@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 11: Problem Solving & Algorithms</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  
+  <!-- External Curriculum Styles -->
+  <link href="/css/compsci.css" rel="stylesheet" />
+</head>
+<body class="compsci-body">
+
+  <div class="chapter-header">
+    <span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 4: Logic & Algorithms</span>
+    <h1 class="display-4 fw-bold">Chapter 11: Problem Solving & Algorithms</h1>
+    <p class="lead text-muted">Breaking down massive challenges, designing logical steps, and prototyping personal solutions.</p>
+  </div>
+
+  <!-- STICKY TABLE OF CONTENTS -->
+  <div class="sticky-toc">
+      <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#section-11-1">11.1 The Art of Decomposition</a>
+      <a href="#section-11-2">11.2 Designing Algorithms</a>
+      <a href="#section-11-3">11.3 Prototyping & Iteration</a>
+  </div>
+
+  <p class="fs-5 mb-5">Before writing a single line of code, computer scientists must know how to solve problems. Coding is simply the translation of a solution into a language the computer understands. In this chapter, we explore how to tackle massive, overwhelming projects by breaking them down, planning the logic step-by-step, and building rough drafts before we commit to writing real code.</p>
+
+  <!-- Section 11.1 -->
+  <h3 id="section-11-1" class="fw-bold mt-4 border-bottom pb-2">11.1 The Art of Decomposition <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.AP.M.1</span></h3>
+  <p class="fs-5">If someone told you to "Build a house," you would probably feel overwhelmed. Where do you even start? But if someone told you to "Lay one brick," you could do that easily. This is the core of computer science.</p>
+  
+  <h4 class="fw-bold mt-4 text-primary">11.1.1 Breaking it Down</h4>
+  <p><strong>Decomposition</strong> is the process of taking a massive, complex problem and breaking it down into smaller, manageable, and solvable pieces. Trying to solve a "big" problem all at once usually leads to failure because there are too many overlapping variables. By decomposing the problem, we can focus all of our brainpower on solving one tiny challenge at a time.</p>
+
+  <h4 class="fw-bold mt-5 text-info">11.1.2 Identifying Sub-problems</h4>
+  <p>Let's look at the seemingly impossible task of "Building a Video Game." Instead of writing one massive script, a developer breaks the game into independent <strong>Sub-problems</strong>:</p>
+  
+  <div class="row g-4 my-3">
+      <div class="col-md-3">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body text-center">
+                  <i class="fas fa-gamepad fa-2x text-warning mb-2"></i>
+                  <h6 class="fw-bold">Player Movement</h6>
+                  <p class="small text-muted mb-0">How does the character run and jump?</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-3">
+          <div class="card h-100 shadow-sm border-success">
+              <div class="card-body text-center">
+                  <i class="fas fa-star fa-2x text-success mb-2"></i>
+                  <h6 class="fw-bold">Scoring System</h6>
+                  <p class="small text-muted mb-0">How are points added and saved?</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-3">
+          <div class="card h-100 shadow-sm border-danger">
+              <div class="card-body text-center">
+                  <i class="fas fa-robot fa-2x text-danger mb-2"></i>
+                  <h6 class="fw-bold">Enemy A.I.</h6>
+                  <p class="small text-muted mb-0">How do the bad guys track the player?</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-3">
+          <div class="card h-100 shadow-sm border-primary">
+              <div class="card-body text-center">
+                  <i class="fas fa-paint-brush fa-2x text-primary mb-2"></i>
+                  <h6 class="fw-bold">Graphics & UI</h6>
+                  <p class="small text-muted mb-0">What do the menus and levels look like?</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">11.1.3 Systematic Analysis</h4>
+  <p>Once the sub-problems are identified, a software engineer will categorize them into specific <strong>Procedures</strong> (mini-programs that do one specific job, like calculate gravity) or <strong>Modules</strong> (entire separate files that handle big tasks, like saving a game). This systematic approach allows a large team of developers to work on the exact same game at the same time without stepping on each other's toes.</p>
+
+  <div class="concept-box shadow-sm border-primary bg-light m-0">
+      <h5 class="fw-bold text-primary"><i class="fas fa-cubes me-2"></i> The Power of Modularity</h5>
+      <p class="mb-0">If the "Scoring System" is built as its own independent module, and a bug causes the score to stop updating, the developers know exactly where to look. They don't have to search through 10,000 lines of "Player Movement" code; they just open the small "Scoring" module and fix the isolated problem.</p>
+  </div>
+
+  <!-- Activity 11.1.4 -->
+  <div class="alert alert-info mt-5 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-bread-slice fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity 11.1.4: The Robot Breakfast Challenge</h4>
+              <p class="mb-0">Computers do not have common sense. If you tell a robot to "make a peanut butter and jelly sandwich," it doesn't know what "peanut butter" is or how to "make" anything. You must write a set of instructions for a clueless robot to make the sandwich. You must decompose the task into every tiny sub-step (e.g., Reach out hand, grasp jar lid, twist counter-clockwise...).</p>
+              <p class="mb-0 fw-bold mt-1 text-dark">👉 Log your decomposed instructions in the Digital Notebook on the right.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 11.2 -->
+  <h3 id="section-11-2" class="fw-bold border-bottom pb-2">11.2 Designing Algorithms <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.AP.A.1</span></h3>
+  <p class="fs-5">Once a problem is decomposed into small pieces, we need a reliable way to solve each piece. This is where we create algorithms.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">11.2.1 What is an Algorithm?</h4>
+  <p>An <strong>Algorithm</strong> is a finite set of clear, unambiguous instructions used to solve a specific problem or perform a calculation. A recipe for baking a cake is an algorithm. The steps to tie your shoes is an algorithm. </p>
+  <p>Crucially, an algorithm must be <em>finite</em>—meaning it has a distinct beginning and a clear end. If the instructions create an infinite loop where the computer gets stuck forever, the algorithm is broken.</p>
+
+  <h4 class="fw-bold mt-5 text-info">11.2.2 Natural Language to Pseudocode</h4>
+  <p>You shouldn't write complex algorithms in Python or JavaScript right away. You will likely get bogged down trying to remember where to place the semicolons and brackets. Instead, programmers use <strong>Pseudocode</strong>.</p>
+  <p>Pseudocode ("fake code") is a shorthand that looks like programming code but is written in plain English. It is language-agnostic, meaning a Python developer and a C++ developer can both read the exact same pseudocode and then translate it into their preferred language later.</p>
+
+  <!-- Step-by-Step Guide for Pseudocode & Flowcharts -->
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-map-signs me-2"></i> Step-by-Step: From Idea to Flowchart</h5>
+      <p class="small mb-3 text-light">Let's design an algorithm for a video game enemy deciding whether to attack the player or sleep.</p>
+      
+      <div class="row g-3 mt-3 mb-4">
+          <!-- Step 1: Natural Language -->
+          <div class="col-md-4">
+              <div class="bg-light text-dark p-3 rounded h-100">
+                  <h6 class="fw-bold border-bottom pb-1">1. Natural Language</h6>
+                  <p class="small mb-0 italic">"If the player is close by, the enemy should attack them. If the player is far away, the enemy should just go to sleep."</p>
+              </div>
+          </div>
+          <!-- Step 2: Pseudocode -->
+          <div class="col-md-4">
+              <div class="bg-secondary text-white p-3 rounded h-100">
+                  <h6 class="fw-bold border-bottom pb-1">2. Pseudocode</h6>
+                  <pre class="small mb-0 text-white font-monospace" style="white-space: pre-wrap;">IF player_distance < 10:
+  THEN attack_player()
+ELSE:
+  THEN sleep()</pre>
+              </div>
+          </div>
+          <!-- Step 3: Flowchart Elements -->
+          <div class="col-md-4">
+              <div class="bg-primary text-white p-3 rounded h-100">
+                  <h6 class="fw-bold border-bottom pb-1">3. Flowchart Symbols</h6>
+                  <ul class="small mb-0 ps-3">
+                      <li><strong>Oval:</strong> Start or End</li>
+                      <li><strong>Diamond:</strong> A Decision (Yes/No)</li>
+                      <li><strong>Rectangle:</strong> An Action/Process</li>
+                  </ul>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">11.2.3 Flowcharting Logic</h4>
+  <p>Sometimes, algorithms are so complex with so many branching "Yes/No" decisions that pseudocode becomes hard to read. In these cases, we use a visual <strong>Flowchart</strong>. By drawing out the path of the algorithm using standardized symbols, developers can trace the logic with their finger to ensure there are no "dead ends" or infinite loops before they start coding.</p>
+
+  <div class="image-placeholder shadow-sm">
+    <i class="fas fa-project-diagram fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">The Flowchart Standard</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A classic programming flowchart diagram. An Oval says 'START', pointing to a Diamond that asks 'Is Player Near?'. The 'Yes' path points to a Rectangle saying 'Attack'. The 'No' path points to a Rectangle saying 'Sleep'. Both point to an Oval saying 'END'.</p>
+  </div>
+
+  <!-- Activity 11.2.4 -->
+  <div class="alert alert-warning mt-4 shadow-sm border-warning">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-route fa-3x me-4 text-warning"></i>
+          <div>
+              <h4 class="fw-bold mb-1 text-dark">Activity 11.2.4: The School Navigation Algorithm</h4>
+              <p class="mb-0 text-dark">You must design an algorithm to get a new student from the Front Office to your specific classroom. Use either a Flowchart or Pseudocode. You must account for branching decisions: e.g., "Is the main hallway blocked by the janitor?" or "Is it currently passing period?"</p>
+              <p class="mb-0 fw-bold mt-1 text-danger">👉 Document your algorithm in the Digital Notebook or upload a photo of your Flowchart to the Dropbox.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 11.3 -->
+  <h3 id="section-11-3" class="fw-bold border-bottom pb-2">11.3 Prototyping for Personal Interest <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.AP.A.1</span></h3>
+  <p class="fs-5">The ultimate purpose of learning how to build algorithms and design data structures is to create something that actually solves a problem you care about.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">11.3.1 From Plan to Prototype</h4>
+  <p>Professional developers rarely build the final, polished app on their first try. They build a <strong>Prototype</strong>. A prototype is a "rough draft" used to test an algorithm’s feasibility before spending millions of dollars on full-scale development.</p>
+  <p>Prototypes can be "High-Fidelity" (a working, buggy piece of software) or "Low-Fidelity" (a series of hand-drawn paper sketches or PowerPoint slides that show how the app will look and feel). The goal of a prototype is to <strong>fail fast and fail cheap</strong> so you can identify the flaws in your logic early.</p>
+
+  <h4 class="fw-bold mt-5 text-info">11.3.2 Leveraging Prior Knowledge</h4>
+  <p>When designing an app prototype, you must pull together everything you've learned in the previous units:</p>
+  <ul>
+      <li><strong>Unit 1 (Hardware):</strong> Does your app idea require a camera to scan barcodes? Does it need GPS sensors to track running distance? If the hardware doesn't exist, the app can't be built.</li>
+      <li><strong>Unit 2 (Networking):</strong> Does your app need to be constantly connected to the cloud, or can it work locally without Wi-Fi?</li>
+      <li><strong>Unit 3 (Data):</strong> How will you organize the user's information? What is the Primary Key in your database that prevents their account from being mixed up with someone else's?</li>
+  </ul>
+
+  <h4 class="fw-bold mt-5 text-info">11.3.3 Computational Problem Solving</h4>
+  <p>The best apps are born out of personal frustration. If you are constantly losing track of your knitting patterns, or if you can't find a good way to organize statistics for your fantasy sports team, you have discovered a problem that can be solved computationally.</p>
+
+  <!-- Activity 11.3.4 -->
+  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-mobile-alt fa-3x me-4 text-primary"></i>
+          <div>
+              <h3 class="fw-bold mb-1">Activity 11.3.4: The "App Idea" Prototype</h3>
+              <p class="mb-2 fs-5">Identify a problem in your own life or community (related to a hobby, sport, or personal interest) that could be solved with a simple app. You must design a low-fidelity prototype (paper-based sketches or a slide deck) demonstrating how the app works.</p>
+              <ul class="mb-0 fw-bold text-dark small">
+                  <li class="mb-1"><strong>The Interface:</strong> Draw 3 screens showing the user interface.</li>
+                  <li class="mb-1"><strong>The Data:</strong> List the variables your app needs to save (e.g., username, high score).</li>
+                  <li><strong>The Algorithm:</strong> Write the pseudocode or flowchart for the main feature of the app.</li>
+              </ul>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Open the "Prototype Pitch" template in your Digital Notebook to begin your design.</p>
+          </div>
+      </div>
+  </div>
+
+  <!-- Required scripts for interactive tabs/accordions inside the iframe -->
+  <script src="/js/bootstrap.bundle.js"></script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

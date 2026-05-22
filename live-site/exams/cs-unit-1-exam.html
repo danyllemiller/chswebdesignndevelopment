@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Summative Assessment | Unit 1: The Digital Foundation</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/examLogicCS.js"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <!-- Back to Lesson Link -->
+    <nav class="mb-4 d-flex justify-content-between small fw-bold no-print">
+        <a href="/computerscience.html" class="text-decoration-none text-primary">&laquo; Back to Course Portal</a>
+        <span class="text-muted text-uppercase tracking-widest">Summative Assessment</span>
+    </nav>
+
+    <div id="exam-container">
+        <div class="text-center p-5">
+            <div class="spinner-border text-info"></div>
+            <p class="mt-2 fw-bold text-primary">Syncing Guild Secure Environment...</p>
+        </div>
+    </div>
+  </section>
+
+  <script>
+    const unit1Pool = [
+        // --- Chapter 1 ---
+        { chapter: 1, question: "What is the physical metal component that pulls heat away from the CPU to prevent it from melting?", options: ["Heat Sink", "Power Supply Unit", "Cooling Fan", "Thermal Paste"] },
+        { chapter: 1, question: "The speed at which a CPU can execute instructions is known as its:", options: ["Clock Speed", "Processing Limit", "Bus Rate", "Bandwidth"] },
+        { chapter: 1, question: "A CPU clock speed of 3.0 GHz means the processor can handle how many cycles per second?", options: ["3 Billion", "3 Million", "3 Trillion", "3 Thousand"] },
+        { chapter: 1, question: "Any external device connected to a computer, like a printer or scanner, is called a:", options: ["Peripheral", "Accessory", "Component", "Node"] },
+        { chapter: 1, question: "Which specialized processor is designed specifically to render high-definition graphics and video?", options: ["GPU (Graphics Processing Unit)", "CPU (Central Processing Unit)", "ALU (Arithmetic Logic Unit)", "RAM (Random Access Memory)"] },
+        { chapter: 1, question: "The standard physical size and shape of a motherboard (like ATX or Micro-ATX) is called its:", options: ["Form Factor", "Layout Profile", "Design Blueprint", "System Board Matrix"] },
+        { chapter: 1, question: "Memory that contains permanent instructions for booting the computer and cannot be easily erased is:", options: ["ROM (Read-Only Memory)", "RAM (Random Access Memory)", "Cache Memory", "Virtual Memory"] },
+        { chapter: 1, question: "Which fundamental firmware wakes up the hardware and loads the operating system when you press the power button?", options: ["BIOS / UEFI", "Windows OS", "Command Prompt", "Kernel"] },
+        { chapter: 1, question: "What microscopic electronic component acts as a digital on/off switch inside the CPU?", options: ["Transistor", "Capacitor", "Resistor", "Diode"] },
+        { chapter: 1, question: "The historical observation that the number of transistors on a microchip doubles every two years is known as:", options: ["Moore's Law", "Gates' Principle", "Turing's Theory", "The Silicon Rule"] },
+        { chapter: 1, question: "What numbering system uses only 0s and 1s to represent all digital data?", options: ["Binary", "Hexadecimal", "Decimal", "Octal"] },
+        { chapter: 1, question: "The lowest-level programming language consisting entirely of binary code that the CPU directly understands is:", options: ["Machine Language", "Assembly Language", "Python", "C++"] },
+        { chapter: 1, question: "Which hardware component converts alternating current (AC) from the wall into direct current (DC) for the computer?", options: ["Power Supply Unit (PSU)", "Surge Protector", "Motherboard", "Heat Sink"] },
+        { chapter: 1, question: "The initial sequence of events that occurs when a computer is turned on is called the:", options: ["Boot Process", "Initialization Routine", "Start-up Cycle", "Kernel Launch"] },
+        { chapter: 1, question: "Hard drives and SSDs are examples of what type of storage?", options: ["Secondary Storage", "Primary Storage", "Volatile Memory", "Cache Storage"] },
+
+        // --- Chapter 2 ---
+        { chapter: 2, question: "What does GUI stand for?", options: ["Graphical User Interface", "General Utility Interface", "Graphic Usage Index", "Guided User Interaction"] },
+        { chapter: 2, question: "Which interface requires typing text commands to operate?", options: ["CLI", "GUI", "API", "VUI"] },
+        { chapter: 2, question: "The 'core' part of the Operating System that manages hardware is the:", options: ["Kernel", "Shell", "BIOS", "Driver"] },
+        { chapter: 2, question: "A software 'translator' between the OS and a hardware device is a:", options: ["Driver", "Compiler", "Kernel", "Peripheral"] },
+        { chapter: 2, question: "The hardware check performed by the computer at startup is called:", options: ["POST", "PING", "BOOT", "LOAD"] },
+        { chapter: 2, question: "The very top level of a file system (like C:\\) is called the:", options: ["Root Directory", "Master Folder", "Home Drive", "Base Path"] },
+        { chapter: 2, question: "What is the 'Rule of 3-2-1' in data protection?", options: ["3 copies, 2 media types, 1 offsite", "3 servers, 2 networks, 1 firewall", "3 days, 2 backups, 1 flash drive", "3 users, 2 passwords, 1 admin"] },
+        { chapter: 2, question: "A 'Zero-Day' exploit is dangerous because:", options: ["It is unknown to the developers", "It deletes files in exactly zero days", "It bypasses all antivirus software instantly", "It targets computers that are turned off"] },
+        { chapter: 2, question: "Which tool is used to force a frozen application to close in Windows?", options: ["Task Manager", "Control Panel", "System Monitor", "Command Prompt"] },
+        { chapter: 2, question: "Why should you never use spaces in filenames for web design?", options: ["Browsers process spaces as broken characters", "Spaces take up too much memory", "Spaces make the file unsearchable", "Servers will immediately delete files with spaces"] },
+        { chapter: 2, question: "A .zip file is used to:", options: ["Compress many files into one smaller file", "Permanently delete files", "Convert files into a different format", "Encrypt files for secure sending"] },
+        { chapter: 2, question: "What is a 'Bug' in computer science?", options: ["An error in the code that causes a malfunction", "A virus that infects the motherboard", "A feature that hasn't been finished yet", "A tiny insect that eats computer wires"] },
+        { chapter: 2, question: "What is the first step in the Troubleshooting Mindset?", options: ["Stop and read the error message", "Restart the computer immediately", "Reinstall the application", "Click random buttons to see if it unfreezes"] },
+        { chapter: 2, question: "Which OS is 'Open Source'?", options: ["Linux", "Windows", "macOS", "iOS"] },
+        { chapter: 2, question: "Clearing the 'Cache' in a browser helps to:", options: ["Fix display errors and free up space", "Make the internet run faster permanently", "Delete a computer virus", "Upgrade the browser to the latest version"] },
+
+        // --- Chapter 3 ---
+        { chapter: 3, question: "What is the primary purpose of a PDF (Portable Document Format)?", options: ["To preserve formatting across all devices and operating systems", "To allow multiple people to edit the text simultaneously", "To compress large video files into a smaller size", "To create a dynamic, interactive webpage"] },
+        { chapter: 3, question: "Why should you use Heading styles (H1, H2) instead of just bolding text?", options: ["It creates a logical hierarchy for screen readers and sitemaps", "It makes the text print faster", "It automatically changes the font color", "It prevents other users from editing the text"] },
+        { chapter: 3, question: "What does 'Death by PowerPoint' typically refer to?", options: ["Overloading slides with too much text and reading directly from them", "Using too many flashy animations and transitions", "Creating a presentation that is more than 50 slides long", "Failing to turn on the projector before speaking"] },
+        { chapter: 3, question: "What is 'Concurrent Editing'?", options: ["Multiple people editing the same cloud document at the same time", "Editing a document while saving it to a flash drive", "Using two different monitors to edit one file", "Writing code and text at the exact same moment"] },
+        { chapter: 3, question: "Which feature allows you to see what a document looked like three hours ago and restore it?", options: ["Version History", "Track Changes", "System Restore", "Backup Wizard"] },
+        { chapter: 3, question: "In cloud collaboration, which permission level allows someone to read but NOT type or leave notes?", options: ["Viewer", "Commenter", "Editor", "Admin"] },
+        { chapter: 3, question: "What is the golden rule of using presentations as a visual aid?", options: ["The presentation is a support for the speaker, not a script", "The presentation should contain every single word you plan to say", "Never use images, only bullet points", "Always read directly from the slides to avoid mistakes"] },
+        { chapter: 3, question: "What is 'Digital Etiquette' in a collaborative document?", options: ["Using comments and suggested edits instead of deleting others' work", "Making all your text bold so people know you wrote it", "Deleting the entire document when you are finished", "Only working on the document when no one else is looking"] },
+        { chapter: 3, question: "When collaborating, what does the 'Editor' role allow you to do?", options: ["View, comment on, and directly change the document", "Only leave comments on the side", "Read the text without making any marks", "Delete the entire Google Drive folder"] },
+        { chapter: 3, question: "What is 'Asynchronous Communication'?", options: ["Teammates leaving feedback that can be read later at different times", "Talking to a teammate face-to-face in the same room", "Editing a document while on a live phone call", "Sending a message that instantly deletes itself"] },
+        { chapter: 3, question: "What is a 'Suggested Edit'?", options: ["A change that must be approved by the owner before becoming permanent", "A change that instantly deletes the original text", "A spell-check correction made by the computer", "A note left at the bottom of the page"] },
+        { chapter: 3, question: "Which alignment is standard for the body text of a professional report?", options: ["Left-aligned", "Center-aligned", "Right-aligned", "Justified"] },
+        { chapter: 3, question: "What is the main benefit of 'Cloud Collaboration' over 'Email Attachments'? ", options: ["There is only one 'Single Source of Truth' file", "It uses less internet data", "It is impossible for the file to be deleted", "You don't need a web browser to open the file"] },
+        { chapter: 3, question: "A 'Sanitized' document is one where?", options: ["Sensitive or hidden metadata has been removed before sharing", "The font has been changed to Arial", "All images have been deleted", "The text has been translated into another language"] },
+        { chapter: 3, question: "In Google Docs, what does 'Resolve' mean for a comment?", options: ["The discussion is finished and the comment is hidden", "The comment is permanently deleted forever", "The comment is sent to the author's email", "The text is highlighted in red"] }
+    ];
+
+    const config = {
+        questions: unit1Pool,
+        chapterTitle: "Unit 1 Summative Exam",
+        perChapter: 5 
+    };
+
+    // Safely execute initExam after the DOM is fully parsed without using window.onload
+    if (document.readyState === "loading") {
+        document.addEventListener('DOMContentLoaded', () => {
+            if(typeof initExam === 'function') initExam(config);
+        });
+    } else {
+        if(typeof initExam === 'function') initExam(config);
+    }
+  </script>
+
+  <div id="footer-placeholder"></div>
+
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

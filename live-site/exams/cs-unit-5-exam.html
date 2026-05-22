@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Summative Assessment | Unit 5: The Human Impact</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/examLogicCS.js"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <!-- Back to Lesson Link -->
+    <nav class="mb-4 d-flex justify-content-between small fw-bold no-print">
+        <a href="/computerscience.html" class="text-decoration-none text-primary">&laquo; Back to Course Portal</a>
+        <span class="text-muted text-uppercase tracking-widest">Summative Assessment</span>
+    </nav>
+
+    <div id="exam-container">
+        <div class="text-center p-5">
+            <div class="spinner-border text-info"></div>
+            <p class="mt-2 fw-bold text-primary">Syncing Guild Secure Environment...</p>
+        </div>
+    </div>
+  </section>
+
+  <script>
+    const unit5Pool = [
+        // --- Chapter 15 ---
+        { chapter: 15, question: "What is the Software Development Lifecycle (SDLC)?", options: ["The professional process used by teams to plan, build, and maintain software.", "The time it takes for a computer to boot up.", "The lifespan of a physical hard drive.", "The code used to animate a character on screen."] },
+        { chapter: 15, question: "What does 'Iterative Design' mean?", options: ["Building a version, finding its flaws, and using that feedback to make the next version better.", "Writing all the code perfectly on the very first try.", "Designing a website without using any CSS.", "Copying a design from another website exactly."] },
+        { chapter: 15, question: "What are the five standard stages of the SDLC?", options: ["Plan, Design, Build, Test, Maintain.", "Start, Write, Click, Fix, End.", "Code, Compile, Run, Error, Delete.", "Draw, Paint, Animate, Sound, Publish."] },
+        { chapter: 15, question: "In the SDLC, what happens during the 'Plan' stage?", options: ["Defining the problem, audience, and hardware requirements before writing any code.", "Writing the actual HTML and CSS.", "Finding and fixing bugs in the JavaScript.", "Uploading the files to a live web server."] },
+        { chapter: 15, question: "In the SDLC, what happens during the 'Design' stage?", options: ["Creating prototypes and mapping out algorithms.", "Defining the target audience.", "Writing the final code.", "Maintaining the servers after launch."] },
+        { chapter: 15, question: "In the SDLC, what happens during the 'Build' stage?", options: ["Writing the actual code and connecting it to data structures.", "Drawing the wireframes in Figma.", "Interviewing users for feedback.", "Applying security patches."] },
+        { chapter: 15, question: "In the SDLC, what happens during the 'Test' stage?", options: ["Giving the program to users to find logic errors or bugs.", "Buying the domain name.", "Creating the color palette and mood board.", "Writing the HTML."] },
+        { chapter: 15, question: "In the SDLC, what happens during the 'Maintain' stage?", options: ["Fixing security holes and adding new features after the app is released.", "Writing the first draft of the code.", "Building a prototype to show the client.", "Figuring out what the app should do."] },
+        { chapter: 15, question: "Why is building an app just for *yourself* considered a mistake in professional development?", options: ["Because a Data Architect must build for a specific 'Audience' with different needs and skills.", "Because you will get sued for copyright infringement.", "Because apps built for one person run too slowly.", "Because it is illegal under the GDPR."] },
+        { chapter: 15, question: "What is the most valuable data a developer can have when testing an app?", options: ["User Feedback.", "The total number of lines of code.", "The color of the buttons.", "The file size of the images."] },
+        { chapter: 15, question: "What is a 'Beta Tester'?", options: ["A real user who hasn't seen the code and tries to use the program to find bugs.", "The lead programmer on the development team.", "A computer program that automatically tests the code.", "The person who pays for the software to be built."] },
+        { chapter: 15, question: "What is a 'Pain Point' in a user interview?", options: ["A specific moment where the user gets confused or frustrated by the app.", "A physical injury caused by using the mouse too much.", "The section of code that has the most errors.", "The button that starts the program."] },
+        { chapter: 15, question: "What does 'Accessibility' mean in software design?", options: ["Ensuring that software can be used by the widest range of people possible, including those with disabilities.", "Making sure the software is free to download.", "Making sure the code is easy for other programmers to read.", "Ensuring the website works without an internet connection."] },
+        { chapter: 15, question: "What is 'Version Control'?", options: ["A system that tracks changes to a file and prevents teammates from accidentally overwriting each other's work.", "A password required to open a file.", "A setting that controls the volume of the audio.", "A tool that automatically deletes old files."] },
+        { chapter: 15, question: "What is 'Documentation' in software development?", options: ["The written explanation, screenshots, and diagrams that explain the 'Why' behind the 'How' of the code.", "The legal contract between the developer and the client.", "The HTML file that displays the website.", "The error messages printed in the console."] },
+
+        // --- Chapter 16 ---
+        { chapter: 16, question: "What is Intellectual Property (IP)?", options: ["Digital creations of the mind, such as code, art, and inventions.", "The physical computer hardware you own.", "The IP address assigned to your router.", "A piece of real estate you buy on the internet."] },
+        { chapter: 16, question: "What does Copyright protect?", options: ["Original works of authorship like code, photos, and music.", "Inventions and machines.", "Brand names and logos.", "Facts and ideas."] },
+        { chapter: 16, question: "What does a Patent protect?", options: ["Inventions or processes.", "Original songs and books.", "Company logos.", "The HTML code of a webpage."] },
+        { chapter: 16, question: "What does a Trademark protect?", options: ["Brands and logos.", "The internal logic of an algorithm.", "A photograph taken with a digital camera.", "A new type of computer processor."] },
+        { chapter: 16, question: "What is Digital Piracy?", options: ["Unauthorized copying or distribution of copyrighted material.", "Hacking into a bank to steal money.", "Using a VPN to hide your IP address.", "Creating a fake social media account."] },
+        { chapter: 16, question: "What is 'Fair Use'?", options: ["A legal safety net allowing use of copyrighted material for education or parody.", "The right to use any image you find on Google.", "A rule that you must pay to use Open Source software.", "The guarantee that internet service is fair to everyone."] },
+        { chapter: 16, question: "What is 'Proprietary Software'?", options: ["Software where the source code is a secret and owned by a company.", "Software that is completely free for anyone to change.", "Software built specifically for the government.", "Software that only runs on Apple computers."] },
+        { chapter: 16, question: "What is 'Open Source Software'?", options: ["Software where the source code is public and anyone can change it.", "Software that does not require a password to log in.", "Software that you must pay a monthly fee to use.", "Software that can only be downloaded from an open Wi-Fi network."] },
+        { chapter: 16, question: "What characterizes the MIT License?", options: ["It is very permissive as long as you keep the original copyright notice.", "It strictly forbids using the code for commercial profit.", "It requires you to pay the original creator every time the code runs.", "It forces you to make your new project open source as well."] },
+        { chapter: 16, question: "What characterizes the GPL (General Public License)?", options: ["Any new app you build using its code must also be Open Source.", "You can use the code, but you must keep your new app a secret.", "It is only valid for software built in the United States.", "You are not allowed to modify the code at all."] },
+        { chapter: 16, question: "Why do programmers use code 'Libraries'?", options: ["To speed up development by leveraging the work of others.", "To hide their code from hackers.", "To encrypt their databases.", "To make their programs run without the internet."] },
+        { chapter: 16, question: "What are 'Cookies' on the internet?", options: ["Small text files stored in your browser to remember you and track your habits.", "Tiny viruses that steal your credit card.", "Advertisements that pop up on your screen.", "The hidden code behind a web page."] },
+        { chapter: 16, question: "How do 'Free' apps like TikTok or Instagram make billions of dollars?", options: ["By collecting and selling your personal data to advertisers.", "By charging the government a fee for every user.", "By secretly using your phone to mine cryptocurrency.", "By asking for donations from users."] },
+        { chapter: 16, question: "In the modern data economy, what is the role of the user?", options: ["The user is not the customer; the user is the product.", "The user is the owner of the data.", "The user is the developer of the app.", "The user is immune to targeted advertising."] },
+        { chapter: 16, question: "What is the GDPR?", options: ["A strict European law that protects user data and requires transparency.", "A new type of computer processor.", "A programming language used for databases.", "A type of internet connection."] },
+
+        // --- Chapter 17 ---
+        { chapter: 17, question: "How has computing fundamentally changed 'Social Architecture'?", options: ["By allowing people to form deep connections globally based on shared interests rather than just physical location.", "By forcing everyone to build houses the exact same way.", "By removing the need for people to talk to each other entirely.", "By limiting communication strictly to people in the same city."] },
+        { chapter: 17, question: "What is the 'Attention Economy'?", options: ["An environment where apps are designed to keep users scrolling and engaged for as long as possible.", "A system where users are paid money for paying attention.", "A budgeting tool used by large tech companies.", "A school grading system based on focus."] },
+        { chapter: 17, question: "How has the 'Automation Shift' changed the nature of work?", options: ["It has moved many jobs from traditional 9-to-5 roles to the 'Gig Economy.'", "It has completely eliminated all need for human workers.", "It has forced everyone to work in factories.", "It has made physical labor the most highly paid job."] },
+        { chapter: 17, question: "What is the 'Digital Divide'?", options: ["The gap between communities that have access to high-speed internet and those that rely on slow, expensive connections.", "The space between the hardware and the software in a computer.", "The difference between Mac and PC users.", "The line separating the front-end from the back-end."] },
+        { chapter: 17, question: "Why should a Data Architect design 'Light' versions of their software?", options: ["To ensure users on slow or cellular connections can still access the tools.", "Because they take less time to code.", "To make the colors on the screen brighter.", "Because light versions are immune to computer viruses."] },
+        { chapter: 17, question: "What is 'Algorithmic Bias'?", options: ["When human prejudices, whether intentional or unintentional, are programmed into software.", "When a computer calculates a math problem incorrectly.", "When a website prefers Chrome over Safari.", "When a hard drive saves data too slowly."] },
+        { chapter: 17, question: "Why do we often incorrectly assume computers are always 'fair'?", options: ["Because they are based on math, but we forget that the data feeding the math comes from flawed humans.", "Because computers have their own set of morals and ethics.", "Because programmers are legally required to be fair.", "Because algorithms are strictly reviewed by the government before launch."] },
+        { chapter: 17, question: "What did the 'Gender Shades' project reveal about commercial facial recognition?", options: ["It had an error rate of nearly 35% for dark-skinned women, but under 1% for light-skinned men.", "It was 100% perfectly accurate for all humans.", "It could only recognize faces wearing sunglasses.", "It confused humans with animals frequently."] },
+        { chapter: 17, question: "What is an 'Equity Audit'?", options: ["Testing a program with a diverse data set to ensure it works equally well for all users regardless of race, gender, or age.", "Checking a company's bank account to make sure they are making money.", "Reviewing the code to ensure it runs as fast as possible.", "Scanning the network for malware and viruses."] },
+        { chapter: 17, question: "When auditing logic, why might the rule `IF name_length < 5` be biased?", options: ["It might accidentally punish or exclude users from cultures with very long names.", "It requires too much processing power.", "It will crash if the user enters numbers.", "It is grammatically incorrect in JavaScript."] },
+        { chapter: 17, question: "What is 'Inclusive Design'?", options: ["The practice of building products that are welcoming and usable by as many people as possible.", "Designing a website that only VIP members can access.", "Including every single feature a user asks for in one app.", "Designing a logo using all colors of the rainbow."] },
+        { chapter: 17, question: "Why must responsive design account for Text Direction?", options: ["Because languages like Arabic and Hebrew read right-to-left, requiring the entire layout to flip.", "Because mobile phones can be held upside down.", "Because monitors display text diagonally sometimes.", "Because users like to read from bottom to top."] },
+        { chapter: 17, question: "What does it mean to 'Localize' an app rather than just 'Translate' it?", options: ["Working with native speakers to ensure the interface feels culturally natural and respectful, not just running it through Google Translate.", "Storing all the app data on a local server in the user's city.", "Making sure the app works without an internet connection.", "Using only local programmers to write the code."] },
+        { chapter: 17, question: "If an algorithm is 'unintentionally' biased, what does that mean?", options: ["The programmer didn't mean to cause harm, but failed to use diverse testing data.", "The computer became self-aware and decided to be biased.", "A hacker broke in and changed the code to be unfair.", "The software is glitching due to a power surge."] },
+        { chapter: 17, question: "Why is 'Designing with people' better than 'Designing for people'?", options: ["It gives marginalized groups a voice in how the technology that affects them is built.", "It ensures the programmer gets paid more money.", "It guarantees the software will be completely bug-free.", "It makes the coding process twice as fast."] },
+
+        // --- Chapter 18 ---
+        { chapter: 18, question: "What is considered the 'Universal Tool' of the 21st century?", options: ["Computer Science and Algorithms.", "The Hammer and Nail.", "The Internal Combustion Engine.", "The Printing Press."] },
+        { chapter: 18, question: "How do biologists use 'Pattern Matching' algorithms from Computer Science?", options: ["To sequence human DNA and find the causes of diseases.", "To build websites for their laboratories.", "To control the temperature of their microscopes.", "To match animals with their correct habitats."] },
+        { chapter: 18, question: "What type of algorithm do delivery companies like UPS and Amazon use to calculate efficient routes?", options: ["Pathfinding algorithms.", "Sorting algorithms.", "Encryption algorithms.", "Compression algorithms."] },
+        { chapter: 18, question: "How do meteorologists use technology to predict where a hurricane will land?", options: ["They use massive data sets and Computational Models.", "They use virtual reality headsets.", "They build simple HTML websites.", "They use basic spreadsheet formulas."] },
+        { chapter: 18, question: "What is the definition of Artificial Intelligence (AI) in this course?", options: ["Software designed to mimic human cognitive functions like learning and problem-solving.", "A robot that can walk and talk like a human.", "A computer that is completely self-aware and alive.", "Software that never makes a mistake."] },
+        { chapter: 18, question: "How is an AI program fundamentally different from a standard 'If-Then' program?", options: ["An AI 'learns' to create its own paths by looking at millions of examples, rather than following a strict human-written rule.", "An AI is written in a secret programming language.", "An AI requires an internet connection to run.", "An AI does not use a Central Processing Unit."] },
+        { chapter: 18, question: "How does Machine Learning work?", options: ["By feeding a model massive amounts of 'Big Data' to find subtle patterns.", "By having a human programmer write millions of IF statements.", "By connecting a computer to a physical machine.", "By letting the computer guess randomly until it gets it right."] },
+        { chapter: 18, question: "What are Generative AI tools (like ChatGPT or Gemini) designed to do?", options: ["Use probability to create 'new' content like text, images, and code.", "Only search the internet for exact copies of old documents.", "Edit videos automatically without human input.", "Securely store passwords and encrypted data."] },
+        { chapter: 18, question: "When a Generative AI writes a poem, what is it actually doing?", options: ["Calculating which word is most likely to come next based on patterns in all the poems it has read.", "Experiencing deep human emotion and expressing it.", "Copying a poem exactly from a hidden database.", "Asking a human programmer for the next line."] },
+        { chapter: 18, question: "What is 'Prompt Engineering'?", options: ["The skill of using decomposition to write clear, precise instructions for an AI.", "Building physical engines for robots.", "Writing HTML code really fast.", "Hacking into an AI to steal its data."] },
+        { chapter: 18, question: "Why is 'Validation' a critical final step when using AI?", options: ["Because you should never trust the output without checking for logic errors or 'hallucinations.'", "Because the AI will delete your work if you don't validate it.", "Because it proves to the AI that you are human.", "Because it makes the AI run faster next time."] },
+        { chapter: 18, question: "What is a 'Deepfake'?", options: ["AI-generated fake video or audio that looks and sounds real, often used to spread lies or steal identities.", "A deep dive into the code of an AI.", "A highly realistic 3D video game.", "A computer virus that hides deep in the hard drive."] },
+        { chapter: 18, question: "What is the 'Black Box Problem' in Artificial Intelligence?", options: ["When an AI makes a decision, but the programmers don't know exactly *why* it made that choice.", "When the computer monitor randomly turns off during coding.", "When the data center server runs completely out of storage space.", "When the AI model flatly refuses to answer a user's question."] },
+        { chapter: 18, question: "If an AI generates a completely false statement but presents it as a fact, what is this called?", options: ["A Hallucination.", "A Syntax Error.", "An Infinite Loop.", "A Hardware Crash."] },
+        { chapter: 18, question: "Ultimately, what determines if AI will be a beneficial tool or a harmful weapon?", options: ["The ethical framework, diversity, and choices of the human creators and power users who wield it.", "The sheer speed and core count of the processing unit.", "The total amount of physical RAM installed in the server.", "The upfront financial cost of the software license."] }
+    ];
+
+    const config = {
+        questions: unit5Pool,
+        chapterTitle: "Unit 5 Summative Exam",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbyoX6MTNxThGNVQtIn4e_OgJoYUGUdPPKY9lbXf63h3H9fwGOxUeToxptyORS7LgWVNeg/exec",
+        perChapter: 5 
+    };
+
+    // Safely execute initExam after the DOM is fully parsed without using window.onload
+    if (document.readyState === "loading") {
+        document.addEventListener('DOMContentLoaded', () => {
+            if(typeof initExam === 'function') initExam(config);
+        });
+    } else {
+        if(typeof initExam === 'function') initExam(config);
+    }
+  </script>
+
+  <div id="footer-placeholder"></div>
+
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

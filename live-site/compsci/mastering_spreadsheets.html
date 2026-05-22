@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 9: Mastering Spreadsheets & Data</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  
+  <!-- External Curriculum Styles -->
+  <link href="/css/compsci.css" rel="stylesheet" />
+</head>
+<body class="compsci-body">
+
+  <div class="chapter-header">
+    <span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 3: The Data Architect</span>
+    <h1 class="display-4 fw-bold">Chapter 9: Mastering Spreadsheets & Data Visualization</h1>
+    <p class="lead text-muted">Transforming raw numbers into dynamic insights, interactive dashboards, and compelling visual stories.</p>
+  </div>
+
+  <!-- STICKY TABLE OF CONTENTS -->
+  <div class="sticky-toc">
+      <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#section-9-1">9.1 Spreadsheet Foundations</a>
+      <a href="#section-9-2">9.2 Data Transformation</a>
+      <a href="#section-9-3">9.3 Interactive Visualization</a>
+  </div>
+
+  <!-- Section 9.1 -->
+  <h3 id="section-9-1" class="fw-bold mt-4 border-bottom pb-2">9.1 Spreadsheet Foundations & Data Entry</h3>
+  <p class="fs-5">Databases are incredibly powerful for storing millions of records, but when you need to quickly analyze, calculate, and manipulate data, nothing beats a Spreadsheet. Programs like Microsoft Excel and Google Sheets are the undisputed standard in almost every modern industry.</p>
+  
+  <h4 class="fw-bold mt-4 text-primary">9.1.1 The Anatomy of a Sheet</h4>
+  <p>A spreadsheet is essentially a massive, infinite grid. To use it effectively, you must understand its coordinate system:</p>
+  <ul>
+      <li><strong>Columns:</strong> Run vertically and are labeled with Letters (A, B, C...).</li>
+      <li><strong>Rows:</strong> Run horizontally and are labeled with Numbers (1, 2, 3...).</li>
+      <li><strong>Cells:</strong> The individual boxes where data is entered. Every cell has a unique "address" combining its column and row (e.g., <code>B4</code> or <code>F12</code>).</li>
+  </ul>
+
+  <div class="concept-box shadow-sm border-warning bg-light m-0">
+    <h5 class="fw-bold text-dark"><i class="fas fa-paint-brush text-warning me-2"></i> Data vs. Formatting</h5>
+    <p class="mb-0">A common beginner mistake is confusing the raw <em>data</em> with its visual <em>format</em>. If a cell displays <strong>$5.00</strong>, the actual data stored in the computer's memory is just the number <code>5</code>. The dollar sign and the decimals are just a visual mask ("Currency Formatting") layered over the top. If you physically type a dollar sign into a cell, the computer will treat it as plain text and refuse to do math with it!</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">9.1.2 Cell Referencing: The Power of the $ Sign</h4>
+  <p>The true power of a spreadsheet isn't acting as a calculator; it is acting as a <em>dynamic</em> calculator. Instead of typing <code>=5+10</code>, we type <code>=A1+B1</code>. This means if the number in A1 ever changes, the answer updates automatically.</p>
+  
+  <div class="row g-4 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-primary">
+              <div class="card-body">
+                  <h5 class="fw-bold text-primary"><i class="fas fa-people-arrows me-2"></i> Relative Referencing</h5>
+                  <p>By default, spreadsheets use <strong>Relative Referencing</strong>. If you write <code>=A1+B1</code> in cell C1, and then drag/copy that formula down to C2, the spreadsheet automatically adjusts the formula to <code>=A2+B2</code>. It shifts relative to where you moved it.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-danger">
+              <div class="card-body">
+                  <h5 class="fw-bold text-danger"><i class="fas fa-lock me-2"></i> Absolute Referencing</h5>
+                  <p>Sometimes you <em>don't</em> want a cell reference to move when you copy it (like if you are referencing a single Tax Rate cell). You use the <strong>$</strong> symbol to lock it in place. <code>=$A$1</code> tells the spreadsheet: "Absolutely do not change this column or row, no matter where I copy this formula."</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Step-by-Step Guide for F4 Shortcut -->
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-keyboard me-2"></i> Step-by-Step: The "F4" Keyboard Shortcut</h5>
+      <p class="small mb-3 text-light">Typing out the dollar signs manually is slow and prone to errors. Professional data analysts use a quick keyboard shortcut to toggle their references.</p>
+      
+      <ol class="mb-0 text-light small">
+          <li class="mb-2"><strong>Start your formula:</strong> Type <code>=</code> and click on the cell you want to reference (e.g., <code>A1</code>).</li>
+          <li class="mb-2"><strong>Press F4 once:</strong> The reference instantly changes to <code>$A$1</code> (Locks both Column and Row).</li>
+          <li class="mb-2"><strong>Press F4 again:</strong> It changes to <code>A$1</code> (Locks the Row only).</li>
+          <li class="mb-2"><strong>Press F4 a third time:</strong> It changes to <code>$A1</code> (Locks the Column only).</li>
+          <li><strong>Press F4 a fourth time:</strong> It goes back to a normal relative reference (<code>A1</code>).</li>
+      </ol>
+      <p class="mt-2 mb-0 x-small text-muted italic">Note: On some laptops (especially Macs or modern Chromebooks), you may need to hold the "fn" (function) key while pressing F4, or use Cmd+T on a Mac.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">9.1.3 Data Types in Cells</h4>
+  <p>Just like in programming, a spreadsheet must know exactly what type of data it is looking at to prevent catastrophic calculation errors.</p>
+  <ul class="mb-4">
+      <li><strong>Number/Currency:</strong> Used for math. (e.g., <code>42.50</code>)</li>
+      <li><strong>Date/Time:</strong> Dates are actually stored as serial numbers counting the days since Jan 1, 1900. This is why you can add "+7" to a date to find next week!</li>
+      <li><strong>Percentage:</strong> A percentage is just a fraction. 50% is stored as <code>0.5</code>.</li>
+      <li><strong>Plain Text:</strong> Words and letters. If a number is formatted as text, the <code>SUM</code> function will ignore it entirely!</li>
+  </ul>
+
+  <!-- Activity 9.1.4 -->
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-wallet fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity 9.1.4: The Personal Budget Tracker</h4>
+              <p class="mb-0">It's time to build a dynamic tool! You will create a foundational budget spreadsheet tracking monthly income and expenses. You must use relative and absolute cell references so that changing a single value (like "Rent") automatically recalculates your "Total Remaining" and "Percentage of Income" across the entire sheet.</p>
+              <p class="mb-0 fw-bold mt-1 text-dark">👉 Open the "Budget Tracker" assignment via the Dropbox tool on the right.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 9.2 -->
+  <h3 id="section-9-2" class="fw-bold border-bottom pb-2">9.2 Data Transformation & Cleaning <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.DA.CVT.1</span></h3>
+  <p class="fs-5">In the real world, data is rarely perfect. Before you can build beautiful charts, you have to "wrangle" the data. Transformation is the process of taking messy, disorganized information and cleaning it up so the computer can analyze it accurately.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">9.2.1 Sorting and Filtering</h4>
+  <p>When looking at a massive spreadsheet of 10,000 students, you need tools to find needles in the haystack.</p>
+  <ul>
+      <li><strong>Sorting:</strong> Rearranging the entire dataset based on a specific rule (e.g., Alphabetical A-Z, or Highest GPA to Lowest).</li>
+      <li><strong>Filtering:</strong> Temporarily hiding rows that don't match your criteria (e.g., "Only show me students who are in 12th Grade"). The data isn't deleted; it's just hidden from view.</li>
+  </ul>
+
+  <h4 class="fw-bold mt-5 text-info">9.2.2 Cleaning "Dirty" Data</h4>
+  <p>What happens if you ask a computer to count how many people live in Nevada, but half the users typed "Nevada", a quarter typed "NV", and the rest typed "nevada "? The computer sees three entirely different states! This is called <strong>Dirty Data</strong>.</p>
+  
+  <div class="image-placeholder shadow-sm">
+    <i class="fas fa-broom fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">The Data Janitor</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A split-screen graphic. On the left, a chaotic spreadsheet with misspelled words, blank cells, and misaligned columns. On the right, a perfectly aligned, color-coded, clean spreadsheet. A digital broom sweeps across the middle.</p>
+  </div>
+
+  <p class="mt-4">Data Architects spend most of their time cleaning data using techniques like:</p>
+  <ul>
+      <li><strong>Removing Duplicates:</strong> Using built-in tools to find and delete accidental double-entries.</li>
+      <li><strong>Standardization (Find & Replace):</strong> Forcing all instances of "NV" to become "Nevada".</li>
+      <li><strong>Handling Null Values:</strong> Deciding what to do with empty cells (Should they be deleted? Replaced with a zero? Left alone?).</li>
+  </ul>
+
+  <!-- Step-by-Step Guide for Cleaning -->
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-filter me-2"></i> Step-by-Step: Filtering & Removing Duplicates</h5>
+      <p class="small mb-3 text-light">Here is how to instantly clean up a massive, messy dataset in Google Sheets or Excel.</p>
+      
+      <h6 class="fw-bold text-info mt-3"><i class="fas fa-magic me-2"></i> How to Remove Duplicates:</h6>
+      <ol class="mb-3 text-light small">
+          <li class="mb-1">Click on the very top-left corner of your grid to <strong>select the entire sheet</strong> (or press Ctrl+A).</li>
+          <li class="mb-1">In the top menu, click <strong>Data</strong>.</li>
+          <li class="mb-1">Select <strong>Data cleanup</strong> (in Sheets) or look for the <strong>Remove Duplicates</strong> button (in Excel).</li>
+          <li>Click it, confirm your columns, and the software will instantly delete any row that is an exact clone of another!</li>
+      </ol>
+
+      <h6 class="fw-bold text-success mt-3"><i class="fas fa-funnel-dollar me-2"></i> How to Turn on a Filter:</h6>
+      <ol class="mb-0 text-light small">
+          <li class="mb-1">Click anywhere inside your data set.</li>
+          <li class="mb-1">In the top menu, click <strong>Data</strong> -> <strong>Create a filter</strong>.</li>
+          <li class="mb-1">Notice the tiny green funnel icons that appeared at the top of every column.</li>
+          <li>Click the funnel icon on a specific column (like "State") and uncheck the values you want to hide. The rows disappear temporarily!</li>
+      </ol>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">9.2.3 Aggregation and Core Functions</h4>
+  <p>Once the data is clean, we use <strong>Functions</strong> (pre-built math formulas) to aggregate (summarize) thousands of rows into actionable insights.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-code me-2"></i> Essential Data Functions</h5>
+      <div class="row g-3 mt-2">
+          <div class="col-md-6">
+              <div class="p-2 border border-secondary rounded bg-dark">
+                  <code class="text-info fs-5">=SUM(A1:A100)</code>
+                  <p class="small mb-0 text-light mt-1">Adds all the numbers in a specific range together.</p>
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="p-2 border border-secondary rounded bg-dark">
+                  <code class="text-info fs-5">=AVERAGE(B1:B50)</code>
+                  <p class="small mb-0 text-light mt-1">Calculates the mathematical mean of a range.</p>
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="p-2 border border-secondary rounded bg-dark">
+                  <code class="text-info fs-5">=COUNT(C1:C200)</code>
+                  <p class="small mb-0 text-light mt-1">Counts exactly how many cells actually contain numbers.</p>
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="p-2 border border-secondary rounded bg-dark">
+                  <code class="text-info fs-5">=IF(D1>90, "Pass", "Fail")</code>
+                  <p class="small mb-0 text-light mt-1">The logic gate. If the condition is true, do X. If false, do Y.</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Activity 9.2.4 -->
+  <div class="alert alert-warning mt-4 shadow-sm border-warning">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-dumpster fa-3x me-4 text-warning"></i>
+          <div>
+              <h4 class="fw-bold mb-1 text-dark">Activity 9.2.4: The Census Cleanup</h4>
+              <p class="mb-0 text-dark">You have been given a "messy" CSV file of fictional population data. It is full of duplicates, weird spellings, and formatting errors. You must use spreadsheet tools to clean the data, standardize city names, and then use aggregation functions to calculate the average age per region.</p>
+              <p class="mb-0 fw-bold mt-1 text-danger">👉 Load the "Census CSV" and document your cleanup steps in the Digital Notebook.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 9.3 -->
+  <h3 id="section-9-3" class="fw-bold border-bottom pb-2">9.3 Interactive Data Visualization <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.DA.CVT.1</span></h3>
+  <p class="fs-5">Humans are visual creatures. We struggle to comprehend a spreadsheet with 50,000 rows of numbers, but if you turn those numbers into a single Line Chart, our brains instantly understand the trend. This is <strong>Data Visualization</strong>: telling the story behind the numbers.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">9.3.1 Choosing the Right Chart</h4>
+  <p>The biggest mistake in data visualization is choosing the wrong chart type for your data. A beautiful chart is useless if it tells the wrong story.</p>
+  
+  <!-- Interactive Tabs for Chart Types -->
+  <ul class="nav nav-tabs mt-4" id="chartTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+          <button class="nav-link active fw-bold text-danger" id="pie-tab" data-bs-toggle="tab" data-bs-target="#pie-pane" type="button" role="tab">
+              <i class="fas fa-chart-pie me-2"></i> Pie Chart
+          </button>
+      </li>
+      <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-primary" id="bar-tab" data-bs-toggle="tab" data-bs-target="#bar-pane" type="button" role="tab">
+              <i class="fas fa-chart-bar me-2"></i> Bar/Column
+          </button>
+      </li>
+      <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-success" id="line-tab" data-bs-toggle="tab" data-bs-target="#line-pane" type="button" role="tab">
+              <i class="fas fa-chart-line me-2"></i> Line Graph
+          </button>
+      </li>
+      <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-warning text-dark" id="scatter-tab" data-bs-toggle="tab" data-bs-target="#scatter-pane" type="button" role="tab">
+              <i class="fas fa-braille me-2"></i> Scatter Plot
+          </button>
+      </li>
+  </ul>
+  
+  <div class="tab-content border border-top-0 bg-white p-4 shadow-sm mb-4" id="chartTabsContent">
+      <div class="tab-pane fade show active" id="pie-pane">
+          <h5 class="fw-bold text-danger">Pie Charts: Parts of a Whole</h5>
+          <p>Used <em>only</em> when you want to show how a single whole is divided into percentages (e.g., Market Share between 3 companies). If your numbers don't add up to exactly 100%, do not use a pie chart!</p>
+      </div>
+      <div class="tab-pane fade" id="bar-pane">
+          <h5 class="fw-bold text-primary">Bar & Column Charts: Comparing Categories</h5>
+          <p>The workhorse of data visualization. Excellent for comparing the size or amount of different distinct categories against each other (e.g., Comparing the total sales of 5 different car models).</p>
+      </div>
+      <div class="tab-pane fade" id="line-pane">
+          <h5 class="fw-bold text-success">Line Graphs: Trends Over Time</h5>
+          <p>Whenever time is a factor (days, months, years), use a line graph. It perfectly illustrates whether a value is trending up, trending down, or experiencing seasonal spikes (e.g., Website traffic over a 12-month period).</p>
+      </div>
+      <div class="tab-pane fade" id="scatter-pane">
+          <h5 class="fw-bold text-warning text-dark">Scatter Plots: Identifying Relationships</h5>
+          <p>Used to plot hundreds of individual data points to see if two variables are correlated. (e.g., Plotting "Hours Studied" on the X-axis and "Test Score" on the Y-axis to visually prove that more studying leads to higher scores).</p>
+      </div>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">9.3.2 Visual Ethics, Clarity, & Accessibility</h4>
+  <p>Because visualizations are so powerful, they can easily be weaponized to lie to an audience. A common unethical trick is <strong>Truncating the Y-Axis</strong>. If a chart's Y-Axis starts at 90 instead of 0, a tiny 1% difference between two bars will look like a massive 500% difference, tricking the viewer's brain.</p>
+  <p>Furthermore, charts must be <strong>Accessible</strong>. Relying purely on colors (like Red vs. Green) makes the chart unreadable to someone with color blindness. Professional charts use high-contrast palettes, patterns, and clear, distinct text labels to ensure everyone can read the data.</p>
+
+  <div class="concept-box shadow-sm border-success bg-light">
+      <h5 class="fw-bold text-success"><i class="fas fa-sliders-h me-2"></i> 9.3.3 Building Interactivity (Dashboards)</h5>
+      <p>A static chart is good, but an interactive <strong>Dashboard</strong> is incredible. In modern spreadsheet software, you can add <strong>Slicers</strong> and <strong>Dropdown Menus</strong>.</p>
+      <p class="mb-0">Instead of building 50 different charts for 50 different states, a Data Architect builds one dynamic chart connected to a Slicer. When the user clicks "Nevada" on the Slicer, the entire dashboard automatically updates to show only Nevada's data. This empowers the user to explore the data themselves and find their own answers.</p>
+  </div>
+
+  <!-- Step-by-Step Guide for Slicers -->
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-mouse-pointer me-2"></i> Step-by-Step: Adding a Slicer to a Chart</h5>
+      <p class="small mb-3 text-light">A Slicer acts as a remote-control button for your charts, allowing viewers to filter data visually without needing to touch the raw spreadsheet grid.</p>
+      
+      <h6 class="fw-bold text-info mt-3"><i class="fab fa-google me-2"></i> In Google Sheets:</h6>
+      <ol class="mb-0 text-light small">
+          <li class="mb-2"><strong>Build your Chart:</strong> First, insert a chart normally based on your data.</li>
+          <li class="mb-2"><strong>Open the Menu:</strong> Click <strong>Data</strong> in the top menu, then select <strong>Add a slicer</strong>.</li>
+          <li class="mb-2"><strong>Pick a Column:</strong> A floating control panel will appear. In the settings on the right, choose which column it should control (e.g., select the "Region" column).</li>
+          <li><strong>Test it out:</strong> Click the new Slicer button on your screen and uncheck a few boxes. Watch your chart dynamically update!</li>
+      </ol>
+  </div>
+
+  <!-- Final Chapter Call to Action -->
+  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-laptop-code fa-3x me-4 text-primary"></i>
+          <div>
+              <h3 class="fw-bold mb-1">Activity 9.3.4: The Real-World Dashboard</h3>
+              <p class="mb-0 fs-5">This is your final unit project! You will take a real-world, massive dataset (like local weather trends or school sports stats), clean it, and build an interactive dashboard with slicers that helps a user "see" the story behind the numbers.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Open the "Real-World Dashboard" rubric and submit your final spreadsheet to the Dropbox!</p>
+          </div>
+      </div>
+  </div>
+
+  <!-- Required scripts for interactive tabs/accordions inside the iframe -->
+  <script src="/js/bootstrap.bundle.js"></script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

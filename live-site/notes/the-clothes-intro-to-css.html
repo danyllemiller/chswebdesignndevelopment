@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Guided Notes: Chapter 6 | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <!-- BootStrap & FontAwesome -->
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <link href="/css/guided-notes.css" rel="stylesheet"/>
+  
+  <!-- Security Guard -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    
+    <div class="row justify-content-center">
+      <div class="col-lg-9 col-xl-8">
+        
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+            <a href="/year1/the-clothes-intro-to-css.html" class="text-decoration-none small fw-bold">&laquo; Back to Chapter 6</a>
+            <div class="btn-group shadow-sm">
+                <button onclick="window.print()" class="btn btn-outline-primary fw-bold"><i class="fas fa-print me-1"></i> Print Worksheet</button>
+                <button id="copyNotebookBtn" class="btn btn-primary fw-bold" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy this worksheet code so you can paste it into your Digital Notebook!">
+                    <i class="fas fa-copy me-1"></i> Copy Code for Notebook
+                </button>
+            </div>
+        </div>
+
+        <!-- The Worksheet Content -->
+        <div class="card shadow-sm border-primary" id="worksheet-content">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h2 class="mb-0 gochi fs-1">Chapter 6: The "Clothes" (Intro to CSS)</h2>
+                <p class="mb-0 fw-bold">Guided Notes</p>
+            </div>
+            <div class="card-body p-4 p-md-5 notes-container">
+                
+                <!-- Student Info Header -->
+                <div class="student-info-grid border-bottom pb-4">
+                    <div>
+                        <strong>Name:</strong> <span class="fill-blank" style="min-width: 200px;" contenteditable="true"></span>
+                    </div>
+                    <div>
+                        <strong>Date:</strong> <span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span>
+                    </div>
+                    <div>
+                        <strong>Class/Period:</strong> <span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span>
+                    </div>
+                </div>
+
+                <!-- Essential Question -->
+                <div class="bg-site-secondary p-3 rounded border border-primary mt-4 mb-4">
+                    <h5 class="fw-bold text-primary mb-2"><i class="fas fa-check-square me-2"></i> Essential Question:</h5>
+                    <p class="mb-0 fst-italic">How does a developer use Cascading Style Sheets to transform a raw document into a branded, professional, and visually engaging user interface?</p>
+                </div>
+
+                <!-- PART 1 -->
+                <div class="section-heading mt-4">I. Introduction &amp; The Cascade</div>
+                
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        <strong>Definition:</strong> CSS (Cascading Style Sheets) is the language that controls the <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> and appearance of your HTML.
+                    </li>
+                    <li class="mb-3">
+                        <strong>Pro Tool:</strong> <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (right-click and "Inspect") lets you view and test CSS live in the browser.
+                    </li>
+                    <li class="mb-0">
+                        <strong>Style Inheritance:</strong> Some styles (like font-family) on a parent tag (e.g., <code>&lt;body&gt;</code>) are <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> by all its child tags.
+                    </li>
+                </ul>
+
+                <h5 class="fw-bold mt-4 text-primary">The CSS Hierarchy ("Who Wins the Style Fight?")</h5>
+                <p>The "C" in CSS stands for <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> which means the order of your rules matters.</p>
+                
+                <table class="table table-bordered table-sm small bg-white shadow-sm mb-4">
+                    <thead class="bg-light text-center">
+                        <tr>
+                            <th style="width: 25%;">Method</th>
+                            <th style="width: 45%;">Description</th>
+                            <th style="width: 30%;">Priority Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Inline Styles</td>
+                            <td class="align-middle">Written directly on the HTML tag using the <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> attribute.</td>
+                            <td class="align-middle text-center">Highest (The Boss)</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Embedded Styles</td>
+                            <td class="align-middle">Styles placed in a <code>&lt;style&gt;</code> tag in the HTML <code>&lt;head&gt;</code>.</td>
+                            <td class="align-middle text-center">Medium</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">External Styles</td>
+                            <td class="align-middle">Written in a separate <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> file and linked to the HTML.</td>
+                            <td class="align-middle text-center">Best Practice (Lowest, but most manageable)</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Browser Default</td>
+                            <td class="align-middle">The built-in style (e.g., blue links) applied by the browser (user agent).</td>
+                            <td class="align-middle text-center">Lowest</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="mt-4 p-4 bg-light rounded border shadow-sm mb-5">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-comments me-2 text-primary"></i> Deep Dive Discussion</h5>
+                    <p class="small fw-bold text-primary mb-1">1. Best Practice:</p>
+                    <p class="small text-muted mb-3">Why is using an External Stylesheet the professional "Pro Way," even though Inline Styles have the highest priority?</p>
+                    <div class="cornell-summary mb-4 bg-white" contenteditable="true"></div>
+
+                    <p class="small fw-bold text-primary mb-1">2. The Cascade:</p>
+                    <p class="small text-muted mb-3">If you have the same rule (<code>color: red;</code>) for an <code>&lt;h1&gt;</code> tag at the top of your external stylesheet and a conflicting rule (<code>color: blue;</code>) for the same <code>&lt;h1&gt;</code> tag at the bottom, which rule wins, and why?</p>
+                    <div class="cornell-summary bg-white" contenteditable="true"></div>
+                </div>
+
+                <!-- PART 2 -->
+                <div class="section-heading">II. Color and Selector Specificity</div>
+                
+                <h5 class="fw-bold mt-4 text-primary">Painting with Code</h5>
+                <p>CSS uses three main color formats:</p>
+                <table class="table table-bordered table-sm small bg-white shadow-sm mb-4">
+                    <thead class="bg-light text-center">
+                        <tr>
+                            <th style="width: 15%;">Format</th>
+                            <th style="width: 25%;">Stands For</th>
+                            <th style="width: 25%;">Example</th>
+                            <th style="width: 35%;">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Hex</td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span></td>
+                            <td class="align-middle text-center">#FF69B4</td>
+                            <td class="align-middle">A six-digit code representing R, G, and B values.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">RGB</td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span></td>
+                            <td class="align-middle text-center">rgb(255, 105, 180)</td>
+                            <td class="align-middle">Mixes red, green, and blue light (0-255).</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">HSL</td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span></td>
+                            <td class="align-middle text-center">hsl(330, 100%, 71%)</td>
+                            <td class="align-middle">Based on the color wheel, saturation, and brightness.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="mb-4"><strong>Transparency:</strong> To add transparency (alpha) to a color, you use the formats <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> and <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> with a value between 0.0 (transparent) and 1.0 (solid).</p>
+
+                <h5 class="fw-bold mt-4 text-primary">Selectors (Target Practice)</h5>
+                <p>When two rules conflict, the browser uses <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> to pick a winner. The more specific selector wins.</p>
+                <table class="table table-bordered table-sm small bg-white shadow-sm mb-4">
+                    <thead class="bg-light text-center">
+                        <tr>
+                            <th style="width: 25%;">Selector Type</th>
+                            <th style="width: 25%;">Example</th>
+                            <th style="width: 25%;">Symbol/Prefix</th>
+                            <th style="width: 25%;">Specificity Rank</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">ID</td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span></td>
+                            <td class="align-middle text-center">#</td>
+                            <td class="align-middle text-center">Highest<br>(Heavyweight Champ)</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Class</td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span></td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="min-width: 60px;" contenteditable="true"></span></td>
+                            <td class="align-middle text-center">Medium<br>(Can be reused)</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Element</td>
+                            <td class="align-middle text-center">p</td>
+                            <td class="align-middle text-center">(None)</td>
+                            <td class="align-middle text-center">Lowest<br>(Styles all tags of that type)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5 class="fw-bold mt-4 text-primary">Advanced Selectors</h5>
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        &bull; <strong>Descendant Selector (space):</strong> Selects an element that is <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> an ancestor (e.g., <code>article p</code>).
+                    </li>
+                    <li class="mb-0">
+                        &bull; <strong>Child Selector (>):</strong> Selects an element <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> if it is a direct child (e.g., <code>ul > li</code>).
+                    </li>
+                </ul>
+
+                <div class="mt-4 p-4 bg-white rounded border border-primary shadow-sm mb-5">
+                    <h5 class="fw-bold text-primary mb-3"><i class="fas fa-laptop-code me-2"></i> Application Activity</h5>
+                    <p class="small fw-bold text-dark mb-1">1. Selector Showdown:</p>
+                    <p class="small text-muted mb-3">You want to style a single button on a specific page blue, but keep all other buttons red. Write the Selector that would win the "style fight" and make that one button blue:</p>
+                    <ul class="list-unstyled mb-0 ms-2">
+                        <li class="mb-3"><strong>Selector Type:</strong> <span class="fill-blank" style="min-width: 200px;" contenteditable="true"></span></li>
+                        <li class="mb-0"><strong>Example Selector:</strong> <span class="fill-blank" style="min-width: 200px;" contenteditable="true"></span></li>
+                    </ul>
+                </div>
+
+                <!-- PART 3 -->
+                <div class="section-heading">III. Typography, Sizing, and The Box Model</div>
+                
+                <h5 class="fw-bold mt-4 text-primary">Sizing Units</h5>
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        &bull; <strong>Absolute Unit:</strong> A fixed size that never changes (e.g., the <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> unit).
+                    </li>
+                    <li class="mb-3">
+                        &bull; <strong>Relative Unit (MVP):</strong> <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> (rem) is relative to the font size of the <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> element, making it the best unit for scalable design.
+                    </li>
+                    <li class="mb-0">
+                        &bull; <strong>Viewport Unit:</strong> Units like <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> (vw) are based on the width or height of the user's browser window.
+                    </li>
+                </ul>
+
+                <h5 class="fw-bold mt-4 text-primary">Typography</h5>
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        &bull; <strong>Font Stack:</strong> A prioritized list of fonts (e.g., "Roboto", Arial, sans-serif) that ensures the browser always has a <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> option.
+                    </li>
+                    <li class="mb-3">
+                        &bull; <strong>Generic Font Families:</strong> <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (fonts with "feet," like Times New Roman) vs. <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (clean fonts, like Arial).
+                    </li>
+                    <li class="mb-0">
+                        &bull; <strong>@font-face:</strong> The special CSS rule that allows you to upload and use <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> font files.
+                    </li>
+                </ul>
+
+                <h5 class="fw-bold mt-4 text-primary">The Box Model</h5>
+                <p>The most important concept in CSS: every element is a box with four layers.</p>
+                <table class="table table-bordered table-sm small bg-white shadow-sm mb-4">
+                    <thead class="bg-light">
+                        <tr>
+                            <th style="width: 25%;">Box Model Layer</th>
+                            <th style="width: 35%;">Description</th>
+                            <th style="width: 40%;">What it does</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold align-middle">Content</td>
+                            <td class="align-middle">Your actual text or image.</td>
+                            <td class="align-middle"><span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle">Padding</td>
+                            <td class="align-middle">The <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> space inside the box.</td>
+                            <td class="align-middle">Adds cushioning between the content and the border.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle">Border</td>
+                            <td class="align-middle">The line around the outside of the padding.</td>
+                            <td class="align-middle"><span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle">Margin</td>
+                            <td class="align-middle">The element's "personal space bubble."</td>
+                            <td class="align-middle">Adds space outside the box, pushing other elements away.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="mt-4 p-4 bg-light rounded border shadow-sm mb-5">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-comments me-2 text-primary"></i> Deep Dive Discussion</h5>
+                    <p class="small fw-bold text-primary mb-1">1. rem vs. px:</p>
+                    <p class="small text-muted mb-3">Why is it considered best practice to use rem for font sizing instead of px? (Hint: Think about accessibility and user preferences.)</p>
+                    <div class="cornell-summary mb-4 bg-white" contenteditable="true"></div>
+
+                    <p class="small fw-bold text-primary mb-1">2. The Box Model Fight:</p>
+                    <p class="small text-muted mb-3">If you set a <code>&lt;header&gt;</code> to have <code>padding: 20px</code> and <code>margin: 20px</code>, describe where the two spaces would appear in relation to the element's border.</p>
+                    <div class="cornell-summary bg-white" contenteditable="true"></div>
+                </div>
+
+                <!-- PART 4 -->
+                <div class="section-heading">IV. Layout and CSS Magic Tricks</div>
+                
+                <h5 class="fw-bold mt-4 text-primary">Layout (Arranging the Boxes)</h5>
+                <table class="table table-bordered table-sm small bg-white shadow-sm mb-4">
+                    <thead class="bg-light">
+                        <tr>
+                            <th style="width: 25%;">Layout Property</th>
+                            <th style="width: 40%;">What it Does</th>
+                            <th style="width: 35%;">Best Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold align-middle"><code>position: fixed;</code></td>
+                            <td class="align-middle">The element is <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> from the flow and "stuck" to the browser window.</td>
+                            <td class="align-middle">Navigation bars or "Back to Top" buttons.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle">Flexbox (<code>display: flex</code>)</td>
+                            <td class="align-middle">Arranges items perfectly in a single dimension <span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span> or <span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span></td>
+                            <td class="align-middle">Centering a logo, aligning items horizontally.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle">Grid (<code>display: grid</code>)</td>
+                            <td class="align-middle">Arranges items in two dimensions <span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span> and <span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span></td>
+                            <td class="align-middle">Complex, whole-page structural layouts.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5 class="fw-bold mt-4 text-primary">Pseudo-Classes &amp; Pseudo-Elements</h5>
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        &bull; <strong>Pseudo-Classes (:)</strong> - Style an element based on its <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (e.g., when the mouse is over it).
+                    </li>
+                    <li class="mb-3">
+                        &bull; <strong>Pseudo-Elements (::)</strong> - Style a specific <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> of an element (e.g., the first letter).
+                    </li>
+                    <li class="mb-0">
+                        &bull; <strong>Content Generation:</strong> You can insert text or images before or after an element using the content property with the pseudo-elements <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> and <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>.
+                    </li>
+                </ul>
+
+                <div class="mt-4 p-4 bg-white rounded border border-primary shadow-sm mb-5">
+                    <h5 class="fw-bold text-primary mb-3"><i class="fas fa-laptop-code me-2"></i> Application Activity</h5>
+                    <p class="small fw-bold text-dark mb-1">1. Link Hover Style:</p>
+                    <p class="small text-muted mb-3">Write the CSS code that changes the text color of all links on the page to green when the user hovers over them.</p>
+                    
+                    <p class="small fw-bold text-muted mb-1">CSS Code:</p>
+                    <div class="p-4 bg-light border rounded font-monospace small" contenteditable="true" style="outline: none; min-height: 120px;">
+                        /* Your CSS here */<br><br><br>
+                    </div>
+                </div>
+
+                <!-- PART 5 -->
+                <div class="section-heading">V. Progressive Enhancement &amp; Validation</div>
+                
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        &bull; <strong>Progressive Enhancement:</strong> A professional strategy where you build a simple, solid website that works for <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> browsers first, and then you layer on the fancy features for modern browsers.
+                    </li>
+                    <li class="mb-0">
+                        &bull; <strong>CSS Validation:</strong> The process of checking your CSS code against official standards using the <span class="fill-blank" style="min-width: 200px;" contenteditable="true"></span> to find typos and syntax errors.
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/guided-notes.js"></script>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

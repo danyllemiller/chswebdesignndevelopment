@@ -1,0 +1,55 @@
+2. Stop the Database Service (Systemd)
+If MariaDB restarts instantly after you stop it, it is being managed by systemd. To stop it and disable the "Restart=always" rule:
+
+Stop the service:
+
+Bash
+sudo systemctl stop mysql
+(If that returns "command not found," try sudo systemctl stop mariadb)
+
+Verify it stays down:
+
+Bash
+sudo systemctl status mysql
+(If the status says Active: active (running), the monitor is still holding it open. We must proceed to step 3).
+
+3. Identify and Kill the "Watchdog" Script
+If the above two steps don't keep the services down, you have a hidden monitoring script (a cron job or a background bash script) that is watching your processes.
+
+Check for background processes:
+
+Bash
+ps aux | grep -E "node|mysql|monitor"
+Look at the list. If you see a script running that you don't recognize (or one that looks like a loop), copy its PID (the number in the second column).
+
+Kill the "Watchdog" script:
+
+Bash
+sudo kill -9 <PID>
+Check for Cron Jobs: Sometimes these monitors are scheduled tasks. Check if you have a job configured to restart your services:
+
+Bash
+crontab -l
+sudo crontab -l
+If you see a line there that looks like your server script or a monitoring script, you can temporarily comment it out by adding a # to the start of the line using crontab -e.
+
+4. Verification
+Run this command to ensure nothing is listening on the ports:
+
+Bash
+sudo netstat -tulpn | grep -E "3000|3306"
+If this command returns nothing, your server and database are officially stopped and will not restart. You are now free to perform your maintenance.
+
+How to Restore Services
+Once your maintenance is complete, you will need to bring the services back online in this specific order:
+
+Start MariaDB:
+
+Bash
+sudo systemctl start mysql
+Start your Node app:
+
+Bash
+pm2 start server.js --name "guild-server"
+Re-enable any disabled Cron jobs:
+If you commented out lines in crontab -e in step 3, remove the # to re-enable your monitor.

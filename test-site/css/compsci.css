@@ -1,0 +1,43 @@
+/* =========================================
+   COMPUTER SCIENCE CURRICULUM STYLES
+   ========================================= */
+
+body.compsci-body { 
+    background-color: #ffffff; 
+    padding: 1.5rem 2rem; 
+}
+
+.compsci-body h1, 
+.compsci-body h2, 
+.compsci-body h3 { 
+    color: var(--primary-color); 
+}
+
+.chapter-header { 
+    border-bottom: 3px solid var(--primary-color); 
+    padding-bottom: 1rem; 
+    margin-bottom: 2rem; 
+}
+
+.concept-box { 
+    background-color: #f8f9fa; 
+    border-left: 5px solid var(--tertiary-color); 
+    padding: 1.5rem; 
+    margin: 1.5rem 0; 
+    border-radius: 0 8px 8px 0; 
+}
+
+.image-placeholder { 
+    background-color: #e9ecef; 
+    border: 2px dashed #adb5bd; 
+    border-radius: 8px; 
+    padding: 2rem; 
+    text-align: center; 
+    margin: 1.5rem 0; 
+}
+
+.highlight-text { 
+    color: var(--file-name-color); 
+    font-weight: bold; 
+    font-family: var(--font-family-monospace); 
+}

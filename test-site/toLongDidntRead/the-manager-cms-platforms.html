@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>TL;DR: Chapter 14 - The "Manager"</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-12">
+        <nav class="mb-4 d-flex justify-content-between small fw-bold">
+            <a href="/year2/the-manager-cms-platforms.html" class="text-decoration-none">&laquo; Back to Lesson</a>
+            <span class="text-muted text-uppercase">Manager's Quick-Start</span>
+        </nav>
+
+        <hgroup class="mb-5 border-bottom pb-3 mt-4">
+          <h1 class="display-4 fw-bold text-primary">TL;DR: Chapter 14</h1>
+          <p class="lead text-muted fs-4">CMS Strategy, WordPress &amp; Maintenance Cheat Sheet</p>
+        </hgroup>
+
+        <div class="content-section">
+          <div class="row mb-5 pb-4 border-bottom align-items-start">
+            <div class="col-lg-8">
+              <h2 class="section-title mt-0">The Manager's Code of Conduct</h2>
+              
+              <h5 class="fw-bold mt-4 text-primary">1. Choose Your Ownership Model</h5>
+              <ul class="small mb-4">
+                <li><strong>WordPress.com (Rental):</strong> Easy but limited. Host manages everything. You follow <em>their</em> rules.</li>
+                <li><strong>WordPress.org (Owner):</strong> Professional standard. Open-source software you host yourself for total freedom and ownership.</li>
+              </ul>
+              
+              <h5 class="fw-bold mt-4 text-primary">2. The "Clothes" vs. The "Apps"</h5>
+              <ul class="small mb-4">
+                <li><strong>Theme:</strong> Controls visual design. Swapping themes changes the "Clothes" but leaves the content (Database) intact.</li>
+                <li><strong>Plugin:</strong> Mini-apps (like <strong>WooCommerce</strong>) that add specific powers like stores or contact forms.</li>
+              </ul>
+
+              <h5 class="fw-bold mt-4 text-primary">3. Timely vs. Timeless Content</h5>
+              <ul class="small mb-4">
+                <li><strong>Posts:</strong> Timely news stories. Reverse-chronological. Use <strong>Categories/Tags</strong> for search.</li>
+                <li><strong>Pages:</strong> Timeless navigation items (About Us). Found in <strong>Appearance > Menus</strong>.</li>
+              </ul>
+
+              <h5 class="fw-bold mt-4 text-primary">4. Publishing &amp; Admin</h5>
+              <p class="small">Enter the <strong>Dashboard</strong> via <code>/wp-admin</code>. Use the <strong>Block Editor</strong> (Gutenberg) to rearrange content with the <strong>'+' icon</strong>. Use <strong>Revisions</strong> to undo mistakes.</p>
+
+              <h5 class="fw-bold mt-4 text-primary">5. Pro Strategy: SEO & Security</h5>
+              <p class="small">Optimize <strong>Permalinks</strong> for readable URLs. Use <strong>Caching</strong> for speed. Assign <strong>Roles</strong> (Administrator vs. Editor) to protect settings.</p>
+            </div>
+
+            <div class="col-lg-4">
+              <div class="card bg-primary text-white shadow-sm mb-4 border-0">
+                <div class="card-header border-bottom-0 fw-bold">The Golden Rule of Maintenance</div>
+                <div class="card-body small">
+                  Before updating the WordPress core, a theme, or a major plugin, you <u>must</u> perform a full database and file <strong>Backup</strong>.
+                </div>
+              </div>
+              <div class="card bg-warning text-dark shadow-sm border-0">
+                <div class="card-header border-bottom-0 fw-bold">Beware of Vendor Lock-in</div>
+                <div class="card-body small">
+                  No-Code builders (Wix/Squarespace) are easy for beginners but prevent you from moving your code to a different host later.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+  
+<div id="footer-nav"></div>
+<div id="footer-placeholder"></div>
+
+  <footer class="navbar  bg-body-tertiary border-top mt-5">
+   <div class="container text-center">
+    <p class="w-100 small mb-0 p-3">
+     Copyright - Danylle Miller Designs 2024
+    </p>
+   </div>
+  </footer>
+
+  <script>
+    (function() {
+        var url = "/includes/footer.html?v=" + new Date().getTime();
+        
+        fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error("Footer file not found at " + url);
+                return response.text();
+            })
+            .then(html => {
+                var placeholder = document.getElementById("footer-placeholder");
+                if (!placeholder) return;
+                
+                placeholder.innerHTML = html;
+
+                var scripts = placeholder.querySelectorAll("script");
+                scripts.forEach(oldScript => {
+                    var newScript = document.createElement("script");
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+                
+                console.log("✅ Footer Logic Loaded & Executed!");
+            })
+            .catch(error => console.error("Footer Load Error:", error));
+    })();
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

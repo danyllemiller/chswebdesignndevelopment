@@ -1,0 +1,271 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Infographic: The Architect's Blueprint (Chapter 3)</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <style>
+    :root {
+      --blueprint-blue: #0ea5e9;
+      --research-purple: #8b5cf6;
+      --strategy-orange: #f59e0b;
+      --seo-green: #10b981;
+      --soft-bg: #f8fafc;
+    }
+
+    body { background-color: var(--soft-bg); }
+
+    .roadmap-header {
+      background: var(--primary-color);
+      color: white;
+      padding: 3rem 1rem;
+      border-radius: 0 0 60px 60px;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,153,0.1);
+    }
+
+    .blueprint-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 2px solid rgba(0,0,0,0.05);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.03);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .section-ribbon {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 8px;
+        height: 100%;
+        background-color: var(--primary-color);
+    }
+
+    .info-card {
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 15px;
+      height: 100%;
+      border-left: 4px solid var(--blueprint-blue);
+    }
+
+    .atomic-box {
+        border: 2px dashed #cbd5e1;
+        border-radius: 15px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .seo-trinity-box {
+        background: #ecfdf5;
+        border: 2px solid var(--seo-green);
+        color: #065f46;
+        border-radius: 15px;
+    }
+
+    @media print {
+        .no-print { display: none !important; }
+        .blueprint-section { break-inside: avoid; border: 1px solid #ddd; }
+    }
+  </style>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <header class="roadmap-header text-center">
+    <div class="container">
+      <nav class="mb-4 d-flex justify-content-between small fw-bold no-print">
+          <a href="/year1/chapter_03.html" class="text-white text-decoration-none">&laquo; Back to Lesson</a>
+          <span class="badge bg-info text-dark text-uppercase border border-dark">Phase 2: Planning</span>
+      </nav>
+      <h1 class="display-4 fw-bold mb-0 gochi" style="letter-spacing: 2px;">THE ARCHITECT'S BLUEPRINT</h1>
+      <p class="lead opacity-75 mt-2 fw-bold">Chapter 3: UX Research, Information Architecture & SEO</p>
+    </div>
+  </header>
+
+  <section class="container pb-5">
+
+    <!-- 1. THE RESEARCH DICHOTOMY -->
+    <div class="blueprint-section">
+      <div class="section-ribbon bg-research-purple"></div>
+      <h3 class="fw-bold text-primary mb-4">1. Research: Finding the "Who"</h3>
+      <div class="row g-4">
+          <div class="col-md-6">
+              <div class="info-card border-purple" style="border-left-color: var(--research-purple);">
+                  <h5 class="fw-bold text-dark">Qualitative (The Why)</h5>
+                  <p class="small text-muted">Focuses on <strong>User Interviews</strong> and observation. We identify <strong>Pain Points</strong> (frustrations) and emotional motivations.</p>
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="info-card" style="border-left-color: var(--blueprint-blue);">
+                  <h5 class="fw-bold text-dark">Quantitative (The What)</h5>
+                  <p class="small text-muted">Focuses on <strong>Surveys</strong> and analytics. Gathers statistical data (percentages) to prove patterns across large groups.</p>
+              </div>
+          </div>
+          <div class="col-12">
+            <div class="p-3 bg-light rounded-4 border text-center">
+                <h6 class="fw-bold mb-1">The Synthesis: User Personas</h6>
+                <p class="x-small text-muted mb-0">We combine research into a <strong>fictional archetype</strong> to represent our real users. Use an <strong>Empathy Map</strong> (Says, Thinks, Does, Feels) to step into their shoes.</p>
+            </div>
+          </div>
+      </div>
+    </div>
+
+    <!-- 2. STRATEGY & COMPETITION -->
+    <div class="blueprint-section">
+      <div class="section-ribbon bg-strategy-orange"></div>
+      <h3 class="fw-bold text-primary mb-4">2. Strategic Analysis</h3>
+      <div class="row g-4 align-items-center">
+          <div class="col-md-5">
+              <div class="p-3 border rounded-4 bg-light shadow-sm">
+                  <h6 class="fw-bold text-warning">SWOT Report</h6>
+                  <ul class="x-small list-unstyled mb-0">
+                      <li><strong>S</strong>trengths (Internal)</li>
+                      <li><strong>W</strong>eaknesses (Internal)</li>
+                      <li><strong>O</strong>pportunities (External)</li>
+                      <li><strong>T</strong>hreats (External)</li>
+                  </ul>
+              </div>
+          </div>
+          <div class="col-md-7">
+              <h6 class="fw-bold">Blue Ocean Strategy</h6>
+              <p class="small text-muted">Use a <strong>Competitive Matrix</strong> to cross-reference features. Look for the "Blue Ocean"—the gaps where competitors are failing, allowing you to offer unique value.</p>
+          </div>
+      </div>
+    </div>
+
+    <!-- 3. PROJECT PLANNING (MoSCoW & STORIES) -->
+    <div class="blueprint-section">
+      <div class="section-ribbon bg-danger"></div>
+      <h3 class="fw-bold text-primary mb-4">3. The Agile Workflow</h3>
+      <div class="row g-4">
+          <div class="col-lg-7 border-end">
+              <h6 class="fw-bold">User Stories: The 3 C's</h6>
+              <p class="x-small text-muted">"As a <strong>[user]</strong>, I want to <strong>[action]</strong> so that <strong>[goal]</strong>."</p>
+              <ul class="x-small text-muted">
+                  <li><strong>Card:</strong> Keep the requirement short.</li>
+                  <li><strong>Conversation:</strong> Discuss the details with the team.</li>
+                  <li><strong>Confirmation:</strong> Define <strong>Acceptance Criteria</strong> (Given/When/Then).</li>
+              </ul>
+          </div>
+          <div class="col-lg-5">
+              <h6 class="fw-bold">MoSCoW Prioritization</h6>
+              <table class="table table-sm x-small mb-0">
+                  <tr class="table-danger"><td><strong>Must</strong> Have</td><td>Critical for MVP</td></tr>
+                  <tr class="table-warning"><td><strong>Should</strong> Have</td><td>High priority</td></tr>
+                  <tr class="table-info"><td><strong>Could</strong> Have</td><td>Nice-to-have</td></tr>
+                  <tr class="table-secondary"><td><strong>Won't</strong> Have</td><td>Out of scope</td></tr>
+              </table>
+          </div>
+      </div>
+    </div>
+
+    <!-- 4. INFORMATION ARCHITECTURE & WIREFRAMES -->
+    <div class="blueprint-section">
+      <div class="section-ribbon bg-info"></div>
+      <h3 class="fw-bold text-primary mb-4">4. Structural Engineering</h3>
+      <div class="row g-4">
+          <div class="col-md-6">
+              <div class="p-3 bg-light rounded-4 h-100">
+                  <h6 class="fw-bold">The Sitemap (The Map)</h6>
+                  <p class="x-small text-muted mb-0">A top-down hierarchy of every file in the project. Always starts with <code>index.html</code> at the root level.</p>
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="p-3 bg-dark text-white rounded-4 h-100">
+                  <h6 class="fw-bold text-info">Wireframes (The Blueprint)</h6>
+                  <p class="x-small opacity-75 mb-0">Black & White skeletal layouts focusing only on <strong>Hierarchy and Priority</strong>. We ignore color to focus on user journey.</p>
+              </div>
+          </div>
+      </div>
+
+      <div class="row mt-4 g-3">
+          <div class="col-md-4">
+              <div class="atomic-box">
+                  <h6 class="fw-bold small">Atoms</h6>
+                  <p class="x-small mb-0">Basic HTML tags (Buttons, Inputs)</p>
+              </div>
+          </div>
+          <div class="col-md-4">
+              <div class="atomic-box border-info">
+                  <h6 class="fw-bold small">Molecules</h6>
+                  <p class="x-small mb-0">Small groups (Search Forms)</p>
+              </div>
+          </div>
+          <div class="col-md-4">
+              <div class="atomic-box border-primary">
+                  <h6 class="fw-bold small">Organisms</h6>
+                  <p class="x-small mb-0">Sections (Site Header)</p>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <!-- 5. OPTICAL PATTERNS & SEO -->
+    <div class="blueprint-section">
+      <div class="section-ribbon bg-seo-green"></div>
+      <div class="row g-4">
+          <div class="col-md-6 border-end">
+              <h3 class="fw-bold text-primary">5. Reading Patterns</h3>
+              <div class="row mt-3 text-center">
+                  <div class="col-6">
+                      <h1 class="mb-1">F</h1>
+                      <h6 class="fw-bold x-small">F-Pattern</h6>
+                      <p class="x-small text-muted">For text-heavy blogs/forums.</p>
+                  </div>
+                  <div class="col-6">
+                      <h1 class="mb-1">Z</h1>
+                      <h6 class="fw-bold x-small">Z-Pattern</h6>
+                      <p class="x-small text-muted">For visual landing pages.</p>
+                  </div>
+              </div>
+          </div>
+          <div class="col-md-6">
+              <h3 class="fw-bold text-primary">6. The SEO Trinity</h3>
+              <div class="seo-trinity-box p-3 mt-2">
+                  <ol class="x-small mb-0">
+                      <li><strong>The Title Tag:</strong> The blue link in search results.</li>
+                      <li><strong>Meta Description:</strong> The ad snippet under the link.</li>
+                      <li><strong>The H1 Tag:</strong> The one main visible headline.</li>
+                  </ol>
+                  <p class="x-small mt-2 mb-0 fw-bold">PRO TIP: Use "Long-Tail Keywords" to capture users with high intent!</p>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <div class="text-center no-print">
+        <button onclick="window.print()" class="btn btn-outline-primary shadow-sm fw-bold px-5">🖨️ Print Blueprint Guide</button>
+    </div>
+
+  </section>
+
+<div id="footer-nav"></div>
+<div id="footer-placeholder"></div>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

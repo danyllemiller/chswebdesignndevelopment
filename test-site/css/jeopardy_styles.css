@@ -1,0 +1,170 @@
+/* --- JEOPARDY GAME STYLES --- */
+
+body {
+    /* Use a standard sans-serif font, similar to Bootstrap's default */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    padding-bottom: 70px; /* Account for the sticky footer */
+    background-color: #f8f9fa; /* Light gray background */
+}
+
+/* Apply the "Gochi Hand" font to titles, as seen in the template */
+.title-font {
+    font-family: 'Gochi Hand', cursive;
+    color: #343a40;
+}
+
+/* Style for the game board buttons */
+.question-btn {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 20px 10px;
+    border: 2px solid #0d6efd;
+    transition: all 0.2s ease-in-out;
+}
+
+.question-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Style for buttons that have been "used" */
+.question-btn:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #ccc;
+    transform: none;
+    box-shadow: none;
+    opacity: 0.7;
+    text-decoration: line-through;
+}
+
+/* Style for the category headers */
+.category-header {
+    font-family: 'Gochi Hand', cursive;
+    font-size: 1.8rem;
+    color: #fff;
+    background-color: #0d6efd;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    min-height: 80px; /* Ensure headers align nicely */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Team scorecard styling */
+.team-card {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.team-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    /* Allows the team name to be edited */
+    cursor: pointer;
+}
+
+.team-name:hover, .team-name:focus {
+    background-color: #fefef0;
+    outline: none;
+}
+
+.team-score {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #28a745;
+}
+
+/* Modal styling */
+.modal-question {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.modal-answer {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #28a745;
+    background-color: #f0fff4;
+    border: 1px solid #28a745;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+/* Custom footer to match template */
+footer. {
+    border-top: 1px solid #e7e7e7;
+    padding: 15px 0;
+    background-color: #f8f8f8;
+}
+
+/* Specific Jeopardy Table Styling (if using table layout) */
+#jeopardy {
+    width: 100%;
+    margin-bottom: 20px;
+}
+#jeopardy th {
+    background-color: #0d6efd;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    font-family: 'Gochi Hand', cursive;
+    font-size: 1.5rem;
+    border: 2px solid #fff;
+}
+#jeopardy td {
+    background-color: #00008b; /* Dark Blue Jeopardy Color */
+    text-align: center;
+    border: 2px solid #fff;
+    height: 100px;
+    vertical-align: middle;
+}
+#jeopardy a.track-link {
+    color: #ffd700; /* Gold */
+    font-size: 2rem;
+    font-weight: bold;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    height: 100%;
+    line-height: 100px; /* Vertically center */
+}
+#jeopardy td.visited {
+    background-color: #555;
+}
+#jeopardy td.visited a {
+    color: #ffeb3b;
+    text-decoration: line-through;
+    pointer-events: none;
+}
+
+/* Scoreboard Table Styling */
+#scoreboard {
+    width: 100%;
+    margin-bottom: 30px;
+    text-align: center;
+    border-collapse: collapse;
+}
+#scoreboard th {
+    background-color: #343a40;
+    color: white;
+    padding: 10px;
+}
+#scoreboard td {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #28a745;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    background-color: white;
+}

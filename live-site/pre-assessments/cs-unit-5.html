@@ -1,0 +1,158 @@
+<!-- File: pre-assessments/cs-unit-5.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Pre-Assessment: Unit 5 - The Human Impact</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <!-- Strict DAC Styles -->
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/student-pages.css">
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body style="background-color: var(--site-secondary);">
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5 bg-white shadow-sm rounded" style="border-top: 6px solid var(--primary-color);">
+                <div class="spinner-border" style="color: var(--primary-color);" role="status"></div>
+                <p class="mt-3 fw-bold" style="color: var(--primary-color);">Connecting to Digital Arts Cloud...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-placeholder"></div>
+
+  <!-- PRE-TEST DATA INJECTION & LAUNCH -->
+  <script type="module">
+    import { initPreTest } from '/js/preTestLogic.js';
+
+    // Unit 5 Diagnostic Pool (60 Questions: 15 from Ch 15, 16, 17, 18)
+    const unit5DiagPool = [
+        // --- CHAPTER 15: SDLC ---
+        { question: "What is the Software Development Lifecycle (SDLC)?", options: ["The professional process used by teams to plan, build, and maintain software.", "A hardware component.", "The time to render HTML.", "A legal document."] },
+        { question: "What does 'Iterative Design' mean?", options: ["Building a version, finding its flaws, and using that feedback to make the next version better.", "Writing all code in one day.", "Deleting old code.", "Designing without clients."] },
+        { question: "What are the five standard stages of the SDLC?", options: ["Plan, Design, Build, Test, Maintain.", "HTML, CSS, JS, PHP, SQL", "Fetch, Decode, Execute, Store, Sync", "Draft, Publish, Market, Sell, Profit"] },
+        { question: "In the SDLC, what happens during the 'Plan' stage?", options: ["Defining the problem, audience, and hardware requirements before writing any code.", "Writing core algorithms.", "Paying for hosting.", "Giving the program to beta testers."] },
+        { question: "In the SDLC, what happens during the 'Design' stage?", options: ["Creating prototypes and mapping out algorithms.", "Writing the actual code.", "Fixing security holes after launch.", "Writing unit tests."] },
+        { question: "In the SDLC, what happens during the 'Build' stage?", options: ["Writing the actual code and connecting it to data structures.", "Drawing the blueprint.", "Defining the problem.", "Giving the program to users."] },
+        { question: "In the SDLC, what happens during the 'Test' stage?", options: ["Giving the program to users to find logic errors or bugs.", "Creating prototypes.", "Writing the actual code.", "Fixing security holes after launch."] },
+        { question: "In the SDLC, what happens during the 'Maintain' stage?", options: ["Fixing security holes and adding new features after the app is released.", "Defining the problem, audience, and hardware requirements.", "Writing the actual code and connecting it to data structures.", "Giving the program to users to find logic errors or bugs."] },
+        { question: "Why is building an app just for *yourself* considered a mistake in professional development?", options: ["Because a Data Architect must build for a specific 'Audience' with different needs and skills.", "Because personal apps cannot be sold.", "Because it violates terms of service.", "Because personal apps do not require a database."] },
+        { question: "What is the most valuable data a developer can have when testing an app?", options: ["User Feedback.", "Lines of code written.", "The size of the database.", "The speed of the CPU."] },
+        { question: "What is a 'Beta Tester'?", options: ["A real user who hasn't seen the code and tries to use the program to find bugs.", "A program that automatically writes CSS.", "The project manager.", "A hacker trying to steal passwords."] },
+        { question: "What is a 'Pain Point' in a user interview?", options: ["A specific moment where the user gets confused or frustrated by the app.", "When the computer overheats.", "When the developer gets tired.", "A syntax error."] },
+        { question: "What does 'Accessibility' mean in software design?", options: ["Ensuring that software can be used by the widest range of people possible, including those with disabilities.", "Making sure the website loads fast.", "Allowing anyone to steal your code.", "Giving users the ability to hack."] },
+        { question: "What is 'Version Control'?", options: ["A system that tracks changes to a file and prevents teammates from accidentally overwriting each other's work.", "A tool to limit users.", "A firewall that blocks viruses.", "An algorithm that translates HTML."] },
+        { question: "What is 'Documentation' in software development?", options: ["The written explanation, screenshots, and diagrams that explain the 'Why' behind the 'How' of the code.", "A receipt from buying a domain.", "The process of deleting files.", "A legal contract signed by users."] },
+
+        // --- CHAPTER 16: ETHICS, LAW & PRIVACY ---
+        { question: "What is Intellectual Property (IP)?", options: ["Digital creations of the mind, such as code, art, and inventions.", "Physical land.", "IP addresses.", "Database rules."] },
+        { question: "What does Copyright protect?", options: ["Original works of authorship like code, photos, and music.", "Inventions.", "Logos.", "Social Security Numbers."] },
+        { question: "What does a Patent protect?", options: ["Inventions or processes.", "Original works of authorship.", "Brands and logos.", "Social security numbers."] },
+        { question: "What does a Trademark protect?", options: ["Brands and logos.", "Inventions or processes.", "Original works of authorship.", "Person's identity."] },
+        { question: "What is a 'Beneficial Effect' of IP laws?", options: ["Protecting a creator's income to encourage innovation.", "Slowing down new inventions.", "Allowing piracy.", "Making code free."] },
+        { question: "What is a 'Harmful Effect' of overly strict IP laws?", options: ["Slowing down new inventions due to fear of lawsuits.", "Protecting creator income.", "Reducing piracy.", "Encouraging innovation."] },
+        { question: "What is Digital Piracy?", options: ["Unauthorized copying or distribution of copyrighted material.", "Using open-source libraries.", "Sailing virtual boats.", "Linking to YouTube."] },
+        { question: "What is 'Fair Use'?", options: ["A legal safety net allowing use of copyrighted material for education or parody.", "A rule that everything is free.", "A CSS styling rule.", "A bandwidth requirement."] },
+        { question: "In the Fair Use test, what does 'Purpose' evaluate?", options: ["Whether the use is for education or to make money.", "The age of the user.", "The type of monitor used.", "The file extension."] },
+        { question: "In the Fair Use test, what does 'Effect' evaluate?", options: ["Will your use stop the original creator from making money?", "Is the code efficient?", "Does it use RAM?", "Is it open source?"] },
+        { question: "What is 'Proprietary Software'?", options: ["Software where the source code is a secret and owned by a company.", "Software where code is public.", "Linux-based software.", "Software with no license."] },
+        { question: "What is 'Open Source Software'?", options: ["Software where the source code is public and anyone can change it.", "Secret code.", "Apple-only code.", "Subscription software."] },
+        { question: "Why is Open Source considered the engine of the modern web?", options: ["It allows developers to collaborate and fix bugs much faster.", "It is more expensive.", "It blocks hackers.", "It is private."] },
+        { question: "What is a Software License?", options: ["A legal agreement you must follow when using someone else's code.", "A driver's license.", "A virus scan.", "A RAM upgrade."] },
+        { question: "What is 'Automated Data Collection'?", options: ["Computers collecting data like location without you clicking 'Save'.", "Typing data into a form.", "Deleting old browser cookies.", "Designing a database schema."] },
+        { question: "What characterizes the MIT License?", options: ["It is very permissive as long as you keep the original copyright notice.", "It strictly forbids using the code to make any money.", "It requires you to delete your code after 30 days.", "It forces you to make all your new code open source as well."] },
+        { question: "What characterizes the GPL (General Public License)?", options: ["Any new app you build using its code must also be Open Source.", "It is very permissive as long as you keep the original copyright notice.", "It strictly forbids using the code to make any money.", "It forces you to pay a monthly fee."] },
+        { question: "Why do programmers use code 'Libraries'?", options: ["To speed up development by leveraging the work of others.", "To read fictional stories.", "To hide their code.", "To delete old files."] },
+        { question: "What are 'Cookies' on the internet?", options: ["Small text files stored in your browser to remember you and track your habits.", "Pop-up ads.", "Special image files.", "Code blocks that delete history."] },
+        { question: "How do 'Free' apps like TikTok or Instagram make billions of dollars?", options: ["By collecting and selling your personal data to advertisers.", "By asking for donations.", "By selling physical products.", "By charging the government a fee."] },
+        { question: "In the modern data economy, what is the role of the user?", options: ["The user is not the customer; the user is the product.", "The user is the CEO.", "The user is completely anonymous.", "The user is the primary software engineer."] },
+        { question: "What is COPPA?", options: ["A U.S. law that prevents companies from collecting data on kids under 13 without parental consent.", "A protocol for encrypting passwords.", "An algorithm used to compress large images.", "A European law about sharing open-source code."] },
+        { question: "What is the GDPR?", options: ["A strict European law that protects user data and requires transparency.", "A brand of physical server hardware.", "A type of database.", "A programming language."] },
+        { question: "What does the GDPR 'Right to be Forgotten' do?", options: ["It forces companies to delete your data if you ask them to.", "It forces a browser to clear its cache.", "It automatically logs you out of an app.", "It deletes old emails from your inbox."] },
+        { question: "What is a 'Transformative Work' in copyright law?", options: ["A piece of media that changes the original so much it creates a new meaning.", "A website that uses CSS to change colors.", "Copying an entire movie.", "Converting a PNG file to a JPG file."] },
+
+        // --- CHAPTER 17: SOCIAL IMPACT & BIAS ---
+        { question: "How has computing fundamentally changed 'Social Architecture'?", options: ["By allowing people to form deep connections globally based on shared interests rather than just physical location.", "By moving cities.", "By deleting languages.", "By forcing local networking."] },
+        { question: "What is the 'Attention Economy'?", options: ["An environment where apps are designed to keep users scrolling and engaged for as long as possible.", "Bitcoin mining.", "School grading.", "Cloud storage costs."] },
+        { question: "How has the 'Automation Shift' changed the nature of work?", options: ["It has moved many jobs from traditional 9-to-5 roles to the 'Gig Economy.'", "Ended work.", "Ended offices.", "Ended hardware."] },
+        { question: "What is a major ethical concern regarding the 'Gig Economy'?", options: ["The power balance between the human worker and the algorithm.", "Uber prices.", "GPS signal strength.", "Phone battery life."] },
+        { question: "What is the 'Digital Divide'?", options: ["The gap between communities that have access to high-speed internet and those that rely on slow, expensive connections.", "Binary subtraction.", "A firewall.", "A hard drive partition."] },
+        { question: "How does the Digital Divide create an 'Opportunity Gap'?", options: ["Students without high-speed internet struggle to apply for remote jobs.", "Apps are more expensive.", "RAM is slower.", "Monitors are smaller."] },
+        { question: "Solving the Digital Divide requires hardware access and what else?", options: ["Equity in Education (teaching people to use the tools).", "A 5G tower.", "A new mouse.", "A CSS grid."] },
+        { question: "Why should a Data Architect design 'Light' versions of their software?", options: ["To ensure users on slow or cellular connections can still access the tools.", "To save RAM.", "To use less blue light.", "To follow WCAG."] },
+        { question: "What is 'Algorithmic Bias'?", options: ["When human prejudices, whether intentional or unintentional, are programmed into software.", "A laggy computer.", "A sorting algorithm.", "A network firewall."] },
+        { question: "Why do we often incorrectly assume computers are always 'fair'?", options: ["Because they are based on math, but we forget that the data feeding the math comes from flawed humans.", "They have no hearts.", "They are made of metal.", "They run on code."] },
+        { question: "If an app is only tested on people with light skin, what will the algorithm learn?", options: ["That light skin is the 'default,' causing it to fail for others.", "To brightness the screen.", "To delete old data.", "To update its logic."] },
+        { question: "What did the 'Gender Shades' project reveal about commercial facial recognition?", options: ["It had an error rate of nearly 35% for dark-skinned women, but under 1% for light-skinned men.", "It was perfect.", "It only saw eyes.", "It only saw men."] },
+        { question: "What is an 'Equity Audit'?", options: ["Testing a program with a diverse data set to ensure it works equally well for all users regardless of race, gender, or age.", "Counting money.", "Deleting accounts.", "Speed testing."] },
+        { question: "When auditing logic, why might the rule `IF name_length < 5` be biased?", options: ["It might accidentally punish or exclude users from cultures with very long names.", "Assuming everyone's name is short.", "It uses too much server RAM.", "It is mathematically impossible to process."] },
+        { question: "What is 'Inclusive Design'?", options: ["The practice of building products that are welcoming and usable by as many people as possible.", "Designing for billionaires.", "Hiding buttons.", "Using only images."] },
+        { question: "Why must responsive design account for Text Direction?", options: ["Because languages like Arabic and Hebrew read right-to-left, requiring the entire layout to flip.", "Reading backwards.", "Because some monitors only show vertical text.", "Because CSS cannot align text to the right."] },
+        { question: "What does it mean to 'Localize' an app rather than just 'Translate' it?", options: ["Working with native speakers to ensure the interface feels culturally natural and respectful, not just running it through Google Translate.", "More than just changing words.", "Moving the physical server to a new country.", "Only changing the currency symbols."] },
+        { question: "If an algorithm is 'unintentionally' biased, what does that mean?", options: ["The programmer didn't mean to cause harm, but failed to use diverse testing data.", "Unintentional flaw.", "The computer became self-aware.", "The API key was typed incorrectly."] },
+        { question: "What is a 'Blind Spot' in software design?", options: ["An issue or barrier that a developer doesn't notice because it doesn't affect them personally.", "Unseen barrier.", "A dead pixel on a monitor.", "A firewall setting."] },
+        { question: "Why is 'Designing with people' better than 'Designing for people'?", options: ["It gives marginalized groups a voice in how the technology that affects them is built.", "Giving a voice.", "It makes software cheaper.", "It forces people to pay."] },
+
+        // --- CHAPTER 18: COMPUTING IN EVERY FIELD & AI ---
+        { question: "What is considered the 'Universal Tool' of the 21st century?", options: ["Computer Science and Algorithms.", "Hammer.", "Electricity.", "The wheel."] },
+        { question: "How do biologists use 'Pattern Matching' algorithms from Computer Science?", options: ["To sequence human DNA and find the causes of diseases.", "To sort animals.", "To feed fish.", "To plant trees."] },
+        { question: "What type of algorithm do delivery companies like UPS and Amazon use to calculate efficient routes?", options: ["Pathfinding algorithms.", "Sorting.", "Hashing.", "Encryption."] },
+        { question: "How do streaming apps like Spotify use Data Structures?", options: ["To power recommendation algorithms.", "To store vinyl.", "To delete old songs.", "To record sound."] },
+        { question: "What is the goal of a Power User when looking at a non-technical field?", options: ["To see the 'Hidden Algorithm' and make it efficient.", "To hack.", "To quit.", "To ignore it."] },
+        { question: "If a nurse is organizing patient charts, what kind of computational problem is this?", options: ["A Sorting problem.", "Routing.", "Encryption.", "Looping."] },
+        { question: "If an architect is designing hallways, what kind of computational problem is this?", options: ["A Flow or Pathfinding problem.", "Sorting.", "Hashing.", "Variables."] },
+        { question: "How do chemists use Computational Models?", options: ["To simulate how new medicines will react in the body.", "To bake cakes.", "To email.", "To design ads."] },
+        { question: "How do meteorologists use technology to predict where a hurricane will land?", options: ["They use massive data sets and Computational Models.", "Looking at clouds.", "Reading CSS.", "Binary math."] },
+        { question: "How does computer science power modern film-making?", options: ["CGI uses physics models to calculate light/water.", "Prints scripts.", "Replaces actors.", "Sells snacks."] },
+        { question: "What is the definition of Artificial Intelligence (AI) in this course?", options: ["Software designed to mimic human cognitive functions like learning and problem-solving.", "A walking robot.", "A big hard drive.", "A calculator."] },
+        { question: "How is an AI program fundamentally different from a standard 'If-Then' program?", options: ["An AI 'learns' to create its own paths by looking at millions of examples, rather than following a strict human-written rule.", "It is free.", "It is 100% correct.", "It only uses HTML."] },
+        { question: "What is the 'Engine' behind modern AI?", options: ["Machine Learning (ML).", "JavaScript.", "HTML5.", "The CPU."] },
+        { question: "How does Machine Learning work?", options: ["By feeding a model massive amounts of 'Big Data' to find subtle patterns.", "Typing rules.", "Guessing.", "Deleting data."] },
+        { question: "What are Generative AI tools (like ChatGPT or Gemini) designed to do?", options: ["Use probability to create 'new' content like text, images, and code.", "Generate new content.", "Scan computers for viruses.", "Store passwords securely."] },
+        { question: "When a Generative AI writes a poem, what is it actually doing?", options: ["Calculating which word is most likely to come next based on patterns in all the poems it has read.", "Word probability.", "Copying a poem exactly from Google.", "Translating binary code."] },
+        { question: "What is 'Prompt Engineering'?", options: ["The skill of using decomposition to write clear, precise instructions for an AI.", "Writing AI instructions.", "Fixing syntax errors.", "Installing an OS."] },
+        { question: "Why is 'Validation' a critical final step when using AI?", options: ["Because you should never trust the output without checking for logic errors or 'hallucinations.'", "Checking output.", "Because AI requires you to pay per word.", "Because the AI will delete your account."] },
+        { question: "What is a 'Deepfake'?", options: ["AI-generated fake video or audio that looks and sounds real, often used to spread lies or steal identities.", "Fake media.", "A hidden folder.", "A submarine drone."] },
+        { question: "What is the 'Black Box Problem' in Artificial Intelligence?", options: ["When an AI makes a decision, but the programmers don't know exactly *why* it made that choice.", "Unknown reasons.", "When the server catches on fire.", "When a drone goes missing."] },
+        { question: "If an AI generates a completely false statement but presents it as a fact, what is this called?", options: ["A Hallucination.", "False fact.", "A Syntax Error", "A Runtime Glitch"] },
+        { question: "Ultimately, what determines if AI will be a beneficial tool or a harmful weapon?", options: ["The ethical framework, diversity, and choices of the human creators and power users who wield it.", "Human choices.", "How much money the company spends.", "Whether it is connected to 5G."] }
+    ];
+
+    // Configuration for the Pre-Test Engine
+    const config = {
+        questions: unit5DiagPool,
+        questionCount: 15, // Selects 15 random questions from the pool of 60
+        chapterTitle: "Unit 5: The Human Impact",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbzuZbL4UW8_bzLcp7bZJmcU9VSbofoerCk823K6e2cgLPIBCaTb5ulXlm0skQv49IG21Q/exec"
+    };
+    
+    initPreTest(config);
+
+  </script>
+</body>
+</html>

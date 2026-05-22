@@ -1,0 +1,180 @@
+<!-- /include/navbar.html -->
+<!-- Bulletproof FontAwesome CDN (Bypasses 403 Forbidden Kit Errors) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top shadow-sm border-bottom border-primary border-2">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/index.html">
+        <div class="brand-logo"><img src="/images/weblogo.png" alt="CHS Web Design & Dev Logo" class="d-inline-block align-middle"></div>
+    </a>
+    <button aria-controls="navbarNav" aria-expanded="false" aria-label="toggle navigation" class="navbar-toggler" data-bs-target="#navbarNav" data-bs-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>    
+    
+    <div class="collapse navbar-collapse" id="navbarNav">
+      
+      <!-- SUMMER COUNTDOWN (Left Aligned & Slimmed) -->
+      <ul class="navbar-nav me-auto mb-1 mb-lg-0">
+        <li class="nav-item d-flex align-items-center bg-primary text-white rounded px-2 py-1 my-0 ms-lg-3 shadow-sm" style="white-space: nowrap; min-width: max-content; line-height: 1.1;">
+            <i class="fas fa-sun me-2 text-warning" style="font-size: 0.8rem;"></i>
+            <span class="fw-bold" id="summer-countdown" style="font-size: 0.75rem;">Calculating...</span>
+        </li>
+      </ul>
+
+      <!-- RIGHT ALIGNED NAVIGATION -->
+      <ul class="navbar-nav ms-auto align-items-lg-center fw-bold">        
+        <li class="nav-item"><a class="nav-link" href="/index.html"><i class="fas fa-home me-1 text-primary"></i> Home</a></li>        
+        
+        <!-- LOGGED-IN: WD STUDENT TOOLS (Hidden by default) -->
+        <li class="nav-item dropdown d-none" id="student-menu-wd">
+          <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);" id="navbarStudentWD" role="button"><i class="fas fa-user-graduate me-1 text-primary"></i> Student Tools</a>
+          <ul aria-labelledby="navbarStudentWD" class="dropdown-menu dropdown-menu-end shadow border-primary">
+            <li><a class="nav-link dropdown-item" href="/student/notes.html"><i class="fas fa-book me-2 text-info"></i> My Notebook</a></li>
+            <li><a class="nav-link dropdown-item" href="/student/grades.html"><i class="fas fa-chart-line me-2 text-success"></i> My Grades</a></li>
+            <li><a class="nav-link dropdown-item" href="/student/files.html"><i class="fas fa-folder-open me-2 text-warning"></i> My Files</a></li>
+            <li><a class="nav-link dropdown-item" href="/calendar.html"><i class="fas fa-calendar-alt me-2 text-secondary"></i> Calendar</a></li>
+            <li><hr class="dropdown-divider border-primary"></li>
+            <li><a class="nav-link dropdown-item text-danger" href="/logout.html"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+          </ul>
+        </li>
+
+        <!-- LOGGED-IN: CS STUDENT TOOLS (Hidden by default) -->
+        <li class="nav-item dropdown d-none" id="student-menu-cs">
+          <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);" id="navbarStudentCS" role="button"><i class="fas fa-user-graduate me-1 text-success"></i> Student Tools</a>
+          <ul aria-labelledby="navbarStudentCS" class="dropdown-menu dropdown-menu-end shadow border-success">
+            <li><a class="nav-link dropdown-item" href="/cs-interactive.html"><i class="fas fa-terminal me-2 text-info"></i> CS Workspace</a></li>
+            <li><a class="nav-link dropdown-item" href="/student/grades.html"><i class="fas fa-chart-line me-2 text-success"></i> My Grades</a></li>
+            <li><a class="nav-link dropdown-item" href="/student/files.html"><i class="fas fa-folder-open me-2 text-warning"></i> My Files</a></li>
+            <li><a class="nav-link dropdown-item" href="/calendar.html"><i class="fas fa-calendar-alt me-2 text-secondary"></i> Calendar</a></li>
+            <li><hr class="dropdown-divider border-success"></li>
+            <li><a class="nav-link dropdown-item text-danger" href="/logout.html"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+          </ul>
+        </li>
+
+        <!-- ADMIN MENU (Hidden by default) -->
+        <li class="nav-item dropdown d-none" id="admin-menu-item">
+          <a aria-expanded="false" class="nav-link dropdown-toggle text-danger" data-bs-toggle="dropdown" href="javascript:void(0);" id="navbarAdmin" role="button"><i class="fas fa-shield-alt me-1"></i> Admin</a>
+          <ul aria-labelledby="navbarAdmin" class="dropdown-menu dropdown-menu-end shadow border-danger">
+            <li><a class="nav-link dropdown-item" href="/admin/roster.html"><i class="fas fa-users me-2 text-primary"></i> Roster Management</a></li>
+            <li><a class="nav-link dropdown-item" href="/admin/gradebook.html"><i class="fas fa-graduation-cap me-2 text-primary"></i> Master Gradebook</a></li>
+            <li><a class="nav-link dropdown-item" href="/admin/payroll.html"><i class="fas fa-money-check-alt me-2 text-primary"></i> Payroll & Timeclock</a></li>
+            <li><hr class="dropdown-divider border-danger"></li>
+            <li><a class="nav-link dropdown-item" href="/admin/notebooks.html"><i class="fas fa-book-open me-2 text-info"></i> Digital Notebooks</a></li>
+            <li><a class="nav-link dropdown-item" href="/admin/files.html"><i class="fas fa-folder me-2 text-warning"></i> Student Files</a></li>
+            <li><a class="nav-link dropdown-item" href="/calendar.html"><i class="fas fa-calendar-alt me-2 text-secondary"></i> Calendar</a></li>
+            <li><a class="nav-link dropdown-item" href="/admin/rubrics.html"><i class="fas fa-bullhorn me-2 text-success"></i> Rubric Manager</a></li>
+            <li><hr class="dropdown-divider border-danger"></li>
+            <li><a class="nav-link dropdown-item text-danger" href="/logout.html"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+          </ul>
+        </li>
+
+        <!-- LOGGED-OUT: LOGIN BUTTON -->
+        <li class="nav-item mx-lg-2 mt-3 mt-lg-0" id="login-menu-item">
+            <a class="btn btn-outline-primary btn-sm px-4 fw-bold shadow-sm" href="/login.html"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
+        </li>
+
+        <!-- 1. WEB DESIGN MASTER MENU -->
+        <li class="nav-item dropdown" id="nav-web-design">
+          <a aria-current="page" aria-expanded="false" class="nav-link dropdown-toggle" data-bs-auto-close="outside" data-bs-toggle="dropdown" href="javascript:void(0);"><i class="fas fa-paint-brush me-1 text-primary"></i> Web Design</a>
+          <ul class="dropdown-menu shadow border-primary">
+            <li class="dropdown dropdown-item">
+              <a aria-expanded="false" class="nav-link dropdown-toggle fw-bold" data-bs-auto-close="outside" data-bs-toggle="dropdown" href="/level1.html"><i class="fas fa-laptop me-2 text-info"></i> Web Design 1</a>
+              <ul class="dropdown-menu shadow border-info">
+                <li><a class="nav-link dropdown-item fw-bold" href="/level1.html"><i class="fas fa-home text-info me-2"></i> Web Design 1 Overview</a></li>
+                <li><hr class="dropdown-divider border-info"></li>
+                <li><a class="nav-link dropdown-item" href="/year1/join-the-developers-guild.html"><i class="fas fa-globe text-info me-2"></i> 1: The Developer's World</a></li>
+                <li><a class="nav-link dropdown-item" href="/year1/the-rules-how-not-to-get-sued.html"><i class="fas fa-gavel text-info me-2"></i> 2: The "Rules"</a></li>
+                <li><a class="nav-link dropdown-item" href="/year1/the-blueprint.html"><i class="fas fa-pencil-ruler text-info me-2"></i> 3: The Blueprint</a></li>
+                <li><a class="nav-link dropdown-item" href="/year1/the-why-intro-to-uiux.html"><i class="fas fa-palette text-info me-2"></i> 4: UI/UX Design</a></li>
+                <li><a class="nav-link dropdown-item" href="/year1/the-bones-intro-to-html.html"><i class="fab fa-html5 text-info me-2"></i> 5: The "Bones"</a></li>
+                <li><a class="nav-link dropdown-item" href="/year1/the-clothes-intro-to-css.html"><i class="fab fa-css3-alt text-info me-2"></i> 6: The "Clothes"</a></li>
+                <li><a class="nav-link dropdown-item" href="/year1/the-style-advanced-css-layout.html"><i class="fas fa-border-all text-info me-2"></i> 7: Advanced Layout</a></li>
+                <li><a class="nav-link dropdown-item" href="/year1/sights-sounds-making-it-pop-html-media.html"><i class="fas fa-photo-video text-info me-2"></i> 8: Sights &amp; Sounds</a></li>
+              </ul>
+            </li>
+            <li class="dropdown dropdown-item">
+              <a aria-expanded="false" class="nav-link dropdown-toggle fw-bold" data-bs-auto-close="outside" data-bs-toggle="dropdown" href="/level2andUp.html"><i class="fas fa-code me-2 text-warning"></i> Web Design 2 and Up</a>
+              <ul class="dropdown-menu shadow border-warning">
+                <li><a class="nav-link dropdown-item fw-bold" href="/level2andUp.html"><i class="fas fa-home text-warning me-2"></i> Web Design 2 Overview</a></li>
+                <li><hr class="dropdown-divider border-warning"></li>
+                <li><a class="nav-link dropdown-item" href="/year2/the-brains-intro-to-javascript.html"><i class="fab fa-js-square text-warning me-2"></i> 9: The "Brains"</a></li>
+                <li><a class="nav-link dropdown-item" href="/year2/the-game-dev-advanced-js-game-logic.html"><i class="fas fa-cogs text-warning me-2"></i> 10: Advanced JavaScript</a></li>
+                <li><a class="nav-link dropdown-item" href="/year2/the-cloud-collaboration-hosting.html"><i class="fas fa-cloud text-warning me-2"></i> 11: The Cloud</a></li>
+                <li><a class="nav-link dropdown-item" href="/year2/the-manager-cms-platforms.html"><i class="fas fa-tasks text-warning me-2"></i> 12: The "Manager"</a></li>
+                <li><a class="nav-link dropdown-item" href="/year2/the-network-intro-to-apis.html"><i class="fas fa-network-wired text-warning me-2"></i> 13: The "Network"</a></li>
+                <li><a class="nav-link dropdown-item" href="/year2/the-brain-databases.html"><i class="fas fa-database text-warning me-2"></i> 14: The "Brain"</a></li>
+                <li><a class="nav-link dropdown-item" href="/year2/the-game-never-ends.html"><i class="fas fa-rocket text-warning me-2"></i> 15: The Future</a></li>
+                <li><a class="nav-link dropdown-item" href="/year2/the-final-boss-going-live.html"><i class="fas fa-space-shuttle text-warning me-2"></i> 16: The "Launch"</a></li>
+              </ul>
+            </li>
+            <li><hr class="dropdown-divider border-primary"></li>
+            <li class="dropdown dropdown-item">
+              <a aria-expanded="false" class="nav-link dropdown-toggle fw-bold" data-bs-auto-close="outside" data-bs-toggle="dropdown" href="javascript:void(0);"><i class="fas fa-gamepad me-2 text-success"></i> WD Review Games</a>
+              <ul class="dropdown-menu shadow border-success">
+                <li><a class="nav-link dropdown-item fw-bold text-success" href="/reviewGames/webReviewGames.html"><i class="fas fa-dice me-2"></i> All Web Review Games</a></li>
+                <li><hr class="dropdown-divider border-success"></li>
+                <li><h6 class="dropdown-header text-primary">Web 1 Review</h6></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/join-the-developers-guild.html">1: Developer's World</a></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/the-rules-how-not-to-get-sued.html">2: The "Rules"</a></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/the-blueprint.html">3: The Blueprint</a></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/the-user-interface-uiux-design.html">4: UI/UX Design</a></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/the-bones-intro-to-html.html">5: The "Bones"</a></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/the-clothes-intro-to-css.html">6: The "Clothes"</a></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/the-style-advanced-css-layout.html">7: Advanced Layout</a></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/sights-sounds-making-it-pop-html-media.html">8: Sights &amp; Sounds</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 2. COMPUTER SCIENCE MASTER MENU -->
+        <li class="nav-item dropdown" id="nav-computer-science">
+          <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-auto-close="outside" data-bs-toggle="dropdown" href="javascript:void(0);"><i class="fas fa-microchip me-1 text-primary"></i> Computer Science</a>
+          <ul class="dropdown-menu shadow border-success">
+            <li><a class="nav-link dropdown-item fw-bold" href="/computerscience.html"><i class="fas fa-home text-primary me-2"></i> CS Course Home</a></li>
+            <li><a class="nav-link dropdown-item fw-bold" href="/cs-interactive.html"><i class="fas fa-terminal text-primary me-2"></i> CS Interactive Workspace</a></li>
+            <li><hr class="dropdown-divider border-success"></li>
+            <li class="dropdown dropdown-item">
+              <a aria-expanded="false" class="nav-link dropdown-toggle fw-bold" data-bs-auto-close="outside" data-bs-toggle="dropdown" href="javascript:void(0);"><i class="fas fa-gamepad me-2 text-success"></i> CS Review Games</a>
+              <ul class="dropdown-menu shadow border-success">
+                <li><a class="nav-link dropdown-item" href="/reviewGames/how_computers_work.html">1: How Computers Work</a></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/essential_computer_skills.html">2: Essential Computer Skills</a></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/intro_to_office_software.html">3: Intro to Office Software</a></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/how_the_internet_works.html">4: How the Internet Works</a></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/cybersecurity_threats.html">5: Cybersecurity Threats</a></li>
+                <li><a class="nav-link dropdown-item" href="/reviewGames/defending_systems.html">6: Defending Systems</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+
+        <!-- CLASSROOM INFO -->
+        <li class="nav-item dropdown">
+          <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);" id="policies" role="button"><i class="fas fa-clipboard-list me-1 text-primary"></i> Classroom Policies</a>
+          <ul aria-labelledby="navbarPolicies" class="dropdown-menu shadow border-primary" id="policiesMenu">
+            <li class="dropdown-item"><a class="nav-link" href="/grading.html"><i class="fas fa-check-double me-2 text-primary"></i> Grading</a></li>
+            <li class="dropdown-item"><a class="nav-link" href="/notices.html"><i class="fas fa-bullhorn me-2 text-primary"></i> Notices</a></li>
+            <li class="dropdown-item"><a class="nav-link" href="/expectations.html"><i class="fas fa-book me-2 text-primary"></i> Expectations</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="/contact.html"><i class="fas fa-envelope me-1 text-primary"></i> Contact Me</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<script type="module">
+  import { auth } from "/js/firebase-init.js";
+  import { signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+  document.querySelectorAll('a[href="/logout.html"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+          e.preventDefault();
+          link.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Logging out...';
+          signOut(auth).then(() => {
+              window.location.href = '/login.html';
+          }).catch(err => {
+              console.error("Logout Error:", err);
+              alert("Error logging out.");
+          });
+      });
+  });
+</script>

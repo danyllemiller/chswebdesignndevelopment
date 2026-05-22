@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Summative Assessment | Unit 4: The Logic Builder</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/examLogicCS.js"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <!-- Back to Lesson Link -->
+    <nav class="mb-4 d-flex justify-content-between small fw-bold no-print">
+        <a href="/computerscience.html" class="text-decoration-none text-primary">&laquo; Back to Course Portal</a>
+        <span class="text-muted text-uppercase tracking-widest">Summative Assessment</span>
+    </nav>
+
+    <div id="exam-container">
+        <div class="text-center p-5">
+            <div class="spinner-border text-info"></div>
+            <p class="mt-2 fw-bold text-primary">Syncing Guild Secure Environment...</p>
+        </div>
+    </div>
+  </section>
+
+  <script>
+    const unit4Pool = [
+        // --- Chapter 11 ---
+        { chapter: 11, question: "What is the process of breaking a complex problem down into smaller, more manageable parts?", options: ["Decomposition", "Abstraction", "Pattern Recognition", "Algorithm Design"] },
+        { chapter: 11, question: "What is a 'Sub-problem'?", options: ["A specific, smaller task that can stand on its own within a larger project.", "An error in the code that causes a crash.", "A problem that is too small to require an algorithm.", "A temporary variable used inside a loop."] },
+        { chapter: 11, question: "In Systematic Analysis, what is a 'Procedure'?", options: ["A step-by-step list of instructions or actions.", "A physical component of the computer.", "A visual diagram of a webpage.", "A piece of data stored in memory."] },
+        { chapter: 11, question: "In Systematic Analysis, what is an 'Object'?", options: ["A component that represents a 'noun' or a thing with its own data.", "An action or verb that the computer performs.", "A step in a step-by-step procedure.", "A mathematical calculation."] },
+        { chapter: 11, question: "In Systematic Analysis, what is a 'Module'?", options: ["A self-contained toolbox or group of related tasks.", "A single line of HTML code.", "The main power supply of the computer.", "A type of physical internet cable."] },
+        { chapter: 11, question: "What is an Algorithm?", options: ["A finite set of precise instructions designed to solve a specific problem.", "A physical part of the CPU.", "A generic guess at how to solve a problem.", "A programming language used for web design."] },
+        { chapter: 11, question: "What is Pseudocode?", options: ["A shorthand that looks like code but is meant for humans to read and plan logic.", "A secret language used by hackers.", "The final code that is sent to the server.", "Code that has too many bugs to run."] },
+        { chapter: 11, question: "In a flowchart, what does an Oval represent?", options: ["The Start or End of an algorithm.", "A 'Yes/No' decision point.", "A process or calculation.", "An input or output of data."] },
+        { chapter: 11, question: "In a flowchart, what does a Diamond represent?", options: ["A decision or a 'Yes/No' question.", "The Start or End of the algorithm.", "A process or action step.", "A connection to another flowchart."] },
+        { chapter: 11, question: "In a flowchart, what does a Rectangle represent?", options: ["A process, command, or action.", "A decision or question.", "The Start or End point.", "A user input."] },
+        { chapter: 11, question: "What is a Prototype?", options: ["A rough draft used to test an idea's feasibility before full-scale development.", "The final, published version of a website.", "A list of rules for the design.", "A specialized piece of server hardware."] },
+        { chapter: 11, question: "When translating 'natural language' to a computer, what is the biggest challenge?", options: ["Removing human ambiguity and assuming zero 'common sense'.", "Teaching the computer how to speak English.", "Translating the words into Hexadecimal colors.", "Getting the microphone to hear the words clearly."] },
+        { chapter: 11, question: "If an algorithm runs forever without solving the problem, it has hit a(n):", options: ["Infinite Loop", "Syntax Error", "Dead End", "Overflow Crash"] },
+        { chapter: 11, question: "What shape would you use in a flowchart to represent the instruction: 'Add 10 to Score'?", options: ["Rectangle", "Diamond", "Oval", "Parallelogram"] },
+        { chapter: 11, question: "What is a 'Logic Error' in a flowchart?", options: ["A flaw in the path, such as an impossible choice or a missing step.", "A misspelled word in one of the shapes.", "Using a blue pen instead of a black pen.", "A failure to connect to the internet."] },
+
+        // --- Chapter 12 ---
+        { chapter: 12, question: "What is the role of a 'Conditional' in programming?", options: ["To evaluate a condition and decide which path of code to run.", "To repeat a block of code over and over.", "To store data for later use.", "To connect the HTML to the CSS."] },
+        { chapter: 12, question: "What is the fundamental structure that acts as a 'Fork in the Road' for a computer?", options: ["The If-Then Statement", "The For Loop", "The Variable Assignment", "The Function Call"] },
+        { chapter: 12, question: "Which Boolean operator requires BOTH conditions to be True for the whole statement to be True?", options: ["AND", "OR", "NOT", "XOR"] },
+        { chapter: 12, question: "Which Boolean operator requires only ONE condition to be True?", options: ["OR", "AND", "NOT", "NOR"] },
+        { chapter: 12, question: "Which Boolean operator flips the result, looking for the 'Opposite' of a condition?", options: ["NOT", "AND", "OR", "NAND"] },
+        { chapter: 12, question: "What is 'Nested Logic'?", options: ["Placing one decision inside another decision.", "Writing all your code on a single line.", "Putting your JavaScript inside your HTML.", "Repeating the same conditional over and over."] },
+        { chapter: 12, question: "What is a 'Loop' in programming?", options: ["A control structure that repeats a block of code until a specific goal is met.", "A decision that asks a 'Yes/No' question.", "A variable that holds multiple pieces of data.", "A function that returns a value."] },
+        { chapter: 12, question: "When should a programmer use a 'FOR' loop?", options: ["When they know exactly how many times they want the code to repeat.", "When they want the code to repeat until a specific condition is met.", "When they want to ask a 'Yes/No' question.", "When they want to run the code exactly one time."] },
+        { chapter: 12, question: "When should a programmer use a 'WHILE' loop?", options: ["When they don't know the exact number of times, but know when they want to stop.", "When they know exactly how many times they want the code to repeat.", "When they want to wait for the user to click a button.", "When they want to skip a block of code entirely."] },
+        { chapter: 12, question: "What does the 'DRY Principle' stand for in coding?", options: ["Don't Repeat Yourself", "Do Run Yearly", "Data Requires Y-Axis", "Direct Route Yes"] },
+        { chapter: 12, question: "What is an 'Infinite Loop'?", options: ["A loop with a condition that is always true, causing it to run forever.", "A loop that counts exactly to infinity.", "A loop that never starts.", "A loop that requires internet access."] },
+        { chapter: 12, question: "What is 'Clean Code'?", options: ["Code that is easy for other humans to read and understand.", "Code that has been erased from the hard drive.", "Code that uses zero memory.", "Code that only uses the 'let' keyword."] },
+        { chapter: 12, question: "What is 'Event-Driven Programming'?", options: ["Code that sits quietly and waits for a user action to trigger it.", "Code that runs automatically from top to bottom.", "Code that is used to plan parties.", "Code that completely ignores the user."] },
+        { chapter: 12, question: "What is an 'Event Handler'?", options: ["A specific block of code that is mapped to 'wake up' and run when a certain event happens.", "A button on the screen.", "The person clicking the mouse.", "A variable that stores the score."] },
+        { chapter: 12, question: "Which type of event is 'onKeyPress'?", options: ["A keyboard event.", "A mouse event.", "A network event.", "A timer event."] },
+
+        // --- Chapter 13 ---
+        { chapter: 13, question: "What is a 'Data Structure'?", options: ["A specialized format for organizing and storing data so it can be accessed efficiently.", "The physical hard drive inside a computer.", "The HTML layout of a webpage.", "A visual chart or graph."] },
+        { chapter: 13, question: "What is an Array?", options: ["A collection of items stored in a specific order in contiguous memory locations.", "A single variable that holds one number.", "A list of instructions for the CPU.", "A network of connected servers."] },
+        { chapter: 13, question: "What is an 'Index' in an array?", options: ["The specific number or 'locker number' used to find an item.", "The total number of items in the array.", "The alphabetical order of the items.", "The memory size of the array."] },
+        { chapter: 13, question: "What is 'Zero-Based Indexing'?", options: ["Starting the count at 0 instead of 1.", "Counting backward from the end.", "Using only 0s and 1s to store data.", "Deleting the very first item."] },
+        { chapter: 13, question: "In Google Apps Script, what property tells you how many items are in an array?", options: [".length", ".size", ".count", ".total"] },
+        { chapter: 13, question: "What command is commonly used to add a new item to the end of a dynamic array?", options: [".push()", ".add()", ".insert()", ".append()"] },
+        { chapter: 13, question: "What is a major advantage of an Array?", options: ["It is incredibly fast at accessing a specific item by its index.", "It uses no memory.", "It can automatically sort itself alphabetically.", "It is incredibly fast at inserting items in the exact middle."] },
+        { chapter: 13, question: "What is a major disadvantage of an Array?", options: ["It is slow at inserting or deleting items in the middle because everything else must move.", "It cannot hold more than 10 items.", "It can only hold numbers, not text.", "It is very slow to read the first item."] },
+        { chapter: 13, question: "What is a Linked List?", options: ["A collection of nodes where each item points to the next one in line.", "A list of hyperlinks on a webpage.", "An array that is saved to the cloud.", "A list that is locked and cannot be edited."] },
+        { chapter: 13, question: "What are the two parts of a 'Node' in a linked list?", options: ["The Data and a Pointer.", "The Head and the Tail.", "The Value and the Index.", "The String and the Integer."] },
+        { chapter: 13, question: "What do we call the very first item in a linked list?", options: ["The Head", "The Root", "The Start", "Index 0"] },
+        { chapter: 13, question: "What is the major advantage of a Linked List?", options: ["It is incredibly fast at inserting or deleting items anywhere in the list.", "It is incredibly fast at jumping to a specific item by its index number.", "It uses less memory than a standard array.", "It automatically deletes old data."] },
+        { chapter: 13, question: "Why does a Linked List use slightly MORE total memory per item than an Array?", options: ["Because every node must also store the Pointer address.", "Because it stores the data in duplicate.", "Because it requires a cloud connection.", "Because it is built using complex graphic files."] },
+        { chapter: 13, question: "In a Linked List, what does the last node's pointer point to?", options: ["Nothing (or Null).", "The Head node.", "The previous node.", "The memory drive."] },
+        { chapter: 13, question: "If `fruits = ['Apple', 'Banana', 'Cherry']`, what does `fruits[1]` return?", options: ["Banana", "Apple", "Cherry", "Null"] },
+
+        // --- Chapter 14 ---
+        { chapter: 14, question: "What is a 'Module' in computer science?", options: ["A self-contained unit of code that performs one specific task.", "A piece of physical hardware.", "A type of internet connection.", "A complete operating system."] },
+        { chapter: 14, question: "What do we call a block of code that is given a name and can be called whenever needed?", options: ["A Procedure or Function", "A Variable", "An Array", "A Conditional"] },
+        { chapter: 14, question: "What are 'Parameters' in programming?", options: ["The pieces of information you 'pass' into a procedure so it can do its job.", "The rules for naming a variable.", "The limits on how much memory a program can use.", "The outputs that a procedure returns."] },
+        { chapter: 14, question: "What is a 'Return Value'?", options: ["The result or answer that a procedure hands back to you once it is finished.", "The error message displayed when a program crashes.", "The amount of memory recovered after a variable is deleted.", "The data passed into the function to start it."] },
+        { chapter: 14, question: "In Google Sheets, how do you create a 'Custom Function'?", options: ["By writing a procedure in Apps Script and returning a value.", "By copying and pasting an existing formula.", "By downloading a new spreadsheet template.", "By changing the cell color to green."] },
+        { chapter: 14, question: "If you write a custom function called CALCULATE_TAX(price), what does 'price' represent?", options: ["A Parameter", "A Return Value", "A Global Variable", "An Event Handler"] },
+        { chapter: 14, question: "What happens if a 'Login' module sends a number, but the 'Profile' module expects a name?", options: ["The system will crash due to mismatched data types.", "The system will automatically convert the number to a name.", "The system will run faster.", "The system will ignore the input and use a default name."] },
+        { chapter: 14, question: "What is a 'Naming Conflict' in programming?", options: ["When the same variable name is used in multiple modules and the computer gets confused.", "When two programmers argue over what to call a file.", "When a function name is too long to type.", "When a parameter doesn't match the return value."] },
+        { chapter: 14, question: "What is a 'Local Variable'?", options: ["A variable created inside a procedure that only exists while that specific 'Black Box' is running.", "A variable that can be accessed by any module in the entire program.", "A variable that is saved permanently to the hard drive.", "A variable that only holds text, not numbers."] },
+        { chapter: 14, question: "What happens to a local variable once its procedure finishes running?", options: ["It is erased from memory.", "It is saved to the cloud.", "It becomes a global variable.", "It is sent back as the return value."] },
+        { chapter: 14, question: "What is a 'Library' in computer science?", options: ["A collection of pre-written modules created by other people that you can plug into your program.", "A physical building where servers are stored.", "A list of all the variables you have created.", "A database of user passwords."] },
+        { chapter: 14, question: "What is 'Unit Testing'?", options: ["Testing one module at a time in isolation to find exactly where a bug is hiding.", "Testing the entire program from start to finish at once.", "Testing the speed of the internet connection.", "Testing the physical hardware of the computer."] },
+        { chapter: 14, question: "Why do large tech companies build software using modular sections?", options: ["Because it is impossible to build a massive system without snapping together smaller, separate pieces.", "Because modular code takes up less hard drive space.", "Because it prevents any bugs from ever occurring.", "Because it bypasses the need for variables."] },
+        { chapter: 14, question: "Which keyword is essential at the end of a custom function to give the answer back to the spreadsheet?", options: ["return", "end", "stop", "finish"] },
+        { chapter: 14, question: "If you have variables `score` and `timer` shared by multiple buttons, they are NOT local. What are they called?", options: ["Global Variables", "Local Variables", "String Variables", "Parameter Variables"] }
+    ];
+
+    const config = {
+        questions: unit4Pool,
+        chapterTitle: "Unit 4 Summative Exam",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbyoX6MTNxThGNVQtIn4e_OgJoYUGUdPPKY9lbXf63h3H9fwGOxUeToxptyORS7LgWVNeg/exec",
+        perChapter: 5 
+    };
+
+    // Safely execute initExam after the DOM is fully parsed without using window.onload
+    if (document.readyState === "loading") {
+        document.addEventListener('DOMContentLoaded', () => {
+            if(typeof initExam === 'function') initExam(config);
+        });
+    } else {
+        if(typeof initExam === 'function') initExam(config);
+    }
+  </script>
+
+  <div id="footer-placeholder"></div>
+
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!-- the-manager-cms-platforms.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 12: The Manager (CMS) | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <!-- Security Guard: Kicks out anyone not logged in -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+</head>
+<body class="bg-light">
+
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+        
+    <nav class="mb-4 d-flex justify-content-between small fw-bold">
+        <a href="/year2/the-cloud-collaboration-hosting.html" class="text-decoration-none text-primary">&laquo; Previous: 11: The "Cloud"</a>
+        <a href="/year2/the-network-intro-to-apis.html" class="text-decoration-none text-primary">Next: 13: The "Network" (APIs) &raquo;</a>
+    </nav>
+
+    <!-- CLEAN MODERN HEADER -->
+    <h1 class="text-center text-primary fw-bold mt-5 mb-2">Chapter 12: The "Manager"</h1>
+    <p class="text-center text-secondary fst-italic fs-5 mb-5">Content Management Systems (CMS) &amp; Platforms</p>
+
+    <!-- SECTION 1: OVERVIEW & PERSONA -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Agency Scaling: Stop Coding Everything from Scratch</h2>
+        <p>You know how to code. You can build a beautiful, responsive, interactive website from a blank text document. But what if the Carson High Web Design Agency gets hired to run a news website like IGN or the Nevada Appeal? They publish 100 new articles every single day. Do you think a web developer is manually opening an <code>index.html</code> file, typing out <code>&lt;p&gt;</code> tags, and pushing to GitHub 100 times a day? <strong>Absolutely not.</strong></p>
+        
+        <p>To maximize our agency's profit margins and empower our clients to make simple updates, we use a <strong>CMS</strong>. What does CMS stand for? It stands for <strong>Content Management System</strong>. It is a "system" designed to "manage" website "content" without needing to touch the code.</p>
+        
+        <p>This changes your job. What is the primary difference between a builder and a manager in web design? <strong>Builders code from scratch; managers use a pre-built CMS to post content quickly.</strong> As an agency developer, your job is no longer to write the articles. Your job is to set up the CMS architecture so the marketing team, writers, and business owners can log in and manage the site themselves safely.</p>
+        
+        <h2 class="section-title mt-5">Meet the Client: "Manager Mike"</h2>
+        
+        <div class="card shadow-sm border-0 bg-light mt-4 mb-5 text-start">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center border-bottom pb-3 mb-3">
+              <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-3 shadow-sm border border-3 border-white" style="width: 70px; height: 70px;">M</div>
+              <div class="ms-3">
+                <h5 class="fw-bold text-dark mb-0">Manager Mike</h5>
+                <span class="badge bg-primary text-uppercase tracking-wide mt-1" style="font-size: 0.65rem;">Persona: Local Legends Coffee</span>
+              </div>
+            </div>
+            <div class="small">
+              <div class="mb-2">
+                <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Who</span>
+                <span class="text-dark">Mike is the owner of a local Carson City coffee shop. He makes great coffee, but he does not know HTML or CSS.</span>
+              </div>
+              <div class="mb-2">
+                <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Goal</span>
+                <span class="text-dark">Why might 'Manager Mike' prefer a CMS over hand-coding HTML? <strong>He wants to log in, write a headline, and publish quickly without paying an agency hourly fees for minor text changes.</strong></span>
+              </div>
+              <div>
+                <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Needs</span>
+                <span class="text-dark">Mike needs a developer (you) to build him a custom WordPress site with a clean dashboard so he can easily update his menu, announce weekend sales, and manage contact forms without breaking the site.</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer bg-white border-top text-center py-2">
+            <span class="small text-muted" style="font-size: 0.75rem;"><strong>Figure 12.1:</strong> User Persona: Manager Mike</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <!-- Materials Hub -->
+        <div class="card shadow-sm mb-4 bg-white border-primary text-start">
+          <div class="card-header bg-site-secondary fw-bold text-primary border-bottom">Materials Hub</div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush small">
+              <a href="/proficiencyScales/the-manager-cms-platforms.html"  class="list-group-item list-group-item-action text-primary fw-bold">🎯 1. Proficiency Scale</a>
+              <a href="/pre-assessments/the-manager-cms-platforms.html"  class="list-group-item list-group-item-action text-dark">🚀 2. Pre-Assessment</a>
+              <a href="/notes/the-manager-cms-platforms.html"  class="list-group-item list-group-item-action text-dark">📝 3. Guided Notes</a>
+              <a href="/studentFiles/coffeeShopCMS.zip" class="list-group-item list-group-item-action text-dark">📁 4. Chapter Files (.zip)</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card roadmap-card mb-4 border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info border-bottom">Unlocking New Abilities</div>
+          <div class="card-body small">
+            <ul class="mb-0 ps-3">
+              <li class="mb-2"><strong>Differentiate</strong> between No-Code builders, SaaS CMS models, and Self-Hosted Open-Source platforms.</li>
+              <li class="mb-2"><strong>Architect</strong> content using Pages vs Posts, Categories, and Tags.</li>
+              <li class="mb-2"><strong>Design</strong> using Themes, the Customizer, and Child Themes.</li>
+              <li class="mb-2"><strong>Build</strong> layouts using the Gutenberg Block Editor and Page Builder plugins.</li>
+              <li class="mb-2"><strong>Secure</strong> a CMS by managing User Roles, Plugin Bloat, and Data Backups.</li>
+              <li class="mb-0"><strong>Optimize</strong> CMS settings for SEO, including Permalinks and Caching.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: PLATFORMS & CMS CONCEPTS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">The Matrix: Pitching Platforms to Clients</h2>
+        <p>How can you tell if a piece of software is truly a CMS? <strong>It separates the content creation from the code structure and design.</strong> This means your articles are stored in a database, and your design is stored in a Theme. If a Theme is the "clothes" of a website, what is the database? <strong>The brain/memory that remembers the content.</strong></p>
+        
+        <p>Because they are separate, what happens to your blog posts if you switch to a completely different WordPress Theme? <strong>The design changes, but the text and posts remain perfectly intact!</strong> Can you switch WordPress Themes without losing your Media Library uploads? Yes! The <strong>Media Library</strong> is the digital warehouse where all uploaded photos and videos are stored separately.</p>
+
+        <h5 class="fw-bold mt-5 text-primary">The 3 Tiers of Web Creation</h5>
+        <table class="table table-bordered table-sm small bg-white shadow-sm mt-3 mb-0 text-start">
+          <thead class="bg-light">
+            <tr>
+              <th>Platform Type</th>
+              <th>Examples</th>
+              <th>Pros &amp; Cons</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="fw-bold text-center align-middle">"No-Code" Builders</td>
+              <td class="align-middle">Wix, Squarespace</td>
+              <td>
+                <strong>Pro:</strong> What is the primary advantage of a 'No-Code' builder like Squarespace compared to a CMS? <strong>They are easier and faster for absolute beginners with no technical knowledge to set up.</strong><br>
+                <strong>Con:</strong> What is the primary disadvantage of a 'No-Code' builder like Wix? <strong>Vendor lock-in: you do not own the code and cannot easily move your site to a different hosting provider.</strong>
+              </td>
+            </tr>
+            <tr>
+              <td class="fw-bold text-center align-middle bg-site-secondary">SaaS CMS (Rental)</td>
+              <td class="align-middle bg-site-secondary">WordPress.com, Shopify</td>
+              <td class="bg-site-secondary">Which platform represents the 'Rental' model where the hosting company manages everything for you? <strong>WordPress.com</strong>. You pay for convenience and hosting, but customization is limited.</td>
+            </tr>
+            <tr>
+              <td class="fw-bold text-center align-middle">Self-Hosted CMS (Owner)</td>
+              <td class="align-middle">WordPress.org, Drupal</td>
+              <td>Which platform represents the 'Owner' model where you download free software and host it yourself? <strong>WordPress.org</strong>. Why is WordPress.org the professional standard over website builders like Wix? Because of <strong>total freedom and ownership of every line of code.</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="alert alert-info py-2 px-3 small border-info shadow-sm mt-4 mb-5 text-start">
+            <strong>The King of the Web:</strong> WordPress powers over 40% of the entire internet. What does it mean that WordPress is 'Open-Source'? <strong>The source code is free and available for anyone to inspect, modify, and enhance.</strong> What programming language powers the logic and templates of WordPress? <strong>PHP</strong>. <br><br>
+            <em>Note: Which of the following is NOT a popular Content Management System? <strong>Photoshop!</strong> That is a photo editor, not a website manager!</em>
+        </div>
+
+        <!-- LAB 1 CARD -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 1: The Platform Pitch Matrix [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Evaluate and recommend web platforms based on client constraints to win an agency contract.</p>
+                <ol>
+                    <li class="mb-2">Open a Google Doc. Create a table comparing WordPress.org, Shopify, and Wix. List two "Pros" and two "Cons" for each.</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 1:</strong> You have been hired by "Local Legends Coffee Shop" to build their website. Below your table, write a 3-sentence proposal recommending which of the three platforms they should use.</li>
+                    <li class="mb-2">Justify your choice mathematically (cost) or functionally (features). (Hint: Shopify for heavy e-commerce, Wix for simple visual portfolios, WordPress for scalable business/news sites).</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your Google Doc or PDF Proposal.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4">
+          <a href="/images/the-manager-cms-platforms/figure-01.png" target="_blank" rel="noopener">
+            <img src="/images/the-manager-cms-platforms/figure-01.png" alt="Diagram showing the separation of Content, Database, and Theme in a CMS." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=CMS+Architecture'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 12.2:</strong> CMS Architecture (Separating Content from Design).</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 3: DASHBOARD & ARCHITECTURE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Information Architecture &amp; The Dashboard</h2>
+        <p>How do you typically access the hidden back-end login screen of a standard WordPress site? By <strong>Adding <code>/wp-admin</code> to the URL</strong>. Once logged in, you enter the <strong>Dashboard</strong>. What is the WordPress 'Dashboard'? It is <strong>the private back-end mission control for the website</strong>.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">Content Types: Pages vs. Posts</h5>
+        <p>A professional agency developer never confuses a Page with a Post.</p>
+        <ul class="small mb-4">
+            <li class="mb-3"><strong>Pages:</strong> What is a WordPress 'Page'? <strong>Timeless, permanent information</strong> that doesn't expire or belong on a news feed. If you want to create a 'Contact Us' section that lives in your main menu, should you use a Post or a Page? A <strong>Page</strong>.</li>
+            <li class="mb-3"><strong>Posts:</strong> What is a WordPress 'Post'? <strong>A timely, reverse-chronological news article or blog update.</strong> If you want to announce a weekend sale that expires on Sunday, should you use a Post or a Page? A <strong>Post</strong>.</li>
+        </ul>
+        
+        <p>Which piece of content relies heavily on <strong>Categories</strong> and <strong>Tags</strong> for searching? <strong>Posts.</strong> Categories are for broad topics (e.g., "News", "Events"), while Tags are for specific, detailed keywords. Because there can be hundreds of posts, they need organization labels.</p>
+        <p>What is the difference between a 'Draft' and a 'Published' post? <strong>Drafts are saved in the back-end but hidden from the public; Published posts are live.</strong></p>
+
+        <h5 class="fw-bold mt-4 text-primary">Settings &amp; Permalinks</h5>
+        <p>Settings are crucial for professional decorum. When you change the 'Site Title' in WordPress General Settings, what happens? <strong>The browser tab and site header update instantly across the entire site.</strong></p>
+        <p>What is the purpose of the 'Permalink' setting? <strong>To control the structure of the URL (e.g., making it `/about-us` instead of `/?p=123`) for better SEO and readability.</strong> You should always set Permalinks to "Post Name" before creating content!</p>
+        <p>Which setting sets a static page instead of blog posts on the front page? <strong>Settings &gt; Reading</strong>.</p>
+        
+        <p class="mt-3 small"><strong>Pro Tip:</strong> What does the 'Screen Options' tab do in the Dashboard? It <strong>allows you to hide or show specific panels on your admin screen to reduce clutter for clients.</strong></p>
+
+        <!-- LAB 2 CARD -->
+        <div class="card border-success shadow-sm my-4 mt-5 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 2: Information Architecture Lab [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Configure local server settings and map out structural site hierarchy for the client.</p>
+                <ol>
+                    <li class="mb-2">Launch your LocalWP environment and start your "CoffeeShopCMS" site. Log into the Dashboard.</li>
+                    <li class="mb-2">Go to <strong>Settings &gt; Permalinks</strong> and change it to "Post Name".</li>
+                    <li class="mb-2">Delete the default "Hello World" post and "Sample Page".</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Create the architecture for your Coffee Shop. Create 4 blank Pages (Home, Menu, About Us, Contact), 2 Categories ("Seasonal Flavors", "Community Events"), and 2 fake Posts assigned to your new categories.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Take a screenshot of your "All Pages" screen and your "All Posts" screen to prove structural separation.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 mt-3">
+          <a href="/images/the-manager-cms-platforms/figure-02.png" target="_blank" rel="noopener">
+            <img src="/images/the-manager-cms-platforms/figure-02.png" alt="The WordPress Admin Dashboard." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Dashboard'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 12.3:</strong> The WordPress Dashboard (wp-admin).</figcaption>
+        </figure>
+
+        <div class="card roadmap-card border-warning shadow-sm mt-4 text-start">
+            <div class="card-header bg-warning text-dark fw-bold">Pro Tip:</div>
+            <div class="card-body small">
+                <p class="mb-0"><strong>Content Management vs Dev:</strong> What is the difference between a Web Developer and a Content Manager? Developers build the architecture, themes, and logic; Content Managers use the dashboard to publish daily text and images without touching code!</p>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: THE BLOCK EDITOR -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Writing Content: The Block Editor</h2>
+        <p>What is the modern default WordPress editor called? <strong>The Block Editor (Gutenberg)</strong>, named after the inventor of the printing press. How does the Block Editor handle content? <strong>Every paragraph, image, or video is its own movable block.</strong></p>
+        
+        <h5 class="fw-bold mt-4 text-primary">Mastering the Editor</h5>
+        <ul class="small mb-4 bg-light p-4 rounded shadow-sm border">
+            <li class="mb-2"><strong>Adding Content:</strong> Where do you find the button to add new elements in the Block Editor? Look for <strong>The '+' Icon</strong> (the universal symbol for add/new).</li>
+            <li class="mb-2"><strong>Moving Content:</strong> What feature in the Block Editor allows you to move a paragraph above an image? <strong>The drag-and-drop handles or up/down arrows on the block.</strong></li>
+            <li class="mb-2"><strong>Custom Code:</strong> If the Block Editor doesn't have a specific visual feature you need, how can you write code directly? Use a <strong>'Custom HTML Block'</strong>!</li>
+            <li class="mb-2"><strong>Mistakes:</strong> If 'Manager Mike' accidentally deletes a paragraph in the Block Editor, what is the fastest way to get it back? Use the <strong>'Undo' button (or Ctrl+Z)</strong> in the editor.</li>
+            <li class="mb-0"><strong>Revisions:</strong> If you really mess up, you can restore a backup. What is a WordPress 'Revision'? <strong>An automatically saved previous version of a post that you can restore if you make a mistake.</strong></li>
+        </ul>
+        
+        <h5 class="fw-bold mt-4 text-primary">Featured Images &amp; Shortcodes</h5>
+        <p>Every post needs a <strong>Featured Image</strong>. What is it? <strong>The main thumbnail people see when the post is shared on social media.</strong></p>
+        <p>You will also frequently use Shortcodes. What is a 'Shortcode'? <strong>A small piece of code in brackets (e.g., <code>[gallery id="5"]</code>) that executes a larger script or plugin feature within a post.</strong></p>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 mt-3">
+          <a href="/images/the-manager-cms-platforms/figure-03.png" target="_blank" rel="noopener">
+            <img src="/images/the-manager-cms-platforms/figure-03.png" alt="The Gutenberg Block Editor in action." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Block+Editor'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 12.4:</strong> The Block Editor (Gutenberg).</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 5: THEMES & DESIGN -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">The Clothes: Themes &amp; Child Themes</h2>
+        <p>What controls the 'Look' or visual design of a WordPress site? <strong>A Theme.</strong> This dictates your global colors, typography, and layout structure. If you want to build a highly customized page layout for a client that the standard Block Editor can't handle, what type of plugin would you install? A <strong>Page Builder Plugin (like Elementor or Divi).</strong></p>
+        
+        <h5 class="fw-bold mt-4 text-primary">Widgets &amp; Menus</h5>
+        <p>Themes give you control over sidebars and footers using Widgets. What is a 'Widget' in the context of a CMS? <strong>A small block that performs a specific function, often placed in sidebars or footers (like a search bar or calendar).</strong> Where would you typically place a copyright notice that needs to appear on every single page of the site? <strong>In the Footer (via Widgets or Theme Customizer).</strong></p>
+        <p>Navigation is handled separately. Where do you manage the layout of your site's navigation links? <strong>Appearance &gt; Menus</strong>.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">The Golden Rule: Child Themes</h5>
+        <p>What is the primary purpose of a Child Theme? <strong>To ensure custom code isn't deleted during theme updates.</strong> If you write custom CSS into a parent theme, and the developer pushes an update, your code will be wiped out! A child theme safely inherits the parent's design while protecting the agency's custom coding.</p>
+
+        <!-- LAB 3 CARD -->
+        <div class="card border-success shadow-sm my-4 mt-5 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 3: The Design Skin [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Utilize global customization tools to implement brand styling.</p>
+                <ol>
+                    <li class="mb-2">Go to <strong>Appearance &gt; Themes</strong> and install a professional theme like Astra or OceanWP. (Ensure you install/activate a Child Theme if making CSS changes).</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Use the WordPress Customizer (Appearance &gt; Customize) to brand your Coffee Shop.</li>
+                    <li class="mb-2">Set the Global Typography and Colors (e.g., browns, creams, dark greys).</li>
+                    <li class="mb-2">Upload a logo to the Header/Site Identity section. Build your primary navigation menu in <strong>Appearance &gt; Menus</strong>.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload a screenshot of your stylized Homepage.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 mt-3">
+          <a href="/images/the-manager-cms-platforms/figure-04.png" target="_blank" rel="noopener">
+            <img src="/images/the-manager-cms-platforms/figure-04.png" alt="The WordPress Customizer." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Customizer'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 12.5:</strong> Global styling via the Customizer.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 6: PLUGINS, SECURITY, & SEO -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Plugins, Security, &amp; SEO</h2>
+        <p>In the 'Smartphone' analogy, what do WordPress Plugins represent? <strong>The apps you download to give the phone new powers.</strong> What is used to add new functionality (like a store or contact form) to a WordPress site? <strong>A Plugin.</strong> (For example, what is 'WooCommerce'? The most popular e-commerce plugin that turns a WordPress site into an online store!)</p>
+        
+        <h5 class="fw-bold mt-4 text-danger">The Danger of Plugin Bloat</h5>
+        <p>What is the primary risk of installing too many WordPress plugins? <strong>They can slow down the site, cause conflicts, and create security vulnerabilities.</strong> This is known as "Plugin Bloat."</p>
+        <p>Furthermore, what does it mean if a plugin has not been 'tested with your current version of WordPress'? <strong>It might be abandoned by its developer and could break your site or introduce security flaws.</strong> Updating vulnerable plugins immediately demonstrates the WRS skill of <strong>Probity / Ethical Adherence</strong>.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">Security &amp; Roles</h5>
+        <p>How do you ensure a client's WordPress site remains secure from hackers? <strong>Regularly update the WordPress core, themes, and plugins to patch vulnerabilities.</strong> BUT wait! Before updating the WordPress core or installing a major plugin, what is the single most important action a professional developer must take? <strong>Perform a complete database and file Backup.</strong></p>
+        <p>Why is it important to assign 'Roles' (like Editor, Author, Contributor) to users in a CMS? <strong>To restrict permissions so an author (like Manager Mike) can't accidentally delete the entire website or change the theme.</strong> Which user role has absolute total control over every aspect of a WordPress site? The <strong>Administrator</strong>.</p>
+
+        <h5 class="fw-bold mt-4 text-primary">SEO &amp; Caching</h5>
+        <p>How does a CMS help with SEO (Search Engine Optimization)? <strong>By automatically generating clean HTML structure, sitemaps, and allowing plugins (like Yoast) to optimize keywords.</strong></p>
+        <p>To make your site lightning fast, use Caching plugins. What is 'Caching' in the context of a CMS? <strong>Creating static copies of dynamic pages so they load much faster for visitors.</strong></p>
+
+        <!-- LAB 4 CARD -->
+        <div class="card border-success shadow-sm my-4 mt-5 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 4: Forms &amp; SEO Security [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Safely expand CMS functionality using verified plugins and shortcodes.</p>
+                <ol>
+                    <li class="mb-2">Go to <strong>Plugins &gt; Add New</strong>. Install and activate the "WPForms Lite" plugin.</li>
+                    <li class="mb-2">Create a basic Contact Form.</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 4:</strong> Copy the form's shortcode (e.g., <code>[wpforms id="123"]</code>) and paste it into your "Contact" page block editor.</li>
+                    <li class="mb-2">Install an SEO plugin (like Yoast SEO) and write a 150-character Meta Description for your Homepage to boost search rankings.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload a screenshot of your Contact page showing the rendered form.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 mt-3">
+          <a href="/images/the-manager-cms-platforms/figure-05.png" target="_blank" rel="noopener">
+            <img src="https://placehold.co/600x400/1e293b/0ea5e9?text=Plugin+Directory" alt="The WordPress Plugin Directory." class="img-fluid rounded border shadow-sm w-100">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 12.6:</strong> The Plugin Directory. Beware of abandoned software!</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- MILESTONE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-12">
+        <div class="card border-primary shadow-sm mt-5 mx-auto text-start" style="max-width: 900px;">
+            <div class="card-header bg-primary text-white fw-bold">
+                🏆 Milestone: Client Site Assembly &amp; QA [100 pts]
+            </div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Synthesize your knowledge of CMS architecture to deliver a professional product for Local Legends Coffee.</p>
+                <ol>
+                    <li class="mb-2"><strong>Assemble:</strong> Finish your Coffee Shop site using the milestones from Blocks 1-4. Ensure your Menu Navigation links correctly to Home, Menu, About, and Contact. Set your "Settings &gt; Reading" so your Homepage is static, and your Posts show up on a separate "News" page.</li>
+                    <li class="mb-2"><strong>Level 4.0 Challenge:</strong> Install a Child Theme. Add custom CSS in the customizer to alter layout elements beyond default theme options (demonstrating Cognitive Flexibility).</li>
+                    <li class="mb-2"><strong>QA Check &amp; Handoff:</strong> Perform a final review. Creating a clean site structure that is easy for a client to navigate demonstrates <strong>Professional Decorum</strong>! Check for mobile responsiveness, ensure your Contact form submits correctly, and verify all dummy text (Lorem Ipsum) has been replaced with relevant Coffee Shop copy.</li>
+                    <li class="mb-2">Share your LocalWP live link with an agency peer for a 10-minute review.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Export your LocalWP site or take screenshots of your final 4 pages, and upload to the Dropbox below.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINAL RECAP -->
+    <div class="row mt-5">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="final-recap">
+            <h2 class="section-title mt-0 text-primary fw-bold">The Final Download: Chapter Recap</h2>
+            <p>In this chapter, you stepped into the role of the "Manager." You learned how a CMS separates content (stored in a database) from design (controlled by Themes). You practiced professional architecture by separating timeless Pages from categorized Posts, and managed layouts using the Gutenberg Block Editor and shortcodes. Finally, you secured your site against hackers and "Plugin Bloat" by managing roles, backups, and SEO caching, preparing a dynamic site for a real-world client.</p>
+        </section>
+        <p class="text-muted small mt-5">Copyright &copy; 2026 Danylle Miller Designs. Built for Carson High School.</p>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 d-flex flex-column justify-content-end pb-3 text-center">
+        <div class="card roadmap-card border-info mb-4 bg-white shadow-sm text-start">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-info"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <h6 class="card-title fw-bold small text-info mb-0 ms-2 text-uppercase">Guild Checkpoint</h6>
+            </div>
+            <p class="small mb-2" style="color: #495057;"><strong>Q1:</strong> Why must you back up a database before updating a CMS core or plugin?</p>
+            <p class="small mb-2" style="color: #495057;"><strong>Q2:</strong> Explain the difference between a Post and a Page in WordPress.</p>
+            <p class="small mb-0" style="color: #495057;"><strong>Q3:</strong> Why is a Child Theme critical for developers modifying CSS in WordPress?</p>
+          </div>
+        </div>
+        <a href="/year2/the-network-intro-to-apis.html" class="btn btn-primary w-100 shadow-sm fw-bold text-uppercase">Next: Chapter 13 &raquo;</a>
+      </div>
+    </div>
+
+    <!-- ENHANCED TURN-IN DROPBOX -->
+    <div class="card shadow border-success mx-auto mb-5 mt-5 text-start" style="max-width: 800px;" id="submission-zone">
+        <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+            <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>Student Assignment Dropbox</h4>
+            <span class="badge bg-light text-success shadow-sm" id="student-id-badge">Verifying...</span>
+        </div>
+        <div class="card-body p-4">
+            <form id="uploadForm">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
+                    <select id="uploadAssignment" class="form-select border-success" required>
+                        <option value="" disabled selected>Select an assignment...</option>
+                        <option value="ch12_lab1">Lab 1: The Platform Pitch Matrix (25 pts)</option>
+                        <option value="ch12_lab2">Lab 2: Information Architecture Lab (25 pts)</option>
+                        <option value="ch12_lab3">Lab 3: The Design Skin (25 pts)</option>
+                        <option value="ch12_lab4">Lab 4: Forms &amp; SEO Security (25 pts)</option>
+                        <option value="ch12_milestone">Milestone: Client Site Assembly (100 pts)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">2. What type of upload is this?</label>
+                    <select id="uploadType" class="form-select border-primary bg-site-secondary">
+                        <option value="file">A Single File (e.g. Screenshot, Word Doc, ZIP)</option>
+                        <option value="folder">An Entire Folder (e.g. A Full Website Project)</option>
+                    </select>
+                </div>
+
+                <div class="mb-4" id="fileInputContainer">
+                    <label class="form-label fw-bold">3. Select File</label>
+                    <input type="file" id="fileInput" class="form-control" required>
+                </div>
+
+                <div class="mb-4 d-none" id="folderInputContainer">
+                    <label class="form-label fw-bold">3. Select Project Folder</label>
+                    <input type="file" id="folderInput" class="form-control" webkitdirectory directory multiple>
+                    <div class="form-text x-small text-danger fw-bold mt-1">Note: This will upload ALL files and sub-folders inside the folder you select, keeping your website links intact!</div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-success w-100 fw-bold py-3 shadow-sm" disabled>
+                    Upload to Teacher Server
+                </button>
+            </form>
+            
+            <div id="uploadProgress" class="progress mt-3 d-none shadow-sm" style="height: 25px;">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%;">0%</div>
+            </div>
+            <div id="uploadStatus" class="mt-3 d-none p-3 rounded small fw-bold text-center shadow-sm"></div>
+        </div>
+    </div>
+
+  </section>
+
+  <div id="footer-nav"></div>
+  <div id="footer-placeholder"></div>
+
+  <!-- ASSIGNMENT UPLOADER LOGIC -->
+  <script type="module" src="/js/assignment-uploader.js"></script>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

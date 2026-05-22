@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Selector Scavenger Hunt
+  </title>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js">
+  </script>
+  <script src="/js/jquery.js">
+  </script>
+  <script src="/js/loader.js">
+  </script>
+  <!-- Auth Guard formats the navigation menus! -->
+  <script type="module" src="/js/auth-guard.js"></script>
+ </head>
+ <body>
+    <div class="container-fluid sticky-top px-0 no-print">
+      <div id="nav-placeholder"></div>
+   </div>
+  <div class="container">
+   <!-- Target 1: The ID -->
+   <h1 id="main-title">
+    Welcome to the Scavenger Hunt!
+   </h1>
+   <div class="clutter">
+    <p>
+     Ignore me, I'm just clutter.
+    </p>
+   </div>
+   <!-- Target 2: The First Paragraph (in the main content) -->
+   <p>
+    This is the first real paragraph. Can you grab me using querySelector?
+   </p>
+   <p>
+    This is the second paragraph. You don't need me right now.
+   </p>
+   <img alt="Just a placeholder" src="https://via.placeholder.com/150"/>
+   <p>
+    Keep looking! The console is your friend.
+   </p>
+   <button id="submit-btn">
+    Don't Click Me
+   </button>
+  </div>
+  <!-- Target 3: The Hidden Footer Message -->
+  <footer id="footer-zone">
+   <p>
+    Copyright © 2024 The Web Guild
+   </p>
+   <!-- The Hidden Clue -->
+   <div class="secret-box" id="secret-message" style="display:none">
+    Congratulations! You found the hidden artifact! 🏆
+   </div>
+  </footer>
+  <!-- Instructions for the student are commented out here -->
+  <!-- 
+        MISSION INSTRUCTIONS:
+        1. Open this page in Chrome.
+        2. Right-click > Inspect > Console.
+        3. Challenge 1: Type document.getElementById('main-title') to find the H1.
+        4. Challenge 2: Type document.querySelector('p') to find the first paragraph.
+        5. Challenge 3: Find the hidden message in the footer. 
+           (Hint: Select it by ID, then change its style.display to 'block' or check its innerText!)
+        6. Stretch: Select the H1 and change its text to "I Hacked This!" using JS.
+    -->
+<div id="footer-placeholder"></div>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

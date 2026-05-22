@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Summative Assessment: Chapter 4 - UX/UI Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/examLogic.js?v=4"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 fw-bold">Loading Secure Environment...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Chapter 4 Summative Question Pool (52 Questions - Correct Answers STRIPPED the-why-intro-to-uiux.html)
+    const ch4ExamPool = [
+        { question: "What does UX stand for in the context of web design?", options: ["User Exchange", "Universal eXecution", "User Experience", "Unified X-axis"] },
+        { question: "What does UI stand for in the context of web design?", options: ["Universal Interface", "User Interface", "Uniform Index", "User Internet"] },
+        { question: "Which of the following best describes the difference between UI and UX?", options: ["UI is how it looks (the paint); UX is how it feels and functions (the architecture).", "There is no difference.", "UX is for mobile apps; UI is for desktop sites.", "UX focuses on color choices; UI focuses on psychology."] },
+        { question: "What is User-Centered Design (UCD)?", options: ["Designing entirely for the CEO's preferences.", "A process where the needs, wants, and limitations of the end-user are given extensive attention at each stage.", "Designing websites that center all text automatically.", "Using AI to generate layouts."] },
+        { question: "In visual design, what is 'White Space' (Negative Space)?", options: ["Space on the screen that must be painted white.", "The empty space between and around elements that gives the design 'room to breathe'.", "An error where an image fails to load.", "The margin outside the browser window."] },
+        { question: "Why is White Space important in UI design?", options: ["It wastes valuable screen real estate.", "It improves readability, reduces cognitive overload, and clarifies relationships between elements.", "It makes the website load faster.", "It forces users to scroll more."] },
+        { question: "What is Visual Hierarchy?", options: ["Arranging elements in a way that implies importance, guiding the user's eye from most critical to least critical.", "Putting everything in alphabetical order.", "Using the same font size for everything.", "Hiding elements behind menus."] },
+        { question: "Which characteristic is the strongest tool for establishing Visual Hierarchy?", options: ["Size (making the most important thing the largest).", "Color (making everything neon).", "Alignment (putting everything on the right).", "Font family (using cursive)."] },
+        { question: "How do western users typically scan a text-heavy webpage?", options: ["In a circle.", "From bottom to top.", "In an F-Pattern (across the top, down the side, across the middle).", "In a zig-zag pattern."] },
+        { question: "How do users typically scan highly visual, image-based websites?", options: ["In an F-Pattern.", "In a Z-Pattern (left-to-right, diagonal down-left, left-to-right).", "Straight down the middle.", "From right to left."] },
+        { question: "In color psychology, what emotion or action is most commonly associated with the color Red?", options: ["Calmness and trust.", "Excitement, urgency, or an error/warning.", "Growth and nature.", "Wealth and royalty."] },
+        { question: "In color psychology, what is the color Blue often used to convey?", options: ["Danger.", "Appetite stimulation.", "Trust, security, and professionalism (often used by banks).", "Playfulness."] },
+        { question: "What is the 60-30-10 Rule in UI color design?", options: ["A formula for dividing your palette: 60% dominant base color, 30% secondary color, and 10% accent color (like for buttons).", "The ratio of HTML, CSS, and JS code.", "The percentage of users on Desktop, Tablet, and Mobile.", "The sizing ratio for fonts."] },
+        { question: "What is an 'Affordance' in UX design?", options: ["How much a user is willing to pay.", "A visual clue that tells the user how an object should be used (e.g., a button looking clickable).", "A discount code.", "A type of web hosting."] },
+        { question: "Why is 'Consistency' a golden rule in UI design?", options: ["It makes the site look boring.", "It forces users to learn new interactions.", "It reduces the user's learning curve because things behave exactly as they expect across the whole site.", "It proves you know how to copy and paste."] },
+        { question: "What does the Gestalt Principle of 'Proximity' state?", options: ["Items that are far apart are identical.", "Elements that are placed close to each other are perceived as being related or part of a group.", "All shapes must be perfect circles.", "Colors must contrast sharply."] },
+        { question: "What does the Gestalt Principle of 'Similarity' state?", options: ["Elements that look similar (in shape, color, or size) are perceived as having the same function.", "Text should always be black.", "Buttons must always be rectangles.", "Images must be identical sizes."] },
+        { question: "What is 'Cognitive Load' in UX?", options: ["The speed of the computer's processor.", "The amount of mental effort required by the user to understand and navigate an interface.", "The number of colors on a screen.", "The emotional reaction to a photo."] },
+        { question: "A great UX designer aims to ____________ cognitive load.", options: ["Increase", "Ignore", "Reduce", "Maximize"] },
+        { question: "What is the primary purpose of a 'Call to Action' (CTA)?", options: ["To display the copyright date.", "To prompt the user to take a specific, desired action (like 'Buy Now' or 'Sign Up').", "To list the company's address.", "To play a background video."] },
+        { question: "Which of the following is a characteristic of a good Call to Action (CTA)?", options: ["It blends into the background.", "It uses confusing, clever wording.", "It stands out visually using a strong accent color and clear, action-oriented text.", "It is hidden at the very bottom of the page."] },
+        { question: "What is a 'Wireframe'?", options: ["A highly polished, full-color final design.", "The code used to build the database.", "A low-fidelity, structural blueprint showing the layout of elements without distracting design details.", "A security protocol."] },
+        { question: "What is a 'Prototype' in UI/UX?", options: ["The very first sketch on a napkin.", "An interactive model of the design that simulates how the final product will feel and function before coding begins.", "The final published website.", "A persona description."] },
+        { question: "Why is it cheaper to fix a usability problem during the Wireframing/Prototyping phase rather than after the site is coded?", options: ["It isn't cheaper.", "Because changing lines on a blueprint takes minutes, while rewriting complex code architecture can take weeks.", "Because wireframes don't use electricity.", "Because developers charge less than designers."] },
+        { question: "What is A/B Testing?", options: ["Grading a student's project.", "Testing the website on Android and Blackberry.", "Showing two slightly different versions of a design to users to see which one performs better.", "A CSS debugging technique."] },
+        { question: "What is the 'Three-Click Rule' in UX?", options: ["A user must click three times to buy something.", "A theory that users will leave a site if they can't find what they want within three clicks.", "A security feature to prevent accidental purchases.", "A way to unlock developer tools."] },
+        { question: "In typography, what is 'Tracking'?", options: ["Following a user's mouse movements.", "The uniform spacing between all letters in a block of text.", "The space between lines of text.", "The size of the font."] },
+        { question: "In typography, what is 'Leading' (Line-Height)?", options: ["The vertical space between lines of text, crucial for readability.", "The most important headline on the page.", "The space between two specific letters.", "The bold weight of a font."] },
+        { question: "Which font type is generally considered best for large blocks of text on digital screens because of its clean edges?", options: ["Serif", "Cursive", "Sans-Serif", "Fantasy"] },
+        { question: "What is 'Friction' in User Experience?", options: ["When a user drags their finger across a touchscreen.", "Anything that slows down, confuses, or prevents a user from completing their goal.", "A fast internet connection.", "A smooth transition animation."] },
+        { question: "Requiring a user to fill out a 20-field form just to download a free PDF is an example of:", options: ["Great UI.", "High Friction.", "Low Cognitive Load.", "The F-Pattern."] },
+        { question: "What is a 'Dark Pattern' in UI design?", options: ["A design that uses a black background.", "A deceptive interface trick designed to manipulate users into doing things they didn't intend to do (like a hidden subscription fee).", "A missing image.", "A broken link."] },
+        { question: "Which of the following is a classic example of a Dark Pattern?", options: ["A clear 'Cancel' button.", "A tiny, barely visible 'unsubscribe' link hidden at the bottom of a spam email.", "A bright red 'Delete' warning.", "A navigation menu at the top of the page."] },
+        { question: "What is the 'Fold' in web design?", options: ["A CSS property for origami.", "The imaginary line where the bottom of the user's screen cuts off the page before they scroll.", "A folder holding images.", "A type of menu."] },
+        { question: "Why is 'Above the Fold' critical real estate?", options: ["Because it's the only part of the site that loads.", "Because it is the first thing users see without scrolling, making it the best place for your core message and CTA.", "Because it is where the footer lives.", "Because it uses the most bandwidth."] },
+        { question: "What is 'Responsive Design' primarily concerned with?", options: ["How fast the server responds.", "Ensuring the UI adapts gracefully to provide a good UX on any device (mobile, tablet, desktop).", "Making the site respond to voice commands.", "Replying to user emails quickly."] },
+        { question: "What does the 'Accessibility' (a11y) aspect of UX focus on?", options: ["Making the site cheap to host.", "Ensuring the site is usable by people of all abilities and disabilities.", "Giving hackers access to the database.", "Translating the site into Spanish."] },
+        { question: "Adequate color contrast is a critical rule for both UI aesthetics and:", options: ["Server Speed.", "Accessibility for visually impaired users.", "Database Security.", "JavaScript Logic."] },
+        { question: "What is a 'User Persona'?", options: ["A fake account used by hackers.", "A fictional character created to represent a specific user type, helping designers empathize with their target audience.", "A picture of the web developer.", "A type of CSS selector."] },
+        { question: "When designing for a 'User Persona', what is the most important question to ask?", options: ["'What do I (the designer) like?'", "'What colors are trending right now?'", "'What problem is this specific user trying to solve?'", "'How can we add more animations?'"] },
+        { question: "What is 'Microcopy'?", options: ["Small, barely readable text.", "The tiny bits of text on an interface (like button labels, error messages, and tooltips) that guide the user.", "A compressed image.", "A CSS variable."] },
+        { question: "Changing a button label from 'Submit' to 'Get Your Free Guide' is an improvement in:", options: ["Backend routing.", "Microcopy and UX.", "Database architecture.", "Visual weight."] },
+        { question: "What is 'Feedback' in UI design?", options: ["Users leaving a Yelp review.", "The system acknowledging a user's action (e.g., a button changing color when clicked, or a success message appearing).", "A high-pitched noise from the speakers.", "The server crashing."] },
+        { question: "If a user clicks a 'Buy' button and nothing visually happens for 5 seconds while it loads, what UX principle has failed?", options: ["Visual Hierarchy", "Proximity", "System Feedback", "Color Theory"] },
+        { question: "What is 'Breadcrumb Navigation'?", options: ["A trail of literal food emojis.", "A secondary navigation scheme that shows the user's location in a site's hierarchy (e.g., Home > Electronics > TVs).", "A way to track hackers.", "The main logo link."] },
+        { question: "What is the 'Law of Proximity' a subset of?", options: ["Newton's Laws.", "Gestalt Psychology.", "Moore's Law.", "The ADA."] },
+        { question: "Why should you never use color as the *only* way to convey important information?", options: ["Because colorblind users might not be able to perceive the difference.", "Because colors look bad on mobile.", "Because it takes too much CSS.", "Because colors slow down the website."] },
+        { question: "What is 'Card Sorting'?", options: ["Sorting playing cards.", "A UX research method where users organize topics into groups, helping designers build logical navigation menus.", "Organizing CSS files.", "A database search algorithm."] },
+        { question: "Which tool is commonly used by professionals to create high-fidelity UI prototypes?", options: ["Microsoft Word", "Notepad", "Figma", "FileZilla"] },
+        { question: "The phrase 'Don't Make Me Think' is a famous UX mantra. What does it mean?", options: ["Users should not read the text.", "Interfaces should be obvious, self-explanatory, and intuitive so users don't have to figure out how to use them.", "Websites shouldn't have educational content.", "Designers shouldn't plan their layouts."] },
+        { question: "What is 'Accessibility Contrast Ratio'?", options: ["The difference between HTML and CSS.", "The mathematical difference in brightness between text and its background color.", "The ratio of images to text.", "The speed of the animation."] },
+        { question: "If a website's primary goal is a calm, relaxing meditation app, which color palette is the most appropriate UI choice?", options: ["Neon Red and Black.", "Soft Blues, Greens, and Whites.", "Bright Orange and Yellow.", "Pure Black and Hot Pink."] }
+    ];
+
+    const examConfig = {
+        questions: ch4ExamPool,
+        questionCount: 20, 
+        chapterTitle: "Chapter 4: The 'Why' (UI/UX)",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbyoX6MTNxThGNVQtIn4e_OgJoYUGUdPPKY9lbXf63h3H9fwGOxUeToxptyORS7LgWVNeg/exec"
+    };
+
+    window.onload = () => initExam(examConfig);
+  </script>
+  
+<div id="footer-placeholder"></div>
+
+  <script>
+    (function() {
+        var url = "/includes/footer.html?v=" + new Date().getTime();
+        fetch(url)
+            .then(res => res.text())
+            .then(html => {
+                var ph = document.getElementById("footer-placeholder");
+                if (ph) ph.innerHTML = html;
+            });
+    })();
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

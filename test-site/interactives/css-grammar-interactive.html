@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 3 Interactive: CSS Grammar</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <!-- Standard DAC Head Elements -->
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <!-- Interactive Module Dependencies -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="/css/interactive.css" rel="stylesheet"/>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print"><div id="nav-placeholder"></div></div>
+
+  <section class="container-fluid my-5">
+    <div class="row"><div class="col-12 d-flex flex-column align-items-center">
+        
+        <nav class="mb-4 w-100 d-flex justify-content-start small fw-bold container">
+            <a href="/year1/the-clothes-intro-to-css.html" class="text-decoration-none da-primary">
+                <i class="fas fa-angles-left me-1"> Back to Chapter Reading</i>
+            </a>
+        </nav>
+
+        <div id="interactive-module" class="d-flex justify-content-center w-100 py-4 mb-5">
+            <main class="container bg-white rounded-4 shadow-lg overflow-hidden border p-0 interactive-main">
+                <div class="row g-0 h-100 module-row">
+                    
+                    <!-- Code Column -->
+                    <div class="col-12 col-md-6 code-panel bg-dark text-white p-4 p-md-5 d-flex flex-column justify-content-center position-relative">
+                        <div class="position-absolute top-0 start-0 mt-3 ms-4 text-white-50 small text-uppercase fw-bold letter-spacing-wide">
+                            <i class="fas fa-code me-2"></i> CSS Code
+                        </div>
+                        
+                        <div class="code-font fs-5 fs-md-4 lh-lg mt-4">
+                            <span class="code-segment step-hidden syn-sel" data-steps="1,2,3">h1</span> 
+                            <span class="code-segment step-hidden syn-punct" data-steps="1,2,3">{</span><br>
+                            
+                            &nbsp;&nbsp;<span class="code-segment step-hidden syn-prop" data-steps="2,3">color</span><span class="code-segment step-hidden syn-punct" data-steps="2,3">:</span> 
+                            <span class="code-segment step-hidden syn-val" data-steps="3">blue</span><span class="code-segment step-hidden syn-punct" data-steps="2,3">;</span><br>
+                            
+                            <span class="code-segment step-hidden syn-punct" data-steps="1,2,3">}</span>
+                        </div>
+
+                        <div class="mt-5 preview-wrapper rounded p-4 position-relative overflow-hidden bg-secondary bg-opacity-25 d-flex justify-content-center align-items-center">
+                            <div class="position-absolute top-0 end-0 mt-2 me-2 text-uppercase fw-bold preview-badge px-2 py-1 rounded text-dark">Browser View</div>
+                            <div class="w-100 p-4 bg-white rounded shadow-sm border text-center" style="min-height: 120px;">
+                                <h1 id="preview-heading" class="display-5 fw-bold transition-all text-dark" style="transition: color 0.4s ease;">Hello World</h1>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Column -->
+                    <div class="col-12 col-md-6 p-4 p-md-5 d-flex flex-column justify-content-between bg-white text-dark">
+                        <div>
+                            <div class="d-inline-block px-3 py-1 bg-success bg-opacity-10 text-success rounded-pill small fw-bold mb-4 text-uppercase letter-spacing-wide">Interactive Lesson</div>
+                            <h2 class="display-6 fw-bold da-primary mb-2 mt-0">CSS Grammar</h2>
+                            <div class="d-flex gap-1 mb-5 mt-4" id="module-progress"></div>
+                            <div id="module-content" class="content-min-height"></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
+                            <button class="btn-prev btn text-secondary fw-semibold border-0"><i class="fas fa-arrow-left me-2"></i> Back</button>
+                            <button class="btn-next btn text-white bg-da-primary fw-semibold shadow-sm px-4 py-2">Next Step <i class="fas fa-arrow-right ms-2"></i></button>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div></div>
+  </section>
+
+
+  <script src="/js/interactive.js"></script>
+  <script>
+    const steps = [
+        { title: "CSS Rules", icon: "fa-book", text: "CSS is written in <strong>rules</strong>. A rule tells the browser <em>what</em> element to style, and <em>how</em> to style it." },
+        { title: "The Selector", icon: "fa-mouse-pointer", text: "First, we need a <strong>Selector</strong>. This targets the HTML element we want to style. Here, we are targeting all <code>&lt;h1&gt;</code> elements on the page." },
+        { title: "The Property", icon: "fa-palette", text: "Next is the <strong>Property</strong>. This is the specific feature of the element we want to change. Here, we want to change the text <code>color</code>." },
+        { title: "The Value", icon: "fa-fill-drip", text: "Finally, the <strong>Value</strong>. This is the setting we are applying to our property. We set the color to <code>blue</code>!" }
+    ];
+    
+    const quiz = {
+        snippet: `<code class="da-primary fw-bold">color</code><code>:</code> <code>blue</code><code>;</code>`,
+        question: "In the snippet above, what role does the word 'color' play?",
+        options: [
+            { text: "It is the Value", isCorrect: false },
+            { text: "It is the Selector", isCorrect: false },
+            { text: "It is the Property", isCorrect: true }
+        ],
+        correctText: "Spot on! <code>color</code> is the Property. It is the specific feature we are trying to change.",
+        incorrectText: "Remember the order: Selector { Property : Value ; }."
+    };
+    
+    new InteractiveModule(steps, quiz, (step) => {
+        const heading = document.getElementById('preview-heading');
+        if (step === 3) {
+            heading.classList.add('da-primary'); // Custom brand blue
+            heading.classList.remove('text-dark');
+        } else {
+            heading.classList.remove('da-primary');
+            heading.classList.add('text-dark');
+        }
+    });
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

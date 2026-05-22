@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- File: compsci/culture_equity_bias.html -->
+  <meta charset="utf-8"/>
+  <title>Chapter 17: Culture, Equity, and Bias in Tech</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  
+  <!-- External Curriculum Styles -->
+  <link href="/css/compsci.css" rel="stylesheet" />
+</head>
+<body class="compsci-body">
+
+  <div class="chapter-header">
+    <span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 7: Society & Ethics</span>
+    <h1 class="display-4 fw-bold">Chapter 17: Culture, Equity, and Bias in Tech</h1>
+    <p class="lead text-muted">Understanding how technology shapes society and how human prejudices become programmed into code.</p>
+  </div>
+
+  <!-- STICKY TABLE OF CONTENTS -->
+  <div class="sticky-toc">
+      <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#section-17-1">17.1 Computing & Global Culture</a>
+      <a href="#section-17-2">17.2 Identifying Algorithmic Bias</a>
+      <a href="#section-17-3">17.3 Inclusive Design Practices</a>
+  </div>
+
+  <p class="fs-5 mb-5">Technology does not exist in a vacuum. Every app, website, and algorithm is built by humans, for humans. Because of this, technology reflects the culture that creates it—including its flaws. In this chapter, we will explore how computing changes society, how unintentional biases get hard-coded into software, and how we can use inclusive design to build a more equitable digital world.</p>
+
+  <!-- Section 17.1 -->
+  <h3 id="section-17-1" class="fw-bold mt-4 border-bottom pb-2">17.1 Computing and Global Culture <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.IC.C.1</span></h3>
+  <p class="fs-5">The invention of the smartphone and high-speed internet didn't just give us new gadgets; it fundamentally rewired human culture. Technology dictates how we communicate, work, and access the world.</p>
+  
+  <h4 class="fw-bold mt-4 text-primary">17.1.1 Personal and Social Impacts</h4>
+  <p>Computing has completely transformed the human experience:</p>
+  <ul>
+      <li><strong>Friendships & Communication:</strong> We no longer rely on physical proximity to build communities. Social media allows us to form global networks based on shared interests, but it also introduces challenges like digital isolation and cyberbullying.</li>
+      <li><strong>Finding Jobs:</strong> The days of dropping off a paper resume are largely over. Algorithms on sites like LinkedIn now match your skills to employers instantly across the globe.</li>
+      <li><strong>Free Time:</strong> Entertainment has shifted from scheduled television broadcasts to on-demand streaming and immersive, massive multiplayer online gaming.</li>
+  </ul>
+
+  <h4 class="fw-bold mt-5 text-info">17.1.2 Economic and Ethical Shifts</h4>
+  <p>The economy has been entirely disrupted by two major computing trends: <strong>Automation</strong> and the <strong>Gig Economy</strong>.</p>
+  
+  <div class="row g-4 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-primary">
+              <div class="card-body">
+                  <h5 class="fw-bold text-primary"><i class="fas fa-robot me-2"></i> Automation</h5>
+                  <p class="small text-muted mb-0">Computers and robots are replacing repetitive human labor (like factory assembly or data entry). While this destroys certain traditional jobs, it creates entirely new industries focused on programming, maintaining, and designing those automated systems.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body">
+                  <h5 class="fw-bold text-warning text-dark"><i class="fas fa-car me-2"></i> The Gig Economy</h5>
+                  <p class="small text-muted mb-0">Apps like Uber and DoorDash created the "Gig Economy." It allows people to work whenever they want with ultimate flexibility. However, it raises major ethical questions: these workers are classified as "independent contractors," meaning the tech companies don't have to provide health insurance, minimum wage, or sick leave.</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">17.1.3 The Digital Divide</h4>
+  <p>We often assume everyone has a smartphone and fast Wi-Fi, but this is a dangerous assumption. <strong>The Digital Divide</strong> is the gap between demographics and regions that have access to modern information technology, and those that don't.</p>
+  <p>Why do some wealthy urban communities have ultra-fast fiber-optic internet, while rural or low-income communities rely on expensive, slow cellular data? If a student has to do their homework on a parent's cell phone in a McDonald's parking lot to get free Wi-Fi, they are at a massive disadvantage compared to a student with a desktop computer at home. As tech creators, we must recognize that assuming "everyone is online" creates inequitable access to information.</p>
+
+  <div class="image-placeholder shadow-sm my-4">
+    <i class="fas fa-network-wired fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">The Digital Divide</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A stark visual contrast. The left side shows a brightly lit, modern city skyline connected by glowing, thick fiber-optic cables. The right side shows a dark, rural landscape with a single, weak, broken Wi-Fi signal struggling to reach a small house.</p>
+  </div>
+
+  <!-- Activity 17.1.4 -->
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-clock fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity 17.1.4: The "Tech Impact" Timeline</h4>
+              <p class="mb-0">Using Google Slides, create a timeline tracing the evolution of one specific technology (e.g., the Smartphone, Artificial Intelligence, or Social Media). For every major milestone, you must identify one positive cultural impact and one negative social or ethical "side effect."</p>
+              <p class="mb-0 fw-bold mt-1 text-dark">👉 Upload your finished timeline to the Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 17.2 -->
+  <h3 id="section-17-2" class="fw-bold border-bottom pb-2">17.2 Identifying Algorithmic Bias <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.IC.C.2</span></h3>
+  <p class="fs-5">There is a famous saying in computer science: <em>"Algorithms are just opinions embedded in code."</em> Computers are not naturally objective or fair. They do exactly what we tell them to do, and they learn from the data we give them.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">17.2.1 What is Bias in Code?</h4>
+  <p><strong>Algorithmic Bias</strong> occurs when a computer system produces unfair, prejudiced, or discriminatory outcomes. This almost never happens because a programmer is intentionally trying to be evil. Usually, it happens because the programmer had an unconscious "blind spot" and didn't realize they were programming their own assumptions into the math.</p>
+
+  <h4 class="fw-bold mt-5 text-info">17.2.2 Case Studies in Inequity <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.IC.C.2</span></h4>
+  <p>When algorithms are biased, real people get hurt. Consider these real-world failures:</p>
+
+  <!-- Interactive Tabs for Case Studies -->
+  <ul class="nav nav-tabs mt-4" id="biasTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+          <button class="nav-link active fw-bold text-danger" id="facial-tab" data-bs-toggle="tab" data-bs-target="#facial-pane" type="button" role="tab">
+              <i class="fas fa-camera me-2"></i> Facial Recognition
+          </button>
+      </li>
+      <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-warning text-dark" id="hiring-tab" data-bs-toggle="tab" data-bs-target="#hiring-pane" type="button" role="tab">
+              <i class="fas fa-briefcase me-2"></i> Hiring AI
+          </button>
+      </li>
+      <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-success" id="medical-tab" data-bs-toggle="tab" data-bs-target="#medical-pane" type="button" role="tab">
+              <i class="fas fa-stethoscope me-2"></i> Medical Algorithms
+          </button>
+      </li>
+  </ul>
+  
+  <div class="tab-content border border-top-0 bg-white p-4 shadow-sm mb-4" id="biasTabsContent">
+      <div class="tab-pane fade show active" id="facial-pane">
+          <h5 class="fw-bold text-danger">The Flawed Dataset</h5>
+          <p>Early facial recognition software was incredibly accurate at identifying lighter-skinned males, but failed miserably at recognizing darker-skinned females. Why? <strong>GIGO (Garbage In, Garbage Out)</strong>. The engineers trained the AI using photos of themselves and their coworkers (mostly white males). Because the AI was never taught what diverse faces looked like, it failed in the real world.</p>
+      </div>
+      <div class="tab-pane fade" id="hiring-pane">
+          <h5 class="fw-bold text-warning text-dark">The Biased Resume Scanner</h5>
+          <p>A major tech company built an AI to scan resumes and find the "best" candidates. They trained the AI using 10 years of successful hires. However, because the tech industry historically hired mostly men, the AI learned that being male was a "success metric." It began automatically rejecting resumes that included words like "Women's Chess Club." The AI learned human bias perfectly.</p>
+      </div>
+      <div class="tab-pane fade" id="medical-pane">
+          <h5 class="fw-bold text-success">The Healthcare Blind Spot</h5>
+          <p>A widely used healthcare algorithm was designed to identify patients who needed extra medical care. It used "Amount of Money Spent on Healthcare" as the main variable to determine sickness. However, because marginalized groups historically lacked access to expensive healthcare, the algorithm assumed they were "healthy" and denied them the extra care they desperately needed.</p>
+      </div>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">17.2.3 Testing for Equity Deficits</h4>
+  <p>To prevent these disasters, modern software teams must actively search for "Equity Deficits" in their code before it is released to the public.</p>
+
+  <!-- Step-by-Step Guide for Auditing Bias -->
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-clipboard-check me-2"></i> Step-by-Step: How to Audit an Algorithm for Bias</h5>
+      <p class="small mb-3 text-light">A Data Architect must actively look for blind spots. Here is the framework for auditing your own code:</p>
+      
+      <ol class="mb-0 text-light small">
+          <li class="mb-2"><strong>Examine the Dataset:</strong> Look at the raw data you are using. Is it diverse? Does it represent the entire population, or just a small subset?</li>
+          <li class="mb-2"><strong>Identify Proxy Variables:</strong> Sometimes an algorithm is biased without explicitly mentioning race or gender. For example, using "Zip Code" as a variable can accidentally redline marginalized communities. This is called a Proxy Variable.</li>
+          <li class="mb-2"><strong>Run Edge-Case Scenarios:</strong> Test your app using the longest possible name, the shortest possible name, and non-English characters. Does the system break?</li>
+          <li><strong>Invite External Testers:</strong> You cannot spot your own bias. Bring in beta testers from completely different cultural and socioeconomic backgrounds to try your software.</li>
+      </ol>
+  </div>
+
+  <!-- Activity 17.2.4 -->
+  <div class="alert alert-warning mt-4 shadow-sm border-warning">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-hat-wizard fa-3x me-4 text-warning text-dark"></i>
+          <div>
+              <h4 class="fw-bold mb-1 text-dark">Activity 17.2.4: The "Sorting Hat" Audit</h4>
+              <p class="mb-0 text-dark">You have been given a Google Sheets "Sorting Algorithm" that divides students into groups. However, the hidden math logic is secretly biased (e.g., it gives better groups to students with shorter names). You must audit the sheet, find the biased formula, and rewrite the code to be 100% equitable.</p>
+              <p class="mb-0 fw-bold mt-1 text-danger">👉 Load the "Sorting Hat" spreadsheet in your workspace and begin the audit!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 17.3 -->
+  <h3 id="section-17-3" class="fw-bold border-bottom pb-2">17.3 Inclusive Design Practices <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.IC.C.1</span></h3>
+  <p class="fs-5">If algorithmic bias is the disease, Inclusive Design is the cure. We must intentionally engineer systems that welcome and accommodate the broadest possible audience.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">17.3.1 Cultural Sensitivity in UI/UX</h4>
+  <p>When designing an interface, you must remember that visual cues change drastically across cultures.</p>
+  <ul>
+      <li><strong>Color Meanings:</strong> In the United States, the color Red usually means "Stop," "Danger," or "Error." In Chinese culture, Red is the color of luck, joy, and prosperity. If you build a global financial app, making a stock portfolio "Red" might convey completely different messages depending on where the user lives.</li>
+      <li><strong>Icons and Symbols:</strong> A "shopping cart" icon makes sense in America, but in countries where small local markets are the norm, a "basket" might be more universally understood.</li>
+  </ul>
+
+  <h4 class="fw-bold mt-5 text-info">17.3.2 Design Justice</h4>
+  <p>There is a powerful phrase in inclusive design: <strong>"Nothing about us without us."</strong> If you are building an app to help visually impaired students navigate a school, you cannot build it successfully unless visually impaired students are on your design team.</p>
+  <p>This is why diversity in the tech industry is so critical. If every software engineer in a company comes from the exact same background, they will all share the exact same blind spots. Diverse teams build better, more equitable, and more profitable products because they can spot bias before the code is ever written.</p>
+
+  <h4 class="fw-bold mt-5 text-info">17.3.3 Refining for Broad Impact</h4>
+  <p>To make a digital artifact welcoming to a global audience, developers rely on <strong>Localization</strong> (L10n) and <strong>Internationalization</strong> (i18n).</p>
+
+  <div class="image-placeholder shadow-sm my-4">
+    <i class="fas fa-language fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">Translation vs. Localization</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> An infographic showing the difference between Translation and Localization. On the left (Translation), a website is simply swapped from English to Spanish. On the right (Localization), the entire layout flips from Left-to-Right to Right-to-Left (for Arabic), the currency symbols change, and the images are updated to reflect the local culture.</p>
+  </div>
+
+  <p>When refining text for a global app, you must avoid local slang, idioms, or metaphors (like "hit a home run" or "piece of cake") that do not translate properly. Clear, direct language is the most inclusive language.</p>
+
+  <!-- Activity 17.3.4 -->
+  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-eraser fa-3x me-4 text-primary"></i>
+          <div>
+              <h3 class="fw-bold mb-1">Activity 17.3.4: The "Right to be Forgotten"</h3>
+              <p class="mb-2 fs-5">Different cultures have wildly different expectations of privacy. In Europe, the GDPR enforces the "Right to be Forgotten," allowing citizens to force Google to delete embarrassing articles from their past. The United States does not have this right, prioritizing "Freedom of Speech."</p>
+              <ul class="mb-0 fw-bold text-dark small">
+                  <li class="mb-1">Should people have the right to demand that tech companies delete their past mistakes?</li>
+                  <li class="mb-1">If a global tech company is based in the US, should they have to follow European cultural norms?</li>
+              </ul>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Open the "Discussion Reflection" template in your Digital Notebook to outline your argument for the class debate.</p>
+          </div>
+      </div>
+  </div>
+
+  <!-- Required scripts for interactive tabs/accordions inside the iframe -->
+  <script src="/js/bootstrap.bundle.js"></script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

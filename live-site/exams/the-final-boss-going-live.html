@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Summative Assessment: Chapter 16 - The "Launch"</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/examLogic.js?v=4"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 fw-bold">Loading Secure Environment...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Chapter 16 Summative Question Pool (52 Questions - Correct Answers STRIPPED)
+    const ch16ExamPool = [
+        { question: "What does the term 'Deployment' mean in web development?", options: ["Deleting old code.", "Writing the final CSS styles.", "Moving files from a local private environment to a public live environment.", "Compressing images."] },
+        { question: "What does FTP stand for?", options: ["File Transfer Protocol", "Fast Text Processing", "Folder Tracking Program", "Final Test Phase"] },
+        { question: "Why is the 'Old School' FTP method considered dangerous for modern team development?", options: ["It requires an expensive license.", "It is manual, error-prone, and can instantly overwrite live files with no 'undo' button.", "It cannot upload images.", "It only works on Mac computers."] },
+        { question: "What is the name of the popular, legacy software program used as a digital 'moving truck' for FTP?", options: ["Photoshop", "FileZilla", "VS Code", "Netlify"] },
+        { question: "In modern development, what does CI/CD stand for?", options: ["Computer Integration / Code Design", "Continuous Integration / Continuous Deployment", "Central Index / Core Data", "Cascading Images / Cascading Documents"] },
+        { question: "How does a modern cloud host (like Netlify) know when you have updated your code on GitHub?", options: ["You have to email them.", "Through an automated digital tripwire called a Webhook.", "By checking your computer's hard drive.", "By sending you a text message."] },
+        { question: "What is the primary benefit of a CI/CD pipeline?", options: ["It writes HTML for you.", "It makes the website completely un-hackable.", "It automatically updates the live website seconds after you push code to GitHub.", "It removes the need for CSS."] },
+        { question: "What is the Domain Name System (DNS)?", options: ["A virus scanner.", "The internet's master phonebook that translates human-friendly names into computer-friendly IP addresses.", "A CSS framework.", "A type of database."] },
+        { question: "When you purchase a domain name from a Registrar (like GoDaddy), how long do you typically 'own' it before having to renew?", options: ["Forever.", "One Month.", "One Year.", "Ten Years."] },
+        { question: "What is a DNS 'A Record' used for?", options: ["Pointing a domain name to a specific numeric IP address.", "Sending emails.", "Storing passwords securely.", "Linking to a CSS file."] },
+        { question: "What is a DNS 'CNAME Record' used for?", options: ["Encrypting a database.", "Pointing a domain to another domain or subdomain URL (like a Netlify app link).", "Connecting to a printer.", "Blocking hackers."] },
+        { question: "What does 'DNS Propagation' refer to?", options: ["The time it takes for a new domain setting to spread to every internet provider across the globe.", "A server crash.", "The process of uploading files via FTP.", "Generating an SSL certificate."] },
+        { question: "In the context of launching a site, what does QA stand for?", options: ["Quick Answers", "Quality Assurance", "Quantity Assessment", "Query Analysis"] },
+        { question: "Why should you perform the 'Resize Test' before launching?", options: ["To make sure images are compressed.", "To ensure the layout doesn't break and remains fully responsive on mobile-sized screens.", "To test the database connection.", "To check the spelling."] },
+        { question: "What is 'Link Rot'?", options: ["When old code expires.", "When hyperlinks point to pages or resources that have been deleted or moved (resulting in 404 errors).", "When an image loses its color.", "When a server overheats."] },
+        { question: "When conducting an 'Alt Audit' for accessibility, what are you checking?", options: ["That all text is big enough.", "That every <img> tag has a descriptive alt='' attribute for screen readers.", "That the site works on an alternative browser.", "That the colors have high contrast."] },
+        { question: "What should you be looking for when you open the Browser Developer Console during QA testing?", options: ["Bright red JavaScript errors or failed image loads.", "Hidden passwords.", "The user's IP address.", "New font styles."] },
+        { question: "What is Google Lighthouse?", options: ["A physical server.", "A free, professional auditing tool built into Chrome that grades your site's performance and accessibility.", "A type of database.", "A web design agency."] },
+        { question: "Why is a portfolio so critical for a developer seeking a job?", options: ["It proves you have a degree.", "It acts as a 'Show, Don't Tell' trophy case that proves you can actually build functioning software.", "It is required by federal law.", "It replaces a resume completely."] },
+        { question: "What is the 'STAR Method' used for in a portfolio Case Study?", options: ["Structuring project descriptions by explaining the Situation, Task, Action, and Result.", "A way to rate other people's websites.", "A specific CSS animation.", "A tool for fixing bugs."] },
+        { question: "Why is it important to include a link to the GitHub Repository for your portfolio projects?", options: ["So users can play the game.", "So senior engineers and hiring managers can read your raw code and see how you solved problems.", "To increase the website's speed.", "To get free cloud hosting."] },
+        { question: "What is 'Imposter Syndrome'?", options: ["A computer virus.", "A psychological feeling that you aren't a 'real' professional or aren't good enough, despite your accomplishments.", "When a hacker steals your identity.", "A bug in CSS."] },
+        { question: "If your QA test reveals that your text is light gray on a white background, which Lighthouse score will drop?", options: ["Performance", "SEO", "Accessibility", "Best Practices"] },
+        { question: "What is a 'Subdomain'?", options: ["A domain you don't own.", "A prefix added to a domain name to separate content (like 'blog.mysite.com' vs 'mysite.com').", "A hidden URL.", "An expired domain."] },
+        { question: "Why is 'Continuous Deployment' safer than manual FTP?", options: ["It never connects to the internet.", "It relies on version control, meaning every update is tracked and can be instantly rolled back if a bug occurs.", "It uses older, proven technology.", "It does not require code."] },
+        { question: "If you change a DNS setting, why might your friend in another city not see the change immediately?", options: ["Their computer is broken.", "The change has not fully propagated across the global DNS network yet.", "They are using the wrong browser.", "You forgot to save the CSS."] },
+        { question: "What does the 'Performance' score in Google Lighthouse primarily measure?", options: ["How pretty the colors are.", "How fast the page loads and becomes interactive for the user.", "How many pages the site has.", "How many users visit the site daily."] },
+        { question: "When an external link opens in the same tab and navigates the user away from your portfolio, it breaks best practices. What attribute fixes this?", options: ["target='_self'", "href='new'", "target='_blank'", "link='external'"] },
+        { question: "What happens if you deploy an HTML file but forget to deploy the `images` folder that goes with it?", options: ["The browser draws the images anyway.", "The images will show as broken links (404 errors) on the live site.", "The site will crash entirely.", "The CSS will break."] },
+        { question: "Why should you never wait for a project to be 'perfect' before putting it in your portfolio?", options: ["Software is never truly finished; it is meant to be iterated upon.", "Employers prefer broken code.", "Perfect projects are boring.", "It costs too much money."] },
+        { question: "What is the primary function of a Content Delivery Network (CDN) like Netlify?", options: ["To write HTML.", "To host copies of your website on servers globally so it loads fast for everyone.", "To generate color palettes.", "To prevent users from copying text."] },
+        { question: "If you push a broken `index.html` file to GitHub, what will the CI/CD pipeline do?", options: ["Fix the code automatically.", "Delete the repository.", "Automatically deploy the broken code to the live site.", "Pause the internet."] },
+        { question: "What does the 'A' in the STAR method stand for?", options: ["Attitude", "Action (What you specifically did to solve the problem)", "Application", "Approval"] },
+        { question: "What does the 'R' in the STAR method stand for?", options: ["Result (The final outcome of your actions)", "Reasoning", "Review", "Repository"] },
+        { question: "Why do hiring managers look for a 'Contact Information' section on a portfolio?", options: ["To send spam.", "Because if they can't easily figure out how to email you, they will move on to the next candidate.", "To find your home address.", "To check your CSS skills."] },
+        { question: "What is the danger of hardcoding an Absolute Path (like `C:/Users/Hannah/Desktop/image.jpg`) in your HTML before deployment?", options: ["It uses too much memory.", "It works on your laptop, but will break completely when moved to a cloud server.", "It causes a virus.", "It changes the image color."] },
+        { question: "Which file is automatically recognized as the default homepage by almost all web servers?", options: ["home.html", "start.html", "index.html", "main.html"] },
+        { question: "What is a '404 Error'?", options: ["Server Overload.", "Unauthorized Access.", "Not Found (The requested page or file does not exist on the server).", "Successful connection."] },
+        { question: "How does a Custom Domain (like `johndoe.com`) improve a portfolio?", options: ["It makes the code run faster.", "It makes the images higher quality.", "It projects professionalism, authority, and brand ownership.", "It is required by GitHub."] },
+        { question: "What is the purpose of an SSL/TLS Certificate on a live website?", options: ["To enable the padlock icon and encrypt data sent between the user and the server.", "To compress images.", "To make the domain name shorter.", "To translate the site to different languages."] },
+        { question: "If a user reports that a button on your live site doesn't work, what is the first debugging step you should take?", options: ["Delete the database.", "Change the domain name.", "Open the Browser Console to check for JavaScript errors.", "Upload the files via FTP."] },
+        { question: "What is 'Vendor Lock-in'?", options: ["When a user forgets their password.", "When you build a site on a closed platform (like Wix) and cannot easily move your code to a different host.", "When an API rejects your key.", "A CSS styling issue."] },
+        { question: "Why is it recommended to include a downloadable PDF resume on your portfolio?", options: ["So recruiters can print it or upload it directly into their Applicant Tracking Systems.", "To prove you know how to use Microsoft Word.", "Because PDFs load faster than HTML.", "To hide your email address."] },
+        { question: "What does the 'SEO' score in Google Lighthouse measure?", options: ["How secure the database is.", "Search Engine Optimization; how well search engines can understand and rank your page.", "How fast the JavaScript executes.", "How many colors are used."] },
+        { question: "If your QA test reveals that your website requires horizontal scrolling on a phone, what CSS feature do you need to fix?", options: ["The Font Family", "The Media Queries and responsive widths", "The Color Palette", "The Z-Index"] },
+        { question: "What is the best way to handle 'Imposter Syndrome'?", options: ["Quit coding.", "Accept that all developers feel it, keep learning, and proudly share the work you have completed.", "Pretend to know everything.", "Only use No-Code builders."] },
+        { question: "When using Netlify, what branch does it monitor by default for automatic deployments?", options: ["The 'test' branch.", "The 'main' or 'master' branch.", "The 'beta' branch.", "A local folder."] },
+        { question: "What is the purpose of a 'Favicon'?", options: ["To make the site load faster.", "It is the small logo icon that appears in the browser tab, adding a final professional touch.", "To prevent SQL injection.", "To connect to an API."] },
+        { question: "If you want to update your live Netlify site, what is the correct workflow?", options: ["Change code locally -> Save -> Commit -> Push to GitHub.", "Email Netlify.", "Drag and drop via FileZilla.", "Edit the code directly in the browser's Inspect tool."] },
+        { question: "What is the primary difference between HTTP and HTTPS?", options: ["Speed.", "Color depth.", "HTTPS encrypts the data being transferred; HTTP sends it in plain text.", "HTTP is for mobile, HTTPS is for desktop."] },
+        { question: "Why is a 'Case Study' better than just a screenshot in a portfolio?", options: ["It proves you can write CSS.", "It explains your thought process, challenges faced, and how you solved them, which employers value highly.", "It hides your mistakes.", "It takes up more screen space."] },
+        { question: "What is the very last thing you should do before officially sharing your portfolio link with an employer?", options: ["Change the font.", "Click every single link yourself to ensure absolutely nothing is broken.", "Delete your GitHub repository.", "Turn off the server."] }
+    ];
+
+    const examConfig = {
+        questions: ch16ExamPool,
+        questionCount: 20, 
+        chapterTitle: "Chapter 16: The 'Launch' (Deployment)",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbyoX6MTNxThGNVQtIn4e_OgJoYUGUdPPKY9lbXf63h3H9fwGOxUeToxptyORS7LgWVNeg/exec"
+    };
+
+    window.onload = () => initExam(examConfig);
+  </script>
+  
+<div id="footer-placeholder"></div>
+
+  <script>
+    (function() {
+        var url = "/includes/footer.html?v=" + new Date().getTime();
+        fetch(url)
+            .then(res => res.text())
+            .then(html => {
+                var ph = document.getElementById("footer-placeholder");
+                if (ph) ph.innerHTML = html;
+            });
+    })();
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

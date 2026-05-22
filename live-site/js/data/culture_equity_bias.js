@@ -1,0 +1,132 @@
+/**
+ * CHAPTER 17: Culture, Equity, and Bias in Tech
+ * MASTER MIGRATION FILE - UNIFIED DATA BANK
+ * 75 Items Total (5 Categories x 5 Levels x 3 Variations)
+ */
+(async function() {
+    const firebaseConfig = {
+        apiKey: "AIzaSyAK1sGWu6jyWzbxfQCj-cgUBn85mJh9Nv0",
+        authDomain: "digitalartsclasses-games-67ae7.firebaseapp.com",
+        projectId: "digitalartsclasses-games-67ae7",
+        storageBucket: "digitalartsclasses-games-67ae7.firebasestorage.app",
+        messagingSenderId: "662051088920",
+        appId: "1:662051088920:web:3b05cb890d834c0b9cb16d",
+        measurementId: "G-LZ4CXH6X3G"
+    };
+
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
+    const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
+    const { getFirestore, collection, addDoc, getDocs } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.migrationPool = window.migrationPool || []; window.migrationPool.push(...[
+        // --- CATEGORY: GLOBAL CULTURE & SOCIETY ---
+        { cat: "Global Culture & Society", val: 100, q: "How has computing fundamentally changed 'Social Architecture'?", a: "By allowing global connections based on shared interests rather than just physical location", d: ["By forcing people to only interact with neighbors", "By eliminating physical communication", "By making people travel more frequently"] },
+        { cat: "Global Culture & Society", val: 100, q: "What does the term 'Global Culture' refer to in computing?", a: "The rapid spread of ideas and trends across international borders via the internet", d: ["The strict enforcement of local laws", "The physical shipping of computer hardware", "The universal language of binary code"] },
+        { cat: "Global Culture & Society", val: 100, q: "What is the 'Attention Economy'?", a: "An environment where apps are designed to keep users scrolling and engaged for as long as possible", d: ["A system where users are paid to watch ads", "An economic model based on hardware sales", "A classroom management strategy"] },
+
+        { cat: "Global Culture & Society", val: 200, q: "What is a potential negative social impact of the Attention Economy?", a: "Digital isolation, where users are more connected to screens than to people nearby", d: ["It makes the internet run too fast", "It causes computer batteries to last longer", "It prevents people from using social media"] },
+        { cat: "Global Culture & Society", val: 200, q: "Why do companies want to keep you scrolling for as long as possible?", a: "To capture more data and show you more advertisements", d: ["To help you learn more facts", "To drain your battery on purpose", "Because they want you to be happy"] },
+        { cat: "Global Culture & Society", val: 200, q: "How does technology affect our real-world identity?", a: "Our 'Digital Life' is an extension of our real-world identity that impacts our mental health", d: ["It completely erases our physical identity", "It has absolutely no impact on our real lives", "It changes our physical DNA"] },
+
+        { cat: "Global Culture & Society", val: 300, q: "What is a major consequence of 'Digital Isolation'?", a: "Negative impacts on mental health and local community connections", d: ["Increased speed of computer processors", "More time spent outdoors", "The inability to use a mouse"] },
+        { cat: "Global Culture & Society", val: 300, q: "How has technology changed how we form friendships?", a: "It removes physical location as the primary barrier to finding people with shared interests", d: ["It requires everyone to use the same computer brand", "It limits friends to a 5-mile radius", "It makes talking in person illegal"] },
+        { cat: "Global Culture & Society", val: 300, q: "Why do designers build apps with endless scrolling features?", a: "To maximize user engagement metrics and ad revenue", d: ["To help users read books faster", "To save screen space", "To prevent the app from crashing"] },
+
+        { cat: "Global Culture & Society", val: 400, q: "In the 'Tech Impact' timeline activity, what must you identify for a milestone?", a: "One positive impact and one negative social or ethical side effect", d: ["The exact price of the technology", "The name of the lead programmer", "The specific binary code used"] },
+        { cat: "Global Culture & Society", val: 400, q: "How do social media platforms monetize the 'Attention Economy'?", a: "By selling user attention and behavioral data to advertisers", d: ["By charging users a hidden monthly fee", "By selling the physical servers", "By asking for donations"] },
+        { cat: "Global Culture & Society", val: 400, q: "What is the psychological effect of constant digital connection without physical presence?", a: "A paradox of feeling connected yet socially isolated", d: ["Improved physical fitness", "Perfect emotional stability", "Enhanced vision"] },
+
+        { cat: "Global Culture & Society", val: 500, q: "Why is analyzing the 'Tech Impact' of historical milestones important for a Logic Builder?", a: "It helps developers predict and mitigate the social side effects of future technologies", d: ["It allows them to sue the original inventors", "It deletes old hardware automatically", "It makes the code run ten times faster"] },
+        { cat: "Global Culture & Society", val: 500, q: "How does the Attention Economy conflict with user well-being?", a: "It prioritizes engagement metrics over the mental health and time management of the user", d: ["It forces users to buy expensive monitors", "It generates too much heat from the CPU", "It stops the internet from working"] },
+        { cat: "Global Culture & Society", val: 500, q: "What is the primary ethical concern of apps designed specifically for maximum engagement?", a: "They exploit human psychology to create addictive behaviors for profit", d: ["They use too many bright colors", "They require users to know programming", "They take up too much hard drive space"] },
+
+        // --- CATEGORY: THE DIGITAL DIVIDE & GIG ECONOMY ---
+        { cat: "The Digital Divide", val: 100, q: "What is the 'Digital Divide'?", a: "The gap between communities with access to high-speed internet and those without", d: ["The physical distance between a router and a switch", "The difference between Mac and PC", "A mathematical formula used in databases"] },
+        { cat: "The Digital Divide", val: 100, q: "How has the 'Automation Shift' changed the nature of work?", a: "It has moved many jobs from traditional 9-to-5 roles to the 'Gig Economy'", d: ["It eliminated the need for programmers", "It guarantees everyone a stable salary", "It forced everyone to work in offices"] },
+        { cat: "The Digital Divide", val: 100, q: "What is a defining feature of the Gig Economy?", a: "Workers use apps to find short-term, flexible jobs without traditional employer safety nets", d: ["Workers are paid strictly in hardware", "Workers must have a computer science degree", "Workers never use the internet"] },
+
+        { cat: "The Digital Divide", val: 200, q: "How does the Digital Divide create an 'Opportunity Gap'?", a: "Students without fast internet struggle to attend online classes or apply for remote jobs", d: ["It forces people to buy more expensive computers", "It makes social media apps run too fast", "It prevents companies from paying taxes"] },
+        { cat: "The Digital Divide", val: 200, q: "What is a major difference between traditional employment and Gig Economy work?", a: "Gig work lacks traditional safety nets like health insurance and stable pay", d: ["Gig work pays significantly more", "Gig workers do not use smartphones", "Traditional work is only done outdoors"] },
+        { cat: "The Digital Divide", val: 200, q: "Why might a community have to rely on slow cellular data instead of fiber-optics?", a: "They might be in a rural or low-income area where ISPs haven't built infrastructure", d: ["Because fiber-optics are illegal there", "Because cellular data is much faster", "Because they prefer using flip phones"] },
+
+        { cat: "The Digital Divide", val: 300, q: "Solving the Digital Divide requires hardware access and what else?", a: "Equity in Education, ensuring everyone learns how to use digital tools", d: ["A faster CPU in every laptop", "More social media influencers", "A completely new programming language"] },
+        { cat: "The Digital Divide", val: 300, q: "What is a major ethical concern regarding the 'Gig Economy'?", a: "The power balance between the human worker and the algorithm managing them", d: ["The fact that gig workers are paid too much", "That gig apps take up too much storage", "That apps are only available on Macs"] },
+        { cat: "The Digital Divide", val: 300, q: "How does a 'Gig Economy' app algorithm control a worker's livelihood?", a: "It dictates which jobs they get and can 'fire' them automatically based on GPS metrics", d: ["It forces them to buy expensive cars", "It steals their personal bank accounts", "It forces them to write Java code"] },
+
+        { cat: "The Digital Divide", val: 400, q: "Why should a Data Architect design 'Light' versions of their software?", a: "To ensure users on slow or cellular connections can still access the tools", d: ["To make the colors on the screen brighter", "Because it is required by law", "To hide the source code from hackers"] },
+        { cat: "The Digital Divide", val: 400, q: "How does the Digital Divide impact computational modeling?", a: "Models may lack data from disconnected populations, creating a biased representation", d: ["It makes the models run twice as fast", "It causes the spreadsheet to crash", "It encrypts the model's algorithms"] },
+        { cat: "The Digital Divide", val: 400, q: "What happens when gig workers are managed strictly by GPS algorithms without human context?", a: "They can be unfairly penalized or fired for things out of their control, like traffic jams", d: ["They are instantly promoted", "Their vehicles run faster", "Their phones stop tracking location"] },
+
+        { cat: "The Digital Divide", val: 500, q: "What is one practical way a programmer can help bridge the Digital Divide?", a: "Building lightweight, efficient code that doesn't require high-speed internet to function", d: ["Increasing the price of the software", "Refusing to build apps for smartphones", "Forcing users to upgrade their RAM"] },
+        { cat: "The Digital Divide", val: 500, q: "How does the 'Automation Shift' force workers to adapt?", a: "It requires workers to constantly learn new digital skills to remain employable", d: ["It allows them to stop working entirely", "It forces them to learn ancient languages", "It makes them physically stronger"] },
+        { cat: "The Digital Divide", val: 500, q: "Why is relying solely on algorithms for gig worker management considered ethically risky?", a: "Algorithms lack the empathy to understand complex human situations and nuance", d: ["Algorithms are too generous with pay", "Algorithms require too much electricity", "Algorithms delete the user's data"] },
+
+        // --- CATEGORY: ALGORITHMIC BIAS ---
+        { cat: "Algorithmic Bias", val: 100, q: "What is 'Algorithmic Bias'?", a: "When human prejudices, whether intentional or unintentional, are programmed into software", d: ["A hardware failure that corrupts a drive", "A virus that steals passwords", "A legal protection for software"] },
+        { cat: "Algorithmic Bias", val: 100, q: "Why do we often incorrectly assume computers are always 'fair'?", a: "Because they use math, but we forget the math uses flawed human data", d: ["Because computers have feelings", "Because computers always run slowly", "Because the law requires them to be fair"] },
+        { cat: "Algorithmic Bias", val: 100, q: "If an algorithm is 'intentionally' biased, what does that mean?", a: "The programmer purposely wrote code to exclude or disadvantage a specific group", d: ["The programmer made a spelling mistake", "The computer glitched during execution", "The data was corrupted by a virus"] },
+
+        { cat: "Algorithmic Bias", val: 200, q: "In which phase of the SDLC does bias usually get introduced?", a: "The Build or Design phase, when programmers use limited or skewed testing data", d: ["The Maintenance phase, years after release", "During the hardware manufacturing process", "When the user buys the software"] },
+        { cat: "Algorithmic Bias", val: 200, q: "If an algorithm is 'unintentionally' biased, what does that mean?", a: "The programmer didn't mean to cause harm, but failed to use diverse testing data", d: ["The software is actually a virus", "The code was written by an AI", "The hardware is broken"] },
+        { cat: "Algorithmic Bias", val: 200, q: "What did the 'Gender Shades' project reveal about commercial facial recognition?", a: "It had an error rate of nearly 35% for dark-skinned women, but under 1% for light-skinned men", d: ["It worked perfectly for everyone equally", "It only worked on Apple devices", "It was unable to recognize men"] },
+
+        { cat: "Algorithmic Bias", val: 300, q: "If an app is only tested on people with light skin, what will the algorithm learn?", a: "That light skin is the 'default,' causing it to fail for dark-skinned users", d: ["It will automatically adapt to all skin types", "It will change the user's camera settings", "It will ask the user for their age"] },
+        { cat: "Algorithmic Bias", val: 300, q: "How can an AI 'Hiring Algorithm' be biased?", a: "It might filter out resumes containing names common in minority communities if trained on biased data", d: ["It randomly deletes resumes", "It charges users money to apply", "It only hires people without degrees"] },
+        { cat: "Algorithmic Bias", val: 300, q: "If a search engine only shows images of straight, blonde hair when you search for 'professional hair,' what is it doing?", a: "Reinforcing harmful stereotypes and hiding real-world diversity", d: ["Operating at peak algorithmic efficiency", "Following the law correctly", "Saving bandwidth on the server"] },
+
+        { cat: "Algorithmic Bias", val: 400, q: "What is the ethical danger of an AI sorting resumes based on historical data?", a: "It will repeat and automate the same discrimination that happened in the past", d: ["It will automatically hire everyone", "It will steal the applicants' identities", "It cannot read PDF files"] },
+        { cat: "Algorithmic Bias", val: 400, q: "Why is it crucial to check the 'Inputs' when looking for algorithmic bias?", a: "Because if the input data only represents one demographic, the model's output will be biased (GIGO)", d: ["Because inputs are always encrypted", "Because inputs take up too much space", "Because inputs are physical hardware"] },
+        { cat: "Algorithmic Bias", val: 400, q: "How do algorithms learn human biases?", a: "By finding patterns in massive datasets that reflect historical human inequalities", d: ["By listening to humans through microphones", "By reading Wikipedia articles only", "By randomly generating logic errors"] },
+
+        { cat: "Algorithmic Bias", val: 500, q: "What does the acronym GIGO stand for in the context of Algorithmic Bias?", a: "Garbage In, Garbage Out", d: ["Great Information, Great Output", "Global Internet Gateway Operations", "Generate Interface Graphics Online"] },
+        { cat: "Algorithmic Bias", val: 500, q: "How can unintentional bias ruin a medical diagnostic tool?", a: "If trained only on one demographic, it may misdiagnose patients from other backgrounds", d: ["It will charge patients too much money", "It will delete the hospital's Wi-Fi", "It will overheat the MRI machine"] },
+        { cat: "Algorithmic Bias", val: 500, q: "Why is algorithmic bias sometimes more dangerous than human bias?", a: "It automates and scales the discrimination to millions of people instantly", d: ["It physically attacks the user", "It deletes the entire hard drive", "It cannot be seen on a screen"] },
+
+        // --- CATEGORY: EQUITY AUDITS & TESTING ---
+        { cat: "Equity Audits", val: 100, q: "What is an 'Equity Audit'?", a: "Testing a program with a diverse data set to ensure it works equally well for all users", d: ["Checking the financial budget of the company", "Making sure code has no syntax errors", "Scanning the computer for malware"] },
+        { cat: "Equity Audits", val: 100, q: "What does an 'Equity Deficit' mean in software?", a: "The app works perfectly for one group but fails or creates barriers for another group", d: ["The app costs too much money", "The app uses too much battery power", "The app is illegal to download"] },
+        { cat: "Equity Audits", val: 100, q: "What is the best way to avoid bias when building a product?", a: "Having a diverse engineering team with different backgrounds and perspectives", d: ["Having one programmer write everything", "Using a completely randomized algorithm", "Never testing the software"] },
+
+        { cat: "Equity Audits", val: 200, q: "When auditing logic, why might the rule `IF name_length < 5` be biased?", a: "It might accidentally punish or exclude users from cultures with very long names", d: ["It forces users to change their names", "It uses too much memory in RAM", "It deletes the database"] },
+        { cat: "Equity Audits", val: 200, q: "Why is it important to use a 'Diverse Data Set' during the SDLC Test phase?", a: "To ensure the software works correctly for people of all races, genders, and ages", d: ["To make the file size as large as possible", "To slow down the testing process", "To ensure the code complies with copyright"] },
+        { cat: "Equity Audits", val: 200, q: "In the 'Sorting Hat' activity, how did you fix the biased formula?", a: "By rewriting it to use a random number or a fair primary key instead of name length", d: ["By deleting the spreadsheet completely", "By charging the students money", "By ignoring the complaints"] },
+
+        { cat: "Equity Audits", val: 300, q: "How can an 'Equity Audit' protect a company's reputation?", a: "By catching biased logic before the product is released to the public and causes a scandal", d: ["By hiding errors from the users", "By increasing the price of the app", "By ensuring the logo looks modern"] },
+        { cat: "Equity Audits", val: 300, q: "What is a 'Blind Spot' in software design?", a: "An issue or barrier that a developer doesn't notice because it doesn't affect them personally", d: ["A dead pixel on the monitor", "A section of encrypted code", "A Wi-Fi dead zone in an office"] },
+        { cat: "Equity Audits", val: 300, q: "If a team consists entirely of 20-something males, what is the main risk to their app?", a: "They will likely have blind spots regarding the needs of users of different ages and genders", d: ["The code will run too fast", "They will use too much electricity", "They won't know how to type"] },
+
+        { cat: "Equity Audits", val: 400, q: "Why should an app allow for various date formats (like DD/MM/YYYY)?", a: "Because different countries format their calendar dates differently", d: ["Because the database requires it", "Because it saves memory space", "Because it is a requirement of HTML"] },
+        { cat: "Equity Audits", val: 400, q: "What is the main goal of finding an 'Equity Deficit' in a prototype?", a: "To fix the underlying logic before the software is released and harms the public", d: ["To make the programmer feel bad", "To get a higher grade in class", "To delete the prototype"] },
+        { cat: "Equity Audits", val: 400, q: "How does an Equity Audit relate to the 'Fail Fast' philosophy?", a: "It identifies cultural or logical failures early in the design process when they are cheap to fix", d: ["It forces the server to crash instantly", "It deletes all the project files", "It fires the programmer immediately"] },
+
+        { cat: "Equity Audits", val: 500, q: "What is the most effective way to eliminate a blind spot during the testing phase?", a: "Invite beta testers from diverse and marginalized communities to use the product", d: ["Use a faster computer to compile code", "Change the background color to blue", "Write more lines of HTML"] },
+        { cat: "Equity Audits", val: 500, q: "Why can't we just trust a computer to be fair automatically during an audit?", a: "Because the computer only executes the logic and mathematical models written by flawed humans", d: ["Because computers are inherently evil", "Because computers don't understand math", "Because the internet is too slow"] },
+        { cat: "Equity Audits", val: 500, q: "If you discover your algorithm is biased after launch, what SDLC phase must you enter immediately?", a: "The Maintain phase, to issue an emergency patch and rewrite the logic", d: ["The Planning phase, to start over", "The Hardware phase, to buy a new server", "The Design phase, to draw new slides"] },
+
+        // --- CATEGORY: INCLUSIVE DESIGN & JUSTICE ---
+        { cat: "Inclusive Design", val: 100, q: "What is 'Inclusive Design'?", a: "The practice of building products that are welcoming and usable by as many people as possible", d: ["Writing software only for experts", "Designing apps that are entirely gray", "Only using proprietary software"] },
+        { cat: "Inclusive Design", val: 100, q: "What is 'Design Justice'?", a: "Moving from 'Designing for people' to 'Designing with people' to catch cultural blind spots", d: ["Suing hackers for stealing code", "Ensuring code is perfectly formatted", "A law about hardware manufacturing"] },
+        { cat: "Inclusive Design", val: 100, q: "What does it mean to 'Localize' an app rather than just 'Translate' it?", a: "Working with native speakers to ensure the interface feels culturally natural and respectful", d: ["Changing the app's price in different countries", "Restricting the app to one city", "Translating code into Java"] },
+
+        { cat: "Inclusive Design", val: 200, q: "How does the meaning of the color 'Red' change between the U.S. and China?", a: "In the U.S. it means 'Danger/Stop,' but in China it means 'Luck/Celebration'", d: ["In the U.S. it means 'Luck,' but in China it means 'Stop'", "It means 'Error' in both cultures", "It means 'Money' everywhere"] },
+        { cat: "Inclusive Design", val: 200, q: "Why is relying on icons alone a bad idea for a global app?", a: "Different cultures interpret images differently (e.g., a 'Trash Can' vs. a 'Recycle Bin')", d: ["Icons use too much storage space", "Icons cannot be clicked on a touchscreen", "Icons are illegal under GDPR"] },
+        { cat: "Inclusive Design", val: 200, q: "Why must responsive design account for Text Direction?", a: "Because languages like Arabic and Hebrew read right-to-left, requiring the layout to flip", d: ["Because screens are getting smaller", "Because users read from bottom-to-top", "Because vertical text is the new standard"] },
+
+        { cat: "Inclusive Design", val: 300, q: "If a global app uses a green checkmark for 'Submit,' what must the developer verify?", a: "That the color green and the checkmark symbol mean 'positive/correct' in the target cultures", d: ["That the button is exactly 50 pixels wide", "That the code is written in Java", "That the checkmark is trademarked"] },
+        { cat: "Inclusive Design", val: 300, q: "Why is 'Designing with people' better than 'Designing for people'?", a: "It gives marginalized groups a voice in how the technology that affects them is built", d: ["It is a much faster process", "It requires less code to be written", "It completely eliminates testing"] },
+        { cat: "Inclusive Design", val: 300, q: "If an elderly user cannot understand the icons in a fitness app, what principle has the developer violated?", a: "Inclusive Design / Design Justice", d: ["Intellectual Property Rights", "Data Exfiltration protocols", "Zero-based indexing"] },
+ 
+        { cat: "Inclusive Design", val: 400, q: "What is the 'Right to be Forgotten'?", a: "A European law (GDPR) giving people the right to demand that companies delete their digital history", d: ["A law that deletes all data every 10 years", "A rule preventing password changes", "An internet protocol for wiping drives"] },
+        { cat: "Inclusive Design", val: 400, q: "Why does the 'Right to be Forgotten' cause a cultural conflict between the US and Europe?", a: "The US values freedom of information, while Europe places a higher legal value on digital privacy", d: ["The US hates the internet", "Europe doesn't have high-speed networks", "The law requires everything to be translated"] },
+        { cat: "Inclusive Design", val: 400, q: "Why is enforcing the 'Right to be Forgotten' difficult on a global network?", a: "A server in a country without the law might refuse to delete the data", d: ["Computers don't have delete buttons", "Data is too heavy to move", "Hackers block the deletion commands"] },
+
+        { cat: "Inclusive Design", val: 500, q: "How does 'Design Justice' challenge the traditional tech industry model?", a: "It shifts power from the developers directly to the community being impacted by the software", d: ["It forces companies to give away computers", "It makes programming illegal", "It replaces programmers with AI"] },
+        { cat: "Inclusive Design", val: 500, q: "Why is testing for cultural sensitivity considered an ethical responsibility?", a: "Releasing an offensive or ignorant app can cause real-world harm and alienate users", d: ["It uses up too much bandwidth", "It crashes the database", "It lowers the resolution of the screen"] },
+        { cat: "Inclusive Design", val: 500, q: "How does building an inclusive UI impact the overall success of a global application?", a: "It vastly increases the potential user base by removing cultural and accessibility barriers", d: ["It guarantees a billion dollars in profit", "It automatically translates the code", "It physically upgrades the user's phone"] }
+    ].map(item => ({ ...item, chapter: "Chapter 17", grade: "CS & Literacy Guild" })));
+    
+})();

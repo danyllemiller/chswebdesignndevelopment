@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Pre-Assessment: Chapter 15 - The Network</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module">
+    import { initPreTest } from "/js/preTestLogic.js";
+    window.initPreTest = initPreTest;
+  </script>
+<script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div id="exam-container">
+        <div class="text-center p-5"><div class="spinner-border text-info"></div><p class="mt-2 fw-bold">Loading Network Diagnostic...</p></div>
+    </div>
+  </section>
+  <script>
+    const diagPool = [
+        { question: "What is the primary role of an API in the 'Waiter' analogy?", options: ["The Chef preparing data", "The Client placing orders", "The Messenger (Waiter) that takes your request to the kitchen and brings back data.", "The Restaurant Owner"] },
+        { question: "Which HTTP method is used when you simply want to view a list of products on an e-commerce site?", options: ["POST", "PUT", "DELETE", "GET"] },
+        { question: "Which status code indicates that the request was successful and the data is attached?", options: ["200 OK", "404 Not Found", "500 Server Error", "401 Unauthorized"] },
+        { question: "What happens if you try to use data from a fetch() request before using the 'await' keyword?", options: ["The site crashes", "The code runs faster", "You receive a 'Pending Promise' instead of the actual data.", "The browser reloads"] },
+        { question: "Which format is the modern standard for API data delivery because it looks like a JavaScript object?", options: ["XML", "CSV", "TXT", "JSON"] },
+        { question: "What is an API 'Endpoint'?", options: ["The physical location of a server.", "The specific URL address where a service or data can be accessed.", "The password for the API.", "The end of a JSON file."] },
+        { question: "If a user enters the wrong password and the server denies access, which status code is most likely returned?", options: ["200 OK", "404 Not Found", "401 Unauthorized", "500 Server Error"] },
+        { question: "Which function is used to turn a usable JavaScript Object into a raw string of text for transmission?", options: ["JSON.parse()", "JSON.stringify()", "fetch()", "await()"] },
+        { question: "What is a 'Rate Limit' on an API?", options: ["The maximum speed of the internet.", "A restriction on how many requests a user can make in a specific time period.", "The price per gigabyte.", "The maximum file size of an image."] },
+        { question: "Why is a 'try/catch' block essential when fetching data?", options: ["It makes the API faster.", "It acts as a safety net that catches network failures (like no Wi-Fi) without crashing the app.", "It generates API keys automatically.", "It is required by the HTML standard."] },
+        { question: "Which HTTP method is used to create a completely new user account on a server?", options: ["GET", "PUT", "DELETE", "POST"] },
+        { question: "What is a CORS error?", options: ["A syntax error in your JS.", "A security feature where a server blocks a domain from accessing its data.", "A slow internet connection error.", "An error when a database is full."] },
+        { question: "What does 'Stateless' mean in the context of a REST API?", options: ["The API only works in one country.", "The server does not remember anything about previous requests; each request is independent.", "The API has no variables.", "The code is written in HTML."] },
+        { question: "Which technology hosts copies of media on global servers to reduce lag for users?", options: ["CDN (Content Delivery Network)", "CMS", "VCS", "SQL"] },
+        { question: "If you receive a 404 status code, whose 'fault' is the error according to the standards?", options: ["The Server", "The Client (The user requested something that doesn't exist).", "The API Provider", "The Wi-Fi Router"] },
+        { question: "What is 'Pagination' in an API?", options: ["Converting data to a PDF.", "Splitting a huge result set into smaller 'pages' (e.g., 20 results at a time).", "Adding a header and footer.", "Printing the code."] },
+        { question: "What acts as a digital ID badge to authenticate your application to an API provider?", options: ["A Password", "An API Key", "A Cookie", "A Username"] },
+        { question: "Which legacy format preceded JSON but is much heavier because of its tag-based structure?", options: ["JSON", "XML", "YAML", "TXT"] },
+        { question: "What does the 'CRUD' acronym stand for?", options: ["Compile, Run, Update, Delete", "Create, Read, Update, Delete", "Copy, Read, Upload, Download", "Create, Render, Undo, Deploy"] },
+        { question: "Which JavaScript keyword tells a function that it is allowed to 'pause' while waiting for a network request?", options: ["wait", "pause", "async", "stop"] },
+        { question: "What is a 'Webhook'?", options: ["A physical cable.", "An automated message sent from one app to another triggered by a specific event.", "A type of database query.", "A CSS framework."] },
+        { question: "When using fetch(), which boolean property do you check to see if the response was in the 200-range?", options: ["response.valid", "response.ok", "response.success", "response.true"] },
+        { question: "Which status code means 'Forbidden' (You are logged in, but not allowed to see this specific data)?", options: ["200", "403", "404", "500"] },
+        { question: "What is the 'Payload' of a POST request?", options: ["The shipping cost.", "The actual data body being sent to the server.", "The time it takes to arrive.", "The name of the server."] },
+        { question: "To display an image from a JSON object, you must inject the URL into which HTML attribute?", options: ["href", "class", "src", "alt"] },
+        { question: "Which HTTP method is used to change a user's existing email address in a database?", options: ["GET", "POST", "DELETE", "PUT/PATCH"] },
+        { question: "What object is returned immediately by the fetch() command?", options: ["The JSON data", "A Promise", "An HTML string", "A CSV file"] },
+        { question: "Which status code means 'Internal Server Error' (The provider's kitchen is broken)?", options: ["200", "404", "500", "401"] },
+        { question: "Deserialization is the process of turning a string into a:", options: ["Function", "JavaScript Object", "Boolean", "Number"] },
+        { question: "Which symbol starts a Query Parameter in a URL?", options: ["#", "!", "?", "&"] },
+        { question: "A 201 status code means:", options: ["Success (OK)", "Success (Created)", "Forbidden", "Found"] },
+        { question: "REST stands for:", options: ["Real Estate Standard Table", "Representational State Transfer", "Routing Engine System Tool", "Remote Entry Serial Terminal"] },
+        { question: "Which HTTP status code is used for 'Unauthorized'?", options: ["200", "401", "403", "404"] },
+        { question: "If an API is 'Read-Only', it only supports which method?", options: ["POST", "PUT", "DELETE", "GET"] },
+        { question: "What happens in the 'catch' block of a fetch request?", options: ["Success is logged", "Network errors or failures are handled gracefully", "The page refreshes", "The data is deleted"] }
+    ];
+    const config = {
+        questions: diagPool,
+        questionCount: 15,
+        chapterTitle: "Chapter 15 Diagnostic",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbzgJFP8F23d1C8UtIT1jG-eosRq1YBaA2dfqCIQnPMuZeAfGd1gVPYrObO8UQgkIb3atQ/exec"
+    };
+    window.onload = () => initPreTest(config);
+  </script>
+  
+<div id="footer-placeholder"></div>
+
+  
+
+  
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

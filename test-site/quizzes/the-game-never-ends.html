@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Practice Quiz: Chapter 17 - The "Future"</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/quizLogic.js"></script>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container my-5 text-center">
+    <div class="row">
+      <div class="col-lg-9">
+        <hgroup class="mb-5 border-bottom pb-3">
+          <h1 class="display-5 fw-bold text-primary">Chapter 17: Practice Quiz</h1>
+          <p class="lead text-muted">Ready to step into the future? Randomized 10 from 35+ questions.</p>
+        </hgroup>
+
+        <div id="quiz-questions" class="text-start mb-5">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Simulating Future Tech...</p>
+            </div>
+        </div>
+
+        <div class="row text-center g-3 mt-5 no-print border-top pt-4">
+            <div class="col-6 col-md-3"><a href="/year2/the-game-never-ends.html" class="btn btn-outline-primary w-100 small rounded-pill">Back to Lesson</a></div>
+            <div class="col-6 col-md-3"><a href="/techTalkA-Zguide/the-game-never-ends.html" class="btn btn-outline-primary w-100 small rounded-pill">Tech Talk A-Z</a></div>
+            <div class="col-6 col-md-3"><a href="/toLongDidntRead/the-game-never-ends.html" class="btn btn-outline-primary w-100 small rounded-pill">TL;DR Version</a></div>
+            <div class="col-6 col-md-3"><a href="/infographics/the-game-never-ends.html" class="btn btn-outline-primary w-100 small rounded-pill">Infographics</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Chapter 17 Randomized Pool (Different but Similar to Exam)
+    const pool = [
+        { question: "What prevents the screen from going white/refreshing in an SPA?", options: ["The HTML shell stays loaded while JS swaps content", "The server is closer to the user", "The internet speed is faster", "CSS animations hide the reload"], correct: 0 },
+        { question: "Which framework is known for using 'Reusable Components'?", options: ["React.js", "Bootstrap", "Standard HTML", "SQL"], correct: 0 },
+        { question: "In the 5E model, which step happens first to spark interest?", options: ["Engage", "Evaluate", "Explain", "Elaborate"], correct: 0 },
+        { question: "What is the primary hardware dependency of IoT devices?", options: ["Physical Sensors", "High-end Graphics Cards", "Touchscreens", "External Hard Drives"], correct: 0 },
+        { question: "What does 'Decentralization' mean in Web 3.0?", options: ["Data is spread across many servers/blockchain instead of one company", "There are no servers at all", "Only one person owns the internet", "Websites only work locally"], correct: 0 },
+        { question: "Which code block handles an API failure without crashing the site?", options: ["try/catch", "if/else", "while loop", "switch case"], correct: 0 },
+        { question: "What does an HTTP 404 code tell the developer?", options: ["The endpoint address is missing or wrong", "The server is broken", "Success!", "Access is forbidden"], correct: 0 },
+        { question: "How does ML 'learn' to recognize cats in photos?", options: ["Exposure to massive amounts of data patterns", "A developer writes code for every single cat", "It uses AR filters", "It searches the local storage"], correct: 0 },
+        { question: "Which role builds both the user interface AND the server back-end?", options: ["Full Stack Developer", "UX Designer", "DevOps Engineer", "Project Manager"], correct: 0 },
+        { question: "What acts as the architectural 'blueprint' for an app's functionality?", options: ["Wireframe", "Prototype", "Component", "API Key"], correct: 0 },
+        { question: "In a smart home, a fridge ordering milk automatically is an example of:", options: ["IoT", "AR", "VR", "CMS"], correct: 0 },
+        { question: "Which technology adds digital furniture to your real living room via a camera?", options: ["Augmented Reality (AR)", "Virtual Reality (VR)", "Single Page App", "Cloud Computing"], correct: 0 },
+        { question: "What is a major downside of mass-produced IoT gadgets?", options: ["Weak default security/passwords", "They are too expensive", "They don't use the internet", "They require VR headsets"], correct: 0 },
+        { question: "What is the benefit of Serverless Computing?", options: ["Developers only pay for code that actually runs", "There are no computers involved", "It only works on smart phones", "It doesn't require a database"], correct: 0 },
+        { question: "In JSON, data is organized into:", options: ["Key-Value pairs", "Tables and Rows", "Folders and Files", "Tags and Attributes"], correct: 0 },
+        { question: "What is an API 'Endpoint'?", options: ["The specific URL where data is requested", "The end of a coding script", "A hardware cable plugin", "A type of AR headset"], correct: 0 },
+        { question: "Which status code means 'Internal Server Error'?", options: ["500", "200", "404", "401"], correct: 0 },
+        { question: "What does the 'S' in HTTPS represent?", options: ["Secure (Encryption)", "System", "Server", "Standard"], correct: 0 },
+        { question: "An interactive, clickable model of an app is a:", options: ["Prototype", "Wireframe", "Snippet", "Component"], correct: 0 },
+        { question: "Which role ensures servers scale and stay secure in the cloud?", options: ["DevOps Engineer", "UI Designer", "Full Stack Developer", "Front End Developer"], correct: 0 },
+        { question: "What describes AI producing biased results based on flawed data?", options: ["Algorithmic Bias", "Syntax Error", "Server Lag", "Pattern Recognition"], correct: 0 },
+        { question: "What is a 'Webhook'?", options: ["An automated notification triggered by an event", "A physical sensor", "A type of VR controller", "A CSS framework"], correct: 0 },
+        { question: "Which framework was created by Google for enterprise apps?", options: ["Angular", "React", "Vue", "WordPress"], correct: 0 },
+        { question: "What does a CDN do?", options: ["Speeds up content by hosting copies on global servers", "Stores passwords in a database", "Builds wireframes", "Creates AR filters"], correct: 0 },
+        { question: "Which model separates the back-end data from the front-end layout?", options: ["Headless CMS", "Traditional WordPress", "SPA", "Local Storage"], correct: 0 },
+        { question: "In the Waiter analogy, what is the 'Kitchen'?", options: ["The Server/Data", "The Browser", "The API", "The CSS"], correct: 0 },
+        { question: "What does an API Key prevent?", options: ["Anonymous/unauthorized access to a service", "Slow internet speeds", "CSS errors", "Machine learning bias"], correct: 0 },
+        { question: "Which language is the 'interaction layer' for modern SPAs?", options: ["JavaScript", "HTML", "C++", "Python"], correct: 0 },
+        { question: "If a user wants to finish a movie on their phone where they left off on TV, what tech is required?", options: ["Cloud Syncing", "AR Overlays", "VUI Design", "Haptic Feedback"], correct: 0 },
+        { question: "What is Haptic Feedback?", options: ["Physical vibrations or touch sensations", "Voice commands", "A type of database", "A framework"], correct: 0 },
+        { question: "The 'Elaborate' phase of 5E is for:", options: ["Applying knowledge to new/complex situations", "Getting student attention", "Taking an exam", "Explaining definitions"], correct: 0 },
+        { question: "What does JSON stand for?", options: ["JavaScript Object Notation", "Java System Open Network", "Joint Software Online Node", "Just Some Ordinary Numbers"], correct: 0 },
+        { question: "Which device is mandatory for a VR experience?", options: ["Headset/Goggles", "Microphone", "Keyboard", "Physical Sensor"], correct: 0 },
+        { question: "Which is a 'Non-Relational' document database?", options: ["NoSQL", "SQL", "Excel", "Local Storage"], correct: 0 },
+        { question: "What is 'Continuous Integration' (CI)?", options: ["Automatically testing and merging code frequently", "Building a website in one day", "Using only one CSS file", "Connecting to an API once"], correct: 0 }
+    ];
+    window.onload = () => initQuiz(pool);
+  </script>
+
+<div id="footer-nav"></div>
+<div id="footer-placeholder"></div>
+
+  
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

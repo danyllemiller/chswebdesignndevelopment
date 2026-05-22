@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Guided Notes: Chapter 1 | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <!-- BootStrap & FontAwesome -->
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  
+  <!-- NEW: The extracted, shared stylesheet for Guided Notes -->
+  <link href="/css/guided-notes.css" rel="stylesheet"/>
+  
+  <!-- Security Guard -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    
+    <div class="row justify-content-center">
+      <div class="col-lg-9 col-xl-8">
+        
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+            <a href="/year1/join-the-developers-guild.html" class="text-decoration-none small fw-bold">&laquo; Back to Chapter 1</a>
+            <div class="btn-group shadow-sm">
+                <button onclick="window.print()" class="btn btn-outline-primary fw-bold"><i class="fas fa-print me-1"></i> Print Worksheet</button>
+                
+                <!-- NEW: Added Bootstrap Tooltip (data-bs-toggle & title) -->
+                <button id="copyNotebookBtn" class="btn btn-primary fw-bold" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy this worksheet to your clipboard, then click the &lt;/&gt; HTML button in your Digital Notebook to paste it in!">
+                    <i class="fas fa-copy me-1"></i> Copy Code for Notebook
+                </button>
+            </div>
+        </div>
+
+        <!-- The Worksheet Content -->
+        <div class="card shadow-sm border-primary" id="worksheet-content">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h2 class="mb-0 gochi fs-1">Chapter 1: The Developer's World</h2>
+                <p class="mb-0 fw-bold">Guided Notes</p>
+            </div>
+            <div class="card-body p-4 p-md-5 notes-container">
+                
+                <!-- Student Info Header -->
+                <div class="student-info-grid border-bottom pb-4">
+                    <div>
+                        <strong>Name:</strong> <span class="fill-blank" style="min-width: 200px;" contenteditable="true"></span>
+                    </div>
+                    <div>
+                        <strong>Date:</strong> <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>
+                    </div>
+                    <div>
+                        <strong>Period:</strong> <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>
+                    </div>
+                </div>
+
+                <!-- Essential Question -->
+                <div class="bg-site-secondary p-3 rounded border border-primary mt-4 mb-4">
+                    <h5 class="fw-bold text-primary mb-2"><i class="fas fa-check-square me-2"></i> Essential Question:</h5>
+                    <p class="mb-0 fst-italic">How do the mechanical foundations of the internet, combined with strict professional ethics and communication skills, empower a developer to architect the modern web?</p>
+                </div>
+
+                <!-- PART 1 -->
+                <div class="section-heading">PART 1: Welcome to the Guild (Professionalism)</div>
+                
+                <ol class="ps-3">
+                    <li class="mb-4">
+                        <strong>Hard Skills vs. Soft Skills</strong>
+                        <ul class="mt-2">
+                            <li class="mb-2"><strong>Hard Skills:</strong> <span class="fill-blank" contenteditable="true"></span>, measurable technical abilities (e.g., writing HTML, configuring a server).</li>
+                            <li class="mb-2"><strong>Soft Skills:</strong> <span class="fill-blank" contenteditable="true"></span> skills that make you great to work with (e.g., Teamwork, Empathy, Communication).</li>
+                            <li class="mb-0 text-muted fst-italic">Note: 92% of hiring managers say Soft Skills are equally or more important than Hard Skills.</li>
+                        </ul>
+                    </li>
+                    
+                    <li class="mb-4">
+                        <strong>Leveling Up with CTSOs:</strong>
+                        <p class="mt-2 mb-0">A CTSO stands for Career and Technical <span class="fill-blank" contenteditable="true"></span> Organizations like SkillsUSA act as a "cheat code" for your career by helping you build a <span class="fill-blank" contenteditable="true"></span> (a collection of real-world projects).</p>
+                    </li>
+
+                    <li class="mb-3">
+                        <strong>Developer Career Classes:</strong>
+                        <ul class="mt-2">
+                            <li class="mb-2"><strong>Front-End:</strong> Writes the code that runs in the <span class="fill-blank" contenteditable="true"></span> (HTML/CSS/JS).</li>
+                            <li class="mb-2"><strong>Back-End:</strong> Builds server-side logic, handles databases, and manages security.</li>
+                            <li class="mb-0"><strong>Full-Stack:</strong> A developer who has mastered <span class="fill-blank" contenteditable="true"></span> client-side and server-side code.</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <!-- PART 2 -->
+                <div class="section-heading">PART 2: The Digital Highway (Internet vs. Web)</div>
+                
+                <ol start="4" class="ps-3">
+                    <li class="mb-4">
+                        <strong>Concept Mapping: The Digital Network</strong>
+                        <ul class="mt-2">
+                            <li class="mb-2"><strong>The Internet:</strong> The physical <span class="fill-blank" contenteditable="true"></span> (cables, routers, and servers connecting the globe).</li>
+                            <li class="mb-2"><strong>The Web:</strong> The software <span class="fill-blank" contenteditable="true"></span> (pages, apps, and videos) that runs on the physical tracks.</li>
+                            <li class="mb-0"><strong>An Intranet:</strong> A restricted, <span class="fill-blank" contenteditable="true"></span> network only for members of a specific organization.</li>
+                        </ul>
+                    </li>
+
+                    <li class="mb-4">
+                        <strong>The Creator:</strong>
+                        <p class="mt-2 mb-0"><span class="fill-blank" contenteditable="true"></span> invented the World Wide Web in 1989. To protect the "Open Web," he founded the W3C (World Wide Web <span class="fill-blank" contenteditable="true"></span>) to create the rules and standards we all follow today.</p>
+                    </li>
+
+                    <li class="mb-3">
+                        <strong>The Client-Server Model:</strong>
+                        <p class="mt-2 mb-0">Your web browser acts as the <span class="fill-blank" contenteditable="true"></span> which requests files. A powerful remote computer acts as the <span class="fill-blank" contenteditable="true"></span> which delivers the files back to your screen.</p>
+                    </li>
+                </ol>
+
+                <!-- PART 3 -->
+                <div class="section-heading">PART 3: The Internet's Address Book</div>
+                
+                <ol start="7" class="ps-3">
+                    <li class="mb-4">
+                        <strong>Finding the Server:</strong>
+                        <ul class="mt-2">
+                            <li class="mb-2"><strong>IP Address:</strong> A unique <span class="fill-blank" contenteditable="true"></span> coordinate for a computer (e.g., 172.217.14.228).</li>
+                            <li class="mb-2"><strong>Domain Name:</strong> The human-friendly <span class="fill-blank" contenteditable="true"></span> (e.g., google.com).</li>
+                            <li class="mb-0"><strong>DNS:</strong> Stands for Domain Name <span class="fill-blank" contenteditable="true"></span>. It acts as the internet's phone book, translating the domain name into the IP address so the computers can connect.</li>
+                        </ul>
+                    </li>
+
+                    <li class="mb-3">
+                        <strong>Anatomy of a URL &amp; Security:</strong>
+                        <ul class="mt-2">
+                            <li class="mb-2"><strong>https://</strong> The <span class="fill-blank" contenteditable="true"></span> (The "S" stands for Secure, meaning it uses an <span class="fill-blank" contenteditable="true"></span> Certificate to encrypt data).</li>
+                            <li class="mb-2"><strong>pixelpaws.com</strong> The Domain Name.</li>
+                            <li class="mb-0"><strong>/products</strong> The <span class="fill-blank" contenteditable="true"></span> (The specific folder on the server).</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <!-- PART 4 -->
+                <div class="section-heading">PART 4: Hosting &amp; The Rules</div>
+                
+                <ol start="9" class="ps-3">
+                    <li class="mb-4">
+                        <strong>Cloud Hosting Models:</strong>
+                        <ul class="mt-2">
+                            <li class="mb-2"><strong>IaaS</strong> (Infrastructure as a Service): Renting raw hardware (Take-and-Bake Pizza).</li>
+                            <li class="mb-0"><strong>SaaS</strong> (<span class="fill-blank" contenteditable="true"></span> as a Service): Using a fully finished cloud app like Google Docs (Dine-In Restaurant).</li>
+                        </ul>
+                    </li>
+
+                    <li class="mb-3">
+                        <strong>Mandatory File Naming Rules:</strong>
+                        <ul class="mt-2">
+                            <li class="mb-2">1. ALWAYS name your homepage: <span class="fill-blank" contenteditable="true"></span></li>
+                            <li class="mb-2">2. File names must be ALL-<span class="fill-blank" contenteditable="true"></span></li>
+                            <li class="mb-0">3. NEVER use <span class="fill-blank" contenteditable="true"></span> in your file names (use hyphens instead).</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <!-- CORNELL SUMMARY -->
+                <div class="mt-5 p-4 bg-light rounded border">
+                    <h4 class="fw-bold text-dark mb-3"><i class="fas fa-pen-nib me-2"></i> CORNELL SUMMARY</h4>
+                    <p class="small fw-bold text-primary mb-2">Summary Prompt:</p>
+                    <p class="small text-muted mb-3">In 3-4 complete sentences, summarize the difference between the Internet and the World Wide Web, and explain how the DNS helps us navigate it.</p>
+                    <div class="cornell-summary" contenteditable="true"></div>
+                </div>
+
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <!-- NEW: The extracted, shared javascript file containing the copy logic -->
+  <script src="/js/guided-notes.js"></script>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

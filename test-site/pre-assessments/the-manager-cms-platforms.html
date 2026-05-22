@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Pre-Assessment: Chapter 14 - The Manager</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module">
+    import { initPreTest } from "/js/preTestLogic.js";
+    window.initPreTest = initPreTest;
+  </script>
+<script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5">
+                <div class="spinner-border text-info" role="status"></div>
+                <p class="mt-2 fw-bold text-primary">Loading Diagnostic Environment...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Selected Diagnostic Pool for Chapter 14 (15 Questions)
+    const ch14Pool = [
+        { question: "What does CMS stand for?", options: ["Computer Management System", "Code Master Server", "Content Management System", "Cascading Media Styles"] },
+        { question: "Which platform represents the 'Owner' model where you download free software and host it yourself?", options: ["WordPress.com", "WordPress.org", "Wix", "Squarespace"] },
+        { question: "What is the WordPress 'Dashboard'?", options: ["The public homepage.", "The private back-end mission control for the website.", "A plugin for adding charts.", "A database table."] },
+        { question: "What controls the 'Look' or visual design of a WordPress site?", options: ["A Theme", "A Plugin", "A Database", "A Widget"] },
+        { question: "What is used to add new functionality (like a store or contact form) to a WordPress site?", options: ["A Plugin", "A Theme", "A Post", "A Page"] },
+        { question: "What is a WordPress 'Post'?", options: ["A permanent navigational link.", "A timely, reverse-chronological news article or blog update.", "A user comment.", "A CSS file."] },
+        { question: "What is a WordPress 'Page'?", options: ["Timeless, permanent information like an 'About Us' section.", "A daily news update.", "An image in the gallery.", "A specific database row."] },
+        { question: "What is the modern default WordPress editor called?", options: ["The Classic Editor", "The Block Editor (Gutenberg)", "Elementor", "HTML Editor"] },
+        { question: "What programming language powers the logic and templates of WordPress?", options: ["Python", "C++", "PHP", "Java"] },
+        { question: "What is the primary risk of installing too many WordPress plugins?", options: ["They take up too much screen space.", "They can slow down the site, cause conflicts, and create security vulnerabilities.", "They automatically change the Theme.", "They cost money every time somebody clicks them."] },
+        { question: "Which user role has absolute total control over every aspect of a WordPress site?", options: ["Subscriber", "Author", "Editor", "Administrator"] },
+        { question: "How can you tell if a piece of software is truly a CMS?", options: ["It requires you to write HTML by hand.", "It separates the content creation from the code structure and design.", "It only works on desktop computers.", "It has a blue logo."] },
+        { question: "What is the primary disadvantage of a 'No-Code' builder like Wix?", options: ["They are too hard to use.", "Vendor lock-in: you do not own the code and cannot easily move your site to a different hosting provider.", "They don't support images.", "They require you to know PHP."] },
+        { question: "What is the purpose of the 'Permalink' setting?", options: ["To delete a link permanently.", "To control the structure of the URL (e.g., making it /about-us instead of /?p=123) for better SEO and readability.", "To link to external websites.", "To set the site title."] },
+        { question: "Before updating the WordPress core or installing a major plugin, what is the single most important action a professional developer must take?", options: ["Write a new blog post.", "Change the theme.", "Perform a complete database and file Backup.", "Log out of the dashboard."] }
+    ];
+
+    const config = {
+        questions: ch14Pool,
+        questionCount: 10, // Diagnostic length
+        chapterTitle: "Chapter 14 Diagnostic",
+        // POINTING TO PRE-ASSESSMENT SCRIPT (atQ/exec)
+        webhookUrl: "https://script.google.com/macros/s/AKfycbzgJFP8F23d1C8UtIT1jG-eosRq1YBaA2dfqCIQnPMuZeAfGd1gVPYrObO8UQgkIb3atQ/exec"
+    };
+
+    window.onload = () => initPreTest(config);
+  </script>
+
+<div id="footer-placeholder"></div>
+
+  
+  <script>
+    (function() {
+        const url = "/includes/footer.html?v=" + new Date().getTime();
+        fetch(url).then(res => res.text()).then(html => {
+            const placeholder = document.getElementById("footer-placeholder");
+            if(placeholder) placeholder.innerHTML = html;
+            const scripts = placeholder.querySelectorAll("script");
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement("script");
+                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+        }).catch(err => console.error("Footer Load Error:", err));
+    })();
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

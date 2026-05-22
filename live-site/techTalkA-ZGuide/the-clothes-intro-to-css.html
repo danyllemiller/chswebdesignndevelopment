@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <title>Chapter 6: The "Clothes" (Intro to CSS)</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+   
+   <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+   <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+   <script src="/js/bootstrap.bundle.js">
+   </script>
+   <script src="/js/jquery.js">
+   </script>
+   <script src="/js/loader.js">
+   </script>
+  </link>
+ </head>
+ <body>
+  <div class="container-fluid sticky-top px-0 no-print"><div id="nav-placeholder"></div></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <section class="container">
+   <section class="container d-print-grid">
+    <article class="row">
+     <hgroup>
+      <h1 class="text-center d-print-none">
+       CHS Web Design Track
+      </h1>
+      <h2>Chapter 6: The "Clothes" (Intro to CSS)</h2>
+      <p>
+       Master the language of styling with these core terms from Chapter 8.
+      </p>
+     </hgroup>
+    </article>
+    <!-- Glossary Content -->
+    <article class="row mb-5">
+     <h2 class="section-header">
+      Essential Terminology
+     </h2>
+     <dl class="col-12">
+      <dt class="glossary-term">
+       Absolute units
+      </dt>
+      <dd class="glossary-definition">
+       Fixed units of measurement that don't change, like pixels (
+       <code>
+        px
+       </code>
+       ).
+      </dd>
+      <dt class="glossary-term">
+       Attribute Selector
+      </dt>
+      <dd class="glossary-definition">
+       A selector that targets an element based on its HTML attributes, like
+       <code>
+        [type="submit"]
+       </code>
+       .
+      </dd>
+      <dt class="glossary-term">
+       Browser styles
+      </dt>
+      <dd class="glossary-definition">
+       The default styles that a web browser applies to all websites. Also called user agent styles.
+      </dd>
+      <dt class="glossary-term">
+       CSS (Cascading Style Sheets)
+      </dt>
+      <dd class="glossary-definition">
+       The language used to style the visual presentation of a website.
+      </dd>
+      <dt class="glossary-term">
+       CSS at-rule
+      </dt>
+      <dd class="glossary-definition">
+       A special CSS instruction that starts with an
+       <code>
+        @
+       </code>
+       symbol, like
+       <code>
+        @charset
+       </code>
+       or
+       <code>
+        @import
+       </code>
+       .
+      </dd>
+      <dt class="glossary-term">
+       Embedded Styles
+      </dt>
+      <dd class="glossary-definition">
+       CSS rules placed inside a
+       <code>
+        &lt;style&gt;
+       </code>
+       tag in the HTML file's
+       <code>
+        &lt;head&gt;
+       </code>
+       . (Also: Internal Styles).
+      </dd>
+      <dt class="glossary-term">
+       External Styles
+      </dt>
+      <dd class="glossary-definition">
+       CSS rules placed in a separate
+       <code>
+        .css
+       </code>
+       file, which is the recommended method.
+      </dd>
+      <dt class="glossary-term">
+       Flexbox
+      </dt>
+      <dd class="glossary-definition">
+       A CSS layout module (
+       <code>
+        display: flex
+       </code>
+       ) for arranging items in a single dimension (a row or a column).
+      </dd>
+      <dt class="glossary-term">
+       Grid
+      </dt>
+      <dd class="glossary-definition">
+       A CSS layout module (
+       <code>
+        display: grid
+       </code>
+       ) for arranging items in two dimensions (rows and columns).
+      </dd>
+      <dt class="glossary-term">
+       HSL
+      </dt>
+      <dd class="glossary-definition">
+       A way to define color based on Hue, Saturation, and Lightness.
+      </dd>
+      <dt class="glossary-term">
+       Inline Styles
+      </dt>
+      <dd class="glossary-definition">
+       A style rule applied directly to an HTML element using the
+       <code>
+        style
+       </code>
+       attribute.
+      </dd>
+      <dt class="glossary-term">
+       Position
+      </dt>
+      <dd class="glossary-definition">
+       A CSS property (
+       <code>
+        static
+       </code>
+       ,
+       <code>
+        relative
+       </code>
+       ,
+       <code>
+        absolute
+       </code>
+       ,
+       <code>
+        fixed
+       </code>
+       ) that controls how an element is placed on the page.
+      </dd>
+      <dt class="glossary-term">
+       Progressive enhancement
+      </dt>
+      <dd class="glossary-definition">
+       A design strategy where you build a baseline experience, then add advanced features for capable browsers.
+      </dd>
+      <dt class="glossary-term">
+       pseudo-class
+      </dt>
+      <dd class="glossary-definition">
+       A keyword added to a selector to style an element in a special state (e.g.,
+       <code>
+        :hover
+       </code>
+       ).
+      </dd>
+      <dt class="glossary-term">
+       pseudo-element
+      </dt>
+      <dd class="glossary-definition">
+       A keyword added to a selector to style a specific part of an element (e.g.,
+       <code>
+        ::first-letter
+       </code>
+       ).
+      </dd>
+      <dt class="glossary-term">
+       rem or root em unit
+      </dt>
+      <dd class="glossary-definition">
+       A relative unit that is based on the font size of the root (
+       <code>
+        &lt;html&gt;
+       </code>
+       ) element.
+      </dd>
+      <dt class="glossary-term">
+       Relative units
+      </dt>
+      <dd class="glossary-definition">
+       Flexible units of measurement that are based on another value, like
+       <code>
+        rem
+       </code>
+       or
+       <code>
+        %
+       </code>
+       .
+      </dd>
+      <dt class="glossary-term">
+       RGB triplet
+      </dt>
+      <dd class="glossary-definition">
+       A method of defining color by its Red, Green, Blue light values.
+      </dd>
+      <dt class="glossary-term">
+       selector patterns
+      </dt>
+      <dd class="glossary-definition">
+       The different ways you can target HTML elements with CSS.
+      </dd>
+      <dt class="glossary-term">
+       style inheritance
+      </dt>
+      <dd class="glossary-definition">
+       The process where some CSS properties on a parent element are passed down to its children.
+      </dd>
+      <dt class="glossary-term">
+       style rule
+      </dt>
+      <dd class="glossary-definition">
+       A single CSS instruction, made of a selector and a declaration block.
+      </dd>
+      <dt class="glossary-term">
+       Typography
+      </dt>
+      <dd class="glossary-definition">
+       The art and technique of arranging text to make it readable and appealing.
+      </dd>
+      <dt class="glossary-term">
+       Validation (CSS)
+      </dt>
+      <dd class="glossary-definition">
+       The process of checking CSS code against official standards.
+      </dd>
+      <dt class="glossary-term">
+       vendor prefix
+      </dt>
+      <dd class="glossary-definition">
+       A prefix added to a CSS property (like
+       <code>
+        -webkit-
+       </code>
+       ) for browsers to test experimental features.
+      </dd>
+      <dt class="glossary-term">
+       viewport unit
+      </dt>
+      <dd class="glossary-definition">
+       A relative unit based on the size of the browser's viewport, like
+       <code>
+        vw
+       </code>
+       (viewport width).
+      </dd>
+      <dt class="glossary-term">
+       web font
+      </dt>
+      <dd class="glossary-definition">
+       A font file that is downloaded by the browser so it can be used on a website.
+      </dd>
+      <dt class="glossary-term">
+       Wildcard
+      </dt>
+      <dd class="glossary-definition">
+       The
+       <code>
+        *
+       </code>
+       selector, which selects all elements.
+      </dd>
+     </dl>
+    </article>
+    <!-- Navigation Buttons -->
+   </section>
+  </section>
+  <!--Footer-->
+  <div id="footer-placeholder">
+  </div>
+  
+ 
+
+
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

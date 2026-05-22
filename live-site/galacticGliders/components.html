@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Components | Galactic Gliders</title>
+    <!-- Tailwind CDN for layout utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Students will manually add the link to styles/styles.css here -->
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Main Navigation -->
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="history.html">History</a></li>
+                <li><a href="components.html">Components</a></li>
+                <li><a href="regulations.html">Regulations</a></li>
+            </ul>
+        </nav>
+
+        <section id="breakdown">
+            <h2>The Brain of the Drone</h2>
+            <p>Every drone relies on a Flight Controller Unit (FCU) to interpret pilot commands and keep the craft level.</p>
+
+            <!-- LAB: Add Responsive Image here -->
+            <img src="media/chipSet.png" alt="Drone Chip set" class="responsive-comp"
+            srcset="media/chipset-optimized.jpg 480w, media/chipSet.png 800w" sizes="(max-width: 600px) 480px, 800px">
+        </section>
+
+        <section id="specs">
+            <h2>Hardware Specifications</h2>
+            <p>Below is a data breakdown of standard components used in current generation Galactic Gliders.</p>
+
+            <!-- LAB: Add Data Table here -->
+            <!-- Use class="spec-table" -->
+        </section>
+
+        <footer>
+            <p>&copy; 2024 Galactic Gliders Drone Education</p>
+        </footer>
+    </div>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

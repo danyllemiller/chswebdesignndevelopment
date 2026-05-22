@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Summative Assessment: Chapter 6 - The "Clothes"</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/examLogic.js?v=4"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 fw-bold">Loading Secure Environment...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Chapter 6 Summative Question Pool (52 Questions - Correct Answers STRIPPED)
+    const ch6ExamPool = [
+        { question: "What is the primary function of Browser Developer Tools?", options: ["To write permanent changes to your server.", "To see which CSS rules are affecting an element and test changes live without altering your files.", "To automatically generate HTML layouts.", "To bypass website security."] },
+        { question: "In the CSS hierarchy of power, which type of style has the ultimate 'final say' (highest priority)?", options: ["External Styles", "Embedded Styles", "Inline Styles", "Browser Default Styles"] },
+        { question: "What is an External Stylesheet?", options: ["CSS written directly inside an HTML tag.", "A separate .css file linked in the <head> of the document.", "CSS injected by a browser extension.", "Styles embedded inside a <style> tag."] },
+        { question: "If an element has a red color set in an External stylesheet but a blue color set Inline, what color will it be?", options: ["Red, because external files are loaded first.", "Purple, because the colors mix.", "Blue, because Inline styles have the highest priority.", "Black, because of a conflict error."] },
+        { question: "What is the purpose of vendor prefixes like `-webkit-` or `-moz-`?", options: ["They compress CSS files.", "They were used by browsers to test new, experimental CSS features before they became standard.", "They encrypt the CSS code.", "They are required for all modern CSS Grid layouts."] },
+        { question: "What does the 'C' in CSS stand for, and what does it mean?", options: ["Cascading: the order of rules matters, and the last rule read by the browser wins ties.", "Coding: it is a full programming language.", "Creative: it focuses on visual design.", "Computing: it calculates element widths."] },
+        { question: "If you set `font-family: Arial;` on the `<body>` tag, why do all the paragraphs inside it also become Arial?", options: ["Because of the Cascade.", "Because of Style Inheritance.", "Because of Vendor Prefixes.", "Because of Inline Styling."] },
+        { question: "What is the format of a Hexadecimal color code?", options: ["rgb(255,0,0)", "hsl(0, 100%, 50%)", "A hash (#) followed by six digits (0-9 and A-F).", "A plain English word like 'tomato'."] },
+        { question: "What do the three numbers in an RGB color code represent?", options: ["Hue, Saturation, Lightness", "Red, Green, Blue intensity from 0 to 255.", "Cyan, Magenta, Yellow", "Top, Right, Bottom margins"] },
+        { question: "Why might a web designer choose HSL over Hex codes?", options: ["HSL is faster to process.", "HSL is easier for humans to understand and tweak (Hue, Saturation, Lightness).", "Hex codes don't support the color red.", "HSL is the only format that supports transparency."] },
+        { question: "How do you make a color 50% transparent using RGBA or HSLA?", options: ["Set the Alpha channel value to 0.5.", "Set the Alpha channel value to 50.", "Add the word 'transparent' to the end.", "Divide the RGB numbers by 2."] },
+        { question: "In CSS Specificity, which selector acts as the 'heavyweight champ' (highest specificity)?", options: ["Element Selector (p)", "Class Selector (.nav-link)", "ID Selector (#main-header)", "Wildcard Selector (*)"] },
+        { question: "What does the descendant selector `article p` target?", options: ["Only <p> tags that are direct children of an <article>.", "Any <p> tag that is anywhere inside an <article>.", "All <article> and <p> tags on the page.", "Only the first <p> inside an <article>."] },
+        { question: "What does the child selector `article > p` target?", options: ["Any <p> tag anywhere inside an <article>.", "Only <p> tags that are a direct child (one level deep) of an <article>.", "The <p> tag immediately following an <article>.", "It targets the <article> itself."] },
+        { question: "What does the wildcard selector `*` do?", options: ["Selects all bold text.", "Selects every single element on the page.", "Selects elements with no class.", "Deletes all CSS rules."] },
+        { question: "What is a 'font stack'?", options: ["A folder containing font files.", "A list of fonts provided in CSS, starting with the first choice and ending with generic backups.", "A tool used to compress fonts.", "A CSS rule for making text bolder."] },
+        { question: "What is the defining characteristic of a 'serif' font?", options: ["Every letter is the exact same width.", "It looks like handwriting.", "It has little 'feet' or strokes at the ends of the letters.", "It has completely clean, straight edges without 'feet'."] },
+        { question: "Which generic font family has letters that are all exactly the same width?", options: ["sans-serif", "cursive", "monospace", "fantasy"] },
+        { question: "What is a 'web font'?", options: ["A font that only works offline.", "A font linked from a service (like Google Fonts) that the browser downloads automatically.", "A font that comes pre-installed on every operating system.", "A font used specifically for coding."] },
+        { question: "Why is it a best practice to use `rem` units for font sizes instead of fixed `px` (pixels)?", options: ["rem units load faster.", "rem units are relative to the root font size, allowing visually impaired users to scale up the text using browser settings.", "rem units make the text bolder.", "Pixels are no longer supported by modern browsers."] },
+        { question: "What do the Viewport Units (`vw` and `vh`) measure?", options: ["Percentages of the parent container's width/height.", "Percentages of the visible browser window's width/height.", "Absolute physical inches on the monitor.", "The size of the HTML root element."] },
+        { question: "Which CSS property is used to push the first line of a paragraph inward?", options: ["margin-left", "padding-left", "text-indent", "letter-spacing"] },
+        { "question": "What does the `line-height` property adjust?", "options": ["The length of a horizontal rule (<hr>).", "The vertical space between lines of text.", "The boldness of the font.", "The space between individual characters."] },
+        { "question": "If you want text to align to the right edge of its container, which property do you use?", "options": ["float: right;", "align: right;", "text-align: right;", "margin-right: 0;"] },
+        { "question": "What is a CSS 'pseudo-class'?", "options": ["A class you make up but don't put in the HTML.", "A keyword added to a selector that specifies a special state (like :hover).", "A class used only for JavaScript.", "A broken CSS rule."] },
+        { "question": "Which pseudo-class targets a link that the user has already clicked on?", "options": [":hover", ":active", ":visited", ":link"] },
+        { "question": "Which pseudo-class targets an element the precise moment it is being clicked (mouse down)?", "options": [":active", ":focus", ":hover", ":click"] },
+        { "question": "Which pseudo-class is critical for keyboard accessibility, targeting an element when a user tabs to it?", "options": [":target", ":hover", ":focus", ":active"] },
+        { "question": "How would you select the very last paragraph in a group of siblings?", "options": ["p:end", "p:last-child", "p:bottom", "p:final"] },
+        { "question": "What does the structural pseudo-class `:nth-child(even)` do when applied to table rows (<tr>)?", "options": ["Hides all rows.", "Selects only the second row.", "Selects alternating rows (2, 4, 6) for 'zebra striping'.", "Selects rows containing numbers."] },
+        { "question": "What is a 'pseudo-element' (like `::before`) used for?", "options": ["To select elements before they load.", "To style a specific part of an element or inject 'phantom' content without changing the HTML.", "To create animations.", "To delete elements."] },
+        { "question": "Which property is REQUIRED to bring a `::before` or `::after` pseudo-element to life?", "options": ["display", "position", "content", "visibility"] },
+        { "question": "What is 'Progressive Enhancement'?", "options": ["Building a site exclusively for the newest iPhones.", "Starting with a simple, solid baseline for all browsers, then layering on advanced features for modern browsers.", "Using JavaScript to load CSS.", "Enhancing images in Photoshop."] },
+        { "question": "What does a CSS Validator do?", "options": ["It checks your code for syntax errors and typos like a strict teacher.", "It formats your code to look pretty.", "It optimizes your images.", "It checks your website for viruses."] },
+        { "question": "In the CSS rule `h1 { color: blue; }`, what is the 'selector'?", "options": ["color", "blue", "h1", "{}"] },
+        { "question": "In the CSS rule `h1 { color: blue; }`, what is the 'property'?", "options": ["h1", "blue", "color", "{}"] },
+        { "question": "What character is used to separate the property and the value in a CSS declaration?", "options": ["Equals sign (=)", "Semicolon (;)", "Colon (:)", "Comma (,)"] },
+        { "question": "What character MUST be placed at the very end of a CSS declaration to close it?", "options": ["Semicolon (;)", "Period (.)", "Closing Bracket (])", "Slash (/)"] },
+        { "question": "If you want to style elements with the class 'highlight', what is the correct selector syntax?", "options": ["#highlight", "highlight", ".highlight", "*highlight"] },
+        { "question": "If you want to style an element with the ID 'main-nav', what is the correct selector syntax?", "options": [".main-nav", "#main-nav", "main-nav", "@main-nav"] },
+        { "question": "How do you group multiple selectors so they share the exact same style rule?", "options": ["Separate them with a comma (e.g., `h1, h2, h3`).", "Separate them with a space (e.g., `h1 h2 h3`).", "Separate them with a plus sign (e.g., `h1+h2+h3`).", "You cannot group selectors."] },
+        { "question": "What does the `text-transform: uppercase;` property do?", "options": ["Increases the font size.", "Changes all letters to capital letters visually without altering the HTML.", "Makes the font bold.", "Moves the text to the top of the page."] },
+        { "question": "Which property changes the color of the text itself?", "options": ["text-color", "font-color", "color", "background-color"] },
+        { "question": "What does `font-style: italic;` do?", "options": ["Slants the text.", "Makes the text thicker.", "Adds an underline.", "Changes the font family."] },
+        { "question": "If you want to remove the default underline from a hyperlink, which property do you use?", "options": ["text-style: normal;", "underline: none;", "text-decoration: none;", "link-decoration: removed;"] },
+        { "question": "What does the `opacity` property control?", "options": ["The thickness of a border.", "The size of the font.", "How transparent an entire element is (0.0 is invisible, 1.0 is solid).", "The speed of an animation."] },
+        { "question": "What is the purpose of the `@charset 'UTF-8';` rule at the top of a CSS file?", "options": ["It tells the server to load the CSS faster.", "It specifies the character encoding, ensuring symbols and international text render correctly.", "It links the CSS to the HTML.", "It defines the primary color palette."] },
+        { "question": "How do you write a comment inside a CSS file?", "options": ["<!-- Comment -->", "// Comment", "/* Comment */", "# Comment"] },
+        { "question": "In the persona profile, what does 'Science Student Sam' rely on to quickly scan articles?", "options": ["Flashy animations.", "Clean typography, clear link states, and organized styling.", "Popup windows.", "Background music."] },
+        { "question": "If you write `p { color: red; }` at line 10, and `p { color: blue; }` at line 50, what color will paragraphs be? Why?", "options": ["Red, because it was loaded first.", "Purple, because they combine.", "Blue, because of the 'Cascading' rule where later styles override earlier ones.", "Black, because it causes an error."] },
+        { "question": "Which of these is NOT a valid way to write the color white in CSS?", "options": ["white", "#FFFFFF", "rgb(255, 255, 255)", "hsl(0, 0%, 0%)"] },
+        { "question": "If you want to target an input field only when it has the attribute `type='text'`, what selector do you use?", "options": ["input.text", "input#text", "input[type='text']", "input:text"] }
+    ];
+
+    const examConfig = {
+        questions: ch6ExamPool,
+        questionCount: 20, 
+        chapterTitle: "Chapter 6: The 'Clothes' (Intro to CSS)",
+        // PASTE YOUR ACTUAL GOOGLE SCRIPT URL BELOW
+        webhookUrl: "https://script.google.com/macros/s/AKfycbyoX6MTNxThGNVQtIn4e_OgJoYUGUdPPKY9lbXf63h3H9fwGOxUeToxptyORS7LgWVNeg/exec"
+    };
+
+    window.onload = () => initExam(examConfig);
+  </script>
+  
+<div id="footer-placeholder"></div>
+
+  <script>
+    (function() {
+        var url = "/includes/footer.html?v=" + new Date().getTime();
+        fetch(url).then(res => res.text()).then(html => {
+            var ph = document.getElementById("footer-placeholder");
+            if (ph) ph.innerHTML = html;
+        });
+    })();
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

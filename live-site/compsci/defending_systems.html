@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 6: Defending Systems</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  
+  <!-- External Curriculum Styles -->
+  <link href="/css/compsci.css" rel="stylesheet" />
+</head>
+<body class="compsci-body">
+
+  <div class="chapter-header">
+    <span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 2: The Connected World</span>
+    <h1 class="display-4 fw-bold">Chapter 6: Defending Systems</h1>
+    <p class="lead text-muted">Building digital fortresses, managing human friction, and the ethics of security.</p>
+  </div>
+
+  <!-- STICKY TABLE OF CONTENTS -->
+  <div class="sticky-toc">
+      <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#section-6-1">6.1 Personal & Network Defense</a>
+      <a href="#section-6-2">6.2 The Tradeoff: Security vs. Usability</a>
+      <a href="#section-6-3">6.3 Systematic Defense & Ethics</a>
+  </div>
+
+  <!-- Section 6.1 -->
+  <h3 id="section-6-1" class="fw-bold mt-4 border-bottom pb-2">6.1 Personal & Network Defense Layers</h3>
+  <p class="fs-5">Knowing the threats is only half the battle. To protect sensitive data from the malware and social engineering tactics we explored in Chapter 5, we must build overlapping layers of defense. Security is not a single wall; it is a complex fortress with guards, vaults, and secret codes.</p>
+  
+  <h4 class="fw-bold mt-4 text-primary">6.1.1 Authentication & Authorization</h4>
+  <p>The first line of defense is proving who you are. A simple username and password is no longer enough in the modern world.</p>
+  
+  <div class="row g-4 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-success">
+              <div class="card-body">
+                  <h5 class="fw-bold text-success"><i class="fas fa-fingerprint me-2"></i> Authentication (MFA)</h5>
+                  <p>Authentication verifies your identity. <strong>Multi-Factor Authentication (MFA)</strong> requires you to provide two or more pieces of evidence from different categories:</p>
+                  <ul class="small mb-0">
+                      <li><strong>Something you know:</strong> A password or PIN.</li>
+                      <li><strong>Something you have:</strong> Your smartphone (receiving a text code) or a hardware security key.</li>
+                      <li><strong>Something you are:</strong> Biometrics like a fingerprint or FaceID.</li>
+                  </ul>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body">
+                  <h5 class="fw-bold text-warning text-dark"><i class="fas fa-user-shield me-2"></i> Authorization (Least Privilege)</h5>
+                  <p>Once you are authenticated, Authorization determines what you are allowed to do. The <strong>Principle of Least Privilege</strong> states that a user should only be given the absolute minimum access required to do their job.</p>
+                  <p class="small mb-0 text-muted"><em>Example: A cashier needs access to the cash register software, but they do not need authorization to view the company's master payroll spreadsheet.</em></p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">6.1.2 The Digital Perimeter: Firewalls & VPNs</h4>
+  <p>Just as a castle has walls and a moat, a network has a digital perimeter. A <strong>Firewall</strong> acts as a security guard inspecting every piece of data trying to enter or leave your network. If the data looks suspicious or comes from a known malicious IP address, the firewall blocks it.</p>
+  <p>If you are working remotely at a coffee shop, you are outside the safety of your corporate firewall. To stay safe on public Wi-Fi, you must use a <strong>Virtual Private Network (VPN)</strong>. A VPN creates a secure, encrypted "tunnel" directly from your laptop to a safe server, hiding your traffic from hackers lurking on the same coffee shop network.</p>
+
+  <h4 class="fw-bold mt-5 text-info">6.1.3 Encryption Basics</h4>
+  <p>Even if an attacker manages to steal your data, we can make it useless to them using <strong>Encryption</strong>. Encryption uses complex mathematical algorithms to scramble plain text into unreadable gibberish (ciphertext). It can only be unscrambled by someone holding the correct digital "Key."</p>
+  <p>When you see <code>HTTPS://</code> and a small padlock in your browser's address bar, it means your connection to that website is encrypted. Even if a hacker intercepts your credit card number while it travels across the internet, all they will see is random scrambled letters.</p>
+
+  <!-- Step-by-Step Guide -->
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-list-ol me-2"></i> Step-by-Step: How to Secure Your Home Router</h5>
+      <p class="small mb-3 text-light">Home routers are notoriously insecure out of the box. Follow these steps to harden your personal network against attacks:</p>
+      
+      <ol class="mb-0 text-light small">
+          <li class="mb-2"><strong>Find Your IP:</strong> Look at the sticker on the back of your router (or use <code>ipconfig</code> in your terminal) to find the "Default Gateway" IP address (usually <code>192.168.1.1</code> or <code>10.0.0.1</code>).</li>
+          <li class="mb-2"><strong>Login to the Admin Panel:</strong> Type that IP address into your web browser. Log in using the default credentials printed on the sticker.</li>
+          <li class="mb-2"><strong>Change the Admin Password:</strong> The default password is often just "admin" or "password." Change this immediately to a strong, unique phrase so hackers can't easily hijack the device.</li>
+          <li class="mb-2"><strong>Enable WPA3 Encryption:</strong> Navigate to the Wireless Settings and ensure your Wi-Fi security is set to <strong>WPA3</strong> (or WPA2-AES if your router is older). Never use WEP or WPA, as they are easily cracked.</li>
+          <li class="mb-1"><strong>Set Up a Guest Network:</strong> Create a separate Wi-Fi network for visitors. This ensures that if a friend's infected laptop connects to your house, it cannot spread malware to your personal devices.</li>
+      </ol>
+  </div>
+
+  <!-- Activity 6.1.4 -->
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-wifi fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity 6.1.4: Securing the Home Router</h4>
+              <p class="mb-0">Using the theoretical "Router Admin Panel" simulation provided by your instructor, apply the steps above to harden the network. Document your changes, the new passwords, and the encryption standards you chose.</p>
+              <p class="mb-0 fw-bold mt-1 text-dark">👉 Log your configuration choices in your Digital Notebook on the right!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 6.2 -->
+  <h3 id="section-6-2" class="fw-bold border-bottom pb-2">6.2 The Security vs. Usability Tradeoff <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standards 9-12.NI.C.3, 9-12.NI.C.4</span></h3>
+  <p class="fs-5">If the goal is 100% perfect security, the best solution is to unplug the computer, encase it in concrete, and drop it in the ocean. However, that computer is now useless. In the real world, cybersecurity is a constant balancing act between keeping data safe and keeping systems usable.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">6.2.1 The Friction of Security</h4>
+  <p>Why do users hate security? Because it creates <strong>Friction</strong>. Every time you have to type a 16-character password or wait for an MFA text message code, you are being slowed down. This constant slowing down leads to "Security Fatigue."</p>
+  <p>When security is too strict and frustrating, users will invent dangerous workarounds. If a company forces employees to change their complex password every 30 days, the employees will stop trying to memorize them and simply write the passwords on sticky notes attached to their monitors—completely destroying the security system.</p>
+
+  <h4 class="fw-bold mt-5 text-info">6.2.2 Analyzing the Tradeoffs</h4>
+  <p>A good cybersecurity engineer does not apply maximum security to everything. They evaluate the risk and apply appropriate defenses.</p>
+
+  <!-- Interactive Tabs for Tradeoffs -->
+  <ul class="nav nav-tabs mt-4" id="tradeoffTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+          <button class="nav-link active fw-bold text-danger" id="high-sec-tab" data-bs-toggle="tab" data-bs-target="#high-sec-pane" type="button" role="tab">
+              <i class="fas fa-university me-2"></i> High Security / Low Usability
+          </button>
+      </li>
+      <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-success" id="low-sec-tab" data-bs-toggle="tab" data-bs-target="#low-sec-pane" type="button" role="tab">
+              <i class="fas fa-cloud-sun me-2"></i> Low Security / High Usability
+          </button>
+      </li>
+  </ul>
+  
+  <div class="tab-content border border-top-0 bg-white p-4 shadow-sm mb-4" id="tradeoffTabsContent">
+      <div class="tab-pane fade show active" id="high-sec-pane">
+          <h5 class="fw-bold text-danger">Example: A Mobile Banking App</h5>
+          <p><strong>The Threat:</strong> Hackers stealing your life savings.</p>
+          <p><strong>The Solution:</strong> The app logs you out after 3 minutes of inactivity. It refuses to let you paste passwords. It requires FaceID and an SMS code every time you log in. It is highly frustrating to use (Low Usability), but because the risk is so immense, the high friction is entirely justified.</p>
+      </div>
+      <div class="tab-pane fade" id="low-sec-pane">
+          <h5 class="fw-bold text-success">Example: A Public Weather App</h5>
+          <p><strong>The Threat:</strong> A hacker finds out you looked at the weather in Chicago.</p>
+          <p><strong>The Solution:</strong> The app does not require an account, has no passwords, and stays open forever. The risk is virtually zero, so the security is removed entirely to make the app incredibly fast and easy for the public to use (High Usability).</p>
+      </div>
+  </div>
+
+  <div class="image-placeholder shadow-sm">
+    <i class="fas fa-balance-scale fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">The Scales of Security</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> An elegant visual of a glowing golden scale. On the left side, a heavy iron padlock labeled 'Security'. On the right side, a sleek, frictionless smartphone UI labeled 'Usability'. The scales are perfectly balanced.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">6.2.3 Cybersecurity Recommendations (Cost-Benefit Analysis)</h4>
+  <p>To meet Standard 9-12.NI.C.4, you must be able to recommend security measures based on cost. Is the cost of the defense higher than the value of the data being protected?</p>
+  <p>If a local bakery's recipe database is worth $5,000, it makes no sense to spend $50,000 on an enterprise-grade biometric security vault. The most effective recommendation would be a cheap, robust cloud backup system and standard MFA for employees.</p>
+
+  <!-- Activity 6.2.4 -->
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-search-dollar fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity 6.2.4: The UX/Security Audit</h4>
+              <p class="mb-0">You have been given two theoretical apps: One with extreme security that users are abandoning because it's too hard to use, and one with zero security that is currently leaking user data. Write a short comparative report proposing a "middle ground" solution for each.</p>
+              <p class="mb-0 fw-bold mt-1 text-dark">👉 Complete the UX Audit in your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 6.3 -->
+  <h3 id="section-6-3" class="fw-bold border-bottom pb-2">6.3 Systematic Defense & Ethics <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standards 9-12.NI.C.2, 9-12.CS.T.1</span></h3>
+  <p class="fs-5">True cybersecurity is not just buying software; it is building a culture. How do we ensure humans behave safely, what do we do when they fail, and where do we draw the ethical line in monitoring them?</p>
+
+  <h4 class="fw-bold mt-4 text-primary">6.3.1 Building a Security Policy</h4>
+  <p>Every organization must create an <strong>Acceptable Use Policy (AUP)</strong> or "Rules of Behavior." This is a legal document employees sign that clearly states what they can and cannot do on company computers (e.g., no downloading unapproved software, no sharing passwords, no plugging in random USB drives). Technical guards fail without human accountability.</p>
+
+  <h4 class="fw-bold mt-4 text-info">6.3.2 Feasibility and Ethical Impacts</h4>
+  <p>When recommending security, we must respect feasibility and user privacy (Standard 9-12.NI.C.2). Implementing a security camera that points directly at every employee's keyboard to ensure they aren't stealing data might be technically secure, but it is ethically unacceptable and severely violates privacy. A better, ethical recommendation is using software that flags unusual mass-downloads without monitoring the employee's personal actions.</p>
+
+  <div class="concept-box shadow-sm border-success bg-light">
+      <h5 class="fw-bold text-success"><i class="fas fa-ambulance me-2"></i> 6.3.3 Incident Response (When the walls fall)</h5>
+      <p class="mb-2">Assume you <em>will</em> be hacked. When a breach occurs, IT teams launch an <strong>Incident Response</strong> plan, applying systematic troubleshooting (Standard 9-12.CS.T.1) to save the network:</p>
+      <ul class="mb-0">
+          <li><strong>1. Containment:</strong> Immediately disconnect infected computers from the network to stop the malware (like a worm) from spreading to other servers.</li>
+          <li><strong>2. Eradication:</strong> Identify the specific malware (Divide and Conquer) and securely wipe the infected drives.</li>
+          <li><strong>3. Recovery:</strong> Restore the lost data from the <strong>Offsite Backups</strong> we discussed in Chapter 2, and patch the vulnerability so the hackers cannot get back in.</li>
+      </ul>
+  </div>
+
+  <!-- Activity 6.3.4 -->
+  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-gavel fa-3x me-4 text-primary"></i>
+          <div>
+              <h3 class="fw-bold mb-1">Activity 6.3.4: The Ethics of Surveillance</h3>
+              <p class="mb-0 fs-5">Does a school or employer have the ethical right to monitor every keystroke, email, and website visited on their network in the name of "security"? Where is the line between protecting the network and violating human privacy?</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Open the "Discussion Reflection" template in your Digital Notebook to outline your argument for the class debate.</p>
+          </div>
+      </div>
+  </div>
+
+  <!-- Required scripts for interactive tabs/accordions inside the iframe -->
+  <script src="/js/bootstrap.bundle.js"></script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

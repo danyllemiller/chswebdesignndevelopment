@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Summative Assessment: Chapter 13 - The "Network"</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/examLogic.js?v=4"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 fw-bold">Loading Secure Environment...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Chapter 13 Summative Question Pool (52 Questions - Correct Answers STRIPPED)
+    const ch13ExamPool = [
+        { question: "What does the acronym API stand for?", options: ["Automated Processing Interface", "Application Programming Interface", "Active Protocol Index", "Asynchronous Payload Interceptor"] },
+        { question: "In the 'Waiter Analogy', what does the Kitchen represent?", options: ["The Client's web browser.", "The API Documentation.", "The Server and its Database.", "The user's laptop."] },
+        { question: "What is an API 'Endpoint'?", options: ["The physical location of a server.", "A specific URL where a service can be accessed by a client application.", "The end of a JSON file.", "A password required to login."] },
+        { question: "Which HTTP method is the industry standard for 'Retrieving' or 'Reading' data?", options: ["POST", "GET", "PUT", "DELETE"] },
+        { question: "Which HTTP method is used to send data to the server to 'Create' a new record?", options: ["POST", "GET", "FETCH", "CREATE"] },
+        { question: "What does JSON stand for?", options: ["Java Standard Output Network", "JavaScript Object Notation", "Joint Server Operation Node", "Just Some Ordinary Numbers"] },
+        { question: "How does JSON structure its data?", options: ["Using HTML tags.", "In a spreadsheet format.", "Using 'key: value' pairs that look exactly like JavaScript objects.", "Using binary 1s and 0s."] },
+        { question: "Why is the `fetch()` command in JavaScript considered 'Asynchronous'?", options: ["Because it runs faster than other commands.", "Because it stops the entire browser from working until the data arrives.", "Because it runs in the background, allowing the rest of the website to load while waiting for the server's response.", "Because it deletes old data."] },
+        { question: "What is a JavaScript 'Promise'?", options: ["A variable that never changes.", "An object representing the eventual completion (or failure) of an asynchronous network operation.", "A guarantee that an API is free to use.", "A string of text in the console."] },
+        { question: "What happens if you run `const data = fetch('url')` without using the `await` keyword?", options: ["The browser crashes.", "The variable 'data' instantly contains the JSON information.", "The variable 'data' is filled with a 'Pending Promise' rather than the actual data.", "The request is cancelled."] },
+        { question: "What does the `async` keyword do when placed before a function declaration?", options: ["It encrypts the function.", "It tells JavaScript that the function will contain asynchronous operations and is allowed to use 'await'.", "It automatically connects to a database.", "It slows the function down."] },
+        { question: "Why do we need to call `await response.json()` after a successful fetch?", options: ["To delete the response.", "Because the data comes across the internet as a raw stream of text, and this command translates it back into a usable JavaScript Object.", "To upload data to the server.", "To bypass API keys."] },
+        { question: "What does an HTTP Status Code in the 200s (like 200 OK) mean?", options: ["The server crashed.", "The user typed the wrong URL.", "The request was successful and the data is attached.", "The API key was rejected."] },
+        { question: "What does an HTTP Status Code of 404 signify?", options: ["Internal Server Error.", "Unauthorized.", "Not Found (The client requested an endpoint that doesn't exist).", "Success."] },
+        { question: "What does an HTTP Status Code of 500 signify?", options: ["The user needs to log in.", "The server encountered an unexpected condition that prevented it from fulfilling the request (Server Error).", "The page loaded perfectly.", "The image is too large."] },
+        { question: "What is the primary purpose of a `try/catch` block in network requests?", options: ["To force an API to load faster.", "To try different passwords automatically.", "To provide a 'safety net' that catches errors (like no Wi-Fi) without crashing the entire application.", "To parse JSON data."] },
+        { question: "What is an API Key?", options: ["A physical USB drive.", "A unique string of characters used to authenticate the caller to the API to prevent spam and abuse.", "The password to your laptop.", "A type of database."] },
+        { question: "What is 'Rate Limiting'?", options: ["Making a website load slowly on purpose.", "A restriction set by an API provider on how many times you can request data in a certain time period (e.g., 100 requests per hour).", "The maximum speed of a hard drive.", "Charging users per click."] },
+        { question: "In the context of the SpaceX API, if you fetch the '/rockets/falcon9' endpoint, what kind of data are you likely to get?", options: ["An array of every launch in history.", "A single JSON object detailing the specs of the Falcon 9 rocket.", "A live video feed of a launch.", "A CSS stylesheet."] },
+        { question: "If your `fetch()` request fails entirely (e.g., the user's internet drops), where does the JavaScript execution instantly jump to?", options: ["The `finally` block.", "The top of the file.", "The `catch` block.", "It refreshes the page."] },
+        { question: "What does the 'CRUD' acronym stand for in database and API operations?", options: ["Copy, Read, Upload, Download", "Create, Read, Update, Delete", "Compile, Run, Undo, Deploy", "Code, Render, Understand, Debug"] },
+        { question: "Which HTTP method corresponds to the 'Update' action in CRUD?", options: ["GET", "POST", "PUT/PATCH", "DELETE"] },
+        { question: "When making a POST request, where do you typically put the data you are sending (like a new user's email)?", options: ["In the URL.", "In the `body` (or payload) of the request.", "In the `try` block.", "In a separate CSS file."] },
+        { question: "What is a 'CORS' error in the browser console?", options: ["Cross-Origin Resource Sharing error; it happens when a server blocks your specific website domain from accessing its API.", "Computer Offline Routing System; your Wi-Fi is disconnected.", "Code Override Runtime Stop; your syntax is wrong.", "A CSS layout error."] },
+        { question: "What is API Documentation?", options: ["The bill you receive for using an API.", "The 'Menu' provided by the developers that explains exactly what endpoints exist and how to structure your requests.", "The legal terms of service.", "The server's internal hard drive log."] },
+        { question: "Why is it important to use Template Literals (backticks) when dealing with API data?", options: ["They are the only way to write CSS.", "They allow you to easily inject the variables (e.g., `${data.name}`) you received from the JSON into your HTML string.", "They encrypt the data.", "They convert text to numbers."] },
+        { question: "What does `console.error()` do that `console.log()` does not?", options: ["It fixes the bug automatically.", "It formats the message in red text in the developer tools, specifically designed for highlighting failures in a `catch` block.", "It sends an email to the developer.", "It deletes the variable."] },
+        { question: "If you want to display an image URL that came from a JSON object (e.g., `rocket.flickr_images[0]`), which HTML attribute must you set?", options: ["The `href` of an `<a>` tag.", "The `src` of an `<img>` tag.", "The `alt` of an `<img>` tag.", "The `class` of a `<div>` tag."] },
+        { question: "What is a Webhook?", options: ["A virus that steals data.", "A way for an app to provide other applications with real-time information by pushing data to them instantly when an event occurs.", "A physical cable connecting servers.", "An outdated form of FTP."] },
+        { question: "How does a REST API generally differ from a GraphQL API?", options: ["REST is for images; GraphQL is for text.", "REST has multiple fixed endpoints for different data; GraphQL has one endpoint where you request exactly the shape of data you want.", "GraphQL does not use JSON.", "REST is only for Python."] },
+        { question: "What is 'Pagination' in the context of an API request?", options: ["Styling the data to look like a book.", "When an API returns millions of results, it splits them into 'pages' (e.g., 20 results at a time) to save bandwidth.", "Downloading the entire database at once.", "Printing the code on paper."] },
+        { question: "If an API requires an API key, where is the most common place to include it in your `fetch()` request?", options: ["In a comment.", "Appended to the end of the URL (e.g., `?api_key=123`) or in the Headers object.", "Inside the HTML body.", "You email it to the server."] },
+        { question: "What is an HTTP 'Header'?", options: ["The largest text on a webpage.", "Invisible metadata sent with a request/response (like specifying content-type or authorization tokens).", "The navigation bar.", "The title of the JSON file."] },
+        { question: "Why should you never expose a private API key (like a Stripe payment key) in your client-side JavaScript?", options: ["It will slow down the browser.", "Anyone can view your JS code in DevTools, steal the key, and rack up massive charges on your account.", "The browser will delete it.", "It changes the color of your site."] },
+        { question: "How do developers typically hide private API keys?", options: ["By making the text transparent.", "By routing requests through their own secure Backend Server or using Serverless Functions, keeping the key off the client's browser.", "By putting it in a CSS file.", "By scrambling the letters."] },
+        { question: "What is a 'Mock API'?", options: ["A fake API server set up for testing purposes during development before the real backend is finished.", "An API that steals data.", "An API that only returns errors.", "A database that deletes itself daily."] },
+        { question: "What does the term 'Payload' refer to?", options: ["The cost of the API.", "The actual data you are sending to the server in a POST/PUT request.", "The speed of the network.", "The HTML structure."] },
+        { question: "If an API returns an array of 50 users, which JavaScript loop is most efficient for rendering them all to the DOM?", options: ["A while loop.", "A for...of loop or the .forEach() method.", "An if/else statement.", "A switch statement."] },
+        { question: "What is the purpose of a 'Loading Spinner' UI element?", options: ["To make the site look busy.", "To provide visual feedback to the user that an asynchronous fetch request is currently pending.", "To restart the browser.", "To generate random numbers."] },
+        { question: "What does it mean if an API is 'Read-Only'?", options: ["It can only be accessed by robots.", "It only supports the GET method; you cannot POST, PUT, or DELETE data.", "It only returns text, no numbers.", "It requires a paid subscription."] },
+        { question: "Which standard data format preceded JSON but is much heavier because it relies on complex tags (like `<user><name>Anna</name></user>`)?", options: ["CSV", "TXT", "XML", "YAML"] },
+        { question: "What is 'Serialization' (or `JSON.stringify()`)?", options: ["Converting a usable JavaScript Object into a raw string of JSON text so it can be transmitted over a network.", "Deleting data.", "Translating JSON into HTML.", "Encrypting a password."] },
+        { question: "What is 'Deserialization' (or `JSON.parse()`)?", options: ["Translating HTML into CSS.", "Taking a raw string of JSON text received from a network and converting it back into a usable JavaScript Object.", "Removing all numbers from a string.", "Canceling a network request."] },
+        { question: "If you call `response.ok` on a fetch response and it returns `false`, what should your code do next?", options: ["Assume it worked and try to parse the JSON.", "Throw an error so the `catch` block can handle the failure gracefully.", "Delete the database.", "Refresh the page."] },
+        { question: "What is a 'Timeout' in network requests?", options: ["A break for the developer.", "A mechanism that automatically cancels a fetch request if the server takes too long to respond, preventing the app from hanging forever.", "When the user closes the laptop.", "A CSS animation delay."] },
+        { question: "What does it mean when an API is described as 'Stateless' (like a REST API)?", options: ["It only works in one state (e.g., Nevada).", "The server does not remember anything about previous requests; every single request must contain all the information needed to understand it.", "It cannot handle numbers.", "It is immune to hacking."] },
+        { question: "In a URL, what is a 'Query Parameter'?", options: ["The main domain name.", "The part of the URL after the `?` used to filter data (e.g., `?limit=10&sort=desc`).", "The `https://` prefix.", "A hidden CSS class."] },
+        { question: "Which HTTP status code signifies 'Forbidden' (You are logged in, but you don't have permission to see this)?", options: ["200", "403", "404", "500"] },
+        { question: "Which HTTP status code signifies 'Unauthorized' (You need to log in first)?", options: ["201", "401", "404", "500"] },
+        { question: "What does it mean to 'Consume' an API?", options: ["To delete it.", "To write code that makes requests to an API and uses its data in your own application.", "To purchase the company that made it.", "To print out its documentation."] },
+        { question: "Why is 'Astro Anna' using the SpaceX API instead of hardcoding the rocket data?", options: ["To make her site slower.", "So her fan site always displays the most accurate, up-to-date, real-time data automatically.", "Because HTML doesn't support text.", "To hack SpaceX's servers."] },
+        { question: "If you forget the `await` keyword before `response.json()`, what will your data variable contain?", options: ["The parsed JSON.", "An error string.", "A pending Promise instead of the actual data.", "An empty array."] }
+    ];
+
+    const examConfig = {
+        questions: ch13ExamPool,
+        questionCount: 20, 
+        chapterTitle: "Chapter 13: The Network (APIs)",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbyoX6MTNxThGNVQtIn4e_OgJoYUGUdPPKY9lbXf63h3H9fwGOxUeToxptyORS7LgWVNeg/exec"
+    };
+
+    window.onload = () => initExam(examConfig);
+  </script>
+  
+<div id="footer-placeholder"></div>
+
+  <script>
+    (function() {
+        var url = "/includes/footer.html?v=" + new Date().getTime();
+        fetch(url).then(res => res.text()).then(html => {
+            var ph = document.getElementById("footer-placeholder");
+            if (ph) ph.innerHTML = html;
+        });
+    })();
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

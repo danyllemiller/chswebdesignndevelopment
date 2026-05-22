@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Interactive Workspace | CHS Computer Science</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <link href="/css/student-pages.css" rel="stylesheet" />
+  
+  <!-- Monaco Editor Loader -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+  
+  <style>
+    /* Custom Styling for the Two-Tier Tab System */
+    .unit-tab-btn { background: #e9ecef; border: 2px solid transparent; border-radius: 8px; padding: 0.5rem 1rem; font-weight: bold; color: #6c757d; cursor: pointer; transition: all 0.2s; }
+    .unit-tab-btn:hover { background: #dee2e6; color: var(--primary-color); }
+    .unit-tab-btn.active { background: var(--primary-color); color: white; box-shadow: 0 4px 10px rgba(0,0,153,0.2); }
+    
+    .chapter-tab-btn { background: transparent; border: 2px solid transparent; border-bottom: 2px solid #dee2e6; padding: 0.5rem 1rem; font-weight: 600; color: var(--tertiary-color); cursor: pointer; transition: all 0.2s; }
+    .chapter-tab-btn:hover { color: var(--primary-color); border-bottom-color: var(--primary-color); background: #f8f9fa; }
+    .chapter-tab-btn.active { color: var(--primary-color); border-bottom: 3px solid var(--primary-color); background: white; font-weight: 700; }
+    
+    .exam-tab-btn { color: #856404; border-bottom-color: #ffeeba; }
+    .exam-tab-btn:hover { color: #856404; border-bottom-color: #ffc107; background: #fff3cd; }
+    .exam-tab-btn.active { color: #856404; border-bottom: 3px solid #ffc107; background: #fff3cd; }
+  </style>
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div class="container-fluid my-4 px-lg-5" id="cs-interactive-pane">
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-8">
+            <h1 class="gochi text-primary mb-0 fs-3xl"><i class="fas fa-terminal"></i> CS Interactive Workspace</h1>
+            <p class="text-muted fw-bold mb-0">Read the curriculum on the left, complete your work on the right.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+             <span class="badge bg-primary fs-6 shadow-sm" id="userSubtitle">Loading Identity...</span>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- NEW TWO-TIER DYNAMIC NAVIGATION -->
+    <!-- ======================================================== -->
+    <div class="course-nav-container mb-4">
+        <!-- Tier 1: Units -->
+        <div class="unit-tabs d-flex flex-wrap gap-2 mb-2" id="unitTabsContainer">
+            <!-- Injected by JS -->
+            <div class="spinner-border text-primary spinner-border-sm"></div>
+        </div>
+        <!-- Tier 2: Chapters -->
+        <div class="chapter-tabs d-flex flex-wrap gap-1 border-bottom pb-0" id="chapterTabsContainer">
+            <!-- Injected by JS -->
+        </div>
+    </div>
+
+    <div class="row g-4">
+        
+        <!-- LEFT PANE: CURRICULUM & DIAGNOSTIC VIEWER -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-primary h-100 position-relative" id="left-pane-card">
+                <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                    <span id="list-chapter-title">Course Material</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span id="unit-status-pill" class="status-pill bg-white text-primary fw-bold px-2 py-1 rounded small d-none">Diagnostic Required</span>
+                        <i class="fas fa-book-reader" id="left-pane-icon"></i>
+                    </div>
+                </div>
+                <div class="card-body p-0 bg-white h-75vh overflow-hidden-strict pos-relative">
+                    
+                    <!-- 1. Regular Curriculum Content -->
+                    <iframe id="curriculum-frame" src="about:blank" class="iframe-full"></iframe>
+                    
+                    <!-- 2. Diagnostic (Pre-Test) Iframe -->
+                    <iframe id="assessment-frame" class="d-none iframe-full pos-absolute top-0-strict left-0-strict z-20"></iframe>
+
+                    <!-- 3. Exam Launch Overlay (For Summative) -->
+                    <div id="exam-launch-overlay" class="locked-overlay d-none overlay-locked">
+                        <i class="fas fa-file-signature text-primary fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
+                        <h3 class="fw-bold">Summative Assessment Ready</h3>
+                        <p class="text-muted px-4 mb-4">You have reached the end of this unit! The final exam will open in a <strong>secure new tab</strong>. You must use your Digital Notebook to help you.</p>
+                        <button id="btn-launch-exam" class="btn btn-primary btn-lg fw-bold px-5 shadow-sm mt-2">
+                            <i class="fas fa-external-link-alt me-2"></i> Launch Secure Exam
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANE: HYBRID WORKSPACE -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100 position-relative">
+                <div class="card-header bg-site-secondary border-bottom border-primary py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-primary" id="workspace-mode-title"><i class="fas fa-pencil-alt me-2"></i> Essay & Reflection Journal</h5>
+                    <span class="badge bg-warning text-dark font-monospace shadow-sm" id="workspace-badge">Journal Mode</span>
+                </div>
+                <div class="card-body p-0 bg-light pos-relative h-75vh overflow-auto-y">
+                    
+                    <!-- LOCK OVERLAY: Shown if Pre-Assessment is required -->
+                    <div id="workspace-lock" class="locked-overlay d-none overlay-workspace">
+                        <i class="fas fa-lock text-danger fa-4x mb-3"></i>
+                        <h3 class="fw-bold">Module Workspace Locked</h3>
+                        <p class="text-muted px-5">You must complete the <strong>Diagnostic Pre-Assessment</strong> on the left to unlock your notebook for this Unit.</p>
+                        <button class="btn btn-outline-primary fw-bold px-4 mt-3" onclick="document.getElementById('assessment-frame').contentWindow.location.reload()">
+                           <i class="fas fa-sync me-2"></i> Refresh Diagnostic
+                        </button>
+                    </div>
+
+                    <!-- MODE 1: RICH TEXT JOURNAL -->
+                    <div id="view-journal" class="workspace-view p-4 h-100">
+                        <div class="editor-toolbar mb-3 shadow-sm rounded bg-white p-2 d-flex gap-2 align-items-center border">
+                            <span class="small fw-bold text-muted px-2 border-end me-1">Templates:</span>
+                            <button type="button" id="tpl-worksheet" class="btn btn-sm btn-success fw-bold px-3">
+                                <i class="fas fa-file-invoice me-1"></i> Worksheet
+                            </button>
+                            <button type="button" id="tpl-donow" class="btn btn-sm btn-danger fw-bold px-3">
+                                <i class="fas fa-bolt me-1"></i> Do Now
+                            </button>
+                            <button type="button" id="tpl-html" class="btn btn-sm btn-primary fw-bold px-3">
+                                <i class="fas fa-list me-1"></i> Notes
+                            </button>
+                            <div class="ms-auto">
+                                <button type="button" onclick="window.dispatchEvent(new CustomEvent('prepareNewNote'))" class="btn btn-sm btn-outline-secondary fw-bold">
+                                    <i class="fas fa-plus me-1"></i> New Entry
+                                </button>
+                            </div>
+                        </div>
+
+                        <form id="note-form" class="h-100 d-flex flex-column">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-8">
+                                    <label class="form-label small fw-bold text-muted mb-1">Entry Title</label>
+                                    <input type="text" id="note-title" class="form-control border-secondary shadow-sm" placeholder="e.g., Reflection on Privacy Laws" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold text-muted mb-1">Category</label>
+                                    <select id="note-category" class="form-select border-secondary shadow-sm">
+                                        <option value="Reflection">Reflection</option>
+                                        <option value="Notes">Notes</option>
+                                        <option value="Do Now">Do Now</option>
+                                        <option value="Worksheet">Worksheet</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 mb-3 position-relative">
+                                <textarea id="note-content" class="d-none"></textarea>
+                                <iframe id="preview-frame" class="w-100 h-100 shadow-sm iframe-card"></iframe>
+                            </div>
+                            <button type="submit" id="btn-save-note" class="btn btn-success fw-bold shadow-sm mt-auto py-2">
+                                <i class="fas fa-save me-2"></i> Save & Turn In Worksheet
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  
+  <script>
+    /**
+     * SAFE MONACO LOADER
+     */
+    window.initSafeMonaco = function(containerId, initialValue) {
+        if (typeof monaco !== 'undefined') {
+            return monaco.editor.create(document.getElementById(containerId), {
+                value: initialValue, language: 'html', theme: 'vs-dark', automaticLayout: true
+            });
+        }
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            window.monacoEditorInstance = monaco.editor.create(document.getElementById(containerId), {
+                value: initialValue, language: 'html', theme: 'vs-dark', automaticLayout: true
+            });
+        });
+    };
+
+    // Listen for completion messages from the Pre-Test iframe to unlock automatically
+    window.addEventListener('message', (event) => {
+        if (event.data.type === 'diagnostic_complete' || (event.data && event.data.score !== undefined && !event.data.type)) {
+            console.log("Diagnostic complete detected. Refreshing notebook logic...");
+            window.dispatchEvent(new CustomEvent('refreshUserProgress'));
+        }
+    });
+  </script>
+
+  <!-- Centralized Controller for CS Notebook Logic -->
+  <script type="module" src="/js/cs-interactive.js"></script>
+
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

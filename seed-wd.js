@@ -1,0 +1,177 @@
+// seed-wd.js
+const mysql = require('mysql2/promise');
+
+const wdClockIn = [
+    // Unit 1: Taxes, Paychecks, & Income
+    { question: "When you are hired for a new job, your employer requires you to fill out a W-4 form. What is the purpose of this form?", options: ["To enroll in medical benefits.", "To specify federal tax withholdings.", "To verify legal residency status.", "To request vacation scheduling."], answer: "To specify federal tax withholdings." },
+    { question: "Employers also require you to fill out an I-9 form on your first day. Why is this mandatory?", options: ["To verify your identity and legal right to work in the United States.", "To set up direct deposit.", "To do a background check.", "To track your hours."], answer: "To verify your identity and legal right to work in the United States." },
+    { question: "You work 40 hours a week at $18.00 per hour. What is your gross pay for one week?", options: ["$620", "$720", "$820", "$560"], answer: "$720" },
+    { question: "Your gross monthly pay is $3,200. If total paycheck deductions are 22%, how much is deducted?", options: ["$640.00", "$704.00", "$2,496.00", "$320.00"], answer: "$704.00" },
+    { question: "You earn $15/hour. Overtime is 1.5 times your regular rate. If you work 45 hours, what is your gross pay?", options: ["$675.00", "$712.50", "$600.00", "$1,012.50"], answer: "$712.50" },
+    { question: "What is the difference between gross pay and net pay?", options: ["There is no actual difference.", "Gross is after tax, net is before.", "Gross is total pay, net is take-home.", "Net is salary, gross is hourly pay."], answer: "Gross is total pay, net is take-home." },
+    { question: "Why do employers care that you understand your paycheck deductions?", options: ["They don't monitor this.", "To prevent payroll disputes and errors.", "Because they keep the tax money.", "To monitor employee performance levels."], answer: "To prevent payroll disputes and errors." },
+    { question: "You earn a 5% commission on sales. If your sales are $55,000, what is your commission?", options: ["$2,750", "$5,500", "$275", "$2,250"], answer: "$2,750" },
+    { question: "Your annual salary is $54,000. What is your gross monthly income?", options: ["$4,200", "$5,400", "$4,500", "$1,038.46"], answer: "$4,500" },
+    { question: "You are paid bi-weekly (every two weeks). Your annual salary is $65,000. What is your gross pay per paycheck?", options: ["$2,500", "$5,416.67", "$1,250", "$2,692.31"], answer: "$2,500" },
+
+    // Unit 2: Banking & Financial Responsibility
+    { question: "Employers heavily prefer to pay you via 'Direct Deposit.' What does this mean?", options: ["Receiving physical cash payments daily.", "Getting a printed company check.", "Transferring pay to your bank account.", "Issuing funds onto a gift card."], answer: "Transferring pay to your bank account." },
+    { question: "To set up Direct Deposit, your employer’s payroll department will need two numbers from you. What are they?", options: ["Your PIN and password.", "Your routing number and checking account number.", "Your debit card number and CVV code.", "Your phone number and zip code."], answer: "Your routing number and checking account number." },
+    { question: "Why might an employer check your credit report before offering you a job, especially in finance or management?", options: ["To view your current savings balance.", "To assess financial responsibility and risk.", "To obtain your personal identity data.", "To market corporate credit products."], answer: "To assess financial responsibility and risk." },
+    { question: "If you spend more money than you have in your checking account, your bank will charge you a penalty fee. What is this called?", options: ["An interest charge.", "An overdraft fee.", "A premium.", "A deductible."], answer: "An overdraft fee." },
+    { question: "What is the primary difference between a checking account and a savings account?", options: ["Checking is for daily transactions; savings is for storing money long-term to earn interest.", "Savings comes with a debit card; checking does not.", "Checking accounts are illegal for minors.", "There is no difference."], answer: "Checking is for daily transactions; savings is for storing money long-term to earn interest." },
+    { question: "From an employer's perspective, why is it beneficial for an employee to have an 'emergency fund' saved up?", options: ["To provide potential corporate loans.", "To reduce stress and work absences.", "To demonstrate personal wealth levels.", "To justify lower hourly wages."], answer: "To reduce stress and work absences." },
+    { question: "What is a 'budget'?", options: ["A bank account.", "A plan for managing your income and expenses over a specific period.", "A type of loan.", "A tax form."], answer: "A plan for managing your income and expenses over a specific period." },
+    { question: "If a court orders your employer to withhold a portion of your paycheck to pay off a debt (like unpaid child support or taxes), this is called:", options: ["Wage garnishment.", "A bonus.", "A deductible.", "Direct deposit."], answer: "Wage garnishment." },
+    { question: "Which action will negatively impact your credit score the fastest?", options: ["Checking your own score.", "Consistently missing payment deadlines or paying late.", "Using a debit card instead of cash.", "Getting a raise at work."], answer: "Consistently missing payment deadlines or paying late." },
+    { question: "Why should you avoid 'payday loan' companies?", options: ["They don't provide cash assets.", "They charge high, predatory interest.", "They report data to your manager.", "They require advanced college degrees."], answer: "They charge high, predatory interest." },
+
+    // Unit 3: Insurance & Workplace Benefits
+    { question: "What is an insurance 'premium'?", options: ["The maximum your insurance pays out.", "A yearly bonus.", "The set amount deducted from your paycheck or paid monthly to keep your policy active.", "A doctor's office fee."], answer: "The set amount deducted from your paycheck or paid monthly to keep your policy active." },
+    { question: "In health or auto insurance, what is a 'deductible'?", options: ["Tax-exempt monetary income.", "Your initial out-of-pocket payment.", "A policyholder safety discount.", "A mandatory processing fee."], answer: "Your initial out-of-pocket payment." },
+    { question: "What does legally required 'liability' auto insurance cover?", options: ["Damage to your own vehicle.", "Damage caused to the other person.", "Rental car reimbursement fees.", "Natural weather-related damage."], answer: "Damage caused to the other person." },
+    { question: "True or False: If your rented apartment catches fire, your landlord’s insurance pays to replace your personal belongings (TV, clothes, etc.).", options: ["True", "False (You need Renter's Insurance!)"], answer: "False (You need Renter's Insurance!)" },
+    { question: "What is a medical 'copay'?", options: ["A fixed, flat fee you pay at the time of receiving a medical service.", "A tip for the nurse.", "A fee covering the entire hospital stay.", "A donation."], answer: "A fixed, flat fee you pay at the time of receiving a medical service." },
+    { question: "Why should you ensure a doctor is 'in-network'?", options: ["Out-of-network care is illegal.", "Providers offer lower, agreed rates.", "Only these doctors issue medicine.", "It is required by your manager."], answer: "Providers offer lower, agreed rates." },
+    { question: "What does 'Comprehensive' auto insurance cover?", options: ["Only multi-car traffic accidents.", "Damage from theft or vandalism.", "Standard vehicle maintenance.", "Outstanding car loan balances."], answer: "Damage from theft or vandalism." },
+    { question: "Who is the 'beneficiary' on an employer-sponsored life insurance policy?", options: ["The employer.", "The insurance agent.", "The person you choose to receive the money if you pass away.", "The doctor."], answer: "The person you choose to receive the money if you pass away." },
+    { question: "Many employers offer a 401(k) plan and will 'match' your contributions. What is a 401(k)?", options: ["Health insurance.", "A company-sponsored retirement savings plan.", "A training course.", "A union due."], answer: "A company-sponsored retirement savings plan." },
+    { question: "What does 'P.T.O.' stand for in a workplace benefits package?", options: ["Professional Training Opportunity", "Paid Time Off", "Part-Time Only", "Please Turn Over"], answer: "Paid Time Off" },
+
+    // Unit 4: Communication & Ethics
+    { question: "To demonstrate effective listening when a supervisor gives complex instructions, you should:", options: ["Start working immediately.", "Ask a coworker later.", "Repeat the core directions back to ensure you understood correctly.", "Wait for an email."], answer: "Repeat the core directions back to ensure you understood correctly." },
+    { question: "A customer asks a question you don't know the answer to. To represent the business well, you should:", options: ["Guess.", "Say 'I don't know' and walk away.", "Honestly state you're unsure, but offer to find the answer.", "Tell them to Google it."], answer: "Honestly state you're unsure, but offer to find the answer." },
+    { question: "In a professional email to a client or manager, what should you always include?", options: ["Slang to be friendly.", "A clear and concise subject line.", "Everyone in the 'CC' line.", "All capital letters."], answer: "A clear and concise subject line." },
+    { question: "Which is a constructive, professional way to receive performance feedback?", options: ["Get defensive.", "Listen actively, ask for examples, and use it to improve your work.", "Ignore it.", "Complain to coworkers."], answer: "Listen actively, ask for examples, and use it to improve your work." },
+    { question: "The workplace has a strict policy against personal cell phone use on the floor. A coworker frequently breaks this rule. As a good employee, you should:", options: ["Ignore it.", "Join them.", "Remind them of the policy, as their distraction hurts the team.", "Post about them online."], answer: "Remind them of the policy, as their distraction hurts the team." },
+    { question: "You overhear coworkers gossiping about your manager. You should:", options: ["Join in.", "Politely refuse to participate and remove yourself from the conversation.", "Record them.", "Start a rumor about them."], answer: "Politely refuse to participate and remove yourself from the conversation." },
+    { question: "If you make a mistake that damages company property or delays a project, you should:", options: ["Hope no one notices.", "Blame a coworker.", "Honestly and promptly inform your supervisor and offer a solution.", "Fix it secretly."], answer: "Honestly and promptly inform your supervisor and offer a solution." },
+    { question: "Why is punctuality highly valued by employers?", options: ["To ensure fresh morning coffee.", "It shows respect and reliability.", "To secure better parking spots.", "Timeliness doesn't affect results."], answer: "It shows respect and reliability." },
+    { question: "What does it mean to maintain 'confidentiality' at work?", options: ["Protecting private data and secrets.", "Speaking quietly at your desk.", "Concealing work-related errors.", "Ignoring all customer requests."], answer: "Protecting private data and secrets." },
+    { question: "You are taking a sick day. What is the most professional way to handle this?", options: ["Just don't show up.", "Notify your supervisor as early as possible according to company policy.", "Text a coworker to tell the boss.", "Post on social media that you are sick."], answer: "Notify your supervisor as early as possible according to company policy." },
+
+    // Unit 5: Teamwork, Diversity, & Conflict Resolution
+    { question: "A customer is yelling at you and using offensive language. Which skill is most needed to protect the business's reputation?", options: ["Conflict-resolution and de-escalation skills.", "Job acquisition skills.", "Creativity.", "Time management."], answer: "Conflict-resolution and de-escalation skills." },
+    { question: "A team member suggests a bad idea during a meeting. You should:", options: ["Tell them it's stupid.", "Politely explain your concerns and brainstorm alternatives together.", "Ignore them.", "Report them to the boss."], answer: "Politely explain your concerns and brainstorm alternatives together." },
+    { question: "A colleague from a different background has a different communication style that you find confusing. You should:", options: ["Ask them to change habits.", "Avoid working with them.", "Respectfully adapt your style.", "Report the issue to HR."], answer: "Respectfully adapt your style." },
+    { question: "Your shift is incredibly busy, and your team is falling behind. You should:", options: ["Blame the shift leader.", "Work with your peers to prioritize tasks and push through together.", "Do only your assigned station and ignore the rest.", "Take a break."], answer: "Work with your peers to prioritize tasks and push through together." },
+    { question: "Workplace teamwork involves:", options: ["Doing only your job description.", "Collaborating, sharing ideas, and working toward the company's goals.", "Always agreeing with the boss to avoid waves.", "Competing with coworkers."], answer: "Collaborating, sharing ideas, and working toward the company's goals." },
+    { question: "A key characteristic of a high-value team member is:", options: ["Being the smartest person in the room.", "Being reliable, accountable, and willing to help others.", "Being bossy.", "Working entirely independently."], answer: "Being reliable, accountable, and willing to help others." },
+    { question: "The best way to resolve a minor interpersonal conflict with a coworker is:", options: ["Ignoring it until you explode.", "Running to HR immediately.", "Discussing the issue openly, respectfully, and directly with them in private.", "Gossiping about them."], answer: "Discussing the issue openly, respectfully, and directly with them in private." },
+    { question: "You finish your tasks early, but a coworker is struggling to finish theirs before closing. A good employee will:", options: ["Clock out and go home.", "Tell the boss the coworker is slow.", "Ask the coworker if they need assistance so everyone can leave on time.", "Sit in the breakroom."], answer: "Ask the coworker if they need assistance so everyone can leave on time." },
+    { question: "What does it mean to have 'empathy' in conflict resolution?", options: ["Agreeing with every complaint.", "Displaying emotional distress.", "Understanding another perspective.", "Providing financial assistance."], answer: "Understanding another perspective." },
+    { question: "If a conflict with a coworker escalates and becomes hostile, what is your next step?", options: ["Yell back.", "Step away and involve a supervisor or HR representative.", "Challenge them to a fight outside.", "Quit your job."], answer: "Step away and involve a supervisor or HR representative." },
+
+    // Unit 6: Problem Solving, Safety, & Time Management
+    { question: "Your boss gives you a new project, but you are already overloaded. You should:", options: ["Work unpaid overtime.", "Refuse it flatly.", "Discuss your current workload with your boss to prioritize tasks and set realistic expectations.", "Delegate it to the new guy."], answer: "Discuss your current workload with your boss to prioritize tasks and set realistic expectations." },
+    { question: "A piece of company equipment you use is malfunctioning. You should:", options: ["Try to fix it yourself with a butter knife.", "Keep using it until it breaks completely.", "Ignore it.", "Stop using it, tag it, and report it according to safety guidelines to prevent injury or costly damage."], answer: "Stop using it, tag it, and report it according to safety guidelines to prevent injury or costly damage." },
+    { question: "You find a faster, more efficient way to do a routine daily task. You should:", options: ["Keep it secret so you have more free time.", "Share it with your supervisor as a potential new procedure to save the company money.", "Just do it yourself.", "Wait to see if someone else notices."], answer: "Share it with your supervisor as a potential new procedure to save the company money." },
+    { question: "You see a wet spill on the floor in a high-traffic area. A responsible employee will:", options: ["Walk around it.", "Put up a wet floor sign and clean it up immediately to prevent slip-and-fall lawsuits.", "Tell a customer to watch out.", "Assume the janitor will get it."], answer: "Put up a wet floor sign and clean it up immediately to prevent slip-and-fall lawsuits." },
+    { question: "Demonstrating 'initiative' (being a self-starter) means:", options: ["Doing exactly what you're told and nothing more.", "Procrastinating.", "Identifying a problem or a mess and proactively fixing it without being asked.", "Complaining about problems."], answer: "Identifying a problem or a mess and proactively fixing it without being asked." },
+    { question: "Workplace 'critical thinking' involves:", options: ["Criticizing your coworkers.", "Analyzing a problem objectively and thinking through the consequences before acting.", "Blindly following orders even if they seem dangerous.", "Rushing."], answer: "Analyzing a problem objectively and thinking through the consequences before acting." },
+    { question: "What is 'time theft' in the workplace?", options: ["Stealing a clock off the wall.", "Taking an extra 15 minutes on your break, or browsing social media on the clock instead of working.", "Working too fast.", "Overtime."], answer: "Taking an extra 15 minutes on your break, or browsing social media on the clock instead of working." },
+    { question: "A project takes 10 days. You've worked 6. What fraction of the work remains?", options: ["3/5", "2/5", "1/2", "1/3"], answer: "2/5" },
+    { question: "A task needs 3 quarts of commercial solvent. It's only sold in gallons (1 gal = 4 qts). How many gallons must the company buy?", options: ["1", "2", "3", "4"], answer: "1" },
+    { question: "Which is considered a highly valuable 'soft skill' by employers?", options: ["Forklift certification.", "Coding in Python.", "The ability to manage your time and prioritize tasks independently.", "Speaking Spanish."], answer: "The ability to manage your time and prioritize tasks independently." },
+
+    // Unit 7: Business & Consumer Math
+    { question: "You are running a register. A customer's bill is $85.00. Sales tax is 7.5%. What is the total owed?", options: ["$91.38", "$85.75", "$92.50", "$6.38"], answer: "$91.38" },
+    { question: "The monthly department budget is $500. You spent $289.75 on supplies and $155.50 on software. How much is left?", options: ["$54.75", "$210.25", "$244.50", "$64.75"], answer: "$54.75" },
+    { question: "A product costs the company $12.50 to make. The boss wants a 40% profit margin. What should the selling price be?", options: ["$17.50", "$12.90", "$5.00", "$18.75"], answer: "$17.50" },
+    { question: "You earn a stellar performance review and get a 3% raise on a $48,000 salary. What is your new salary?", options: ["$49,440", "$48,144", "$49,000", "$50,400"], answer: "$49,440" },
+    { question: "You are tracking inventory. You have 150 boxes. You ship out 30% of them. How many boxes are left?", options: ["120", "105", "45", "100"], answer: "105" },
+    { question: "A client repair takes 7 hours at a labor rate of $65/hour. Parts cost $142. What is the total invoice amount?", options: ["$455", "$207", "$597", "$522"], answer: "$597" },
+    { question: "You are ordering pens for the office. They are $8.40 per dozen. You need 60 pens. Total cost?", options: ["$42.00", "$50.40", "$33.60", "$84.00"], answer: "$42.00" },
+    { question: "You drive a company vehicle 220 miles. It gets 25 MPG. How many gallons of gas did you use?", options: ["9.2", "8.8", "8.0", "11.0"], answer: "8.8" },
+    { question: "You are catering a corporate event. A recipe serves 10 people and uses 2 lbs of chicken. How much chicken is needed for 150 people?", options: ["15 lbs", "20 lbs", "30 lbs", "150 lbs"], answer: "30 lbs" },
+    { question: "An item is marked down 20% for a sale. The original price is $60. What is the sale price?", options: ["$12", "$48", "$40", "$72"], answer: "$48" },
+
+    // Unit 8: Technology, Internet, & Digital Literacy
+    { question: "The company updates its software, and the interface is completely different. A good employee will:", options: ["Complain about the change.", "Refuse to use the program.", "Proactively learn the system.", "Ask IT to do their work."], answer: "Proactively learn the system." },
+    { question: "You must compile sales data from three departments. You should use:", options: ["Calculator and scratch paper.", "Effective spreadsheet software.", "A standard Word document.", "A visual slide presentation."], answer: "Effective spreadsheet software." },
+    { question: "You receive a suspicious email to your work address with a link from an unknown sender. You should:", options: ["Click to verify the link.", "Forward to all team members.", "Report the phishing attempt.", "Reply to the sender's email."], answer: "Report the phishing attempt." },
+    { question: "A friend sends you a link to a funny YouTube video while you are working. You should:", options: ["Open it immediately with the volume up.", "Hide it from the boss.", "Wait to view it on your personal time or your designated break.", "Send it to the whole office."], answer: "Wait to view it on your personal time or your designated break." },
+    { question: "What does 'networking' mean in a career context?", options: ["Connecting office hardware.", "Building professional relations.", "Only speaking with managers.", "Hanging by the water cooler."], answer: "Building professional relations." },
+    { question: "Why should you care about your personal 'digital footprint' (social media presence)?", options: ["Employers never check online.", "It impacts hiring and growth.", "It only affects technology jobs.", "You shouldn't worry about it."], answer: "It impacts hiring and growth." },
+    { question: "When presenting team findings to leadership, you should use:", options: ["Only your voice.", "Strategic digital media (like a slide deck) to make the data visual and easy to understand.", "Hand-written notes.", "Text messages."], answer: "Strategic digital media (like a slide deck) to make the data visual and easy to understand." },
+    { question: "What does it mean to be a 'lifelong learner' in the workplace?", options: ["Taking college classes forever.", "Pursuing new skills and trends.", "Doing only mandatory training.", "Memorizing the staff handbook."], answer: "Pursuing new skills and trends." },
+    { question: "What is a 'BCC' on an email, and when should you use it?", options: ["Big Carbon Copy; to make the text larger.", "Blind Carbon Copy; to copy someone on an email without the other recipients seeing their address (used for privacy).", "Basic Company Communication; for daily memos.", "Bad Connection Code; used when internet is slow."], answer: "Blind Carbon Copy; to copy someone on an email without the other recipients seeing their address (used for privacy)." },
+    { question: "If your work computer freezes, what is the best first step before calling IT?", options: ["Unplug the computer from the wall.", "Hit the monitor.", "Save your work if possible, and try restarting the computer.", "Go home for the day."], answer: "Save your work if possible, and try restarting the computer." },
+
+    // Unit 9: Career Readiness, Resumes, & Interviews
+    { question: "From an employer's perspective, what is the primary purpose of reading your résumé?", options: ["To learn your entire life story.", "To verify skills and experience.", "To see your personal photo.", "To read about your hobbies."], answer: "To verify skills and experience." },
+    { question: "After an interview, why should you send a brief thank-you email within 24 hours?", options: ["To beg for the employment.", "To show courtesy and interest.", "To re-verify the starting pay.", "It is a legal hiring requirement."], answer: "To show courtesy and interest." },
+    { question: "How should you answer 'What is your greatest weakness?' in an interview?", options: ["Say 'I am a perfectionist.'", "Discuss steps for improvement.", "Claim to have no weaknesses.", "Criticize your previous boss."], answer: "Discuss steps for improvement." },
+    { question: "Before walking into an interview, a prepared candidate must:", options: ["Stalk the interviewer online.", "Research the company mission.", "Plan their future vacation.", "Memorize the entire dictionary."], answer: "Research the company mission." },
+    { question: "What is the standard, professional way to resign from a job so you don't burn bridges?", options: ["Simply stop showing up to work.", "Sending a casual text message.", "Providing formal two-week notice.", "Posting it on social media."], answer: "Providing formal two-week notice." },
+    { question: "When the interviewer asks, 'Do you have any questions for me?' at the end of an interview, you should:", options: ["Say 'No, I am all set.'", "Ask about sick leave immediately.", "Ask about the company culture.", "Ask 'Did I get the job?'"], answer: "Ask about the company culture." },
+    { question: "What should you bring to an in-person job interview?", options: ["Your mom for support.", "Extra printed copies of your resume, a notepad, and a pen.", "Your lunch.", "Just your phone."], answer: "Extra printed copies of your resume, a notepad, and a pen." },
+    { question: "When shaking hands with a hiring manager, you should:", options: ["Grip as hard as possible to show dominance.", "Look at the floor.", "Offer a firm, confident handshake with good eye contact and a smile.", "Do a fist bump."], answer: "Offer a firm, confident handshake with good eye contact and a smile." },
+    { question: "On a resume, what are 'transferable skills'?", options: ["Skills for one specific job.", "Valuable skills for any role.", "Ability to move heavy boxes.", "Basic typing and data skills."], answer: "Valuable skills for any role." },
+    { question: "If you are offered a job but the salary is lower than you expected, what is the professional response?", options: ["Yell at the hiring manager.", "Accept and complain later.", "Respectfully negotiate the pay.", "Hang up the telephone call."], answer: "Respectfully negotiate the pay." }
+];
+
+const dbConfig = {
+    host: 'localhost',
+    user: 'root',
+    password: 'chs_password',
+    database: 'chs_gradebook'
+};
+
+async function getDbConnection() {
+    try {
+        return await mysql.createConnection(dbConfig);
+    } catch (err) {
+        if (process.platform === 'linux') {
+            try {
+                return await mysql.createConnection({
+                    socketPath: '/var/run/mysqld/mysqld.sock',
+                    user: 'root',
+                    password: '',
+                    database: 'chs_gradebook'
+                });
+            } catch (socketErr) {
+                throw err;
+            }
+        }
+        throw err;
+    }
+}
+
+async function seedDatabase() {
+    let connection;
+    try {
+        connection = await getDbConnection();
+        console.log('Connected to MariaDB. Seeding WD questions...');
+
+        // 1. Clear out the old WD_IN questions so you don't accidentally double-stack them
+        await connection.execute('DELETE FROM daily_questions WHERE category = "WD_IN"');
+        console.log('Cleared out old WD_IN questions to prevent duplicates.');
+
+        // 2. Loop through the array and insert them
+        // The index 'i' will serve as the "day_group" number
+        for (let i = 0; i < wdClockIn.length; i++) {
+            const q = wdClockIn[i];
+            
+            // MariaDB requires JSON arrays to be passed as a stringified object
+            const optionsJson = JSON.stringify(q.options);
+
+            await connection.execute(
+                'INSERT INTO daily_questions (day_group, category, question_text, options, correct_answer) VALUES (?, ?, ?, ?, ?)',
+                [i, 'WD_IN', q.question, optionsJson, q.answer]
+            );
+        }
+
+        console.log(`Success! Inserted ${wdClockIn.length} questions into the daily_questions table.`);
+        
+    } catch (err) {
+        console.error('Error seeding the database:', err);
+    } finally {
+        if (connection) {
+            await connection.end();
+            console.log('Database connection closed.');
+        }
+    }
+}
+
+seedDatabase();

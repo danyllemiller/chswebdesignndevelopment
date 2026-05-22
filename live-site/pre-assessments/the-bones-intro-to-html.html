@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Pre-Assessment: Chapter 7 - The Bones</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module">
+    import { initPreTest } from "/js/preTestLogic.js";
+    window.initPreTest = initPreTest;
+  </script>
+<script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+<div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+  <section class="container-ultrawide my-5">
+    <div id="exam-container">
+        <div class="text-center p-5">
+            <div class="spinner-border text-info" role="status"></div>
+            <p class="mt-2 fw-bold text-primary">Syncing HTML Diagnostic...</p>
+        </div>
+    </div>
+  </section>
+
+  <script>
+    const diagPool = [
+        { question: "Why is a code editor like Visual Studio Code better than a basic text editor like Notepad?", options: ["It color-codes your code and checks for mistakes as you type.", "It automatically writes the code for you.", "It does not require an internet connection.", "It turns HTML into a video game."] },
+        { question: "Which tool acts like a 'spell-checker' for your HTML code to find tricky errors?", options: ["The W3C validation website", "Google Chrome", "Photoshop", "A CMS Dashboard"] },
+        { question: "What is the primary goal of 'responsive design'?", options: ["To ensure the website looks great and functions well on any screen size, including mobile phones.", "To make websites load faster on dial-up internet.", "To make the website respond to voice commands.", "To hide the HTML code from users."] },
+        { question: "What is the very first line of code required in a modern HTML5 document?", options: ["<!DOCTYPE html>", "<html>", "<head>", "<meta charset='UTF-8'>"] },
+        { question: "In the HTML 'family tree', which element is considered the root that holds everything else together?", options: ["<html>", "<body>", "<head>", "<!DOCTYPE html>"] },
+        { question: "Why is it important to include the lang='en' attribute in the root html tag?", options: ["It tells search engines and screen readers what language the page is in.", "It translates the page automatically.", "It forces the browser to use an English font.", "It is required to use CSS."] },
+        { question: "Which part of the HTML boilerplate holds important information that the user does NOT see?", options: ["<head>", "<body>", "<footer>", "<main>"] },
+        { question: "Which section of the HTML document holds all the content the user actually sees (text, images, video)?", options: ["<body>", "<head>", "<main>", "<html>"] },
+        { question: "All web servers look for a specific file name to serve as a website's default home page. What is it?", options: ["index.html", "home.html", "start.html", "main.html"] },
+        { question: "What is the 'First-In, Last-Out' rule refer to?", options: ["When nesting tags, the last tag you open is the first one you must close.", "The order images must load.", "The way CSS overrides HTML.", "How files are uploaded via FTP."] },
+        { question: "Which tag is used to logically emphasize text, usually rendering it in italics?", options: ["<em>", "<i>", "<b>", "<strong>"] },
+        { question: "Why should developers use Semantic Tags (like <article> or <footer>) instead of generic <div> tags?", options: ["Their names describe exactly what kind of content they contain, which is great for SEO and screen readers.", "They load much faster.", "They automatically apply CSS styles.", "They hide the code from hackers."] },
+        { question: "Which attribute is REQUIRED in an <img> tag to provide a description for screen readers?", options: ["alt", "src", "title", "href"] },
+        { question: "What is the difference between an Absolute Path and a Relative Path?", options: ["Absolute paths are the full URL (https://...); relative paths are the path from the current file to the target file.", "Absolute paths are for images; relative paths are for text.", "Relative paths load faster.", "Absolute paths only work on local computers."] },
+        { question: "In order to connect an external CSS file to an HTML document, which tag must be used?", options: ["<link rel='stylesheet' href='...'>", "<style src='...'>", "<css file='...'>", "<script src='...'>"] },
+        { question: "Which tag defines the title seen in the browser tab?", options: ["<title>", "<header>", "<h1>", "<meta>"] },
+        { question: "The tag <br> is an example of an:", options: ["Empty Element", "Root Element", "Block Element", "Metadata tag"] },
+        { question: "Which tag is used for a numbered, sequential list?", options: ["<ol>", "<ul>", "<li>", "<dl>"] },
+        { question: "What does PII stand for?", options: ["Personally Identifiable Information", "Public Internet Interface", "Private Input Index", "Password Integrated Item"] },
+        { question: "What entity is used for the copyright symbol?", options: ["&copy;", "&copy", "#copy", "@copy"] }
+    ];
+
+    const config = {
+        questions: diagPool,
+        questionCount: 15,
+        chapterTitle: "Chapter 7 Diagnostic",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbzgJFP8F23d1C8UtIT1jG-eosRq1YBaA2dfqCIQnPMuZeAfGd1gVPYrObO8UQgkIb3atQ/exec"
+    };
+
+    window.onload = () => initPreTest(config);
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

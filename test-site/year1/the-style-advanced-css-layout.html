@@ -1,0 +1,647 @@
+<!-- the-style-advanced-css-layout.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 7: The "Style" (Advanced CSS Layout) | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <!-- Security Guard: Kicks out anyone not logged in -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    
+    <nav class="mb-4 d-flex justify-content-between small fw-bold">
+        <a href="/year1/the-clothes-intro-to-css.html" class="text-decoration-none text-primary">&laquo; Previous: 6: The "Clothes" (CSS)</a>
+        <a href="/year1/sights-sounds-making-it-pop-html-media.html" class="text-decoration-none text-primary">Next: 8: Sights &amp; Sounds (Media) &raquo;</a>
+    </nav>
+
+    <!-- CLEAN MODERN HEADER -->
+    <h1 class="text-center text-primary fw-bold mt-5 mb-2">Chapter 7: The "Style"</h1>
+    <p class="text-center text-secondary fst-italic fs-5 mb-5">Advanced CSS Lab (Flexbox, Grid &amp; Media Queries)</p>
+          
+    <!-- SECTION 1: OVERVIEW & PERSONA -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">The "Magic" Behind Real Agency Websites</h2>
+        <p>In the last chapter, you built the brand foundation for your local clients with colors, fonts, and basic selectors. Your client's site has clothes, but they hang awkwardly. The layout is just a top-to-bottom stack of blocks. Now, as a developer at the <strong>Carson High Web Design & Marketing Agency</strong>, you're going to learn the "magic" that professional developers use to build complex, adaptive, and highly interactive layouts. This chapter is all about moving beyond simple styling and truly <strong>mastering the architecture</strong> of a commercial webpage.</p>
+        <p>We'll start with the <strong>Document Flow</strong> and the <strong>Box Model</strong>—the secret to all spacing—and then move to positioning elements exactly where your client needs them. Then we will deploy the two "heavy hitters" of modern layout: <strong>Flexbox</strong> (for rows/columns) and <strong>CSS Grid</strong> (for 2D layouts). Finally, we'll use <strong>Media Queries</strong> to make our client sites fully responsive so they look great on a tiny phone screen <em>and</em> a giant desktop monitor.</p>
+        
+        <h2 class="section-title mt-5">Meet the User: "Science Student Sam"</h2>
+        <!-- PRO UI/UX PERSONA CARD -->
+        <div class="card shadow-sm border-0 bg-light mb-5">
+          <div class="card-body p-4 text-start">
+            <div class="d-flex align-items-center border-bottom pb-3 mb-3">
+              <img src="/images/the-clothes-intro-to-css/figure-02.png" alt="Sam" class="rounded-circle shadow-sm border border-3 border-white" style="width: 70px; height: 70px; object-fit: cover;" onerror="this.src='https://placehold.co/70x70?text=S'">
+              <div class="ms-3">
+                <h5 class="fw-bold text-dark mb-0">Science Student Sam</h5>
+                <span class="badge bg-primary text-uppercase tracking-wide mt-1" style="font-size: 0.65rem;">Client Persona: The Curiosity Corner</span>
+              </div>
+            </div>
+            <div class="small">
+              <div class="mb-2">
+                <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Who</span>
+                <span class="text-dark">Sam is a high school student researching scientific topics for a project.</span>
+              </div>
+              <div class="mb-2">
+                <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Goal</span>
+                <span class="text-dark">She needs the layout to be adaptive and visually organized so she can easily scan articles, even on her phone.</span>
+              </div>
+              <div>
+                <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Needs</span>
+                <span class="text-dark">Sam relies on clear visual hierarchy (like distinct article boxes arranged in grids) and responsive design to use the site comfortably on any device.</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer bg-white border-top text-center py-2">
+            <span class="small text-muted" style="font-size: 0.75rem;"><strong>Figure 7.1:</strong> User Persona</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <!-- Materials Hub -->
+        <div class="card shadow-sm mb-4 bg-white border-primary text-start">
+          <div class="card-header bg-primary text-white fw-bold border-bottom">Materials Hub</div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush small">
+              <a href="/proficiencyScales/the-style-advanced-css-layout.html"  class="list-group-item list-group-item-action text-primary fw-bold">🎯 1. Proficiency Scale</a>
+              <a href="/pre-assessments/the-style-advanced-css-layout.html"  class="list-group-item list-group-item-action text-dark">🚀 2. Pre-Assessment</a>
+              <a href="/notes/the-style-advanced-css-layout.html"  class="list-group-item list-group-item-action text-dark">📝 3. Guided Notes</a>
+              <a href="/studentFiles/curiosityCorner.zip" class="list-group-item list-group-item-action text-dark">📁 6. Chapter Files</a>
+            </div>
+          </div>
+        </div>
+        <!-- Interactives Hub Card -->
+        <div class="card shadow-sm mb-4 bg-white border-info text-start">
+        <div class="card-header bg-info text-white fw-bold border-bottom">Interactive Lessons</div>
+        <div class="card-body p-0">
+            <div class="list-group list-group-flush small">
+            <a href="/interactives/css-grid-interactive.html" class="list-group-item list-group-item-action text-dark">⚡ CSS Grid Interactive</a>
+            <a href="/interactives/flexbox-interactive.html" target="_blank" class="list-group-item list-group-item-action text-info fw-bold">🎮 4. Game: Flexbox Froggy</a>
+              <a href="/interactives/flexbox-interactive.html"  class="list-group-item list-group-item-action text-dark">⚡ Flexbox Interactive</a>
+              <a href="/reviewGames/layoutLabyrinth.html" target="_blank" class="list-group-item list-group-item-action text-info fw-bold">🎮 5. Game: Layout Labyrinth</a>
+            </div>
+        </div>
+        </div>
+        <div class="card roadmap-card mb-4 border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info border-bottom">Unlocking New Abilities</div>
+          <div class="card-body small">
+            <ul class="mb-0 ps-3">
+              <li class="mb-1">Master <strong>Document Flow</strong> and <code>display</code> properties.</li>
+              <li class="mb-1">Calculate the <strong>CSS Box Model</strong> using <code>padding</code>, <code>border</code>, and <code>margin</code>.</li>
+              <li class="mb-1">Use <code>position: relative</code>, <code>absolute</code>, <code>fixed</code>, and <code>sticky</code>.</li>
+              <li class="mb-1">Build 1-dimensional layouts using <strong>Flexbox</strong>.</li>
+              <li class="mb-1">Build 2-dimensional layouts using <strong>CSS Grid</strong>.</li>
+              <li>Scale sites using <strong>Responsive Units</strong> and <strong>Media Queries</strong>.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: THE BOX MODEL & DOCUMENT FLOW -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Document Flow &amp; Display Types</h2>
+        <p>By default, elements on a webpage follow <strong>Normal Document Flow</strong>. The browser reads your HTML from top to bottom and places elements on the screen based on their <code>display</code> type. Think of it like organizing items on a desk.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">The <code>display</code> Property</h5>
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-4 text-start">
+            <thead class="bg-light">
+                <tr><th>Display Type</th><th>Behavior</th><th>Examples</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-bold"><code>block</code></td>
+                    <td>The "Hogs." A block element naturally takes up <strong>100% of the available width</strong> and forces a new line after it. They stack on top of each other like bricks.</td>
+                    <td><code>&lt;div&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;h1&gt;</code>, <code>&lt;section&gt;</code></td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>inline</code></td>
+                    <td>The "Polite Ones." They only take up as much width as their content needs and sit side-by-side like beads on a string. <strong>Critical Rule:</strong> You cannot set a defined width/height or top/bottom margins on inline elements!</td>
+                    <td><code>&lt;span&gt;</code>, <code>&lt;a&gt;</code>, <code>&lt;strong&gt;</code></td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>inline-block</code></td>
+                    <td>The "Hybrid." It sits side-by-side in a line with other elements, but it <em>respects</em> width and height properties like a block.</td>
+                    <td>Buttons, Navigation Links</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ADDED TABLE: VISIBILITY & FLOW -->
+        <h5 class="fw-bold mt-4 text-primary">Visibility vs. Display</h5>
+        <p>When you need to hide an element, you have two choices, and they affect the layout completely differently:</p>
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-4 text-start">
+            <thead class="bg-light"><tr><th>Property</th><th>Behavior</th><th>Flow Impact</th></tr></thead>
+            <tbody>
+                <tr><td><code>display: none;</code></td><td><strong>Completely removes</strong> the element from the document flow as if it doesn't exist.</td><td>Adjacent boxes fill the space.</td></tr>
+                <tr><td><code>visibility: hidden;</code></td><td>Invisible, but it <strong>reserves physical space</strong>.</td><td>Leaves an empty hole in the layout.</td></tr>
+            </tbody>
+        </table>
+
+        <h2 class="section-title mt-5">The Box Model: Spacing Math</h2>
+        <p>Every HTML element is a rectangular box. The <strong>Box Model</strong> describes the 4 layers of this box, from the inside out:</p>
+        <ul class="small mb-4">
+            <li><strong>Content:</strong> The actual stuff (text, images).</li>
+            <li><strong>Padding:</strong> The empty space <em>inside</em> the box. It acts like cushioning between the content and the border.</li>
+            <li><strong>Border:</strong> The "wall" of the box.</li>
+            <li><strong>Margin:</strong> The empty space <em>outside</em> the box. This is the element's personal space that pushes other elements away.</li>
+        </ul>
+        
+        <h5 class="fw-bold mt-4 text-primary">The Pro-Tip: The "Magic Reset" (<code>box-sizing: border-box</code>)</h5>
+        <p>By default, browsers use <code>box-sizing: content-box</code>. In this mode, padding and borders are <em>added</em> to the width you specify. <strong>Example: If an element has 100px width, 10px padding, and a 5px border (using content-box), what is the total rendered width?</strong> You must add the padding and border of BOTH sides (left and right) to the original width: 100 + (10+10) + (5+5) = <strong>130px total width.</strong> This breaks grid layouts easily!</p>
+        <p>To fix this, professionals use <code>box-sizing: border-box;</code>. This ensures that padding and borders are <strong>included</strong> in the element's total width and height, meaning a 100px box stays exactly 100px.</p>
+
+        <h5 class="fw-bold mt-4 text-primary">Layout Quirks & Tricks</h5>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>Margin Collapse:</strong> When two vertical margins touch (like the bottom margin of an H1 and the top margin of a P), they don't add together. They <strong>collapse</strong> into a single margin equal to the larger of the two values.</li>
+            <li class="mb-2"><strong>Centering a Block:</strong> What is the classic CSS technique to horizontally center a block-level element (like a container div) with a set width? You use <code>margin: 0 auto;</code>. Setting left and right margins to 'auto' forces the browser to split the remaining space equally.</li>
+            <li class="mb-0"><strong>Overflow:</strong> If text is spilling out of its container, setting <code>overflow: scroll;</code> forces a scrollbar to appear inside the box.</li>
+        </ul>
+
+        <!-- LAB 1 CARD -->
+        <div class="card border-success shadow-sm my-4 mt-5 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 1: Display Fixes [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Utilize display types to manage element flow and spacing for your client's navigation.</p>
+                <ol>
+                    <li class="mb-2">Open your Client Project's <code>style.css</code>.</li>
+                    <li class="mb-2">Target your navigation links (e.g., <code>header nav a</code>).</li>
+                    <li class="mb-2">Because <code>&lt;a&gt;</code> tags are inline, top/bottom padding won't push the surrounding layout correctly. Change their display type to <code>inline-block</code>.</li>
+                    <li class="mb-2">Apply padding (e.g., <code>10px 20px</code>) to the links. Notice how the clickable area grows into a perfect button without breaking the navigation line!</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated <code>style.css</code> file.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 text-center">
+          <img src="/images/the-style-advanced-css-layout/figure-01.png" alt="Box Model Diagram" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Box+Model'">
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 7.2:</strong> The CSS Box Model</figcaption>
+        </figure>
+        <div class="card roadmap-card border-warning shadow-sm mt-5 mb-4 text-start">
+            <div class="card-header bg-warning text-dark fw-bold">E.O.P. Exam Tip:</div>
+            <div class="card-body small">
+                <p class="mb-0">Remember the math! If a question asks for the width of a <strong>content-box</strong>, you must add the border and padding for the left <em>and</em> the right side.</p>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: FLEXBOX -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Flexbox: 1-Dimensional Layouts</h2>
+        <p>For years, developers used complicated "float hacks" to put boxes next to each other. Now, we use <strong>Flexbox (Flexible Box Module)</strong>. Flexbox is designed for laying out items in a <strong>single row or a single column (1-Dimensional)</strong>. It is the absolute gold standard for navigation bars, aligning icons, and perfectly centering content.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">The Golden Rule of Flex</h5>
+        <p>To use Flexbox, you must apply <code>display: flex;</code> to the <strong>Parent Container</strong>, not the child elements. Once the parent is a flex container, the immediate children become "flex items" and follow flexbox rules.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">Core Flexbox Properties</h5>
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-4 text-start">
+            <thead class="bg-light">
+                <tr><th>Property</th><th>What it Does</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-bold"><code>flex-direction</code></td>
+                    <td>Determines the Main Axis. The default of a newly created flex container is <code>row</code> (horizontal). You can change it to <code>column</code> to stack items vertically.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>justify-content</code></td>
+                    <td>Aligns items along the <strong>Main Axis</strong>. 
+                        <ul class="mb-0 mt-1 ps-3">
+                            <li><code>center</code>: Packs items in the middle.</li>
+                            <li><code>space-between</code>: Pushes the first item to the start edge and the last item to the end edge, spacing the rest evenly.</li>
+                            <li><code>space-evenly</code>: Ensures the gap between all items AND the edges of the container are exactly identical.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>align-items</code></td>
+                    <td>Aligns individual items along the <strong>Cross Axis</strong> (usually vertically). If <code>align-items: center</code> isn't vertically centering your flex item, the most likely cause is that the flex container doesn't have a defined height!</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>flex-wrap</code></td>
+                    <td>If a flex container runs out of horizontal room, items will normally shrink. To force them to drop to a new line instead, use <code>flex-wrap: wrap;</code>.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>align-content</code></td>
+                    <td>Only matters if you have multiple wrapped rows! <code>align-items</code> handles individual items on a single line; <code>align-content</code> handles the spacing of multiple wrapped lines as a group.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>flex-grow</code></td>
+                    <td>Applied to the <em>child</em> item. Determines how much of the available free space the item should take up.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>order</code></td>
+                    <td>Applied to the <em>child</em> item. Allows you to visually re-arrange the sequence of flex items without changing the HTML markup (e.g., <code>order: -1;</code> moves it to the front).</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- LAB 2 & 3 CARD -->
+        <div class="card border-success shadow-sm my-4 mt-5 text-start">
+            <div class="card-header bg-success text-white fw-bold">Labs 2 &amp; 3: Flexbox &amp; Centering [50 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Engineer flexible navigation and perfectly centered heroes using 1D layout logic for the agency template.</p>
+                <ol>
+                    <li class="mb-2"><strong>Navbar:</strong> Apply <code>display: flex;</code> to your <code>&lt;nav&gt;</code> or its child <code>&lt;ul&gt;</code>. Use <code>justify-content: space-between;</code> to push your logo to the left and your navigation links to the right. Use <code>align-items: center;</code> to keep them vertically aligned.</li>
+                    <li class="mb-2"><strong>Centering:</strong> Select your Hero section (e.g., <code>.hero-banner</code>). Apply <code>display: flex;</code>, <code>flex-direction: column;</code>, <code>justify-content: center;</code>, and <code>align-items: center;</code>. Ensure the container has a height (like <code>height: 60vh;</code>) to perfectly center the headline vertically and horizontally!</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload the <code>style.css</code> containing your new flex rules.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+          <figure class="mb-4 text-center">
+              <img src="/images/the-style-advanced-css-layout/figure-06.png" alt="Flexbox Axis" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Flexbox+Axes'">
+              <figcaption class="p-2 small text-muted text-center"><strong>Figure 7.3:</strong> Flexbox Main and Cross Axes.</figcaption>
+          </figure>
+          <div class="card roadmap-card border-warning shadow-sm mt-5 mb-4 text-start">
+            <div class="card-header bg-warning text-dark fw-bold">Let's Discuss:</div>
+            <div class="card-body small">
+              <p class="mb-0 text-dark">Why is it important to use Flexbox to center elements instead of trying to manually guess padding sizes in pixels?</p>
+            </div>
+          </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: CSS GRID -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">CSS Grid: 2-Dimensional Architecture</h2>
+        <p>While Flexbox is great for a single line of items, <strong>CSS Grid</strong> is primarily designed for <strong>2-Dimensional layouts (Rows AND Columns simultaneously)</strong>. It allows you to build the "skeleton" of your entire client webpage with incredible precision.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">Defining the Grid and the "fr" Unit</h5>
+        <p>To use it, apply <code>display: grid;</code> to a parent container. Then, define your columns and rows. Grid introduces a powerful new unit: <strong><code>fr</code> (Fractional Unit)</strong>. It represents a fraction of the available free space in the grid container.</p>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>3 Equal Columns:</strong> <code>grid-template-columns: 1fr 1fr 1fr;</code> (or use the shorthand: <code>repeat(3, 1fr)</code>).</li>
+            <li class="mb-2"><strong>Row Heights:</strong> Which CSS property defines the height of rows? <code>grid-template-rows: 200px 1fr;</code></li>
+            <li class="mb-2"><strong>Spacing:</strong> What does the <code>gap</code> property do? It sets the space between grid tracks (rows/cols) <em>without</em> using margins, keeping the math clean!</li>
+        </ul>
+
+        <h5 class="fw-bold mt-4 text-primary">Advanced Grid Powers</h5>
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-4 text-start">
+            <thead class="bg-light">
+                <tr><th>Property / Function</th><th>What it Does</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-bold"><code>grid-column: span 2;</code></td>
+                    <td>Tells a single grid item to stretch across two columns.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>grid-column: 1 / 3;</code></td>
+                    <td>Does the exact same thing! It signifies the item starts at vertical grid line 1 and ends at grid line 3 (spanning 2 columns).</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>grid-template-areas</code></td>
+                    <td>Allows you to map out your layout using named visual strings (e.g., <code>"header header" "sidebar content"</code>).</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>minmax(200px, 1fr)</code></td>
+                    <td>Defines a size range for a track, setting a minimum size (so it never squishes too small) and allowing it to grow to a maximum size.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold text-danger"><code>auto-fill</code> vs <code>auto-fit</code></td>
+                    <td>Both create responsive grids without media queries. <br><strong>auto-fill</strong>: Leaves empty tracks if there's extra space.<br><strong>auto-fit</strong>: Collapses empty tracks to stretch existing items to fill the row.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- LAB 4 & 5 CARD -->
+        <div class="card border-success shadow-sm my-4 mt-5 text-start">
+            <div class="card-header bg-success text-white fw-bold">Labs 4 &amp; 5: Grid Skeleton &amp; Gallery [50 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Architect multi-dimensional layouts for your client's content organization.</p>
+                <ol>
+                    <li class="mb-2"><strong>Skeleton:</strong> In your <code>&lt;main&gt;</code> section (or a specific page like an About page), use CSS Grid to create a 2-column layout (e.g., a Sidebar at <code>250px</code> and a Main Content area at <code>1fr</code>).</li>
+                    <li class="mb-2"><strong>Gallery:</strong> On a page with multiple images or product cards, create a responsive grid using <code>grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));</code>. Use the <code>gap</code> property (e.g., <code>20px</code>) to create space between items.</li>
+                    <li class="mb-2"><strong>Spanning:</strong> Use <code>grid-column: span 2;</code> to make one "featured" card stretch across the gallery.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>style.css</code>.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+          <figure class="mb-4 text-center">
+              <img src="/images/the-style-advanced-css-layout/figure-14.png" alt="CSS Grid Structure" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=CSS+Grid+Lines'">
+              <figcaption class="p-2 small text-muted text-center"><strong>Figure 7.4:</strong> CSS Grid Lines and Tracks</figcaption>
+          </figure>
+          <div class="card roadmap-card border-warning shadow-sm mt-5 mb-4 text-start">
+            <div class="card-header bg-warning text-dark fw-bold">E.O.P. Exam Tip:</div>
+            <div class="card-body small">
+                <p class="mb-0">Pay close attention to the difference between <code>auto-fill</code> and <code>auto-fit</code>. "Fill" fills with ghost columns; "Fit" fits the actual items to stretch across.</p>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: POSITIONING -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Positioning &amp; Z-Index</h2>
+        <p>Sometimes you need to break an element out of the normal flow and place it exactly where you want it on the screen.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">The <code>position</code> Property Values</h5>
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-4 text-start">
+            <thead class="bg-light">
+                <tr><th>Value</th><th>How it affects the element</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-bold"><code>static</code></td>
+                    <td>The default. It ignores <code>top</code>, <code>bottom</code>, <code>left</code>, and <code>right</code> coordinate offsets completely.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>relative</code></td>
+                    <td>Allows you to move it using top/left relative to its normal position, BUT it acts as an "anchor" parent for any absolute children inside it.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>absolute</code></td>
+                    <td>Removes the element from normal document flow entirely. It is positioned relative to its <strong>closest non-static positioned ancestor</strong>.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>fixed</code></td>
+                    <td>Glues an element to the viewport so it never moves when the user scrolls.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold text-success"><code>sticky</code></td>
+                    <td>Acts as 'relative' until it reaches a specific scroll threshold, then stays in place (like a sticky navbar).</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h5 class="fw-bold mt-4 text-primary">Stacking Order: <code>z-index</code></h5>
+        <p>Which CSS property controls the stacking order of overlapping elements on the Z-axis (front-to-back)? <code>z-index</code>! Higher numbers (like 1000) sit on top. And yes, a <code>z-index</code> CAN have a negative value (e.g., <code>-1</code>), which pushes the element behind the default background layer.</p>
+
+        <!-- LAB 6 CARD -->
+        <div class="card border-success shadow-sm my-4 mt-5 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 6: The Sticky Header [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Implement persistent navigation using advanced positioning to ensure client site usability.</p>
+                <ol>
+                    <li class="mb-2">Target your <code>&lt;header&gt;</code> or <code>&lt;nav&gt;</code> container in your CSS.</li>
+                    <li class="mb-2">Apply <code>position: sticky;</code> and <code>top: 0;</code> to anchor it to the top.</li>
+                    <li class="mb-2">Give it a <code>z-index: 1000;</code> to ensure it stays on top of all other content (like images) as the user scrolls.</li>
+                    <li class="mb-2">Ensure the sticky element has a solid background color so the text underneath doesn't make the links unreadable!</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>style.css</code> file.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+          <figure class="mb-0 text-center">
+              <img src="/images/the-style-advanced-css-layout/figure-06.png" alt="Z-Index visualization" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Z-Index+Stacking'">
+              <figcaption class="p-2 small text-muted text-center"><strong>Figure 7.5:</strong> Z-Index 3D Stacking Order</figcaption>
+          </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 6: RESPONSIVE UNITS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Responsive Sizing: Stop Using Pixels!</h2>
+        <p>What happens if a block element's width is set to <code>1000px</code>, but the user's screen is only 400px wide? The browser creates an annoying horizontal scrollbar. To fix this, modern web design relies on relative units and mathematical functions.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">The Relative Units</h5>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong><code>%</code> (Percentage):</strong> If a child div is set to <code>width: 50%</code>, it will take up half the width of its <strong>direct parent element</strong>.</li>
+            <li class="mb-2"><strong><code>em</code>:</strong> The <code>em</code> unit is relative to the font-size of its <strong>direct parent element</strong>.</li>
+            <li class="mb-2"><strong><code>rem</code>:</strong> Relative to the <strong>root (<code>&lt;html&gt;</code>) element</strong> font size.</li>
+            <li class="mb-0"><strong><code>vw</code> and <code>vh</code>:</strong> Viewport units. <code>vw</code> represents 1% of the browser window's width, and <code>vh</code> stands for Viewport Height.</li>
+        </ul>
+
+        <h5 class="fw-bold mt-4 text-primary">Responsive CSS Functions</h5>
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-4 text-start">
+            <thead class="bg-light"><tr><th>Function</th><th>Definition &amp; Exam Hint</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td class="fw-bold"><code>calc()</code></td>
+                    <td>Allows you to perform math directly in your stylesheet (e.g., subtracting pixels from percentages like <code>width: calc(100% - 40px);</code>).</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>clamp()</code></td>
+                    <td>Perfect for fluid typography. It allows font size to scale smoothly between a minimum floor and a maximum ceiling (e.g., <code>font-size: clamp(1rem, 2vw, 3rem);</code>).</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold"><code>aspect-ratio</code></td>
+                    <td>Maintains an element's proportions (like a 16:9 video) as it resizes responsively without distorting.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h5 class="fw-bold mt-4 text-primary">The Magic Image Fix</h5>
+        <p>What is the standard "magic fix" to ensure images never overflow their parent containers? Always set <code>max-width: 100%; height: auto;</code> globally on all images.</p>
+
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+          <div class="card roadmap-card border-warning shadow-sm mt-4 text-start">
+            <div class="card-header bg-warning text-dark fw-bold">Let's Discuss:</div>
+            <div class="card-body small">
+                <p class="mb-0">Why is a horizontal scrollbar considered the ultimate sin of User Experience design on a mobile phone?</p>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 7: MEDIA QUERIES -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Media Queries &amp; Mobile-First Design</h2>
+        <p>To truly change the layout based on the screen size, we use a <strong>Media Query</strong>. It is an "If-Then" statement for your website. <em>If</em> the screen matches a condition, <em>then</em> apply these specific CSS rules.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">The Mandatory HTML Tag</h5>
+        <p>Before any media query will work, you MUST have the viewport tag in your HTML head: <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code>. What does it do? It tells mobile devices not to zoom out, and to render the page at its actual device width!</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">Mobile-First Strategy</h5>
+        <p>The "Mobile-First" approach means coding styles for small screens first, then using <code>min-width</code> media queries to add complex layouts for larger screens. This forces you to prioritize content for users on the go.</p>
+
+        <pre class="p-3 border rounded shadow-sm mb-4 no-copy"><code>/* Mobile-First: Default styles apply to phones */
+.gallery { display: grid; grid-template-columns: 1fr; }
+
+/* Desktop: If you use (min-width: 1024px), the CSS inside will apply to screens 1024px and wider. */
+@media (min-width: 1024px) {
+  .gallery { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+/* Device specific triggers */
+@media (orientation: landscape) {
+  /* Detects if the user is holding their phone sideways */
+  .hero { height: 100vh; }
+}</code></pre>
+
+        <h5 class="fw-bold mt-4 text-primary">Breakpoints</h5>
+        <p>A "Breakpoint" refers to the pixel width where a media query triggers a layout change (e.g., 768px for tablets). The syntax to target screens 600px wide or smaller is: <code>@media (max-width: 600px)</code>.</p>
+
+        <!-- LAB 7, 8, 9 CARD -->
+        <div class="card border-success shadow-sm my-4 mt-5 text-start">
+            <div class="card-header bg-success text-white fw-bold">Labs 7-9: Breakpoints &amp; Refactoring [75 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Implement responsive breakpoints and refactor code to meet professional agency maintainability standards.</p>
+                <ol>
+                    <li class="mb-2"><strong>The Viewport:</strong> Verify that the Viewport Meta tag is present in the <code>&lt;head&gt;</code> of all your HTML files.</li>
+                    <li class="mb-2"><strong>Breakpoints:</strong> Add a media query (e.g., <code>@media (max-width: 768px)</code>). Inside, change your Flexbox Nav from a row to a <code>column</code>. Change your multi-column Grid layouts back to a 1-column layout (<code>grid-template-columns: 1fr;</code>).</li>
+                    <li class="mb-2"><strong>Refactor:</strong> Go through your entire <code>style.css</code>. Ensure all hard-coded colors are using <code>var(--variable)</code> and replace fixed pixel font sizes with <code>rem</code> or <code>clamp()</code>.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your cleaned up, responsive <code>style.css</code> file.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+         <figure class="mb-0 text-center">
+          <img src="/images/the-style-advanced-css-layout/figure-14.png" class="img-fluid rounded border shadow-sm w-100" alt="Breakpoints" onerror="this.src='https://placehold.co/600x400?text=Breakpoints'">
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 7.6:</strong> Responsive Breakpoints</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- MILESTONE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-12">
+        <h2 class="section-title mt-0 text-center">Final Architecture Audit</h2>
+        <p class="text-center mx-auto mb-4" style="max-width: 800px;">You have the colors, the fonts, and now the advanced layout logic. It is time to finalize the structural architecture of your Custom Website using Chrome Developer Tools.</p>
+
+        <!-- MILESTONE CARD -->
+        <div class="card border-primary shadow-sm mt-5 mx-auto text-start" style="max-width: 900px;">
+            <div class="card-header bg-primary text-white fw-bold">
+                🏆 Milestone: Project 3 Architecture [100 pts]
+            </div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Prove technical mastery of 1D and 2D responsive layouts across multiple device viewports for your Carson City client.</p>
+                <ol>
+                    <li class="mb-2"><strong>Integration:</strong> Finalize the layout for your entire Custom Website. Your navigation must use Flexbox, and your content organization must use CSS Grid. Ensure your images have <code>max-width: 100%</code>.</li>
+                    <li class="mb-2"><strong>Debugging:</strong> Use the <strong>Computed</strong> tab in DevTools to verify your box-sizing math and ensure margins are collapsing correctly.</li>
+                    <li class="mb-2"><strong>Mobile Polish:</strong> Use DevTools to simulate an iPhone. Write Media Queries to ensure there are ZERO horizontal scrollbars. Ensure all text is legible and buttons are large enough for thumbs.</li>
+                    <li class="mb-2"><strong>Peer QA:</strong> Load your site on an actual physical phone. Swap phones with a partner. Document and fix any horizontal scrolling bugs or overlapping text.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your completed Custom Website project folder.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINAL RECAP -->
+    <div class="row mt-5">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="final-recap">
+            <h2 class="section-title mt-0 text-primary fw-bold">The Final Download: Chapter Recap</h2>
+            <p>In this chapter, you learned how to take complete control over your webpage's layout. We explored the <strong>CSS Box Model</strong> to manage math and spacing reliably. You learned how to rip elements out of the flow using <strong>Absolute and Sticky Positioning</strong>. Finally, you deployed professional layout techniques by using <strong>Flexbox</strong> (for 1D centering and alignment) and <strong>CSS Grid</strong> (for complex 2D spanning) wrapped in <strong>Media Queries</strong> to build a responsive, mobile-first site that adapts to any device viewport.</p>
+        </section>
+        <p class="text-muted small mt-5">Copyright &copy; 2026 Danylle Miller Designs. Built for Carson High School.</p>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 d-flex flex-column justify-content-end pb-3 text-center">
+        <div class="card roadmap-card border-info mb-4 bg-white shadow-sm text-start">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-info"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <h6 class="card-title fw-bold small text-info mb-0 ms-2 text-uppercase">Guild Checkpoint</h6>
+            </div>
+            <p class="small mb-2" style="color: #495057;"><strong>Q1:</strong> Explain the difference between <code>display: none</code> and <code>visibility: hidden</code> in terms of document flow.</p>
+            <p class="small mb-2" style="color: #495057;"><strong>Q2:</strong> Why is it considered an industry best practice to build "Mobile-First" instead of "Desktop-First"?</p>
+            <p class="small mb-0" style="color: #495057;"><strong>Q3:</strong> Calculate the total width of a 300px box with 20px padding and a 10px border using `content-box` math.</p>
+          </div>
+        </div>
+        <a href="/year1/sights-sounds-making-it-pop-html-media.html" class="btn btn-primary w-100 shadow-sm fw-bold text-uppercase">Next: Chapter 8 &raquo;</a>
+      </div>
+    </div>
+
+    <!-- ENHANCED TURN-IN DROPBOX -->
+    <div class="card shadow border-success mx-auto mb-5 mt-5 text-start" style="max-width: 800px;" id="submission-zone">
+        <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+            <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>Student Assignment Dropbox</h4>
+            <span class="badge bg-light text-success shadow-sm" id="student-id-badge">Verifying...</span>
+        </div>
+        <div class="card-body p-4">
+            <form id="uploadForm">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
+                    <select id="uploadAssignment" class="form-select border-success" required>
+                        <option value="" disabled selected>Select an assignment...</option>
+                        <option value="ch7_lab1">Lab 1: Display Fixes (25 pts)</option>
+                        <option value="ch7_lab2_3">Labs 2 &amp; 3: Flexbox &amp; Centering (50 pts)</option>
+                        <option value="ch7_lab4_5">Labs 4 &amp; 5: Grid Skeleton &amp; Gallery (50 pts)</option>
+                        <option value="ch7_lab6">Lab 6: The Sticky Header (25 pts)</option>
+                        <option value="ch7_lab7_9">Labs 7-9: Responsiveness &amp; Refactoring (75 pts)</option>
+                        <option value="ch7_milestone">Milestone: Project 3 Architecture (100 pts)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">2. What type of upload is this?</label>
+                    <select id="uploadType" class="form-select border-primary bg-site-secondary">
+                        <option value="file">A Single File (e.g. Screenshot, Word Doc, ZIP)</option>
+                        <option value="folder">An Entire Folder (e.g. A Full Website Project)</option>
+                    </select>
+                </div>
+
+                <div class="mb-4" id="fileInputContainer">
+                    <label class="form-label fw-bold">3. Select File</label>
+                    <input type="file" id="fileInput" class="form-control" required>
+                </div>
+
+                <div class="mb-4 d-none" id="folderInputContainer">
+                    <label class="form-label fw-bold">3. Select Project Folder</label>
+                    <input type="file" id="folderInput" class="form-control" webkitdirectory directory multiple>
+                    <div class="form-text x-small text-danger fw-bold mt-1">Note: This will upload ALL files and sub-folders inside the folder you select, keeping your website links intact!</div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-success w-100 fw-bold py-3 shadow-sm" disabled>
+                    Upload to Teacher Server
+                </button>
+            </form>
+            
+            <div id="uploadProgress" class="progress mt-3 d-none shadow-sm" style="height: 25px;">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%;">0%</div>
+            </div>
+            <div id="uploadStatus" class="mt-3 d-none p-3 rounded small fw-bold text-center shadow-sm"></div>
+        </div>
+    </div>
+
+  </section>
+
+  <div id="footer-nav"></div>
+  <div id="footer-placeholder"></div>
+
+  <!-- ASSIGNMENT UPLOADER LOGIC -->
+  <script type="module" src="/js/assignment-uploader.js"></script>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

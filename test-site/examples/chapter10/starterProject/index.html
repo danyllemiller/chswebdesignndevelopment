@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Adoption Card</title>
+    <link rel="stylesheet" href="css/style.css">
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+
+    <div class="container">
+        <h1>DOM Detectives Agency</h1>
+        
+        <!-- The Suspect Card -->
+        <div class="pet-card">
+            <!-- Image Suspect -->
+            <img src="https://images.dog.ceo/breeds/retriever-golden/n02099601_124.jpg" alt="A Golden Retriever" class="pet-img">
+            
+            <div class="card-body">
+                <!-- Name Suspect -->
+                <h2 id="pet-name">Unknown Dog</h2>
+                
+                <p><strong>Age:</strong> 2 years</p>
+                
+                <!-- Hidden Fact Suspect -->
+                <p class="hidden-fact hidden">Fact: Loves to steal socks!</p>
+                
+                <!-- Form Input Suspects -->
+                <form class="adoption-form">
+                    <input type="text" placeholder="Your Name" id="adopter-name">
+                    <button type="button" id="adopt-btn">Adopt Me</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

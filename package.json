@@ -1,0 +1,16 @@
+{
+"name": "chs-guild-server",
+"version": "1.0.0",
+"description": "Professional Gradebook and Exam System for CHS Web Design",
+"main": "server.js",
+"scripts": {
+"start": "node server.js"
+},
+"dependencies": {
+"bcrypt": "^5.1.1",
+"express": "^4.19.2",
+"mysql2": "^3.9.7"
+},
+"author": "CHS Web Design",
+"license": "ISC"
+}

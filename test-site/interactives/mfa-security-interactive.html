@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 17 Interactive: Multi-Factor Authentication</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="/css/interactive.css" rel="stylesheet"/>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print"><div id="nav-placeholder"></div></div>
+
+  <section class="container-fluid my-5">
+    <div class="row"><div class="col-12 d-flex flex-column align-items-center">
+        
+        <nav class="mb-4 w-100 d-flex justify-content-start small fw-bold container">
+            <a href="the-future-data.html" class="text-decoration-none da-primary">
+                <i class="fas fa-angles-left me-1"></i> Back to Chapter 17 Reading
+            </a>
+        </nav>
+
+        <div id="interactive-module" class="d-flex justify-content-center w-100 py-4 mb-5">
+            <main class="container bg-white rounded-4 shadow-lg overflow-hidden border p-0 interactive-main">
+                <div class="row g-0 h-100 module-row">
+                    
+                    <div class="col-12 col-md-6 code-panel bg-dark text-white p-4 p-md-5 d-flex flex-column justify-content-center position-relative">
+                        <div class="position-absolute top-0 start-0 mt-3 ms-4 text-white-50 small text-uppercase fw-bold letter-spacing-wide">
+                            <i class="fas fa-shield-halved me-2"></i> Auth Logic
+                        </div>
+                        
+                        <div class="code-font fs-6 fs-md-5 lh-lg mt-4">
+                            <span class="code-segment step-hidden text-info" data-steps="1,2,3">function</span> <span class="code-segment step-hidden text-success" data-steps="1,2,3">loginUser</span><span class="code-segment step-hidden text-white" data-steps="1,2,3">(user) {</span><br>
+                            &nbsp;&nbsp;<div class="text-secondary d-inline-block" data-steps="2">// Factor 1: Knowledge</div><br>
+                            &nbsp;&nbsp;<span class="code-segment step-hidden text-warning" data-steps="2,3">require</span><span class="code-segment step-hidden text-white" data-steps="2,3">(user.password);</span><br><br>
+                            
+                            &nbsp;&nbsp;<div class="text-secondary d-inline-block" data-steps="3">// Factor 2: Possession</div><br>
+                            &nbsp;&nbsp;<span class="code-segment step-hidden text-warning" data-steps="3">require</span><span class="code-segment step-hidden text-white" data-steps="3">(user.smsPhoneCode);</span><br><br>
+                            
+                            &nbsp;&nbsp;<span class="code-segment step-hidden text-info" data-steps="1,2,3">return</span> <span class="code-segment step-hidden text-white" data-steps="1,2,3">grantAccess();</span><br>
+                            <span class="code-segment step-hidden text-white" data-steps="1,2,3">}</span>
+                        </div>
+
+                        <div class="mt-5 preview-wrapper rounded p-4 position-relative overflow-hidden bg-secondary bg-opacity-25 d-flex flex-column justify-content-center align-items-center">
+                            <div class="d-flex gap-4">
+                                <div class="text-center transition-all opacity-25" id="factor-1">
+                                    <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto shadow" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-asterisk text-warning fs-4"></i>
+                                    </div>
+                                    <small class="fw-bold">Password</small>
+                                </div>
+                                <div class="text-center transition-all opacity-25" id="factor-2">
+                                    <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto shadow" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-mobile-screen text-info fs-4"></i>
+                                    </div>
+                                    <small class="fw-bold">SMS Code</small>
+                                </div>
+                            </div>
+                            <div id="auth-status" class="mt-4 badge bg-danger text-white fs-6 transition-all opacity-0">Access Denied</div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 p-4 p-md-5 d-flex flex-column justify-content-between bg-white text-dark">
+                        <div>
+                            <div class="d-inline-block px-3 py-1 bg-success bg-opacity-10 text-success rounded-pill small fw-bold mb-4 text-uppercase letter-spacing-wide">Interactive Lesson</div>
+                            <h2 class="display-6 fw-bold da-primary mb-2 mt-0">Multi-Factor Auth</h2>
+                            <div class="d-flex gap-1 mb-5 mt-4" id="module-progress"></div>
+                            <div id="module-content" class="content-min-height"></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
+                            <button class="btn-prev btn text-secondary fw-semibold border-0"><i class="fas fa-arrow-left me-2"></i> Back</button>
+                            <button class="btn-next btn text-white bg-da-primary fw-semibold shadow-sm px-4 py-2">Next Step <i class="fas fa-arrow-right ms-2"></i></button>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div></div>
+  </section>
+
+
+  <script src="/js/interactive.js"></script>
+  <script>
+    const steps = [
+        { title: "Authentication", icon: "fa-lock", text: "Authentication is simply proving you are who you say you are. Historically, systems only checked one 'factor' to prove this." },
+        { title: "Factor 1: Knowledge", icon: "fa-brain", text: "The most common factor is something you <strong>know</strong>. This is your username and password. But passwords can be stolen in data breaches!" },
+        { title: "Factor 2: Possession", icon: "fa-mobile", text: "Multi-Factor Authentication (MFA) requires a second, different type of factor. Usually, this is something you <strong>have</strong>, like a text message code sent to your physical phone. Hackers can't steal your phone from across the globe!" }
+    ];
+    
+    const quiz = {
+        snippet: `<i class="fas fa-shield-check text-success me-2"></i> Secure Login System`,
+        question: "How is Multi-Factor Authentication (MFA) defined?",
+        options: [
+            { text: "A system requiring two or more methods of verification (e.g., password + text code)", isCorrect: true },
+            { text: "A system that requires users to change their password every 30 days", isCorrect: false },
+            { text: "A system that uses fingerprint scanning instead of a password", isCorrect: false }
+        ],
+        correctText: "Correct! MFA requires you to prove multiple independent 'factors' before granting access.",
+        incorrectText: "Look at the name: 'Multi-Factor'. It means you need more than one piece of proof."
+    };
+    
+    new InteractiveModule(steps, quiz, (step) => {
+        const f1 = document.getElementById('factor-1');
+        const f2 = document.getElementById('factor-2');
+        const status = document.getElementById('auth-status');
+        
+        if (step === 1) {
+            f1.className = "text-center transition-all opacity-25";
+            f2.className = "text-center transition-all opacity-25";
+            status.className = "mt-4 badge bg-danger text-white fs-6 transition-all opacity-100";
+            status.innerText = "Access Denied";
+        } else if (step === 2) {
+            f1.className = "text-center transition-all opacity-100";
+            f2.className = "text-center transition-all opacity-25";
+            status.className = "mt-4 badge bg-warning text-dark fs-6 transition-all opacity-100";
+            status.innerText = "Awaiting Factor 2";
+        } else if (step === 3) {
+            f1.className = "text-center transition-all opacity-100";
+            f2.className = "text-center transition-all opacity-100";
+            status.className = "mt-4 badge bg-success text-white fs-6 transition-all opacity-100";
+            status.innerText = "Access Granted";
+        }
+    });
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

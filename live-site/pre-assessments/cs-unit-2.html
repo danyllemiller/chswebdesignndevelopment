@@ -1,0 +1,116 @@
+<!-- File: pre-assessments/cs-unit-2.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Pre-Assessment: Unit 2 - The Connected World</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <!-- Strict DAC Styles -->
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/student-pages.css">
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body style="background-color: var(--site-secondary);">
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5 bg-white shadow-sm rounded" style="border-top: 6px solid var(--primary-color);">
+                <div class="spinner-border" style="color: var(--primary-color);" role="status"></div>
+                <p class="mt-3 fw-bold" style="color: var(--primary-color);">Connecting to Digital Arts Cloud...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRE-TEST DATA INJECTION & LAUNCH -->
+  <script type="module">
+    import { initPreTest } from '/js/preTestLogic.js';
+
+    // Unit 2 Diagnostic Pool
+    const unit2DiagPool = [
+        // --- CHAPTER 4: NETWORKS ---
+        { question: "What is the fundamental building block of a network, representing any physical device connected to it?", options: ["Node", "Link", "Router", "Packet"] },
+        { question: "Which network type is most appropriate for connecting devices within a single high school classroom?", options: ["LAN (Local Area Network)", "WAN (Wide Area Network)", "VPN", "SAN"] },
+        { question: "The global system of interconnected computer networks that links billions of devices worldwide is a:", options: ["WAN", "LAN", "Intranet", "Subnet"] },
+        { question: "Why is a network Switch considered 'smarter' than a network Hub?", options: ["It directs data only to the specific intended device", "It broadcasts data to every port", "It encrypts the data automatically", "It generates IP addresses"] },
+        { question: "Which device functions as the 'Post Office' of the internet, directing data between different networks?", options: ["Router", "Switch", "Hub", "Modem"] },
+        { question: "In the Client-Server model, which node is responsible for holding the data and 'serving' it upon request?", options: ["Server", "Client", "Router", "Switch"] },
+        { question: "What is the most common modern LAN topology, where all nodes connect independently to a central Switch?", options: ["Star", "Bus", "Ring", "Mesh"] },
+        { question: "Which highly reliable topology connects every node to every other node, allowing data multiple paths?", options: ["Mesh", "Star", "Ring", "Bus"] },
+        { question: "How many bits are used in a standard IPv4 address?", options: ["32 bits", "64 bits", "128 bits", "8 bits"] },
+        { question: "What is the primary role of the Domain Name System (DNS)?", options: ["Translating human-friendly URLs into machine-friendly IP addresses", "Encrypting user passwords", "Assigning dynamic IP addresses", "Hosting website files"] },
+        { question: "What happens to a large file, like a high-res video, before it is sent across the internet?", options: ["It is chopped into thousands of tiny packets", "It is compressed into a single zip file", "It is converted into a vector graphic", "It is sent as one massive continuous stream"] },
+        { question: "Which protocol is responsible for reassembling packets in the correct order once they arrive?", options: ["TCP", "IP", "HTTP", "DNS"] },
+        { question: "Which transmission medium uses light pulses to carry data at incredible speeds across oceans?", options: ["Fiber Optic", "Copper Wire", "Radio Waves", "Satellite"] },
+        { question: "What does the 'IP' in TCP/IP stand for?", options: ["Internet Protocol", "Internal Processing", "Intranet Path", "Information Packet"] },
+        { question: "What is the specific term for the delay or 'lag' in data transmission across a network?", options: ["Latency", "Bandwidth", "Throughput", "Packet Loss"] },
+
+        // --- CHAPTER 5: CYBERSECURITY THREATS ---
+        { question: "What is the broad term for any code specifically designed to exploit, damage, or gain unauthorized access to a computer system?", options: ["Malware", "Ransomware", "Adware", "Freeware"] },
+        { question: "Which type of malware is designed to spread by attaching itself to legitimate programs and requires human action to move between files?", options: ["Virus", "Worm", "Trojan Horse", "Spyware"] },
+        { question: "How does a 'Worm' differ from a traditional computer virus?", options: ["It can replicate and spread across a network automatically without human help", "It only targets Apple computers", "It disguises itself as a helpful program", "It cannot be removed by antivirus software"] },
+        { question: "Which type of malware is disguised as useful or legitimate software but contains a hidden malicious payload?", options: ["Trojan Horse", "Worm", "Virus", "Ransomware"] },
+        { question: "What is the primary goal of Ransomware?", options: ["To encrypt a victim's files and demand payment for the decryption key", "To secretly record a user's keystrokes", "To show unwanted pop-up advertisements", "To delete the operating system"] },
+        { question: "Which type of malware silently monitors user behavior, such as browsing history or keystrokes, without their knowledge?", options: ["Spyware", "Adware", "Worm", "Trojan"] },
+        { question: "What is 'Social Engineering' in the context of cybersecurity?", options: ["Manipulating people into giving up confidential information or performing actions", "Hacking into a social media company's servers", "Creating fake social media profiles", "Writing malicious code"] },
+        { question: "Which attack uses deceptive emails or websites that look like a trusted source to steal login credentials?", options: ["Phishing", "Spoofing", "Baiting", "Vishing"] },
+        { question: "What is 'Spoofing'?", options: ["Faking a sender's address or identity to make a message appear legitimate", "Leaving an infected USB drive in a parking lot", "Calling a victim on the phone to steal data", "Guessing a password multiple times"] },
+        { question: "According to the 'Weakest Link' theory, what is the most common vulnerability in a secure system?", options: ["Human beings and their behavior", "Outdated firewalls", "Weak Wi-Fi passwords", "Unpatched operating systems"] },
+        { question: "Which 'red flag' is most common in a phishing email designed to make you act without thinking?", options: ["A sense of extreme urgency or threats", "A generic greeting", "A request for a meeting", "A link to a secure website"] },
+        { question: "What is PII?", options: ["Personally Identifiable Information", "Public Internet Infrastructure", "Private IP Interface", "Primary Information Index"] },
+        { question: "What does 'DDoS' stand for?", options: ["Distributed Denial of Service", "Direct Data Output System", "Digital Domain Object Security", "Dual Disk Operating System"] },
+        { question: "What is a 'Botnet'?", options: ["A network of infected computers controlled by a single attacker", "A group of AI chatbots", "A secure network for banks", "A hardware firewall"] },
+        { question: "What is a 'Zero-Day' threat?", options: ["A vulnerability that has no known patch or fix yet", "An attack that takes zero seconds to execute", "A virus that deletes data at midnight", "A hacker with zero experience"] },
+
+        // --- CHAPTER 6: DEFENDING SYSTEMS ---
+        { question: "What is the process of verifying a user's identity before they can access a system?", options: ["Authentication", "Authorization", "Identification", "Encryption"] },
+        { question: "Which security principle suggests giving users only the access they need for their specific job?", options: ["Principle of Least Privilege", "Zero-Day Protocol", "Rule of Thirds", "Open Source Concept"] },
+        { question: "Multi-Factor Authentication (MFA) requires how many categories of evidence?", options: ["Two or more", "Only one", "Exactly three", "Four or five"] },
+        { question: "A fingerprint or facial scan is an example of which MFA category?", options: ["Something you are", "Something you have", "Something you know", "Something you do"] },
+        { question: "Receiving a code via SMS on your smartphone is which MFA category?", options: ["Something you have", "Something you know", "Something you are", "Something you buy"] },
+        { question: "A standard password or PIN falls into which MFA category?", options: ["Something you know", "Something you have", "Something you are", "Something you create"] },
+        { question: "What device acts as a security guard, inspecting data packets entering or leaving a network?", options: ["Firewall", "Router", "Modem", "Switch"] },
+        { question: "What technology creates a secure, encrypted 'tunnel' for data over public Wi-Fi?", options: ["VPN", "LAN", "DNS", "HTTP"] },
+        { question: "Scrambling plain text into unreadable gibberish is called:", options: ["Encryption", "Hashing", "Compressing", "Routing"] },
+        { question: "What two indicators in a web browser show that a connection is encrypted?", options: ["HTTPS and the Padlock icon", "A green background and HTTP", "A popup warning and a key", "The word SECURE in the title"] },
+        { question: "A legal document outlining rules for how technology can be used in an organization is an:", options: ["Acceptable Use Policy (AUP)", "Non-Disclosure Agreement (NDA)", "Digital Rights Management (DRM)", "End User License Agreement (EULA)"] },
+        { question: "What is the first step in an Incident Response plan after a breach is detected?", options: ["Containment", "Eradication", "Recovery", "Evaluation"] },
+        { question: "Which encryption standard is the current recommendation for home Wi-Fi?", options: ["WPA3", "WPA2", "WEP", "IPv6"] },
+        { question: "If data is stolen but encrypted, can a hacker read it?", options: ["No, not without the digital key", "Yes, if they use a VPN", "Yes, because encryption is just a password", "No, unless they use an Apple computer"] },
+        { question: "What does a Firewall look at to decide whether to block traffic?", options: ["The source IP, destination IP, and port", "The username and password", "The file size and extension", "The physical location of the server"] }
+    ];
+
+    const config = {
+        questions: unit2DiagPool,
+        questionCount: 15, 
+        chapterTitle: "Unit 2: The Connected World",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbzuZbL4UW8_bzLcp7bZJmcU9VSbofoerCk823K6e2cgLPIBCaTb5ulXlm0skQv49IG21Q/exec"
+    };
+    
+    initPreTest(config);
+
+  </script>
+</body>
+</html>

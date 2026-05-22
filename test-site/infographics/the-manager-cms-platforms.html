@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Infographic: Chapter 14 - The Content Manager</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <style>
+    .strategy-box { background: #f8f9fa; border: 2px dashed var(--primary-color); padding: 20px; border-radius: 12px; }
+    .vs-badge { background: var(--file-name-color); color: white; padding: 2px 10px; border-radius: 12px; font-weight: bold; font-family: var(--font-family-monospace); font-size: 0.8rem; }
+    .icon-feature { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+  <section class="container-ultrawide my-5">
+    <div class="row justify-content-center text-center">
+      <div class="col-12">
+        <h1 class="display-4 fw-bold text-primary mb-5 text-uppercase">The Content Manager</h1>
+
+        <!-- ROW 1: OWNERSHIP MODELS -->
+        <div class="row mb-5 align-items-center text-start">
+            <div class="col-md-6">
+                <h2 class="section-title mt-0 text-primary">Rental vs. Ownership</h2>
+                <p class="small text-muted">A Content Manager must choose how much control they need. Businesses almost always choose the <strong>Owner</strong> model for total freedom.</p>
+                <div class="strategy-box shadow-sm">
+                    <p class="mb-1 fw-bold text-danger">WordPress.com (The Rental):</p>
+                    <p class="x-small text-dark mb-3">Host manages security and updates. You are limited by <em>their</em> rules. Harder to customize.</p>
+                    <p class="mb-1 fw-bold text-success">WordPress.org (The Owner):</p>
+                    <p class="x-small text-dark mb-0">Open-Source software you host yourself. Total control over code, plugins, and monetization.</p>
+                </div>
+            </div>
+            <div class="col-md-6 text-center">
+                <div class="p-4 bg-site-secondary rounded border border-primary shadow-sm">
+                    <span class="icon-feature">🔑</span>
+                    <h5 class="fw-bold">Mission Control</h5>
+                    <p class="small">Access the Dashboard via:<br><code>mysite.com/wp-admin</code></p>
+                    <hr>
+                    <p class="x-small mb-0"><strong>Tech Stack:</strong> PHP (Language) + MySQL (Database Brain)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 2: THE BLOCK ARCHITECTURE -->
+        <div class="row mb-5 bg-light p-4 p-md-5 rounded border shadow-sm text-start">
+            <div class="col-12 mb-4 text-center">
+                <h2 class="fw-bold text-primary">Themes vs. Plugins</h2>
+                <p class="text-muted small">Content and design are separate. One database can wear many "outfits."</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="bg-white p-3 border border-primary rounded h-100">
+                    <span class="vs-badge">THE CLOTHES</span>
+                    <h5 class="fw-bold mt-2">Theme</h5>
+                    <p class="small mb-0">Controls the visual "Look" (CSS/Layout). Swapping a theme changes the design but <strong>never</strong> deletes your text or photos.</p>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="bg-white p-3 border border-primary rounded h-100">
+                    <span class="vs-badge">THE APPS</span>
+                    <h5 class="fw-bold mt-2">Plugin</h5>
+                    <p class="small mb-0">Adds new "Powers" (Functionality). Examples: WooCommerce (Store), Yoast (SEO), or Contact Forms. <em>Warning: Too many can slow the site down.</em></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 3: CONTENT CONTAINERS -->
+        <div class="row mb-5 text-start">
+             <div class="col-12 mb-3">
+                <h2 class="section-title mt-0 text-primary">Posts vs. Pages</h2>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm border-primary">
+                    <div class="card-header bg-primary text-secondary fw-bold">POSTS (Timely)</div>
+                    <div class="card-body small">
+                        <ul class="mb-0">
+                            <li>News, blog updates, or sales.</li>
+                            <li>Reverse-chronological order.</li>
+                            <li>Uses <strong>Categories & Tags</strong>.</li>
+                            <li>Appears in RSS feeds.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm border-info">
+                    <div class="card-header bg-info text-secondary fw-bold">PAGES (Timeless)</div>
+                    <div class="card-body small">
+                        <ul class="mb-0">
+                            <li>About Us, Contact, or Policies.</li>
+                            <li>Static and permanent.</li>
+                            <li>Lives in <strong>Navigation Menus</strong>.</li>
+                            <li>Usually does not use tags.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 4: PRO PROTOCOLS -->
+        <div class="row mb-5 text-start align-items-center">
+            <div class="col-md-7">
+                <h2 class="section-title mt-0 text-primary">The Manager's Protocols</h2>
+                <ul class="small">
+                    <li class="mb-2"><strong>Backups:</strong> The Golden Rule. Perform a full backup <u>before</u> any update.</li>
+                    <li class="mb-2"><strong>Roles:</strong> Assign permissions (Subscriber to Administrator) to protect site settings.</li>
+                    <li class="mb-2"><strong>SEO:</strong> Use <strong>Permalinks</strong> for readable URLs (<code>/news</code> vs <code>/?p=123</code>).</li>
+                    <li class="mb-0"><strong>Caching:</strong> Speed up the site by serving static copies of dynamic pages.</li>
+                </ul>
+            </div>
+            <div class="col-md-5">
+                <div class="p-3 bg-warning text-dark rounded border border-dark shadow-sm x-small">
+                    <strong>Vendor Lock-in:</strong> A risk of Wix/Squarespace where you don't own your code and cannot easily move your data to a new host. <strong>Solution:</strong> WordPress.org.
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mb-5 no-print">
+            <button onclick="window.print()" class="btn btn-outline-primary px-4 shadow-sm fw-bold">🖨️ Print Manager's Guide</button>
+            <a href="/year2/the-manager-cms-platforms.html" class="btn btn-primary px-5 shadow fw-bold ms-2">Return to Training</a>
+        </div>
+      </div>
+    </div>
+  </section>
+<div id="footer-nav"></div>
+<div id="footer-placeholder"></div>
+
+  <script>
+    (function() {
+        const url = "/includes/footer.html?v=" + new Date().getTime();
+        fetch(url).then(res => res.text()).then(html => {
+            const ph = document.getElementById("footer-placeholder");
+            if (ph) ph.innerHTML = html;
+            const scripts = ph.querySelectorAll("script");
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement("script");
+                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+        });
+    })();
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

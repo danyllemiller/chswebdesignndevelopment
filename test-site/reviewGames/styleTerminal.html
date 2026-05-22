@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Style Terminal | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  
+  <!-- Security Guard -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    .terminal-bg {
+        background-color: #1a1a1a;
+        border-radius: 12px;
+        border: 2px solid #333;
+        overflow: hidden;
+    }
+    
+    .preview-window {
+        background-color: #ffffff;
+        border-radius: 8px;
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.5s ease;
+        position: relative;
+    }
+
+    #target-element {
+        padding: 20px;
+        border: 2px solid #ccc;
+        text-align: left;
+        width: 80%;
+        transition: all 0.4s ease;
+    }
+
+    .code-editor-box {
+        background-color: #252526;
+        color: #d4d4d4;
+        font-family: 'Source Code Pro', monospace;
+        padding: 20px;
+        font-size: 1.1rem;
+    }
+
+    .prop { color: #9cdcfe; }
+    .val-input {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #444;
+        color: #ce9178;
+        outline: none;
+        width: 150px;
+        transition: border-bottom 0.3s;
+    }
+    .val-input:focus {
+        border-bottom-color: var(--primary-color);
+    }
+
+    .status-bar {
+        font-size: 0.8rem;
+        background: #111;
+        color: #888;
+        padding: 5px 15px;
+    }
+
+    .shake { animation: shake 0.4s both; }
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-2px, 0, 0); }
+        20%, 80% { transform: translate3d(4px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+    }
+
+    .hint-text {
+        font-size: 0.85rem;
+        color: #aaa;
+        font-style: italic;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div class="container my-5">
+    <div class="text-center mb-4">
+        <a href="/reviewGames/web1ReviewGames.html" class="text-decoration-none small fw-bold">&laquo; Back to Games</a>
+        <h1 class="gochi text-primary mt-3" style="font-size: 3.5rem;">Style Terminal <i class="fas fa-eye-dropper"></i></h1>
+        <p class="text-muted fw-bold">Chapter 6 Foundations. Calibrate the interface to bypass the security lock.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- THE PREVIEW (LEFT) -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between">
+                    <span>LIVE INTERFACE PREVIEW</span>
+                    <span id="levelIndicator">LVL 1</span>
+                </div>
+                <div class="card-body bg-secondary d-flex align-items-center justify-content-center p-4">
+                    <div class="preview-window w-100" id="previewWindow">
+                        <div id="target-element">
+                            <h4 id="target-heading">System Header</h4>
+                            <p id="target-paragraph">Encryption status: Pending calibration. Enter correct CSS values to modify this node.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white small italic text-center text-muted" id="missionGoal">
+                    Goal: Change the text color to pure white.
+                </div>
+            </div>
+        </div>
+
+        <!-- THE TERMINAL (RIGHT) -->
+        <div class="col-lg-7">
+            <div class="terminal-bg shadow-lg h-100 d-flex flex-column">
+                <div class="status-bar d-flex justify-content-between">
+                    <span>STATUS: CALIBRATING...</span>
+                    <span>CONNECTION: SECURE</span>
+                </div>
+                <div class="code-editor-box flex-grow-1">
+                    <div class="mb-3">
+                        <span style="color: #6a9955;">/* Security Node #<span id="nodeId">001</span> */</span>
+                    </div>
+                    <div class="mb-2"><span id="selectorDisplay" class="prop">h1</span> {</div>
+                    <div class="ms-4 mb-2">
+                        <span class="prop" id="propertyDisplay">color</span>: 
+                        <input type="text" id="styleInput" class="val-input" placeholder="value" autocomplete="off">;
+                    </div>
+                    <div>}</div>
+
+                    <div id="hintBox" class="mt-4 p-3 rounded bg-dark border border-secondary d-none">
+                        <span class="text-info fw-bold small">💡 COMMAND HINT:</span>
+                        <p class="hint-text mb-0 mt-1" id="hintContent"></p>
+                    </div>
+                </div>
+                <div class="p-3 bg-dark border-top border-secondary">
+                    <button id="applyBtn" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">APPLY STYLE CHANGES</button>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS MODAL -->
+  <div class="modal fade" id="successModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-5 border-success border-4">
+            <h1 class="display-1">🔑</h1>
+            <h2 class="gochi text-success">Interface Decrypted!</h2>
+            <p class="text-muted">Your mastery of CSS foundations has unlocked the terminal.</p>
+            <button class="btn btn-success fw-bold px-5" onclick="location.reload()">Reset Terminal</button>
+            <a href="/year1/the-clothes-intro-to-css.html" class="btn btn-outline-secondary mt-2">Return to Chapter 6</a>
+        </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <script>
+    const levels = [
+        {
+            id: "001",
+            selector: "body",
+            property: "background-color",
+            goal: "Change the background color to pure black using a Hex code.",
+            expected: ["#000", "#000000"],
+            hint: "Hex codes start with a # and use 6 digits (or 3 for shorthand).",
+            apply: (val) => { document.getElementById('previewWindow').style.backgroundColor = val; }
+        },
+        {
+            id: "002",
+            selector: "h4",
+            property: "color",
+            goal: "Set the heading to vibrant Blue using the HSL format.",
+            expected: ["hsl(240, 100%, 50%)"],
+            hint: "HSL format: hsl(Hue, Saturation%, Lightness%). Pure blue is 240 degrees.",
+            apply: (val) => { document.getElementById('target-heading').style.color = val; }
+        },
+        {
+            id: "003",
+            selector: "p",
+            property: "font-size",
+            goal: "Scale the text to 1.5 times the root size using relative units.",
+            expected: ["1.5rem"],
+            hint: "We use the 'rem' unit for accessible scaling relative to the root.",
+            apply: (val) => { document.getElementById('target-paragraph').style.fontSize = val; }
+        },
+        {
+            id: "004",
+            selector: "#target-element",
+            property: "text-align",
+            goal: "Move the interface content to the center of the card.",
+            expected: ["center"],
+            hint: "This property controls horizontal alignment: left, right, or center.",
+            apply: (val) => { document.getElementById('target-element').style.textAlign = val; }
+        },
+        {
+            id: "005",
+            selector: "a:hover",
+            property: "text-decoration",
+            goal: "Remove the default underline from the link text.",
+            expected: ["none"],
+            hint: "If you don't want a decoration, set it to 'none'.",
+            setup: () => {
+                const p = document.getElementById('target-paragraph');
+                p.innerHTML = 'Calibration complete. <a href="#" style="color:blue">Verify Connection</a>';
+            },
+            apply: (val) => { 
+                const a = document.querySelector('#target-paragraph a');
+                if(a) a.style.textDecoration = val;
+            }
+        }
+    ];
+
+    let currentLevel = 0;
+    const inputEl = document.getElementById('styleInput');
+    const applyBtn = document.getElementById('applyBtn');
+    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+
+    function loadLevel() {
+        const level = levels[currentLevel];
+        document.getElementById('nodeId').innerText = level.id;
+        document.getElementById('selectorDisplay').innerText = level.selector;
+        document.getElementById('propertyDisplay').innerText = level.property;
+        document.getElementById('missionGoal').innerText = `Goal: ${level.goal}`;
+        document.getElementById('levelIndicator').innerText = `NODE ${currentLevel + 1}`;
+        document.getElementById('hintContent').innerText = level.hint;
+        document.getElementById('hintBox').classList.add('d-none');
+        
+        inputEl.value = '';
+        inputEl.focus();
+
+        if (level.setup) level.setup();
+    }
+
+    function checkAnswer() {
+        const val = inputEl.value.trim().toLowerCase();
+        const level = levels[currentLevel];
+
+        // 1. Visual update (live feedback)
+        level.apply(val);
+
+        // 2. Logic check
+        if (level.expected.includes(val)) {
+            // SUCCESS
+            inputEl.style.color = "#198754";
+            applyBtn.innerText = "CALIBRATION SUCCESSFUL";
+            applyBtn.className = "btn btn-success w-100 fw-bold py-2";
+
+            setTimeout(() => {
+                currentLevel++;
+                if (currentLevel < levels.length) {
+                    applyBtn.innerText = "APPLY STYLE CHANGES";
+                    applyBtn.className = "btn btn-primary w-100 fw-bold py-2";
+                    inputEl.style.color = "";
+                    loadLevel();
+                } else {
+                    successModal.show();
+                }
+            }, 1500);
+        } else {
+            // FAILURE
+            document.querySelector('.terminal-bg').classList.add('shake');
+            document.getElementById('hintBox').classList.remove('d-none');
+            setTimeout(() => {
+                document.querySelector('.terminal-bg').classList.remove('shake');
+            }, 400);
+        }
+    }
+
+    applyBtn.addEventListener('click', checkAnswer);
+    inputEl.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') checkAnswer();
+    });
+
+    window.onload = loadLevel;
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

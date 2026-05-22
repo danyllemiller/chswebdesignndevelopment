@@ -1,0 +1,5 @@
+sudo pm2 restart guild-server
+sudo pm2 startup
+sudo pm2 save
+
+db password: chs_password

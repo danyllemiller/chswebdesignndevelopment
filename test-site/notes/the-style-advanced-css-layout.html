@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Guided Notes: Chapter 7 | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <!-- BootStrap & FontAwesome -->
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <link href="/css/guided-notes.css" rel="stylesheet"/>
+  
+  <!-- Security Guard -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    
+    <div class="row justify-content-center">
+      <div class="col-lg-9 col-xl-8">
+        
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+            <a href="/year1/the-style-advanced-css-layout.html" class="text-decoration-none small fw-bold">&laquo; Back to Chapter 7</a>
+            <div class="btn-group shadow-sm">
+                <button onclick="window.print()" class="btn btn-outline-primary fw-bold"><i class="fas fa-print me-1"></i> Print Worksheet</button>
+                <button id="copyNotebookBtn" class="btn btn-primary fw-bold" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy this worksheet code so you can paste it into your Digital Notebook!">
+                    <i class="fas fa-copy me-1"></i> Copy Code for Notebook
+                </button>
+            </div>
+        </div>
+
+        <!-- The Worksheet Content -->
+        <div class="card shadow-sm border-primary" id="worksheet-content">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h2 class="mb-0 gochi fs-1">Chapter 7: The "Style" (Advanced CSS &amp; Layout)</h2>
+                <p class="mb-0 fw-bold">Guided Notes</p>
+            </div>
+            <div class="card-body p-4 p-md-5 notes-container">
+                
+                <!-- Student Info Header -->
+                <div class="student-info-grid border-bottom pb-4">
+                    <div>
+                        <strong>Name:</strong> <span class="fill-blank" style="min-width: 200px;" contenteditable="true"></span>
+                    </div>
+                    <div>
+                        <strong>Date:</strong> <span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span>
+                    </div>
+                    <div>
+                        <strong>Class/Period:</strong> <span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span>
+                    </div>
+                </div>
+
+                <!-- Essential Question -->
+                <div class="bg-site-secondary p-3 rounded border border-primary mt-4 mb-4">
+                    <h5 class="fw-bold text-primary mb-2">&#127919; Essential Question:</h5>
+                    <p class="mb-0 fst-italic">How does a "Layout Architect" use mathematical logic and responsive frameworks to ensure a website remains functional, organized, and beautiful for users like Olivia on any device?</p>
+                </div>
+
+                <!-- PART 1 -->
+                <div class="section-heading mt-4">I. Foundations, Flow, and Selectors</div>
+                
+                <ul class="ps-3 mb-4">
+                    <li class="mb-2">
+                        &bull; <strong>Magic Reset:</strong> Modern developers often use <code>box-sizing: <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span></code> to make the Box Model more intuitive.
+                    </li>
+                </ul>
+
+                <h5 class="fw-bold mt-4 text-primary">The Box Model (Review)</h5>
+                <p class="mb-2">Every element is a box with four layers.</p>
+                <table class="table table-bordered table-sm small bg-white shadow-sm mb-4">
+                    <thead class="bg-light text-center">
+                        <tr>
+                            <th style="width: 20%;">Layer</th>
+                            <th style="width: 35%;">Location</th>
+                            <th style="width: 45%;">Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Padding</td>
+                            <td class="align-middle">Space <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> the border.</td>
+                            <td class="align-middle">The element's inner cushioning.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Margin</td>
+                            <td class="align-middle">Space <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> the border.</td>
+                            <td class="align-middle">The element's "personal space" that pushes other elements away.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Key Property</td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="width: 80%;" contenteditable="true"></span></td>
+                            <td class="align-middle">CSS property used to give a box rounded corners.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5 class="fw-bold mt-4 text-primary">The <code>display</code> Property (How Elements Flow)</h5>
+                <table class="table table-bordered table-sm small bg-white shadow-sm mb-4">
+                    <thead class="bg-light text-center">
+                        <tr>
+                            <th style="width: 25%;">Value</th>
+                            <th style="width: 25%;">Analogy</th>
+                            <th style="width: 50%;">Key Behavior</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold align-middle text-center"><code>display: block;</code></td>
+                            <td class="align-middle text-center">The <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span></td>
+                            <td class="align-middle">Takes up the full available width and stacks vertically (e.g., <code>&lt;div&gt;</code>, <code>&lt;p&gt;</code>).</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center"><code>display: inline;</code></td>
+                            <td class="align-middle text-center">The <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span></td>
+                            <td class="align-middle">Takes up only as much width as its content; ignores width/height settings.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center"><code>display: inline-block;</code></td>
+                            <td class="align-middle text-center">The <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span></td>
+                            <td class="align-middle">Sits in a line but DOES respect width and height settings.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5 class="fw-bold mt-4 text-primary">Advanced Selectors</h5>
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        &bull; <strong>Attribute Selector:</strong> Targets an element based on its HTML attributes (e.g., <code>input[type="<span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>"]</code>).
+                    </li>
+                    <li class="mb-0">
+                        &bull; <strong>Pseudo-class:</strong> Targets an element based on its position (e.g., <code>li:nth-child(<span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>)</code> targets every odd item).
+                    </li>
+                </ul>
+
+                <div class="mt-4 p-4 bg-light rounded border shadow-sm mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-comments me-2 text-primary"></i> Deep Dive Discussion</h5>
+                    <p class="small fw-bold text-primary mb-1">1. Block vs. Inline:</p>
+                    <p class="small text-muted mb-3">Why can you not give a simple <code>&lt;a&gt;</code> (link) tag a width of 200px without changing its display property?</p>
+                    <div class="cornell-summary mb-4 bg-white" contenteditable="true"></div>
+
+                    <p class="small fw-bold text-primary mb-1">2. Specificity:</p>
+                    <p class="small text-muted mb-3">Why does an ID selector (e.g., <code>#main-header</code>) win a "style fight" against an Attribute Selector (e.g., <code>[class="header"]</code>)?</p>
+                    <div class="cornell-summary bg-white" contenteditable="true"></div>
+                </div>
+
+                <div class="mt-4 p-4 bg-white rounded border border-primary shadow-sm mb-5">
+                    <h5 class="fw-bold text-primary mb-3"><i class="fas fa-laptop-code me-2"></i> Application Activity</h5>
+                    <p class="small fw-bold text-dark mb-1">1. Box Model Challenge:</p>
+                    <p class="small text-muted mb-3">You want a button to look bigger when clicked, but you don't want the button to take up any more physical space on the page. Which property should you increase: Padding or Margin? Explain why.</p>
+                    <ul class="list-unstyled mb-0 ms-2 small">
+                        <li class="mb-4">
+                            <strong>Answer:</strong> <span class="fill-blank mt-2 d-inline-block" style="min-width: 200px;" contenteditable="true"></span>
+                        </li>
+                        <li class="mb-0">
+                            <strong>(Explanation:</strong> <span class="fill-blank mt-2 d-inline-block" style="min-width: 400px;" contenteditable="true"></span> )
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- PART 2 -->
+                <div class="section-heading mt-4">II. Advanced Layout (Position, Flexbox, Grid)</div>
+                
+                <h5 class="fw-bold mt-4 text-primary">The <code>position</code> Property</h5>
+                <p class="mb-2">This property allows you to control an element's exact placement.</p>
+                <table class="table table-bordered table-sm small bg-white shadow-sm mb-4">
+                    <thead class="bg-light text-center">
+                        <tr>
+                            <th style="width: 20%;">Value</th>
+                            <th style="width: 20%;">Analogy / What it Does</th>
+                            <th style="width: 60%;">Key Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold align-middle text-center"><code>position: relative;</code></td>
+                            <td class="align-middle text-center">The "<span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span>"</td>
+                            <td class="align-middle">Tells its children, "You can position yourself relative to <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>"</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center"><code>position: absolute;</code></td>
+                            <td class="align-middle text-center">The "<span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span>"</td>
+                            <td class="align-middle">It is pulled from the page flow and positioned relative to its nearest <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> parent.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center"><code>position: fixed;</code></td>
+                            <td class="align-middle text-center">The "<span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span>"</td>
+                            <td class="align-middle">The element is "glued" to the <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> and won't move when scrolling.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5 class="fw-bold mt-4 text-primary">Modern Layout Tools</h5>
+                <table class="table table-bordered table-sm small bg-white shadow-sm mb-4">
+                    <thead class="bg-light text-center">
+                        <tr>
+                            <th style="width: 15%;">Tool</th>
+                            <th style="width: 30%;">Dimension</th>
+                            <th style="width: 25%;">Primary Properties</th>
+                            <th style="width: 30%;">Primary Goal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Flexbox</td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (row or column)</td>
+                            <td class="align-middle text-center"><code>justify-content</code>,<br><code>align-items</code></td>
+                            <td class="align-middle">Perfect alignment and <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> of items (e.g., centering).</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">CSS Grid</td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (rows and columns)</td>
+                            <td class="align-middle text-center"><code>grid-template-columns</code>,<br><code>gap</code></td>
+                            <td class="align-middle">Creating complex, <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> layouts (e.g., photo gallery).</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="mt-4 p-4 bg-light rounded border shadow-sm mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-comments me-2 text-primary"></i> Deep Dive Discussion</h5>
+                    <p class="small fw-bold text-primary mb-1">1. Absolute Positioning:</p>
+                    <p class="small text-muted mb-3">If a child element has <code>position: absolute</code> but its parent element is <code>position: static</code> (the default), where does the absolute element look for its anchor point?</p>
+                    <div class="cornell-summary mb-4 bg-white" contenteditable="true"></div>
+
+                    <p class="small fw-bold text-primary mb-1">2. Flexbox vs. Grid:</p>
+                    <p class="small text-muted mb-3">If you need to arrange three navigation links across a header, which tool should you use (Flexbox or Grid), and why?</p>
+                    <div class="cornell-summary bg-white" contenteditable="true"></div>
+                </div>
+
+                <div class="mt-4 p-4 bg-white rounded border border-primary shadow-sm mb-5">
+                    <h5 class="fw-bold text-primary mb-3"><i class="fas fa-laptop-code me-2"></i> Application Activity</h5>
+                    <p class="small fw-bold text-dark mb-1">1. Sticky Footer:</p>
+                    <p class="small text-muted mb-3">You want the site footer to always be visible at the bottom of the viewport, even if the content is short, and you want the header to take up the full available height. Write the two necessary properties for the <code>&lt;body&gt;</code> and the <code>&lt;main&gt;</code> element to achieve this "sticky footer" effect using Flexbox.</p>
+                    
+                    <div class="p-4 bg-light border rounded font-monospace small" contenteditable="true" style="outline: none;">
+                        body { <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> ; <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> ; }<br><br>
+                        main { <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> ; }
+                    </div>
+                </div>
+
+                <!-- PART 3 -->
+                <div class="section-heading mt-4">III. Interactivity and Responsiveness</div>
+                
+                <h5 class="fw-bold mt-4 text-primary">Pseudo-classes &amp; Transitions</h5>
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        &bull; <strong>Pseudo-class (<code>:</code>):</strong> Lets you style an element based on its <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (e.g., <code>:active</code>, <code>:focus</code>).
+                    </li>
+                    <li class="mb-3">
+                        &bull; <strong><code>transition</code>:</strong> The property that makes style changes <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (professional animations).
+                    </li>
+                    <li class="mb-0">
+                        &bull; <strong><code>box-shadow</code>:</strong> A property often combined with <code>:hover</code> to create a <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> effect, making an element appear to "lift up."
+                    </li>
+                </ul>
+
+                <h5 class="fw-bold mt-4 text-primary">Responsive Units</h5>
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        &bull; <strong><code>rem</code>:</strong> The <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> unit. It is relative to the font size of the <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> element.
+                    </li>
+                    <li class="mb-0">
+                        &bull; <strong><code>vh/vw</code>:</strong> Viewport units that are based on a percentage of the browser window's <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> or <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>.
+                    </li>
+                </ul>
+
+                <h5 class="fw-bold mt-4 text-primary">Media Queries</h5>
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        &bull; <strong>Definition:</strong> CSS "<span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>" statements that apply styles only if the screen is a certain size.
+                    </li>
+                    <li class="mb-0">
+                        &bull; <strong>Mobile-First:</strong> The strategy of designing the site for <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> screens first, and then using a media query (with <code>min-width</code>) to apply larger styles for desktops.
+                    </li>
+                </ul>
+
+                <div class="mt-4 p-4 bg-light rounded border shadow-sm mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-comments me-2 text-primary"></i> Deep Dive Discussion</h5>
+                    <p class="small fw-bold text-primary mb-1">1. Smooth Interaction:</p>
+                    <p class="small text-muted mb-3">Why is the transition property essential when styling a <code>:hover</code> state? What does the site look like if you change the color on hover without using transition?</p>
+                    <div class="cornell-summary mb-4 bg-white" contenteditable="true"></div>
+
+                    <p class="small fw-bold text-primary mb-1">2. Mobile-First Logic:</p>
+                    <p class="small text-muted mb-3">Explain the logic of a Mobile-First media query: Why do you set a style outside the query and then use <code>@media (min-width: 768px)</code> to set the desktop style?</p>
+                    <div class="cornell-summary bg-white" contenteditable="true"></div>
+                </div>
+
+                <div class="mt-4 p-4 bg-white rounded border border-primary shadow-sm mb-5">
+                    <h5 class="fw-bold text-primary mb-3"><i class="fas fa-laptop-code me-2"></i> Application Activity</h5>
+                    <p class="small fw-bold text-dark mb-1">1. Responsive Layout:</p>
+                    <p class="small text-muted mb-3">Write a Media Query rule that changes a <code>&lt;nav&gt;</code> bar from a vertical column on a phone to a horizontal row on a large screen.</p>
+                    
+                    <p class="small fw-bold text-muted mb-1">CSS Code:</p>
+                    <div class="p-4 bg-light border rounded font-monospace small" contenteditable="true" style="outline: none;">
+                        /* Mobile (Default Style) */<br>
+                        nav {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;display: flex;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;flex-direction: column;<br>
+                        }<br><br>
+                        /* 1. Write the Media Query for screens 1024px or wider */<br>
+                        @media <span class="fill-blank" style="min-width: 200px;" contenteditable="true"></span> {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;nav {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* 2. Change the flex direction to horizontal */<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flex-direction: <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/guided-notes.js"></script>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

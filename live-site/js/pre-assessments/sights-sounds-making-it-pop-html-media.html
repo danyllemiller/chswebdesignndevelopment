@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Pre-Assessment: Chapter 10 - Sights & Sounds</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/preTestLogic.js"></script>
+<script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        
+        <!-- The Exam Container (Managed by preTestLogic.js) -->
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5">
+                <div class="spinner-border text-info" role="status"></div>
+                <p class="mt-2 fw-bold">Connecting to Digital Arts Cloud...</p>
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Chapter 10 Diagnostic Pool (Balanced distractors to avoid "long-answer" bias)
+    const ch10DiagPool = [
+        { 
+            question: "You have a company logo with a transparent background. Which format should you choose to preserve that transparency?", 
+            options: ["JPG", "GIF", "PNG", "BMP"] 
+        },
+        { 
+            question: "A professional photographer wants to upload a 10MB photo to a homepage. What is the first step they should take?", 
+            options: [
+                "Optimize the file by resizing and compressing it within Photoshop.", 
+                "Rename the file to index.jpg to force automatic browser optimization.", 
+                "Upload the high-resolution file directly to the GitHub repository.", 
+                "Apply a CSS filter to hide the image until the page finishes loading."
+            ] 
+        },
+        { 
+            question: "Which image format is made entirely of math-based code, allowing it to stay sharp when scaled to the size of a billboard?", 
+            options: ["PNG", "JPG", "WebP", "SVG"] 
+        },
+        { 
+            question: "You are testing your site and notice an image has a small 'X' and displays the text 'Golden Retriever'. What is the browser showing you?", 
+            options: [
+                "The Alt Text (because the original image failed to load correctly).", 
+                "A browser error message suggesting a fix for the invalid image path.", 
+                "A search engine suggestion based on the page's metadata structure.", 
+                "The Title attribute used to provide extra info on a mouse hover."
+            ] 
+        },
+        { 
+            question: "A client wants their background video to play automatically when the page loads. Which attribute is mandatory to prevent browsers from blocking it?", 
+            options: ["loop", "autoplay", "muted", "controls"] 
+        },
+        { 
+            question: "Which Photoshop tool would you use to remove the cluttered background of a photo and focus only on the subject?", 
+            options: ["Brush Tool", "Crop Tool", "Paint Bucket", "Type Tool"] 
+        },
+        { 
+            question: "In a data table, you want one header cell to stretch across three columns. Which attribute do you apply to that <th> tag?", 
+            options: ["rowspan='3'", "width='300%'", "colspan='3'", "cellspacing='3'"] 
+        },
+        { 
+            question: "What is the standard resolution (DPI/PPI) for images intended specifically for web display?", 
+            options: ["300 DPI", "10 DPI", "72 to 96 DPI", "1200 DPI"] 
+        },
+        { 
+            question: "Why is it better to embed a YouTube video using an <iframe> rather than hosting the raw .mp4 file yourself?", 
+            options: [
+                "It allows YouTube's servers to handle the heavy processing and bandwidth costs.", 
+                "It prevents the video from using any bandwidth on the local user network.", 
+                "It ensures the video resolution is automatically upgraded to 4K resolution.", 
+                "It allows the video to play offline without requiring an active internet connection."
+            ] 
+        },
+        { 
+            question: "You need to add a small brand icon that appears in the browser tab next to your page title. This is called a:", 
+            options: ["Banner", "Thumbnail", "Favicon", "Hero Image"] 
+        },
+        { 
+            question: "Which 'POUR' principle is a developer following when they ensure a video has captions for hearing-impaired users?", 
+            options: ["Perceivable", "Operable", "Understandable", "Robust"] 
+        },
+        { 
+            question: "What happens to a Raster image (like a JPG) if you try to stretch it to be much larger than its original size?", 
+            options: [
+                "It becomes pixelated and blurry.", 
+                "It turns into an SVG format automatically to maintain its clarity.", 
+                "It remains perfectly sharp regardless of the new scale or dimensions.", 
+                "It changes into a PNG to preserve the original colors of the subject."
+            ] 
+        },
+        { 
+            question: "Which tag is used to provide the actual location (URL) of an audio file inside an <audio> container?", 
+            options: ["<link>", "<source>", "<data>", "<href>"] 
+        },
+        { 
+            question: "A developer wants to show a specific image of a movie poster before the user clicks 'Play' on a video. They should use this attribute:", 
+            options: ["preview", "thumbnail", "poster", "src"] 
+        },
+        { 
+            question: "If you are building a table for a monthly budget, which semantic tag should wrap the row containing the final 'Total' calculation?", 
+            options: ["<thead>", "<tbody>", "<tfoot>", "<caption>"] 
+        },
+        { 
+            question: "How does a Content Delivery Network (CDN) help a user in London load media faster from a site based in New York?", 
+            options: [
+                "It serves the media from a server physically located closer to London.", 
+                "It automatically translates the website text from American into British English.", 
+                "It compresses the HTML files into a single ZIP archive to increase download speed.", 
+                "It increases the user's Wi-Fi speed by boosting the signal of the local router."
+            ] 
+        },
+        { 
+            question: "Which CSS property is the modern way to ensure an image fills its container without being squished or distorted?", 
+            options: ["background-size: cover", "object-fit: cover", "image-scaling: fixed", "width: 100%"] 
+        },
+        { 
+            question: "In the 8-step SSL handshake, what does the browser check with a 'Certificate Authority' (CA)?", 
+            options: [
+                "If the website is who it claims to be and the certificate is valid.", 
+                "If the user's password meets the minimum complexity requirements for security.", 
+                "If the size of the images on the server is optimized for high-speed delivery.", 
+                "If the physical speed of the internet connection is fast enough for encryption."
+            ] 
+        },
+        { 
+            question: "To provide a text file containing subtitles for a video, you use the <track> tag to link to which file format?", 
+            options: [".txt", ".vtt", ".sub", ".srt"] 
+        },
+        { 
+            question: "What is the primary risk of using a very large, unoptimized image on a mobile website?", 
+            options: [
+                "It will consume too much of the user's data plan and slow down the page load.", 
+                "It will cause the font size of the text content to become much smaller visually.", 
+                "It will cause the colors of the image to disappear when viewed in sunlight.", 
+                "It will trigger a legal fine from the state privacy commission in Nevada."
+            ] 
+        },
+        { 
+            question: "Which image format was created by Google to provide better compression than JPG while maintaining high quality?", 
+            options: ["PNG-24", "WebP", "SVG", "GIF"] 
+        },
+        { 
+            question: "A table header cell (th) is visually different from a data cell (td) by default because it is:", 
+            options: ["Italicized and blue.", "Bold and centered.", "Underlined and red.", "Smaller and gray."] 
+        },
+        { 
+            question: "What is 'Lossy' compression best used for?", 
+            options: [
+                "Complex photographs where slight data loss isn't noticeable.", 
+                "Company logos that need to remain perfectly sharp at any scale.", 
+                "Text documents that require perfect character alignment for readability.", 
+                "Transparent graphics that need to overlay on top of complex backgrounds."
+            ] 
+        },
+        { 
+            question: "If you want to hide the 'Download' button on a native browser video player, you might use which attribute?", 
+            options: ["nodownload", "controlsList='nodownload'", "secure='true'", "private"] 
+        },
+        { 
+            question: "What does the attribute alt='' (empty alt text) tell a screen reader?", 
+            options: [
+                "Skip this image because it is purely decorative.", 
+                "Read the original filename of the image aloud to the visiting user.", 
+                "Describe the image as being 'empty' or having no visible subject matter.", 
+                "Throw a technical error message to alert the developer of a missing file."
+            ] 
+        },
+        { 
+            question: "Which Photoshop algorithm is specifically designed to keep edges sharp when 'down-sampling' (shrinking) an image?", 
+            options: ["Bicubic Smoother", "Nearest Neighbor", "Bicubic Sharper", "Bilinear"] 
+        },
+        { 
+            question: "If you use a table to structure your entire website layout instead of CSS Grid, what is a major negative consequence?", 
+            options: [
+                "It will break for screen readers and fail to be responsive on mobile.", 
+                "The site will load too fast for the browser to render the elements correctly.", 
+                "The site will be perfectly accessible for all users regardless of their device.", 
+                "The site will be flagged as fraudulent and fined by the W3C organization."
+            ] 
+        }
+    ];
+
+    const config = {
+        questions: ch10DiagPool,
+        questionCount: 10, 
+        chapterTitle: "Chapter 10 Diagnostic: Sights & Sounds",
+        // WEBHOOK URL: Points to your Google Apps Script Diagnostic Grader
+        webhookUrl: "https://script.google.com/macros/s/AKfycbyoX6MTNxThGNVQtIn4e_OgJoYUGUdPPKY9lbXf63h3H9fwGOxUeToxptyORS7LgWVNeg/exec"
+    };
+
+    window.onload = () => initPreTest(config);
+  </script>
+
+  <div id="footer-placeholder"></div>
+  <a href="#" class="back-to-top" title="Back to Top">🚀</a>
+
+  <footer class="navbar sticky-bottom bg-body-tertiary">
+   <div class="container"><p class="text-center w-100 small mb-0" style="padding: 12px;">Copyright - Danylle Miller Designs 2024</p></div>
+  </footer>
+  <script>
+    (function() {
+        const url = "/footer.html";
+        fetch(url).then(res => res.text()).then(html => {
+            const placeholder = document.getElementById("footer-placeholder");
+            if(placeholder) placeholder.innerHTML = html;
+            const scripts = placeholder.querySelectorAll("script");
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement("script");
+                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+        }).catch(err => console.error("Footer Load Error:", err));
+    })();
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

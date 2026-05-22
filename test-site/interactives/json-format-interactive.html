@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 17 Interactive: JSON Data</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="/css/interactive.css" rel="stylesheet"/>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print"><div id="nav-placeholder"></div></div>
+
+  <section class="container-fluid my-5">
+    <div class="row"><div class="col-12 d-flex flex-column align-items-center">
+        
+        <nav class="mb-4 w-100 d-flex justify-content-start small fw-bold container">
+            <a href="the-future-data.html" class="text-decoration-none da-primary">
+                <i class="fas fa-angles-left me-1"></i> Back to Chapter 17 Reading
+            </a>
+        </nav>
+
+        <div id="interactive-module" class="d-flex justify-content-center w-100 py-4 mb-5">
+            <main class="container bg-white rounded-4 shadow-lg overflow-hidden border p-0 interactive-main">
+                <div class="row g-0 h-100 module-row">
+                    
+                    <div class="col-12 col-md-6 code-panel bg-dark text-white p-4 p-md-5 d-flex flex-column justify-content-center position-relative">
+                        <div class="position-absolute top-0 start-0 mt-3 ms-4 text-white-50 small text-uppercase fw-bold letter-spacing-wide">
+                            <i class="fas fa-file-code me-2"></i> JSON Object
+                        </div>
+                        
+                        <div class="code-font fs-5 fs-md-4 lh-lg mt-4">
+                            <span class="code-segment step-hidden text-white" data-steps="1,2,3">{</span><br>
+                            &nbsp;&nbsp;<span class="code-segment step-hidden text-info" data-steps="2,3">"name"</span><span class="code-segment step-hidden text-white" data-steps="2,3">: </span><span class="code-segment step-hidden text-success" data-steps="3">"Alex"</span><span class="code-segment step-hidden text-white" data-steps="2,3">,</span><br>
+                            &nbsp;&nbsp;<span class="code-segment step-hidden text-info" data-steps="2,3">"score"</span><span class="code-segment step-hidden text-white" data-steps="2,3">: </span><span class="code-segment step-hidden text-warning" data-steps="3">95</span><span class="code-segment step-hidden text-white" data-steps="2,3">,</span><br>
+                            &nbsp;&nbsp;<span class="code-segment step-hidden text-info" data-steps="2,3">"passed"</span><span class="code-segment step-hidden text-white" data-steps="2,3">: </span><span class="code-segment step-hidden text-warning" data-steps="3">true</span><br>
+                            <span class="code-segment step-hidden text-white" data-steps="1,2,3">}</span>
+                        </div>
+
+                        <div class="mt-5 preview-wrapper rounded p-4 position-relative overflow-hidden bg-secondary bg-opacity-25 d-flex justify-content-center align-items-center">
+                            <div class="position-absolute top-0 end-0 mt-2 me-2 text-uppercase fw-bold preview-badge px-2 py-1 rounded text-dark">Syntax Rules</div>
+                            <div class="text-center text-white">
+                                <div id="json-rule-1" class="transition-all opacity-25 fw-bold mb-2">Use Curly Braces</div>
+                                <div id="json-rule-2" class="transition-all opacity-25 fw-bold mb-2 text-info">Quotes around Keys</div>
+                                <div id="json-rule-3" class="transition-all opacity-25 fw-bold text-success">Colons separate Keys and Values</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 p-4 p-md-5 d-flex flex-column justify-content-between bg-white text-dark">
+                        <div>
+                            <div class="d-inline-block px-3 py-1 bg-success bg-opacity-10 text-success rounded-pill small fw-bold mb-4 text-uppercase letter-spacing-wide">Interactive Lesson</div>
+                            <h2 class="display-6 fw-bold da-primary mb-2 mt-0">JSON Format</h2>
+                            <div class="d-flex gap-1 mb-5 mt-4" id="module-progress"></div>
+                            <div id="module-content" class="content-min-height"></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
+                            <button class="btn-prev btn text-secondary fw-semibold border-0"><i class="fas fa-arrow-left me-2"></i> Back</button>
+                            <button class="btn-next btn text-white bg-da-primary fw-semibold shadow-sm px-4 py-2">Next Step <i class="fas fa-arrow-right ms-2"></i></button>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div></div>
+  </section>
+
+
+  <script src="/js/interactive.js"></script>
+  <script>
+    const steps = [
+        { title: "Standard Formatting", icon: "fa-brackets-curly", text: "APIs need a standard way to send data over the internet so any computer can read it. <strong>JSON</strong> (JavaScript Object Notation) is the most popular format in the world." },
+        { title: "The Key", icon: "fa-key", text: "JSON uses a strict system called <strong>Key-Value pairs</strong>. The 'Key' is always a string wrapped in quotes (like <code>\"name\"</code> or <code>\"score\"</code>). It tells us what the data represents." },
+        { title: "The Value", icon: "fa-tag", text: "The 'Value' is the actual data attached to that key. It comes after the colon. Values can be text (strings), numbers, or booleans (true/false)." }
+    ];
+    
+    const quiz = {
+        snippet: `<span class="text-info">"username"</span> : <span class="text-success">"Student123"</span>`,
+        question: "How does JSON format and organize data?",
+        options: [
+            { text: "Using HTML tags like <body> and <p>", isCorrect: false },
+            { text: "Using numbered arrays like [1, 2, 3]", isCorrect: false },
+            { text: "Using Key-Value pairs separated by colons", isCorrect: true }
+        ],
+        correctText: "Spot on! JSON relies entirely on pairing a Key (the label) with a Value (the data).",
+        incorrectText: "Look at the snippet above. What relationship do those two items have?"
+    };
+    
+    new InteractiveModule(steps, quiz, (step) => {
+        const r1 = document.getElementById('json-rule-1');
+        const r2 = document.getElementById('json-rule-2');
+        const r3 = document.getElementById('json-rule-3');
+        
+        r1.className = step >= 1 ? "transition-all opacity-100 fw-bold mb-2" : "transition-all opacity-25 fw-bold mb-2";
+        r2.className = step >= 2 ? "transition-all opacity-100 fw-bold mb-2 text-info" : "transition-all opacity-25 fw-bold mb-2 text-info";
+        r3.className = step >= 3 ? "transition-all opacity-100 fw-bold text-success" : "transition-all opacity-25 fw-bold text-success";
+    });
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

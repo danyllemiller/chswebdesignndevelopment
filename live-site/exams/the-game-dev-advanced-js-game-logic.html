@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Summative Assessment: Chapter 10 - The Game Dev</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/examLogic.js?v=4"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        <!-- The Exam Container -->
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 fw-bold">Loading Secure Environment...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Chapter 10 Summative Question Pool (52 Questions - Correct Answers STRIPPED)
+    const ch10ExamPool = [
+        { question: "Which method tells the browser to perform an animation and requests a call to a function to update before the next repaint?", options: ["requestAnimationFrame()", "setInterval()", "setTimeout()", "animate()"] },
+        { question: "When setting up a game loop, in what order should the core functions generally execute?", options: ["Clear canvas -> Update logic -> Draw objects", "Update logic -> Draw objects -> Clear", "Draw objects -> Clear -> Update", "Clear -> Draw -> Update"] },
+        { question: "How do you stop a game loop when the player loses?", options: ["cancelAnimationFrame()", "stopAnimation()", "pause()", "break"] },
+        { question: "To prevent an object named player from moving off the left edge of the canvas, which condition should you check?", options: ["if (player.x < 0)", "if (player.x > 0)", "if (player.x == canvas.width)", "if (player.y < 0)"] },
+        { question: "What property of a keyboard event tells you the physical key that was pressed (like 'ArrowRight')?", options: ["event.code", "event.key", "event.which", "event.id"] },
+        { question: "In JavaScript ES6, what function runs automatically when a new instance of a class is created?", options: ["constructor()", "init()", "start()", "new()"] },
+        { question: "How do you create a brand new enemy from an Enemy class?", options: ["new Enemy()", "Enemy.create()", "Enemy.new()", "make Enemy"] },
+        { question: "If you have an array of asteroids, how do you remove the first one from the array after it is destroyed?", options: ["asteroids.shift()", "asteroids.pop()", "asteroids.splice(0)", "asteroids.remove(0)"] },
+        { question: "Which Canvas API method is used to render an image asset (like a character sprite) onto the screen?", options: ["ctx.drawImage()", "ctx.renderImage()", "ctx.putImageData()", "ctx.drawSprite()"] },
+        { question: "Axis-Aligned Bounding Box (AABB) collision detection requires checking the overlap of which properties?", options: ["x, y, width, and height", "x, y, radius", "top, bottom, center", "mass, velocity, force"] },
+        { question: "If player.y + player.height >= canvas.height evaluates to true, what is happening?", options: ["The player is touching the bottom of the canvas", "Player is at the top", "Player is at the left edge", "Player is centered"] },
+        { question: "To apply basic gravity to a jumping character, what must you do every frame?", options: ["Add a constant value to the character's vertical velocity", "Set Y to 0", "Subtract from velocity", "Multiply x by y"] },
+        { question: "How do you detect if a user has released a key to stop moving?", options: ["'keyup'", "'keydown'", "'keypress'", "'keyrelease'"] },
+        { question: "What mathematical object is required to generate a random spawning location for an item?", options: ["Math", "Random", "Number", "Geo"] },
+        { question: "If a game runs too fast on high-refresh-rate monitors, what concept is used to normalize the speed?", options: ["Delta Time", "Frame Rate", "Refresh Sync", "Speed Cap"] },
+        { question: "How can you completely clear the entire canvas element ctx?", options: ["ctx.clearRect(0, 0, canvas.width, canvas.height)", "ctx.clear()", "ctx.reset()", "canvas.innerHTML = ''"] },
+        { question: "To check for circular collision, which mathematical theorem is typically applied to find the distance between center points?", options: ["Pythagorean theorem", "Newton's Second Law", "Euler's method", "Pascal's Triangle"] },
+        { question: "What is the main advantage of using a Class to build game objects?", options: ["It encapsulates properties and methods for reuse", "It runs faster", "It uses less memory", "It prevents bugs"] },
+        { question: "When building a Start Screen, how do you prevent the main game loop from running until a button is clicked?", options: ["Wrap requestAnimationFrame inside a conditional state check", "Disconnect the monitor", "Use a CSS hidden property", "Delete the canvas"] },
+        { question: "What does Math.floor(Math.random() * 10) return?", options: ["An integer between 0 and 9", "A decimal between 0 and 10", "An integer between 1 and 10", "Exactly 10"] },
+        { question: "Which method is used to get the 2D drawing context for a canvas element?", options: ["getContext('2d')", "getDrawing('2d')", "initContext('2d')", "getCanvas()"] },
+        { question: "What happens if you don't call clearRect() or fillRect() at the start of every frame?", options: ["The previous frames' drawings will stay on the screen (smearing)", "The game will crash", "The canvas will automatically turn white", "The frame rate will double"] },
+        { question: "In a class, what does the 'this' keyword refer to?", options: ["The specific instance of the object being created/updated", "The entire window", "The canvas element", "The previous object in the array"] },
+        { question: "Which coordinate represents the top-left corner of the canvas?", options: ["(0, 0)", "(100, 100)", "(canvas.width, canvas.height)", "(-1, -1)"] },
+        { question: "To move an object to the right, what must you do to its X coordinate?", options: ["Add a positive value to x", "Subtract from x", "Add a positive value to y", "Set x to 0"] },
+        { question: "How do you define a new method inside a JavaScript class?", options: ["MethodName() { }", "function MethodName() { }", "var MethodName = () => { }", "new Method()"] },
+        { question: "What is 'Sprite Sheet' animation?", options: ["One large image containing multiple frames of animation", "A specific type of CSS file", "A 3D modeling technique", "A way to organize game code"] },
+        { question: "When using ctx.arc(), which parameter defines the size of the circle?", options: ["radius", "diameter", "width", "circumference"] },
+        { question: "Which property allows you to change the color of a shape before calling fill()?", options: ["ctx.fillStyle", "ctx.color", "ctx.backgroundColor", "ctx.strokeStyle"] },
+        { question: "How do you create an 'infinite' wrap-around effect on the X-axis?", options: ["if (x > width) x = 0", "if (x > width) x = width", "x = Math.random()", "canvas.style.overflow = 'wrap'"] },
+        { question: "Which array method is best for adding a newly spawned projectile to a list of active bullets?", options: ["bullets.push()", "bullets.shift()", "bullets.pop()", "bullets.join()"] },
+        { question: "What is the purpose of a 'Game State' variable (like gameState = 'menu')?", options: ["To control which screens or logic blocks are active", "To save the high score to the server", "To define the player's health", "To set the difficulty level"] },
+        { question: "Why is requestAnimationFrame better than setInterval for games?", options: ["It syncs with the monitor's refresh rate and pauses when the tab is inactive", "It allows for higher resolution", "It is easier to type", "It works without a GPU"] },
+        { question: "If you want a bullet to travel upwards, what should its Y-velocity be?", options: ["A negative number", "A positive number", "Zero", "Exactly 100"] },
+        { question: "What does the 'ctx.save()' and 'ctx.restore()' pair do?", options: ["Saves and resets the current drawing state (rotation, scale, colors)", "Saves the game progress to LocalStorage", "Downloads the canvas as a PNG", "Pauses the animation"] },
+        { question: "How do you rotate an object on the canvas?", options: ["Use ctx.rotate() after translating to the object's center", "Set the object.rotation property in CSS", "Rotate the entire HTML element", "You cannot rotate objects on a 2D canvas"] },
+        { question: "What is 'Hitbox'?", options: ["The invisible area used to calculate collisions", "A special button on the keyboard", "The name of the game engine", "A type of particles effect"] },
+        { question: "In circular collision detection, when has a collision occurred?", options: ["When the distance between centers is less than the sum of the radii", "When the x coordinates match", "When the objects touch the canvas edge", "When the distance is greater than 100"] },
+        { question: "Which event listener is used to track the mouse position on the canvas?", options: ["'mousemove'", "'click'", "'mousedown'", "'mouseenter'"] },
+        { question: "How do you draw text on the canvas?", options: ["ctx.fillText()", "ctx.drawText()", "ctx.write()", "canvas.innerHTML = 'text'"] },
+        { question: "What property determines the thickness of lines drawn with stroke()?", options: ["ctx.lineWidth", "ctx.strokeSize", "ctx.borderWidth", "ctx.weight"] },
+        { question: "Which method is used to start a path for drawing custom shapes?", options: ["ctx.beginPath()", "ctx.start()", "ctx.newPath()", "ctx.moveTo(0,0)"] },
+        { question: "What is 'Parallax Scrolling'?", options: ["Background layers moving at different speeds to create depth", "A bug in the frame rate", "A way to save image data", "Rotating the camera 360 degrees"] },
+        { question: "How do you check if a specific key (like 'Space') is currently being held down?", options: ["Store the key state in a boolean variable inside keydown/keyup listeners", "Check event.isPressed every frame", "Use ctx.getKeyState()", "JavaScript cannot detect held keys"] },
+        { question: "Which function is used to convert degrees to radians (required for Math.sin/cos)?", options: ["degrees * (Math.PI / 180)", "degrees * 180", "Math.toRadians(degrees)", "degrees / Math.PI"] },
+        { question: "What is 'Friction' in game physics?", options: ["Gradually reducing velocity over time", "The speed of the player", "A type of collision detection", "The gravity constant"] },
+        { question: "What does 'ctx.globalAlpha' control?", options: ["Transparency of everything drawn on the canvas", "The size of the canvas", "The speed of the game", "The volume of game music"] },
+        { question: "If you use `asteroids.filter(a => !a.destroyed)`, what are you doing?", options: ["Creating a new array containing only asteroids that are NOT destroyed", "Deleting all asteroids", "Sorting the asteroids by size", "Changing the color of destroyed asteroids"] },
+        { question: "What is 'Z-Index' equivalent in Canvas?", options: ["The order in which you draw (later items appear on top)", "A specific CSS property for the canvas", "The depth of a 3D object", "A method called ctx.setZIndex()"] },
+        { question: "Which property of a class instance allows it to 'know' how much health it has left?", options: ["A property defined in the constructor, like this.health", "A global variable called Health", "A CSS class", "The index in the array"] },
+        { question: "How do you make an object 'bounce' off the bottom of the canvas?", options: ["velocity.y *= -1", "velocity.y = 0", "y = 0", "delete object"] },
+        { question: "What is the primary purpose of 'Particle Systems' in games?", options: ["To create effects like fire, smoke, or explosions using many small objects", "To manage player inventory", "To handle database connections", "To compress large image files"] }
+    ];
+
+    const examConfig = {
+        questions: ch10ExamPool,
+        questionCount: 52, 
+        chapterTitle: "Chapter 10: The Game Dev",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbyoX6MTNxThGNVQtIn4e_OgJoYUGUdPPKY9lbXf63h3H9fwGOxUeToxptyORS7LgWVNeg/exec"
+    };
+
+    window.onload = () => initExam(examConfig);
+  </script>
+  
+<div id="footer-placeholder"></div>
+
+  <script>
+    (function() {
+        var url = "/includes/footer.html?v=" + new Date().getTime();
+        fetch(url)
+            .then(res => res.text())
+            .then(html => {
+                var ph = document.getElementById("footer-placeholder");
+                if (ph) ph.innerHTML = html;
+            });
+    })();
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

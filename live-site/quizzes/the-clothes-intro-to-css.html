@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Practice Quiz: Chapter 8 - The "Clothes"</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <!-- Auth Guard formats the navigation menus! -->
+  <script type="module" src="/js/auth-guard.js"></script>
+  <script src="/js/quizLogic.js"></script>
+</head>
+<body>
+<div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        <hgroup class="mb-5 border-bottom pb-3 text-center">
+          <h1 class="display-5 fw-bold text-primary">Chapter 8 Skill Practice</h1>
+          <p class="lead text-muted">20 Fresh Questions to Master CSS Foundations &amp; Syntax</p>
+        </hgroup>
+
+        <!-- Quiz Container -->
+        <div id="quiz-questions" class="mb-5 text-start">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Building your practice session...</p>
+            </div>
+        </div>
+
+        <!-- Four-Button Navigation -->
+        <div class="row text-center g-3 mt-5 no-print border-top pt-4">
+            <div class="col-6 col-md-3">
+                <a href="/year1/the-clothes-intro-to-css.html" class="btn btn-outline-primary w-100 small rounded-pill py-2">Back to Lesson</a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="/techTalkA-Zguide/the-clothes-intro-to-css.html" class="btn btn-outline-primary w-100 small rounded-pill py-2">Tech Talk A-Z</a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="/toLongDidntRead/the-clothes-intro-to-css.html" class="btn btn-outline-primary w-100 small rounded-pill py-2">TL;DR Version</a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="/infographics/the-clothes-intro-to-css.html" class="btn btn-outline-primary w-100 small rounded-pill py-2">Infographics</a>
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Chapter 8 PRACTICE Pool: 20 Unique Questions different from the Exam
+    const practicePool = [
+        { question: "In the rule 'h1 { color: blue; }', which part is considered the 'Declaration'?", options: ["h1", "{ color: blue; }", "color: blue;", "color"], correct: 2 },
+        { question: "Which color is represented by the hexadecimal code #00FF00?", options: ["Pure Blue", "Pure Red", "Pure Green", "Black"], correct: 2 },
+        { question: "If you want to comment out a block of CSS that covers three lines, what syntax do you use?", options: ["// Line 1 // Line 2", "/* Line 1 Line 2 */", "<!-- Line 1 -->", "# Line 1"], correct: 1 },
+        { question: "What is the primary drawback of using Inline Styles (style='...') throughout your site?", options: ["They are too fast.", "They make the CSS file too small.", "They are hard to update globally and create messy HTML.", "They don't support colors."], correct: 2 },
+        { question: "If a custom font name has a space, like 'Open Sans', how must it be written in the font-family stack?", options: ["Open-Sans", "OpenSans", "'Open Sans' (inside quotes)", "open_sans"], correct: 2 },
+        { question: "Which CSS property is used to control the thickness of text (e.g., making it Bold)?", options: ["font-style", "text-decoration", "font-weight", "text-transform"], correct: 2 },
+        { question: "Which selector targets a paragraph only when it is the very first child of its parent?", options: ["p:first-child", "p:only-child", "p:start", "p:first-of-type"], correct: 0 },
+        { question: "What is the 'Specificity Score' of a basic Class selector compared to a basic Element selector?", options: ["Classes are weaker.", "They are equal.", "Classes are stronger (10 pts vs 1 pt).", "Elements are the strongest."], correct: 2 },
+        { question: "Which property allows you to change all text to uppercase visually without changing the HTML source?", options: ["text-style: uppercase;", "font-variant: caps;", "text-transform: uppercase;", "text-decoration: caps;"], correct: 2 },
+        { question: "In the font stack 'Arial, Helvetica, sans-serif', which font acts as the final 'Safety Net'?", options: ["Arial", "Helvetica", "sans-serif", "The browser decides randomly"], correct: 2 },
+        { question: "Which unit is a 'Viewport Unit' that changes based on the height of the browser window?", options: ["vw", "rem", "vh", "px"], correct: 2 },
+        { question: "How do you group h1 and h2 tags so they both have the same red color?", options: ["h1 + h2 { color: red; }", "h1 h2 { color: red; }", "h1, h2 { color: red; }", "h1 .h2 { color: red; }"], correct: 2 },
+        { question: "Which pseudo-class is best for providing visual feedback that a button can be clicked?", options: [":visited", ":focus", ":hover", ":link"], correct: 2 },
+        { question: "Which property is used to create space between the characters in a word?", options: ["word-spacing", "line-height", "letter-spacing", "text-indent"], correct: 2 },
+        { question: "Which property makes an entire image 50% see-through?", options: ["transparency: 0.5;", "alpha: 50%;", "opacity: 0.5;", "filter: blur(5px);"], correct: 2 },
+        { question: "Which attribute selector targets only anchor tags whose link ends specifically with '.pdf'?", options: ["a[href^='.pdf']", "a[href*='.pdf']", "a[href$='.pdf']", "a[href='.pdf']"], correct: 2 },
+        { question: "What is the result of using the selector 'article p' (with a space)?", options: ["Targets only direct children.", "Targets any paragraph that is a descendant of an article.", "Targets only the first paragraph.", "Targets both articles and paragraphs."], correct: 1 },
+        { question: "Which pseudo-element allows you to style the very first letter of a paragraph to be larger?", options: ["::first-line", "::initial", "::first-letter", "::large-cap"], correct: 2 },
+        { question: "If two rules have the exact same specificity and target the same element, which one does the browser pick?", options: ["The one written first.", "The one with the most properties.", "The one written last (lower in the file).", "It ignores both."], correct: 2 },
+        { question: "Which property allows you to vertically align an icon in the middle of a line of text?", options: ["text-align: middle;", "vertical-align: middle;", "float: center;", "display: middle;"], correct: 1 }
+    ];
+
+    // Initialize using the standard engine logic
+    window.onload = () => initQuiz(practicePool);
+  </script>
+
+<div id="footer-nav"></div>
+<div id="footer-placeholder"></div>
+
+  <footer class="navbar  bg-body-tertiary border-top mt-5">
+   <div class="container text-center">
+    <p class="w-100 small mb-0 p-3">
+     Copyright - Danylle Miller Designs 2024
+    </p>
+   </div>
+  </footer>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

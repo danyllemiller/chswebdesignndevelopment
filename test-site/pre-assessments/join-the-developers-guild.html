@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Pre-Assessment: Chapter 1 - The Developer's World</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module">
+    import { initPreTest } from "/js/preTestLogic.js";
+    window.initPreTest = initPreTest;
+  </script>
+<script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <!-- Back to Lesson Link -->
+    <nav class="mb-4 d-flex justify-content-between small fw-bold no-print">
+        <a href="/year1/chapter_01.html" class="text-decoration-none text-primary">&laquo; Back to Lesson</a>
+        <span class="text-muted text-uppercase tracking-widest">Diagnostic</span>
+    </nav>
+
+    <div id="exam-container">
+        <div class="text-center p-5">
+            <div class="spinner-border text-info"></div>
+            <p class="mt-2 fw-bold text-primary">Syncing Guild Diagnostic Environment...</p>
+        </div>
+    </div>
+  </section>
+
+  <script>
+    // EXPANDED 32-QUESTION DIAGNOSTIC POOL FOR COMBINED CHAPTER 1
+    // Note: The correct answer is ALWAYS placed at index 0 to exactly match Code.gs. 
+    // The preTestLogic.js will automatically shuffle these options for the student.
+    const diagPool = [
+        { question: "What does the acronym CTSO stand for (e.g., SkillsUSA or FBLA)?", options: ["Career and Technical Student Organization", "Computer Technology Software Operation", "Coding and Typing Skills Outline", "College Tech System Online"] },
+        { question: "What are 'Soft Skills' in the tech industry?", options: ["Communication, teamwork, empathy, and problem-solving.", "Writing HTML and CSS code.", "Fixing hardware and servers.", "Using design software like Photoshop."] },
+        { question: "Which Career 'Class' is responsible for writing the code (HTML/CSS/JS) that runs locally in the browser?", options: ["Front-End Developer", "Back-End Developer", "QA Tester", "Database Administrator"] },
+        { question: "What is the 'Project Triangle' rule for building an MVP (Minimum Viable Product)?", options: ["You can only pick two: Fast, Cheap, or Good.", "Always choose the most expensive option.", "Speed is the only thing that matters.", "Clients prefer cheap and slow projects."] },
+        { question: "What is the mandatory, non-negotiable filename for the homepage of a professional website?", options: ["index.html", "home.html", "main.html", "start.html"] },
+        { question: "What is the physical network of cables, routers, and servers connecting the globe called?", options: ["The Internet", "The World Wide Web", "The Intranet", "The Cloud"] },
+        { question: "What system acts as the 'phone book' of the internet, translating human-readable domain names into numerical IP addresses?", options: ["DNS (Domain Name System)", "HTTP (Hypertext Transfer Protocol)", "W3C (World Wide Web Consortium)", "CTSO (Career and Technical Student Organization)"] },
+        { question: "In web architecture, your browser requests files and a powerful remote computer delivers them. What is this model called?", options: ["The Client-Server Model", "Two computers fighting over the same connection.", "A client paying a developer to build a website.", "A server saving data to a local flash drive."] },
+        { question: "What cryptographic mechanism does a website need to establish a secure, encrypted HTTPS connection?", options: ["An SSL Certificate", "A Content Delivery Network (CDN)", "A fast IP Address", "A Private Intranet"] },
+        { question: "Which cloud hosting model is analogous to a 'Take-and-Bake' pizza, where you rent raw hardware but configure the operating system yourself?", options: ["IaaS (Infrastructure as a Service)", "PaaS (Platform as a Service)", "SaaS (Software as a Service)", "DaaS (Database as a Service)"] },
+        { question: "Which core web language is considered the 'Bones' or structural foundation of a webpage?", options: ["HTML (HyperText Markup Language)", "CSS", "JavaScript", "Python"] },
+        { question: "Arranging elements on a page by size and color so the user's eye is naturally guided to the most important information first is known as:", options: ["Visual Hierarchy", "Search Engine Optimization", "Spamdexing", "Rubber Ducking"] },
+        { question: "Automatic legal protection for original creative works (like code, photos, or text) that you create is called:", options: ["Copyright", "Trademark", "Patent", "Fair Use"] },
+        { question: "Deceptive techniques used to artificially boost a website's ranking on search engines (like keyword stuffing or invisible text) are called:", options: ["Spamdexing", "Search Engine Optimization (SEO)", "Phishing", "Hashing"] },
+        { question: "What sociological principle proves that designing for marginalized users (like adding alt-text for the blind) inherently makes the web better for everyone?", options: ["The Curb Cut Effect", "The Magic Triangle", "The Agile Methodology", "The Client-Server Model"] },
+        { question: "What is the fundamental difference between the Internet and the World Wide Web?", options: ["The Internet is the physical infrastructure; the Web is a software service that runs on it.", "The Web is the physical hardware; the Internet is the software.", "They are exactly the same thing.", "The Internet is only for emails; the Web is for videos."] },
+        { question: "A restricted, internal network only for members of a specific organization (like a company's employees) is called an:", options: ["Intranet", "Extranet", "ARPANET", "Dark Web"] },
+        { question: "Who is credited with inventing the World Wide Web in 1989?", options: ["Tim Berners-Lee", "Bill Gates", "Steve Jobs", "Mark Zuckerberg"] },
+        { question: "What does the 'W3C' (World Wide Web Consortium) do?", options: ["Develops the open standards (like HTML/CSS) to ensure websites work correctly in all browsers.", "Sells domain names to businesses.", "Provides cloud hosting for websites.", "Arrests hackers on the Dark Web."] },
+        { question: "What is an IP Address?", options: ["A unique numerical coordinate assigned to every device on a network.", "The password for a Wi-Fi network.", "The physical address of a server building.", "The cost of a domain name."] },
+        { question: "Which global non-profit organization manages the rules for Domain Name registrars?", options: ["ICANN", "W3C", "IEEE", "IETF"] },
+        { question: "What is the primary purpose of a CDN (Content Delivery Network)?", options: ["It stores copies of static files on global edge servers to speed up loading times for users.", "It creates secure passwords for users.", "It writes CSS code automatically.", "It deletes old files from a database."] },
+        { question: "Which web language provides the 'Clothes' (Style and Appearance) of a website?", options: ["CSS", "HTML", "JavaScript", "Python"] },
+        { question: "Which web language provides the 'Brains' (Interactivity and Logic) of a website?", options: ["JavaScript", "HTML", "CSS", "SQL"] },
+        { question: "Which career role focuses primarily on visual aesthetics (UI) and user psychology (UX) to create a frictionless journey?", options: ["UI/UX Designer", "Database Administrator", "DevOps Engineer", "QA Tester"] },
+        { question: "What do you call an elite developer who has mastered both the Front-End interface and the Back-End database architecture?", options: ["Full-Stack Developer", "Front-End Developer", "Back-End Developer", "Project Manager"] },
+        { question: "Which debugging technique involves a developer articulating their code line-by-line to an inanimate object to illuminate logic errors?", options: ["Rubber Duck Debugging", "Spamdexing", "Client-Server Modeling", "Agile Sprints"] },
+        { question: "Why must web developers NEVER use spaces in their file or folder names?", options: ["Because web servers process spaces as broken characters; developers must use hyphens instead.", "Because spaces take up too much memory on the hard drive.", "Because HTML tags don't allow spaces.", "Because Google penalizes spaces in SEO."] },
+        { question: "What is the industry term for deceptive UI tricks designed to manipulate users into clicking things they did not intend to?", options: ["Dark Patterns", "Visual Hierarchies", "Creative Commons", "White Space"] },
+        { question: "The legal contract professionals sign to protect a company's Trade Secrets is called an:", options: ["NDA (Non-Disclosure Agreement)", "SSL Certificate", "ICANN Registration", "Open Source License"] },
+        { question: "Which nationally recognized organization acts as a 'cheat code' for your career by providing leadership training and technical competitions?", options: ["A CTSO (like SkillsUSA or FBLA)", "W3C (World Wide Web Consortium)", "ICANN", "IEEE"] },
+        { question: "According to the Agile Project Triangle, every project balances Time (Fast), Cost (Cheap), and Quality (Good). What is the golden rule?", options: ["You can only pick TWO.", "Always choose the most expensive option.", "Speed is the only thing that matters.", "Clients prefer cheap and slow projects."] }
+    ];
+
+    const config = {
+        questions: diagPool,
+        questionCount: 32, // Updated to test all 32 questions perfectly matching Code.gs
+        chapterTitle: "Chapter 1 Diagnostic",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbzgJFP8F23d1C8UtIT1jG-eosRq1YBaA2dfqCIQnPMuZeAfGd1gVPYrObO8UQgkIb3atQ/exec"
+    };
+
+    window.onload = () => initPreTest(config);
+  </script>
+
+<div id="footer-placeholder"></div>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

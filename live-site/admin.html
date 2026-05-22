@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Migration Hub | Guild Master</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        /** * SUPER SHIELD: This block prevents the 21 data files from crashing 
+         * or interfering with the dashboard logic.
+         */
+        window.appId = "1:662051088920:web:3b05cb890d834c0b9cb16d";
+        window.migrationPool = [];
+        
+        // Disable automatic game startup functions found in data files
+        window.loadGameData = () => { console.log("Shield: Prevented local loadGameData from running."); };
+        window.migrateDataToCloud = () => { console.log("Shield: Prevented local migrate function from overwriting dashboard."); };
+        window.startBulkMigration = () => { console.log("Shield: Prevented local bulk function from overwriting dashboard."); };
+        
+        // Mock game engines to prevent "undefined" errors
+        window.Jeopardy = { setup: () => {} };
+        window.Hollywood = { setup: () => {} };
+        window.Millionaire = { setup: () => {} };
+        window.Smarter = { setup: () => {} };
+        window.WordGames = { setup: () => {} };
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+        body { font-family: 'Fira Code', monospace; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+    <!-- Auth Guard formats the navigation menus! -->
+    <script type="module" src="/js/auth-guard.js"></script>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+</head>
+<body class="bg-slate-900 text-slate-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-bold text-orange-400 mb-2">Guild Master Seeder</h1>
+            <p class="text-slate-400 text-sm">Pushing 21 files to Firestore</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="glass p-6 rounded-2xl border-l-4 border-blue-500">
+                <p class="text-xs uppercase tracking-widest text-slate-500">Questions in Pool</p>
+                <h2 id="pool-count" class="text-4xl font-bold text-white">0</h2>
+            </div>
+            <div class="glass p-6 rounded-2xl border-l-4 border-orange-500">
+                <p class="text-xs uppercase tracking-widest text-slate-500">Status</p>
+                <h2 id="upload-status" class="text-2xl font-bold text-slate-400 italic">Ready</h2>
+            </div>
+        </div>
+
+        <div class="glass p-8 rounded-3xl mb-8 text-center">
+            <button id="migrate-btn" onclick="runMigration()" class="px-12 py-4 bg-orange-500 hover:bg-orange-400 text-slate-900 rounded-xl font-bold shadow-lg transition-all text-xl">
+                START LIVE MIGRATION
+            </button>
+            <div id="progress-container" class="mt-8 hidden">
+                <div class="flex justify-between mb-2 text-sm">
+                    <span id="progress-text">Initializing...</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-4 overflow-hidden">
+                    <div id="progress-bar" class="bg-orange-400 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-black/50 rounded-2xl p-6 h-64 overflow-y-auto border border-slate-800 text-xs font-mono" id="console-log">
+            <p class="text-slate-500">// System ready. List your 21 scripts below in the HTML code.</p>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- DATA FILES: LIST ALL 21 SCRIPTS HERE -->
+    <!-- ========================================== -->
+    <script src="/js/data/join-the-developers-guild.js"></script>
+    <script src="/js/data/decoding-the-web-review.js"></script>
+    <script src="/js/data/the-rules-how-not-to-get-sued.js"></script>
+    <script src="/js/data/the-who-who-are-we-building-for.js"></script>
+    <script src="/js/data/the-how-how-do-we-plan-a-site.js"></script>
+    <script src="/js/data/the-why-intro-to-uiux.js"></script>
+    <script src="/js/data/the-bones-intro-to-html.js"></script>
+    <script src="/js/data/the-clothes-intro-to-css.js"></script>
+    <script src="/js/data/the-style-advanced-css-layout.js"></script>
+    <script src="/js/data/sights-sounds-data.js"></script>
+    <script src="/js/data/intro-to-javascript-data.js"></script>
+    <script src="/js/data/the-game-dev-advanced-js-game-logic.js"></script>
+    <script src="/js/data/the-cloud-collaboration-hosting.js"></script>
+    <script src="/js/data/the-manager-cms-platforms.js"></script>
+    <script src="/js/data/the-network-intro-to-apis.js"></script>
+    <script src="/js/data/the-brain-databases.js"></script>
+    <script src="/js/data/the-game-never-ends.js"></script>
+    <script src="/js/data/the-final-boss-going-live.js"></script>
+    <script src="/js/data/webdesign1review.js"></script>
+    <script src="/js/data/webdesign2review.js"></script>
+    <script src="/js/data/webdesignreview.js"></script>
+
+    <script>
+        const logEl = document.getElementById('console-log');
+        const poolEl = document.getElementById('pool-count');
+
+        function addLog(msg, type = 'info') {
+            const p = document.createElement('p');
+            const colors = { info: 'text-slate-300', success: 'text-green-400', error: 'text-red-400', warning: 'text-yellow-400' };
+            p.className = `mb-1 ${colors[type]}`;
+            p.innerHTML = `> ${msg}`;
+            logEl.appendChild(p);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        async function runMigration() {
+            const pool = window.migrationPool || [];
+            if (pool.length === 0) return addLog("No data found in window.migrationPool. Ensure your .js files use the push() method.", "error");
+
+            const btn = document.getElementById('migrate-btn');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            document.getElementById('progress-container').classList.remove('hidden');
+            document.getElementById('upload-status').textContent = "In Progress";
+
+            try {
+                const config = {
+                    apiKey: "AIzaSyAK1sGWu6jyWzbxfQCj-cgUBn85mJh9Nv0",
+                    authDomain: "digitalartsclasses-games-67ae7.firebaseapp.com",
+                    projectId: "digitalartsclasses-games-67ae7",
+                    appId: "1:662051088920:web:3b05cb890d834c0b9cb16d"
+                };
+
+                // Import required Firebase modules
+                const { initializeApp, getApps, deleteApp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
+                const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
+                const { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+
+                // SAFE INITIALIZATION: 
+                // 1. Check if an app is already running (from the 21 data files)
+                // 2. Kill it so the Dashboard can use its own fresh config
+                const existingApps = getApps();
+                if (existingApps.length > 0) {
+                    addLog("Clearing existing Firebase instances...", "info");
+                    for (let appInstance of existingApps) {
+                        await deleteApp(appInstance);
+                    }
+                }
+
+                const app = initializeApp(config);
+                const db = getFirestore(app);
+                await signInAnonymously(getAuth(app));
+                
+                const colRef = collection(db, 'artifacts', config.appId, 'public', 'data', 'questions');
+                
+                // ==========================================
+                // WIPE EXISTING DATA BEFORE UPLOAD
+                // ==========================================
+                addLog("Querying existing database to wipe old questions...", "warning");
+                const querySnapshot = await getDocs(colRef);
+                const deletePromises = [];
+                
+                querySnapshot.forEach((documentSnapshot) => {
+                    deletePromises.push(deleteDoc(doc(db, 'artifacts', config.appId, 'public', 'data', 'questions', documentSnapshot.id)));
+                });
+                
+                if (deletePromises.length > 0) {
+                    addLog(`Deleting ${deletePromises.length} old questions...`, "info");
+                    await Promise.all(deletePromises);
+                    addLog("Database wiped clean. Ready for new data.", "success");
+                } else {
+                    addLog("Database is already empty. Proceeding to upload...", "info");
+                }
+                
+                // ==========================================
+                // UPLOAD NEW DATA
+                // ==========================================
+                let count = 0;
+                addLog(`Bulk process started for ${pool.length} items...`, "warning");
+
+                for (const item of pool) {
+                    // Ensure every item is marked as "unified" for the new game engines
+                    await addDoc(colRef, { ...item, type: "unified" });
+                    count++;
+                    
+                    const percent = Math.round((count / pool.length) * 100);
+                    document.getElementById('progress-bar').style.width = percent + '%';
+                    document.getElementById('progress-percent').textContent = percent + '%';
+                    document.getElementById('progress-text').textContent = `Uploading ${count}/${pool.length}`;
+                    
+                    if(count % 25 === 0) addLog(`Checkpoint: ${count} items uploaded.`, "info");
+                }
+
+                addLog(`🏁 SUCCESS: ${count} items pushed to the cloud!`, "success");
+                document.getElementById('upload-status').textContent = "Complete";
+            } catch (err) {
+                addLog(`CRITICAL ERROR: ${err.message}`, "error");
+                document.getElementById('upload-status').textContent = "Failed";
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+            }
+        }
+
+        // Wait a moment for all scripts to dump data into the pool
+        setTimeout(() => { 
+            poolEl.textContent = window.migrationPool.length; 
+            addLog(`Pool ready with ${window.migrationPool.length} questions.`, "info");
+        }, 2000);
+    </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

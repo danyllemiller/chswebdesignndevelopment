@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Layout Labyrinth | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  
+  <!-- Security Guard -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    :root {
+        --grid-bg: #121212;
+        --wall-color: #2c2c2c;
+        --path-color: #1e1e1e;
+        --player-color: #0d6efd;
+        --target-color: #198754;
+    }
+
+    .maze-container {
+        background-color: var(--grid-bg);
+        border: 4px solid #333;
+        border-radius: 8px;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(5, 1fr);
+        gap: 2px;
+        width: 400px;
+        height: 400px;
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cell {
+        background-color: var(--path-color);
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        color: #333;
+    }
+
+    .cell.wall {
+        background-color: var(--wall-color);
+        background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,0.1) 5px, rgba(0,0,0,0.1) 10px);
+    }
+
+    #player {
+        position: absolute;
+        width: 76px; /* Calculation: (400/5) - 4px safety */
+        height: 76px;
+        background-color: var(--player-color);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        z-index: 10;
+        transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        box-shadow: 0 0 15px rgba(13, 110, 253, 0.5);
+        border: 2px solid white;
+    }
+
+    #target {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        background-color: rgba(25, 135, 84, 0.2);
+        border: 2px dashed var(--target-color);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        z-index: 5;
+    }
+
+    .code-input-area {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        font-family: 'Source Code Pro', monospace;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .property-label { color: #9cdcfe; }
+    .value-input {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #333;
+        color: #ce9178;
+        width: 120px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+    .value-input:focus { border-color: var(--primary-color); }
+
+    .shake { animation: shake 0.4s both; }
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-2px, 0, 0); }
+        20%, 80% { transform: translate3d(4px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+    }
+
+    .success-flash { animation: successFlash 1s forwards; }
+    @keyframes successFlash {
+        0% { background-color: #1e1e1e; }
+        50% { background-color: #155724; }
+        100% { background-color: #1e1e1e; }
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div class="container my-5">
+    <div class="text-center mb-4">
+        <a href="/reviewGames/web1ReviewGames.html" class="text-decoration-none small fw-bold">&laquo; Back to Games</a>
+        <h1 class="gochi text-primary mt-3" style="font-size: 3.5rem;">Layout Labyrinth <i class="fas fa-th"></i></h1>
+        <p class="text-muted fw-bold">Master the Architecture. Use CSS Grid properties to navigate the security bypass.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- THE MAZE VIEWPORT -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-primary h-100">
+                <div class="card-header bg-primary text-white d-flex justify-content-between">
+                    <span class="fw-bold" id="levelDisplay">Terminal 01</span>
+                    <span class="badge bg-light text-primary" id="scoreDisplay">Level 1 of 5</span>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center bg-dark" style="min-height: 500px;">
+                    <div class="maze-container" id="maze">
+                        <div id="player">🤖</div>
+                        <div id="target">🏆</div>
+                        <!-- Cells generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- THE COMMAND CENTER -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-dark h-100">
+                <div class="card-header bg-dark text-white fw-bold">
+                    <i class="fas fa-terminal me-2"></i> CSS Command Center
+                </div>
+                <div class="card-body p-4">
+                    <div id="instructionBox" class="alert alert-info small fw-bold mb-4">
+                        Navigate to the portal. Remember: Grid lines start at 1.
+                    </div>
+
+                    <div class="code-input-area mb-4">
+                        <div class="mb-2">.player {</div>
+                        <div class="ms-4 mb-2">
+                            <span class="property-label">grid-column-start</span>: 
+                            <input type="text" id="colInput" class="value-input" placeholder="?" autocomplete="off">;
+                        </div>
+                        <div class="ms-4 mb-3">
+                            <span class="property-label">grid-row-start</span>: 
+                            <input type="text" id="rowInput" class="value-input" placeholder="?" autocomplete="off">;
+                        </div>
+                        <div>}</div>
+                    </div>
+
+                    <button id="executeBtn" class="btn btn-success w-100 fw-bold py-3 shadow-sm">
+                        INITIALIZE POSITION
+                    </button>
+
+                    <div id="feedback" class="mt-3 text-center small fw-bold d-none"></div>
+
+                    <div class="mt-5 p-3 bg-light rounded border small">
+                        <h6 class="fw-bold text-muted border-bottom pb-2">Technical Specs</h6>
+                        <p class="mb-1"><strong>Grid:</strong> 5 x 5</p>
+                        <p class="mb-0 text-muted italic">Warning: Colliding with firewall (dark blocks) will reset the connection.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- GAME OVER OVERLAY -->
+  <div class="modal fade" id="winModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-5">
+            <h1 class="display-1">🥇</h1>
+            <h2 class="gochi text-success">Architecture Mastered!</h2>
+            <p class="text-muted">You've successfully navigated the Labyrinth using CSS Grid logic.</p>
+            <button class="btn btn-primary fw-bold px-5" onclick="location.reload()">Re-enter Labyrinth</button>
+        </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <script>
+    const levels = [
+        {
+            start: { c: 1, r: 1 },
+            end: { c: 5, r: 1 },
+            walls: [],
+            hint: "Move across the first row to the end."
+        },
+        {
+            start: { c: 1, r: 1 },
+            end: { c: 5, r: 5 },
+            walls: [{c:2, r:1}, {c:2, r:2}, {c:2, r:3}, {c:2, r:4}],
+            hint: "The direct path is blocked. Find the opening at row 5."
+        },
+        {
+            start: { c: 5, r: 1 },
+            end: { c: 1, r: 5 },
+            walls: [{c:4, r:2}, {c:3, r:2}, {c:2, r:2}, {c:2, r:3}, {c:2, r:4}, {c:2, r:5}],
+            hint: "Navigate the 'L' shaped corridor."
+        },
+        {
+            start: { c: 1, r: 5 },
+            end: { c: 3, r: 3 },
+            walls: [{c:1, r:3}, {c:2, r:3}, {c:4, r:3}, {c:5, r:3}, {c:3, r:1}, {c:3, r:2}, {c:3, r:4}, {c:3, r:5}],
+            hint: "Wait... only one way into the center. Look for the gap."
+        },
+        {
+            start: { c: 1, r: 1 },
+            end: { c: 5, r: 5 },
+            walls: [{c:1, r:2}, {c:2, r:2}, {c:3, r:2}, {c:4, r:2}, {c:2, r:4}, {c:3, r:4}, {c:4, r:4}, {c:5, r:4}],
+            hint: "The S-Curve. Precision is mandatory."
+        }
+    ];
+
+    let currentLevel = 0;
+    const playerEl = document.getElementById('player');
+    const targetEl = document.getElementById('target');
+    const mazeEl = document.getElementById('maze');
+    const feedbackEl = document.getElementById('feedback');
+    const winModal = new bootstrap.Modal(document.getElementById('winModal'));
+
+    function initLevel() {
+        const data = levels[currentLevel];
+        document.getElementById('levelDisplay').innerText = `Terminal 0${currentLevel + 1}`;
+        document.getElementById('scoreDisplay').innerText = `Level ${currentLevel + 1} of ${levels.length}`;
+        document.getElementById('instructionBox').innerText = data.hint;
+        
+        // Clear old walls
+        document.querySelectorAll('.cell').forEach(c => c.remove());
+        
+        // Build 5x5 grid cells
+        for (let r = 1; r <= 5; r++) {
+            for (let c = 1; c <= 5; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                // Is it a wall?
+                if (data.walls.some(w => w.c === c && w.r === r)) {
+                    cell.classList.add('wall');
+                }
+                mazeEl.appendChild(cell);
+            }
+        }
+
+        // Set Target Position
+        targetEl.style.left = `${(data.end.c - 1) * 80}px`;
+        targetEl.style.top = `${(data.end.r - 1) * 80}px`;
+
+        // Set Player Position
+        movePlayer(data.start.c, data.start.r);
+        
+        // Reset Inputs
+        document.getElementById('colInput').value = '';
+        document.getElementById('rowInput').value = '';
+        document.getElementById('colInput').focus();
+    }
+
+    function movePlayer(c, r) {
+        // Simple 80px per grid unit (400px / 5)
+        playerEl.style.left = `${(c - 1) * 80 + 2}px`;
+        playerEl.style.top = `${(r - 1) * 80 + 2}px`;
+        playerEl.dataset.c = c;
+        playerEl.dataset.r = r;
+    }
+
+    function checkMove() {
+        const targetC = parseInt(document.getElementById('colInput').value);
+        const targetR = parseInt(document.getElementById('rowInput').value);
+        const levelData = levels[currentLevel];
+
+        if (isNaN(targetC) || isNaN(targetR)) {
+            showFeedback("Invalid Coordinates. Use numbers 1-5.", "text-danger");
+            return;
+        }
+
+        // 1. Move the player
+        movePlayer(targetC, targetR);
+
+        // 2. Check for wall collision
+        const hitWall = levelData.walls.some(w => w.c === targetC && w.r === targetR);
+        const outOfBounds = targetC < 1 || targetC > 5 || targetR < 1 || targetR > 5;
+
+        setTimeout(() => {
+            if (hitWall || outOfBounds) {
+                playerEl.classList.add('shake');
+                showFeedback("⚠️ FIREWALL DETECTED. Resetting to start...", "text-danger");
+                setTimeout(() => {
+                    playerEl.classList.remove('shake');
+                    movePlayer(levelData.start.c, levelData.start.r);
+                }, 500);
+            } else if (targetC === levelData.end.c && targetR === levelData.end.r) {
+                // SUCCESS
+                document.querySelector('.code-input-area').classList.add('success-flash');
+                showFeedback("🔓 ACCESS GRANTED. Initializing next terminal...", "text-success");
+                
+                setTimeout(() => {
+                    document.querySelector('.code-input-area').classList.remove('success-flash');
+                    currentLevel++;
+                    if (currentLevel < levels.length) {
+                        initLevel();
+                    } else {
+                        winModal.show();
+                    }
+                }, 1500);
+            } else {
+                showFeedback("Coordinates accepted, but portal not reached.", "text-warning");
+            }
+        }, 600);
+    }
+
+    function showFeedback(msg, cls) {
+        feedbackEl.innerText = msg;
+        feedbackEl.className = `mt-3 text-center small fw-bold d-block ${cls}`;
+    }
+
+    document.getElementById('executeBtn').addEventListener('click', checkMove);
+
+    // Enter key support
+    document.querySelectorAll('.value-input').forEach(input => {
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkMove();
+        });
+    });
+
+    // Start
+    window.onload = initLevel;
+
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

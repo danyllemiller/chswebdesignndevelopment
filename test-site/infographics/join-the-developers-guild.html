@@ -1,0 +1,397 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Infographic: The Guild Survival Guide (Chapter 1)</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <style>
+    :root {
+      --guild-gold: #f59e0b;
+      --legal-red: #ef4444;
+      --pro-blue: #3b82f6;
+      --code-green: #10b981;
+      --soft-bg: #f8fafc;
+    }
+
+    body { background-color: var(--soft-bg); }
+
+    .roadmap-header {
+      background: var(--primary-color);
+      color: white;
+      padding: 3rem 1rem;
+      border-radius: 0 0 60px 60px;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,153,0.1);
+    }
+
+    .guild-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 2px solid rgba(0,0,0,0.05);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.03);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .section-ribbon {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 8px;
+        height: 100%;
+        background-color: var(--primary-color);
+    }
+
+    .pro-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 15px;
+      height: 100%;
+      border-left: 4px solid var(--primary-color);
+      transition: transform 0.2s ease;
+    }
+    .pro-card:hover { transform: translateY(-3px); }
+
+    /* Infrastructure Icons */
+    .net-box {
+        background: #f1f5f9;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        border: 2px solid #e2e8f0;
+    }
+
+    /* STAR Method Grid */
+    .star-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    .star-box {
+        background: white;
+        border: 2px solid var(--tertiary-color);
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+    }
+    .star-letter {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--tertiary-color);
+        margin-bottom: 5px;
+        line-height: 1;
+    }
+
+    /* Parli Pro Flowchart */
+    .flow-arrow {
+        font-size: 2rem;
+        color: var(--file-name-color);
+        line-height: 1;
+    }
+
+    /* Pathway connection line */
+    .pathway-line {
+        border-left: 4px dashed var(--tertiary-color);
+        padding-left: 25px;
+        margin-left: 15px;
+    }
+
+    .rule-alert {
+        background-color: #fee2e2;
+        border: 2px solid var(--legal-red);
+        color: #991b1b;
+        border-radius: 15px;
+        padding: 15px;
+    }
+
+    @media print {
+        .no-print { display: none !important; }
+        .guild-section { break-inside: avoid; border: 1px solid #ddd; }
+    }
+  </style>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <header class="roadmap-header text-center">
+    <div class="container">
+      <nav class="mb-4 d-flex justify-content-between small fw-bold no-print">
+          <a href="/year1/chapter_01.html" class="text-white text-decoration-none">&laquo; Back to Lesson</a>
+          <span class="badge bg-warning text-dark text-uppercase border border-dark">Level 1: Foundations</span>
+      </nav>
+      <h1 class="display-4 fw-bold mb-0 gochi" style="letter-spacing: 2px;">THE GUILD SURVIVAL GUIDE</h1>
+      <p class="lead opacity-75 mt-2 fw-bold">Chapter 1: Infrastructure, Ethics & Professionalism</p>
+    </div>
+  </header>
+
+  <section class="container pb-5">
+
+    <!-- 1. THE INFRASTRUCTURE (Internet vs Web) -->
+    <div class="guild-section">
+      <div class="section-ribbon bg-info"></div>
+      <h3 class="fw-bold text-primary mb-4">1. The Digital World (Infrastructure)</h3>
+      <div class="row g-4 text-center">
+          <div class="col-md-6">
+              <div class="net-box h-100">
+                  <h1 class="mb-2">🛣️</h1>
+                  <h5 class="fw-bold text-dark">The Internet</h5>
+                  <p class="small text-muted mb-0">The <strong>Physical Hardware</strong>. Cables, routers, and servers. The global highway system.</p>
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="net-box h-100 border-primary">
+                  <h1 class="mb-2">🚗</h1>
+                  <h5 class="fw-bold text-primary">The World Wide Web</h5>
+                  <p class="small text-muted mb-0">The <strong>Software Service</strong>. Hyperlinked documents and apps that run ON the internet.</p>
+              </div>
+          </div>
+          <div class="col-12">
+              <div class="p-3 bg-light rounded-4 border border-info border-dashed">
+                  <h6 class="fw-bold mb-2">📞 The DNS (Domain Name System)</h6>
+                  <p class="x-small text-muted mb-0">The Internet's Phonebook. It translates human names (<code>google.com</code>) into machine numbers (<code>172.217.14.228</code>).</p>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <!-- 2. THE FOUNDATION (Perkins & CTSO) -->
+    <div class="guild-section">
+      <div class="section-ribbon bg-primary"></div>
+      <div class="row align-items-center g-4">
+        <div class="col-md-5 border-end">
+          <h3 class="fw-bold text-primary mb-3">2. The Career Track</h3>
+          <div class="mb-3">
+            <h6 class="fw-bold text-success mb-1">💰 Carl D. Perkins Law</h6>
+            <p class="x-small mb-0 text-muted">Federal funding for our <strong>CTE</strong> (Career and Technical Education) hardware and training.</p>
+          </div>
+          <div>
+            <h6 class="fw-bold text-danger mb-1">🎓 Final Boss Goal</h6>
+            <p class="x-small mb-0 text-muted">Complete the pathway and earn your <strong>Industry Certification</strong> to prove your technical acumen.</p>
+          </div>
+        </div>
+        <div class="col-md-7 ps-md-4">
+          <h3 class="fw-bold text-primary mb-3">3. The CTSO (Multiplayer Mode)</h3>
+          <p class="small">Our classroom is a chapter of <strong>SkillsUSA</strong> (also FBLA/TSA). This is your leadership organization.</p>
+          <div class="row g-2 mt-2 text-center">
+              <div class="col-6">
+                  <div class="p-2 bg-light border rounded h-100">
+                      <h6 class="fw-bold x-small mb-1">🤝 Networking</h6>
+                      <p class="mb-0 x-small text-muted">Meet industry mentors.</p>
+                  </div>
+              </div>
+              <div class="col-6">
+                  <div class="p-2 bg-light border rounded h-100">
+                      <h6 class="fw-bold x-small mb-1">🏆 Competitions</h6>
+                      <p class="mb-0 x-small text-muted">Win college scholarships.</p>
+                  </div>
+              </div>
+              <div class="col-12 mt-2">
+                  <div class="p-2 bg-danger bg-opacity-10 border border-danger rounded">
+                      <strong class="text-danger x-small text-uppercase">The Legendary Armor:</strong>
+                      <span class="small fw-bold text-dark">The Red Blazer</span>
+                  </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. GUILD GOVERNANCE (Parli Pro) -->
+    <div class="guild-section">
+      <div class="section-ribbon bg-warning"></div>
+      <h3 class="fw-bold text-primary text-center mb-4">4. Guild Governance (Parliamentary Procedure)</h3>
+      <div class="row align-items-center text-center mb-4 g-2">
+          <div class="col-md-3">
+              <div class="p-3 bg-light rounded-4 border border-warning shadow-sm">
+                  <span class="fs-3">🙋‍♂️</span>
+                  <h6 class="fw-bold mt-2 mb-1">1. The Motion</h6>
+                  <p class="x-small mb-0 text-muted">"I move that we..."</p>
+              </div>
+          </div>
+          <div class="col-md-1 d-none d-md-block"><span class="flow-arrow">&rarr;</span></div>
+          <div class="col-md-3">
+              <div class="p-3 bg-light rounded-4 border border-warning shadow-sm">
+                  <span class="fs-3">👍</span>
+                  <h6 class="fw-bold mt-2 mb-1">2. The Second</h6>
+                  <p class="x-small mb-0 text-muted">"I second that."</p>
+              </div>
+          </div>
+          <div class="col-md-1 d-none d-md-block"><span class="flow-arrow">&rarr;</span></div>
+          <div class="col-md-4">
+              <div class="p-3 bg-warning bg-opacity-10 rounded-4 border border-warning shadow-sm">
+                  <span class="fs-3">⚖️</span>
+                  <h6 class="fw-bold mt-2 mb-1">3. Debate & Vote</h6>
+                  <p class="x-small mb-0 text-muted">Requires a <strong>Quorum</strong> (min. members).</p>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <!-- 4. THE BUILDING BLOCKS & CLASSES -->
+    <div class="row g-4 mb-4">
+        <!-- The Big 3 -->
+        <div class="col-lg-5">
+            <div class="guild-section h-100 mb-0">
+                <div class="section-ribbon bg-code-green"></div>
+                <h3 class="fw-bold text-primary mb-4">5. The "Big Three"</h3>
+                <div class="mb-4 text-center">
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <div class="p-2 border rounded bg-light">
+                                <h6 class="fw-bold small mb-1">HTML</h6>
+                                <p class="x-small text-muted mb-0">Bones<br>(Structure)</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded bg-light">
+                                <h6 class="fw-bold small mb-1">CSS</h6>
+                                <p class="x-small text-muted mb-0">Clothes<br>(Style)</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded bg-light">
+                                <h6 class="fw-bold small mb-1">JS</h6>
+                                <p class="x-small text-muted mb-0">Brains<br>(Action)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h6 class="fw-bold text-dark x-small text-uppercase">The Project Triangle</h6>
+                <p class="x-small text-muted">Fast, Cheap, or Good. <strong>Pick TWO.</strong> (A universal law of professional development).</p>
+            </div>
+        </div>
+
+        <!-- Career Classes -->
+        <div class="col-lg-7">
+            <div class="guild-section h-100 mb-0">
+                <div class="section-ribbon bg-pro-blue"></div>
+                <h3 class="fw-bold text-primary mb-4">6. Choose Your Class</h3>
+                <div class="pathway-line">
+                    <div class="mb-3 position-relative">
+                        <span class="position-absolute top-0 start-0 translate-middle p-2 bg-info border border-light rounded-circle" style="margin-left: -25px;"></span>
+                        <h6 class="fw-bold mb-0">🎨 Front-End & UI/UX</h6>
+                        <p class="x-small text-muted mb-0">Visuals, layouts, and user empathy.</p>
+                    </div>
+                    <div class="mb-3 position-relative">
+                        <span class="position-absolute top-0 start-0 translate-middle p-2 bg-primary border border-light rounded-circle" style="margin-left: -25px;"></span>
+                        <h6 class="fw-bold mb-0">⚙️ Back-End & DevOps</h6>
+                        <p class="x-small text-muted mb-0">Logic, databases, and server uptime.</p>
+                    </div>
+                    <div class="position-relative">
+                        <span class="position-absolute top-0 start-0 translate-middle p-2 bg-dark border border-light rounded-circle" style="margin-left: -25px;"></span>
+                        <h6 class="fw-bold mb-0">🧙‍♂️ Full-Stack Developer</h6>
+                        <p class="x-small text-muted mb-0">The Archmage. Masters both client and server.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. THE RULES & ETHICS -->
+    <div class="guild-section">
+      <div class="section-ribbon bg-danger"></div>
+      <h3 class="fw-bold text-primary mb-4">7. The Guild Rules (Law & Ethics)</h3>
+      <div class="row g-4">
+          <div class="col-md-6">
+              <div class="rule-alert h-100">
+                  <h6 class="fw-bold mb-2">🚫 Mandatory File Rules</h6>
+                  <ul class="x-small mb-0">
+                      <li>Homepage MUST be <code>index.html</code></li>
+                      <li>Lowercase ONLY (No Caps)</li>
+                      <li>NEVER use spaces (Use hyphens)</li>
+                  </ul>
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="pro-card bg-white text-dark">
+                  <h6 class="fw-bold text-primary mb-1">🛡️ Intellectual Property</h6>
+                  <p class="x-small mb-2 text-muted"><strong>Copyright:</strong> Automatic protection for your code/art. Use <strong>Creative Commons</strong> to share legally.</p>
+                  <p class="x-small mb-0 text-muted"><strong>NDA:</strong> A legal contract to protect <strong>Trade Secrets</strong>.</p>
+              </div>
+          </div>
+          <div class="col-12">
+              <div class="p-3 border rounded-4 bg-light">
+                  <h6 class="fw-bold mb-1">♿ Accessibility: The Curb Cut Effect</h6>
+                  <p class="small text-muted mb-0">Designing for marginalized users (like adding alt-text) makes the web better for <strong>everyone</strong>. It's not just polite; it's the law.</p>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <!-- 6. BOSS BATTLE (STAR METHOD) -->
+    <div class="guild-section">
+      <div class="section-ribbon bg-warning"></div>
+      <div class="row g-4">
+          <div class="col-md-5 border-end">
+              <h3 class="fw-bold text-primary mb-3">8. Final Gear</h3>
+              <div class="mb-3">
+                  <span class="badge bg-dark mb-1 px-3 py-2">📄 THE RESUME</span>
+                  <p class="x-small mb-0 text-muted">A 1-page summary of your <strong>WBL</strong> (Work-Based Learning) and portfolio highlights.</p>
+              </div>
+              <div>
+                  <span class="badge bg-dark mb-1 px-3 py-2">👔 ATTIRE</span>
+                  <p class="x-small mb-0 text-muted"><strong>Business Professional:</strong> Full suit/blazer for competitions.<br><strong>Business Casual:</strong> Slacks/button-down for interviews.</p>
+              </div>
+          </div>
+
+          <div class="col-md-7 ps-md-4">
+              <h3 class="fw-bold text-primary mb-3">9. The STAR Method</h3>
+              <p class="small text-muted mb-3">Prove your <strong>Soft Skills</strong> in behavioral interviews.</p>
+              <div class="star-grid">
+                  <div class="star-box shadow-sm">
+                      <div class="star-letter">S</div>
+                      <h6 class="fw-bold mb-0 x-small">Situation</h6>
+                  </div>
+                  <div class="star-box shadow-sm">
+                      <div class="star-letter">T</div>
+                      <h6 class="fw-bold mb-0 x-small">Task</h6>
+                  </div>
+                  <div class="star-box shadow-sm">
+                      <div class="star-letter">A</div>
+                      <h6 class="fw-bold mb-0 x-small">Action</h6>
+                  </div>
+                  <div class="star-box shadow-sm">
+                      <div class="star-letter">R</div>
+                      <h6 class="fw-bold mb-0 x-small">Result</h6>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <div class="text-center no-print">
+        <button onclick="window.print()" class="btn btn-outline-primary shadow-sm fw-bold px-5">🖨️ Print Survival Guide</button>
+    </div>
+
+  </section>
+
+<div id="footer-nav"></div>
+<div id="footer-placeholder"></div>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

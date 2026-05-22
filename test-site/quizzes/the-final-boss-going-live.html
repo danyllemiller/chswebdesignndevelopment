@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Practice Quiz: Chapter 18 - The "Launch"</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/quizLogic.js"></script>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container my-5 text-center">
+    <div class="row">
+      <div class="col-lg-9">
+        <hgroup class="mb-5 border-bottom pb-3">
+          <h1 class="display-5 fw-bold text-primary">Chapter 18 Skill Practice</h1>
+          <p class="lead text-muted">Ready to go live? Randomized 10 from 35+ questions.</p>
+        </hgroup>
+        <div id="quiz-questions" class="text-start mb-5">
+            <div class="text-center p-5"><div class="spinner-border text-primary"></div><p class="mt-2">Simulating Deployment...</p></div>
+        </div>
+        <div class="row text-center g-3 mt-5 no-print border-top pt-4">
+            <div class="col-6 col-md-3"><a href="/year2/the-launch-deployment-portfolio.html" class="btn btn-outline-primary w-100 small rounded-pill">Back to Lesson</a></div>
+            <div class="col-6 col-md-3"><a href="/techTalkA-Zguide/the-launch-deployment-portfolio.html" class="btn btn-outline-primary w-100 small rounded-pill">Tech Talk A-Z</a></div>
+            <div class="col-6 col-md-3"><a href="/toLongDidntRead/the-launch-deployment-portfolio.html" class="btn btn-outline-primary w-100 small rounded-pill">TL;DR Version</a></div>
+            <div class="col-6 col-md-3"><a href="/infographics/the-launch-deployment-portfolio.html" class="btn btn-outline-primary w-100 small rounded-pill">Infographics</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const pool = [
+        { question: "What is 'Deployment'?", options: ["Moving code from local storage to a live public server", "Writing CSS", "Designing a logo", "Deleting a GitHub repo"], correct: 0 },
+        { question: "What is the primary risk of manual FTP?", options: ["Accidentally overwriting live files with no undo button", "It uses too much internet", "It's too cheap", "It only works on Linux"], correct: 0 },
+        { question: "Which tool automates deployment via GitHub?", options: ["CI/CD Pipeline", "FileZilla", "Notepad++", "Photoshop"], correct: 0 },
+        { question: "What acts as the 'Digital Tripwire' for Netlify?", options: ["Webhook", "Firewall", "Router", "Database"], correct: 0 },
+        { question: "Which file is the default homepage on a server?", options: ["index.html", "home.html", "main.html", "start.html"], correct: 0 },
+        { question: "What is an Absolute Path?", options: ["A file path specific to your laptop (e.g., C:/Users)", "A link to an external site", "A CSS variable", "A path within the project folder"], correct: 0 },
+        { question: "DNS translates human URLs into:", options: ["Numeric IP Addresses", "Binary code", "CSS Styles", "Zip folders"], correct: 0 },
+        { question: "A DNS 'A Record' points to an:", options: ["IP Address", "Email server", "Image folder", "Another domain"], correct: 0 },
+        { question: "What is 'DNS Propagation'?", options: ["The time it takes for DNS changes to spread globally", "A way to grow domain names", "A type of server crash", "A security hack"], correct: 0 },
+        { question: "Which tool grades Accessibility and SEO?", options: ["Google Lighthouse", "FileZilla", "Git Bash", "MAMP"], correct: 0 },
+        { question: "In STAR, what does the 'A' stand for?", options: ["Action", "Attitude", "Analyze", "Apply"], correct: 0 },
+        { question: "What is the small icon in the browser tab?", options: ["Favicon", "Thumbnail", "Avatar", "Header"], correct: 0 },
+        { question: "What does HTTPS provide that HTTP doesn't?", options: ["Encryption", "More colors", "Faster scrolling", "3D support"], correct: 0 },
+        { question: "What is 'Vendor Lock-in'?", options: ["Being stuck on a closed platform like Wix", "Losing your password", "A server physical lock", "A coding error"], correct: 0 },
+        { question: "What is 'Link Rot'?", options: ["When old links lead to 404 errors", "A slow internet speed", "A virus", "A CSS bug"], correct: 0 },
+        { question: "Which attribute opens links in a new tab?", options: ["target='_blank'", "rel='external'", "href='new'", "tab='true'"], correct: 0 },
+        { question: "A subdomain is a ______ added to a domain.", options: ["Prefix", "Suffix", "Folder", "Tag"], correct: 0 },
+        { question: "Lighthouse 'Accessibility' scores measure:", options: ["Inclusion for users with disabilities", "How fast the site loads", "Code clarity", "SEO keywords"], correct: 0 },
+        { question: "What is 'Imposter Syndrome'?", options: ["Feeling like you aren't good enough despite success", "A computer virus", "A type of hacker", "A broken CSS layout"], correct: 0 },
+        { question: "Which method is better for teams of 4 developers?", options: ["CI/CD via GitHub", "Manual FTP", "Emailing zip files", "Using a shared USB drive"], correct: 0 },
+        { question: "What does the 'S' in HTTPS stand for?", options: ["Secure", "System", "Static", "Standard"], correct: 0 },
+        { question: "A Case Study explains your ______ process.", options: ["Thought", "Printing", "Payment", "Deletion"], correct: 0 },
+        { question: "How long is a typical domain registration?", options: ["One Year", "One Month", "Lifetime", "Ten Years"], correct: 0 },
+        { question: "Red messages in the browser console indicate:", options: ["Errors", "Success", "Warnings", "Comments"], correct: 0 },
+        { question: "A professional portfolio link should be ______.", options: ["Live and public", "Private and locked", "In a Word doc", "A local file path"], correct: 0 },
+        { question: "Why include a PDF resume?", options: ["Easy for recruiters to print/scan", "It has better colors", "It's interactive", "It's required by Git"], correct: 0 },
+        { question: "What is a CNAME record?", options: ["Points a domain to another domain", "Points a domain to an IP", "Deletes a domain", "Starts a server"], correct: 0 },
+        { question: "What does the 'R' in STAR stand for?", options: ["Result", "Review", "Reason", "Return"], correct: 0 },
+        { question: "Lighthouse Performance scores measure:", options: ["Speed and interactivity", "Colors and fonts", "Image count", "Keyword density"], correct: 0 },
+        { question: "Deployment moves files to which environment?", options: ["Production", "Development", "Staging", "Local"], correct: 0 },
+        { question: "The 'padlock' icon indicates a valid ______.", options: ["SSL/TLS Certificate", "User Password", "API Key", "GitHub Account"], correct: 0 },
+        { question: "Which protocol is the legacy 'Moving Truck'?", options: ["FTP", "HTTP", "DNS", "TCP"], correct: 0 },
+        { question: "Alt text is checked during which QA step?", options: ["Accessibility Audit", "Resize Test", "Speed Test", "Console Check"], correct: 0 },
+        { question: "Netlify's global network of servers is a ______.", options: ["CDN", "VCS", "SaaS", "IDE"], correct: 0 },
+        { question: "The main branch in Git is usually called ______.", options: ["main or master", "root", "final", "test"], correct: 0 }
+    ];
+    window.onload = () => initQuiz(pool);
+  </script>
+  
+<div id="footer-nav"></div>
+<div id="footer-placeholder"></div>
+
+  <a href="#" class="back-to-top" title="Back to Top">🚀</a>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Worksheet: Chapter 17 Mastery (The Future)</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <!-- External Stylesheets -->
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/worksheetStyles.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <!-- Auth Guard formats the navigation menus! -->
+  <script type="module" src="/js/auth-guard.js"></script>
+  
+  <!-- Interactive Engine Dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="/js/worksheetLogic.js"></script>
+</head>
+<body>
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container my-5" id="worksheet-content">
+    <div class="row">
+      <div class="col-12">
+        
+        <!-- TOP NAVIGATION ONLY -->
+        <nav class="mb-4 d-flex justify-content-between small fw-bold no-print">
+            <a href="/studyGuides/the-brain-databases.html" class="text-decoration-none text-primary">&laquo; Previous Chapter</a>
+            <a href="/studyGuides/the-final-boss-going-live.html" class="text-decoration-none text-primary">Next Chapter &raquo;</a>
+        </nav>
+
+        <hgroup class="mb-5 border-bottom pb-3 mt-4 text-center">
+          <h1 class="display-4 fw-bold text-primary">Mastery Worksheet: Chapter 17</h1>
+          <p class="lead text-muted fs-4">Reviewing Web 3.0, APIs, AI, and Emerging Architectures.</p>
+        </hgroup>
+
+        <div class="content-section">
+          
+          <!-- OBJECTIVES CHECKLIST (Nevada CTE Standards 2023) -->
+          <div class="quest-section mb-5">
+            <h4 class="section-title mt-0">Learning Targets Check-In</h4>
+            <p class="small text-muted">Check these off when you can confidently perform the task. (Ref: Nevada CTE Standards 2023)</p>
+            <ul class="list-group list-group-flush small">
+              <li class="list-group-item bg-transparent">
+                  <input class="form-check-input me-2" type="checkbox" id="obj1"><label for="obj1">I can identify emerging web technologies (Web 3.0, SPAs, Frameworks). [Standard 6.1]</label>
+              </li>
+              <li class="list-group-item bg-transparent">
+                  <input class="form-check-input me-2" type="checkbox" id="obj2"><label for="obj2">I can describe the role of APIs, JSON, and async fetching in modern apps. [Standard 6.2]</label>
+              </li>
+              <li class="list-group-item bg-transparent">
+                  <input class="form-check-input me-2" type="checkbox" id="obj3"><label for="obj3">I can analyze IoT hardware (Sensors) and describe its security vulnerabilities. [Standard 6.3]</label>
+              </li>
+              <li class="list-group-item bg-transparent">
+                  <input class="form-check-input me-2" type="checkbox" id="obj4"><label for="obj4">I can evaluate the societal impacts and ethical concerns of AI and automation. [Standard 6.4]</label>
+              </li>
+              <li class="list-group-item bg-transparent">
+                  <input class="form-check-input me-2" type="checkbox" id="obj5"><label for="obj5">I can contrast immersive realities including Augmented (AR) and Virtual (VR). [Standard 6.1]</label>
+              </li>
+            </ul>
+          </div>
+
+          <!-- TASK 1: APP ARCHITECTURE -->
+          <article class="row mt-5 quest-section" id="sec-1">
+            <h2 class="section-title mt-0 text-primary">Task 1: Modern App Foundations</h2>
+            <p class="small text-muted">Identify the architectural concept based on its technical behavior.</p>
+            <div class="table-responsive">
+                <table class="table table-sm small align-middle">
+                    <thead><tr class="bg-light"><th>Description</th><th>Identity</th></tr></thead>
+                    <tbody>
+                        <tr><td>A web app that updates parts of a single page without refreshing:</td><td><input type="text" class="form-control form-control-sm user-input" data-answer="single page application" placeholder="..."></td></tr>
+                        <tr><td>The language used to build the interactive logic and API fetching:</td><td><input type="text" class="form-control form-control-sm user-input" data-answer="javascript" placeholder="..."></td></tr>
+                        <tr><td>A 'LEGO kit' of pre-written code/components to speed up development:</td><td><input type="text" class="form-control form-control-sm user-input" data-answer="framework" placeholder="..."></td></tr>
+                        <tr><td>A visual blueprint of layout and function before any code is written:</td><td><input type="text" class="form-control form-control-sm user-input" data-answer="wireframe" placeholder="..."></td></tr>
+                        <tr><td>The automated process of merging code and launching it live:</td><td><input type="text" class="form-control form-control-sm user-input" data-answer="ci/cd" placeholder="..."></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <button onclick="checkSection('sec-1')" class="btn btn-sm btn-primary no-print mt-2">Check Section 1</button>
+          </article>
+
+          <!-- TASK 2: API MESSENGER (WAITERS & JSON) -->
+          <article class="row mt-5 quest-section" id="sec-2">
+            <h2 class="section-title mt-0 text-primary">Task 2: The API Messenger</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="fw-bold small d-block">1. What acts as the 'Digital ID Badge' for API authentication?</label>
+                    <input type="text" class="form-control user-input" data-answer="api key" placeholder="...">
+                </div>
+                <div class="col-md-6">
+                    <label class="fw-bold small d-block">2. Which HTTP method is standard for 'Retrieving' or reading data?</label>
+                    <input type="text" class="form-control user-input" data-answer="get" placeholder="...">
+                </div>
+                <div class="col-md-6">
+                    <label class="fw-bold small d-block">3. Data from an API is usually delivered in this key-value format:</label>
+                    <input type="text" class="form-control user-input" data-answer="json" placeholder="...">
+                </div>
+                <div class="col-md-6">
+                    <label class="fw-bold small d-block">4. Which keyword is used to 'pause' async code until data arrives?</label>
+                    <input type="text" class="form-control user-input" data-answer="await" placeholder="...">
+                </div>
+            </div>
+            <div class="mt-4 p-3 bg-dark text-warning rounded shadow-sm font-monospace small">
+                // In the waiter analogy: <br>
+                Menu = <input type="text" class="user-input bg-transparent border-0 border-bottom text-warning text-center" data-answer="documentation" style="width: 150px;" placeholder="..."> <br>
+                Kitchen = Server / Database
+            </div>
+            <button onclick="checkSection('sec-2')" class="btn btn-sm btn-primary no-print mt-3">Check Section 2</button>
+          </article>
+
+          <!-- TASK 3: INTELLIGENCE & ETHICS -->
+          <article class="row mt-5 quest-section" id="sec-3">
+            <h2 class="section-title mt-0 text-primary">Task 3: AI &amp; Ethical Compass</h2>
+            <div class="mb-4">
+                <label class="fw-bold small d-block">5. Machine Learning improves its performance based on exposure to:</label>
+                <input type="text" class="form-control user-input w-50" data-answer="data" placeholder="...">
+            </div>
+            <div class="mb-4">
+                <label class="fw-bold small d-block">6. Which AI application filters spam by looking for junk characteristics?</label>
+                <input type="text" class="form-control user-input w-50" data-answer="pattern recognition" placeholder="...">
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3 border rounded h-100 bg-white">
+                        <label class="x-small fw-bold">Algorithmic Bias:</label>
+                        <p class="x-small text-muted">Prejudiced results usually caused by flaws in the...</p>
+                        <input type="text" class="form-control form-control-sm user-input" data-answer="training dataset" placeholder="...">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 border rounded h-100 bg-white">
+                        <label class="x-small fw-bold">Chatbot:</label>
+                        <p class="x-small text-muted">AI-driven interface designed to simulate...</p>
+                        <input type="text" class="form-control form-control-sm user-input" data-answer="conversation" placeholder="...">
+                    </div>
+                </div>
+            </div>
+            <button onclick="checkSection('sec-3')" class="btn btn-sm btn-primary no-print mt-3">Check Section 3</button>
+          </article>
+
+          <!-- TASK 4: HARDWARE & REALITY -->
+          <article class="row mt-5 quest-section" id="sec-4">
+            <h2 class="section-title mt-0 text-danger" style="border-color: #E07A5F;">Task 4: IoT &amp; New Realities</h2>
+            <p class="small text-muted">Identify the technology or risk from the chapter.</p>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="fw-bold small">IoT devices use what to collect information?</label>
+                    <input type="text" class="form-control user-input" data-answer="sensors" placeholder="...">
+                </div>
+                <div class="col-md-6">
+                    <label class="fw-bold small">A major IoT security flaw for consumers:</label>
+                    <input type="text" class="form-control user-input" data-answer="weak default passwords" placeholder="...">
+                </div>
+                <div class="col-md-6">
+                    <label class="fw-bold small">Overlays digital graphics onto real-world camera views:</label>
+                    <input type="text" class="form-control user-input" data-answer="augmented reality" placeholder="...">
+                </div>
+                <div class="col-md-6">
+                    <label class="fw-bold small">Completely immerses a user in a simulated world:</label>
+                    <input type="text" class="form-control user-input" data-answer="virtual reality" placeholder="...">
+                </div>
+            </div>
+            <div class="bg-site-secondary border border-primary p-3 rounded shadow-sm mt-4">
+                <h6 class="fw-bold">Interface Rule:</h6>
+                <p class="small mb-2">Interfaces designed for speech/voice (Alexa) or touch vibration are:</p>
+                <input type="text" class="user-input border-bottom border-0 w-25 bg-transparent text-primary fw-bold" data-answer="headless" placeholder="...">
+            </div>
+            <button onclick="checkSection('sec-4')" class="btn btn-sm btn-primary no-print mt-3">Check Section 4</button>
+          </article>
+
+          <!-- TASK 5: NOTES & REFLECTION -->
+          <div class="quest-section mb-5">
+            <h2 class="section-title mt-0">My Notes &amp; Reflection</h2>
+            <p class="small text-muted">Explain how a Single Page Application (SPA) combined with APIs creates a superior experience for "Connected Chloe" compared to an old-school multi-page website. Mention "page flashing" and "real-time data" in your answer.</p>
+            <textarea class="form-control user-input-text" rows="10" placeholder="Write your reflections here for the 'Copy Everything' report..."></textarea>
+          </div>
+
+          <!-- CONSOLIDATED ACTION BAR -->
+          <div class="row mb-5 no-print g-2 align-items-center bg-light p-3 rounded border shadow-sm mx-1">
+              <div class="col-md-4">
+                  <a href="/year2/the-game-never-ends.html" class="btn btn-sm btn-outline-primary w-100 fw-bold text-decoration-none">🏠 Back to Lesson</a>
+              </div>
+              <div class="col-md-4">
+                  <button onclick="checkAll()" class="btn btn-sm btn-success w-100 fw-bold">✅ Validate All</button>
+              </div>
+              <div class="col-md-4">
+                  <button onclick="copyWorksheetToClipboard()" class="btn btn-sm btn-warning w-100 fw-bold text-dark">📋 Copy Everything</button>
+              </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screenshot Modal (Hidden) -->
+  <div class="modal fade" id="screenshotModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Guild Certification Dashboard</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center" id="screenshot-modal-body">
+          <div id="captured-image-placeholder"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+
+  <!-- ENHANCED FOOTER (Removed sticky-bottom) -->
+  <footer class="bg-primary text-white pt-5 pb-3 mt-5 no-print">
+    <div class="container">
+      <div class="row g-4">
+        <!-- Brand/About -->
+        <div class="col-lg-3 col-md-6">
+          <h5 class="fw-bold mb-3" style="font-family: 'Gochi Hand', cursive;">Digital Arts Classes</h5>
+          <p class="x-small opacity-75 lh-base">
+            Professional Web Design &amp; Development curriculum for the modern era. Building the architects of tomorrow through standards-aligned coding labs and industry-ready projects.
+          </p>
+        </div>
+
+        <!-- Yearly Portals -->
+        <div class="col-lg-3 col-md-6">
+          <h6 class="text-uppercase fw-bold mb-3 x-small" style="letter-spacing: 1.5px; color: var(--secondary-color);">Yearly Portals</h6>
+          <ul class="list-unstyled x-small lh-lg">
+            <li><a href="/level1.html" class="text-white text-decoration-none opacity-75 link-hover">🚀 Year 1: Foundations</a></li>
+            <li><a href="/level2andUp.html" class="text-white text-decoration-none opacity-75 link-hover">⚔️ Year 2: Mastering</a></li>
+            <li><a href="/computerscience.html" class="text-white text-decoration-none opacity-75 link-hover">💻 Computer Science</a></li>
+          </ul>
+        </div>
+
+        <!-- Important Tools -->
+        <div class="col-lg-3 col-md-6">
+          <h6 class="text-uppercase fw-bold mb-3 x-small" style="letter-spacing: 1.5px; color: var(--secondary-color);">Study Tools</h6>
+          <ul class="list-unstyled x-small lh-lg">
+            <li><a href="/studyGuides/" class="text-white text-decoration-none opacity-75 link-hover">Interactive Study Guides</a></li>
+            <li><a href="/quizzes/" class="text-white text-decoration-none opacity-75 link-hover">Practice Exam Shuffle</a></li>
+            <li><a href="/techTalkA-Zguide/" class="text-white text-decoration-none opacity-75 link-hover">Architect's Dictionary</a></li>
+            <li><a href="/toLongDidntRead/" class="text-white text-decoration-none opacity-75 link-hover">TL;DR Summaries</a></li>
+          </ul>
+        </div>
+
+        <!-- Administrative -->
+        <div class="col-lg-3 col-md-6">
+          <h6 class="text-uppercase fw-bold mb-3 x-small" style="letter-spacing: 1.5px; color: var(--secondary-color);">Important Links</h6>
+          <ul class="list-unstyled x-small lh-lg">
+            <li><a href="/sitemap.html" class="text-white text-decoration-none fw-bold text-info link-hover">🗺️ Complete Site Map</a></li>
+            <li><a href="/grading.html" class="text-white text-decoration-none opacity-75 link-hover">Grading Policy</a></li>
+            <li><a href="/contact.html" class="text-white text-decoration-none opacity-75 link-hover">Contact Instructor</a></li>
+            <li><a href="/notices.html" class="text-white text-decoration-none opacity-75 link-hover">Legal &amp; Privacy</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <hr class="my-4 opacity-25">
+      
+      <div class="row">
+        <div class="col-12 text-center">
+          <p class="x-small mb-0 opacity-50 fw-light">
+            Copyright &copy; 2026 Danylle Miller Designs. Built for Carson High School. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

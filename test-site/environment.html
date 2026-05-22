@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+	<title>CHS Web Design &amp; Development</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<link href="https://fonts.googleapis.com" rel="preconnect" />
+	<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+	<link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&amp;display=swap" rel="stylesheet" />
+	<script src="js/bootstrap.bundle.js"></script><script src="js/jquery.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/dacStyleSheets.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/dacPrint.css" media="print" />
+</head>
+<body>
+    <section class="container">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <!--Navigation-->
+<div class="container-fluid sticky-top px-0 no-print">
+    <nav class="navbar navbar-light navbar-expand-sm bg-light">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navBarNav" aria-expanded="false" aria-label="toggle navigation">
+            <span class="navbar-toggler-icon"></span> Menu
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav w-auto ms-auto text-center">
+                <li class="nav-item"><a class="nav-link" href="/index.html">Home</a></li>
+                <li class="nav-item dropdown">
+                    <a aria-current="page" class="nav-link dropdown-toggle" href="#" id="navbarClasses" data-bs-target="dropdown" aria-expanded="false" data-bs-auto-close="outside">Classes</a>
+                    <ul class="dropdown-menu" id="classes">
+                        <li><a href="/computerscience.html" class="nav-link dropdown-item">Computer Science</a></li>
+                        <li class="dropdown dropdown-item">
+                            <a href="/level1.html" class="nav-link dropdown-toggle" data-bs-target="dropdown" aria-expanded="false" data-bs-auto-close="outside">Web Design 1</a>
+                            <ul class="dropdown-menu" id="webDesign1">
+                                <li><a href="/year1/chapter01.html" class="nav-link dropdown-item">1: The Developer's World (CTSO &amp; Professionalism)</a></li>
+                                <li><a href="/year1/chapter02.html" class="nav-link dropdown-item">1: The Developer's World (What IS the Web?)</a></li>
+                                <li><a href="/year1/chapter03.html" class="nav-link dropdown-item">2: The "Rules" (Web Law, Ethics &amp; Security)</a></li>
+                                <li><a href="/year1/chapter04.html" class="nav-link dropdown-item">4: The "Who" (Target Audience &amp; Personas)</a></li>
+                                <li><a href="/year1/chapter05.html" class="nav-link dropdown-item">5: The "How" (Sitemaps &amp; Wireframing)</a></li>
+                                <li><a href="/year1/chapter06.html" class="nav-link dropdown-item">6: UI/UX Design (Psychology &amp; Figma)</a></li>
+                                <li><a href="/year1/chapter07.html" class="nav-link dropdown-item">5: The "Bones" (Intro to HTML)</a></li>
+                                <li><a href="/year1/chapter08.html" class="nav-link dropdown-item">6: The "Clothes" (Intro to CSS)</a></li>
+                                <li><a href="/year1/chapter09.html" class="nav-link dropdown-item">9: Advanced Layout (Flexbox &amp; CSS Grid)</a></li>
+                                <li><a href="/year1/chapter10.html" class="nav-link dropdown-item">8: Sights &amp; Sounds (Media Integration)</a></li>
+                                <li><a href="/year1/chapter11.html" class="nav-link dropdown-item">9: The "Brains" (Intro to JS) (Intro to JavaScript)</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown dropdown-item">
+                            <a class="nav-link dropdown-toggle" data-bs-target="dropdown" aria-expanded="false" data-bs-auto-close="outside" href="/level2andUp.html">Web Design 2 and Up</a>
+                            <ul class="dropdown-menu" id="webDesign2">
+                                <li><a href="/year2/chapter12.html" class="nav-link dropdown-item">12: The "Remodeler" (Advanced JavaScript &amp; DOM)</a></li>
+                                <li><a href="/year2/chapter13.html" class="nav-link dropdown-item">11: The "Cloud" (Collaboration &amp; Hosting)</a></li>
+                                <li><a href="/year2/chapter14.html" class="nav-link dropdown-item">12: The "Manager" (CMS &amp; Platforms)</a></li>
+                                <li><a href="/year2/chapter15.html" class="nav-link dropdown-item">13: The "Network" (Intro to APIs)</a></li>
+                                <li><a href="/year2/chapter16.html" class="nav-link dropdown-item">14: The "Brain" (Databases &amp; SQL)</a></li>
+                                <li><a href="/year2/chapter17.html" class="nav-link dropdown-item">17: The "Future" (Emerging Tech)</a></li>
+                                <li><a href="/year2/chapter18.html" class="nav-link dropdown-item">16: The "Launch" (Final Deployment)</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown dropdown-item">
+                            <a class="nav-link dropdown-toggle" data-bs-target="dropdown" aria-expanded="false" data-bs-auto-close="outside" href="#">Study Guides</a>
+                            <ul class="dropdown-menu" id="studyGuides">
+                                <li><a href="/studyGuides/chapter01.html" class="nav-link dropdown-item">1: Developer's Guild</a></li>
+                                <li><a href="/studyGuides/chapter02.html" class="nav-link dropdown-item">2: What is the Web?</a></li>
+                                <li><a href="/studyGuides/chapter03.html" class="nav-link dropdown-item">3: Web Law &amp; Ethics</a></li>
+                                <li><a href="/studyGuides/chapter04.html" class="nav-link dropdown-item">4: Target Audience</a></li>
+                                <li><a href="/studyGuides/chapter05.html" class="nav-link dropdown-item">5: Site Architecture</a></li>
+                                <li><a href="/studyGuides/chapter06.html" class="nav-link dropdown-item">6: UI/UX Design</a></li>
+                                <li><a href="/studyGuides/chapter07.html" class="nav-link dropdown-item">7: Intro to HTML</a></li>
+                                <li><a href="/studyGuides/chapter08.html" class="nav-link dropdown-item">8: Intro to CSS</a></li>
+                                <li><a href="/studyGuides/chapter09.html" class="nav-link dropdown-item">9: Advanced Layout</a></li>
+                                <li><a href="/studyGuides/chapter10.html" class="nav-link dropdown-item">10: Media Integration</a></li>
+                                <li><a href="/studyGuides/chapter11.html" class="nav-link dropdown-item">11: Intro to JavaScript</a></li>
+                                <li><a href="/studyGuides/chapter12.html" class="nav-link dropdown-item">12: Advanced DOM</a></li>
+                                <li><a href="/studyGuides/chapter13.html" class="nav-link dropdown-item">13: Cloud &amp; Collab</a></li>
+                                <li><a href="/studyGuides/chapter14.html" class="nav-link dropdown-item">14: The Manager (CMS)</a></li>
+                                <li><a href="/studyGuides/chapter15.html" class="nav-link dropdown-item">15: Intro to APIs</a></li>
+                                <li><a href="/studyGuides/chapter16.html" class="nav-link dropdown-item">16: Databases</a></li>
+                                <li><a href="/studyGuides/chapter17.html" class="nav-link dropdown-item">17: Emerging Tech</a></li>
+                                <li><a href="/studyGuides/chapter18.html" class="nav-link dropdown-item">18: Final Portfolio</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown dropdown-item">
+                            <a class="nav-link dropdown-toggle" data-bs-target="dropdown" aria-expanded="false" data-bs-auto-close="outside" href="jeopardy.html">Study Games</a>
+                            <ul class="dropdown-menu" id="compSci">
+                                <li><a href="/reviewGames/web1ReviewGames.html" class="nav-link dropdown-item">Web 1 Study Games</a></li>
+                                <li><a href="/reviewGames/web2ReviewGames.html" class="nav-link dropdown-item">Web 2 Study Games</a></li>
+                                <li><a href="/reviewGames/chapter01.html" class="nav-link dropdown-item">1 Developer's Guild</a></li>
+                                <li><a href="/reviewGames/chapter02.html" class="nav-link dropdown-item">2 What is the Web?</a></li>
+                                <li><a href="/reviewGames/chapter03.html" class="nav-link dropdown-item">3 Web Law &amp; Ethics</a></li>
+                                <li><a href="/reviewGames/chapter04.html" class="nav-link dropdown-item">4 User Personas &amp; SEO</a></li>
+                                <li><a href="/reviewGames/chapter05.html" class="nav-link dropdown-item">5 Wireframing Challenge</a></li>
+                                <li><a href="/reviewGames/chapter06.html" class="nav-link dropdown-item">6 UI/UX Principles</a></li>
+                                <li><a href="/reviewGames/chapter07.html" class="nav-link dropdown-item">7 Intro to HTML</a></li>
+                                <li><a href="/reviewGames/chapter08.html" class="nav-link dropdown-item">8 Intro to CSS</a></li>
+                                <li><a href="/reviewGames/chapter09.html" class="nav-link dropdown-item">9 Advanced Layout</a></li>
+                                <li><a href="/reviewGames/chapter10.html" class="nav-link dropdown-item">10 Media Integration</a></li>
+                                <li><a href="/reviewGames/chapter11.html" class="nav-link dropdown-item">11 Intro to JavaScript</a></li>
+                                <li><a href="/reviewGames/chapter12.html" class="nav-link dropdown-item">12 Advanced DOM Manipulation</a></li>
+                                <li><a href="/reviewGames/chapter13.html" class="nav-link dropdown-item">13 Collaboration &amp; Cloud</a></li>
+                                <li><a href="/reviewGames/chapter14.html" class="nav-link dropdown-item">14 The Manager</a></li>
+                                <li><a href="/reviewGames/chapter15.html" class="nav-link dropdown-item">15 Intro to APIs</a></li>
+                                <li><a href="/reviewGames/chapter16.html" class="nav-link dropdown-item">16 Databases</a></li>
+                                <li><a href="/reviewGames/chapter17.html" class="nav-link dropdown-item">17 Emerging Tech</a></li>
+                                <li><a href="/reviewGames/chapter18.html" class="nav-link dropdown-item">18 Final Portfolio</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" id="policies" role="button" data-bs-target="dropdown" aria-expanded="false">Classroom Policies</a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarPolicies" id="policies">
+                        <li class="dropdown-item"><a class="nav-link" href="/grading.html">Grading</a></li>
+                        <li class="dropdown-item"><a class="nav-link" href="/expectations.html">Expectations</a></li>
+                        <li class="dropdown-item"><a class="nav-link" href="/discipline.html">Discipline</a></li>
+                        <li class="dropdown-item"><a class="nav-link" href="/notices.html">Notices</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="/contact.html">Contact Me</a></li>
+            </ul>
+        </div>
+
+<!--Section-->
+<!--Section-->
+<!--Section-->
+    <section class="container d-print-grid">
+        <article class="row">
+            <h1 class="text-center d-print-none">CHS Web Design Track</h1>
+            <h2>1 The Environment and the Tools</h2>
+            <h3>Introduction</h3>
+            <p>Using new and developing technologies, even beginner web developers can create professional-looking websites that include multimedia, social media, and dynamic content viewable on various devices and screen sizes. Applying web technologies is only one part of what is required to produce a success­ful website: a website that effectively communicates, educates, entertains, or provides a venue for conducting business transactions also requires good web design. This book explains the basic elements of good web design and shows you how to develop compelling websites and webpages for specific purposes or audiences. This chapter begins the process by describing the Internet and the World Wide Web. Next, you learn about the various ways users connect to the Internet. The chapter then describes different types of websites and the tools for creating them. Finally, the chapter discusses the various roles, responsibilities, and skills essential to successful web design. </p>
+            <p>After completing this chapter you will be able to:</p>
+            <ul>
+                <li>Describe the Internet and the World Wide Web</li>
+                <li>Discuss ways to access the Internet and the web</li>
+                <li>Categorize types of websites</li>
+                <li>Identify web design tools</li>
+                <li>Explain web design principles, roles, and required skills.</li>
+            </ul>
+        </article>
+        <article class="row">
+            <h3>The Internet and the World Wide Web</h3>
+            <img class="img-fluid d-print-inline float-end col-md-4" src="images/wd6eCh01/CFig1_01.gif" alt="" />
+            <dl>
+                <dt class="clear">A computer network</dt>
+                <dd class="notes">consists of connected computers, mobile devices, printers and data storage devices that share computing resources and data</dd>
+                <dt>The Internet</dt>
+                <dd><span class="notes"> a worldwide public network that connects millions of these private networks</span></dd>
+                <dt>The World Wide Web (web)</dt>
+                <dd class="notes">is a part of the Internet that consists of connected computers called web servers that store electronic documents called webpages</dd>
+                <dt>A webpage <img class="img-fluid float-end col-md-3 d-print-none" src="images/wd6eCh01/CFig1_02.gif" alt="" /></dt>
+                <dd class="notes">is a specially formatted document that can contain images, text, interactive elements, and hyperlinks, which are links to other pages</dd>
+                <dt>A website </dt>
+                <dd class="notes">is a group of related webpages
+                    <ul>
+                        <li> <span class="notes">A website’s primary page is its home page</li>
+                    </ul>
+                </dd>
+                <dt>Browsing or surfing the web</dt>
+                <dd class="notes">is exploring the web by moving from one webpage to another </dd>
+            </dl>
+        </article>
+        <article class="row">
+            <h3>Influence on Society </h3>
+            <figure class="figure col-md-6">
+                <img class="img-fluid col-md-12" src="images/wd6eCh01/CFig1_04.gif" alt=""/>
+                <figcaption class="figure-caption notes">Communication</figcaption>
+            </figure>
+            <figure class="figure col-md-6">
+                <img class="img-fluid col-md-12" src="images/wd6eCh01/CFig1_10.gif"/>
+                <figcaption class="figure-caption notes">Education</figcaption>
+            </figure>
+        </article>
+        <article class="row">
+            <figure class="figure col-md-6">
+                <img class="img-fluid col-md-12" src="images/wd6eCh01/CFig1_12.gif" />
+                <figcaption class="figure-caption notes">News and Entertainment</figcaption>
+            </figure>
+            <figure class="figure col-md-6">
+                <img class="img-fluid col-md-12" src="images/wd6eCh01/CFig1_13.gif" />
+                <figcaption class="figure-caption notes">eCommerce</figcaption>
+            </figure>
+        </article>
+        <article class="row">
+            <h4>Communication </h4>
+            <img class="col-md-5 float-end" src="images/wd6eCh01/CFig1_06.gif" alt="" />
+            <ul class="col-md-3">
+                <li> <span class="notes">Bookmark / favorite</span> </li>
+                <li> <span class="notes">Shortcut</span> </li>
+                <li> <span class="notes">Internet Relay Chat (IRC)</span></li> 
+                <li> <span class="notes">Web chat</span> </li>
+                <li> <span class="notes">Instant messaging / IM chat</span></li> 
+                <li> <span class="notes">Group messaging apps</span> </li>
+                <li> <span class="notes">Collaborative workspaces / virtual meeting spaces</span></li>
+            </ul>
+            <ul class="col-md-3">
+                <li> <span class="notes">Blog</span> </li>
+                <li> <span class="notes">Video sharing / Video blogging</span></li>
+                <li> <span class="notes">Social networking</span> </li>
+                <li> <span class="notes">Social bookmarking</span></li>
+                <li> <span class="notes">Massively multiplayer online games (MMOGs)</span></li>
+                <li> <span class="notes">3D virtual worlds</span> </li>
+                <li> <span class="notes">Wiki</span>  </li>
+            </ul>
+        </article>
+        <article class="row">
+            <h4>Education</h4>
+                <img src="images/wd6eCh01/CFig1_11.gif" class="col-md-6 float-start"/>
+            <section class="col-md-5">
+                <ul>
+                    <li> <span class="notes">Take an online course from an academic institution to earn a degree or certificate</span> </li>
+                    <li> <span class="notes">Watch a video or read a blog post by an amateur expert</span> </li>
+                    <li> <span class="notes">Several universities and academic institutions publish some or all educational materials online</span> </li>
+                </ul>
+            </section>
+        </article>
+        <article class="row">
+            <section>
+                <h4>Entertainment and News </h4>
+                <img src="images/wd6eCh01/CFig1_12.gif" class="col-md-6 float-start"/>
+                <p class="notes">Popular entertainment sites include music, videos, sports, games, and more </p>
+                <p class="notes">News websites allow you to read news stories, and some even allow you to watch video clips</p>
+                <ul>
+                    <li> <span class="notes">Some provide interactive elements</span></li>
+                </ul>
+            </section>
+        </article>
+        <article class="row">
+            <h4>E-Commerce </h4>
+            <img src="images/wd6eCh01/CFig1_13.gif" class="col-md-6 float-start"/>
+            <dl>
+                <dt class="notes">Electronic commerce or e-commerce</dt>
+                <dd>encompasses a wide variety of online business activities, including consumer shopping and investing and the exchange of business data and transactions within a company or among multiple companies</dd>
+            </dl>
+            <h5>E-commerce Transaction Types</h5>
+            <table>
+                <tr>
+                    <th>Category</th>
+                    <th>Description>
+                </tr>
+                <tr>
+                    <td>Business-to-consumer (B2C)</td>
+                    <td class="notes">B2C e-commerce involves the sale of an endless assortment of products and services directly to consumers. Transactions take place between an online business and an individual consumer</td>
+                </tr>
+                <tr>
+                    <td>Business-to-business (B2B)</td>
+                    <td class="notes">B2B e-commerce involves the sale of products and services and the exchange of data between businesses, and accounts for the majority of e-commerce transactions in the corporate world.</td>
+                </tr>
+                <tr>
+                    <td>Consumer-to-consumer (C2C)</td>
+                    <td class="notes">In C2C e-commerce, business transactions occur between consumers. Examples of C2C e-commerce include online auctions and person-to-person classified ads</td>
+                </tr>
+            </table>
+        </article>
+        <article class="row">
+            <h4>Quick Quiz</h4>
+            <ol>
+                <li>What is the Internet? </li><br />
+                <li>What is a hyperlink or link? </li><br />
+                <li>What is e-commerce? </li><br />
+            </ol>
+        </article>
+        <article class="row">
+            <h4>Class Discussion</h4>
+            <p>Share how the ability to access the Internet and the web has changed your lives and the lives of your family and friends. Have you never known the world without these technologies? What is your perspective on this question?</p>
+            <pre>
+    
+    
+    
+    
+    
+    
+    
+            </pre>
+        </article>
+        <article class="row">
+            <h4>Ways to Access the Internet </h4>
+            <p>The speed at which data travels from one device to another is the</p>
+            <ul>
+                <li> <span class="notes">transfer rate</span></li>
+                <li>measured in:
+                    <ul>
+                        <li> <span class="notes">Bits per second (bps)</span></li> 
+                        <li> <span class="notes">From thousands (kbps) to millions (Mbps</span>) </li>
+                        <li> <span class="notes">Higher-quality connections needed for</span> 
+                            <ul>
+                                <li>streaming media </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul> 
+        </article>
+        <article class="row">
+            <h4>Broadband Connections</h4> 
+            <dl>
+                <dt class="notes">Broadband </dt>
+                <dd>defines high-speed data transmissions over a communications channel that can transmit multiple signals at one time 
+                    <ul>
+                        <li> <span class="notes">Digital subscriber line (DSL)</span> </li>
+                        <li> <span class="notes">Cable television (CATV) line</span> </li>
+                        <li> <span class="notes">FTTP: Fiber to the Premises</span> </li>
+                        <li> <span class="notes">Satellite </li>
+                    </ul>
+                </dd>
+            </dl>
+        </article>
+        <article class="row">
+            <h4>Connecting to the Internet and the Web </h4>
+            <p>Mobile wireless technologies: </p>
+            <ul>
+                <li> <span class="notes">Radio signals</span> </li>
+                <li> <span class="notes">Wi-Fi (wireless fidelity)</span> </li>
+                <li> <span class="notes">Cellular telephones </span></li>
+                <li> <span class="notes">Wireless providers&apos; broadband networks</span></li>
+            </ul>
+        </article>
+        <article class="row>">
+            <h4>Mobile Internet Access </h4>
+            <p>Generations classify standards for mobile communications: </p>
+            <ul>
+                <li> <span class="notes">3G: speech and data services</span> </li>
+                <li> <span class="notes">4G: gaming apps and streaming media </span></li>
+            </ul>
+        </article> 
+        <article class="row">   
+            <h4>Internet Service Providers (ISP)</h4>
+            <img src="images/wd6eCh01/CFig1_15.gif" class="col-md-6 float-start"/>
+            <ul class="col-md-5">
+                <li> <span class="notes">Has permanent Internet connection</span> </li>
+                <li> <span class="notes">Provides temporary connections</span> </li>
+                <li>Regional ISP </li>
+                <li>National ISP 
+                    <ul>
+                        <li>Verizon </li>
+                    </ul>
+                </li>
+            </ul> 
+        </article> 
+        <article class="row">
+            <h4>Web Browsers</h4>
+            <img src="images/wd6eCh01/CFig1_16.gif" />
+            <dl>
+                <dt>A web browser</dt> 
+                    <dd><span class="notes"> a program or app that requests, downloads, and displays webpages stored on a web server </span>
+                        <ul>
+                            <li> <span class="notes">Google Chrome</span> </li>
+                            <li> <span class="notes">Microsoft Edge</span> </li>
+                            <li> <span class="notes">Mozilla Firefox</span> </li>
+                        </ul>
+                    </dd>
+                <dt class="notes">Responsive web design (RWD) <img src="images/wd6eCh01/CFig1_17.gif" class="col-md-6 float-start"/></dt>
+                    <dd>is used to create websites that adjust to the device and screen size displaying the webpage </dd>
+                <dt>Access webpages by entering its </dt>
+                    <dd class="notes">Uniform Resource Locator (URL) into the browser’s Address bar </dd>
+            </dl>
+            <ul>
+                <li>URL is comprised of the protocol, domain name and top-level domain designation 
+                    <ul>
+                        <li> <span class="notes">Hypertext Transfer Protocol (HTTP) </span></li>
+                        <li> <span class="notes">Domain name can be an IP address or a text version of this address</span> </li>
+                        <li><img src="images/wd6eCh01/CFig1_18.gif" /></li>
+                    </ul>
+                </li>
+            </ul>
+        </article>
+        <article class="row">
+            <div class="col-md-6">
+                <table>
+                    <tr class="bg-blue">
+                        <th>Top-Level Domain</th>
+                        <th>Domain Type</th>
+                    </tr>
+                    <tr>
+                        <td>.aero</td>
+                        <td>Air-transportation industry</td>
+                    </tr>
+                    <tr class="bg-ltBlue">
+                        <td>.asia</td>
+                        <td>Asia Pacific community</td>
+                    </tr>
+                    <tr>
+                        <td>.biz</td>
+                        <td>Businesses</td>
+                    </tr>
+                    <tr class="bg-ltBlue">
+                        <td>.cat</td>
+                        <td>Catalan linguistic community</td>
+                    </tr>
+                    <tr>
+                        <td>.com</td>
+                        <td>Commercial, personal</td>
+                    </tr>
+                    <tr class="bg-ltBlue">
+                        <td>.coop</td>
+                        <td>Cooperative associations</td>
+                    </tr>
+                    <tr>
+                        <td>.edu</td>
+                        <td>Postsecondary institutions</td>
+                    </tr>
+                    <tr class="bg-ltBlue">
+                        <td>.gov</td>
+                        <td>US government</td>
+                    </tr>
+                    <tr>
+                        <td>.info</td>
+                        <td>General Information</td>
+                    </tr>
+                    <tr class="bg-ltBlue">
+                        <td>.int</td>
+                        <td>International treaty organization</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table>
+                    <tr class="bg-blue">
+                        <th>Top-Level Domain</th>
+                        <th>Domain Type</th>
+                    </tr>
+                    <tr>
+                        <td>.jobs</td>
+                        <td>Human resources managers</td>
+                    </tr>
+                    <tr class="bg-ltBlue">
+                        <td>.mil</td>
+                        <td>US Military</td>
+                    </tr>
+                    <tr>
+                        <td>.mobi</td>
+                        <td>Consumers and providers of mobile products and services</td>
+                    </tr>
+                    <tr class="bg-ltBlue">
+                        <td>.museum</td>
+                        <td>Museums</td>
+                    </tr>
+                    <tr>
+                        <td>.name</td>
+                        <td>Individuals</td>
+                    </tr>
+                    <tr class="bg-ltBlue">
+                        <td>.net</td>
+                        <td>Network Providers</td>
+                    </tr>
+                    <tr>
+                        <td>.org</td>
+                        <td>Noncommercial community</td>
+                    </tr>
+                    <tr class="bg-ltBlue">
+                        <td>.pro</td>
+                        <td>Credentialed professionals</td>
+                    </tr>
+                    <tr>
+                        <td>.tel</td>
+                        <td>Business and individual contact data</td>
+                    </tr>
+                    <tr class="bg-ltBlue">
+                        <td>.travel</td>
+                        <td>Travel industry</td>
+                    </tr>
+                </table>
+            </div>
+        </article>
+        <article class="row">
+            <h4>Types of Websites </h4>
+            <h5 class="notes">Personal</h5> 
+            <ul>
+                <li>Limited developmental resources 
+                    <ul>
+                        <li>Content management systems </li>
+                    </ul>
+                </li>
+                <li>Uses: 
+                    <ul>
+                        <li> <span class="notes">Promote employment credentials</span> </li>
+                        <li> <span class="notes">Share news and photos with friends and family </span></li>
+                        <li> <span class="notes">Share common interests or hobbies</span> </li>
+                    </ul>
+                </li>
+                <li>Do not post information that can be misused </li>
+            </ul>
+        </article>
+        <article class="row">
+            <h5 class="notes">Organizational / Topical </h5>
+            <img src="images/wd6eCh01/CFig1_20.gif" class="col-md-6 float-start"/>
+            <dl class="col-md-5">
+                <dt>Organizational websites </dt>
+                <dd class="notes">contain information on particular organizations </dd>
+                <dt>Topical </dt>
+                <dd class="notes">websites focus on a specific subject </dd>
+            </dl>    
+        </article>
+        <article class="row">
+            <h5 class="notes">Commercial</h5>
+            <img src="images/wd6eCh01/CFig1_21.gif" class="col-md-6 float-start"/> 
+            <div class="col-md-5">
+                <p class="notes">Used to promote and sell a product or service </p>
+                <p>More sophisticated commercial websites generally produce greater revenue </p>
+            </div>
+        </article>
+        <article class="row">
+            <h4>Search Tools</h4>
+            <img src="images/wd6eCh01/CFig1_22.gif" class="col-md-6 float-start"/> 
+            <ul class="col-md-5">
+                <li>Web-based search tools
+                    <dl>
+                        <dt>Search engines</dt>
+                        <dd>Keywords </dd>
+                    </dl>
+                </li>
+                <li>Search engines might use a variety of methods to create its index 
+                    <ul>
+                        <li> <span class="notes">Spiders or robots </span></li>
+                        <li> <span class="notes">Meta tags</span></li>
+                    </ul>
+                </li> 
+                <li>Metasearch engines </li>
+                <li>Search Engine Optimization (SEO)
+                    <ul>
+                        <li> <span class="notes">Designing webpages to appear higher in search engine results</span>
+                            <ul>
+                                <li> Meta tags</li>
+                                <li> <span class="notes">Descriptive page titles</span> </li>
+                                <li> <span class="notes">Relevant inbound links</span></li>
+                                <li> <span class="notes">Clearly written text</span> </li>
+                            </ul>
+                        </li>
+                        <li>Search Directory 
+                            <ul>
+                                <li> <span class="notes">Builds index using human interaction</span> </li>
+                                <li> Click category and subcategory links to find webpages </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </article>
+        <article class="row">
+            <h4>Portals</h4> 
+            <img src="images/wd6eCh01/CFig1_25.gif" class="col-md-5 float-start"/> 
+            <dl class="col-md-5">
+                <dt class="notes">A portal </dt>
+                <dd>is a website that offers a starting point for accessing information 
+                    <ul>
+                        <li> <span class="notes">General consumer</span> </li>
+                        <li> <span class="notes">Personal</span> </li>
+                        <li> <span class="notes">Vertical</span></li>
+                        <li> <span class="notes">Corporate</span> </li>
+                    </ul>
+                </dd>
+            </dl>
+        </article>
+        <article class="row">
+            <h4>Other Types of Websites </h4>
+            <table>
+                <tr>
+                    <th>Category</th>
+                    <th>Purpose</th>
+                    <th>Examples</th>
+                </tr>
+                <tr>
+                    <td>Travel</td>
+                    <td class="notes">Book a flight or hotel</td>
+                    <td>Travelocity, Expedia</td>
+                </tr>
+                <tr class="bg-ltBlue">
+                    <td>Mapping</td>
+                    <td class="notes">get driving directions or plan a bike ride or run</td>
+                    <td>Mapquest, MapMyRun</td>
+                </tr>
+                <tr>
+                    <td>Financial</td>
+                    <td class="notes">Pay bills, transfer funds between bank accounts, and make investments</td>
+                    <td>Citizen Bank, E<sup>*</sup>Trade</td>
+                </tr>
+                <tr class="bg-ltBlue">
+                    <td>Career</td>
+                    <td class="notes">Search job databases, post online reusmes, and network</td>
+                    <td>Monster, LinkedIn, CareerBuilder</td>
+                </tr>
+                <tr>
+                    <td>Web Publishing</td>
+                    <td class="notes">Publish web content in a blog or website</td>
+                    <td>WordPress, Joomla!</td>
+                </tr>
+            </table>
+        </article>
+        <article class="row">
+            <h4>Web Design Tools </h4>
+            <p>Before adding new technology, ask:</p>
+            <ul> 
+                <li> <span class="notes">Does it meet currently accepted standards?</span> </li>
+                <li> <span class="notes">What can it do to further my purpose? </span></li>
+                <li> <span class="notes">How will it affect my website’s visual appeal, accessibility, and usability? </span></li>
+                <li> <span class="notes">What impact will it have on security and other website elements?</span> </li>
+                <li> <span class="notes">What are the direct and indirect costs? </span></li>
+                <li> <span class="notes">How soon will I see a return on investing? </span></li>
+            </ul>
+        </article>
+        <article class="row"> 
+            <h4>Markup Languages</h4>
+            <ul>
+                <li> <span class="notes">Hypertext Markup Language (HTML)</span>
+                    <ul>
+                        <li>Uses tags to define format and organization of webpage elements </li>
+                        <li>HTML5 </li>
+                        <li>W3C sets standards </li>
+                    </ul>
+                </li>
+                <li> <span class="notes">Extensible Markup Language (XML) </span>
+                    <ul>
+                        <li>Facilitates sharing of information </li>
+                    </ul>
+                </li>
+            </ul>
+            <img src="images/wd6eCh01/CFig1_27.gif" />
+        </article>
+        <article class="row">
+            <h5>Cascading Style Sheets </h5>
+            <ul>
+                <li> <span class="notes">Standardize the presentation of the content by applying styles to such elements </span>
+                    <ul>
+                        <li>Font </li>
+                        <li>Margins </li>
+                        <li>Positioning </li>
+                        <li>Background colors</li>
+                    </ul> 
+                </li>
+                <li> <span class="notes">Style sheets can be attached to multiple webpages  </span></li>
+            </ul>
+        </article>
+        <article class="row">
+            <h5>Scripting Languages </h5>
+            <dl>
+                <dt>Programming </dt>
+                <dd> class="notes"languages used to write short programs that run on the server or the browser 
+                    <ul>
+                        <li> <span class="notes">Javascript </span></li>
+                        <li> <span class="notes">PHP: Hypertext Preprocessor (PHP)</span> </li>
+                        <li> <span class="notes">CoffeeScript</span> </li>
+                    </ul>
+                </dd>
+            </dl>
+            <ul>
+                <li>Active content </li>
+                <li>Malware </li>
+            </ul>  
+        </article>
+        <article class="row">  
+            <h4>Text and HTML Editors </h4>
+            <img src="images/wd6eCh01/CFig1_28.gif" class="col-md-7 float-start"/>
+            <dl class="col-md-4">
+                <dt class="notes">A text editor</dt>
+                <dd>is software used to create plain (ASCII) text files</dd>
+                <dt class="notes">An HTML editor</dt>
+                <dd> is a text editor enhanced with special features that are used to more easily insert HTML tags and their attributes
+                    <ul>
+                        <li> <span class="notes">HTML-Kit</span> </li>
+                        <li> <span class="notes">CoffeeCup </span></li>
+                        <li> <span class="notes">BBEdit</span></li>
+                        <li> <span class="notes">NoteTab</span> </li>
+                        <li> <span class="notes">Visual Studio Code</span></li>
+                    </ul>
+                </dd>
+            </dl>
+        </article>
+        <article class="row">
+            <h4>Web Development Tools</h4>
+            <img src="images/wd6eCh01/CFig1_29.gif" class="col-md-7 float-end"/>
+            <div class="col-md-4">
+                <p>Packages that automatically generate HTML code </p>
+                <ul>
+                    <li>WYSIWYG 
+                        <p class="notes">(what you see is what you get [not always])</p>
+                    </li>
+                    <li>IDEs </li>
+                </ul>
+            </div>
+        </article>
+        <article class="row">
+            <p>Challenges to using web development tools: </p>
+            <ul>
+                <li> <span class="notes">Might look different than what you see in browser</span> </li>
+                <li> <span class="notes">Unnecessary codes create large, slow-loading webpages </span></li>
+                <li> <span class="notes">Might not use latest markup language standards</span> </li>
+            </ul>
+        </article>
+        <article class="row">
+            <h5>Web Templates and Content Management Systems</h5> 
+            <img src="images/wd6eCh01/CFig1_30.gif" />
+            <dl>
+                <dt class="notes">A Web template or theme<dt>
+                    <dd> is a predesigned model that can be customized for fast website or webpage creation or updating </dd>
+                <dt class="notes">A content management system (CMS)</dt>
+                    <dd> facilitates the management of web content development 
+                        <ul>
+                            <li>WordPress</li>
+                            <li>Joomla </li>
+                            <li>Drupal</li>
+                        </ul>
+                    </dd>
+                <dt class="notes">Content repository </dt>
+                    <dd>An intranet is a private network within a large organization or commercial entity that uses Internet and web technologies to share information among only its members, employees, or business partners </dd>
+            </dl>
+        </article>
+        <article class="row">
+            <h5>Web Design Roles</h5>
+            <ul>
+                <li>Creative Roles 
+                    <ul>
+                        <li> <span class="notes">Content writer / editor </span></li>
+                        <li> <span class="notes">SEO expert</span> </li>
+                        <li> <span class="notes">Web designer</span> </li>
+                        <li> <span class="notes">UI / UX manager </span></li>
+                        <li> <span class="notes">Web artist / graphic designer</span> </li>
+                        <li> <span class="notes">Multimedia producer</span> </li>
+                    </ul>
+                </li>
+                <li>Technical Roles 
+                    <ul>
+                        <li> <span class="notes">Web programmer / developer -Front-end -Back-end -Full-stack</span> </li>
+                        <li> <span class="notes">Database developer</span> </li>
+                        <li> <span class="notes">Web server administrator</span> </li>
+                    </ul>
+                </li>
+                <li>Oversight Roles
+                    <ul>
+                        <li> <span class="notes">Web administrator</span> </li>
+                        <li> <span class="notes">System architect</span> </li>
+                        <li> <span class="notes">Tester</span> </li>
+                        <li> <span class="notes">Social media expert</span> </li>
+                    </ul>
+                </li> 
+            </ul>
+        </article>
+    </section>
+</section>
+<!--Footer-->
+    <footer class="d-print-none navbar  bg-body-tertiary">
+        <div class="container">
+            <p class="text-center" style="padding: 12px;">Copyright - Danylle Miller Designs 2024</p>
+        </div>
+    </footer>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

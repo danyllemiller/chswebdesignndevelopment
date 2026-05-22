@@ -1,0 +1,15 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="380" height="280" fill="#f4f4f4" stroke="#ccc" />
+  <rect x="30" y="30" width="340" height="20" fill="#ddd" />
+  <rect x="30" y="60" width="340" height="10" fill="#eee" />
+  <rect x="30" y="80" width="340" height="10" fill="#eee" />
+  <rect x="30" y="110" width="200" height="20" fill="#ddd" />
+  <rect x="30" y="140" width="340" height="10" fill="#eee" />
+  <rect x="30" y="160" width="340" height="10" fill="#eee" />
+  
+  <path d="M 40,40 L 360,40 M 40,40 L 40,260 M 40,120 L 240,120" 
+        stroke="#ff4500" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.6" />
+  <path d="M 350,35 L 360,40 L 350,45 M 230,115 L 240,120 L 230,125 M 35,250 L 40,260 L 45,250" 
+        fill="none" stroke="#ff4500" stroke-width="3" />
+  <text x="200" y="290" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">F-Pattern: Skimming Text</text>
+</svg>

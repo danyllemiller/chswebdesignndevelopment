@@ -1,0 +1,186 @@
+/* interactive.css 
+   Fixes layout, typography, and color contrast for Interactive Modules 
+*/
+
+/* --- 1. Utility Classes --- */
+.da-primary {
+    color: var(--primary-color, #000099) !important;
+}
+.bg-da-primary {
+    background-color: var(--primary-color, #000099) !important;
+    color: #ffffff !important;
+}
+.letter-spacing-wide {
+    letter-spacing: 0.05em;
+}
+
+/* --- 2. Main Layout & Spacing --- */
+.interactive-main {
+    /* Prevents the box from collapsing and overlapping on small screens */
+    min-height: 550px; 
+    border: 1px solid var(--quaternary-color, #c0c0c0);
+}
+
+/* Handle rounded corners properly on mobile vs desktop */
+@media (max-width: 767.98px) {
+    .code-panel {
+        border-radius: 1rem 1rem 0 0 !important;
+    }
+}
+@media (min-width: 768px) {
+    .code-panel {
+        border-radius: 1rem 0 0 1rem !important;
+    }
+}
+
+/* Fixes the "Browser View" Badge Overlapping the Text Box */
+.preview-wrapper {
+    padding-top: 3.5rem !important; /* Forces the inner box down so the badge has room */
+}
+
+.preview-badge {
+    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+/* --- 3. Fixing the "Light on Light" Text Issue --- */
+#module-content {
+    font-size: 1.15rem;
+    line-height: 1.7;
+}
+
+.content-min-height {
+    /* Prevents the right column from jumping up and down when text length changes */
+    min-height: 220px; 
+}
+
+/* Deep targeting to forcefully override any Bootstrap injected text classes (like .text-muted) */
+#module-content,
+#module-content p,
+#module-content strong,
+#module-content em,
+#module-content span,
+#module-content .text-secondary,
+#module-content .text-dark,
+#module-content .text-primary {
+    color: var(--primary-color, #000099) !important; 
+    font-family: var(--font-family-clean, Arial, Helvetica, sans-serif) !important;
+}
+
+#module-content code {
+    background-color: var(--secondary-color, #cfe1f0) !important;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    color: var(--primary-color, #000099) !important; 
+    font-family: var(--font-family-monospace, 'Courier New', Courier, monospace) !important;
+    font-size: 0.9em !important;
+}
+
+/* --- 4. Code Syntax & Highlighting --- */
+.code-font {
+    font-family: var(--font-family-monospace, 'Courier New', Courier, monospace);
+    font-weight: bold;
+    color: #f8f9fa; /* Explicitly forces plain code text to be off-white on the dark background */
+}
+
+/* Syntax Colors - With hardcoded fallbacks just in case the :root variables aren't loaded */
+.syn-sel { color: var(--file-name-color, #E07A5F); }
+.syn-prop { color: var(--secondary-color, #cfe1f0); }
+.syn-val { color: var(--code-color, #588157); }
+.syn-punct { color: var(--quaternary-color, #c0c0c0); }
+
+/* Step-by-step visibility */
+.code-segment {
+    transition: opacity 0.4s ease, filter 0.4s ease;
+}
+
+/* Dims future code steps so students focus on the current lesson */
+.step-hidden {
+    /* Increased significantly so the code doesn't completely vanish into the dark background */
+    opacity: 0.6;
+    filter: grayscale(40%);
+}
+
+.step-active {
+    opacity: 1;
+    filter: none;
+}
+
+/* --- 5. Interactive UI Elements (Buttons & Progress) --- */
+
+/* Fixes the invisible "Next Step" button from the screenshot */
+.btn-next {
+    background-color: var(--primary-color, #000099) !important;
+    color: #ffffff !important;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-next:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px var(--tertiary-color, #3a52a4) !important;
+    color: #ffffff !important;
+}
+
+.btn-prev:hover {
+    background-color: var(--secondary-color, #cfe1f0);
+    color: var(--primary-color, #000099) !important;
+}
+
+/* Styles the JS-injected progress dots */
+#module-progress {
+    display: flex;
+    gap: 8px;
+}
+
+.prog-bar {
+    height: 8px;
+    width: 35px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.prog-bar-inactive {
+    background-color: var(--quaternary-color, #c0c0c0);
+}
+
+/* --- 6. Quiz Styles --- */
+/* (In case your interactive.js injects a quiz at the end) */
+.quiz-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 20px;
+    margin-bottom: 12px;
+    background-color: #ffffff;
+    border: 2px solid var(--quaternary-color, #c0c0c0);
+    border-radius: 8px;
+    color: var(--primary-color, #000099);
+    font-family: var(--font-family-clean, Arial, Helvetica, sans-serif);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.quiz-btn:hover:not(:disabled) {
+    border-color: var(--primary-color, #000099);
+    background-color: var(--secondary-color, #cfe1f0);
+}
+
+.quiz-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.quiz-btn.correct {
+    border-color: var(--code-color, #588157) !important;
+    background-color: #ffffff !important;
+    color: var(--code-color, #588157) !important;
+}
+
+.quiz-btn.incorrect {
+    border-color: var(--file-name-color, #E07A5F) !important;
+    background-color: #ffffff !important;
+    color: var(--file-name-color, #E07A5F) !important;
+}

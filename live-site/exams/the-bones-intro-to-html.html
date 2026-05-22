@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Summative Assessment: Chapter 5 - The "Bones"</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/examLogic.js?v=4"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 fw-bold">Loading Secure Environment...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Chapter 5 Summative Question Pool (52 Questions - Correct Answers STRIPPED)
+    const ch5ExamPool = [
+  { question: "Why is a code editor like Visual Studio Code better than a basic text editor like Notepad?", options: ["It automatically writes the code for you.", "It color-codes your code and checks for mistakes as you type.", "It does not require an internet connection.", "It turns HTML into a video game."] },
+  { question: "Which tool acts like a 'spell-checker' for your HTML code to find tricky errors?", options: ["Google Chrome", "The W3C validation website", "Photoshop", "A CMS Dashboard"] },
+  { question: "What is the primary goal of 'responsive design'?", options: ["To make websites load faster on dial-up internet.", "To ensure the website looks great and functions well on any screen size, including mobile phones.", "To make the website respond to voice commands.", "To hide the HTML code from users."] },
+  { question: "What is the very first line of code required in a modern HTML5 document (the document type declaration)?", options: ["<html>", "<head>", "<!DOCTYPE html>", "<meta charset='UTF-8'>"] },
+  { question: "In the HTML 'family tree', which element is considered the root that holds everything else together?", options: ["<body>", "<head>", "<!DOCTYPE html>", "<html>"] },
+  { question: "Why is it important to include the `lang='en'` attribute in the root html tag?", options: ["It translates the page automatically.", "It tells search engines and screen readers what language the page is in.", "It forces the browser to use an English font.", "It is required to use CSS."] },
+  { question: "Which part of the HTML boilerplate holds important information that the user does NOT see on the page?", options: ["<body>", "<head>", "<footer>", "<main>"] },
+  { question: "What does the `<meta charset='UTF-8'>` tag do?", options: ["It links the CSS file.", "It tells the browser to use a standard character set that supports almost all symbols.", "It makes the page responsive.", "It creates a navigation menu."] },
+  { question: "Which invisible tag provides a short summary of your page for search engine results like Google?", options: ["<meta name='viewport'>", "<title>", "<meta name='description'>", "<header>"] },
+  { question: "Which section of the HTML document holds all the content the user actually sees (text, images, video)?", options: ["<head>", "<body>", "<main>", "<html>"] },
+  { question: "All web servers look for a specific file name to serve as a website's default home page. What is it?", options: ["home.html", "start.html", "index.html", "main.html"] },
+  { question: "What is an 'empty element' in HTML?", options: ["A tag that has no content inside it and only needs one tag (like <br>).", "An element that has been deleted.", "A <div> with no text.", "A tag that failed validation."] },
+  { question: "What does the 'First-In, Last-Out' rule refer to?", options: ["The order images must load.", "When nesting tags, the last tag you open is the first one you must close.", "The way CSS overrides HTML.", "How files are uploaded via FTP."] },
+  { question: "Using the suitcase analogy, what happens if you try to close an outer tag before closing the inner nested tag?", options: ["The text becomes bold.", "The page will refresh continuously.", "It results in incorrect nesting (overlapping tags) and can break the layout.", "The browser will automatically fix it."] },
+  { question: "Which tag is used to create a standard paragraph of text?", options: ["<text>", "<p>", "<para>", "<br>"] },
+  { question: "Which tag is used to logically emphasize text, usually rendering it in italics?", options: ["<i>", "<b>", "<em>", "<strong>"] },
+  { question: "What is an HTML 'Attribute'?", options: ["A separate file linked to the HTML.", "Special instructions added to the starting tag to give elements extra information (like class='intro').", "The text between the opening and closing tags.", "A tool used to validate code."] },
+  { question: "Why should developers use Semantic Tags (like <article> or <footer>) instead of generic <div> tags?", options: ["They load much faster.", "Their names describe exactly what kind of content they contain, which is great for SEO and screen readers.", "They automatically apply CSS styles.", "They hide the code from hackers."] },
+  { question: "What is the primary purpose of creating a wireframe before coding?", options: ["To pick the exact hex colors.", "To test JavaScript interactions.", "To map out the logical structure and placement of semantic areas before getting distracted by design.", "To upload the site to a server."] },
+  { question: "Which semantic tag marks the introduction of a section or page?", options: ["<main>", "<nav>", "<header>", "<intro>"] },
+  { question: "Which semantic tag is used to wrap a list of hypertext navigation links?", options: ["<menu>", "<ul>", "<nav>", "<links>"] },
+  { question: "Which semantic tag marks a self-contained piece of content, like a blog post or news story?", options: ["<section>", "<div>", "<main>", "<article>"] },
+  { question: "What is the difference between a block-level element and an inline element?", options: ["Block elements take up the full width and stack; inline elements sit next to each other and don't start a new line.", "Inline elements are invisible; block elements are visible.", "Block elements are only for text; inline elements are for images.", "There is no difference."] },
+  { question: "Which element represents a generic container used to group elements when no semantic tag fits?", options: ["<container>", "<span>", "<div>", "<section>"] },
+  { question: "Which text-level element indicates content of strong importance (usually rendered bold)?", options: ["<b>", "<em>", "<important>", "<strong>"] },
+  { question: "Which tag is used to create a numbered, sequential list?", options: ["<ul>", "<dl>", "<ol>", "<li>"] },
+  { question: "In a Description List (<dl>), what tag is used for the term being defined?", options: ["<dd>", "<dt>", "<li>", "<def>"] },
+  { question: "Which attribute is REQUIRED in an <img> tag to provide a description for screen readers?", options: ["src", "title", "alt", "href"] },
+  { question: "Which attribute in an <img> tag tells the browser exactly where to find the image file?", options: ["alt", "link", "href", "src"] },
+  { question: "What tag is used to create a clickable hypertext link?", options: ["<link>", "<href>", "<a>", "<nav>"] },
+  { question: "In a link, what does the attribute `target='_blank'` do?", options: ["Downloads the file.", "Opens the link in a new browser tab.", "Hides the link.", "Makes the link open an email draft."] },
+  { question: "What is the difference between an Absolute Path and a Relative Path?", options: ["Absolute paths are for images; relative paths are for text.", "Absolute paths are the full URL (https://...); relative paths are the path from the current file to the target file.", "Relative paths load faster.", "Absolute paths only work on local computers."] },
+  { question: "Why do we use character entity references like `&copy;`?", options: ["To encrypt data.", "To hide text from search engines.", "To display symbols not found on a standard keyboard, like the copyright symbol.", "To write CSS faster."] },
+  { question: "What tag is specifically designed to hold a long quote from another source and visually indents it?", options: ["<q>", "<cite>", "<blockquote>", "<indent>"] },
+  { question: "In order to connect an external CSS file to an HTML document, which tag must be placed inside the <head>?", options: ["<style src='...'>", "<link rel='stylesheet' href='...'>", "<css file='...'>", "<script src='...'>"] },
+  { question: "What does the `href` attribute stand for in an anchor tag?", options: ["Hypertext Reference", "Hyperlink Resource", "HTML Redirect", "Hosting Reference"] },
+  { question: "Which tag should be used to wrap the name of the author or the title of a work being quoted?", options: ["<name>", "<author>", "<cite>", "<em>"] },
+  { question: "If you want a link to open the user's default email program, what prefix do you use in the href?", options: ["email:", "send:", "contact:", "mailto:"] },
+  { question: "If you want a link to allow mobile users to tap to call a phone number, what prefix do you use in the href?", options: ["call:", "tel:", "phone:", "dial:"] },
+  { question: "Which HTML tag acts as a generic inline container for styling small runs of text without starting a new line?", options: ["<div>", "<p>", "<span>", "<text>"] },
+  { question: "What is the correct syntax to add a class named 'active' to a paragraph?", options: ["<p id='active'>", "<p name='active'>", "<p class='active'>", "<p class:active>"] },
+  { question: "Which tag is used to mark a thematic break in content, usually displaying as a horizontal line?", options: ["<break>", "<line>", "<hr>", "<br>"] },
+  { question: "Which grouping element is best used to mark content that shares a common theme or purpose on the page?", options: ["<section>", "<div>", "<article>", "<aside>"] },
+  { question: "Which grouping element marks content that is related to the main article but usually placed to the side?", options: ["<sidebar>", "<aside>", "<margin>", "<nav>"] },
+  { question: "In an unordered list (<ul>), what tag must wrap every individual bullet point?", options: ["<bullet>", "<ul>", "<li>", "<item>"] },
+  { question: "If an HTML document does not have a <title> tag, what will the browser display in the tab?", options: ["A blank space", "The filename (e.g., index.html)", "The <h1> text", "An error message"] },
+  { question: "Why is the `<meta name='viewport'>` tag considered mandatory for modern websites?", options: ["It activates CSS Flexbox.", "It tells mobile devices to render the page at its actual width rather than zooming out to show a desktop version.", "It compresses images automatically.", "It connects the site to a database."] },
+  { question: "What happens if you use a relative path like `href='about.html'` but the file is actually inside a folder named 'pages'?", options: ["The browser searches the entire computer for it.", "The link will break and show a 'File Not Found' error.", "The browser automatically fixes the path.", "It redirects to the homepage."] },
+  { question: "What is the purpose of the <figcaption> tag?", options: ["To define a CSS class.", "To provide a caption specifically associated with a <figure> element.", "To draw a border around an image.", "To make an image responsive."] },
+  { question: "If you want to display the exact code `<p>` on a webpage without the browser interpreting it as a paragraph, what entity must you use for the less-than sign?", options: ["&p;", "&less;", "&lt;", "&code;"] },
+  { question: "Which tag is used to mark text that represents computer code?", options: ["<pre>", "<code>", "<script>", "<css>"] },
+  { question: "In the curriculum persona, what was 'Organizer Olivia' primarily looking for?", options: ["A way to play retro video games.", "A clear, logically structured page to easily find location and contact info.", "A complex JavaScript animation.", "A dark mode theme."] }
+];
+
+
+    const examConfig = {
+        questions: ch5ExamPool,
+        questionCount: 20, 
+        chapterTitle: "Chapter 5: The 'Bones' (Intro to HTML)",
+        // PASTE YOUR ACTUAL GOOGLE SCRIPT URL BELOW
+        webhookUrl: "https://script.google.com/macros/s/AKfycbyoX6MTNxThGNVQtIn4e_OgJoYUGUdPPKY9lbXf63h3H9fwGOxUeToxptyORS7LgWVNeg/exec"
+    };
+
+    window.onload = () => initExam(examConfig);
+  </script>
+  
+<div id="footer-placeholder"></div>
+
+  <script>
+    (function() {
+        var url = "/includes/footer.html?v=" + new Date().getTime();
+        fetch(url).then(res => res.text()).then(html => {
+            var ph = document.getElementById("footer-placeholder");
+            if (ph) ph.innerHTML = html;
+        });
+    })();
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

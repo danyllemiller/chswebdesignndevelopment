@@ -1,0 +1,135 @@
+<!-- /exams/join-the-developers-guild.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Summative Assessment: Chapter 1 - The Developer's World</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/examLogic.js?v=4"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        <nav class="mb-4 d-flex justify-content-between small fw-bold no-print">
+            <a href="/year1/chapter_01.html" class="text-decoration-none text-primary">&laquo; Back to Lesson</a>
+            <span class="text-muted text-uppercase tracking-widest">Summative Exam</span>
+        </nav>
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 fw-bold">Loading Secure Guild Environment...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  
+<div id="footer-nav" class="no-print"></div>
+<div id="footer-placeholder" class="no-print"></div>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>
+<script>
+const ch1ExamPool = [
+    { question: "Which federal law provides specific financial support for CTE equipment and training?", options: ["The Carl D. Perkins Law", "The Higher Education Act", "The Technology Training Act", "The Workforce Development Bill"] },
+    { question: "Which piece of legislation ensures that high school labs are stocked with industry-standard hardware for technical training?", options: ["The Carl D. Perkins Law", "The Federal Hardware Act", "The CTE Infrastructure Bill", "The Academic Equipment Act"] },
+    { question: "According to Parliamentary Procedure, what is the correct first step to propose a new website project?", options: ["She must stand and say 'I move that we design a website...' so someone can second it.", "She must ask the chairperson for permission to speak to the group.", "She must write a formal proposal and submit it to the board.", "She must wait for the chair to open the floor for new business."] },
+    { question: "In a professional meeting, if you want the group to take action on an idea, you must formally introduce a:", options: ["Motion", "Proposal", "Directive", "Statement"] },
+    { question: "If your SkillsUSA chapter has 30 members but only 5 show up, you cannot hold an official vote because you lack a:", options: ["Quorum", "Majority", "Consensus", "Delegation"] },
+    { question: "In Parliamentary Procedure, what must happen immediately after a motion is made before it can be discussed?", options: ["Someone must second the motion.", "The chair must sign the motion.", "A vote must be taken immediately.", "The secretary must record the motion."] },
+    { question: "A temporary 'Strike Team' formed to handle a specific, short-term task is known as a:", options: ["Committee", "Department", "Division", "Assembly"] },
+    { question: "Which role builds the 'engine room' including servers, databases, and security logic?", options: ["Back-End Developer", "Front-End Designer", "Hardware Engineer", "Database Architect"] },
+    { question: "Which career role focuses primarily on visual aesthetics and user psychology to create a frictionless journey?", options: ["UI/UX Designer", "Network Engineer", "System Developer", "Security Analyst"] },
+    { question: "What do you call an elite developer who has mastered both Front-End and Back-End architecture?", options: ["Full-Stack Developer", "Master Programmer", "Interface Specialist", "Database Administrator"] },
+    { question: "A developer who is paid to find glitches, test edge cases, and try to break software before launch is a:", options: ["Quality Assurance (QA) Tester", "Technical Writer", "System Integrator", "Project Coordinator"] },
+    { question: "On a dev team, the person acting as the bridge between the client's needs and the programmers' schedule is the:", options: ["Project Manager", "Account Executive", "Product Strategist", "Business Developer"] },
+    { question: "Using the STAR method, which part is missing if you explain the problem but never explain the positive outcome?", options: ["The Result", "The Scenario", "The Evaluation", "The Conclusion"] },
+    { question: "Which 'Soft Skill' is best defined as the ability to understand and share the feelings of the end-user?", options: ["Empathy", "Sympathy", "Communication", "Collaboration"] },
+    { question: "A professional 1-page document summarizing your technical skills, WBL experience, and community service is a:", options: ["Resume", "Portfolio", "Biography", "Newsletter"] },
+    { question: "Which interviewing technique helps you structure a story about a time you solved a technical problem?", options: ["The STAR Method", "The Narrative Plan", "The Reflection Cycle", "The Solution Model"] },
+    { question: "What is the fundamental difference between the Internet and the World Wide Web?", options: ["The Internet is the physical infrastructure; the Web is a software service running on it.", "The Web is the hardware network; the Internet is a protocol for data.", "They are exactly the same thing and used interchangeably.", "The Internet is for files; the Web is strictly for email and messaging."] },
+    { question: "Who is credited with inventing the World Wide Web in 1989?", options: ["Tim Berners-Lee", "Bill Gates", "Steve Jobs", "Alan Turing"] },
+    { question: "A restricted, internal network only for members of a specific organization is called an:", options: ["Intranet", "Extranet", "Local-Cloud", "Private-Server"] },
+    { question: "What is the physical network of cables, routers, and servers connecting the globe called?", options: ["The Internet", "The Cloud", "The World Web", "The Data Grid"] },
+    { question: "What is the 'phone book' of the internet that translates human-readable domain names into numerical IP addresses?", options: ["DNS (Domain Name System)", "TCP/IP Protocol", "URL Mapping System", "HTTP Address Table"] },
+    { question: "What is an IP Address?", options: ["A unique numerical coordinate assigned to every device on a network.", "A digital password used to secure private web servers.", "A string of text used to identify a browser version.", "A specific file path used to locate an image on a disk."] },
+    { question: "What cryptographic mechanism does a website need to establish a secure, encrypted HTTPS connection?", options: ["An SSL Certificate", "A Firewall License", "A Domain Secret", "An Encryption Keypad"] },
+    { question: "Which global non-profit organization manages the rules for Domain Name registrars?", options: ["ICANN", "W3C", "IEEE", "IETF"] },
+    { question: "Which cloud hosting model is like 'Take-and-Bake' pizza, where you rent raw hardware but configure the OS yourself?", options: ["IaaS (Infrastructure as a Service)", "SaaS (Software as a Service)", "PaaS (Platform as a Service)", "DaaS (Desktop as a Service)"] },
+    { question: "What is the primary purpose of a CDN (Content Delivery Network)?", options: ["It stores copies of static files on global edge servers to speed up loading times.", "It protects the website from malicious SQL injection attacks.", "It converts all images into a high-efficiency WebP format.", "It monitors the uptime of the server every millisecond."] },
+    { question: "According to the Agile Project Triangle, every project balances Time, Cost, and Quality. What is the golden rule?", options: ["You can only pick TWO.", "Quality must always be sacrificed.", "Cost is the only relevant factor.", "Time is the least important variable."] },
+    { question: "The cloud's ability to automatically shrink or grow computer power based on a viral traffic spike is called:", options: ["Elasticity", "Scalability", "Flexibility", "Redundancy"] },
+    { question: "Which core web language is considered the 'Bones' or structural foundation of a webpage?", options: ["HTML", "JSON", "XML", "YAML"] },
+    { question: "Which web language provides the 'Clothes' (Style and Appearance) of a website?", options: ["CSS", "SASS", "LESS", "Stylus"] },
+    { question: "Which web language provides the 'Brains' (Interactivity and Logic) of a website?", options: ["JavaScript", "TypeScript", "CoffeeScript", "ActionScript"] },
+    { question: "Arranging elements on a page by size and color so the user's eye is naturally guided to the most important information first is known as:", options: ["Visual Hierarchy", "Layout Pattern", "Content Structuring", "Design Blueprint"] },
+    { question: "The design principle of leaving 'Breathing Room' or empty space around elements to improve readability is:", options: ["White Space", "Empty Margin", "Null Padding", "Clear Canvas"] },
+    { question: "What is the mandatory, non-negotiable filename for the homepage of a professional website?", options: ["index.html", "home.html", "main.html", "start.html"] },
+    { question: "Why must web developers NEVER use spaces in their file or folder names?", options: ["Because web servers process spaces as broken characters; developers must use hyphens.", "Because the browser cannot render files that have hidden characters.", "Because it creates too much metadata for the server to read.", "Because it violates the W3C standards for secure coding."] },
+    { question: "What naming convention uses a lowercase first letter and capitalizes subsequent words (e.g., userName)?", options: ["camelCase", "snake_case", "PascalCase", "kebab-case"] },
+    { question: "On a Linux-based web server, 'About-us.html' and 'about-us.html' are considered:", options: ["Two different files because servers are case-sensitive.", "The same file because browsers ignore case sensitivity.", "Two different files because of the character encoding.", "The same file because the OS is built on Windows."] },
+    { question: "What principle states that designing for marginalized users makes the web better for everyone?", options: ["The Curb Cut Effect", "The Inclusive Shift", "The Universal Rule", "The Accessibility Law"] },
+    { question: "What is the industry term for deceptive UI tricks designed to manipulate users into clicking things they did not intend to?", options: ["Dark Patterns", "Shadow Tactics", "Ghosting Effects", "Hidden Interfaces"] },
+    { question: "The legal contract professionals sign to protect a company's Trade Secrets is called an:", options: ["NDA (Non-Disclosure Agreement)", "LSA (Legal Security Act)", "TCA (Trade Confidential Agreement)", "CCA (Company Compliance Accord)"] },
+    { question: "Automatic legal protection for original creative works (like code, photos, or text) is called:", options: ["Copyright", "Trademark", "Patent", "License"] },
+    { question: "Which license allows you to share your work legally while still keeping your copyright?", options: ["Creative Commons", "Public Domain", "Open Source", "General License"] },
+    { question: "Which debugging technique involves a developer articulating their code line-by-line to an inanimate object?", options: ["Rubber Duck Debugging", "Yellow Toy Troubleshooting", "Object Logic Review", "Inanimate Code Parsing"] },
+    { question: "The 'Open Web' philosophy, stating the web should be a public resource for all, is protected by the:", options: ["W3C (World Wide Web Consortium)", "Internet Governance Board", "World Web Foundation", "The Digital Rights Union"] },
+    { question: "A version of a product with just enough features to be usable by early customers for feedback is a:", options: ["Minimum Viable Product (MVP)", "Basic Functional Item (BFI)", "Initial Beta Release (IBR)", "Core Development Model (CDM)"] },
+    { question: "The iterative project management system used to build software in small steps called Sprints is:", options: ["Agile", "Waterfall", "Sequential", "LinearPlan"] },
+    { question: "What does the acronym CTSO stand for?", options: ["Career and Technical Student Organization", "Computer Training System Organization", "Career Technology Support Office", "Central Technical Student Office"] },
+    { question: "In the 'Client-Server' model, which device initiates the request for a webpage?", options: ["The Client (The Browser)", "The Server (The Host)", "The Proxy (The Gatekeeper)", "The Router (The Hub)"] },
+    { question: "What part of a URL represents the folder structure on the server (e.g., /products/shoes)?", options: ["The Path", "The Directory", "The Route", "The Map"] },
+    { question: "The '.org' or '.gov' part of a domain name is officially known as the:", options: ["TLD (Top-Level Domain)", "Root Extension", "Suffix Designator", "Domain Category"] },
+    { question: "What is 'Spamdexing'?", options: ["Unethical SEO techniques like keyword stuffing to trick search engines.", "A tool used to monitor spam traffic on email servers.", "The process of cleaning a database of fake user accounts.", "An automated script that blocks malicious IP addresses."] },
+    { question: "A developer who organizes their code using professional naming and clear structure is showing:", options: ["Professional Decorum", "Technical Diligence", "Code Etiquette", "Systematic Integrity"] }
+];
+
+    const examConfig = {
+        questions: ch2ExamPool,
+        questionCount: 20, 
+        chapterTitle: "Chapter 2: The Rules (Law & Ethics)",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbyoX6MTNxThGNVQtIn4e_OgJoYUGUdPPKY9lbXf63h3H9fwGOxUeToxptyORS7LgWVNeg/exec"
+    };
+
+    window.onload = () => initExam(examConfig);
+  </script>
+  
+<div id="footer-placeholder"></div>
+
+  <script>
+    (function() {
+        var url = "/includes/footer.html?v=" + new Date().getTime();
+        fetch(url).then(res => res.text()).then(html => {
+            var ph = document.getElementById("footer-placeholder");
+            if (ph) ph.innerHTML = html;
+        });
+    })();
+  </script>

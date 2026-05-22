@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Tech Talk: Chapter 16 Exhaustive Vocabulary Guide</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-12">
+        <nav class="mb-4 d-flex justify-content-between small fw-bold">
+            <a href="/year2/the-brain-databases.html" class="text-decoration-none">&laquo; Back to Lesson</a>
+            <span class="text-muted text-uppercase tracking-widest">Architect's Dictionary</span>
+        </nav>
+
+        <hgroup class="mb-5 border-bottom pb-3 mt-4">
+          <h1 class="display-4 fw-bold text-primary">Tech Talk: Chapter 16</h1>
+          <p class="lead text-muted fs-4">Exhaustive Vocabulary for Databases &amp; SQL Persistence</p>
+        </hgroup>
+
+        <div class="content-section">
+          <div class="row">
+            <!-- COLUMN 1: A through M -->
+            <div class="col-md-6">
+              <dl>
+                <dt class="text-primary fw-bold">ACID Compliance</dt>
+                <dd class="small mb-3">Atomicity, Consistency, Isolation, Durability. A set of properties that guarantee database transactions are processed reliably, essential for financial and critical data systems.</dd>
+
+                <dt class="text-primary fw-bold">bcrypt / Argon2</dt>
+                <dd class="small mb-3">Modern, secure mathematical algorithms used for <strong>Hashing</strong> passwords. They are specifically designed to be slow to compute, protecting against brute-force attacks.</dd>
+
+                <dt class="text-primary fw-bold">Boolean Field</dt>
+                <dd class="small mb-3">A database column type that only stores two possible values: True (1) or False (0).</dd>
+
+                <dt class="text-primary fw-bold">CRUD</dt>
+                <dd class="small mb-3">Create, Read, Update, Delete; the four fundamental functions of any persistent storage system.</dd>
+
+                <dt class="text-primary fw-bold">Data Normalization</dt>
+                <dd class="small mb-3">The process of organizing data in a database to reduce redundancy (repetition) and improve integrity using primary and foreign keys.</dd>
+
+                <dt class="text-primary fw-bold">Data Validation</dt>
+                <dd class="small mb-3">Checking if data meets specific rules (e.g., age &gt; 13) before it is saved. For security, this must happen on both the <strong>Client-Side</strong> and <strong>Server-Side</strong>.</dd>
+
+                <dt class="text-primary fw-bold">DROP TABLE</dt>
+                <dd class="small mb-3">The catastrophic SQL command that permanently deletes an entire table's structure AND all its data from the database.</dd>
+
+                <dt class="text-primary fw-bold">Foreign Key</dt>
+                <dd class="small mb-3">A column in one table that points back to the <strong>Primary Key</strong> of another table, creating a relational link between them.</dd>
+
+                <dt class="text-primary fw-bold">Hashing</dt>
+                <dd class="small mb-3">A one-way mathematical function that turns a password into a unique "fingerprint." It can never be reversed, only compared for a match.</dd>
+
+                <dt class="text-primary fw-bold">Index</dt>
+                <dd class="small mb-3">A specialized data structure that massively speeds up search queries on a column, much like an index in a physical book.</dd>
+              </dl>
+            </div>
+
+            <!-- COLUMN 2: M through Z -->
+            <div class="col-md-6">
+              <dl>
+                <dt class="text-primary fw-bold">JOIN</dt>
+                <dd class="small mb-3">The SQL command used to combine rows from two or more tables based on a related column between them.</dd>
+
+                <dt class="text-primary fw-bold">LIKE % (Wildcard)</dt>
+                <dd class="small mb-3">An SQL operator used for partial string matching. The <code>%</code> symbol represents any sequence of characters (e.g., <code>'Co%'</code> finds 'Cody' and 'Comet').</dd>
+
+                <dt class="text-primary fw-bold">Local Storage</dt>
+                <dd class="small mb-3">A 5MB segment of memory located entirely in the user's browser. It is non-persistent across devices and only stores <strong>Strings</strong>.</dd>
+
+                <dt class="text-primary fw-bold">NoSQL</dt>
+                <dd class="small mb-3">Non-relational databases (like Firebase) that store data in flexible "Documents" and "Collections" rather than rigid tables.</dd>
+
+                <dt class="text-primary fw-bold">ORM (Object-Relational Mapper)</dt>
+                <dd class="small mb-3">A tool (like Sequelize) that allows developers to interact with a database using their programming language (JavaScript) instead of raw SQL code.</dd>
+
+                <dt class="text-primary fw-bold">Parameterized Query</dt>
+                <dd class="small mb-3">A secure coding method that "sanitizes" user input by treating it as harmless text rather than executable code, stopping <strong>SQL Injection</strong>.</dd>
+
+                <dt class="text-primary fw-bold">Primary Key</dt>
+                <dd class="small mb-3">A unique identifier for every single row in a table. It <strong>must be unique</strong> and <strong>cannot be null</strong>.</dd>
+
+                <dt class="text-primary fw-bold">Rainbow Tables</dt>
+                <dd class="small mb-3">Pre-computed lists of common password hashes. Developers use <strong>Salting</strong> to render these tables useless.</dd>
+
+                <dt class="text-primary fw-bold">Salt</dt>
+                <dd class="small mb-3">A string of random characters added to a password before it is hashed, ensuring two users with the same password have unique hash fingerprints.</dd>
+
+                <dt class="text-primary fw-bold">Schema</dt>
+                <dd class="small mb-3">The structural blueprint or "map" that defines the tables, columns, and data types of a relational database.</dd>
+
+                <dt class="text-primary fw-bold">SQL Injection (SQLi)</dt>
+                <dd class="small mb-3">A dangerous attack where a hacker types SQL code into an input field (like a search box) to trick the database into performing malicious tasks.</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        
+
+      </div>
+    </div>
+  </section>
+
+<div id="footer-nav"></div>
+<div id="footer-placeholder"></div>
+
+  
+
+  
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

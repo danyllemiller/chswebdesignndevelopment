@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Infographic: Chapter 2 - The Infrastructure Roadmap</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <style>
+    .roadmap-section { background: #f8fafc; border: 4px solid var(--primary-color); border-radius: 30px; padding: 40px; }
+    .path-step { background: white; border: 2px solid var(--primary-color); border-radius: 12px; padding: 15px; margin-bottom: 10px; }
+    .rule-box { border-left: 5px solid var(--file-name-color); background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 0 10px 10px 0;}
+    .stat-circle { width: 100px; height: 100px; border: 5px solid var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+<div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+  <section class="container my-5 text-center">
+    <h1 class="display-4 fw-bold text-primary mb-5 text-uppercase">The Global Infrastructure Roadmap</h1>
+
+    <!-- 1. CABLES & TRAFFIC -->
+    <div class="roadmap-section mb-5 shadow text-start">
+        <h2 class="section-title mt-0">Physical vs. Logical Layers</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="path-step border-info">
+                    <h6 class="fw-bold text-info">THE INTERNET (The Tracks)</h6>
+                    <p class="x-small mb-0">Hardware: <strong>Fiber Optics</strong>, <strong>Routers</strong>, and <strong>Packets</strong>. Managed by <strong>ISPs</strong> and the <strong>Backbone</strong>.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="path-step border-success">
+                    <h6 class="fw-bold text-success">THE WEB (The Train)</h6>
+                    <p class="x-small mb-0">The Service: <strong>HTTP</strong>, HTML/CSS/JS. Accessed via <strong>Browsers</strong>. Standardized by the <strong>W3C</strong>.</p>
+                </div>
+            </div>
+        </div>
+        <p class="x-small text-muted mt-3">An <strong>Intranet</strong> is a private road; the <strong>Internet</strong> is a public highway.</p>
+    </div>
+
+    <!-- 2. THE DNS FLOW -->
+    <div class="row mb-5 text-start">
+        <div class="col-lg-7">
+            <h3 class="fw-bold text-primary border-bottom pb-2">The DNS "Phonebook" Request</h3>
+            <div class="p-4 bg-light border rounded shadow-sm d-flex justify-content-between align-items-center mt-3">
+                <div class="small">1. <strong>URL:</strong> google.com</div>
+                <div class="text-primary h2">➔</div>
+                <div class="small">2. <strong>DNS Server:</strong> Lookup</div>
+                <div class="text-primary h2">➔</div>
+                <div class="small">3. <strong>IP:</strong> 172.217.14.228</div>
+            </div>
+            <p class="x-small mt-3">All names and numbers are assigned globally by <strong>ICANN</strong>.</p>
+        </div>
+        <div class="col-lg-5">
+            <h3 class="fw-bold text-primary border-bottom pb-2">URL Anatomy</h3>
+            <div class="bg-dark text-warning p-3 rounded font-monospace x-small shadow">
+                https://blog.mysite.com/search<br>
+                <hr class="border-warning">
+                Protocol: https<br>
+                Subdomain: blog<br>
+                Domain: mysite.com<br>
+                TLD: .com<br>
+                Path: /search
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. BUSINESS MODELS -->
+    <div class="row mb-5 text-start bg-light p-4 rounded border shadow-sm">
+        <div class="col-md-4 text-center">
+            <h5 class="fw-bold text-primary">B2B</h5>
+            <p class="x-small">Biz to Biz<br>(Bulk Steel to Factory)</p>
+        </div>
+        <div class="col-md-4 border-start border-end text-center">
+            <h5 class="fw-bold text-primary">B2C</h5>
+            <p class="x-small">Biz to Consumer<br>(Amazon Order)</p>
+        </div>
+        <div class="col-md-4 text-center">
+            <h5 class="fw-bold text-primary">C2C</h5>
+            <p class="x-small">Consumer to Consumer<br>(eBay / Marketplace)</p>
+        </div>
+    </div>
+
+    <!-- 4. SECURITY & RULES -->
+    <div class="row mb-5 text-start">
+        <div class="col-md-6">
+            <h3 class="fw-bold text-primary border-bottom pb-2">The Rules (State Standards)</h3>
+            <div class="rule-box shadow-sm"><strong>index.html:</strong> The only valid home page name.</div>
+            <div class="rule-box shadow-sm"><strong>Lowercase:</strong> Case-sensitive servers need lowercase names.</div>
+            <div class="rule-box shadow-sm"><strong>No Spaces:</strong> Never use spaces in file or folder names.</div>
+        </div>
+        <div class="col-md-6">
+             <h3 class="fw-bold text-primary border-bottom pb-2">Security Radar</h3>
+             <ul class="small">
+                 <li><strong>HTTPS:</strong> Encrypts data in transit via SSL/TLS.</li>
+                 <li><strong>Phishing:</strong> Fraudulent data theft disguise.</li>
+                 <li><strong>Spamdexing:</strong> Deceptive SEO like keyword stuffing.</li>
+                 <li><strong>Firewall:</strong> Traffic rule monitor.</li>
+             </ul>
+        </div>
+    </div>
+
+    <div class="no-print">
+        <button onclick="window.print()" class="btn btn-outline-primary px-4 shadow-sm fw-bold">🖨️ Print Global Roadmap</button>
+        <a href="/year1/decoding-the-web-what-it-is-where-it-lives.html" class="btn btn-primary px-5 shadow fw-bold ms-2">Return to Training</a>
+    </div>
+  </section>
+<div id="footer-nav"></div>
+<div id="footer-placeholder"></div>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

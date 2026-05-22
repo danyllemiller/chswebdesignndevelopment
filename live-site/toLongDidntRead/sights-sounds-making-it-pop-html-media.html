@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>TL;DR: Chapter 10 - Sights & Sounds</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-12">
+        <nav class="mb-4 d-flex justify-content-between small fw-bold">
+            <a href="/year1/sights-sounds-making-it-pop-html-media.html" class="text-decoration-none">&laquo; Back to Lesson</a>
+            <span class="text-muted">Manager's Quick-Start</span>
+        </nav>
+
+        <hgroup class="mb-5 border-bottom pb-3 mt-4">
+          <h1 class="display-4 fw-bold text-primary">TL;DR: Chapter 10</h1>
+          <p class="lead text-muted fs-4">Media Optimization &amp; Embedding Cheat Sheet</p>
+        </hgroup>
+
+        <div class="content-section">
+          <div class="row mb-5 pb-4 border-bottom align-items-start">
+            <div class="col-lg-8">
+              <h2 class="section-title mt-0">The Core "Rules" of Media</h2>
+              
+              <h5 class="fw-bold mt-4 text-primary">1. Choose the Correct Format</h5>
+              <ul class="small mb-4">
+                <li><strong>Photos:</strong> Use <strong>JPG</strong> (high detail, small size) or <strong>WebP</strong> (modern best compression).</li>
+                <li><strong>Logos/Icons:</strong> Use <strong>SVG</strong> (infinitely sharp code) or <strong>PNG</strong> (if transparency is needed).</li>
+              </ul>
+              
+              <h5 class="fw-bold mt-4 text-primary">2. The Optimization Funnel</h5>
+              <p>NEVER upload a raw photo. Use Photoshop to: <strong>Crop</strong> (Focus) &rarr; <strong>Resize</strong> (Shrink dimensions to 800px-1200px) &rarr; <strong>Compress</strong> (Save for Web at 60-80% quality).</p>
+
+              <h5 class="fw-bold mt-4 text-primary">3. Video Best Practices</h5>
+              <ul class="small mb-4">
+                <li><strong>iframe:</strong> Best for YouTube/Vimeo. Use <code>aspect-ratio: 16 / 9</code> in CSS to keep it responsive.</li>
+                <li><strong>Native <code>&lt;video&gt;</code>:</strong> Use for local files. Always include <code>controls</code> and <code>&lt;track&gt;</code> for accessibility.</li>
+              </ul>
+
+              <h5 class="fw-bold mt-4 text-primary">4. Semantic Tables</h5>
+              <p>Tables are for <strong>data</strong>, not layout. Use <code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>, and <code>&lt;tfoot&gt;</code>. Use <code>colspan</code> to merge columns for summaries.</p>
+            </div>
+
+            <div class="col-lg-4">
+              <div class="card bg-primary text-white shadow-sm mb-4">
+                <div class="card-header border-bottom-0 fw-bold">Manager's Golden Rule</div>
+                <div class="card-body small">
+                  Always include <code>alt</code> text on images and <code>&lt;track&gt;</code> subtitles for video. Accessibility is not optional—it's the law.
+                </div>
+              </div>
+              <div class="card bg-warning text-dark shadow-sm">
+                <div class="card-header border-bottom-0 fw-bold">The MAMP Trick</div>
+                <div class="card-body small">
+                  Subtitles (.vtt files) will not load if you just open the file from your folder. You <strong>must</strong> use <code>localhost</code> (MAMP) to see them!
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+  
+<div id="footer-nav"></div>
+<div id="footer-placeholder"></div>
+
+  <footer class="navbar  bg-body-tertiary border-top mt-5">
+   <div class="container text-center">
+    <p class="w-100 small mb-0 p-3">
+     Copyright - Danylle Miller Designs 2024
+    </p>
+   </div>
+  </footer>
+
+  <script>
+    (function() {
+        var url = "/includes/footer.html?v=" + new Date().getTime();
+        
+        fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error("Footer file not found at " + url);
+                return response.text();
+            })
+            .then(html => {
+                var placeholder = document.getElementById("footer-placeholder");
+                if (!placeholder) return;
+                
+                placeholder.innerHTML = html;
+
+                var scripts = placeholder.querySelectorAll("script");
+                scripts.forEach(oldScript => {
+                    var newScript = document.createElement("script");
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+                
+                console.log("✅ Footer Logic Loaded & Executed!");
+            })
+            .catch(error => console.error("Footer Load Error:", error));
+    })();
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

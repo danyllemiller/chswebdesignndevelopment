@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- interactives/ch8-figures.html -->
+  <meta charset="utf-8"/>
+  <title>Chapter 8 Interactive: Semantic Figures</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="/css/interactive.css" rel="stylesheet"/>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print"><div id="nav-placeholder"></div></div>
+
+  <section class="container-fluid my-5">
+    <div class="row"><div class="col-12">
+        <nav class="mb-4 w-100 d-flex justify-content-start small fw-bold container">
+            <a href="/year1/sights-and-sounds-media.html" class="text-decoration-none da-primary">
+                <i class="fas fa-angles-left me-1"> Back to Chapter Reading</i>
+            </a>
+        </nav>
+
+        <div id="interactive-module" class="d-flex justify-content-center w-100 py-4 mb-5">
+            <main class="container bg-white rounded-4 shadow-lg overflow-hidden border p-0 interactive-main">
+                <div class="row g-0 h-100 module-row">
+                    
+                    <!-- Code Column -->
+                    <div class="col-12 col-md-6 code-panel bg-dark text-white p-4 p-md-5 d-flex flex-column justify-content-center position-relative">
+                        <div class="position-absolute top-0 start-0 mt-3 ms-4 text-white-50 small text-uppercase fw-bold letter-spacing-wide">
+                            <i class="fas fa-universal-access me-2"></i> Accessibility Code
+                        </div>
+                        
+                        <div class="code-font fs-5 fs-md-4 lh-lg mt-4">
+                            <span class="code-segment step-hidden" data-steps="2,3">
+                                <span class="text-warning">&lt;</span><span class="text-info fw-bold">figure</span><span class="text-warning">&gt;</span><br>
+                            </span>
+                            
+                            &nbsp;&nbsp;<span class="text-warning">&lt;</span><span class="text-info fw-bold">img</span> 
+                            <span class="text-primary">src</span><span class="text-warning">=</span><span class="text-success">"puppy.jpg"</span> 
+                            <span class="text-primary fw-bold">alt</span><span class="text-warning fw-bold">=</span><span class="text-danger fw-bold">"Golden retriever sitting"</span><span class="text-warning">&gt;</span><br>
+                            
+                            <span class="code-segment step-hidden" data-steps="3">
+                                &nbsp;&nbsp;<span class="text-warning">&lt;</span><span class="text-info fw-bold">figcaption</span><span class="text-warning">&gt;</span><br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;A new puppy looking for a home.<br>
+                                &nbsp;&nbsp;<span class="text-warning">&lt;/</span><span class="text-info fw-bold">figcaption</span><span class="text-warning">&gt;</span><br>
+                            </span>
+
+                            <span class="code-segment step-hidden" data-steps="2,3">
+                                <span class="text-warning">&lt;/</span><span class="text-info fw-bold">figure</span><span class="text-warning">&gt;</span>
+                            </span>
+                        </div>
+
+                        <div class="mt-5 preview-wrapper rounded p-4 position-relative overflow-hidden bg-white text-center text-dark" style="min-height: 180px;">
+                            <div class="position-absolute top-0 end-0 mt-2 me-2 text-uppercase fw-bold preview-badge px-2 py-1 rounded bg-secondary text-white small">Screen Reader Log</div>
+                            <div id="preview-reader" class="fst-italic mt-3 fs-5">
+                                "Image: puppy.jpg"
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Column -->
+                    <div class="col-12 col-md-6 p-4 p-md-5 d-flex flex-column justify-content-between bg-white text-dark">
+                        <div>
+                            <div class="d-inline-block px-3 py-1 bg-success bg-opacity-10 text-success rounded-pill small fw-bold mb-4 text-uppercase letter-spacing-wide">Interactive Lesson</div>
+                            <h2 class="display-6 fw-bold da-primary mb-2 mt-0">Semantic Figures & Alt Text</h2>
+                            <div class="d-flex gap-1 mb-5 mt-4" id="module-progress"></div>
+                            <div id="module-content" class="content-min-height"></div> 
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
+                            <button class="btn-prev btn text-secondary fw-semibold border-0"><i class="fas fa-arrow-left me-2"></i> Back</button>
+                            <button class="btn-next btn text-white bg-da-primary fw-semibold shadow-sm px-4 py-2">Next Step <i class="fas fa-arrow-right ms-2"></i></button>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div></div>
+  </section>
+
+  <script src="/js/interactive.js"></script>
+  <script>
+    const steps = [
+        { title: "Alt Text Requirement", icon: "fa-eye-slash", text: "Visually impaired users rely on screen readers. If you omit the <code>alt</code> attribute, the reader might just read the ugly file name. By adding <code>alt=\"Golden retriever sitting\"</code>, you describe the image to those who can't see it." },
+        { title: "The Figure Wrapper", icon: "fa-box", text: "To make an image a self-contained unit of content (like a diagram in a textbook), we wrap it in semantic <code>&lt;figure&gt;</code> tags rather than a generic div." },
+        { title: "The Figcaption", icon: "fa-closed-captioning", text: "If we want a visible caption underneath the image, we use the <code>&lt;figcaption&gt;</code> tag inside the figure. This explicitly ties the text to the image for search engines and assistive technology." }
+    ];
+    
+    const quiz = {
+        snippet: `If an image is purely for decoration (like a background swirl) and has no meaning, how should the alt attribute be written?`,
+        question: "How do you tell a screen reader to ignore a decorative image entirely?",
+        options: [
+            { text: "Don't include the alt attribute at all.", isCorrect: false },
+            { text: "alt=\"decorative\"", isCorrect: false },
+            { text: "alt=\"\"", isCorrect: true }
+        ],
+        correctText: "Yes! Using an empty string (<code>alt=\"\"</code>) signals to the screen reader that the image is purely decorative and should be skipped silently.",
+        incorrectText: "If you omit the alt attribute completely, the screen reader might panic and read the file name! If you write \"decorative\", it forces the user to listen to that useless word."
+    };
+    
+    new InteractiveModule(steps, quiz, (step) => {
+        const reader = document.getElementById('preview-reader');
+        if (step === 0) {
+            reader.innerHTML = '"Image: Golden retriever sitting"';
+            reader.className = "fst-italic mt-3 fs-5 text-success fw-bold";
+        } else if (step === 1) {
+            reader.innerHTML = '"Figure containing: Image: Golden retriever sitting"';
+        } else {
+            reader.innerHTML = '"Figure containing: Image: Golden retriever sitting. Caption: A new puppy looking for a home."';
+        }
+    });
+  </script>
+</body>
+</html>

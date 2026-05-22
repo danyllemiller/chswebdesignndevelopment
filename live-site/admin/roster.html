@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Teacher Admin | Update Roster</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <!-- Favicon Icons -->
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+
+  <!-- BootStrap & Fonts -->
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet" />
+   <!-- Auth Guard formats the navigation menus! -->
+  <script type="module" src="/js/auth-guard.js"></script>
+  <!-- Dedicated Admin Styles -->
+  <link href="/css/admin-roster.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+
+  <!-- Navigation Placeholder -->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div class="container my-5">
+    <div class="card shadow-sm border-danger mx-auto" style="max-width: 1000px;">
+      <div class="card-header bg-danger text-center py-3">
+        <h4 class="mb-0 text-white gochi">Roster Management (Teacher Only)</h4>
+      </div>
+      <div class="card-body p-4">
+        
+        <!-- Tabs -->
+        <ul class="nav nav-pills nav-justified mb-4" id="roster-tabs" role="tablist">
+          <li class="nav-item">
+            <button class="nav-link active fw-bold" id="tab-view" data-bs-toggle="pill" data-bs-target="#pills-view" type="button">👀 View Roster</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-bold" id="tab-single" data-bs-toggle="pill" data-bs-target="#pills-single" type="button">➕ Add Student</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-bold" id="tab-bulk" data-bs-toggle="pill" data-bs-target="#pills-bulk" type="button">📁 Bulk Upload</button>
+          </li>
+        </ul>
+
+        <div id="statusMessage" class="mb-3 text-center fw-bold small"></div>
+
+        <div class="tab-content">
+          
+          <!-- VIEW ROSTER TAB -->
+          <div class="tab-pane fade show active" id="pills-view">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+              <h5 class="text-primary fw-bold mb-0">Approved Access List</h5>
+              
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <!-- Search Input -->
+                <div class="search-container">
+                  <input type="text" id="rosterSearch" class="form-control form-control-sm" placeholder="Search name, ID, or user...">
+                </div>
+                
+                <!-- Filter Dropdown (Fixed CS Periods) -->
+                <select id="periodFilter" class="form-select form-select-sm" style="width: auto;">
+                  <option value="All">All Periods</option>
+                  <option value="Teacher">Teacher (Admin)</option>
+                  <optgroup label="Web Design 1 (Ch 1-8)">
+                    <option value="WD1-A1">WD1-A1</option><option value="WD1-B2">WD1-B2</option>
+                    <option value="WD1-A3">WD1-A3</option><option value="WD1-B4">WD1-B4</option>
+                    <option value="WD1-A5">WD1-A5</option><option value="WD1-B6">WD1-B6</option>
+                    <option value="WD1-A7">WD1-A7</option><option value="WD1-B8">WD1-B8</option>
+                  </optgroup>
+                  <optgroup label="Web Design 2 (Ch 9-16)">
+                    <option value="WD2-A1">WD2-A1</option><option value="WD2-B2">WD2-B2</option>
+                    <option value="WD2-A3">WD2-A3</option><option value="WD2-B4">WD2-B4</option>
+                    <option value="WD2-A5">WD2-A5</option><option value="WD2-B6">WD2-B6</option>
+                    <option value="WD2-A7">WD2-A7</option><option value="WD2-B8">WD2-B8</option>
+                  </optgroup>
+                  <optgroup label="Computer Science (Ch 1-18)">
+                    <option value="CS-A1">CS-A1</option><option value="CS-B2">CS-B2</option>
+                    <option value="CS-A3">CS-A3</option><option value="CS-B4">CS-B4</option>
+                    <option value="CS-A5">CS-A5</option><option value="CS-B6">CS-B6</option>
+                    <option value="CS-A7">CS-A7</option><option value="CS-B8">CS-B8</option>
+                  </optgroup>
+                </select>
+                <button id="downloadRosterBtn" class="btn btn-sm btn-success fw-bold">📥 CSV</button>
+                <button id="refreshRosterBtn" class="btn btn-sm btn-outline-primary">🔄 Refresh</button>
+              </div>
+            </div>
+
+            <!-- Bulk Toolbar -->
+            <div id="bulkActionsToolbar" class="bg-site-secondary p-2 rounded mb-3 border border-primary d-none">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="small fw-bold text-primary"><span id="selectedCount">0</span> selected</div>
+                <div class="d-flex gap-2">
+                  <!-- Bulk Move Dropdown (Fixed CS Periods) -->
+                  <select id="bulkPeriodMove" class="form-select form-select-sm" style="width: auto;">
+                    <option value="">Move to...</option>
+                    <option value="Teacher">Teacher (Admin)</option>
+                    <optgroup label="Web Design 1 (Ch 1-8)">
+                      <option value="WD1-A1">WD1-A1</option><option value="WD1-B2">WD1-B2</option>
+                      <option value="WD1-A3">WD1-A3</option><option value="WD1-B4">WD1-B4</option>
+                      <option value="WD1-A5">WD1-A5</option><option value="WD1-B6">WD1-B6</option>
+                      <option value="WD1-A7">WD1-A7</option><option value="WD1-B8">WD1-B8</option>
+                    </optgroup>
+                    <optgroup label="Web Design 2 (Ch 9-16)">
+                      <option value="WD2-A1">WD2-A1</option><option value="WD2-B2">WD2-B2</option>
+                      <option value="WD2-A3">WD2-A3</option><option value="WD2-B4">WD2-B4</option>
+                      <option value="WD2-A5">WD2-A5</option><option value="WD2-B6">WD2-B6</option>
+                      <option value="WD2-A7">WD2-A7</option><option value="WD2-B8">WD2-B8</option>
+                    </optgroup>
+                    <optgroup label="Computer Science (Ch 1-18)">
+                      <option value="CS-A1">CS-A1</option><option value="CS-B2">CS-B2</option>
+                      <option value="CS-A3">CS-A3</option><option value="CS-B4">CS-B4</option>
+                      <option value="CS-A5">CS-A5</option><option value="CS-B6">CS-B6</option>
+                      <option value="CS-A7">CS-A7</option><option value="CS-B8">CS-B8</option>
+                    </optgroup>
+                  </select>
+                  <button id="bulkMoveBtn" class="btn btn-sm btn-primary">Move</button>
+                  <button id="bulkDeleteBtn" class="btn btn-sm btn-danger">Delete</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+              <table class="table table-striped table-hover border mb-0 table-roster-custom">
+                <thead class="bg-primary text-white sticky-top">
+                  <tr>
+                    <th style="width: 40px;"><input type="checkbox" id="selectAll"></th>
+                    <th style="width: 90px;" class="sortable sort-icon" id="sortPeriod">Period</th>
+                    <th class="sortable sort-icon" id="sortLastName">Last Name</th>
+                    <th class="sortable sort-icon" id="sortFirstName">First Name</th>
+                    <th class="sortable sort-icon" id="sortUsername">Username</th>
+                    <th>ID</th>
+                    <th class="text-center" style="width: 120px;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="rosterTableBody">
+                  <tr><td colspan="7" class="text-center py-4"><span class="spinner-border spinner-border-sm text-primary"></span> Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SINGLE STUDENT TAB -->
+          <div class="tab-pane fade" id="pills-single">
+            <div class="row g-2 mb-3">
+                <div class="col-md-3"><input type="text" id="single-fname" class="form-control" placeholder="First Name"></div>
+                <div class="col-md-3"><input type="text" id="single-lname" class="form-control" placeholder="Last Name"></div>
+                <div class="col-md-3"><input type="text" id="single-sid" class="form-control" placeholder="Student/Staff ID"></div>
+                <div class="col-md-3">
+                    <!-- Add Student Dropdown (Fixed CS Periods) -->
+                    <select id="single-period" class="form-select">
+                        <option value="">Role/Period...</option>
+                        <option value="Teacher">Teacher (Admin)</option>
+                        <optgroup label="Web Design 1 (Ch 1-8)">
+                          <option value="WD1-A1">WD1-A1</option><option value="WD1-B2">WD1-B2</option>
+                          <option value="WD1-A3">WD1-A3</option><option value="WD1-B4">WD1-B4</option>
+                          <option value="WD1-A5">WD1-A5</option><option value="WD1-B6">WD1-B6</option>
+                          <option value="WD1-A7">WD1-A7</option><option value="WD1-B8">WD1-B8</option>
+                        </optgroup>
+                        <optgroup label="Web Design 2 (Ch 9-16)">
+                          <option value="WD2-A1">WD2-A1</option><option value="WD2-B2">WD2-B2</option>
+                          <option value="WD2-A3">WD2-A3</option><option value="WD2-B4">WD2-B4</option>
+                          <option value="WD2-A5">WD2-A5</option><option value="WD2-B6">WD2-B6</option>
+                          <option value="WD2-A7">WD2-A7</option><option value="WD2-B8">WD2-B8</option>
+                        </optgroup>
+                        <optgroup label="Computer Science (Ch 1-18)">
+                          <option value="CS-A1">CS-A1</option><option value="CS-B2">CS-B2</option>
+                          <option value="CS-A3">CS-A3</option><option value="CS-B4">CS-B4</option>
+                          <option value="CS-A5">CS-A5</option><option value="CS-B6">CS-B6</option>
+                          <option value="CS-A7">CS-A7</option><option value="CS-B8">CS-B8</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+            <button id="addSingleBtn" class="btn btn-primary w-100 fw-bold">Add to Access List</button>
+          </div>
+
+          <!-- BULK CSV TAB -->
+          <div class="tab-pane fade" id="pills-bulk">
+            <div class="alert alert-warning small">
+                Upload CSV: <code>First Name, Last Name, ID, Period</code>. Use "Teacher" in the Period column for admin access.
+            </div>
+            <input class="form-control mb-3" type="file" id="csvFileInput" accept=".csv">
+            <button id="uploadBtn" class="btn btn-danger w-100 fw-bold">Process CSV Upload</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Management Modal -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title fw-bold" id="editModalLabel">Manage Identity</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="editDocId">
+          
+          <h6 class="fw-bold text-primary border-bottom pb-2 mb-3 small uppercase">Step 1: Verify Information</h6>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label class="small fw-bold text-muted">First Name</label>
+                <input type="text" id="editFname" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label class="small fw-bold text-muted">Last Name</label>
+                <input type="text" id="editLname" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label class="small fw-bold text-muted">ID</label>
+                <input type="text" id="editSid" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label class="small fw-bold text-muted">Role/Period</label>
+              <!-- THE FIX: Changed ID to 'editPeriod' to match JS and fix console error -->
+              <select id="editPeriod" class="form-select form-select-sm">
+                <option value="Teacher">Teacher (Admin)</option>
+                <optgroup label="Web Design 1 (Ch 1-8)">
+                  <option value="WD1-A1">WD1-A1</option><option value="WD1-B2">WD1-B2</option>
+                  <option value="WD1-A3">WD1-A3</option><option value="WD1-B4">WD1-B4</option>
+                  <option value="WD1-A5">WD1-A5</option><option value="WD1-B6">WD1-B6</option>
+                  <option value="WD1-A7">WD1-A7</option><option value="WD1-B8">WD1-B8</option>
+                </optgroup>
+                <optgroup label="Web Design 2 (Ch 9-16)">
+                  <option value="WD2-A1">WD2-A1</option><option value="WD2-B2">WD2-B2</option>
+                  <option value="WD2-A3">WD2-A3</option><option value="WD2-B4">WD2-B4</option>
+                  <option value="WD2-A5">WD2-A5</option><option value="WD2-B6">WD2-B6</option>
+                  <option value="WD2-A7">WD2-A7</option><option value="WD2-B8">WD2-B8</option>
+                </optgroup>
+                <optgroup label="Computer Science (Ch 1-18)">
+                  <option value="CS-A1">CS-A1</option><option value="CS-B2">CS-B2</option>
+                  <option value="CS-A3">CS-A3</option><option value="CS-B4">CS-B4</option>
+                  <option value="CS-A5">CS-A5</option><option value="CS-B6">CS-B6</option>
+                  <option value="CS-A7">CS-A7</option><option value="CS-B8">CS-B8</option>
+                </optgroup>
+              </select>
+            </div>
+            <!-- EDITABLE USERNAME FIELD -->
+            <div class="col-12 mt-2">
+                <label class="small fw-bold text-muted">App Username Link</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted">@</span>
+                    <input type="text" id="editUsername" class="form-control" placeholder="e.g. teststudent">
+                </div>
+                <div class="form-text x-small text-danger fw-bold">Note: Use "Pending" if unlinked. Change this to fix "Profile Not Found" errors!</div>
+            </div>
+            <div class="col-12 mt-3">
+              <button type="button" id="saveEditBtn" class="btn btn-primary fw-bold w-100">Update Access Info Only</button>
+            </div>
+          </div>
+
+          <h6 class="text-danger fw-bold border-bottom pb-2 mb-2 small uppercase">Step 2: Password / Registration Reset</h6>
+          <div class="bg-light p-3 rounded border small text-muted">
+            <p class="mb-3">Use this if a student forgot their password and is locked out.</p>
+            
+            <button id="resetStudentBtn" class="btn btn-warning w-100 fw-bold mb-3">
+              ⚠️ 1. Wipe & Refresh Roster Entry
+            </button>
+
+            <a href="https://console.firebase.google.com/project/digitalartsclasses-games-67ae7/authentication/users" target="_blank" class="btn btn-sm btn-outline-danger w-100 fw-bold">
+              🔑 2. Open Dashboard to Delete Login Account
+            </a>
+            
+            <p class="mt-3 x-small italic text-center mb-0">
+              Note: You must do BOTH steps above. After that, the student can go to the login page and use "Create Account" to set a new password.
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary btn-sm px-4" data-bs-dismiss="modal">Close Manager</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <!-- Dedicated Admin Roster Logic -->
+  <script type="module" src="/js/admin/roster.js"></script>
+</body>
+</html>

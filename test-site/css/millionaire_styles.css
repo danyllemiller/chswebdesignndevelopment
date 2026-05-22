@@ -1,0 +1,276 @@
+/* --- MILLIONAIRE THEME & LAYOUT --- */
+body.millionaire-theme {
+    background: radial-gradient(circle, #20002c 0%, #060018 100%);
+    color: #fff;
+    font-family: 'Verdana', sans-serif;
+    min-height: 100vh;
+}
+
+/* Container */
+.game-container {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    gap: 20px;
+}
+
+/* Main Game Area (Question + Answers) */
+.main-game-area {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Question Box */
+.question-box {
+    background: linear-gradient(180deg, #100e17 0%, #302b63 50%, #100e17 100%);
+    border: 2px solid #fff;
+    border-radius: 50px;
+    padding: 30px;
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 40px;
+    position: relative;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* Decorative lines for question box */
+.question-box::before, .question-box::after {
+    content: '';
+    position: absolute;
+    height: 2px;
+    width: 40px;
+    background: #fff;
+    top: 50%;
+}
+.question-box::before { left: -40px; }
+.question-box::after { right: -40px; }
+
+/* Answer Grid */
+.answers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.answer-btn {
+    background: linear-gradient(180deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    border: 2px solid #aaa;
+    border-radius: 40px;
+    padding: 15px 30px;
+    color: #fff;
+    font-size: 1.2rem;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.2s;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.answer-btn:hover:not(:disabled) {
+    background: linear-gradient(180deg, #f12711 0%, #f5af19 100%); /* Orange Hover */
+    border-color: #fff;
+    color: #000;
+    transform: scale(1.02);
+}
+.answer-btn:hover:not(:disabled) .answer-letter {
+    color: #000;
+}
+
+.answer-btn.selected {
+    background: #f5af19; /* Orange */
+    color: #000;
+    border-color: #fff;
+}
+.answer-btn.selected .answer-letter { color: #000; }
+
+.answer-btn.correct {
+    background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%); /* Green */
+    color: #000;
+    border-color: #fff;
+    animation: flashCorrect 0.6s infinite alternate;
+}
+.answer-btn.correct .answer-letter { color: #000; }
+
+.answer-btn.wrong {
+    background: linear-gradient(90deg, #cb2d3e 0%, #ef473a 100%); /* Red */
+    border-color: #fff;
+}
+
+.answer-letter {
+    color: #daa520; /* Gold */
+    font-weight: bold;
+    font-size: 1.3rem;
+    margin-right: 15px;
+}
+
+/* Sidebar: Money Ladder & Lifelines */
+.sidebar-area {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Lifelines */
+.lifelines {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.5);
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #444;
+}
+
+.lifeline-btn {
+    width: 70px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: radial-gradient(circle, #302b63 0%, #0f0c29 100%);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+.lifeline-btn:hover:not(:disabled) {
+    box-shadow: 0 0 15px #fff;
+    background: #302b63;
+}
+.lifeline-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    position: relative;
+}
+.lifeline-btn:disabled::after {
+    content: '❌';
+    position: absolute;
+    font-size: 2rem;
+    color: red;
+}
+
+/* Money List */
+.money-list {
+    list-style: none;
+    padding: 10px;
+    margin: 0;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid #daa520;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column-reverse; /* $1M at top */
+}
+
+.money-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 10px;
+    color: #daa520; /* Gold text */
+    font-family: monospace;
+    font-size: 1.1rem;
+}
+
+.money-item.milestone {
+    color: #fff;
+    font-weight: bold;
+}
+
+.money-item.active {
+    background-color: #daa520;
+    color: #000;
+    border-radius: 4px;
+    font-weight: bold;
+    box-shadow: 0 0 10px #daa520;
+}
+
+/* --- CROSSWORD & WORD SEARCH OVERRIDES FOR DARK THEME --- */
+.crossword-container, .ws-container {
+    background: #fff; /* Keep content area white for readability */
+    color: #333;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.cw-grid, .ws-grid {
+    background-color: #343a40;
+    border: 2px solid #343a40;
+    width: fit-content;
+    margin: 0 auto;
+    display: grid;
+    gap: 2px;
+}
+
+.cw-cell, .ws-cell {
+    width: 30px; 
+    height: 30px; 
+    background-color: #212529; 
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Crossword Specifics */
+.cw-cell.active-cell { background-color: #fff; }
+.cw-cell input {
+    width: 100%; height: 100%; border: none; text-align: center;
+    font-size: 0.9rem; font-weight: bold; text-transform: uppercase;
+    padding: 0; margin: 0; outline: none; color: #000; cursor: pointer;
+}
+.cw-cell input:focus { background-color: #e3f2fd; }
+.cw-num {
+    position: absolute; top: 1px; left: 2px; font-size: 0.5rem; color: #666; pointer-events: none;
+}
+
+/* Word Search Specifics */
+.ws-cell {
+    background-color: #f8f9fa; /* Light cells */
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+}
+.ws-cell:hover { background-color: #e9ecef; }
+.ws-cell.selected { background-color: #fff3cd; } /* Yellow select */
+.ws-cell.found { background-color: #d1e7dd; color: #0f5132; } /* Green found */
+
+/* Clue Lists */
+.clue-section, .ws-clue-list {
+    max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6;
+    padding: 15px; border-radius: 5px; background-color: #f8f9fa; color: #333;
+}
+.clue-list, .ws-clue-list { list-style: none; padding: 0; margin: 0; }
+.clue-list li, .ws-clue-item {
+    padding: 5px; border-bottom: 1px solid #eee; cursor: pointer;
+}
+.clue-list li.active-clue {
+    background-color: #fff3cd; font-weight: bold; border-left: 4px solid #ffc107;
+}
+.ws-clue-item.found-clue {
+    text-decoration: line-through; color: #adb5bd;
+}
+
+/* Animations */
+@keyframes flashCorrect {
+    0% { background: #56ab2f; }
+    100% { background: #a8e063; }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .game-container { flex-direction: column-reverse; }
+    .sidebar-area { width: 100%; flex-direction: row-reverse; justify-content: space-between; }
+    .money-ladder-area { display: none; } /* Hide ladder on mobile */
+    .answers-grid { grid-template-columns: 1fr; }
+}

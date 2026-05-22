@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Worksheet: Chapter 7 Mastery (The "Bones")</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <!-- External Stylesheets -->
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/worksheetStyles.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <!-- Auth Guard formats the navigation menus! -->
+  <script type="module" src="/js/auth-guard.js"></script>
+  
+  <!-- Interactive Engine Dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="/js/worksheetLogic.js"></script>
+</head>
+<body>
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container my-5" id="worksheet-content">
+    <div class="row">
+      <div class="col-12">
+        
+        <!-- TOP NAVIGATION -->
+        <nav class="mb-4 d-flex justify-content-between small fw-bold no-print">
+            <a href="/studyGuides/the-why-intro-to-uiux.html" class="text-decoration-none text-primary">&laquo; Previous Chapter</a>
+            <a href="/studyGuides/the-clothes-intro-to-css.html" class="text-decoration-none text-primary">Next Chapter &raquo;</a>
+        </nav>
+
+        <hgroup class="mb-5 border-bottom pb-3 mt-4 text-center">
+          <h1 class="text-center text-primary fw-bold">CHS Web Design Track</h1>
+          <h2 class="text-center">Chapter 5: The "Bones" (Intro to HTML)</h2>
+          <p class="lead text-center text-muted">Structure, Semantics, and the Foundation of the Web.</p>
+        </hgroup>
+
+        <div class="content-section">
+          
+          <!-- OBJECTIVES CHECKLIST (Nevada CTE Standards 2023) -->
+          <div class="quest-section mb-5">
+            <h4 class="section-title mt-0">Learning Targets Check-In</h4>
+            <p class="small text-muted">Check these off when you can confidently perform the task. (Ref: Nevada CTE Standards 2023)</p>
+            <ul class="list-group list-group-flush small">
+              <li class="list-group-item bg-transparent">
+                  <input class="form-check-input me-2" type="checkbox" id="obj1"><label for="obj1">I can utilize a specialized code editor to write and validate HTML. [Standard 3.3]</label>
+              </li>
+              <li class="list-group-item bg-transparent">
+                  <input class="form-check-input me-2" type="checkbox" id="obj2"><label for="obj2">I can construct a standard HTML5 document boilerplate. [Standard 5.2]</label>
+              </li>
+              <li class="list-group-item bg-transparent">
+                  <input class="form-check-input me-2" type="checkbox" id="obj3"><label for="obj3">I can implement semantic HTML tags to organize page structure. [Standard 5.4]</label>
+              </li>
+              <li class="list-group-item bg-transparent">
+                  <input class="form-check-input me-2" type="checkbox" id="obj4"><label for="obj4">I can create hyperlinks and embed media using proper relative paths. [Standard 5.2]</label>
+              </li>
+              <li class="list-group-item bg-transparent">
+                  <input class="form-check-input me-2" type="checkbox" id="obj5"><label for="obj5">I can explain the difference between block-level and inline elements. [Standard 5.3]</label>
+              </li>
+            </ul>
+          </div>
+
+          <!-- TASK 1: THE TOOLBOX & VALIDATION -->
+          <article class="row mt-5 quest-section" id="sec-1">
+            <h2 class="section-title mt-0 text-primary">Task 1: The Detective's Toolbox</h2>
+            <p class="small text-muted">Identify the professional tools used to write and check code.</p>
+            <div class="mb-4">
+                <label class="fw-bold small d-block">1. Why is VS Code better than Notepad for a developer?</label>
+                <select class="form-select user-input" data-answer="mistakes">
+                    <option value="">Choose logic...</option>
+                    <option value="offline">It only works when offline.</option>
+                    <option value="mistakes">It color-codes your code and checks for mistakes as you type.</option>
+                    <option value="expensive">It is significantly more expensive.</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="fw-bold small">2. The industry-standard tool to "spell-check" your HTML logic is the:</label>
+                <input type="text" class="form-control user-input w-50" data-answer="w3c validation website" placeholder="Tool name...">
+            </div>
+            <button onclick="checkSection('sec-1')" class="btn btn-sm btn-primary no-print">Check Section 1</button>
+          </article>
+
+          <!-- TASK 2: BOILERPLATE ANATOMY -->
+          <article class="row mt-5 quest-section" id="sec-2">
+            <h2 class="section-title mt-0 text-primary">Task 2: Boilerplate Anatomy</h2>
+            <p class="small text-muted">Complete the skeleton of a standard HTML document.</p>
+            <div class="bg-dark text-light p-4 rounded font-monospace small mb-3">
+              &lt;!DOCTYPE html&gt;<br>
+              &lt;html <input type="text" class="user-input bg-transparent border-0 border-bottom text-warning" data-answer="lang" style="width: 50px;">="en"&gt;<br>
+              &lt;<input type="text" class="user-input bg-transparent border-0 border-bottom text-warning" data-answer="head" style="width: 50px;">&gt;<br>
+              &nbsp;&nbsp;&lt;meta charset="UTF-8"&gt;<br>
+              &nbsp;&nbsp;&lt;title&gt;PixelPlay Arcade&lt;/title&gt;<br>
+              &lt;/head&gt;<br>
+              &lt;<input type="text" class="user-input bg-transparent border-0 border-bottom text-warning" data-answer="body" style="width: 50px;">&gt;<br>
+              &nbsp;&nbsp;&lt;h1&gt;Welcome&lt;/h1&gt;<br>
+              &lt;/body&gt;<br>
+              &lt;/html&gt;
+            </div>
+            <p class="small"><strong>Fact Check:</strong> Which invisible tag provides the summary found in Google search results?</p>
+            <input type="text" class="form-control user-input w-50" data-answer="meta description" placeholder="Tag name...">
+            <button onclick="checkSection('sec-2')" class="btn btn-sm btn-primary no-print mt-3">Check Boilerplate</button>
+          </article>
+
+          <!-- TASK 3: NESTING & THE SUITCASE -->
+          <article class="row mt-5 quest-section" id="sec-3">
+            <h2 class="section-title mt-0 text-primary">Task 3: The "First-In, Last-Out" Rule</h2>
+            <p class="small text-muted">Using the suitcase analogy, identify the correctly nested code block.</p>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3 border rounded bg-white shadow-sm h-100">
+                        <p class="x-small mb-1"><strong>Syntax A:</strong></p>
+                        <code class="d-block mb-3 text-dark">&lt;p&gt;Pro &lt;em&gt;Dev&lt;/p&gt;&lt;/em&gt;</code>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check user-input-radio" name="nest1" id="nest1-v" value="valid">
+                            <label class="btn btn-outline-success btn-sm" for="nest1-v">Valid</label>
+                            <input type="radio" class="btn-check user-input-radio" name="nest1" id="nest1-i" value="invalid" data-answer="invalid">
+                            <label class="btn btn-outline-danger btn-sm" for="nest1-i">Invalid</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 border rounded bg-white shadow-sm h-100">
+                        <p class="x-small mb-1"><strong>Syntax B:</strong></p>
+                        <code class="d-block mb-3 text-dark">&lt;p&gt;Pro &lt;em&gt;Dev&lt;/em&gt;&lt;/p&gt;</code>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check user-input-radio" name="nest2" id="nest2-v" value="valid" data-answer="valid">
+                            <label class="btn btn-outline-success btn-sm" for="nest2-v">Valid</label>
+                            <input type="radio" class="btn-check user-input-radio" name="nest2" id="nest2-i" value="invalid">
+                            <label class="btn btn-outline-danger btn-sm" for="nest2-i">Invalid</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <label class="fw-bold small">A tag like <code>&lt;br&gt;</code> that has no content and no closing tag is an:</label>
+                <input type="text" class="form-control user-input w-50" data-answer="empty element" placeholder="...">
+            </div>
+            <button onclick="checkSection('sec-3')" class="btn btn-sm btn-primary no-print mt-3">Check Nesting</button>
+          </article>
+
+          <!-- TASK 4: SEMANTIC ARCHITECTURE -->
+          <article class="row mt-5 quest-section" id="sec-4">
+            <h2 class="section-title mt-0 text-primary">Task 4: Organising Olivia's Site</h2>
+            <p class="small text-muted">Identify the semantic tag based on its role in a professional layout.</p>
+            <div class="table-responsive">
+                <table class="table table-sm small align-middle">
+                    <thead><tr class="bg-light"><th>Description</th><th>Semantic Tag</th></tr></thead>
+                    <tbody>
+                        <tr><td>The introduction of a page, usually containing a logo:</td><td><input type="text" class="form-control form-control-sm user-input" data-answer="header"></td></tr>
+                        <tr><td>A dedicated block for navigation links:</td><td><input type="text" class="form-control form-control-sm user-input" data-answer="nav"></td></tr>
+                        <tr><td>A self-contained piece of content, like a blog post:</td><td><input type="text" class="form-control form-control-sm user-input" data-answer="article"></td></tr>
+                        <tr><td>Content related to the main topic but placed to the side:</td><td><input type="text" class="form-control form-control-sm user-input" data-answer="aside"></td></tr>
+                        <tr><td>The closing content, often with contact info:</td><td><input type="text" class="form-control form-control-sm user-input" data-answer="footer"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-3 bg-site-secondary border border-primary rounded mt-3 shadow-sm">
+                <p class="small mb-1"><strong>Block vs Inline:</strong> Elements that take up full width and stack vertically (like <code>&lt;h1&gt;</code>) are:</p>
+                <input type="text" class="user-input border-bottom border-0 w-50 bg-transparent text-primary fw-bold" data-answer="block-level elements" placeholder="...">
+            </div>
+            <button onclick="checkSection('sec-4')" class="btn btn-sm btn-primary no-print mt-3">Check Semantics</button>
+          </article>
+
+          <!-- TASK 5: ATTRIBUTES & PATHS -->
+          <article class="row mt-5 quest-section" id="sec-5">
+            <h2 class="section-title mt-0 text-primary">Task 5: Attributes & Navigation</h2>
+            <div class="mb-4">
+                <p class="small fw-bold">3. Complete the image tag for a dog named Sparky:</p>
+                <div class="bg-dark text-light p-3 rounded font-monospace small shadow-sm">
+                  &lt;img <input type="text" class="user-input bg-transparent border-0 border-bottom text-warning" data-answer="src" style="width: 50px;">="images/dog.jpg" <input type="text" class="user-input bg-transparent border-0 border-bottom text-warning" data-answer="alt" style="width: 50px;">="A cute dog named Sparky"&gt;
+                </div>
+            </div>
+            <div class="mb-4">
+                <p class="small fw-bold">4. Complete the link to open "google.com" in a NEW tab:</p>
+                <div class="bg-dark text-light p-3 rounded font-monospace small shadow-sm">
+                  &lt;a href="https://google.com" <input type="text" class="user-input bg-transparent border-0 border-bottom text-warning" data-answer="target" style="width: 80px;">="<input type="text" class="user-input bg-transparent border-0 border-bottom text-warning" data-answer="_blank" style="width: 80px;">"&gt;Search&lt;/a&gt;
+                </div>
+            </div>
+            <div class="mb-0">
+                <label class="fw-bold small d-block">5. A link to <code>about.html</code> within your project folder is a:</label>
+                <input type="text" class="form-control user-input w-50" data-answer="relative path" placeholder="Path type...">
+            </div>
+            <button onclick="checkSection('sec-5')" class="btn btn-sm btn-primary no-print mt-3">Check Attributes</button>
+          </article>
+
+          <!-- TASK 6: LISTS & ENTITIES -->
+          <article class="row mt-5 quest-section" id="sec-6">
+            <h2 class="section-title mt-0 text-primary">Task 6: Lists & Special Characters</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="fw-bold small">6. Tag used for a numbered, sequential list:</label>
+                    <input type="text" class="form-control user-input" data-answer="ol">
+                </div>
+                <div class="col-md-6">
+                    <label class="fw-bold small">7. In a Description List, which tag holds the <u>term</u> being defined?</label>
+                    <input type="text" class="form-control user-input" data-answer="dt">
+                </div>
+                <div class="col-md-6">
+                    <label class="fw-bold small">8. What is the character entity for the &copy; symbol?</label>
+                    <input type="text" class="form-control user-input" data-answer="&copy;">
+                </div>
+                 <div class="col-md-6">
+                    <label class="fw-bold small">9. Which tag visually indents a long quote from another source?</label>
+                    <input type="text" class="form-control user-input" data-answer="blockquote">
+                </div>
+            </div>
+            <button onclick="checkSection('sec-6')" class="btn btn-sm btn-primary no-print mt-3">Check Section 6</button>
+          </article>
+
+          <!-- TASK 7: NOTES & REFLECTION -->
+          <div class="quest-section mb-5">
+            <h2 class="section-title mt-0">My Notes &amp; Reflection</h2>
+            <p class="small text-muted">In your own words, explain why logical structure and semantic tags are so critical for the experience of a visually impaired user. (Hint: Think about screen readers).</p>
+            <textarea class="form-control user-input-text" rows="10" placeholder="Write your reflections here for the 'Copy Everything' report..."></textarea>
+          </div>
+
+          <!-- CONSOLIDATED ACTION BAR -->
+          <div class="row mb-5 no-print g-2 align-items-center bg-light p-3 rounded border shadow-sm mx-1">
+              <div class="col-md-4">
+                  <a href="/year1/the-bones-intro-to-html.html" class="btn btn-sm btn-outline-primary w-100 fw-bold text-decoration-none">🏠 Back to Lesson</a>
+              </div>
+              <div class="col-md-4">
+                  <button onclick="checkAll()" class="btn btn-sm btn-success w-100 fw-bold">✅ Validate All</button>
+              </div>
+              <div class="col-md-4">
+                  <button onclick="copyWorksheetToClipboard()" class="btn btn-sm btn-warning w-100 fw-bold text-dark">📋 Copy Everything</button>
+              </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screenshot Modal (Hidden) -->
+  <div class="modal fade" id="screenshotModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Guild Certification Dashboard</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center" id="screenshot-modal-body">
+          <div id="captured-image-placeholder"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+
+  <!-- ENHANCED FOOTER (Removed sticky-bottom) -->
+  <footer class="bg-primary text-white pt-5 pb-3 mt-5 no-print">
+    <div class="container">
+      <div class="row g-4">
+        <!-- Brand/About -->
+        <div class="col-lg-3 col-md-6">
+          <h5 class="fw-bold mb-3" style="font-family: 'Gochi Hand', cursive;">Digital Arts Classes</h5>
+          <p class="x-small opacity-75 lh-base">
+            Professional Web Design &amp; Development curriculum for the modern era. Building the architects of tomorrow through standards-aligned coding labs and industry-ready projects.
+          </p>
+        </div>
+
+        <!-- Yearly Portals -->
+        <div class="col-lg-3 col-md-6">
+          <h6 class="text-uppercase fw-bold mb-3 x-small" style="letter-spacing: 1.5px; color: var(--secondary-color);">Yearly Portals</h6>
+          <ul class="list-unstyled x-small lh-lg">
+            <li><a href="/level1.html" class="text-white text-decoration-none opacity-75 link-hover">🚀 Year 1: Foundations</a></li>
+            <li><a href="/level2andUp.html" class="text-white text-decoration-none opacity-75 link-hover">⚔️ Year 2: Mastering</a></li>
+            <li><a href="/computerscience.html" class="text-white text-decoration-none opacity-75 link-hover">💻 Computer Science</a></li>
+          </ul>
+        </div>
+
+        <!-- Important Tools -->
+        <div class="col-lg-3 col-md-6">
+          <h6 class="text-uppercase fw-bold mb-3 x-small" style="letter-spacing: 1.5px; color: var(--secondary-color);">Study Tools</h6>
+          <ul class="list-unstyled x-small lh-lg">
+            <li><a href="/studyGuides/" class="text-white text-decoration-none opacity-75 link-hover">Interactive Study Guides</a></li>
+            <li><a href="/quizzes/" class="text-white text-decoration-none opacity-75 link-hover">Practice Exam Shuffle</a></li>
+            <li><a href="/techTalkA-Zguide/" class="text-white text-decoration-none opacity-75 link-hover">Architect's Dictionary</a></li>
+            <li><a href="/toLongDidntRead/" class="text-white text-decoration-none opacity-75 link-hover">TL;DR Summaries</a></li>
+          </ul>
+        </div>
+
+        <!-- Administrative -->
+        <div class="col-lg-3 col-md-6">
+          <h6 class="text-uppercase fw-bold mb-3 x-small" style="letter-spacing: 1.5px; color: var(--secondary-color);">Important Links</h6>
+          <ul class="list-unstyled x-small lh-lg">
+            <li><a href="/sitemap.html" class="text-white text-decoration-none fw-bold text-info link-hover">🗺️ Complete Site Map</a></li>
+            <li><a href="/grading.html" class="text-white text-decoration-none opacity-75 link-hover">Grading Policy</a></li>
+            <li><a href="/contact.html" class="text-white text-decoration-none opacity-75 link-hover">Contact Instructor</a></li>
+            <li><a href="/notices.html" class="text-white text-decoration-none opacity-75 link-hover">Legal &amp; Privacy</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <hr class="my-4 opacity-25">
+      
+      <div class="row">
+        <div class="col-12 text-center">
+          <p class="x-small mb-0 opacity-50 fw-light">
+            Copyright &copy; 2026 Danylle Miller Designs. Built for Carson High School. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

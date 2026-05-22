@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Tech Talk: Chapter 12 Exhaustive Vocabulary Guide</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-12">
+        <nav class="mb-4 d-flex justify-content-between small fw-bold">
+            <a href="/year2/the-game-dev-advanced-js-game-logic.html" class="text-decoration-none">&laquo; Back to Lesson</a>
+            <span class="text-muted text-uppercase tracking-widest">Game Architect's Dictionary</span>
+        </nav>
+
+        <hgroup class="mb-5 border-bottom pb-3 mt-4">
+          <h1 class="display-4 fw-bold text-primary">Tech Talk: Chapter 12</h1>
+          <p class="lead text-muted fs-4">Exhaustive Vocabulary for Game Dev, Physics &amp; OOP</p>
+        </hgroup>
+
+        <div class="content-section">
+          <div class="row">
+            <!-- COLUMN 1 -->
+            <div class="col-md-6">
+              <dl>
+                <dt class="text-primary fw-bold">AABB Collision</dt>
+                <dd class="small mb-3">Axis-Aligned Bounding Box; the most common method for detecting rectangle collisions by checking the overlap of x, y, width, and height.</dd>
+
+                <dt class="text-primary fw-bold">Acceleration</dt>
+                <dd class="small mb-3">The rate at which an object's velocity increases over time. In games, this is used to make movement feel more natural.</dd>
+
+                <dt class="text-primary fw-bold">Asset Loader</dt>
+                <dd class="small mb-3">Code designed to ensure all images and sounds are 100% downloaded before the game loop starts to prevent errors or "invisible" objects.</dd>
+
+                <dt class="text-primary fw-bold">cancelAnimationFrame()</dt>
+                <dd class="small mb-3">The command used to instantly stop a game loop that was triggered by requestAnimationFrame.<br>
+                <code class="text-dark bg-light px-2">Example: cancelAnimationFrame(gameLoopId);</code></dd>
+
+                <dt class="text-primary fw-bold">Canvas API</dt>
+                <dd class="small mb-3">A high-performance HTML5 system for drawing 2D graphics and sprites directly in the browser via JavaScript.</dd>
+
+                <dt class="text-primary fw-bold">Circular Collision</dt>
+                <dd class="small mb-3">Collision detection that checks if the distance between the center points of two circles is less than the sum of their radii.</dd>
+
+                <dt class="text-primary fw-bold">constructor()</dt>
+                <dd class="small mb-3">The specialized function inside an ES6 Class that executes automatically every time a brand new object (instance) is created.<br>
+                <code class="text-dark bg-light px-2">Example: constructor(x, y) { this.x = x; }</code></dd>
+
+                <dt class="text-primary fw-bold">ctx.arc()</dt>
+                <dd class="small mb-3">The Canvas method used to draw curves or full circles. It requires a starting and ending angle in radians.<br>
+                <code class="text-dark bg-light px-2">Example: ctx.arc(x, y, radius, 0, Math.PI * 2);</code></dd>
+
+                <dt class="text-primary fw-bold">ctx.beginPath()</dt>
+                <dd class="small mb-3">Starts a new drawing path; essential to call before a new shape to prevent it from connecting to previous shapes.<br>
+                <code class="text-dark bg-light px-2">Example: ctx.beginPath(); ctx.moveTo(0,0);</code></dd>
+
+                <dt class="text-primary fw-bold">ctx.clearRect()</dt>
+                <dd class="small mb-3">Erases a specific area of the canvas. This is the first step of a professional game loop to prevent "smearing."<br>
+                <code class="text-dark bg-light px-2">Example: ctx.clearRect(0, 0, canvas.width, canvas.height);</code></dd>
+
+                <dt class="text-primary fw-bold">ctx.drawImage()</dt>
+                <dd class="small mb-3">The primary method used to render external image files (sprites) onto the game board.<br>
+                <code class="text-dark bg-light px-2">Example: ctx.drawImage(heroImage, heroX, heroY);</code></dd>
+
+                <dt class="text-primary fw-bold">ctx.fillStyle / strokeStyle</dt>
+                <dd class="small mb-3">Properties that set the interior color (fill) or border color (stroke) of shapes before they are drawn.<br>
+                <code class="text-dark bg-light px-2">Example: ctx.fillStyle = "#FF0000";</code></dd>
+
+                <dt class="text-primary fw-bold">ctx.save() / restore()</dt>
+                <dd class="small mb-3">A pair of commands that saves the current state of the canvas (colors, rotation) and then restores it, preventing one object's rotation from affecting the next.<br>
+                <code class="text-dark bg-light px-2">Example: ctx.save(); ctx.rotate(1); ... ctx.restore();</code></dd>
+
+                <dt class="text-primary fw-bold">Delta Time</dt>
+                <dd class="small mb-3">The time elapsed since the last frame. Used to normalize movement speed so Gabe has the same experience on a 60Hz or 144Hz monitor.</dd>
+
+                <dt class="text-primary fw-bold">Encapsulation</dt>
+                <dd class="small mb-3">The OOP principle of grouping all related properties and methods inside a single Class blueprint for organization.</dd>
+
+                <dt class="text-primary fw-bold">event.code</dt>
+                <dd class="small mb-3">The property of a keyboard event that identifies the physical key pressed (e.g., 'Space', 'ArrowUp'), ignoring the character itself.<br>
+                <code class="text-dark bg-light px-2">Example: if (event.code === "ArrowRight") { ... }</code></dd>
+              </dl>
+            </div>
+
+            <!-- COLUMN 2 -->
+            <div class="col-md-6">
+              <dl>
+                <dt class="text-primary fw-bold">extends / super()</dt>
+                <dd class="small mb-3">Keywords used for Class inheritance. `extends` creates a subclass, and `super()` calls the parent's constructor.<br>
+                <code class="text-dark bg-light px-2">Example: class Dog extends Animal { constructor() { super(); } }</code></dd>
+
+                <dt class="text-primary fw-bold">Friction</dt>
+                <dd class="small mb-3">Simulated physics where velocity is multiplied by a value less than 1 (e.g., 0.98) every frame to gradually slow an object down.</dd>
+
+                <dt class="text-primary fw-bold">Game Loop Order (C.U.D.)</dt>
+                <dd class="small mb-3">The professional execution sequence: Clear the Canvas &rarr; Update logic/physics &rarr; Draw the objects.</dd>
+
+                <dt class="text-primary fw-bold">Game State</dt>
+                <dd class="small mb-3">A variable (often a string or boolean) that controls which logic blocks are currently active (e.g., 'menu', 'playing', 'gameover').</dd>
+
+                <dt class="text-primary fw-bold">Gravity</dt>
+                <dd class="small mb-3">Simulated by adding a constant, positive value to an object's vertical velocity (Y-axis) every single frame.</dd>
+
+                <dt class="text-primary fw-bold">Haptic Feedback</dt>
+                <dd class="small mb-3">Physical communication through touch or vibration, often used to alert Gamer Gabe to a hit or a win.</dd>
+
+                <dt class="text-primary fw-bold">Hitbox</dt>
+                <dd class="small mb-3">The invisible area (usually a rectangle or circle) around a sprite used to calculate if a collision has occurred.</dd>
+
+                <dt class="text-primary fw-bold">Instantiate (new)</dt>
+                <dd class="small mb-3">The process of creating a brand new, active object from a Class blueprint using the `new` keyword.<br>
+                <code class="text-dark bg-light px-2">Example: const boss = new Enemy();</code></dd>
+
+                <dt class="text-primary fw-bold">Magic Numbers</dt>
+                <dd class="small mb-3">Hard-coded, unexplained numbers in your code (e.g., 800) that should be replaced with named constants (e.g., CANVAS_WIDTH).</dd>
+
+                <dt class="text-primary fw-bold">Parallax Scrolling</dt>
+                <dd class="small mb-3">Moving background layers at different speeds to create a 3D illusion of depth on a 2D screen.</dd>
+
+                <dt class="text-primary fw-bold">Particle Systems</dt>
+                <dd class="small mb-3">A technique for creating complex effects like fire, smoke, or explosions using dozens of small, short-lived objects.</dd>
+
+                <dt class="text-primary fw-bold">Pythagorean Theorem</dt>
+                <dd class="small mb-3">The math formula ($a^2+b^2=c^2$) used to find the distance between two center points for circular collision detection.</dd>
+
+                <dt class="text-primary fw-bold">requestAnimationFrame()</dt>
+                <dd class="small mb-3">The pro standard for game loops; it syncs with the screen's refresh rate and pauses automatically when the tab is hidden.<br>
+                <code class="text-dark bg-light px-2">Example: requestAnimationFrame(gameLoop);</code></dd>
+
+                <dt class="text-primary fw-bold">shift() / splice()</dt>
+                <dd class="small mb-3">Array methods used for cleaning. `shift()` removes the first item; `splice()` removes an item at a specific index.<br>
+                <code class="text-dark bg-light px-2">Example: enemies.splice(hitIndex, 1);</code></dd>
+
+                <dt class="text-primary fw-bold">Sprite Sheet</dt>
+                <dd class="small mb-3">A single image file containing every frame of an animation sequence to save memory and loading time.</dd>
+
+                <dt class="text-primary fw-bold">this</dt>
+                <dd class="small mb-3">A keyword referring to the specific object instance currently being updated or drawn inside a Class.<br>
+                <code class="text-dark bg-light px-2">Example: this.health -= 10;</code></dd>
+
+                <dt class="text-primary fw-bold">Velocity</dt>
+                <dd class="small mb-3">A vector value representing both the speed and the direction of an object's movement.</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        
+
+      </div>
+    </div>
+  </section>
+
+<div id="footer-nav"></div>
+<div id="footer-placeholder"></div>
+
+  
+  <a href="#" class="back-to-top" title="Back to Top">🚀</a>
+
+  <footer class="navbar  bg-body-tertiary border-top mt-5">
+   <div class="container">
+    <p class="text-center w-100 small mb-0" style="padding: 12px;">
+     Copyright - Danylle Miller Designs 2024
+    </p>
+   </div>
+  </footer>
+
+  
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

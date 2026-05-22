@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Pre-Assessment: Chapter 3 - The Rules</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module">
+    import { initPreTest } from "/js/preTestLogic.js";
+    window.initPreTest = initPreTest;
+  </script>
+<script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+<div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+  <section class="container-ultrawide my-5">
+    <div id="exam-container">
+        <div class="text-center p-5"><div class="spinner-border text-info"></div><p class="mt-2 fw-bold text-primary">Syncing Ethical Diagnostic...</p></div>
+    </div>
+  </section>
+  <script>
+    const diagPool = [
+        { question: "The moment you create an original piece of code or take a photo, what legal shield automatically applies?", options: ["Trademark", "Copyright", "Patent", "NDA"] },
+        { question: "What does the symbol '™' represent?", options: ["Copyright", "Trademark (Brand identity)", "Patent", "CC License"] },
+        { question: "Which type of intellectual property is NOT automatic and must be applied for and granted by the government?", options: ["Copyright", "Trademark", "Patent", "Trade Secret"] },
+        { question: "What is 'Work Made for Hire'?", options: ["Volunteering.", "A contract where your employer owns the copyright to everything you build.", "Working for free.", "Selling code."] },
+        { question: "Which Creative Commons license requirement means 'You must give credit to the original creator'?", options: ["NC", "ND", "Attribution (BY)", "SA"] },
+        { question: "If a license is marked 'NC', can you use that asset on a website that sells products?", options: ["Yes", "No, NC means NonCommercial use only.", "Only in the footer", "Only if cropped"] },
+        { question: "What does the 'ND' requirement in a CC license prohibit?", options: ["Money", "Credit", "Editing, cropping, or filtering the work (No Derivatives).", "Mobile use"] },
+        { question: "Work that has no copyright protection and is free for anyone to use without permission belongs to the:", options: ["Deep Web", "Creative Commons", "Public Domain", "Private Sector"] },
+        { question: "What is the 'Digital Footprint'?", options: ["Monitor size", "A permanent record of every activity, search, and comment a user makes online.", "Footer width", "Secure login"] },
+        { question: "What does PII stand for in the context of user privacy?", options: ["Public Internet", "Personally Identifiable Information", "Private Input", "Password Index"] },
+        { question: "What is an 'Invasion of Privacy' in web development?", options: ["Theft", "Collecting or sharing a user's personal data without their consent.", "Broken tab", "Black theme"] },
+        { question: "HTTP is like sending a ____________, while HTTPS is like sending a sealed armored letter.", options: ["Postcard", "Package", "Email", "Note"] },
+        { question: "What technology provides the 's' in HTTPS and the padlock icon in the browser?", options: ["JavaScript", "CSS", "SSL/TLS Certificate", "VPN"] },
+        { question: "How many steps are typically involved in the SSL/TLS Handshake?", options: ["3", "5", "8", "10"] },
+        { question: "What is a 'Certificate Authority' (CA)?", options: ["Police", "A trusted third party that verifies a website is who they say they are.", "Developer", "Router"] },
+        { question: "The European privacy law that uses an 'OPT-IN' model for data collection is:", options: ["ADA", "SB220", "GDPR", "W3C"] },
+        { question: "The Nevada privacy law SB220 uses which model for the sale of consumer data?", options: ["Opt-In", "Opt-Out", "No Sale", "Implicit"] },
+        { question: "What does 'Privacy by Design' mean?", options: ["Pretty policy", "Building data protection into the technology from the very start of development.", "Original images", "Hidden code"] },
+        { question: "What does 'a11y' stand for?", options: ["Analytics", "Accessibility", "Always Online", "Algorithm"] },
+        { question: "Which federal law makes web accessibility a legal requirement for public businesses?", options: ["GDPR", "ADA (Americans with Disabilities Act)", "NRS", "TCP"] },
+        { question: "What is the global standard for web accessibility guidelines?", options: ["W3C", "Google Manual", "WCAG (Web Content Accessibility Guidelines)", "HTML5"] },
+        { question: "In the 'POUR' principles, what does the 'P' stand for?", options: ["Powerful", "Private", "Perceivable", "Public"] },
+        { question: "Which principle ensures that a user can navigate your entire site using only a keyboard?", options: ["Operable", "Understandable", "Robust", "Perceivable"] },
+        { question: "Why is 'Alt Text' required for images?", options: ["Speed", "So screen readers can describe the image to visually impaired users.", "Google SEO only", "Captions"] },
+        { question: "What is the minimum required color contrast ratio for normal text under WCAG standards?", options: ["3:1", "10:1", "4.5:1", "2:1"] }
+    ];
+    const config = {
+        questions: diagPool,
+        questionCount: 15,
+        chapterTitle: "Chapter 3 Diagnostic",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbzgJFP8F23d1C8UtIT1jG-eosRq1YBaA2dfqCIQnPMuZeAfGd1gVPYrObO8UQgkIb3atQ/exec"
+    };
+    window.onload = () => initPreTest(config);
+  </script>
+<div id="footer-placeholder"></div>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

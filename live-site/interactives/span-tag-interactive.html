@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 5 Interactive: Inline Containers</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <!-- Standard DAC Head Elements -->
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <!-- Interactive Module Dependencies -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="/css/interactive.css" rel="stylesheet"/>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print"><div id="nav-placeholder"></div></div>
+
+  <section class="container-fluid my-5">
+    <div class="row"><div class="col-12 d-flex flex-column align-items-center">
+        
+        <nav class="mb-4 w-100 d-flex justify-content-start small fw-bold container">
+            <a href="/year1/the-bones-intro-to-html.html" class="text-decoration-none da-primary">
+                <i class="fas fa-angles-left me-1"> Back to Chapter Reading</i>
+            </a>
+        </nav>
+
+        <div id="interactive-module" class="d-flex justify-content-center w-100 py-4 mb-5">
+            <main class="container bg-white rounded-4 shadow-lg overflow-hidden border p-0 interactive-main">
+                <div class="row g-0 h-100 module-row">
+                    
+                    <!-- Code Column -->
+                    <div class="col-12 col-md-6 code-panel bg-dark text-white p-4 p-md-5 d-flex flex-column justify-content-center position-relative">
+                        <div class="position-absolute top-0 start-0 mt-3 ms-4 text-white-50 small text-uppercase fw-bold letter-spacing-wide">
+                            <i class="fas fa-code me-2"></i> HTML Syntax
+                        </div>
+                        
+                        <div class="code-font fs-5 fs-md-4 lh-lg mt-4">
+                            <span class="code-segment step-hidden syn-punct" data-steps="0,1">&lt;p&gt;</span><br>
+                            &nbsp;&nbsp;<span class="code-segment step-hidden text-white" data-steps="0,1">My favorite color is</span><br>
+                            &nbsp;&nbsp;<span class="code-segment step-hidden syn-sel" data-steps="1">&lt;span style="color: blue;"&gt;</span><span class="code-segment step-hidden text-white" data-steps="0,1">blue</span><span class="code-segment step-hidden syn-sel" data-steps="1">&lt;/span&gt;</span><br>
+                            &nbsp;&nbsp;<span class="code-segment step-hidden text-white" data-steps="0,1">!</span><br>
+                            <span class="code-segment step-hidden syn-punct" data-steps="0,1">&lt;/p&gt;</span>
+                        </div>
+
+                        <div class="mt-5 preview-wrapper rounded p-4 position-relative overflow-hidden bg-secondary bg-opacity-25 d-flex justify-content-center align-items-center">
+                            <div class="position-absolute top-0 end-0 mt-2 me-2 text-uppercase fw-bold preview-badge px-2 py-1 rounded text-dark">Browser View</div>
+                            <div class="w-100 p-4 bg-white rounded shadow-sm border text-center" style="min-height: 120px;">
+                                <p class="fs-5 mb-0 text-dark">My favorite color is <span id="preview-text" class="transition-all fw-bold">blue</span>!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Column -->
+                    <div class="col-12 col-md-6 p-4 p-md-5 d-flex flex-column justify-content-between bg-white text-dark">
+                        <div>
+                            <div class="d-inline-block px-3 py-1 bg-success bg-opacity-10 text-success rounded-pill small fw-bold mb-4 text-uppercase letter-spacing-wide">Interactive Lesson</div>
+                            <h2 class="display-6 fw-bold da-primary mb-2 mt-0">The &lt;span&gt; Tag</h2>
+                            <div class="d-flex gap-1 mb-5 mt-4" id="module-progress"></div>
+                            <div id="module-content" class="content-min-height"></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
+                            <button class="btn-prev btn text-secondary fw-semibold border-0"><i class="fas fa-arrow-left me-2"></i> Back</button>
+                            <button class="btn-next btn text-white bg-da-primary fw-semibold shadow-sm px-4 py-2">Next Step <i class="fas fa-arrow-right ms-2"></i></button>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div></div>
+  </section>
+
+
+  <script src="/js/interactive.js"></script>
+  <script>
+    const steps = [
+        { title: "The Generic Container", icon: "fa-box-open", text: "The <code>&lt;span&gt;</code> tag is a <strong>generic inline container</strong>. It doesn't inherently mean anything or change the visual layout on its own." },
+        { title: "Targeting within a line", icon: "fa-bullseye", text: "Unlike a <code>&lt;div&gt;</code> (which forces a line break), <code>&lt;span&gt;</code> is used when you want to group a small piece of text <em>within</em> a line to apply CSS styles to it, without breaking the paragraph apart." }
+    ];
+    
+    const quiz = {
+        snippet: `<code>&lt;p&gt;</code><code>I love </code><code class="da-primary fw-bold">&lt;span class="highlight"&gt;</code><code>HTML</code><code class="da-primary fw-bold">&lt;/span&gt;</code><code>!</code><code>&lt;/p&gt;</code>`,
+        question: "You want to change the text color of a single word in a paragraph, but you don't want the word to jump to a new line. Which generic container should you use?",
+        options: [
+            { text: "&lt;div&gt;", isCorrect: false },
+            { text: "&lt;span&gt;", isCorrect: true },
+            { text: "&lt;section&gt;", isCorrect: false }
+        ],
+        correctText: "Spot on! The <code>&lt;span&gt;</code> tag is perfect for inline grouping without causing line breaks.",
+        incorrectText: "Remember, <code>&lt;div&gt;</code> and <code>&lt;section&gt;</code> are block-level elements and will push the text to a new line."
+    };
+    
+    new InteractiveModule(steps, quiz, (step) => {
+        const txt = document.getElementById('preview-text');
+        if (step === 1) {
+            txt.style.color = 'blue';
+        } else {
+            txt.style.color = 'inherit';
+        }
+    });
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

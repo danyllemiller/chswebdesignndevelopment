@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Events Lab</title>
+    <link rel="stylesheet" href="style.css">
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Interactive Robot</h1>
+
+        <!-- PART A: Image Rollover -->
+        <div class="card">
+            <!-- Default: Normal State -->
+            <img id="moodImage" src="https://api.dicebear.com/7.x/bottts/svg?seed=Normal&backgroundColor=c0aede" alt="Robot Face" width="150">
+            <p>Hover over me!</p>
+        </div>
+
+        <!-- PART B: Fact Toggle -->
+        <div class="card">
+            <h2>Did you know?</h2>
+            <!-- The "hidden" class makes this invisible initially -->
+            <p id="funFact" class="hidden">JavaScript was created in just 10 days in 1995!</p>
+            <button id="factToggle">Show Fact</button>
+        </div>
+
+        <!-- PART C: Form Validation -->
+        <div class="card">
+            <h2>Join the Club</h2>
+            <form id="signupForm">
+                <label for="nameInput">Enter your Name:</label>
+                <input type="text" id="nameInput" placeholder="Letters only...">
+                
+                <!-- Error message area -->
+                <span id="nameError" class="error-msg"></span>
+                
+                <button type="submit">Join Now</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

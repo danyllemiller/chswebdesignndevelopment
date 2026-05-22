@@ -1,0 +1,57 @@
+/* =========================================
+   WORKSHEET INTERACTIVITY & FEEDBACK
+   ========================================= */
+
+/* Answer Validation States */
+.is-valid { 
+    border: 2px solid #198754 !important; 
+    background-color: #e8f5e9 !important; 
+}
+
+.is-invalid { 
+    border: 2px solid #dc3545 !important; 
+    background-color: #f8d7da !important; 
+}
+
+/* Feedback Icons & Spacing */
+.feedback-icon { 
+    font-size: 1.2rem; 
+    margin-left: 10px; 
+}
+
+/* Study Hints for Exam Prep */
+.test-hint { 
+    font-size: 0.8rem; 
+    color: var(--tertiary-color); 
+    font-style: italic; 
+    display: block; 
+    margin-top: 5px; 
+}
+
+/* Drop Zone Styles (For potential future drag-and-drop) */
+.drop-zone { 
+    min-height: 40px; 
+    border: 1px dashed var(--quaternary-color); 
+    border-radius: 4px; 
+    padding: 5px; 
+    background: #fff; 
+}
+
+/* =========================================
+   PORTFOLIO CAPTURE UTILITIES
+   ========================================= */
+
+/* Container for Screenshot generation */
+.capture-container { 
+    padding: 20px; 
+    background: white; 
+    border-radius: 12px; 
+}
+
+/* Preview Image in Modal */
+#screenshot-modal-body img { 
+    max-width: 100%; 
+    height: auto; 
+    border: 1px solid #ccc; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+}

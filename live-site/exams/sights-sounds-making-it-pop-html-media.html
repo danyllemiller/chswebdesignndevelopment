@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Summative Assessment: Chapter 10 - Media &amp; Tables</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script src="/js/examLogic.js?v=5"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        <!-- The Exam Container -->
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 fw-bold">Loading Secure Environment...</p>
+            </div> 
+        </div>
+      </div> 
+    </div>
+  </section>
+
+  <script>
+    // Chapter 8 Summative Question Pool (52 Questions - Correct Answers STRIPPED)
+    const ch8ExamPool = [
+        { question: "What is a 'Hero Image'?", options: ["A large, prominently placed banner image at the top of a webpage used to capture attention.", "A small icon used in the browser tab.", "A background image that repeats endlessly.", "An image optimized specifically for visually impaired users."] },
+        { question: "Which image format is best for large, complex photographs because of its small file size?", options: ["JPG", "PNG", "SVG", "GIF"] },
+        { question: "Which image format is made entirely of math-based paths and stays perfectly sharp at any scale?", options: ["SVG", "JPG", "PNG", "WebP"] },
+        { question: "Which image format was created by Google to provide superior compression on the web?", options: ["WebP", "PNG", "GIF", "SVG"] },
+        { question: "What happens during 'Lossy' compression (like saving a JPG)?", options: ["Mathematical data is permanently deleted to reduce file size.", "Rewrites data without losing visual quality.", "Turns the image into a scalable vector graphic.", "Forces the image to become transparent."] },
+        { question: "What happens during 'Lossless' compression (like saving a PNG)?", options: ["The file size is reduced by rewriting the data without losing visual quality.", "Mathematical data is permanently deleted to reduce file size.", "The image becomes entirely black and white.", "The image is forced into a vector format."] },
+        { question: "Which image format is most widely used for short, looping, soundless animations?", options: ["GIF", "JPG", "PNG", "WebP"] },
+        { question: "What is 'Dithering'?", options: ["Simulating colors using patterns of dots to prevent banding.", "Compressing a file by removing metadata.", "Cropping an image to focus on the main subject.", "Stretching a low-resolution image to fit a large screen."] },
+        { question: "What is the primary function of the src attribute in an <img> tag?", options: ["It tells the browser exactly where to find the image file.", "It scales the image to fit the container.", "It provides text for screen readers.", "It adds a border around the image."] },
+        { question: "If an image fails to load, which attribute's text will the browser display instead?", options: ["alt", "title", "src", "href"] },
+        { question: "If an image is purely decorative, how should you write the alt attribute?", options: ["alt=\"\"", "alt=\"decorative\"", "Leave the attribute out entirely.", "alt=\"none\""] },
+        { question: "Why must web designers ensure their file paths match perfectly in case sensitivity?", options: ["Because Linux web servers view 'Image.jpg' and 'image.jpg' as two entirely different files.", "Because Windows computers cannot read lowercase letters.", "Because CSS only targets uppercase filenames.", "Because it prevents viruses from downloading the image."] },
+        { question: "Why is it a terrible practice to use CSS width to shrink a massive 4000px image?", options: ["The browser still downloads the massive original file, slowing down the site.", "It converts the image to a low-quality GIF.", "It breaks the semantic structure of the HTML document.", "It causes the image to become stretched and distorted."] },
+        { question: "What is the Photoshop tool specifically used to permanently shrink the total pixel dimensions of an image?", options: ["Image Size", "Canvas Size", "Crop Tool", "Magic Wand"] },
+        { question: "When resizing an image in Photoshop, which 'Resample' setting is best for keeping details crisp when shrinking?", options: ["Bicubic Sharper (reduction)", "Nearest Neighbor (hard edges)", "Bilinear", "Bicubic Smoother (enlargement)"] },
+        { question: "What is the 'Save for Web (Legacy)' tool primarily used for in Photoshop?", options: ["Compressing file sizes for lightning-fast loading on the internet.", "Saving an image specifically for printing on a billboard.", "Converting images directly into HTML code.", "Uploading images straight to a database."] },
+        { question: "How do you describe an HTML tag like <img> that does not require a closing tag?", options: ["An 'empty' or 'self-closing' tag.", "A 'void' or 'null' tag.", "An 'inline' or 'block' tag.", "A 'semantic' tag."] },
+        { question: "Which two tags should wrap an image and its visible text description to be semantically correct?", options: ["<figure> and <figcaption>", "<div> and <p>", "<article> and <footer>", "<section> and <aside>"] },
+        { question: "Which attribute allows the browser to pick from a menu of different image sizes based on the user's screen?", options: ["srcset", "src", "sizes", "media"] },
+        { question: "In responsive imagery, what does the 'w' descriptor do in the srcset attribute (e.g., 800w)?", options: ["It tells the browser the exact width of the image file in pixels.", "It stands for 'weight', making the image load faster.", "It sets the 'width' CSS property of the image to 800 pixels.", "It tells the browser the image is 800 times heavier than normal."] },
+        { question: "What is the purpose of the 'sizes' attribute in a responsive <img> tag?", options: ["It acts as an instruction manual telling the browser how much space the image will take up at different breakpoints.", "It physically crops the image file on the server.", "It tells the server how many images to send to the browser.", "It determines the aspect ratio of the video player."] },
+        { question: "Why would a developer choose to copy and paste ('inline') raw SVG code directly into their HTML file?", options: ["By inlining the code, the developer can change the icon's color directly using CSS.", "Because SVG files cannot be loaded using an <img> tag.", "To prevent hackers from stealing the vector paths.", "To make the file size larger."] },
+        { question: "What CSS property can be used to change the color of an inline SVG graphic?", options: ["fill", "background-color", "color", "stroke"] },
+        { question: "In Illustrator, what is the crucial step before exporting text as an SVG to ensure it displays correctly for everyone?", options: ["Convert the text to outlines (Create Outlines).", "Change the font to Arial or Times New Roman.", "Embed the font file in the HTML document.", "Rasterize the text into pixels."] },
+        { question: "What is the small image displayed in the browser tab next to your page title called?", options: ["Favicon", "Hero Image", "Thumbnail", "Vector Graphic"] },
+        { question: "What is the ideal canvas shape and size for designing a modern Favicon?", options: ["A perfectly square 512x512 pixel canvas.", "A rectangular 1920x1080 pixel canvas.", "A circle 100x100 pixel canvas.", "A vertical 1080x1920 pixel canvas."] },
+        { question: "Which file format is universally recommended for saving modern Favicons?", options: ["A transparent PNG.", "A heavily compressed JPG.", "An animated GIF.", "A high-resolution WebP."] },
+        { question: "Why is it often better to embed a YouTube video using an <iframe> rather than hosting the MP4 yourself?", options: ["It saves you from paying for massive bandwidth by using YouTube's servers.", "It makes the video automatically play with sound on all devices.", "It converts the video into an SVG format.", "It prevents users from pausing the video."] },
+        { question: "In modern CSS, what property is used to make an <iframe> fluidly maintain a specific 16:9 shape?", options: ["aspect-ratio", "width: 100%", "height: auto", "object-fit"] },
+        { question: "What is the gold standard, universally supported video format for native HTML5 playback?", options: ["MP4", "MOV", "AVI", "WMV"] },
+        { question: "Which attribute is strictly REQUIRED for an HTML5 video to autoplay in modern browsers?", options: ["muted", "loop", "controls", "preload"] },
+        { question: "What does the preload='none' attribute do in a <audio> or <video> tag?", options: ["It prevents the browser from downloading any media data until the user actually clicks play.", "It forces the media to download before the rest of the webpage loads.", "It only downloads the thumbnail image and nothing else.", "It plays the audio secretly in the background."] },
+        { question: "If you want a background video to play over and over forever, which attribute do you include?", options: ["loop", "autoplay", "repeat", "infinite"] },
+        { question: "What does the controls attribute add to a native <video> or <audio> tag?", options: ["The play, pause, and volume buttons required for accessibility.", "A border around the player.", "The ability to skip advertisements.", "A download button for the user."] },
+        { question: "What does the 'poster' attribute do in a <video> tag?", options: ["Specifies a static thumbnail image to show before the user hits play.", "Adds subtitles to the video.", "Loops the video automatically.", "Forces the video to load in high definition."] },
+        { question: "Why do you need a local server (like MAMP) to view subtitle tracks (.vtt) during development?", options: ["Browsers block local file access for security reasons.", "Subtitles must be translated by an online database.", "MAMP automatically generates the text tracks.", "HTML5 does not natively support VTT files without PHP."] },
+        { question: "According to accessibility rules, what must you provide if your video has spoken words and playback controls?", options: ["Subtitles or captions for deaf and hard-of-hearing users.", "A written transcript printed below the video.", "A sign language interpreter overlay.", "An audio-only version of the file."] },
+        { question: "Which HTML tag is used to attach a subtitle file (.vtt) to a video?", options: ["<track>", "<subtitle>", "<source>", "<caption>"] },
+        { question: "Which tag is used inside your video or audio elements to provide fallback file formats?", options: ["<source>", "<track>", "<link>", "<file>"] },
+        { question: "Why is it a best practice to provide both an .ogg and .mp3 file inside an <audio> element?", options: ["To provide fallback file formats in case a browser doesn't support one of them.", "To play both tracks simultaneously in stereo.", "To increase the volume of the audio file.", "To make the file download faster on mobile devices."] },
+        { question: "Why is it a terrible practice to use HTML tables for an entire page layout?", options: ["They are completely inaccessible to screen readers and break responsive design.", "They load much slower than CSS Grid.", "They require too much JavaScript to function.", "They cost money to host on web servers."] },
+        { question: "Which tag acts as a title or explanation specifically attached to a table?", options: ["<caption>", "<title>", "<header>", "<th>"] },
+        { question: "In a semantic table, which tag wraps all of the standard data rows in the middle of the table?", options: ["<tbody>", "<thead>", "<tfoot>", "<data>"] },
+        { question: "Which HTML tag is semantically correct for defining the header row containing column titles?", options: ["<th>", "<thead>", "<tr>", "<td>"] },
+        { question: "Which table attribute is used to stretch a single cell horizontally across multiple columns?", options: ["colspan", "rowspan", "width", "stretch"] },
+        { question: "Which table attribute is used to stretch a single cell vertically across multiple rows?", options: ["rowspan", "colspan", "height", "merge"] },
+        { question: "How does CSS object-fit: contain behave differently than object-fit: cover?", options: ["It scales the image down until the entire picture fits inside the box, usually leaving blank letterbox space.", "It stretches the image to fit the box, causing severe distortion.", "It permanently crops the image file on the server.", "It removes the image entirely from the page layout."] },
+        { question: "Which CSS property forces an image to scale and crop perfectly to fill its box without squishing?", options: ["object-fit: cover", "background-size: 100%", "width: 100%", "image-rendering: pixelated"] },
+        { question: "What CSS rule is considered the 'Magic Reset' that prevents padding and borders from expanding a box's width?", options: ["box-sizing: border-box", "margin: 0 auto", "display: flex", "width: 100%"] },
+        { question: "Why is the 'rem' unit highly recommended for typography over fixed 'px' (pixels)?", options: ["It scales perfectly based on the Root font size, aiding visually impaired users.", "It forces the font to be exactly 16 pixels at all times.", "It only works on mobile devices.", "It is required for all Google Web Fonts."] },
+        { question: "Which global CSS rule prevents images and videos from overflowing their parent containers on mobile devices?", options: ["max-width: 100%; height: auto;", "width: 100vw; height: 100vh;", "object-fit: contain;", "display: block; margin: auto;"] },
+        { question: "What is Google Lighthouse?", options: ["A diagnostic auditing tool built into Chrome that grades your site's performance and accessibility.", "A physical server used to host web pages.", "An FTP client used to transfer files to the cloud.", "A search engine optimized for developers."] },
+        { question: "Which Lighthouse score drops significantly if a developer uploads a 5MB unoptimized background image?", options: ["Performance", "Accessibility", "Best Practices", "SEO"] }
+    ];
+
+    const examConfig = {
+        questions: ch8ExamPool,
+        questionCount: 20, 
+        chapterTitle: "Chapter 8: Sights & Sounds (Media)",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbyoX6MTNxThGNVQtIn4e_OgJoYUGUdPPKY9lbXf63h3H9fwGOxUeToxptyORS7LgWVNeg/exec"
+    };
+
+    window.onload = () => initExam(examConfig);
+  </script>
+  
+<div id="footer-placeholder"></div>
+
+  
+
+  
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

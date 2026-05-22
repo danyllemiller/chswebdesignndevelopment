@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Guided Notes: Chapter 14 | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <!-- BootStrap & FontAwesome -->
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <link href="/css/guided-notes.css" rel="stylesheet"/>
+  
+  <!-- Security Guard -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    
+    <div class="row justify-content-center">
+      <div class="col-lg-9 col-xl-8">
+        
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+            <a href="/year2/the-brain-databases.html" class="text-decoration-none small fw-bold">&laquo; Back to Chapter 14</a>
+            <div class="btn-group shadow-sm">
+                <button onclick="window.print()" class="btn btn-outline-primary fw-bold"><i class="fas fa-print me-1"></i> Print Worksheet</button>
+                <button id="copyNotebookBtn" class="btn btn-primary fw-bold" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy this worksheet code so you can paste it into your Digital Notebook!">
+                    <i class="fas fa-copy me-1"></i> Copy Code for Notebook
+                </button>
+            </div>
+        </div>
+
+        <!-- The Worksheet Content -->
+        <div class="card shadow-sm border-primary" id="worksheet-content">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h2 class="mb-0 gochi fs-1">Chapter 14: The "Brain" (Databases)</h2>
+                <p class="mb-0 fw-bold">Guided Notes</p>
+            </div>
+            <div class="card-body p-4 p-md-5 notes-container">
+                
+                <!-- Student Info Header -->
+                <div class="student-info-grid border-bottom pb-4">
+                    <div>
+                        <strong>Name:</strong> <span class="fill-blank" style="min-width: 200px;" contenteditable="true"></span>
+                    </div>
+                    <div>
+                        <strong>Date:</strong> <span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span>
+                    </div>
+                    <div>
+                        <strong>Class/Period:</strong> <span class="fill-blank" style="min-width: 80px;" contenteditable="true"></span>
+                    </div>
+                </div>
+
+                <!-- Essential Question -->
+                <div class="bg-site-secondary p-3 rounded border border-primary mt-4 mb-4">
+                    <h5 class="fw-bold text-primary mb-2"><i class="fas fa-check-square me-2"></i> Essential Question:</h5>
+                    <p class="mb-0 fst-italic">How does a "Digital Brain" store, organize, and retrieve millions of pieces of information instantly, and what is the developer's ethical responsibility toward that data?</p>
+                </div>
+
+                <!-- PART 1 -->
+                <div class="section-heading mt-4">I. The Amnesia Problem &amp; Relational Databases (SQL)</div>
+                
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        <strong>The Problem:</strong> Without a database, every dynamic website has <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>. It forgets you the second you close the tab.
+                    </li>
+                    <li class="mb-3">
+                        <strong>Database Purpose:</strong> Solves the two biggest problems: provides <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (permanently stores data) and <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (structured retrieval).
+                    </li>
+                </ul>
+
+                <h5 class="fw-bold mt-4 text-primary">Relational Databases (SQL)</h5>
+                <ul class="ps-3 mb-4">
+                    <li class="mb-2"><strong>Structure:</strong> Organizes data into <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> that look like spreadsheets.</li>
+                    <li class="mb-4"><strong>Language:</strong> To talk to this type of database, you use <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (SQL).</li>
+                </ul>
+
+                <h5 class="fw-bold mt-4 text-primary">Key Components:</h5>
+                <ul class="ps-3 mb-4">
+                    <li class="mb-2">&bull; <strong>Primary Key:</strong> A column (usually id) that <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> identifies every row in a table.</li>
+                    <li class="mb-0">&bull; <strong>Foreign Key:</strong> A column in one table that <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> to the primary key in another table, creating a relationship.</li>
+                </ul>
+
+                <div class="mt-4 p-4 bg-light rounded border shadow-sm mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-comments me-2 text-primary"></i> Deep Dive Discussion</h5>
+                    <p class="small fw-bold text-primary mb-1">1. Memory Problem:</p>
+                    <p class="small text-muted mb-3">You build a social media site that allows users to create posts. If you don't use a database, where does that user's post exist, and what happens to it when the user refreshes the page?</p>
+                    <div class="cornell-summary mb-4 bg-white" contenteditable="true"></div>
+
+                    <p class="small fw-bold text-primary mb-1">2. Relational Magic:</p>
+                    <p class="small text-muted mb-3">Explain how a relational database links a specific high score (e.g., 998,000) to a specific user name (e.g., ArcadeAce) using the Primary Key and Foreign Key concept.</p>
+                    <div class="cornell-summary bg-white" contenteditable="true"></div>
+                </div>
+
+                <div class="mt-4 p-4 bg-white rounded border border-primary shadow-sm mb-5">
+                    <h5 class="fw-bold text-primary mb-3"><i class="fas fa-laptop-code me-2"></i> Application Activity</h5>
+                    <p class="small fw-bold text-dark mb-1">1. Tracing the Key:</p>
+                    <p class="small text-muted mb-3">Imagine the HighScores table has a score with user_id = 1. In the Users table, circle the Primary Key that the score is referencing and the Foreign Key that makes the connection. <em>(Use this space to explain the relationship since you cannot physically circle it digitally)</em>.</p>
+                    <div class="cornell-summary bg-light" contenteditable="true"></div>
+                </div>
+
+                <!-- PART 2 -->
+                <div class="section-heading">II. Database Types &amp; SQL Commands</div>
+                
+                <h5 class="fw-bold mt-4 text-primary">Comparing Database Types</h5>
+                <table class="table table-bordered table-sm small bg-white shadow-sm mb-5">
+                    <thead class="bg-light text-center">
+                        <tr>
+                            <th style="width: 20%;">Database Type</th>
+                            <th style="width: 25%;">Analogy</th>
+                            <th style="width: 30%;">Description</th>
+                            <th style="width: 25%;">Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">SQL (Relational)</td>
+                            <td class="align-middle"><span class="fill-blank" style="width: 100%;" contenteditable="true"></span> or Filing Cabinet</td>
+                            <td class="align-middle">Strict tables and columns; excellent for complex, <span class="fill-blank" style="width: 80%;" contenteditable="true"></span> data.</td>
+                            <td class="align-middle">Accounts, Orders, <span class="fill-blank" style="width: 80%;" contenteditable="true"></span> (core site data).</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">NoSQL (Non-Relational)</td>
+                            <td class="align-middle"><span class="fill-blank" style="width: 100%;" contenteditable="true"></span> of JSON Files</td>
+                            <td class="align-middle">Flexible; stores data in JSON-like <span class="fill-blank" style="width: 80%;" contenteditable="true"></span>.</td>
+                            <td class="align-middle">Live Chat messages, rapidly <span class="fill-blank" style="width: 80%;" contenteditable="true"></span> data (like "likes").</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Local Storage</td>
+                            <td class="align-middle"><span class="fill-blank" style="width: 100%;" contenteditable="true"></span> on the Browser</td>
+                            <td class="align-middle">Tiny storage (5-10MB); data is <span class="fill-blank" style="width: 80%;" contenteditable="true"></span> (does not go to a server).</td>
+                            <td class="align-middle">Dark Mode preference, last <span class="fill-blank" style="width: 80%;" contenteditable="true"></span> term.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5 class="fw-bold mt-4 text-primary">The Language of the Database (CRUD)</h5>
+                <table class="table table-bordered table-sm small bg-white shadow-sm mb-4">
+                    <thead class="bg-light text-center">
+                        <tr>
+                            <th style="width: 20%;">CRUD</th>
+                            <th style="width: 30%;">SQL Command</th>
+                            <th style="width: 50%;">Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Create</td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="width: 80%;" contenteditable="true"></span></td>
+                            <td class="align-middle">Adds a new row of data (e.g., signing up).</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Read</td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="width: 80%;" contenteditable="true"></span></td>
+                            <td class="align-middle"><span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> existing data (e.g., loading a gallery).</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Update</td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="width: 80%;" contenteditable="true"></span></td>
+                            <td class="align-middle">Modifies an existing row (e.g., changing a password).</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-middle text-center">Delete</td>
+                            <td class="align-middle text-center"><span class="fill-blank" style="width: 80%;" contenteditable="true"></span></td>
+                            <td class="align-middle">Removes a row (e.g., deleting a post).</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="mt-4 p-4 bg-light rounded border shadow-sm mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-comments me-2 text-primary"></i> Deep Dive Discussion</h5>
+                    <p class="small fw-bold text-primary mb-1">1. Local vs. External:</p>
+                    <p class="small text-muted mb-3">Why did the book suggest using Local Storage for a Dark Mode toggle, but you must use an external SQL database for "Competitive Cody's" high score?</p>
+                    <div class="cornell-summary mb-4 bg-white" contenteditable="true"></div>
+
+                    <p class="small fw-bold text-primary mb-1">2. SQL Query:</p>
+                    <p class="small text-muted mb-3">In the SELECT query structure (<code>SELECT columns FROM table WHERE condition</code>), what is the purpose of the WHERE clause?</p>
+                    <div class="cornell-summary bg-white" contenteditable="true"></div>
+                </div>
+
+                <div class="mt-4 p-4 bg-white rounded border border-primary shadow-sm mb-5">
+                    <h5 class="fw-bold text-primary mb-3"><i class="fas fa-laptop-code me-2"></i> Application Activity</h5>
+                    <p class="small fw-bold text-dark mb-1">1. SQL Query Construction:</p>
+                    <p class="small text-muted mb-3">Competitive Cody (user_id 1) logs in. You need to pull his two highest scores, regardless of the game. Fill in the blanks below to write the SQL query that achieves this goal:</p>
+                    
+                    <div class="p-4 bg-light border rounded font-monospace small">
+                        SELECT game_title, score_value<br><br>
+                        FROM <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span><br><br>
+                        WHERE user_id = <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span><br><br>
+                        ORDER BY score_value DESC<br><br>
+                        LIMIT 2;
+                    </div>
+                </div>
+
+                <!-- PART 3 -->
+                <div class="section-heading">III. Database Security and Server-Side Code</div>
+                
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        <strong>Security Rule:</strong> Database interaction must happen on the <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> to prevent direct user attacks.
+                    </li>
+                    <li class="mb-3">
+                        <strong>SQL Injection:</strong> A severe security attack where a hacker inserts <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> commands into an input field to steal or damage data.
+                    </li>
+                    <li class="mb-0">
+                        <strong>The Fix:</strong> You must always <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> user input before putting it into a database query.
+                    </li>
+                </ul>
+
+                <h5 class="fw-bold mt-4 text-primary">Password Security</h5>
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3"><strong>The Problem:</strong> Never store passwords as <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>.</li>
+                    <li class="mb-3"><strong>Hashing:</strong> A <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> algorithm that scrambles a password into an irreversible "<span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>" for secure storage.</li>
+                    <li class="mb-0"><strong>Verification:</strong> The system takes the user's login password, <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> it, and checks if the two scrambled strings match.</li>
+                </ul>
+
+                <div class="mt-4 p-4 bg-light rounded border shadow-sm mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-comments me-2 text-primary"></i> Deep Dive Discussion</h5>
+                    <p class="small fw-bold text-primary mb-1">1. Hacker Protection:</p>
+                    <p class="small text-muted mb-3">A hacker manages to steal the database containing all the users' passwords. Why are the users safe if the developer used hashing, but they would be completely compromised if the developer stored the passwords as plain text?</p>
+                    <div class="cornell-summary mb-4 bg-white" contenteditable="true"></div>
+
+                    <p class="small fw-bold text-primary mb-1">2. The Server Wall:</p>
+                    <p class="small text-muted mb-3">Why can't a developer just use JavaScript (client-side) to send an INSERT command directly to an external database?</p>
+                    <div class="cornell-summary bg-white" contenteditable="true"></div>
+                </div>
+
+                <div class="mt-4 p-4 bg-white rounded border border-primary shadow-sm mb-5">
+                    <h5 class="fw-bold text-primary mb-3"><i class="fas fa-laptop-code me-2"></i> Application Activity</h5>
+                    <p class="small fw-bold text-dark mb-1">1. Security Threat:</p>
+                    <p class="small text-muted mb-3">The hacker input <code>Cody'; DROP TABLE Users; --</code> successfully executes an SQL Injection. Which part of that input is the actual malicious command that destroys the database?</p>
+                    
+                    <div class="p-3 bg-light border rounded">
+                        <strong>Malicious Command:</strong> <span class="fill-blank" style="min-width: 300px;" contenteditable="true"></span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/guided-notes.js"></script>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

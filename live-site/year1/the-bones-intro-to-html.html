@@ -1,0 +1,1072 @@
+<!-- the-bones-intro-to-html.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 5: The "Bones" (Intro to HTML) | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <!-- Security Guard: Kicks out anyone not logged in -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <nav class="mb-4 d-flex justify-content-between small fw-bold">
+        <a href="/year1/the-why-intro-to-uiux.html" class="text-decoration-none text-primary">&laquo; Previous: 4: The Artist</a>
+        <a href="/year1/the-clothes-intro-to-css.html" class="text-decoration-none text-primary">Next: 6: The "Clothes" &raquo;</a>
+    </nav>
+
+    <!-- CLEAN MODERN HEADER -->
+    <h1 class="text-center text-primary fw-bold mt-5 mb-2">Chapter 5: The "Bones"</h1>
+    <p class="text-center text-secondary fst-italic fs-5 mb-5">Intro to HTML &amp; Semantic Architecture</p>
+
+    <!-- ROW 1: OVERVIEW & PERSONA -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="overview">
+          <h2 class="section-title mt-0">Chapter 5 Overview: Your Coding "Toolbox"</h2>
+          <p>Every amazing website starts with a simple file. To build one, you need a <strong>text editor</strong>, which is like your secret weapon for writing code. You can use a basic one like Notepad on a PC or TextEdit on a Mac, but as professionals in the Carson High Agency, we use a dedicated code editor like <strong>Visual Studio Code</strong>. These editors are like having a helpful co-pilot, giving you special powers like color-coding your code and checking for mistakes as you type!</p>
+
+          <div class="alert alert-secondary border-0 mt-4 small shadow-sm">
+            <strong>The Project Scope:</strong> In this chapter, you will begin coding the High-Fidelity mockup you designed in Chapter 4 for your <strong>Custom Website</strong> agency client. To show you how the tags work, our walkthroughs will continue to build out our example client site, <strong>PixelPlay</strong>.
+          </div>
+          
+          <h2 class="section-title mt-5">Meet the Target Audience: "Organizer Olivia"</h2>
+          <div class="card shadow-sm border-0 bg-light mt-4">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center border-bottom pb-3 mb-3">
+                <img src="/images/the-bones-intro-to-html/figure-02.png" alt="Organizer Olivia" class="rounded-circle shadow-sm border border-3 border-white" style="width: 70px; height: 70px; object-fit: cover;" onerror="this.src='https://placehold.co/70x70?text=O'">
+                <div class="ms-3">
+                  <h5 class="fw-bold text-dark mb-0">Organizer Olivia</h5>
+                  <span class="badge bg-primary text-uppercase tracking-wide mt-1" style="font-size: 0.65rem;">Client Persona: PixelPlay</span>
+                </div>
+              </div>
+              <div class="small">
+                <div class="mb-2">
+                  <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Who</span>
+                  <span class="text-dark">Olivia is a mom organizing a 10-year-old's birthday party in Carson City.</span>
+                </div>
+                <div class="mb-2">
+                  <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Goal</span>
+                  <span class="text-dark">She needs to quickly find the service area, schedule, and contact information to book a mobile arcade truck rental.</span>
+                </div>
+                <div>
+                  <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Needs</span>
+                  <span class="text-dark">Olivia needs a clear, logically structured page (using semantic HTML) where information like location and contact details stand out immediately.</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer bg-white border-top text-center py-2">
+              <span class="small text-muted" style="font-size: 0.75rem;"><strong>Figure 5.1:</strong> Target User Persona</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="card shadow-sm mb-4 bg-white border-primary text-start">
+          <div class="card-header bg-primary text-white fw-bold border-bottom">Materials Hub</div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush small">
+              <a href="/proficiencyScales/the-bones-intro-to-html.html" class="list-group-item list-group-item-action text-primary fw-bold">🎯 1. Proficiency Scale</a>
+              <a href="/pre-assessments/the-bones-intro-to-html.html" class="list-group-item list-group-item-action text-dark">🚀 2. Pre-Assessment</a>
+              <a href="/notes/the-bones-intro-to-html.html" class="list-group-item list-group-item-action text-dark">📝 3. Guided Notes</a>
+              <a href="/studentFiles/pixelPlay.zip" class="list-group-item list-group-item-action text-dark">📁 4. Chapter Files (.zip)</a>
+              <a href="/interactives/code-tag-interactive.html" class="list-group-item list-group-item-action text-dark">⚡&lt;code&gt; Interactive</a>
+              <a href="/interactives/span-tag-interactive.html" class="list-group-item list-group-item-action text-dark">⚡&lt;span&gt; Interactive</a>
+              <a href="/interactives/meta-tag-interactive.html" class="list-group-item list-group-item-action text-dark">⚡&lt;meta&gt; Interactive</a>
+              <a href="/reviewGames/syntaxHacker.html" class="list-group-item list-group-item-action text-dark">🎮 5. Syntax Hacker Game</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card roadmap-card mb-4 border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info border-bottom">Unlocking New Abilities</div>
+          <div class="card-body small">
+            <ul class="mb-0 ps-3">
+              <li class="mb-2"><strong>Be a detective:</strong> Identify and explain the purpose of the main parts of an HTML file.</li>
+              <li class="mb-2"><strong>Build with confidence:</strong> Write and use element tags correctly with attributes.</li>
+              <li class="mb-2"><strong>Structure your pages:</strong> Use semantic elements to organize your content.</li>
+              <li class="mb-2"><strong>Add personality:</strong> Use text-level elements, images, and clickable links.</li>
+              <li><strong>Make it for everyone:</strong> Explain responsive design and accessibility.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FULL WIDTH BANNER IMAGE -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <figure class="mb-0 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-01.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-01.png" alt="A screenshot comparing two code editors." class="img-fluid rounded shadow-sm border w-100" style="object-fit: cover; max-height: 450px; object-position: center top;" onerror="this.src='https://placehold.co/1200x400?text=Code+Editors'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center">
+            <strong>Figure 5.2:</strong> Professional vs Basic Editors.
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 2: DETECTIVE & ABILITIES -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Become a Code Detective</h2>
+        <p>Once you've written your code, you need to make sure it's perfect. This is where you become an <strong>agency code detective</strong>!</p>
+        <ul class="small mb-4">
+          <li class="mb-2"><strong>Validate Your Code:</strong> Use a tool like the <strong>W3C validation website</strong>. It's like a spell-checker for your HTML and will find any tricky errors you might have missed.</li>
+          <li class="mb-2"><strong>Test Your Site:</strong> You need to test your website on different web browsers like <strong>Google Chrome</strong>, <strong>Safari</strong>, and <strong>Firefox</strong> to ensure our client's customers get a flawless experience.</li>
+          <li class="mb-0"><strong>Test on All Devices:</strong> What looks awesome on your computer's screen might look totally different on a friend's phone. To make sure your site works for everyone, always test it on different devices, including phones and tablets.</li>
+        </ul>
+        
+        <h5 class="fw-bold mt-4 text-primary">Building for the Mobile World</h5>
+        <p>Did you know that more people use their phones to browse the internet than computers? This is why web designers have to be extra careful to create websites that look great on any screen, big or small. This is called <strong>responsive design</strong>, and it's a super important skill we'll explore more later!</p>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center pt-lg-4">
+        <div class="card roadmap-card border-warning shadow-sm mb-4 text-start">
+          <div class="card-header bg-warning text-dark fw-bold">Let's Discuss:</div>
+          <div class="card-body small">
+            <p class="mb-0">Beyond just looking 'cool', why does color-coding in an editor actually save a developer time and reduce stress, saving the agency money in the long run?</p>
+          </div>
+        </div>
+
+        <figure class="mb-0 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-03.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-03.png" alt="W3C Validation illustration." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=W3C+Validation'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.3:</strong> W3C Validation is your code's spell-checker.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 3: THE BOILERPLATE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">What is an HTML File? (The Boilerplate)</h2>
+        <p>Every HTML file starts with a friendly greeting called the <strong>document type declaration</strong>, or <strong>doctype</strong>. It's a special tag that tells the browser what kind of code it's about to read. For HTML5, the newest version, it's super simple: <code>&lt;!DOCTYPE html&gt;</code>.</p>
+        <p>You can think of every HTML document as a family tree with three main parts. This whole structure is called the "boilerplate."</p>
+        <ul class="small mb-5 ps-3">
+          <li class="mb-3"><strong>&lt;html&gt;:</strong> The root element that holds everything together. A common and important attribute to add to this tag is <code>lang</code> (language), like <code>&lt;html lang="en"&gt;</code>. This tells search engines and screen readers that the page is in English, which is important for accessibility and SEO.</li>
+          <li class="mb-3"><strong>&lt;head&gt;:</strong> The brain of the page, holding all the important information that the user doesn't see, like the page's title. Besides the <code>&lt;title&gt;</code> tag, the <code>&lt;head&gt;</code> is also where you put crucial <strong>meta tags</strong>. These are invisible tags that provide data <em>about</em> your page. Three of the most important ones you should always include are:
+            <ul class="mt-2 ps-3">
+              <li class="mb-1"><strong>&lt;meta charset="UTF-8"&gt;:</strong> This tells the browser to use the standard UTF-8 character set, which supports almost all characters and symbols.</li>
+              <li class="mb-1"><strong>&lt;meta name="viewport" content="..."&gt;:</strong> This is essential for responsive design. It tells mobile phones to use their actual screen width.</li>
+              <li class="mb-1"><strong>&lt;meta name="description" content="..."&gt;:</strong> This provides a short summary of your page for search engine results, like Google.</li>
+            </ul>
+          </li>
+          <li><strong>&lt;body&gt;:</strong> The main part of the page, holding all the content the user <strong>does</strong> see, like text, images, and videos.</li>
+        </ul>
+
+        <!-- WALKTHROUGH 1: Practice Index -->
+        <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+          Walkthrough: Create the Index Page (Initial Boilerplate)
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+          <p class="small fw-bold text-dark">This is the first page users see. All web servers look for a file named <strong>index.html</strong> to serve as a website's home page.</p>
+          <ol class="small mb-0 ps-3">
+            <li class="mb-3"><strong>Open a New File:</strong> Open a new text file in your code editor (like VS Code) and save it as <code>index.html</code>.</li>
+            <li class="mb-3"><strong>Write the Structure:</strong> In VS Code, type <code>!</code> and press <strong>Tab</strong> (this is an Emmet shortcut!). Watch the boilerplate magically appear. Update the title and metadata to match the example below:
+              <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;meta name="description" content="PixelPlay: Retro Arcade."&gt;
+  &lt;title&gt;PixelPlay: Your Ultimate Retro Arcade Destination&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;p&gt;Initial Boilerplate Content.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </li>
+            <li class="mb-0"><strong>Test It:</strong> Save your file, double-click it in your computer's file explorer, and it will open in your web browser. You should see a blank page with your single line of text!</li>
+          </ol>
+        </div>
+
+        <!-- GRADED LAB 1 CARD -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 1: Project 2 Setup [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Demonstrate diligence by setting up a technically accurate foundational document for your agency client's Custom Website.</p>
+                <ol>
+                    <li class="mb-2">In your main project folder, create three new, perfectly named files: <code>index.html</code>, <code>about.html</code>, and <code>contact.html</code>.</li>
+                    <li class="mb-2">Generate the HTML5 Boilerplate in all three files using the Emmet abbreviation.</li>
+                    <li class="mb-2">Change the <code>&lt;title&gt;</code> tags and meta descriptions to match the Custom Website theme you designed in your Figma mockups.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your completed <code>index.html</code> file.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-04.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-04.png" alt="A tree diagram illustrating the HTML document structure." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=HTML+Tree'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.4:</strong> The HTML Tree Structure.</figcaption>
+        </figure>
+        <figure class="mb-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-05.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-05.png" alt="A code snippet showing the starting boilerplate." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Boilerplate+Code'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.5:</strong> The initial index.html code structure.</figcaption>
+        </figure>
+        <figure class="mb-0 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-06.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-06.png" alt="A browser window showing the rendered home page." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Browser+View'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.6:</strong> Browser view.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 4: TAGS & NESTING -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">What is an HTML "Tag"?</h2>
+        <p>HTML is all about using <strong>element tags</strong> to mark different parts of your page. Most tags come in pairs, with a starting tag and an ending tag. This creates an <strong>element</strong>.</p>
+        <ul class="small mb-4">
+          <li class="mb-2">Some elements, like a line break, are <strong>empty elements</strong> and only need one tag: <code>&lt;br&gt;</code>.</li>
+          <li>Tags can also be <strong>nested</strong>, which means you put one tag completely inside another. Think of it like putting one box inside a bigger box.</li>
+        </ul>
+
+        <h2 class="section-title mt-5">The "First-In, Last-Out" Rule</h2>
+        <p>When you nest tags, remember this golden rule: <strong>the last tag you open is the first one you have to close</strong>. This concept is often called proper nesting.</p>
+        <p>Think of it like packing a suitcase. You put your clothes inside a packing cube, and then you put the packing cube inside the suitcase. You have to zip up the packing cube (the inner container) <strong>before</strong> you can zip up the suitcase (the outer container). If you try to close the suitcase while the packing cube is still half-open and sticking out, it won't work!</p>
+        
+        <div class="card bg-light border-success p-3 small mb-3 shadow-sm">
+          <strong class="text-success">Correct Nesting:</strong><br>
+          <code class="text-dark">&lt;p&gt;This is &lt;em&gt;correct&lt;/em&gt; nesting.&lt;/p&gt;</code>
+        </div>
+        <div class="card bg-light border-danger p-3 small mb-5 shadow-sm">
+          <strong class="text-danger">Incorrect Nesting (Overlapping Tags):</strong><br>
+          <code class="text-dark">&lt;p&gt;This is &lt;em&gt;incorrect nesting.&lt;/p&gt;&lt;/em&gt;</code>
+        </div>
+
+        <!-- WALKTHROUGH 2: Paragraphs and Nesting -->
+        <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+          Walkthrough: Paragraphs &amp; Nesting Tags
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+          <ol class="small mb-0 ps-3">
+            <li class="mb-4"><strong>Add Content:</strong> Inside the <code>&lt;body&gt;</code> tag in your <code>index.html</code> file, delete your old test text and add these paragraphs using <code>&lt;p&gt;</code> tags:
+              <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;p&gt;Welcome to PixelPlay! We bring the ultimate arcade experience directly to your doorstep. Our high-tech arcade truck is packed with the latest consoles and classic retro games, perfect for any event.&lt;/p&gt;
+
+&lt;p&gt;Whether you're planning a birthday party, corporate event, or community festival, our Game Coaches ensure everyone has a blast. Book your mobile arcade rental today and let the games begin!&lt;/p&gt;</code></pre>
+            </li>
+            <li class="mb-4"><strong>Practice Nesting:</strong> Find the first paragraph you just added. Modify it to logically emphasize the brand name "PixelPlay" by wrapping it tightly in an <code>&lt;em&gt;</code> tag. Pay close attention to the open and close tags!
+              <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;p&gt;Welcome to &lt;em&gt;PixelPlay&lt;/em&gt;! We bring the ultimate...&lt;/p&gt;</code></pre>
+            </li>
+            <li class="mb-0"><strong>Test It:</strong> Save your file and refresh it in the web browser. The brand name should now appear italicized, proving your tags are nested properly!</li>
+          </ol>
+        </div>
+
+        <!-- GRADED LAB 2 CARD -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 2: Typography Translation [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Translate visual hierarchy from Figma into semantic code.</p>
+                <ol>
+                    <li class="mb-2">Open your Custom Website's <code>index.html</code>.</li>
+                    <li class="mb-2">Look closely at your Chapter 4 Figma Mockup. Identify your main page title, your sub-headings, and your body text.</li>
+                    <li class="mb-2">Write out the text of your Homepage using the correct <code>&lt;h1&gt;</code> to <code>&lt;h6&gt;</code> heading scales and <code>&lt;p&gt;</code> tags.</li>
+                    <li class="mb-2">Do NOT worry about colors or fonts—just focus on structure and hierarchy! Ensure you only have ONE <code>&lt;h1&gt;</code>.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated <code>index.html</code> file.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-07.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-07.png" alt="A technical diagram of an HTML element." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Element+Anatomy'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.7:</strong> Anatomy of an HTML element.</figcaption>
+        </figure>
+        <figure class="mb-4 mt-4 pt-3 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-10.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-10.png" alt="A visual representation of the suitcase and packing cube nesting analogy." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Nesting'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.8:</strong> The suitcase analogy for nesting.</figcaption>
+        </figure>
+        
+        <figure class="mb-4 mt-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-08.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-08.png" class="img-fluid rounded border shadow-sm w-100" alt="Paragraph tags" onerror="this.src='https://placehold.co/600x400?text=Code'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.9:</strong> Adding paragraphs.</figcaption>
+        </figure>
+        <figure class="mb-4 mt-4 pt-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-11.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-11.png" class="img-fluid rounded border shadow-sm w-100" alt="Nested tags code" onerror="this.src='https://placehold.co/600x400?text=Code'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.10:</strong> Proper nesting code.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 5: ATTRIBUTES & SEMANTICS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">What is an "Attribute"?</h2>
+        <p>HTML elements can have special <strong>attributes</strong> that give them extra information. You add them to the <strong>starting tag</strong> to give your elements special instructions.</p>
+        <div class="alert alert-info py-3 small shadow-sm mb-5 border-info">
+          <code>&lt;p class="intro"&gt;</code>: Here, <strong>class</strong> is the attribute, and <strong>intro</strong> is its value.
+        </div>
+        
+        <h2 class="section-title">The "Big 5" Semantic Tags (The Page Layout)</h2>
+        <p>Now it's time to build the "body" of our page! We can use special tags called <strong>semantic elements</strong> because their names tell you exactly what kind of content they contain. This is great for SEO and for screen readers (accessibility).</p>
+        
+        <!-- BUSINESS PLAN INTEGRATION: SELLING SEMANTICS & SEO -->
+        <div class="card border-dark shadow-sm my-4">
+          <div class="card-header bg-dark text-white fw-bold">
+            💼 The Agency Founder's Log: Selling SEO
+          </div>
+          <div class="card-body small bg-light">
+            <p class="mb-0">When pitching a Carson City business, anyone can build a visual layout using generic <code>&lt;div&gt;</code> tags or drag-and-drop website builders. As an agency, you sell <strong>'Semantic Architecture.'</strong> By using proper tags like <code>&lt;article&gt;</code> and <code>&lt;nav&gt;</code>, you are explicitly telling Google how to read the site, which boosts your client's search rankings. Higher rankings = more revenue for them, which means higher development fees for you!</p>
+          </div>
+        </div>
+
+        <h5 class="fw-bold mt-4 text-primary">The Blueprint: Why We Wireframe</h5>
+        <p>Think of a wireframe as the architectural blueprint for your website. Just as you wouldn't build a house without a plan, you shouldn't build a website without a wireframe. Developers use them to map out exactly where the semantic areas (like the header, nav, and footer) will live before getting distracted by colors, fonts, or images.</p>
+        <p><strong>Why are they so important?</strong> This step is critical because it forces you to think about the <strong>structure</strong> of your data. If you skip this step, you risk writing messy, unorganized markup that is hard to fix later. By planning with boxes and labels first, you ensure your HTML tags will be nested correctly and your content will be logical.</p>
+        
+        <ul class="small mb-5 bg-light p-4 rounded border shadow-sm">
+          <li class="mb-2"><strong>&lt;header&gt;</strong>: The introduction of a section or page.</li>
+          <li class="mb-2"><strong>&lt;nav&gt;</strong>: Marks a list of hypertext or navigation links. [HTML5]</li>
+          <li class="mb-2"><strong>&lt;main&gt;</strong>: Marks the main content of the document; only one main element should be used. [HTML5]</li>
+          <li class="mb-2"><strong>&lt;article&gt;</strong>: A self-contained piece of content, like a blog post or news story. [HTML5]</li>
+          <li class="mb-2"><strong>&lt;footer&gt;</strong>: The closing content of a section or page, often with contact info. [HTML5]</li>
+          <li class="mb-0"><strong>&lt;h1&gt; to &lt;h6&gt;</strong>: Headings that mark the most important text.</li>
+        </ul>
+
+        <!-- WALKTHROUGH 3: Edit Index Semantics -->
+        <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+          Walkthrough: Add Semantics to the Index Page
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+          <p class="small fw-bold text-dark">Now, edit your existing <code>index.html</code> file to wrap your generic paragraphs into powerful semantic elements.</p>
+          <ol class="small mb-0 ps-3">
+            <li class="mb-3"><strong>Build the Header:</strong> Above your first paragraph, add a <code>&lt;header&gt;</code> element containing an <code>&lt;h1&gt;</code> heading with the text "Welcome to PixelPlay".</li>
+            <li class="mb-3"><strong>Build the Main Content:</strong> Wrap your two existing paragraphs of text inside an <code>&lt;article&gt;</code> tag. Then, wrap that entire article inside a <code>&lt;main&gt;</code> tag. Inside the <code>&lt;article&gt;</code> tag, right above your first paragraph, add an <code>&lt;h2&gt;</code> heading with the text "What We Do".</li>
+            <li class="mb-3"><strong>Build the Footer:</strong> Below the <code>&lt;/main&gt;</code> closing tag, add a <code>&lt;footer&gt;</code> element with a new paragraph containing contact info. Your body should look exactly like this:
+              <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;body&gt;
+  &lt;header&gt;
+    &lt;h1&gt;Welcome to PixelPlay&lt;/h1&gt;
+  &lt;/header&gt;
+  &lt;main&gt;
+    &lt;article&gt;
+      &lt;h2&gt;What We Do&lt;/h2&gt;
+      &lt;p&gt;Welcome to &lt;em&gt;PixelPlay&lt;/em&gt;! We bring the ultimate arcade experience directly to your doorstep. Our high-tech arcade truck is packed with the latest consoles and classic retro games, perfect for any event.&lt;/p&gt;
+      &lt;p&gt;Whether you're planning a birthday party, corporate event, or community festival, our Game Coaches ensure everyone has a blast. Book your mobile arcade rental today and let the games begin!&lt;/p&gt;
+    &lt;/article&gt;
+  &lt;/main&gt;
+  &lt;footer&gt;
+    &lt;p&gt;Contact us at 555-0199&lt;/p&gt;
+  &lt;/footer&gt;
+&lt;/body&gt;</code></pre>
+            </li>
+            <li class="mb-0"><strong>Test It:</strong> Save and refresh. You should see huge default stylings applied to your headings, making your page structural and legible!</li>
+          </ol>
+        </div>
+
+        <!-- GRADED LAB 5 CARD (Semantic Skeleton) -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 5: The Global Skeleton [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Architect a universally accessible HTML structure using HTML5 Semantic tags for your client.</p>
+                <ol>
+                    <li class="mb-2">Open the <code>index.html</code> file for your Custom Website.</li>
+                    <li class="mb-2">Wrap your existing code in the proper semantic tags: Use a <code>&lt;header&gt;</code> for the top area, a <code>&lt;main&gt;</code> tag to wrap the primary content, and a <code>&lt;footer&gt;</code> at the bottom containing a copyright notice.</li>
+                    <li class="mb-2">Copy this exact identical skeleton structure to your <code>about.html</code> and <code>contact.html</code> files.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your structurally sound <code>index.html</code> file.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="card roadmap-card border-warning shadow-sm mb-4 text-start">
+          <div class="card-header bg-warning text-dark fw-bold">Let's Discuss:</div>
+          <div class="card-body small">
+            <p class="mb-0">A screen reader doesn't 'see' bold text. How can we use semantic tags to tell a visually impaired user that a piece of text is extremely important? How does this change their experience?</p>
+          </div>
+        </div>
+
+        <figure class="mb-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-13.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-13.png" alt="A technical diagram showing the syntax for adding attributes." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Attribute+Syntax'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.11:</strong> Attribute Syntax</figcaption>
+        </figure>
+        <figure class="mb-4 mt-5 pt-3 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-14.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-14.png" alt="A simple wireframe diagram representing the blueprint." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Wireframe'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.12:</strong> Wireframes establish structure early.</figcaption>
+        </figure>
+        
+        <figure class="mb-4 mt-5 pt-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-16.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-16.png" alt="Semantic structure code snippet." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Code'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.13:</strong> Adding semantic structure.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 6: GROUPING ELEMENTS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Other Sectioning &amp; Grouping Elements</h2>
+        <p>Grouping elements are essential for keeping your webpage organized and manageable. Think of them as the containers or boxes that hold related pieces of content together. By wrapping specific parts of your page in these elements, you can target them as a group for styling with CSS or applying behavior with JavaScript.</p>
+        <p>For example, you might group a headline, an image, and a paragraph together to create a "card" component that stands out from the rest of the page. Beyond just styling, these elements provide structure that helps browsers and screen readers understand the relationships between different parts of your content. While a <code>&lt;div&gt;</code> is a generic container with no specific meaning, elements like <code>&lt;section&gt;</code> and <code>&lt;article&gt;</code> add semantic value, telling the browser exactly what purpose that group of content serves.</p>
+        
+        <table class="table table-bordered table-sm small bg-white shadow-sm mt-4 mb-5 text-start">
+          <thead class="bg-light">
+            <tr><th width="20%">Element</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>&lt;address&gt;</code></td><td>Marks contact information for an individual or group.</td></tr>
+            <tr><td><code>&lt;aside&gt;</code></td><td>Marks content that is related to a main article. [HTML5]</td></tr>
+            <tr><td><code>&lt;blockquote&gt;</code></td><td>A long quote from another source.</td></tr>
+            <tr><td><code>&lt;body&gt;</code></td><td>Contains the entire content of the document.</td></tr>
+            <tr><td><code>&lt;dd&gt;</code></td><td>Contains the description or definition associated with a term from a description list.</td></tr>
+            <tr><td><code>&lt;div&gt;</code></td><td>A generic container for a group of elements.</td></tr>
+            <tr><td><code>&lt;dl&gt;</code></td><td>A description list.</td></tr>
+            <tr><td><code>&lt;dt&gt;</code></td><td>Contains a single term from a description list.</td></tr>
+            <tr><td><code>&lt;figcaption&gt;</code></td><td>Contains the caption associated with a figure. [HTML5]</td></tr>
+            <tr><td><code>&lt;figure&gt;</code></td><td>A diagram, photo, or illustration. [HTML5]</td></tr>
+            <tr><td><code>&lt;hr&gt;</code></td><td>Marks a thematic break (often displayed as a horizontal rule).</td></tr>
+            <tr><td><code>&lt;li&gt;</code></td><td>A single item in a list.</td></tr>
+            <tr><td><code>&lt;ol&gt;</code></td><td>An ordered (numbered) list.</td></tr>
+            <tr><td><code>&lt;p&gt;</code></td><td>A paragraph of text.</td></tr>
+            <tr><td><code>&lt;pre&gt;</code></td><td>Contains a block of preformatted text (retains line breaks and spaces).</td></tr>
+            <tr><td><code>&lt;section&gt;</code></td><td>Marks content that shares a common theme or purpose on the page. [HTML5]</td></tr>
+            <tr><td><code>&lt;ul&gt;</code></td><td>Contains an unordered list of items.</td></tr>
+          </tbody>
+        </table>
+
+        <!-- GRADED LAB 6 CARD (Content Blocks) -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 6: Content Blocks [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Implement advanced semantic sectioning within a document.</p>
+                <ol>
+                    <li class="mb-2">Open the <code>index.html</code> file for your Custom Website.</li>
+                    <li class="mb-2">Look at your Figma design and identify the different thematic "zones" (e.g., a "Services" area, a "Testimonials" area, or an "About Me" section).</li>
+                    <li class="mb-2">Wrap the content for those respective zones tightly inside <code>&lt;section&gt;</code> tags. Ensure they are still correctly nested inside your <code>&lt;main&gt;</code> element!</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated <code>index.html</code> file.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-0 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-15.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-15.png" alt="A graphic illustrating the difference between a div container and a section tag." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Div+vs+Section'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.14:</strong> Div vs Section.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 7: TEXT LEVEL ELEMENTS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">The "Content" Tags (Adding Personality)</h2>
+        <p>Now for the details! <strong>Text-level elements</strong> are used to add special formatting to specific words or phrases. Unlike the grouping elements, these are <strong>inline elements</strong>, which means they don't start new lines. Think of your block-level tags as the walls and structure, while these are the paint and decorations. By using the correct tag, you define exactly what that piece of text represents to search engines and browsers.</p>
+        
+        <table class="table table-bordered table-sm small bg-white shadow-sm mt-4 text-start">
+          <thead class="bg-light">
+            <tr><th width="20%">Element</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>&lt;a&gt;</code></td><td>Marks content that acts as a hypertext link.</td></tr>
+            <tr><td><code>&lt;abbr&gt;</code></td><td>Marks an abbreviation or acronym.</td></tr>
+            <tr><td><code>&lt;b&gt;</code></td><td>Indicates a span of text to which attention should be drawn (use <code>&lt;strong&gt;</code> instead).</td></tr>
+            <tr><td><code>&lt;br&gt;</code></td><td>Represents a line break.</td></tr>
+            <tr><td><code>&lt;cite&gt;</code></td><td>Marks a citation to a title or author of a work (usually appears in italics).</td></tr>
+            <tr><td><code>&lt;code&gt;</code></td><td>Marks content that represents computer code.</td></tr>
+            <tr><td><code>&lt;data&gt;</code></td><td>Associates a data value with the marked text. [HTML5]</td></tr>
+            <tr><td><code>&lt;dfn&gt;</code></td><td>Marks a defined term.</td></tr>
+            <tr><td><code>&lt;em&gt;</code></td><td>Indicates content that is emphasized or stressed (text usually appears in italics).</td></tr>
+            <tr><td><code>&lt;i&gt;</code></td><td>Indicates alternate voice or mood (usually italics).</td></tr>
+            <tr><td><code>&lt;kbd&gt;</code></td><td>Marks text that represents user input.</td></tr>
+            <tr><td><code>&lt;mark&gt;</code></td><td>Contains a row of text that is marked or highlighted. [HTML5]</td></tr>
+            <tr><td><code>&lt;q&gt;</code></td><td>Marks content that is quoted from another source (short inline quote).</td></tr>
+            <tr><td><code>&lt;s&gt;</code></td><td>Marks content that is no longer accurate.</td></tr>
+            <tr><td><code>&lt;samp&gt;</code></td><td>Marks text representing sample output from a program.</td></tr>
+            <tr><td><code>&lt;small&gt;</code></td><td>Marks side comments (text usually in small print).</td></tr>
+            <tr><td><code>&lt;span&gt;</code></td><td>Generic run of text for styling with CSS.</td></tr>
+            <tr><td><code>&lt;strong&gt;</code></td><td>Indicates content of strong importance (usually bold).</td></tr>
+            <tr><td><code>&lt;sub&gt;</code></td><td>Marks text as subscript.</td></tr>
+            <tr><td><code>&lt;sup&gt;</code></td><td>Marks text as superscript.</td></tr>
+            <tr><td><code>&lt;time&gt;</code></td><td>Marks a time value or text string. [HTML5]</td></tr>
+            <tr><td><code>&lt;u&gt;</code></td><td>Indicates text that appears stylistically different (underlined).</td></tr>
+            <tr><td><code>&lt;var&gt;</code></td><td>Marks text that is treated as a variable.</td></tr>
+            <tr><td><code>&lt;wbr&gt;</code></td><td>Represents where a line break should occur if needed. [HTML5]</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-0 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-18.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-18.png" alt="A screenshot showing various text-level formatting in a browser." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Text+Formatting'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.15:</strong> Examples of various text-level elements.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 8: LISTS & ABOUT PAGE LAB -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Working with Lists (Getting Organized)</h2>
+        <p>Another type of grouping element is a list. HTML supports three types of lists:</p>
+        <ul class="small mb-5 bg-light p-4 rounded border shadow-sm">
+          <li class="mb-2"><strong>Ordered Lists</strong>: Sequential order using <code>&lt;ol&gt;</code> and <code>&lt;li&gt;</code>.</li>
+          <li class="mb-2"><strong>Unordered Lists</strong>: No sequential order using <code>&lt;ul&gt;</code> and <code>&lt;li&gt;</code>.</li>
+          <li class="mb-0"><strong>Description Lists</strong>: Terms (<code>&lt;dt&gt;</code>) and descriptions (<code>&lt;dd&gt;</code>) using <code>&lt;dl&gt;</code>.</li>
+        </ul>
+
+        <!-- WALKTHROUGH 4: About Page -->
+        <h3 class="section-title d-flex align-items-center mt-5 text-primary">
+          Walkthrough: Create the PixelPlay About Page
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+          <p class="small fw-bold text-dark">Practice using the boilerplate, headings, and text-level elements on a brand new page. (Save this as <code>about.html</code>)</p>
+          <ol class="small mb-0 ps-3">
+            <li class="mb-3"><strong>Open a New File</strong> and add the basic HTML <strong>boilerplate</strong>.</li>
+            <li class="mb-3"><strong>Add the Page Title</strong>: Inside the <code>&lt;head&gt;</code> tags, add a <code>&lt;title&gt;</code> tag: "About PixelPlay".</li>
+            <li class="mb-3"><strong>Build the Page Body</strong>: Type this structure explicitly:
+              <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;body&gt;
+  &lt;header&gt;
+    &lt;h1&gt;About PixelPlay&lt;/h1&gt;
+  &lt;/header&gt;
+  &lt;main&gt;
+    &lt;p&gt;We are a &lt;strong&gt;family-owned&lt;/strong&gt; business dedicated to bringing joy and &lt;em&gt;epic&lt;/em&gt; gaming to your neighborhood.&lt;/p&gt;
+  &lt;/main&gt;
+  &lt;footer&gt;
+    &lt;p&gt;Contact us at 555-0199&lt;/p&gt;
+  &lt;/footer&gt;
+&lt;/body&gt;</code></pre>
+            </li>
+            <li class="mb-0"><strong>Save the File</strong>: Save the entire document in your project folder as <code>about.html</code> and test it in your browser!</li>
+          </ol>
+        </div>
+
+        <!-- GRADED LAB 3 CARD (Nav List Structure) -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 3: Nav List Structure [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Utilize parent/child tag relationships to structure unordered lists.</p>
+                <ol>
+                    <li class="mb-2">Almost all website navigation menus in the world are built using Unordered Lists.</li>
+                    <li class="mb-2">Open your <code>index.html</code> file. Inside your <code>&lt;header&gt;</code>, create a new <code>&lt;nav&gt;</code> element.</li>
+                    <li class="mb-2">Inside the nav, create an unordered list (<code>&lt;ul&gt;</code>) with three <code>&lt;li&gt;</code> items: "Home", "About", and "Contact".</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated <code>index.html</code> file with the list structure.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="card roadmap-card border-warning shadow-sm mb-4 text-start">
+          <div class="card-header bg-warning text-dark fw-bold">Let's Discuss:</div>
+          <div class="card-body small">
+            <p class="mb-0">Why is a 'Description List' better than an 'Ordered List' for a store's hours or a mobile arcade's schedule?</p>
+          </div>
+        </div>
+
+        <figure class="mb-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-19.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-19.png" alt="Code editor view of the about.html page structure." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=About+Code'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.16:</strong> The code for about.html.</figcaption>
+        </figure>
+        <figure class="mb-0 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-20.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-20.png" alt="Browser rendered view of the about.html page." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Browser+View'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.17:</strong> Browser view of the PixelPlay About page.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 9: OTHER PAGES PRACTICE LABS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <!-- WALKTHROUGH 5: Reviews Page -->
+        <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+          Walkthrough: Build the Reviews Page
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+          <p class="small fw-bold text-dark">Practice using standard paragraphs to structure content.</p>
+          <ol class="small mb-0 ps-3">
+            <li class="mb-3"><strong>Create the File:</strong> Open a new file in VS Code and save it as <code>reviews.html</code> in your project folder.</li>
+            <li class="mb-3"><strong>Add Boilerplate:</strong> Type out your standard HTML boilerplate.</li>
+            <li class="mb-0"><strong>Structure the Content:</strong> Inside the <code>&lt;body&gt;</code>, add a <code>&lt;main&gt;</code> tag. Inside that, add an <code>&lt;h2&gt;</code> heading and your review using <code>&lt;p&gt;</code> and <code>&lt;i&gt;</code> tags for the source names.
+              <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;main&gt;
+  &lt;h2&gt;Reviews&lt;/h2&gt;
+  &lt;p&gt;"Best party ever!" - &lt;i&gt;Sarah J.&lt;/i&gt;&lt;/p&gt;
+&lt;/main&gt;</code></pre>
+            </li>
+          </ol>
+        </div>
+
+        <!-- WALKTHROUGH 6: Contact Page -->
+        <h3 class="section-title d-flex align-items-center text-primary">
+          Walkthrough: Make the Contact Page
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+          <p class="small fw-bold text-dark">Practice using the <code>&lt;address&gt;</code> tag.</p>
+          <ol class="small mb-0 ps-3">
+            <li class="mb-3"><strong>Create the File:</strong> Open a new file and save it as <code>contact.html</code>. Add your boilerplate.</li>
+            <li class="mb-0"><strong>Add the Address:</strong> Inside the <code>&lt;body&gt;</code>, use the semantic <code>&lt;address&gt;</code> tag and <code>&lt;br&gt;</code> tags to format the physical address properly.
+              <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;address&gt;
+  PixelPlay Arcade&lt;br&gt;
+  123 Gaming Blvd.&lt;br&gt;
+  Carson City, NV 89701
+&lt;/address&gt;</code></pre>
+            </li>
+          </ol>
+        </div>
+
+        <!-- WALKTHROUGH 7: Schedule Page -->
+        <h3 class="section-title d-flex align-items-center text-primary">
+          Walkthrough: Create a Schedule Page
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary">
+          <p class="small fw-bold text-dark">Practice using a description list.</p>
+          <ol class="small mb-0 ps-3">
+            <li class="mb-3"><strong>Create the File:</strong> Save a new file as <code>schedule.html</code> and add the boilerplate.</li>
+            <li class="mb-0"><strong>Build the Description List:</strong> Inside the body, use <code>&lt;dl&gt;</code> for the list, <code>&lt;dt&gt;</code> for the day (term), and <code>&lt;dd&gt;</code> for the location and time (description).
+              <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;dl&gt;
+  &lt;dt&gt;Saturday&lt;/dt&gt;
+  &lt;dd&gt;Mills Park - 10 AM to 2 PM&lt;/dd&gt;
+&lt;/dl&gt;</code></pre>
+            </li>
+          </ol>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <!-- Vertically Stacked Readability Fix -->
+        <figure class="mb-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-21.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-21.png" class="img-fluid rounded border shadow-sm w-100" alt="Reviews code snippet." onerror="this.src='https://placehold.co/600x400?text=Reviews+Code'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.18:</strong> Reviews Code</figcaption>
+        </figure>
+        
+        <figure class="mb-4 mt-5 pt-3 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-23.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-23.png" class="img-fluid rounded border shadow-sm w-100" alt="Contact code snippet." onerror="this.src='https://placehold.co/600x400?text=Contact+Code'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.19:</strong> Contact Code</figcaption>
+        </figure>
+        
+        <figure class="mb-4 mt-5 pt-5 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-25.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-25.png" class="img-fluid rounded border shadow-sm w-100" alt="Schedule code snippet." onerror="this.src='https://placehold.co/600x400?text=Schedule+Code'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.20:</strong> Schedule Code</figcaption>
+        </figure>
+        
+      </div>
+    </div>
+
+    <!-- SECTION 10: LINKS & IMAGES -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Working with Links and Images (The "Web" Part)</h2>
+        <h5 class="fw-bold text-primary">Inline Images</h5>
+        <p>The most common embedded element is an image, which you add using the self-closing <code>&lt;img&gt;</code> tag.</p>
+        <ul class="small mb-5 bg-light p-4 rounded border shadow-sm">
+          <li class="mb-2">The <strong>src</strong> attribute tells the browser exactly where to find the image file.</li>
+          <li class="mb-2">The <strong>alt</strong> attribute is description for screen readers or if the image fails to load. This is a <strong>legal accessibility requirement.</strong></li>
+          <li class="mb-0">Control initial size with <strong>width</strong> and <strong>height</strong>.</li>
+        </ul>
+
+        <!-- WALKTHROUGH 8: Arcade Rentals -->
+        <h3 class="section-title d-flex align-items-center mt-5 text-primary">
+          Walkthrough: Create the Arcade Rentals Page
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+          <ol class="small mb-0 ps-3">
+            <li class="mb-3"><strong>Create the File:</strong> Save a new file as <code>rentals.html</code>. Add your boilerplate and an <code>&lt;h1&gt;</code> heading for the page title.</li>
+            <li class="mb-0"><strong>Insert the Image:</strong> Use the <code>&lt;img&gt;</code> tag to embed your picture. Make sure the <code>src</code> path points correctly to your images folder, and always include <code>alt</code> text!
+              <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;img src="images/arcade_truck.jpg" alt="A mobile arcade truck with neon lights" width="600"&gt;</code></pre>
+            </li>
+          </ol>
+        </div>
+
+        <!-- GRADED LAB 7 CARD (Images) -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 7: Image Placeholders [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Utilize self-closing tags and accessibility attributes to embed media for the client mockup.</p>
+                <ol>
+                    <li class="mb-2">Review your Figma mockups and locate where photos will eventually go on your Custom Website.</li>
+                    <li class="mb-2">Insert <code>&lt;img&gt;</code> tags into your HTML files in those exact spots.</li>
+                    <li class="mb-2">For now, use a placeholder service in the <code>src</code> attribute (e.g., <code>https://placehold.co/600x400</code>).</li>
+                    <li class="mb-2">You MUST write descriptive <code>alt</code> text that clearly describes what the final image will be.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload the HTML file containing your placeholders.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 mt-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-27.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-27.png" alt="A guide for the img tag labeling src and alt attributes." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=IMG+Tag'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.21:</strong> Anatomy of an image tag.</figcaption>
+        </figure>
+        
+        <!-- Vertically Stacked Readability Fix -->
+        <figure class="mb-4 mt-5 pt-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-28.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-28.png" class="img-fluid rounded border shadow-sm w-100" alt="Rentals code." onerror="this.src='https://placehold.co/600x400?text=Rentals+Code'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.22:</strong> Rentals Code</figcaption>
+        </figure>
+
+      </div>
+    </div>
+
+    <!-- SECTION 11: HYPERTEXT & NAVIGATION -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Hypertext Links</h2>
+        <p>What made the World Wide Web different from just reading a digital book? It's right in the name of the language: HyperText. Links are created with the <code>&lt;a&gt;</code> (anchor) tag. <strong>href</strong> is the address, and the content between the tags is the clickable part.</p>
+        <ul class="small mb-4 bg-light p-4 rounded border shadow-sm">
+          <li class="mb-2"><code>mailto:</code> opens email (e.g., <code>&lt;a href="mailto:test@test.com"&gt;Email Us&lt;/a&gt;</code>).</li>
+          <li class="mb-2"><code>tel:</code> allows mobile users to tap to call.</li>
+          <li class="mb-0"><code>target="_blank"</code> forces the link to open in a brand new tab.</li>
+        </ul>
+        
+        <h5 class="fw-bold mt-4 text-primary">Relative vs. Absolute Paths</h5>
+        <p><strong>Absolute Path:</strong> The full URL to a completely different website (e.g., <code>https://google.com</code>).<br><strong>Relative Path:</strong> The path from the current file you are editing to a target file on your own computer (e.g., <code>about.html</code>). If you break a relative path, the user gets a 404 Error!</p>
+
+        <!-- WALKTHROUGH 9: Navigation -->
+        <h3 class="section-title d-flex align-items-center mt-5 text-primary">
+          Walkthrough: Link It All Together (Navigation)
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+          <ol class="small mb-0 ps-3">
+            <li class="mb-3"><strong>Build the Nav:</strong> Open your <code>index.html</code>. Inside the <code>&lt;header&gt;</code>, find the <code>&lt;nav&gt;&lt;ul&gt;</code> you built earlier. Wrap the text of your list items in anchor tags (<code>&lt;a&gt;</code>) pointing to your other pages using relative paths.
+              <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;nav&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href="index.html"&gt;Home&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="about.html"&gt;About&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="rentals.html"&gt;Rentals&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="contact.html"&gt;Contact&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;</code></pre>
+            </li>
+            <li class="mb-0"><strong>Duplicate Across Pages:</strong> Copy this entire <code>&lt;nav&gt;</code> block and paste it into the <code>&lt;header&gt;</code> of <em>all</em> your other HTML files (about.html, contact.html, etc.) so the user can navigate anywhere from any page!</li>
+          </ol>
+        </div>
+
+        <!-- GRADED LAB 4 CARD (Links) -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 4: The Network Link Lab [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Establish a functional hypertext network using relative paths.</p>
+                <ol>
+                    <li class="mb-2">Open your Custom Website project files.</li>
+                    <li class="mb-2">Wrap the text inside your navigation <code>&lt;li&gt;</code> tags with <code>&lt;a&gt;</code> tags.</li>
+                    <li class="mb-2">Use perfect <strong>relative paths</strong> in the <code>href</code> attributes to link your Home, About, and Contact pages together.</li>
+                    <li class="mb-2">Copy the completed navigation menu to all pages, open your site in a browser, and verify you can click back and forth between every page without hitting a 404 error.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your fully linked <code>index.html</code> file.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-32.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-32.png" alt="Anatomy of an anchor tag diagram." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Anchor+Tag'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.23:</strong> Anchor Tag Anatomy</figcaption>
+        </figure>
+        <figure class="mb-4 mt-5 pt-4 text-center">
+          <a href="/images/the-bones-intro-to-html/figure-33.png" target="_blank" rel="noopener">
+            <img src="/images/the-bones-intro-to-html/figure-33.png" alt="Navigation code snippet." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Nav+Code'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 5.24:</strong> Navigation Code</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- NEW: SECTION 12: FORMS & INPUTS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+        <div class="col-lg-8 pe-lg-5">
+            <h2 class="section-title mt-0">Accessible Forms &amp; User Input</h2>
+            <p>Without forms, the web is just a one-way TV broadcast. Forms allow the user to talk back! Think of Instagram—what HTML element do you type your comments into? An input field inside a form.</p>
+            
+            <p>The <code>&lt;form&gt;</code> tag acts as a wrapper for all user inputs. Inside it, we use tags like <code>&lt;input type="text"&gt;</code> for short answers, <code>&lt;textarea&gt;</code> for long messages, and <code>&lt;button type="submit"&gt;</code> to send the data.</p>
+
+            <h5 class="fw-bold mt-4 text-primary">Cultural Competency: The Label Rule</h5>
+            <p>A visually impaired user using a screen reader cannot see the box on the screen. If you just put a generic input box, the screen reader will just say "text field." To fix this, <strong>every input MUST have a matching <code>&lt;label&gt;</code></strong>.</p>
+            <div class="alert alert-warning small border-0 py-3 shadow-sm mb-4">
+                We link them together using the <code>for</code> attribute on the label, and the <code>id</code> attribute on the input. They must match perfectly!
+            </div>
+
+            <!-- WALKTHROUGH 10: Form -->
+            <h3 class="section-title d-flex align-items-center mt-5 text-primary">
+                Walkthrough: Add a Contact Form
+            </h3>
+            <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+                <ol class="small mb-0 ps-3">
+                    <li class="mb-3"><strong>Open Contact Page:</strong> Open your <code>contact.html</code> file. Inside the <code>&lt;main&gt;</code> area, create a <code>&lt;form&gt;</code> block.</li>
+                    <li class="mb-0"><strong>Build the Inputs:</strong> Add a labeled input for Name, a labeled input for Email, and a labeled textarea for the Message. We will also use the HTML5 <code>required</code> attribute so the user can't submit a blank form!
+                        <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;form&gt;
+    &lt;label for="userName"&gt;Full Name:&lt;/label&gt;
+    &lt;input type="text" id="userName" name="userName" required&gt;
+    
+    &lt;label for="userEmail"&gt;Email Address:&lt;/label&gt;
+    &lt;input type="email" id="userEmail" name="userEmail" required&gt;
+
+    &lt;label for="userMessage"&gt;Your Message:&lt;/label&gt;
+    &lt;textarea id="userMessage" name="userMessage" rows="4" required&gt;&lt;/textarea&gt;
+
+    &lt;button type="submit"&gt;Send Message&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- GRADED LAB 8 CARD (Forms) -->
+            <div class="card border-success shadow-sm my-4 text-start">
+                <div class="card-header bg-success text-white fw-bold">Lab 8: Full Contact Form [25 pts]</div>
+                <div class="card-body small p-4">
+                    <p><strong>Objective:</strong> Engineer accessible user input structures with HTML5 validation.</p>
+                    <ol>
+                        <li class="mb-2">On your custom <code>contact.html</code> page, build a full <code>&lt;form&gt;</code>.</li>
+                        <li class="mb-2">Include a text input for a Name, an email input for an Email Address, and a <code>&lt;textarea&gt;</code> for a message.</li>
+                        <li class="mb-2">Ensure <strong>every input</strong> has a dedicated <code>&lt;label&gt;</code> with a matching <code>for</code> / <code>id</code> relationship.</li>
+                        <li class="mb-2">Add the <code>required</code> attribute to the critical fields to prevent blank submissions. Include a submit button.</li>
+                    </ol>
+                    <p class="mb-3 text-danger fw-bold">Turn In: Upload your completed <code>contact.html</code> file.</p>
+                    <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+            <div class="card roadmap-card border-warning shadow-sm mb-4 text-start">
+              <div class="card-header bg-warning text-dark fw-bold">Let's Discuss:</div>
+              <div class="card-body small">
+                <p class="mb-0">Why is it important to use <code>type="email"</code> instead of just <code>type="text"</code> when asking for an email address, especially for users on mobile phones?</p>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 13: ENTITIES -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-12">
+        <h2 class="section-title mt-0">Character Sets and Special Characters</h2>
+        <p>Sometimes you need to type characters that have special meaning in HTML (like <code>&lt;</code> or <code>&gt;</code>), or characters that aren't on your keyboard (like the Copyright symbol &copy;). To do this, we use <strong>character entity references</strong>.</p>
+        
+        <div class="row mt-4 text-start">
+          <div class="col-md-6">
+            <h6 class="fw-bold small text-center bg-light p-2 rounded shadow-sm border mb-0">Most Common Entities</h6>
+            <table class="table table-bordered table-sm small bg-white shadow-sm mt-0">
+              <thead class="bg-light"><tr><th>Entity</th><th>Symbol</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>&amp;lt;</code></td><td>&lt;</td><td>Less than (prevents starting a tag)</td></tr>
+                <tr><td><code>&amp;gt;</code></td><td>&gt;</td><td>Greater than</td></tr>
+                <tr><td><code>&amp;amp;</code></td><td>&amp;</td><td>Ampersand</td></tr>
+                <tr><td><code>&amp;quot;</code></td><td>"</td><td>Double quotes</td></tr>
+                <tr><td><code>&amp;copy;</code></td><td>&copy;</td><td>Copyright sign (Great for Footers!)</td></tr>
+                <tr><td><code>&amp;trade;</code></td><td>&trade;</td><td>Trade mark sign</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6 class="fw-bold small text-center bg-light p-2 rounded shadow-sm border mb-0">Punctuation &amp; Spaces</h6>
+            <table class="table table-bordered table-sm small bg-white shadow-sm mt-0">
+              <thead class="bg-light"><tr><th>Entity</th><th>Symbol</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>&amp;nbsp;</code></td><td> </td><td>Non-breaking space (forces a blank space)</td></tr>
+                <tr><td><code>&amp;mdash;</code></td><td>&mdash;</td><td>Em dash (long dash)</td></tr>
+                <tr><td><code>&amp;bull;</code></td><td>&bull;</td><td>Bullet point</td></tr>
+                <tr><td><code>&amp;euro;</code></td><td>&euro;</td><td>Euro sign</td></tr>
+                <tr><td><code>&amp;pound;</code></td><td>&pound;</td><td>Pound sign</td></tr>
+                <tr><td><code>&amp;deg;</code></td><td>&deg;</td><td>Degree sign (e.g., 90&deg;)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW SECTION 14: W3C VALIDATION MILESTONE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+        <div class="col-lg-12">
+            <h2 class="section-title mt-0 text-center">Quality Assurance: The Zero Error Audit</h2>
+            <p class="text-center mx-auto mb-4" style="max-width: 800px;">You have now coded the entirety of your Figma design in raw HTML. Before we start styling it with CSS, we must ensure the structural foundation is flawless. If your HTML foundation is cracked (missing closing tags, incorrect attributes), your CSS house will eventually collapse.</p>
+
+            <!-- BUSINESS PLAN INTEGRATION: QA -->
+            <div class="card border-dark shadow-sm my-4 mx-auto text-start" style="max-width: 900px;">
+              <div class="card-header bg-dark text-white fw-bold">
+                💼 The Agency Founder's Log: Quality Assurance (QA)
+              </div>
+              <div class="card-body small bg-light">
+                <p class="mb-0">In the agency world, delivering broken code is how you lose clients and get bad reviews. The Zero Error Audit isn't just a grade; it's our agency's guarantee. We do not push code to production until it passes W3C Validation. This protects our reputation in the local market and saves us from costly post-launch bug fixes.</p>
+              </div>
+            </div>
+
+            <!-- MILESTONE CARD -->
+            <div class="card border-primary shadow-sm mt-5 mx-auto text-start" style="max-width: 900px;">
+                <div class="card-header bg-primary text-white fw-bold">
+                    🏆 Milestone: Zero Error Audit [50 pts]
+                </div>
+                <div class="card-body small p-4">
+                    <p><strong>Objective:</strong> Prove technical accuracy and rigorous Quality Assurance for your agency by passing a W3C Code Validation check.</p>
+                    <ol>
+                        <li class="mb-2">Open the official <a href="https://validator.w3.org/#validate_by_input" target="_blank" class="fw-bold">W3C HTML Validator</a> website.</li>
+                        <li class="mb-2">Copy all the code from your Custom Website's <code>index.html</code> file and paste it into the "Direct Input" box. Click Check.</li>
+                        <li class="mb-2">Use Analytical Reasoning to read the red error messages. Find your missing tags or typos, and fix them in your actual VS Code file until the validator shows green.</li>
+                        <li class="mb-2">Repeat this process for your <code>about.html</code> and <code>contact.html</code> pages.</li>
+                    </ol>
+                    <p class="mb-3 text-danger fw-bold mt-4">Turn In: Upload a screenshot showing the green "Document checking completed. No errors or warnings to show" message, or upload your fully repaired Custom Website Folder.</p>
+                    <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FINAL RECAP -->
+    <div class="row mt-5">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="final-recap">
+            <h2 class="section-title mt-0 text-primary fw-bold">The Final Download: Chapter Recap</h2>
+            <p>In this chapter, you learned the critical foundation of the web: HTML. You discovered how to use an IDE code editor instead of a basic text program. You learned how to write the essential HTML "Boilerplate" to define the document type and metadata. You practiced using nested tags correctly to create paragraphs, semantic structure (like header and footer), text-level formatting (like bold and italics), lists, and accessible forms. Finally, you learned how to audit your code using W3C validation to ensure a flawless foundation for your agency's clients.</p>
+        </section>
+        <p class="text-muted small mt-5">Copyright - Danylle Miller Designs 2026</p>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 d-flex flex-column justify-content-end pb-3 text-center">
+        <div class="card roadmap-card border-info mb-4 bg-white shadow-sm text-start">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-info"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <h6 class="card-title fw-bold small text-info mb-0 ms-2 text-uppercase">Guild Checkpoint</h6>
+            </div>
+            <p class="small mb-2" style="color: #495057;"><strong>Q1:</strong> Why is the "First-In, Last-Out" rule so important when nesting HTML tags?</p>
+            <p class="small mb-2" style="color: #495057;"><strong>Q2:</strong> How do semantic tags like &lt;article&gt; or &lt;footer&gt; help people using screen readers compared to using generic &lt;div&gt; elements?</p>
+            <p class="small mb-2" style="color: #495057;"><strong>Q3:</strong> Why must every input field in a form have a specifically linked &lt;label&gt;?</p>
+            <p class="small mb-0" style="color: #495057;"><strong>Q4:</strong> What is the difference between a relative path and an absolute path? Why is it safer to use relative paths for local project files?</p>
+          </div>
+        </div>
+        <a href="/year1/the-clothes-intro-to-css.html" class="btn btn-primary w-100 shadow-sm fw-bold text-uppercase">Next: Chapter 6 &raquo;</a>
+      </div>
+    </div>
+
+    <!-- ENHANCED TURN-IN DROPBOX -->
+    <div class="card shadow border-success mx-auto mb-5 mt-5 text-start" style="max-width: 800px;" id="submission-zone">
+        <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+            <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>Student Assignment Dropbox</h4>
+            <span class="badge bg-light text-success shadow-sm" id="student-id-badge">Verifying...</span>
+        </div>
+        <div class="card-body p-4">
+            <form id="uploadForm">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
+                    <select id="uploadAssignment" class="form-select border-success" required>
+                        <option value="" disabled selected>Select an assignment...</option>
+                        <option value="ch5_lab1">Lab 1: Project 2 Setup (25 pts)</option>
+                        <option value="ch5_lab2">Lab 2: Typography Translation (25 pts)</option>
+                        <option value="ch5_lab3">Lab 3: Nav List Structure (25 pts)</option>
+                        <option value="ch5_lab4">Lab 4: The Network Link Lab (25 pts)</option>
+                        <option value="ch5_lab5">Lab 5: The Global Skeleton (25 pts)</option>
+                        <option value="ch5_lab6">Lab 6: Content Blocks (25 pts)</option>
+                        <option value="ch5_lab7">Lab 7: Image Placeholders (25 pts)</option>
+                        <option value="ch5_lab8">Lab 8: Full Contact Form (25 pts)</option>
+                        <option value="ch5_milestone">Milestone: Zero Error Audit (50 pts)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">2. What type of upload is this?</label>
+                    <select id="uploadType" class="form-select border-primary bg-site-secondary">
+                        <option value="file">A Single File (e.g. Screenshot, Word Doc, ZIP)</option>
+                        <option value="folder">An Entire Folder (e.g. A Full Website Project)</option>
+                    </select>
+                </div>
+
+                <div class="mb-4" id="fileInputContainer">
+                    <label class="form-label fw-bold">3. Select File</label>
+                    <input type="file" id="fileInput" class="form-control" required>
+                </div>
+
+                <div class="mb-4 d-none" id="folderInputContainer">
+                    <label class="form-label fw-bold">3. Select Project Folder</label>
+                    <input type="file" id="folderInput" class="form-control" webkitdirectory directory multiple>
+                    <div class="form-text x-small text-danger fw-bold mt-1">Note: This will upload ALL files and sub-folders inside the folder you select, keeping your website links intact!</div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-success w-100 fw-bold py-3 shadow-sm" disabled>
+                    Upload to Teacher Server
+                </button>
+            </form>
+            
+            <div id="uploadProgress" class="progress mt-3 d-none shadow-sm" style="height: 25px;">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%;">0%</div>
+            </div>
+            <div id="uploadStatus" class="mt-3 d-none p-3 rounded small fw-bold text-center shadow-sm"></div>
+        </div>
+    </div>
+
+  </section>
+
+  <div id="footer-nav"></div>
+  <div id="footer-placeholder"></div>
+
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+
+  <!-- ASSIGNMENT UPLOADER LOGIC -->
+  <script type="module" src="/js/assignment-uploader.js"></script>
+
+</body>
+</html>

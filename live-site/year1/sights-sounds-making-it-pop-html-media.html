@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Chapter 8: Sights &amp; Sounds | CHS Web Design</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+    <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+    
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+    
+    <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+    <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+    
+    <!-- Security Guard: Kicks out anyone not logged in -->
+    <script type="module" src="/js/auth-guard.js"></script>
+
+    <script src="/js/bootstrap.bundle.js"></script>
+    <script src="/js/jquery.js"></script>
+    <script src="/js/loader.js?v=6"></script>
+</head>
+<body class="bg-light">
+
+    <!--Navigation-->
+    <div class="container-fluid sticky-top px-0 no-print">
+        <div id="nav-placeholder"></div>
+    </div>
+
+    <section class="container-ultrawide my-5">
+        <div class="row">
+            <div class="col-12">
+                
+                <nav class="mb-4 d-flex justify-content-between small fw-bold">
+                    <a href="/year1/the-style-advanced-css-layout.html" class="text-decoration-none text-primary">&laquo; Previous: 7: The "Style"</a>
+                    <a href="/year2/the-brains-intro-to-javascript.html" class="text-decoration-none text-primary">Next: 9: The "Brains" (Intro to JS) &raquo;</a>
+                </nav>
+
+                <hgroup class="mb-5 border-bottom pb-3 mt-4">
+                    <h1 class="display-4 fw-bold text-primary">Chapter 8: Sights &amp; Sounds</h1>
+                    <p class="lead text-muted fs-4">Media: Images, Video, Audio &amp; Tables</p>
+                </hgroup>
+
+                <div class="content-section">
+                    
+                    <!-- SECTION 1: OVERVIEW & PERSONA -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">A Professional Multi-Page Experience</h2>
+                            
+                            <p>Let's be real: a wall of text is boring. A modern website is a “multimedia” experience. It has images, videos, and audio that grab your attention.</p>
+                            
+                            <p>In this chapter, we aren't just adding media; you will be building a complete <strong>multi-page custom website</strong> (like a retail store, a restaurant, a fan site, or a personal portfolio). To show you how it's done, our walkthroughs will build an example site called <strong>Galactic Gliders</strong> across a few HTML files that share a single external stylesheet.</p>
+                            
+                            <!-- PRO UI/UX PERSONA CARD (Now Full Width) -->
+                            <div class="card shadow-sm border-0 bg-light mt-5 mb-5">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-center border-bottom pb-3 mb-3">
+                                        <img src="/images/sights-sounds-making-it-pop-html-media/figure-02.png" alt="Hobbyist Harry" class="rounded-circle shadow-sm border border-3 border-white avatar-img-large">
+                                        <div class="ms-3">
+                                            <h5 class="fw-bold text-dark mb-0">Hobbyist Harry</h5>
+                                            <p class="mb-0 text-muted small">The Drone Enthusiast</p>
+                                        </div>
+                                    </div>
+                                    <div class="small">
+                                        <div class="mb-2">
+                                            <span class="text-uppercase fw-bold text-muted d-block small-label">Who</span>
+                                            <span class="text-dark">Harry is a drone enthusiast looking to learn more about the technical history and regulatory landscape of UAVs.</span>
+                                        </div>
+                                        <div class="mb-2">
+                                            <span class="text-uppercase fw-bold text-muted d-block small-label">Goal</span>
+                                            <span class="text-dark">Harry wants to navigate between technical specs, historical footage, and regulatory audio without losing his place.</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-uppercase fw-bold text-muted d-block small-label">Needs</span>
+                                            <span class="text-dark">He needs a site that loads media fast and looks professional on his desktop and his tablet in the field.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-top text-center py-2">
+                                    <span class="small text-muted"><strong>Figure 8.2:</strong> User Persona</span>
+                                </div>
+                            </div>
+                            <figure class="mt-5 mb-5 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-01.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-01.png" alt="Conceptual image of multimedia elements" class="img-fluid rounded shadow-sm border w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted">
+                                    <strong>Figure 8.1:</strong> Multimedia Experience
+                                </figcaption>
+                            </figure>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card shadow-sm mb-4 bg-white border-primary">
+                                <div class="card-header bg-site-secondary fw-bold text-primary border-bottom">Materials Hub</div>
+                                <div class="card-body p-0">
+                                    <div class="list-group list-group-flush small">
+                                        <a href="/proficiencyScales/sights-sounds-making-it-pop-html-media.html" class="list-group-item list-group-item-action text-primary fw-bold">🎯 1. Proficiency Scale</a>
+                                        <a href="/pre-assessments/sights-sounds-making-it-pop-html-media.html" class="list-group-item list-group-item-action text-dark">🚀 2. Pre-Assessment</a>
+                                        <a href="/notes/sights-sounds-making-it-pop-html-media.html"  class="list-group-item list-group-item-action text-dark">📝 3. Guided Notes</a>
+                                        <a href="/studentFiles/galacticGliders.zip" class="list-group-item list-group-item-action text-dark">📁 4. Chapter Files (.zip)</a>
+                                        <a href="/projectSpecs/sights_Sounds_Project.pdf" target="_blank" rel="noopener" class="list-group-item list-group-item-action text-danger fw-bold">📄 5. Project 3 Specifications (PDF)</a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Interactives Hub Card -->
+                            <div class="card shadow-sm mb-4 bg-white border-info text-start">
+                            <div class="card-header bg-info text-white fw-bold border-bottom">Interactive Lessons</div>
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush small">
+                                <a href="/interactives/ss-images.html" class="list-group-item list-group-item-action text-dark">⚡ Image Formats</a>
+                                <a href="/interactives/ss-video.html" class="list-group-item list-group-item-action text-dark">⚡ Native HTML5 Video</a>
+                                <a href="/interactives/ss-iframes.html" class="list-group-item list-group-item-action text-dark">⚡ Embedding Media (Iframes)</a>
+                                <a href="/interactives/ss-figures.html" class="list-group-item list-group-item-action text-dark">⚡ Semantic Figures & Alt Text</a>
+                                <a href="/interactives/ss-tables.html" class="list-group-item list-group-item-action text-dark">⚡ Semantic Tables</a>
+                                </div>
+                            </div>
+                            </div>
+                            <div class="card roadmap-card mb-4 border-info shadow-sm">
+                                <div class="card-header bg-site-secondary fw-bold text-info border-bottom">Unlocking New Abilities</div>
+                                <div class="card-body small">
+                                    <ul class="mb-0 ps-3">
+                                        <li class="mb-2">Optimize photos in Photoshop for lightning-fast load times.</li>
+                                        <li class="mb-2">Design and export crisp Vector Graphics (SVG) using Adobe Illustrator.</li>
+                                        <li class="mb-2">Embed accessible HTML5 Video and Audio with subtitle tracks.</li>
+                                        <li class="mb-2">Ethically embed maps and YouTube videos using Iframes.</li>
+                                        <li class="mb-2">Build Semantic Data Tables using colspan.</li>
+                                        <li>Fix "squished" media using CSS object-fit properties.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Moved Figure 8.1 to match sidebar formatting -->
+                            
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: IMAGES SETUP -->
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">Images (The Right Way)</h2>
+                            <p>Images are the heavy lifters of web design. They evoke emotion, clarify complex topics, and break up text. But adding an image isnt just about slapping an <code>&lt;img&gt;</code> tag on the page. It involves choosing the right file format, optimizing for speed, and ensuring accessibility.</p>
+                            
+                            <h5 class="fw-bold mt-4">The Hero Image</h5>
+                            <p>A <strong>Hero Image</strong> is a large, prominently placed banner image at the top of a webpage. It is usually the first visual element a visitor encounters, making it crucial for setting the tone and capturing attention.</p>
+                            
+                            <h5 class="fw-bold mt-4">Understanding Image Compression</h5>
+                            <ul class="small mb-4">
+                                <li class="mb-2"><strong>Lossy Compression (JPG/WebP):</strong> Mathematical data is permanently deleted to reduce the file size. This is perfect for large, complex photographs because the human eye can't notice the slight loss in quality.</li>
+                                <li class="mb-2"><strong>Lossless Compression (PNG/GIF):</strong> The file size is reduced by rewriting the data without losing visual quality (similar to zipping a folder). Best for sharp graphics and text.</li>
+                                <li><strong>Dithering:</strong> An old technique of simulating colors using patterns of dots. It was used when color palettes were heavily restricted on early computers to prevent banding.</li>
+                            </ul>
+
+                            <h5 class="fw-bold mt-4">Quick-Reference Table: Image Formats</h5>
+                            <table class="table table-bordered small bg-white shadow-sm mb-2">
+                                <thead class="bg-light text-center">
+                                    <tr>
+                                        <th>Format</th>
+                                        <th>Full Name</th>
+                                        <th>Best For</th>
+                                        <th>Key Feature(s)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold">JPG</td>
+                                        <td>Joint Photographic Experts Group</td>
+                                        <td>Photos. Real-world pics.</td>
+                                        <td>Small file size (Lossy compression)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">PNG</td>
+                                        <td>Portable Network Graphics</td>
+                                        <td>Logos, Icons, Graphics</td>
+                                        <td>Transparency support (Lossless)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">GIF</td>
+                                        <td>Graphics Interchange Format</td>
+                                        <td>Memes. Short animations.</td>
+                                        <td>Looped animation</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">SVG</td>
+                                        <td>Scalable Vector Graphic</td>
+                                        <td>Logos &amp; Icons. The GOAT.</td>
+                                        <td>Perfectly sharp at any size (Math-based Vector)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">WebP</td>
+                                        <td>WebP (Google)</td>
+                                        <td>Modern Web Performance</td>
+                                        <td>Superior lossless and lossy compression on the web</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p class="small text-muted border-start border-3 border-primary px-3 mb-5">
+                                <strong>Key Takeaway:</strong> Use JPG or WebP for photos. Use SVG for all logos and icons. Use PNG <strong>only</strong> if you need a transparent photo.
+                            </p>
+                            
+                            <h5 class="fw-bold mt-4">Adding an Image to Your Website</h5>
+                            <p>To add a basic image, use the <code>&lt;img&gt;</code> tag. This is an <strong>"empty" or "self-closing" tag</strong>, meaning it does not wrap around text and does not require a closing <code>&lt;/img&gt;</code> tag.</p>
+                            <pre class="p-3 border rounded shadow-sm mb-3"><code>&lt;img src="media/filename.jpg" alt="A descriptive text for screen readers"&gt;</code></pre>
+                            
+                            <div class="alert alert-info small mb-5 shadow-sm">
+                                <strong>The Rules of Alt Text:</strong> If an image fails to load, the browser will display the <code>alt</code> attribute's text instead. 
+                                <ul>
+                                    <li><strong>When to use it:</strong> If an image contains important information, you MUST describe it (e.g. <code>alt="A chart showing a 20% increase in sales"</code>).</li>
+                                    <li><strong>When to leave it empty:</strong> If an image is purely decorative (like a background swirl), you must leave it empty (e.g. <code>alt=""</code>) so screen readers skip it instead of confusing the user.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="bg-light p-3 rounded border shadow-sm mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                                </div>
+                                <p class="mb-0 small text-dark">Why is it important to use different image formats (like SVG vs. WebP) instead of just saving everything as a PNG?</p>
+                            </div>
+
+                            <figure class="mb-4">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-03.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-03.png" alt="Choosing the Best Image" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.3:</strong> Choosing the Best Image</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- Mission Prep Row -->
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">Mission Prep: Quick Folder Setup</h2>
+                            <p>Professional sites use a clean folder hierarchy. Before coding, perform this housekeeping in your <strong>galacticGliders</strong> folder:</p>
+                            <ul class="small mb-5">
+                                <li class="mb-2">Create <code>docs</code>, <code>media</code>, and <code>styles</code> folders inside your project root.</li>
+                                <li class="mb-2">Move your project's <code>styles.css</code> into the <strong>styles</strong> folder.</li>
+                                <li class="mb-2">Move <strong>all project-specific images</strong> into the <strong>media</strong> folder.</li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-4">
+                            <figure class="mb-4 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-04.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-04.png" alt="Folder Structure" class="img-fluid rounded border shadow-sm folder-structure-img">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.4:</strong> Folder Structure</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- WALKTHROUGH 1: ADD HERO IMAGE -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+                                Walkthrough: Add a Hero Image (The Basics)
+                            </h3>
+                            <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary">
+                                <p class="small fw-bold text-dark">Let's add our first image, representing the historical context of drones. Assume nothing is done for you—follow these steps exactly!</p>
+                                <ol class="small mb-0 ps-3">
+                                    <li class="mb-3">
+                                        <strong>Open Your Editor:</strong> Launch Visual Studio Code and open your <code>galacticGliders</code> project folder.
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong>Verify Your Files:</strong> Look at your file explorer tree on the left. Make sure you have a folder named <code>media</code> and that your <code>old-plain.jpg</code> image is inside it.
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong>Link the Stylesheet:</strong> Open <code>history.html</code>. In the <code>&lt;head&gt;</code> section at the top of the file, manually type the link to your style sheet so the page knows where to find its colors:
+                                        <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;link rel="stylesheet" href="styles/styles.css"&gt;</code></pre>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong>Find the Target:</strong> Scroll down in <code>history.html</code> until you find the HTML comment that says <code>&lt;!-- LAB: Add Hero Image here --&gt;</code>.
+                                    </li>
+                                    <li class="mb-0">
+                                        <strong>Type the Image Tag:</strong> Right below that comment, type out the <code>&lt;img&gt;</code> tag exactly as you see it below.
+                                        <pre class="p-3 rounded mt-2 mb-3 no-copy"><code>&lt;img src="media/old-plain.jpg" alt="A military drone." class="hero-img w-full rounded-lg shadow-md"&gt;</code></pre>
+                                        <br><em class="text-success fw-bold">Save your file and either open it in a browser to see the results or refresh your browser to see the results!</em>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0">
+                            <figure class="mb-4">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-05.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-05.png" alt="Hero Image Code" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.5:</strong> Hero Image Code</figcaption>
+                            </figure>
+                            <figure class="mb-0">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-06.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-06.png" alt="Browser View" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.6:</strong> Browser View (Hero)</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: PHOTOSHOP OPTIMIZATION -->
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">Pro Skill: Optimizing Images in Photoshop</h2>
+                            <p>You should NEVER use a 5MB photo straight from your phone or a modern digital camera on your website. If an image is 4000px wide, it is a terrible practice to simply use CSS <code>width: 400px;</code> to make it look smaller on screen. <strong>Why? Because CSS only changes how it looks; the browser still has to download the massive original file, slowing down your site to a crawl.</strong></p>
+                            
+                            <div class="alert alert-info border-0 p-3 my-4 small shadow-sm border-start border-4 border-info">
+                                <strong class="text-info"><i class="fas fa-lightbulb me-1"></i> The 'Why':</strong> Real-world photos are massive. If you force a user's phone to download a heavy 5MB image just to show a small 400px thumbnail, they will likely leave your site before it loads. Compressing images ensures lightning-fast load times and preserves your bandwidth.
+                            </div>
+
+                            <p>To fix this, professional web developers always <strong>optimize</strong> their images before writing a single line of HTML. Optimizing an image means finding the perfect balance between a tiny file size and high visual quality. Here is the standard three-step workflow we use in Adobe Photoshop:</p>
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0">
+                            <div class="bg-light p-3 rounded border shadow-sm mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                                </div>
+                                <p class="mb-0 small text-dark">Think about a user on a slow mobile connection. How does properly cropping, resizing, and compressing a 5MB image down to 150KB impact their UX?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Workflow Steps -->
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h5 class="fw-bold mt-0">1. Crop (The “Get-to-the-Point” Tool)</h5>
+                            <ol class="small mb-4 ps-3">
+                                <li class="mb-2">Open your image in Photoshop.</li>
+                                <li class="mb-2">Select the <strong>Crop Tool (C)</strong>.</li>
+                                <li class="mb-2">Drag the handles to frame the most important part of the image. Press <strong>Enter</strong>.</li>
+                            </ol>
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                            <figure class="mb-0">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-07.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-07.png" alt="Crop Tool" class="img-fluid rounded border shadow-sm crop-tool-img">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.7:</strong> Crop Tool</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h5 class="fw-bold mt-0">2. Resize (The “Shrink Ray”)</h5>
+                            <p class="small">We use the <strong>Image Size</strong> tool in Photoshop specifically because it permanently shrinks the total pixel dimensions of the image.</p>
+                            <ol class="small mb-4 ps-3">
+                                <li class="mb-2">Go to <strong>Image &gt; Image Size...</strong> (<code>Alt+Ctrl+I</code>).</li>
+                                <li class="mb-2">Make sure the “chain link” icon is on (to keep the proportions).</li>
+                                <li class="mb-2">Change <strong>Dimensions</strong> to <strong>Pixels</strong>.</li>
+                                <li class="mb-2">Enter your target width (e.g., <strong>800</strong> pixels for a blog post).</li>
+                                <li class="mb-2">For <strong>Resample</strong>, choose <strong>Bicubic Sharper (reduction)</strong>.</li>
+                                <li class="mb-2">Click <strong>OK</strong>.</li>
+                            </ol>
+                        </div>
+                        <div class="col-lg-4 text-center">
+                            <figure class="mb-0">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-08.gif" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-08.gif" alt="Image Size" class="img-fluid rounded border shadow-sm resize-img">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.8:</strong> Image Size</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h5 class="fw-bold mt-0">3. Compress (The “Squoosher”)</h5>
+                            <ol class="small mb-3 ps-3">
+                                <li class="mb-2">Go to <strong>File &gt; Export &gt; Save for Web (Legacy)...</strong> (<code>Alt+Shift+Ctrl+S</code>).</li>
+                                <li class="mb-2">This window is the secret sauce. Choose your format:
+                                    <ul class="mt-1">
+                                        <li class="mb-2"><strong>JPEG High:</strong> Perfect for photos. Lower the <strong>Quality</strong> slider (e.g., 60-80) and watch the file size drop.</li>
+                                        <li class="mb-2"><strong>PNG-24:</strong> Use this <strong>only</strong> if you need transparency.</li>
+                                    </ul>
+                                </li>
+                                <li class="mb-2">Check “Convert to sRGB” for good colors.</li>
+                                <li class="mb-2">Click <strong>Save...</strong> and name your new, optimized file (e.g., <code>hero-image-optimized.jpg</code>).</li>
+                            </ol>
+                            <div class="alert alert-success border-0 p-3 mb-4 small shadow-sm">
+                                <i class="fas fa-check-circle me-1"></i> This process can turn a 5MB monster photo into a 150KB lightning-fast image.
+                            </div>
+
+                            <!-- GRADED LAB 1 CARD -->
+                            <div class="card border-success shadow-sm my-4">
+                                <div class="card-header bg-success text-white fw-bold">
+                                    Lab: Raster Compression [25 pts]
+                                </div>
+                                <div class="card-body small">
+                                    <div class="mb-3">
+                                        <span class="badge bg-success shadow-sm" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-container="body" title="Your custom website needs professional imagery. Instead of pulling raw, massive images from Google, this lab ensures your site's hero and background images are perfectly optimized to keep your Lighthouse performance score high.">
+                                            <i class="fas fa-project-diagram me-1"></i> Project Connection
+                                        </span>
+                                    </div>
+                                    <p><strong>Employability Focus:</strong> Positive Work Ethic (1.1.1) &amp; Resource Management (1.2.8).</p>
+                                    <ol>
+                                        <li class="mb-2">Decide on the theme for your new custom website (e.g., a retail store, a restaurant, a fan site, or a personal portfolio).</li>
+                                        <li class="mb-2">Gather 3-5 large photographs relevant to your theme. Open them in Adobe Photoshop.</li>
+                                        <li class="mb-2">Crop them, resize them to a maximum width of 1000px, and use "Save for Web" to compress them as JPGs or WebPs.</li>
+                                        <li class="mb-2">Save the optimized files into your project's <code>media</code> folder using strict lowercase naming rules.</li>
+                                    </ol>
+                                    <p class="mb-3 text-danger fw-bold">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your whole project folder. If prompted, always click "Overwrite All" to update your files.</p>
+                                    <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-4 text-center">
+                            <figure class="mb-0">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-09.mp4" target="_blank" rel="noopener">
+                                    <video src="/images/sights-sounds-making-it-pop-html-media/figure-09.mp4" autoplay loop muted playsinline class="img-fluid rounded border shadow-sm compress-video"></video>
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.9:</strong> Save for Web Settings</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- Semantic Tags -->
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">Making It Official: <code>&lt;figure&gt;</code> and <code>&lt;figcaption&gt;</code></h2>
+                            <p>What if you want a <strong>visible caption</strong> under your image? The correct, “semantic” way is to wrap your <code>&lt;img&gt;</code> in a <code>&lt;figure&gt;</code> tag and add a <code>&lt;figcaption&gt;</code>. This tells Google and screen readers that the image and caption are a “package deal.”</p>
+                            
+                            <h5 class="fw-bold mt-4">Adding a Figure and Caption to Your Website</h5>
+                            <pre class="p-3 border rounded shadow-sm mb-5"><code>&lt;figure&gt;
+    &lt;img src="media/image.jpg" alt="Description"&gt;
+    &lt;figcaption&gt;This is the visible caption text.&lt;/figcaption&gt;
+&lt;/figure&gt;</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- WALKTHROUGH 2: ADD SEMANTIC CAPTION -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+                                Walkthrough: Add an Image with a Semantic Caption
+                            </h3>
+                            <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary">
+                                <ol class="small mb-0 ps-3">
+                                    <li class="mb-4">
+                                        <strong>Find the Spot:</strong> Open <code>history.html</code> in VS Code and scroll down to the section talking about commercial logistics.
+                                    </li>
+                                    <li class="mb-4">
+                                        <strong>Type the Semantic Tags:</strong> Instead of just an image, we are going to wrap it in a <code>&lt;figure&gt;</code> tag and add a <code>&lt;figcaption&gt;</code>. Type this code exactly as shown:
+                                        <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;figure class="media-card"&gt;
+    &lt;img src="media/drone-package.png" alt="Commercial delivery drone."&gt;
+    &lt;figcaption&gt;Commercial UAVs are vital to logistics.&lt;/figcaption&gt;
+&lt;/figure&gt;</code></pre>
+                                    </li>
+                                    <li class="mb-0">
+                                        <strong>Make it Look Good (CSS):</strong> Open your <code>styles/styles.css</code> file. We need to add a rule for that <code>media-card</code> class we just used. Type this at the bottom:
+                                        <pre class="p-3 rounded mt-2 mb-3 no-copy"><code>.media-card {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 10px;
+}</code></pre>
+                                        <br><em class="text-success fw-bold">Save your file and either open it in a browser to see the results or refresh your browser to see the results!</em>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                            <figure class="mb-4 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-10.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-10.png" alt="Figure/Caption Code" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.10:</strong> Figure/Caption Code</figcaption>
+                            </figure>
+                            <figure class="mb-0 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-11.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-11.png" alt="Browser View" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.11:</strong> Browser View (Caption)</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 4: RESPONSIVE IMAGES & SVG -->
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">Next Level: Responsive Images with <code>srcset</code></h2>
+                            <p>Standard <code>&lt;img&gt;</code> tags are “one size fits all.” <code>srcset</code> turns your image into a smart element that adjusts based on the user's hardware. It lets you provide multiple versions of an image so the browser can pick the one that fits the screen size perfectly.</p>
+                            
+                            <div class="alert alert-info border-0 p-3 my-4 small shadow-sm border-start border-4 border-info">
+                                <strong class="text-info"><i class="fas fa-lightbulb me-1"></i> The 'Why':</strong> Standard <code>&lt;img&gt;</code> tags force all devices to download the exact same file. <code>srcset</code> is a responsive superpower that lets a mobile phone download a tiny version of an image while a 4K desktop monitor downloads the high-res version, saving immense bandwidth.
+                            </div>
+
+                            <h5 class="fw-bold mt-4">The Anatomy of a Responsive Image:</h5>
+                            <ul class="small mb-4">
+                                <li class="mb-3"><strong>The <code>srcset</code> attribute:</strong> This is your menu of options. You list the file path and its actual width in pixels using the <strong><code>w</code> descriptor</strong> (e.g., <code>800w</code>).</li>
+                                <li class="mb-3"><strong>The <code>sizes</code> attribute:</strong> This is the instruction manual for the browser. You tell the browser how much space the image will take up on the screen at different breakpoints.</li>
+                                <li class="mb-3"><strong>The <code>src</code> fallback:</strong> You still include a standard <code>src</code> attribute so that older browsers that don't understand <code>srcset</code> still show an image.</li>
+                            </ul>
+                            
+                            <h5 class="fw-bold mt-4">Adding Responsive Images to Your Website</h5>
+                            <pre class="p-3 border rounded shadow-sm mb-5"><code>&lt;img src="media/fallback.jpg" alt="Description"
+    srcset="media/small.jpg 480w, media/large.jpg 800w"
+    sizes="(max-width: 600px) 480px, 800px"&gt;</code></pre>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="bg-light p-3 rounded border shadow-sm mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                                </div>
+                                <p class="mb-0 small text-dark">Why is using <code>srcset</code> considered an accessibility and performance upgrade compared to a standard <code>&lt;img&gt;</code> tag?</p>
+                            </div>
+
+                            <figure class="mb-0 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-12.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-12.png" alt="How srcset Works" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.12:</strong> How srcset Works</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                    
+                    <!-- WALKTHROUGH 3: ADD RESPONSIVE IMAGES -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+                                Walkthrough: Add Responsive Images with <code>srcset</code>
+                            </h3>
+                            <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary">
+                                <ol class="small mb-0 ps-3">
+                                    <li class="mb-4">
+                                        <strong>Prep Your Images:</strong> The media files in the files you downloaded is just <code>chipset.png</code>. Before coding, open this image in Photoshop (or your preferred editor). You need to save two files from the original:
+                                        <ul class="mt-2 mb-2 list-disc pl-4 text-dark">
+                                            <li>A <strong>medium</strong> version (for the default image). Name it exactly <code>chipset-medium.png</code>.</li>
+                                            <li>A <strong>small</strong> version (for the smallest screens). Name it exactly <code>chipset-small.png</code>.</li>
+                                        </ul>
+                                        Keep the original <code>chipset.png</code> to use for the largest screens! Make sure all three files are in your <code>media</code> folder.
+                                    </li>
+                                    <li class="mb-4">
+                                        <strong>Open the File:</strong> Go to VS Code and open your <code>components.html</code> file.
+                                    </li>
+                                    <li class="mb-4">
+                                        <strong>Link your CSS:</strong> Just like the last lab, make sure you manually type <code>&lt;link rel="stylesheet" href="styles/styles.css"&gt;</code> at the top inside your <code>&lt;head&gt;</code>!
+                                    </li>
+                                    <li class="mb-0">
+                                        <strong>Type the Smart Image Tag:</strong> Find the section discussing drone chipsets. Carefully type the following code, making sure to include a clear space before the `srcset` attribute:
+                                        <pre class="p-3 rounded mt-2 mb-3 no-copy"><code>&lt;img src="media/chipset-medium.png" alt="Drone chipset." class="responsive-comp"
+     srcset="media/chipset-small.png 480w, media/chipset.png 1200w"
+     sizes="(max-width: 600px) 480px, 800px"&gt;</code></pre>
+                                        <br><em class="text-success fw-bold">Save your file and either open it in a browser to see the results or refresh your browser to see the results!</em> <em class="text-muted">Then slowly resize your window from small to large to see how the browser handles it!</em>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <!-- GRADED LAB 2: RESPONSIVE IMAGERY -->
+                            <div class="card border-success shadow-sm my-4 mt-5">
+                                <div class="card-header bg-success text-white fw-bold">
+                                    Lab: Responsive Imagery [25 pts]
+                                </div>
+                                <div class="card-body small">
+                                    <div class="mb-3">
+                                        <span class="badge bg-success shadow-sm" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-container="body" title="Your custom website must look perfect on both mobile phones and desktop monitors. Implementing 'srcset' on your hero image guarantees your site is responsive, hitting the technical requirements for Project 3.">
+                                            <i class="fas fa-project-diagram me-1"></i> Project Connection
+                                        </span>
+                                    </div>
+                                    <p><strong>Employability Focus:</strong> Problem Solving (1.2.3) &amp; Information Technology (1.3.2).</p>
+                                    <ol>
+                                        <li class="mb-2">Open your project's main HTML file.</li>
+                                        <li class="mb-2">Implement a hero image wrapped in semantic <code>&lt;figure&gt;</code> and <code>&lt;figcaption&gt;</code> tags.</li>
+                                        <li class="mb-2">Utilize the <code>srcset</code> and <code>sizes</code> attributes to provide at least two screen-size variants of your image for mobile and desktop optimization.</li>
+                                    </ol>
+                                    <p class="mb-3 text-danger fw-bold">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your whole project folder. If prompted, always click "Overwrite All" to update your files.</p>
+                                    <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                            <figure class="mb-4 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-13.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-13.png" alt="Srcset Code" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.13:</strong> Srcset Code</figcaption>
+                            </figure>
+                            <figure class="mb-0 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-14.gif" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-14.gif" alt="Browser View" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.14:</strong> Browser View (Responsive)</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- SVG Section -->
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">Vector Graphics (SVG &amp; Illustrator)</h2>
+                            
+                            <p>What happens to a photo (JPG) when you zoom in 500%? It gets blurry and "pixelated" because it is a <strong>Raster</strong> image made of a grid of tiny colored squares.</p>
+                            
+                            <p>Logos and icons require a different approach. We use <strong>SVG (Scalable Vector Graphics)</strong>. SVGs are not made of pixels; they are made of mathematical paths, coordinates, and curves. Because it's just math, you can scale an SVG to the size of a billboard and it will remain perfectly crisp, all while having a file size of just a few kilobytes.</p>
+
+                            <h5 class="fw-bold mt-4">Creating an SVG in Adobe Illustrator</h5>
+                            <p>We use Adobe Illustrator to draw these mathematical paths using tools like the Pen Tool and the Pathfinder.</p>
+                            <ol class="small mb-4 ps-3">
+                                <li class="mb-2">Open Illustrator and create a new Web canvas.</li>
+                                <li class="mb-2">Use the Text tool or Shape tools to design a simple, bold logo.</li>
+                                <li class="mb-2">Select your text and choose <em>Type &gt; Create Outlines</em>. This turns your font into raw mathematical paths so it loads correctly on any computer.</li>
+                                <li class="mb-2">Use the <strong>Pathfinder Tool</strong> to merge overlapping shapes into a single clean icon.</li>
+                                <li class="mb-2">Go to <em>File &gt; Export &gt; Export As...</em> and choose <strong>SVG</strong>.</li>
+                            </ol>
+
+                            <div class="alert alert-info py-2 px-3 mb-4 shadow-sm small">
+                               <i class="fas fa-video me-1"></i> <strong>Need a visual guide?</strong> Check out this <a href="https://www.youtube.com/watch?v=j69a3-shkGE" target="_blank" class="fw-bold text-info">Illustrator Beginner Tutorial for Simple Letter Logos</a>.
+                            </div>
+
+                            <h5 class="fw-bold mt-4">The Text Editor Trick: Inlining SVG</h5>
+                            <p class="small mb-4">If you have a <code>.svg</code> file on your computer, you can right-click it and choose <strong>Open with &gt; Notepad</strong> (or drag it into VS Code). You will see the actual <code>&lt;svg&gt;</code> tags and path data, which you can then copy and paste directly into your HTML. By inlining the code, we can style it using CSS!</p>
+                            
+                            <pre class="p-3 border rounded shadow-sm mb-5"><code>&lt;div class="brand-logo"&gt;
+    &lt;svg xmlns="https://www.w3.org/2000/svg" ...&gt;
+        &lt;!-- entire code from file --&gt;
+    &lt;/svg&gt;
+    &lt;span&gt;Galactic Gliders&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="bg-light p-3 rounded border shadow-sm mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                                </div>
+                                <p class="mb-0 small text-dark">What makes an SVG 'magical' compared to a JPG? Why can't we use SVGs for real-world photographs?</p>
+                            </div>
+
+                            <figure class="mb-0 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-15.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-15.png" alt="Vector vs Raster" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.15:</strong> Vector vs Raster</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- WALKTHROUGH 5: ADD INLINE SVG -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+                                Walkthrough: Add an Inline SVG Icon
+                            </h3>
+                            <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+                                <ol class="small mb-0 ps-3">
+                                    <li class="mb-4">
+                                        <strong>Get the SVG Code:</strong> Go to your <code>media</code> folder. Right-click <code>galacticgliderslogo.svg</code> and open it with VS Code.
+                                    </li>
+                                    <li class="mb-4">
+                                        <strong>Copy the Magic:</strong> You will see a huge block of text that looks like math coordinates. Press <strong>Ctrl+A (Cmd+A)</strong> to Select All, and then <strong>Ctrl+C (Cmd+C)</strong> to copy it.
+                                    </li>
+                                    <li class="mb-4">
+                                        <strong>Paste into HTML:</strong> Open <code>index.html</code>. Find the <code>&lt;div class="brand-logo"&gt;</code> section. Put your cursor inside that div and press <strong>Ctrl+V (Cmd+V)</strong>.
+                                    </li>
+                                    <li class="mb-0">
+                                        <strong>Style with CSS:</strong> Open <code>styles/styles.css</code>. Because an SVG is technically code, we can change its color using the CSS <code>fill</code> property! Type this rule exactly:
+                                        <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>.brand-logo svg {
+    fill: #ffa500; /* This makes it a cool orange! */
+    width: 200px;
+}</code></pre>
+                                        <br><em class="text-success fw-bold">Save your file and either open it in a browser to see the results or refresh your browser to see the results!</em>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                            <figure class="mb-4 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-16.gif" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-16.gif" alt="Inline SVG Code" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.16:</strong> Inline SVG Code</figcaption>
+                            </figure>
+                            <figure class="mb-0 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-17.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-17.png" alt="Browser View" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.17:</strong> Browser View (SVG)</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: FAVICONS -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">Favicons: The Tiny Details That Matter</h2>
+                            <p>A <strong>Favicon</strong> (short for "favorite icon") is the tiny logo that appears next to your website's title in the browser tab. While small, it is absolutely critical for branding, making your site look professional, and helping users find your tab when they have 50 of them open!</p>
+                            
+                            <div class="alert alert-info border-0 p-3 my-4 small shadow-sm border-start border-4 border-info">
+                                <strong class="text-info"><i class="fas fa-lightbulb me-1"></i> The 'Why':</strong> Brand logos must look perfectly crisp whether they are on a tiny business card or a massive billboard. SVGs use math instead of pixels to achieve infinite sharpness. Favicons are crucial for brand recognition when users have 20 tabs open.
+                            </div>
+
+                            <p>In modern web design, we don't just use one favicon. Because users view websites on desktops, iPhones, and Androids, we have to provide a few different formats so the device can pick the best one. Here are the formats you need to know:</p>
+
+                            <div class="row g-3 mt-3 mb-4">
+                                <!-- 1. The Classic .ICO -->
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-secondary shadow-sm">
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold text-dark mb-2">
+                                                <span class="badge bg-secondary me-2 font-monospace">.ico</span> Classic Fallback
+                                            </h6>
+                                            <p class="small text-muted mb-0">Every browser looks for <code>favicon.ico</code> by default. It's a special format that holds multiple sizes (like 16x16 and 32x32) in one file. Used as a safety net for older browsers.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 2. The Modern .PNG -->
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-info shadow-sm">
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold text-info mb-2">
+                                                <span class="badge bg-info text-dark me-2 font-monospace">.png</span> Modern Standard
+                                            </h6>
+                                            <p class="small text-muted mb-0">Supports high-quality transparency. Most modern browsers prefer grabbing a 32x32 or 16x16 PNG over an <code>.ico</code> because they are sharper and easier to export.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 3. The Future .SVG -->
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-primary shadow-sm">
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold text-primary mb-2">
+                                                <span class="badge bg-primary me-2 font-monospace">.svg</span> The Future
+                                            </h6>
+                                            <p class="small text-muted mb-0">Drawn with math, an SVG favicon scales perfectly without blurring. You can even use CSS inside it to change colors for Dark Mode!</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 4. The Apple Touch Icon -->
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-dark shadow-sm">
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold text-dark mb-2">
+                                                <i class="fab fa-apple text-dark me-1"></i> Apple Touch Icon
+                                            </h6>
+                                            <p class="small text-muted mb-0">When an iOS user clicks "Add to Home Screen", Apple looks for a 180x180 PNG called <code>apple-touch-icon.png</code> to use as the app icon.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 5. Android / Webmanifest -->
+                                <div class="col-md-12">
+                                    <div class="card border-success shadow-sm">
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold text-success mb-2">
+                                                <i class="fab fa-android text-success me-1"></i> Android / PWA <span class="badge bg-success ms-1 font-monospace">192x192 .png</span>
+                                            </h6>
+                                            <p class="small text-muted mb-0">Android devices look for larger PNGs (192x192, 512x512) linked inside a <code>.webmanifest</code> file to generate home screen app icons.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="fw-bold mt-4">Converting Your Logo to All These Formats</h5>
+                            <p>Here's the reality: you're not going to manually create 8 different versions of your logo in Photoshop. That's where <strong>Real Favicon Generator</strong> comes in. This free online tool does the hard work for you:</p>
+                            <ol class="small mb-4 ps-3">
+                                <li class="mb-2">Go to <a href="https://realfavicongenerator.net" target="_blank" rel="noopener"><code>realfavicongenerator.net</code></a></li>
+                                <li class="mb-2">Upload your square logo image (PNG, JPG, or SVG)</li>
+                                <li class="mb-2">The tool automatically converts it into <strong>all eight formats</strong> you saw above. It generates all the HTML code you need (you'll paste it into your <code>&lt;head&gt;</code>)</li>
+                                <li class="mb-2">Create a new folder called <strong>favicon</strong> inside your <code>media</code> folder (or whatever you named the folder where all your images and media go).</li>
+                                <li class="mb-0">Download the package, extract the files, and place them ALL inside this new <code>favicon</code> folder.</li>
+                            </ol>
+                            <p class="mt-3"><strong>Why do we need all these versions?</strong> Because different devices, operating systems, and browsers look for favicons in different ways. Your desktop browser wants a PNG. Your iPhone wants a specific size and file format. Android wants it referenced in a manifest file. By providing all formats, you guarantee your brand icon displays correctly everywhere.</p>
+                            
+                            <h5 class="fw-bold mt-4">Adding the Favicons to Your Website</h5>
+                            <p>You don't need to memorize these tags! You can place all of these right inside the <code>&lt;head&gt;</code> of your HTML document so the browser knows exactly where to find your icons within that new `favicon` folder:</p>
+                            <pre class="p-3 border rounded shadow-sm mb-5"><code>&lt;!-- Apple Touch Icon (iOS Home Screen) --&gt;
+&lt;link rel="apple-touch-icon" sizes="180x180" href="media/favicon/apple-touch-icon.png"&gt;
+
+&lt;!-- Modern PNG Favicons --&gt;
+&lt;link rel="icon" type="image/png" sizes="32x32" href="media/favicon/favicon-32x32.png"&gt;
+&lt;link rel="icon" type="image/png" sizes="16x16" href="media/favicon/favicon-16x16.png"&gt;
+
+&lt;!-- Android Manifest --&gt;
+&lt;link rel="manifest" href="media/favicon/site.webmanifest"&gt;
+
+&lt;!-- Fallback Classic ICO --&gt;
+&lt;link rel="shortcut icon" href="media/favicon/favicon.ico"&gt;</code></pre>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="bg-light p-3 rounded border shadow-sm mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                                </div>
+                                <p class="mb-0 small text-dark">How does a favicon contribute to a company's brand identity and overall UX when a user has 20 tabs open at once?</p>
+                            </div>
+
+                            <figure class="mb-0 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-18.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-18.png" alt="Favicon Example" class="img-fluid rounded border shadow-sm favicon-example-img">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.18:</strong> Favicon Example</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- WALKTHROUGH 4: ADD FAVICON -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+                                Walkthrough: Add a Favicon to Your Website
+                            </h3>
+                            <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+                                <ol class="small mb-0 ps-3">
+                                    <li class="mb-4">
+                                        <strong>Prep the Folder:</strong> Create a new folder named <code>favicon</code> inside your <code>media</code> folder (or whatever you named the folder where all your images and media go).
+                                    </li>
+                                    <li class="mb-4">
+                                        <strong>Verify Your Images:</strong> Make sure you have extracted all of your generated favicon files into that new <code>media/favicon/</code> folder.
+                                    </li>
+                                    <li class="mb-4">
+                                        <strong>Add to the Home Page:</strong> Open <code>index.html</code>. Go to the very top, inside the <code>&lt;head&gt;</code> section. Type this exact line of code to link your modern PNG version:
+                                        <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;link rel="icon" type="image/png" href="media/favicon/favicon-32x32.png"&gt;</code></pre>
+                                    </li>
+                                    <li class="mb-0">
+                                        <strong>Copy to All Pages:</strong> Your entire website needs this branding! Since you already typed it once, highlight that line of code, copy it, and paste it into the <code>&lt;head&gt;</code> section of all other pages on your site.
+                                        <br><br><em class="text-success fw-bold">Save your file and either open it in a browser to see the results or refresh your browser to see the results!</em>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <!-- REQUIREMENTS BEFORE LAB -->
+                            <div class="card border-warning shadow-sm my-4">
+                                <div class="card-header bg-warning text-dark fw-bold">
+                                    📋 Requirements for This Lab
+                                </div>
+                                <div class="card-body small">
+                                    <p class="mb-2"><strong>Before you start:</strong> Make sure you have Adobe Illustrator installed and can export SVG files. You'll also need access to an image editor to export a square PNG for your favicon.</p>
+                                    <div class="alert alert-info mb-0">
+                                        <strong>Context Check:</strong> In the Walkthrough above, we gave you the pre-made files for <em>Galactic Gliders</em>. For this lab, you must now create these assets from scratch for your <em>own</em> custom website project!
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- GRADED LAB 3 CARD -->
+                            <div class="card border-success shadow-sm my-4">
+                                <div class="card-header bg-success text-white fw-bold">
+                                    Lab: The SVG Logo &amp; Favicons [25 pts]
+                                </div>
+                                <div class="card-body small">
+                                    <div class="mb-3">
+                                        <span class="badge bg-success shadow-sm" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-container="body" title="Every professional site needs an identity. Generating a custom SVG logo and injecting the favicon package into your HTML head solidifies your brand's presence across all browser tabs for your final website.">
+                                            <i class="fas fa-project-diagram me-1"></i> Project Connection
+                                        </span>
+                                    </div>
+                                    <p><strong>Employability Focus:</strong> Creativity (1.1.7) &amp; Job-Specific Technologies (1.3.1).</p>
+                                    <ol>
+                                        <li class="mb-2"><strong>Design the Logo:</strong> Use Adobe Illustrator to create a brand logo for your custom website. Ensure all text has been converted to outlines (<em>Type &gt; Create Outlines</em>) and export it as an SVG file.</li>
+                                        <li class="mb-2"><strong>Embed the SVG:</strong> Place the SVG file in your site's <code>media</code> folder, and embed it into your custom site's header using either an <code>&lt;img&gt;</code> tag or by inlining the code.</li>
+                                        <li class="mb-2"><strong>Generate Favicon Files:</strong> Export a square PNG version of your logo. Go to <a href="https://realfavicongenerator.net" target="_blank" rel="noopener">realfavicongenerator.net</a>, upload the PNG, and download the generated package. Create a <code>favicon</code> folder inside your <code>media</code> folder (or whatever your media folder is named) and extract those files there.</li>
+                                        <li class="mb-2"><strong>Link to Every Page:</strong> Copy the HTML tags provided by the generator (or from the lesson above) and paste into the <code>&lt;head&gt;</code> section of <strong>every page</strong> on your website. Test in at least two browsers to verify they appear correctly.</li>
+                                    </ol>
+                                    <p class="mb-3 text-danger fw-bold">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your whole project folder. If prompted, always click "Overwrite All" to update your files.</p>
+                                    <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                            <figure class="mb-0 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-19.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-19.png" alt="Favicon Tag" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.19:</strong> Favicon Link Tag</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- Video Section: Iframe vs Native -->
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">Video (The Easy Way vs. The Pro Way)</h2>
+                            <p>The <code>&lt;iframe&gt;</code> tag allows you to embed external content like a YouTube video. This is the "Easy Way." Wrapping it in a div allows you to control responsiveness using the modern <code>aspect-ratio</code> property.</p>
+                            
+                            <div class="alert alert-info border-0 p-3 my-4 small shadow-sm border-start border-4 border-info">
+                                <strong class="text-info"><i class="fas fa-lightbulb me-1"></i> The 'Why':</strong> Video files are huge bandwidth hogs. By embedding a YouTube video or Google Map using an <code>&lt;iframe&gt;</code>, you are forcing Google's massive servers to handle the heavy processing and bandwidth costs instead of your own.
+                            </div>
+
+                            <p><strong>Why use a YouTube <code>&lt;iframe&gt;</code>?</strong> Because video files are huge! By embedding a video, you allow YouTube's massive servers to handle the heavy processing, saving you from paying for the massive bandwidth the video uses.</p>
+
+                            <h5 class="fw-bold mt-4">Adding an Iframe (YouTube) to Your Website</h5>
+                            <p>To make the iframe fluid so it adjusts to the screen size, it's common practice to use the <code>width="100%"</code> attribute.</p>
+                            <pre class="p-3 border rounded shadow-sm mb-4"><code>&lt;div class="aspect-video"&gt;
+    &lt;iframe width="100%" src="https://www.youtube.com/embed/VIDEO_ID" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;
+&lt;/div&gt;</code></pre>
+
+                            <h5 class="fw-bold mt-4">Video Formats Checklist</h5>
+                            <p>If you choose to host the video files on your own server (The Pro Way), you must use specific file types.</p>
+                            <table class="table table-bordered small bg-white shadow-sm mb-5">
+                                <thead class="bg-light text-center">
+                                    <tr>
+                                        <th>Format</th>
+                                        <th>Support</th>
+                                        <th>Best Use Case</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold">MP4</td>
+                                        <td>100%</td>
+                                        <td>Gold Standard. Works everywhere.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">WebM</td>
+                                        <td>High</td>
+                                        <td>Open-source; smaller size and higher quality.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">OGG</td>
+                                        <td>Medium</td>
+                                        <td>An older open-source format.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="bg-light p-3 rounded border shadow-sm mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                                </div>
+                                <p class="mb-0 small text-dark">What are the pros and cons of embedding a YouTube video via an <code>&lt;iframe&gt;</code> versus hosting the MP4 file natively on your own server?</p>
+                            </div>
+
+                            <figure class="mb-0 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-21.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-21.png" alt="YouTube Embed Code" class="img-fluid rounded border shadow-sm youtube-code-img">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.21:</strong> YouTube Embed Code</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- WALKTHROUGH 6: EMBED YOUTUBE IFRAME -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+                                Walkthrough: Embed a YouTube Video with an &lt;iframe&gt;
+                            </h3>
+                            <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+                                <ol class="small mb-0 ps-3">
+                                    <li class="mb-4">
+                                        <strong>Find the Video:</strong> Open a new tab and go to YouTube. Search for "Drones | The complete flight dynamics".
+                                    </li>
+                                    <li class="mb-4">
+                                        <strong>Get the Code:</strong> Underneath the video, click <strong>Share</strong>, then <strong>&lt; &gt; Embed</strong>. Click the "Copy" button.
+                                    </li>
+                                    <li class="mb-4">
+                                        <strong>Open Your Web Page:</strong> Switch back to VS Code and open your <code>regulations.html</code> file.
+                                    </li>
+                                    <li class="mb-0">
+                                        <strong>Paste and Wrap:</strong> Find the section for flight dynamics and wrap the code:
+                                        <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;div class="aspect-video"&gt;
+    &lt;!-- PASTE YOUR YOUTUBE IFRAME CODE HERE --&gt;
+&lt;/div&gt;</code></pre>
+                                        <br><em class="text-success fw-bold">Save your file and either open it in a browser to see the results or refresh your browser to see the results!</em>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <!-- GRADED LAB 6 CARD -->
+                            <div class="card border-success shadow-sm my-4">
+                                <div class="card-header bg-success text-white fw-bold">
+                                    Lab: Map &amp; Video Embeds [25 pts]
+                                </div>
+                                <div class="card-body small">
+                                    <div class="mb-3">
+                                        <span class="badge bg-success shadow-sm" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-container="body" title="Since we aren't hosting native videos, IFrames are your best friend! Embedding a relevant YouTube video and a Google Map adds rich, interactive media to your custom website without destroying your bandwidth limits.">
+                                            <i class="fas fa-project-diagram me-1"></i> Project Connection
+                                        </span>
+                                    </div>
+                                    <p><strong>Employability Focus:</strong> Integrity (1.1.2) &amp; Internet Safety (1.3.3).</p>
+                                    <ol>
+                                        <li class="mb-2">Navigate to Google Maps, search for a relevant location for your custom website (your city, a restaurant address, or business headquarters).</li>
+                                        <li class="mb-2">Click "Share," and choose "Embed a map." Copy the provided <code>&lt;iframe&gt;</code> code.</li>
+                                        <li class="mb-2">Paste this code into a relevant page (like Contact or About) of your custom website.</li>
+                                        <li class="mb-2">Embed a relevant YouTube video demonstrating a skill or related topic using the same method on a different page.</li>
+                                    </ol>
+                                    <p class="mb-3 text-danger fw-bold">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your whole project folder. If prompted, always click "Overwrite All" to update your files.</p>
+                                    <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                            <figure class="mb-4 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-22.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-22.png" alt="Iframe Code" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.22:</strong> Iframe Code</figcaption>
+                            </figure>
+                            <figure class="mb-0 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-23.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-23.png" alt="Browser View Iframe" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.23:</strong> Browser View (Iframe)</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- Code Correction Native Media Theory -->
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">Pro Skill: The Native Media Environment</h2>
+                            <p>While embedding YouTube videos is best for saving bandwidth, sometimes you are required to host raw media files directly on your server (like building a custom Netflix clone or an internal company dashboard).</p>
+                            
+                            <p>Because downloading and hosting massive media files is restricted on many school networks to save bandwidth, <strong>we are going to learn the native syntax by acting as QA Debuggers.</strong></p>
+
+                            <div class="alert alert-info border-0 p-3 my-4 small shadow-sm border-start border-4 border-info">
+                                <strong class="text-info"><i class="fas fa-lightbulb me-1"></i> The 'Why':</strong> Even if you don't host large videos yourself due to server limits, as a developer you <em>must</em> know how to read, write, and debug standard HTML5 media tags—especially the strict accessibility rules around muted autoplay.
+                            </div>
+
+                            <h5 class="fw-bold mt-4">Essential <code>&lt;video&gt;</code> Attributes</h5>
+                            <p>Native HTML5 allows us to host media files directly. However, browsers have strict rules to protect users from annoying experiences. For example, if you want a video to autoplay, you <strong>must</strong> include the <code>muted</code> attribute. Browsers block noisy videos from playing automatically.</p>
+
+                            <table class="table table-bordered small bg-white shadow-sm mb-4">
+                                <thead class="bg-light text-center">
+                                    <tr>
+                                        <th>Attribute</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold"><code>controls</code></td>
+                                        <td>Adds the play, volume, and CC buttons. Required for accessibility.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold"><code>autoplay</code></td>
+                                        <td>Playback starts immediately. <strong>Required:</strong> must be paired with <code>muted</code>.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold"><code>muted</code></td>
+                                        <td>Turns off audio by default. Often required for autoplay.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold"><code>loop</code></td>
+                                        <td>Restarts the video automatically so it loops forever.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold"><code>poster</code></td>
+                                        <td>Specifies a static thumbnail image to show before the user hits play.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h5 class="fw-bold mt-4 text-primary">Cultural Competency: The <code>&lt;track&gt;</code> Tag</h5>
+                            <p>If your video has spoken words and you provide <code>controls</code>, you have a legal and ethical obligation to provide subtitles for deaf and hard-of-hearing users. We achieve this by linking a <strong>.vtt (Web Video Text Tracks)</strong> file using the <code>&lt;track&gt;</code> tag.</p>
+
+                            <div class="alert alert-warning mt-4 shadow-sm">
+                                <h5 class="fw-bold text-dark mb-2"><i class="fas fa-server me-2"></i>Crucial Tech Note: Why We Need a Local Server (MAMP)</h5>
+                                <p class="small text-dark mb-2">If you simply double-click your HTML file to open it in Chrome (using a <code>file:///</code> path), your <strong>subtitle tracks will not load</strong>. Why? Browsers have strict security rules (CORS) that block local files from accessing other local files to prevent hackers from reading your hard drive.</p>
+                                <p class="small text-dark mb-2"><strong>What is MAMP?</strong> MAMP is a free program that turns your own computer into a simulated web server. Instead of reading a local file, you are accessing your site via <code>http://localhost:8888</code>.</p>
+                                <p class="small text-dark mb-0"><strong>Alternatives:</strong> If you don't have MAMP installed, you can easily bypass this issue by installing the <strong>"Live Server"</strong> extension directly inside VS Code, which launches its own temporary local server with one click!</p>
+                            </div>
+
+                            <h5 class="fw-bold mt-4">Correct Native Video Syntax</h5>
+                            <p>The <code>&lt;source&gt;</code> tag is used inside your video or audio elements to provide fallback file formats.</p>
+                            <pre class="p-3 border rounded shadow-sm mb-5"><code>&lt;video controls poster="media/poster.png"&gt;
+    &lt;source src="media/drone-swarm.mp4" type="video/mp4"&gt;
+    &lt;track src="docs/subtitles.vtt" kind="subtitles" srclang="en" label="English" default&gt;
+&lt;/video&gt;</code></pre>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="bg-light p-3 rounded border shadow-sm mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                                </div>
+                                <p class="mb-0 small text-dark">Why do modern web browsers intentionally block media files from using the <code>autoplay</code> attribute unless the code also contains the <code>muted</code> attribute?</p>
+                            </div>
+
+                            <figure class="mb-0 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-25.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-25.png" alt="Video Element UI" class="img-fluid rounded border shadow-sm video-ui-img">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.24:</strong> Native Video Player</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- WALKTHROUGH 7: VIDEO CODE CORRECTION -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+                                Walkthrough: QA Debugging (Video)
+                            </h3>
+                            <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary">
+                                <p class="small mb-3">Since downloading massive video files is impractical on our network, let's practice our syntax logic by acting as a QA (Quality Assurance) Tester. A junior developer has created a file called <code>media-practice.html</code> but made several critical syntax errors with the media tags.</p>
+                                <ol class="small mb-0 ps-3">
+                                    <li class="mb-2"><strong>Locate the File:</strong> Open the <code>media-practice.html</code> file that came in your Chapter 8 <code>galacticGliders.zip</code> download.</li>
+                                    <li class="mb-2"><strong>Read the Instructions:</strong> The file itself contains a UI with specific context, instructions, and a checklist of the exact errors the junior developer made.</li>
+                                    <li class="mb-0"><strong>Preview the Damage:</strong> Open the file in Chrome. You will see that the video and audio players are completely broken or missing!
+                                        <br><br><em class="text-success fw-bold">Save your file and either open it in a browser to see the results or refresh your browser to see the results!</em>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <!-- GRADED LAB 4 CARD -->
+                            <div class="card border-success shadow-sm my-4 mt-5">
+                                <div class="card-header bg-success text-white fw-bold">
+                                    Lab: Code Correction (Video) [25 pts]
+                                </div>
+                                <div class="card-body small">
+                                    <div class="mb-3">
+                                        <span class="badge bg-success shadow-sm" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-container="body" title="While we are skipping native video hosting in the final Project 3 build to save server bandwidth, debugging this worksheet ensures you still master the strict accessibility and autoplay rules required in the industry.">
+                                            <i class="fas fa-project-diagram me-1"></i> Project Connection
+                                        </span>
+                                    </div>
+                                    <p><strong>Employability Focus:</strong> Information Tech (1.3.2) &amp; Problem Solving (1.2.3).</p>
+                                    <ol>
+                                        <li class="mb-2">Open <code>media-practice.html</code> in your code editor.</li>
+                                        <li class="mb-2">Locate the <strong>Lab: Broken Native Video</strong> section in the code.</li>
+                                        <li class="mb-2">Using the error checklist provided in the file, fix all the syntax errors so the code represents a perfectly structured, accessible HTML5 background video.</li>
+                                        <li class="mb-2">Save and refresh your browser to verify the video now plays silently and loops.</li>
+                                    </ol>
+                                    <p class="mb-3 text-danger fw-bold">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your whole project folder. If prompted, always click "Overwrite All" to update your files.</p>
+                                    <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                            <figure class="mb-4">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-25.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-25.png" alt="Video Code" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.25:</strong> Video Tag Code</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- Audio Section -->
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">Adding Audio (Podcasts &amp; Sound FX)</h2>
+                            <p>Sound is the “hidden” layer of web design. It can be used for long-form content like podcasts or sound effects.</p>
+                            
+                            <div class="alert alert-info border-0 p-3 my-4 small shadow-sm border-start border-4 border-info">
+                                <strong class="text-info"><i class="fas fa-lightbulb me-1"></i> The 'Why':</strong> Browsers are picky about audio formats. You need to know how to properly construct fallback architectures (like .mp3 and .ogg) so your audio player functions flawlessly regardless of whether the user is on an iPhone or a Windows desktop.
+                            </div>
+
+                            <h5 class="fw-bold mt-4">The Anatomy of an <code>&lt;audio&gt;</code> Element</h5>
+                            <ul class="small mb-4">
+                                <li class="mb-2"><strong>The Wrapper:</strong> The <code>&lt;audio&gt;</code> tag holds settings like <code>controls</code>.</li>
+                                <li class="mb-2"><strong>The Source:</strong> The <code>&lt;source&gt;</code> tag tells the browser where the file is located.</li>
+                                <li class="mb-0"><strong>The Fallback:</strong> Text between the tags only appears if the browser is ancient.</li>
+                            </ul>
+
+                            <h5 class="fw-bold mt-4">Audio Format Comparison</h5>
+                            <table class="table table-bordered small bg-white shadow-sm mb-4">
+                                <thead class="bg-light text-center">
+                                    <tr>
+                                        <th>Format</th>
+                                        <th>Strengths</th>
+                                        <th>Weaknesses</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold">MP3</td>
+                                        <td>Compatibility</td>
+                                        <td>Lower quality than modern formats.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">OGG</td>
+                                        <td>Open-source</td>
+                                        <td>Support can vary on older iOS devices.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">WAV</td>
+                                        <td>Highest quality</td>
+                                        <td>Huge file size. Slows down loading.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <h5 class="fw-bold mt-4">Correct Native Audio Syntax</h5>
+                            <pre class="p-3 border rounded shadow-sm mb-5"><code>&lt;audio controls preload="none"&gt;
+    &lt;source src="media/regulations.ogg" type="audio/ogg"&gt;
+    &lt;source src="media/regulations.mp3" type="audio/mpeg"&gt;
+    Your browser does not support the audio element.
+&lt;/audio&gt;</code></pre>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="bg-light p-3 rounded border shadow-sm mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                                </div>
+                                <p class="mb-0 small text-dark">Why is it a professional best practice to provide multiple <code>&lt;source&gt;</code> files (like .mp3 and .ogg) for a single <code>&lt;audio&gt;</code> element?</p>
+                            </div>
+
+                            <figure class="mb-0 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-27.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-27.png" alt="Audio UI" class="img-fluid rounded border shadow-sm audio-ui-img">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.27:</strong> Audio Player UI</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- WALKTHROUGH 8: ADD NATIVE AUDIO -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+                                Walkthrough: QA Debugging (Audio)
+                            </h3>
+                            <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+                                <p class="small mb-3">Scroll down in that same <code>media-practice.html</code> file. You will see the junior developer also attempted to add an audio player, but it isn't showing up on the page at all.</p>
+                                <ol class="small mb-0 ps-3">
+                                    <li class="mb-2"><strong>Review the Error Log:</strong> Review the checklist provided in the UI for the Audio Lab.</li>
+                                    <li class="mb-0"><strong>Identify the Tags:</strong> Notice how the developer used the wrong tags for the fallback formats, causing the browser to reject the file.
+                                        <br><br><em class="text-success fw-bold">Save your file and either open it in a browser to see the results or refresh your browser to see the results!</em>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <!-- GRADED LAB 5 CARD -->
+                            <div class="card border-success shadow-sm my-4 mt-5">
+                                <div class="card-header bg-success text-white fw-bold">
+                                    Lab: Code Correction (Audio) [25 pts]
+                                </div>
+                                <div class="card-body small">
+                                    <div class="mb-3">
+                                        <span class="badge bg-success shadow-sm" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-container="body" title="Similar to video, we aren't uploading audio files to our live Project 3 servers. However, debugging this audio player guarantees you understand fallback formats and browser compatibility.">
+                                            <i class="fas fa-project-diagram me-1"></i> Project Connection
+                                        </span>
+                                    </div>
+                                    <p><strong>Employability Focus:</strong> Customer Service (1.2.10) &amp; Problem Solving (1.2.3).</p>
+                                    <ol>
+                                        <li class="mb-2">Continue working in your <code>media-practice.html</code> file.</li>
+                                        <li class="mb-2">Locate the <strong>Lab: Broken Native Audio</strong> section in the code.</li>
+                                        <li class="mb-2">Debug the code by fixing the 3 major errors listed in the UI checklist.</li>
+                                        <li class="mb-2">Save and refresh to ensure the audio player now appears with visible controls.</li>
+                                    </ol>
+                                    <p class="mb-3 text-danger fw-bold">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your whole project folder. If prompted, always click "Overwrite All" to update your files.</p>
+                                    <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                            <figure class="mb-4">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-28.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-28.png" alt="Audio Tag Code" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.28:</strong> Audio Tag Code</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- Tables Section -->
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">Old-School Cool: HTML Tables</h2>
+                            <p>Warning: <strong>Never use HTML tables for an entire page layout!</strong> In the early 2000s, developers used tables to build the grid of a website. This is a terrible practice because it is entirely inaccessible to screen readers and completely breaks responsive design. Today, tables are strictly for displaying <strong>tabular data</strong> (like schedules, pricing tiers, or statistics).</p>
+                            
+                            <div class="alert alert-info border-0 p-3 my-4 small shadow-sm border-start border-4 border-info">
+                                <strong class="text-info"><i class="fas fa-lightbulb me-1"></i> The 'Why':</strong> Never use tables for layout, but <em>always</em> use them for tabular data (like pricing, statistics, or schedules). Using proper semantic tags (<code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>, <code>&lt;th&gt;</code>) ensures screen readers can mathematically decipher the grid for visually impaired users.
+                            </div>
+
+                            <h5 class="fw-bold mt-4">The Anatomy of a Table</h5>
+                            <p>A semantic table is built like a sandwich:</p>
+                            
+                            <table class="table table-bordered small bg-white shadow-sm mb-4">
+                                <thead class="bg-light text-center">
+                                    <tr>
+                                        <th>Tag</th>
+                                        <th>Definition</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold"><code>&lt;table&gt;</code></td>
+                                        <td>Main container for all table data.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold"><code>&lt;caption&gt;</code></td>
+                                        <td>Acts as a title or explanation specifically for the table.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold"><code>&lt;thead&gt;</code></td>
+                                        <td>Header section.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold"><code>&lt;th&gt;</code></td>
+                                        <td>Table Header. Semantically correct for defining the header row containing column titles.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold"><code>&lt;tbody&gt;</code></td>
+                                        <td>Main data section containing regular rows.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold"><code>&lt;tfoot&gt;</code></td>
+                                        <td>Summary or totals section wrapping the bottom.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <h5 class="fw-bold mt-4">Table Superpowers</h5>
+                            <p>Use <strong><code>colspan</code></strong> to stretch a cell horizontally across multiple columns. Use <strong><code>rowspan</code></strong> to stretch a cell vertically across multiple rows. We will use <code>colspan="3"</code> in our lab to stretch a footer across the entire width.</p>
+                            
+                            <h5 class="fw-bold mt-4">Adding a Data Table to Your Website</h5>
+                            <pre class="p-3 border rounded shadow-sm mb-5"><code>&lt;table&gt;
+    &lt;caption&gt;Employee Schedule&lt;/caption&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;
+            &lt;th&gt;Header&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+        &lt;tr&gt;
+            &lt;td&gt;Data&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+    &lt;tfoot&gt;
+        &lt;tr&gt;
+            &lt;td colspan="3"&gt;Summary&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tfoot&gt;
+&lt;/table&gt;</code></pre>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="bg-light p-3 rounded border shadow-sm mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                                </div>
+                                <p class="mb-0 small text-dark">Draw a 2x2 grid on a piece of paper. Label the rows and columns. How does the browser know the difference between the header and the data?</p>
+                            </div>
+
+                            <figure class="mb-0 text-center">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-30.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-30.png" alt="Table Anatomy" class="img-fluid rounded border shadow-sm table-anatomy-img">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.30:</strong> Semantic Table Architecture</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- WALKTHROUGH 9: DATA TABLE -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+                                Walkthrough: Add a Data Table with <code>colspan</code>
+                            </h3>
+                            <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+                                <ol class="small mb-0 ps-3">
+                                    <li class="mb-4">
+                                        <strong>Open the File:</strong> Open <code>components.html</code>. Locate the drone specifications section.
+                                    </li>
+                                    <li class="mb-4">
+                                        <strong>Build the Skeleton:</strong> Type the wrapper: <code>&lt;table class="spec-table"&gt;</code>. Add empty <code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>, and <code>&lt;tfoot&gt;</code> sections.
+                                    </li>
+                                    <li class="mb-0">
+                                        <strong>Fill in the Rows:</strong> Use <code>colspan="3"</code> in the footer to span the text across the 3 columns:
+                                        <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;table class="spec-table"&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;
+            &lt;th&gt;Part&lt;/th&gt;
+            &lt;th&gt;Weight (g)&lt;/th&gt;
+            &lt;th&gt;Cost ($)&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+        &lt;tr&gt;
+            &lt;td&gt;Motors&lt;/td&gt;
+            &lt;td&gt;120&lt;/td&gt;
+            &lt;td&gt;45.00&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td&gt;Battery&lt;/td&gt;
+            &lt;td&gt;250&lt;/td&gt;
+            &lt;td&gt;80.00&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+    &lt;tfoot&gt;
+        &lt;tr&gt;
+            &lt;td colspan="3" class="text-center"&gt;Total Weight Capacity: 500g&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tfoot&gt;
+&lt;/table&gt;</code></pre>
+                                        <br><em class="text-success fw-bold">Save your file and either open it in a browser to see the results or refresh your browser to see the results!</em>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <!-- GRADED LAB 7 CARD -->
+                            <div class="card border-success shadow-sm my-4 mt-5">
+                                <div class="card-header bg-success text-white fw-bold">
+                                    Lab: Semantic Data Tables [25 pts]
+                                </div>
+                                <div class="card-body small">
+                                    <div class="mb-3">
+                                        <span class="badge bg-success shadow-sm" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-container="body" title="Your website needs a way to display organized data—whether it's a store's operating hours, a restaurant menu, or a leaderboard. Building this semantic table adds a highly structured, accessible component to your final project.">
+                                            <i class="fas fa-project-diagram me-1"></i> Project Connection
+                                        </span>
+                                    </div>
+                                    <p><strong>Employability Focus:</strong> Reading &amp; Writing Documents (1.2.2).</p>
+                                    <ol>
+                                        <li class="mb-2">Build a complex HTML table outlining tabular data for your custom site (e.g., hours of operation, a menu, or statistics).</li>
+                                        <li class="mb-2">You must divide the table perfectly into <code>&lt;thead&gt;</code> and <code>&lt;tbody&gt;</code> sections.</li>
+                                        <li class="mb-2">Use bold semantic headers (<code>&lt;th&gt;</code>) for the top row to pass accessibility standards.</li>
+                                    </ol>
+                                    <p class="mb-3 text-danger fw-bold">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your whole project folder. If prompted, always click "Overwrite All" to update your files.</p>
+                                    <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                            <figure class="mb-4">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-31.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-31.png" alt="Table Code" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.31:</strong> Table Code</figcaption>
+                            </figure>
+                            <figure class="mb-0">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-b.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-b.png" alt="Browser View Table" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.32:</strong> Browser View (Table)</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 7: CSS OBJECT-FIT -->
+                    <div class="row mb-4 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">CSS Styling for Media (Object-Fit)</h2>
+                            <p>Have you ever seen an image on a website that looks completely squished or stretched out? This happens when developers force an image with a vertical aspect ratio into a horizontal CSS box.</p>
+                            <p>To prevent this, we use the magical CSS property <strong><code>object-fit</code></strong>. It tells the browser how the image should behave inside its container.</p>
+                            
+                            <div class="alert alert-info border-0 p-3 my-4 small shadow-sm border-start border-4 border-info">
+                                <strong class="text-info"><i class="fas fa-lightbulb me-1"></i> The 'Why':</strong> When you force a vertical photo into a horizontal box, it stretches and looks terrible. `object-fit: cover` fixes this instantly. Additionally, hover effects provide crucial UX feedback, telling the user without words that an element is interactive.
+                            </div>
+
+                            <ul class="small mb-4">
+                                <li class="mb-3"><code>object-fit: cover;</code> – The image will scale and crop itself perfectly to fill the entire box without ever stretching. This is the gold standard for hero images and profile pictures.</li>
+                                <li class="mb-3"><code>object-fit: contain;</code> – The image will scale down until the entire picture fits inside the box, usually leaving blank letterbox space on the sides.</li>
+                            </ul>
+
+                            <h5 class="fw-bold mt-4">CSS Architect Reminders</h5>
+                            <p class="small">A few key rules that power professional CSS design:</p>
+                            <ul class="small mb-4">
+                                <li>The <strong><code>rem</code></strong> unit is highly recommended for typography because it is strictly relative to the <strong>Root</strong> HTML element's font size, scaling perfectly for visually impaired users.</li>
+                                <li>Always start your stylesheet with <strong><code>box-sizing: border-box;</code></strong>. This is the "Magic Reset" that changes how width and height are calculated, preventing borders and padding from expanding a box and breaking your layout!</li>
+                            </ul>
+
+                            <p>To ensure images are mobile-responsive, we apply a global CSS rule to all images:</p>
+                            <pre class="p-3 border rounded shadow-sm mb-4"><code>img, video {
+    max-width: 100%;
+    height: auto;
+}</code></pre>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="bg-light p-3 rounded border shadow-sm mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                                </div>
+                                <p class="mb-0 small text-dark">Describe the difference between <code>object-fit: cover</code> and <code>object-fit: contain</code>. Which one is better for a background image?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WALKTHROUGH 10: OBJECT-FIT & HOVER -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+                                Walkthrough: Styling Media with&nbsp;<code>object-fit</code>
+                            </h3>
+                            <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+                                <ol class="small mb-0 ps-3">
+                                    <li class="mb-4">
+                                        <strong>Open the Stylesheet:</strong> Open your <code>styles.css</code> file in Visual Studio Code. Ensure the global responsive image rule mentioned above is already applied.
+                                    </li>
+                                    <li class="mb-4">
+                                        <strong>Fix the Squished Hero:</strong> Locate the class that controls your hero image (e.g., <code>.hero-img</code>). Apply <code>object-fit: cover;</code> so it scales dynamically without distortion:
+                                        <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>.hero-img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}</code></pre>
+                                    </li>
+                                    <li class="mb-0">
+                                        <strong>Add the Hover Feedback:</strong> Select the image cards on your page (e.g., your <code>figure</code> elements). Add a scale transition and translate it left so the zoomed image isn't cut off by the edge of the screen:
+                                        <pre class="p-3 rounded mt-2 mb-3 no-copy"><code>figure {
+    transition: transform 0.3s ease;
+}
+
+figure:hover {
+    transform: scale(1.2) translateX(-50px);
+}</code></pre>
+                                        <br><em class="text-success fw-bold">Save your file and refresh your browser. Try hovering over the image cards!</em>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <!-- GRADED LABS 8 & 9 CARD -->
+                            <div class="card border-success shadow-sm my-4 mt-5">
+                                <div class="card-header bg-success text-white fw-bold">
+                                    Lab: Proportions &amp; Hover Effects [50 pts]
+                                </div>
+                                <div class="card-body small">
+                                    <div class="mb-3">
+                                        <span class="badge bg-success shadow-sm" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-container="body" title="Nothing ruins a professional design faster than stretched images or a site that feels 'dead.' Adding 'object-fit' and CSS hover transitions ensures your Project 3 site feels polished, interactive, and responsive.">
+                                            <i class="fas fa-project-diagram me-1"></i> Project Connection
+                                        </span>
+                                    </div>
+                                    <p><strong>Employability Focus:</strong> Mathematics Skills (1.2.9) &amp; Critical Thinking (1.2.3).</p>
+                                    <ol>
+                                        <li class="mb-2">Open your project's main <code>style.css</code> file. Apply a global responsive rule (<code>max-width: 100%; height: auto;</code>) to all images and videos.</li>
+                                        <li class="mb-2">Identify any hero backgrounds or profile pictures and apply <code>object-fit: cover;</code> so they never distort.</li>
+                                        <li class="mb-2">Add a CSS hover effect to all figures on the right side of the page: on <code>:hover</code>, scale them to 120%, add a smooth transition, and translate them left by 50px so the entire zoomed image remains visible.</li>
+                                    </ol>
+                                    <p class="mb-3 text-danger fw-bold">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your whole project folder. If prompted, always click "Overwrite All" to update your files.</p>
+                                    <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                            <figure class="mb-4">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-33.png" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-33.png" alt="Object-Fit Code" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.33:</strong> Object-Fit Code</figcaption>
+                            </figure>
+                            <figure class="mb-0">
+                                <a href="/images/sights-sounds-making-it-pop-html-media/figure-34.gif" target="_blank" rel="noopener">
+                                    <img src="/images/sights-sounds-making-it-pop-html-media/figure-34.gif" alt="Browser View Hover" class="img-fluid rounded border shadow-sm w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.34:</strong> Browser View (Hover)</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- NEW SECTION: THE ARCHITECT'S PRIMER -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-12">
+                            <h2 class="section-title mt-0 text-primary fw-bold">The Architect's Primer: Web Accessibility</h2>
+                            <p>As a Digital Architect, you don't just build pretty pages; you are legally and ethically responsible for the code you deploy. When dealing with rich media like images and videos, accessibility (a11y) becomes paramount.</p>
+                        </div>
+                        
+                        <!-- Accessibility Column -->
+                        <div class="col-lg-12 mt-4 bg-site-secondary p-4 rounded border border-primary">
+                            <h4 class="fw-bold text-dark border-bottom border-primary pb-2">Web Accessibility (a11y) Core Principles</h4>
+                            <p class="small text-dark mb-3">If you build a building without a wheelchair ramp, it is illegal. The web is no different.</p>
+                            
+                            <ul class="small mb-4 ps-3">
+                                <li class="mb-3"><strong>The POUR Principles:</strong> Guidelines ensuring a site is Perceivable, Operable, Understandable, and Robust. For example, to be <strong>Operable</strong>, a site must be fully navigable using just a keyboard.</li>
+                                <li class="mb-3"><strong>Color Contrast:</strong> A site with light gray text on a white background immediately fails accessibility checks. The recommended tool for verifying this is the <strong>WebAIM Contrast Checker</strong>.</li>
+                                <li class="mb-3"><strong>The Curb Cut Effect:</strong> Designing for the most marginalized users (like adding closed captions to videos) often improves the experience for everyone.</li>
+                                <li><strong>Legal Standards:</strong> The Web Content Accessibility Guidelines (WCAG) dictate how to make sites accessible. The standard, legally targeted level of compliance is <strong>Level AA</strong>.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 8: MILESTONE & LIGHTHOUSE -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <h2 class="section-title mt-0">Project 3: Media Integration &amp; Audits</h2>
+                            <p>You have built the structure. Now it's time to inject the media. As you finalize your custom website, you must ensure your file paths are perfectly accurate. Check your "Assets" folder. Are all your filenames in lowercase with no spaces? Linux servers are case-sensitive; <code>Image.JPG</code> and <code>image.jpg</code> are two different files to a web server!</p>
+                            
+                            <h5 class="fw-bold mt-4">The Lighthouse Audit</h5>
+                            <p>Before launching a site, professionals run a diagnostic audit. Open your website in Google Chrome. Right-click, select <strong>Inspect</strong>, and navigate to the <strong>Lighthouse</strong> tab in DevTools. Run a report for "Desktop."</p>
+                            <p>Lighthouse will grade your site out of 100 for Performance, Accessibility, Best Practices, and SEO. If your images are too large, your Performance score will tank. Use Analytical Reasoning to read the report and apply the suggested technical fixes.</p>
+
+                            <!-- MILESTONE CARD -->
+                            <div class="card border-primary shadow-sm my-4 mt-5">
+                                <div class="card-header bg-primary text-white fw-bold">
+                                    🏆 Milestone: Project 3 Media Integration [100 pts]
+                                </div>
+                                <div class="card-body small">
+                                    <div class="mb-3">
+                                        <span class="badge bg-primary shadow-sm" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-container="body" title="A professional site is a multimedia experience. This final step brings all your optimized assets together. Running a Lighthouse audit ensures your code meets rigorous industry standards for speed and accessibility before you ever show it to a client.">
+                                            <i class="fas fa-lightbulb me-1"></i> The 'Why'
+                                        </span>
+                                    </div>
+                                    <p><strong>Employability Focus:</strong> Time Management (1.2.8), Teamwork (1.1.3) &amp; Lifelong Learning (1.2.6).</p>
+                                    <ol>
+                                        <li class="mb-2"><strong>Integration:</strong> Inject your optimized JPGs, vector SVGs, Map/YouTube Embeds, and Tables into your multi-page HTML files. <em>(Note: Native video and audio hosting is explicitly excluded from this project to save on server bandwidth).</em></li>
+                                        <li class="mb-2"><strong>Bug Bash:</strong> Partner with a peer and actively hunt for broken image links (404 Not Found) by navigating through every page. Fix any case sensitivity errors.</li>
+                                        <li class="mb-2"><strong>Audit:</strong> Run a Lighthouse audit on your finished site. Read the report, document your "Performance" score, and apply at least one fix the report suggests.</li>
+                                    </ol>
+                                    <p class="mb-3 text-danger fw-bold">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your completed Project 3 Website folder. If prompted, always click "Overwrite All" to update your files.</p>
+                                    <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="bg-light p-3 rounded border shadow-sm mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                                </div>
+                                <p class="mb-0 small text-dark">What was your "Performance" score on the Lighthouse audit? List one specific fix the report suggested for your images.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FINAL RECAP -->
+                    <div class="row mt-5">
+                        <div class="col-lg-8 pe-lg-5">
+                            <section id="final-recap">
+                                <h2 class="section-title mt-0 text-primary fw-bold">The Final Download: Chapter Recap</h2>
+                                <p>This chapter covered the essential techniques for adding rich media to your web projects. We learned how to optimize images in Photoshop, use the <code>&lt;picture&gt;</code> and <code>srcset</code> attributes for responsive design, embed vector graphics for crystal-clear logos, and include accessible audio and video players. We also covered the semantic use of HTML data tables and mastered CSS object-fit.</p>
+                            </section>
+                            <p class="text-muted small mt-5">Copyright - Danylle Miller Designs 2026</p>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card roadmap-card border-info mb-4 bg-white shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <h6 class="card-title fw-bold small text-info mb-0 ms-2 text-uppercase">Guild Checkpoint</h6>
+                                    </div>
+                                    <p class="small mb-2"><strong>Q1:</strong> Why is manually optimizing and compressing images before uploading them crucial for website performance?</p>
+                                    <p class="small mb-2"><strong>Q2:</strong> How does utilizing the <code>&lt;track&gt;</code> tag with your video files improve accessibility for all users?</p>
+                                    <p class="small mb-0"><strong>Q3:</strong> Why is it a strict rule that HTML tables should only be used for tabular data and never for page layout?</p>
+                                </div>
+                            </div>
+                            <a href="/level1.html" class="btn btn-primary w-100 shadow-sm fw-bold text-uppercase">Back to Level 1</a>
+                        </div>
+                    </div> 
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- ENHANCED TURN-IN DROPBOX -->
+        <div class="card shadow border-success mx-auto mb-5 mt-5" style="max-width: 800px;" id="submission-zone">
+            <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>Student Assignment Dropbox</h4>
+                <span class="badge bg-light text-success shadow-sm" id="student-id-badge">Verifying...</span>
+            </div>
+            <div class="card-body p-4">
+                <form id="uploadForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
+                        <select id="uploadAssignment" class="form-select border-success" required>
+                            <option value="" disabled selected>Select an assignment...</option>
+                            <option value="ch8_lab1">Lab: Raster Compression [25 pts]</option>
+                            <option value="ch8_lab2">Lab: Responsive Imagery [25 pts]</option>
+                            <option value="ch8_lab3">Lab: The SVG Logo &amp; Favicons [25 pts]</option>
+                            <option value="ch8_lab4">Lab: Code Correction (Video) [25 pts]</option>
+                            <option value="ch8_lab5">Lab: Code Correction (Audio) [25 pts]</option>
+                            <option value="ch8_lab6">Lab: Map &amp; Video Embeds [25 pts]</option>
+                            <option value="ch8_lab7">Lab: Semantic Data Tables [25 pts]</option>
+                            <option value="ch8_lab8_9">Lab: Proportions &amp; Hover Effects [50 pts]</option>
+                            <option value="ch8_milestone">Milestone: Project 3 Media Integration [100 pts]</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">2. What type of upload is this?</label>
+                        <select id="uploadType" class="form-select border-primary bg-site-secondary">
+                            <option value="file">A Single File (e.g. Screenshot, HTML File, Image)</option>
+                            <option value="folder">An Entire Folder (e.g. A Full Website Project)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4" id="fileInputContainer">
+                        <label class="form-label fw-bold">3. Select File</label>
+                        <input type="file" id="fileInput" class="form-control" required>
+                    </div>
+
+                    <div class="mb-4 d-none" id="folderInputContainer">
+                        <label class="form-label fw-bold">3. Select Project Folder</label>
+                        <input type="file" id="folderInput" class="form-control" webkitdirectory directory multiple>
+                        <div class="form-text x-small text-danger fw-bold mt-1">Note: This will upload ALL files and sub-folders inside the folder you select, keeping your website links intact!</div>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn btn-success w-100 fw-bold py-3 shadow-sm" disabled>
+                        Upload to Teacher Server
+                    </button>
+                </form>
+                
+                <div id="uploadProgress" class="progress mt-3 d-none shadow-sm" style="height: 25px;">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%;">0%</div>
+                </div>
+                <div id="uploadStatus" class="mt-3 d-none p-3 rounded small fw-bold text-center shadow-sm"></div>
+            </div>
+        </div>
+        
+    </section>
+
+    <div id="footer-nav"></div>
+    <div id="footer-placeholder"></div>
+
+    <!-- ASSIGNMENT UPLOADER LOGIC -->
+    <script type="module" src="/js/assignment-uploader.js"></script>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>
