@@ -56,6 +56,25 @@ async function initCalendar() {
         console.warn('[Calendar] Could not auto-load /special-dates.csv:', e);
     }
 
+    // Merge single events saved by teacher from DB
+    try {
+        const res = await fetch('/api/events.php');
+        if (res.ok) {
+            const data = await res.json();
+            (data.events || []).forEach(ev => {
+                const evDesc = ev.title + (ev.description ? ': ' + ev.description : '');
+                const existing = specialDates.get(ev.event_date);
+                if (existing) {
+                    existing.description = existing.description
+                        ? existing.description + ' | ' + evDesc
+                        : evDesc;
+                } else {
+                    specialDates.set(ev.event_date, { type: ev.type, description: evDesc });
+                }
+            });
+        }
+    } catch {}
+
     renderMonth();
     initAppointments();
 }
@@ -289,6 +308,57 @@ function initAppointments() {
     document.getElementById('btn-add-single-event')?.addEventListener('click', () => {
         bootstrap.Modal.getOrCreateInstance(document.getElementById('modalSingleEvent')).show();
     });
+    document.getElementById('btn-save-single-event')?.addEventListener('click', saveSingleEvent);
+    document.getElementById('se-all-day')?.addEventListener('change', e => {
+        document.getElementById('se-time-section').style.display = e.target.checked ? 'none' : '';
+    });
+}
+
+async function saveSingleEvent() {
+    const title  = document.getElementById('se-title')?.value.trim();
+    const date   = document.getElementById('se-date')?.value;
+    const type   = document.getElementById('se-type')?.value;
+    const allDay = document.getElementById('se-all-day')?.checked ?? true;
+    const desc   = document.getElementById('se-description')?.value.trim() || '';
+    const start  = document.getElementById('se-start-time')?.value || null;
+    const end    = document.getElementById('se-end-time')?.value   || null;
+
+    if (!title || !date || !type) {
+        alert('Please fill in the title, date, and schedule type.');
+        return;
+    }
+
+    const btn  = document.getElementById('btn-save-single-event');
+    const orig = btn?.innerHTML;
+    if (btn) { btn.disabled = true; btn.innerHTML = 'Saving…'; }
+
+    try {
+        const res = await fetch('/api/events.php', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ event_date: date, title, type, description: desc, all_day: allDay, start_time: start, end_time: end }),
+        });
+        const data = await res.json();
+        if (data.success) {
+            const evDesc = title + (desc ? ': ' + desc : '');
+            const existing = specialDates.get(date);
+            if (existing) {
+                existing.description = existing.description ? existing.description + ' | ' + evDesc : evDesc;
+            } else {
+                specialDates.set(date, { type, description: evDesc });
+            }
+            renderMonth();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalSingleEvent')).hide();
+            document.getElementById('single-event-form')?.reset();
+            document.getElementById('se-time-section').style.display = 'none';
+        } else {
+            alert(data.error || 'Could not save event.');
+        }
+    } catch {
+        alert('Network error. Please try again.');
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+    }
 }
 
 // ─── Slot Loader ──────────────────────────────────────────────────────────────
