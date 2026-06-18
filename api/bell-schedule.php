@@ -60,11 +60,21 @@ if ($method === 'POST') {
         }
     }
 
-    $saveAll = !empty($data['all']);
+    $saveAll     = !empty($data['all']);
+    $schedTypes  = isset($data['schedule_types']) && is_array($data['schedule_types'])
+                   ? array_values(array_filter(array_map('trim', $data['schedule_types'])))
+                   : [];
 
     if ($saveAll) {
-        // Bulk save — replace everything
+        // Legacy: replace everything
         $db->query('DELETE FROM bell_schedule');
+    } elseif (!empty($schedTypes)) {
+        // Replace only the rows for the specified schedule types (regular or summer school)
+        $ph  = implode(',', array_fill(0, count($schedTypes), '?'));
+        $del = $db->prepare("DELETE FROM bell_schedule WHERE schedule_type IN ($ph)");
+        $del->bind_param(str_repeat('s', count($schedTypes)), ...$schedTypes);
+        $del->execute();
+        $del->close();
     } elseif ($type) {
         // Replace just one day/type
         $del = $db->prepare('DELETE FROM bell_schedule WHERE schedule_type = ?');
@@ -73,7 +83,7 @@ if ($method === 'POST') {
         $del->close();
     } else {
         http_response_code(400);
-        echo json_encode(['error' => 'schedule_type or all:true required']);
+        echo json_encode(['error' => 'schedule_types array or schedule_type required']);
         $db->close();
         exit;
     }

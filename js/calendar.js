@@ -563,17 +563,53 @@ async function saveOfficeHours() {
 
 // ─── Bell Schedule ────────────────────────────────────────────────────────────
 
-const BELL_DAYS = ['Mon','Tue','Wed','Thu','Fri'];
-const BELL_DAY_LABEL = { Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday' };
+const BELL_SCHEDULES = {
+    regular: { label: 'Regular Year',  days: ['Mon','Tue','Wed','Thu','Fri'] },
+    summer:  { label: 'Summer School', days: ['SS_Mon','SS_Tue','SS_Wed','SS_Thu','SS_Fri'] }
+};
+const BELL_DAY_LABEL = {
+    Mon:'Monday',    Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday',    Fri:'Friday',
+    SS_Mon:'Monday', SS_Tue:'Tuesday', SS_Wed:'Wednesday', SS_Thu:'Thursday', SS_Fri:'Friday'
+};
+let activeBellSched = 'regular';
 
 async function openBellScheduleModal() {
-    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalBellSchedule')).show();
+    const modal = document.getElementById('modalBellSchedule');
+
+    // Inject schedule-type switcher once
+    if (!document.getElementById('bell-sched-switcher')) {
+        const container = document.getElementById('bell-sections-container');
+        const sw = document.createElement('div');
+        sw.id = 'bell-sched-switcher';
+        sw.className = 'btn-group mb-3 w-100';
+        sw.innerHTML = Object.entries(BELL_SCHEDULES).map(([key, s]) =>
+            `<button type="button" class="btn btn-sm btn-outline-primary" data-sched="${key}">${s.label}</button>`
+        ).join('');
+        container.parentNode.insertBefore(sw, container);
+        sw.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                activeBellSched = btn.dataset.sched;
+                sw.querySelectorAll('button').forEach(b =>
+                    b.className = `btn btn-sm ${b.dataset.sched === activeBellSched ? 'btn-primary' : 'btn-outline-primary'}`
+                );
+                await loadBellSchedule();
+            });
+        });
+    }
+    // Reflect active schedule in switcher buttons
+    document.querySelectorAll('#bell-sched-switcher button').forEach(b =>
+        b.className = `btn btn-sm ${b.dataset.sched === activeBellSched ? 'btn-primary' : 'btn-outline-primary'}`
+    );
+
+    bootstrap.Modal.getOrCreateInstance(modal).show();
     await loadBellSchedule();
 }
 
 async function loadBellSchedule() {
     const container = document.getElementById('bell-sections-container');
     if (!container) return;
+
+    const schedDays = BELL_SCHEDULES[activeBellSched].days;
 
     // Wire the Add button immediately — before the fetch — so it always works
     const addBtn = document.getElementById('btn-add-bell-section');
@@ -590,13 +626,14 @@ async function loadBellSchedule() {
         const res  = await fetch('/api/bell-schedule.php');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        rows = data.schedule || [];
+        // Only keep rows belonging to the active schedule
+        rows = (data.schedule || []).filter(r => schedDays.includes(r.schedule_type));
     } catch (e) {
         container.innerHTML = `<p class="small text-warning mb-2">
             <strong>Could not reach the API</strong> (${e.message}) —
             you can still build your schedule here and it will save once the server file is in place.
         </p>`;
-        addBellSection(container); // give one blank card to start
+        addBellSection(container);
         return;
     }
 
@@ -623,7 +660,7 @@ function addBellSection(container, sec = {}) {
     const card = document.createElement('div');
     card.className = 'card mb-2 bell-section-card';
 
-    const daysHtml = BELL_DAYS.map(day => {
+    const daysHtml = BELL_SCHEDULES[activeBellSched].days.map(day => {
         const times   = sec.days?.[day];
         const checked = times ? 'checked' : '';
         const start   = times?.start || '07:35';
@@ -704,7 +741,7 @@ async function saveBellSchedule() {
         const res  = await fetch('/api/bell-schedule.php', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ teacher_id: window.dacAuthData?.user?.student_id, all: true, periods }),
+            body:    JSON.stringify({ teacher_id: window.dacAuthData?.user?.student_id, schedule_types: BELL_SCHEDULES[activeBellSched].days, periods }),
         });
         const data = await res.json();
         if (data.success) {
