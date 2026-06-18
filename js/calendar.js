@@ -284,13 +284,6 @@ function initAppointments() {
     document.getElementById('btn-bell-schedule')?.addEventListener('click', openBellScheduleModal);
     document.getElementById('btn-save-bell-schedule')?.addEventListener('click', saveBellSchedule);
 
-    // Load the correct tab's schedule whenever the user switches tabs
-    document.querySelectorAll('#bell-tabs .nav-link').forEach(tab => {
-        tab.addEventListener('shown.bs.tab', e => {
-            const stype = e.target.dataset.stype;
-            if (stype) loadBellTab(stype);
-        });
-    });
 
     // Add Single Event modal
     document.getElementById('btn-add-single-event')?.addEventListener('click', () => {
@@ -570,100 +563,115 @@ async function saveOfficeHours() {
 
 // ─── Bell Schedule ────────────────────────────────────────────────────────────
 
-let bellScheduleCache = {}; // stype → periods[]
-
-const BELL_PANE = { Mon:'bell-tab-Mon', Tue:'bell-tab-Tue', Wed:'bell-tab-Wed', Thu:'bell-tab-Thu', Fri:'bell-tab-Fri' };
+const BELL_DAYS = ['Mon','Tue','Wed','Thu','Fri'];
+const BELL_DAY_LABEL = { Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday' };
 
 async function openBellScheduleModal() {
     bootstrap.Modal.getOrCreateInstance(document.getElementById('modalBellSchedule')).show();
-    await loadBellTab('Mon');
+    await loadBellSchedule();
 }
 
-async function loadBellTab(stype) {
-    const paneId = BELL_PANE[stype];
-    const pane = document.getElementById(paneId);
-    if (!pane) return;
+async function loadBellSchedule() {
+    const container = document.getElementById('bell-sections-container');
+    if (!container) return;
+    container.innerHTML = '<p class="small text-muted">Loading…</p>';
 
-    // Only fetch if not cached
-    if (!bellScheduleCache[stype]) {
-        pane.innerHTML = '<p class="small text-muted">Loading…</p>';
-        try {
-            const res  = await fetch(`/api/bell-schedule?type=${encodeURIComponent(stype)}`);
-            const data = await res.json();
-            bellScheduleCache[stype] = data.schedule || [];
-        } catch {
-            pane.innerHTML = '<p class="small text-danger">Could not load schedule.</p>';
-            return;
-        }
+    let rows = [];
+    try {
+        const res  = await fetch('/api/bell-schedule');
+        const data = await res.json();
+        rows = data.schedule || [];
+    } catch {
+        container.innerHTML = '<p class="small text-danger">Could not load schedule — make sure api/bell-schedule.php is on the server.</p>';
+        return;
     }
 
-    renderBellTab(pane, stype, bellScheduleCache[stype]);
+    // Group rows by period_label → { label, course, days:{Mon:{start,end}, …} }
+    const sections = {};
+    rows.forEach(r => {
+        if (!sections[r.period_label]) {
+            sections[r.period_label] = { label: r.period_label, course: r.course_name || '', days: {} };
+        }
+        sections[r.period_label].days[r.schedule_type] = { start: r.start_time, end: r.end_time };
+    });
+
+    container.innerHTML = '';
+    const secList = Object.values(sections);
+    if (secList.length === 0) {
+        addBellSection(container);
+    } else {
+        secList.forEach(sec => addBellSection(container, sec));
+    }
+
+    document.getElementById('btn-add-bell-section')?.addEventListener('click', () => addBellSection(container));
 }
 
-function renderBellTab(pane, stype, periods) {
-    pane.innerHTML = `
-    <div class="table-responsive">
-      <table class="table table-sm align-middle" id="bell-table-${stype}">
-        <thead class="table-light">
-          <tr>
-            <th style="min-width:120px">Period / Label<br><small class="fw-normal text-muted">e.g. A1, Lunch, PLC</small></th>
-            <th style="min-width:105px">Start</th>
-            <th style="min-width:105px">End</th>
-            <th style="min-width:180px">Course Name<br><small class="fw-normal text-muted">optional — fill in later</small></th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="bell-body-${stype}"></tbody>
-      </table>
-    </div>
-    <button type="button" class="btn btn-outline-secondary btn-sm mb-1 bell-add-row" data-stype="${stype}">
-      + Add Period
-    </button>`;
+function addBellSection(container, sec = {}) {
+    const uid  = Math.random().toString(36).slice(2);
+    const card = document.createElement('div');
+    card.className = 'card mb-2 bell-section-card';
 
-    const tbody = pane.querySelector(`#bell-body-${stype}`);
-    periods.forEach(p => addBellRow(tbody, p));
+    const daysHtml = BELL_DAYS.map(day => {
+        const times   = sec.days?.[day];
+        const checked = times ? 'checked' : '';
+        const start   = times?.start || '07:35';
+        const end     = times?.end   || '09:00';
+        return `
+        <div class="d-flex align-items-center gap-2 mb-1 bell-day-row" data-day="${day}">
+          <div class="form-check mb-0" style="min-width:100px">
+            <input type="checkbox" class="form-check-input bell-day-check" id="bdc-${day}-${uid}" ${checked}>
+            <label class="form-check-label small fw-semibold" for="bdc-${day}-${uid}">${BELL_DAY_LABEL[day]}</label>
+          </div>
+          <div class="bell-day-times d-flex align-items-center gap-1" style="${times ? '' : 'display:none'}">
+            <input type="time" class="form-control form-control-sm bell-start" value="${start}" style="width:108px">
+            <span class="text-muted small">→</span>
+            <input type="time" class="form-control form-control-sm bell-end"   value="${end}"   style="width:108px">
+          </div>
+        </div>`;
+    }).join('');
 
-    // Empty tab gets one blank row
-    if (!periods.length) addBellRow(tbody, {});
+    card.innerHTML = `
+    <div class="card-body p-3">
+      <div class="d-flex gap-2 mb-3 align-items-center">
+        <input type="text" class="form-control form-control-sm bell-sec-label fw-bold"
+               value="${sec.label || ''}" placeholder="A1" style="width:72px">
+        <input type="text" class="form-control form-control-sm bell-sec-course flex-fill"
+               value="${sec.course || ''}" placeholder="Course name (optional, e.g. Computer Science)">
+        <button type="button" class="btn btn-outline-danger btn-sm px-2 bell-remove-section">×</button>
+      </div>
+      <div class="bell-days-list ps-1">${daysHtml}</div>
+    </div>`;
 
-    pane.querySelector('.bell-add-row').addEventListener('click', () => addBellRow(tbody, {}));
-}
-
-function addBellRow(tbody, p = {}) {
-    const tr = document.createElement('tr');
-    tr.className = 'bell-row';
-    tr.innerHTML = `
-        <td><input type="text" class="form-control form-control-sm bell-label"  value="${p.period_label || ''}" placeholder="A1"></td>
-        <td><input type="time" class="form-control form-control-sm bell-start"  value="${p.start_time   || ''}"></td>
-        <td><input type="time" class="form-control form-control-sm bell-end"    value="${p.end_time     || ''}"></td>
-        <td><input type="text" class="form-control form-control-sm bell-course" value="${p.course_name  || ''}" placeholder="Computer Science"></td>
-        <td><button type="button" class="btn btn-outline-danger btn-sm bell-remove-row px-2">×</button></td>`;
-    tr.querySelector('.bell-remove-row').addEventListener('click', () => tr.remove());
-    tbody.appendChild(tr);
+    card.querySelectorAll('.bell-day-check').forEach(cb => {
+        cb.addEventListener('change', () => {
+            cb.closest('.bell-day-row').querySelector('.bell-day-times').style.display = cb.checked ? '' : 'none';
+        });
+    });
+    card.querySelector('.bell-remove-section').addEventListener('click', () => card.remove());
+    container.appendChild(card);
 }
 
 async function saveBellSchedule() {
-    const activeTab  = document.querySelector('#bell-tabs .nav-link.active');
-    const stype      = activeTab?.dataset.stype;
-    if (!stype) return;
-
-    const paneId = BELL_PANE[stype];
-    const pane   = document.getElementById(paneId);
-    const rows   = pane?.querySelectorAll('.bell-row') || [];
-
     const periods = [];
-    rows.forEach((tr, i) => {
-        const label  = tr.querySelector('.bell-label')?.value.trim();
-        const start  = tr.querySelector('.bell-start')?.value;
-        const end    = tr.querySelector('.bell-end')?.value;
-        const course = tr.querySelector('.bell-course')?.value.trim();
-        if (label && start && end && start < end) {
-            periods.push({ period_label: label, start_time: start, end_time: end,
-                           section_id: label, course_name: course || null, sort_order: i });
-        }
+    document.querySelectorAll('.bell-section-card').forEach(card => {
+        const label  = card.querySelector('.bell-sec-label')?.value.trim();
+        const course = card.querySelector('.bell-sec-course')?.value.trim() || null;
+        if (!label) return;
+        card.querySelectorAll('.bell-day-row').forEach(row => {
+            const day = row.dataset.day;
+            const cb  = row.querySelector('.bell-day-check');
+            if (!cb?.checked) return;
+            const start = row.querySelector('.bell-start')?.value;
+            const end   = row.querySelector('.bell-end')?.value;
+            if (start && end && start < end) {
+                periods.push({ schedule_type: day, period_label: label,
+                               section_id: label, course_name: course,
+                               start_time: start, end_time: end });
+            }
+        });
     });
 
-    const btn = document.getElementById('btn-save-bell-schedule');
+    const btn  = document.getElementById('btn-save-bell-schedule');
     const orig = btn?.innerHTML;
     if (btn) { btn.disabled = true; btn.innerHTML = 'Saving…'; }
 
@@ -671,15 +679,10 @@ async function saveBellSchedule() {
         const res  = await fetch('/api/bell-schedule', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({
-                teacher_id:    window.dacAuthData?.user?.student_id,
-                schedule_type: stype,
-                periods,
-            }),
+            body:    JSON.stringify({ teacher_id: window.dacAuthData?.user?.student_id, all: true, periods }),
         });
         const data = await res.json();
         if (data.success) {
-            bellScheduleCache[stype] = null; // bust cache so next open re-fetches
             if (btn) btn.innerHTML = '<i class="fas fa-check me-1"></i>Saved!';
             setTimeout(() => { if (btn) { btn.disabled = false; btn.innerHTML = orig; } }, 2000);
         } else {

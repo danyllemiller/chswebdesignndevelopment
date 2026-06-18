@@ -46,13 +46,6 @@ if ($method === 'POST') {
     $type      = trim($data['schedule_type'] ?? '');
     $periods   = $data['periods']            ?? [];
 
-    if (!$type) {
-        http_response_code(400);
-        echo json_encode(['error' => 'schedule_type required']);
-        $db->close();
-        exit;
-    }
-
     if ($teacherId) {
         $chk = $db->prepare('SELECT role FROM students WHERE student_id = ? LIMIT 1');
         $chk->bind_param('s', $teacherId);
@@ -67,10 +60,23 @@ if ($method === 'POST') {
         }
     }
 
-    $del = $db->prepare('DELETE FROM bell_schedule WHERE schedule_type = ?');
-    $del->bind_param('s', $type);
-    $del->execute();
-    $del->close();
+    $saveAll = !empty($data['all']);
+
+    if ($saveAll) {
+        // Bulk save — replace everything
+        $db->query('DELETE FROM bell_schedule');
+    } elseif ($type) {
+        // Replace just one day/type
+        $del = $db->prepare('DELETE FROM bell_schedule WHERE schedule_type = ?');
+        $del->bind_param('s', $type);
+        $del->execute();
+        $del->close();
+    } else {
+        http_response_code(400);
+        echo json_encode(['error' => 'schedule_type or all:true required']);
+        $db->close();
+        exit;
+    }
 
     if (!empty($periods)) {
         $ins = $db->prepare(

@@ -364,27 +364,15 @@
         </div>
         <div class="modal-body">
           <p class="small text-muted mb-3">
-            Set period times for each schedule type. Link each period to a <strong>Section ID</strong>
-            (matches the student's section, e.g. <code>A1</code>) and give it a <strong>Course Name</strong>
-            (e.g. <em>Computer Science</em>). You can leave those blank and fill them in later.
+            Add one card per class section (A1, B2, Lunch…). Check each day it meets and set the
+            start/end time for that day. <strong>Course Name</strong> is optional — fill it in now or later.
           </p>
-
-          <!-- Day-of-week tabs -->
-          <ul class="nav nav-tabs mb-3" id="bell-tabs" role="tablist">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#bell-tab-Mon" data-stype="Mon">Monday</button></li>
-            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#bell-tab-Tue" data-stype="Tue">Tuesday</button></li>
-            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#bell-tab-Wed" data-stype="Wed">Wednesday</button></li>
-            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#bell-tab-Thu" data-stype="Thu">Thursday</button></li>
-            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#bell-tab-Fri" data-stype="Fri">Friday</button></li>
-          </ul>
-
-          <div class="tab-content">
-            <div class="tab-pane fade show active" id="bell-tab-Mon" data-stype="Mon"></div>
-            <div class="tab-pane fade"             id="bell-tab-Tue" data-stype="Tue"></div>
-            <div class="tab-pane fade"             id="bell-tab-Wed" data-stype="Wed"></div>
-            <div class="tab-pane fade"             id="bell-tab-Thu" data-stype="Thu"></div>
-            <div class="tab-pane fade"             id="bell-tab-Fri" data-stype="Fri"></div>
+          <div id="bell-sections-container" class="mb-3">
+            <p class="small text-muted fst-italic">Loading…</p>
           </div>
+          <button type="button" class="btn btn-outline-primary btn-sm" id="btn-add-bell-section">
+            + Add Section / Period
+          </button>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
