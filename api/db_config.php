@@ -1,8 +1,8 @@
 <?php
 define('DB_HOST', 'localhost');
-define('DB_USER', 'digartcl_danylle');
-define('DB_PASS', 'k@T1e!2503!$');
-define('DB_NAME', 'digartcl_students');
+define('DB_USER', 'root');
+define('DB_PASS', 'chs_password');
+define('DB_NAME', 'chs_gradebook');
 
 function getDB() {
     $conn = @new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
