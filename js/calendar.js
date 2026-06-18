@@ -574,15 +574,29 @@ async function openBellScheduleModal() {
 async function loadBellSchedule() {
     const container = document.getElementById('bell-sections-container');
     if (!container) return;
+
+    // Wire the Add button immediately — before the fetch — so it always works
+    const addBtn = document.getElementById('btn-add-bell-section');
+    if (addBtn) {
+        const fresh = addBtn.cloneNode(true);
+        addBtn.parentNode.replaceChild(fresh, addBtn);
+        fresh.addEventListener('click', () => addBellSection(container));
+    }
+
     container.innerHTML = '<p class="small text-muted">Loading…</p>';
 
     let rows = [];
     try {
         const res  = await fetch('/api/bell-schedule');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         rows = data.schedule || [];
-    } catch {
-        container.innerHTML = '<p class="small text-danger">Could not load schedule — make sure api/bell-schedule.php is on the server.</p>';
+    } catch (e) {
+        container.innerHTML = `<p class="small text-warning mb-2">
+            <strong>Could not reach the API</strong> (${e.message}) —
+            you can still build your schedule here and it will save once the server file is in place.
+        </p>`;
+        addBellSection(container); // give one blank card to start
         return;
     }
 
@@ -602,8 +616,6 @@ async function loadBellSchedule() {
     } else {
         secList.forEach(sec => addBellSection(container, sec));
     }
-
-    document.getElementById('btn-add-bell-section')?.addEventListener('click', () => addBellSection(container));
 }
 
 function addBellSection(container, sec = {}) {
