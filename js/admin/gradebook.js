@@ -765,21 +765,26 @@ function renderGradebook(students, grades, currentPeriod) {
     const thead = document.getElementById('gradebookHead');
     const tbody = document.getElementById('gradebookBody');
     const assignmentMap = new Map();
+    const seenCleanKeys = new Set();
 
-    Object.keys(allAssignments).forEach(key => { 
+    Object.keys(allAssignments).forEach(key => {
         if(key !== 'lastSubmitDate' && isAssignmentVisible(key, currentPeriod)) {
-            assignmentMap.set(key, { ...parseAssignmentInfo(key), dueDate: resolveDueDate(key, currentPeriod), instructions: allAssignments[key].instructions || '' }); 
+            const ck = cleanKey(key);
+            if (!seenCleanKeys.has(ck)) {
+                seenCleanKeys.add(ck);
+                assignmentMap.set(key, { ...parseAssignmentInfo(key), dueDate: resolveDueDate(key, currentPeriod), instructions: allAssignments[key].instructions || '' });
+            }
         }
     });
 
     students.forEach(s => {
         const sGrades = grades[s.studentId] || {};
-        Object.keys(sGrades).forEach(key => { 
+        Object.keys(sGrades).forEach(key => {
             if(key !== 'lastSubmitDate' && isAssignmentVisible(key, currentPeriod)) {
-                const registryKeys = Array.from(assignmentMap.keys());
-                const matchingKey = registryKeys.find(rKey => cleanKey(rKey) === cleanKey(key));
-                if (!matchingKey) {
-                    assignmentMap.set(key, { ...parseAssignmentInfo(key), dueDate: resolveDueDate(key, currentPeriod), instructions: '' }); 
+                const ck = cleanKey(key);
+                if (!seenCleanKeys.has(ck)) {
+                    seenCleanKeys.add(ck);
+                    assignmentMap.set(key, { ...parseAssignmentInfo(key), dueDate: resolveDueDate(key, currentPeriod), instructions: '' });
                 }
             }
         });

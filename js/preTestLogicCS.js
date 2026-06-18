@@ -169,6 +169,7 @@ window.initCSPreTest = async function(unitNum) {
     const config = {
         questions: questions,
         chapterTitle: `${chapterLabel} Pre-Assessment`,
+        chapter: unitNum,
         questionCount: 10,
         trackType: 'compsci',
         // MARIADB ONLY - No Google Sheets webhook

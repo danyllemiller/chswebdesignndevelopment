@@ -146,6 +146,7 @@ let serverFeedback = [];
 let finalScore = 0;
 let finalTotal = 0;
 let finalPercentage = 0;
+let gradebookExamId = "";
 
 function escapeHtml(str) {
     if (typeof str !== 'string') return str;
@@ -165,6 +166,15 @@ async function initPreTest(config) {
     examQuestions = pool.slice(0, 10).map(q => ({ ...q, options: shuffleArray([...q.options]) }));
     webhookUrl = config.webhookUrl;
     chapterTitle = config.chapterTitle;
+
+    // Pre-compute the gradebook exam_id so processResults uses a consistent key.
+    // config.gradebookExamId is an explicit override; config.chapter is the unit/chapter number.
+    gradebookExamId = config.gradebookExamId || '';
+    if (!gradebookExamId && config.chapter !== undefined && config.chapter !== null) {
+        const chStr = String(config.chapter).toUpperCase();
+        const isCSPath = window.location.pathname.includes('/cs-') || window.location.pathname.includes('cs-unit');
+        gradebookExamId = isCSPath ? `Unit${chStr}-Pre` : `Ch${chStr} Pre-Assessment [15 pts]`;
+    }
 
     const container = document.getElementById('exam-container');
     if (container) {
@@ -559,32 +569,43 @@ async function processResults() {
     try {
         const user = JSON.parse(localStorage.getItem('user'));
         if (user && user.student_id) {
-            // Try to extract unit/chapter number from chapterTitle OR from current page URL
-            let unitNum = 1;
-            
-            // First try to extract from chapterTitle (e.g., "Unit 1 Diagnostic")
-            const chMatch = chapterTitle.match(/(?:unit|chapter)\s*(\d+)/i);
-            if (chMatch) {
-                unitNum = parseInt(chMatch[1], 10);
+            // Use the pre-computed exam_id set in initPreTest when config.chapter was provided.
+            // Fall back to extracting from chapterTitle / URL for legacy pages without config.chapter.
+            let preAssmtExamId = gradebookExamId;
+
+            if (!preAssmtExamId) {
+                const isCS = window.location.pathname.includes('/cs-') || window.location.pathname.includes('cs-unit');
+                // Try numeric chapter from title first (e.g. "Chapter 13 Diagnostic" → 13)
+                const numMatch = chapterTitle.match(/(?:unit|chapter)\s*(\d+)/i);
+                if (numMatch) {
+                    const unitNum = parseInt(numMatch[1], 10);
+                    preAssmtExamId = isCS ? `Unit${unitNum}-Pre` : `Ch${unitNum} Pre-Assessment [15 pts]`;
+                } else {
+                    // Try alphabetic chapter (e.g. "Chapter A Pre-Assessment" → A)
+                    const alphaMatch = chapterTitle.match(/(?:unit|chapter)\s*([A-Za-z])\b/i);
+                    if (alphaMatch) {
+                        const alphaUnit = alphaMatch[1].toUpperCase();
+                        preAssmtExamId = isCS ? `Unit${alphaUnit}-Pre` : `Ch${alphaUnit} Pre-Assessment [15 pts]`;
+                    } else {
+                        // Try URL as last resort (e.g. /cs-unit-1.html)
+                        const urlNum = window.location.pathname.match(/cs[_-]?unit[\s_-]?(\d+)/i);
+                        const urlAlpha = window.location.pathname.match(/cs[_-]?unit[\s_-]?([a-z])\b/i);
+                        if (urlNum) {
+                            preAssmtExamId = isCS ? `Unit${urlNum[1]}-Pre` : `Ch${urlNum[1]} Pre-Assessment [15 pts]`;
+                        } else if (urlAlpha) {
+                            preAssmtExamId = isCS ? `Unit${urlAlpha[1].toUpperCase()}-Pre` : `Ch${urlAlpha[1].toUpperCase()} Pre-Assessment [15 pts]`;
+                        } else {
+                            console.warn("[QuizLogic] Could not determine chapter from title or URL. Skipping gradebook sync.");
+                            preAssmtExamId = null;
+                        }
+                    }
+                }
             }
-            
-            // If not found in title, try to extract from current page URL (e.g., /pre-assessments/cs-unit-1.html)
-            if (!chMatch) {
-                const urlMatch = window.location.pathname.match(/cs[_-]?unit[\s_-]?(\d+)/i);
-                if (urlMatch) unitNum = parseInt(urlMatch[1], 10);
+
+            if (!preAssmtExamId) {
+                throw new Error("Chapter could not be determined for gradebook sync.");
             }
-            
-            // Determine if this is CS or Web Design based on URL path
-            const isCS = window.location.pathname.includes('/cs-') || window.location.pathname.includes('cs-unit');
-            
-            // CS uses "Unit1-Pre" format, Web Design uses "Ch1 Pre-Assessment [15 pts]"
-            let preAssmtExamId;
-            if (isCS) {
-                preAssmtExamId = `Unit${unitNum}-Pre`;
-            } else {
-                preAssmtExamId = `Ch${unitNum} Pre-Assessment [15 pts]`;
-            }
-            
+
             console.log("[QuizLogic] Syncing Pre-Assessment to gradebook:", preAssmtExamId, "15 points");
             
             const res = await fetch('/api/submit-exam', {
@@ -624,6 +645,7 @@ function returnToWorkspace() {
 
 // Expose to global scope for onclick handlers in dynamically rendered HTML
 window.initPreTest = initPreTest;
+window.__quizLogicInitPreTest = initPreTest; // stable reference used by preTestLogic.js module
 window.selectOption = selectOption;
 window.nextQuestion = nextQuestion;
 window.prevQuestion = prevQuestion;
