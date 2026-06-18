@@ -57,6 +57,7 @@ async function initCalendar() {
     }
 
     renderMonth();
+    initAppointments();
 }
 
 // ─── CSV Parser ──────────────────────────────────────────────────────────────
@@ -222,3 +223,308 @@ function showCsvStatus(msg, type) {
 }
 
 document.addEventListener('DOMContentLoaded', initCalendar);
+
+// ─── Appointment Booking ──────────────────────────────────────────────────────
+
+let selectedSlot = null;
+
+function initAppointments() {
+    // Show teacher button once auth resolves
+    function applyAuthUI() {
+        if (window.dacAuthData?.isTeacher) {
+            const btn = document.getElementById('btn-teacher-dashboard');
+            if (btn) btn.style.display = '';
+        }
+    }
+    if (window.dacAuthData) applyAuthUI();
+    document.addEventListener('authComplete', applyAuthUI);
+
+    // Student: open booking modal
+    document.getElementById('btn-book-appointment')?.addEventListener('click', () => {
+        selectedSlot = null;
+        const dateInput = document.getElementById('ap-date');
+        if (dateInput && selectedDate) dateInput.value = selectedDate;
+        const form = document.getElementById('appointment-request-form');
+        const reqBtn = document.getElementById('btn-request-appointment');
+        if (form) form.style.display = 'none';
+        if (reqBtn) reqBtn.style.display = 'none';
+        document.getElementById('appointment-slots').innerHTML =
+            '<p class="small text-muted">Select a date to see available times.</p>';
+        if (dateInput?.value) loadSlots(dateInput.value);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalBookAppointment')).show();
+    });
+
+    document.getElementById('ap-date')?.addEventListener('change', e => loadSlots(e.target.value));
+    document.getElementById('btn-request-appointment')?.addEventListener('click', submitBooking);
+
+    // Teacher: open dashboard
+    document.getElementById('btn-teacher-dashboard')?.addEventListener('click', () => {
+        loadTeacherDashboard();
+        renderOfficeHoursForm();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalAppointmentDashboard')).show();
+    });
+
+    // Tab switches reload data
+    document.querySelector('a[href="#tab-pending"]')?.addEventListener('shown.bs.tab', loadTeacherDashboard);
+    document.querySelector('a[href="#tab-approved"]')?.addEventListener('shown.bs.tab', loadTeacherDashboard);
+    document.querySelector('a[href="#tab-manage-hours"]')?.addEventListener('shown.bs.tab', renderOfficeHoursForm);
+
+    document.getElementById('btn-save-office-hours')?.addEventListener('click', saveOfficeHours);
+
+    // Add Single Event modal
+    document.getElementById('btn-add-single-event')?.addEventListener('click', () => {
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalSingleEvent')).show();
+    });
+}
+
+// ─── Slot Loader ──────────────────────────────────────────────────────────────
+
+async function loadSlots(date) {
+    const container = document.getElementById('appointment-slots');
+    const form      = document.getElementById('appointment-request-form');
+    const reqBtn    = document.getElementById('btn-request-appointment');
+    if (!container) return;
+
+    selectedSlot = null;
+    if (form) form.style.display = 'none';
+    if (reqBtn) reqBtn.style.display = 'none';
+    container.innerHTML = '<p class="small text-muted">Loading...</p>';
+
+    try {
+        const res  = await fetch(`/api/appointments/slots?date=${date}`);
+        const data = await res.json();
+
+        if (!data.slots?.length) {
+            container.innerHTML = `<p class="small text-muted fst-italic">${data.message || 'No available slots on this day.'}</p>`;
+            return;
+        }
+
+        container.innerHTML = '<div class="appointment-slot-grid"></div>';
+        const grid = container.querySelector('.appointment-slot-grid');
+
+        data.slots.forEach(slot => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.dataset.time = slot.time;
+
+            if (!slot.available) {
+                b.className = 'btn btn-secondary btn-sm appointment-slot-btn';
+                b.textContent = formatTime12(slot.time);
+                b.disabled = true;
+                b.title = 'Already booked';
+            } else {
+                b.className = 'btn btn-outline-info btn-sm appointment-slot-btn';
+                b.textContent = formatTime12(slot.time);
+                b.addEventListener('click', () => selectSlot(slot.time, b));
+            }
+            grid.appendChild(b);
+        });
+    } catch {
+        container.innerHTML = '<p class="small text-danger">Could not load available times.</p>';
+    }
+}
+
+function selectSlot(time, btnEl) {
+    selectedSlot = time;
+    document.querySelectorAll('.appointment-slot-btn').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+    const selectedEl = document.getElementById('ap-selected-slot');
+    if (selectedEl) selectedEl.textContent = formatTime12(time);
+    const form   = document.getElementById('appointment-request-form');
+    const reqBtn = document.getElementById('btn-request-appointment');
+    if (form) form.style.display = '';
+    if (reqBtn) reqBtn.style.display = '';
+}
+
+async function submitBooking() {
+    const studentId = window.dacAuthData?.user?.student_id;
+    const date      = document.getElementById('ap-date')?.value;
+    const reason    = document.getElementById('ap-reason')?.value?.trim() || '';
+    const btn       = document.getElementById('btn-request-appointment');
+
+    if (!studentId || !date || !selectedSlot) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    try {
+        const res  = await fetch('/api/appointments/book', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ student_id: studentId, date, time: selectedSlot, reason }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalBookAppointment')).hide();
+            alert(`Request sent for ${date} at ${formatTime12(selectedSlot)}. Your teacher will confirm it.`);
+        } else {
+            alert(data.error || 'Could not book that slot — please try another time.');
+        }
+    } catch {
+        alert('Network error. Please try again.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Request Appointment';
+    }
+}
+
+// ─── Teacher Dashboard ────────────────────────────────────────────────────────
+
+async function loadTeacherDashboard() {
+    const pendingEl  = document.getElementById('pending-requests');
+    const approvedEl = document.getElementById('approved-appointments');
+
+    try {
+        const res  = await fetch('/api/appointments/requests?role=teacher');
+        const data = await res.json();
+        const all  = data.appointments || [];
+
+        const pending  = all.filter(a => a.status === 'pending');
+        const resolved = all.filter(a => a.status !== 'pending');
+
+        if (pendingEl) {
+            pendingEl.innerHTML = pending.length
+                ? pending.map(a => apptCard(a, true)).join('')
+                : '<p class="text-muted small">No pending requests.</p>';
+        }
+        if (approvedEl) {
+            approvedEl.innerHTML = resolved.length
+                ? resolved.map(a => apptCard(a, false)).join('')
+                : '<p class="text-muted small">No approved or denied appointments yet.</p>';
+        }
+
+        document.querySelectorAll('.btn-approve-appt').forEach(b =>
+            b.addEventListener('click', () => updateApptStatus(+b.dataset.id, 'approved')));
+        document.querySelectorAll('.btn-deny-appt').forEach(b =>
+            b.addEventListener('click', () => updateApptStatus(+b.dataset.id, 'denied')));
+    } catch {
+        if (pendingEl) pendingEl.innerHTML = '<p class="text-danger small">Could not load appointments.</p>';
+    }
+}
+
+function apptCard(a, showActions) {
+    const name   = a.student_name || a.student_id;
+    const colors = { pending: 'warning', approved: 'success', denied: 'secondary' };
+    const color  = colors[a.status] || 'secondary';
+
+    return `
+    <div class="card mb-2 border-${color}">
+      <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <div>
+            <strong>${name}</strong>
+            <span class="badge bg-${color} ms-1">${a.status}</span><br>
+            <span class="small">${a.date} at ${formatTime12(a.time)}</span>
+            ${a.section_id ? `<span class="small text-muted"> · ${a.section_id}</span>` : ''}<br>
+            ${a.reason ? `<span class="small">${a.reason}</span>` : ''}
+          </div>
+          ${showActions ? `
+          <div class="d-flex flex-column gap-1 flex-shrink-0">
+            <button class="btn btn-success btn-sm btn-approve-appt" data-id="${a.id}">Approve</button>
+            <button class="btn btn-outline-secondary btn-sm btn-deny-appt" data-id="${a.id}">Deny</button>
+          </div>` : ''}
+        </div>
+        ${a.teacher_note ? `<div class="mt-1 small text-muted fst-italic">Note: ${a.teacher_note}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+async function updateApptStatus(id, status) {
+    const teacherId = window.dacAuthData?.user?.student_id;
+    try {
+        const res  = await fetch('/api/appointments/update-status', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ id, status, teacher_id: teacherId }),
+        });
+        const data = await res.json();
+        if (data.success) loadTeacherDashboard();
+    } catch {
+        alert('Could not update appointment status.');
+    }
+}
+
+// ─── Office Hours Form ────────────────────────────────────────────────────────
+
+async function renderOfficeHoursForm() {
+    const container = document.getElementById('office-hours-schedule');
+    if (!container) return;
+
+    let currentHours = {};
+    try {
+        const res  = await fetch('/api/appointments/office-hours');
+        const data = await res.json();
+        (data.hours || []).forEach(h => { currentHours[h.day_of_week] = h; });
+    } catch { /* no hours saved yet */ }
+
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+    container.innerHTML = days.map((day, dow) => {
+        const h      = currentHours[dow] || {};
+        const active = h.is_active == 1;
+        const start  = (h.start_time || '07:30').substring(0, 5);
+        const end    = (h.end_time   || '08:15').substring(0, 5);
+        const dur    = h.slot_duration || 15;
+
+        return `
+        <div class="card mb-2 p-2">
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div class="form-check mb-0" style="min-width:110px">
+              <input class="form-check-input oh-active" type="checkbox" id="oh-${dow}" data-dow="${dow}" ${active ? 'checked' : ''}>
+              <label class="form-check-label fw-bold" for="oh-${dow}">${day}</label>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <input type="time" class="form-control form-control-sm oh-start" data-dow="${dow}" value="${start}" style="width:120px">
+              <span class="text-muted">to</span>
+              <input type="time" class="form-control form-control-sm oh-end" data-dow="${dow}" value="${end}" style="width:120px">
+            </div>
+            <select class="form-select form-select-sm oh-duration" data-dow="${dow}" style="width:145px">
+              <option value="15" ${dur==15?'selected':''}>15 min slots</option>
+              <option value="20" ${dur==20?'selected':''}>20 min slots</option>
+              <option value="30" ${dur==30?'selected':''}>30 min slots</option>
+            </select>
+          </div>
+        </div>`;
+    }).join('');
+}
+
+async function saveOfficeHours() {
+    const teacherId = window.dacAuthData?.user?.student_id;
+    const hours     = [];
+
+    document.querySelectorAll('.oh-active').forEach(cb => {
+        const dow   = +cb.dataset.dow;
+        const start = document.querySelector(`.oh-start[data-dow="${dow}"]`)?.value || '07:30';
+        const end   = document.querySelector(`.oh-end[data-dow="${dow}"]`)?.value   || '08:15';
+        const dur   = +(document.querySelector(`.oh-duration[data-dow="${dow}"]`)?.value || 15);
+        hours.push({ day_of_week: dow, start_time: start, end_time: end, slot_duration: dur, is_active: cb.checked ? 1 : 0 });
+    });
+
+    const btn = document.getElementById('btn-save-office-hours');
+    try {
+        const res  = await fetch('/api/appointments/office-hours', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ teacher_id: teacherId, hours }),
+        });
+        const data = await res.json();
+        if (data.success && btn) {
+            btn.textContent = '✓ Saved!';
+            setTimeout(() => { btn.textContent = 'Save Office Hours'; }, 2000);
+        } else {
+            alert('Could not save office hours.');
+        }
+    } catch {
+        alert('Network error.');
+    }
+}
+
+// ─── Shared Helpers ───────────────────────────────────────────────────────────
+
+function formatTime12(hhmm) {
+    const [h, m] = (hhmm || '').split(':').map(Number);
+    if (isNaN(h)) return hhmm;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`;
+}

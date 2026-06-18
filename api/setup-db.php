@@ -111,6 +111,31 @@ $tables['self_assessments'] = "CREATE TABLE IF NOT EXISTS `self_assessments` (
   UNIQUE KEY `uq_student_chapter_mode` (`student_id`, `chapter_id`, `mode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
 
+// --- office_hours -------------------------------------------------------
+$tables['office_hours'] = "CREATE TABLE IF NOT EXISTS `office_hours` (
+  `id`            INT AUTO_INCREMENT PRIMARY KEY,
+  `day_of_week`   TINYINT      NOT NULL,
+  `start_time`    TIME         NOT NULL,
+  `end_time`      TIME         NOT NULL,
+  `slot_duration` INT          NOT NULL DEFAULT 15,
+  `is_active`     TINYINT(1)   NOT NULL DEFAULT 1,
+  UNIQUE KEY `uq_day` (`day_of_week`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+
+// --- appointments -------------------------------------------------------
+$tables['appointments'] = "CREATE TABLE IF NOT EXISTS `appointments` (
+  `id`           INT AUTO_INCREMENT PRIMARY KEY,
+  `student_id`   VARCHAR(50)  NOT NULL,
+  `date`         DATE         NOT NULL,
+  `time`         TIME         NOT NULL,
+  `reason`       TEXT,
+  `status`       VARCHAR(20)  NOT NULL DEFAULT 'pending',
+  `teacher_note` TEXT,
+  `created_at`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY `uq_slot` (`date`, `time`),
+  KEY `idx_student_appt` (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+
 // Run all table creations
 $results = [];
 foreach ($tables as $name => $sql) {
