@@ -534,7 +534,6 @@ async function renderSelfAssessmentChart(assessmentsArray, courseKey, myGrades) 
     const labels = [];
     const perceivedData = [];
     const actualLevelsData = []; // Actual level from pretest + exam
-    const actualLevelsData = [];
     
 for (let i = 1; i <= totalItems; i++) {
         const lookupKey = `${keyPrefix}${i}`.toLowerCase().trim();
