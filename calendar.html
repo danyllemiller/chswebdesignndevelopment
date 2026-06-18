@@ -116,6 +116,14 @@
               </div>
 
               <div class="calendar-form-card mb-3">
+                <h3 class="h5 text-primary mb-2"><i class="fas fa-bell me-2"></i>Bell Schedule</h3>
+                <p class="small text-muted mb-2">Set period times and link sections to courses.</p>
+                <button id="btn-bell-schedule" class="btn btn-primary btn-sm w-100">
+                  <i class="fas fa-clock me-1"></i>Manage Bell Schedule
+                </button>
+              </div>
+
+              <div class="calendar-form-card mb-3">
                 <h3 class="h5 text-warning mb-2"><i class="fas fa-user-clock me-2"></i>Office Hours</h3>
                 <p class="small text-muted mb-2">Set the days and times students can book appointments with you.</p>
                 <button class="btn btn-outline-warning btn-sm w-100" type="button"
@@ -341,6 +349,48 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Bell Schedule -->
+  <div class="modal fade" id="modalBellSchedule" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fas fa-bell me-2"></i>Bell Schedule</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-muted mb-3">
+            Set period times for each schedule type. Link each period to a <strong>Section ID</strong>
+            (matches the student's section, e.g. <code>A1</code>) and give it a <strong>Course Name</strong>
+            (e.g. <em>Computer Science</em>). You can leave those blank and fill them in later.
+          </p>
+
+          <!-- Schedule type tabs -->
+          <ul class="nav nav-tabs mb-3" id="bell-tabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#bell-tab-A"  data-stype="A">A Day</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#bell-tab-B"  data-stype="B">B Day</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#bell-tab-AM" data-stype="A_MIN">A Min Day</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#bell-tab-BM" data-stype="B_MIN">B Min Day</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#bell-tab-C"  data-stype="C">All Periods</button></li>
+          </ul>
+
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="bell-tab-A"  data-stype="A"></div>
+            <div class="tab-pane fade"             id="bell-tab-B"  data-stype="B"></div>
+            <div class="tab-pane fade"             id="bell-tab-AM" data-stype="A_MIN"></div>
+            <div class="tab-pane fade"             id="bell-tab-BM" data-stype="B_MIN"></div>
+            <div class="tab-pane fade"             id="bell-tab-C"  data-stype="C"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary"   id="btn-save-bell-schedule">
+            <i class="fas fa-save me-1"></i>Save Schedule
+          </button>
         </div>
       </div>
     </div>

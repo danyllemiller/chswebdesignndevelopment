@@ -16,34 +16,35 @@ if (!$date || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
     exit;
 }
 
-$db = getDB();
-
-// Day of week for requested date (0 = Sun, 6 = Sat)
+$db  = getDB();
 $dow = (int) date('w', strtotime($date));
 
+// Get ALL office hour windows for this day (supports multiple windows per day)
 $ohStmt = $db->prepare(
-    'SELECT start_time, end_time, slot_duration FROM office_hours WHERE day_of_week = ? AND is_active = 1 LIMIT 1'
+    'SELECT start_time, end_time, slot_duration FROM office_hours WHERE day_of_week = ? ORDER BY start_time ASC'
 );
 $ohStmt->bind_param('i', $dow);
 $ohStmt->execute();
-$oh = $ohStmt->get_result()->fetch_assoc();
+$windows = $ohStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $ohStmt->close();
 
-if (!$oh) {
+if (empty($windows)) {
     $db->close();
     echo json_encode(['slots' => [], 'message' => 'No office hours set for this day.']);
     exit;
 }
 
-// Generate slot list
-$startTs  = strtotime($date . ' ' . $oh['start_time']);
-$endTs    = strtotime($date . ' ' . $oh['end_time']);
-$stepSecs = (int) $oh['slot_duration'] * 60;
-
-$slotTimes = [];
-for ($t = $startTs; $t < $endTs; $t += $stepSecs) {
-    $slotTimes[] = date('H:i', $t);
+// Generate slots for every window, collect in a set to avoid duplicates
+$slotSet = [];
+foreach ($windows as $w) {
+    $startTs  = strtotime($date . ' ' . $w['start_time']);
+    $endTs    = strtotime($date . ' ' . $w['end_time']);
+    $stepSecs = (int) $w['slot_duration'] * 60;
+    for ($t = $startTs; $t < $endTs; $t += $stepSecs) {
+        $slotSet[date('H:i', $t)] = (int) $w['slot_duration'];
+    }
 }
+ksort($slotSet); // sort by time
 
 // Booked slots for this date (anything not denied counts as taken)
 $bkStmt = $db->prepare(
@@ -51,11 +52,14 @@ $bkStmt = $db->prepare(
 );
 $bkStmt->bind_param('s', $date);
 $bkStmt->execute();
-$bkResult = $bkStmt->get_result();
-$booked   = [];
-while ($row = $bkResult->fetch_assoc()) $booked[] = $row['t'];
+$booked = [];
+while ($row = $bkStmt->get_result()->fetch_assoc()) $booked[] = $row['t'];
 $bkStmt->close();
 $db->close();
 
-$slots = array_map(fn($s) => ['time' => $s, 'available' => !in_array($s, $booked)], $slotTimes);
+$slots = [];
+foreach ($slotSet as $time => $dur) {
+    $slots[] = ['time' => $time, 'available' => !in_array($time, $booked)];
+}
+
 echo json_encode(['slots' => $slots]);

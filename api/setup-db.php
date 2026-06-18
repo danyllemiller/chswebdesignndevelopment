@@ -111,15 +111,28 @@ $tables['self_assessments'] = "CREATE TABLE IF NOT EXISTS `self_assessments` (
   UNIQUE KEY `uq_student_chapter_mode` (`student_id`, `chapter_id`, `mode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
 
+// --- bell_schedule ------------------------------------------------------
+$tables['bell_schedule'] = "CREATE TABLE IF NOT EXISTS `bell_schedule` (
+  `id`            INT AUTO_INCREMENT PRIMARY KEY,
+  `schedule_type` VARCHAR(10)  NOT NULL,
+  `period_label`  VARCHAR(50)  NOT NULL,
+  `sort_order`    INT          NOT NULL DEFAULT 0,
+  `start_time`    TIME         NOT NULL,
+  `end_time`      TIME         NOT NULL,
+  `section_id`    VARCHAR(50)           DEFAULT NULL,
+  `course_name`   VARCHAR(100)          DEFAULT NULL,
+  KEY `idx_sched_type` (`schedule_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+
 // --- office_hours -------------------------------------------------------
+// No unique key on day_of_week — multiple windows per day are supported
 $tables['office_hours'] = "CREATE TABLE IF NOT EXISTS `office_hours` (
   `id`            INT AUTO_INCREMENT PRIMARY KEY,
   `day_of_week`   TINYINT      NOT NULL,
   `start_time`    TIME         NOT NULL,
   `end_time`      TIME         NOT NULL,
   `slot_duration` INT          NOT NULL DEFAULT 15,
-  `is_active`     TINYINT(1)   NOT NULL DEFAULT 1,
-  UNIQUE KEY `uq_day` (`day_of_week`)
+  KEY `idx_day` (`day_of_week`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
 
 // --- appointments -------------------------------------------------------

@@ -280,6 +280,18 @@ function initAppointments() {
     // Load office hours form when sidebar collapse opens
     document.getElementById('sidebar-office-hours')?.addEventListener('show.bs.collapse', renderOfficeHoursForm);
 
+    // Bell schedule modal
+    document.getElementById('btn-bell-schedule')?.addEventListener('click', openBellScheduleModal);
+    document.getElementById('btn-save-bell-schedule')?.addEventListener('click', saveBellSchedule);
+
+    // Load the correct tab's schedule whenever the user switches tabs
+    document.querySelectorAll('#bell-tabs .nav-link').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', e => {
+            const stype = e.target.dataset.stype;
+            if (stype) loadBellTab(stype);
+        });
+    });
+
     // Add Single Event modal
     document.getElementById('btn-add-single-event')?.addEventListener('click', () => {
         bootstrap.Modal.getOrCreateInstance(document.getElementById('modalSingleEvent')).show();
@@ -457,59 +469,83 @@ async function updateApptStatus(id, status) {
 // ─── Office Hours Form ────────────────────────────────────────────────────────
 
 async function renderOfficeHoursForm() {
-    // Prefer sidebar container; fall back to modal container
     const container = document.getElementById('office-hours-schedule-sidebar')
                    || document.getElementById('office-hours-schedule');
     if (!container) return;
 
-    let currentHours = {};
+    // Group saved windows by day_of_week
+    let byDay = {};
     try {
         const res  = await fetch('/api/appointments/office-hours');
         const data = await res.json();
-        (data.hours || []).forEach(h => { currentHours[h.day_of_week] = h; });
-    } catch { /* no hours saved yet */ }
+        (data.hours || []).forEach(h => {
+            const d = +h.day_of_week;
+            if (!byDay[d]) byDay[d] = [];
+            byDay[d].push(h);
+        });
+    } catch { /* no hours yet */ }
 
     const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-    container.innerHTML = days.map((day, dow) => {
-        const h      = currentHours[dow] || {};
-        const active = h.is_active == 1;
-        const start  = (h.start_time || '07:30').substring(0, 5);
-        const end    = (h.end_time   || '08:15').substring(0, 5);
-        const dur    = h.slot_duration || 15;
+    container.innerHTML = days.map((day, dow) => `
+        <div class="card mb-2 p-2 oh-day" data-dow="${dow}">
+          <div class="fw-bold mb-2">${day}</div>
+          <div class="oh-windows mb-2"></div>
+          <button type="button" class="btn btn-outline-secondary btn-sm oh-add-window">
+            + Add time window
+          </button>
+        </div>`).join('');
 
-        return `
-        <div class="card mb-2 p-2">
-          <div class="d-flex align-items-center gap-3 flex-wrap">
-            <div class="form-check mb-0" style="min-width:110px">
-              <input class="form-check-input oh-active" type="checkbox" id="oh-${dow}" data-dow="${dow}" ${active ? 'checked' : ''}>
-              <label class="form-check-label fw-bold" for="oh-${dow}">${day}</label>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-              <input type="time" class="form-control form-control-sm oh-start" data-dow="${dow}" value="${start}" style="width:120px">
-              <span class="text-muted">to</span>
-              <input type="time" class="form-control form-control-sm oh-end" data-dow="${dow}" value="${end}" style="width:120px">
-            </div>
-            <select class="form-select form-select-sm oh-duration" data-dow="${dow}" style="width:145px">
-              <option value="15" ${dur==15?'selected':''}>15 min slots</option>
-              <option value="20" ${dur==20?'selected':''}>20 min slots</option>
-              <option value="30" ${dur==30?'selected':''}>30 min slots</option>
-            </select>
-          </div>
-        </div>`;
-    }).join('');
+    // Populate saved windows (or one blank row if none saved)
+    days.forEach((_, dow) => {
+        const dayEl  = container.querySelector(`.oh-day[data-dow="${dow}"]`);
+        const saved  = byDay[dow] || [];
+        if (saved.length === 0 && [1,2,3,4,5].includes(dow)) {
+            // Weekdays start with one blank row
+            addWindowRow(dayEl);
+        } else {
+            saved.forEach(h => addWindowRow(dayEl,
+                h.start_time.substring(0,5),
+                h.end_time.substring(0,5),
+                +h.slot_duration));
+        }
+
+        dayEl.querySelector('.oh-add-window').addEventListener('click', () => addWindowRow(dayEl));
+    });
+}
+
+function addWindowRow(dayEl, start = '07:30', end = '08:15', dur = 15) {
+    const windows = dayEl.querySelector('.oh-windows');
+    const row = document.createElement('div');
+    row.className = 'oh-window d-flex align-items-center gap-2 mb-2 flex-wrap';
+    row.innerHTML = `
+        <input type="time" class="form-control form-control-sm oh-start" value="${start}" style="width:108px">
+        <span class="text-muted small">to</span>
+        <input type="time" class="form-control form-control-sm oh-end" value="${end}" style="width:108px">
+        <select class="form-select form-select-sm oh-duration" style="width:130px">
+          <option value="15" ${dur===15?'selected':''}>15 min slots</option>
+          <option value="20" ${dur===20?'selected':''}>20 min slots</option>
+          <option value="30" ${dur===30?'selected':''}>30 min slots</option>
+        </select>
+        <button type="button" class="btn btn-outline-danger btn-sm oh-remove px-2">×</button>`;
+    row.querySelector('.oh-remove').addEventListener('click', () => row.remove());
+    windows.appendChild(row);
 }
 
 async function saveOfficeHours() {
     const teacherId = window.dacAuthData?.user?.student_id;
     const hours     = [];
 
-    document.querySelectorAll('.oh-active').forEach(cb => {
-        const dow   = +cb.dataset.dow;
-        const start = document.querySelector(`.oh-start[data-dow="${dow}"]`)?.value || '07:30';
-        const end   = document.querySelector(`.oh-end[data-dow="${dow}"]`)?.value   || '08:15';
-        const dur   = +(document.querySelector(`.oh-duration[data-dow="${dow}"]`)?.value || 15);
-        hours.push({ day_of_week: dow, start_time: start, end_time: end, slot_duration: dur, is_active: cb.checked ? 1 : 0 });
+    document.querySelectorAll('.oh-day').forEach(dayEl => {
+        const dow = +dayEl.dataset.dow;
+        dayEl.querySelectorAll('.oh-window').forEach(winEl => {
+            const start = winEl.querySelector('.oh-start')?.value;
+            const end   = winEl.querySelector('.oh-end')?.value;
+            const dur   = +(winEl.querySelector('.oh-duration')?.value || 15);
+            if (start && end && start < end) {
+                hours.push({ day_of_week: dow, start_time: start, end_time: end, slot_duration: dur });
+            }
+        });
     });
 
     const btn = document.getElementById('btn-save-office-hours');
@@ -521,13 +557,141 @@ async function saveOfficeHours() {
         });
         const data = await res.json();
         if (data.success && btn) {
-            btn.textContent = '✓ Saved!';
-            setTimeout(() => { btn.textContent = 'Save Office Hours'; }, 2000);
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check me-1"></i>Saved!';
+            setTimeout(() => { btn.innerHTML = orig; }, 2000);
         } else {
             alert('Could not save office hours.');
         }
     } catch {
         alert('Network error.');
+    }
+}
+
+// ─── Bell Schedule ────────────────────────────────────────────────────────────
+
+let bellScheduleCache = {}; // stype → periods[]
+
+async function openBellScheduleModal() {
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalBellSchedule')).show();
+    // Load the first tab (A Day) immediately
+    await loadBellTab('A');
+}
+
+async function loadBellTab(stype) {
+    const paneId = { A: 'bell-tab-A', B: 'bell-tab-B', A_MIN: 'bell-tab-AM', B_MIN: 'bell-tab-BM', C: 'bell-tab-C' }[stype];
+    const pane = document.getElementById(paneId);
+    if (!pane) return;
+
+    // Only fetch if not cached
+    if (!bellScheduleCache[stype]) {
+        pane.innerHTML = '<p class="small text-muted">Loading…</p>';
+        try {
+            const res  = await fetch(`/api/bell-schedule?type=${encodeURIComponent(stype)}`);
+            const data = await res.json();
+            bellScheduleCache[stype] = data.schedule || [];
+        } catch {
+            pane.innerHTML = '<p class="small text-danger">Could not load schedule.</p>';
+            return;
+        }
+    }
+
+    renderBellTab(pane, stype, bellScheduleCache[stype]);
+}
+
+function renderBellTab(pane, stype, periods) {
+    pane.innerHTML = `
+    <div class="table-responsive">
+      <table class="table table-sm align-middle" id="bell-table-${stype}">
+        <thead class="table-light">
+          <tr>
+            <th style="min-width:130px">Period / Label</th>
+            <th style="min-width:110px">Start</th>
+            <th style="min-width:110px">End</th>
+            <th style="min-width:100px">Section ID</th>
+            <th style="min-width:160px">Course Name</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="bell-body-${stype}"></tbody>
+      </table>
+    </div>
+    <button type="button" class="btn btn-outline-secondary btn-sm mb-1 bell-add-row" data-stype="${stype}">
+      + Add Period
+    </button>`;
+
+    const tbody = pane.querySelector(`#bell-body-${stype}`);
+    periods.forEach(p => addBellRow(tbody, p));
+
+    // Empty tab gets one blank row
+    if (!periods.length) addBellRow(tbody, {});
+
+    pane.querySelector('.bell-add-row').addEventListener('click', () => addBellRow(tbody, {}));
+}
+
+function addBellRow(tbody, p = {}) {
+    const tr = document.createElement('tr');
+    tr.className = 'bell-row';
+    tr.innerHTML = `
+        <td><input type="text"  class="form-control form-control-sm bell-label"   value="${p.period_label || ''}"  placeholder="Period 1"></td>
+        <td><input type="time"  class="form-control form-control-sm bell-start"   value="${p.start_time   || ''}"></td>
+        <td><input type="time"  class="form-control form-control-sm bell-end"     value="${p.end_time     || ''}"></td>
+        <td><input type="text"  class="form-control form-control-sm bell-section" value="${p.section_id   || ''}"  placeholder="A1"></td>
+        <td><input type="text"  class="form-control form-control-sm bell-course"  value="${p.course_name  || ''}"  placeholder="Computer Science"></td>
+        <td><button type="button" class="btn btn-outline-danger btn-sm bell-remove-row px-2">×</button></td>`;
+    tr.querySelector('.bell-remove-row').addEventListener('click', () => tr.remove());
+    tbody.appendChild(tr);
+}
+
+async function saveBellSchedule() {
+    // Find the currently active tab
+    const activeTab  = document.querySelector('#bell-tabs .nav-link.active');
+    const stype      = activeTab?.dataset.stype;
+    if (!stype) return;
+
+    const paneId = { A: 'bell-tab-A', B: 'bell-tab-B', A_MIN: 'bell-tab-AM', B_MIN: 'bell-tab-BM', C: 'bell-tab-C' }[stype];
+    const pane   = document.getElementById(paneId);
+    const rows   = pane?.querySelectorAll('.bell-row') || [];
+
+    const periods = [];
+    rows.forEach((tr, i) => {
+        const label   = tr.querySelector('.bell-label')?.value.trim();
+        const start   = tr.querySelector('.bell-start')?.value;
+        const end     = tr.querySelector('.bell-end')?.value;
+        const section = tr.querySelector('.bell-section')?.value.trim();
+        const course  = tr.querySelector('.bell-course')?.value.trim();
+        if (label && start && end && start < end) {
+            periods.push({ period_label: label, start_time: start, end_time: end,
+                           section_id: section || null, course_name: course || null, sort_order: i });
+        }
+    });
+
+    const btn = document.getElementById('btn-save-bell-schedule');
+    const orig = btn?.innerHTML;
+    if (btn) { btn.disabled = true; btn.innerHTML = 'Saving…'; }
+
+    try {
+        const res  = await fetch('/api/bell-schedule', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({
+                teacher_id:    window.dacAuthData?.user?.student_id,
+                schedule_type: stype,
+                periods,
+            }),
+        });
+        const data = await res.json();
+        if (data.success) {
+            bellScheduleCache[stype] = null; // bust cache so next open re-fetches
+            if (btn) btn.innerHTML = '<i class="fas fa-check me-1"></i>Saved!';
+            setTimeout(() => { if (btn) { btn.disabled = false; btn.innerHTML = orig; } }, 2000);
+        } else {
+            alert('Could not save schedule.');
+            if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+        }
+    } catch {
+        alert('Network error.');
+        if (btn) { btn.disabled = false; btn.innerHTML = orig; }
     }
 }
 

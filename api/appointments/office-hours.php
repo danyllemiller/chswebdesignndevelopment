@@ -6,21 +6,24 @@ handleOptions();
 $db     = getDB();
 $method = $_SERVER['REQUEST_METHOD'];
 
-// ── GET: return all office hours ─────────────────────────────────────────────
+// ── GET: return all office hour windows ───────────────────────────────────────
 if ($method === 'GET') {
-    $result = $db->query('SELECT day_of_week, start_time, end_time, slot_duration, is_active FROM office_hours ORDER BY day_of_week');
-    $hours  = [];
+    $result = $db->query(
+        'SELECT id, day_of_week, start_time, end_time, slot_duration
+         FROM office_hours ORDER BY day_of_week ASC, start_time ASC'
+    );
+    $hours = [];
     while ($row = $result->fetch_assoc()) $hours[] = $row;
     $db->close();
     echo json_encode(['hours' => $hours]);
     exit;
 }
 
-// ── POST: save office hours (teacher only) ────────────────────────────────────
+// ── POST: replace all windows (teacher only) ──────────────────────────────────
 if ($method === 'POST') {
     $data      = json_decode(file_get_contents('php://input'), true);
     $teacherId = trim($data['teacher_id'] ?? '');
-    $hours     = $data['hours'] ?? [];
+    $hours     = $data['hours'] ?? [];   // array of {day_of_week, start_time, end_time, slot_duration}
 
     if ($teacherId) {
         $chk = $db->prepare('SELECT role FROM students WHERE student_id = ? LIMIT 1');
@@ -36,28 +39,26 @@ if ($method === 'POST') {
         }
     }
 
+    // Delete all existing windows and re-insert
     $db->query('DELETE FROM office_hours');
 
-    $stmt = $db->prepare(
-        'INSERT INTO office_hours (day_of_week, start_time, end_time, slot_duration, is_active)
-         VALUES (?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE
-           start_time    = VALUES(start_time),
-           end_time      = VALUES(end_time),
-           slot_duration = VALUES(slot_duration),
-           is_active     = VALUES(is_active)'
-    );
-
-    foreach ($hours as $h) {
-        $dow      = (int)($h['day_of_week']   ?? 0);
-        $start    = $h['start_time']  ?? '08:00';
-        $end      = $h['end_time']    ?? '09:00';
-        $duration = (int)($h['slot_duration'] ?? 15);
-        $active   = (int)($h['is_active']     ?? 1);
-        $stmt->bind_param('issii', $dow, $start, $end, $duration, $active);
-        $stmt->execute();
+    if (!empty($hours)) {
+        $stmt = $db->prepare(
+            'INSERT INTO office_hours (day_of_week, start_time, end_time, slot_duration)
+             VALUES (?, ?, ?, ?)'
+        );
+        foreach ($hours as $h) {
+            $dow      = (int)($h['day_of_week']   ?? 0);
+            $start    = $h['start_time']  ?? '08:00';
+            $end      = $h['end_time']    ?? '09:00';
+            $duration = (int)($h['slot_duration'] ?? 15);
+            if ($start >= $end) continue; // skip invalid windows
+            $stmt->bind_param('issi', $dow, $start, $end, $duration);
+            $stmt->execute();
+        }
+        $stmt->close();
     }
-    $stmt->close();
+
     $db->close();
     echo json_encode(['success' => true]);
     exit;
