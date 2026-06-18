@@ -95,8 +95,20 @@ $tables['cs_questions'] = "CREATE TABLE IF NOT EXISTS `cs_questions` (
   `question`  TEXT         NOT NULL,
   `options`   TEXT         NOT NULL,
   `answer`    VARCHAR(500) NOT NULL,
+  `hint`      TEXT                  DEFAULT NULL,
   `course_id` VARCHAR(50)           DEFAULT 'CS',
   KEY `idx_unit` (`unit`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+
+// --- self_assessments ---------------------------------------------------
+$tables['self_assessments'] = "CREATE TABLE IF NOT EXISTS `self_assessments` (
+  `id`         INT AUTO_INCREMENT PRIMARY KEY,
+  `student_id` VARCHAR(50) NOT NULL,
+  `chapter_id` INT         NOT NULL,
+  `level`      FLOAT       NOT NULL DEFAULT 0,
+  `mode`       VARCHAR(10) NOT NULL DEFAULT 'pre',
+  `updated_at` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `uq_student_chapter_mode` (`student_id`, `chapter_id`, `mode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
 
 // Run all table creations

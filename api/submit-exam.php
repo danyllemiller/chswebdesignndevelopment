@@ -33,7 +33,8 @@ $stmt->bind_param('ssis', $examId, $examId, $totalPoints, $course);
 $stmt->execute();
 $stmt->close();
 
-// UPSERT grade — never create duplicates
+// UPSERT grade — always saves (no keep-higher blocking)
+// ON DUPLICATE KEY UPDATE unconditionally overwrites so re-submissions always land
 $stmt = $db->prepare(
     'INSERT INTO grades (student_id, exam_id, score, total_points, timestamp)
      VALUES (?, ?, ?, ?, NOW())
@@ -42,10 +43,17 @@ $stmt = $db->prepare(
 $stmt->bind_param('sssi', $studentId, $examId, $scoreVal, $totalPoints);
 
 if ($stmt->execute()) {
-    echo json_encode(['result' => 'success', 'score' => $scoreVal, 'total_points' => $totalPoints]);
+    // Return both formats so any client code works regardless of which key it checks
+    echo json_encode([
+        'success'     => true,
+        'result'      => 'success',
+        'keptHigher'  => false,
+        'score'       => $scoreVal,
+        'total_points'=> $totalPoints,
+    ]);
 } else {
     http_response_code(500);
-    echo json_encode(['error' => $stmt->error]);
+    echo json_encode(['error' => $stmt->error, 'success' => false]);
 }
 $stmt->close();
 $db->close();

@@ -1928,6 +1928,12 @@ window.addEventListener('message', async (event) => {
                 if (event.data.type === 'diagnostic_complete') {
                     await syncPreAssessment(15, 15);  // FIXED: Always pass 15 points fixed
                     console.log("Pre-Assessment synced: 15 pts fixed");
+
+                    // Tell the scale iframe (curriculum-frame) to refresh its grade bars
+                    // so the pre-system-overlay unlocks without the user needing to reload
+                    if (dom.curriculumFrame && dom.curriculumFrame.contentWindow) {
+                        dom.curriculumFrame.contentWindow.postMessage({ type: 'refresh_scores' }, '*');
+                    }
                 }
             }
         });

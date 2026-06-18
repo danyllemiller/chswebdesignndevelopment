@@ -32,16 +32,111 @@ function setupPostMode() {
 document.addEventListener("DOMContentLoaded", () => {
     const headerElements = document.querySelectorAll('header h1, header p, .header-banner h1, .header-banner p');
     headerElements.forEach(el => {
-        el.classList.remove('text-primary', 'text-dark', 'text-muted'); 
-        el.style.setProperty('color', '#ffffff', 'important'); // Hard-override to ensure readability
+        el.classList.remove('text-primary', 'text-dark', 'text-muted');
+        el.style.setProperty('color', '#ffffff', 'important');
     });
 
-    // Detect if loaded as a POST-SCALE via URL parameters (used by CS Interactive Notebook)
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('type') === 'post') {
         setupPostMode();
     }
+
+    loadStudentScores();
 });
+
+// Refresh scores when the parent iframe controller signals that a quiz just completed
+window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'refresh_scores') {
+        loadStudentScores();
+    }
+});
+
+/**
+ * Fetches the logged-in student's grades and unlocks the pre/post overlay panels
+ * if a matching score already exists in the gradebook.
+ */
+async function loadStudentScores() {
+    let user = null;
+    try { user = JSON.parse(localStorage.getItem('user')); } catch(e) {}
+    if (!user || !user.student_id) return;
+
+    // Use data-unit attribute (CS pages) if present, else parse from title (WD pages)
+    const bodyUnit = document.body.getAttribute('data-unit');
+    const unitNum  = bodyUnit ? parseInt(bodyUnit) : chapterNum;
+
+    try {
+        const res = await fetch(`/api/student/grades?student_id=${encodeURIComponent(user.student_id)}`);
+        if (!res.ok) return;
+        const { responses = [] } = await res.json();
+
+        // ── Pre-Assessment bar ─────────────────────────────────────────────
+        // Matches: "Unit5-Pre", "Ch2 Pre-Assessment [15 pts]", etc.
+        const preGrade = responses.find(g => {
+            const id = g.exam_id || '';
+            const hasUnit = new RegExp(`(unit\\s*0*${unitNum}[\\s\\-]|ch\\s*0*${unitNum}[\\s\\-\\[])`, 'i').test(id);
+            return hasUnit && /pre/i.test(id) && !/post/i.test(id) && !/scale/i.test(id);
+        });
+
+        if (preGrade) {
+            const score = parseFloat(preGrade.score) || 0;
+            const total = parseFloat(preGrade.total_points) || 15;
+            unlockBar('pre-system-overlay', 'pre-test-bar', 'pre-test-label', score, total);
+        }
+
+        // ── Post / Summative bar ───────────────────────────────────────────
+        // Matches: "Unit5 Summative", "Unit5 Exam", "Ch2 Final", etc.
+        const postGrade = responses.find(g => {
+            const id = g.exam_id || '';
+            const hasUnit = new RegExp(`(unit\\s*0*${unitNum}|ch\\s*0*${unitNum})`, 'i').test(id);
+            return hasUnit && /summative|exam|final/i.test(id);
+        });
+
+        if (postGrade) {
+            const score = parseFloat(postGrade.score) || 0;
+            const total = parseFloat(postGrade.total_points) || 100;
+            unlockBar('post-system-overlay', 'post-test-bar', 'post-test-label', score, total);
+        }
+
+    } catch(e) {
+        console.warn('[prof-scales] Could not load grades:', e);
+    }
+}
+
+/**
+ * Removes the lock overlay and fills the progress bar with the student's score.
+ * @param {string} overlayId  - e.g. 'pre-system-overlay'
+ * @param {string} barId      - e.g. 'pre-test-bar'
+ * @param {string} labelId    - e.g. 'pre-test-label'
+ * @param {number} score      - raw score (e.g. 12)
+ * @param {number} total      - max points (e.g. 15)
+ */
+function unlockBar(overlayId, barId, labelId, score, total) {
+    const overlay = document.getElementById(overlayId);
+    if (overlay) overlay.remove();
+
+    const pct   = total > 0 ? score / total : 0;
+    const level = pct * 4;
+
+    const bar = document.getElementById(barId);
+    if (bar) {
+        bar.style.width = (pct * 100) + '%';
+        bar.className   = 'progress-bar text-end pe-2 fw-bold';
+        bar.style.setProperty('color', '#ffffff', 'important');
+        if      (level >= 3.5) bar.style.backgroundColor = 'var(--code-color, #588157)';
+        else if (level >= 2.5) bar.style.backgroundColor = 'var(--tertiary-color, #3a52a4)';
+        else if (level >= 1.5) bar.style.backgroundColor = 'var(--file-name-color, #E07A5F)';
+        else if (level  >  0)  bar.style.backgroundColor = 'var(--primary-color, #000099)';
+        else                   bar.style.backgroundColor = 'var(--quaternary-color, #c0c0c0)';
+    }
+
+    const label = document.getElementById(labelId);
+    if (label) {
+        label.innerText = `${score} / ${total} pts`;
+        label.classList.remove('fst-italic', 'text-muted', 'fw-normal');
+        label.style.color      = '#212529';
+        label.style.fontWeight = 'bold';
+    }
+}
 
 // 1. Listen for setup commands from your parent website (used by Web Design)
 window.addEventListener('message', (event) => {

@@ -28,12 +28,19 @@ if ($unit !== '') {
 $questions = [];
 while ($row = $result->fetch_assoc()) {
     $questions[] = [
-        'chapter' => $row['unit'],
+        'chapter'  => $row['unit'],
         'question' => $row['question'],
         'options'  => is_string($row['options']) ? json_decode($row['options'], true) : $row['options'],
         'answer'   => $row['answer'],
+        'hint'     => $row['hint'] ?? '',
     ];
 }
 $db->close();
 
-echo json_encode($questions);
+// Return the wrapper format that preTestLogicCS.js expects: {unit, count, questions:[...]}
+$unitVal = $unit !== '' ? $unit : 'all';
+echo json_encode([
+    'unit'      => $unitVal,
+    'count'     => count($questions),
+    'questions' => $questions,
+]);
