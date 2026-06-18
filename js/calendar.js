@@ -638,6 +638,7 @@ function addBellSection(container, sec = {}) {
             <input type="time" class="form-control form-control-sm bell-start" value="${start}" style="width:108px">
             <span class="text-muted small">→</span>
             <input type="time" class="form-control form-control-sm bell-end"   value="${end}"   style="width:108px">
+            <button type="button" class="btn btn-outline-secondary btn-sm bell-fill-all py-0" title="Copy these times to all checked days" style="font-size:.75rem;white-space:nowrap">Fill all</button>
           </div>
         </div>`;
     }).join('');
@@ -657,6 +658,18 @@ function addBellSection(container, sec = {}) {
     card.querySelectorAll('.bell-day-check').forEach(cb => {
         cb.addEventListener('change', () => {
             cb.closest('.bell-day-row').querySelector('.bell-day-times').style.display = cb.checked ? 'flex' : 'none';
+        });
+    });
+    card.querySelectorAll('.bell-fill-all').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const row   = btn.closest('.bell-day-row');
+            const start = row.querySelector('.bell-start').value;
+            const end   = row.querySelector('.bell-end').value;
+            card.querySelectorAll('.bell-day-check:checked').forEach(cb => {
+                const r = cb.closest('.bell-day-row');
+                r.querySelector('.bell-start').value = start;
+                r.querySelector('.bell-end').value   = end;
+            });
         });
     });
     card.querySelector('.bell-remove-section').addEventListener('click', () => card.remove());
