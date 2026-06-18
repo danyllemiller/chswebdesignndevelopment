@@ -33,6 +33,25 @@ injectTurnInModal();
 
 let currentTurnInState = null; 
 
+// Mirrors the identical function in admin/gradebook.js so column labels match exactly
+function abbreviateAssignmentName(name) {
+    let abbr = name.replace(/\s*[\[\(]\d+\s*pts?[\]\)]/i, '').trim();
+    if (abbr.toUpperCase().startsWith('TC-')) return abbr;
+    abbr = abbr.replace(/Chapter\s*(\d+)/i, 'Ch$1')
+               .replace(/Unit\s*(\d+)/i, 'Unit$1')
+               .replace(':', '-');
+    abbr = abbr.replace(/\b(Summative|Formative|Assessment|Assignment)\b/ig, '').replace(/Lab\s*/i, 'Ch ').trim();
+    if (!abbr.includes('-') && abbr.includes(' ')) abbr = abbr.replace(' ', '-');
+    if (abbr.includes('-')) {
+        const parts = abbr.split('-');
+        const prefix = parts[0].trim();
+        const suffixWords = parts.slice(1).join('-').trim().replace(/['"()\[\]]/g, '').split(/[\s\/]+/);
+        if (suffixWords.length > 1 && suffixWords[0].toLowerCase() === 'the') suffixWords.shift();
+        abbr = suffixWords.length > 0 && suffixWords[0].length > 0 ? prefix + '-' + suffixWords[0] : prefix;
+    }
+    return abbr.replace(/\s+/g, ' ').replace(/--+/g, '-').replace(/-+$/, '').trim();
+}
+
 // HELPER: Mimics Teacher Gradebook logic to hide CS assignments from WD students and vice versa!
 function isAssignmentVisible(name, period, registryData) {
     if (!period || period === 'Teacher') return true;
@@ -99,21 +118,24 @@ async function loadGrades() {
             if (courseKey === "CS") subtitleEl.innerText = `Viewing Computer Science Gradebook (Period ${studentPeriod})`;
         }
 
+        // Key everything by exam_id only — avoids duplicate columns when title !== exam_id
         const registryData = {};
         if (Array.isArray(data.assignments)) {
             data.assignments.forEach((assignment) => {
                 const examIdKey = String(assignment.exam_id || '').trim();
-                const titleKey = String(assignment.title || '').trim();
-                const registryEntry = {
-                    title: assignment.title || '',
+                if (!examIdKey) return;
+                registryData[examIdKey] = {
+                    title: assignment.title || examIdKey,
                     maxPoints: assignment.total_points || 0,
                     dueDate: assignment.due_date || '',
                     instructions: assignment.instructions || '',
-                    targetCourse: assignment.course_id || 'All'
+                    targetCourse: assignment.course_id || 'All',
+                    periodDueDates: assignment.period_due_dates
+                        ? (typeof assignment.period_due_dates === 'string'
+                            ? JSON.parse(assignment.period_due_dates)
+                            : assignment.period_due_dates)
+                        : {}
                 };
-
-                if (examIdKey) registryData[examIdKey] = registryEntry;
-                if (titleKey && !registryData[titleKey]) registryData[titleKey] = registryEntry;
             });
         }
 
@@ -121,21 +143,21 @@ async function loadGrades() {
         if (Array.isArray(data.assignments)) {
             data.assignments.forEach((assignment) => {
                 const examIdKey = String(assignment.exam_id || '').trim();
-                const titleKey = String(assignment.title || '').trim();
-                const entry = {
+                if (!examIdKey) return;
+                myGrades[examIdKey] = {
                     score: assignment.score,
                     timestamp: assignment.timestamp,
                     exam_id: examIdKey,
-                    title: titleKey
+                    title: assignment.title || examIdKey
                 };
-
-                if (examIdKey) myGrades[examIdKey] = entry;
-                if (titleKey && !myGrades[titleKey]) myGrades[titleKey] = entry;
             });
         }
 
-        const allKeys = new Set(Object.keys(myGrades).filter(k => k !== 'lastSubmitDate' && k !== 'uid'));
-        Object.keys(registryData).forEach(key => allKeys.add(key));
+        const allKeys = new Set(
+            Object.keys(myGrades)
+                .concat(Object.keys(registryData))
+                .filter(k => k !== 'lastSubmitDate' && k !== 'uid')
+        );
             
 const keys = Array.from(allKeys)
             .filter(key => isAssignmentVisible(key, studentPeriod, registryData))
@@ -311,11 +333,11 @@ function renderGradeTable(keys, myGrades, studentId, registryData, studentPeriod
     if (!thead || !tbody) return;
 
     let headHtml = `<tr><th class="label-cell sticky-col font-monospace px-3 py-3 assignment-header">Assignment</th>`;
-    keys.forEach(key => { 
-        const displayLabel = key.replace(/Lab\s*/i, 'Ch ').replace(/CS Unit\s*/i, 'Unit ');
+    keys.forEach(key => {
+        const displayLabel = abbreviateAssignmentName(key);
         let tooltipText = key;
         const regInfo = registryData[key];
-        
+
         if (regInfo) {
             let dueDate = regInfo.dueDate || '';
             if (regInfo.periodDueDates && regInfo.periodDueDates[studentPeriod]) dueDate = regInfo.periodDueDates[studentPeriod];
@@ -325,7 +347,7 @@ function renderGradeTable(keys, myGrades, studentId, registryData, studentPeriod
             }
             if (regInfo.instructions) tooltipText += ` | Instructions: ${regInfo.instructions.replace(/"/g, "'")}`;
         }
-        
+
         headHtml += `<th class="header-main-blue" data-bs-toggle="tooltip" data-bs-placement="top" title="${escapeHtml(tooltipText)}">
             <div class="h-100 d-flex flex-column align-items-center justify-content-end pb-2" style="cursor: help;">
                 <span class="vertical-text mb-2">${displayLabel}</span>
