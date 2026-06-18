@@ -107,90 +107,56 @@
   box-shadow: 0 0 0 3px rgba(114, 145, 171, 0.16);
 }
 
-/* Day type colors */
-.calendar-day.day-a {
-  background-color: var(--calendar-day-a);
-  color: var(--calendar-text-dark);
+/* Typed day — background/text/border come from JS via CSS variables */
+.calendar-day.typed-day {
+  background-color: var(--day-bg);
+  color: var(--day-text);
+  border-color: var(--day-border);
 }
 
-.calendar-day.day-a .text-muted,
-.calendar-day.day-a .day-number {
-  color: var(--calendar-text-dark) !important;
+.calendar-day.typed-day .day-number {
+  color: var(--day-text);
 }
 
-.calendar-day.day-b {
-  background-color: var(--calendar-day-b);
-  color: var(--calendar-text-light);
+/* Empty cells that fill grid gaps before day 1 */
+.calendar-day-empty {
+  min-height: 110px;
+  background: transparent;
+  border: none;
 }
 
-.calendar-day.day-b .day-number,
-.calendar-day.day-b .event-count,
-.calendar-day.day-b .text-muted {
-  color: var(--calendar-text-light) !important;
-}
-
-.calendar-day.day-a-min {
-  background-color: var(--calendar-day-a-min);
-  color: var(--calendar-text-dark);
-}
-
-.calendar-day.day-a-min .text-muted,
-.calendar-day.day-a-min .day-number {
-  color: var(--calendar-text-dark) !important;
-}
-
-.calendar-day.day-b-min {
-  background-color: var(--calendar-day-b-min);
-  color: var(--calendar-text-dark);
-}
-
-.calendar-day.day-b-min .text-muted,
-.calendar-day.day-b-min .day-number {
-  color: var(--calendar-text-dark) !important;
-}
-
-.calendar-day.day-off {
-  background-color: var(--calendar-day-off);
-  color: var(--calendar-text-light);
-}
-
-.calendar-day.day-off .day-number,
-.calendar-day.day-off .event-count,
-.calendar-day.day-off .text-muted {
-  color: var(--calendar-text-light) !important;
-}
-
-/* Day type badge styling */
-.day-type-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
+/* Type chip — small label inside the day cell */
+.day-type-chip {
   display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.3rem;
+  background-color: rgba(0,0,0,0.12);
+  color: inherit;
+  margin-top: 0.25rem;
 }
 
-.day-type-badge.day-a {
-  background-color: var(--calendar-day-a);
-  color: var(--calendar-text-dark);
+/* Event / description text inside a day cell */
+.day-event-text {
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-top: 0.35rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  color: inherit;
 }
 
-.day-type-badge.day-b {
-  background-color: var(--calendar-day-b);
-  color: var(--calendar-text-light);
-}
-
-.day-type-badge.day-a-min {
-  background-color: var(--calendar-day-a-min);
-  color: var(--calendar-text-dark);
-}
-
-.day-type-badge.day-b-min {
-  background-color: var(--calendar-day-b-min);
-  color: var(--calendar-text-dark);
-}
-
-.day-type-badge.day-off {
-  background-color: var(--calendar-day-off);
-  color: var(--calendar-text-light);
+/* Observance-only (type=none): italic, muted, no background */
+.day-event-text--observance {
+  font-style: italic;
+  font-weight: 500;
+  color: #555;
 }
 
 .calendar-sidebar {
@@ -338,24 +304,19 @@
   overflow-y: auto;
 }
 
-/* Hide calendar text labels at larger breakpoints when content gets tight */
 @media (max-width: 1200px) {
-  .day-type-badge .badge-text {
-    display: none;
-  }
-  
-  .day-info .info-text {
-    display: none;
-  }
-  
   .calendar-day {
     min-height: 80px;
     padding: 0.6rem 0.4rem;
   }
-  
-  .day-type-badge {
-    padding: 0.2rem 0.4rem;
-    margin-bottom: 0.4rem !important;
+
+  .day-type-chip {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.3rem;
+  }
+
+  .day-event-text {
+    font-size: 0.62rem;
   }
 }
 
@@ -445,11 +406,20 @@
   .calendar-day .day-number {
     font-size: 0.85rem;
   }
-  
-  .day-type-badge {
-    padding: 0.15rem;
-    margin-bottom: 0.3rem !important;
-    font-size: 0.65rem;
+
+  .day-type-chip {
+    font-size: 0.55rem;
+    padding: 0.1rem 0.25rem;
+  }
+
+  .day-event-text {
+    font-size: 0.58rem;
+  }
+
+  .calendar-day-empty {
+    min-height: 0;
+    height: 0;
+    padding: 0;
   }
 }
 
