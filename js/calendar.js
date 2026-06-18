@@ -572,14 +572,15 @@ async function saveOfficeHours() {
 
 let bellScheduleCache = {}; // stype → periods[]
 
+const BELL_PANE = { Mon:'bell-tab-Mon', Tue:'bell-tab-Tue', Wed:'bell-tab-Wed', Thu:'bell-tab-Thu', Fri:'bell-tab-Fri' };
+
 async function openBellScheduleModal() {
     bootstrap.Modal.getOrCreateInstance(document.getElementById('modalBellSchedule')).show();
-    // Load the first tab (A Day) immediately
-    await loadBellTab('A');
+    await loadBellTab('Mon');
 }
 
 async function loadBellTab(stype) {
-    const paneId = { A: 'bell-tab-A', B: 'bell-tab-B', A_MIN: 'bell-tab-AM', B_MIN: 'bell-tab-BM', C: 'bell-tab-C' }[stype];
+    const paneId = BELL_PANE[stype];
     const pane = document.getElementById(paneId);
     if (!pane) return;
 
@@ -605,11 +606,10 @@ function renderBellTab(pane, stype, periods) {
       <table class="table table-sm align-middle" id="bell-table-${stype}">
         <thead class="table-light">
           <tr>
-            <th style="min-width:130px">Period / Label</th>
-            <th style="min-width:110px">Start</th>
-            <th style="min-width:110px">End</th>
-            <th style="min-width:100px">Section ID</th>
-            <th style="min-width:160px">Course Name</th>
+            <th style="min-width:120px">Period / Label<br><small class="fw-normal text-muted">e.g. A1, Lunch, PLC</small></th>
+            <th style="min-width:105px">Start</th>
+            <th style="min-width:105px">End</th>
+            <th style="min-width:180px">Course Name<br><small class="fw-normal text-muted">optional — fill in later</small></th>
             <th></th>
           </tr>
         </thead>
@@ -633,36 +633,33 @@ function addBellRow(tbody, p = {}) {
     const tr = document.createElement('tr');
     tr.className = 'bell-row';
     tr.innerHTML = `
-        <td><input type="text"  class="form-control form-control-sm bell-label"   value="${p.period_label || ''}"  placeholder="Period 1"></td>
-        <td><input type="time"  class="form-control form-control-sm bell-start"   value="${p.start_time   || ''}"></td>
-        <td><input type="time"  class="form-control form-control-sm bell-end"     value="${p.end_time     || ''}"></td>
-        <td><input type="text"  class="form-control form-control-sm bell-section" value="${p.section_id   || ''}"  placeholder="A1"></td>
-        <td><input type="text"  class="form-control form-control-sm bell-course"  value="${p.course_name  || ''}"  placeholder="Computer Science"></td>
+        <td><input type="text" class="form-control form-control-sm bell-label"  value="${p.period_label || ''}" placeholder="A1"></td>
+        <td><input type="time" class="form-control form-control-sm bell-start"  value="${p.start_time   || ''}"></td>
+        <td><input type="time" class="form-control form-control-sm bell-end"    value="${p.end_time     || ''}"></td>
+        <td><input type="text" class="form-control form-control-sm bell-course" value="${p.course_name  || ''}" placeholder="Computer Science"></td>
         <td><button type="button" class="btn btn-outline-danger btn-sm bell-remove-row px-2">×</button></td>`;
     tr.querySelector('.bell-remove-row').addEventListener('click', () => tr.remove());
     tbody.appendChild(tr);
 }
 
 async function saveBellSchedule() {
-    // Find the currently active tab
     const activeTab  = document.querySelector('#bell-tabs .nav-link.active');
     const stype      = activeTab?.dataset.stype;
     if (!stype) return;
 
-    const paneId = { A: 'bell-tab-A', B: 'bell-tab-B', A_MIN: 'bell-tab-AM', B_MIN: 'bell-tab-BM', C: 'bell-tab-C' }[stype];
+    const paneId = BELL_PANE[stype];
     const pane   = document.getElementById(paneId);
     const rows   = pane?.querySelectorAll('.bell-row') || [];
 
     const periods = [];
     rows.forEach((tr, i) => {
-        const label   = tr.querySelector('.bell-label')?.value.trim();
-        const start   = tr.querySelector('.bell-start')?.value;
-        const end     = tr.querySelector('.bell-end')?.value;
-        const section = tr.querySelector('.bell-section')?.value.trim();
-        const course  = tr.querySelector('.bell-course')?.value.trim();
+        const label  = tr.querySelector('.bell-label')?.value.trim();
+        const start  = tr.querySelector('.bell-start')?.value;
+        const end    = tr.querySelector('.bell-end')?.value;
+        const course = tr.querySelector('.bell-course')?.value.trim();
         if (label && start && end && start < end) {
             periods.push({ period_label: label, start_time: start, end_time: end,
-                           section_id: section || null, course_name: course || null, sort_order: i });
+                           section_id: label, course_name: course || null, sort_order: i });
         }
     });
 
