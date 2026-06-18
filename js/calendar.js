@@ -64,15 +64,23 @@ async function initCalendar() {
 function parseCSV(text) {
     specialDates.clear();
     const lines = text.split(/\r?\n/);
+
+    // Detect delimiter from first non-empty line (tab-separated or comma-separated)
+    const firstLine = lines.find(l => l.trim());
+    const delim = firstLine && firstLine.includes('\t') ? '\t' : ',';
+
     for (let i = 0; i < lines.length; i++) {
         const raw = lines[i].trim();
         if (!raw) continue;
-        if (i === 0 && /^date/i.test(raw)) continue; // skip header
+        if (i === 0 && /^date/i.test(raw.split(delim)[0].trim())) continue; // skip header
 
-        const cols = raw.split(',');
+        const cols = raw.split(delim);
         const date = cols[0]?.trim();
         const type = cols[1]?.trim();
-        const description = cols.slice(2).join(',').trim();
+        // For comma-delimited files description may itself contain commas; for TSV just use col 2
+        const description = delim === '\t'
+            ? (cols[2]?.trim() || '')
+            : cols.slice(2).join(',').trim();
 
         if (date && /^\d{4}-\d{2}-\d{2}$/.test(date) && type) {
             specialDates.set(date, { type, description });
