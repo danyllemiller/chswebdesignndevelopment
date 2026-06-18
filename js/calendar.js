@@ -229,12 +229,18 @@ document.addEventListener('DOMContentLoaded', initCalendar);
 let selectedSlot = null;
 
 function initAppointments() {
-    // Show teacher button once auth resolves
+    // Reveal the correct sidebar section once auth resolves
     function applyAuthUI() {
-        if (window.dacAuthData?.isTeacher) {
-            const btn = document.getElementById('btn-teacher-dashboard');
-            if (btn) btn.style.display = '';
-        }
+        const isTeacher = window.dacAuthData?.isTeacher ?? false;
+
+        document.getElementById('btn-teacher-dashboard')?.style.setProperty('display', isTeacher ? '' : 'none');
+
+        document.querySelectorAll('.sidebar-teacher-tools').forEach(el => {
+            el.style.display = isTeacher ? '' : 'none';
+        });
+        document.querySelectorAll('.sidebar-student-tools').forEach(el => {
+            el.style.display = isTeacher ? 'none' : '';
+        });
     }
     if (window.dacAuthData) applyAuthUI();
     document.addEventListener('authComplete', applyAuthUI);
