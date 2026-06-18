@@ -305,7 +305,7 @@ async function loadSlots(date) {
     container.innerHTML = '<p class="small text-muted">Loading...</p>';
 
     try {
-        const res  = await fetch(`/api/appointments/slots?date=${date}`);
+        const res  = await fetch(`/api/appointments/slots.php?date=${date}`);
         const data = await res.json();
 
         if (!data.slots?.length) {
@@ -362,7 +362,7 @@ async function submitBooking() {
     btn.textContent = 'Sending…';
 
     try {
-        const res  = await fetch('/api/appointments/book', {
+        const res  = await fetch('/api/appointments/book.php', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ student_id: studentId, date, time: selectedSlot, reason }),
@@ -390,7 +390,7 @@ async function loadTeacherDashboard() {
     const approvedEl = document.getElementById('approved-appointments');
 
     try {
-        const res  = await fetch('/api/appointments/requests?role=teacher');
+        const res  = await fetch('/api/appointments/requests.php?role=teacher');
         const data = await res.json();
         const all  = data.appointments || [];
 
@@ -447,7 +447,7 @@ function apptCard(a, showActions) {
 async function updateApptStatus(id, status) {
     const teacherId = window.dacAuthData?.user?.student_id;
     try {
-        const res  = await fetch('/api/appointments/update-status', {
+        const res  = await fetch('/api/appointments/update-status.php', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ id, status, teacher_id: teacherId }),
@@ -469,7 +469,7 @@ async function renderOfficeHoursForm() {
     // Group saved windows by day_of_week
     let byDay = {};
     try {
-        const res  = await fetch('/api/appointments/office-hours');
+        const res  = await fetch('/api/appointments/office-hours.php');
         const data = await res.json();
         (data.hours || []).forEach(h => {
             const d = +h.day_of_week;
@@ -543,7 +543,7 @@ async function saveOfficeHours() {
 
     const btn = document.getElementById('btn-save-office-hours');
     try {
-        const res  = await fetch('/api/appointments/office-hours', {
+        const res  = await fetch('/api/appointments/office-hours.php', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ teacher_id: teacherId, hours }),
@@ -587,7 +587,7 @@ async function loadBellSchedule() {
 
     let rows = [];
     try {
-        const res  = await fetch('/api/bell-schedule');
+        const res  = await fetch('/api/bell-schedule.php');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         rows = data.schedule || [];
@@ -688,7 +688,7 @@ async function saveBellSchedule() {
     if (btn) { btn.disabled = true; btn.innerHTML = 'Saving…'; }
 
     try {
-        const res  = await fetch('/api/bell-schedule', {
+        const res  = await fetch('/api/bell-schedule.php', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ teacher_id: window.dacAuthData?.user?.student_id, all: true, periods }),
