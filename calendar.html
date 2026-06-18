@@ -114,6 +114,24 @@
                 <button id="btn-import-csv" class="btn btn-success btn-sm w-100">Import Schedule</button>
                 <div id="csv-status" class="mt-2 small"></div>
               </div>
+
+              <div class="calendar-form-card mb-3">
+                <h3 class="h5 text-warning mb-2"><i class="fas fa-user-clock me-2"></i>Office Hours</h3>
+                <p class="small text-muted mb-2">Set the days and times students can book appointments with you.</p>
+                <button class="btn btn-outline-warning btn-sm w-100" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#sidebar-office-hours"
+                        aria-expanded="false">
+                  <i class="fas fa-cog me-1"></i>Set My Office Hours
+                </button>
+                <div class="collapse mt-3" id="sidebar-office-hours">
+                  <div id="office-hours-schedule-sidebar">
+                    <p class="small text-muted fst-italic">Loading…</p>
+                  </div>
+                  <button id="btn-save-office-hours" class="btn btn-warning btn-sm w-100 mt-2">
+                    <i class="fas fa-save me-1"></i>Save Office Hours
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- ── STUDENT TOOLS (JS reveals when !isTeacher) ── -->

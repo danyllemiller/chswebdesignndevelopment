@@ -277,6 +277,9 @@ function initAppointments() {
 
     document.getElementById('btn-save-office-hours')?.addEventListener('click', saveOfficeHours);
 
+    // Load office hours form when sidebar collapse opens
+    document.getElementById('sidebar-office-hours')?.addEventListener('show.bs.collapse', renderOfficeHoursForm);
+
     // Add Single Event modal
     document.getElementById('btn-add-single-event')?.addEventListener('click', () => {
         bootstrap.Modal.getOrCreateInstance(document.getElementById('modalSingleEvent')).show();
@@ -454,7 +457,9 @@ async function updateApptStatus(id, status) {
 // ─── Office Hours Form ────────────────────────────────────────────────────────
 
 async function renderOfficeHoursForm() {
-    const container = document.getElementById('office-hours-schedule');
+    // Prefer sidebar container; fall back to modal container
+    const container = document.getElementById('office-hours-schedule-sidebar')
+                   || document.getElementById('office-hours-schedule');
     if (!container) return;
 
     let currentHours = {};
