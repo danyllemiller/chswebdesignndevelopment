@@ -634,7 +634,7 @@ function addBellSection(container, sec = {}) {
             <input type="checkbox" class="form-check-input bell-day-check" id="bdc-${day}-${uid}" ${checked}>
             <label class="form-check-label small fw-semibold" for="bdc-${day}-${uid}">${BELL_DAY_LABEL[day]}</label>
           </div>
-          <div class="bell-day-times d-flex align-items-center gap-1" style="${times ? '' : 'display:none'}">
+          <div class="bell-day-times align-items-center gap-1" style="${times ? 'display:flex' : 'display:none'}">
             <input type="time" class="form-control form-control-sm bell-start" value="${start}" style="width:108px">
             <span class="text-muted small">→</span>
             <input type="time" class="form-control form-control-sm bell-end"   value="${end}"   style="width:108px">
@@ -646,7 +646,7 @@ function addBellSection(container, sec = {}) {
     <div class="card-body p-3">
       <div class="d-flex gap-2 mb-3 align-items-center">
         <input type="text" class="form-control form-control-sm bell-sec-label fw-bold"
-               value="${sec.label || ''}" placeholder="A1" style="width:72px">
+               value="${sec.label || ''}" placeholder="e.g. A1" style="width:90px">
         <input type="text" class="form-control form-control-sm bell-sec-course flex-fill"
                value="${sec.course || ''}" placeholder="Course name (optional, e.g. Computer Science)">
         <button type="button" class="btn btn-outline-danger btn-sm px-2 bell-remove-section">×</button>
@@ -656,7 +656,7 @@ function addBellSection(container, sec = {}) {
 
     card.querySelectorAll('.bell-day-check').forEach(cb => {
         cb.addEventListener('change', () => {
-            cb.closest('.bell-day-row').querySelector('.bell-day-times').style.display = cb.checked ? '' : 'none';
+            cb.closest('.bell-day-row').querySelector('.bell-day-times').style.display = cb.checked ? 'flex' : 'none';
         });
     });
     card.querySelector('.bell-remove-section').addEventListener('click', () => card.remove());
