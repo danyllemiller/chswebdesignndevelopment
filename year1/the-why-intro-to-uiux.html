@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 4: Intro to UI/UX | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <!-- Security Guard: Kicks out anyone not logged in -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+</head>
+<body class="bg-white">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <nav class="mb-4 d-flex justify-content-between small fw-bold">
+        <a href="/year1/the-blueprint.html" class="text-decoration-none text-primary">&laquo; Previous: Chapter 3: The Blueprint</a>
+        <a href="/year1/intro-to-html.html" class="text-decoration-none text-primary">Next: Chapter 5: The Bones (HTML) &raquo;</a>
+    </nav>
+
+    <!-- CLEAN MODERN HEADER IDENTICAL TO CHAPTER 1, 2 & 3 -->
+    <h1 class="text-center text-primary fw-bold mt-5 mb-2">Chapter 4: The Artist</h1>
+    <p class="text-center text-secondary fst-italic fs-5 mb-5">Intro to UI/UX</p>
+
+    <!-- ROW 1: OVERVIEW & OBJECTIVES -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="overview">
+          <h2 class="section-title mt-0">Chapter 4 Overview:</h2>
+          <p>Welcome back, designer! 🎨 Up until now, we’ve been focused on the <strong>mechanics</strong> of the web and the structural blueprints of your projects. We've been building the engine and the frame of the car.</p>
+          <p>But now, we need to ask the most important question for our agency clients: <strong>Why?</strong> Why is the "Buy" button green? Why is the menu hidden behind three little lines? Why is the text on the hero section so big?</p>
+          <p>If your answer is "because it looks cool," you are failing your user and your client. This chapter introduces you to <strong>UI (User Interface)</strong> and <strong>UX (User Experience)</strong>. These aren't just buzzwords; they are the psychology and strategy behind every pixel on your screen.</p>
+
+          <!-- BUSINESS PLAN INTEGRATION: SELLING UX -->
+          <div class="card border-dark shadow-sm my-4 mt-5">
+            <div class="card-header bg-dark text-white fw-bold">
+              💼 The Agency Founder's Log: Business Plan Integration
+            </div>
+            <div class="card-body small bg-light">
+              <p class="mb-0"><strong>Selling Solutions, Not Just Art:</strong> When pitching to Carson City businesses, many owners will just ask for a "pretty" website. As an agency employee, you must educate them. A beautiful site that doesn't convert visitors into paying customers is useless. You are selling them <strong>UX (User Experience)</strong>—a strategic tool designed to increase their revenue. This is why successful agencies can charge premium rates for their design services.</p>
+            </div>
+          </div>
+
+          <!-- MOVED BANNER IMAGE -->
+          <figure class="mb-4 text-center mt-4">
+            <a href="/images/the-why-intro-to-uiux/figure-01.png" target="_blank" rel="noopener">
+              <img src="/images/the-why-intro-to-uiux/figure-01.png" alt="UI vs UX Concept" class="img-fluid rounded shadow-sm border w-100" style="object-fit: cover; height: 350px;" onerror="this.src='https://placehold.co/600x400?text=UI+vs+UX+Concept'">
+            </a>
+            <figcaption class="p-2 small text-muted text-center">
+              <strong>Figure 4.1:</strong> UI vs UX Concept - The visual interface vs. the overall experience.
+            </figcaption>
+          </figure>
+
+        </section>
+      </div>
+
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="card shadow-sm mb-4 bg-white border-primary text-start">
+          <div class="card-header bg-primary text-white fw-bold border-bottom">Materials Hub</div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush small">
+              <a href="/proficiencyScales/the-why-intro-to-uiux.html" class="list-group-item list-group-item-action text-primary fw-bold">🎯 1. Proficiency Scale</a>
+              <a href="/pre-assessments/the-why-intro-to-uiux.html" class="list-group-item list-group-item-action text-dark">🚀 2. Pre-Assessment</a>
+              <a href="/notes/the-blueprint.html" class="list-group-item list-group-item-action text-dark" >📝 3. Guided Notes</a>
+              <a href="#" class="list-group-item list-group-item-action text-dark">📁 4. Project Assets (.zip)</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card roadmap-card mb-4 border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info border-bottom">Unlocking New Abilities</div>
+          <div class="card-body small">
+              <ul class="mb-0 ps-3">
+                  <li class="mb-2"><strong>Define</strong> the distinct roles of "UI" (User Interface) and "UX" (User Experience) design.</li>
+                  <li class="mb-2"><strong>Explain</strong> why "good UX" is vital for a product's success using the Ketchup Bottle analogy.</li>
+                  <li class="mb-2"><strong>Apply</strong> the "Curb Cut Effect" to understand why accessibility benefits everyone.</li>
+                  <li class="mb-2"><strong>Master</strong> the "Mobile-First" strategy by prioritizing content for small screens.</li>
+                  <li class="mb-2"><strong>Identify</strong> industry-standard UI patterns like Cards, Modals, and Breadcrumbs.</li>
+                  <li class="mb-2"><strong>Create</strong> a professional High-Fidelity Mockup and Components using Adobe XD (or Figma).</li>
+                  <li><strong>Conduct</strong> a Usability Test to "debug" your design before writing code.</li>
+              </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2: UI VS UX -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="battle">
+          <h2 class="section-title mt-0">UI vs. UX: The Battle for the User</h2>
+          <p>People often use these terms interchangeably, but they are two completely different disciplines.</p>
+          
+          <h5 class="fw-bold mt-4 text-primary">1. UI (User Interface) — The "Sensation"</h5>
+          <p>UI is the <strong>"What."</strong> It is everything the user <strong>sees</strong> and <strong>interacts</strong> with. It is the visual layer. It involves Typography, Color Theory, Spacing, and Iconography.</p>
+          <p>A UI Designer asks: <em>"Is this beautiful? Is it on-brand? Is the visual hierarchy clear?"</em></p>
+
+          <h5 class="fw-bold mt-4 text-primary">2. UX (User Experience) — The "Solution"</h5>
+          <p>UX is the <strong>"How."</strong> It is the overall journey and feeling the user has while using the product. It focuses on Information Architecture, Interaction Design, User Research, and Performance.</p>
+          <p>A UX Designer asks: <em>"Is this easy? Can the user achieve their goal without thinking? Is it frustrating?"</em></p>
+          
+          <h3 class="mt-5 fw-bold">The Analogy: The Ketchup Bottle</h3>
+          <ul class="small mb-4">
+            <li class="mb-2"><strong>The Glass Bottle (High UI, Low UX):</strong> Looks beautiful (A+ UI), but you have to smack the bottom to get ketchup out, which ruins your fries (F UX).</li>
+            <li class="mb-2"><strong>The Squeezy Bottle (Low UI, High UX):</strong> Looks cheap (C- UI), but it works perfectly, giving you exactly the amount you want (A+ UX).</li>
+          </ul>
+          <p><strong>The Lesson:</strong> Ideally, a great site has both: it looks beautiful AND it works perfectly.</p>
+        </section>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center pt-lg-5">
+        <figure class="mb-4 text-center">
+          <a href="/images/the-why-intro-to-uiux/figure-02.png" target="_blank" rel="noopener">
+            <img src="/images/the-why-intro-to-uiux/figure-02.png" alt="Form vs Function" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Form+vs+Function'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 4.2:</strong> Form vs Function - The balance of beauty and utility.</figcaption>
+        </figure>
+        <div class="card roadmap-card border-warning mb-4 shadow-sm text-start">
+          <div class="card-header bg-warning text-dark fw-bold">Let's Discuss:</div>
+          <div class="card-body small">
+            <p class="mb-0">Can you think of a website that looks amazing but is impossible to navigate? Is that a UI failure or a UX failure?</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 3: CORE PRINCIPLES & HIERARCHY -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-12">
+        <section id="principles">
+          <h2 class="section-title mt-0 text-center">Core Principles of Good UX</h2>
+          <p class="text-center mx-auto" style="max-width: 800px;">How do we ensure our websites aren't "Glass Bottles"? We follow four golden rules.</p>
+          
+          <div class="row g-4 mt-2 mx-auto" style="max-width: 1000px;">
+            <div class="col-md-3">
+              <div class="card h-100 shadow-sm border-0 bg-white border-top border-4 border-primary text-start">
+                <div class="card-body small">
+                  <h6 class="fw-bold text-primary">Clarity (Visual Hierarchy)</h6>
+                  <p class="mb-0 text-muted">The deliberate arrangement of elements using Scale, Contrast, and White Space to imply importance. Don't make the user guess what a button does.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card h-100 shadow-sm border-0 bg-white border-top border-4 border-info text-start">
+                <div class="card-body small">
+                  <h6 class="fw-bold text-info">Consistency (Jakob's Law)</h6>
+                  <p class="mb-0 text-muted">Users expect your site to work like other sites. Don't put your logo at the bottom right; they expect it at the top left.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card h-100 shadow-sm border-0 bg-white border-top border-4 border-success text-start">
+                <div class="card-body small">
+                  <h6 class="fw-bold text-success">Feedback (Talk Back)</h6>
+                  <p class="mb-0 text-muted">When a user hovers over a button, it should change color. When they submit a form, show a "Success" message.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card h-100 shadow-sm border-0 bg-white border-top border-4 border-warning text-start">
+                <div class="card-body small">
+                  <h6 class="fw-bold text-warning">Forgiveness (Undo)</h6>
+                  <p class="mb-0 text-muted">Users make mistakes. Provide confirmation dialogs ("Are you sure you want to delete?") and useful Empty States.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LAB 1 CARD -->
+          <div class="card border-success shadow-sm mt-5 mx-auto text-start" style="max-width: 800px;">
+              <div class="card-header bg-success text-white fw-bold">Lab 1: The Hierarchy Audit [25 pts]</div>
+              <div class="card-body small p-4">
+                  <p><strong>Objective:</strong> Demonstrate analytical reasoning by identifying design patterns on live interfaces to see what competitors are doing right.</p>
+                  <ol>
+                      <li class="mb-2">Find a landing page for a modern app or service you use frequently (e.g., Spotify, Discord, Netflix).</li>
+                      <li class="mb-2">Take a screenshot of the entire page and paste it into an image editor or document.</li>
+                      <li class="mb-2">Draw numbered arrows pointing to the top 3 elements in the Visual Hierarchy (1 being the first thing you see, 2 being second, etc.).</li>
+                      <li class="mb-2">Identify the Primary CTA (Call to Action) and draw a circle around the "White Space" (negative space) used to make that CTA stand out.</li>
+                  </ol>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Submit your annotated screenshot.</p>
+                  <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+              </div>
+          </div>
+
+        </section>
+      </div>
+    </div>
+
+    <!-- ROW 4: ACCESSIBILITY -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="accessibility">
+          <h2 class="section-title mt-0">The "Universal" Rule: Accessibility (a11y)</h2>
+          <p>Accessibility isn't a "nice-to-have" feature; it is the foundation of the web. The <strong>"Curb Cut" Effect</strong> teaches us that when you design for accessibility (like ramps for wheelchairs), you make the experience better for <strong>everyone</strong> (parents with strollers, travelers with luggage).</p>
+          
+          <h5 class="fw-bold mt-4 text-primary">The Big Three Checks</h5>
+          <ul class="small mb-4">
+            <li class="mb-3"><strong>Contrast:</strong> Text must stand out against the background. Light gray text on white is a design crime.</li>
+            <li class="mb-3"><strong>Alt Text:</strong> Screen readers need text descriptions for images. Without it, blind users miss the content.</li>
+            <li class="mb-0"><strong>Touch Targets:</strong> Buttons on mobile should be at least <strong>44x44 pixels</strong> to accommodate a human thumb.</li>
+          </ul>
+        </section>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 text-center">
+          <a href="/images/the-why-intro-to-uiux/figure-03.png" target="_blank" rel="noopener">
+            <img src="/images/the-why-intro-to-uiux/figure-03.png" alt="Color contrast example" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Contrast+Matters'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 4.3:</strong> Contrast Matters - Designing for visibility.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- ROW 5: STRATEGY, MISSION & COLOR PSYCHOLOGY -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="strategy">
+          <h2 class="section-title mt-0">The Strategy: Mobile-First Design</h2>
+          <p>Professional designers usually don't start by designing the desktop site. They start with the phone. Why? Because it forces you to <strong>Prioritize</strong>. On a small screen, you can't fit everything, so you must decide what is most important.</p>
+          <p><strong>The Process:</strong> Start Small (Mobile) → Prioritize Content → Scale Up (Desktop). If it works on mobile, it will work anywhere.</p>
+
+          <h2 class="section-title mt-5">The Mission: Designing "Glitch Gaming"</h2>
+          <p>To put these theories into practice, our walkthroughs will design an example interface for <strong>Glitch Gaming Lounge</strong>, a local Carson City esports startup. (Remember: For your actual labs, you will be designing your own Custom Website for your agency client!).</p>
+          
+          <h5 class="fw-bold mt-4 text-primary">Meet The Example User: Sarah "SpeedRun"</h5>
+          <div class="card bg-dark text-white p-3 small border-primary shadow-sm mb-4">
+            <p class="mb-1"><strong>Name:</strong> Sarah (24), a local semi-pro streamer.</p>
+            <p class="mb-1"><strong>The Goal:</strong> She needs to book a PC terminal for a tournament this weekend.</p>
+            <p class="mb-1"><strong>The Frustration:</strong> Hates "cluttered" sites where she has to hunt for pricing and specs.</p>
+            <p class="mb-0"><strong>The Design Solution:</strong> We will use a <strong>Dark Mode</strong> UI (to match her gaming setup) with high-contrast text and clear CTA buttons.</p>
+          </div>
+
+          <h5 class="fw-bold mt-4 text-primary">Color Psychology & Typography</h5>
+          <p>We don't pick colors at random. Blue evokes Trust (Banking). Red evokes Urgency or Danger (Fast Food/Errors). Green evokes Success or Nature. We use the <strong>60-30-10 Rule</strong>: 60% Primary Color, 30% Secondary Color, 10% Accent Color (usually reserved strictly for Call to Action buttons!).</p>
+          <p>For Typography, we limit our designs to just two font families: A Heading font (to grab attention) and a highly readable Paragraph font.</p>
+
+          <!-- LAB 2 CARD -->
+          <div class="card border-success shadow-sm my-4 mt-5 text-start">
+              <div class="card-header bg-success text-white fw-bold">Lab 2: Brand UI Kit [25 pts]</div>
+              <div class="card-body small p-4">
+                  <p><strong>Objective:</strong> Establish a cohesive, psychologically appropriate brand identity for your first agency client.</p>
+                  <ol>
+                      <li class="mb-2">Based on the Persona you created in Chapter 3, determine the "vibe" your Custom Website needs (e.g., Playful, Serious, Trustworthy).</li>
+                      <li class="mb-2">Use <a href="https://coolors.co" target="_blank" class="fw-bold">Coolors.co</a> and <a href="https://fonts.google.com" target="_blank" class="fw-bold">Google Fonts</a> to create a "UI Kit" document.</li>
+                      <li class="mb-2">You must clearly define: 1 Primary Color (Hex Code), 1 Secondary Color, 1 Accent Color (for buttons), 1 Heading Font, and 1 Paragraph Font.</li>
+                      <li class="mb-2">Write 2 sentences explaining <em>why</em> you chose these colors based on color psychology and your target user.</li>
+                  </ol>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Submit your UI Kit document and justification.</p>
+                  <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+              </div>
+          </div>
+
+        </section>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 text-center">
+          <a href="/images/the-why-intro-to-uiux/figure-04.png" target="_blank" rel="noopener">
+            <img src="/images/the-why-intro-to-uiux/figure-04.png" alt="Target Audience" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Target+Audience'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 4.4:</strong> Designing for Sarah.</figcaption>
+        </figure>
+        <div class="card roadmap-card border-info bg-white shadow-sm mt-4 text-start">
+          <div class="card-header bg-info text-white fw-bold">Guild Checkpoint</div>
+          <div class="card-body small text-center">
+            <p class="mb-0">Why is Sarah's specific frustration about 'clutter' so important for our UI layout? What can we remove from the screen to help her?</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 6: PATTERNS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="patterns">
+          <h2 class="section-title mt-0">Common UI "Design Patterns"</h2>
+          <p>Don't reinvent the wheel. Use standard patterns users already know.</p>
+          <ul class="small mb-4">
+            <li class="mb-3"><strong>The Card:</strong> A container that groups an image, headline, and text. (Think Pinterest or Amazon).</li>
+            <li class="mb-3"><strong>The Hero:</strong> The massive, full-width section at the very top of the homepage to grab attention.</li>
+            <li class="mb-3"><strong>The Hamburger Menu:</strong> The three-line icon (☰) used to toggle navigation on mobile.</li>
+            <li class="mb-3"><strong>The Modal:</strong> A pop-up window that appears <strong>on top</strong> of the page (e.g., for Login or Confirmations).</li>
+            <li class="mb-3"><strong>Breadcrumbs:</strong> A text path (Home > Men's Wear > Shoes) that helps users navigate back.</li>
+          </ul>
+
+          <!-- BUSINESS PLAN INTEGRATION: SCALING -->
+          <div class="card border-dark shadow-sm my-4 mt-5">
+            <div class="card-header bg-dark text-white fw-bold">
+              💼 The Agency Founder's Log: Business Plan Integration
+            </div>
+            <div class="card-body small bg-light">
+              <p class="mb-0"><strong>Agency Scaling & Profit Margins:</strong> In business, time is money. If you have to redesign the same navigation bar on 50 different pages for a client, you are losing profit. By using Figma <strong>Components</strong>, your agency builds a master template. Change the master, and all 50 pages update instantly. This workflow allows you to take on more clients without hiring more staff, drastically increasing your profit margin.</p>
+            </div>
+          </div>
+
+          <!-- LAB 3 CARD -->
+          <div class="card border-success shadow-sm my-4 mt-5 text-start">
+              <div class="card-header bg-success text-white fw-bold">Lab 3: The Component Lab [25 pts]</div>
+              <div class="card-body small p-4">
+                  <p><strong>Objective:</strong> Build precise UI components demonstrating professional decorum in file organization for your agency.</p>
+                  <ol>
+                      <li class="mb-2">Open <strong>Adobe XD</strong> (or log into a personal <strong>Figma</strong> account) and create a new Design File.</li>
+                      <li class="mb-2">Using the colors and fonts from your UI Kit (Lab 2), design a custom <strong>"Submit" button</strong> and a custom <strong>"Header/Nav Bar"</strong> for your Custom Website.</li>
+                      <li class="mb-2">Turn both of these elements into reusable Components (<em>Adobe XD: Right Click > Make Component</em> | <em>Figma: Right Click > Create Component</em>).</li>
+                      <li class="mb-2"><strong>Naming Rule:</strong> You must demonstrate professional decorum by renaming every single layer in your left panel to a professional standard (e.g., <code>nav-bg</code>, <code>submit-text</code>). "Rectangle 542" is unacceptable!</li>
+                  </ol>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload a screenshot of your components with the layers panel visible, or share your XD/Figma link.</p>
+                  <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+              </div>
+          </div>
+
+        </section>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 text-center">
+          <a href="/images/the-why-intro-to-uiux/figure-05.png" target="_blank" rel="noopener">
+            <img src="/images/the-why-intro-to-uiux/figure-05.png" alt="UI Patterns" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=UI+Patterns'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 4.5:</strong> Standard UI Patterns used in modern web development.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- ROW 7: SIDE QUEST (ADOBE XD & PROTOTYPING) -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="side-quest">
+          <h2 class="section-title mt-0">Side Quest: Prototyping (XD or Figma)</h2>
+          <p>Theory is boring without practice. Let's follow along to create a professional UI element <strong>for "Glitch Gaming Lounge"</strong>: A Product Card. This is a "High-Fidelity Mockup"—a realistic picture of what the final website will look like, with real colors, fonts, and images.</p>
+          
+          <h5 class="fw-bold mt-4 text-primary">Step 1: The Setup</h5>
+          <div class="alert alert-secondary small border-0 py-2 mb-3">
+              <strong>Tool Choice:</strong> We will default to <strong>Adobe XD</strong> as it is provided by the school. If you created a free personal account on <strong>Figma</strong>, you can use that instead! Both are industry standards.
+          </div>
+          <ul class="small mb-3">
+            <li>Open <strong>Adobe XD</strong> (or log into <strong>Figma</strong>).</li>
+            <li>Select the <strong>iPhone 14/15</strong> preset from the home screen to create your canvas (Called an <em>Artboard</em> in XD, or a <em>Frame</em> in Figma).</li>
+            <li>Press <strong>V</strong> to ensure you are on the Select tool.</li>
+          </ul>
+
+          <h5 class="fw-bold mt-4 text-primary">Step 2: The Container (The Card)</h5>
+          <p class="small mb-3">Draw a rectangle (R) to serve as the background of your card. Give it a dark gray fill and slightly rounded corners (border radius).</p>
+
+          <h5 class="fw-bold mt-4 text-primary">Step 3: Hierarchy (Text &amp; Image)</h5>
+          <p class="small mb-3">Drop in a high-quality transparent PNG of a headset or PC terminal. Add a large, bold Title, and a smaller, lighter-colored price tag.</p>
+
+          <h5 class="fw-bold mt-4 text-primary">Step 4: The Call to Action (CTA)</h5>
+          <p class="small mb-4">Create a high-contrast Accent button ("Book Terminal") that stands out immediately from the dark background.</p>
+
+          <p class="mt-3 fw-bold text-success">Congratulations! You just designed a High-Fidelity UI Component.</p>
+
+          <!-- LAB 4 CARD -->
+          <div class="card border-success shadow-sm my-4 mt-5 text-start">
+              <div class="card-header bg-success text-white fw-bold">Lab 4: The Linked Flow Lab [25 pts]</div>
+              <div class="card-body small p-4">
+                  <p><strong>Objective:</strong> Utilize analytical reasoning to establish a functional, clickable user journey to pitch to your client.</p>
+                  <ol>
+                      <li class="mb-2">In your design file, create three simple Artboards/Frames (screens): "Login", "Dashboard", and "Settings".</li>
+                      <li class="mb-2">Switch to the <strong>Prototype</strong> tab (Top left in Adobe XD; Top right in Figma).</li>
+                      <li class="mb-2">Use the connection arrows ("noodles") to link these screens:
+                          <ul>
+                              <li>A "Login" button on Screen 1 must link to the "Dashboard".</li>
+                              <li>A "Gear/Settings" icon on the Dashboard must link to "Settings".</li>
+                              <li>A "Back" button on Settings must return to the "Dashboard".</li>
+                          </ul>
+                      </li>
+                      <li class="mb-2">Click the play icon in the top right to preview and test your interactive flow.</li>
+                  </ol>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Submit the Share link to your prototype.</p>
+                  <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+              </div>
+          </div>
+
+        </section>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4 text-center">
+          <a href="/images/the-why-intro-to-uiux/figure-06.png" target="_blank" rel="noopener">
+            <img src="/images/the-why-intro-to-uiux/figure-06.png" alt="Final Mockup" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Final+Mockup'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 4.6:</strong> Final High-Fi Mockup of our Glitch Gaming card.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- ROW 8: REALITY CHECK & MILESTONE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-12">
+        <section id="reality">
+          <h2 class="section-title mt-0 text-center">The Reality Check: Usability Testing</h2>
+          <p class="text-center mx-auto mb-4" style="max-width: 800px;">You think your design is perfect. <strong>You are wrong.</strong> You suffer from "The Curse of Knowledge." Before coding, conduct a <strong>Usability Test</strong> (or "The Mom Test").</p>
+          
+          <div class="row g-4 mx-auto" style="max-width: 1000px;">
+            <div class="col-md-7">
+              <div class="bg-white p-4 rounded border shadow-sm h-100 text-start">
+                  <h6 class="fw-bold text-primary mb-3">The Testing Protocol:</h6>
+                  <ol class="small mb-0">
+                    <li class="mb-2">Recruit a friend, parent, or classmate.</li>
+                    <li class="mb-2">Show them your linked XD or Figma prototype.</li>
+                    <li class="mb-2">Give them a specific task (e.g., "Find the Settings page").</li>
+                    <li class="mb-2"><strong>Shut up and watch.</strong> Do not help them or point to the screen.</li>
+                    <li class="mb-0">Observe where they get stuck. If they get stuck, your design is broken. Fix it in your design software before you ever write code.</li>
+                  </ol>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <div class="card roadmap-card border-warning shadow-sm h-100 text-start">
+                <div class="card-header bg-warning text-dark fw-bold">Let's Discuss:</div>
+                <div class="card-body small">
+                  <p class="mb-0">Why is it so hard to 'Shut up and watch'? Why do designers instinctively want to explain their design to the user instead of letting the user discover it organically?</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BUSINESS PLAN INTEGRATION: CLIENT APPROVAL -->
+          <div class="card border-dark shadow-sm my-5 mx-auto text-start" style="max-width: 900px;">
+            <div class="card-header bg-dark text-white fw-bold">
+              💼 The Agency Founder's Log: Business Plan Integration
+            </div>
+            <div class="card-body small bg-light">
+              <p class="mb-0"><strong>Securing the Signature:</strong> High-Fidelity prototypes aren't just for usability testing; they are your primary sales tool. Before your Junior and Senior Developers write a single line of expensive code, you sit down with the client, hand them the prototype, and have them click through it. Once they approve the prototype, they sign off. If they want changes <em>after</em> this point, your agency charges them a "Change Order" fee. This protects your time and your developers' sanity.</p>
+            </div>
+          </div>
+
+          <!-- MILESTONE CARD -->
+          <div class="card border-primary shadow-sm mt-5 mx-auto text-start" style="max-width: 900px;">
+              <div class="card-header bg-primary text-white fw-bold">
+                  🏆 Milestone: Project 1 - Phase 2 (High-Fi Mockup) [100 pts]
+              </div>
+              <div class="card-body small p-4">
+                  <p><strong>Project Overview:</strong> You have completed your Research and Mid-Fi Wireframes (Phase 1). Today, you move to Phase 2: The High-Fidelity Mockup. You will apply your visual brand to your structural blueprints.</p>
+                  <ol>
+                      <li class="mb-2">Review your Chapter 3 Mid-Fi Wireframes.</li>
+                      <li class="mb-2">In Adobe XD (or Figma), recreate your Homepage and Sub-page wireframes for your Carson City client using the actual colors, fonts, and components from your UI Kit.</li>
+                      <li class="mb-2">Replace the placeholder "X" boxes with real (ethically sourced) images. Replace "Lorem Ipsum" with actual text relevant to your custom website topic.</li>
+                      <li class="mb-2">Link your Homepage to your Sub-page using the Prototype tab so it is clickable.</li>
+                      <li class="mb-2"><strong>Peer QA:</strong> Ensure you maintain strict Visual Hierarchy. Does your Accent Color draw the eye directly to your most important Call to Action?</li>
+                  </ol>
+                  <p class="mb-3 text-danger fw-bold mt-4">Turn In: Upload the link to your final Prototype, or upload the file directly.</p>
+                  <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+              </div>
+          </div>
+
+        </section>
+      </div>
+    </div>
+
+    <!-- RECAP & NAV -->
+    <div class="row mt-5">
+      <div class="col-lg-8 pe-lg-5">
+          <h2 class="section-title text-primary fw-bold">The Final Download: Chapter Recap</h2>
+          <p>This chapter transformed you from a builder into a digital psychologist. We learned the critical difference between UI (Sensation) and UX (Solution). We mastered Visual Hierarchy, utilized Color Psychology, and applied the Mobile-First strategy to prioritize content. Finally, we learned how to build and link High-Fidelity Mockups in Adobe XD and Figma, allowing our agency to secure client approvals and save hundreds of hours of coding errors through rapid Usability Testing.</p>
+          <p class="text-muted small mt-5">Copyright - Danylle Miller Designs 2026</p>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 d-flex flex-column justify-content-end pb-3">
+          <a href="/year1/intro-to-html.html" class="btn btn-primary w-100 shadow-sm fw-bold text-uppercase">Next: Chapter 5 &raquo;</a>
+      </div>
+    </div>
+
+    <!-- ENHANCED TURN-IN DROPBOX -->
+    <div class="card shadow border-success mx-auto mb-5 mt-5" style="max-width: 800px;" id="submission-zone">
+        <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+            <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>Student Assignment Dropbox</h4>
+            <span class="badge bg-light text-success shadow-sm" id="student-id-badge">Verifying...</span>
+        </div>
+        <div class="card-body p-4 text-start">
+            <form id="uploadForm">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
+                    <select id="uploadAssignment" class="form-select border-success" required>
+                        <option value="" disabled selected>Select an assignment...</option>
+                        <option value="ch4_lab1">Lab 1: The Hierarchy Audit (25 pts)</option>
+                        <option value="ch4_lab2">Lab 2: Brand UI Kit (25 pts)</option>
+                        <option value="ch4_lab3">Lab 3: The Component Lab (25 pts)</option>
+                        <option value="ch4_lab4">Lab 4: The Linked Flow Lab (25 pts)</option>
+                        <option value="ch4_milestone">Milestone: Project 1 Phase 2 High-Fi Mockup (100 pts)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">2. What type of upload is this?</label>
+                    <select id="uploadType" class="form-select border-primary bg-site-secondary">
+                        <option value="file">A Single File (e.g. Screenshot, Word Doc, ZIP)</option>
+                        <option value="folder">An Entire Folder (e.g. A Full Website Project)</option>
+                    </select>
+                </div>
+
+                <div class="mb-4" id="fileInputContainer">
+                    <label class="form-label fw-bold">3. Select File</label>
+                    <input type="file" id="fileInput" class="form-control" required>
+                </div>
+
+                <div class="mb-4 d-none" id="folderInputContainer">
+                    <label class="form-label fw-bold">3. Select Project Folder</label>
+                    <input type="file" id="folderInput" class="form-control" webkitdirectory directory multiple>
+                    <div class="form-text x-small text-danger fw-bold mt-1">Note: This will upload ALL files and sub-folders inside the folder you select, keeping your website links intact!</div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-success w-100 fw-bold py-3 shadow-sm" disabled>
+                    Upload to Teacher Server
+                </button>
+            </form>
+            
+            <div id="uploadProgress" class="progress mt-3 d-none shadow-sm" style="height: 25px;">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%;">0%</div>
+            </div>
+            <div id="uploadStatus" class="mt-3 d-none p-3 rounded small fw-bold text-center shadow-sm"></div>
+        </div>
+    </div>
+
+  </section>
+
+  <!-- Standard Footer Inclusion via loader.js -->
+  <div id="footer-nav"></div>
+  <div id="footer-placeholder"></div>
+
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+
+  <!-- ENHANCED FOOTER -->
+  <footer class="bg-primary text-white pt-5 pb-3 mt-5 no-print">
+    <div class="container">
+      <div class="row g-4">
+        <!-- Brand/About -->
+        <div class="col-lg-3 col-md-6">
+          <h5 class="fw-bold mb-3" style="font-family: 'Gochi Hand', cursive;">Digital Arts Classes</h5>
+          <p class="x-small opacity-75 lh-base">
+            Professional Web Design &amp; Development curriculum for the modern era. Building the architects of tomorrow through standards-aligned coding labs and industry-ready projects.
+          </p>
+        </div>
+
+        <!-- Yearly Portals -->
+        <div class="col-lg-3 col-md-6">
+          <h6 class="text-uppercase fw-bold mb-3 x-small" style="letter-spacing: 1.5px; color: var(--secondary-color);">Yearly Portals</h6>
+          <ul class="list-unstyled x-small lh-lg">
+            <li><a href="/level1.html" class="text-white text-decoration-none opacity-75 link-hover">🚀 Year 1: Foundations</a></li>
+            <li><a href="/level2andUp.html" class="text-white text-decoration-none opacity-75 link-hover">⚔️ Year 2: Mastering</a></li>
+            <li><a href="/computerscience.html" class="text-white text-decoration-none opacity-75 link-hover">💻 Computer Science</a></li>
+          </ul>
+        </div>
+
+        <!-- Important Tools -->
+        <div class="col-lg-3 col-md-6">
+          <h6 class="text-uppercase fw-bold mb-3 x-small" style="letter-spacing: 1.5px; color: var(--secondary-color);">Study Tools</h6>
+          <ul class="list-unstyled x-small lh-lg">
+            <li><a href="/studyGuides/" class="text-white text-decoration-none opacity-75 link-hover">Interactive Study Guides</a></li>
+            <li><a href="/quizzes/" class="text-white text-decoration-none opacity-75 link-hover">Practice Exam Shuffle</a></li>
+            <li><a href="/techTalkA-Zguide/" class="text-white text-decoration-none opacity-75 link-hover">Architect's Dictionary</a></li>
+            <li><a href="/toLongDidntRead/" class="text-white text-decoration-none opacity-75 link-hover">TL;DR Summaries</a></li>
+          </ul>
+        </div>
+
+        <!-- Administrative -->
+        <div class="col-lg-3 col-md-6">
+          <h6 class="text-uppercase fw-bold mb-3 x-small" style="letter-spacing: 1.5px; color: var(--secondary-color);">Important Links</h6>
+          <ul class="list-unstyled x-small lh-lg">
+            <li><a href="/sitemap.html" class="text-white text-decoration-none fw-bold text-info link-hover">🗺️ Complete Site Map</a></li>
+            <li><a href="/grading.html" class="text-white text-decoration-none opacity-75 link-hover">Grading Policy</a></li>
+            <li><a href="/contact.html" class="text-white text-decoration-none opacity-75 link-hover">Contact Instructor</a></li>
+            <li><a href="/notices.html" class="text-white text-decoration-none opacity-75 link-hover">Legal &amp; Privacy</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <hr class="my-4 opacity-25">
+      
+      <div class="row">
+        <div class="col-12 text-center">
+          <p class="x-small mb-0 opacity-50 fw-light">
+            Copyright &copy; 2026 Danylle Miller Designs. Built for Carson High School. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ASSIGNMENT UPLOADER LOGIC -->
+  <script type="module" src="/js/assignment-uploader.js"></script>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

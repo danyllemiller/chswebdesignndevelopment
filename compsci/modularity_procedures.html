@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- File: compsci/modularity_procedures.html -->
+  <meta charset="utf-8"/>
+  <title>Chapter 14: Modularity & Procedures</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+  
+  <!-- External Curriculum Styles -->
+  <link href="/css/compsci.css" rel="stylesheet" />
+</head>
+<body class="compsci-body">
+
+<div class="chapter-header">
+    <span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 4: Logic & Algorithms</span>
+    <h1 class="display-4 fw-bold">Chapter 11: Modularity & Procedures</h1>
+    <p class="lead text-muted">Building complex systems using reusable, interrelated, and independent blocks of code.</p>
+  </div>
+
+  <!-- STICKY TABLE OF CONTENTS -->
+  <div class="sticky-toc">
+      <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#section-14-1">14.1 The Power of the "Black Box"</a>
+      <a href="#section-14-2">14.2 Interrelated Programs</a>
+      <a href="#section-14-3">14.3 Managing Complexity</a>
+  </div>
+
+  <p class="fs-5 mb-5">When you first learn to code, you write programs that are 10 or 20 lines long, executing straight from top to bottom. But modern video games and apps have millions of lines of code. If a developer tried to read a million lines straight down, their brain would melt. To build massive software systems without losing our minds, we must master <strong>Modularity</strong>.</p>
+
+  <!-- Section 14.1 -->
+  <h3 id="section-14-1" class="fw-bold mt-4 border-bottom pb-2">14.1 The Power of the "Black Box" <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.AP.M.1</span></h3>
+  <p class="fs-5">Imagine driving a car. You press the gas pedal, and the car moves forward. Do you need to know exactly how the fuel injector mixes gasoline and oxygen to create combustion? No! The engine is a "Black Box"—you give it an input (pressing the pedal), and it gives you an output (movement). Programming works the exact same way.</p>
+  
+  <h4 class="fw-bold mt-4 text-primary">14.1.1 Defining Modularity (The DRY Principle)</h4>
+  <p><strong>Modularity</strong> is the design technique of breaking a large software program into smaller, self-contained units (modules) where each unit performs exactly one specific task.</p>
+  <p>The golden rule of software engineering is <strong>DRY: Don't Repeat Yourself</strong>. If you are building an online store, you need to calculate sales tax when the user views their cart, and again when they checkout, and again when you print their receipt. If you type the math formula for calculating tax three different times, you are violating the DRY principle. What happens if the tax rate changes next year? You have to hunt down and fix all three formulas. Instead, we use a Procedure.</p>
+
+  <h4 class="fw-bold mt-5 text-info">14.1.2 Decomposition into Procedures</h4>
+  <p>A <strong>Procedure</strong> (also known as a Function or a Method) is a named block of code that you write once, and then "Call" (trigger) as many times as you want. By decomposing a program into procedures, you turn 100 lines of repetitive math into a single, clean command: <code>calculateTax()</code>.</p>
+  
+  <div class="image-placeholder shadow-sm my-4">
+    <i class="fas fa-box fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">The Digital Black Box</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> An illustration of a glowing, mysterious black box. On the left side, a conveyor belt feeds raw materials labeled "Inputs" into the box. Inside the box, glowing gears are turning. On the right side, a finished product labeled "Output" rolls out.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">14.1.3 Inputs and Outputs (Parameters)</h4>
+  <p>For a procedure to be a true "Black Box," it needs to accept data, process it, and return a result. The data we send <em>into</em> the procedure is called a <strong>Parameter</strong> (or Argument).</p>
+  
+  <div class="row g-4 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body">
+                  <h5 class="fw-bold text-warning text-dark"><i class="fas fa-sign-in-alt me-2"></i> Inputs (Parameters)</h5>
+                  <p>When you call <code>calculateTax( 50 )</code>, the number 50 is the input parameter. The procedure catches that number and uses it to do the math.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-success">
+              <div class="card-body">
+                  <h5 class="fw-bold text-success"><i class="fas fa-sign-out-alt me-2"></i> Outputs (Return)</h5>
+                  <p>Once the math is done, the procedure uses a <strong>Return</strong> command to shoot the final answer back to the main program (e.g., returning <code>54.00</code>).</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Step-by-Step Guide for Custom Spreadsheets Functions -->
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-wrench me-2"></i> Step-by-Step: Writing a Custom Procedure in Sheets</h5>
+      <p class="small mb-3 text-light">You don't need to write Python to create a procedure. We can create a custom Named Function right inside Google Sheets!</p>
+      
+      <ol class="mb-0 text-light small">
+          <li class="mb-2"><strong>Open the Menu:</strong> In Google Sheets, click <strong>Data</strong> &gt; <strong>Named functions</strong>.</li>
+          <li class="mb-2"><strong>Create the Box:</strong> Click "Add new function." Give it a name like <code>CALCULATE_TAX</code>.</li>
+          <li class="mb-2"><strong>Set the Parameters (Inputs):</strong> In the "Argument placeholders" box, type <code>price</code> and hit Enter. This tells the computer to expect one input.</li>
+          <li class="mb-2"><strong>Write the Code:</strong> In the "Formula definition" box, type the math: <code>=price + (price * 0.08)</code>. Click Save.</li>
+          <li><strong>Call the Procedure:</strong> Click on any empty cell in your sheet and type <code>=CALCULATE_TAX(100)</code>. It will instantly return <code>108</code>! You just built a reusable module!</li>
+      </ol>
+  </div>
+
+  <!-- Activity 14.1.4 -->
+  <div class="alert alert-info mt-5 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-receipt fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity 14.1.4: The "Custom Function" in Sheets</h4>
+              <p class="mb-0">You are managing an online store spreadsheet with hundreds of different products. Following the steps above, create your own custom named function (e.g., <code>CALCULATE_DISCOUNT</code>). Instead of typing the complex discount math over and over, you will "call" your custom function in different cells, proving how one module can serve many areas effortlessly.</p>
+              <p class="mb-0 fw-bold mt-1 text-dark">👉 Complete this activity in the Sandbox tab of your Workspace.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 14.2 -->
+  <h3 id="section-14-2" class="fw-bold border-bottom pb-2">14.2 Interrelated Programs <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.AP.M.2</span></h3>
+  <p class="fs-5">A single procedure is helpful, but true software engineering happens when multiple independent modules talk to each other to solve a massive problem.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">14.2.1 Building Systems</h4>
+  <p>A video game is not one program; it is a <strong>System</strong> of interrelated programs. The <code>Movement</code> module calculates where the player is standing. It then talks to the <code>Graphics</code> module, sending it the coordinates so the Graphics module knows where to draw the character on the screen. Because they are modular, the Graphics developer can update the character's 3D model without ever accidentally breaking the Movement developer's physics code.</p>
+
+  <h4 class="fw-bold mt-5 text-info">14.2.2 Combinations of Data and Procedures</h4>
+  <p>In Chapter 13, we learned about Arrays. Procedures and Arrays are a match made in heaven. You can create a procedure called <code>findHighestScore()</code>, and pass an entire Array of 10,000 scores into it as a single parameter. The procedure loops through the array, finds the winner, and returns the result. This keeps your main program perfectly clean.</p>
+
+  <h4 class="fw-bold mt-5 text-info">14.2.3 Independent but Interrelated</h4>
+  <p>For modules to work together safely, they must be independent. This means the "Login" module shouldn't care how the "User Profile" module stores its data. The Login module just verifies the password and says, <em>"Hey User Profile, the password was correct. Load the screen for Alice."</em> If they are too deeply tangled together (what programmers call "Spaghetti Code"), fixing a bug in the Login screen might accidentally delete Alice's profile picture!</p>
+
+  <!-- Activity 14.2.4 -->
+  <div class="alert alert-warning mt-4 shadow-sm border-warning">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-gamepad fa-3x me-4 text-warning text-dark"></i>
+          <div>
+              <h4 class="fw-bold mb-1 text-dark">Activity 14.2.4: The Interactive Slide Dashboard</h4>
+              <p class="mb-0 text-dark">You will design a "Game Interface" prototype using Google Slides. You will create different interactive "buttons" that represent different modules.</p>
+              <ul class="mt-2 mb-0 fw-bold text-dark small">
+                  <li>One module (button) handles the "Score".</li>
+                  <li>Another module handles the "Timer".</li>
+                  <li>You must map out how these independent slides "talk" to each other (using hyperlinks and transitions) to run the game without breaking.</li>
+              </ul>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Document your system architecture in the Digital Notebook.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 14.3 -->
+  <h3 id="section-14-3" class="fw-bold border-bottom pb-2">14.3 Managing Complexity <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.AP.M.1</span></h3>
+  <p class="fs-5">As a system gets larger, a Data Architect must enforce strict rules to prevent the code from collapsing under its own weight.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">14.3.1 Scope and Local Variables</h4>
+  <p>To keep procedures truly independent, programming languages use a concept called <strong>Scope</strong>. Scope is the "Las Vegas Rule" of coding: <em>What happens inside the procedure, stays inside the procedure.</em></p>
+  
+  <div class="concept-box shadow-sm border-danger bg-light m-0">
+      <h5 class="fw-bold text-danger"><i class="fas fa-door-closed me-2"></i> The Soundproof Room</h5>
+      <p class="mb-0">If you create a variable named <code>totalCoins</code> inside the <code>calculateScore()</code> procedure, that variable is <strong>Local</strong> to that specific procedure. It exists in a soundproof room. If you try to ask for <code>totalCoins</code> from outside the procedure, the computer will crash and say it has no idea what you are talking about. This is a good thing! It prevents other modules from accidentally overwriting your math.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">14.3.2 Library Logic</h4>
+  <p>The ultimate form of DRY (Don't Repeat Yourself) is realizing that someone else has probably already solved your problem. A <strong>Library</strong> is a collection of pre-written, highly tested modules created by other developers that you can download and plug directly into your own program.</p>
+  <p>If you are building an app that needs to find the distance between two GPS coordinates on a map, you don't need to invent complex spherical geometry math. You just download a "Map Math Library," and call their <code>calculateDistance(lat1, lat2)</code> procedure. Don't reinvent the wheel!</p>
+
+  <h4 class="fw-bold mt-5 text-info">14.3.3 Troubleshooting Modules (Unit Testing)</h4>
+  <p>When a massive game crashes, finding the bug can be terrifying. But if the game is highly modular, developers use <strong>Unit Testing</strong>. They unplug all the modules from each other and test them one by one in isolation. They feed a fake number into the `calculateScore` module. If it returns the correct math, they know that specific unit is safe, and the bug must be hiding in a different module.</p>
+
+  <!-- Activity 14.3.4 -->
+  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-cubes fa-3x me-4 text-primary"></i>
+          <div>
+              <h3 class="fw-bold mb-1">Activity 14.3.4: The Lego Analogy Debate</h3>
+              <p class="mb-2 fs-5">Computer scientists often compare writing code to building with Legos. Consider the following prompts:</p>
+              <ul class="mb-0 fw-bold text-dark small">
+                  <li class="mb-1">How does having pre-built "bricks" (Libraries and Modules) allow a single developer to build an app like Instagram in weeks instead of years?</li>
+                  <li class="mb-1">What is the danger of using a "Black Box" module written by a stranger if you don't actually understand the code inside of it?</li>
+              </ul>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Open the "Discussion Reflection" template in your Digital Notebook to outline your argument for the class debate.</p>
+          </div>
+      </div>
+  </div>
+
+  <!-- Required scripts for interactive tabs/accordions inside the iframe -->
+  <script src="/js/bootstrap.bundle.js"></script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

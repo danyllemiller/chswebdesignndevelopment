@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Migration Hub | Guild Master</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        /** * SUPER SHIELD: This block prevents the 21 data files from crashing 
+         * or interfering with the dashboard logic.
+         */
+        window.appId = "1:662051088920:web:3b05cb890d834c0b9cb16d";
+        window.migrationPool = [];
+        
+        // Disable automatic game startup functions found in data files
+        window.loadGameData = () => { console.log("Shield: Prevented local loadGameData from running."); };
+        window.migrateDataToCloud = () => { console.log("Shield: Prevented local migrate function from overwriting dashboard."); };
+        window.startBulkMigration = () => { console.log("Shield: Prevented local bulk function from overwriting dashboard."); };
+        
+        // Mock game engines to prevent "undefined" errors
+        window.Jeopardy = { setup: () => {} };
+        window.Hollywood = { setup: () => {} };
+        window.Millionaire = { setup: () => {} };
+        window.Smarter = { setup: () => {} };
+        window.WordGames = { setup: () => {} };
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+        body { font-family: 'Fira Code', monospace; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+    <!-- Auth Guard formats the navigation menus! -->
+    <script type="module" src="/js/auth-guard.js"></script>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+</head>
+<body class="bg-slate-900 text-slate-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-bold text-orange-400 mb-2">Guild Master Seeder</h1>
+            <p class="text-slate-400 text-sm">Seeds local JS question pool → MariaDB</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="glass p-6 rounded-2xl border-l-4 border-blue-500">
+                <p class="text-xs uppercase tracking-widest text-slate-500">Questions in Pool</p>
+                <h2 id="pool-count" class="text-4xl font-bold text-white">0</h2>
+            </div>
+            <div class="glass p-6 rounded-2xl border-l-4 border-green-500">
+                <p class="text-xs uppercase tracking-widest text-slate-500">Questions in DB</p>
+                <h2 id="db-count" class="text-4xl font-bold text-white">—</h2>
+            </div>
+            <div class="glass p-6 rounded-2xl border-l-4 border-orange-500">
+                <p class="text-xs uppercase tracking-widest text-slate-500">Status</p>
+                <h2 id="upload-status" class="text-2xl font-bold text-slate-400 italic">Ready</h2>
+            </div>
+        </div>
+
+        <div class="glass p-8 rounded-3xl mb-8 text-center">
+            <button id="migrate-btn" onclick="runMigration()" class="px-12 py-4 bg-orange-500 hover:bg-orange-400 text-slate-900 rounded-xl font-bold shadow-lg transition-all text-xl">
+                SEED MARIADB
+            </button>
+            <p class="text-slate-500 text-xs mt-3">Truncates the review_questions table and re-inserts all questions from the local JS pool.</p>
+            <div id="progress-container" class="mt-8 hidden">
+                <div class="flex justify-between mb-2 text-sm">
+                    <span id="progress-text">Uploading...</span>
+                    <span id="progress-percent"></span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-4 overflow-hidden">
+                    <div id="progress-bar" class="bg-orange-400 h-full transition-all duration-700" style="width:0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-black/50 rounded-2xl p-6 h-64 overflow-y-auto border border-slate-800 text-xs font-mono" id="console-log">
+            <p class="text-slate-500">// System ready. List your 21 scripts below in the HTML code.</p>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- DATA FILES (18 active question pools)    -->
+    <!-- ========================================== -->
+    <script src="/js/data/join-the-developers-guild.js"></script>
+    <script src="/js/data/the-rules-how-not-to-get-sued.js"></script>
+    <script src="/js/data/the-why-intro-to-uiux.js"></script>
+    <script src="/js/data/the-bones-intro-to-html.js"></script>
+    <script src="/js/data/the-clothes-intro-to-css.js"></script>
+    <script src="/js/data/the-style-advanced-css-layout.js"></script>
+    <script src="/js/data/sights-sounds-data.js"></script>
+    <script src="/js/data/intro-to-javascript-data.js"></script>
+    <script src="/js/data/the-game-dev-advanced-js-game-logic.js"></script>
+    <script src="/js/data/the-cloud-collaboration-hosting.js"></script>
+    <script src="/js/data/the-manager-cms-platforms.js"></script>
+    <script src="/js/data/the-network-intro-to-apis.js"></script>
+    <script src="/js/data/the-brain-databases.js"></script>
+    <script src="/js/data/the-game-never-ends.js"></script>
+    <script src="/js/data/the-final-boss-going-live.js"></script>
+    <script src="/js/data/webdesign1review.js"></script>
+    <script src="/js/data/webdesign2review.js"></script>
+    <script src="/js/data/webdesignreview.js"></script>
+
+    <script>
+        const logEl = document.getElementById('console-log');
+        const poolEl = document.getElementById('pool-count');
+
+        function addLog(msg, type = 'info') {
+            const p = document.createElement('p');
+            const colors = { info: 'text-slate-300', success: 'text-green-400', error: 'text-red-400', warning: 'text-yellow-400' };
+            p.className = `mb-1 ${colors[type]}`;
+            p.innerHTML = `> ${msg}`;
+            logEl.appendChild(p);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        async function checkDbCount() {
+            try {
+                const res = await fetch('/api/review-questions');
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('db-count').textContent = (data.questions || []).length;
+                }
+            } catch(e) {
+                document.getElementById('db-count').textContent = 'ERR';
+            }
+        }
+
+        async function runMigration() {
+            const pool = window.migrationPool || [];
+            if (pool.length === 0) {
+                addLog("ERROR: window.migrationPool is empty. Check that data files loaded correctly.", "error");
+                return;
+            }
+
+            const btn = document.getElementById('migrate-btn');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            document.getElementById('progress-container').classList.remove('hidden');
+            document.getElementById('upload-status').textContent = "Seeding...";
+
+            // Send in batches of 150 (~45kb each) to stay under nginx's 1mb body limit
+            const BATCH_SIZE = 150;
+            const totalBatches = Math.ceil(pool.length / BATCH_SIZE);
+            let totalUploaded = 0;
+
+            try {
+                for (let i = 0; i < pool.length; i += BATCH_SIZE) {
+                    const batch = pool.slice(i, i + BATCH_SIZE);
+                    const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+                    const pct = Math.round((i / pool.length) * 95);
+
+                    document.getElementById('progress-text').textContent = `Batch ${batchNum} of ${totalBatches}...`;
+                    document.getElementById('progress-bar').style.width = pct + '%';
+                    document.getElementById('progress-percent').textContent = pct + '%';
+
+                    const res = await fetch('/api/admin/review-questions/seed', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        // First batch truncates the table; subsequent batches append
+                        body: JSON.stringify({ questions: batch, truncate: i === 0 })
+                    });
+
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => ({}));
+                        throw new Error(errData.error || `HTTP ${res.status} on batch ${batchNum}`);
+                    }
+
+                    const data = await res.json();
+                    totalUploaded += data.count;
+                    addLog(`Batch ${batchNum}/${totalBatches}: ${data.count} questions inserted.`, "info");
+                }
+
+                document.getElementById('progress-bar').style.width = '100%';
+                document.getElementById('progress-percent').textContent = '100%';
+                document.getElementById('progress-text').textContent = 'Done!';
+                addLog(`✅ SUCCESS: ${totalUploaded} questions seeded to MariaDB.`, "success");
+                document.getElementById('upload-status').textContent = "Complete";
+                await checkDbCount();
+            } catch (err) {
+                addLog(`CRITICAL ERROR: ${err.message}`, "error");
+                document.getElementById('upload-status').textContent = "Failed";
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+            }
+        }
+
+        // Wait a moment for all scripts to dump data into the pool, then check DB
+        setTimeout(async () => {
+            const poolSize = (window.migrationPool || []).length;
+            poolEl.textContent = poolSize;
+            addLog(`Local pool ready: ${poolSize} questions loaded from JS data files.`, "info");
+            addLog(`Click "SEED MARIADB" to push them into the database.`, "info");
+            await checkDbCount();
+        }, 500);
+    </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+<title>Chapter 8: Computational Modeling</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+  
+  <!-- External Curriculum Styles -->
+  <link href="/css/compsci.css" rel="stylesheet" />
+</head>
+<body class="compsci-body">
+
+  <div class="chapter-header">
+<span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 3: Data & Analysis</span>
+<h1 class="display-4 fw-bold">Chapter 8: Computational Modeling</h1>
+    <p class="lead text-muted">Using math, logic, and variables to simulate and predict real-world processes.</p>
+  </div>
+
+  <!-- STICKY TABLE OF CONTENTS -->
+  <div class="sticky-toc">
+      <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#section-10-1">10.1 What is a Model?</a>
+      <a href="#section-10-2">10.2 Building Relationships</a>
+      <a href="#section-10-3">10.3 Limitations & Validation</a>
+  </div>
+
+  <p class="fs-5 mb-5">In the previous chapters, we learned how to speak the language of bits, how to store data safely, and how to master the spreadsheets that organize it. But the ultimate goal of a Data Architect is not just to look at what has happened—it is to predict what will happen. In this chapter, we explore <strong>Computational Modeling</strong>, the art of using math and logic to create a digital "sandbox" where we can test ideas, simulate disasters, or launch businesses without any real-world risk.</p>
+
+  <!-- Section 10.1 -->
+  <h3 id="section-10-1" class="fw-bold mt-4 border-bottom pb-2">10.1 What is a Model? <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.DA.IM.1</span></h3>
+  <p class="fs-5">A model is not the "real thing." If you have a plastic model of a car, you can see the shape and the wheels, but you can’t drive it to the store. In computer science, a Computational Model is a simplified representation of a real-world process. We strip away the unnecessary details so we can focus on the specific math and logic that drive a system. By building these digital versions of reality, we can ask the computer "What if?" and get an answer in seconds.</p>
+  
+  <h4 class="fw-bold mt-4 text-primary">10.1.1 Defining the Model (Digital Blueprints)</h4>
+  <p>Think of a computational model as a "Digital Laboratory." Scientists use these models to understand things that are too big, too small, or too dangerous to test in real life. For example, we can't start a real wildfire just to see how fast it burns, but we can build a model of a forest inside a computer. We tell the computer the "Rules" of fire—how it moves uphill, how it reacts to wind, and how fast it burns through dry pine trees.</p>
+  
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-compress-arrows-alt me-2"></i> The Power of Abstraction</h5>
+      <p class="mb-0">When we build a model, we are practicing <strong>Abstraction</strong>. We decide which details matter and which don't. If you are modeling how a virus spreads through a school, you don't need to know the students' favorite colors; you only need to know how many people they sit next to and how often they wash their hands. By simplifying the world into a set of mathematical rules, we allow the CPU to process the simulation millions of times, finding patterns that a human could never see.</p>
+  </div>
+
+  <p>Models are the foundation of modern decision-making. Architects use them to see if a building will survive an earthquake before they ever pour the concrete. Airplane designers use them to test wings in "digital wind tunnels." Even the video games you play are actually massive computational models of physics—the game is constantly calculating how gravity and friction should affect your character's movement based on the rules the programmers wrote.</p>
+
+  <h4 class="fw-bold mt-5 text-info">10.1.2 Static vs. Dynamic Models</h4>
+  <p>Not all models work the same way. Data Architects categorize models based on how they handle time.</p>
+  
+  <div class="row g-4 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body">
+                  <h5 class="fw-bold text-warning text-dark"><i class="fas fa-camera me-2"></i> Static Models (The Snapshot)</h5>
+                  <p>A static model is like a "snapshot" in time. It represents a system that doesn't change based on its own internal clock.</p>
+                  <p>A spreadsheet that shows your current grades is a static model; it tells you exactly where you stand right now based on the data you’ve already entered. Static models are great for budgets, inventories, and maps where the information is relatively stable.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-success">
+              <div class="card-body">
+                  <h5 class="fw-bold text-success"><i class="fas fa-chart-line me-2"></i> Dynamic Models (The Living System)</h5>
+                  <p>A dynamic model changes over time based on specific rules. It is a "Living" model.</p>
+                  <p>If you build a simulation of a colony of bees, a dynamic model will calculate how many bees are born, die, and make honey every "minute" of the simulation. Each step depends on the step before it, creating complex "Feedback Loops."</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">10.1.3 Variables and Parameters (The Inputs)</h4>
+  <p>Every model is driven by <strong>Variables</strong> and <strong>Parameters</strong>. These are the "knobs and dials" that you can turn to change the outcome of the simulation.</p>
+  <ul>
+      <li><strong>A Variable</strong> is a piece of data that changes during the model. In a wildfire model, the "Wind Speed" is a variable—it might be 5 mph at the start and 20 mph an hour later.</li>
+      <li><strong>A Parameter</strong> is a value that stays the same for that specific run of the model, such as the "Type of Tree" in the forest.</li>
+  </ul>
+  <p>Identifying the right variables is a critical part of modeling. If you miss a key variable, your model will be inaccurate. For example, if you are modeling traffic in Carson City but you forget to include "Traffic Lights," your simulation will show cars moving much faster than they do in reality. As a Power User, you must be a "Systems Thinker," looking at the world and asking: <em>"What are the hidden forces that make this system move?"</em></p>
+
+  <!-- Step-by-Step Guide for Model Dashboard -->
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-sliders-h me-2"></i> Step-by-Step: Setting Up a Model Dashboard</h5>
+      <p class="small mb-3 text-light">When you build a model in a spreadsheet, you should always keep your "Knobs" (Inputs) separate from your "Output" formulas.</p>
+      
+      <ol class="mb-0 text-light small">
+          <li class="mb-2"><strong>The Label:</strong> In cell <code>A1</code>, type "Wind Speed." In <code>A2</code>, type "Humidity."</li>
+          <li class="mb-2"><strong>The Input:</strong> In cell <code>B1</code>, type a number (e.g., <code>15</code>). In <code>B2</code>, type another (e.g., <code>0.20</code>).</li>
+          <li class="mb-2"><strong>The Calculation:</strong> In cell <code>C5</code>, write your formula that uses those cells (e.g., <code>=(B1 * 10) / B2</code>).</li>
+          <li><strong>The Simulation:</strong> Now, don't change the formula! Just change the number in <code>B1</code> and watch how <code>C5</code> changes. This is the "Heart" of computational modeling.</li>
+      </ol>
+  </div>
+
+  <!-- Activity 10.1.4 -->
+  <div class="alert alert-info mt-5 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-paper-plane fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity 10.1.4: The Paper Airplane Model</h4>
+              <p class="mb-0">Before we touch a computer, we must understand how variables affect outcomes in the real world. In this activity, you will build a physical model of "Flight."</p>
+              <ul class="mt-2 mb-0 fw-bold text-dark small">
+                  <li><strong>The Baseline:</strong> Build a standard paper airplane. Throw it three times and record the Average Distance. This is your "Control" group.</li>
+                  <li><strong>Identify the Variable:</strong> Choose ONE thing to change (e.g., add a paperclip to the nose, change the wing width, or use a heavier paper).</li>
+                  <li><strong>The Simulation:</strong> Throw the "New" model three times and record the results.</li>
+                  <li><strong>The Data Analysis:</strong> Compare the two averages. Did your change help or hurt?</li>
+                  <li><strong>The Prediction:</strong> If you added two paperclips, what do you think would happen to the distance? Why is this a "model" of how engineers design real jets?</li>
+              </ul>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Log your variables and flight distances in the Digital Notebook on the right.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 10.2 -->
+  <h3 id="section-10-2" class="fw-bold border-bottom pb-2">10.2 Building Relationships in Data <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.DA.IM.1</span></h3>
+  <p class="fs-5">Variables are useless unless they affect each other. In modeling, we use formulas to represent <strong>Relationships</strong>. A relationship is a rule that says: <em>"When this number goes up, that number should go down."</em> By building thousands of these rules into a single system, we create a simulation that can mimic the complexity of the real world.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">10.2.1 Correlation vs. Causation</h4>
+  <p>When analyzing data to build your model, you must avoid the most famous trap in computer science: confusing <strong>Correlation</strong> (two things moving at the same time) with <strong>Causation</strong> (one thing directly causing the other).</p>
+  <p>Correlation means that two things are moving together. For example, in the summer, both "Ice Cream Sales" and "Shark Attacks" go up. They are correlated. However, buying ice cream does not cause a shark to bite you! They are both moving because of a third variable: The Heat.</p>
+  <p>Causation means that one event directly makes another event happen. If you increase the "Temperature" variable in a model of a pot of water, that causes the water to boil. When building a model, you must prove causation. If you build a model based only on correlations, your predictions will eventually fail because you aren't actually understanding the "Engine" of the system.</p>
+
+  <div class="image-placeholder shadow-sm">
+    <i class="fas fa-ice-cream fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">The Ice Cream Trap</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> An infographic showing two line graphs that match perfectly. One line represents 'Ice Cream Sales' going up in the summer. The other line represents 'Shark Attacks' going up in the summer. A bold red 'X' over an arrow shows that Ice Cream does NOT cause Shark Attacks.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">10.2.2 Linear vs. Non-Linear Relationships</h4>
+  <p>When you define the rules of your simulation, you must use the right math to represent how the system grows.</p>
+  
+  <div class="row g-4 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-primary">
+              <div class="card-body">
+                  <h5 class="fw-bold text-primary"><i class="fas fa-chart-bar me-2"></i> Linear Relationships</h5>
+                  <p>Growth happens at a steady, predictable rate. If one person can pick 10 apples in an hour, two people can pick 20, and three can pick 30. If you graph this, it looks like a perfectly straight line. Linear relationships are easy to understand because the "Rule" never changes.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-danger">
+              <div class="card-body">
+                  <h5 class="fw-bold text-danger"><i class="fas fa-chart-line me-2"></i> Non-Linear (Exponential)</h5>
+                  <p>A small change in the input leads to an explosive change in the output. Think about a viral social media post: you share it with 2 friends, they share it with 2 friends each (now 4), then 8, then 16... very quickly, the numbers become millions. It forms a massive "hockey stick" curve on a graph.</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Step-by-Step Guide for Non-Linear -->
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-calculator me-2"></i> Step-by-Step: Calculating Non-Linear Growth</h5>
+      <p class="small mb-3 text-light">To see the power of non-linear modeling, let's build a quick comparison in a spreadsheet:</p>
+      
+      <ol class="mb-0 text-light small">
+          <li class="mb-2"><strong>The Day:</strong> In Column <code>A</code>, list numbers 1 to 10 (Days).</li>
+          <li class="mb-2"><strong>The Linear Growth:</strong> In <code>B1</code>, type <code>10</code>. In <code>B2</code>, type <code>=B1 + 10</code>. Drag it down to Row 10. By Day 10, you have 100.</li>
+          <li class="mb-2"><strong>The Non-Linear Growth:</strong> In <code>C1</code>, type <code>2</code>. In <code>C2</code>, type <code>=C1 * 2</code>. Drag it down to Row 10.</li>
+          <li><strong>The Comparison:</strong> By Day 10, the non-linear column has reached 1,024! It started much smaller but exploded. This is exactly how we model viral videos or pandemic spreads.</li>
+      </ol>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">10.2.3 Simulation Logic ("What-If" Analysis)</h4>
+  <p>Once you have your variables and your relationships, you can run a <strong>Simulation</strong>. A simulation is a single "run" of your model. But a Power User doesn't just run it once; they run it 1,000 times with slightly different inputs. This is called a <em>Monte Carlo Simulation</em>. By seeing all 1,000 outcomes, we can see the "Most Likely" result and the "Worst Case Scenario."</p>
+  <p>This "What-If" analysis allows us to "fail" in the computer so we can succeed in the real world. You can ask the computer: <em>"What if the price of gas goes up by $2?"</em> or <em>"What if 10% of our customers stop buying our product?"</em> Instead of guessing, the model uses its mathematical relationships to give you a data-driven answer.</p>
+
+  <!-- Activity 10.2.4 -->
+  <div class="alert alert-warning mt-4 shadow-sm border-warning">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-lemon fa-3x me-4 text-warning"></i>
+          <div>
+              <h4 class="fw-bold mb-1 text-dark">Activity 10.2.4: The "Lemonade Stand" Simulator</h4>
+              <p class="mb-0 text-dark">In this activity, you will build a dynamic business model in a spreadsheet. Follow these steps to build your "Engine":</p>
+              
+              <div class="row mt-2">
+                  <div class="col-md-6">
+                      <ul class="mb-0 fw-bold text-dark small">
+                          <li><strong>1. The Setup:</strong> In <code>A1</code>, type "Weather (1=Sun, 2=Rain)". In <code>B1</code>, type <code>1</code>.</li>
+                          <li><strong>2. Variables:</strong> In <code>A2</code>, type "Price per Cup". In <code>B2</code>, type <code>1.50</code>.</li>
+                          <li><strong>3. Parameters:</strong> In <code>A3</code>, type "Cost per Cup". In <code>B3</code>, type <code>0.25</code>.</li>
+                          <li><strong>4. Customer Demand:</strong> In <code>B5</code>, type: <code>=IF(B1=1, 100, 20)</code>.</li>
+                      </ul>
+                  </div>
+                  <div class="col-md-6">
+                      <ul class="mb-0 fw-bold text-dark small">
+                          <li><strong>5. Price Penalty:</strong> Change <code>B5</code> to: <code>=IF(B1=1, 100, 20) - (B2 * 10)</code>. As price goes up, demand drops!</li>
+                          <li><strong>6. Total Profit:</strong> In <code>B7</code>, type: <code>=(B2 - B3) * B5</code>.</li>
+                          <li><strong>7. The Simulation:</strong> Test different prices for Sunny (1) and Rainy (2) days. Find the absolute perfect "Sweet Spot" for your pricing!</li>
+                      </ul>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 10.3 -->
+  <h3 id="section-10-3" class="fw-bold border-bottom pb-2">10.3 Limitations and Validation <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.DA.IM.1</span></h3>
+  <p class="fs-5">A model is a tool, not an oracle. It can give us amazing insights, but it can also be dangerously wrong if we aren't careful. A Data Architect must be a "Skeptic"—someone who always questions the numbers.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">10.3.1 Garbage In, Garbage Out (GIGO)</h4>
+  <p>In computer science, there is an ironclad rule: <strong>GIGO (Garbage In, Garbage Out)</strong>. The quality of a model’s prediction is limited by the quality and diversity of the data we used to build it. If you build a model of "Car Safety" but you only use data from male drivers, your model will be Biased. It won't accurately predict what happens to female drivers or children.</p>
+  <p>GIGO also applies to the math. If your relationships are wrong (like assuming a system is linear when it is actually non-linear), the computer will still give you a "result," but that result will be garbage. It might look professional because it's in a beautiful chart, but it is a "Calculated Lie."</p>
+
+  <h4 class="fw-bold mt-5 text-info">10.3.2 Testing and Validation</h4>
+  <p>How do we know if a model is "Good"? We use <strong>Validation</strong>. This is the process of comparing a model's prediction against real-world results. If a climate model predicted in 2010 that the global temperature would rise by 1 degree, and by 2020 the temperature did rise by 1 degree, the model is Validated.</p>
+
+  <!-- Step-by-Step Guide for Validation -->
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Step-by-Step: How to Validate a Model</h5>
+      <p class="small mb-3 text-light">You can never blindly trust a model. Follow this scientific cycle to prove your math works:</p>
+      
+      <ol class="mb-0 text-light small">
+          <li class="mb-2"><strong>The Prediction:</strong> Use your model to predict an outcome (e.g., "If I spend $10 on ads, I will get 50 customers").</li>
+          <li class="mb-2"><strong>The Observation:</strong> Go into the real world and spend the $10.</li>
+          <li class="mb-2"><strong>The Comparison:</strong> Did you actually get 50 customers?
+              <ul class="mt-1">
+                  <li><em>If Yes:</em> Your model is validated for that specific variable.</li>
+                  <li><em>If No:</em> You must go back to your "Relationships" and find the missing variable.</li>
+              </ul>
+          </li>
+          <li><strong>The Refinement:</strong> Update your formulas and test again. This cycle is how real science is done.</li>
+      </ol>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">10.3.3 The Human Factor</h4>
+  <p>The biggest limitation of any model is <strong>Unpredictability</strong>. Computers are logical, but humans are not. We often act based on emotions, rumors, or sudden changes in mood. This is why "Economic Models" that try to predict the stock market or "Political Models" that try to predict elections are so often wrong. They are trying to use math to solve a "Human Problem."</p>
+  <p>There is also the risk of the <strong>"Missing Variable."</strong> No matter how complex a model is, it can't include everything. A model of a bridge might be mathematically perfect, but it can't predict that a rare species of bird will build nests in the support beams and cause them to rust faster. A Data Architect must have humility and acknowledge that their model is just a "Simplified Guess."</p>
+
+  <!-- Activity 10.3.4 -->
+  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-comments fa-3x me-4 text-primary"></i>
+          <div>
+              <h3 class="fw-bold mb-1">Activity 10.3.4: Modeling the Future</h3>
+              <p class="mb-2 fs-5">Computational models are now used to write laws and decide how billions of dollars are spent. Consider the following prompts:</p>
+              <ul class="mb-0 fw-bold text-dark small">
+                  <li class="mb-1"><strong>The Power of the Model:</strong> If a climate model predicts a city will be underwater in 50 years, should the government force people to move today? What if the model is wrong?</li>
+                  <li class="mb-1"><strong>Algorithmic Bias:</strong> If a model used by a bank to approve loans is "Biased" because it only looks at data from certain neighborhoods, who is responsible?</li>
+                  <li><strong>The Debate:</strong> Why are models (like pandemic spread models) often debated? How can they be refined over time as more data becomes available?</li>
+              </ul>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Open the "Discussion Reflection" template in your Digital Notebook to outline your argument for the class debate.</p>
+          </div>
+      </div>
+  </div>
+
+  <!-- Required scripts for interactive tabs/accordions inside the iframe -->
+  <script src="/js/bootstrap.bundle.js"></script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

@@ -1,0 +1,206 @@
+CHS Web Design & Development Site Architecture
+===============================================
+
+This document describes the current structure of `chswebdesignndevelopment`, what connects to what, and how the application behaves today.
+It reflects the current organization of static pages, JS assets, API routes, and database dependencies.
+
+1. Repository layout
+--------------------
+- Root folder: `/srv/chswebdesignndevelopment`
+- Main server file: `server.js`
+- Static content is served directly from the repo root via Express `express.static(__dirname)`.
+- JS assets are organized under `js/`.
+- CSS under `css/`.
+- Pages are mostly plain HTML served directly, with client-side JS driving behavior.
+- Exam pages remain exactly where they are in `exams/` and are intentionally unchanged.
+
+2. `js/` organization today
+---------------------------
+- `js/games/` now contains public review-game scripts used by `reviewGames/*.html` pages:
+  - `js/games/hollywood.js`
+  - `js/games/jeopardy.js`
+  - `js/games/millionaire.js`
+  - `js/games/wordgames.js`
+  - `js/games/review_games_logic.js`
+  - `js/games/smarter.js`
+- `js/student/` contains private student-page logic:
+  - `js/student/dashboard.js`
+  - `js/student/student-files.js`
+  - `js/student/student-notes.js`
+  - `js/student/student-payroll.js`
+  - `js/student/timeclock.js`
+- `js/admin/` contains admin portal logic:
+  - `js/admin/roster.js`
+  - `js/admin/gradebook.js`
+- `js/data/` now only contains the curriculum data scripts that `admin.html` uses to populate Firestore via the migration dashboard.
+  - These are not used by student pages directly.
+- Shared site utilities and entrypoint scripts remain at top-level `js/`:
+  - `js/auth-guard.js`
+  - `js/bootstrap.bundle.js`
+  - `js/jquery.js`
+  - `js/loader.js`
+  - `js/login-logic.js`
+  - `js/examLogic.js`
+  - `js/examLogicCS.js`
+  - `js/preTestLogic.js`
+  - `js/quizLogic.js`
+  - `js/prof-scales.js`
+  - `js/prof-scales-cs-firebase.js`
+  - `js/interactive.js`
+  - `js/cs-interactive.js`
+
+3. Server backend
+------------------
+- `server.js` runs an Express server on port `3000`.
+- It serves static content from the repo root.
+- It supports sessions using `express-session` with `cookie.secure = false`.
+- It uses `mysql2/promise` to connect to a MariaDB/MySQL database named `chs_gradebook`.
+- Database connect logic:
+  - primary: `host: localhost`, `user: root`, `password: chs_password`.
+  - fallback for Linux socket path: `/var/run/mysqld/mysqld.sock`, `user: root`, empty password.
+
+4. Main database and API flows
+------------------------------
+- Primary data storage for login, roster, grades, exams, and admin metadata is the MariaDB database.
+- The main app is a hybrid static + API system:
+  - static HTML pages load in the browser
+  - client JS calls server API endpoints under `/api/`
+- Implemented API routes in `server.js`:
+  - `POST /api/register` — register new student accounts by validating student_id against the roster.
+  - `POST /api/login` — authenticate username/password and create session data.
+  - `POST /api/logout` — destroy session and clear cookie.
+  - `POST /api/clockin` — save student clock-in activity.
+  - `POST /api/verify-user` — lookup a student by username for exam verification.
+  - `POST /api/submit-exam` — save exam results.
+  - `GET /api/student/grades` — fetch grades for a student.
+  - `GET /api/questions` — fetch exam question payloads.
+  - `GET /api/admin/roster` — return the full roster for admin pages.
+  - `POST /api/admin/save-assignment` — create or update assignment metadata.
+  - `POST /api/admin/edit-assignment` — edit an existing assignment.
+  - `POST /api/admin/delete-assignment` — delete an assignment.
+
+5. Auth and login flow
+-----------------------
+- `login.html` is the main login/registration page.
+- It loads:
+  - `/js/loader.js?v=6`
+  - `/js/login-logic.js`
+  - `/js/auth-guard.js`
+  - `/js/bootstrap.bundle.js`
+  - `/js/jquery.js`
+- `js/login-logic.js` handles:
+  - login POST to `/api/login`
+  - registration POST to `/api/register`
+  - optional clock-in flow for overtime/regular shifts
+  - password reset if the client uses `/api/reset-password` (note: this route is not implemented in `server.js`)
+- After successful login, the client stores `user` in `localStorage` and redirects students to `/student/grades.html` or admins to `/admin/gradebook.html`.
+
+6. Student page flow
+---------------------
+- Student pages are under `student/` and use the new `js/student/` folder.
+- Key student pages:
+  - `/student/grades.html` — student gradebook dashboard
+  - `/student/files.html` — student file manager
+  - `/student/notes.html` — student notes page
+- Page-specific JS:
+  - `/student/grades.html` loads `js/student/dashboard.js`, `js/student/student-payroll.js`, `js/student/timeclock.js`.
+  - `/student/files.html` loads `js/student/student-files.js`.
+  - `/student/notes.html` loads `js/student/student-notes.js`.
+- These pages depend on the logged-in user session and backend APIs.
+
+7. Exam page flow
+------------------
+- `exams/` pages are left in place and are a core part of the application.
+- They continue to use `js/examLogic.js` and `js/examLogicCS.js`.
+- Exam logic:
+  - verifies a user by posting to `/api/verify-user`
+  - loads questions from `/api/questions?exam_id={id}`
+  - submits results to `/api/submit-exam`
+- These pages are intentionally preserved exactly in their current locations.
+
+8. Public game/review pages
+----------------------------
+- Public review/game pages are under `reviewGames/`.
+- They now load their game logic from `js/games/`.
+- Example public game scripts:
+  - `js/games/review_games_logic.js`
+  - `js/games/jeopardy.js`
+  - `js/games/hollywood.js`
+  - `js/games/millionaire.js`
+  - `js/games/wordgames.js`
+  - `js/games/smarter.js`
+- These scripts are separate from private student pages and are only used by review game content.
+
+9. Data files and migration
+-----------------------------
+- Static curriculum data files in `js/data/` are no longer consumed by normal student pages.
+- `admin.html` still uses a subset of `js/data/*.js` scripts to bootstrap Firestore content via the migration dashboard.
+- In practice:
+  - normal site navigation and exams do not depend on `js/data/`
+  - the database is now the authoritative source for content
+- Remaining `js/data/` resources are only for admin migration and not for active student page delivery.
+
+10. Exact page-to-JS connections
+---------------------------------
+- `/login.html`
+  - `js/loader.js`
+  - `js/login-logic.js`
+  - `js/auth-guard.js`
+- `/student/grades.html`
+  - `js/student/dashboard.js`
+  - `js/student/student-payroll.js`
+  - `js/student/timeclock.js`
+- `/student/files.html`
+  - `js/student/student-files.js`
+- `/student/notes.html`
+  - `js/student/student-notes.js`
+- `/admin.html`
+  - `js/admin/roster.js`
+  - `js/admin/gradebook.js`
+  - `js/data/*.js` (migration seeding only)
+- `/reviewGames/*.html`
+  - `js/games/review_games_logic.js`
+  - `js/games/jeopardy.js`
+  - `js/games/hollywood.js`
+  - `js/games/millionaire.js`
+  - `js/games/wordgames.js`
+  - `js/games/smarter.js`
+- `/exams/*.html`
+  - `js/examLogic.js`
+  - `js/examLogicCS.js`
+  - supporting shared scripts like `js/loader.js`, `js/auth-guard.js`, `js/jquery.js`, `js/bootstrap.bundle.js`
+
+11. Current missing/mismatched routes
+--------------------------------------
+- Some client pages expect API routes that are not present in `server.js`.
+- Known missing or incomplete backend routes:
+  - `/api/reset-password`
+  - `/api/admin/master-gradebook-data`
+  - `/api/admin/save-grade`
+  - `/api/admin/upload-roster`
+  - `/api/admin/reset-student`
+  - `/api/admin/delete-student`
+  - `/api/admin/batch-update-grades`
+- Because these are missing, some admin and student features may not work fully until they are implemented.
+
+12. What is now authoritative
+-----------------------------
+- Student authentication, roster lookup, grade storage, and exam questions are all backed by MariaDB via the `server.js` API.
+- Public game logic is in `js/games/` and served as static scripts.
+- The `exams/` folder remains the core assessment content and is still active.
+- The `admin.html` migration page is a separate Firestore seed tool and does not represent the main student experience.
+
+13. How to run the site today
+------------------------------
+- Start the app from `/srv/chswebdesignndevelopment`:
+  - `node server/server.js`
+- Open a browser to `http://localhost:3000/login.html` or any other page.
+- The server will serve static HTML and respond to `/api/*` calls.
+- Make sure the MariaDB service is available and the `chs_gradebook` database is accessible.
+
+14. Notes on cleanup
+---------------------
+- The JS folder has been reorganized so public games and private student pages are separated.
+- The `js/data/` folder is no longer the source of active student content.
+- Exam pages remain untouched where they are, as requested.
+

@@ -20,17 +20,38 @@ const registry = {
   'the-brain-databases.html': 'wd-ch14-exam',
   'the-game-never-ends.html': 'wd-ch15-exam',
   'the-final-boss-going-live.html': 'wd-ch16-exam',
+  'cs-unit-0-exam.html': 'cs-u0-exam',
   'cs-unit-1-exam.html': 'cs-u1-exam',
   'cs-unit-2-exam.html': 'cs-u2-exam',
   'cs-unit-3-exam.html': 'cs-u3-exam',
   'cs-unit-4-exam.html': 'cs-u4-exam',
-  'cs-unit-5-exam.html': 'cs-u5-exam'
+  'cs-unit-5-exam.html': 'cs-u5-exam',
+  'cs-unit-6-exam.html': 'cs-u6-exam',
+  'cs-unit-7-exam.html': 'cs-u7-exam',
+  'cs-unit-8-exam.html': 'cs-u8-exam'
 };
 
+// Get database config - use same approach as server/db.js for Linux compatibility
+async function getDbConfig() {
+    if (process.platform === 'linux') {
+        return {
+            socketPath: '/var/run/mysqld/mysqld.sock',
+            user: 'root',
+            password: '',
+            database: 'chs_gradebook'
+        };
+    }
+    return {
+        host: 'localhost',
+        user: 'root',
+        password: 'chs_password',
+        database: 'chs_gradebook'
+    };
+}
+
 async function main() {
-  const connection = await mysql.createConnection({
-    host: 'localhost', user: 'root', password: 'chs_password', database: 'chs_gradebook'
-  });
+  const dbConfig = await getDbConfig();
+  const connection = await mysql.createConnection(dbConfig);
 
   console.log('Resetting question table...');
   await connection.query('SET FOREIGN_KEY_CHECKS = 0;');

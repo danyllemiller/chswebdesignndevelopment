@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 0: Introduction to Office Software</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+  
+  <link href="/css/compsci.css" rel="stylesheet" />
+</head>
+<body class="compsci-body">
+
+  <div class="chapter-header">
+    <span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 0: The Digital Foundation</span>
+    <h1 class="display-4 fw-bold">Chapter 0: Intro to Office Software</h1>
+    <p class="lead text-muted">Computer basics, formatting documents, pitching ideas, and collaborating in the cloud.</p>
+  </div>
+
+  <div class="sticky-toc">
+      <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#section-0-1">0.1 Computer Basics & Troubleshooting</a>
+      <a href="#section-0-2">0.2 File Management</a>
+      <a href="#section-0-3">0.3 Word Processing Mastery</a>
+      <a href="#section-0-4">0.4 Powerful Presentations</a>
+      <a href="#section-0-5">0.5 Spreadsheet Fundamentals</a>
+      <a href="#section-0-6">0.6 Collaboration & Teamwork</a>
+      <a href="#section-0-7">0.7 Digital Literacy & Shortcuts</a>
+      <a href="#section-0-8">0.8 Email & Netiquette</a>
+  </div>
+
+  <h3 id="section-0-1" class="fw-bold mt-4 border-bottom pb-2">0.1 Computer Basics & Troubleshooting</h3>
+  <p class="fs-5">Before you can write code or create presentations, you have to successfully operate the physical machine. In a professional or lab environment, hardware configurations can be tricky.</p>
+  
+  <h4 class="fw-bold mt-4 text-primary">0.1.1 Powering On & Hardware Components</h4>
+  <p>In a desktop computer setup, the computer and the screen are two completely separate pieces of hardware.</p>
+  <ul>
+      <li><strong>The PC Tower:</strong> This is the actual "brain" of the computer (containing the CPU, RAM, and storage). It has its own power cable connected to the wall and a main power button (usually on the front or top).</li>
+      <li><strong>The Monitor:</strong> This is just a display screen. It has its own power cable and power button. If the PC is on but the monitor is off, your screen will remain black.</li>
+  </ul>
+
+  <h4 class="fw-bold mt-4 text-info">0.1.2 Input vs. Output Devices</h4>
+  <ul>
+      <li><strong>Input Devices:</strong> Send data <em>INTO</em> the computer (Keyboard, Mouse, Microphone, Webcam).</li>
+      <li><strong>Output Devices:</strong> Receive data <em>OUT OF</em> the computer (Monitor, Speakers, Printer).</li>
+  </ul>
+
+  <h4 class="fw-bold mt-4 text-danger">0.1.3 Troubleshooting: "It won't turn on!"</h4>
+  <p>If you press the power button and nothing happens, do not panic. Follow this basic hardware trace:</p>
+  <div class="concept-box shadow-sm border-danger bg-light m-0">
+    <ol class="mb-0">
+        <li class="mb-2"><strong>Check the Power Strip:</strong> Is it plugged into the wall? Is the switch flipped to the "ON" or "RESET" position (usually indicated by a glowing light)?</li>
+        <li class="mb-2"><strong>Check the Power Cables:</strong> Ensure the thick black power cables are pushed firmly into the back of the PC tower, the monitor, and the power strip.</li>
+        <li><strong>Check the Display Cable:</strong> Ensure the display cable (HDMI or DisplayPort) is securely plugged into both the back of the monitor and the back of the PC tower.</li>
+    </ol>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <h3 id="section-0-2" class="fw-bold border-bottom pb-2">0.2 File Management Basics</h3>
+  <p class="fs-5">A computer without organization quickly becomes a digital junkyard. You should always create specific <strong>Folders</strong> (e.g., <code>Documents/Computer_Science/Unit_0/</code>) to group related files rather than dumping everything onto your Desktop.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
+      <h5 class="fw-bold text-info"><i class="fas fa-cloud me-2"></i> Local Storage vs. Cloud Storage</h5>
+      <ul>
+          <li class="mb-2 small"><strong>Local Storage (C: Drive / Desktop):</strong> The file lives physically inside the hardware of the specific computer you are using. If the hard drive crashes, you lose your work.</li>
+          <li class="small"><strong>Cloud Storage (Google Drive / OneDrive):</strong> The file lives on the internet. It automatically saves every few seconds, and you can access it from any device by logging into your account.</li>
+      </ul>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <h3 id="section-0-3" class="fw-bold border-bottom pb-2">0.3 Word Processing Mastery</h3>
+  <p class="fs-5">Typing words onto a screen is easy; structuring information so that it is readable, professional, and accessible requires mastery. Word processors like Microsoft Word and Google Docs are powerful tools if you know how to use them beyond just basic typing.</p>
+  
+  <h4 class="fw-bold mt-4 text-primary">0.3.1 The Anatomy of a Document</h4>
+  <p>Before you start typing, you need to understand the workspace. Modern word processors use a standardized layout:</p>
+  <ul>
+      <li><strong>The Ribbon/Toolbar:</strong> The menu at the top containing all your tools, organized into tabs (Home, Insert, Layout).</li>
+      <li><strong>The Ruler:</strong> Located at the top and left edges, this tool allows you to visually set indentations, tabs, and page margins.</li>
+      <li><strong>Margins:</strong> The blank white space around the edge of the page. Standard academic and professional margins are usually 1 inch on all sides.</li>
+  </ul>
+
+  <h4 class="fw-bold mt-5 text-info">0.3.2 Formatting for Readability</h4>
+  <p>Have you ever looked at a massive "wall of text" and immediately lost the motivation to read it? Proper formatting prevents this by using <strong>Hierarchy</strong>.</p>
+  
+  <div class="concept-box shadow-sm border-primary bg-light m-0">
+    <h5 class="fw-bold"><i class="fas fa-heading text-primary me-2"></i> Information Hierarchy (H1, H2, P)</h5>
+    <ul class="mb-0">
+        <li class="mb-2"><strong>Heading 1 (H1):</strong> The main title of the document. There should usually only be one H1.</li>
+        <li class="mb-2"><strong>Heading 2 (H2):</strong> Major section breaks (like "0.1 Word Processing Mastery" above).</li>
+        <li><strong>Paragraph (P) / Normal Text:</strong> The actual body of your content. Using proper line spacing (like 1.15 or 1.5) and alignment (Left-aligned for easiest reading) makes a massive difference in professional communication.</li>
+    </ul>
+  </div>
+
+  <div class="image-placeholder shadow-sm my-4">
+    <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">The Wall of Text vs. Hierarchy</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A side-by-side comparison of two digital documents. The left document is a chaotic, unreadable wall of tiny, unspaced text. The right document is beautiful, with clear bold headers (H1, H2), bullet points, and plenty of clean white space.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-success">0.3.3 Creating, Formatting & Sharing (Google Docs vs. MS Word)</h4>
+  <div class="row g-4 mb-4">
+      <div class="col-md-6">
+          <div class="p-3 border rounded shadow-sm bg-white h-100 border-top border-success border-4">
+              <h6 class="fw-bold text-dark"><i class="fas fa-magic text-success me-2"></i> Creating & Formatting</h6>
+              <ul class="small text-muted mb-0">
+                  <li class="mb-2"><strong>Create:</strong> In Google Drive, click "+ New" > Google Docs. In Word, open the app and click "Blank Document".</li>
+                  <li class="mb-2"><strong>Add a Title/Heading:</strong> Type your text, highlight it, and click the "Normal text" dropdown in the toolbar. Select "Title" or "Heading 1".</li>
+                  <li class="mb-2"><strong>Change Font & Color:</strong> Highlight text. Click the Font Name dropdown (e.g., Arial) to change styles. Click the <strong>A with a line under it</strong> to change text color.</li>
+                  <li><strong>Add Images:</strong> Click <em>Insert > Image</em>. Once inserted, click the image and drag the blue corner squares to resize it safely.</li>
+              </ul>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="p-3 border rounded shadow-sm bg-white h-100 border-top border-success border-4">
+              <h6 class="fw-bold text-dark"><i class="fas fa-share-square text-success me-2"></i> Saving & Sharing</h6>
+              <ul class="small text-muted mb-0">
+                  <li class="mb-2"><strong>Saving (Docs):</strong> Auto-saves to the cloud. Click "Untitled document" in the top-left to name it.</li>
+                  <li class="mb-2"><strong>Saving (Word):</strong> Click <em>File > Save As</em>, choose a folder, and name it. Press <code>Ctrl+S</code> frequently!</li>
+                  <li class="mb-2"><strong>Sharing (Docs):</strong> Click the blue "Share" button. Change General Access to "Anyone with the link" and copy/paste that link into an email or assignment submission.</li>
+                  <li><strong>Sharing (Word):</strong> Save the <code>.docx</code> file locally, open your email, click the Paperclip (Attach) icon, and locate the file.</li>
+              </ul>
+          </div>
+      </div>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">0.3.4 The Power of the PDF</h4>
+  <p>If you email a carefully formatted Microsoft Word document to someone using an old Mac or a different app, all your margins, fonts, and spacing might break. How do we prevent this?</p>
+
+  <div class="row g-4 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body">
+                  <h5 class="fw-bold text-warning"><i class="fas fa-file-word me-2"></i> The Working File (.docx)</h5>
+                  <p>A <code>.docx</code> or Google Doc is "fluid." It is meant to be edited. Anyone who opens it can accidentally delete a paragraph or mess up the formatting.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-danger">
+              <div class="card-body">
+                  <h5 class="fw-bold text-danger"><i class="fas fa-file-pdf me-2"></i> The Locked File (.pdf)</h5>
+                  <p>A <strong>Portable Document Format (PDF)</strong> takes a "digital snapshot" of your document. It locks the fonts, images, and margins in place so it looks exactly the same on every device, operating system, and printer in the world.</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-list-ol me-2"></i> Step-by-Step: How to Export as a PDF</h5>
+      <p class="small mb-3 text-light">To ensure your document formatting never breaks, always submit final assignments as a PDF. Here is how to create one in the two most popular word processors:</p>
+      
+      <h6 class="fw-bold text-success mt-3"><i class="fab fa-google drive me-2"></i> From Google Docs/Slides:</h6>
+      <ol class="mb-3 text-light small">
+          <li class="mb-1">Click <strong>File</strong> in the top-left menu bar.</li>
+          <li class="mb-1">Hover your mouse over <strong>Download</strong> in the dropdown menu.</li>
+          <li class="mb-1">Click <strong>PDF Document (.pdf)</strong>. The locked file will instantly download to your computer.</li>
+      </ol>
+
+      <h6 class="fw-bold text-info mt-3"><i class="fab fa-microsoft me-2"></i> From Microsoft Word/PowerPoint:</h6>
+      <ol class="mb-0 text-light small">
+          <li class="mb-1">Click <strong>File</strong> in the top-left menu bar.</li>
+          <li class="mb-1">Select <strong>Save As</strong> (or <strong>Export</strong>, depending on your version).</li>
+          <li class="mb-1">Click the "File Format" dropdown menu (which usually says ".docx") and change it to <strong>PDF</strong>.</li>
+          <li class="mb-1">Click <strong>Save</strong>.</li>
+      </ol>
+  </div>
+
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-magic fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity 0.3.5: The "Ugly Document" Rescue</h4>
+              <p class="mb-0">You have been given a poorly formatted, chaotic text document. Your mission is to use styles, headers, proper spacing, and margins to transform it into a professional report. Finally, you must export it as a clean PDF to lock your changes.</p>
+              <p class="mb-0 fw-bold mt-1 text-dark">👉 Check your assignment instructions and upload your final PDF to the Dropbox on the right!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <h3 id="section-0-4" class="fw-bold border-bottom pb-2">0.4 Powerful Presentations</h3>
+  <p class="fs-5">Presentations are not documents. A document is meant to be read; a presentation is a visual aid meant to support a speaker. Mixing up the two results in bored, disengaged audiences.</p>
+
+  <h4 class="fw-bold mt-4 text-danger"><i class="fas fa-skull-crossbones me-2"></i> 0.4.1 Death by PowerPoint</h4>
+  <p>The worst mistake you can make is creating "Death by PowerPoint." Avoid these common pitfalls:</p>
+  <ul>
+      <li><strong>Too Much Text:</strong> If your audience is reading paragraphs off the screen, they are not listening to you.</li>
+      <li><strong>Reading from the Screen:</strong> Never turn your back to the audience to read your own slides verbatim.</li>
+      <li><strong>Terrible Contrast:</strong> Using light yellow text on a white background makes your presentation unreadable.</li>
+  </ul>
+
+  <h4 class="fw-bold mt-5 text-info">0.4.2 Principles of Slide Design</h4>
+  <p>To create a powerful slide deck, embrace these core design principles:</p>
+  <div class="concept-box shadow-sm border-success bg-light">
+      <ul class="mb-0">
+          <li class="mb-2"><strong>White Space:</strong> Empty space is your friend. It draws the eye to what actually matters.</li>
+          <li class="mb-2"><strong>High-Quality Imagery:</strong> Use one strong, high-resolution photo instead of five tiny, pixelated clip-art images.</li>
+          <li><strong>Consistent Branding:</strong> Pick a color palette (2-3 colors) and 1 or 2 fonts, and stick to them for the entire presentation.</li>
+      </ul>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">0.4.3 Choosing the Right Tool</h4>
+  <p>Different tasks require different software. Standard tools like <strong>PowerPoint, Keynote, or Google Slides</strong> are great for standard classroom or business presentations. However, if you are designing a highly visual "Pitch Deck" for a startup, you might want to use creative layout tools like <strong>Canva, Adobe Express, or Adobe InDesign</strong>.</p>
+
+  <h4 class="fw-bold mt-5 text-success">0.4.4 Creating & Designing (Google Slides vs. PowerPoint)</h4>
+  <div class="row g-4 mb-4">
+      <div class="col-md-6">
+          <div class="p-3 border rounded shadow-sm bg-white h-100 border-top border-success border-4">
+              <h6 class="fw-bold text-dark"><i class="fas fa-font text-success me-2"></i> Working with Text & Themes</h6>
+              <ul class="small text-muted mb-0">
+                  <li class="mb-2"><strong>Applying a Theme:</strong> Click <em>Slide > Change Theme</em> (or the Theme button on the toolbar) to instantly apply professional background colors and matching fonts to all slides.</li>
+                  <li class="mb-2"><strong>Adding Text Boxes:</strong> Unlike Word, you cannot just click anywhere and type. Text must live inside a <strong>Text Box</strong>. Click the 'T' icon in the toolbar, draw a box, and type inside it.</li>
+                  <li><strong>Adding Images:</strong> Click <em>Insert > Image</em>. You can drag images anywhere on the slide.</li>
+              </ul>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="p-3 border rounded shadow-sm bg-white h-100 border-top border-success border-4">
+              <h6 class="fw-bold text-dark"><i class="fas fa-share-square text-success me-2"></i> Saving & Sharing</h6>
+              <ul class="small text-muted mb-0">
+                  <li class="mb-2"><strong>Saving:</strong> Google Slides auto-saves. For MS PowerPoint, click <em>File > Save As</em>.</li>
+                  <li><strong>Sharing Warning:</strong> Presentations with lots of images create massive file sizes. If your <code>.pptx</code> file is over 25MB, you cannot attach it to a standard email. You must upload it to a cloud drive and share the link, or share directly via Google Slides.</li>
+              </ul>
+          </div>
+      </div>
+  </div>
+
+  <div class="image-placeholder shadow-sm my-4">
+    <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">The Good vs. The Bad Slide</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A side-by-side of two presentation slides. Left side (Bad): A slide crammed with 5 paragraphs of tiny text, 3 different fonts, and a terrible low-res clipart image. Right side (Good): A stunning, minimalist slide with one powerful high-res image taking up half the screen, and just 4 words of large, bold text on the other half.</p>
+  </div>
+
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-presentation fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity 0.4.5: The 5-Slide Pitch</h4>
+              <p class="mb-0">Take a complex technical concept you learned in Chapter 1 (like how RAM or the CPU works). Your goal is to explain this concept using a highly visual, 5-slide deck that relies on strong imagery and minimal text.</p>
+              <p class="mb-0 fw-bold mt-1 text-dark">👉 Upload your completed Slide Deck (or PDF export) to the Dropbox on the right!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <h3 id="section-0-5" class="fw-bold border-bottom pb-2">0.5 Spreadsheet Fundamentals</h3>
+  <p class="fs-5">Google Sheets and MS Excel are used for organizing data, tracking budgets, and performing math calculations. Data is organized into a grid of <strong>Columns</strong> (letters) and <strong>Rows</strong> (numbers).</p>
+
+  <h4 class="fw-bold mt-4 text-primary">0.5.1 Cells & Data Entry</h4>
+  <p>The intersection of a Column and a Row is called a <strong>Cell</strong> (e.g., cell A1 is the top-left box). To add data, click a cell so it is highlighted, type your text/numbers, and press <strong>Enter</strong> to move down, or <strong>Tab</strong> to move right.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">0.5.2 Equations & Formulas</h4>
+  <p>Spreadsheets do math for you. To tell the software you are writing a math equation (and not just typing regular text), you <strong>must always start by typing an Equals Sign ( = )</strong>.</p>
+  
+  <div class="bg-light p-3 rounded border shadow-sm my-3">
+      <h6 class="fw-bold text-success"><i class="fas fa-calculator me-2"></i> The Top 5 Essential Formulas:</h6>
+      <ul class="mb-0 mt-2 text-muted">
+          <li class="mb-1"><code>=SUM(A1:A5)</code> <em>Adds all numbers from cell A1 through A5 together.</em></li>
+          <li class="mb-1"><code>=AVERAGE(B1:B10)</code> <em>Calculates the average (mean) of the selected cells.</em></li>
+          <li class="mb-1"><code>=MAX(C1:C20)</code> <em>Finds the highest number in the selected range.</em></li>
+          <li class="mb-1"><code>=MIN(D1:D20)</code> <em>Finds the lowest number in the selected range.</em></li>
+          <li><code>=COUNT(E1:E10)</code> <em>Counts how many cells actually have numbers in them.</em></li>
+      </ul>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <h3 id="section-0-6" class="fw-bold border-bottom pb-2">0.6 Collaboration & Teamwork <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standards 9-12.AP.PD.4, 9-12.IC.SI.1</span></h3>
+  <p class="fs-5">In the modern workplace, you will rarely work alone. The ability to seamlessly collaborate on digital files with team members across the room (or across the globe) is a mandatory skill.</p>
+
+  <ul class="nav nav-tabs mt-4" id="collabTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+          <button class="nav-link active fw-bold text-primary" id="cloud-tab" data-bs-toggle="tab" data-bs-target="#cloud-pane" type="button" role="tab">
+              <i class="fas fa-cloud me-2"></i> Working in the Cloud
+          </button>
+      </li>
+      <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-success" id="version-tab" data-bs-toggle="tab" data-bs-target="#version-pane" type="button" role="tab">
+              <i class="fas fa-history me-2"></i> Version History
+          </button>
+      </li>
+      <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-warning text-dark" id="roles-tab" data-bs-toggle="tab" data-bs-target="#roles-pane" type="button" role="tab">
+              <i class="fas fa-users-cog me-2"></i> Team Roles
+          </button>
+      </li>
+  </ul>
+  
+  <div class="tab-content border border-top-0 bg-white p-4 shadow-sm mb-4" id="collabTabsContent">
+      <div class="tab-pane fade show active" id="cloud-pane">
+          <h5 class="fw-bold text-primary">Concurrent Editing</h5>
+          <p>We used to email files back and forth: <code>project_v1.docx</code>, then <code>project_v2_final.docx</code>, then <code>project_v3_really_final.docx</code>. It was a mess.</p>
+          <p class="mb-0">Today, we use <strong>Cloud Collaboration</strong> (like Google Docs or Office 365). Multiple people can log into the exact same document at the exact same time (concurrent editing). You can see their cursors typing live, eliminating the need to ever email a file attachment.</p>
+      </div>
+      <div class="tab-pane fade" id="version-pane">
+          <h5 class="fw-bold text-success">Version History & Tracking Changes</h5>
+          <p>What happens if your partner accidentally deletes half your essay? Because you are in the cloud, you can open <strong>Version History</strong> to literally turn back time and restore the document to how it looked 3 hours ago.</p>
+          <p class="mb-0">Instead of deleting someone's work, you should use <strong>Suggested Edits</strong> and <strong>Comment Threads</strong>. This allows you to communicate asynchronously and approve changes before they become permanent.</p>
+      </div>
+      <div class="tab-pane fade" id="roles-pane">
+          <h5 class="fw-bold text-warning text-dark">Digital Etiquette & Permissions</h5>
+          <p>When sharing a file, you must assign the correct permission level to protect your data:</p>
+          <ul>
+              <li><strong>Viewer:</strong> Can only read the file. (Best for public sharing).</li>
+              <li><strong>Commenter:</strong> Can read and leave sticky notes, but cannot change the actual text.</li>
+              <li><strong>Editor:</strong> Has full control to delete and rewrite. (Only give this to trusted teammates).</li>
+          </ul>
+      </div>
+  </div>
+
+  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-users fa-3x me-4 text-primary"></i>
+          <div>
+              <h3 class="fw-bold mb-1">Activity 0.6.1: The Collaborative Sandbox</h3>
+              <p class="mb-0 fs-5">Get into groups of three. You must collaboratively write and format a short tech policy (e.g., "Lab Rules") in a shared cloud document.</p>
+              <ul class="mt-2 mb-0 fw-bold">
+                  <li>Student 1: Lead Writer (Drafts the content)</li>
+                  <li>Student 2: Editor/Commenter (Leaves suggested changes and comments)</li>
+                  <li>Student 3: Formatting Lead (Applies H1/H2 hierarchy and spacing)</li>
+              </ul>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 When finished, export your shared document as a PDF and upload it to the Dropbox!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <h3 id="section-0-7" class="fw-bold border-bottom pb-2">0.7 Digital Literacy & Keyboard Shortcuts</h3>
+  <p class="fs-5">Power users don't take their hands off the keyboard to hunt for options in menus. Memorizing these essential keyboard shortcuts will drastically increase your speed and efficiency.</p>
+
+  <div class="row mt-4">
+      <div class="col-md-6">
+          <ul class="list-group shadow-sm mb-4">
+              <li class="list-group-item bg-light fw-bold text-secondary">Universal Text Editing</li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                  Copy
+                  <span class="badge bg-primary rounded-pill font-monospace">Ctrl + C</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                  Cut (removes original)
+                  <span class="badge bg-primary rounded-pill font-monospace">Ctrl + X</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                  Paste
+                  <span class="badge bg-primary rounded-pill font-monospace">Ctrl + V</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                  Select All
+                  <span class="badge bg-primary rounded-pill font-monospace">Ctrl + A</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <strong>Undo (The Lifesaver)</strong>
+                  <span class="badge bg-danger rounded-pill font-monospace">Ctrl + Z</span>
+              </li>
+          </ul>
+      </div>
+      <div class="col-md-6">
+          <ul class="list-group shadow-sm mb-4">
+              <li class="list-group-item bg-light fw-bold text-secondary">System & Browser</li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                  Save File
+                  <span class="badge bg-success rounded-pill font-monospace">Ctrl + S</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                  Find (Search inside a document)
+                  <span class="badge bg-success rounded-pill font-monospace">Ctrl + F</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                  Switch Programs/Windows
+                  <span class="badge bg-warning text-dark rounded-pill font-monospace">Alt + Tab</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                  New Browser Tab
+                  <span class="badge bg-warning text-dark rounded-pill font-monospace">Ctrl + T</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                  Restore Closed Tab
+                  <span class="badge bg-warning text-dark rounded-pill font-monospace">Ctrl + Shift + T</span>
+              </li>
+          </ul>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <h3 id="section-0-8" class="fw-bold border-bottom pb-2">0.8 Basic Email & Netiquette</h3>
+  <p class="fs-5">Email is the official communication tool of the professional world. Sending an email to a teacher or boss is very different from sending a text message.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">0.8.1 Anatomy of a Professional Email</h4>
+  <ul>
+      <li><strong>The Subject Line:</strong> A short, clear summary (e.g., "Question about Chapter 3"). Never leave this blank.</li>
+      <li><strong>The Salutation:</strong> Always open professionally (e.g., "Dear Mr. Miller,").</li>
+      <li><strong>The Body:</strong> Keep your message clear, polite, and to the point.</li>
+      <li><strong>The Sign-off:</strong> Close professionally (e.g., "Thank you, [Your Name]").</li>
+  </ul>
+
+  <h4 class="fw-bold mt-4 text-danger">0.8.2 Netiquette (Internet Etiquette)</h4>
+  <div class="row g-3 my-2 mb-5">
+      <div class="col-md-6">
+          <div class="p-3 border rounded bg-white h-100 shadow-sm">
+              <h6 class="fw-bold text-danger"><i class="fas fa-times-circle me-2"></i> What NOT to do:</h6>
+              <ul class="small mb-0 text-muted">
+                  <li>Do not type in ALL CAPS (it reads as shouting).</li>
+                  <li>Do not use text-speak or excessive emojis ("idk lol").</li>
+                  <li>Do not demand immediate responses.</li>
+              </ul>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="p-3 border rounded bg-white h-100 shadow-sm">
+              <h6 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> What TO do:</h6>
+              <ul class="small mb-0 text-muted">
+                  <li>Always proofread for spelling before sending.</li>
+                  <li>Keep your tone respectful and neutral.</li>
+                  <li>Include context. Say "I need help with Step 4" rather than just "I need help."</li>
+              </ul>
+          </div>
+      </div>
+  </div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

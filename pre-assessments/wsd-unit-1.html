@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Pre-Assessment: Unit 1 - Web Design Foundations</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/favicon-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/student-pages.css">
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body style="background-color: var(--site-secondary);">
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5 bg-white shadow-sm rounded" style="border-top: 6px solid var(--primary-color);">
+                <div class="spinner-border" style="color: var(--primary-color);" role="status"></div>
+                <p class="mt-3 fw-bold" style="color: var(--primary-color);">Connecting to Digital Arts Cloud...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRE-TEST DATA INJECTION & LAUNCH -->
+  <script type="module">
+    import { initPreTest } from '/js/preTestLogic.js';
+
+    // Unit 1 Web Design Diagnostic Pool
+    const unit1WSDiagPool = [
+        // --- CHAPTER 1: HTML BASICS ---
+        { question: "What does HTML stand for?", options: ["Hyper Text Markup Language", "High Tech Modern Language", "Hyper Transfer Markup Logic", "Home Tool Markup Language"] },
+        { question: "Which HTML tag is used for the largest heading?", options: ["<h1>", "<h6>", "<heading>", "<head>"] },
+        { question: "What is the correct HTML element for inserting a line break?", options: ["<br>", "<break>", "<lb>", "<newline>"] },
+        { question: "Which attribute provides alternative text for an image?", options: ["alt", "src", "title", "href"] },
+        { question: "What is the correct HTML for creating a hyperlink?", options: ["<a href='url'>", "<a url='url'>", "<link href='url'>", "<hyperlink='url'>"] },
+        { question: "Which HTML element defines the title of the document?", options: ["<title>", "<head>", "<header>", "<meta>"] },
+        { question: "What does the DOCTYPE declaration do?", options: ["Tells the browser which HTML version to expect", "Creates a new document", "Adds styling to the page", "Connects to the server"] },
+        { question: "Which element contains the visible content of a webpage?", options: ["<body>", "<html>", "<main>", "<content>"] },
+        { question: "What is semantic HTML?", options: ["Using elements that describe their meaning", "Using colorful fonts", "Using tables for layout", "Adding scripts to HTML"] },
+        { question: "Which tag is used for an unordered (bulleted) list?", options: ["<ul>", "<ol>", "<li>", "<list>"] },
+        { question: "What attribute is used to open a link in a new tab?", options: ["target='_blank'", "newtab='true'", "open='new'", "href='blank'"] },
+        { question: "Which element is used for the most important text on a page?", options: ["<strong>", "<b>", "<important>", "<em>"] },
+        { question: "What is the purpose of the 'alt' attribute in images?", options: ["Provides text if image can't load", "Makes images smaller", "Adds a border", "Creates an animation"] },
+        { question: "Which HTML5 element is used for navigation menus?", options: ["<nav>", "<menu>", "<navigation>", "<navigate>"] },
+        { question: "What does a comment look like in HTML?", options: ["<!-- comment -->", "// comment", "/* comment */", "# comment"] },
+
+        // --- CHAPTER 2: CSS BASICS ---
+        { question: "What does CSS stand for?", options: ["Cascading Style Sheets", "Creative Style Sheets", "Computer Style Sheets", "Colorful Style Sheets"] },
+        { question: "How do you select an element by its ID in CSS?", options: ["#header", ".header", "header", "*header"] },
+        { question: "How do you select an element by its class in CSS?", options: [".content", "#content", "content", "*content"] },
+        { question: "Which property changes the text color?", options: ["color", "text-color", "font-color", "foreground"] },
+        { question: "Which property changes the background color?", options: ["background-color", "bgcolor", "bg-color", "back-color"] },
+        { question: "What is the correct way to add internal CSS?", options: ["<style> in <head>", "<css> in <body>", "<link> in <body>", "All of the above"] },
+        { question: "What does the 'margin' property control?", options: ["Space OUTSIDE the border", "Space INSIDE the border", "The border itself", "The padding"] },
+        { question: "What does the 'padding' property control?", options: ["Space INSIDE the border", "Space OUTSIDE the border", "The margin", "The border color"] },
+        { question: "Which property makes text bold?", options: ["font-weight", "text-bold", "bold", "text-style"] },
+        { question: "What is the Box Model?", options: ["Margin, border, padding, content", "Box, model, shape, size", "Border, margin, box, padding", "Content, model, style, border"] },
+        { question: "How do you add an external CSS file?", options: ["<link rel='stylesheet' href='style.css'>", "<style src='style.css'>", "<css href='style.css'>", "<external href='style.css'>"] },
+        { question: "Which unit is relative to the font-size of the root element?", options: ["rem", "em", "px", "%"] },
+        { question: "What selector has the highest specificity?", options: ["ID", "Class", "Element", "Universal"] },
+        { question: "How do you center text using CSS?", options: ["text-align: center", "align: center", "center: true", "text-center: center"] },
+        { question: "What is Flexbox used for?", options: ["One-dimensional layout", "Three-dimensional graphics", "Database connections", "Server-side coding"] },
+
+        // --- CHAPTER 3: WEB DESIGN PRINCIPLES ---
+        { question: "What is responsive web design?", options: ["Creating sites that work on all screen sizes", "Making sites load faster", "Adding animations to sites", "Using databases"] },
+        { question: "What is mobile-first design?", options: ["Designing for small screens first, then larger", "Making phone apps", "Starting with mobile navigation", "All websites must be on phones"] },
+        { question: "What is white space?", options: ["Empty space between design elements", "The background color", "The page border", "The footer area"] },
+        { question: "What is visual hierarchy?", options: ["Arranging elements to show importance", "Creating multiple pages", "Using only images", "Adding many colors"] },
+        { question: "What is contrast in design?", options: ["Difference between foreground and background", "Comparing two designs", "Adding shadows", "Using animations"] },
+        { question: "Why is accessibility important?", options: ["Ensures everyone can use the site", "Makes sites load faster", "Improves SEO only", "Adds more features"] },
+        { question: "What is a wireframe?", options: ["A simple layout sketch", "A database", "A server", "A programming language"] },
+        { question: "What is UX design?", options: ["User Experience - how easy it is to use", "User Extension", "Unique Experience", "Universal Exchange"] },
+        { question: "What is a favicon?", options: ["A small icon in the browser tab", "A favorite page", "A footer icon", "A Facebook icon"] },
+        { question: "What unit is used for responsive width?", options: ["%", "px", "pt", "in"] },
+        { question: "What is a media query?", options: ["CSS that applies based on screen size", "A news article", "A database query", "A JavaScript function"] },
+        { question: "What is parallax scrolling?", options: ["Background moves slower than foreground", "A type of database", "A programming error", "A color scheme"] },
+        { question: "What is a navigation menu?", options: ["Links to help users find pages", "A list of colors", "A type of form", "A database table"] },
+        { question: "What is prototyping?", options: ["Creating a preliminary version", "A final product", "A database design", "A server setup"] },
+        { question: "What is visual consistency?", options: ["Using similar styles throughout", "Only using images", "Having many colors", "Adding animations"] }
+    ];
+
+    const config = {
+        questions: unit1WSDiagPool,
+        questionCount: 15, 
+        chapterTitle: "Unit 1: Web Design Foundations",
+        // Web Design uses MariaDB only (no Google Sheets)
+        useMariaDB: true,
+        trackType: "webdesign"
+    };
+    
+    initPreTest(config);
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+CHS Web Design & Development Database Schema
+=============================================
+
+This file documents the current MySQL schema for the `chs_gradebook` database used by `chswebdesignndevelopment`.
+The schema was generated from the live database using the backend connection settings found in `server/db.js`.
+
+Database: chs_gradebook
+
+Tables
+------
+
+chapters
+--------
+- id int(11) NO PRI NULL auto_increment
+- chapter_number int(11) NO NULL
+- chapter_name varchar(100) NO NULL
+- course_id varchar(50) NO MUL NULL
+- is_visible tinyint(1) YES 1
+
+class_sections
+--------------
+- section_id varchar(50) NO PRI NULL
+- course_id varchar(50) YES MUL NULL
+
+clockins
+--------
+- id int(11) NO PRI NULL auto_increment
+- student_id varchar(50) YES NULL
+- section_id varchar(50) YES NULL
+- type varchar(50) YES NULL
+- answer text YES NULL
+- timestamp datetime YES NULL
+
+courses
+-------
+- course_id varchar(50) NO PRI NULL
+- course_name varchar(100) YES NULL
+- department varchar(50) YES NULL
+
+daily_questions
+---------------
+- id int(11) NO PRI NULL auto_increment
+- day_group int(11) YES NULL
+- category varchar(50) YES NULL
+- question_text text YES NULL
+- options longtext YES NULL
+- correct_answer text YES NULL
+- is_default tinyint(1) YES 0
+
+exams
+-----
+- exam_id varchar(50) NO PRI NULL
+- title varchar(100) YES NULL
+- total_points int(11) YES NULL
+- course_id varchar(50) YES MUL NULL
+
+notebook_entries
+----------------
+- id int(11) NO PRI NULL auto_increment
+- student_id varchar(50) NO MUL NULL
+- chapter_id int(11) NO MUL NULL
+- title varchar(150) NO NULL
+- category enum('Notes','Do Now','Exit Ticket','Worksheet') YES Notes
+- content longtext NO NULL
+- created_at timestamp YES current_timestamp()
+- updated_at timestamp YES current_timestamp() on update current_timestamp()
+
+pay_roles
+---------
+- id int(11) NO PRI NULL auto_increment
+- title varchar(50) NO UNI NULL
+- hourly_rate decimal(5,2) NO NULL
+
+questions
+---------
+- question_id int(11) NO PRI NULL auto_increment
+- exam_id varchar(50) YES MUL NULL
+- chapter_number int(11) YES NULL
+- question_text text YES NULL
+- option_a varchar(255) YES NULL
+- option_b varchar(255) YES NULL
+- option_c varchar(255) YES NULL
+- option_d varchar(255) YES NULL
+- correct_answer varchar(255) YES NULL
+- study_hint text YES NULL
+- concept_tag varchar(100) YES NULL
+
+responses
+---------
+- id int(11) NO PRI NULL auto_increment
+- student_id varchar(50) YES MUL NULL
+- exam_id varchar(100) YES NULL
+- score varchar(10) YES NULL
+- total_points int(11) YES NULL
+- timestamp datetime YES NULL
+
+self_assessments
+----------------
+- id int(11) NO PRI NULL auto_increment
+- student_id varchar(50) NO MUL NULL
+- chapter_id varchar(50) NO NULL
+- level float NO NULL
+- updated_at timestamp YES current_timestamp() on update current_timestamp()
+
+student_responses
+-----------------
+- response_id int(11) NO PRI NULL auto_increment
+- student_id varchar(50) YES MUL NULL
+- exam_id varchar(50) YES MUL NULL
+- question_id int(11) YES MUL NULL
+- student_answer varchar(255) YES NULL
+- is_correct tinyint(1) YES NULL
+- submission_date timestamp YES current_timestamp()
+
+students
+--------
+- student_id varchar(50) NO PRI NULL
+- first_name varchar(50) YES NULL
+- last_name varchar(50) YES NULL
+- section_id varchar(50) YES MUL NULL
+- email varchar(100) YES UNI NULL
+- password_hash varchar(255) YES NULL
+- role varchar(50) YES student
+- username varchar(50) YES UNI NULL
+- password varchar(255) YES NULL
+- role_id int(11) YES 1
+
+timesheets
+----------
+- id int(11) NO PRI NULL auto_increment
+- student_id varchar(50) YES NULL
+- date date YES NULL
+- clock_in datetime YES NULL
+- clock_out datetime YES NULL
+- in_answer text YES NULL
+- out_answer text YES NULL
+- score int(11) YES 0
+
+Notes
+-----
+- The database is used by `server/api.js`, `server/auth.js`, and the seed/import scripts.
+- Some tables are specifically used for exam/question content (`exams`, `questions`, `responses`, `student_responses`).
+- Some tables are used for student activity and payroll flows (`clockins`, `timesheets`, `pay_roles`).
+- `js/data/` has been moved to migration-only usage and is not the active source of student records.

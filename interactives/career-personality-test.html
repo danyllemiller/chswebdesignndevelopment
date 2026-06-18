@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Guild Class Placement Test | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  
+  <!-- Security Guard -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    .quiz-question {
+        display: none;
+    }
+    .quiz-question.active {
+        display: block;
+        animation: fadeIn 0.5s;
+    }
+    .quiz-option {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+    }
+    .quiz-option:hover {
+        border-color: var(--primary-color);
+        background-color: var(--site-secondary);
+        transform: translateY(-2px);
+    }
+    input[type="radio"]:checked + .quiz-option {
+        border-color: var(--primary-color);
+        background-color: #e6f0ff;
+        font-weight: bold;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .result-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body class="bg-white">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <div class="text-center mb-4">
+                <a href="/year1/join-the-developers-guild.html" class="text-decoration-none small fw-bold">&laquo; Back to Chapter 1</a>
+                <h1 class="gochi text-primary mt-3" style="font-size: 3rem;">The Sorting Hat</h1>
+                <p class="text-muted fw-bold">Discover your Developer's Guild Class.</p>
+            </div>
+
+            <!-- THE QUIZ CONTAINER -->
+            <div class="card shadow-sm border-primary" id="quizContainer">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h5 class="mb-0">Aptitude & Personality Assessment</h5>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    
+                    <form id="careerQuiz">
+                        
+                        <!-- Question 1 -->
+                        <div class="quiz-question active" id="q1">
+                            <h4 class="mb-4 text-primary">1. When faced with a complex problem or project, what is your first instinct?</h4>
+                            <div class="row g-3">
+                                <label class="col-12">
+                                    <input type="radio" name="q1" value="uiux" class="d-none" required>
+                                    <div class="card quiz-option p-3 shadow-sm h-100">A. Grab a sketchbook or whiteboard and start drawing how it should look and feel.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q1" value="frontend" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">B. Start building a prototype immediately to see if the interactive pieces work.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q1" value="backend" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">C. Break down the underlying logic, data, and math before doing anything else.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q1" value="pm" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">D. Organize a checklist, define the goals, and figure out who is doing what.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q1" value="qa" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">E. Try to find the flaws in the plan or figure out how the project might break.</div>
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-primary mt-4 w-100 fw-bold py-2 next-btn">Next Question &raquo;</button>
+                        </div>
+
+                        <!-- Question 2 -->
+                        <div class="quiz-question" id="q2">
+                            <h4 class="mb-4 text-primary">2. If you were helping build a physical house, which job would you want?</h4>
+                            <div class="row g-3">
+                                <label class="col-12">
+                                    <input type="radio" name="q2" value="uiux" class="d-none" required>
+                                    <div class="card quiz-option p-3 shadow-sm h-100">A. The Interior Designer: Picking colors, fabrics, and ensuring the rooms flow nicely.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q2" value="frontend" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">B. The Carpenter: Building the visible walls, installing the doors, and laying the floors.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q2" value="backend" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">C. The Electrician/Plumber: Installing the hidden pipes and wires that make the house function.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q2" value="pm" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">D. The General Contractor: Hiring the workers, managing the budget, and talking to the buyer.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q2" value="qa" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">E. The Inspector: Checking the foundation for cracks and ensuring it meets safety codes.</div>
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-primary mt-4 w-100 fw-bold py-2 next-btn">Next Question &raquo;</button>
+                        </div>
+
+                        <!-- Question 3 -->
+                        <div class="quiz-question" id="q3">
+                            <h4 class="mb-4 text-primary">3. What bothers you the most when using a website or app?</h4>
+                            <div class="row g-3">
+                                <label class="col-12">
+                                    <input type="radio" name="q3" value="uiux" class="d-none" required>
+                                    <div class="card quiz-option p-3 shadow-sm h-100">A. Ugly colors, tiny fonts, and confusing menus that make it hard to find things.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q3" value="frontend" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">B. Animations that lag or buttons that don't look right on my mobile phone.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q3" value="backend" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">C. Loading screens that take forever or errors when I try to save my profile data.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q3" value="pm" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">D. When an app promises a feature but fails to actually deliver what the users wanted.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q3" value="qa" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">E. Typos, broken links, and glitches that should have been caught before release.</div>
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-primary mt-4 w-100 fw-bold py-2 next-btn">Next Question &raquo;</button>
+                        </div>
+
+                        <!-- Question 4 -->
+                        <div class="quiz-question" id="q4">
+                            <h4 class="mb-4 text-primary">4. Choose your ideal workspace environment:</h4>
+                            <div class="row g-3">
+                                <label class="col-12">
+                                    <input type="radio" name="q4" value="uiux" class="d-none" required>
+                                    <div class="card quiz-option p-3 shadow-sm h-100">A. A highly visual space with mood boards, user profiles, and design software open.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q4" value="frontend" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">B. A split-screen setup: code editor on one side, live browser preview on the other.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q4" value="backend" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">C. A dark-mode terminal window managing databases, servers, and heavy logic.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q4" value="pm" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">D. A communication hub: calendars, team chat, email, and strategy documents.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q4" value="qa" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">E. A systematic testing lab with multiple devices (phones/tablets) to hunt for bugs.</div>
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-primary mt-4 w-100 fw-bold py-2 next-btn">Next Question &raquo;</button>
+                        </div>
+
+                        <!-- Question 5 -->
+                        <div class="quiz-question" id="q5">
+                            <h4 class="mb-4 text-primary">5. What brings you the most satisfaction in your work?</h4>
+                            <div class="row g-3">
+                                <label class="col-12">
+                                    <input type="radio" name="q5" value="uiux" class="d-none" required>
+                                    <div class="card quiz-option p-3 shadow-sm h-100">A. Making something that feels intuitive, empathetic, and beautiful for the user.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q5" value="frontend" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">B. Bringing a static design to life with interactive code and animations.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q5" value="backend" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">C. Creating a perfectly secure, incredibly fast system that handles complex data.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q5" value="pm" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">D. Leading a team to success and delivering a finished product on time.</div>
+                                </label>
+                                <label class="col-12">
+                                    <input type="radio" name="q5" value="qa" class="d-none">
+                                    <div class="card quiz-option p-3 shadow-sm h-100">E. The thrill of finding an obscure error and fixing it before it hurts the company.</div>
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-success mt-4 w-100 fw-bold py-3 fs-5">Reveal My Class</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- THE RESULTS CONTAINER (Hidden initially) -->
+            <div class="card shadow-lg border-success d-none" id="resultContainer">
+                <div class="card-header bg-success text-white text-center py-3">
+                    <h5 class="mb-0 gochi fs-3">Guild Placement Complete</h5>
+                </div>
+                <div class="card-body p-4 p-md-5 text-center">
+                    
+                    <div id="resultIcon" class="result-icon text-primary"></div>
+                    <h2 class="fw-bold text-dark mb-1" id="resultTitle">The Developer</h2>
+                    <h5 class="text-muted mb-4" id="resultSubtitle">Your Class Alignment</h5>
+                    
+                    <p class="lead mb-4" id="resultDescription" style="font-size: 1.1rem; line-height: 1.6;"></p>
+                    
+                    <div class="bg-site-secondary p-4 rounded border border-primary text-start mt-4">
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3"><i class="fas fa-clipboard-list"></i> Lab 1 Assistant: Write Your Justification</h6>
+                        <p class="small text-muted mb-3">Use the guided prompts below to write your own 3-sentence justification for the "Guild Initiation Lab" on the Chapter 1 page!</p>
+                        
+                        <div class="bg-white p-3 rounded border shadow-sm small" style="line-height: 1.6;" id="labTemplate">
+                            <!-- Prompts injected via JS -->
+                        </div>
+                    </div>
+
+                    <a href="/year1/join-the-developers-guild.html#submission-zone" class="btn btn-primary mt-4 px-5 fw-bold py-2">Return to Chapter 1 to Turn In</a>
+                    <button class="btn btn-outline-secondary mt-4 ms-2 py-2" onclick="window.location.reload()">Retake Quiz</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <script>
+      // Quiz Navigation Logic
+      const questions = document.querySelectorAll('.quiz-question');
+      const nextBtns = document.querySelectorAll('.next-btn');
+      
+      nextBtns.forEach((btn, index) => {
+          btn.addEventListener('click', () => {
+              // Ensure a radio is checked before moving on
+              const inputs = questions[index].querySelectorAll('input[type="radio"]');
+              let answered = false;
+              inputs.forEach(input => { if (input.checked) answered = true; });
+              
+              if (!answered) {
+                  alert("Please select an answer to continue.");
+                  return;
+              }
+
+              questions[index].classList.remove('active');
+              questions[index + 1].classList.add('active');
+          });
+      });
+
+      // Profiles and Guided Prompts
+      const profiles = {
+          "uiux": {
+              icon: "🎨",
+              title: "UI/UX Designer",
+              subtitle: "The Artist & The Detective",
+              desc: "You have a deep sense of empathy for the user and an eye for aesthetics. You care about the <strong>Surface Layer</strong> and <strong>Information Architecture</strong>. Your goal is to make digital spaces beautiful, accessible, and intuitive. You understand that good design is invisible.",
+              template: '<strong>Sentence 1:</strong> State your chosen class and why your personality fits it. <br><em class="text-muted">(Hint: Mention understanding human behavior or visual aesthetics.)</em><br><br><strong>Sentence 2:</strong> Identify 1-2 soft skills that are crucial for this role and explain why. <br><em class="text-muted">(Hint: Think about empathy and communication for user-centric design.)</em><br><br><strong>Sentence 3:</strong> State a specific hard skill or concept you aim to master. <br><em class="text-muted">(Hint: Information Architecture or usability.)</em>'
+          },
+          "frontend": {
+              icon: "💻",
+              title: "Front-End Developer",
+              subtitle: "The Artist-Coder",
+              desc: "You are the bridge between design and logic. You take the blueprints and build the actual house that users interact with. You thrive on immediate visual feedback and enjoy mastering the '3 Languages' (HTML, CSS, JavaScript) to create responsive, interactive experiences.",
+              template: '<strong>Sentence 1:</strong> State your chosen class and why your personality fits it. <br><em class="text-muted">(Hint: Blending visual design with interactive coding logic.)</em><br><br><strong>Sentence 2:</strong> Identify 1-2 soft skills crucial for this role and explain why. <br><em class="text-muted">(Hint: Adaptability or teamwork when working with designers.)</em><br><br><strong>Sentence 3:</strong> State a specific hard skill or concept you aim to master. <br><em class="text-muted">(Hint: HTML, CSS, JavaScript, or responsive design.)</em>'
+          },
+          "backend": {
+              icon: "⚙️",
+              title: "Back-End Developer",
+              subtitle: "The Master Chef",
+              desc: "You are the wizard behind the curtain. You care about the engine, not the paint job. You love structured logic, data security, and performance. You prefer working with server-side architecture, relational databases, and ensuring the Client-Server model runs flawlessly.",
+              template: '<strong>Sentence 1:</strong> State your chosen class and why your personality fits it. <br><em class="text-muted">(Hint: Analytical, building hidden logical structures.)</em><br><br><strong>Sentence 2:</strong> Identify 1-2 soft skills crucial for this role and explain why. <br><em class="text-muted">(Hint: Problem-solving, critical thinking.)</em><br><br><strong>Sentence 3:</strong> State a specific hard skill or concept you aim to master. <br><em class="text-muted">(Hint: Client-Server model, data security, or databases.)</em>'
+          },
+          "pm": {
+              icon: "📋",
+              title: "Project Manager",
+              subtitle: "The Bridge & Leader",
+              desc: "You are the glue that holds the Guild together. You excel at organization, communication, and strategy. You understand the 'Project Triangle' (Time, Cost, Quality) and use Agile workflows to guide the entire dev team from discovery to the final launch.",
+              template: '<strong>Sentence 1:</strong> State your chosen class and why your personality fits it. <br><em class="text-muted">(Hint: Organization, strategy, leadership.)</em><br><br><strong>Sentence 2:</strong> Identify 1-2 soft skills crucial for this role and explain why. <br><em class="text-muted">(Hint: Communication, empathy for both the team and the client.)</em><br><br><strong>Sentence 3:</strong> State a specific concept you aim to master. <br><em class="text-muted">(Hint: Agile methodologies, navigating the Project Triangle.)</em>'
+          },
+          "qa": {
+              icon: "🛡️",
+              title: "QA Tester",
+              subtitle: "The Guardian",
+              desc: "You have extreme attention to detail and a knack for finding what others miss. You are the last line of defense before a product goes live. You excel at analytical reasoning and take pride in breaking things systematically so they can be fixed properly.",
+              template: '<strong>Sentence 1:</strong> State your chosen class and why your personality fits it. <br><em class="text-muted">(Hint: Attention to detail, systematic problem-solving.)</em><br><br><strong>Sentence 2:</strong> Identify 1-2 soft skills crucial for this role and explain why. <br><em class="text-muted">(Hint: Clear communication for delivering constructive feedback or the "Crit-Wich".)</em><br><br><strong>Sentence 3:</strong> State your primary goal in this role. <br><em class="text-muted">(Hint: Rigorous testing, preventing bugs from reaching the user.)</em>'
+          }
+      };
+
+      // Quiz Calculation Logic
+      document.getElementById('careerQuiz').addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          // Tally the scores
+          const scores = { "uiux": 0, "frontend": 0, "backend": 0, "pm": 0, "qa": 0 };
+          const formData = new FormData(this);
+          
+          for (let value of formData.values()) {
+              scores[value]++;
+          }
+
+          // Find the highest score
+          let highestClass = "frontend"; // Default fallback
+          let maxScore = 0;
+          for (const [cls, score] of Object.entries(scores)) {
+              if (score > maxScore) {
+                  maxScore = score;
+                  highestClass = cls;
+              }
+          }
+
+          // Render Results
+          const result = profiles[highestClass];
+          document.getElementById('resultIcon').innerText = result.icon;
+          document.getElementById('resultTitle').innerText = result.title;
+          document.getElementById('resultSubtitle').innerText = result.subtitle;
+          document.getElementById('resultDescription').innerHTML = result.desc;
+          document.getElementById('labTemplate').innerHTML = result.template;
+
+          // Swap UI
+          document.getElementById('quizContainer').classList.add('d-none');
+          document.getElementById('resultContainer').classList.remove('d-none');
+          window.scrollTo(0,0);
+      });
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

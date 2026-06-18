@@ -1,0 +1,550 @@
+<!-- the-game-dev-advanced-js-game-logic.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 10: The Game Developer (Adv JS) | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <!-- Security Guard: Kicks out anyone not logged in -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+</head>
+<body class="bg-white">
+
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+        
+    <nav class="mb-4 d-flex justify-content-between small fw-bold">
+        <a href="/year2/the-brains-intro-to-javascript.html" class="text-decoration-none text-primary">&laquo; Previous: 9: The "Brains" (Intro to JS)</a>
+        <a href="/year2/the-cloud-collaboration-hosting.html" class="text-decoration-none text-primary">Next: 11: The "Cloud" (Hosting) &raquo;</a>
+    </nav>
+
+    <!-- CLEAN MODERN HEADER -->
+    <h1 class="text-center text-primary fw-bold mt-5 mb-2">Chapter 10: The Game Developer</h1>
+    <p class="text-center text-secondary fst-italic fs-5 mb-5">Advanced JS &amp; Game Logic</p>
+
+    <!-- SECTION 1: OVERVIEW & PERSONA -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Level Up: Building Agency Gamification</h2>
+        <p>Welcome back, Full-Stack Developers. At the Carson High Web Design & Marketing Agency, we understand that user engagement equals higher conversion rates for our clients. In Chapter 9, you learned how to make a website react to basic user input using the DOM. Now, we are going to throw the standard "website" concept out the window. We are going to build a fully functional <strong>Video Game</strong> entirely in the browser using the HTML5 Canvas to create a highly addictive promotional tool for a client.</p>
+        
+        <p>Why a game? Because games require <strong>Advanced Logic</strong>. A normal website usually just sits there waiting for the user to click something. A game has to have a mind of its own: it has to continuously draw graphics 60 times a second, calculate complex math for gravity, spawn enemies automatically, and detect fast keyboard inputs instantly. To build our project, "Cosmic Clicker," we need to master the <strong>Canvas API</strong>, <strong>Object-Oriented Programming (OOP)</strong>, and complex <strong>State Management</strong>.</p>
+        
+        <h2 class="section-title mt-5">Meet the Target User: "Gamer Gabe"</h2>
+        
+        <div class="card shadow-sm border-0 bg-light mt-4 mb-5 text-start">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center border-bottom pb-3 mb-3">
+              <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-3 shadow-sm border border-3 border-white" style="width: 70px; height: 70px;">G</div>
+              <div class="ms-3">
+                <h5 class="fw-bold text-dark mb-0">Gamer Gabe</h5>
+                <span class="badge bg-primary text-uppercase tracking-wide mt-1" style="font-size: 0.65rem;">Persona: Cosmic Clicker Demographic</span>
+              </div>
+            </div>
+            <div class="small">
+              <div class="mb-2">
+                <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Who</span>
+                <span class="text-dark">Gabe is a 16-year-old student who loves arcade games and fast-paced action. He is the target demographic for our newest local client: <strong>PixelPlay Arcade on Gaming Blvd, Carson City</strong>.</span>
+              </div>
+              <div class="mb-2">
+                <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Goal</span>
+                <span class="text-dark">PixelPlay Arcade hired our agency to build a web-based game where targets appear and physics act realistically. If Gabe gets a high score, he earns a digital coupon for the physical arcade!</span>
+              </div>
+              <div>
+                <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Needs</span>
+                <span class="text-dark">A fast, highly responsive interface. He needs to see his score go up instantly, needs smooth 60fps animations, and needs the game to end automatically when he loses without breaking the browser.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <!-- Materials Hub -->
+        <div class="card shadow-sm mb-4 bg-white border-primary text-start">
+          <div class="card-header bg-site-secondary fw-bold text-primary border-bottom">Materials Hub</div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush small">
+              <a href="/proficiencyScales/the-game-dev-advanced-js-game-logic.html"  class="list-group-item list-group-item-action text-primary fw-bold">🎯 1. Proficiency Scale</a>
+              <a href="/pre-assessments/the-game-dev-advanced-js-game-logic.html"  class="list-group-item list-group-item-action text-dark">🚀 2. Pre-Assessment</a>
+              <a href="/notes/the-game-dev-advanced-js-game-logic.html"  class="list-group-item list-group-item-action text-dark">📝 3. Guided Notes</a>
+              <a href="/studentFiles/cosmicClicker.zip" class="list-group-item list-group-item-action text-dark">📁 4. Chapter Files (.zip)</a>
+            </div>
+          </div>
+        </div>
+
+        <figure class="mb-4">
+          <a href="/images/the-game-dev-advanced-js-game-logic/figure-01.png" target="_blank" rel="noopener">
+            <img src="https://placehold.co/600x400/1e293b/0ea5e9?text=Game+Design+Concept" alt="Cosmic Clicker Concept" class="img-fluid rounded border shadow-sm w-100">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 10.1:</strong> Cosmic Clicker Visual Concept.</figcaption>
+        </figure>
+
+        <div class="card roadmap-card mb-4 border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info border-bottom">Unlocking New Abilities</div>
+          <div class="card-body small">
+            <ul class="mb-0 ps-3">
+              <li class="mb-2"><strong>Canvas API:</strong> Draw shapes, text, and images using exact X/Y coordinates.</li>
+              <li class="mb-2"><strong>Animation Control:</strong> Build professional game loops with <code>requestAnimationFrame()</code>.</li>
+              <li class="mb-2"><strong>OOP:</strong> Use ES6 <strong>Classes</strong> to build blueprints for spawning multiple game objects.</li>
+              <li class="mb-2"><strong>Physics:</strong> Implement <strong>AABB Collision</strong>, circular collision, gravity, and friction.</li>
+              <li class="mb-2"><strong>Advanced Arrays:</strong> Use <code>push()</code>, <code>shift()</code>, and <code>filter()</code> to manage entities.</li>
+              <li class="mb-0"><strong>State Management:</strong> Combine logic to track score, time, and active game screens.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: THE CANVAS API & COORDINATES -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">The Canvas API &amp; Coordinates</h2>
+        <p>In standard web design, we use HTML elements like <code>&lt;div&gt;</code> and CSS rules to build grids. But if you want to build a promotional game with 500 asteroids flying across the screen, creating 500 HTML <code>div</code> elements will cause the user's browser to crash. The DOM is simply too heavy for that much movement.</p>
+        
+        <p>Instead, we use the HTML5 <strong><code>&lt;canvas&gt;</code></strong> tag. Which HTML element is designed for high-performance drawing via scripting? <strong><code>&lt;canvas&gt;</code></strong>. The canvas is literally just a blank digital painting frame. We use JavaScript to grab a set of "digital paintbrushes" and manually paint our graphics directly onto it.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">The 2D Context (ctx)</h5>
+        <p>To start painting, we need the tools. Which method is used to get the 2D drawing context for a canvas element? <strong><code>getContext('2d')</code></strong>. We usually store this in a variable named <code>ctx</code>.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">The Coordinate System (Not Like Math Class!)</h5>
+        <p>In your geometry class, the origin point (0,0) is in the center, and Y goes UP. A computer screen works differently.</p>
+        <ul class="small mb-4 bg-light p-3 rounded border shadow-sm">
+            <li class="mb-2">Which coordinate represents the top-left corner of the canvas? <strong><code>(0, 0)</code></strong>.</li>
+            <li class="mb-2">If you want to move an object to the right, what must you do to its X coordinate? <strong>Add a positive value to X</strong>. (X increases left to right).</li>
+            <li class="mb-0">If you increase an object's "Y" coordinate value, which way does it move on the screen? It moves <strong>DOWN</strong>! Y increases from the top to the bottom. If you want a bullet to travel upwards, what should its Y-velocity be? <strong>A negative number</strong>.</li>
+        </ul>
+        
+        <h5 class="fw-bold mt-4 text-primary">Drawing Shapes &amp; Images</h5>
+        <p>Once we have <code>ctx</code>, we can draw. Which JavaScript method is used to draw a solid, colored rectangle? <strong><code>fillRect(x, y, width, height)</code></strong>.</p>
+        <p>But what if we want it to be red? Which Canvas property is used to set the color of a shape before it is drawn? <strong><code>ctx.fillStyle = "red";</code></strong>.</p>
+
+        <table class="table table-bordered table-sm small bg-white shadow-sm mt-4 text-start">
+            <thead class="bg-light"><tr><th>Method/Property</th><th>What it Does</th></tr></thead>
+            <tbody>
+                <tr><td class="fw-bold"><code>ctx.beginPath()</code></td><td>Which method is used to start a path for drawing custom shapes? This one. It resets the pen.</td></tr>
+                <tr><td class="fw-bold"><code>ctx.arc()</code></td><td>Draws circles/curves. When using <code>ctx.arc()</code>, which parameter defines the size of the circle? The <strong>radius</strong>.</td></tr>
+                <tr><td class="fw-bold"><code>ctx.lineWidth</code></td><td>What property determines the thickness of lines drawn with stroke()? <code>ctx.lineWidth</code>.</td></tr>
+                <tr><td class="fw-bold"><code>ctx.fillText()</code></td><td>How do you draw text on the canvas? Use <code>ctx.fillText("Score: " + score, x, y)</code>.</td></tr>
+                <tr><td class="fw-bold"><code>ctx.drawImage()</code></td><td>Which Canvas API method is used to render an image asset (like a character sprite) onto the screen? <code>ctx.drawImage()</code>.</td></tr>
+            </tbody>
+        </table>
+
+        <!-- WALKTHROUGH 1: Setup -->
+        <h3 class="section-title d-flex align-items-center mt-5 text-primary">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2 text-primary"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          Walkthrough: The Canvas Setup
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+          <ol class="small mb-0 ps-3">
+              <li class="mb-3">In your <code>index.html</code>, place a `&lt;canvas id="gameCanvas" width="800" height="600"&gt;&lt;/canvas&gt;` element.</li>
+              <li class="mb-0">In your <code>main.js</code>, grab the context and draw a simple player:
+                <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+// Draw a blue square player
+ctx.fillStyle = "blue";
+ctx.fillRect(50, 50, 40, 40);</code></pre>
+              </li>
+          </ol>
+        </div>
+
+        <!-- LAB 1 CARD -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 1: Canvas Coordinate Art Lab [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Prove spatial reasoning mastery to the Agency Lead Developer by generating digital art via scripting.</p>
+                <ol>
+                    <li class="mb-2">Set up an <code>index.html</code> file with a <code>&lt;canvas width="800" height="600"&gt;</code>. Link a <code>script.js</code> file.</li>
+                    <li class="mb-2">Use <code>getContext('2d')</code> to initialize the canvas.</li>
+                    <li class="mb-2">Using only <code>ctx.fillRect</code> and <code>ctx.fillStyle</code>, draw a recognizable robot face using at least 5 different rectangles. You must calculate the exact X/Y math to make sure the eyes, mouth, and head align perfectly.</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 1:</strong> In a separate project file for the PixelPlay Arcade game, initialize an 800x600 canvas and draw your static "Player" rectangle at its starting position.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>script.js</code> file.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4">
+          <img src="/images/the-game-dev-advanced-js-game-logic/figure-02.png" alt="Canvas Coordinates" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Canvas+Coordinates'">
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 10.2:</strong> Canvas (0,0) is Top-Left.</figcaption>
+        </figure>
+        <div class="card roadmap-card border-warning shadow-sm mt-4 text-start">
+            <div class="card-header bg-warning text-dark fw-bold">Pro Tip:</div>
+            <div class="card-body small">
+                <p class="mb-2"><strong>Z-Index in Canvas:</strong> What is 'Z-Index' equivalent in Canvas? It is simply <strong>The order in which you draw</strong>. There is no CSS `z-index` inside the canvas. Things drawn *later* in your JavaScript file will appear 'on top' of things drawn earlier.</p>
+                <p class="mb-0"><strong>Rotation:</strong> How do you rotate an object on the canvas? You must use <code>ctx.rotate()</code> <strong>after translating to the object's center</strong>, otherwise it will swing in a giant circle around the top-left (0,0) origin point!</p>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: ANIMATION & GAME LOOPS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Animation &amp; The Game Loop</h2>
+        <p>How does a flipbook work? You draw an image, turn to a blank white page, and draw the image shifted slightly. Computer animation is the exact same. We must completely wipe the canvas clean before drawing the next frame.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">The Pro Engine: <code>requestAnimationFrame</code></h5>
+        <p>Which method tells the browser to perform an animation and requests a call to a function to update before the next repaint? <strong><code>requestAnimationFrame()</code></strong>. Why is requestAnimationFrame better than setInterval for games? Because it syncs with the monitor's refresh rate (for smooth 60fps motion) and automatically pauses when the user switches tabs, saving battery life. This is critical for meeting our agency's WRS Reliability standards.</p>
+        
+        <p>How do you stop a game loop when the player loses? You use <strong><code>cancelAnimationFrame()</code></strong>.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">The 3 Steps of a Game Loop</h5>
+        <p>When setting up a game loop, in what order should the core functions generally execute? <strong>Clear canvas -> Update logic -> Draw objects</strong>. This happens 60 times a second.</p>
+        
+        <ul class="small mb-4 bg-light p-3 rounded border shadow-sm">
+            <li class="mb-3"><strong>1. Clear:</strong> How can you completely clear the entire canvas element <code>ctx</code>? You use <strong><code>ctx.clearRect(0, 0, canvas.width, canvas.height)</code></strong>. What happens if you don't call clearRect() or fillRect() at the start of every frame? The previous frames' drawings will stay on the screen, creating an ugly <strong>smearing</strong> effect!</li>
+            <li class="mb-3"><strong>2. Update:</strong> The "Update" portion of the game loop is responsible for calculating new positions and checking collisions. (e.g. <code>player.x += speed;</code>).</li>
+            <li class="mb-0"><strong>3. Draw:</strong> Finally, you render the new graphics.</li>
+        </ul>
+
+        <!-- WALKTHROUGH 2: Loop -->
+        <h3 class="section-title d-flex align-items-center mt-5 text-primary">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2 text-primary"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          Walkthrough: The Game Loop
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+          <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>let playerX = 50;
+let speed = 5;
+
+function gameLoop() {
+    // 1. CLEAR
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 2. UPDATE
+    playerX += speed; // Move right
+    
+    // 3. DRAW
+    ctx.fillStyle = "blue";
+    ctx.fillRect(playerX, 50, 40, 40);
+    
+    // LOOP
+    requestAnimationFrame(gameLoop);
+}
+gameLoop(); // Start the engine</code></pre>
+        </div>
+
+        <!-- GRADED LAB 2 CARD -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 2: The Bouncing Box Lab [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Build a high-performance rendering loop for the client's promotional game.</p>
+                <ol>
+                    <li class="mb-2">In a new file, declare variables: <code>let x = 0;</code> and <code>let speed = 5;</code>.</li>
+                    <li class="mb-2">Create a <code>gameLoop()</code> function that clears the canvas, adds speed to X, draws a box at X, and calls <code>requestAnimationFrame</code>.</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Implement the loop in your main PixelPlay Arcade game. Update your player box so it moves across the screen automatically. Add an `if` statement to reverse its direction if it hits the right or left edge of the canvas! (Hint: <code>if (x > canvas.width) { speed = -5; }</code>).</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>script.js</code> file.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+          <div class="card roadmap-card border-warning shadow-sm mt-4 text-start">
+            <div class="card-header bg-warning text-dark fw-bold">Pro Tip:</div>
+            <div class="card-body small">
+                <p class="mb-2"><strong>Saving State:</strong> What does the <code>ctx.save()</code> and <code>ctx.restore()</code> pair do? It saves and resets the current drawing state (rotation, scale, colors). Think of it like taking a snapshot of your settings so you can mess with them for one specific object, and then go back to normal for the rest.</p>
+                <p class="mb-0"><strong>High Refresh Rates:</strong> If a game runs too fast on high-refresh-rate monitors (like 144Hz gaming screens), what concept is used to normalize the speed? <strong>Delta Time</strong>. This tracks the difference in time between the current frame and the last frame to ensure a player moving 10px per second actually moves 10px, regardless of framerate.</p>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: OOP & CLASSES -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">OOP &amp; Classes (The Blueprint)</h2>
+        <p>If you are building a game with 50 aliens, it would be a nightmare to create 50 `alienX` and 50 `alienY` variables. This is "Spaghetti Code," and it wastes our agency's billable hours. Instead, we use <strong>Object-Oriented Programming (OOP)</strong>.</p>
+        
+        <p>What is the name of the "Blueprint" used in Object-Oriented Programming to create multiple objects? A <strong>Class</strong>. What is the main advantage of using a Class to build game objects? <strong>It encapsulates properties and methods for reuse</strong>. You write the code once, and you can spawn a thousand enemies perfectly.</p>
+
+        <h5 class="fw-bold mt-4 text-primary">Anatomy of a Class</h5>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>Naming:</strong> What naming convention is the industry standard for Class names? <strong>Capitalized (PascalCase)</strong>, like `class Enemy`.</li>
+            <li class="mb-2"><strong>Constructor:</strong> In JavaScript ES6, what function runs automatically when a new instance of a class is created? The <strong><code>constructor()</code></strong>. This is where you set the starting X/Y coordinates.</li>
+            <li class="mb-2"><strong>Context (<code>this</code>):</strong> In a class, what does the 'this' keyword refer to? <strong>The specific instance of the object being created/updated</strong>. If you forget to include `this.` before a variable inside a class method, what happens? The computer looks for a global variable instead, causing a <strong>Reference Error</strong>. Which property of a class instance allows it to 'know' how much health it has left? A property defined in the constructor, like <strong><code>this.health</code></strong>.</li>
+            <li class="mb-0"><strong>Methods:</strong> How do you define a new method inside a JavaScript class? You just write <strong><code>MethodName() { }</code></strong> without using the word `function`.</li>
+        </ul>
+        
+        <h5 class="fw-bold mt-4 text-primary">Instantiating & Arrays</h5>
+        <p>How do you create a brand new enemy from an Enemy class? You use the `new` keyword: <strong><code>new Enemy()</code></strong>. When spawning many, we store them in an array.</p>
+        <ul class="small mb-4 bg-light p-3 rounded shadow-sm border">
+            <li class="mb-2">Which array method is best for adding a newly spawned projectile to a list of active bullets? <strong><code>bullets.push()</code></strong>.</li>
+            <li class="mb-2">If you have an array of asteroids, how do you remove the first one from the array after it is destroyed? You use <strong><code>asteroids.shift()</code></strong>.</li>
+            <li class="mb-0">If you use <code>asteroids.filter(a =&gt; !a.destroyed)</code>, what are you doing? You are <strong>creating a new array containing only asteroids that are NOT destroyed</strong>. This is how we clean up memory!</li>
+        </ul>
+
+        <!-- WALKTHROUGH 3: Classes -->
+        <h3 class="section-title d-flex align-items-center mt-5 text-primary">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2 text-primary"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          Walkthrough: The Class Blueprint
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5">
+          <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>class Particle {
+    constructor() {
+        this.x = Math.floor(Math.random() * canvas.width);
+        this.y = 0; // Starts at top
+        this.speed = Math.random() * 3 + 1;
+    }
+    update() {
+        this.y += this.speed; // Falls down
+    }
+    draw() {
+        ctx.fillStyle = "white";
+        ctx.fillRect(this.x, this.y, 5, 5);
+    }
+}
+// Spawn 10 particles into an array
+const particles = [];
+for(let i=0; i<10; i++) {
+    particles.push(new Particle());
+}</code></pre>
+        </div>
+
+        <!-- GRADED LAB 3 CARD -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 3: The Entity Factory [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Engineer modular, object-oriented blueprints to save agency billable hours.</p>
+                <ol>
+                    <li class="mb-2">Create a class <code>Particle</code>. Give it a constructor that assigns random X and Y properties using <code>Math.random()</code>.</li>
+                    <li class="mb-2">Instantiate 10 copies of the Particle using the <code>new</code> keyword and push them into an array. Update and Draw them in your game loop!</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Convert your game's Player logic into a class `Player`. Create a class `Enemy` (or Item) with its own `draw()` and `update()` methods. Instantiate at least one Enemy in your game.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>script.js</code>.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+          <div class="card roadmap-card border-warning shadow-sm mt-4 text-start">
+            <div class="card-header bg-warning text-dark fw-bold">Pro Tip:</div>
+            <div class="card-body small">
+                <p class="mb-2"><strong>Random Chaos:</strong> What mathematical object is required to generate a random spawning location? The <strong><code>Math</code></strong> object. What does <code>Math.floor(Math.random() * 10)</code> return? <strong>An integer between 0 and 9</strong>.</p>
+                <p class="mb-0"><strong>Encapsulation:</strong> Encapsulating code into classes promotes which professional benefit? <strong>Modularity and Reusability</strong>. You build it once, and spawn it a million times.</p>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: PHYSICS & INPUT -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Physics, Collisions, &amp; User Input</h2>
+        <p>How does a video game actually 'know' when a bullet hits a monster? A "Hitbox" is used in game logic to determine <strong>if two objects are overlapping or touching</strong>. What is a 'Hitbox'? It is <strong>The invisible area used to calculate collisions</strong>, which is often smaller than the actual graphic being drawn.</p>
+        
+        <h5 class="fw-bold mt-4 text-primary">AABB Collision (Rectangles)</h5>
+        <p>AABB Collision detection stands for <strong>Axis-Aligned Bounding Box</strong>. It requires checking the overlap of which properties? <strong>x, y, width, and height</strong>. Which operator allows us to check multiple collision conditions at the same time? We MUST use the <strong><code>&amp;&amp;</code></strong> (AND) operator, because all four sides must overlap simultaneously for a true hit.</p>
+        
+        <pre class="p-3 border rounded shadow-sm mb-4 no-copy"><code>// The Pro AABB Formula
+if (rect1.x < rect2.x + rect2.width &&
+    rect1.x + rect1.width > rect2.x &&
+    rect1.y < rect2.y + rect2.height &&
+    rect1.y + rect1.height > rect2.y) {
+    // Collision detected!
+}</code></pre>
+
+        <h5 class="fw-bold mt-4 text-primary">Circular Collision</h5>
+        <p>For circular hitboxes, we don't use X and Width. To check for circular collision, which mathematical theorem is typically applied to find the distance between center points? The <strong>Pythagorean theorem</strong> ($a^2+b^2=c^2$). In circular collision detection, when has a collision occurred? <strong>When the distance between centers is less than the sum of the radii.</strong></p>
+
+        <h5 class="fw-bold mt-4 text-primary">Physics Math</h5>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>Canvas Boundaries:</strong> To prevent an object named player from moving off the left edge of the canvas, which condition should you check? <strong><code>if (player.x < 0)</code></strong>. If <code>player.y + player.height >= canvas.height</code> evaluates to true, what is happening? <strong>The player is touching the bottom of the canvas</strong>.</li>
+            <li class="mb-2"><strong>Bouncing:</strong> How do you make an object 'bounce' off the bottom of the canvas? You reverse its direction: <strong><code>velocity.y *= -1</code></strong>.</li>
+            <li class="mb-2"><strong>Screen Wrapping:</strong> How do you create an 'infinite' wrap-around effect on the X-axis? <strong><code>if (x > width) x = 0</code></strong>.</li>
+            <li class="mb-2"><strong>Speed:</strong> To make an object move faster, you should <strong>Increase the value added to its position per frame</strong>.</li>
+            <li class="mb-2"><strong>Gravity:</strong> To apply basic gravity to a jumping character, what must you do every frame? <strong>Add a constant value to the character's vertical velocity</strong>. Simulating gravity usually involves adding a small value to an object's <strong>Y-velocity</strong>.</li>
+            <li class="mb-0"><strong>Friction:</strong> What is 'Friction' in game physics? <strong>Gradually reducing velocity over time</strong> (e.g. `speed *= 0.98`).</li>
+        </ul>
+
+        <h5 class="fw-bold mt-5 text-primary">Keyboard &amp; Mouse Inputs</h5>
+        <p>Which event listener is typically used for continuous character movement in games? The <code>keydown</code> event. How do you detect if a user has released a key to stop moving? Listen for the <strong><code>'keyup'</code></strong> event.</p>
+        <p>What property of a keyboard event tells you the physical key that was pressed? <strong><code>event.code</code></strong> (e.g. 'ArrowRight' or 'Space'). How do you check if a specific key (like 'Space') is currently being held down? <strong>Store the key state in a boolean variable inside keydown/keyup listeners.</strong></p>
+        <p>Which event listener is used to track the mouse position on the canvas? <strong><code>'mousemove'</code></strong>.</p>
+
+        <!-- LAB 4 CARD -->
+        <div class="card border-success shadow-sm my-4 mt-5 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 4: The Hitbox Detector [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Implement bounding box algorithms to determine spatial overlap, ensuring fair play for the client's customers.</p>
+                <ol>
+                    <li class="mb-2">Create a static "Lava" box in the center of the screen. Make your player box follow your mouse or keyboard.</li>
+                    <li class="mb-2">Write an AABB `if` statement. If the player overlaps the Lava, change the player's color to red.</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 4:</strong> Implement AABB collision detection between your Player class and your Enemy class in your main game loop. <code>console.log("HIT!")</code> when they touch.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>script.js</code>.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+          <div class="card roadmap-card border-warning shadow-sm mt-4 text-start">
+            <div class="card-header bg-warning text-dark fw-bold">Pro Tip:</div>
+            <div class="card-body small">
+                <p class="mb-2"><strong>Trig Math:</strong> If you want to calculate angles for shooting, remember that JavaScript's <code>Math.sin</code> and <code>Math.cos</code> expect radians, not degrees! Which function is used to convert degrees to radians? <strong><code>degrees * (Math.PI / 180)</code></strong>.</p>
+                <p class="mb-0"><strong>WRS Integration:</strong> Which WRS skill is a developer demonstrating when they use math to solve a character jump arc? <strong>Analytical Reasoning</strong>.</p>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 6: ADVANCED LOGIC & GRAPHICS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Advanced Game Logic &amp; Graphics</h2>
+        
+        <h5 class="fw-bold mt-4 text-primary">State Management</h5>
+        <p>What is the purpose of a 'Game State' variable (like <code>gameState = 'menu'</code>)? <strong>To control which screens or logic blocks are active.</strong> A Game State variable is used to control which logic runs at different times.</p>
+        <p>When building a Start Screen, how do you prevent the main game loop from running until a button is clicked? <strong>Wrap requestAnimationFrame inside a conditional state check</strong> (e.g. `if(gameState === 'playing') requestAnimationFrame(loop);`).</p>
+
+        <h5 class="fw-bold mt-4 text-primary">Advanced Graphics</h5>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>Sprite Sheets:</strong> What is 'Sprite Sheet' animation? <strong>One large image containing multiple frames of animation.</strong> This is much faster for the browser to load than 20 separate image files!</li>
+            <li class="mb-2"><strong>Parallax:</strong> What is 'Parallax Scrolling'? <strong>Background layers moving at different speeds to create depth.</strong></li>
+            <li class="mb-2"><strong>Transparency:</strong> What does <code>ctx.globalAlpha</code> control? <strong>Transparency of everything drawn on the canvas.</strong></li>
+            <li class="mb-0"><strong>Particles:</strong> What is the primary purpose of 'Particle Systems' in games? <strong>To create effects like fire, smoke, or explosions using many small objects.</strong></li>
+        </ul>
+        
+        <p class="small text-muted mt-3">Need to center something exactly? What is the result of <code>canvas.width / 2</code>? <strong>The horizontal center of the canvas.</strong></p>
+      </div>
+    </div>
+
+    <!-- MILESTONE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-12">
+        <div class="card border-primary shadow-sm mt-5 mx-auto text-start" style="max-width: 900px;">
+            <div class="card-header bg-primary text-white fw-bold">
+                🏆 Milestone: Project 3 Game Assembly &amp; QA [100 pts]
+            </div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Synthesize Advanced JS and Game Logic into a playable promotional simulation for PixelPlay Arcade.</p>
+                <ol>
+                    <li class="mb-2"><strong>Assemble:</strong> Bring your Player, Enemies, Input, and AABB Collision together into your final Game Loop.</li>
+                    <li class="mb-2"><strong>State:</strong> The game must have a Score, a "Start Screen" that prevents the game from running immediately, and a "Game Over" state when a collision occurs.</li>
+                    <li class="mb-2"><strong>Level 4.0 Challenge:</strong> Implement gravity physics, Sprite Sheet animation, or Delta Time normalization!</li>
+                    <li class="mb-2"><strong>QA Check:</strong> Swap computers with a peer for a 10-minute playtest to find edge-case bugs. A developer who writes comments explaining their complex math for teammates is showing <strong>Professional Decorum / Teamwork</strong>!</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your completed Game folder.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINAL RECAP -->
+    <div class="row mt-5">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="final-recap">
+            <h2 class="section-title mt-0 text-primary fw-bold">The Final Download: Chapter Recap</h2>
+            <p>In this chapter, you leveled up your agency skills. You manipulated the Canvas API using precise coordinates, controlled time with <code>requestAnimationFrame</code>, and spawned legions of entities using Object-Oriented Classes. You managed complex player inputs, built physics engines using velocity and AABB collision mathematics, and polished your project using Game State management. You didn't just build a website—you built an interactive world!</p>
+        </section>
+        <p class="text-muted small mt-5">Copyright &copy; 2026 Danylle Miller Designs. Built for Carson High School.</p>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 d-flex flex-column justify-content-end pb-3 text-center">
+        <div class="card roadmap-card border-info mb-4 bg-white shadow-sm text-start">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-info"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <h6 class="card-title fw-bold small text-info mb-0 ms-2 text-uppercase">Guild Checkpoint</h6>
+            </div>
+            <p class="small mb-2" style="color: #495057;"><strong>Q1:</strong> Why do we use <code>requestAnimationFrame</code> instead of <code>setInterval</code> for game loops?</p>
+            <p class="small mb-2" style="color: #495057;"><strong>Q2:</strong> Explain the 4 conditions required for an AABB collision to register as true.</p>
+            <p class="small mb-0" style="color: #495057;"><strong>Q3:</strong> Why must <code>clearRect()</code> be called at the very beginning of the loop?</p>
+          </div>
+        </div>
+        <a href="/year2/the-cloud-collaboration-hosting.html" class="btn btn-primary w-100 shadow-sm fw-bold text-uppercase">Next: Chapter 11 &raquo;</a>
+      </div>
+    </div>
+
+    <!-- ENHANCED TURN-IN DROPBOX -->
+    <div class="card shadow border-success mx-auto mb-5 mt-5 text-start" style="max-width: 800px;" id="submission-zone">
+        <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+            <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>Student Assignment Dropbox</h4>
+            <span class="badge bg-light text-success shadow-sm" id="student-id-badge">Verifying...</span>
+        </div>
+        <div class="card-body p-4">
+            <form id="uploadForm">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
+                    <select id="uploadAssignment" class="form-select border-success" required>
+                        <option value="" disabled selected>Select an assignment...</option>
+                        <option value="ch10_lab1">Lab 1: Canvas Coordinate Art Lab (25 pts)</option>
+                        <option value="ch10_lab2">Lab 2: The Bouncing Box Lab (25 pts)</option>
+                        <option value="ch10_lab3">Lab 3: The Entity Factory (25 pts)</option>
+                        <option value="ch10_lab4">Lab 4: The Hitbox Detector (25 pts)</option>
+                        <option value="ch10_milestone">Milestone: Game Assembly &amp; QA (100 pts)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">2. What type of upload is this?</label>
+                    <select id="uploadType" class="form-select border-primary bg-site-secondary">
+                        <option value="file">A Single File (e.g. script.js, index.html)</option>
+                        <option value="folder">An Entire Folder (e.g. Full Game App)</option>
+                    </select>
+                </div>
+
+                <div class="mb-4" id="fileInputContainer">
+                    <label class="form-label fw-bold">3. Select File</label>
+                    <input type="file" id="fileInput" class="form-control" required>
+                </div>
+
+                <div class="mb-4 d-none" id="folderInputContainer">
+                    <label class="form-label fw-bold">3. Select Project Folder</label>
+                    <input type="file" id="folderInput" class="form-control" webkitdirectory directory multiple>
+                    <div class="form-text x-small text-danger fw-bold mt-1">Note: This will upload ALL files and sub-folders inside the folder you select, keeping your website links intact!</div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-success w-100 fw-bold py-3 shadow-sm" disabled>
+                    Upload to Teacher Server
+                </button>
+            </form>
+            
+            <div id="uploadProgress" class="progress mt-3 d-none shadow-sm" style="height: 25px;">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%;">0%</div>
+            </div>
+            <div id="uploadStatus" class="mt-3 d-none p-3 rounded small fw-bold text-center shadow-sm"></div>
+        </div>
+    </div>
+
+  </section>
+
+  <div id="footer-nav"></div>
+  <div id="footer-placeholder"></div>
+
+  <!-- ASSIGNMENT UPLOADER LOGIC -->
+  <script type="module" src="/js/assignment-uploader.js"></script>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 12 Review: Control Structures and Events</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <link href="/css/game_styles.css" rel="stylesheet" />
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <!-- Security Guard -->
+  <script type="module" src="/js/auth-guard.js"></script>
+  <!-- Master Engine -->
+  <script src="/js/games/review_games_logic.js"></script>
+  <script src="/js/games/jeopardy.js"></script>
+  <script src="/js/games/hollywood.js"></script>
+  <script src="/js/games/millionaire.js"></script>
+  <script src="/js/games/wordgames.js"></script>
+ </head>
+ 
+ <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+  <div class="container mt-5 mb-5">
+   <div class="text-center mb-5">
+    <h1 id="dynamic-title" class="display-4 fw-bold text-primary">Loading Quest...</h1>
+    <h2 class="text-muted">Review Games & Activities</h2>
+   </div>
+
+   <!-- GAME LAUNCHER DASHBOARD -->
+   <div id="game-launcher" class="card shadow-lg border-primary rounded-4 mb-5 overflow-hidden">
+    <div class="card-header bg-primary text-white p-3 text-center"><h4 class="mb-0 fw-bold">CHOOSE YOUR QUEST</h4></div>
+    <div class="card-body p-4 bg-site-secondary">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-4 border-end border-primary border-opacity-25">
+                <label class="form-label fw-bold text-primary">1. Mode</label>
+                <div class="d-grid gap-2">
+                    <button onclick="setPlayMode('solo')" class="btn btn-primary fw-bold">👤 Solo</button>
+                    <div class="input-group">
+                        <input type="text" id="room-input" class="form-control border-primary" placeholder="Code">
+                        <button onclick="setPlayMode('room')" class="btn btn-outline-primary fw-bold">Join</button>
+                    </div>
+                </div>
+                <p id="mode-status" class="mt-2 small text-center text-primary fw-bold italic">Currently: Solo Mode</p>
+            </div>
+            <div class="col-md-8 text-center">
+                <label class="form-label fw-bold text-primary mb-3">2. Launch Game</label>
+                <div class="row g-2 justify-content-center">
+                    <div class="col-3"><button onclick="launchGame('game-jeopardy')" class="btn btn-outline-primary w-100 py-3 bg-white shadow-sm h-100">🔔<br>Jeopardy</button></div>
+                    <div class="col-3"><button onclick="launchGame('game-hollywood')" class="btn btn-outline-primary w-100 py-3 bg-white shadow-sm h-100">🌟<br>Hollywood</button></div>
+                    <div class="col-3"><button onclick="launchGame('game-millionaire')" class="btn btn-outline-primary w-100 py-3 bg-white shadow-sm h-100">💰<br>Millionaire</button></div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+   </div>
+
+   <div id="game-container-root">
+       <!-- 1. Jeopardy -->
+       <section id="game-jeopardy" class="game-section d-none mb-5 shadow-sm rounded-4 bg-white p-4">
+           <h2 class="game-title text-site-secondary mb-4 text-center">Jeopardy</h2>
+           <div id="jeopardy-scoreboard" class="mb-4"></div>
+           <div class="text-center mb-4"><button class="btn btn-primary btn-sm px-4" id="jeopardy-add-team">Add Team</button><button class="btn btn-outline-danger btn-sm ms-2" id="jeopardy-reset-btn">Reset</button></div>
+           <div id="jeopardy-board"></div>
+       </section>
+
+       <!-- 2. Hollywood -->
+       <section id="game-hollywood" class="game-section d-none mb-5 shadow-sm rounded-4 bg-white p-4">
+           <h2 class="game-title text-center text-site-secondary mb-4">Hollywood Squares</h2>
+           <div id="hs-grid"></div>
+       </section>
+
+       <!-- 3. Millionaire -->
+       <section id="game-millionaire" class="game-section d-none mb-5 shadow-sm rounded-4 bg-white p-4">
+           <h2 class="game-title text-center text-site-secondary mb-4">Who Wants to be a Millionaire?</h2>
+           <div id="millionaire-ui"></div>
+       </section>
+
+       <!-- 4. Word Games -->
+       <div id="word-games" class="d-none">
+           <div class="row">
+               <div class="col-lg-6"><section id="crossword-section" class="game-section mb-4 bg-white p-3 rounded-4 border"><div id="cw-grid"></div></section></div>
+               <div class="col-lg-6"><section id="wordsearch-section" class="game-section mb-4 bg-white p-3 rounded-4 border"><div id="ws-grid"></div></section></div>
+           </div>
+       </div>
+   </div>
+  </div>
+
+  <!-- JEOPARDY MODAL -->
+  <div class="modal fade" id="jeopardyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-primary text-white border-info" style="border-width:4px; border-radius: 20px;">
+            <div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold" id="j-modal-cat">CATEGORY</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">X</button></div>
+            <div class="modal-body text-center p-5">
+                <h2 id="j-modal-val" class="text-warning mb-4">$100</h2>
+                <p id="j-modal-q" class="fs-3 mb-5">Loading...</p>
+                <input type="text" id="j-user-answer" class="form-control form-control-lg text-center mb-4" placeholder="Who is / What is...">
+                <div class="d-flex gap-2">
+                    <button id="j-check-btn" class="btn btn-warning btn-lg fw-bold w-100">Final Answer</button>
+                    <button id="j-reveal-btn" class="btn btn-outline-light w-100">Reveal</button>
+                </div>
+                <div id="j-modal-answer" class="alert mt-4 d-none"></div>
+            </div>
+        </div>
+    </div>
+  </div>
+<div id="footer-placeholder"></div>
+
+ <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

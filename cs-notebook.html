@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Exam Scratchpad | CHS Computer Science</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <link href="/css/student-pages.css" rel="stylesheet" />
+  
+  <script type="module" src="/js/auth-guard.js"></script>
+  
+  <style>
+    body { background: #f8f9fa; }
+    .notes-container { max-width: 900px; margin: 0 auto; }
+    .note-editor { min-height: 70vh; }
+    .preview-frame { min-height: 500px; border: 2px solid var(--primary-color); border-radius: 8px; background: white; }
+    .rich-toolbar { background: #f1f3f4; border-radius: 8px 8px 0 0; border: 2px solid #dee2e6; border-bottom: none; }
+    .preview-frame:last-of-type { border-radius: 0 0 8px 8px; }
+  </style>
+</head>
+<body class="bg-white">
+
+  <div class="container notes-container my-4">
+    <div class="row mb-3 align-items-center">
+      <div class="col-md-8">
+        <h1 class="gochi text-primary mb-0 fs-3xl"><i class="fas fa-pencil-alt"></i> Exam Scratchpad</h1>
+        <p class="text-muted fw-bold mb-0">Use this space to take notes during your exam. Your notes are saved automatically.</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <span class="badge bg-primary fs-6 shadow-sm" id="userSubtitle">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Notes Editor Card -->
+    <div class="card shadow-sm border-primary">
+      <div class="card-header bg-site-secondary border-bottom border-primary py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-white"><i class="fas fa-sticky-note me-2"></i> Your Notes</h5>
+        <span class="badge bg-warning text-dark font-monospace shadow-sm">Auto-Save Enabled</span>
+      </div>
+      
+      <div class="card-body p-4 bg-white">
+        <!-- Rich Text Toolbar -->
+        <div class="rich-toolbar p-2 mb-0 d-flex flex-wrap gap-1 align-items-center rounded-top" id="rt-toolbar">
+            <span class="small fw-bold text-muted px-2 border-end me-1">Format:</span>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="bold" title="Bold"><i class="fas fa-bold"></i></button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="italic" title="Italic"><i class="fas fa-italic"></i></button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="underline" title="Underline"><i class="fas fa-underline"></i></button>
+            <span class="border-end mx-1"></span>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-btn fw-bold" data-command="formatBlock" data-val="H2" title="Heading">H1</button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-btn fw-bold" data-command="formatBlock" data-val="H3" title="Subheading">H2</button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="formatBlock" data-val="P" title="Paragraph">P</button>
+            <span class="border-end mx-1"></span>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="insertUnorderedList" title="Bullet List"><i class="fas fa-list-ul"></i></button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="insertOrderedList" title="Numbered List"><i class="fas fa-list-ol"></i></button>
+            <span class="border-end mx-1"></span>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-warning" data-command="hiliteColor" data-val="#fff200" title="Highlight"><i class="fas fa-highlighter"></i></button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-danger" data-command="removeFormat" title="Clear"><i class="fas fa-eraser"></i></button>
+            <div class="ms-auto">
+                <span class="badge bg-success" id="saveStatus"><i class="fas fa-check me-1"></i> Saved</span>
+            </div>
+        </div>
+
+        <form id="note-form" class="note-editor">
+            <div class="row g-3 mb-3">
+                <div class="col-md-8">
+                    <label class="form-label small fw-bold text-muted mb-1">Title</label>
+                    <input type="text" id="note-title" class="form-control border-secondary shadow-sm" placeholder="Exam Notes" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-muted mb-1">Category</label>
+                    <select id="note-category" class="form-select border-secondary shadow-sm">
+                        <option value="Reflection">Reflection</option>
+                        <option value="Notes" selected>Notes</option>
+                        <option value="Exam">Exam</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <textarea id="note-content" class="d-none"></textarea>
+                <iframe id="preview-frame" class="w-100 preview-frame shadow-sm" style="min-height: 400px;"></iframe>
+            </div>
+            
+<div class="d-flex gap-2">
+                <button type="button" id="btn-load-notes" class="btn btn-outline-primary fw-bold">
+                    <i class="fas fa-folder-open me-1"></i> Load Notes
+                </button>
+                <button type="submit" class="btn btn-success fw-bold shadow-sm">
+                    <i class="fas fa-save me-2"></i> Save & Turn In
+                </button>
+                <button type="button" onclick="window.prepareNewNote()" class="btn btn-outline-secondary fw-bold">
+                    <i class="fas fa-plus me-1"></i> New Entry
+                </button>
+            </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+ 
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  
+<script type="module">
+    // ========================================================
+    // CS EXAM NOTES - Worksheet Support with Answer Checking
+    // ========================================================
+    
+    let currentStudentData = null;
+    let activeNoteId = null;
+    let autoSaveTimer = null;
+    let currentMode = 'notes'; // 'notes' or 'worksheet'
+    let currentChapter = 'Misc';
+    let worksheetAnswers = {}; // Store correct answers for checking
+    
+// Check URL params for mode and chapter
+    const urlParams = new URLSearchParams(window.location.search);
+    currentMode = urlParams.get('mode') || 'notes';
+    let paramChapter = urlParams.get('chapter') || 'Misc';
+    
+    // Handle case where chapter is 0, "Misc", or empty - use Unit 0 intro to office software worksheet
+    if (paramChapter === '0' || paramChapter === 'Misc' || !paramChapter || paramChapter === 'unit0') {
+        currentChapter = '0'; // Chapter 0: Intro to Office Software
+    } else {
+        currentChapter = paramChapter;
+    }
+    
+    console.log('Worksheet chapter:', currentChapter);
+    
+async function init() {
+        // Load worksheets library first
+        await loadWorksheetsLibrary();
+        
+        // Wait for auth
+        await new Promise(resolve => {
+            if (window.dacAuthData) { resolve(); }
+            else { document.addEventListener('authComplete', resolve, { once: true }); }
+            setTimeout(resolve, 8000);
+        });
+        
+        const authData = window.dacAuthData || { isAuthenticated: false };
+        if (!authData.isAuthenticated) {
+            window.location.replace('/login.html?redirect=' + encodeURIComponent(window.location.pathname));
+            return;
+        }
+        
+        // Update page title based on mode
+        if (currentMode === 'worksheet') {
+            document.title = 'Worksheet | CHS Computer Science';
+            const h1 = document.querySelector('h1.gochi');
+            if (h1) {
+                h1.innerHTML = '<i class="fas fa-file-invoice"></i> Worksheet';
+            }
+            const pDesc = document.querySelector('p.text-muted');
+            if (pDesc) {
+                pDesc.textContent = 'Complete the worksheet questions below. Your work is saved automatically.';
+            }
+        }
+        
+        // Load student profile
+        try {
+            const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+            const username = storedUser.username || authData.user?.username;
+            
+            if (!username) {
+                window.location.replace('/login.html?redirect=' + encodeURIComponent(window.location.pathname));
+                return;
+            }
+            
+            const profileRes = await fetch('/api/student/profile?username=' + encodeURIComponent(username));
+            if (!profileRes.ok) throw new Error('Profile not found');
+            currentStudentData = await profileRes.json();
+            
+// Update user display
+            const subtitle = document.getElementById('userSubtitle');
+            if (subtitle) {
+                subtitle.textContent = `${currentStudentData.first_name} ${currentStudentData.last_name} | ID: ${currentStudentData.student_id}`;
+            }
+            
+            // For worksheet mode, load worksheet template; otherwise load existing notes or create new
+            if (currentMode === 'worksheet') {
+                window.prepareNewNote();
+            } else {
+                fetchNotes();
+            }
+            
+        } catch(e) {
+            console.error('Init error:', e);
+            document.getElementById('userSubtitle').textContent = 'Error loading profile';
+        }
+    }
+    
+    // ========================================================
+    // NOTES FUNCTIONS
+    // ========================================================
+    
+    function updatePreview() {
+        const contentIn = document.getElementById('note-content');
+        const previewFrame = document.getElementById('preview-frame');
+        if (!previewFrame || !contentIn) return;
+        
+        const htmlContent = contentIn.value;
+        const srcDoc = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { 
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                        padding: 20px; 
+                        color: #333; 
+                        line-height: 1.6; 
+                    }
+                    h2, h3, h4 { color: #000099; border-bottom: 2px solid #cfe1f0; padding-bottom: 5px; }
+                    .donow { background: #fffcf0; border-left: 5px solid #ffc107; padding: 15px; margin: 15px 0; }
+                    .highlight { background: #fff200; padding: 2px 5px; }
+                </style>
+                <script>
+                    function sync() { window.parent.postMessage({type:'updateHtml',content:document.body.innerHTML}, '*');}
+                    document.addEventListener('keydown', function(e) {
+                        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                            e.preventDefault(); document.execCommand('undo'); sync();
+                        }
+                    });
+                <\/script>
+            </head>
+            <body contenteditable="true" oninput="sync()">${htmlContent || '<p>Start typing your notes here...</p>'}</body>
+            </html>
+        `;
+        previewFrame.srcdoc = srcDoc;
+    }
+    
+async function fetchNotes() {
+        if (!currentStudentData) return;
+        
+        try {
+            const res = await fetch('/api/student/cs-notebook?student_id=' + encodeURIComponent(currentStudentData.student_id));
+            if (!res.ok) throw new Error('Failed to fetch');
+            const data = await res.json();
+            // Load ALL notes - students need access to all their saved notes during exams
+            const allNotes = data.notes || [];
+            
+            // Get most recent or create new
+            if (allNotes.length > 0) {
+                allNotes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                const note = allNotes[0];
+                activeNoteId = note.id;
+                document.getElementById('note-title').value = note.title || 'Exam Notes';
+                document.getElementById('note-content').value = note.content || '';
+                document.getElementById('note-category').value = note.category || 'Notes';
+                updatePreview();
+            } else {
+                window.prepareNewNote();
+            }
+        } catch(e) {
+            console.error('Fetch notes error:', e);
+            window.prepareNewNote();
+        }
+    }
+    
+// Get worksheet template content - loads from worksheets library if available
+    let worksheetsLibrary = {};
+    
+    async function loadWorksheetsLibrary() {
+        try {
+            const resp = await fetch('/data/cs-worksheets.json?v=' + Date.now());
+            if (resp.ok) worksheetsLibrary = await resp.json();
+            console.log('Worksheets library loaded for chapter:', currentChapter);
+        } catch(e) {
+            console.warn('Worksheet Library not found, using default template');
+        }
+    }
+    
+function getWorksheetTemplate() {
+        // Try to get chapter-specific worksheet first
+        const chapterNum = parseInt(currentChapter, 10);
+        
+        // If chapter is 0 or invalid number, use default template with chapter 0 info
+        if (isNaN(chapterNum) || chapterNum < 0) {
+            console.log('Using default worksheet template for chapter:', currentChapter);
+            return getDefaultWorksheetTemplate();
+        }
+        
+        if (worksheetsLibrary[chapterNum]) {
+            const sheet = worksheetsLibrary[chapterNum];
+            return sheet.html || getDefaultWorksheetTemplate();
+        }
+        // Fallback to default worksheet if not found in library
+        console.log('Chapter', chapterNum, 'not in library, using default');
+        return getDefaultWorksheetTemplate();
+    }
+    
+function getDefaultWorksheetTemplate() {
+        // Worksheet with interactive answer fields and check button
+        const displayChapter = currentChapter === '0' ? '0: Intro to Office Software' : currentChapter;
+        return `<div class="worksheet" style="font-family: 'Segoe UI', sans-serif; background: #f8f9fa; padding: 20px; border: 2px solid var(--primary-color); border-radius: 8px;">
+<h2 style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 5px;">Chapter ${displayChapter} Worksheet</h2>
+<p class="text-muted mb-3"><i class="fas fa-info-circle"></i> Fill in your answers below. Use the "Check Answers" button to verify your work. If incorrect, review the chapter content to find the correct answer.</p>
+
+<div class="mb-3">
+    <label class="form-label fw-bold">Your Name:</label>
+    <input type="text" class="form-control" id="ws-name" placeholder="Enter your name">
+</div>
+
+<h4 style="color: var(--primary-color); margin-top: 20px;">Section 1: Key Concepts</h4>
+<div class="mb-3 p-3 bg-white rounded border">
+    <label class="form-label fw-bold">1. Define the main term/concept:</label>
+    <textarea class="form-control" id="ws-q1" rows="3" placeholder="Type your definition here..."></textarea>
+    <div class="mt-2" id="ws-q1-result"></div>
+</div>
+
+<h4 style="color: var(--primary-color); margin-top: 20px;">Section 2: Explanation</h4>
+<div class="mb-3 p-3 bg-white rounded border">
+    <label class="form-label fw-bold">2. Explain why this concept is important:</label>
+    <textarea class="form-control" id="ws-q2" rows="3" placeholder="Type your explanation here..."></textarea>
+    <div class="mt-2" id="ws-q2-result"></div>
+</div>
+
+<h4 style="color: var(--primary-color); margin-top: 20px;">Section 3: Application</h4>
+<div class="mb-3 p-3 bg-white rounded border">
+    <label class="form-label fw-bold">3. Give a real-world example:</label>
+    <textarea class="form-control" id="ws-q3" rows="3" placeholder="Type your example here..."></textarea>
+    <div class="mt-2" id="ws-q3-result"></div>
+</div>
+
+<h4 style="color: var(--primary-color); margin-top: 20px;">Section 4: Reflection</h4>
+<div class="mb-3 p-3 bg-white rounded border">
+    <label class="form-label fw-bold">4. What did you learn from this chapter? How can you apply this knowledge?</label>
+    <textarea class="form-control" id="ws-q4" rows="3" placeholder="Type your reflection here..."></textarea>
+    <div class="mt-2" id="ws-q4-result"></div>
+</div>
+
+<div class="d-flex gap-2 mt-4">
+    <button type="button" class="btn btn-primary fw-bold" onclick="checkWorksheetAnswers()">
+        <i class="fas fa-check-circle me-1"></i> Check Answers
+    </button>
+    <button type="button" class="btn btn-outline-secondary fw-bold" onclick="showWorksheetAnswers()">
+        <i class="fas fa-eye me-1"></i> Show Answers (after checking)
+    </button>
+</div>
+
+<div id="ws-status" class="mt-3"></div>
+</div>`;
+    }
+    
+    // Function to check worksheet answers (basic validation - encourages students to review chapter)
+    window.checkWorksheetAnswers = function() {
+        const answers = {
+            q1: document.getElementById('ws-q1')?.value.trim() || '',
+            q2: document.getElementById('ws-q2')?.value.trim() || '',
+            q3: document.getElementById('ws-q3')?.value.trim() || '',
+            q4: document.getElementById('ws-q4')?.value.trim() || ''
+        };
+        
+        let allFilled = true;
+        let emptyFields = [];
+        
+        // Check if all fields have content
+        Object.keys(answers).forEach((key, idx) => {
+            const resultEl = document.getElementById('ws-q' + (idx + 1) + '-result');
+            if (!answers[key]) {
+                allFilled = false;
+                emptyFields.push('Question ' + (idx + 1));
+                if (resultEl) {
+                    resultEl.innerHTML = '<span class="text-danger"><i class="fas fa-times"></i> Please answer this question</span>';
+                }
+            } else {
+                if (resultEl) {
+                    // Just mark as filled - don't reveal if correct or not
+                    resultEl.innerHTML = '<span class="text-info"><i class="fas fa-check"></i> Answer recorded - review chapter if needed</span>';
+                }
+            }
+        });
+        
+        const statusEl = document.getElementById('ws-status');
+        if (statusEl) {
+            if (allFilled) {
+                statusEl.innerHTML = '<div class="alert alert-info"><i class="fas fa-lightbulb"></i> <strong>Good job!</strong> You\'ve completed all questions. Review the chapter content to verify your answers are correct. Click "Show Answers" only after you\'ve reviewed.</div>';
+            } else {
+                statusEl.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Please fill in all questions: ' + emptyFields.join(', ') + '</div>';
+            }
+        }
+    };
+    
+    // Function to show hints (not full answers) after checking
+    window.showWorksheetAnswers = function() {
+        const answers = {
+            q1: document.getElementById('ws-q1')?.value.trim() || '',
+            q2: document.getElementById('ws-q2')?.value.trim() || '',
+            q3: document.getElementById('ws-q3')?.value.trim() || '',
+            q4: document.getElementById('ws-q4')?.value.trim() || ''
+        };
+        
+        // First check if they've filled in answers
+        const allFilled = Object.values(answers).every(a => a.length > 0);
+        
+        if (!allFilled) {
+            const statusEl = document.getElementById('ws-status');
+            if (statusEl) {
+                statusEl.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Please answer all questions first before viewing hints.</div>';
+            }
+            return;
+        }
+        
+        // Show hints instead of full answers
+        const hints = [
+            'Hint: Review the chapter introduction and key terms section.',
+            'Hint: Think about how this concept is used in practical applications.',
+            'Hint: Consider examples from everyday technology use.',
+            'Hint: Reflect on how this knowledge applies to your future work.'
+        ];
+        
+        const statusEl = document.getElementById('ws-status');
+        if (statusEl) {
+            let hintsHtml = '<div class="alert alert-info"><i class="fas fa-book"></i> <strong>Review Hints:</strong><ul>';
+            hints.forEach((hint, idx) => {
+                hintsHtml += '<li>' + hint + '</li>';
+            });
+            hintsHtml += '</ul><p class="mt-2">Go back to the chapter content to find the correct answers!</p></div>';
+            statusEl.innerHTML = hintsHtml;
+        }
+        
+        // Also show hints on each question
+        Object.keys(answers).forEach((key, idx) => {
+            const resultEl = document.getElementById('ws-q' + (idx + 1) + '-result');
+            if (resultEl) {
+                resultEl.innerHTML = '<span class="text-info"><i class="fas fa-search"></i> ' + hints[idx] + '</span>';
+            }
+        });
+    };
+    
+    window.prepareNewNote = function() {
+        activeNoteId = null;
+        const form = document.getElementById('note-form');
+        if (form) form.reset();
+        const contentIn = document.getElementById('note-content');
+        const titleInput = document.getElementById('note-title');
+        const catInput = document.getElementById('note-category');
+        
+        if (currentMode === 'worksheet') {
+            // Load worksheet template
+            if (contentIn) contentIn.value = getWorksheetTemplate();
+            if (titleInput) titleInput.value = 'Chapter Worksheet';
+            if (catInput) catInput.value = 'Worksheet';
+        } else {
+            // Load regular notes template
+            if (contentIn) contentIn.value = '<h2>Notes</h2><p>Start writing your notes here...</p>';
+            if (titleInput) titleInput.value = 'My Notes';
+            if (catInput) catInput.value = 'Notes';
+        }
+        updatePreview();
+    };
+    
+    async function saveNotes(isSubmit = false) {
+        if (!currentStudentData) return;
+        
+        const titleInput = document.getElementById('note-title');
+        const contentIn = document.getElementById('note-content');
+        const catInput = document.getElementById('note-category');
+        
+        if (!titleInput || !titleInput.value.trim()) return;
+        
+        const btn = document.getElementById('saveStatus');
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Saving...';
+            btn.className = 'badge bg-warning';
+        }
+        
+        const payload = {
+            student_id: currentStudentData.student_id,
+            chapter: 'Unit Exam Scratchpad',
+            title: titleInput.value.trim(),
+            category: catInput ? catInput.value : 'Notes',
+            content: contentIn ? contentIn.value : '',
+            is_submitted: isSubmit ? 1 : 0,
+            timestamp: Date.now()
+        };
+        
+        try {
+            const res = await fetch('/api/student/cs-notebook', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            if (!res.ok) throw new Error('Save failed');
+            
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-check me-1"></i> Saved';
+                btn.className = 'badge bg-success';
+            }
+        } catch(e) {
+            console.error('Save error:', e);
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Error';
+                btn.className = 'badge bg-danger';
+            }
+        }
+    }
+    
+function triggerAutoSave() {
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => saveNotes(false), 1500);
+    }
+    
+    // ========================================================
+    // LOAD SAVED NOTES FUNCTIONALITY
+    // ========================================================
+    const escapeHtmlSimple = function(str) {
+        if (typeof str !== 'string') return str;
+        return str.replace(/&/g, "&amp;").replace(/</g, "<").replace(/>/g, ">").replace(/"/g, "\\x22").replace(/'/g, "&#039;");
+    };
+
+    const setupLoadNotes = () => {
+        const btnLoadNotes = document.getElementById('btn-load-notes');
+        if (btnLoadNotes && !document.getElementById('loadNotesModal')) {
+            btnLoadNotes.onclick = async () => {
+                // Create modal if it doesn't exist
+                if (!document.getElementById('loadNotesModal')) {
+                    const modalHtml = `
+                        <div class="modal fade" id="loadNotesModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title fw-bold"><i class="fas fa-folder-open me-2"></i> Load Saved Notes</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                                        <div id="notes-list-container" class="text-center p-4">
+                                            <div class="spinner-border text-primary"></div>
+                                            <p class="mt-2 text-muted">Loading your saved notes...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    document.body.insertAdjacentHTML('beforeend', modalHtml);
+                }
+
+                // Show modal
+                const modalEl = document.getElementById('loadNotesModal');
+                let modal = null;
+                if (typeof bootstrap !== 'undefined') {
+                    modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                }
+
+// Fetch all notes for this student
+                const listContainer = document.getElementById('notes-list-container');
+                try {
+                    const res = await fetch(`/api/student/cs-notebook?student_id=${encodeURIComponent(currentStudentData.student_id)}`);
+                    if (!res.ok) throw new Error('Failed to fetch');
+                    const data = await res.json();
+                    const allNotes = data.notes || [];
+
+                    if (allNotes.length === 0) {
+                        listContainer.innerHTML = `
+                            <div class="text-center p-4">
+                                <i class="fas fa-clipboard text-muted fs-1 mb-3"></i>
+                                <p class="text-muted">No saved notes found. Start a new entry!</p>
+                            </div>`;
+                        return;
+                    }
+
+                    // Sort by timestamp descending (newest first)
+                    allNotes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    
+                    // Filter to only keep ONE note per unique title (the most recent one)
+                    const uniqueNotesMap = new Map();
+                    allNotes.forEach(n => {
+                        const titleKey = (n.title || '').trim().toLowerCase();
+                        // Only add if we haven't seen this title yet (first one is most recent due to sort)
+                        if (titleKey && !uniqueNotesMap.has(titleKey)) {
+                            uniqueNotesMap.set(titleKey, n);
+                        }
+                    });
+                    const uniqueNotes = Array.from(uniqueNotesMap.values());
+                    
+                    if (uniqueNotes.length === 0) {
+                        listContainer.innerHTML = `
+                            <div class="text-center p-4">
+                                <i class="fas fa-clipboard text-muted fs-1 mb-3"></i>
+                                <p class="text-muted">No saved notes found. Start a new entry!</p>
+                            </div>`;
+                        return;
+                    }
+
+                    const notesHtml = uniqueNotes.map(n => {
+                        const date = n.timestamp ? new Date(n.timestamp).toLocaleDateString() : 'Unknown date';
+                        const preview = n.content ? n.content.substring(0, 80).replace(/<[^>]*>/g, '') + '...' : 'No content';
+                        return `
+                            <div class="card mb-2 shadow-sm note-card" style="cursor: pointer; border-left: 4px solid var(--primary-color);" data-id="${n.id}" data-title="${escapeHtmlSimple(n.title || '')}" data-content="${escapeHtmlSimple(n.content || '')}">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1 fw-bold text-primary">${escapeHtmlSimple(n.title || 'Untitled')}</h6>
+                                            <p class="mb-0 small text-muted">${escapeHtmlSimple(n.chapter || 'General')} | ${date}</p>
+                                            <p class="mb-0 small text-muted mt-1" style="font-style: italic;">${escapeHtmlSimple(preview)}</p>
+                                        </div>
+                                        <span class="badge bg-light text-dark border">${escapeHtmlSimple(n.category || 'Note')}</span>
+                                    </div>
+                                </div>
+                            </div>`;
+                    }).join('');
+
+                    listContainer.innerHTML = `<div class="text-start">${notesHtml}</div>`;
+
+                    // Add click handlers to load notes
+                    listContainer.querySelectorAll('.note-card').forEach(card => {
+                        card.onclick = () => {
+                            const noteId = card.dataset.id;
+                            const noteTitle = card.dataset.title;
+                            const noteContent = card.dataset.content;
+                            
+                            // Load into the current note form
+                            document.getElementById('note-title').value = noteTitle;
+                            document.getElementById('note-content').value = noteContent;
+                            
+                            // Update the preview
+                            updatePreview();
+                            triggerAutoSave();
+                            
+                            // Close modal
+                            if (modal) modal.hide();
+                        };
+                    });
+                } catch (e) {
+                    listContainer.innerHTML = `<div class="text-center p-4 text-danger">
+                        <i class="fas fa-exclamation-triangle fs-1 mb-2"></i>
+                        <p>Could not load notes. Please try again.</p>
+                    </div>`;
+                }
+            };
+        }
+    };
+    
+    // ========================================================
+    // RICH TEXT TOOLBAR
+    // ========================================================
+    
+    function setupRichToolbar() {
+        const previewFrame = document.getElementById('preview-frame');
+        const rtBtns = document.querySelectorAll('.rt-btn');
+        
+        rtBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!previewFrame || !previewFrame.contentWindow) return;
+                
+                const doc = previewFrame.contentWindow.document;
+                const cmd = btn.getAttribute('data-command');
+                const val = btn.getAttribute('data-val') || null;
+                
+                try {
+                    if (cmd === 'hiliteColor') {
+                        try { doc.execCommand('hiliteColor', false, val); }
+                        catch(err) { doc.execCommand('backColor', false, val); }
+                    } else {
+                        doc.execCommand(cmd, false, val);
+                    }
+                } catch(err) { console.error('Command error:', err); }
+                
+                previewFrame.contentWindow.focus();
+                
+                const contentIn = document.getElementById('note-content');
+                if (contentIn) {
+                    contentIn.value = doc.body.innerHTML;
+                    triggerAutoSave();
+                }
+            });
+        });
+    }
+    
+    // ========================================================
+    // EVENT LISTENERS
+    // ========================================================
+    
+    document.getElementById('note-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        await saveNotes(true);
+    });
+    
+    window.addEventListener('message', (ev) => {
+        if (ev.data && ev.data.type === 'updateHtml') {
+            const contentIn = document.getElementById('note-content');
+            if (contentIn) {
+                contentIn.value = ev.data.content;
+                triggerAutoSave();
+            }
+        }
+    });
+    
+// Initialize
+    init().then(() => {
+        setupRichToolbar();
+        setupLoadNotes();
+        
+        // Also listen for iframe content changes
+        const previewFrame = document.getElementById('preview-frame');
+        if (previewFrame) {
+            previewFrame.addEventListener('load', () => {
+                try {
+                    const doc = previewFrame.contentWindow.document;
+                    doc.addEventListener('input', () => {
+                        const contentIn = document.getElementById('note-content');
+                        if (contentIn) {
+                            contentIn.value = doc.body.innerHTML;
+                            triggerAutoSave();
+                        }
+                    });
+                } catch(e) { /* Cross-origin */ }
+            });
+        }
+    });
+  </script>
+
+  
+</body>
+</html>

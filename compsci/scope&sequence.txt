@@ -1,0 +1,409 @@
+Unit,Chapter,HTML Page,Standard(s) Covered
+Unit 0,0,intro_to_office_software.html,9-12.AP.PD.4
+Unit 1,1,essential_computer_skills.html,"9-12.DC.B.1, 9-12.DC.B.2"
+Unit 1,2,ethics_privacy_law.html,"9-12.DC.A.1, 9-12.DC.D.1"
+Unit 1,3,cybersecurity_threats.html,9-12.NI.C.1
+Unit 2,4,how_computers_work.html,"9-12.CS.D.1, 9-12.CS.HS.1"
+Unit 2,5,language_of_computers.html,9-12.DA.S.1
+Unit 3,6,storing_data.html,9-12.DA.S.2
+Unit 3,7,mastering_spreadsheets.html,9-12.DA.CVT.1
+Unit 3,8,computational_modeling.html,9-12.DA.IM.1
+Unit 4,9,problem_solving_algorithms.html,9-12.AP.A.1
+Unit 4,10,control_structures_events.html,"9-12.AP.C.1, 9-12.AP.C.2"
+Unit 4,11,modularity_procedures.html,"9-12.AP.M.1, 9-12.AP.M.2"
+Unit 5,12,culture_equity_bias.html,9-12.IC.C.2
+Unit 5,13,ethics_societal_impact.html,"9-12.IC.C.1, 9-12.IC.SLE.1, 9-12.IC.SLE.2, 9-12.IC.SLE.3"
+Unit 6,14,advanced_data_structures.html,9-12.AP.V.1
+Unit 6,15,software_development_lifecycle.html,"9-12.AP.PD.1, 9-12.AP.PD.4, 9-12.AP.PD.5"
+Unit 7,16,how_the_internet_works.html,9-12.NI.NCO.1
+Unit 7,17,defending_systems.html,"9-12.NI.C.2, 9-12.NI.C.3, 9-12.NI.C.4"
+Unit 8,18,ai_cross_disciplinary.html,"9-12.IC.C.3, 9-12.IC.C.4"
+
+
+Grades 9-12 Computer Science Standards
+Algorithms and Programming
+By the end of Grade 12, students who demonstrate understanding can:
+Indicator Standard
+9-12.AP.A.1 Create prototypes that use algorithms to solve computational problems by
+leveraging prior student knowledge and personal interests.
+9-12.AP.V.1 Demonstrate the use of both linked lists and arrays to simplify solutions,
+generalizing computational problems instead of repeatedly using simple
+variables.
+9-12.AP.C.1 Justify the selection of specific control structures when tradeoffs involve
+implementation, readability, and program performance, and explain the benefits
+and drawbacks of choices made.
+9-12.AP.C.2 Design and iteratively develop computational artifacts for practical intent,
+personal expression, or to address a societal issue by using events to initiate
+instructions.
+9-12.AP.M.1 Decompose problems into smaller components through systematic analysis,
+using constructs such as procedures, modules, and/or objects.
+9-12.AP.M.2 Create artifacts by using procedures within a program, combinations of data and
+procedures, or independent but interrelated programs.
+9-12.AP.PD.1 Systematically design and develop programs for broad audiences by
+incorporating feedback from users.
+9-12.AP.PD.2 Evaluate licenses that limit or restrict use of computational artifacts when using
+resources such as libraries.
+9-12.AP.PD.3 Evaluate and refine computational artifacts to make them more usable by all and
+accessible to people with disabilities.
+9-12.AP.PD.4 Design and develop computational artifacts working in team roles using
+collaborative tools.
+9-12.AP.PD.5 Document design decisions using text, graphics, presentations, and/or
+demonstrations in the development of complex programs.
+Nevada Academic Content Standards for Computer Science and Integrated Technology – 2019 51
+Practice Connection Concept Connection
+Practice 2. Collaborating Around Computing
+4. Evaluate and select technological tools that can be
+used to collaborate on a project (9-12.AP.PD.4).
+Practice 3. Recognizing and Defining
+Computational Problems
+2. Decompose complex real-world problems into
+manageable subproblems that could integrate existing
+solutions or procedures (9-12.AP.C.1 and 9-
+12.AP.M.1).
+Practice 4. Developing and Using Abstractions
+1. Extract common features from a set of interrelated
+processes or complex phenomena (9-12.AP.V.1).
+Practice 5. Creating Computational Artifacts
+1. Plan the development of a computational artifact using
+an iterative process that includes reflection on and
+modification of the plan, taking into account key
+features, time and resource constraints, and user
+expectations (9-12.AP.PD.1).
+2. Create a computational artifact for practical intent,
+personal expression, or to address a societal issue
+(9-12.AP.A.1, 9-12.AP.C.1-2, and 9-12.AP.M.2).
+Practice 6. Testing and Refining Computational
+Artifacts
+3. Evaluate and refine a computational artifact multiple
+times to enhance its performance, reliability, usability,
+and accessibility (9-12.AP.PD.3).
+Practice 7. Communicating About Computing
+2. Describe, justify, and document computational
+processes and solutions using appropriate terminology
+consistent with the intended audience and purpose
+(9-12.AP.PD.5).
+3. Articulate ideas responsibly by observing intellectual
+property rights and giving appropriate attribution
+(9-12.AP.PD.2).
+Algorithms and Programming
+● AP.A: Algorithms - People evaluate and select
+algorithms based on performance, reusability, and
+ease of implementation. Knowledge of common
+algorithms improves how people develop software,
+secure data, and store information (9-12.AP.A.1).
+● AP.V: Variables - Data structures are used to
+manage program complexity. Programmers choose
+data structures based on functionality, storage, and
+performance tradeoffs (9-12.AP.V.1).
+● AP.C: Control - Programmers consider tradeoffs
+related to implementation, readability, and program
+performance when selecting and combining control
+structures (9-12.AP.C.1 and 9-12.AP.C.2).
+● AP.M: Modularity - Complex programs are designed
+as systems of interacting modules, each with a
+specific role, coordinating for a common overall
+purpose. These modules can be procedures within a
+program; combinations of data and procedures; or
+independent, but interrelated, programs. Modules
+allow for better management of complex tasks (9-
+12.AP.M.1 and 9-12.AP.M.2).
+● AP.PD: Program Development - Diverse teams
+can develop programs with a broad impact through
+careful review and by drawing on the strengths of
+members in different roles. Design decisions often
+involve tradeoffs. The development of complex
+programs is aided by resources such as libraries and
+tools to edit and manage parts of the program.
+Systematic analysis is critical for identifying the effects
+of lingering bugs (9-12.AP.PD.1-5).
+Connections to other NVACS at this grade level
+NVACS for Science (9-12.AP.A.1) – HS-ETS1-2
+(9-12.AP.C.1) – HS-ETS1-3, SEP7
+(9-12.AP.M.1) – HS-ETS1-2
+(9-12.AP.M.2) – HS-ETS1-4
+(9-12.AP.PD.1) – CCC4, HS-ETS1-3
+(9-12.AP.PD.3) – SEP8
+(9-12.AP.PD.4) – SEP5, SEP8
+(9-12.AP.PD.5) – SEP8
+Nevada Academic Content Standards for Computer Science and Integrated Technology – 2019 52
+NVACS for Mathematics (9-12.AP.A.1) – SMP 1, 2, 4, 7, & 8
+(9-12.AP.V.1) – SMP 4, 5, & 7
+(9-12.AP.C.1) – SMP 2 & 3
+(9-12.AP.C.2) – SMP 4
+(9-12.AP.M.1) – SMP 2, 6, & 7
+(9-12.AP.PD.1) – SMP 1-4
+(9-12.AP.PD.3) – SMP 3 & 6
+(9-12.AP.PD.4) – SMP 4 & 5
+(9-12.AP.PD.5) – SMP 1, 2, 4, & 5
+NVACS for ELA (9-12.AP.A.1) – ELA W.9-10.3
+(9-12.AP.V.1) – ELA L.9-10.1b
+(9-12.AP.C.1) – ELA W.9-10.1
+(9-12.AP.M.1) – ELA RI.9-10.3
+(9-12.AP.PD.1) – ELA W.9-10.5
+(9-12.AP.PD.2) – ELA RI.9-10.7
+(9-12.AP.PD.3) – ELA RI.9-10.8
+(9-12.AP.PD.4) – ELA W.9-10.3a
+(9-12.AP.PD.5) – ELA W.9-10.2a
+NVACS for Social Studies None
+Nevada Academic Content Standards for Computer Science and Integrated Technology – 2019 53
+Grades 9-12 Computer Science Standards
+Computing Systems
+By the end of Grade 12, students who demonstrate understanding can:
+Indicator Standard
+9-12.CS.D.1 Explain how abstractions hide the underlying implementation details of
+computing systems embedded in everyday objects.
+9-12.CS.HS.1 Compare levels of abstraction and interactions between application software,
+system software, and hardware layers.
+9-12.CS.T.1 Develop guidelines that convey systematic troubleshooting strategies that others
+can use to identify and fix errors.
+Practice Connection Concept Connection
+Practice 4. Developing and Using Abstractions
+1. Extract common features from a set of interrelated
+processes or complex phenomena (9-12.CS.D.1 and
+9-12.CS.HS.1).
+Practice 6. Testing and Refining Computational
+Artifacts
+2. Identify and fix errors using a systematic process (9-
+12.CS.T.1).
+Computing Systems
+● CS.D: Devices - Computing devices are often
+integrated with other systems, including biological,
+mechanical, and social systems. These devices can
+share data with one another. The usability,
+dependability, security, and accessibility of these
+devices, and the systems they are integrated with, are
+important considerations in their design as they evolve
+(9-12.CS.D.1).
+● CS.HS: Hardware and Software - Levels of
+interaction exist between the hardware, software, and
+user of a computing system. The most common levels
+of software that a user interacts with include system
+software and applications. System software controls
+the flow of information between hardware components
+used for input, output, storage, and processing (9-
+12.CS.HS.1).
+● CS.T: Troubleshooting - Troubleshooting complex
+problems involves the use of multiple sources when
+researching, evaluating, and implementing potential
+solutions. Troubleshooting also relies on experience,
+such as when people recognize that a problem is
+similar to one they have seen before or adapt
+solutions that have worked in the past (9-12.CS.T.1). 
+Nevada Academic Content Standards for Computer Science and Integrated Technology – 2019 54
+Connections to other NVACS at this grade level
+NVACS for Science (9-12.CS.D.1) – SEP2, SEP8
+(9-12.CS.HS.1) – SEP2, SEP8
+(9-12.CS.T.1) – SEP2, SEP8
+NVACS for Mathematics (9-12.CS.CS.T.1) – SMP3
+NVACS for ELA (9-12.CS.D.1) – ELA RI.9-10.3
+(9-12.CS.HS.1) – ELA RI.6.9
+(9-12.CS.T.1) – ELA W.9-10.2b
+NVACS for Social Studies None
+Nevada Academic Content Standards for Computer Science and Integrated Technology – 2019 55
+Grades 9-12 Computer Science Standards
+Data and Analysis
+By the end of Grade 12, students who demonstrate understanding can:
+Indicator Standard
+9-12.DA.S.1 Translate between different bit representations of real-world phenomena, such
+as characters, numbers, and images (e.g., convert hexadecimal colors to
+decimal percentages, ASCII/Unicode representation).
+9-12.DA.S.2 Evaluate the tradeoffs in how data elements are organized and where data is
+stored.
+9-12.DA.CVT.1 Create interactive data visualizations or alternative representations using
+software tools to help others better understand real-world phenomena.
+9-12.DA.IM.1 Create computational models that represent the relationships among different
+elements of data collected from a phenomenon, process, or model.
+Practice Connection Concept Connection
+Practice 3. Recognizing and Defining
+Computational Problems
+3. Evaluate whether it is appropriate and feasible to
+solve a problem computationally (9-12.DA.S.2).
+Practice 4. Developing and Using Abstractions
+1. Extract common features from a set of interrelated
+processes or complex phenomena (9-12.DA.S.1).
+4. Model phenomena and processes and simulate
+systems to understand and evaluate potential
+outcomes (9-12.DA.CVT.1 and 9-12.DA.IM.1).
+Data and Analysis
+● DA.S: Storage - Data can be composed of multiple
+data elements that relate to one another. For example,
+population data may contain information about age,
+gender, and height. People make choices about how
+data elements are organized and where data is stored.
+These choices affect cost, speed, reliability,
+accessibility, privacy, and integrity (9-12.DA.S.1 and 9-
+12.DA.S.2).
+● DA.CVT: Collection, Visualization, and
+Transformation - Data is constantly collected or
+generated through automated processes that are not
+always evident, raising privacy concerns. The different
+collection methods and tools that are used influence
+the amount and quality of the data that is observed
+and recorded. People transform, generalize, simplify,
+and present large data sets in different ways to
+influence how other people interpret and understand
+the underlying information. Examples include
+visualization, aggregation, rearrangement, and
+application of mathematical operations (9-
+12.DA.CVT.1).
+● DA.IM: Inference and Models - The accuracy of
+predictions or inferences depends upon the limitations
+of the computer model and the data the model is built
+upon. The amount, quality, and diversity of data and
+the features chosen can affect the quality of a model
+and ability to understand a system. Predictions or
+inferences are tested to validate models. (9-
+12.DA.IM.1).
+Nevada Academic Content Standards for Computer Science and Integrated Technology – 2019 56
+Connections to other NVACS at this grade level
+NVACS for Science (9-12.DA.S.1) – SEP2, SEP4
+(9-12.DA.S.2) – HS-ETS1-3, HS-LS2-7, HS-ETS1-2 & 1-3, HS-LS4-6,
+HS-ETS1-2 & 1-3, SEP8
+(9-12.DA.CVT.1) – SEP2, HS-LS2-4, HS-LS2-1 & 2-2, HS-LS3-3, HSLS4-3, HS-LS4-1, HS-LS4-6
+(9-12.DA.IM.1) – SEP2, SEP4, SEP5, SEP8
+NVACS for Mathematics (9-12.DA.S.1) – SMP 4-7
+(9-12.DA.CVT.1) – SMP 4 & 5
+(9-12.DA.IM.1) – SMP 4 & 5
+NVACS for ELA (9-12.DA.S.2) – ELA RI.9-10.8
+(9-12.DA.CVT.1) – ELA W.9-10.2a
+(9-12.DA.IM.1) – ELA W.9-10.2a
+NVACS for Social Studies None
+Nevada Academic Content Standards for Computer Science and Integrated Technology – 2019 57
+Grades 9-12 Computer Science Standards
+Impacts of Computing
+By the end of Grade 12, students who demonstrate understanding can:
+Indicator Standard
+9-12.IC.C.1 Evaluate the ways computing impacts personal, ethical, social, economic, and
+cultural practices.
+9-12.IC.C.2 Test and refine computational artifacts to reduce bias and equity deficits.
+9-12.IC.C.3 Demonstrate ways a given algorithm applies to problems across disciplines.
+9-12.IC.C.4 Explain the potential impacts of artificial intelligence on society.
+9-12.IC.SI.1 Use tools and methods for collaboration on a project to increase connectivity of
+people in different cultures and career fields.
+9-12.IC.SLE.1 Explain the beneficial and harmful effects that intellectual property laws can
+have on innovation.
+9-12.IC.SLE.2 Explain the privacy concerns related to the collection and generation of data
+through automated processes that may not be evident to users.
+9-12.IC.SLE.3 Evaluate the social and economic implications of privacy in the context of safety,
+law, or ethics.
+Practice Connection Concept Connection
+Practice 1. Fostering an Inclusive Computing
+Culture
+1. Include the unique perspectives of others and reflect
+on one’s own perspectives when designing and
+developing computational products (9-12.IC.C.4).
+2. Address the needs of diverse end users during the
+design process to produce artifacts with broad
+accessibility and usability (9-12.IC.C.1 and 9-
+12.IC.C.2).
+Practice 2. Collaborating Around Computing
+4. Evaluate and select technological tools that can be
+used to collaborate on a project (9-12.IC.SI.1).
+Practice 3. Recognizing and Defining
+Computational Problems
+1. Identify complex, interdisciplinary, real-world problems
+that can be solved computationally (9-12.IC.C.3).
+Practice 7. Communicating About Computing
+2. Describe, justify, and document computational
+processes and solutions using appropriate terminology
+consistent with the intended audience and purpose (9-
+12.IC.SLE.2).
+3. Articulate ideas responsibly by observing intellectual
+property rights and giving appropriate attribution (9-
+12.IC.SLE.1 and 9-12.IC.SLE.3).
+Impacts of Computing
+● IC.C: Culture - The design and use of computing
+technologies and artifacts can improve, worsen, or
+maintain inequitable access to information and
+opportunities (9-12.IC.C.1-4).
+● IC.SI: Social Interactions - Many aspects of society,
+especially careers, have been affected by the degree
+of communication afforded by computing. The
+increased connectivity between people in different
+cultures and in different career fields has changed the
+nature and content of many careers (9-12.IC.SI.1).
+● IC.SLE: Safety, Law, and Ethics - Laws govern
+many aspects of computing, such as privacy, data,
+property, information, and identity. These laws can
+have beneficial and harmful effects, such as
+expediting or delaying advancements in computing
+and protecting or infringing upon people’s rights.
+International differences in laws and ethics have
+implications for computing (9-12.IC.SLE.1-3). 
+Nevada Academic Content Standards for Computer Science and Integrated Technology – 2019 58
+Connections to other NVACS at this grade level
+NVACS for Science (9-12.IC.C.1) – ETS2.8
+(9-12.IC.C.2) – SEP2, SEP3, SEP8
+(9-12.IC.C.4) – SEP6, ETS2.8
+(9-12.IC.SI.1) – SEP8
+(9-12.IC.SLE.1) – SEP6, SEP 7, SEP8, HS-ETS1-3
+(9-12.IC.SLE.3) – HS-ETS1-3, SEP7
+NVACS for Mathematics (9-12.IC.C.2) – SMP 4
+(9-12.IC.C.3) – SMP 7
+(9-12.IC.SI.1) – SMP 5
+NVACS for ELA (9-12.IC.C.1) – ELA RI.9-10.8
+(9-12.IC.C.4) – ELA W.9-10.2
+(9-12.IC.SI.1) – ELA SL.9-10.1b
+(9-12.IC.SLE.1) – ELA W.9-10.2
+(9-12.IC.SLE.2) – ELA W.9-10.2
+(9-12.IC.SLE.3) – ELA RI.9-10.8
+NVACS for Social Studies (9-12.IC.SLE.1-3) – Connect to financial literacy (risk)
+Nevada Academic Content Standards for Computer Science and Integrated Technology – 2019 59
+Grades 9-12 Computer Science Standards
+Networks and the Internet
+By the end of Grade 12, students who demonstrate understanding can:
+Indicator Standard
+9-12.NI.NCO.1 Evaluate the scalability and reliability of networks, by describing the
+relationship between routers, switches, servers, topology, and addressing.
+9-12.NI.C.1 Give examples to illustrate how sensitive data can be affected by malware and
+other attacks.
+9-12.NI.C.2 Recommend security measures to address various scenarios based on factors
+such as efficiency, feasibility, and ethical impacts.
+9-12.NI.C.3 Compare various security measures, considering tradeoffs between the
+usability and security of a computing system.
+9-12.NI.C.4 Explain tradeoffs when selecting and implementing cybersecurity
+recommendations.
+Practice Connection Concept Connection
+Practice 3. Recognizing and Defining
+Computational Problems
+3. Evaluate whether it is appropriate and feasible to
+solve a problem computationally (9-12.NI.C.2).
+Practice 4. Developing and Using Abstractions
+1. Extract common features from a set of interrelated
+processes or complex phenomena (9-12.NI.NCO.1).
+Practice 6. Testing and Refining Computational
+Artifacts
+3. Evaluate and refine a computational artifact multiple
+times to enhance its performance, reliability, usability,
+and accessibility (9-12.NI.C.3).
+Practice 7. Communicating About Computing
+2. Describe, justify, and document computational
+processes and solutions using appropriate terminology
+consistent with the intended audience and purpose (9-
+12.NI.C.1 and 9-12.NI.C.4).
+Networks and the Internet
+● NI.NCO: Network, Communication, and
+Organization - Network topology is determined, in
+part, by how many devices can be supported. Each
+device is assigned an address that uniquely identifies
+it on the network. The scalability and reliability of the
+Internet are enabled by the hierarchy and redundancy
+in networks (9-12.NI.NCO.1).
+● NI.C: Cybersecurity - Network security depends on
+a combination of hardware, software, and practices
+that control access to data and systems. The needs of
+users and the sensitivity of data determine the level of
+security implemented (9-12.NI.C.1-4). 
+Nevada Academic Content Standards for Computer Science and Integrated Technology – 2019 60
+Connections to other NVACS at this grade level
+NVACS for Science (9-12.NI.NCO.1) – SEP8, HS-ETS1-1
+(9-12.NI.C.1) – SEP2
+(9-12.NI.C.2) – HS-ETS1-1, HS-ETS1-2
+(9-12.NI.C.3) – HS-ETS1-3
+(9-12.NI.C.4) – HS-ETS1-3
+NVACS for Mathematics None
+NVACS for ELA (9-12.NI.NCO.1) – ELA RI.9-10.8
+(9-12.NI.C.1) – ELA RI.9-10.1
+(9-12.NI.C.3) – ELA RI.6.9
+(9-12.NI.C.4) – ELA W.9-10.2d
+NVACS for Social Studies (9-12.NI.C.1-4) – Connect to financial literacy (risk)

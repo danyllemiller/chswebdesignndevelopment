@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Syntax Hacker | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+<link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  
+  <!-- Security Guard -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    .game-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .code-editor {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        font-family: 'Source Code Pro', monospace;
+        font-size: 1.2rem;
+        border: 2px solid #333;
+        border-radius: 8px;
+        padding: 1rem;
+        width: 100%;
+        resize: vertical;
+        box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    }
+    
+    .code-editor:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25), inset 0 2px 10px rgba(0,0,0,0.5);
+    }
+    
+    .level-badge {
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+    }
+
+    /* Animations */
+    .shake {
+        animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        transform: translate3d(0, 0, 0);
+        backface-visibility: hidden;
+        border-color: #dc3545 !important;
+    }
+
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-2px, 0, 0); }
+        20%, 80% { transform: translate3d(4px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+        40%, 60% { transform: translate3d(6px, 0, 0); }
+    }
+
+    .success-pulse {
+        animation: pulse 1s ease-out;
+        border-color: #198754 !important;
+        background-color: #f0fdf4;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(25, 135, 84, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
+    }
+    
+    .tag-highlight {
+        color: #569cd6; /* VS Code Blue */
+        font-weight: bold;
+    }
+    
+    .attr-highlight {
+        color: #9cdcfe; /* VS Code Light Blue */
+    }
+    
+    .val-highlight {
+        color: #ce9178; /* VS Code Orange/String */
+    }
+  </style>
+</head>
+<body class="bg-white">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div class="container my-5 game-container">
+    <div class="text-center mb-4">
+        <a href="/reviewGames/web1ReviewGames.html" class="text-decoration-none small fw-bold">&laquo; Back to Review Games</a>
+        <h1 class="gochi text-primary mt-3" style="font-size: 3.5rem;">Syntax Hacker <i class="fas fa-laptop-code"></i></h1>
+        <p class="text-muted fw-bold">Prove your coding precision. Write flawless HTML tags and attributes to bypass each security terminal.</p>
+    </div>
+
+    <div class="card shadow border-primary" id="gameCard">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+            <span class="fw-bold" id="levelDisplay">Level 1 of 10</span>
+            <span class="badge bg-light text-primary level-badge shadow-sm">Score: <span id="scoreDisplay">0</span></span>
+        </div>
+        
+        <div class="card-body p-4 p-md-5">
+            
+            <!-- Game Over Screen (Hidden initially) -->
+            <div id="gameOverScreen" class="text-center d-none py-5">
+                <h2 class="display-3 mb-3">🎉</h2>
+                <h2 class="fw-bold text-success mb-3">System Cracked!</h2>
+                <p class="lead mb-4">You have successfully proven your HTML syntax mastery.</p>
+                <div class="bg-light p-4 rounded border d-inline-block mb-4 shadow-sm">
+                    <h4 class="mb-0 text-dark">Final Score: <span id="finalScore" class="text-primary fw-bold">0</span></h4>
+                    <p class="text-muted small mt-2 mb-0" id="mistakeCount">Mistakes made: 0</p>
+                </div>
+                <br>
+                <button class="btn btn-primary px-5 py-2 fw-bold" onclick="location.reload()">Play Again</button>
+                <a href="/year1/the-bones-intro-to-html.html" class="btn btn-outline-secondary px-5 py-2 ms-2 fw-bold">Back to Chapter 5</a>
+            </div>
+
+            <!-- Active Gameplay Screen -->
+            <div id="activeGameScreen">
+                <div class="mb-4">
+                    <h5 class="text-secondary fw-bold text-uppercase" style="letter-spacing: 1px;" id="levelTitle">The Paragraph</h5>
+                    <div class="bg-site-secondary p-3 rounded border border-primary fs-5" id="promptText">
+                        <!-- Prompt injected via JS -->
+                    </div>
+                </div>
+
+                <div class="mb-3 position-relative">
+                    <label class="form-label fw-bold small text-muted">CODE EDITOR</label>
+                    <textarea id="codeInput" class="code-editor" rows="3" placeholder="Type your HTML here..." spellcheck="false" autocomplete="off"></textarea>
+                </div>
+
+                <div id="feedbackArea" class="alert d-none mb-4 small fw-bold shadow-sm">
+                    <!-- Feedback injected via JS -->
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <button class="btn btn-outline-secondary btn-sm" id="hintBtn">Get a Hint (-5 pts)</button>
+                    <button class="btn btn-success px-5 py-2 fw-bold shadow-sm" id="submitBtn">Execute Code</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <script>
+    // --- GAME DATA ---
+    const levels = [
+        {
+            title: "The Foundation",
+            prompt: "Create a standard paragraph containing the exact text: <strong>Hello World</strong>",
+            // Allow flexible spacing but require exact tags and text
+            regex: /^<p>\s*Hello World\s*<\/p>$/i,
+            hint: "Paragraphs use the &lt;p&gt; and &lt;/p&gt; tags.",
+            exactHint: "&lt;p&gt;Hello World&lt;/p&gt;"
+        },
+        {
+            title: "The Main Heading",
+            prompt: "Create a Level 1 Heading containing the exact text: <strong>Welcome</strong>",
+            regex: /^<h1>\s*Welcome\s*<\/h1>$/i,
+            hint: "The largest heading tag is &lt;h1&gt;.",
+            exactHint: "&lt;h1&gt;Welcome&lt;/h1&gt;"
+        },
+        {
+            title: "The Hyperlink",
+            prompt: "Create a link that points to <strong>index.html</strong> with the clickable text: <strong>Home</strong>",
+            // Flexible regex to allow single or double quotes, and varying spaces
+            regex: /^<a\s+href=["']index\.html["']\s*>\s*Home\s*<\/a>$/i,
+            hint: "Links use the anchor tag (&lt;a&gt;) and require an href attribute.",
+            exactHint: "&lt;a href=\"index.html\"&gt;Home&lt;/a&gt;"
+        },
+        {
+            title: "The Image",
+            prompt: "Embed an image with the source <strong>logo.png</strong> and the alternative text <strong>Logo</strong>",
+            // Lookahead regex to allow attributes in any order
+            regex: /^<img\s+(?=.*src=["']logo\.png["'])(?=.*alt=["']Logo["']).*\/?>$/i,
+            hint: "Image tags (&lt;img&gt;) are self-closing. You need both src=\"...\" and alt=\"...\".",
+            exactHint: "&lt;img src=\"logo.png\" alt=\"Logo\"&gt;"
+        },
+        {
+            title: "Semantic Emphasis",
+            prompt: "Wrap the word <strong>Important</strong> in the semantic HTML5 tag used to indicate strong importance (bold text).",
+            regex: /^<strong>\s*Important\s*<\/strong>$/i,
+            hint: "Do not use the old &lt;b&gt; tag. Use the modern semantic tag for strong importance.",
+            exactHint: "&lt;strong&gt;Important&lt;/strong&gt;"
+        },
+        {
+            title: "The Container",
+            prompt: "Create an empty generic container div and give it the class attribute <strong>card</strong>",
+            regex: /^<div\s+class=["']card["']\s*>\s*<\/div>$/i,
+            hint: "Make sure you have an opening &lt;div&gt; with the class attribute, and a closing &lt;/div&gt;.",
+            exactHint: "&lt;div class=\"card\"&gt;&lt;/div&gt;"
+        },
+        {
+            title: "The Form Input",
+            prompt: "Create a self-closing input field with the type attribute set to <strong>email</strong>",
+            regex: /^<input\s+type=["']email["']\s*\/?>$/i,
+            hint: "Input tags are empty elements (no closing tag). Set the type attribute.",
+            exactHint: "&lt;input type=\"email\"&gt;"
+        },
+        {
+            title: "List Items",
+            prompt: "Create an unordered list (bullets) containing exactly one list item with the text <strong>Apples</strong>",
+            regex: /^<ul>\s*<li>\s*Apples\s*<\/li>\s*<\/ul>$/i,
+            hint: "You need a parent &lt;ul&gt; tag wrapped around a child &lt;li&gt; tag.",
+            exactHint: "&lt;ul&gt;\n  &lt;li&gt;Apples&lt;/li&gt;\n&lt;/ul&gt;"
+        },
+        {
+            title: "Semantic Sections",
+            prompt: "Create a main element wrapper. Inside it, create an article element. <em>(Leave it empty)</em>",
+            regex: /^<main>\s*<article>\s*<\/article>\s*<\/main>$/i,
+            hint: "Nesting practice! Put the &lt;article&gt;&lt;/article&gt; directly inside the &lt;main&gt;&lt;/main&gt;.",
+            exactHint: "&lt;main&gt;\n  &lt;article&gt;&lt;/article&gt;\n&lt;/main&gt;"
+        },
+        {
+            title: "The Boilerplate Setup",
+            prompt: "Write the very first line of code required for an HTML5 document (The Document Type Declaration).",
+            regex: /^<!DOCTYPE html>$/i,
+            hint: "It starts with an exclamation point and defines the doctype.",
+            exactHint: "&lt;!DOCTYPE html&gt;"
+        }
+    ];
+
+    // --- GAME ENGINE ---
+    let currentLevel = 0;
+    let score = 0;
+    let totalMistakes = 0;
+    const pointsPerLevel = 100;
+
+    const ui = {
+        levelDisplay: document.getElementById('levelDisplay'),
+        scoreDisplay: document.getElementById('scoreDisplay'),
+        levelTitle: document.getElementById('levelTitle'),
+        promptText: document.getElementById('promptText'),
+        codeInput: document.getElementById('codeInput'),
+        feedbackArea: document.getElementById('feedbackArea'),
+        submitBtn: document.getElementById('submitBtn'),
+        hintBtn: document.getElementById('hintBtn'),
+        activeScreen: document.getElementById('activeGameScreen'),
+        gameOverScreen: document.getElementById('gameOverScreen'),
+        finalScore: document.getElementById('finalScore'),
+        mistakeCount: document.getElementById('mistakeCount')
+    };
+
+    function initGame() {
+        currentLevel = 0;
+        score = 0;
+        totalMistakes = 0;
+        loadLevel();
+    }
+
+    function loadLevel() {
+        if (currentLevel >= levels.length) {
+            endGame();
+            return;
+        }
+
+        const levelData = levels[currentLevel];
+        
+        ui.levelDisplay.innerText = `Level ${currentLevel + 1} of ${levels.length}`;
+        ui.scoreDisplay.innerText = score;
+        ui.levelTitle.innerText = levelData.title;
+        ui.promptText.innerHTML = levelData.prompt;
+        
+        ui.codeInput.value = '';
+        ui.codeInput.classList.remove('shake', 'success-pulse');
+        
+        hideFeedback();
+        
+        ui.hintBtn.disabled = false;
+        ui.hintBtn.innerText = "Get a Hint (-5 pts)";
+        
+        // Focus input automatically
+        setTimeout(() => ui.codeInput.focus(), 100);
+    }
+
+    function checkAnswer() {
+        const inputVal = ui.codeInput.value.trim();
+        const levelData = levels[currentLevel];
+
+        if (inputVal === '') {
+            showFeedback("Please type some HTML code first!", "warning");
+            shakeInput();
+            return;
+        }
+
+        // Run the regex test
+        if (levelData.regex.test(inputVal)) {
+            // SUCCESS
+            handleSuccess();
+        } else {
+            // FAILURE
+            totalMistakes++;
+            score = Math.max(0, score - 10); // Penalty for wrong guess
+            ui.scoreDisplay.innerText = score;
+            showFeedback("Syntax Error! Try checking your spelling, slashes, or quotes.", "danger");
+            shakeInput();
+        }
+    }
+
+    function handleSuccess() {
+        score += pointsPerLevel;
+        ui.scoreDisplay.innerText = score;
+        ui.codeInput.classList.add('success-pulse');
+        showFeedback("✅ Correct Syntax! Cracking next level...", "success");
+        
+        ui.submitBtn.disabled = true;
+        ui.hintBtn.disabled = true;
+
+        setTimeout(() => {
+            ui.submitBtn.disabled = false;
+            currentLevel++;
+            loadLevel();
+        }, 1500);
+    }
+
+    function showHint() {
+        score = Math.max(0, score - 5); // Penalty for hint
+        ui.scoreDisplay.innerText = score;
+        ui.hintBtn.disabled = true;
+        
+        const levelData = levels[currentLevel];
+        
+        // Show partial hint first, if they click again show exact (just swapping text)
+        if (ui.hintBtn.innerText.includes("Exact")) {
+            showFeedback(`<strong>Answer:</strong> <code>${levelData.exactHint}</code>`, "info");
+        } else {
+            showFeedback(`<strong>Hint:</strong> ${levelData.hint}`, "info");
+            ui.hintBtn.disabled = false;
+            ui.hintBtn.innerText = "Show Exact Answer (-15 pts)";
+            
+            // Re-wire button to show exact answer
+            ui.hintBtn.onclick = () => {
+                score = Math.max(0, score - 15);
+                ui.scoreDisplay.innerText = score;
+                showFeedback(`<strong>Exact Code:</strong> <br><code class="fs-6">${levelData.exactHint}</code>`, "info");
+                ui.hintBtn.disabled = true;
+            };
+        }
+    }
+
+    function showFeedback(msg, type) {
+        ui.feedbackArea.innerHTML = msg;
+        ui.feedbackArea.className = `alert alert-${type} mt-3 small fw-bold shadow-sm d-block`;
+    }
+
+    function hideFeedback() {
+        ui.feedbackArea.className = `alert d-none`;
+        ui.feedbackArea.innerHTML = '';
+    }
+
+    function shakeInput() {
+        ui.codeInput.classList.remove('shake');
+        void ui.codeInput.offsetWidth; // Trigger reflow
+        ui.codeInput.classList.add('shake');
+    }
+
+    function endGame() {
+        ui.activeScreen.classList.add('d-none');
+        ui.gameOverScreen.classList.remove('d-none');
+        ui.finalScore.innerText = score;
+        ui.mistakeCount.innerText = `Total Mistakes Made: ${totalMistakes}`;
+    }
+
+    // --- EVENT LISTENERS ---
+    ui.submitBtn.addEventListener('click', checkAnswer);
+    
+    // Original hint button mapping
+    ui.hintBtn.addEventListener('click', function hintHandler() {
+        showHint();
+    });
+
+    // Enter key submits (if not holding shift for new lines)
+    ui.codeInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            checkAnswer();
+        }
+    });
+
+    // Start game on load
+    initGame();
+
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

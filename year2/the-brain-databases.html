@@ -1,0 +1,633 @@
+<!-- the-brain-databases.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 14: The "Brain" (Databases) | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/android-chrome-512x512.png">
+  
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+  
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  
+  <!-- Security Guard: Kicks out anyone not logged in -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+</head>
+<body class="bg-white">
+
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+        
+    <nav class="mb-4 d-flex justify-content-between small fw-bold">
+        <a href="/year2/the-network-intro-to-apis.html" class="text-decoration-none text-primary">&laquo; Previous: 13: The "Network"</a>
+        <a href="/year2/the-game-never-ends.html" class="text-decoration-none text-primary">Next: 15: The "Future" &raquo;</a>
+    </nav>
+
+    <!-- CLEAN MODERN HEADER -->
+    <h1 class="text-center text-primary fw-bold mt-5 mb-2">Chapter 14: The "Brain"</h1>
+    <p class="text-center text-secondary fst-italic fs-5 mb-5">Databases, SQL &amp; Data Security (Exhaustive Edition)</p>
+
+    <!-- SECTION 1: OVERVIEW & PERSONA -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">The Amnesia Problem: Why Your Client Needs a Brain</h2>
+        <p>Welcome back, Agency Full-Stack Developer! In previous chapters, you learned how to make your client's site interactive with JavaScript. Your sites can react to clicks, validate forms, and run mini-games, which is awesome! But there's still a massive piece of magic missing. <strong>What happens when the customer closes the page or hits refresh?</strong></p>
+        
+        <p>All their changes, all their shopping cart items, and all their user data vanish into thin air.</p>
+        
+        <p>How do sites like Instagram, TikTok, or Netflix remember <em>you</em>, your posts, your preferences, and your friends? The answer is a <strong>Database</strong>. What is the primary problem that a database solves for a dynamic website? <strong>It solves the 'amnesia' problem by providing permanent, organized memory/storage on a remote server.</strong></p>
+        
+        <p>Think of a database as a website's permanent brain or its giant, super-organized digital filing cabinet. Without one, every dynamic website has amnesia—it forgets everything you did the second you close the tab. Our current Year 2 agency client, <strong>"ByteBox Arcade in Carson City,"</strong> needs a brain to store competitive high scores so players can battle each other across the internet!</p>
+        
+        <h2 class="section-title mt-5">Meet the User: "Competitive Cody"</h2>
+        
+        <div class="card shadow-sm border-0 bg-light mt-4 mb-5 text-start">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center border-bottom pb-3 mb-3">
+              <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-3 shadow-sm border border-3 border-white" style="width: 70px; height: 70px;">C</div>
+              <div class="ms-3">
+                <h5 class="fw-bold text-dark mb-0">Competitive Cody</h5>
+                <span class="badge bg-primary text-uppercase tracking-wide mt-1" style="font-size: 0.65rem;">Persona: ByteBox Arcade Customer</span>
+              </div>
+            </div>
+            <div class="small">
+              <div class="mb-2">
+                <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Who</span>
+                <span class="text-dark">Cody is an avid gamer and regular customer at ByteBox Arcade who loves climbing leaderboards and proving his skills.</span>
+              </div>
+              <div class="mb-2">
+                <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Goal</span>
+                <span class="text-dark">He wants to visit the "ByteBox" promotional site, submit his high score in Cosmic Comet, and know it will still be there tomorrow for his friends to try and beat.</span>
+              </div>
+              <div>
+                <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.7rem;">Needs</span>
+                <span class="text-dark">Cody demands <strong>persistence</strong> (a memory that doesn't wipe when he leaves) and <strong>security</strong> (a secure login so nobody else can fake a score under his username). If our agency fails to provide this, ByteBox loses customers.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <!-- Materials Hub -->
+        <div class="card shadow-sm mb-4 bg-white border-primary text-start">
+          <div class="card-header bg-site-secondary fw-bold text-primary">Materials Hub</div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush small">
+              <a href="/proficiencyScales/the-brain-databases.html"  class="list-group-item list-group-item-action text-primary fw-bold">🎯 1. Proficiency Scale</a>
+              <a href="/pre-assessments/the-brain-databases.html"  class="list-group-item list-group-item-action text-dark">🚀 2. Pre-Assessment</a>
+              <a href="/notes/the-brain-databases.html"  class="list-group-item list-group-item-action text-dark">📝 3. Guided Notes</a>
+              <a href="/studentFiles/byteBox.zip" class="list-group-item list-group-item-action text-dark">📁 4. Chapter Files (.zip)</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card roadmap-card mb-4 border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info border-bottom">Unlocking New Abilities</div>
+          <div class="card-body small">
+            <ul class="mb-0 ps-3">
+              <li class="mb-1">Describe the purpose of a database as the essential memory for modern websites.</li>
+              <li class="mb-1">Identify and describe a relational database (like MySQL) and its table structure.</li>
+              <li class="mb-1">Analyze the differences between SQL, NoSQL, and Local Storage to pitch scalable solutions to clients.</li>
+              <li class="mb-1">Write simple CRUD operations (Create, Read, Update, Delete).</li>
+              <li class="mb-0">Describe critical security practices like password hashing and input sanitization to stop hackers.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: DATABASES & RELATIONS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Describing the Database</h2>
+        <p>A database is the critical link between a user's action on the front-end (Client-Side) and the site's permanent storage (Server-Side). For an agency, it solves two massive problems for our clients:</p>
+        <ol class="small mb-4 bg-light p-4 border rounded shadow-sm text-start">
+          <li class="mb-2"><strong>Memory:</strong> It permanently stores user-generated content and account data on a remote server that stays online 24/7.</li>
+          <li class="mb-0"><strong>Organization:</strong> It provides a highly structured, searchable way to retrieve data instantly. If you search for "funny cat videos," the database can sort through millions of records and return exactly what you need in milliseconds.</li>
+        </ol>
+
+        <h5 class="fw-bold mt-5 text-primary">The Database Schema</h5>
+        <p>Before developers add any data, they must design the <strong>Database Schema</strong>. What is a 'Database Schema'? <strong>The structural blueprint that defines the tables, columns, data types, and relationships in a relational database.</strong> Data types help the database optimize storage (e.g., using <code>INT</code> for numbers, or <code>VARCHAR</code> for strings). Which data type is best for storing a user's date of birth? <strong><code>DATE</code> or <code>DATETIME</code></strong>. What is a 'Boolean' field? <strong>A field that only stores True/False (or 1/0) values.</strong></p>
+
+        <h5 class="fw-bold mt-4 text-primary">Relational Databases (SQL)</h5>
+        <p>What is a 'Relational Database' (like MySQL)? <strong>A database that organizes data into strict tables that are linked to each other using IDs.</strong> Think of a set of interconnected spreadsheets.</p>
+        
+        <p>The true power of a relational database is how these separate spreadsheets "talk" or relate to each other. They are linked using special ID numbers:</p>
+        <ul class="small mb-4 text-start">
+            <li class="mb-2"><strong>Primary Key:</strong> What is the defining characteristic of a 'Primary Key'? <strong>It must contain a unique value for each row and cannot be null.</strong> Think of this as a student's ID number. No two students can have the exact same ID number.</li>
+            <li class="mb-0"><strong>Foreign Key:</strong> What is a Foreign Key? <strong>A column in one table that points back to the Primary Key of another table, creating a link between them.</strong> Think of a class roster sheet. Instead of writing out a student's full name on every sheet, the school just writes their Student ID (the Foreign Key). This is part of <strong>Data Normalization</strong>: Organizing data to reduce redundancy and improve data integrity (e.g., using Foreign Keys instead of typing a name 100 times to save the client server space!).</li>
+        </ul>
+
+        <h5 class="fw-bold mt-4">Example: Linking User Data to Scores</h5>
+        <p class="small text-muted mb-2">Notice how the HighScores table doesn't waste space writing out "CompetitiveCody" again. It just references his unique User ID (1).</p>
+        
+        <div class="row text-start">
+          <div class="col-md-12 mb-3">
+            <table class="table table-bordered small bg-white shadow-sm mb-0 text-center">
+              <thead class="bg-site-secondary">
+                <tr>
+                  <th colspan="3" class="text-start">Users Table</th>
+                </tr>
+                <tr>
+                  <th>id <span class="text-primary fw-bold">(Primary Key)</span></th>
+                  <th>username</th>
+                  <th>password_hash</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="fw-bold">1</td>
+                  <td>CompetitiveCody</td>
+                  <td>$2y$10$...</td>
+                </tr>
+                <tr>
+                  <td class="fw-bold">2</td>
+                  <td>PixelPenny</td>
+                  <td>$2b$12$...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-md-12">
+            <table class="table table-bordered small bg-white shadow-sm mb-0 text-center">
+              <thead class="bg-light">
+                <tr>
+                  <th colspan="4" class="text-start">HighScores Table</th>
+                </tr>
+                <tr>
+                  <th>id (Primary)</th>
+                  <th>game_title</th>
+                  <th>score_value</th>
+                  <th>user_id <span class="text-danger fw-bold">(Foreign Key)</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>101</td>
+                  <td>Cosmic Comet</td>
+                  <td>985,000</td>
+                  <td class="fw-bold text-danger">1</td>
+                </tr>
+                <tr>
+                  <td>102</td>
+                  <td>Neon Racers</td>
+                  <td>45,200</td>
+                  <td class="fw-bold text-danger">1</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+          <div class="d-flex align-items-center mb-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary me-2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+          </div>
+          <p class="mb-0 small text-dark">Why not just save user data in a standard Microsoft Word or text file on the server? What makes a Database better than a text file?</p>
+        </div>
+
+        <figure class="mb-4 mt-4">
+          <a href="/images/chapter-16-databases/figure-01.png" target="_blank" rel="noopener">
+            <img src="/images/chapter-16-databases/figure-01.png" alt="Relational Database Link Diagram." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Relational+Mapping'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 14.1:</strong> Relational Database Link.</figcaption>
+        </figure>
+        
+        <div class="card roadmap-card border-warning shadow-sm mt-4 text-start">
+            <div class="card-header bg-warning text-dark fw-bold">Pro Tip:</div>
+            <div class="card-body small">
+                <p class="mb-0"><strong>ACID Compliance:</strong> If a database transaction involves multiple steps (e.g., deducting money from Account A and adding it to Account B), what ensures that either ALL steps succeed or NONE of them do? An <strong>ACID-compliant Transaction mechanism.</strong> (Atomicity, Consistency, Isolation, Durability).</p>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: DATABASE TYPES & LOCAL STORAGE LAB -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Analyzing Database Types</h2>
+        <p>Professional agency developers choose the right tool for the job. Here is how the modern web stores data:</p>
+        
+        <ul class="small mb-5 text-start">
+            <li class="mb-4">
+              <strong class="fs-6 text-primary">1. SQL (Relational): The "Organizer"</strong>
+              <p class="mt-1 mb-1">Strict, reliable, and rigid. Best for complex data where relationships matter deeply, like Bank Accounts or School Grading systems.</p>
+            </li>
+            <li class="mb-4">
+              <strong class="fs-6 text-primary">2. NoSQL (Non-Relational): The "Scrapbook"</strong>
+              <p class="mt-1 mb-1">Which type of database stores data as flexible 'documents' (like JSON objects) rather than rigid tables with predefined columns? <strong>NoSQL (like MongoDB or Firebase).</strong> In NoSQL, a 'Collection' is roughly equivalent to a Table, and a 'Document' is roughly equivalent to a Single Row/Record.</p>
+            </li>
+            <li class="mb-4">
+              <strong class="fs-6 text-primary">3. The Cloud</strong>
+              <p class="mt-1 mb-1">What does it mean for a database to be 'Hosted in the Cloud' (e.g., AWS RDS or MongoDB Atlas)? <strong>The database lives on a remote, managed server cluster rather than on a computer in your office.</strong></p>
+            </li>
+            <li class="mb-0">
+              <strong class="fs-6 text-primary">4. Local Storage: The "Sticky Note"</strong>
+              <p class="mt-1 mb-1">Why is 'Local Storage' not considered a true database? <strong>It lives entirely in the user's specific browser, never touches the cloud, and vanishes if they clear their cache or switch devices.</strong> What is the maximum storage capacity limit for Local Storage in most browsers? <strong>5 MB</strong>. In Local Storage, data is always saved as <strong>A String (Text)</strong>. How do you store a complex JavaScript Object into Local Storage? <strong>You must use <code>JSON.stringify(object)</code> to turn it into a string before saving.</strong> How do you retrieve it? <strong>Using <code>JSON.parse(string)</code>.</strong></p>
+            </li>
+        </ul>
+
+        <!-- WALKTHROUGH 1: Local Storage Save -->
+        <h3 class="section-title d-flex align-items-center mt-5 text-primary">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2 text-primary"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          Walkthrough: The "Sticky Note" Database (Saving Data)
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5 text-start">
+          <p class="small fw-bold text-dark">If 'Competitive Cody' clicks a button to toggle the game music off, where is the best place to save that preference? <strong>Local Storage.</strong> Let's practice persistence.</p>
+          <ol class="small mb-0 ps-3">
+              <li class="mb-3"><strong>Open your JS file:</strong> Open <code>js/game.js</code> in your ByteBox project folder.</li>
+              <li class="mb-3"><strong>Create the Save Function:</strong> Type this code:
+                  <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>function saveHighScore(score) {
+    // Save the score into Local Storage with the key 'bytebox_score'
+    localStorage.setItem("bytebox_score", score);
+    alert("Score Saved Locally!");
+}</code></pre>
+              </li>
+              <li class="mb-0"><strong>Trigger it:</strong> Ensure this function is called when the user clicks your "Save Score" button!</li>
+          </ol>
+        </div>
+
+        <!-- WALKTHROUGH 2: Local Storage Read -->
+        <h3 class="section-title d-flex align-items-center mt-0 text-primary">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2 text-primary"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          Walkthrough: The "Sticky Note" Database (Loading Data)
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5 text-start">
+          <ol class="small mb-0 ps-3">
+              <li class="mb-3"><strong>Load the Data:</strong> Use <code>localStorage.getItem</code> to retrieve the string.
+                  <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>const savedScore = localStorage.getItem("bytebox_score");
+if (savedScore !== null) {
+    document.querySelector("#high-score-display").textContent = "Your High Score: " + savedScore;
+}</code></pre>
+              </li>
+              <li class="mb-0"><strong>Test it:</strong> Refresh the page. The score survives!</li>
+          </ol>
+        </div>
+
+        <!-- GRADED LAB 1 CARD -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 1: The CRUD App Audit [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Define the four pillars of data using real-world platform analysis.</p>
+                <ol>
+                    <li class="mb-2">Open a Google Doc. Choose a popular application (e.g., Spotify, TikTok, Netflix).</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 1:</strong> Describe exactly what action a user takes to trigger each part of the CRUD cycle for that app.</li>
+                    <li class="mb-2">For example: <strong>Create</strong> = Posting a new video. <strong>Read</strong> = Scrolling the "For You" feed. <strong>Update</strong> = Changing the caption on an existing video. <strong>Delete</strong> = Trashing an old video.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your Google Doc or PDF.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+          <div class="d-flex align-items-center mb-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary me-2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+          </div>
+          <p class="mb-0 small text-dark">If you are building an online store for a client, why is it a terrible idea to save the user's final Order History exclusively in Local Storage?</p>
+        </div>
+
+        <figure class="mb-4">
+          <a href="/images/chapter-16-databases/figure-02.png" target="_blank" rel="noopener">
+            <img src="/images/chapter-16-databases/figure-02.png" alt="Saving to Local Storage." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=LocalStorage'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 14.2:</strong> Saving to Local Storage via the Browser Console.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 4: CRUD & SQL LANGUAGE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">The Language of the Database (SQL)</h2>
+        <p>To talk to a true relational server database, you must speak its language: <strong>SQL</strong> (Structured Query Language). We interact with data through <strong>CRUD</strong>.</p>
+        
+        <table class="table table-bordered small bg-white shadow-sm mt-4 mb-5 text-center text-start">
+          <thead class="bg-light">
+            <tr>
+              <th style="width: 15%;">Acronym</th>
+              <th style="width: 25%;">SQL Command</th>
+              <th class="text-start">Real World Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="fw-bold">C (Create)</td>
+              <td><code class="text-success fw-bold">INSERT INTO</code></td>
+              <td class="text-start">Which SQL command is used to add a brand new record to a table? <strong>INSERT INTO</strong>.</td>
+            </tr>
+            <tr>
+              <td class="fw-bold">R (Read)</td>
+              <td><code class="text-primary fw-bold">SELECT</code></td>
+              <td class="text-start">Which SQL command corresponds to the 'Read' action in CRUD? <strong>SELECT</strong>.</td>
+            </tr>
+            <tr>
+              <td class="fw-bold">U (Update)</td>
+              <td><code class="text-warning fw-bold">UPDATE</code></td>
+              <td class="text-start">Which command would you use to modify an existing user's email address? <strong>UPDATE</strong>.</td>
+            </tr>
+            <tr>
+              <td class="fw-bold">D (Delete)</td>
+              <td><code class="text-danger fw-bold">DELETE</code></td>
+              <td class="text-start">Deleting an old photo or account.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h5 class="fw-bold mt-4 text-primary">The Anatomy of a Read Operation (<code>SELECT</code>)</h5>
+        <p>The <code>SELECT</code> query retrieves specific data. We use <strong>Indexes</strong> to massively speed up searches. What is an 'Index' in a database? <strong>A special data structure created to massively speed up search queries on a specific column, much like an index in a book.</strong> However, what is the primary drawback of adding an Index to every single column? <strong>It slows down INSERT, UPDATE, and DELETE operations because the index must also be updated every time.</strong></p>
+        
+        <pre class="p-3 border rounded shadow-sm mb-4 no-copy text-start"><code>SELECT username, score_value, game_title
+FROM HighScores 
+JOIN Users ON HighScores.user_id = Users.id
+WHERE game_title LIKE 'Cosmic%'
+ORDER BY score_value DESC
+LIMIT 10;</code></pre>
+        
+        <ul class="small mb-5 bg-light p-4 rounded border shadow-sm text-start">
+            <li class="mb-2"><strong>SELECT:</strong> Grab these columns...</li>
+            <li class="mb-2"><strong>JOIN:</strong> In the context of SQL, what does the <code>JOIN</code> command do? <strong>Combines columns from two or more tables based on a related column (like linking HighScores to Users).</strong></li>
+            <li class="mb-2"><strong>WHERE:</strong> What does the SQL <code>WHERE</code> clause do? <strong>Filters the results to only include rows that meet a specific condition.</strong> If you want to find all users whose last name is EXACTLY 'Smith', which operator do you use? <strong><code>=</code></strong>. What does the SQL wildcard <code>%</code> mean when used with the <code>LIKE</code> operator? <strong>It represents zero, one, or multiple characters (e.g., <code>LIKE 'Dan%'</code> finds 'Dan', 'Daniel', 'Danny').</strong></li>
+            <li class="mb-2"><strong>ORDER BY:</strong> What does the SQL command <code>ORDER BY score_value DESC</code> do? <strong>Orders the results from highest score to lowest (Descending).</strong></li>
+            <li class="mb-0"><strong>LIMIT:</strong> What does the <code>LIMIT 10</code> clause do at the end of a SQL query? <strong>Restricts the output to only return the first 10 rows of the result.</strong></li>
+        </ul>
+        
+        <p class="small text-muted mb-5"><strong>Math Functions:</strong> SQL can also do math! What does the <code>COUNT()</code> function do in SQL? <strong>Returns the number of rows that match a specified criterion.</strong> What does the <code>SUM()</code> function do? <strong>Calculates the total mathematical sum of a numeric column.</strong></p>
+
+        <!-- WALKTHROUGH 3: SQL Practice -->
+        <h3 class="section-title d-flex align-items-center mt-5 text-primary">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2 text-primary"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          Walkthrough: Write Your First SQL Queries
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-primary mb-5 text-start">
+          <ol class="small mb-0 ps-3">
+              <li class="mb-3">Create <code>queries.sql</code>.</li>
+              <li class="mb-4"><strong>Write an INSERT:</strong>
+                  <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>INSERT INTO HighScores (game_title, score_value, user_id)
+VALUES ('Cosmic Comet', 999999, 1);</code></pre>
+              </li>
+              <li class="mb-0"><strong>Write a SELECT:</strong>
+                  <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>SELECT username, score_value FROM HighScores 
+JOIN Users ON HighScores.user_id = Users.id
+ORDER BY score_value DESC LIMIT 10;</code></pre>
+              </li>
+          </ol>
+        </div>
+
+        <!-- GRADED LAB 2 CARD -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 2: The Schema Architect Lab [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Design a database schema with proper relational connections for an agency client.</p>
+                <ol>
+                    <li class="mb-2">Open a Google Doc. Design a database schema for a "Video Game Library".</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Create two tables: <code>Games</code> and <code>Platforms</code>. List 4 columns for each.</li>
+                    <li class="mb-2">Explicitly label the Primary Key for both tables.</li>
+                    <li class="mb-2">Explain how you would link them using a Foreign Key.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your Schema Document.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+
+        <!-- GRADED LAB 3 CARD -->
+        <div class="card border-success shadow-sm my-4 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 3: The Data Detective Lab [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Execute filtering read operations using standard SQL query language.</p>
+                <ol>
+                    <li class="mb-2">Open an online SQL Sandbox (like SQLFiddle or W3Schools).</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Write 3 <code>SELECT</code> queries.</li>
+                    <li class="mb-2">Query 1: Find all customers in "London" using a <code>WHERE</code> clause.</li>
+                    <li class="mb-2">Query 2: Find all products over $50.</li>
+                    <li class="mb-2">Query 3: List all employees sorted by age (oldest to youngest) using <code>ORDER BY DESC</code>.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Copy your three successful queries into a text file and upload it.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+          <div class="d-flex align-items-center mb-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary me-2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+          </div>
+          <p class="mb-0 small text-dark">If a developer writes a <code>DELETE</code> or <code>UPDATE</code> statement but forgets to include a <code>WHERE</code> clause at the end of it... what catastrophic event just happened to the client's database?</p>
+        </div>
+
+        <div class="card roadmap-card border-danger shadow-sm mt-4 mb-4 text-start">
+            <div class="card-header bg-danger text-white fw-bold">Pro Tip:</div>
+            <div class="card-body small">
+                <p class="mb-2"><strong>The Cardinal Sin:</strong> If you execute <code>DELETE FROM Users;</code> without a <code>WHERE</code> clause, what happens? <strong>Every single user in the table is deleted.</strong> ALWAYS double-check your WHERE clauses.</p>
+                <p class="mb-0"><strong>Drop Table vs Delete:</strong> What does it mean to 'Drop' a database table? <strong>To permanently delete the entire table structure AND all the data inside it.</strong> Delete only removes rows.</p>
+            </div>
+        </div>
+
+        <div class="p-3 bg-info text-white rounded shadow-sm small text-start">
+          <strong>ORM (Object-Relational Mapper):</strong> What is an ORM? <strong>A tool that allows developers to interact with a database using their preferred programming language (like JavaScript) instead of writing raw SQL queries.</strong> It acts as a translator.
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: SECURITY, SQLi, HASHING -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Security and the Database (Agency Liability)</h2>
+        <p>A database contains the client's most valuable asset: User Data. What is the danger of assigning the 'Root' or 'Admin' database role to a standard web application? <strong>If the application is hacked, the attacker gains absolute control over the entire database server.</strong> If our agency's code allows a client's database to get breached, we will be held legally and financially liable!</p>
+        
+        <h5 class="fw-bold mt-5 text-primary">Data Validation &amp; SQL Injection (SQLi)</h5>
+        <p>What is 'Data Validation'? <strong>Ensuring that data entered into a system meets specific criteria (e.g., an email field actually contains an '@' symbol) before saving it.</strong> Where should Data Validation occur for maximum security? <strong>Both on the Client-Side (for user experience) AND on the Server-Side (for actual security).</strong></p>
+        
+        <p>What is an SQL Injection (SQLi) attack? <strong>A hacker typing malicious SQL commands into an input field to trick the server into executing them (like dropping a table).</strong> How do professional developers prevent SQL Injection attacks? <strong>By using 'Parameterized Queries' to sanitize inputs, treating them as harmless text rather than executable commands.</strong></p>
+
+        <h5 class="fw-bold mt-5 text-primary">Password Hashing &amp; Rainbow Tables</h5>
+        <p>Why is it a cardinal sin to store user passwords in 'plain text'? <strong>If the database is breached, hackers instantly have the exact passwords to access users' other accounts.</strong></p>
+        
+        <p>We use <strong>Password Hashing</strong>. What is 'Password Hashing'? <strong>A one-way mathematical meat-grinder that turns a password into an irreversible, scrambled fingerprint.</strong> Which is a more secure, modern algorithm for password hashing? <strong>bcrypt or Argon2</strong>.</p>
+        
+        <p>If we scramble the password one-way, how does a server verify a login if it only has the hashed password stored? <strong>It takes the newly typed password, runs it through the exact same hashing algorithm, and checks if the new hash matches the saved hash.</strong></p>
+        
+        <p>However, simple hashing isn't enough. What happens if a developer forgets to 'Salt' a hashed password? <strong>Hackers can use pre-computed lists of hashes (Rainbow Tables) to quickly crack common passwords.</strong> What does adding a 'Salt' to a password hash do? <strong>Adds random characters to the password before hashing, ensuring two users with the same password have completely different hashes.</strong></p>
+
+        <h5 class="fw-bold mt-5 text-primary">Sessions &amp; JWTs</h5>
+        <p>Once a user is verified, we need to remember them. What is 'Session Management'? <strong>The process of securely keeping a user logged in as they navigate from page to page, usually using cookies or tokens.</strong> What is a JSON Web Token (JWT)? <strong>A secure, encoded string used to verify a user's identity between the client and server without needing to store a session in the database.</strong></p>
+
+        <!-- GRADED LAB 4 CARD -->
+        <div class="card border-success shadow-sm my-4 mt-5 text-start">
+            <div class="card-header bg-success text-white fw-bold">Lab 4: Secure Data Entry Lab [25 pts]</div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Safely manipulate database records using conditional constraints.</p>
+                <ol>
+                    <li class="mb-2">Write an <code>INSERT</code> statement to add yourself to the online SQL Sandbox database.</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 4:</strong> Write an <code>UPDATE</code> statement to change your "City", and a <code>DELETE</code> statement to remove user ID 5.</li>
+                    <li class="mb-2"><strong>Security Check:</strong> Ensure your UPDATE and DELETE statements have explicit <code>WHERE</code> clauses.</li>
+                    <li class="mb-2">Write a 2-sentence reflection on why forgetting the <code>WHERE</code> clause is dangerous.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your queries and reflection in a document.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <figure class="mb-4">
+          <a href="/images/chapter-16-databases/figure-05.png" target="_blank" rel="noopener">
+            <img src="/images/chapter-16-databases/figure-05.png" alt="SQL Injection Illustration." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=SQL+Injection'">
+          </a>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 14.5:</strong> SQL Injection tricks the database into executing malicious commands.</figcaption>
+        </figure>
+        
+        <div class="bg-light p-3 rounded border shadow-sm mb-4 mt-5 text-start">
+          <div class="d-flex align-items-center mb-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary me-2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+          </div>
+          <p class="mb-0 small text-dark">Have you ever clicked "Forgot Password" on a website and they actually emailed you your current password instead of a reset link? What does that prove about their database security?</p>
+        </div>
+        
+        <div class="card bg-dark text-light p-3 small mb-4 shadow-sm border-0 mt-4 text-start">
+          <p class="mb-2 text-warning">Plain Text (Sin): <code>"Cody123!"</code></p>
+          <p class="mb-0 text-success">Hashed Value (Win): <code>$2b$12$Q.mP5jX1yZk...</code></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MILESTONE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-12">
+        <div class="card border-primary shadow-sm mt-5 mx-auto text-start" style="max-width: 900px;">
+            <div class="card-header bg-primary text-white fw-bold">
+                🏆 Milestone: Client Database Schema [100 pts]
+            </div>
+            <div class="card-body small p-4">
+                <p><strong>Objective:</strong> Synthesize all database skills to architect and query a professional relational system.</p>
+                <ol>
+                    <li class="mb-2"><strong>Assemble:</strong> Compile your SQL scripts from Milestones 1-4 into a single <code>.sql</code> master file.</li>
+                    <li class="mb-2"><strong>Schema:</strong> Your script must build a valid schema containing two tables (e.g., <code>Books</code> and <code>Authors</code>) linked properly by Primary and Foreign Keys.</li>
+                    <li class="mb-2"><strong>Execution:</strong> Your script must populate the tables with data using <code>INSERT</code>, and execute your <code>SELECT</code>, <code>UPDATE</code>, and <code>DELETE</code> queries securely.</li>
+                    <li class="mb-2"><strong>Level 4.0 Challenge:</strong> Write a complex SQL <code>JOIN</code> statement to combine the Books and Authors tables into one unified view, demonstrating Cognitive Flexibility.</li>
+                    <li class="mb-2"><strong>Privacy:</strong> List two privacy rules you will follow to protect Author data, demonstrating Probity.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Upload your <code>master.sql</code> file and your privacy rules.</p>
+                <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINAL RECAP -->
+    <div class="row mt-5">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="final-recap">
+            <h2 class="section-title mt-0 text-primary fw-bold">The Final Download: Chapter Recap</h2>
+            <p>In this chapter, you learned how websites achieve persistent memory by using Databases. We explored how Relational (SQL) databases use rigid tables linked by Primary and Foreign keys to efficiently organize complex data (Normalization), and how NoSQL databases offer a more flexible, document-based approach. We used Local Storage as a simple client-side memory test. You learned the four pillars of database interaction (CRUD) and wrote your first <code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, and <code>DELETE</code> queries. Finally, we covered critical backend security: protecting against SQL Injection attacks by sanitizing inputs, and protecting user privacy by using one-way cryptographic hashing and salting for passwords. You are now a full-stack architect!</p>
+        </section>
+        <p class="text-muted small mt-5">Copyright &copy; 2026 Danylle Miller Designs. Built for Carson High School.</p>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 d-flex flex-column justify-content-end pb-3 text-center">
+        <div class="card roadmap-card border-info mb-4 bg-white shadow-sm text-start">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-info"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <h6 class="card-title fw-bold small text-info mb-0 ms-2 text-uppercase">Guild Checkpoint</h6>
+            </div>
+            <p class="small mb-2" style="color: #495057;"><strong>Q1:</strong> What is the difference between a Primary Key and a Foreign Key in a relational database?</p>
+            <p class="small mb-2" style="color: #495057;"><strong>Q2:</strong> Explain what the acronym CRUD stands for and give a real-world web example for each action.</p>
+            <p class="small mb-0" style="color: #495057;"><strong>Q3:</strong> Why is it impossible for a secure website to tell you what your forgotten password is?</p>
+          </div>
+        </div>
+        <a href="/year2/the-game-never-ends.html" class="btn btn-primary w-100 shadow-sm fw-bold text-uppercase">Next: Chapter 15 &raquo;</a>
+      </div>
+    </div>
+
+    <!-- ENHANCED TURN-IN DROPBOX -->
+    <div class="card shadow border-success mx-auto mb-5 mt-5 text-start" style="max-width: 800px;" id="submission-zone">
+        <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+            <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>Student Assignment Dropbox</h4>
+            <span class="badge bg-light text-success shadow-sm" id="student-id-badge">Verifying...</span>
+        </div>
+        <div class="card-body p-4">
+            <form id="uploadForm">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
+                    <select id="uploadAssignment" class="form-select border-success" required>
+                        <option value="" disabled selected>Select an assignment...</option>
+                        <option value="ch14_lab1">Lab 1: The CRUD App Audit (25 pts)</option>
+                        <option value="ch14_lab2">Lab 2: The Schema Architect Lab (25 pts)</option>
+                        <option value="ch14_lab3">Lab 3: The Data Detective Lab (25 pts)</option>
+                        <option value="ch14_lab4">Lab 4: Secure Data Entry Lab (25 pts)</option>
+                        <option value="ch14_milestone">Milestone: The Library Database (100 pts)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">2. What type of upload is this?</label>
+                    <select id="uploadType" class="form-select border-primary bg-site-secondary">
+                        <option value="file">A Single File (e.g. script.js, queries.sql)</option>
+                        <option value="folder">An Entire Folder (e.g. Full DB Project)</option>
+                    </select>
+                </div>
+
+                <div class="mb-4" id="fileInputContainer">
+                    <label class="form-label fw-bold">3. Select File</label>
+                    <input type="file" id="fileInput" class="form-control" required>
+                </div>
+
+                <div class="mb-4 d-none" id="folderInputContainer">
+                    <label class="form-label fw-bold">3. Select Project Folder</label>
+                    <input type="file" id="folderInput" class="form-control" webkitdirectory directory multiple>
+                    <div class="form-text x-small text-danger fw-bold mt-1">Note: This will upload ALL files and sub-folders inside the folder you select, keeping your website links intact!</div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-success w-100 fw-bold py-3 shadow-sm" disabled>
+                    Upload to Teacher Server
+                </button>
+            </form>
+            
+            <div id="uploadProgress" class="progress mt-3 d-none shadow-sm" style="height: 25px;">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%;">0%</div>
+            </div>
+            <div id="uploadStatus" class="mt-3 d-none p-3 rounded small fw-bold text-center shadow-sm"></div>
+        </div>
+    </div>
+
+  </section>
+
+  <div id="footer-nav"></div>
+  <div id="footer-placeholder"></div>
+
+  <!-- ASSIGNMENT UPLOADER LOGIC -->
+  <script type="module" src="/js/assignment-uploader.js"></script>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

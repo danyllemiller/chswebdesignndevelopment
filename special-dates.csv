@@ -1,0 +1,232 @@
+Date	Type	Description
+2026-08-12	OFF	Teacher Training
+2026-08-13	OFF	Teacher Training
+2026-08-14	OFF	Teacher Training
+2026-08-17	OFF	Teacher Work Day
+2026-08-18	A	First Day of School
+2026-08-19	B	
+2026-08-20	A	
+2026-08-21	B	
+2026-08-24	C	All Period Day
+2026-08-25	A_MIN	
+2026-08-26	B	
+2026-08-27	A	
+2026-08-28	B	
+2026-08-31	C	All Period Day
+2026-09-01	A_MIN	
+2026-09-02	B	
+2026-09-03	A	
+2026-09-04	B	
+2026-09-07	OFF	Labor Day No School
+2026-09-08	A_MIN	
+2026-09-09	B	
+2026-09-10	A	
+2026-09-11	OFF	Patriot Day (9/11)
+2026-09-13	none	Grandparents Day
+2026-09-14	C	All Period Day
+2026-09-15	A_MIN	
+2026-09-16	B	
+2026-09-17	A	Constitution Day
+2026-09-18	B	
+2026-09-21	OFF	Staff Prof Learning
+2026-09-22	A_MIN	First Day of Fall
+2026-09-23	B	
+2026-09-24	A	
+2026-09-25	B	
+2026-09-28	C	All Period Day
+2026-09-29	A_MIN	
+2026-09-30	B	
+2026-10-01	A	
+2026-10-02	B	
+2026-10-05	C	All Period Day
+2026-10-06	A_MIN	Voter Registration Deadline
+2026-10-07	B	
+2026-10-08	A	
+2026-10-09	B	
+2026-10-12	OFF	Columbus Day
+2026-10-13	A_MIN	
+2026-10-14	B	PSAT/NMSQT
+2026-10-15	A	
+2026-10-16	B	End Q1
+2026-10-19	C	All Period Day
+2026-10-20	A_MIN	
+2026-10-21	B	
+2026-10-22	A	
+2026-10-23	B	
+2026-10-26	B	
+2026-10-27	A_MIN	
+2026-10-28	B	
+2026-10-29	A	
+2026-10-30	OFF	Nevada Day No School
+2026-10-31	none	Halloween
+2026-11-01	none	Daylight Saving Time Ends
+2026-11-02	OFF	Staff Prof Learning
+2026-11-03	A_MIN	Election Day
+2026-11-04	B	
+2026-11-05	A	
+2026-11-06	B	
+2026-11-09	B	
+2026-11-10	A_MIN	
+2026-11-11	OFF	Veteran’s Day No School
+2026-11-12	A	
+2026-11-13	B	
+2026-11-16	C	All Period Day
+2026-11-17	A_MIN	
+2026-11-18	B	
+2026-11-19	A	
+2026-11-20	B	
+2026-11-23	OFF	Start Thanksgiving Break
+2026-11-24	OFF	No School
+2026-11-25	OFF	No School
+2026-11-26	OFF	No School
+2026-11-27	OFF	No School / End Thanksgiving Break
+2026-11-30	C	All Period Day
+2026-12-01	A_MIN	
+2026-12-02	B	
+2026-12-03	A	
+2026-12-04	B	
+2026-12-07	C	Pearl Harbor Remembrance Day / All Period Day
+2026-12-08	A_MIN	
+2026-12-09	B	
+2026-12-10	A	
+2026-12-11	B	
+2026-12-14	A	
+2026-12-15	B	
+2026-12-16	A	
+2026-12-17	B	
+2026-12-18	OFF	Teacher Work Day / End S1
+2026-12-21	OFF	First Day of Winter / Start Winter Break
+2026-12-22	OFF	No School
+2026-12-23	OFF	No School
+2026-12-24	OFF	No School / Christmas Eve
+2026-12-25	OFF	No School / Christmas Day
+2026-12-26	OFF	No School
+2026-12-27	OFF	No School
+2026-12-28	OFF	No School
+2026-12-29	OFF	No School
+2026-12-30	B	
+2026-12-31	OFF	New Year's Eve No School
+2027-01-01	OFF	End Winter Break / New Year's Day
+2027-01-04	OFF	Staff Prof Learning
+2027-01-05	A	
+2027-01-06	B	
+2027-01-07	A	
+2027-01-08	B	
+2027-01-11	C	All Period Day
+2027-01-12	A_MIN	
+2027-01-13	B	
+2027-01-14	A	
+2027-01-15	B	
+2027-01-18	OFF	Martin Luther King Jr. Day No School
+2027-01-19	A_MIN	
+2027-01-20	B	
+2027-01-21	A	
+2027-01-22	B	
+2027-01-25	C	All Period Day
+2027-01-26	A_MIN	
+2027-01-27	B	
+2027-01-28	A	
+2027-01-29	B	
+2027-02-01	C	All Period Day
+2027-02-02	A_MIN	Groundhog Day
+2027-02-03	B	
+2027-02-04	A	
+2027-02-05	B	
+2027-02-08	C	100th Day of School / All Period Day
+2027-02-09	A_MIN	
+2027-02-10	B	
+2027-02-11	OFF	Staff Prof Learning
+2027-02-12	OFF	Non-School Day
+2027-02-14	none	Valentine's Day
+2027-02-15	OFF	President’s Day No School
+2027-02-16	A_MIN	
+2027-02-17	B	
+2027-02-18	A	
+2027-02-19	B	
+2027-02-22	A	
+2027-02-23	A_MIN	
+2027-02-24	B	
+2027-02-25	A	
+2027-02-26	B	
+2027-03-01	C	All Period Day
+2027-03-02	A_MIN	Read Across America Day
+2027-03-03	B	
+2027-03-04	A	
+2027-03-05	B	
+2027-03-08	C	All Period Day
+2027-03-09	A_MIN	
+2027-03-10	B	
+2027-03-11	A	
+2027-03-12	B	
+2027-03-13	none	SAT National Test Day
+2027-03-14	none	Daylight Saving Time Starts / Pi Day
+2027-03-15	C	All Period Day
+2027-03-16	A_MIN	
+2027-03-17	B	St. Patrick's Day
+2027-03-18	A	
+2027-03-19	B	End Q3
+2027-03-20	none	First Day of Spring
+2027-03-22	C	All Period Day
+2027-03-23	A_MIN	
+2027-03-24	B	
+2027-03-25	A	
+2027-03-26	B	
+2027-03-28	none	Easter Sunday
+2027-03-29	OFF	Start Spring Break
+2027-03-30	OFF	No School
+2027-03-31	OFF	No School
+2027-04-01	OFF	April Fools' Day No School / No School
+2027-04-02	OFF	End Spring Break
+2027-04-05	OFF	Staff Prof Learning
+2027-04-06	A_MIN	
+2027-04-07	B	
+2027-04-08	A	
+2027-04-09	B	
+2027-04-10	none	ACT National Test Day
+2027-04-12	C	All Period Day
+2027-04-13	A_MIN	
+2027-04-14	B	
+2027-04-15	A	Tax Day
+2027-04-16	B	
+2027-04-19	C	All Period Day
+2027-04-20	A_MIN	
+2027-04-21	B	Administrative Professionals Day
+2027-04-22	A	Earth Day
+2027-04-23	B	
+2027-04-26	C	All Period Day
+2027-04-27	A_MIN	
+2027-04-28	B	
+2027-04-29	A	
+2027-04-30	B	National Arbor Day
+2027-05-03	C	AP Exams Begin / All Period Day
+2027-05-04	A_MIN	Teacher Appreciation Day
+2027-05-05	B	Cinco de Mayo
+2027-05-06	A	National Nurses Day
+2027-05-07	B	
+2027-05-09	none	Mother's Day
+2027-05-10	C	All Period Day
+2027-05-11	A_MIN	
+2027-05-12	B	
+2027-05-13	A	
+2027-05-14	B	AP Exams End
+2027-05-15	none	Armed Forces Day
+2027-05-17	C	All Period Day
+2027-05-18	A_MIN	
+2027-05-19	B	
+2027-05-20	A	
+2027-05-21	B	
+2027-05-24	B	
+2027-05-25	A	
+2027-05-26	B	
+2027-05-27	A	
+2027-05-28	OFF	Non-School Day
+2027-05-31	OFF	Memorial Day No School
+2027-06-01	A	
+2027-06-02	B_MIN	
+2027-06-03	B_MIN	Last Day of School
+2027-06-04	none	Graduation
+2027-06-14	none	Flag Day
+2027-06-19	none	Juneteenth
+2027-06-20	none	Father's Day
+2027-06-21	none	First Day of Summer
+2027-07-04	none	Independence Day

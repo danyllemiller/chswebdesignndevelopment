@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 10: Control Structures & Events</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+  
+  <!-- External Curriculum Styles -->
+  <link href="/css/compsci.css" rel="stylesheet" />
+</head>
+<body class="compsci-body">
+
+  <div class="chapter-header">
+    <span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 4: Logic & Algorithms</span>
+    <h1 class="display-4 fw-bold">Chapter 10: Control Structures & Events</h1>
+    <p class="lead text-muted">Directing the flow of logic and responding to user interactions.</p>
+  </div>
+
+  <!-- STICKY TABLE OF CONTENTS -->
+  <div class="sticky-toc">
+      <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#section-10-1">10.1 Conditional Statements</a>
+      <a href="#section-10-2">10.2 Loops & Iteration</a>
+      <a href="#section-10-3">10.3 Event-Driven Programming</a>
+  </div>
+
+  <p class="fs-5 mb-5">In the previous chapter, we learned how to decompose problems and design algorithms. Now we need to learn the specific control structures that direct the flow of our programs. Just like a flowchart with diamond decision points, our code needs to make decisions, repeat actions, and respond to user interactions.</p>
+
+  <!-- Section 10.1 -->
+  <h3 id="section-10-1" class="fw-bold mt-4 border-bottom pb-2">10.1 Conditional Statements <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.AP.C.1</span></h3>
+  <p class="fs-5">A program that always runs in a straight line is rare. Most programs need to make decisions based on changing conditions. This is where we use <strong>Conditional Statements</strong>.</p>
+  
+  <h4 class="fw-bold mt-4 text-primary">10.1.1 The If Statement</h4>
+  <p>The most basic control structure is the <strong>If Statement</strong>. It checks a condition and executes code only when that condition is true.</p>
+  
+  <div class="concept-box shadow-sm border-primary bg-light m-0">
+    <h5 class="fw-bold text-primary"><i class="fas fa-code-branch me-2"></i> If-Then Logic</h5>
+    <ul class="mb-0">
+        <li class="mb-2"><strong>IF</strong> (Condition) — Is the condition true?</li>
+        <li class="mb-2"><strong>THEN</strong> (Action) — Execute this code.</li>
+        <li><strong>ELSE</strong> (Alternative) — Do this instead if the condition is false.</li>
+    </ul>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">10.1.2 Boolean Logic</h4>
+  <p>Behind every condition is a <strong>Boolean</strong> value—either <code>true</code> or <code>false</code>. Computers make decisions by comparing values using these operators:</p>
+  
+  <div class="row g-4 my-3">
+      <div class="col-md-3">
+          <div class="card h-100 shadow-sm border-primary">
+              <div class="card-body text-center">
+                  <h5 class="fw-bold text-primary">==</h5>
+                  <p class="small text-muted mb-0">Equal to</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-3">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body text-center">
+                  <h5 class="fw-bold text-warning text-dark">!=</h5>
+                  <p class="small text-muted mb-0">Not equal to</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-3">
+          <div class="card h-100 shadow-sm border-success">
+              <div class="card-body text-center">
+                  <h5 class="fw-bold text-success">></h5>
+                  <p class="small text-muted mb-0">Greater than</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-3">
+          <div class="card h-100 shadow-sm border-info">
+              <div class="card-body text-center">
+                  <h5 class="fw-bold text-info"><</h5>
+                  <p class="small text-muted mb-0">Less than</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">10.1.3 Compound Conditions (AND / OR)</h4>
+  <p>Real-world decisions often require checking multiple conditions at once. We use <strong>logical operators</strong> to combine them:</p>
+  
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-network-wired me-2"></i> Combining Conditions</h5>
+      <div class="row g-3 mt-2">
+          <div class="col-md-6">
+              <div class="p-2 border border-secondary rounded bg-dark">
+                  <code class="text-info fs-5">AND</code>
+                  <p class="small mb-0 text-light mt-1">BOTH conditions must be true. <br><em>"If age >= 13 AND have_permission, then allow account creation."</em></p>
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="p-2 border border-secondary rounded bg-dark">
+                  <code class="text-warning fs-5">OR</code>
+                  <p class="small mb-0 text-light mt-1">AT LEAST ONE condition must be true.<br><em>"If ticket == 'student' OR ticket == 'teacher', then give discount."</em></p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Activity 10.1.4 -->
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-door-open fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity 10.1.4: The Login Logic</h4>
+              <p class="mb-0">Design the conditional logic for a website login system. Your program must check: 1) Is the username correct? AND 2) Is the password correct? AND 3) Is the account locked?</p>
+              <p class="mb-0 fw-bold mt-1 text-dark">👉 Write the pseudocode for this login system in your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 10.2 -->
+  <h3 id="section-10-2" class="fw-bold border-bottom pb-2">10.2 Loops & Iteration <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.AP.C.2</span></h3>
+  <p class="fs-5">One of the most powerful features of computers is their ability to repeat tasks infinitely without getting tired. <strong>Loops</strong> allow us to execute the same code multiple times.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">10.2.1 The For Loop</h4>
+  <p>A <strong>For Loop</strong> is used when you know exactly how many times you want to repeat an action.</p>
+  
+  <div class="concept-box shadow-sm border-success bg-light m-0">
+    <h5 class="fw-bold text-success"><i class="fas fa-redo me-2"></i> For Loop Structure</h5>
+    <p class="mb-0"><code>FOR (counter) FROM 1 TO 10:DO the action</code></p>
+    <p class="small text-muted mb-0">This runs exactly 10 times!</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">10.2.2 The While Loop</h4>
+  <p>A <strong>While Loop</strong> is used when you don't know how many times to repeat, but you know the condition that should stop the loop.</p>
+  
+  <div class="row g-4 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body">
+                  <h5 class="fw-bold text-warning text-dark"><i class="fas fa-play me-2"></i> Pre-Test Loop</h5>
+                  <p class="small text-muted mb-0">Checks the condition <em>before</em> running. If false, never runs at all.</p>
+                  <p class="font-monospace small mt-2 mb-0">WHILE (battery > 0) { playGame() }</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-danger">
+              <div class="card-body">
+                  <h5 class="fw-bold text-danger"><i class="fas fa-stop me-2"></i> Post-Test Loop</h5>
+                  <p class="small text-muted mb-0">Runs at least once, then checks condition.</p>
+                  <p class="font-monospace small mt-2 mb-0">DO { playGame() } WHILE (battery > 0)</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">10.2.3 Avoiding Infinite Loops</h4>
+  <p>The most dangerous bug is an <strong>Infinite Loop</strong>—a loop that never stops. This happens when the condition to stop the loop is never reached.</p>
+  
+  <div class="image-placeholder shadow-sm">
+    <i class="fas fa-infinity fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">The Infinite Loop</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> An illustration of a computer with smoke coming out, caught in an endless circular arrow, representing a frozen/crashed program.</p>
+  </div>
+
+  <!-- Activity 10.2.4 -->
+  <div class="alert alert-warning mt-4 shadow-sm border-warning">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-list-ol fa-3x me-4 text-warning text-dark"></i>
+          <div>
+              <h4 class="fw-bold mb-1 text-dark">Activity 10.2.4: The Loop Challenge</h4>
+              <p class="mb-0 text-dark">Write pseudocode for a program that: 1) Prints numbers 1 to 100, 2) Only prints even numbers, 3) Stops early if the total exceeds 1000.</p>
+              <p class="mb-0 fw-bold mt-1 text-danger">👉 Document your loop logic in the Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 10.3 -->
+  <h3 id="section-10-3" class="fw-bold border-bottom pb-2">10.3 Event-Driven Programming</h3>
+  <p class="fs-5">In interactive apps, programs don't run in a predictable sequence. Instead, they <em>wait</em> for things to happen—like a user clicking a button. This is <strong>Event-Driven Programming</strong>.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">10.3.1 Understanding Events</h4>
+  <p>An <strong>Event</strong> is an action that happens while a program is running. The program "listens" for these events and responds when they occur.</p>
+  
+  <div class="row g-4 my-3">
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm border-primary">
+              <div class="card-body text-center">
+                  <i class="fas fa-mouse-pointer fa-2x text-primary mb-2"></i>
+                  <h6 class="fw-bold">Click</h6>
+                  <p class="small text-muted mb-0">User clicks a button</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm border-success">
+              <div class="card-body text-center">
+                  <i class="fas fa-keyboard fa-2x text-success mb-2"></i>
+                  <h6 class="fw-bold">Keypress</h6>
+                  <p class="small text-muted mb-0">User presses a key</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body text-center">
+                  <i class="fas fa-clock fa-2x text-warning text-dark mb-2"></i>
+                  <h6 class="fw-bold text-dark">Timer</h6>
+                  <p class="small text-muted mb-0">A specific time passes</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">10.3.2 Event Handlers</h4>
+  <p>An <strong>Event Handler</strong> is code that runs when a specific event occurs. It's like having a security guard who only acts when someone rings the doorbell.</p>
+  
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-bell me-2"></i> Event Handler Pattern</h5>
+      <p class="small mb-3 text-light">Most programming languages use this pattern:</p>
+      <ol class="mb-0 text-light small">
+          <li class="mb-2"><strong>Identify the Event:</strong> What happened? (e.g., "button_click")</li>
+          <li class="mb-2"><strong>Connect to Handler:</strong> "When button_click occurs, run this function."</li>
+          <li><strong>The Handler Function:</strong> The specific code that executes.</li>
+      </ol>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">10.3.3 The Event Loop</h4>
+  <p>Modern apps run inside an <strong>Event Loop</strong>—a continuously running program that checks for events, handles them, and then waits for the next one. This is how video games, apps, and interactive websites work!</p>
+
+  <!-- Activity 10.3.4 -->
+  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-gamepad fa-3x me-4 text-primary"></i>
+          <div>
+              <h3 class="fw-bold mb-1">Activity 10.3.4: The Interactive Story</h3>
+              <p class="mb-0 fs-5">Design a simple "Choose Your Own Adventure" story using event-driven logic. Each choice the user makes (clicking a button) should trigger different story branches.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Map out your story events and handlers in the Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <!-- Required scripts for interactive tabs/accordions inside the iframe -->
+  <script src="/js/bootstrap.bundle.js"></script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

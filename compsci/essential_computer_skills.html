@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 1: Essential Computer Skills & Troubleshooting</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+  
+  <!-- External Curriculum Styles -->
+  <link href="/css/compsci.css" rel="stylesheet" />
+</head>
+<body class="compsci-body">
+
+  <div class="chapter-header">
+<span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 1: Digital Citizenship</span>
+    <h1 class="display-4 fw-bold">Chapter 1: Essential Computer Skills</h1>
+    <p class="lead text-muted">Mastering the OS, organizing data, and solving digital problems like a pro.</p>
+  </div>
+
+  <!-- STICKY TABLE OF CONTENTS -->
+  <div class="sticky-toc">
+      <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#section-2-1">1.1 Navigating the OS & Files</a>
+      <a href="#section-2-2">1.2 Systematic Troubleshooting</a>
+      <a href="#section-2-3">1.3 Maintenance & Updates</a>
+  </div>
+
+  <!-- Section 1.1 -->
+  <h3 id="section-2-1" class="fw-bold mt-4 border-bottom pb-2">1.1 Navigating the OS & File Management</h3>
+  <p class="fs-5">In Chapter 1, we learned that the Operating System (OS) is the software that manages the hardware. But how do <em>we</em> manage the OS? To be a digital creator, you need to navigate your computer with speed and precision, organizing your data so it is never lost.</p>
+  
+  <h4 class="fw-bold mt-4 text-primary">1.1.1 The Graphical User Interface (GUI) & The Desktop</h4>
+  <p>In the early days of computing, users interacted with machines using a <strong>Command Line Interface (CLI)</strong>—typing lines of text on a black screen. Today, we use a <strong>Graphical User Interface (GUI)</strong>. A GUI (pronounced "gooey") allows you to interact with the OS using visual elements like windows, icons, and menus.</p>
+  <p>Your <strong>Desktop</strong> is the primary workspace of the GUI. While it's tempting to save every file directly to the desktop, treating it like a digital junk drawer slows down your computer and makes finding files impossible. Customizing and organizing your workspace is the first step to digital productivity.</p>
+
+  <div class="image-placeholder shadow-sm">
+    <i class="fas fa-desktop fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">The Command Line vs. The GUI</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A split-screen image. On the left, a retro black computer monitor with glowing green text code. On the right, a modern, colorful desktop screen with folders, a mouse cursor, and application windows.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">1.1.2 File Systems & Hierarchies</h4>
+  <p>Data isn't just thrown randomly onto your hard drive. The OS uses a <strong>File System</strong> to keep track of where everything is physically stored. The best way to visualize a file system is like an upside-down tree.</p>
+
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-sitemap me-2"></i> The Folder Hierarchy</h5>
+      <ul>
+          <li><strong>The Root Directory:</strong> The very top of the tree. In Windows, this is usually your <code>C:\</code> drive. On a Mac, it is simply <code>Macintosh HD</code>. Everything on the computer branches out from here.</li>
+          <li><strong>Folders (Directories):</strong> Digital containers used to group related files.</li>
+          <li><strong>Subfolders:</strong> Folders placed inside other folders to create a highly specific <strong>File Path</strong>.</li>
+      </ul>
+      <p class="mb-0 font-monospace text-muted mt-2 bg-white p-2 rounded border">Example File Path: C:\Users\Student\Documents\WebDesign\Project1\logo.png</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">1.1.3 File Extensions & Associations</h4>
+  <p>Have you ever noticed the three or four letters at the end of a file's name? That is the <strong>File Extension</strong>. Extensions are crucial because they tell the Operating System <em>which</em> program it should use to open the file.</p>
+
+  <div class="row g-4 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body">
+                  <h5 class="fw-bold text-warning"><i class="fas fa-tools me-2"></i> Raw Working Files</h5>
+                  <p>These are files that are still being edited. They contain layers, history, and raw data. You usually need the specific app that created them to open them.</p>
+                  <p class="font-monospace small bg-light p-2 rounded">.psd (Photoshop)<br>.ai (Illustrator)<br>.docx (Word Document)</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-success">
+              <div class="card-body">
+                  <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Exported Final Products</h5>
+                  <p>These files are "flattened" and ready to be shared with the world. They are universally recognized and can be opened in almost any web browser or basic viewer.</p>
+                  <p class="font-monospace small bg-light p-2 rounded">.jpg / .png (Images)<br>.pdf (Documents)<br>.html (Webpages)</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Review Call to Action -->
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-folder-tree fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity: Structuring a Project Workspace</h4>
+              <p class="mb-0">You have been given a chaotic list of 20 unorganized files. Your mission is to design a logical folder hierarchy (using Folders and Subfolders) to organize them for a digital arts project.</p>
+              <p class="mb-0 fw-bold mt-1">👉 Load the <strong>Chapter 2 Activity</strong> in your Digital Notebook on the right.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 1.2 -->
+  <h3 id="section-2-2" class="fw-bold border-bottom pb-2">1.2 Systematic Troubleshooting <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-11.CS.T.1</span></h3>
+  <p class="fs-5">Technology breaks. Apps freeze, internet connections drop, and files refuse to save. The difference between an amateur and a professional is how they react to failure.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">1.1.1 The Troubleshooting Mindset</h4>
+  <p>When an error occurs, the most common human reaction is panic, followed by rapidly clicking the mouse. This makes the problem worse. The Troubleshooting Mindset requires you to treat computer errors like a scientist:</p>
+  <ol>
+      <li><strong>Stop and Read:</strong> Error messages contain specific clues. Do not immediately click "OK" or "Close." Read the text!</li>
+      <li><strong>Reproduce the Error:</strong> Can you make the error happen again? If it happens every time you click a specific button, you've found the trigger.</li>
+      <li><strong>Don't Panic:</strong> Computers operate on logic. If it is broken, there is a logical reason why.</li>
+  </ol>
+
+  <h4 class="fw-bold mt-5 text-info">1.1.2 The "Divide and Conquer" Strategy</h4>
+  <p>Computers are complex systems made of many overlapping layers. <strong>Isolating the variable</strong> is the key to solving complex problems. By eliminating what <em>isn't</em> broken, we zoom in on what is.</p>
+
+  <!-- Interactive Tabs for Troubleshooting -->
+  <ul class="nav nav-tabs mt-4" id="troubleTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+          <button class="nav-link active fw-bold text-danger" id="hardware-tab" data-bs-toggle="tab" data-bs-target="#hardware-pane" type="button" role="tab">
+              <i class="fas fa-mouse me-2"></i> Is it Hardware?
+          </button>
+      </li>
+      <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-primary" id="software-tab" data-bs-toggle="tab" data-bs-target="#software-pane" type="button" role="tab">
+              <i class="fas fa-window-restore me-2"></i> Is it Software?
+          </button>
+      </li>
+      <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-success" id="network-tab" data-bs-toggle="tab" data-bs-target="#network-pane" type="button" role="tab">
+              <i class="fas fa-wifi me-2"></i> Is it the Network?
+          </button>
+      </li>
+  </ul>
+  
+  <div class="tab-content border border-top-0 bg-white p-4 shadow-sm mb-4" id="troubleTabsContent">
+      <div class="tab-pane fade show active" id="hardware-pane">
+          <h5 class="fw-bold text-danger">The Physical Layer</h5>
+          <p><strong>Example:</strong> Your mouse won't move.</p>
+          <p><strong>Divide & Conquer:</strong> Check the physical connections first. Is the USB plugged in? Does the mouse have batteries? Does a different mouse work in the same USB port? If a second mouse works, the first mouse is physically broken.</p>
+      </div>
+      <div class="tab-pane fade" id="software-pane">
+          <h5 class="fw-bold text-primary">The Application Layer</h5>
+          <p><strong>Example:</strong> Adobe Photoshop is completely frozen.</p>
+          <p><strong>Divide & Conquer:</strong> Is the whole computer frozen, or just the app? Press the Windows key (or Cmd+Space on Mac). If the start menu opens, the hardware is fine, but the app has crashed. You can use the Task Manager (or Force Quit) to close the specific app without restarting the whole machine.</p>
+      </div>
+      <div class="tab-pane fade" id="network-pane">
+          <h5 class="fw-bold text-success">The Communication Layer</h5>
+          <p><strong>Example:</strong> A webpage won't load.</p>
+          <p><strong>Divide & Conquer:</strong> Can you load a different website (like Google)? If yes, your internet is fine, but the specific website is down. If you can't load <em>any</em> website, check your Wi-Fi icon. Are other people in the room connected? If they are, it's an issue with your specific computer's network settings.</p>
+      </div>
+  </div>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-list-ol me-2"></i> Step-by-Step: How to "Force Quit" a Frozen App</h5>
+      <p class="small mb-3 text-light">If an application completely freezes and won't let you close it normally, use the OS's built-in manager to forcefully terminate it without having to restart your whole computer.</p>
+      
+      <h6 class="fw-bold text-info mt-3"><i class="fab fa-windows me-2"></i> On Windows (Task Manager):</h6>
+      <ol class="mb-3 text-light small">
+          <li class="mb-1">Press <code>Ctrl + Shift + Esc</code> on your keyboard. (Alternatively, press <code>Ctrl + Alt + Delete</code> and click "Task Manager").</li>
+          <li class="mb-1">In the Task Manager window, locate the frozen app in the "Processes" list (it will often say "Not Responding").</li>
+          <li class="mb-1">Click on the app to select it, then click the <strong>End Task</strong> button in the bottom right corner.</li>
+      </ol>
+
+      <h6 class="fw-bold text-light mt-3"><i class="fab fa-apple me-2"></i> On macOS (Force Quit):</h6>
+      <ol class="mb-0 text-light small">
+          <li class="mb-1">Press <code>Cmd + Option + Esc</code> on your keyboard all at the same time.</li>
+          <li class="mb-1">A "Force Quit Applications" window will pop up. Select the frozen app from the list.</li>
+          <li class="mb-1">Click the <strong>Force Quit</strong> button in the bottom right corner.</li>
+      </ol>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">1.1.3 Researching the Solution</h4>
+  <p>Even the best IT professionals in the world do not memorize every solution. They are simply experts at using search engines to find answers. The art of the "Tech Query" involves being incredibly specific.</p>
+  
+  <div class="concept-box shadow-sm border-warning bg-light">
+      <h5 class="fw-bold text-dark"><i class="fab fa-google text-primary me-2"></i> How to Google an Error</h5>
+      <p><strong>Bad Search:</strong> "My screen went blue."<br>
+      <em>Why it's bad:</em> Too vague. It will return millions of unrelated results.</p>
+      <p class="mb-0"><strong>Good Search:</strong> "Windows 11 BSOD Error Code 0x000000EF when opening Premiere Pro"<br>
+      <em>Why it works:</em> It includes the OS version, the exact error code, and the specific application that triggered the crash. This will lead you directly to documentation or forums with the exact fix.</p>
+  </div>
+
+  <div class="image-placeholder shadow-sm">
+    <i class="fas fa-project-diagram fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">The Troubleshooting Flowchart</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A clean, modern flowchart graphic demonstrating a 'Yes/No' decision tree for fixing a computer that won't turn on (e.g. "Is it plugged in?" -> Yes -> "Is the power strip on?").</p>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 1.3 -->
+  <h3 id="section-2-3" class="fw-bold border-bottom pb-2">1.3 Maintenance and Updates</h3>
+  <p class="fs-5">A computer is like a car; if you don't change the oil and maintain the engine, it will eventually break down. Digital maintenance ensures your machine runs fast and your data stays safe.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">1.3.1 Software Updates & Patches</h4>
+  <p>Why does your computer constantly annoy you with "Update Available" pop-ups? Developers release updates for three main reasons:</p>
+  <ul>
+      <li><strong>Patching Security Holes:</strong> The most important reason. Hackers constantly find vulnerabilities in software. Updates patch these holes to keep your data safe.</li>
+      <li><strong>Fixing Bugs:</strong> Repairing glitches that cause the software to crash.</li>
+      <li><strong>Adding Features:</strong> Improving the software with new tools and better performance.</li>
+  </ul>
+  <p>Ignoring updates is the number one way computers become infected with malware.</p>
+
+  <h4 class="fw-bold mt-5 text-info">1.3.2 Backups and The Rule of 3-2-1</h4>
+  <p>Hard drives fail. Laptops get stolen. Coffee gets spilled. If your data only exists in one place, it doesn't really exist at all. The golden standard of data protection is the <strong>Rule of 3-2-1</strong>.</p>
+
+  <div class="row g-3 my-4 text-center">
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm border-primary bg-primary text-white">
+              <div class="card-body">
+                  <h1 class="display-3 fw-bold mb-0">3</h1>
+                  <h5 class="fw-bold">Copies of your Data</h5>
+                  <p class="small mb-0 opacity-75">The original working file, plus two backups.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm border-warning bg-warning text-dark">
+              <div class="card-body">
+                  <h1 class="display-3 fw-bold mb-0">2</h1>
+                  <h5 class="fw-bold">Different Media Types</h5>
+                  <p class="small mb-0 opacity-75">E.g., Your laptop's SSD, and an external USB Hard Drive.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm border-success bg-success text-white">
+              <div class="card-body">
+                  <h1 class="display-3 fw-bold mb-0">1</h1>
+                  <h5 class="fw-bold">Offsite Backup</h5>
+                  <p class="small mb-0 opacity-75">Cloud storage (Google Drive, OneDrive) so it survives a physical fire/flood.</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="image-placeholder shadow-sm border-primary">
+    <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+    <h5 class="fw-bold text-dark">Local vs Cloud Storage</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> An infographic showing a laptop backing up a folder. One arrow points to an external physical hard drive (Local), and another arrow points up to a glowing server rack in the sky (Cloud).</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">1.3.3 Digital Housekeeping</h4>
+  <p>Over time, computers accumulate "digital dust." Managing your storage space keeps the OS running efficiently.</p>
+  <ul>
+      <li><strong>Clearing the Cache:</strong> Web browsers download images and code so sites load faster next time. This is the Cache. Over months, this can take up gigabytes of space and cause errors. Clearing it forces a fresh download.</li>
+      <li><strong>Uninstalling Unused Programs:</strong> Safely removing old software prevents background processes from eating up your RAM and CPU cycles.</li>
+      <li><strong>Emptying the Trash:</strong> Deleting a file just moves it to the Recycle Bin. It still takes up hard drive space until you empty the bin!</li>
+  </ul>
+
+  <!-- Final Chapter Call to Action -->
+  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-tasks fa-3x me-4 text-primary"></i>
+          <div>
+              <h3 class="fw-bold mb-1">Chapter 2 Review Activity</h3>
+              <p class="mb-0 fs-5">Can you apply the "Divide and Conquer" strategy to real problems?</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Click the green "Worksheet" button to load your Chapter 2 Assignment into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <!-- Required scripts for interactive tabs/accordions inside the iframe -->
+  <script src="/js/bootstrap.bundle.js"></script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

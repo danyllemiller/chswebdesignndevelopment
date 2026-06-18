@@ -1,3 +1,7 @@
+// DEPRECATED ARCHIVE FILE — DO NOT RUN
+// Canonical runtime server is: /srv/chswebdesignndevelopment/server/server.js
+// This file is retained for historical/reference purposes only.
+
 // server.js
 
 const express = require('express');
