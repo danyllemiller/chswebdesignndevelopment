@@ -1908,8 +1908,22 @@ const escapeHtmlSimple = function(str) {
             if (unitBtn) {
                 const unitVal = unitBtn.dataset.unit;
                 if (unitVal === 'FINAL_EXAM') {
-                    activeTab = { type: 'FINAL_EXAM' };
-                    await checkProgressAndGate(false);
+                    // If grades are loaded, check lock immediately — no extra click needed
+                    const requiredUnits = [1, 2, 3, 4, 5, 6, 7];
+                    const allDone = gradesLoaded && requiredUnits.every(n =>
+                        Object.keys(grades).some(k =>
+                            k.match(new RegExp(`Unit\\s*-?\\s*${n}\\b`, 'i')) &&
+                            k.match(/Summative|Exam|Final/i) &&
+                            !k.match(/Pre/i)
+                        )
+                    );
+                    if (allDone) {
+                        window.open('/exams/cs-final-exam.html', '_blank');
+                    } else {
+                        // Locked or grades not yet loaded — show the lock overlay
+                        activeTab = { type: 'FINAL_EXAM' };
+                        await checkProgressAndGate(false);
+                    }
                 } else {
                     activeUnit = csCourseMap.find(u => u.unitNum === parseInt(unitVal, 10));
                     await checkProgressAndGate(true);
