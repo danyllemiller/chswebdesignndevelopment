@@ -2,7 +2,7 @@
 
 **Files involved:**
 - `calendar.html` — page HTML, modals, sidebar
-- `js/calendar.js` — all calendar logic (~700+ lines)
+- `js/calendar.js` — all calendar logic (~1,300+ lines)
 - `css/calendar.css` — calendar-specific styles
 - `api/events.php` — calendar events CRUD
 - `api/save-csv.php` — CSV bulk import
@@ -30,19 +30,32 @@ let bellScheduleCache = null;      // cached response from /api/bell-schedule.ph
 let schoolConfig = { regular_start:'', regular_end:'', summer_start:'', summer_end:'' };
 ```
 
-`specialDates` is the **rendering key** — the calendar cells read from it. `rawEvents` holds the full event objects from the database so Edit/Delete can work.
+`specialDates` is the **rendering key** — calendar cells and time-grid views read from it. `rawEvents` holds the full event objects from the database so Edit/Delete can work without re-fetching.
 
-### Event Types
+---
 
-| Type Code | Label | Color |
-|-----------|-------|-------|
-| `A` | A Day | Blue-tinted (#e4e6f8) |
-| `B` | B Day | Green-tinted (#d9eed8) |
-| `A_MIN` | A Min Day | Darker blue (#cdd0f0) |
-| `B_MIN` | B Min Day | Darker green (#c3e3c2) |
-| `OFF` | No School | Yellow (#fef9d0) |
-| `C` | All Periods | Warm orange (#f5e6dc) |
-| `none` | Observance | No background |
+## Event Types
+
+| Type Code | Label | Color | Bell Schedule |
+|-----------|-------|-------|---------------|
+| `A` | A Day | Blue-tinted (#e4e6f8) | `A` periods |
+| `B` | B Day | Green-tinted (#d9eed8) | `B` periods |
+| `A_MIN` | A Min Day | Darker blue (#cdd0f0) | `A_MIN` periods |
+| `B_MIN` | B Min Day | Darker green (#c3e3c2) | `B_MIN` periods |
+| `C` | All Periods | Warm orange (#f5e6dc) | `C` periods |
+| `S` | Summer School | Orange (#ffe8cc) | `summer` periods |
+| `OFF` | No School | Yellow (#fef9d0) | none |
+| `none` | Observance | No background | none |
+
+The `TYPE_CONFIG` constant in `calendar.js` maps each code to its bg/text/border colors and display label.
+
+### Event Type Priority
+
+When multiple events exist on the same date, `mergeEventIntoSpecialDates()` picks the highest-priority type:
+
+```
+A=6 > B=5 > C=4 > A_MIN=3 > B_MIN=2 > S=2 > OFF=1 > none=0
+```
 
 ---
 
@@ -59,16 +72,17 @@ When `calendar.html` loads, `js/calendar.js` runs `initCalendar()`:
    ```js
    fetch('/api/school-config.php') → schoolConfig
    ```
+   Used to populate the "SCHEDULE APPLIES" date pickers in the bell schedule modal.
 
 3. **Fetch all calendar events:**
    ```js
    fetch('/api/events.php') → rawEvents Map + specialDates Map
    ```
-   Each event is passed through `mergeEventIntoSpecialDates()`, which determines the highest-priority type for a date when multiple events exist.
+   Each event is passed through `mergeEventIntoSpecialDates()`.
 
-4. **Render the current view** (calls `renderCurrentView()`)
+4. **Render the current view** (`renderCurrentView()`)
 
-5. **Initialize appointments** (calls `initAppointments()` — wires up student/teacher appointment UI based on `window.dacAuthData.isTeacher`)
+5. **Initialize appointments** (`initAppointments()` — wires up student/teacher appointment UI)
 
 ---
 
@@ -83,21 +97,21 @@ When `calendar.html` loads, `js/calendar.js` runs `initCalendar()`:
 
 Each day cell shows:
 - Day number
-- A colored type chip (A Day, B Day, OFF, etc.)
+- A colored type chip (A Day, B Day, Summer School, OFF, etc.)
 - Event/observance text
 
 Clicking a day cell calls `selectDay(dateStr)`, which switches to **Daily view** for that date.
 
 ### 2. Weekly View (`view-weekly`)
 
-`renderWeekView()` (async — fetches bell schedule) builds a Google Calendar-style time grid:
+`renderWeekView()` (async) builds a Google Calendar-style time grid:
 - Column per day (Sun–Sat of the selected week)
-- "All day" row showing schedule-type chips (A Day, B Day, etc.)
+- "All day" row showing schedule-type chips
 - Time grid from 7 AM to 6 PM (`GRID_START = 7`, `GRID_END = 18`, `HOUR_PX = 56` pixels per hour)
 - Period blocks rendered as positioned `div.tg-event` elements
 - Red "now" line for today
 
-Bell schedule periods are fetched once and cached in `bellScheduleCache`. The day key is resolved via `getBellDayKey()`.
+Bell schedule periods are fetched once and cached in `bellScheduleCache`. Which periods appear is resolved via `getBellScheduleKey()`.
 
 ### 3. Daily View (`view-daily`)
 
@@ -109,10 +123,7 @@ Bell schedule periods are fetched once and cached in `bellScheduleCache`. The da
 
 ### Navigating Between Views
 
-- **Prev/Next buttons:** Call `navigateCalendar(dir)`. Direction depends on current view:
-  - Monthly: advance by month
-  - Weekly: advance by 7 days
-  - Daily: advance by 1 day
+- **Prev/Next buttons:** `navigateCalendar(dir)` — advances by month / 7 days / 1 day depending on view
 - **View radio buttons:** Set `currentView` and call `renderCurrentView()`
 - **Clicking a month day:** Always jumps to Daily view for that date
 
@@ -120,37 +131,96 @@ View state is persisted to localStorage via `saveViewState()` on every navigatio
 
 ---
 
-## Bell Schedule Rendering
+## Bell Schedule
 
-### getBellDayKey(dateStr, schedule)
+### How it works
 
-This function resolves which bell schedule to show for a given date:
+Each day's bell schedule is determined entirely by what the **calendar marks that day as**. There is no day-of-week logic.
+
+```
+Calendar type → bell_schedule.schedule_type looked up
+─────────────────────────────────────────────────────
+A      →  'A'        (A Day periods)
+A_MIN  →  'A_MIN'    (A Minimum Day periods)
+B      →  'B'        (B Day periods)
+B_MIN  →  'B_MIN'    (B Minimum Day periods)
+C      →  'C'        (All Periods / C Day)
+S      →  'summer'   (Summer School periods)
+OFF    →  null       (no schedule)
+none   →  null       (no schedule)
+weekend→  null       (no schedule)
+```
+
+### getBellScheduleKey(dateStr)
 
 ```js
-function getBellDayKey(dateStr, schedule) {
-    // 1. OFF days → null (no schedule)
+function getBellScheduleKey(dateStr) {
     if (specialDates.get(dateStr)?.type === 'OFF') return null;
-    // 2. Weekends → null
-    if (jsDay === 0 || jsDay === 6) return null;
-
-    const base = ['','Mon','Tue','Wed','Thu','Fri',''][jsDay]; // e.g., 'Mon'
-    const ssKey = 'SS_' + base; // e.g., 'SS_Mon'
-
-    // 3. Summer school: if SS_{day} rows exist AND date is in summer range → ssKey
-    if (hasSS && date is in schoolConfig.summer range) return ssKey;
-
-    // 4. Regular year: if regular rows exist AND date is in regular range → base key
-    if (date is in schoolConfig.regular range) return base;
-
-    return null; // out of any configured range
+    const jsDay = new Date(dateStr + 'T00:00:00').getDay();
+    if (jsDay === 0 || jsDay === 6) return null;        // weekend
+    const calType = specialDates.get(dateStr)?.type;
+    if (!calType || calType === 'none') return null;
+    if (calType === 'S') return 'summer';               // summer school
+    return calType;  // 'A', 'A_MIN', 'B', 'B_MIN', 'C'
 }
 ```
 
-Schedule types in `bell_schedule` table:
-- Regular: `Mon`, `Tue`, `Wed`, `Thu`, `Fri`
-- Summer school: `SS_Mon`, `SS_Tue`, `SS_Wed`, `SS_Thu`, `SS_Fri`
+The returned key is used to filter `bellScheduleCache`:
+```js
+const schedKey = getBellScheduleKey(dateStr);
+const periods  = schedKey
+    ? schedule.filter(r => r.schedule_type === schedKey)
+              .sort((a, b) => a.start_time.localeCompare(b.start_time))
+    : [];
+```
 
-If `schoolConfig` has no dates set, the fallback is month-based (June–August = summer school).
+### Bell Schedule Admin Modal
+
+Opened via "Bell Schedule" button in the sidebar (teacher/admin only). Contains 6 tabs:
+
+| Tab | `schedule_type` stored | When it shows |
+|-----|------------------------|---------------|
+| A Day | `A` | A Day calendar events |
+| A Min Day | `A_MIN` | A Min Day calendar events |
+| B Day | `B` | B Day calendar events |
+| B Min Day | `B_MIN` | B Min Day calendar events |
+| C Day | `C` | C Day calendar events |
+| Summer | `summer` | S (Summer School) calendar events |
+
+Each tab shows a list of period cards. Each card has:
+- Period label (e.g., "A1", "B4", "Lunch")
+- Course name (optional)
+- Start time → End time
+
+No day-of-week choices exist anywhere in the modal — the calendar event type alone controls which schedule loads.
+
+### Saving a Bell Schedule
+
+`saveBellSchedule()` collects all period cards for the active tab and POSTs to `/api/bell-schedule.php`:
+
+```js
+periods.push({
+    schedule_type: activeBellSched,   // e.g. 'A'
+    period_label:  'A1',
+    course_name:   'Web Design',
+    start_time:    '07:35',
+    end_time:      '09:00',
+});
+// Sent as: { schedule_types: ['A'], periods: [...] }
+```
+
+The PHP handler deletes all existing rows for those `schedule_types` and re-inserts. **Saving one tab does not affect other tabs.**
+
+The "SCHEDULE APPLIES" date pickers (From / to) save to `school_config` and control the date range shown in the modal UI — they do **not** affect which schedule loads (that is driven by the calendar type).
+
+### DB Migration
+
+On every request to `GET /api/bell-schedule.php`, the server runs:
+```sql
+DELETE FROM bell_schedule
+WHERE schedule_type NOT IN ('A','A_MIN','B','B_MIN','C','summer')
+```
+This silently removes any legacy day-of-week rows (`Mon`, `Tue`, `SS_Mon`, etc.) or intermediate `regular`/`summer` rows from previous schema versions.
 
 ---
 
@@ -160,39 +230,46 @@ If `schoolConfig` has no dates set, the fallback is month-based (June–August =
 2. Browser reads the file via `FileReader`
 3. `parseCSV(text)` parses it into `specialDates` Map immediately (client-side preview)
 4. `renderCurrentView()` is called — calendar updates instantly
-5. The raw CSV text is POSTed to `/api/save-csv.php`:
+5. Raw CSV text is POSTed to `/api/save-csv.php`:
    - Server deletes all existing `source='csv'` rows from `calendar_events`
    - Server re-inserts all valid rows with `source='csv'`
-6. Status shown in `#csv-status` element
+6. Status shown in `#csv-status`
 
-**CSV format required:**
+**CSV format:**
 ```
 Date,Type,Description
 2025-09-01,OFF,Labor Day
-2025-10-15,A,Regular A Day
-2025-11-06,B_MIN,Minimum Day - B
+2025-10-15,A,
+2025-10-16,B,
+2025-11-06,A_MIN,Minimum Day
+2026-06-16,S,Summer School Day 1
 ```
 
-On a full page refresh, events are re-loaded from the database via `GET /api/events.php`, which returns both `source='csv'` and `source='manual'` rows.
+**Valid type codes:** `A`, `B`, `A_MIN`, `B_MIN`, `C`, `S`, `OFF`, `none`
+
+On full page refresh, events reload from DB via `GET /api/events.php`, which returns both `source='csv'` and `source='manual'` rows. CSV-imported events are never affected by the manual "Add Event" modal and vice versa.
 
 ### mergeEventIntoSpecialDates(ev)
 
-When multiple events exist for the same date, this function:
-1. Takes the highest-priority type (priority order: `A`=6 > `B`=5 > `C`=4 > `A_MIN`=3 > `B_MIN`=2 > `OFF`=1 > `none`=0)
+When multiple events exist for the same date:
+1. Takes the highest-priority type (see priority table above)
 2. Concatenates descriptions with ` | ` separator
-3. Avoids repeating type-label strings (e.g., "A Day") if there's no separate description
+3. Avoids repeating type-label strings if there's no separate description
 
 ---
 
-## School Year Configuration
+## School Year Configuration (`school_config` table)
 
-Accessed from the Bell Schedule modal in the calendar sidebar. The teacher sets:
-- `regular_start` / `regular_end` — the regular school year boundaries
-- `summer_start` / `summer_end` — summer school boundaries
+Four key-value rows:
 
-Stored in `school_config` table (4 rows, key–value). Loaded into `schoolConfig` object at calendar init.
+| Key | Meaning |
+|-----|---------|
+| `regular_start` | First day of regular school year |
+| `regular_end` | Last day of regular school year |
+| `summer_start` | First day of summer school |
+| `summer_end` | Last day of summer school |
 
-These dates determine whether `getBellDayKey()` returns a regular or summer schedule type for any given date.
+These dates are loaded into `schoolConfig` at init and are used **only** to pre-fill the "SCHEDULE APPLIES" date pickers in the bell schedule modal. They do **not** determine which bell schedule loads on the calendar — the calendar event type (`S`, `A`, etc.) does that.
 
 ---
 
@@ -204,10 +281,7 @@ These dates determine whether `getBellDayKey()` returns a regular or summer sche
 3. On save: `POST /api/appointments/office-hours.php` with array of windows
 4. Multiple windows per day are supported (e.g., before school AND after school)
 
-Teacher can also open the full "Appointments & Hours" dashboard via `#btn-teacher-dashboard` to:
-- View pending appointment requests
-- Approve or deny with a teacher note
-- Manage office hours from the modal
+Teacher can also open the "Appointments & Hours" dashboard via `#btn-teacher-dashboard` to view, approve, or deny requests.
 
 ### Student booking
 1. Student clicks "View Availability & Book"
@@ -216,9 +290,10 @@ Teacher can also open the full "Appointments & Hours" dashboard via `#btn-teache
 4. Slots show as Available or Booked based on existing non-denied appointments
 5. Student clicks a slot, fills in reason, clicks "Request Appointment"
 6. `POST /api/appointments/book.php` creates the appointment with status `pending`
-7. Slot uniqueness is enforced by DB UNIQUE KEY on `(date, time)`
+7. Slot uniqueness enforced by DB UNIQUE KEY on `(date, time)`
 
 ### Appointment statuses
+
 | Status | Meaning |
 |--------|---------|
 | `pending` | Student requested, teacher hasn't acted |
@@ -238,25 +313,16 @@ Teacher can also open the full "Appointments & Hours" dashboard via `#btn-teache
 
 ---
 
-## Role-Based UI Gating in calendar.html
+## Role-Based UI Gating
 
-`calendar.js` calls `initAppointments()` which reads `window.dacAuthData.isTeacher`:
+`initAppointments()` reads `window.dacAuthData.isTeacher`:
 
 ```js
 if (isTeacher) {
-    document.querySelector('.sidebar-teacher-tools').style.display = '';
-    document.getElementById('btn-teacher-dashboard').style.display = '';
+    // Show: Add Event, CSV import, Bell Schedule, Office Hours
 } else {
-    document.querySelector('.sidebar-student-tools').style.display = '';
+    // Show: Book Appointment
 }
 ```
 
-Teacher tools shown:
-- Add Single Event button
-- Bulk CSV import form
-- Bell Schedule button
-- Office Hours panel
-
-Student tools shown:
-- Book Appointment button
-- Google Calendar subscribe links
+The "Add Event", "CSV Upload", and "Bell Schedule" buttons are only rendered/functional for teacher and admin roles.

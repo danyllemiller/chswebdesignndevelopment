@@ -62,7 +62,7 @@ Both layers share the same MariaDB database (`chs_gradebook`), but use different
 **File:** `api/save-csv.php`  
 **Request body:** Plain text CSV content (`Content-Type: text/plain`)  
 **CSV format:** `YYYY-MM-DD, TYPE, Description` (comma or tab delimited, header row optional)  
-**Valid types:** `A`, `B`, `A_MIN`, `B_MIN`, `OFF`, `C`, `none`  
+**Valid types:** `A`, `B`, `A_MIN`, `B_MIN`, `C`, `S`, `OFF`, `none`  (`S` = Summer School day — maps to the `summer` bell schedule)  
 **Response:** `{ success: true, count: number }`  
 **Notes:** Deletes all existing rows where `source = 'csv'`, then re-inserts. Also ensures `source` column exists (ALTER TABLE ADD COLUMN IF NOT EXISTS).  
 **Called by:** `js/calendar.js` CSV import button
@@ -73,8 +73,10 @@ Both layers share the same MariaDB database (`chs_gradebook`), but use different
 
 #### `GET /api/bell-schedule.php`
 **File:** `api/bell-schedule.php`  
-**Query params:** `?type=Mon` (optional — filter by schedule type)  
+**Query params:** `?type=A` (optional — filter by one schedule type)  
+**Valid `schedule_type` values:** `A`, `A_MIN`, `B`, `B_MIN`, `C`, `summer`  
 **Response:** `{ schedule: [{ id, schedule_type, period_label, sort_order, start_time, end_time, section_id, course_name }] }`  
+**Notes:** On every GET, automatically deletes any rows whose `schedule_type` is not in the valid set (removes legacy day-of-week rows).  
 **Called by:** `js/calendar.js` `getBellSchedule()`
 
 #### `POST /api/bell-schedule.php`
@@ -82,12 +84,12 @@ Both layers share the same MariaDB database (`chs_gradebook`), but use different
 ```json
 {
   "teacher_id": "string (optional, validates role)",
-  "schedule_types": ["Mon", "Tue"],
-  "periods": [{ "schedule_type", "period_label", "start_time", "end_time", "section_id", "course_name" }]
+  "schedule_types": ["A"],
+  "periods": [{ "schedule_type": "A", "period_label": "A1", "start_time": "07:35", "end_time": "09:00", "section_id": "A1", "course_name": "Web Design" }]
 }
 ```
 **Response:** `{ success: true }`  
-**Notes:** Deletes rows for listed `schedule_types`, then re-inserts. If `all: true` is sent, deletes entire table.  
+**Notes:** Deletes all rows for the listed `schedule_types`, then re-inserts the provided periods. Saving one tab (e.g., `A`) does not affect other tabs. If `all: true` is sent, truncates the entire table.  
 **Called by:** `js/calendar.js` bell schedule modal save button
 
 ---
