@@ -539,6 +539,22 @@
   font-size: .82rem; color: #adb5bd; text-align: center; width: 80%;
 }
 
+.tg-now-line {
+  position: absolute; left: 0; right: 0;
+  border-top: 2px solid #dc3545; pointer-events: none; z-index: 3;
+}
+.tg-now-line::before {
+  content: '';
+  position: absolute; left: -5px; top: -5px;
+  width: 9px; height: 9px;
+  background: #dc3545; border-radius: 50%;
+}
+
+.tg-day-type-chip {
+  font-size: .58rem; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; opacity: .8; margin-top: 2px;
+}
+
 /* ── Events List View ───────────────────────────────────────────────────────── */
 .events-list { display: flex; flex-direction: column; gap: 0.35rem; }
 .events-list-month {

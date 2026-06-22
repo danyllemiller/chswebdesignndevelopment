@@ -16,22 +16,69 @@ if (!$content) {
     exit;
 }
 
-// Validate it looks like a calendar CSV (first non-empty line should have date-like data)
-$lines = array_filter(array_map('trim', explode("\n", $content)));
-$first = reset($lines);
-if (!$first || (!preg_match('/^\d{4}-\d{2}-\d{2}/', $first) && !preg_match('/^date/i', $first))) {
+$lines = array_values(array_filter(explode("\n", $content), fn($l) => trim($l) !== ''));
+$first = trim($lines[0] ?? '');
+
+if (!preg_match('/^\d{4}-\d{2}-\d{2}/', $first) && !preg_match('/^date/i', $first)) {
     http_response_code(400);
     echo json_encode(['error' => 'File does not look like a calendar CSV']);
     exit;
 }
 
-$target = __DIR__ . '/../special-dates.csv';
-$result = file_put_contents($target, $content);
+$delim = str_contains($first, "\t") ? "\t" : ",";
 
-if ($result === false) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Could not write file — check server permissions']);
-    exit;
+$typeLabels = [
+    'A' => 'A Day', 'B' => 'B Day',
+    'A_MIN' => 'A Min Day', 'B_MIN' => 'B Min Day',
+    'OFF' => 'No School', 'C' => 'All Periods',
+];
+$validTypes = array_merge(array_keys($typeLabels), ['none']);
+
+$db = getDB();
+
+// Ensure source column exists (no-op if already added)
+$db->query("ALTER TABLE calendar_events ADD COLUMN IF NOT EXISTS source VARCHAR(20) NOT NULL DEFAULT 'manual'");
+
+// Replace all previously-imported CSV rows
+$db->query("DELETE FROM calendar_events WHERE source = 'csv'");
+
+$ins = $db->prepare(
+    "INSERT INTO calendar_events (event_date, title, type, description, all_day, source)
+     VALUES (?, ?, ?, ?, 1, 'csv')"
+);
+
+$count = 0;
+foreach ($lines as $i => $line) {
+    $trimmed = trim($line);
+    if (!$trimmed) continue;
+
+    $cols = explode($delim, $trimmed);
+
+    // Skip header row
+    if ($i === 0 && preg_match('/^date/i', trim($cols[0] ?? ''))) continue;
+
+    $date = trim($cols[0] ?? '');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) continue;
+
+    $type = trim($cols[1] ?? '') ?: 'none';
+    if (!in_array($type, $validTypes)) $type = 'none';
+
+    $desc = $delim === "\t"
+        ? trim($cols[2] ?? '')
+        : trim(implode(',', array_slice($cols, 2)));
+
+    // Skip rows with no meaningful content
+    if ($type === 'none' && $desc === '') continue;
+
+    // Title: use description if present, otherwise the type label
+    $title = $desc ?: ($typeLabels[$type] ?? 'Event');
+
+    $ins->bind_param('ssss', $date, $title, $type, $desc);
+    $ins->execute();
+    $count++;
 }
 
-echo json_encode(['success' => true, 'bytes' => $result]);
+$ins->close();
+$db->close();
+
+echo json_encode(['success' => true, 'count' => $count]);

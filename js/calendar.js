@@ -86,7 +86,7 @@ async function initCalendar() {
                     body: text,
                 });
                 const data = await res.json();
-                showCsvStatus(data.success ? `✓ ${count} dates imported and saved.` : `✓ ${count} dates imported (server save failed: ${data.error})`, data.success ? 'success' : 'warning');
+                showCsvStatus(data.success ? `✓ ${data.count} dates saved to calendar.` : `✓ ${count} dates parsed (server save failed: ${data.error})`, data.success ? 'success' : 'warning');
             } catch {
                 showCsvStatus(`✓ ${count} dates imported (could not save to server — will reset on refresh).`, 'warning');
             }
@@ -94,28 +94,23 @@ async function initCalendar() {
         reader.readAsText(file);
     });
 
-    // Auto-load the school year CSV from the server root
-    try {
-        const res = await fetch('/special-dates.csv');
-        if (res.ok) parseCSV(await res.text());
-    } catch (e) {
-        console.warn('[Calendar] Could not auto-load /special-dates.csv:', e);
-    }
-
-    // Merge single events saved by teacher from DB
+    // Load all calendar dates from DB (CSV-imported school calendar + manually-added events)
     try {
         const res = await fetch('/api/events.php');
         if (res.ok) {
             const data = await res.json();
+            const typePri = { A:6, B:5, C:4, A_MIN:3, B_MIN:2, OFF:1, none:0 };
             (data.events || []).forEach(ev => {
-                const evDesc = ev.title + (ev.description ? ': ' + ev.description : '');
+                // Don't show plain type labels ("A Day", "No School") as description text —
+                // the colored chip already communicates that.
+                const isLabel = ev.title === (TYPE_CONFIG[ev.type]?.label ?? '') && !ev.description;
+                const desc = isLabel ? '' : ev.title + (ev.description ? ': ' + ev.description : '');
                 const existing = specialDates.get(ev.event_date);
                 if (existing) {
-                    existing.description = existing.description
-                        ? existing.description + ' | ' + evDesc
-                        : evDesc;
+                    if ((typePri[ev.type] ?? 0) > (typePri[existing.type] ?? 0)) existing.type = ev.type;
+                    if (desc) existing.description = existing.description ? existing.description + ' | ' + desc : desc;
                 } else {
-                    specialDates.set(ev.event_date, { type: ev.type, description: evDesc });
+                    specialDates.set(ev.event_date, { type: ev.type, description: desc });
                 }
             });
         }
@@ -369,6 +364,16 @@ function tgLabelColors(periods) {
     return map;
 }
 
+function tgCurrentTimeLine(dateStr) {
+    const now = new Date();
+    const todayStr = isoDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+    if (dateStr !== todayStr) return '';
+    const h = now.getHours(), m = now.getMinutes();
+    if (h < GRID_START || h >= GRID_END) return '';
+    const top = (h - GRID_START) * HOUR_PX + (m / 60) * HOUR_PX;
+    return `<div class="tg-now-line" style="top:${top}px"></div>`;
+}
+
 // ─── Week View ────────────────────────────────────────────────────────────────
 
 async function renderWeekView() {
@@ -377,24 +382,27 @@ async function renderWeekView() {
 
     listView.innerHTML = '<p class="small text-muted p-3">Loading…</p>';
 
+    // Anchor to Monday of the selected week
     const anchor = new Date((selectedDate || isoDate(currentYear, currentMonth + 1, 1)) + 'T00:00:00');
-    const sunday = new Date(anchor);
-    sunday.setDate(anchor.getDate() - anchor.getDay());
-    const endSat = new Date(sunday); endSat.setDate(sunday.getDate() + 6);
+    const dow    = anchor.getDay(); // 0=Sun
+    const monday = new Date(anchor);
+    monday.setDate(anchor.getDate() - (dow === 0 ? 6 : dow - 1));
+    const friday = new Date(monday); friday.setDate(monday.getDate() + 4);
 
     const monthLabel = document.getElementById('month-label');
     if (monthLabel) {
-        const s = sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const e = endSat.toLocaleDateString('en-US',  { month: 'short', day: 'numeric', year: 'numeric' });
+        const fmt = { month: 'short', day: 'numeric' };
+        const s = monday.toLocaleDateString('en-US', fmt);
+        const e = friday.toLocaleDateString('en-US', { ...fmt, year: 'numeric' });
         monthLabel.textContent = `${s} – ${e}`;
     }
 
     const todayStr = isoDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
     const schedule = await getBellSchedule();
 
-    // Build day data array
-    const days = Array.from({ length: 7 }, (_, i) => {
-        const d = new Date(sunday); d.setDate(sunday.getDate() + i);
+    // Mon–Fri only (school week)
+    const days = Array.from({ length: 5 }, (_, i) => {
+        const d = new Date(monday); d.setDate(monday.getDate() + i);
         const dateStr = isoDate(d.getFullYear(), d.getMonth() + 1, d.getDate());
         const info    = specialDates.get(dateStr);
         const cfg     = info ? (TYPE_CONFIG[info.type] || TYPE_CONFIG.none) : null;
@@ -404,27 +412,25 @@ async function renderWeekView() {
         return { d, dateStr, info, cfg, periods, colors };
     });
 
-    // Header
     const headerCols = days.map(({ d, dateStr, cfg }) => {
         const isToday = dateStr === todayStr;
         const isSel   = dateStr === selectedDate;
         const name    = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
         const num     = d.getDate();
         const hdStyle = cfg?.bg ? `background:${cfg.bg};color:${cfg.text}` : '';
+        const chip    = cfg?.bg ? `<div class="tg-day-type-chip">${cfg.label}</div>` : '';
         return `<div class="tg-day-header${isToday ? ' tg-today' : ''}${isSel ? ' tg-selected' : ''}"
                      style="${hdStyle}" data-date="${dateStr}">
             <div class="tg-day-name">${name}</div>
             <div class="tg-day-num-wrap"><span class="tg-day-num${isToday ? ' tg-today-circle' : ''}">${num}</span></div>
-            ${cfg?.label ? `<div style="font-size:.62rem;margin-top:2px;opacity:.85">${cfg.label}</div>` : ''}
-            ${cfg?.bg && days.find(dy => dy.dateStr === dateStr)?.info?.description
-                ? `<div style="font-size:.6rem;opacity:.75;overflow:hidden;max-height:1.8em">${days.find(dy => dy.dateStr === dateStr).info.description}</div>` : ''}
+            ${chip}
         </div>`;
     }).join('');
 
-    // Day columns
     const dayCols = days.map(({ dateStr, periods, colors }) =>
         `<div class="tg-day-col" data-date="${dateStr}">
             ${tgHourLines()}
+            ${tgCurrentTimeLine(dateStr)}
             ${tgEventBlocks(periods, colors)}
         </div>`
     ).join('');
@@ -439,7 +445,7 @@ async function renderWeekView() {
         </div>
         <div class="tg-body" style="height:${bodyH}px">
             <div class="tg-time-col">${tgHourRows()}</div>
-            <div class="tg-days-area" style="grid-template-columns:repeat(7,1fr)">${dayCols}</div>
+            <div class="tg-days-area" style="grid-template-columns:repeat(5,1fr)">${dayCols}</div>
         </div>
     </div>`;
 
@@ -511,7 +517,7 @@ async function renderDayView() {
         <div class="tg-body" style="height:${bodyH}px">
             <div class="tg-time-col">${tgHourRows()}</div>
             <div class="tg-days-area" style="grid-template-columns:1fr">
-                <div class="tg-day-col">${tgHourLines()}${noSchd}</div>
+                <div class="tg-day-col">${tgHourLines()}${tgCurrentTimeLine(dateStr)}${noSchd}</div>
             </div>
         </div>
     </div>`;
