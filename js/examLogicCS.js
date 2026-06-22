@@ -12,7 +12,7 @@
 // ======================================================
 const ENABLE_ATTEMPT_LIMIT = true;   // true = limit to 3 attempts, false = unlimited
 const ENABLE_COOLDOWN = true;        // true = 45-min block after submit, false = no block
-const ENABLE_WORKSHEET = false;       // true = show side-by-side notebook, false = quiz only
+const ENABLE_WORKSHEET = true;        // true = show side-by-side notebook, false = quiz only
 const MAX_ATTEMPTS = 3;
 const COOLDOWN_MINUTES = 45;
 // ======================================================
