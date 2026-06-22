@@ -35,10 +35,15 @@
     .period-row { display: grid; grid-template-columns: 100px 1fr; gap: 0.5rem; align-items: center; margin-bottom: 0.25rem; font-size: 0.85rem; }
 
     .type-badge { font-size: 0.68rem; padding: 1px 6px; border-radius: 4px; vertical-align: middle; }
-    .badge-exam    { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
-    .badge-pre     { background: #cfe2ff; color: #084298; border: 1px solid #9ec5fe; }
-    .badge-chapter { background: #e2e3e5; color: #41464b; border: 1px solid #ced4da; }
-    .badge-final   { background: #d1e7dd; color: #0f5132; border: 1px solid #a3cfbb; }
+    .badge-exam      { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+    .badge-pre       { background: #cfe2ff; color: #084298; border: 1px solid #9ec5fe; }
+    .badge-chapter   { background: #e2e3e5; color: #41464b; border: 1px solid #ced4da; }
+    .badge-final     { background: #d1e7dd; color: #0f5132; border: 1px solid #a3cfbb; }
+    .badge-lab       { background: #f0e6ff; color: #5a23a0; border: 1px solid #c7a8f0; }
+    .badge-milestone { background: #ede0ff; color: #4a2c91; border: 1px solid #b388ff; }
+
+    .assignment-row.type-lab       .asgn-label { color: #6f42c1; font-size: 0.9rem; }
+    .assignment-row.type-milestone .asgn-label { font-weight: 700; color: #6f42c1; }
 
     #shift-panel { background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; }
 
@@ -171,23 +176,156 @@ const CS_MAP = [
   ]}
 ];
 
-const WD_CHAPTERS = [
-  { ch: 1,  title: "The Developer's World" },
-  { ch: 2,  title: 'The Rules (How Not to Get Sued)' },
-  { ch: 3,  title: 'The Blueprint' },
-  { ch: 4,  title: 'The Why (Intro to UI/UX)' },
-  { ch: 5,  title: 'The "Bones" (Intro to HTML)' },
-  { ch: 6,  title: 'The "Clothes" (Intro to CSS)' },
-  { ch: 7,  title: 'The Style (Advanced CSS Layout)' },
-  { ch: 8,  title: 'Sights & Sounds (Media & Tables)' },
-  { ch: 9,  title: 'The "Brains" (Intro to JavaScript)' },
-  { ch: 10, title: 'The Game Dev (Advanced JS Game Logic)' },
-  { ch: 11, title: 'The "Cloud" (Collaboration & Hosting)' },
-  { ch: 12, title: 'The "Manager" (CMS Platforms)' },
-  { ch: 13, title: 'The Network (Intro to APIs)' },
-  { ch: 14, title: 'The "Brain" (Databases)' },
-  { ch: 15, title: 'The "Future" (The Game Never Ends)' },
-  { ch: 16, title: 'The "Final Boss" (Going Live)' }
+const WD_MAP = [
+  { ch: 1, title: "The Developer's World", labs: [
+    { id: 'ch1_lab_job_app',       title: 'Agency Job Application',  pts: 25 },
+    { id: 'ch1_lab_infra',         title: 'Infrastructure Map',       pts: 25 },
+    { id: 'ch1_lab_dns',           title: 'DNS Trace Log',            pts: 25 },
+    { id: 'ch1_lab_url',           title: 'Secure URL Audit',         pts: 25 },
+    { id: 'ch1_lab_root',          title: 'Root Setup',               pts: 25 },
+    { id: 'ch1_lab_exec_sum',      title: 'The Executive Summary',    pts: 25 },
+    { id: 'ch1_lab_client_neg',    title: 'Client Negotiation',       pts: 25 },
+    { id: 'ch1_lab_code_conduct',  title: 'The Code of Conduct',      pts: 25 },
+  ], milestones: [
+    { id: 'ch1_milestone_setup', title: 'Professional Setup',                 pts: 100 },
+    { id: 'ch1_proj_m1',         title: 'Project M1: The Job Application',    pts: 20  },
+    { id: 'ch1_proj_m2',         title: 'Project M2: The Business Plan',      pts: 20  },
+    { id: 'ch1_proj_m3',         title: 'Project M3: Digital Real Estate',    pts: 20  },
+    { id: 'ch1_proj_m4',         title: 'Project M4: Client Expectations',    pts: 20  },
+    { id: 'ch1_proj_m5',         title: 'Project M5: The Code of Conduct',    pts: 20  },
+  ]},
+  { ch: 2, title: 'The Rules (How Not to Get Sued)', labs: [
+    { id: 'ch2_lab1', title: 'Lab 1: Asset Integrity',           pts: 25 },
+    { id: 'ch2_lab2', title: 'Lab 2: Inclusive Design Proposal', pts: 25 },
+  ], milestones: [
+    { id: 'ch2_milestone', title: 'The Ethics & A11y Audit', pts: 100 },
+  ]},
+  { ch: 3, title: 'The Blueprint', labs: [
+    { id: 'ch3_lab1', title: 'Lab 1: The Pain Point Audit', pts: 25 },
+    { id: 'ch3_lab2', title: 'Lab 2: Meet Your Persona',    pts: 25 },
+    { id: 'ch3_lab3', title: 'Lab 3: The Blue Ocean Map',   pts: 25 },
+    { id: 'ch3_lab4', title: 'Lab 4: The MVP Scope List',   pts: 25 },
+    { id: 'ch3_lab5', title: 'Lab 5: The File Tree Map',    pts: 25 },
+  ], milestones: [
+    { id: 'ch3_milestone', title: 'Project 1 Blueprint', pts: 100 },
+  ]},
+  { ch: 4, title: 'The Why (Intro to UI/UX)', labs: [
+    { id: 'ch4_lab1', title: 'Lab 1: The Hierarchy Audit', pts: 25 },
+    { id: 'ch4_lab2', title: 'Lab 2: Brand UI Kit',        pts: 25 },
+    { id: 'ch4_lab3', title: 'Lab 3: The Component Lab',   pts: 25 },
+    { id: 'ch4_lab4', title: 'Lab 4: The Linked Flow Lab', pts: 25 },
+  ], milestones: [
+    { id: 'ch4_milestone', title: 'Project 1 Phase 2 High-Fi Mockup', pts: 100 },
+  ]},
+  { ch: 5, title: 'The "Bones" (Intro to HTML)', labs: [
+    { id: 'ch5_lab1', title: 'Lab 1: Project 2 Setup',        pts: 25 },
+    { id: 'ch5_lab2', title: 'Lab 2: Typography Translation',  pts: 25 },
+    { id: 'ch5_lab3', title: 'Lab 3: Nav List Structure',      pts: 25 },
+    { id: 'ch5_lab4', title: 'Lab 4: The Network Link Lab',    pts: 25 },
+    { id: 'ch5_lab5', title: 'Lab 5: The Global Skeleton',     pts: 25 },
+    { id: 'ch5_lab6', title: 'Lab 6: Content Blocks',          pts: 25 },
+    { id: 'ch5_lab7', title: 'Lab 7: Image Placeholders',      pts: 25 },
+    { id: 'ch5_lab8', title: 'Lab 8: Full Contact Form',       pts: 25 },
+  ], milestones: [
+    { id: 'ch5_milestone', title: 'Zero Error Audit', pts: 50 },
+  ]},
+  { ch: 6, title: 'The "Clothes" (Intro to CSS)', labs: [
+    { id: 'ch6_lab1', title: 'Lab 1: The External Sheet',   pts: 25 },
+    { id: 'ch6_lab2', title: 'Lab 2: Structural Targeting', pts: 25 },
+    { id: 'ch6_lab3', title: 'Lab 3: Specificity Audit',    pts: 25 },
+    { id: 'ch6_lab4', title: 'Lab 4: CSS Variables',        pts: 25 },
+    { id: 'ch6_lab5', title: 'Lab 5: Brand Typography',     pts: 25 },
+    { id: 'ch6_lab6', title: 'Lab 6: Spacing & Breathing',  pts: 25 },
+    { id: 'ch6_lab7', title: 'Lab 7: Visual Accents',       pts: 25 },
+    { id: 'ch6_lab8', title: 'Lab 8: Browser Reset',        pts: 25 },
+  ], milestones: [
+    { id: 'ch6_milestone', title: 'Project 3 Milestone: Base CSS Integration', pts: 100 },
+  ]},
+  { ch: 7, title: 'The Style (Advanced CSS Layout)', labs: [
+    { id: 'ch7_lab1',   title: 'Lab 1: Display Fixes',                pts: 25 },
+    { id: 'ch7_lab2_3', title: 'Labs 2 & 3: Flexbox & Centering',     pts: 50 },
+    { id: 'ch7_lab4_5', title: 'Labs 4 & 5: Grid Skeleton & Gallery', pts: 50 },
+    { id: 'ch7_lab6',   title: 'Lab 6: The Sticky Header',            pts: 25 },
+    { id: 'ch7_lab7_9', title: 'Labs 7-9: Breakpoints & Refactoring', pts: 75 },
+  ], milestones: [
+    { id: 'ch7_milestone', title: 'Project 3 Architecture', pts: 100 },
+  ]},
+  { ch: 8, title: 'Sights & Sounds (Media & Tables)', labs: [
+    { id: 'ch8_lab1',   title: 'Lab: Raster Compression',          pts: 25 },
+    { id: 'ch8_lab2',   title: 'Lab: Responsive Imagery',          pts: 25 },
+    { id: 'ch8_lab3',   title: 'Lab: The SVG Logo & Favicons',     pts: 25 },
+    { id: 'ch8_lab4',   title: 'Lab: Code Correction (Video)',      pts: 25 },
+    { id: 'ch8_lab5',   title: 'Lab: Code Correction (Audio)',      pts: 25 },
+    { id: 'ch8_lab6',   title: 'Lab: Map & Video Embeds',           pts: 25 },
+    { id: 'ch8_lab7',   title: 'Lab: Semantic Data Tables',         pts: 25 },
+    { id: 'ch8_lab8_9', title: 'Lab: Proportions & Hover Effects',  pts: 50 },
+  ], milestones: [
+    { id: 'ch8_milestone', title: 'Project 3 Media Integration', pts: 100 },
+  ]},
+  { ch: 9, title: 'The "Brains" (Intro to JavaScript)', labs: [
+    { id: 'ch9_lab1', title: 'Lab 1: The Data Vault Lab',       pts: 25 },
+    { id: 'ch9_lab2', title: 'Lab 2: Reusable UI Functions',    pts: 25 },
+    { id: 'ch9_lab3', title: 'Lab 3: Decision Engine Lab',      pts: 25 },
+    { id: 'ch9_lab4', title: 'Lab 4: The Interactive Wire Lab', pts: 25 },
+  ], milestones: [
+    { id: 'ch9_milestone', title: 'Profile App Assembly', pts: 100 },
+  ]},
+  { ch: 10, title: 'The Game Dev (Advanced JS Game Logic)', labs: [
+    { id: 'ch10_lab1', title: 'Lab 1: Canvas Coordinate Art Lab', pts: 25 },
+    { id: 'ch10_lab2', title: 'Lab 2: The Bouncing Box Lab',      pts: 25 },
+    { id: 'ch10_lab3', title: 'Lab 3: The Entity Factory',        pts: 25 },
+    { id: 'ch10_lab4', title: 'Lab 4: The Hitbox Detector',       pts: 25 },
+  ], milestones: [
+    { id: 'ch10_milestone', title: 'Game Assembly & QA', pts: 100 },
+  ]},
+  { ch: 11, title: 'The "Cloud" (Collaboration & Hosting)', labs: [
+    { id: 'ch11_lab1', title: 'Lab 1: Agency File Architecture Setup', pts: 25 },
+    { id: 'ch11_lab2', title: 'Lab 2: Local Agency Backup',            pts: 25 },
+    { id: 'ch11_lab3', title: 'Lab 3: Syncing with the Agency Hub',    pts: 25 },
+    { id: 'ch11_lab4', title: 'Lab 4: Client Infrastructure Proposal', pts: 25 },
+  ], milestones: [
+    { id: 'ch11_milestone', title: 'Project 4 Open Source Repo', pts: 100 },
+  ]},
+  { ch: 12, title: 'The "Manager" (CMS Platforms)', labs: [
+    { id: 'ch12_lab1', title: 'Lab 1: The Platform Pitch Matrix',   pts: 25 },
+    { id: 'ch12_lab2', title: 'Lab 2: Information Architecture Lab', pts: 25 },
+    { id: 'ch12_lab3', title: 'Lab 3: The Design Skin',              pts: 25 },
+    { id: 'ch12_lab4', title: 'Lab 4: Forms & SEO Security',         pts: 25 },
+  ], milestones: [
+    { id: 'ch12_milestone', title: 'Client Site Assembly', pts: 100 },
+  ]},
+  { ch: 13, title: 'The Network (Intro to APIs)', labs: [
+    { id: 'ch13_lab1', title: 'Lab 1: The JSON Blueprint Lab', pts: 25 },
+    { id: 'ch13_lab2', title: 'Lab 2: The Fetch Connection',   pts: 25 },
+    { id: 'ch13_lab3', title: 'Lab 3: Dynamic Search Lab',     pts: 25 },
+    { id: 'ch13_lab4', title: 'Lab 4: UX States Lab',          pts: 25 },
+  ], milestones: [
+    { id: 'ch13_milestone', title: 'Real-Time Data App', pts: 100 },
+  ]},
+  { ch: 14, title: 'The "Brain" (Databases)', labs: [
+    { id: 'ch14_lab1', title: 'Lab 1: The CRUD App Audit',       pts: 25 },
+    { id: 'ch14_lab2', title: 'Lab 2: The Schema Architect Lab', pts: 25 },
+    { id: 'ch14_lab3', title: 'Lab 3: The Data Detective Lab',   pts: 25 },
+    { id: 'ch14_lab4', title: 'Lab 4: Secure Data Entry Lab',    pts: 25 },
+  ], milestones: [
+    { id: 'ch14_milestone', title: 'The Library Database', pts: 100 },
+  ]},
+  { ch: 15, title: 'The "Future" (The Game Never Ends)', labs: [
+    { id: 'ch15_lab1', title: 'Lab 1: Prompt Engineering Lab', pts: 25 },
+    { id: 'ch15_lab2', title: 'Lab 2: Ethics Case Study',      pts: 25 },
+    { id: 'ch15_lab3', title: 'Lab 3: AR Integration Plan',    pts: 25 },
+    { id: 'ch15_lab4', title: 'Lab 4: IoT Security Audit',     pts: 25 },
+  ], milestones: [
+    { id: 'ch15_milestone', title: 'Future-Cast Expo', pts: 100 },
+  ]},
+  { ch: 16, title: 'The "Final Boss" (Going Live)', labs: [
+    { id: 'ch16_lab1', title: 'Lab 1: Manual FTP Upload',      pts: 25 },
+    { id: 'ch16_lab2', title: 'Lab 2: Automated Cloud Launch', pts: 25 },
+    { id: 'ch16_lab3', title: 'Lab 3: The QA Audit',           pts: 25 },
+    { id: 'ch16_lab4', title: 'Lab 4: Lighthouse Polish',      pts: 25 },
+  ], milestones: [
+    { id: 'ch16_milestone', title: 'Live Portfolio Launch', pts: 100 },
+  ]},
 ];
 
 // ─── Title map (exam_id → human label) ───────────────────────────────────────
@@ -201,9 +339,12 @@ const TITLE_MAP = (() => {
     for (const ch of unit.chapters) m[`Unit${n}-Ch${ch.ch}`] = ch.title;
   }
   m['Unit9-Exam'] = 'CS Final Exam';
-  for (const ch of WD_CHAPTERS) {
-    m[`WD-Ch${ch.ch}-Pre`]  = `Ch ${ch.ch} Pre-Assessment`;
-    m[`WD-Ch${ch.ch}-Exam`] = `Ch ${ch.ch}: ${ch.title} – Exam`;
+  for (const ch of WD_MAP) {
+    const n = ch.ch;
+    m[`WD-Ch${n}-Pre`]  = `Ch ${n} Pre-Assessment`;
+    m[`WD-Ch${n}-Exam`] = `Ch ${n}: ${ch.title} – Exam`;
+    for (const lab of ch.labs)       m[lab.id] = lab.title;
+    for (const ms  of ch.milestones) m[ms.id]  = ms.title;
   }
   m['WD-Final'] = 'WD Final Capstone Project';
   return m;
@@ -279,9 +420,9 @@ function pval(examId, period) {
   return existingExams[examId]?.period_due_dates?.[period] || '';
 }
 
-function dateInput(examId, type) {
+function dateInput(examId, type, pts) {
   const v = val(examId);
-  return `<input type="date" class="form-control form-control-sm asgn-date" data-exam="${examId}" data-type="${type}" value="${v}" style="min-width:155px">`;
+  return `<input type="date" class="form-control form-control-sm asgn-date" data-exam="${examId}" data-type="${type}" data-pts="${pts || ''}" value="${v}" style="min-width:155px">`;
 }
 
 function periodToggleBtn(examId) {
@@ -304,15 +445,15 @@ function periodRows(examId, type) {
 }
 
 function assignmentRow(examId, label, type, pts) {
-  const badgeMap = { exam:'badge-exam', pre:'badge-pre', chapter:'badge-chapter', final:'badge-final' };
-  const labelMap = { exam:'Exam', pre:'Pre-Test', chapter:'Notes', final:'Final' };
+  const badgeMap = { exam:'badge-exam', pre:'badge-pre', chapter:'badge-chapter', final:'badge-final', lab:'badge-lab', milestone:'badge-milestone' };
+  const labelMap = { exam:'Exam', pre:'Pre-Test', chapter:'Notes', final:'Final', lab:'Lab', milestone:'Milestone' };
   return `
     <div class="assignment-row type-${type}">
       <div class="asgn-label">
         ${label}
-        <span class="type-badge ${badgeMap[type]} ms-1">${labelMap[type]}</span>
+        <span class="type-badge ${badgeMap[type] || 'badge-chapter'} ms-1">${labelMap[type] || type}</span>
       </div>
-      ${dateInput(examId, type)}
+      ${dateInput(examId, type, pts)}
       ${periodToggleBtn(examId)}
     </div>
     ${periodRows(examId, type)}`;
@@ -360,16 +501,27 @@ function renderCS() {
 function renderWD() {
   let html = '';
 
-  for (const ch of WD_CHAPTERS) {
+  for (const ch of WD_MAP) {
+    const n = ch.ch;
     html += `<div class="card section-card wd mb-3">
       <div class="card-header">
-        <i class="fas fa-globe me-2"></i>Chapter ${ch.ch}: ${ch.title}
+        <i class="fas fa-globe me-2"></i>Chapter ${n}: ${ch.title}
       </div>
-      <div class="card-body p-0">
-        ${assignmentRow(`WD-Ch${ch.ch}-Pre`,  `Ch ${ch.ch} Pre-Assessment`, 'pre', 15)}
-        ${assignmentRow(`WD-Ch${ch.ch}-Exam`, `Ch ${ch.ch}: ${ch.title} — Exam`, 'exam', 100)}
-      </div>
-    </div>`;
+      <div class="card-body p-0">`;
+
+    html += assignmentRow(`WD-Ch${n}-Pre`, `Ch ${n} Pre-Assessment`, 'pre', 15);
+
+    for (const lab of ch.labs) {
+      html += assignmentRow(lab.id, lab.title, 'lab', lab.pts);
+    }
+
+    for (const ms of ch.milestones) {
+      html += assignmentRow(ms.id, ms.title, 'milestone', ms.pts);
+    }
+
+    html += assignmentRow(`WD-Ch${n}-Exam`, `Ch ${n}: ${ch.title} — Exam`, 'exam', 100);
+
+    html += `</div></div>`;
   }
 
   // WD Final / Capstone
@@ -427,7 +579,8 @@ function collectAssignments() {
   list.querySelectorAll('.asgn-date').forEach(inp => {
     const id   = inp.dataset.exam;
     const type = inp.dataset.type;
-    if (!byExam[id]) byExam[id] = { exam_id: id, type, due_date: '', period_due_dates: {} };
+    const pts  = inp.dataset.pts ? parseInt(inp.dataset.pts) : null;
+    if (!byExam[id]) byExam[id] = { exam_id: id, type, due_date: '', period_due_dates: {}, pts };
     byExam[id].due_date = inp.value;
   });
 
@@ -435,21 +588,20 @@ function collectAssignments() {
   list.querySelectorAll('.period-date').forEach(inp => {
     const id     = inp.dataset.exam;
     const period = inp.dataset.period;
-    if (!byExam[id]) byExam[id] = { exam_id: id, type: 'unknown', due_date: '', period_due_dates: {} };
+    if (!byExam[id]) byExam[id] = { exam_id: id, type: 'unknown', due_date: '', period_due_dates: {}, pts: null };
     if (inp.value) byExam[id].period_due_dates[period] = inp.value;
   });
 
   // Annotate with title, course_id, total_points
-  const typePoints = { exam: 100, pre: 15, chapter: 10, final: 100 };
+  const typePoints = { exam: 100, pre: 15, chapter: 10, final: 100, lab: 25, milestone: 100 };
   const assignments = Object.values(byExam).map(a => {
-    const course  = currentCourse;
-    const pts     = typePoints[a.type] || 100;
+    const pts      = a.pts || typePoints[a.type] || 100;
     const existing = existingExams[a.exam_id];
     return {
       exam_id: a.exam_id,
       title: TITLE_MAP[a.exam_id] || existing?.title || humanTitle(a.exam_id),
       total_points: existing?.total_points || pts,
-      course_id: course,
+      course_id: currentCourse,
       due_date: a.due_date || null,
       period_due_dates: Object.keys(a.period_due_dates).length ? a.period_due_dates : null
     };
@@ -485,7 +637,7 @@ async function saveAll(syncCal) {
 
     if (data.success) {
       // Refresh local state
-      withDates.forEach(a => {
+      assignments.forEach(a => {
         existingExams[a.exam_id] = {
           ...existingExams[a.exam_id],
           ...a,
