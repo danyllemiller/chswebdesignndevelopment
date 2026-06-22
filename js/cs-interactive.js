@@ -490,11 +490,15 @@ if (!username || !studentId) {
 
 function renderTabs() {
     if (dom.unitContainer) {
-        dom.unitContainer.innerHTML = csCourseMap.map(u =>
-            `<button class="unit-tab-btn ${u.unitNum === activeUnit.unitNum ? 'active' : ''}" data-unit="${u.unitNum}">
+        let unitHtml = csCourseMap.map(u =>
+            `<button class="unit-tab-btn ${u.unitNum === activeUnit.unitNum && activeTab.type !== 'FINAL_EXAM' ? 'active' : ''}" data-unit="${u.unitNum}">
                 ${u.name}
             </button>`
         ).join('');
+        unitHtml += `<button class="unit-tab-btn final-exam-unit-btn ${activeTab.type === 'FINAL_EXAM' ? 'active' : ''}" data-unit="FINAL_EXAM">
+            <i class="fas fa-graduation-cap me-1"></i> CS Final Exam
+        </button>`;
+        dom.unitContainer.innerHTML = unitHtml;
     }
 
     if (dom.chapContainer) {
@@ -1015,7 +1019,7 @@ else if (activeTab.type === 'EXAM') {
             }
             else if (activeTab.type === 'POST_SCALE') {
                 if (dom.paneTitle) dom.paneTitle.innerText = `Unit ${activeUnit.unitNum}: Post-Evaluation`;
-                
+
 if (!hasExam) {
                     dom.examOverlay.classList.remove('d-none');
                     dom.examOverlay.innerHTML = `<i class="fas fa-lock text-warning fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i><h3 class="fw-bold">Evaluation Locked</h3><p class="text-muted px-4 mb-4">You must complete the <strong>Unit ${activeUnit.unitNum} Summative Exam</strong> before filling out the final self-evaluation.</p>`;
@@ -1023,6 +1027,44 @@ if (!hasExam) {
                     const url = `/proficiencyScales/cs-unit-${activeUnit.unitNum}.html?type=post`;
                     if(dom.assessmentFrame && !dom.assessmentFrame.src.includes(url)) dom.assessmentFrame.src = url;
                     if(dom.assessmentFrame) dom.assessmentFrame.classList.remove('d-none');
+                }
+            }
+            else if (activeTab.type === 'FINAL_EXAM') {
+                if (dom.paneTitle) dom.paneTitle.innerText = 'CS Course Final Exam';
+                if (dom.examOverlay) dom.examOverlay.classList.remove('d-none');
+
+                // Units 1–7 are required; Units 0 and 8 are extra credit
+                const requiredUnits = [1, 2, 3, 4, 5, 6, 7];
+                const unitStatus = requiredUnits.map(n => ({
+                    n,
+                    done: gradesLoaded && Object.keys(grades).some(k =>
+                        k.match(new RegExp(`Unit\\s*-?\\s*${n}\\b`, 'i')) &&
+                        k.match(/Summative|Exam|Final/i) &&
+                        !k.match(/Pre/i)
+                    )
+                }));
+                const allUnitsDone = unitStatus.every(s => s.done);
+
+                if (!allUnitsDone && dom.examOverlay) {
+                    const missing = unitStatus.filter(s => !s.done)
+                        .map(s => `<li>Unit ${s.n} Exam</li>`).join('');
+                    dom.examOverlay.innerHTML = `<i class="fas fa-lock text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
+                        <h3 class="fw-bold">Final Exam Locked</h3>
+                        <p class="text-muted px-4 mb-2">Complete the following unit exams to unlock the CS Final Exam:</p>
+                        <ul class="text-start text-danger fw-bold d-inline-block mb-0">${missing}</ul>
+                        <p class="text-muted small mt-3">Units 0 and 8 are extra credit and not required.</p>`;
+                } else if (dom.examOverlay) {
+                    dom.examOverlay.innerHTML = `
+                        <i class="fas fa-graduation-cap text-warning fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
+                        <h3 class="fw-bold">CS Course Final Exam</h3>
+                        <p class="text-muted px-4 mb-4">You've completed all required unit exams. The final exam will open in a new tab.</p>
+                        <button id="btn-launch-final" class="btn btn-success btn-lg fw-bold px-5 shadow-sm mt-2">
+                            <i class="fas fa-graduation-cap me-2"></i> Launch CS Final Exam
+                        </button>`;
+                    setTimeout(() => {
+                        const btn = document.getElementById('btn-launch-final');
+                        if (btn) btn.onclick = () => window.open('/exams/cs-final-exam.html', '_blank');
+                    }, 50);
                 }
             }
 
@@ -1864,9 +1906,14 @@ const escapeHtmlSimple = function(str) {
             const chapBtn = e.target.closest('.chapter-tab-btn');
 
             if (unitBtn) {
-                const unitNum = parseInt(unitBtn.dataset.unit, 10);
-                activeUnit = csCourseMap.find(u => u.unitNum === unitNum);
-                await checkProgressAndGate(true);
+                const unitVal = unitBtn.dataset.unit;
+                if (unitVal === 'FINAL_EXAM') {
+                    activeTab = { type: 'FINAL_EXAM' };
+                    await checkProgressAndGate(false);
+                } else {
+                    activeUnit = csCourseMap.find(u => u.unitNum === parseInt(unitVal, 10));
+                    await checkProgressAndGate(true);
+                }
             }
 
 if (chapBtn) {
