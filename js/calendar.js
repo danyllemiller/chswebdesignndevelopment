@@ -74,10 +74,22 @@ async function initCalendar() {
         const file = document.getElementById('csv-file')?.files[0];
         if (!file) { showCsvStatus('Select a CSV file first.', 'danger'); return; }
         const reader = new FileReader();
-        reader.onload = e => {
-            const count = parseCSV(e.target.result);
+        reader.onload = async e => {
+            const text  = e.target.result;
+            const count = parseCSV(text);
             renderCurrentView();
-            showCsvStatus(`✓ Imported ${count} dates.`, 'success');
+            showCsvStatus(`✓ Imported ${count} dates — saving to server…`, 'success');
+            try {
+                const res = await fetch('/api/save-csv.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: text,
+                });
+                const data = await res.json();
+                showCsvStatus(data.success ? `✓ ${count} dates imported and saved.` : `✓ ${count} dates imported (server save failed: ${data.error})`, data.success ? 'success' : 'warning');
+            } catch {
+                showCsvStatus(`✓ ${count} dates imported (could not save to server — will reset on refresh).`, 'warning');
+            }
         };
         reader.readAsText(file);
     });
@@ -281,7 +293,7 @@ function renderCurrentView() {
     const grid     = document.getElementById('calendar');
     const listView = document.getElementById('events-list-view');
     if (grid)     grid.style.display     = currentView === 'view-monthly' ? '' : 'none';
-    if (listView) listView.style.display = currentView === 'view-monthly' ? 'none' : '';
+    if (listView) listView.style.display = currentView === 'view-monthly' ? 'none' : 'block';
 
     switch (currentView) {
         case 'view-monthly': renderMonth(); break;
