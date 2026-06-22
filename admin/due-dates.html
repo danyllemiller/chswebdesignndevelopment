@@ -51,6 +51,10 @@
 
     input[type=date]::-webkit-calendar-picker-indicator { opacity: 0.5; cursor: pointer; }
     input[type=date].has-date { border-color: #198754; background: #f0fff4; }
+
+    #smart-panel { border: 2px solid #6610f2 !important; }
+    #smart-panel .card-header { background: #f3f0ff; border-bottom: 2px solid #6610f2; cursor: pointer; }
+    #smart-chevron { transition: transform 0.2s; color: #5a23a0; }
   </style>
 </head>
 <body>
@@ -106,6 +110,102 @@
         <input type="date" id="newStartDate" class="form-control form-control-sm" style="width:160px">
         <button class="btn btn-sm btn-outline-success" onclick="shiftByNewYear()">Recalculate</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Smart Auto-Schedule Panel -->
+  <div id="smart-panel" class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center"
+         onclick="toggleSmartPanel()">
+      <span class="fw-bold" style="color:#5a23a0">
+        <i class="fas fa-magic me-2"></i>Smart Auto-Schedule
+        <span class="text-muted fw-normal small ms-2">— compute due dates from the school calendar</span>
+      </span>
+      <i class="fas fa-chevron-down" id="smart-chevron"></i>
+    </div>
+    <div class="card-body d-none" id="smart-body">
+
+      <!-- CS section -->
+      <div id="smart-cs-section">
+        <div class="row g-2 mb-3">
+          <div class="col-auto">
+            <label class="form-label fw-semibold small mb-1">Semester Start</label>
+            <input type="date" id="cs-sem-start" class="form-control form-control-sm">
+          </div>
+          <div class="col-auto">
+            <label class="form-label fw-semibold small mb-1">Final Exam Date</label>
+            <input type="date" id="cs-sem-end" class="form-control form-control-sm">
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label fw-semibold small mb-1">Which class periods are Computer Science?</label>
+          <div id="cs-period-checks" class="d-flex flex-wrap gap-2 p-2 rounded" style="background:#f8f9fa;min-height:38px"></div>
+        </div>
+      </div>
+
+      <!-- WD section -->
+      <div id="smart-wd-section" class="d-none">
+        <div class="mb-3">
+          <label class="form-label fw-semibold small mb-1">Which class periods are Web Design?</label>
+          <div id="wd-period-checks" class="d-flex flex-wrap gap-2 p-2 rounded" style="background:#f8f9fa;min-height:38px"></div>
+        </div>
+        <div class="row g-3 mb-2">
+          <div class="col-12 col-md-6">
+            <div class="p-2 rounded" style="background:#f8f0ff;border:1px solid #d0b0ff">
+              <div class="fw-bold mb-2" style="color:#6f42c1;font-size:0.88rem">WD 1 — Year 1 (Chapters 1–8)</div>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label class="form-label small mb-0">Sem 1 Start <span class="text-muted">(Ch 1–4)</span></label>
+                  <input type="date" id="wd1-s1-start" class="form-control form-control-sm">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small mb-0">Sem 1 End</label>
+                  <input type="date" id="wd1-s1-end" class="form-control form-control-sm">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small mb-0">Sem 2 Start <span class="text-muted">(Ch 5–8)</span></label>
+                  <input type="date" id="wd1-s2-start" class="form-control form-control-sm">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small mb-0">Sem 2 End / Final</label>
+                  <input type="date" id="wd1-s2-end" class="form-control form-control-sm">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="p-2 rounded" style="background:#e8f4ff;border:1px solid #90c8ff">
+              <div class="fw-bold mb-2" style="color:#0d6efd;font-size:0.88rem">WD 2 — Year 2 (Chapters 9–16)</div>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label class="form-label small mb-0">Sem 1 Start <span class="text-muted">(Ch 9–12)</span></label>
+                  <input type="date" id="wd2-s1-start" class="form-control form-control-sm">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small mb-0">Sem 1 End</label>
+                  <input type="date" id="wd2-s1-end" class="form-control form-control-sm">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small mb-0">Sem 2 Start <span class="text-muted">(Ch 13–16)</span></label>
+                  <input type="date" id="wd2-s2-start" class="form-control form-control-sm">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small mb-0">Sem 2 End / Final</label>
+                  <input type="date" id="wd2-s2-end" class="form-control form-control-sm">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 align-items-center mt-3">
+        <button class="btn btn-sm px-3 fw-bold" style="background:#6610f2;color:white" onclick="autoSchedule()">
+          <i class="fas fa-magic me-2"></i>Auto-Schedule Dates
+        </button>
+        <span class="text-muted small">Spaces all assignments evenly across actual class meeting days. You can adjust any date before saving.</span>
+      </div>
+      <div id="smart-status" class="mt-2 small"></div>
     </div>
   </div>
 
@@ -366,6 +466,7 @@ async function init() {
     periods       = data.sections || [];
     if (periods.length === 0) periods = ['A1','A2','B1','B2'];
     render();
+    initSmartPanel();
     document.getElementById('loading-state').classList.add('d-none');
     document.getElementById('assignment-list').classList.remove('d-none');
   } catch(e) {
@@ -388,11 +489,11 @@ function render() {
 }
 
 function switchCourse(course, btn) {
-  // Persist any unsaved UI changes before switching
   captureToState();
   currentCourse = course;
   document.querySelectorAll('#courseTabs .nav-link').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  updateSmartPanelCourse(course);
   render();
 }
 
@@ -705,6 +806,211 @@ function importCSV(event) {
     event.target.value = '';
   };
   reader.readAsText(file);
+}
+
+// ─── Smart Auto-Schedule ──────────────────────────────────────────────────────
+
+const SMART_KEY = 'duedate_smart_v1';
+
+function toggleSmartPanel() {
+  const body = document.getElementById('smart-body');
+  const chev = document.getElementById('smart-chevron');
+  body.classList.toggle('d-none');
+  chev.style.transform = body.classList.contains('d-none') ? '' : 'rotate(180deg)';
+}
+
+function initSmartPanel() {
+  renderPeriodChecks('cs-period-checks', 'cs');
+  renderPeriodChecks('wd-period-checks', 'wd');
+  restoreSmartConfig();
+  updateSmartPanelCourse(currentCourse);
+}
+
+function renderPeriodChecks(containerId, course) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.innerHTML = periods.map(p =>
+    `<div class="form-check form-check-inline mb-0">
+       <input class="form-check-input" type="checkbox" id="sc-${course}-${p}" value="${p}">
+       <label class="form-check-label" for="sc-${course}-${p}">${p}</label>
+     </div>`
+  ).join('');
+}
+
+function restoreSmartConfig() {
+  const saved = JSON.parse(localStorage.getItem(SMART_KEY) || '{}');
+  const ids  = ['cs-sem-start','cs-sem-end','wd1-s1-start','wd1-s1-end','wd1-s2-start','wd1-s2-end','wd2-s1-start','wd2-s1-end','wd2-s2-start','wd2-s2-end'];
+  const keys = ['csSemStart',  'csSemEnd',  'wd1S1Start',  'wd1S1End',  'wd1S2Start',  'wd1S2End',  'wd2S1Start',  'wd2S1End',  'wd2S2Start',  'wd2S2End' ];
+  ids.forEach((id, i) => { const el = document.getElementById(id); if (el && saved[keys[i]]) el.value = saved[keys[i]]; });
+  (saved.csPeriods || []).forEach(p => { const el = document.getElementById(`sc-cs-${p}`); if (el) el.checked = true; });
+  (saved.wdPeriods || []).forEach(p => { const el = document.getElementById(`sc-wd-${p}`); if (el) el.checked = true; });
+}
+
+function saveSmartConfig() {
+  const g = id => document.getElementById(id)?.value || '';
+  const checked = prefix => [...document.querySelectorAll(`#${prefix}-period-checks input:checked`)].map(cb => cb.value);
+  const cfg = {
+    csPeriods:  checked('cs'), wdPeriods: checked('wd'),
+    csSemStart: g('cs-sem-start'), csSemEnd:   g('cs-sem-end'),
+    wd1S1Start: g('wd1-s1-start'), wd1S1End:   g('wd1-s1-end'),
+    wd1S2Start: g('wd1-s2-start'), wd1S2End:   g('wd1-s2-end'),
+    wd2S1Start: g('wd2-s1-start'), wd2S1End:   g('wd2-s1-end'),
+    wd2S2Start: g('wd2-s2-start'), wd2S2End:   g('wd2-s2-end'),
+  };
+  localStorage.setItem(SMART_KEY, JSON.stringify(cfg));
+  return cfg;
+}
+
+function updateSmartPanelCourse(course) {
+  const cs = document.getElementById('smart-cs-section');
+  const wd = document.getElementById('smart-wd-section');
+  if (cs) cs.classList.toggle('d-none', course !== 'cs');
+  if (wd) wd.classList.toggle('d-none', course !== 'wd');
+}
+
+async function autoSchedule() {
+  const status = document.getElementById('smart-status');
+  status.innerHTML = '<span class="text-muted">Fetching calendar…</span>';
+  const cfg = saveSmartConfig();
+
+  let calData;
+  try {
+    calData = await (await fetch('/api/events.php')).json();
+  } catch(e) {
+    status.innerHTML = `<span class="text-danger">Could not load calendar: ${e.message}</span>`;
+    return;
+  }
+
+  // Build date → highest-priority day type map
+  const PRI = { A:6, B:5, C:4, A_MIN:3, B_MIN:2, S:2, OFF:1, none:0 };
+  const calMap = {};
+  for (const ev of (calData.events || [])) {
+    const d = ev.event_date;
+    if (!d) continue;
+    const p = PRI[ev.type] || 0;
+    if (!calMap[d] || p > (PRI[calMap[d]] || 0)) calMap[d] = ev.type;
+  }
+
+  if (!Object.keys(calMap).length) {
+    status.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>No school calendar found. Import a school calendar CSV first, then retry.</span>';
+    return;
+  }
+
+  let assigned = 0;
+
+  if (currentCourse === 'cs') {
+    if (!cfg.csSemStart || !cfg.csSemEnd) { status.innerHTML = '<span class="text-warning">Enter a semester start date and final exam date.</span>'; return; }
+    if (!cfg.csPeriods.length)            { status.innerHTML = '<span class="text-warning">Check at least one CS period.</span>'; return; }
+    assigned += scheduleBlock(collectCSIds(), cfg.csPeriods, cfg.csSemStart, cfg.csSemEnd, calMap);
+  } else {
+    if (!cfg.wdPeriods.length) { status.innerHTML = '<span class="text-warning">Check at least one WD period.</span>'; return; }
+    const ranges = [
+      { chStart: 1,  chEnd: 4,  start: cfg.wd1S1Start, end: cfg.wd1S1End  },
+      { chStart: 5,  chEnd: 8,  start: cfg.wd1S2Start, end: cfg.wd1S2End  },
+      { chStart: 9,  chEnd: 12, start: cfg.wd2S1Start, end: cfg.wd2S1End  },
+      { chStart: 13, chEnd: 16, start: cfg.wd2S2Start, end: cfg.wd2S2End  },
+    ];
+    for (const r of ranges) {
+      if (!r.start || !r.end) continue;
+      assigned += scheduleBlock(collectWDIds(r.chStart, r.chEnd), cfg.wdPeriods, r.start, r.end, calMap);
+    }
+  }
+
+  render();
+
+  if (!assigned) {
+    status.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>No meeting days found in those date ranges. Verify the calendar has A/B/C days imported for those months.</span>';
+  } else {
+    status.innerHTML = `<span class="text-success"><i class="fas fa-check me-1"></i>${assigned} assignment(s) auto-scheduled. Review the dates below, then click Save.</span>`;
+  }
+}
+
+function scheduleBlock(examIds, selPeriods, start, end, calMap) {
+  if (!examIds.length || !start || !end) return 0;
+
+  // Group periods by A or B prefix
+  const byPrefix = {};
+  for (const p of selPeriods) {
+    const prefix = /^[Bb]/.test(p) ? 'B' : 'A';
+    (byPrefix[prefix] = byPrefix[prefix] || []).push(p);
+  }
+
+  // Get sorted meeting days for each prefix
+  const daysByPrefix = {};
+  for (const prefix of Object.keys(byPrefix)) {
+    daysByPrefix[prefix] = getMeetingDays(calMap, prefix, start, end);
+  }
+
+  // Use A-days as the primary reference; fall back to B if no A periods selected
+  const primaryPrefix = byPrefix['A'] ? 'A' : Object.keys(byPrefix)[0];
+  const primaryDays   = daysByPrefix[primaryPrefix] || [];
+  if (!primaryDays.length) return 0;
+
+  const n = examIds.length;
+  const m = primaryDays.length;
+
+  examIds.forEach((id, i) => {
+    // Spread i evenly across [0 .. m-1]
+    const idx  = n <= 1 ? m - 1 : Math.round(i * (m - 1) / (n - 1));
+    const date = primaryDays[Math.min(idx, m - 1)];
+
+    if (!existingExams[id]) existingExams[id] = { due_date: '', period_due_dates: {} };
+    existingExams[id].due_date          = date;
+    existingExams[id].period_due_dates  = existingExams[id].period_due_dates || {};
+
+    // Per-period override for each group
+    for (const [prefix, prefPeriods] of Object.entries(byPrefix)) {
+      const days = daysByPrefix[prefix] || primaryDays;
+      const dm   = days.length;
+      const di   = dm <= 1 ? dm - 1 : Math.round(i * (dm - 1) / Math.max(n - 1, 1));
+      const pd   = days[Math.min(di, dm - 1)];
+      for (const p of prefPeriods) existingExams[id].period_due_dates[p] = pd;
+    }
+  });
+
+  return examIds.length;
+}
+
+function getMeetingDays(calMap, prefix, startDate, endDate) {
+  const A_TYPES = new Set(['A', 'A_MIN', 'C']);
+  const B_TYPES = new Set(['B', 'B_MIN', 'C']);
+  const valid   = prefix === 'B' ? B_TYPES : A_TYPES;
+  const days    = [];
+  let   d       = new Date(startDate + 'T12:00:00');
+  const stop    = new Date(endDate   + 'T12:00:00');
+  while (d <= stop) {
+    const str = d.toISOString().slice(0, 10);
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6 && valid.has(calMap[str])) days.push(str);
+    d.setDate(d.getDate() + 1);
+  }
+  return days;
+}
+
+function collectCSIds() {
+  const ids = [];
+  for (const unit of CS_MAP) {
+    const n = unit.unitNum;
+    ids.push(`Unit${n}-Pre`);
+    for (const ch of unit.chapters) ids.push(`Unit${n}-Ch${ch.ch}`);
+    ids.push(`Unit${n}-Exam`);
+  }
+  ids.push('Unit9-Exam');
+  return ids;
+}
+
+function collectWDIds(chStart, chEnd) {
+  const ids = [];
+  for (const ch of WD_MAP) {
+    if (ch.ch < chStart || ch.ch > chEnd) continue;
+    const n = ch.ch;
+    ids.push(`WD-Ch${n}-Pre`);
+    for (const lab of ch.labs)       ids.push(lab.id);
+    for (const ms  of ch.milestones) ids.push(ms.id);
+    ids.push(`WD-Ch${n}-Exam`);
+  }
+  if (chEnd >= 16) ids.push('WD-Final');
+  return ids;
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
