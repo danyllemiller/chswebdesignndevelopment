@@ -17,6 +17,7 @@ const TYPE_CONFIG = {
 };
 
 let specialDates = new Map(); // 'YYYY-MM-DD' → { type, description }
+let rawEvents    = new Map(); // 'YYYY-MM-DD' → [{ id, title, type, description, ... }]
 let currentYear, currentMonth;
 let selectedDate = null;
 let currentView = 'view-monthly';
@@ -51,10 +52,31 @@ function getBellDayKey(dateStr, schedule) {
 
 // ─── Bootstrap ──────────────────────────────────────────────────────────────
 
+function saveViewState() {
+    try {
+        localStorage.setItem('cal_view',  currentView);
+        localStorage.setItem('cal_date',  selectedDate || '');
+        localStorage.setItem('cal_year',  currentYear);
+        localStorage.setItem('cal_month', currentMonth);
+    } catch {}
+}
+
 async function initCalendar() {
     const now = new Date();
-    currentYear = now.getFullYear();
+    currentYear  = now.getFullYear();
     currentMonth = now.getMonth();
+
+    // Restore last view/date from previous session
+    try {
+        const v = localStorage.getItem('cal_view');
+        const d = localStorage.getItem('cal_date');
+        const y = localStorage.getItem('cal_year');
+        const m = localStorage.getItem('cal_month');
+        if (v) { currentView = v; const r = document.getElementById(v); if (r) r.checked = true; }
+        if (d) selectedDate = d;
+        if (y) currentYear  = parseInt(y);
+        if (m) currentMonth = parseInt(m);
+    } catch {}
 
     document.getElementById('prev-month')?.addEventListener('click', () => navigateCalendar(-1));
     document.getElementById('next-month')?.addEventListener('click', () => navigateCalendar(1));
@@ -66,6 +88,7 @@ async function initCalendar() {
                 const t = new Date();
                 selectedDate = isoDate(t.getFullYear(), t.getMonth() + 1, t.getDate());
             }
+            saveViewState();
             renderCurrentView();
         });
     });
@@ -99,19 +122,12 @@ async function initCalendar() {
         const res = await fetch('/api/events.php');
         if (res.ok) {
             const data = await res.json();
-            const typePri = { A:6, B:5, C:4, A_MIN:3, B_MIN:2, OFF:1, none:0 };
+            rawEvents = new Map();
             (data.events || []).forEach(ev => {
-                // Don't show plain type labels ("A Day", "No School") as description text —
-                // the colored chip already communicates that.
-                const isLabel = ev.title === (TYPE_CONFIG[ev.type]?.label ?? '') && !ev.description;
-                const desc = isLabel ? '' : ev.title + (ev.description ? ': ' + ev.description : '');
-                const existing = specialDates.get(ev.event_date);
-                if (existing) {
-                    if ((typePri[ev.type] ?? 0) > (typePri[existing.type] ?? 0)) existing.type = ev.type;
-                    if (desc) existing.description = existing.description ? existing.description + ' | ' + desc : desc;
-                } else {
-                    specialDates.set(ev.event_date, { type: ev.type, description: desc });
-                }
+                const arr = rawEvents.get(ev.event_date) || [];
+                arr.push(ev);
+                rawEvents.set(ev.event_date, arr);
+                mergeEventIntoSpecialDates(ev);
             });
         }
     } catch {}
@@ -222,17 +238,33 @@ function renderMonth() {
             cell.appendChild(evt);
         }
 
-        cell.addEventListener('click', () => selectDay(dateStr, cell, info, cfg));
+        cell.addEventListener('click', () => selectDay(dateStr, cell));
         grid.appendChild(cell);
     }
 }
 
 // ─── Sidebar Detail ───────────────────────────────────────────────────────────
 
-function updateDaySidebar(dateStr) {
-    const info = specialDates.get(dateStr);
-    const cfg  = info ? (TYPE_CONFIG[info.type] || TYPE_CONFIG.none) : null;
+const EVENT_TYPE_PRI = { A:6, B:5, C:4, A_MIN:3, B_MIN:2, OFF:1, none:0 };
 
+function mergeEventIntoSpecialDates(ev) {
+    const isLabel = ev.title === (TYPE_CONFIG[ev.type]?.label ?? '') && !ev.description;
+    const desc = isLabel ? '' : ev.title + (ev.description ? ': ' + ev.description : '');
+    const existing = specialDates.get(ev.event_date);
+    if (existing) {
+        if ((EVENT_TYPE_PRI[ev.type] ?? 0) > (EVENT_TYPE_PRI[existing.type] ?? 0)) existing.type = ev.type;
+        if (desc) existing.description = existing.description ? existing.description + ' | ' + desc : desc;
+    } else {
+        specialDates.set(ev.event_date, { type: ev.type, description: desc });
+    }
+}
+
+function rebuildSpecialDatesForDate(dateStr) {
+    specialDates.delete(dateStr);
+    (rawEvents.get(dateStr) || []).forEach(ev => mergeEventIntoSpecialDates(ev));
+}
+
+function updateDaySidebar(dateStr) {
     const [y, m, d] = dateStr.split('-').map(Number);
     const label = document.getElementById('selected-date-label');
     if (label) {
@@ -245,30 +277,87 @@ function updateDaySidebar(dateStr) {
     if (!list) return;
     list.innerHTML = '';
 
-    if (info) {
-        const li = document.createElement('li');
-        li.style.padding = '0.75rem 1rem';
-        li.style.borderRadius = '0.75rem';
-        li.style.border = `2px solid ${cfg?.border || '#ccc'}`;
-        if (cfg?.bg) { li.style.backgroundColor = cfg.bg; li.style.color = cfg.text; }
-        li.innerHTML = `
-            ${cfg?.label ? `<div class="fw-bold mb-1">${cfg.label}</div>` : ''}
-            ${info.description ? `<div class="small">${info.description}</div>` : ''}
-        `;
-        list.appendChild(li);
-    } else {
+    const events = (rawEvents.get(dateStr) || [])
+        .filter(ev => !(ev.title === (TYPE_CONFIG[ev.type]?.label ?? '') && !ev.description));
+
+    if (!events.length) {
         const li = document.createElement('li');
         li.className = 'text-muted small fst-italic';
-        li.textContent = 'No special events scheduled.';
+        li.textContent = 'No events scheduled.';
         list.appendChild(li);
+        return;
     }
+
+    events.forEach(ev => {
+        const cfg = TYPE_CONFIG[ev.type] || TYPE_CONFIG.none;
+        const li  = document.createElement('li');
+        li.className = 'mb-2';
+        li.innerHTML = `
+            <div class="d-flex align-items-start gap-2 p-2 rounded"
+                 style="border:2px solid ${cfg?.border || '#dee2e6'};background:${cfg?.bg || '#fff'}">
+                <div class="flex-grow-1 overflow-hidden">
+                    ${cfg?.bg ? `<div class="fw-bold" style="font-size:.78rem;color:${cfg.text}">${cfg.label}</div>` : ''}
+                    <div style="font-size:.82rem;color:${cfg?.text || '#333'}">${ev.title}</div>
+                    ${ev.description ? `<div style="font-size:.75rem;opacity:.8;color:${cfg?.text || '#555'}">${ev.description}</div>` : ''}
+                    ${!ev.all_day && ev.start_time ? `<div style="font-size:.72rem;opacity:.7;color:${cfg?.text || '#666'}">${formatTime12(ev.start_time)}${ev.end_time ? '–' + formatTime12(ev.end_time) : ''}</div>` : ''}
+                </div>
+                <div class="d-flex flex-column gap-1 flex-shrink-0">
+                    <button class="btn btn-sm btn-outline-secondary btn-edit-ev py-0 px-1" style="font-size:.65rem">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger btn-del-ev py-0 px-1" style="font-size:.65rem">Del</button>
+                </div>
+            </div>`;
+        li.querySelector('.btn-edit-ev').addEventListener('click', () => openEditEvent(ev));
+        li.querySelector('.btn-del-ev').addEventListener('click',  () => deleteEvent(ev.id, ev.event_date));
+        list.appendChild(li);
+    });
 }
 
-function selectDay(dateStr, cellEl, info, cfg) {
+async function deleteEvent(id, dateStr) {
+    if (!confirm('Delete this event?')) return;
+    try {
+        const res  = await fetch(`/api/events.php?id=${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+            rawEvents.set(dateStr, (rawEvents.get(dateStr) || []).filter(e => e.id !== id));
+            rebuildSpecialDatesForDate(dateStr);
+            renderCurrentView();
+            updateDaySidebar(dateStr);
+        } else {
+            alert(data.error || 'Could not delete event.');
+        }
+    } catch { alert('Network error.'); }
+}
+
+function openEditEvent(ev) {
+    document.getElementById('se-id').value    = ev.id;
+    document.getElementById('se-title').value = ev.title;
+    document.getElementById('se-date').value  = ev.event_date;
+    document.getElementById('se-type').value  = ev.type;
+    document.getElementById('se-description').value = ev.description || '';
+    const allDay = +ev.all_day === 1;
+    document.getElementById('se-all-day').checked = allDay;
+    document.getElementById('se-time-section').style.display = allDay ? 'none' : '';
+    if (!allDay) {
+        document.getElementById('se-start-time').value = ev.start_time || '';
+        document.getElementById('se-end-time').value   = ev.end_time   || '';
+    }
+    const modal = document.getElementById('modalSingleEvent');
+    const titleEl = modal?.querySelector('.modal-title');
+    if (titleEl) titleEl.textContent = 'Edit Event';
+    bootstrap.Modal.getOrCreateInstance(modal).show();
+}
+
+function selectDay(dateStr, cellEl) {
     document.querySelectorAll('.calendar-day.selected').forEach(c => c.classList.remove('selected'));
     cellEl.classList.add('selected');
     selectedDate = dateStr;
-    updateDaySidebar(dateStr);
+    const [y, mo] = dateStr.split('-').map(Number);
+    currentYear = y; currentMonth = mo - 1;
+    currentView = 'view-daily';
+    const radio = document.getElementById('view-daily');
+    if (radio) radio.checked = true;
+    saveViewState();
+    renderCurrentView();
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -314,6 +403,7 @@ function navigateCalendar(dir) {
         if (currentMonth < 0)  { currentMonth = 11; currentYear--; }
         if (currentMonth > 11) { currentMonth = 0;  currentYear++; }
     }
+    saveViewState();
     renderCurrentView();
 }
 
@@ -663,7 +753,13 @@ function initAppointments() {
 
     // Add Single Event modal
     document.getElementById('btn-add-single-event')?.addEventListener('click', () => {
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalSingleEvent')).show();
+        document.getElementById('single-event-form')?.reset();
+        document.getElementById('se-id').value = '';
+        document.getElementById('se-time-section').style.display = 'none';
+        const modal = document.getElementById('modalSingleEvent');
+        const titleEl = modal?.querySelector('.modal-title');
+        if (titleEl) titleEl.textContent = 'Add Single Event';
+        bootstrap.Modal.getOrCreateInstance(modal).show();
     });
     document.getElementById('btn-save-single-event')?.addEventListener('click', saveSingleEvent);
     document.getElementById('se-all-day')?.addEventListener('change', e => {
@@ -672,13 +768,14 @@ function initAppointments() {
 }
 
 async function saveSingleEvent() {
+    const id     = parseInt(document.getElementById('se-id')?.value || '0');
     const title  = document.getElementById('se-title')?.value.trim();
     const date   = document.getElementById('se-date')?.value;
     const type   = document.getElementById('se-type')?.value;
     const allDay = document.getElementById('se-all-day')?.checked ?? true;
     const desc   = document.getElementById('se-description')?.value.trim() || '';
-    const start  = document.getElementById('se-start-time')?.value || null;
-    const end    = document.getElementById('se-end-time')?.value   || null;
+    const start  = allDay ? null : (document.getElementById('se-start-time')?.value || null);
+    const end    = allDay ? null : (document.getElementById('se-end-time')?.value   || null);
 
     if (!title || !date || !type) {
         alert('Please fill in the title, date, and schedule type.');
@@ -690,24 +787,32 @@ async function saveSingleEvent() {
     if (btn) { btn.disabled = true; btn.innerHTML = 'Saving…'; }
 
     try {
-        const res = await fetch('/api/events.php', {
-            method:  'POST',
+        const body = { event_date: date, title, type, description: desc, all_day: allDay, start_time: start, end_time: end };
+        if (id) body.id = id;
+        const res  = await fetch('/api/events.php', {
+            method:  id ? 'PUT' : 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ event_date: date, title, type, description: desc, all_day: allDay, start_time: start, end_time: end }),
+            body:    JSON.stringify(body),
         });
         const data = await res.json();
         if (data.success) {
-            const evDesc = title + (desc ? ': ' + desc : '');
-            const existing = specialDates.get(date);
-            if (existing) {
-                existing.description = existing.description ? existing.description + ' | ' + evDesc : evDesc;
+            const evObj = { id: id || data.id, event_date: date, title, type,
+                            description: desc, all_day: allDay ? 1 : 0,
+                            start_time: start, end_time: end, source: 'manual' };
+            if (id) {
+                const arr = rawEvents.get(date) || [];
+                const idx = arr.findIndex(e => e.id === id);
+                if (idx >= 0) arr[idx] = evObj; else arr.push(evObj);
+                rawEvents.set(date, arr);
             } else {
-                specialDates.set(date, { type, description: evDesc });
+                const arr = rawEvents.get(date) || [];
+                arr.push(evObj);
+                rawEvents.set(date, arr);
             }
-            renderMonth();
+            rebuildSpecialDatesForDate(date);
+            renderCurrentView();
+            updateDaySidebar(date);
             bootstrap.Modal.getOrCreateInstance(document.getElementById('modalSingleEvent')).hide();
-            document.getElementById('single-event-form')?.reset();
-            document.getElementById('se-time-section').style.display = 'none';
         } else {
             alert(data.error || 'Could not save event.');
         }

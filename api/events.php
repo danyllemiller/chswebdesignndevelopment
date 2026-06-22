@@ -50,6 +50,36 @@ if ($method === 'DELETE') {
     exit;
 }
 
+// ── PUT: update an existing event ────────────────────────────────────────────
+if ($method === 'PUT') {
+    $data   = json_decode(file_get_contents('php://input'), true);
+    $id     = (int)($data['id']           ?? 0);
+    $date   = trim($data['event_date']    ?? '');
+    $title  = trim($data['title']         ?? '');
+    $type   = trim($data['type']          ?? 'none');
+    $desc   = trim($data['description']   ?? '');
+    $allDay = !empty($data['all_day']) ? 1 : 0;
+    $start  = $allDay ? null : (trim($data['start_time'] ?? '') ?: null);
+    $end    = $allDay ? null : (trim($data['end_time']   ?? '') ?: null);
+
+    if (!$id || !$date || !$title) {
+        http_response_code(400);
+        echo json_encode(['error' => 'id, event_date and title are required']);
+        $db->close();
+        exit;
+    }
+
+    $upd = $db->prepare(
+        'UPDATE calendar_events SET event_date=?, title=?, type=?, description=?, all_day=?, start_time=?, end_time=? WHERE id=?'
+    );
+    $upd->bind_param('ssssissi', $date, $title, $type, $desc, $allDay, $start, $end, $id);
+    $upd->execute();
+    $upd->close();
+    $db->close();
+    echo json_encode(['success' => true]);
+    exit;
+}
+
 // ── POST: add a new event ─────────────────────────────────────────────────────
 if ($method === 'POST') {
     $data  = json_decode(file_get_contents('php://input'), true);
