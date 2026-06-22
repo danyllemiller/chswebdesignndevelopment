@@ -812,6 +812,9 @@ function importCSV(event) {
 
 const SMART_KEY = 'duedate_smart_v1';
 
+// Bell schedule lookup: period_label → schedule_type (e.g. 'A5' → 'A')
+let bellLabelTypeMap = {};
+
 function toggleSmartPanel() {
   const body = document.getElementById('smart-body');
   const chev = document.getElementById('smart-chevron');
@@ -819,22 +822,53 @@ function toggleSmartPanel() {
   chev.style.transform = body.classList.contains('d-none') ? '' : 'rotate(180deg)';
 }
 
-function initSmartPanel() {
+async function initSmartPanel() {
+  // Fetch bell schedule to build label → type map
+  try {
+    const bs = await (await fetch('/api/bell-schedule.php')).json();
+    bellLabelTypeMap = {};
+    for (const row of (Array.isArray(bs) ? bs : (bs.periods || []))) {
+      if (row.period_label && row.schedule_type) {
+        bellLabelTypeMap[row.period_label] = row.schedule_type;
+      }
+    }
+  } catch(e) { /* fall back to regex */ }
+
   renderPeriodChecks('cs-period-checks', 'cs');
   renderPeriodChecks('wd-period-checks', 'wd');
   restoreSmartConfig();
   updateSmartPanelCourse(currentCourse);
 }
 
+// Returns 'A','B','C',etc for a section_id by matching against bell schedule labels,
+// then falling back to regex parsing of the section_id string.
+function getPeriodScheduleType(sectionId) {
+  // Direct match first (e.g. section_id IS the period_label)
+  if (bellLabelTypeMap[sectionId]) return bellLabelTypeMap[sectionId];
+  // Substring match: find a bell schedule label that appears inside the section_id
+  // e.g. 'A5' inside 'CS-A5', 'B4' inside 'WD1-B4'
+  for (const [label, type] of Object.entries(bellLabelTypeMap)) {
+    if (sectionId.includes(label)) return type;
+  }
+  // Regex fallback: look for A/B followed by a digit anywhere in the name
+  const m = sectionId.match(/([AB])\d/i);
+  return m ? m[1].toUpperCase() : 'A';
+}
+
 function renderPeriodChecks(containerId, course) {
   const c = document.getElementById(containerId);
   if (!c) return;
-  c.innerHTML = periods.map(p =>
-    `<div class="form-check form-check-inline mb-0">
+  c.innerHTML = periods.map(p => {
+    const schedType = getPeriodScheduleType(p);
+    const dayLabel  = schedType === 'B' || schedType === 'B_MIN' ? 'B-day'
+                    : schedType === 'C' ? 'C-day'
+                    : 'A-day';
+    const badgeColor = schedType.startsWith('B') ? '#198754' : schedType === 'C' ? '#e67e00' : '#0d6efd';
+    return `<div class="form-check form-check-inline mb-0">
        <input class="form-check-input" type="checkbox" id="sc-${course}-${p}" value="${p}">
-       <label class="form-check-label" for="sc-${course}-${p}">${p}</label>
-     </div>`
-  ).join('');
+       <label class="form-check-label" for="sc-${course}-${p}">${p} <span style="font-size:0.7rem;color:${badgeColor};font-weight:600">${dayLabel}</span></label>
+     </div>`;
+  }).join('');
 }
 
 function restoreSmartConfig() {
@@ -908,8 +942,8 @@ async function autoSchedule() {
     // Diagnostic: show meeting days found per prefix
     const byPfx = {};
     for (const p of cfg.csPeriods) {
-      const m = p.match(/([AB])\d/i);
-      const pf = m && m[1].toUpperCase() === 'B' ? 'B' : 'A';
+      const schedType = getPeriodScheduleType(p);
+      const pf        = (schedType === 'B' || schedType === 'B_MIN') ? 'B' : 'A';
       (byPfx[pf] = byPfx[pf] || []).push(p);
     }
     for (const [pf, ps] of Object.entries(byPfx)) {
@@ -947,12 +981,11 @@ async function autoSchedule() {
 function scheduleBlock(examIds, selPeriods, start, end, calMap) {
   if (!examIds.length || !start || !end) return 0;
 
-  // Group periods by A or B — look for A/B followed by a digit anywhere in the name
-  // Handles names like "CS-A5", "WD1-B4", "A1", "B4", etc.
+  // Group periods by their day type using bell schedule lookup (+ regex fallback)
   const byPrefix = {};
   for (const p of selPeriods) {
-    const m = p.match(/([AB])\d/i);
-    const prefix = m && m[1].toUpperCase() === 'B' ? 'B' : 'A';
+    const schedType = getPeriodScheduleType(p);
+    const prefix    = (schedType === 'B' || schedType === 'B_MIN') ? 'B' : 'A';
     (byPrefix[prefix] = byPrefix[prefix] || []).push(p);
   }
 
