@@ -81,7 +81,7 @@ const HOSTGATOR_MANAGE_URL = "https://digitalartsclasses.com/manage_files.php";
 const GLOBAL_BYPASS_CONFIG = {
     requirePreScale: false,        // false = Pre-Scale NOT required for exam unlock
     requireDiagnostic: false,     // false = Diagnostic NOT required for exam unlock
-    requireWorksheets: true,      // true = chapter notes/grades required before final exam
+    requireWorksheets: false,     // false = Worksheets NOT required (enable_worksheet=false)
     bypassAll: false              // If true, bypasses all gating requirements
 };
 
@@ -984,31 +984,22 @@ else if (activeTab.type === 'PRE_TEST') {
                 // Don't auto-show any view based on chapter - let user choose
             }
 else if (activeTab.type === 'EXAM') {
-                if (dom.paneTitle) dom.paneTitle.innerText = `Unit ${activeUnit.unitNum}: Final Exam`;
+                if (dom.paneTitle) dom.paneTitle.innerText = `Unit ${activeUnit.unitNum}: Final Assessment`;
 
                 if (dom.examOverlay) dom.examOverlay.classList.remove('d-none');
 
                 const bypassWorksheets = !GLOBAL_BYPASS_CONFIG.requireWorksheets || GLOBAL_BYPASS_CONFIG.bypassAll;
-
-                // Build per-chapter completion status for the lock message
-                const chapStatus = activeUnit.chapters.map(c => {
-                    const hasNote  = Object.keys(notes).some(k => k.includes(`Ch ${c.ch}`) || k.includes(`Ch${c.ch}`));
-                    const hasGrade = Object.keys(grades).some(k => k.match(new RegExp(`(Ch|Chapter)\\s*0*${c.ch}[-\\s:\\[]`, 'i')));
-                    return { label: c.title.split(':')[0], done: hasNote || hasGrade };
-                });
-                const allDone = chapStatus.every(s => s.done);
-                const examUnlocked = bypassWorksheets || allDone;
+                const examUnlocked = bypassWorksheets || hasAllChapWork;
 
                 if (!examUnlocked && dom.examOverlay) {
-                    const missing = chapStatus.filter(s => !s.done).map(s => `<li>${s.label}</li>`).join('');
-                    dom.examOverlay.innerHTML = `<i class="fas fa-lock text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i><h3 class="fw-bold">Exam Locked</h3><p class="text-muted px-4 mb-2">Complete notes or assignments for the chapters below to unlock the final exam:</p><ul class="text-start text-danger fw-bold d-inline-block mb-0">${missing}</ul>`;
+                    dom.examOverlay.innerHTML = `<i class="fas fa-ban text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i><h3 class="fw-bold">Exam Locked</h3><p class="text-muted px-4 mb-4">You must submit work (Journal, Code, or File Upload) for <strong>every chapter</strong> in this unit before the exam unlocks.</p>`;
                 } else if (dom.examOverlay) {
                     dom.examOverlay.innerHTML = `
-                        <i class="fas fa-trophy text-warning fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
-                        <h3 class="fw-bold">Final Exam Ready</h3>
-                        <p class="text-muted px-4 mb-4">You've completed all the chapters in this unit. The exam will open in a new tab — use the Journal scratchpad to help you.</p>
+                        <i class="fas fa-file-signature text-primary fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
+                        <h3 class="fw-bold">Summative Assessment Ready</h3>
+                        <p class="text-muted px-4 mb-4">You have reached the end of this unit! The final exam will open in a <strong>secure new tab</strong>. Use the Journal scratchpad to help you.</p>
                         <button id="btn-launch-exam" class="btn btn-primary btn-lg fw-bold px-5 shadow-sm mt-2">
-                            <i class="fas fa-external-link-alt me-2"></i> Launch Final Exam
+                            <i class="fas fa-external-link-alt me-2"></i> Launch Secure Exam
                         </button>
                     `;
                     setTimeout(() => {
@@ -1941,7 +1932,33 @@ if (chapBtn) {
                     activeTab = { type: 'PRE_TEST' };
                 }
                 else if (target === 'EXAM') {
-                    activeTab = { type: 'EXAM' };
+                    // Direct open — same behavior as before (bypass config controls locking)
+                    const bypassWorksheets = !GLOBAL_BYPASS_CONFIG.requireWorksheets || GLOBAL_BYPASS_CONFIG.bypassAll;
+                    const bypassDiagnostic = !GLOBAL_BYPASS_CONFIG.requireDiagnostic || GLOBAL_BYPASS_CONFIG.bypassAll;
+                    const bypassPreScale   = !GLOBAL_BYPASS_CONFIG.requirePreScale   || GLOBAL_BYPASS_CONFIG.bypassAll;
+
+                    const _hasPreScale = selfAssessmentsLoaded && selfAssessments[`unit${activeUnit.unitNum}`] !== undefined && selfAssessments[`unit${activeUnit.unitNum}`] > 0;
+                    const allChaptersDone = activeUnit.chapters.every(c => {
+                        const hasNote  = Object.keys(notes).some(key => key.includes(`Ch ${c.ch}`) || key.includes(`Ch${c.ch}`));
+                        const hasGrade = Object.keys(grades).some(k => k.match(new RegExp(`(Ch|Chapter)\\s*0*${c.ch}[-\\s:]`, 'i')));
+                        return hasNote || hasGrade;
+                    });
+
+                    const examUnlocked  = bypassPreScale   || _hasPreScale;
+                    const diagUnlocked  = bypassDiagnostic || examUnlocked;
+                    const worksUnlocked = bypassWorksheets  || allChaptersDone;
+
+                    if (examUnlocked && diagUnlocked && worksUnlocked) {
+                        window.open(`/exams/cs-unit-${activeUnit.unitNum}-exam.html`, '_blank');
+                        return;
+                    } else {
+                        const missing = [];
+                        if (!examUnlocked)  missing.push('Pre-Scale');
+                        if (!diagUnlocked)  missing.push('Diagnostic');
+                        if (!worksUnlocked) missing.push('All Chapter Notes');
+                        alert(`Exam Locked! Complete the following to unlock:\n• ${missing.join('\n• ')}`);
+                        return;
+                    }
                 }
                 else if (target === 'POST_SCALE') {
                     activeTab = { type: 'POST_SCALE' };
