@@ -936,20 +936,36 @@ const checkProgressAndGate = async (isAutoAdvance = false) => {
 else if (activeTab.type === 'PRE_TEST') {
                 if (dom.paneTitle) dom.paneTitle.innerText = `Unit ${activeUnit.unitNum}: Diagnostic Pre-Assessment`;
 
-                // Check if bypass is enabled (global config OR bypassAll flag)
                 const bypassPreScale = !GLOBAL_BYPASS_CONFIG.requirePreScale || GLOBAL_BYPASS_CONFIG.bypassAll;
-                
-                // Check if they are allowed to be here (or if Pre-Scale is bypassed)
+                const diagnosticUrl = `/pre-assessments/cs-unit-${activeUnit.unitNum}.html`;
+
                 if (!hasPreScale && !bypassPreScale) {
+                    // Pre-scale not done — locked
                     if (dom.examOverlay) {
                         dom.examOverlay.innerHTML = `<i class="fas fa-lock text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i><h3 class="fw-bold">Diagnostic Locked</h3><p class="text-muted px-4 mb-4">You must complete the <strong>Pre-Scale</strong> (the first tab) before you can take the diagnostic.</p>`;
                         dom.examOverlay.classList.remove('d-none');
                     }
+                } else if (hasPreTest) {
+                    // Already completed — show completion notice instead of reopening the window.
+                    // Student can still retake by clicking the button (explicit action).
+                    if (dom.examOverlay) {
+                        dom.examOverlay.innerHTML = `<i class="fas fa-check-circle text-success fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i><h3 class="fw-bold text-success">Pre-Assessment Complete</h3><p class="text-muted px-4 mb-4">You've already completed this pre-assessment and your score is saved in the gradebook.</p><button class="btn btn-outline-secondary btn-sm" onclick="window.open('${diagnosticUrl}', '_blank')">Retake Pre-Assessment</button>`;
+                        dom.examOverlay.classList.remove('d-none');
+                    }
                 } else {
-                    // Diagnostic is unlocked (either hasPreScale OR bypassPreScale is true)
-                    // FIXED: Open in NEW WINDOW instead of iframe (like exam does)
-                    const diagnosticUrl = `/pre-assessments/cs-unit-${activeUnit.unitNum}.html`;
-                    window.open(diagnosticUrl, '_blank');
+                    // Not completed yet, unlocked → open pre-assessment window.
+                    // On auto-advance: only open once per browser session per unit so the tab doesn't
+                    // pop up again on every page reload before the student finishes.
+                    // On manual tab click (!isAutoAdvance): always open (student explicitly requested it).
+                    const sessionKey = `pretest_opened_u${activeUnit.unitNum}`;
+                    if (!isAutoAdvance || !sessionStorage.getItem(sessionKey)) {
+                        if (isAutoAdvance) sessionStorage.setItem(sessionKey, '1');
+                        window.open(diagnosticUrl, '_blank');
+                    }
+                    if (dom.examOverlay) {
+                        dom.examOverlay.innerHTML = `<i class="fas fa-external-link-alt text-primary fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i><h3 class="fw-bold">Diagnostic Pre-Assessment</h3><p class="text-muted px-4 mb-4">Complete the pre-assessment in the new tab, then return here to continue.</p><button class="btn btn-outline-primary btn-sm" onclick="sessionStorage.removeItem('${sessionKey}'); window.open('${diagnosticUrl}', '_blank')">Open Again</button>`;
+                        dom.examOverlay.classList.remove('d-none');
+                    }
                 }
             }
             else if (activeTab.type === 'CHAPTER') {

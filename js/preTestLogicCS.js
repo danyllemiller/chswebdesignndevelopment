@@ -126,7 +126,7 @@ function ensureBaseEngine() {
             return;
         }
         const script = document.createElement('script');
-        script.src = '/js/quizLogic.js';
+        script.src = '/js/quizLogic.js?v=8';
         script.onload = () => {
             if (window.initPreTest) {
                 resolve(window.initPreTest);

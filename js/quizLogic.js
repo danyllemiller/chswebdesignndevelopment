@@ -560,10 +560,9 @@ async function processResults() {
             </div>
         </div>`;
 
-    if (window.parent) {
-        window.parent.postMessage({ type: 'diagnostic_complete', score: finalScore }, '*');
-    }
-    
+    // Use opener for new-window context (CS), fall back to parent for iframe context (WD)
+    (window.opener || window.parent || window).postMessage({ type: 'diagnostic_complete', score: finalScore }, '*');
+
 // B. SYNC PRE-ASSESSMENT TO GRADEBOOK - 15 POINTS FIXED
     // Web Design diagnostic AND CS Pre-Assessment both get fixed 15 points when completed
     try {
@@ -631,10 +630,8 @@ async function processResults() {
 
 // Return to Workspace function - properly redirects back to cs-interactive
 function returnToWorkspace() {
-    // Notify parent that diagnostic is complete
-    if (window.parent) {
-        window.parent.postMessage({ type: 'diagnostic_complete', score: finalScore }, '*');
-    }
+    // Notify parent that diagnostic is complete (use opener for new-window, parent for iframe)
+    (window.opener || window.parent || window).postMessage({ type: 'diagnostic_complete', score: finalScore }, '*');
     // Clear lastPage to prevent redirect loop back to quiz
     try {
         localStorage.removeItem('lastPage');
