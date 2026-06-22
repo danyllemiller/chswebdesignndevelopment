@@ -13,6 +13,7 @@ const TYPE_CONFIG = {
     B_MIN: { bg: '#c3e3c2', text: '#1a3a1a', border: '#88be86', label: 'B Min Day' },
     OFF:   { bg: '#fef9d0', text: '#5c4800', border: '#e6d000', label: 'No School' },
     C:     { bg: '#f5e6dc', text: '#7a2a0a', border: '#e0b89a', label: 'All Periods' },
+    S:     { bg: '#ffe8cc', text: '#7a3800', border: '#ff9944', label: 'Summer School' },
     none:  { bg: null,      text: null,      border: null,      label: ''          },
 };
 
@@ -40,22 +41,16 @@ async function getBellSchedule() {
     return bellScheduleCache;
 }
 
-// Returns the schedule_type key to look up in bell_schedule, or null
-// The calendar event type (A, A_MIN, B, C) IS the key — no day-of-week logic needed.
+// Returns the schedule_type key to look up in bell_schedule, or null.
+// The calendar event type IS the key: S → 'summer', A/A_MIN/B/B_MIN/C → direct match.
 function getBellScheduleKey(dateStr) {
     if (specialDates.get(dateStr)?.type === 'OFF') return null;
     const jsDay = new Date(dateStr + 'T00:00:00').getDay();
     if (jsDay === 0 || jsDay === 6) return null;
-    const { summer_start: ss, summer_end: se, regular_start: rs, regular_end: re } = schoolConfig;
-    // Summer school: override with 'summer' key
-    const isSummer = (ss && se) ? (dateStr >= ss && dateStr <= se)
-                                 : (+dateStr.split('-')[1] >= 6 && +dateStr.split('-')[1] <= 8);
-    if (isSummer) return 'summer';
-    // Regular year: check date range
-    if (rs && re && (dateStr < rs || dateStr > re)) return null;
     const calType = specialDates.get(dateStr)?.type;
     if (!calType || calType === 'none') return null;
-    return calType; // 'A', 'A_MIN', 'B', 'C', 'B_MIN' — direct match to schedule_type
+    if (calType === 'S') return 'summer';
+    return calType; // 'A', 'A_MIN', 'B', 'B_MIN', 'C'
 }
 
 // ─── Bootstrap ──────────────────────────────────────────────────────────────
@@ -259,7 +254,7 @@ function renderMonth() {
 
 // ─── Sidebar Detail ───────────────────────────────────────────────────────────
 
-const EVENT_TYPE_PRI = { A:6, B:5, C:4, A_MIN:3, B_MIN:2, OFF:1, none:0 };
+const EVENT_TYPE_PRI = { A:6, B:5, C:4, A_MIN:3, B_MIN:2, S:2, OFF:1, none:0 };
 
 function mergeEventIntoSpecialDates(ev) {
     const isLabel = ev.title === (TYPE_CONFIG[ev.type]?.label ?? '') && !ev.description;
