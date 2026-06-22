@@ -457,48 +457,87 @@
   font-size: 0.85rem;
 }
 
-/* ── Week View ──────────────────────────────────────────────────────────────── */
-.week-view { display: flex; flex-direction: column; gap: 0.5rem; }
-
-.week-day-row {
+/* ── Time Grid (Week & Day views) ───────────────────────────────────────────── */
+.tg-view {
   display: flex; flex-direction: column;
-  padding: 0.6rem 0.9rem;
-  border-radius: 0.5rem;
-  border: 1px solid #dee2e6;
-  cursor: pointer;
-  transition: opacity .15s;
-}
-.week-day-row:hover { opacity: .85; }
-.week-day--today  { box-shadow: 0 0 0 2px #0d6efd; }
-.week-day--selected { box-shadow: 0 0 0 2px #198754; }
-
-.week-day-header { display: flex; align-items: center; gap: 0.4rem; font-weight: 600; }
-.week-day-name   { min-width: 2.5rem; }
-.week-day-date   { font-size: .85rem; color: inherit; opacity: .8; }
-.week-day-desc   { font-size: .82rem; opacity: .85; }
-
-/* ── Day View ───────────────────────────────────────────────────────────────── */
-.day-view { display: flex; flex-direction: column; gap: 0.75rem; }
-
-.day-view-banner {
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+  border: 1px solid #dee2e6; border-radius: .5rem;
+  overflow: hidden; background: #fff;
 }
 
-.day-view-schedule h6 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
-
-.bell-period-row {
-  display: flex; align-items: center; gap: 0.75rem;
-  padding: 0.55rem 0.9rem;
-  border-radius: 0.45rem;
-  color: #fff;
-  margin-bottom: 0.4rem;
-  font-size: .9rem;
+.tg-header {
+  display: flex;
+  border-bottom: 2px solid #dee2e6;
+  position: sticky; top: 0; z-index: 2; background: #fff;
 }
-.bell-period-label  { font-weight: 700; min-width: 3rem; }
-.bell-period-course { flex: 1; opacity: .9; }
-.bell-period-time   { margin-left: auto; white-space: nowrap; font-size: .82rem; opacity: .9; }
+
+.tg-header-gutter { width: 60px; min-width: 60px; border-right: 1px solid #dee2e6; }
+
+.tg-day-header {
+  flex: 1; text-align: center;
+  padding: .4rem .25rem .35rem;
+  border-left: 1px solid #dee2e6;
+  cursor: pointer; font-size: .78rem;
+  transition: filter .15s;
+}
+.tg-day-header:hover { filter: brightness(.95); }
+.tg-day-header--single { cursor: default; }
+.tg-day-header--single:hover { filter: none; }
+
+.tg-day-name { font-size: .65rem; font-weight: 700; letter-spacing: .06em; opacity: .75; }
+.tg-day-num-wrap { display: flex; justify-content: center; margin: 1px 0; }
+.tg-day-num {
+  font-size: 1.15rem; font-weight: 300; line-height: 1.2;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+}
+.tg-today-circle { background: #0d6efd; color: #fff; font-weight: 500; }
+.tg-today  { box-shadow: inset 0 -3px 0 #0d6efd; }
+.tg-selected { box-shadow: inset 0 -3px 0 #198754; }
+
+.tg-body {
+  display: flex; overflow-y: auto; position: relative;
+}
+
+.tg-time-col {
+  width: 60px; min-width: 60px;
+  border-right: 1px solid #dee2e6;
+}
+.tg-hour-cell {
+  height: 56px;
+  padding: 3px 6px 0 0;
+  font-size: .65rem; color: #6c757d; text-align: right;
+  border-top: 1px solid #dee2e6;
+}
+.tg-hour-cell:first-child { border-top: none; }
+
+.tg-days-area { flex: 1; display: grid; position: relative; }
+
+.tg-day-col {
+  border-left: 1px solid #dee2e6;
+  position: relative;
+}
+
+.tg-hour-line {
+  position: absolute; left: 0; right: 0;
+  border-top: 1px solid #e9ecef;
+  pointer-events: none;
+}
+
+.tg-event {
+  position: absolute; left: 3px; right: 3px;
+  border-radius: 4px;
+  padding: 2px 5px;
+  color: #fff; font-size: .72rem;
+  overflow: hidden; z-index: 1;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.tg-event-label { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tg-event-time  { font-size: .65rem; opacity: .88; }
+
+.tg-no-schedule {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  font-size: .82rem; color: #adb5bd; text-align: center; width: 80%;
+}
 
 /* ── Events List View ───────────────────────────────────────────────────────── */
 .events-list { display: flex; flex-direction: column; gap: 0.35rem; }

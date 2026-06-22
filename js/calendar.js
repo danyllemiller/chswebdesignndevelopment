@@ -322,60 +322,132 @@ function navigateCalendar(dir) {
     renderCurrentView();
 }
 
+// ─── Time Grid Helpers ────────────────────────────────────────────────────────
+
+const HOUR_PX    = 56;
+const GRID_START = 7;   // 7 AM
+const GRID_END   = 18;  // 6 PM
+
+function tgTimeToTop(hhmm) {
+    const [h, m] = hhmm.split(':').map(Number);
+    return ((h * 60 + m) - GRID_START * 60) * (HOUR_PX / 60);
+}
+function tgDuration(startHhmm, endHhmm) {
+    const [hs, ms] = startHhmm.split(':').map(Number);
+    const [he, me] = endHhmm.split(':').map(Number);
+    return ((he * 60 + me) - (hs * 60 + ms)) * (HOUR_PX / 60);
+}
+function tgHourRows() {
+    let s = '';
+    for (let h = GRID_START; h < GRID_END; h++) {
+        s += `<div class="tg-hour-cell">${formatTime12(String(h).padStart(2,'0') + ':00')}</div>`;
+    }
+    return s;
+}
+function tgHourLines() {
+    let s = '';
+    for (let h = GRID_START; h < GRID_END; h++) {
+        s += `<div class="tg-hour-line" style="top:${(h - GRID_START) * HOUR_PX}px"></div>`;
+    }
+    return s;
+}
+function tgEventBlocks(periods, labelColors) {
+    const totalPx = (GRID_END - GRID_START) * HOUR_PX;
+    return periods.map(p => {
+        const top    = Math.max(0, tgTimeToTop(p.start_time));
+        const height = Math.max(18, tgDuration(p.start_time, p.end_time));
+        if (top >= totalPx) return '';
+        return `<div class="tg-event" style="top:${top}px;height:${height}px;background:${labelColors[p.period_label] || '#888'}">
+            <div class="tg-event-label">${p.period_label}${p.course_name ? ' · ' + p.course_name : ''}</div>
+            <div class="tg-event-time">${formatTime12(p.start_time)}–${formatTime12(p.end_time)}</div>
+        </div>`;
+    }).join('');
+}
+function tgLabelColors(periods) {
+    const map = {}; let i = 0;
+    periods.forEach(p => { if (!map[p.period_label]) map[p.period_label] = PERIOD_COLORS[i++ % PERIOD_COLORS.length]; });
+    return map;
+}
+
 // ─── Week View ────────────────────────────────────────────────────────────────
 
-function renderWeekView() {
+async function renderWeekView() {
     const listView = document.getElementById('events-list-view');
     if (!listView) return;
+
+    listView.innerHTML = '<p class="small text-muted p-3">Loading…</p>';
 
     const anchor = new Date((selectedDate || isoDate(currentYear, currentMonth + 1, 1)) + 'T00:00:00');
     const sunday = new Date(anchor);
     sunday.setDate(anchor.getDate() - anchor.getDay());
-
-    const endSat = new Date(sunday);
-    endSat.setDate(sunday.getDate() + 6);
+    const endSat = new Date(sunday); endSat.setDate(sunday.getDate() + 6);
 
     const monthLabel = document.getElementById('month-label');
     if (monthLabel) {
         const s = sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const e = endSat.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const e = endSat.toLocaleDateString('en-US',  { month: 'short', day: 'numeric', year: 'numeric' });
         monthLabel.textContent = `${s} – ${e}`;
     }
 
     const todayStr = isoDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
+    const schedule = await getBellSchedule();
 
-    let html = '<div class="week-view">';
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(sunday);
-        d.setDate(sunday.getDate() + i);
+    // Build day data array
+    const days = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(sunday); d.setDate(sunday.getDate() + i);
         const dateStr = isoDate(d.getFullYear(), d.getMonth() + 1, d.getDate());
-        const info = specialDates.get(dateStr);
-        const cfg  = info ? (TYPE_CONFIG[info.type] || TYPE_CONFIG.none) : null;
+        const info    = specialDates.get(dateStr);
+        const cfg     = info ? (TYPE_CONFIG[info.type] || TYPE_CONFIG.none) : null;
+        const dayKey  = getBellDayKey(dateStr, schedule);
+        const periods = dayKey ? schedule.filter(r => r.schedule_type === dayKey).sort((a,b) => a.start_time.localeCompare(b.start_time)) : [];
+        const colors  = tgLabelColors(periods);
+        return { d, dateStr, info, cfg, periods, colors };
+    });
+
+    // Header
+    const headerCols = days.map(({ d, dateStr, cfg }) => {
         const isToday = dateStr === todayStr;
         const isSel   = dateStr === selectedDate;
-        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
-        const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const borderColor = cfg?.border || (isToday ? '#0d6efd' : '#dee2e6');
-        const classes = ['week-day-row', isToday ? 'week-day--today' : '', isSel ? 'week-day--selected' : ''].filter(Boolean).join(' ');
-        html += `<div class="${classes}" data-date="${dateStr}"
-                      style="border-left:5px solid ${borderColor};${cfg?.bg ? `background:${cfg.bg};color:${cfg.text}` : ''}">
-            <div class="week-day-header">
-                <span class="week-day-name">${dayName}</span>
-                <span class="week-day-date">${dateLabel}</span>
-                ${isToday ? '<span class="badge bg-primary ms-2 py-0">Today</span>' : ''}
-                ${cfg?.label ? `<span class="day-type-chip ms-auto">${cfg.label}</span>` : ''}
-            </div>
-            ${info?.description ? `<div class="week-day-desc small mt-1">${info.description}</div>` : ''}
+        const name    = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+        const num     = d.getDate();
+        const hdStyle = cfg?.bg ? `background:${cfg.bg};color:${cfg.text}` : '';
+        return `<div class="tg-day-header${isToday ? ' tg-today' : ''}${isSel ? ' tg-selected' : ''}"
+                     style="${hdStyle}" data-date="${dateStr}">
+            <div class="tg-day-name">${name}</div>
+            <div class="tg-day-num-wrap"><span class="tg-day-num${isToday ? ' tg-today-circle' : ''}">${num}</span></div>
+            ${cfg?.label ? `<div style="font-size:.62rem;margin-top:2px;opacity:.85">${cfg.label}</div>` : ''}
+            ${cfg?.bg && days.find(dy => dy.dateStr === dateStr)?.info?.description
+                ? `<div style="font-size:.6rem;opacity:.75;overflow:hidden;max-height:1.8em">${days.find(dy => dy.dateStr === dateStr).info.description}</div>` : ''}
         </div>`;
-    }
-    html += '</div>';
-    listView.innerHTML = html;
+    }).join('');
 
-    listView.querySelectorAll('.week-day-row').forEach(row => {
-        row.addEventListener('click', () => {
-            selectedDate = row.dataset.date;
-            const [y, m] = selectedDate.split('-').map(Number);
-            currentYear = y; currentMonth = m - 1;
+    // Day columns
+    const dayCols = days.map(({ dateStr, periods, colors }) =>
+        `<div class="tg-day-col" data-date="${dateStr}">
+            ${tgHourLines()}
+            ${tgEventBlocks(periods, colors)}
+        </div>`
+    ).join('');
+
+    const bodyH = (GRID_END - GRID_START) * HOUR_PX;
+
+    listView.innerHTML = `
+    <div class="tg-view">
+        <div class="tg-header">
+            <div class="tg-header-gutter"></div>
+            ${headerCols}
+        </div>
+        <div class="tg-body" style="height:${bodyH}px">
+            <div class="tg-time-col">${tgHourRows()}</div>
+            <div class="tg-days-area" style="grid-template-columns:repeat(7,1fr)">${dayCols}</div>
+        </div>
+    </div>`;
+
+    listView.querySelectorAll('.tg-day-header').forEach(h => {
+        h.addEventListener('click', () => {
+            selectedDate = h.dataset.date;
+            const [y, mo] = selectedDate.split('-').map(Number);
+            currentYear = y; currentMonth = mo - 1;
             updateDaySidebar(selectedDate);
             renderWeekView();
         });
@@ -390,7 +462,7 @@ async function renderDayView() {
 
     const dateStr = selectedDate || isoDate(currentYear, currentMonth + 1, 1);
     const [y, m, d] = dateStr.split('-').map(Number);
-    const dateObj = new Date(y, m - 1, d);
+    const dateObj   = new Date(y, m - 1, d);
 
     const monthLabel = document.getElementById('month-label');
     if (monthLabel) {
@@ -400,73 +472,49 @@ async function renderDayView() {
     }
 
     updateDaySidebar(dateStr);
+    listView.innerHTML = '<p class="small text-muted p-3">Loading…</p>';
 
-    const info = specialDates.get(dateStr);
-    const cfg  = info ? (TYPE_CONFIG[info.type] || TYPE_CONFIG.none) : null;
-    const jsDay = dateObj.getDay();
-    const isWeekend = jsDay === 0 || jsDay === 6;
+    const info     = specialDates.get(dateStr);
+    const cfg      = info ? (TYPE_CONFIG[info.type] || TYPE_CONFIG.none) : null;
+    const schedule = await getBellSchedule();
+    const dayKey   = getBellDayKey(dateStr, schedule);
+    const periods  = dayKey
+        ? schedule.filter(r => r.schedule_type === dayKey).sort((a,b) => a.start_time.localeCompare(b.start_time))
+        : [];
+    const colors   = tgLabelColors(periods);
 
-    let html = '<div class="day-view">';
+    const todayStr = isoDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
+    const isToday  = dateStr === todayStr;
+    const hdStyle  = cfg?.bg ? `background:${cfg.bg};color:${cfg.text}` : 'background:#f8f9fa;color:#495057';
 
-    // Day type banner
-    if (cfg?.bg) {
-        html += `<div class="day-view-banner" style="background:${cfg.bg};color:${cfg.text};border-left:6px solid ${cfg.border}">
-            <strong>${cfg.label}</strong>
-            ${info.description ? `<span class="ms-3 small">${info.description}</span>` : ''}
-        </div>`;
-    } else {
-        html += `<div class="day-view-banner" style="border-left:6px solid #dee2e6;background:#f8f9fa;color:#6c757d">
-            <strong>${isWeekend ? 'Weekend' : 'No schedule type set for this day'}</strong>
-        </div>`;
-    }
+    const headerHtml = `
+    <div class="tg-day-header tg-day-header--single${isToday ? ' tg-today' : ''}" style="${hdStyle}">
+        <div class="tg-day-name">${dateObj.toLocaleDateString('en-US',{weekday:'long'}).toUpperCase()}</div>
+        <div class="tg-day-num-wrap">
+            <span class="tg-day-num${isToday ? ' tg-today-circle' : ''}">${d}</span>
+        </div>
+        ${cfg?.label ? `<div style="font-size:.75rem;margin-top:2px">${cfg.label}</div>` : ''}
+        ${info?.description ? `<div style="font-size:.72rem;opacity:.8;margin-top:2px">${info.description}</div>` : ''}
+    </div>`;
 
-    // Bell schedule
-    if (!isWeekend) {
-        listView.innerHTML = html + '<p class="small text-muted mt-3">Loading bell schedule…</p></div>';
-        const schedule = await getBellSchedule();
-        const dayKey   = getBellDayKey(dateStr, schedule);
-        const periods  = schedule
-            .filter(r => r.schedule_type === dayKey)
-            .sort((a, b) => a.start_time.localeCompare(b.start_time));
+    const bodyH = (GRID_END - GRID_START) * HOUR_PX;
+    const noSchd = !periods.length
+        ? `<div class="tg-no-schedule">No bell schedule configured for this day.</div>`
+        : tgEventBlocks(periods, colors);
 
-        html = '<div class="day-view">';
-        if (cfg?.bg) {
-            html += `<div class="day-view-banner" style="background:${cfg.bg};color:${cfg.text};border-left:6px solid ${cfg.border}">
-                <strong>${cfg.label}</strong>
-                ${info?.description ? `<span class="ms-3 small">${info.description}</span>` : ''}
-            </div>`;
-        } else {
-            html += `<div class="day-view-banner" style="border-left:6px solid #dee2e6;background:#f8f9fa;color:#6c757d">
-                <strong>No schedule type set for this day</strong>
-            </div>`;
-        }
-
-        if (periods.length) {
-            // Assign a color per unique section label
-            const labelColors = {};
-            let colorIdx = 0;
-            periods.forEach(p => {
-                if (!labelColors[p.period_label]) {
-                    labelColors[p.period_label] = PERIOD_COLORS[colorIdx++ % PERIOD_COLORS.length];
-                }
-            });
-            html += '<div class="day-view-schedule mt-3"><h6 class="text-muted fw-semibold mb-2">Bell Schedule</h6>';
-            periods.forEach(p => {
-                const color = labelColors[p.period_label];
-                html += `<div class="bell-period-row" style="background:${color}">
-                    <span class="bell-period-label">${p.period_label}</span>
-                    ${p.course_name ? `<span class="bell-period-course">${p.course_name}</span>` : ''}
-                    <span class="bell-period-time">${formatTime12(p.start_time)} – ${formatTime12(p.end_time)}</span>
-                </div>`;
-            });
-            html += '</div>';
-        } else {
-            html += '<p class="small text-muted mt-3 fst-italic">No bell schedule configured for this day. Use Manage Bell Schedule to set it up.</p>';
-        }
-    }
-
-    html += '</div>';
-    listView.innerHTML = html;
+    listView.innerHTML = `
+    <div class="tg-view">
+        <div class="tg-header">
+            <div class="tg-header-gutter"></div>
+            ${headerHtml}
+        </div>
+        <div class="tg-body" style="height:${bodyH}px">
+            <div class="tg-time-col">${tgHourRows()}</div>
+            <div class="tg-days-area" style="grid-template-columns:1fr">
+                <div class="tg-day-col">${tgHourLines()}${noSchd}</div>
+            </div>
+        </div>
+    </div>`;
 }
 
 // ─── Events List View ─────────────────────────────────────────────────────────
