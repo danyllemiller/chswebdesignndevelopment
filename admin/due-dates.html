@@ -891,37 +891,56 @@ async function autoSchedule() {
     if (!calMap[d] || p > (PRI[calMap[d]] || 0)) calMap[d] = ev.type;
   }
 
-  if (!Object.keys(calMap).length) {
+  const totalEvents = Object.keys(calMap).length;
+  if (!totalEvents) {
     status.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>No school calendar found. Import a school calendar CSV first, then retry.</span>';
     return;
   }
 
+  const calDates = Object.keys(calMap).sort();
   let assigned = 0;
+  const debugLines = [`<b>Calendar loaded:</b> ${totalEvents} days (${calDates[0]} → ${calDates[calDates.length-1]})`];
 
   if (currentCourse === 'cs') {
     if (!cfg.csSemStart || !cfg.csSemEnd) { status.innerHTML = '<span class="text-warning">Enter a semester start date and final exam date.</span>'; return; }
     if (!cfg.csPeriods.length)            { status.innerHTML = '<span class="text-warning">Check at least one CS period.</span>'; return; }
+
+    // Diagnostic: show meeting days found per prefix
+    const byPfx = {};
+    for (const p of cfg.csPeriods) {
+      const m = p.match(/([AB])\d/i);
+      const pf = m && m[1].toUpperCase() === 'B' ? 'B' : 'A';
+      (byPfx[pf] = byPfx[pf] || []).push(p);
+    }
+    for (const [pf, ps] of Object.entries(byPfx)) {
+      const days = getMeetingDays(calMap, pf, cfg.csSemStart, cfg.csSemEnd);
+      debugLines.push(`<b>${pf}-day periods</b> (${ps.join(', ')}): <b>${days.length}</b> meeting days between ${cfg.csSemStart} → ${cfg.csSemEnd}`);
+    }
+
     assigned += scheduleBlock(collectCSIds(), cfg.csPeriods, cfg.csSemStart, cfg.csSemEnd, calMap);
   } else {
     if (!cfg.wdPeriods.length) { status.innerHTML = '<span class="text-warning">Check at least one WD period.</span>'; return; }
     const ranges = [
-      { chStart: 1,  chEnd: 4,  start: cfg.wd1S1Start, end: cfg.wd1S1End  },
-      { chStart: 5,  chEnd: 8,  start: cfg.wd1S2Start, end: cfg.wd1S2End  },
-      { chStart: 9,  chEnd: 12, start: cfg.wd2S1Start, end: cfg.wd2S1End  },
-      { chStart: 13, chEnd: 16, start: cfg.wd2S2Start, end: cfg.wd2S2End  },
+      { chStart: 1,  chEnd: 4,  start: cfg.wd1S1Start, end: cfg.wd1S1End,  label: 'WD1 Sem1 (Ch 1–4)'   },
+      { chStart: 5,  chEnd: 8,  start: cfg.wd1S2Start, end: cfg.wd1S2End,  label: 'WD1 Sem2 (Ch 5–8)'   },
+      { chStart: 9,  chEnd: 12, start: cfg.wd2S1Start, end: cfg.wd2S1End,  label: 'WD2 Sem1 (Ch 9–12)'  },
+      { chStart: 13, chEnd: 16, start: cfg.wd2S2Start, end: cfg.wd2S2End,  label: 'WD2 Sem2 (Ch 13–16)' },
     ];
     for (const r of ranges) {
-      if (!r.start || !r.end) continue;
+      if (!r.start || !r.end) { debugLines.push(`<b>${r.label}:</b> skipped (no dates set)`); continue; }
+      const testDays = getMeetingDays(calMap, 'A', r.start, r.end);
+      debugLines.push(`<b>${r.label}:</b> ${testDays.length} A-day meetings between ${r.start} → ${r.end}`);
       assigned += scheduleBlock(collectWDIds(r.chStart, r.chEnd), cfg.wdPeriods, r.start, r.end, calMap);
     }
   }
 
   render();
 
+  const diag = `<div class="mt-2 p-2 rounded small" style="background:#f8f9fa;border:1px solid #dee2e6;font-family:monospace;line-height:1.9">${debugLines.join('<br>')}</div>`;
   if (!assigned) {
-    status.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>No meeting days found in those date ranges. Verify the calendar has A/B/C days imported for those months.</span>';
+    status.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>No assignments scheduled — check the details below:</span>' + diag;
   } else {
-    status.innerHTML = `<span class="text-success"><i class="fas fa-check me-1"></i>${assigned} assignment(s) auto-scheduled. Review the dates below, then click Save.</span>`;
+    status.innerHTML = `<span class="text-success"><i class="fas fa-check me-1"></i>${assigned} assignment(s) auto-scheduled. Review dates below, then click Save.</span>` + diag;
   }
 }
 
