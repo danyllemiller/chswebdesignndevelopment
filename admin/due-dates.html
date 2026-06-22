@@ -928,10 +928,12 @@ async function autoSchedule() {
 function scheduleBlock(examIds, selPeriods, start, end, calMap) {
   if (!examIds.length || !start || !end) return 0;
 
-  // Group periods by A or B prefix
+  // Group periods by A or B — look for A/B followed by a digit anywhere in the name
+  // Handles names like "CS-A5", "WD1-B4", "A1", "B4", etc.
   const byPrefix = {};
   for (const p of selPeriods) {
-    const prefix = /^[Bb]/.test(p) ? 'B' : 'A';
+    const m = p.match(/([AB])\d/i);
+    const prefix = m && m[1].toUpperCase() === 'B' ? 'B' : 'A';
     (byPrefix[prefix] = byPrefix[prefix] || []).push(p);
   }
 
