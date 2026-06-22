@@ -20,7 +20,7 @@ while ($row = $result->fetch_assoc()) {
 // Distinct class periods from roster
 $sections = [];
 $sr = $db->query(
-    "SELECT DISTINCT section_id FROM users
+    "SELECT DISTINCT section_id FROM students
      WHERE section_id IS NOT NULL AND section_id != ''
      ORDER BY section_id"
 );
