@@ -177,6 +177,19 @@ Both layers share the same MariaDB database (`chs_gradebook`), but use different
 **Notes:** Deletes ALL rows from `grades` and `exams`. Irreversible without a DB backup.  
 **Called by:** `js/admin/gradebook.js`
 
+#### `GET /api/admin/get-due-dates.php`
+**File:** `api/admin/get-due-dates.php`  
+**Response:** `{ exams: { [exam_id]: { exam_id, title, total_points, course_id, due_date, period_due_dates } }, sections: ["A1","B2",...] }`  
+**Notes:** Returns all rows from `exams` table keyed by `exam_id`, plus distinct `section_id` values from the `users` table (for the period-date dropdowns in the Due Date Manager).  
+**Called by:** `admin/due-dates.html` on page load
+
+#### `POST /api/admin/save-due-dates.php`
+**File:** `api/admin/save-due-dates.php`  
+**Request body:** `{ assignments: [{ exam_id, title, total_points, course_id, due_date, period_due_dates }], sync_calendar: bool }`  
+**Response:** `{ success: true, exams_saved: number, calendar_synced: number }`  
+**Notes:** Upserts all assignments to the `exams` table (`INSERT … ON DUPLICATE KEY UPDATE`). If `sync_calendar` is true: deletes all `calendar_events` rows with `source='due_date'`, then inserts fresh events for every assignment with a due date (type `none`, title `"{assignment} Due"`). Period-specific dates create additional events labeled `"{assignment} Due – Period {id}"`. Sending a null `due_date` for an existing assignment clears it in both the `exams` row and calendar.  
+**Called by:** `admin/due-dates.html` Save buttons
+
 ---
 
 ### Appointments

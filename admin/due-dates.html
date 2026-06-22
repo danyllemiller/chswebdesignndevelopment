@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Due Date Manager | CHS Admin</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { background: #f8f9fa; }
+    .section-card { border-left: 5px solid var(--primary-color); margin-bottom: 1.5rem; }
+    .section-card.wd { border-left-color: #6f42c1; }
+    .section-card .card-header { background: #f1f3ff; font-weight: 700; color: var(--primary-color); }
+    .section-card.wd .card-header { background: #f3f0ff; color: #6f42c1; }
+
+    .assignment-row { display: grid; grid-template-columns: 2fr 1fr 40px; gap: 0.5rem; align-items: center; padding: 0.5rem 1rem; border-bottom: 1px solid #eee; }
+    .assignment-row:last-child { border-bottom: none; }
+    .assignment-row.type-exam .asgn-label { font-weight: 700; color: #856404; }
+    .assignment-row.type-pre  .asgn-label { font-weight: 600; color: #0c6efd; }
+    .assignment-row.type-chapter .asgn-label { color: #444; font-size: 0.92rem; }
+    .assignment-row.type-final .asgn-label { font-weight: 800; color: #198754; }
+
+    .period-rows { background: #f9f9f9; border-top: 1px dashed #ddd; padding: 0.4rem 1rem 0.5rem 2rem; display: none; }
+    .period-rows.open { display: block; }
+    .period-row { display: grid; grid-template-columns: 100px 1fr; gap: 0.5rem; align-items: center; margin-bottom: 0.25rem; font-size: 0.85rem; }
+
+    .type-badge { font-size: 0.68rem; padding: 1px 6px; border-radius: 4px; vertical-align: middle; }
+    .badge-exam    { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+    .badge-pre     { background: #cfe2ff; color: #084298; border: 1px solid #9ec5fe; }
+    .badge-chapter { background: #e2e3e5; color: #41464b; border: 1px solid #ced4da; }
+    .badge-final   { background: #d1e7dd; color: #0f5132; border: 1px solid #a3cfbb; }
+
+    #shift-panel { background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; }
+
+    .save-bar { position: sticky; bottom: 0; background: white; border-top: 2px solid #dee2e6; padding: 1rem 1.5rem; z-index: 100; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+
+    input[type=date]::-webkit-calendar-picker-indicator { opacity: 0.5; cursor: pointer; }
+    input[type=date].has-date { border-color: #198754; background: #f0fff4; }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid sticky-top px-0 no-print">
+  <div id="nav-placeholder"></div>
+</div>
+
+<div class="container-xl my-4 px-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-3">
+    <div>
+      <h2 class="gochi text-primary mb-0"><i class="fas fa-calendar-alt me-2"></i>Scope &amp; Sequence — Due Date Manager</h2>
+      <p class="text-muted mb-0">Set assignment due dates. Dates sync to the school calendar automatically.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <button class="btn btn-outline-secondary btn-sm" onclick="exportCSV()"><i class="fas fa-download me-1"></i>Export CSV</button>
+      <label class="btn btn-outline-secondary btn-sm mb-0">
+        <i class="fas fa-upload me-1"></i>Import CSV
+        <input type="file" accept=".csv" class="d-none" onchange="importCSV(event)">
+      </label>
+    </div>
+  </div>
+
+  <!-- Course Tabs -->
+  <ul class="nav nav-tabs mb-3" id="courseTabs">
+    <li class="nav-item">
+      <button class="nav-link active fw-bold" data-course="cs" onclick="switchCourse('cs', this)">
+        <i class="fas fa-terminal me-1"></i> Computer Science
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link fw-bold" data-course="wd" onclick="switchCourse('wd', this)">
+        <i class="fas fa-globe me-1"></i> Web Design
+      </button>
+    </li>
+  </ul>
+
+  <!-- Shift Dates Panel -->
+  <div id="shift-panel">
+    <div class="d-flex flex-wrap align-items-center gap-3">
+      <span class="fw-bold text-secondary"><i class="fas fa-arrows-alt-h me-1"></i> Shift All Dates:</span>
+      <div class="d-flex align-items-center gap-2">
+        <input type="number" id="shiftDays" class="form-control form-control-sm" style="width:90px" placeholder="±days" value="0">
+        <button class="btn btn-sm btn-outline-primary" onclick="shiftAllDates()">Apply Shift</button>
+      </div>
+      <span class="text-muted small">or set new school year start:</span>
+      <div class="d-flex align-items-center gap-2">
+        <span class="small text-muted">Current start:</span>
+        <input type="date" id="oldStartDate" class="form-control form-control-sm" style="width:160px">
+        <span class="small text-muted">→ New start:</span>
+        <input type="date" id="newStartDate" class="form-control form-control-sm" style="width:160px">
+        <button class="btn btn-sm btn-outline-success" onclick="shiftByNewYear()">Recalculate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading spinner -->
+  <div id="loading-state" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-2 text-muted">Loading assignments...</p>
+  </div>
+
+  <!-- Assignment List -->
+  <div id="assignment-list" class="d-none"></div>
+
+  <!-- Sticky Save Bar -->
+  <div class="save-bar">
+    <button class="btn btn-success fw-bold px-4" onclick="saveAll(true)">
+      <i class="fas fa-save me-2"></i>Save All &amp; Sync to Calendar
+    </button>
+    <button class="btn btn-outline-primary" onclick="saveAll(false)">
+      <i class="fas fa-database me-1"></i>Save Only (no calendar sync)
+    </button>
+    <span id="save-status" class="text-muted small ms-2"></span>
+  </div>
+
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script>
+// ─── Course maps ──────────────────────────────────────────────────────────────
+
+const CS_MAP = [
+  { unitNum: 0, unitTitle: 'Unit 0 (Extra Credit): Office Productivity', extraCredit: true, chapters: [
+    { ch: 0, title: 'Ch 0: Intro to Office Software' }
+  ]},
+  { unitNum: 1, unitTitle: 'Unit 1: Digital Skills & Network Safety', chapters: [
+    { ch: 1, title: 'Ch 1: Essential Computer Skills' },
+    { ch: 2, title: 'Ch 2: Ethics, Privacy & Law' },
+    { ch: 3, title: 'Ch 3: Cybersecurity Threats' }
+  ]},
+  { unitNum: 2, unitTitle: 'Unit 2: How Computers Work', chapters: [
+    { ch: 4, title: 'Ch 4: How Computers Work' },
+    { ch: 5, title: 'Ch 5: The Language of Computers' }
+  ]},
+  { unitNum: 3, unitTitle: 'Unit 3: Data & Spreadsheets', chapters: [
+    { ch: 6,  title: 'Ch 6: Storing Data' },
+    { ch: 7,  title: 'Ch 7: Mastering Spreadsheets' },
+    { ch: 8,  title: 'Ch 8: Computational Modeling' }
+  ]},
+  { unitNum: 4, unitTitle: 'Unit 4: Algorithms & Programming', chapters: [
+    { ch: 9,  title: 'Ch 9: Problem Solving & Algorithms' },
+    { ch: 10, title: 'Ch 10: Control Structures & Events' },
+    { ch: 11, title: 'Ch 11: Modularity & Procedures' }
+  ]},
+  { unitNum: 5, unitTitle: 'Unit 5: Society, Culture & Ethics', chapters: [
+    { ch: 12, title: 'Ch 12: Culture, Equity & Bias' },
+    { ch: 13, title: 'Ch 13: Ethics & Societal Impact' }
+  ]},
+  { unitNum: 6, unitTitle: 'Unit 6: Data Structures & SDLC', chapters: [
+    { ch: 14, title: 'Ch 14: Advanced Data Structures' },
+    { ch: 15, title: 'Ch 15: Software Development Lifecycle' }
+  ]},
+  { unitNum: 7, unitTitle: 'Unit 7: Internet & Security', chapters: [
+    { ch: 16, title: 'Ch 16: How the Internet Works' },
+    { ch: 17, title: 'Ch 17: Defending Systems' }
+  ]},
+  { unitNum: 8, unitTitle: 'Unit 8 (Extra Credit): AI & Future Tech', extraCredit: true, chapters: [
+    { ch: 18, title: 'Ch 18: AI & Cross-Disciplinary Tech' }
+  ]}
+];
+
+const WD_CHAPTERS = [
+  { ch: 1,  title: "The Developer's World" },
+  { ch: 2,  title: 'The Rules (How Not to Get Sued)' },
+  { ch: 3,  title: 'The Blueprint' },
+  { ch: 4,  title: 'The Why (Intro to UI/UX)' },
+  { ch: 5,  title: 'The "Bones" (Intro to HTML)' },
+  { ch: 6,  title: 'The "Clothes" (Intro to CSS)' },
+  { ch: 7,  title: 'The Style (Advanced CSS Layout)' },
+  { ch: 8,  title: 'Sights & Sounds (Media & Tables)' },
+  { ch: 9,  title: 'The "Brains" (Intro to JavaScript)' },
+  { ch: 10, title: 'The Game Dev (Advanced JS Game Logic)' },
+  { ch: 11, title: 'The "Cloud" (Collaboration & Hosting)' },
+  { ch: 12, title: 'The "Manager" (CMS Platforms)' },
+  { ch: 13, title: 'The Network (Intro to APIs)' },
+  { ch: 14, title: 'The "Brain" (Databases)' },
+  { ch: 15, title: 'The "Future" (The Game Never Ends)' },
+  { ch: 16, title: 'The "Final Boss" (Going Live)' }
+];
+
+// ─── Title map (exam_id → human label) ───────────────────────────────────────
+
+const TITLE_MAP = (() => {
+  const m = {};
+  for (const unit of CS_MAP) {
+    const n = unit.unitNum;
+    m[`Unit${n}-Pre`]  = `Unit ${n} Pre-Assessment`;
+    m[`Unit${n}-Exam`] = `Unit ${n} Summative Exam`;
+    for (const ch of unit.chapters) m[`Unit${n}-Ch${ch.ch}`] = ch.title;
+  }
+  m['Unit9-Exam'] = 'CS Final Exam';
+  for (const ch of WD_CHAPTERS) {
+    m[`WD-Ch${ch.ch}-Pre`]  = `Ch ${ch.ch} Pre-Assessment`;
+    m[`WD-Ch${ch.ch}-Exam`] = `Ch ${ch.ch}: ${ch.title} – Exam`;
+  }
+  m['WD-Final'] = 'WD Final Capstone Project';
+  return m;
+})();
+
+// ─── State ────────────────────────────────────────────────────────────────────
+
+let existingExams = {};   // exam_id → row from DB
+let periods       = [];   // ['A1','A2','B1','B2',...]
+let currentCourse = 'cs';
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+
+async function init() {
+  try {
+    const res  = await fetch('/api/admin/get-due-dates.php');
+    const data = await res.json();
+    existingExams = data.exams  || {};
+    periods       = data.sections || [];
+    if (periods.length === 0) periods = ['A1','A2','B1','B2'];
+    render();
+    document.getElementById('loading-state').classList.add('d-none');
+    document.getElementById('assignment-list').classList.remove('d-none');
+  } catch(e) {
+    document.getElementById('loading-state').innerHTML = `<div class="alert alert-danger">Failed to load: ${e.message}</div>`;
+  }
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+
+function render() {
+  const el = document.getElementById('assignment-list');
+  el.innerHTML = currentCourse === 'cs' ? renderCS() : renderWD();
+  // Mark inputs that already have dates
+  el.querySelectorAll('input[type=date]').forEach(inp => {
+    if (inp.value) inp.classList.add('has-date');
+    inp.addEventListener('change', function() {
+      this.classList.toggle('has-date', !!this.value);
+    });
+  });
+}
+
+function switchCourse(course, btn) {
+  // Persist any unsaved UI changes before switching
+  captureToState();
+  currentCourse = course;
+  document.querySelectorAll('#courseTabs .nav-link').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function captureToState() {
+  const list = document.getElementById('assignment-list');
+  if (!list) return;
+  list.querySelectorAll('.asgn-date').forEach(inp => {
+    const id = inp.dataset.exam;
+    if (!existingExams[id]) existingExams[id] = { due_date: '', period_due_dates: {} };
+    existingExams[id].due_date = inp.value;
+  });
+  list.querySelectorAll('.period-date').forEach(inp => {
+    const id = inp.dataset.exam;
+    const period = inp.dataset.period;
+    if (!existingExams[id]) existingExams[id] = { due_date: '', period_due_dates: {} };
+    if (!existingExams[id].period_due_dates) existingExams[id].period_due_dates = {};
+    existingExams[id].period_due_dates[period] = inp.value;
+  });
+}
+
+function val(examId) {
+  return existingExams[examId]?.due_date || '';
+}
+function pval(examId, period) {
+  return existingExams[examId]?.period_due_dates?.[period] || '';
+}
+
+function dateInput(examId, type) {
+  const v = val(examId);
+  return `<input type="date" class="form-control form-control-sm asgn-date" data-exam="${examId}" data-type="${type}" value="${v}" style="min-width:155px">`;
+}
+
+function periodToggleBtn(examId) {
+  return `<button class="btn btn-outline-secondary btn-sm py-0 px-1" title="Per-period dates" onclick="togglePeriods('${examId}')">
+    <i class="fas fa-users fa-xs"></i>
+  </button>`;
+}
+
+function periodRows(examId, type) {
+  if (!periods.length) return '';
+  let rows = '';
+  for (const p of periods) {
+    const v = pval(examId, p);
+    rows += `<div class="period-row">
+      <label class="fw-bold text-muted">${p}</label>
+      <input type="date" class="form-control form-control-sm period-date" data-exam="${examId}" data-period="${p}" value="${v}" ${v ? 'style="border-color:#198754;background:#f0fff4"' : ''}>
+    </div>`;
+  }
+  return `<div class="period-rows" id="prows-${examId}">${rows}</div>`;
+}
+
+function assignmentRow(examId, label, type, pts) {
+  const badgeMap = { exam:'badge-exam', pre:'badge-pre', chapter:'badge-chapter', final:'badge-final' };
+  const labelMap = { exam:'Exam', pre:'Pre-Test', chapter:'Notes', final:'Final' };
+  return `
+    <div class="assignment-row type-${type}">
+      <div class="asgn-label">
+        ${label}
+        <span class="type-badge ${badgeMap[type]} ms-1">${labelMap[type]}</span>
+      </div>
+      ${dateInput(examId, type)}
+      ${periodToggleBtn(examId)}
+    </div>
+    ${periodRows(examId, type)}`;
+}
+
+function renderCS() {
+  let html = '';
+
+  for (const unit of CS_MAP) {
+    const n = unit.unitNum;
+    const isBorderClass = unit.extraCredit ? '' : '';
+    html += `<div class="card section-card mb-3">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="fas fa-layer-group me-2"></i>${unit.unitTitle}${unit.extraCredit ? ' <span class="badge bg-secondary ms-2">Extra Credit</span>' : ''}</span>
+      </div>
+      <div class="card-body p-0">`;
+
+    // Pre-assessment
+    html += assignmentRow(`Unit${n}-Pre`, `Unit ${n} Pre-Assessment`, 'pre', 15);
+
+    // Chapter notes
+    for (const ch of unit.chapters) {
+      html += assignmentRow(`Unit${n}-Ch${ch.ch}`, ch.title, 'chapter', 10);
+    }
+
+    // Summative exam
+    html += assignmentRow(`Unit${n}-Exam`, `Unit ${n} Summative Exam`, 'exam', 100);
+
+    html += `</div></div>`;
+  }
+
+  // CS Final
+  html += `<div class="card section-card mb-3" style="border-left-color:#198754">
+    <div class="card-header" style="background:#d1e7dd;color:#0f5132">
+      <i class="fas fa-graduation-cap me-2"></i>CS Final Exam
+    </div>
+    <div class="card-body p-0">
+      ${assignmentRow('Unit9-Exam', 'CS Final Exam', 'final', 100)}
+    </div>
+  </div>`;
+
+  return html;
+}
+
+function renderWD() {
+  let html = '';
+
+  for (const ch of WD_CHAPTERS) {
+    html += `<div class="card section-card wd mb-3">
+      <div class="card-header">
+        <i class="fas fa-globe me-2"></i>Chapter ${ch.ch}: ${ch.title}
+      </div>
+      <div class="card-body p-0">
+        ${assignmentRow(`WD-Ch${ch.ch}-Pre`,  `Ch ${ch.ch} Pre-Assessment`, 'pre', 15)}
+        ${assignmentRow(`WD-Ch${ch.ch}-Exam`, `Ch ${ch.ch}: ${ch.title} — Exam`, 'exam', 100)}
+      </div>
+    </div>`;
+  }
+
+  // WD Final / Capstone
+  html += `<div class="card section-card wd mb-3" style="border-left-color:#6f42c1">
+    <div class="card-header" style="background:#ede0ff;color:#4a2c91">
+      <i class="fas fa-trophy me-2"></i>WD Capstone / Final Project
+    </div>
+    <div class="card-body p-0">
+      ${assignmentRow('WD-Final', 'WD Final Capstone Project', 'final', 100)}
+    </div>
+  </div>`;
+
+  return html;
+}
+
+// ─── Toggle per-period rows ───────────────────────────────────────────────────
+
+function togglePeriods(examId) {
+  const el = document.getElementById(`prows-${examId}`);
+  if (el) el.classList.toggle('open');
+}
+
+// ─── Shift dates ──────────────────────────────────────────────────────────────
+
+function shiftAllDates() {
+  const days = parseInt(document.getElementById('shiftDays').value || '0');
+  if (!days) return;
+  document.querySelectorAll('.asgn-date, .period-date').forEach(inp => {
+    if (!inp.value) return;
+    const d = new Date(inp.value + 'T12:00:00');
+    d.setDate(d.getDate() + days);
+    inp.value = d.toISOString().slice(0, 10);
+    inp.classList.add('has-date');
+  });
+}
+
+function shiftByNewYear() {
+  const oldStart = document.getElementById('oldStartDate').value;
+  const newStart = document.getElementById('newStartDate').value;
+  if (!oldStart || !newStart) { alert('Enter both old and new start dates.'); return; }
+  const diffMs = new Date(newStart + 'T12:00:00') - new Date(oldStart + 'T12:00:00');
+  const diffDays = Math.round(diffMs / 86400000);
+  if (!diffDays) return;
+  document.getElementById('shiftDays').value = diffDays;
+  shiftAllDates();
+}
+
+// ─── Collect assignments from DOM ────────────────────────────────────────────
+
+function collectAssignments() {
+  const list = document.getElementById('assignment-list');
+  const byExam = {};
+
+  // Main due dates
+  list.querySelectorAll('.asgn-date').forEach(inp => {
+    const id   = inp.dataset.exam;
+    const type = inp.dataset.type;
+    if (!byExam[id]) byExam[id] = { exam_id: id, type, due_date: '', period_due_dates: {} };
+    byExam[id].due_date = inp.value;
+  });
+
+  // Period-specific dates
+  list.querySelectorAll('.period-date').forEach(inp => {
+    const id     = inp.dataset.exam;
+    const period = inp.dataset.period;
+    if (!byExam[id]) byExam[id] = { exam_id: id, type: 'unknown', due_date: '', period_due_dates: {} };
+    if (inp.value) byExam[id].period_due_dates[period] = inp.value;
+  });
+
+  // Annotate with title, course_id, total_points
+  const typePoints = { exam: 100, pre: 15, chapter: 10, final: 100 };
+  const assignments = Object.values(byExam).map(a => {
+    const course  = currentCourse;
+    const pts     = typePoints[a.type] || 100;
+    const existing = existingExams[a.exam_id];
+    return {
+      exam_id: a.exam_id,
+      title: TITLE_MAP[a.exam_id] || existing?.title || humanTitle(a.exam_id),
+      total_points: existing?.total_points || pts,
+      course_id: course,
+      due_date: a.due_date || null,
+      period_due_dates: Object.keys(a.period_due_dates).length ? a.period_due_dates : null
+    };
+  });
+
+  return assignments;
+}
+
+function humanTitle(examId) {
+  return examId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// ─── Save ─────────────────────────────────────────────────────────────────────
+
+async function saveAll(syncCal) {
+  const status = document.getElementById('save-status');
+  status.textContent = 'Saving…';
+
+  const assignments = collectAssignments();
+
+  if (!assignments.length) {
+    status.textContent = 'No assignments found.';
+    return;
+  }
+
+  try {
+    const res  = await fetch('/api/admin/save-due-dates.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assignments, sync_calendar: syncCal })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      // Refresh local state
+      withDates.forEach(a => {
+        existingExams[a.exam_id] = {
+          ...existingExams[a.exam_id],
+          ...a,
+          period_due_dates: a.period_due_dates || {}
+        };
+      });
+      const calMsg = syncCal ? ` | ${data.calendar_synced} calendar event(s) synced` : '';
+      status.innerHTML = `<span class="text-success"><i class="fas fa-check me-1"></i>${data.exams_saved} saved${calMsg}</span>`;
+    } else {
+      status.innerHTML = `<span class="text-danger">Error: ${data.error || 'unknown'}</span>`;
+    }
+  } catch(e) {
+    status.innerHTML = `<span class="text-danger">Network error: ${e.message}</span>`;
+  }
+}
+
+// ─── CSV Export ───────────────────────────────────────────────────────────────
+
+function exportCSV() {
+  const list = document.getElementById('assignment-list');
+  const rows = [['exam_id','title','course_id','due_date','type']];
+
+  list.querySelectorAll('.asgn-date').forEach(inp => {
+    if (!inp.value) return;
+    const id   = inp.dataset.exam;
+    const type = inp.dataset.type;
+    const ex   = existingExams[id];
+    const title = ex?.title || humanTitle(id);
+    rows.push([id, title, currentCourse, inp.value, type]);
+  });
+
+  if (rows.length === 1) { alert('No dates set to export.'); return; }
+
+  const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `due-dates-${currentCourse}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ─── CSV Import ───────────────────────────────────────────────────────────────
+
+function importCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    const header = lines[0].toLowerCase().replace(/"/g,'').split(',');
+    const idIdx   = header.indexOf('exam_id');
+    const dateIdx = header.indexOf('due_date');
+    if (idIdx < 0 || dateIdx < 0) { alert('CSV must have exam_id and due_date columns.'); return; }
+
+    let applied = 0;
+    for (let i = 1; i < lines.length; i++) {
+      const cols   = lines[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(c => c.replace(/"/g,'').trim());
+      const examId = cols[idIdx];
+      const date   = cols[dateIdx];
+      if (!examId || !date) continue;
+      const inp = document.querySelector(`.asgn-date[data-exam="${CSS.escape(examId)}"]`);
+      if (inp) { inp.value = date; inp.classList.add('has-date'); applied++; }
+    }
+    alert(`Imported ${applied} date(s). Review and click Save to confirm.`);
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+init();
+</script>
+</body>
+</html>

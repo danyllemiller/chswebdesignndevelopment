@@ -247,7 +247,21 @@ Date,Type,Description
 
 **Valid type codes:** `A`, `B`, `A_MIN`, `B_MIN`, `C`, `S`, `OFF`, `none`
 
-On full page refresh, events reload from DB via `GET /api/events.php`, which returns both `source='csv'` and `source='manual'` rows. CSV-imported events are never affected by the manual "Add Event" modal and vice versa.
+On full page refresh, events reload from DB via `GET /api/events.php`, which returns `source='csv'`, `source='manual'`, and `source='due_date'` rows together. CSV-imported events are never affected by the manual "Add Event" modal and vice versa. Due-date events (from the Due Date Manager) are rebuilt in full on every save of `admin/due-dates.html` — they appear as `type='none'` observance text labeled `"{assignment} Due"`.
+
+### Due Date Events (source='due_date')
+
+The Due Date Manager (`admin/due-dates.html`) populates the calendar with assignment due dates. These are managed separately from CSV and manual events:
+
+| Characteristic | Value |
+|---------------|-------|
+| Source | `due_date` |
+| Type | `none` (observance-only — italic text, no background color) |
+| Title format | `"{Assignment Title} Due"` or `"{Title} Due – Period {A1}"` |
+| Lifecycle | Fully deleted and rebuilt each time the teacher clicks Save in the Due Date Manager |
+| Not affected by | CSV re-import, manual Add Event modal |
+
+Because `source='due_date'` is not 'csv' or 'manual', CSV imports never delete due-date events and the manual event modal never modifies them.
 
 ### mergeEventIntoSpecialDates(ev)
 

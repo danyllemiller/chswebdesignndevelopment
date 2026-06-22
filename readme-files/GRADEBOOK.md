@@ -192,3 +192,105 @@ Teacher-side notebook viewer:
 - Rubric criteria are stored as `criteria_json` — a JSON array of criterion objects with auto-grader rules
 - Rubrics can enable/disable student self-reflection and peer review forms
 - Used by `admin/files.html` auto-grader to select a rubric for code evaluation
+
+---
+
+## Due Date Manager
+
+### Page: `admin/due-dates.html`
+**APIs:** `api/admin/get-due-dates.php` (GET), `api/admin/save-due-dates.php` (POST)  
+**Auth:** Requires teacher role
+
+Allows the teacher to set due dates for all CS and WD assignments in bulk, then sync them to the school calendar.
+
+### Course Maps (inline in admin/due-dates.html)
+
+**CS assignments per unit (Units 0–8):**
+- `Unit${n}-Pre` — Pre-Assessment Diagnostic (15 pts)
+- `Unit${n}-Ch${ch}` — Chapter notes (10 pts, one per chapter in that unit)
+- `Unit${n}-Exam` — Summative Exam (100 pts)
+- `Unit9-Exam` — CS Final Exam (100 pts)
+
+**WD assignments per chapter (Chapters 1–16):**
+- `WD-Ch${n}-Pre` — Pre-Assessment (15 pts)
+- `WD-Ch${n}-Exam` — Chapter Exam (100 pts)
+- `WD-Final` — WD Final Capstone Project (100 pts)
+
+> **Note:** WD chapter exam pages (the-*.html) submit grades as `Unit${n}-Exam` via `examLogicCS.js`. The `WD-Ch${n}-Exam` keys created by the Due Date Manager are used for due-date tracking only and do not currently conflict with gradebook entries.
+
+### Workflow
+
+1. Open Admin → Due Date Manager
+2. Select CS or WD tab (state is preserved when switching)
+3. Fill in date pickers — inputs turn green when a date is set
+4. Click the group icon on any row to expand per-period date pickers (A1, A2, B1, B2, etc.)
+5. Click **Save All & Sync to Calendar** — saves all dates to `exams` table and rebuilds `calendar_events` with `source='due_date'`
+
+### School Year Shift
+
+The shift panel at the top provides two ways to move all dates for a new school year:
+- **±N days:** Enter a positive or negative integer, click "Apply Shift" — all filled-in date inputs shift by that many days
+- **New year start:** Enter the old school year's first day and the new year's first day → days between is computed automatically → shift applied
+
+After shifting, review dates and click Save.
+
+### Export / Import CSV
+
+- **Export:** Downloads a CSV of all currently set dates (`exam_id`, `title`, `course_id`, `due_date`, `type`)
+- **Import:** Upload a CSV with those columns; matching `exam_id` inputs are updated in-page; teacher must still click Save to persist
+
+### Calendar Integration
+
+When the teacher saves with calendar sync enabled, `save-due-dates.php`:
+1. Adds `source` column to `calendar_events` if missing
+2. Deletes all rows with `source = 'due_date'`
+3. Inserts one `type='none'` event per assignment with a due date, titled `"{title} Due"`
+4. Inserts additional events for any period-specific dates, titled `"{title} Due – Period {id}"`
+
+These appear as italic observance text on the school calendar (same styling as `type='none'` events).
+
+---
+
+## CS Interactive Workspace
+
+### Page: `cs-interactive.html`
+**Script:** `js/cs-interactive.js?v=25`  
+**Auth:** Requires CS student or teacher role
+
+The CS Interactive Workspace is the primary learning environment for CS students. It features a two-tier navigation system and manages the flow between curriculum reading, pre-assessment, and summative exams.
+
+### Navigation Structure
+
+**Tier 1 (unit tabs):** Unit 0–8 buttons + green "CS Final Exam" button  
+**Tier 2 (chapter tabs):** Per-unit chapters + PRE (diagnostic), SCALE (self-assessment), and EXAM tabs
+
+### Pre-Assessment (Diagnostic) Gating
+
+When a student selects a unit and the PRE tab is active:
+1. The system checks grades for a `Unit${n}-Pre` key matching the regex `/Unit\s*-?\s*${n}[\s-]*(Diagnostic|Pre-Assessment|Pre)/i`
+2. **Already completed:** Shows a "Retake" button; clicking it opens the pre-assessment in a new window
+3. **Not yet completed:** Auto-opens the pre-assessment in a new window **once per browser session** (guarded by `sessionStorage` key `pretest_opened_u${n}`)
+4. **Locked (no grade):** Shows the pre-assessment inline instead
+
+Pre-assessment pages (`pre-assessments/cs-unit-{0-8}.html`) load `preTestLogicCS.js` which in turn dynamically loads `quizLogic.js`. On completion, the quiz engine sends `window.opener.postMessage({ type: 'diagnostic_complete', score })` — this uses `window.opener` (not `window.parent`) because the pre-assessment runs in a new window.
+
+### Unit Summative Exam
+
+Each unit's EXAM tab directly calls `window.open('/exams/cs-unit-${n}-exam.html', '_blank')` — no overlay or second click required. The exam is gated by:
+- `GLOBAL_BYPASS_CONFIG.requireWorksheets` — currently `false` (worksheets not required)
+- Pre-assessment must be completed (grade check)
+- Exam itself must not already be graded (if already submitted, a different message shows)
+
+### CS Final Exam
+
+The green **CS Final Exam** button (to the right of the Unit 8 tab) opens `/exams/cs-final-exam.html` directly in one click if Units 1–7 summative exams are all graded. Units 0 and 8 are extra credit and not required. If requirements are not met, clicking the button renders a "locked" overlay listing which unit exams are still missing.
+
+Grade key: `Unit9-Exam` (submitted by `exams/cs-final-exam.html` via `initAdaptiveExam({ unit: 9 })`)
+
+### Exam Engine (`js/examLogicCS.js`)
+
+Used by all CS unit exams, the CS final exam, and all WD chapter exams. Key behaviors:
+- `ENABLE_WORKSHEET = true` activates two-column layout: quiz (col-lg-5) + cs-notebook.html iframe (col-lg-7)
+- `initAdaptiveExam` is an alias for `initExam`
+- Grade keys: CS exams → `Unit${n}-Exam`; WD exams → `Unit${chapterNum}-Exam` (derived from `chapterTitle` match on `/(?:unit|chapter|ch)\s*(\d+)/i`)
+- Scores are submitted to `api/submit-exam.php` and kept at highest score (no overwrite if lower)

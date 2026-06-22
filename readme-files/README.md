@@ -9,6 +9,8 @@ This is the teacher-owned classroom website for Ms. Danylle Miller's Web Design 
 - A **student portal** (grade viewer, digital notebooks, file manager, appointment booking)
 - A **calendar system** with bell schedule, CSV import, office-hours, and appointment booking
 - An **exam/quiz engine** for CS and Web Design review games
+- A **CS Interactive Workspace** with two-tier unit/chapter navigation, pre-assessment diagnostics, summative exam launcher, and CS Final Exam
+- A **Due Date Manager** for bulk-setting assignment due dates that auto-sync to the school calendar
 
 ---
 
@@ -118,6 +120,14 @@ Login stores the user object in `localStorage` under the key `user`. The `auth-g
 /admin/files.html           → Student file explorer (teacher only)
 /admin/notebooks.html       → Student notebook viewer (teacher only)
 /admin/rubrics.html         → Rubric manager (teacher only)
+/admin/due-dates.html       → Due Date Manager — scope & sequence due dates + calendar sync (teacher only)
+
+/cs-interactive.html        → CS Interactive Workspace (CS students — auth required)
+/exams/cs-unit-{0-8}-exam.html → CS unit summative exams (auth required)
+/exams/cs-final-exam.html   → CS Final Exam — pulls questions from all 9 units (auth required)
+/pre-assessments/cs-unit-{0-8}.html → CS pre-assessment diagnostics (auth required)
+/exams/the-*.html           → WD chapter summative exams (auth required)
+/proficiencyScales/the-*.html → WD proficiency self-assessment scales (auth required)
 
 /api/*.php                  → PHP API endpoints
 /api/admin/*.php            → PHP admin API endpoints
@@ -138,6 +148,10 @@ Login stores the user object in `localStorage` under the key `user`. The `auth-g
 /js/student/student-notes.js → Student notebook UI
 /js/student/student-payroll.js → Student payroll/timeclock view
 /js/student/student-files.js   → Student file manager
+/js/cs-interactive.js      → CS Workspace controller — unit/chapter nav, pre-assessment gating, exam launch, Final Exam
+/js/examLogicCS.js          → Exam engine for CS unit exams, CS final, and WD chapter exams
+/js/preTestLogicCS.js       → CS pre-assessment (diagnostic) engine
+/js/quizLogic.js            → Base quiz rendering engine (used by pre-assessments; postMessages to window.opener)
 ```
 
 ---
@@ -155,4 +169,10 @@ Login stores the user object in `localStorage` under the key `user`. The `auth-g
 | `js/auth-guard.js` | Client-side auth check, role detection, navigation filtering |
 | `js/loader.js` | Injects navbar.html, footer.html, site-footer.html into placeholders |
 | `js/calendar.js` | Full calendar — 4 views, bell schedule, CSV import, appointments |
+| `js/cs-interactive.js` | CS workspace controller — two-tier tabs, pre-assessment gating, exam launch, Final Exam button |
+| `js/examLogicCS.js` | Exam engine — adaptive question fetch, two-column exam+notebook layout (`ENABLE_WORKSHEET`), grade submission |
+| `js/preTestLogicCS.js` | CS diagnostic pre-assessment engine — fetches questions from API, falls back to embedded |
+| `js/quizLogic.js` | Base quiz renderer — used by pre-assessments; sends score via `window.opener.postMessage` |
 | `css/dacStyleSheets.css` | Master stylesheet — CSS variables, all shared styles |
+| `includes/navbar.html` | Navigation template — admin menu includes Due Date Manager link |
+| `compsci/scope&sequence.txt` | CS curriculum map — Unit/Chapter/HTML Page/Standards (no dates; dates set via Due Date Manager) |
