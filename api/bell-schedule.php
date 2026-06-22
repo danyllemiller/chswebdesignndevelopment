@@ -95,14 +95,15 @@ if ($method === 'POST') {
              VALUES (?, ?, ?, ?, ?, ?, ?)'
         );
         foreach ($periods as $i => $p) {
-            $label   = trim($p['period_label'] ?? '');
-            $start   = $p['start_time'] ?? '08:00';
-            $end     = $p['end_time']   ?? '09:00';
-            $section = trim($p['section_id']  ?? '') ?: null;
-            $course  = trim($p['course_name'] ?? '') ?: null;
-            $order   = (int)$i;
+            $label    = trim($p['period_label']  ?? '');
+            $start    = $p['start_time'] ?? '08:00';
+            $end      = $p['end_time']   ?? '09:00';
+            $section  = trim($p['section_id']    ?? '') ?: null;
+            $course   = trim($p['course_name']   ?? '') ?: null;
+            $order    = (int)$i;
+            $rowType  = trim($p['schedule_type'] ?? '') ?: $type;
             if (!$label || $start >= $end) continue;
-            $ins->bind_param('ssissss', $type, $label, $order, $start, $end, $section, $course);
+            $ins->bind_param('ssissss', $rowType, $label, $order, $start, $end, $section, $course);
             $ins->execute();
         }
         $ins->close();

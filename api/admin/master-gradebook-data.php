@@ -27,7 +27,7 @@ while ($row = $studentsResult->fetch_assoc()) {
 $examsResult = $db->query(
     "SELECT exam_id, title, total_points, due_date, instructions, course_id, period_due_dates
      FROM exams
-     ORDER BY created_at ASC"
+     ORDER BY exam_id ASC"
 );
 $assignments = [];
 while ($row = $examsResult->fetch_assoc()) {
