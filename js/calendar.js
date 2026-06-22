@@ -22,6 +22,7 @@ let currentYear, currentMonth;
 let selectedDate = null;
 let currentView = 'view-monthly';
 let bellScheduleCache = null;
+let schoolConfig = { regular_start:'', regular_end:'', summer_start:'', summer_end:'' };
 
 const PERIOD_COLORS = [
     '#4e79a7','#59a14f','#f28e2b','#e15759',
@@ -40,14 +41,34 @@ async function getBellSchedule() {
 }
 
 function getBellDayKey(dateStr, schedule) {
+    // No schedule on days off or weekends
+    if (specialDates.get(dateStr)?.type === 'OFF') return null;
     const jsDay = new Date(dateStr + 'T00:00:00').getDay();
     if (jsDay === 0 || jsDay === 6) return null;
+
     const base  = ['','Mon','Tue','Wed','Thu','Fri',''][jsDay];
     const ssKey = 'SS_' + base;
-    const [, mo] = dateStr.split('-').map(Number);
-    const isSummerMonth = mo >= 6 && mo <= 8;
+
+    // Summer school: check configured date range (or fall back to month)
     const hasSS = schedule.some(r => r.schedule_type === ssKey);
-    return (isSummerMonth && hasSS) ? ssKey : base;
+    if (hasSS) {
+        const { summer_start: ss, summer_end: se } = schoolConfig;
+        if (ss && se) {
+            if (dateStr >= ss && dateStr <= se) return ssKey;
+            // Date is outside summer range — fall through to regular check
+        } else {
+            // No config set: use month-based fallback (June–August)
+            const mo = +dateStr.split('-')[1];
+            if (mo >= 6 && mo <= 8) return ssKey;
+        }
+    }
+
+    // Regular school year: check configured date range
+    if (!schedule.some(r => r.schedule_type === base)) return null;
+    const { regular_start: rs, regular_end: re } = schoolConfig;
+    if (rs && re && (dateStr < rs || dateStr > re)) return null;
+
+    return base;
 }
 
 // ─── Bootstrap ──────────────────────────────────────────────────────────────
@@ -116,6 +137,12 @@ async function initCalendar() {
         };
         reader.readAsText(file);
     });
+
+    // Load school year boundary config
+    try {
+        const res = await fetch('/api/school-config.php');
+        if (res.ok) schoolConfig = await res.json();
+    } catch {}
 
     // Load all calendar dates from DB (CSV-imported school calendar + manually-added events)
     try {
@@ -1124,6 +1151,7 @@ async function openBellScheduleModal() {
                 sw.querySelectorAll('button').forEach(b =>
                     b.className = `btn btn-sm ${b.dataset.sched === activeBellSched ? 'btn-primary' : 'btn-outline-primary'}`
                 );
+                fillBellDateRange();
                 await loadBellSchedule();
             });
         });
@@ -1133,8 +1161,39 @@ async function openBellScheduleModal() {
         b.className = `btn btn-sm ${b.dataset.sched === activeBellSched ? 'btn-primary' : 'btn-outline-primary'}`
     );
 
+    // Inject date-range pickers if not already present
+    if (!document.getElementById('bell-date-range')) {
+        const sw = document.getElementById('bell-sched-switcher');
+        const dr = document.createElement('div');
+        dr.id = 'bell-date-range';
+        dr.className = 'mb-3 p-2 border rounded bg-light';
+        dr.innerHTML = `
+            <div class="small fw-bold text-muted mb-2" style="font-size:.7rem;letter-spacing:.06em">SCHEDULE APPLIES (dates)</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <label class="small mb-0">From</label>
+                <input type="date" id="bell-range-start" class="form-control form-control-sm" style="width:160px">
+                <label class="small mb-0">to</label>
+                <input type="date" id="bell-range-end" class="form-control form-control-sm" style="width:160px">
+            </div>`;
+        sw.parentNode.insertBefore(dr, sw.nextSibling);
+    }
+    fillBellDateRange();
+
     bootstrap.Modal.getOrCreateInstance(modal).show();
     await loadBellSchedule();
+}
+
+function fillBellDateRange() {
+    const startEl = document.getElementById('bell-range-start');
+    const endEl   = document.getElementById('bell-range-end');
+    if (!startEl || !endEl) return;
+    if (activeBellSched === 'summer') {
+        startEl.value = schoolConfig.summer_start || '';
+        endEl.value   = schoolConfig.summer_end   || '';
+    } else {
+        startEl.value = schoolConfig.regular_start || '';
+        endEl.value   = schoolConfig.regular_end   || '';
+    }
 }
 
 async function loadBellSchedule() {
@@ -1270,13 +1329,30 @@ async function saveBellSchedule() {
     if (btn) { btn.disabled = true; btn.innerHTML = 'Saving…'; }
 
     try {
-        const res  = await fetch('/api/bell-schedule.php', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ teacher_id: window.dacAuthData?.user?.student_id, schedule_types: BELL_SCHEDULES[activeBellSched].days, periods }),
-        });
-        const data = await res.json();
+        // Save bell periods and school date range in parallel
+        const startVal = document.getElementById('bell-range-start')?.value || '';
+        const endVal   = document.getElementById('bell-range-end')?.value   || '';
+        const configPayload = activeBellSched === 'summer'
+            ? { summer_start: startVal, summer_end: endVal }
+            : { regular_start: startVal, regular_end: endVal };
+
+        const [schedRes] = await Promise.all([
+            fetch('/api/bell-schedule.php', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ teacher_id: window.dacAuthData?.user?.student_id, schedule_types: BELL_SCHEDULES[activeBellSched].days, periods }),
+            }),
+            fetch('/api/school-config.php', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify(configPayload),
+            }),
+        ]);
+
+        const data = await schedRes.json();
         if (data.success) {
+            Object.assign(schoolConfig, configPayload); // update in-memory config
+            bellScheduleCache = null;                   // force re-fetch next render
             if (btn) btn.innerHTML = '<i class="fas fa-check me-1"></i>Saved!';
             setTimeout(() => { if (btn) { btn.disabled = false; btn.innerHTML = orig; } }, 2000);
         } else {
