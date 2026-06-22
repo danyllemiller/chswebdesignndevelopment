@@ -456,3 +456,67 @@
   padding: 0.4rem 0.6rem;
   font-size: 0.85rem;
 }
+
+/* ── Week View ──────────────────────────────────────────────────────────────── */
+.week-view { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.week-day-row {
+  display: flex; flex-direction: column;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.week-day-row:hover { opacity: .85; }
+.week-day--today  { box-shadow: 0 0 0 2px #0d6efd; }
+.week-day--selected { box-shadow: 0 0 0 2px #198754; }
+
+.week-day-header { display: flex; align-items: center; gap: 0.4rem; font-weight: 600; }
+.week-day-name   { min-width: 2.5rem; }
+.week-day-date   { font-size: .85rem; color: inherit; opacity: .8; }
+.week-day-desc   { font-size: .82rem; opacity: .85; }
+
+/* ── Day View ───────────────────────────────────────────────────────────────── */
+.day-view { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.day-view-banner {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+}
+
+.day-view-schedule h6 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+
+.bell-period-row {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.45rem;
+  color: #fff;
+  margin-bottom: 0.4rem;
+  font-size: .9rem;
+}
+.bell-period-label  { font-weight: 700; min-width: 3rem; }
+.bell-period-course { flex: 1; opacity: .9; }
+.bell-period-time   { margin-left: auto; white-space: nowrap; font-size: .82rem; opacity: .9; }
+
+/* ── Events List View ───────────────────────────────────────────────────────── */
+.events-list { display: flex; flex-direction: column; gap: 0.35rem; }
+.events-list-month {
+  font-size: .75rem; text-transform: uppercase; letter-spacing: .07em;
+  color: #6c757d; margin: 0.75rem 0 0.3rem; border-bottom: 1px solid #dee2e6; padding-bottom: 0.2rem;
+}
+
+.event-list-row {
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.4rem;
+  background: #f8f9fa;
+  cursor: pointer;
+  font-size: .88rem;
+  transition: background .15s;
+}
+.event-list-row:hover { background: #e9ecef; }
+.event-past { opacity: .55; }
+.event-list-date { font-weight: 600; min-width: 4.5rem; }
+.event-list-desc { color: #495057; }

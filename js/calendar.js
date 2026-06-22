@@ -19,6 +19,35 @@ const TYPE_CONFIG = {
 let specialDates = new Map(); // 'YYYY-MM-DD' → { type, description }
 let currentYear, currentMonth;
 let selectedDate = null;
+let currentView = 'view-monthly';
+let bellScheduleCache = null;
+
+const PERIOD_COLORS = [
+    '#4e79a7','#59a14f','#f28e2b','#e15759',
+    '#76b7b2','#b07aa1','#9c755f','#edc948',
+];
+
+async function getBellSchedule() {
+    if (bellScheduleCache) return bellScheduleCache;
+    try {
+        const res = await fetch('/api/bell-schedule.php');
+        if (!res.ok) return (bellScheduleCache = []);
+        const data = await res.json();
+        bellScheduleCache = data.schedule || [];
+    } catch { bellScheduleCache = []; }
+    return bellScheduleCache;
+}
+
+function getBellDayKey(dateStr, schedule) {
+    const jsDay = new Date(dateStr + 'T00:00:00').getDay();
+    if (jsDay === 0 || jsDay === 6) return null;
+    const base  = ['','Mon','Tue','Wed','Thu','Fri',''][jsDay];
+    const ssKey = 'SS_' + base;
+    const [, mo] = dateStr.split('-').map(Number);
+    const isSummerMonth = mo >= 6 && mo <= 8;
+    const hasSS = schedule.some(r => r.schedule_type === ssKey);
+    return (isSummerMonth && hasSS) ? ssKey : base;
+}
 
 // ─── Bootstrap ──────────────────────────────────────────────────────────────
 
@@ -27,13 +56,18 @@ async function initCalendar() {
     currentYear = now.getFullYear();
     currentMonth = now.getMonth();
 
-    document.getElementById('prev-month')?.addEventListener('click', () => {
-        if (--currentMonth < 0) { currentMonth = 11; currentYear--; }
-        renderMonth();
-    });
-    document.getElementById('next-month')?.addEventListener('click', () => {
-        if (++currentMonth > 11) { currentMonth = 0; currentYear++; }
-        renderMonth();
+    document.getElementById('prev-month')?.addEventListener('click', () => navigateCalendar(-1));
+    document.getElementById('next-month')?.addEventListener('click', () => navigateCalendar(1));
+
+    document.querySelectorAll('[name="calendar-view"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            currentView = radio.id;
+            if (!selectedDate) {
+                const t = new Date();
+                selectedDate = isoDate(t.getFullYear(), t.getMonth() + 1, t.getDate());
+            }
+            renderCurrentView();
+        });
     });
 
     document.getElementById('btn-import-csv')?.addEventListener('click', () => {
@@ -42,7 +76,7 @@ async function initCalendar() {
         const reader = new FileReader();
         reader.onload = e => {
             const count = parseCSV(e.target.result);
-            renderMonth();
+            renderCurrentView();
             showCsvStatus(`✓ Imported ${count} dates.`, 'success');
         };
         reader.readAsText(file);
@@ -75,7 +109,7 @@ async function initCalendar() {
         }
     } catch {}
 
-    renderMonth();
+    renderCurrentView();
     initAppointments();
 }
 
@@ -188,16 +222,14 @@ function renderMonth() {
 
 // ─── Sidebar Detail ───────────────────────────────────────────────────────────
 
-function selectDay(dateStr, cellEl, info, cfg) {
-    document.querySelectorAll('.calendar-day.selected').forEach(c => c.classList.remove('selected'));
-    cellEl.classList.add('selected');
-    selectedDate = dateStr;
+function updateDaySidebar(dateStr) {
+    const info = specialDates.get(dateStr);
+    const cfg  = info ? (TYPE_CONFIG[info.type] || TYPE_CONFIG.none) : null;
 
     const [y, m, d] = dateStr.split('-').map(Number);
-    const dateObj = new Date(y, m - 1, d);
     const label = document.getElementById('selected-date-label');
     if (label) {
-        label.textContent = dateObj.toLocaleDateString('en-US', {
+        label.textContent = new Date(y, m - 1, d).toLocaleDateString('en-US', {
             weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
         });
     }
@@ -211,12 +243,7 @@ function selectDay(dateStr, cellEl, info, cfg) {
         li.style.padding = '0.75rem 1rem';
         li.style.borderRadius = '0.75rem';
         li.style.border = `2px solid ${cfg?.border || '#ccc'}`;
-
-        if (cfg?.bg) {
-            li.style.backgroundColor = cfg.bg;
-            li.style.color = cfg.text;
-        }
-
+        if (cfg?.bg) { li.style.backgroundColor = cfg.bg; li.style.color = cfg.text; }
         li.innerHTML = `
             ${cfg?.label ? `<div class="fw-bold mb-1">${cfg.label}</div>` : ''}
             ${info.description ? `<div class="small">${info.description}</div>` : ''}
@@ -230,6 +257,13 @@ function selectDay(dateStr, cellEl, info, cfg) {
     }
 }
 
+function selectDay(dateStr, cellEl, info, cfg) {
+    document.querySelectorAll('.calendar-day.selected').forEach(c => c.classList.remove('selected'));
+    cellEl.classList.add('selected');
+    selectedDate = dateStr;
+    updateDaySidebar(dateStr);
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function isoDate(y, m, d) {
@@ -239,6 +273,247 @@ function isoDate(y, m, d) {
 function showCsvStatus(msg, type) {
     const el = document.getElementById('csv-status');
     if (el) { el.className = `mt-2 small text-${type} fw-bold`; el.textContent = msg; }
+}
+
+// ─── View Switcher ────────────────────────────────────────────────────────────
+
+function renderCurrentView() {
+    const grid     = document.getElementById('calendar');
+    const listView = document.getElementById('events-list-view');
+    if (grid)     grid.style.display     = currentView === 'view-monthly' ? '' : 'none';
+    if (listView) listView.style.display = currentView === 'view-monthly' ? 'none' : '';
+
+    switch (currentView) {
+        case 'view-monthly': renderMonth(); break;
+        case 'view-weekly':  renderWeekView(); break;
+        case 'view-daily':   renderDayView(); break;
+        case 'view-events':  renderEventsListView(); break;
+    }
+}
+
+function navigateCalendar(dir) {
+    if (currentView === 'view-daily') {
+        const d = new Date((selectedDate || isoDate(currentYear, currentMonth + 1, 1)) + 'T00:00:00');
+        d.setDate(d.getDate() + dir);
+        selectedDate = isoDate(d.getFullYear(), d.getMonth() + 1, d.getDate());
+        currentYear = d.getFullYear(); currentMonth = d.getMonth();
+    } else if (currentView === 'view-weekly') {
+        const d = new Date((selectedDate || isoDate(currentYear, currentMonth + 1, 1)) + 'T00:00:00');
+        d.setDate(d.getDate() + dir * 7);
+        selectedDate = isoDate(d.getFullYear(), d.getMonth() + 1, d.getDate());
+        currentYear = d.getFullYear(); currentMonth = d.getMonth();
+    } else {
+        currentMonth += dir;
+        if (currentMonth < 0)  { currentMonth = 11; currentYear--; }
+        if (currentMonth > 11) { currentMonth = 0;  currentYear++; }
+    }
+    renderCurrentView();
+}
+
+// ─── Week View ────────────────────────────────────────────────────────────────
+
+function renderWeekView() {
+    const listView = document.getElementById('events-list-view');
+    if (!listView) return;
+
+    const anchor = new Date((selectedDate || isoDate(currentYear, currentMonth + 1, 1)) + 'T00:00:00');
+    const sunday = new Date(anchor);
+    sunday.setDate(anchor.getDate() - anchor.getDay());
+
+    const endSat = new Date(sunday);
+    endSat.setDate(sunday.getDate() + 6);
+
+    const monthLabel = document.getElementById('month-label');
+    if (monthLabel) {
+        const s = sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const e = endSat.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        monthLabel.textContent = `${s} – ${e}`;
+    }
+
+    const todayStr = isoDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
+
+    let html = '<div class="week-view">';
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(sunday);
+        d.setDate(sunday.getDate() + i);
+        const dateStr = isoDate(d.getFullYear(), d.getMonth() + 1, d.getDate());
+        const info = specialDates.get(dateStr);
+        const cfg  = info ? (TYPE_CONFIG[info.type] || TYPE_CONFIG.none) : null;
+        const isToday = dateStr === todayStr;
+        const isSel   = dateStr === selectedDate;
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+        const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const borderColor = cfg?.border || (isToday ? '#0d6efd' : '#dee2e6');
+        const classes = ['week-day-row', isToday ? 'week-day--today' : '', isSel ? 'week-day--selected' : ''].filter(Boolean).join(' ');
+        html += `<div class="${classes}" data-date="${dateStr}"
+                      style="border-left:5px solid ${borderColor};${cfg?.bg ? `background:${cfg.bg};color:${cfg.text}` : ''}">
+            <div class="week-day-header">
+                <span class="week-day-name">${dayName}</span>
+                <span class="week-day-date">${dateLabel}</span>
+                ${isToday ? '<span class="badge bg-primary ms-2 py-0">Today</span>' : ''}
+                ${cfg?.label ? `<span class="day-type-chip ms-auto">${cfg.label}</span>` : ''}
+            </div>
+            ${info?.description ? `<div class="week-day-desc small mt-1">${info.description}</div>` : ''}
+        </div>`;
+    }
+    html += '</div>';
+    listView.innerHTML = html;
+
+    listView.querySelectorAll('.week-day-row').forEach(row => {
+        row.addEventListener('click', () => {
+            selectedDate = row.dataset.date;
+            const [y, m] = selectedDate.split('-').map(Number);
+            currentYear = y; currentMonth = m - 1;
+            updateDaySidebar(selectedDate);
+            renderWeekView();
+        });
+    });
+}
+
+// ─── Day View ─────────────────────────────────────────────────────────────────
+
+async function renderDayView() {
+    const listView = document.getElementById('events-list-view');
+    if (!listView) return;
+
+    const dateStr = selectedDate || isoDate(currentYear, currentMonth + 1, 1);
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dateObj = new Date(y, m - 1, d);
+
+    const monthLabel = document.getElementById('month-label');
+    if (monthLabel) {
+        monthLabel.textContent = dateObj.toLocaleDateString('en-US', {
+            weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+        });
+    }
+
+    updateDaySidebar(dateStr);
+
+    const info = specialDates.get(dateStr);
+    const cfg  = info ? (TYPE_CONFIG[info.type] || TYPE_CONFIG.none) : null;
+    const jsDay = dateObj.getDay();
+    const isWeekend = jsDay === 0 || jsDay === 6;
+
+    let html = '<div class="day-view">';
+
+    // Day type banner
+    if (cfg?.bg) {
+        html += `<div class="day-view-banner" style="background:${cfg.bg};color:${cfg.text};border-left:6px solid ${cfg.border}">
+            <strong>${cfg.label}</strong>
+            ${info.description ? `<span class="ms-3 small">${info.description}</span>` : ''}
+        </div>`;
+    } else {
+        html += `<div class="day-view-banner" style="border-left:6px solid #dee2e6;background:#f8f9fa;color:#6c757d">
+            <strong>${isWeekend ? 'Weekend' : 'No schedule type set for this day'}</strong>
+        </div>`;
+    }
+
+    // Bell schedule
+    if (!isWeekend) {
+        listView.innerHTML = html + '<p class="small text-muted mt-3">Loading bell schedule…</p></div>';
+        const schedule = await getBellSchedule();
+        const dayKey   = getBellDayKey(dateStr, schedule);
+        const periods  = schedule
+            .filter(r => r.schedule_type === dayKey)
+            .sort((a, b) => a.start_time.localeCompare(b.start_time));
+
+        html = '<div class="day-view">';
+        if (cfg?.bg) {
+            html += `<div class="day-view-banner" style="background:${cfg.bg};color:${cfg.text};border-left:6px solid ${cfg.border}">
+                <strong>${cfg.label}</strong>
+                ${info?.description ? `<span class="ms-3 small">${info.description}</span>` : ''}
+            </div>`;
+        } else {
+            html += `<div class="day-view-banner" style="border-left:6px solid #dee2e6;background:#f8f9fa;color:#6c757d">
+                <strong>No schedule type set for this day</strong>
+            </div>`;
+        }
+
+        if (periods.length) {
+            // Assign a color per unique section label
+            const labelColors = {};
+            let colorIdx = 0;
+            periods.forEach(p => {
+                if (!labelColors[p.period_label]) {
+                    labelColors[p.period_label] = PERIOD_COLORS[colorIdx++ % PERIOD_COLORS.length];
+                }
+            });
+            html += '<div class="day-view-schedule mt-3"><h6 class="text-muted fw-semibold mb-2">Bell Schedule</h6>';
+            periods.forEach(p => {
+                const color = labelColors[p.period_label];
+                html += `<div class="bell-period-row" style="background:${color}">
+                    <span class="bell-period-label">${p.period_label}</span>
+                    ${p.course_name ? `<span class="bell-period-course">${p.course_name}</span>` : ''}
+                    <span class="bell-period-time">${formatTime12(p.start_time)} – ${formatTime12(p.end_time)}</span>
+                </div>`;
+            });
+            html += '</div>';
+        } else {
+            html += '<p class="small text-muted mt-3 fst-italic">No bell schedule configured for this day. Use Manage Bell Schedule to set it up.</p>';
+        }
+    }
+
+    html += '</div>';
+    listView.innerHTML = html;
+}
+
+// ─── Events List View ─────────────────────────────────────────────────────────
+
+function renderEventsListView() {
+    const listView = document.getElementById('events-list-view');
+    if (!listView) return;
+
+    const monthLabel = document.getElementById('month-label');
+    if (monthLabel) monthLabel.textContent = 'Upcoming Events';
+
+    const todayStr = isoDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
+
+    const withDesc = [...specialDates.entries()]
+        .filter(([, info]) => info.description)
+        .sort(([a], [b]) => a.localeCompare(b));
+
+    if (!withDesc.length) {
+        listView.innerHTML = '<p class="text-muted fst-italic mt-3">No events in the calendar yet.</p>';
+        return;
+    }
+
+    // Group by month
+    const byMonth = {};
+    withDesc.forEach(([dateStr, info]) => {
+        const key = dateStr.slice(0, 7);
+        (byMonth[key] = byMonth[key] || []).push([dateStr, info]);
+    });
+
+    let html = '<div class="events-list">';
+    Object.entries(byMonth).forEach(([key, entries]) => {
+        const [yr, mo] = key.split('-');
+        html += `<h6 class="events-list-month">${MONTHS[+mo - 1]} ${yr}</h6>`;
+        entries.forEach(([dateStr, info]) => {
+            const cfg = TYPE_CONFIG[info.type] || TYPE_CONFIG.none;
+            const d = new Date(dateStr + 'T00:00:00');
+            const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+            const isPast = dateStr < todayStr;
+            html += `<div class="event-list-row${isPast ? ' event-past' : ''}" data-date="${dateStr}"
+                          style="border-left:4px solid ${cfg.border || '#dee2e6'}">
+                <span class="event-list-date">${dayLabel}</span>
+                ${cfg.label ? `<span class="day-type-chip">${cfg.label}</span>` : ''}
+                ${info.description ? `<span class="event-list-desc">${info.description}</span>` : ''}
+            </div>`;
+        });
+    });
+    html += '</div>';
+    listView.innerHTML = html;
+
+    listView.querySelectorAll('.event-list-row').forEach(row => {
+        row.addEventListener('click', () => {
+            selectedDate = row.dataset.date;
+            const [yr, mo] = selectedDate.split('-').map(Number);
+            currentYear = yr; currentMonth = mo - 1;
+            document.getElementById('view-daily').checked = true;
+            currentView = 'view-daily';
+            renderCurrentView();
+        });
+    });
 }
 
 document.addEventListener('DOMContentLoaded', initCalendar);
