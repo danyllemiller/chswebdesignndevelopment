@@ -6,6 +6,10 @@ handleOptions();
 $db     = getDB();
 $method = $_SERVER['REQUEST_METHOD'];
 
+// ── Migration: remove any old-format rows that don't match the new schedule types ──
+// Valid types are now: A, A_MIN, B, B_MIN, C, summer
+$db->query("DELETE FROM bell_schedule WHERE schedule_type NOT IN ('A','A_MIN','B','B_MIN','C','summer')");
+
 // ── GET: return schedule for one type (or all) ────────────────────────────────
 if ($method === 'GET') {
     $type = trim($_GET['type'] ?? '');

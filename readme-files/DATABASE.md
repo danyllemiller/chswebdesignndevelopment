@@ -1,415 +1,599 @@
-# DATABASE.md — CHS Gradebook Database Reference
+# Database Reference — chs_gradebook
 
-**Database:** `chs_gradebook`  
-**Engine:** MariaDB  
-**Credentials:** host=localhost, user=root, password=DB_PASSWORD_IN_DB_CONFIG  
-**Charset:** utf8mb4
+**Engine:** MariaDB · **Host:** localhost · **User:** root · **DB:** chs_gradebook  
+Credentials are stored in `api/db_config.php` and `server/db.js` — do not commit those files.
 
-The schema is defined across two places:
-- `api/setup-db.php` — the one-time setup script (canonical definitions for core tables)
-- `server/api.js` — Node.js inline DDL for tables created on demand (rubrics, review_questions, teacher_daily_questions, shared_files, exam_progress)
+Schema verified live on 2026-06-22 (29 tables).
 
 ---
 
-## Tables
+## Table Index
 
-### `students`
-The central user table for all accounts (teacher and students).
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | INT AUTO_INCREMENT PK | Internal row ID |
-| `student_id` | VARCHAR(50) UNIQUE | School-issued ID (e.g., `"123456"`), used as login key |
-| `username` | VARCHAR(100) UNIQUE | Chosen login name (lowercase) |
-| `password_hash` | VARCHAR(255) | bcrypt hash. Also stored in `password` column in Node.js auth path |
-| `first_name` | VARCHAR(100) | |
-| `last_name` | VARCHAR(100) | |
-| `section_id` | VARCHAR(50) | Period/course (e.g., `WD1-A1`, `CS-B6`, `Teacher`, `Unassigned`) |
-| `role` | VARCHAR(20) | `student` or `teacher` (or `admin`) |
-| `must_change_password` | TINYINT(1) | 1 = force password change at next login |
-| `created_at` | DATETIME | Auto-set on insert |
-| `role_id` | INT | (Added by payroll system) Links to `pay_roles.id` |
-| `help_requested` | TINYINT(1) | Added dynamically; 1 = student clicked help button |
-| `password_updated_at` | DATETIME | Set when password changes |
-
-**Read by:** `api/login.php`, `server/auth.js`, `api/register.php`, `api/admin/master-gradebook-data.php`, `server/api.js` (all roster endpoints)  
-**Written by:** `api/register.php`, `server/auth.js` (register, reset-password), `server/api.js` (save-student, upload-roster, delete-student, etc.)
-
----
-
-### `exams`
-Assignment and exam definitions — one row per assignment column in the gradebook.
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `exam_id` | VARCHAR(250) PK | Unique string ID (e.g., `"Ch1 Project [100 pts]"`, `"TC-In 9/15 [1 pts]"`) |
-| `title` | VARCHAR(250) | Display name |
-| `total_points` | INT | Max possible points |
-| `due_date` | DATE | Optional |
-| `instructions` | TEXT | Optional instructions shown to students |
-| `course_id` | VARCHAR(50) | Which course this belongs to (`All`, `WD1`, `CS`, course codes like `10003GS`) |
-| `period_due_dates` | TEXT | JSON string of per-period due dates |
-| `created_at` | DATETIME | Auto-set on insert |
-
-**Read by:** `api/admin/master-gradebook-data.php`, `api/student/course-gradebook.php`, `server/api.js`  
-**Written by:** `api/admin/save-assignment.php`, `api/admin/edit-assignment.php`, `api/admin/delete-assignment.php`, `api/clockin.php` (auto-creates TC attendance rows), `api/admin/clear-all-assignments.php`
+| Table | Purpose |
+|-------|---------|
+| [appointments](#appointments) | Student-booked office-hour slots |
+| [bell_schedule](#bell_schedule) | Period times per schedule type (A/B day, summer) |
+| [calendar_events](#calendar_events) | School calendar dates (CSV-imported + manually added) |
+| [calendar_settings](#calendar_settings) | Legacy single-row JSON config (mostly superseded by school_config) |
+| [chapters](#chapters) | Course chapter list (WD + CS) |
+| [class_sections](#class_sections) | Roster section definitions (A1, B2, etc.) |
+| [clockins](#clockins) | Student clock-in/out answers (raw log) |
+| [courses](#courses) | Course catalog |
+| [cs_notebook](#cs_notebook) | CS student notebook entries |
+| [cs_questions](#cs_questions) | CS review quiz questions |
+| [daily_questions](#daily_questions) | Daily warm-up questions pool |
+| [exam_progress](#exam_progress) | Saved mid-exam progress (JSON blob) |
+| [exams](#exams) | Assignment/exam definitions |
+| [grades](#grades) | Teacher-entered scores per student per exam |
+| [notebook_entries](#notebook_entries) | WD student notebook entries |
+| [office_hours](#office_hours) | Teacher availability windows |
+| [pay_roles](#pay_roles) | Payroll role definitions with hourly rates |
+| [questions](#questions) | WD exam multiple-choice questions |
+| [responses](#responses) | Submitted exam score records |
+| [review_questions](#review_questions) | Jeopardy-style review game questions |
+| [school_config](#school_config) | School year + summer school date boundaries |
+| [self_assessments](#self_assessments) | Student self-rating per chapter |
+| [shared_files](#shared_files) | Teacher-shared files/folders per student |
+| [student_responses](#student_responses) | Per-question student answers on exams |
+| [students](#students) | All users (students, teacher, admin) |
+| [teacher_daily_questions](#teacher_daily_questions) | Teacher-set daily question per date |
+| [timeclock_log](#timeclock_log) | Raw clock-in/out punch log |
+| [timesheets](#timesheets) | Summarised daily clock-in/out with score |
+| [turnins](#turnins) | Student assignment turn-ins |
 
 ---
 
-### `grades`
-One row per (student, assignment) pair — the actual grade entries.
+## appointments
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | INT AUTO_INCREMENT PK | |
-| `student_id` | VARCHAR(50) | FK → students.student_id |
-| `exam_id` | VARCHAR(250) | FK → exams.exam_id |
-| `score` | VARCHAR(50) | Stored as string to allow `"EX"`, `"INC"`, numeric values |
-| `total_points` | INT | Snapshot of max points at time of grading |
-| `timestamp` | DATETIME | Auto-updated on each change |
+Student office-hour appointment bookings.
 
-**Unique key:** `(student_id, exam_id)` — prevents duplicate grades  
-**Read by:** `api/admin/master-gradebook-data.php`, `api/student/grades.php`, `api/student/course-gradebook.php`  
-**Written by:** `api/admin/save-grade.php`, `api/admin/batch-update-grades.php`, `api/admin/clear-all-assignments.php`, `api/clockin.php`  
-**Note:** Node.js uses a parallel `responses` table via `server/api.js` that mirrors this schema.
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| student_id | varchar(50) | NO | — | FK → students.student_id |
+| date | date | NO | — | Appointment date |
+| time | time | NO | — | Start time of slot |
+| reason | text | YES | NULL | Student-entered reason |
+| status | varchar(20) | NO | 'pending' | pending / approved / denied |
+| teacher_note | text | YES | NULL | Teacher response note |
+| created_at | datetime | NO | current_timestamp() | |
 
----
-
-### `responses` (Node.js side)
-Mirror of `grades`, used exclusively by Node.js API endpoints.
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `student_id` | VARCHAR | FK → students |
-| `exam_id` | VARCHAR | FK → exams |
-| `score` | NUMERIC | |
-| `total_points` | INT | |
-| `timestamp` | DATETIME | |
-
-**Note:** The PHP side uses `grades` and the Node.js side uses `responses`. Both ultimately write to the same MariaDB database but different table names. This is a migration artifact.
+**Used by:** `api/appointments/book.php` (INSERT), `api/appointments/requests.php` (GET all), `api/appointments/update-status.php` (PUT status+note), `js/calendar.js` (appointment UI)
 
 ---
 
-### `exam_progress`
-Saves in-progress exam answers so students can resume if they close the browser.
+## bell_schedule
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | INT AUTO_INCREMENT PK | |
-| `student_id` | VARCHAR(50) | |
-| `exam_id` | VARCHAR(250) | |
-| `answers` | TEXT | JSON array of selected answers (PHP side) |
-| `progress_json` | MEDIUMTEXT | Full progress blob (Node.js side) |
-| `current_index` | INT | Last question index reached (PHP side) |
-| `updated_at` | DATETIME | Auto-updated |
+One row per period per schedule day type. Multiple rows share the same `section_id`/`period_label` across different `schedule_type` values.
 
-**Unique key:** `(student_id, exam_id)`  
-**Read/Written by:** `api/student/exam-progress.php`, `server/api.js` (GET/POST/DELETE `/api/student/exam-progress`)
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| schedule_type | varchar(10) | NO | — | Mon/Tue/Wed/Thu/Fri (regular) or SS_Mon…SS_Fri (summer school) |
+| period_label | varchar(50) | NO | — | e.g. "A1", "B3" |
+| sort_order | int(11) | NO | 0 | Display order within a day |
+| start_time | time | NO | — | Period start |
+| end_time | time | NO | — | Period end |
+| section_id | varchar(50) | YES | NULL | Links to class_sections.section_id |
+| course_name | varchar(100) | YES | NULL | Human-readable course name |
 
----
+**Used by:** `api/bell-schedule.php` (GET all, POST replace by schedule_types), `js/calendar.js` `getBellSchedule()` / `getBellDayKey()` / week+day view rendering
 
-### `timeclock_log`
-Raw timeclock events (every clock-in and clock-out punch).
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | INT AUTO_INCREMENT PK | |
-| `student_id` | VARCHAR(50) | |
-| `section_id` | VARCHAR(50) | Student's class period at time of punch |
-| `type` | VARCHAR(20) | `Regular`, `Overtime`, `Out`, etc. |
-| `answer` | VARCHAR(500) | Student's answer to the exit ticket question |
-| `timestamp` | DATETIME | Auto-set |
-
-**Written by:** `api/clockin.php`  
-**Read by:** Payroll dashboard (via `server/api.js` `/admin/payroll/timesheets-daily` and `timesheets-period`)
+**Key logic:** `getBellDayKey()` in `calendar.js` checks `school_config` date boundaries and `specialDates` OFF-day flag before returning a key. It never shows schedule outside school year bounds or on OFF days.
 
 ---
 
-### `timesheets` (Node.js side)
-Structured timesheet rows used by the payroll dashboard. One row per student per day.
+## calendar_events
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `student_id` | VARCHAR | |
-| `date` | DATE | |
-| `clock_in` | TIME | |
-| `clock_out` | TIME | |
-| `in_answer` | TEXT | Knowledge check answer |
-| `out_answer` | TEXT | Reflection/exit ticket answer |
+All calendar date entries. Two sources coexist in the same table distinguished by `source`.
 
-**Read by:** `server/api.js` `/admin/payroll/timesheets-daily`, `/admin/payroll/timesheets-period`  
-**Written by:** `server/api.js` `/admin/inject-timesheets` (testing), timeclock student flow
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| event_date | date | NO | — | YYYY-MM-DD |
+| title | varchar(255) | NO | — | Display title |
+| type | varchar(20) | NO | 'none' | A / B / A_MIN / B_MIN / OFF / C / none |
+| description | text | YES | NULL | Extra detail shown in sidebar |
+| all_day | tinyint(1) | NO | 1 | 1 = all-day, 0 = timed |
+| start_time | time | YES | NULL | Only when all_day=0 |
+| end_time | time | YES | NULL | Only when all_day=0 |
+| created_at | datetime | NO | current_timestamp() | |
+| source | varchar(20) | NO | 'manual' | **'csv'** = bulk CSV import, **'manual'** = teacher-added via modal |
 
----
+**source='csv' rows** are deleted and replaced every time a CSV is imported via `api/save-csv.php`.  
+**source='manual' rows** (including summer school dates inserted directly via SQL) are never touched by CSV import.
 
-### `self_assessments`
-Student self-ratings per chapter (pre and post).
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | INT AUTO_INCREMENT PK | |
-| `student_id` | VARCHAR(50) | |
-| `chapter_id` | INT | Chapter number |
-| `level` | FLOAT | Proficiency level (0.0–4.0) |
-| `mode` | VARCHAR(10) | `pre` or `post` |
-| `updated_at` | DATETIME | Auto-updated |
-
-**Unique key:** `(student_id, chapter_id, mode)`  
-**Read by:** `api/student/self-assessments.php`, `server/api.js`  
-**Written by:** `api/student/save-self-assessment.php`, `server/api.js`
+**Used by:** `api/events.php` (GET all, POST insert, PUT update, DELETE by id), `api/save-csv.php` (DELETE csv + bulk INSERT csv), `js/calendar.js` initCalendar() / saveSingleEvent() / deleteEvent()
 
 ---
 
-### `calendar_events`
-All calendar events — both CSV-imported school calendar data and manually added events.
+## calendar_settings
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | INT AUTO_INCREMENT PK | |
-| `event_date` | DATE | |
-| `title` | VARCHAR(255) | Event name / description |
-| `type` | VARCHAR(20) | `A`, `B`, `A_MIN`, `B_MIN`, `OFF`, `C`, `none` |
-| `description` | TEXT | Optional longer description |
-| `all_day` | TINYINT(1) | 1 = all-day, 0 = has specific times |
-| `start_time` | TIME | Null if all-day |
-| `end_time` | TIME | Null if all-day |
-| `source` | VARCHAR(20) | `csv` = imported via CSV upload; `manual` = teacher-added one at a time |
-| `created_at` | DATETIME | |
+Legacy single-row configuration stored as a JSON blob. Mostly superseded by `school_config`.
 
-**Read by:** `api/events.php` (GET — loads all events for calendar)  
-**Written by:** `api/events.php` (POST = add, PUT = edit, DELETE = remove), `api/save-csv.php` (bulk import, deletes all `source='csv'` rows first)  
-**Auto-created by:** `api/events.php` on first request (`CREATE TABLE IF NOT EXISTS`)
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) | NO | 1 | Always row id=1 |
+| config_json | longtext | NO | — | JSON object |
+
+**Note:** Not actively written by current JS code. Verify usage before dropping.
 
 ---
 
-### `bell_schedule`
-Period times for each schedule type. Each row is one period/section on one type of day.
+## chapters
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | INT AUTO_INCREMENT PK | |
-| `schedule_type` | VARCHAR(10) | Day type: `Mon`, `Tue`, `Wed`, `Thu`, `Fri` for regular; `SS_Mon`…`SS_Fri` for summer school |
-| `period_label` | VARCHAR(50) | E.g., `A1`, `B2`, `Lunch` |
-| `sort_order` | INT | Display order within the day |
-| `start_time` | TIME | |
-| `end_time` | TIME | |
-| `section_id` | VARCHAR(50) | Optional — which class section this period maps to |
-| `course_name` | VARCHAR(100) | Optional — display name for the course |
+Course chapter/unit definitions for the notebook system.
 
-**Read by:** `api/bell-schedule.php` (GET), `js/calendar.js` (`getBellSchedule()` → GET /api/bell-schedule.php)  
-**Written by:** `api/bell-schedule.php` (POST — replaces rows for given schedule types)
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| chapter_number | int(11) | NO | — | |
+| chapter_name | varchar(100) | NO | — | |
+| course_id | varchar(50) | NO | — | FK → courses.course_id |
+| is_visible | tinyint(1) | YES | 1 | 0 = hidden from students |
+
+**Used by:** Notebook entry forms; admin chapter management pages.
 
 ---
 
-### `school_config`
-Four key-value pairs controlling the school year date boundaries.
+## class_sections
 
-| config_key | Meaning |
-|-----------|---------|
-| `regular_start` | First day of regular school year (YYYY-MM-DD) |
-| `regular_end` | Last day of regular school year (YYYY-MM-DD) |
-| `summer_start` | First day of summer school (YYYY-MM-DD) |
-| `summer_end` | Last day of summer school (YYYY-MM-DD) |
+Roster section definitions — which class period/section exists.
 
-**Read by:** `api/school-config.php` (GET), `js/calendar.js` (loaded on init into `schoolConfig` object)  
-**Written by:** `api/school-config.php` (POST), calendar sidebar bell schedule modal
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| section_id | varchar(50) PK | NO | — | e.g. "A1", "B3", "CS2" |
+| course_id | varchar(50) | YES | NULL | FK → courses.course_id |
+
+**Used by:** `api/admin/master-gradebook-data.php`, `api/student/profile.php`, gradebook HTML, roster HTML
 
 ---
 
-### `office_hours`
-Teacher's weekly office hour windows. Multiple windows per day are allowed.
+## clockins
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | INT AUTO_INCREMENT PK | |
-| `day_of_week` | TINYINT | 0=Sunday, 1=Monday…6=Saturday |
-| `start_time` | TIME | |
-| `end_time` | TIME | |
-| `slot_duration` | INT | Minutes per appointment slot (default 15) |
+Raw clock-in/clock-out answer log (one row per event).
 
-**Read by:** `api/appointments/office-hours.php` (GET), `api/appointments/slots.php`  
-**Written by:** `api/appointments/office-hours.php` (POST — full replace, deletes all rows first)
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| student_id | varchar(50) | YES | NULL | |
+| section_id | varchar(50) | YES | NULL | |
+| type | varchar(50) | YES | NULL | "clockin" or "clockout" |
+| answer | text | YES | NULL | Student's reflective answer |
+| timestamp | datetime | YES | NULL | |
 
----
-
-### `appointments`
-Student appointment requests and their approval status.
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | INT AUTO_INCREMENT PK | |
-| `student_id` | VARCHAR(50) | FK → students |
-| `date` | DATE | |
-| `time` | TIME | |
-| `reason` | TEXT | Student-provided reason for the meeting |
-| `status` | VARCHAR(20) | `pending`, `approved`, `denied` |
-| `teacher_note` | TEXT | Optional teacher note shown to student |
-| `created_at` | DATETIME | |
-
-**Unique key:** `(date, time)` — prevents double-booking the same slot  
-**Read by:** `api/appointments/requests.php`, `api/appointments/slots.php`  
-**Written by:** `api/appointments/book.php` (student creates), `api/appointments/update-status.php` (teacher approves/denies)
+**Used by:** `api/clockin.php` (INSERT); payroll dashboard reads `timesheets` instead (which aggregates clockin pairs)
 
 ---
 
-### `rubrics`
-Assignment grading rubrics managed from admin/rubrics.html.
+## courses
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | VARCHAR(100) PK | UUID-style string ID |
-| `title` | VARCHAR(255) | |
-| `course` | VARCHAR(100) | Course level (Web Design 1, Web Design 2, Computer Science) |
-| `enable_self_grade` | TINYINT(1) | |
-| `enable_peer_grade` | TINYINT(1) | |
-| `criteria_json` | TEXT | JSON array of criterion objects |
-| `total_points` | INT | |
-| `last_updated` | BIGINT | Unix timestamp (ms) |
+Course catalog.
 
-**Read/Written by:** `server/api.js` (GET/POST `/api/admin/rubrics`, DELETE `/api/admin/rubrics/:id`)  
-**Used by:** `admin/rubrics.html`, `admin/files.html` (auto-grader selects rubric)
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| course_id | varchar(50) PK | NO | — | e.g. "WD", "CS" |
+| course_name | varchar(100) | YES | NULL | |
+| department | varchar(50) | YES | NULL | |
+
+**Used by:** chapters, class_sections, exams, gradebook queries
 
 ---
 
-### `review_questions`
-All review game questions for Web Design (seeded from JS data files via admin.html).
+## cs_notebook
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | INT AUTO_INCREMENT PK | |
-| `chapter` | VARCHAR(200) | Chapter name (e.g., `"Chapter 5: Sights & Sounds"`) |
-| `grade` | VARCHAR(100) | Course level (`"Web Design 1"`, `"Web Design 2"`) |
-| `cat` | VARCHAR(100) | Category within the game |
-| `val` | INT | Point value |
-| `q` | TEXT | Question text |
-| `a` | VARCHAR(1000) | Answer text |
-| `d` | JSON | Array of distractors / multiple-choice options |
+CS course student notebook entries (separate from WD `notebook_entries`).
 
-**Read by:** `server/api.js` GET `/api/review-questions`  
-**Written by:** `server/api.js` POST `/api/admin/review-questions/seed` (called from admin.html migration tool)
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| student_id | varchar(100) | NO | — | |
+| chapter | varchar(200) | YES | NULL | Chapter name/number string |
+| title | varchar(300) | YES | NULL | Entry title |
+| category | varchar(100) | YES | NULL | Notes / Do Now / Exit Ticket / Worksheet |
+| content | mediumtext | YES | NULL | Entry body (HTML or plain text) |
+| is_submitted | tinyint(1) | YES | 0 | 1 = submitted to teacher |
+| timestamp | bigint(20) | YES | NULL | Unix ms timestamp |
+| updated_at | timestamp | YES | current_timestamp() | Auto-updated |
 
----
-
-### `questions`
-CS exam questions (separate from WD review questions). Seeded by import scripts.
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `question_id` | INT PK | |
-| `exam_id` | VARCHAR | Maps to CS unit (e.g., `cs-unit-1`, `cs-u1-exam`) |
-| `question_text` | TEXT | |
-| `option_a` through `option_d` | VARCHAR | Answer choices |
-| `correct_answer` | VARCHAR | |
-| `study_hint` | TEXT | |
-| `chapter_number` | INT | Numeric chapter |
-
-**Read by:** `server/api.js` GET `/api/cs-exam-questions`
+**Used by:** CS notebook JS / PHP endpoints, `admin/notebooks.html`
 
 ---
 
-### `notebook_entries`
-Student digital notebook entries (Web Design students).
+## cs_questions
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | INT AUTO_INCREMENT PK | |
-| `student_id` | VARCHAR | |
-| `chapter_id` | INT | Chapter number |
-| `title` | VARCHAR(255) | |
-| `category` | VARCHAR(100) | E.g., `Notes`, `Reflection` |
-| `content` | TEXT | Note body (may contain HTML) |
-| `created_at` | DATETIME | |
-| `updated_at` | DATETIME | |
+Multiple-choice questions for the CS review quiz engine.
 
-**Read by:** `server/api.js` GET `/api/student/notebook`, `/api/admin/notebooks/entries`  
-**Written by:** `server/api.js` POST `/api/student/notebook/save`, `/api/student/notebook/delete`
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| unit | varchar(10) | NO | — | Unit identifier |
+| question | text | NO | — | Question text |
+| options | text | NO | — | JSON array of answer choices |
+| answer | varchar(500) | NO | — | Correct answer text |
+| hint | text | YES | NULL | |
+| course_id | varchar(50) | YES | 'CS' | |
 
----
-
-### `turnins`
-CS student notebook entries (used differently from notebook_entries — CS-specific).
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `student_id` | VARCHAR | |
-| `chapter` | VARCHAR | Chapter reference |
-| `title` | VARCHAR | |
-| `category` | VARCHAR | |
-| `content` | TEXT | |
-| `is_submitted` | TINYINT | |
-| `timestamp` | DATETIME | |
-
-**Read/Written by:** `server/api.js` GET/POST `/api/student/cs-notebook`
+**Used by:** `api/cs-exam-questions.php`, CS interactive quiz pages
 
 ---
 
-### `teacher_daily_questions`
-Per-date clock-out prompts (exit tickets) set by the teacher.
+## daily_questions
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `date` | DATE PK | |
-| `wd_question` | TEXT | Question shown to Web Design students at clock-out |
-| `cs_question` | TEXT | Question shown to CS students at clock-out |
-| `updated_at` | TIMESTAMP | |
+Pool of daily warm-up questions used by the clock-in system.
 
-**Read by:** `server/api.js` GET `/api/admin/daily-questions`  
-**Written by:** `server/api.js` POST `/api/admin/daily-questions` (from admin/payroll.html "Set Prompts" button)
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| day_group | int(11) | YES | NULL | Groups questions for rotation |
+| category | varchar(50) | YES | NULL | WD or CS |
+| question_text | text | YES | NULL | |
+| options | longtext | YES | NULL | JSON array |
+| correct_answer | text | YES | NULL | |
+| is_default | tinyint(1) | YES | 0 | 1 = shipped with system |
+| study_hint | text | YES | NULL | |
 
----
-
-### `pay_roles`
-Pay rate definitions for the classroom payroll simulation.
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | INT PK | |
-| `title` | VARCHAR | Job title (e.g., `Web Developer`) |
-| `hourly_rate` | DECIMAL | Simulated hourly rate |
-
-**Read by:** `server/api.js` payroll roster queries (JOINed to `students.role_id`)
+**Used by:** `api/clockin.php`, falls back to this pool when no teacher override exists in `teacher_daily_questions` for that date
 
 ---
 
-### `cs_questions`
-Legacy CS question table (may be superseded by `questions` table).
+## exam_progress
 
-| Column | Type |
-|--------|------|
-| `id` | INT AUTO_INCREMENT PK |
-| `unit` | VARCHAR(10) |
-| `question` | TEXT |
-| `options` | TEXT (JSON) |
-| `answer` | VARCHAR(500) |
-| `hint` | TEXT |
-| `course_id` | VARCHAR(50) |
+Saves in-progress exam state so students can resume without losing work.
 
-**Created by:** `api/setup-db.php`
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| student_id | varchar(100) | NO | — | |
+| exam_id | varchar(200) | NO | — | |
+| progress_json | mediumtext | YES | NULL | Full exam state as JSON |
+| updated_at | timestamp | YES | current_timestamp() | Auto-updated |
 
----
-
-### `class_sections`
-Catalog of valid section IDs (used to validate roster uploads).
-
-| Column | Type |
-|--------|------|
-| `section_id` | VARCHAR PK |
-| `course_id` | VARCHAR |
-
-**Read by:** `server/api.js` (validates `section_id` on roster upload and student save)
+**Used by:** `api/student/exam-progress.php` (GET/POST), exam HTML pages
 
 ---
 
-### Additional tables (project workflow, created via Node.js DDL)
-- `chapter_projects` — project spec definitions per chapter
-- `project_submissions` — student file submission metadata
-- `project_evaluations` — self/peer/auto rubric scores
-- `project_grade_aggregates` — computed aggregate scores
-- `calendar_settings` — JSON blob for calendar config (Node.js-only)
-- `shared_files` — peer file sharing inbox
+## exams
+
+Assignment and exam definitions created by the teacher.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| exam_id | varchar(50) PK | NO | — | Teacher-defined ID slug |
+| title | varchar(100) | YES | NULL | Display name |
+| total_points | int(11) | YES | NULL | Max score |
+| course_id | varchar(50) | YES | NULL | FK → courses.course_id |
+| due_date | date | YES | NULL | Default due date |
+| instructions | text | YES | NULL | Assignment instructions |
+| period_due_dates | text | YES | NULL | JSON map of section_id → due_date overrides |
+
+**Used by:** `api/admin/save-assignment.php` (INSERT/UPDATE), `api/admin/edit-assignment.php`, `api/admin/delete-assignment.php`, `api/admin/master-gradebook-data.php` (ORDER BY exam_id), `admin/gradebook.html`
 
 ---
 
-## Database Initialization
+## grades
 
-Run `/api/setup-db.php` once after deployment to create all core tables. Delete the file afterward. Node.js tables are created automatically on first API call via inline `CREATE TABLE IF NOT EXISTS` statements.
+Teacher-entered scores — one row per student per exam.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| student_id | varchar(50) | NO | — | |
+| exam_id | varchar(250) | NO | — | |
+| score | varchar(50) | YES | NULL | Stored as string to allow letter grades (E, M, A, B, etc.) |
+| total_points | int(11) | YES | 100 | |
+| timestamp | datetime | NO | current_timestamp() | |
+
+**Used by:** `api/admin/save-grade.php` (UPSERT), `api/admin/batch-update-grades.php`, `api/student/grades.php` (student view), `admin/gradebook.html`
+
+---
+
+## notebook_entries
+
+WD course student notebook entries.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| student_id | varchar(50) | NO | — | |
+| chapter_id | int(11) | NO | — | FK → chapters.id |
+| title | varchar(150) | NO | — | |
+| category | enum('Notes','Do Now','Exit Ticket','Worksheet') | YES | 'Notes' | |
+| content | longtext | NO | — | |
+| created_at | timestamp | YES | current_timestamp() | |
+| updated_at | timestamp | YES | current_timestamp() | |
+
+**Used by:** Student notebook pages, `admin/notebooks.html`
+
+---
+
+## office_hours
+
+Teacher's available appointment windows.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| day_of_week | tinyint(4) | NO | — | 0=Sun … 6=Sat |
+| start_time | time | NO | — | Window start |
+| end_time | time | NO | — | Window end |
+| slot_duration | int(11) | NO | 15 | Minutes per bookable slot |
+
+**Used by:** `api/appointments/office-hours.php` (GET/POST — replaces all rows on save), `api/appointments/slots.php` (generates available slots)
+
+---
+
+## pay_roles
+
+Payroll role types with hourly rates for the timeclock/payroll system.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| title | varchar(50) | NO | — | Role name e.g. "Web Design TA" |
+| hourly_rate | decimal(5,2) | NO | — | Pay rate |
+
+**Used by:** `admin/payroll.html`, payroll calculation logic
+
+---
+
+## questions
+
+WD exam multiple-choice questions (4-option A/B/C/D format).
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| question_id | int(11) PK AUTO | NO | — | |
+| exam_id | varchar(50) | YES | NULL | FK → exams.exam_id |
+| chapter_number | varchar(10) | YES | NULL | |
+| question_text | text | YES | NULL | |
+| option_a | varchar(255) | YES | NULL | |
+| option_b | varchar(255) | YES | NULL | |
+| option_c | varchar(255) | YES | NULL | |
+| option_d | varchar(255) | YES | NULL | |
+| correct_answer | varchar(255) | YES | NULL | |
+| study_hint | text | YES | NULL | |
+| concept_tag | varchar(100) | YES | NULL | Topic tag for grouping |
+
+**Used by:** WD exam/quiz pages, `api/submit-exam.php`
+
+---
+
+## responses
+
+Top-level exam submission record (score summary, not per-question).
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| student_id | varchar(50) | YES | NULL | |
+| exam_id | varchar(100) | YES | NULL | |
+| score | varchar(10) | YES | NULL | |
+| total_points | int(11) | YES | NULL | |
+| timestamp | datetime | YES | NULL | |
+
+**Used by:** `api/submit-exam.php`, grade-display logic. See also `student_responses` for per-question detail.
+
+---
+
+## review_questions
+
+Jeopardy-style review game question bank.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| chapter | varchar(200) | YES | NULL | Chapter/unit reference |
+| grade | varchar(100) | YES | NULL | Difficulty/grade level |
+| cat | varchar(100) | YES | NULL | Jeopardy column name |
+| val | int(11) | YES | NULL | Point value (100/200/300…) |
+| q | text | NO | — | Question text |
+| a | varchar(1000) | YES | NULL | Answer |
+| d | longtext | YES | NULL | Detail/explanation |
+
+**Used by:** Review game HTML pages, `api/` review question endpoints
+
+---
+
+## school_config
+
+Key-value store for school year date boundaries. Controls when bell schedule appears on the calendar.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| config_key | varchar(50) PK | NO | — | One of four fixed keys (see below) |
+| config_value | varchar(20) | NO | '' | YYYY-MM-DD date string |
+
+**Four keys:**
+
+| Key | Meaning |
+|-----|---------|
+| regular_start | First day of regular school year |
+| regular_end | Last day of regular school year |
+| summer_start | First day of summer school |
+| summer_end | Last day of summer school |
+
+**Set via:** Bell Schedule modal → "SCHEDULE APPLIES" date pickers → saved alongside bell periods via `api/school-config.php`.  
+**Used by:** `api/school-config.php` (GET/POST with ON DUPLICATE KEY UPDATE), `js/calendar.js` `getBellDayKey()` — schedule blocks only render within the configured date range.
+
+---
+
+## self_assessments
+
+Student self-rating (numeric scale) per chapter.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| student_id | varchar(50) | NO | — | |
+| chapter_id | varchar(50) | NO | — | Chapter identifier string |
+| level | float | NO | — | Self-rating value |
+| updated_at | timestamp | YES | current_timestamp() | |
+
+**Used by:** `api/student/save-self-assessment.php`, `api/student/self-assessments.php`, student grade pages
+
+---
+
+## shared_files
+
+Files and folders the teacher shares with specific students.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| recipient_student_id | varchar(50) | NO | — | Target student |
+| sender_name | varchar(100) | YES | NULL | Teacher display name |
+| file_name | varchar(255) | YES | NULL | Display name |
+| url | text | YES | NULL | Link to file |
+| is_folder | tinyint(1) | YES | 0 | 1 = folder row (no direct file) |
+| created_at | timestamp | YES | current_timestamp() | |
+
+**Used by:** `admin/files.html`, student file explorer pages
+
+---
+
+## student_responses
+
+Per-question answer record for each exam submission.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| response_id | int(11) PK AUTO | NO | — | |
+| student_id | varchar(50) | YES | NULL | |
+| exam_id | varchar(50) | YES | NULL | |
+| question_id | int(11) | YES | NULL | FK → questions.question_id |
+| student_answer | varchar(255) | YES | NULL | The answer the student chose |
+| is_correct | tinyint(1) | YES | NULL | 1/0 |
+| submission_date | timestamp | YES | current_timestamp() | |
+
+**Used by:** `api/submit-exam.php`, exam result review pages
+
+---
+
+## students
+
+All site users — students, teacher, and admin. Role controls access.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| student_id | varchar(50) PK | NO | — | Unique ID (school ID or 'teacher') |
+| first_name | varchar(50) | YES | NULL | |
+| last_name | varchar(50) | YES | NULL | |
+| section_id | varchar(50) | YES | NULL | FK → class_sections.section_id |
+| email | varchar(100) | YES | NULL | |
+| password_hash | varchar(255) | YES | NULL | bcrypt hash — used by PHP auth path |
+| role | varchar(50) | YES | 'student' | 'student' / 'teacher' / 'admin' |
+| username | varchar(50) | YES | NULL | Login username |
+| password | varchar(255) | YES | NULL | Used by Node.js auth path (legacy) |
+| role_id | int(11) | YES | 1 | Numeric role (legacy) |
+| must_change_password | tinyint(1) | NO | 0 | Forces password change on next login |
+| password_updated_at | datetime | YES | NULL | |
+
+**Two auth paths exist:**
+- PHP `api/login.php` → reads `password_hash` (bcrypt via `password_verify()`)
+- Node.js `server/auth.js` → reads `password` column (legacy)
+
+Both paths return the same session structure. See `AUTH.md` for full login flow.
+
+**Used by:** `api/login.php`, `api/register.php`, `api/change-password.php`, virtually every protected API endpoint checks role here, `auth-guard.js` uses the returned `role` field
+
+---
+
+## teacher_daily_questions
+
+Teacher overrides for the daily clock-in warm-up question, keyed by date.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| date | date PK | NO | — | The school day date |
+| wd_question | text | YES | NULL | Question for WD students |
+| cs_question | text | YES | NULL | Question for CS students |
+| updated_at | timestamp | YES | current_timestamp() | |
+
+**Used by:** Teacher daily-question editor; `api/clockin.php` checks this first before falling back to the `daily_questions` pool.
+
+---
+
+## timeclock_log
+
+Raw punch log — one row per clock-in or clock-out event.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| student_id | varchar(50) | NO | — | |
+| section_id | varchar(50) | YES | NULL | |
+| type | varchar(20) | NO | — | 'clockin' or 'clockout' |
+| answer | varchar(500) | YES | NULL | Warm-up question answer |
+| timestamp | datetime | NO | current_timestamp() | |
+
+**Used by:** `api/clockin.php` (INSERT), payroll dashboard aggregation
+
+---
+
+## timesheets
+
+Summarised daily attendance — one row per student per day pairing a clock-in with a clock-out.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| student_id | varchar(50) | YES | NULL | |
+| date | date | YES | NULL | |
+| clock_in | datetime | YES | NULL | |
+| clock_out | datetime | YES | NULL | |
+| in_answer | text | YES | NULL | Clock-in warm-up answer |
+| out_answer | text | YES | NULL | Clock-out warm-up answer |
+| score | int(11) | YES | 0 | Auto-scored answer quality |
+
+**Used by:** `admin/payroll.html`, hourly pay calculation (clock_in/clock_out diff × pay_roles.hourly_rate)
+
+---
+
+## turnins
+
+Student assignment turn-in records.
+
+| Column | Type | Nullable | Default | Notes |
+|--------|------|----------|---------|-------|
+| id | int(11) PK AUTO | NO | — | |
+| student_id | varchar(50) | NO | — | |
+| assignment_name | varchar(100) | YES | NULL | |
+| chapter | varchar(200) | YES | NULL | |
+| title | varchar(300) | YES | NULL | |
+| category | varchar(100) | YES | NULL | |
+| content | mediumtext | YES | NULL | Submission content |
+| note | text | YES | NULL | Student note to teacher |
+| is_submitted | tinyint(1) | YES | 0 | 1 = formally submitted |
+| timestamp | datetime | YES | current_timestamp() | |
+
+**Used by:** Student turn-in pages, `admin/files.html` teacher view
+
+---
+
+## Relationship Diagram (text)
+
+```
+courses ──< chapters
+courses ──< class_sections ──< students ──< grades
+                                        ──< timeclock_log
+                                        ──< timesheets
+                                        ──< appointments
+                                        ──< notebook_entries
+                                        ──< cs_notebook
+                                        ──< turnins
+                                        ──< self_assessments
+                                        ──< student_responses
+                                        ──< exam_progress
+                                        ──< responses
+
+exams ──< grades
+      ──< questions ──< student_responses
+      ──< exam_progress
+
+calendar_events  (source = 'csv' | 'manual')
+bell_schedule    (schedule_type = Mon…Fri | SS_Mon…SS_Fri)
+school_config    (4 key-value rows: regular_start/end, summer_start/end)
+office_hours     (teacher availability windows)
+pay_roles        (hourly rates referenced by timesheets)
+```

@@ -40,35 +40,22 @@ async function getBellSchedule() {
     return bellScheduleCache;
 }
 
-function getBellDayKey(dateStr, schedule) {
-    // No schedule on days off or weekends
+// Returns the schedule_type key to look up in bell_schedule, or null
+// The calendar event type (A, A_MIN, B, C) IS the key — no day-of-week logic needed.
+function getBellScheduleKey(dateStr) {
     if (specialDates.get(dateStr)?.type === 'OFF') return null;
     const jsDay = new Date(dateStr + 'T00:00:00').getDay();
     if (jsDay === 0 || jsDay === 6) return null;
-
-    const base  = ['','Mon','Tue','Wed','Thu','Fri',''][jsDay];
-    const ssKey = 'SS_' + base;
-
-    // Summer school: check configured date range (or fall back to month)
-    const hasSS = schedule.some(r => r.schedule_type === ssKey);
-    if (hasSS) {
-        const { summer_start: ss, summer_end: se } = schoolConfig;
-        if (ss && se) {
-            if (dateStr >= ss && dateStr <= se) return ssKey;
-            // Date is outside summer range — fall through to regular check
-        } else {
-            // No config set: use month-based fallback (June–August)
-            const mo = +dateStr.split('-')[1];
-            if (mo >= 6 && mo <= 8) return ssKey;
-        }
-    }
-
-    // Regular school year: check configured date range
-    if (!schedule.some(r => r.schedule_type === base)) return null;
-    const { regular_start: rs, regular_end: re } = schoolConfig;
+    const { summer_start: ss, summer_end: se, regular_start: rs, regular_end: re } = schoolConfig;
+    // Summer school: override with 'summer' key
+    const isSummer = (ss && se) ? (dateStr >= ss && dateStr <= se)
+                                 : (+dateStr.split('-')[1] >= 6 && +dateStr.split('-')[1] <= 8);
+    if (isSummer) return 'summer';
+    // Regular year: check date range
     if (rs && re && (dateStr < rs || dateStr > re)) return null;
-
-    return base;
+    const calType = specialDates.get(dateStr)?.type;
+    if (!calType || calType === 'none') return null;
+    return calType; // 'A', 'A_MIN', 'B', 'C', 'B_MIN' — direct match to schedule_type
 }
 
 // ─── Bootstrap ──────────────────────────────────────────────────────────────
@@ -521,8 +508,8 @@ async function renderWeekView() {
         const dateStr = isoDate(d.getFullYear(), d.getMonth() + 1, d.getDate());
         const info    = specialDates.get(dateStr);
         const cfg     = info ? (TYPE_CONFIG[info.type] || TYPE_CONFIG.none) : null;
-        const dayKey  = getBellDayKey(dateStr, schedule);
-        const periods = dayKey ? schedule.filter(r => r.schedule_type === dayKey).sort((a,b) => a.start_time.localeCompare(b.start_time)) : [];
+        const schedKey = getBellScheduleKey(dateStr);
+        const periods  = schedKey ? schedule.filter(r => r.schedule_type === schedKey).sort((a,b) => a.start_time.localeCompare(b.start_time)) : [];
         const colors  = tgLabelColors(periods);
         return { d, dateStr, info, cfg, periods, colors };
     });
@@ -608,10 +595,8 @@ async function renderDayView() {
     const info     = specialDates.get(dateStr);
     const cfg      = info ? (TYPE_CONFIG[info.type] || TYPE_CONFIG.none) : null;
     const schedule = await getBellSchedule();
-    const dayKey   = getBellDayKey(dateStr, schedule);
-    const periods  = dayKey
-        ? schedule.filter(r => r.schedule_type === dayKey).sort((a,b) => a.start_time.localeCompare(b.start_time))
-        : [];
+    const schedKey = getBellScheduleKey(dateStr);
+    const periods  = schedKey ? schedule.filter(r => r.schedule_type === schedKey).sort((a,b) => a.start_time.localeCompare(b.start_time)) : [];
     const colors   = tgLabelColors(periods);
 
     const todayStr = isoDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
@@ -1123,14 +1108,14 @@ async function saveOfficeHours() {
 // ─── Bell Schedule ────────────────────────────────────────────────────────────
 
 const BELL_SCHEDULES = {
-    regular: { label: 'Regular Year',  days: ['Mon','Tue','Wed','Thu','Fri'] },
-    summer:  { label: 'Summer School', days: ['SS_Mon','SS_Tue','SS_Wed','SS_Thu','SS_Fri'] }
+    A:     { label: 'A Day',     group: 'regular' },
+    A_MIN: { label: 'A Min Day', group: 'regular' },
+    B:     { label: 'B Day',     group: 'regular' },
+    B_MIN: { label: 'B Min Day', group: 'regular' },
+    C:     { label: 'C Day',     group: 'regular' },
+    summer:{ label: 'Summer',    group: 'summer'  },
 };
-const BELL_DAY_LABEL = {
-    Mon:'Monday',    Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday',    Fri:'Friday',
-    SS_Mon:'Monday', SS_Tue:'Tuesday', SS_Wed:'Wednesday', SS_Thu:'Thursday', SS_Fri:'Friday'
-};
-let activeBellSched = 'regular';
+let activeBellSched = 'A';
 
 async function openBellScheduleModal() {
     const modal = document.getElementById('modalBellSchedule');
@@ -1140,7 +1125,7 @@ async function openBellScheduleModal() {
         const container = document.getElementById('bell-sections-container');
         const sw = document.createElement('div');
         sw.id = 'bell-sched-switcher';
-        sw.className = 'btn-group mb-3 w-100';
+        sw.className = 'd-flex flex-wrap gap-1 mb-3';
         sw.innerHTML = Object.entries(BELL_SCHEDULES).map(([key, s]) =>
             `<button type="button" class="btn btn-sm btn-outline-primary" data-sched="${key}">${s.label}</button>`
         ).join('');
@@ -1187,20 +1172,14 @@ function fillBellDateRange() {
     const startEl = document.getElementById('bell-range-start');
     const endEl   = document.getElementById('bell-range-end');
     if (!startEl || !endEl) return;
-    if (activeBellSched === 'summer') {
-        startEl.value = schoolConfig.summer_start || '';
-        endEl.value   = schoolConfig.summer_end   || '';
-    } else {
-        startEl.value = schoolConfig.regular_start || '';
-        endEl.value   = schoolConfig.regular_end   || '';
-    }
+    const isSummer = BELL_SCHEDULES[activeBellSched]?.group === 'summer';
+    startEl.value = isSummer ? (schoolConfig.summer_start || '') : (schoolConfig.regular_start || '');
+    endEl.value   = isSummer ? (schoolConfig.summer_end   || '') : (schoolConfig.regular_end   || '');
 }
 
 async function loadBellSchedule() {
     const container = document.getElementById('bell-sections-container');
     if (!container) return;
-
-    const schedDays = BELL_SCHEDULES[activeBellSched].days;
 
     // Wire the Add button immediately — before the fetch — so it always works
     const addBtn = document.getElementById('btn-add-bell-section');
@@ -1217,8 +1196,7 @@ async function loadBellSchedule() {
         const res  = await fetch('/api/bell-schedule.php');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        // Only keep rows belonging to the active schedule
-        rows = (data.schedule || []).filter(r => schedDays.includes(r.schedule_type));
+        rows = (data.schedule || []).filter(r => r.schedule_type === activeBellSched);
     } catch (e) {
         container.innerHTML = `<p class="small text-warning mb-2">
             <strong>Could not reach the API</strong> (${e.message}) —
@@ -1228,78 +1206,38 @@ async function loadBellSchedule() {
         return;
     }
 
-    // Group rows by period_label → { label, course, days:{Mon:{start,end}, …} }
-    const sections = {};
-    rows.forEach(r => {
-        if (!sections[r.period_label]) {
-            sections[r.period_label] = { label: r.period_label, course: r.course_name || '', days: {} };
-        }
-        sections[r.period_label].days[r.schedule_type] = { start: r.start_time, end: r.end_time };
-    });
-
     container.innerHTML = '';
-    const secList = Object.values(sections);
-    if (secList.length === 0) {
+    if (rows.length === 0) {
         addBellSection(container);
     } else {
-        secList.forEach(sec => addBellSection(container, sec));
+        rows.forEach(r => addBellSection(container, {
+            label:      r.period_label,
+            course:     r.course_name || '',
+            start_time: r.start_time,
+            end_time:   r.end_time,
+        }));
     }
 }
 
 function addBellSection(container, sec = {}) {
-    const uid  = Math.random().toString(36).slice(2);
-    const card = document.createElement('div');
+    const card  = document.createElement('div');
     card.className = 'card mb-2 bell-section-card';
-
-    const daysHtml = BELL_SCHEDULES[activeBellSched].days.map(day => {
-        const times   = sec.days?.[day];
-        const checked = times ? 'checked' : '';
-        const start   = times?.start || '07:35';
-        const end     = times?.end   || '09:00';
-        return `
-        <div class="d-flex align-items-center gap-2 mb-1 bell-day-row" data-day="${day}">
-          <div class="form-check mb-0" style="min-width:100px">
-            <input type="checkbox" class="form-check-input bell-day-check" id="bdc-${day}-${uid}" ${checked}>
-            <label class="form-check-label small fw-semibold" for="bdc-${day}-${uid}">${BELL_DAY_LABEL[day]}</label>
-          </div>
-          <div class="bell-day-times align-items-center gap-1" style="${times ? 'display:flex' : 'display:none'}">
-            <input type="time" class="form-control form-control-sm bell-start" value="${start}" style="width:108px">
-            <span class="text-muted small">→</span>
-            <input type="time" class="form-control form-control-sm bell-end"   value="${end}"   style="width:108px">
-            <button type="button" class="btn btn-outline-secondary btn-sm bell-fill-all py-0" title="Copy these times to all checked days" style="font-size:.75rem;white-space:nowrap">Fill all</button>
-          </div>
-        </div>`;
-    }).join('');
-
+    const start = sec.start_time || '07:35';
+    const end   = sec.end_time   || '09:00';
     card.innerHTML = `
-    <div class="card-body p-3">
-      <div class="d-flex gap-2 mb-3 align-items-center">
+    <div class="card-body p-2">
+      <div class="d-flex gap-2 align-items-center">
         <input type="text" class="form-control form-control-sm bell-sec-label fw-bold"
-               value="${sec.label || ''}" placeholder="e.g. A1" style="width:90px">
+               value="${sec.label || ''}" placeholder="e.g. A1" style="width:90px"
+               title="Use A-prefix for A-day periods, B-prefix for B-day, any label for C-day">
         <input type="text" class="form-control form-control-sm bell-sec-course flex-fill"
-               value="${sec.course || ''}" placeholder="Course name (optional, e.g. Computer Science)">
+               value="${sec.course || ''}" placeholder="Course name (optional)">
+        <input type="time" class="form-control form-control-sm bell-start" value="${start}" style="width:108px">
+        <span class="text-muted small">→</span>
+        <input type="time" class="form-control form-control-sm bell-end"   value="${end}"   style="width:108px">
         <button type="button" class="btn btn-outline-danger btn-sm px-2 bell-remove-section">×</button>
       </div>
-      <div class="bell-days-list ps-1">${daysHtml}</div>
     </div>`;
-
-    card.querySelectorAll('.bell-day-check').forEach(cb => {
-        cb.addEventListener('change', () => {
-            cb.closest('.bell-day-row').querySelector('.bell-day-times').style.display = cb.checked ? 'flex' : 'none';
-        });
-    });
-    card.querySelectorAll('.bell-fill-all').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const row   = btn.closest('.bell-day-row');
-            const start = row.querySelector('.bell-start').value;
-            const end   = row.querySelector('.bell-end').value;
-            card.querySelectorAll('.bell-day-check:checked').forEach(cb => {
-                const r = cb.closest('.bell-day-row');
-                r.querySelector('.bell-start').value = start;
-                r.querySelector('.bell-end').value   = end;
-            });
-        });
-    });
     card.querySelector('.bell-remove-section').addEventListener('click', () => card.remove());
     container.appendChild(card);
 }
@@ -1309,19 +1247,13 @@ async function saveBellSchedule() {
     document.querySelectorAll('.bell-section-card').forEach(card => {
         const label  = card.querySelector('.bell-sec-label')?.value.trim();
         const course = card.querySelector('.bell-sec-course')?.value.trim() || null;
-        if (!label) return;
-        card.querySelectorAll('.bell-day-row').forEach(row => {
-            const day = row.dataset.day;
-            const cb  = row.querySelector('.bell-day-check');
-            if (!cb?.checked) return;
-            const start = row.querySelector('.bell-start')?.value;
-            const end   = row.querySelector('.bell-end')?.value;
-            if (start && end && start < end) {
-                periods.push({ schedule_type: day, period_label: label,
-                               section_id: label, course_name: course,
-                               start_time: start, end_time: end });
-            }
-        });
+        const start  = card.querySelector('.bell-start')?.value;
+        const end    = card.querySelector('.bell-end')?.value;
+        if (label && start && end && start < end) {
+            periods.push({ schedule_type: activeBellSched, period_label: label,
+                           section_id: label, course_name: course,
+                           start_time: start, end_time: end });
+        }
     });
 
     const btn  = document.getElementById('btn-save-bell-schedule');
@@ -1332,7 +1264,8 @@ async function saveBellSchedule() {
         // Save bell periods and school date range in parallel
         const startVal = document.getElementById('bell-range-start')?.value || '';
         const endVal   = document.getElementById('bell-range-end')?.value   || '';
-        const configPayload = activeBellSched === 'summer'
+        const isSummer = BELL_SCHEDULES[activeBellSched]?.group === 'summer';
+        const configPayload = isSummer
             ? { summer_start: startVal, summer_end: endVal }
             : { regular_start: startVal, regular_end: endVal };
 
@@ -1340,7 +1273,7 @@ async function saveBellSchedule() {
             fetch('/api/bell-schedule.php', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ teacher_id: window.dacAuthData?.user?.student_id, schedule_types: BELL_SCHEDULES[activeBellSched].days, periods }),
+                body:    JSON.stringify({ teacher_id: window.dacAuthData?.user?.student_id, schedule_types: [activeBellSched], periods }),
             }),
             fetch('/api/school-config.php', {
                 method:  'POST',
