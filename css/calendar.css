@@ -539,6 +539,41 @@
   font-size: .82rem; color: #adb5bd; text-align: center; width: 80%;
 }
 
+/* All-day row (between header and time grid) */
+.tg-allday-row {
+  display: flex;
+  border-bottom: 1px solid #dee2e6;
+  background: var(--calendar-bg, #feffee);
+}
+.tg-allday-label {
+  width: 60px; min-width: 60px;
+  border-right: 1px solid #dee2e6;
+  font-size: .6rem; color: #6c757d; text-transform: uppercase;
+  letter-spacing: .04em;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding: 4px 8px 4px 0;
+}
+.tg-allday-area {
+  flex: 1; display: grid;
+}
+.tg-allday-col {
+  border-left: 1px solid #dee2e6;
+  padding: 3px 4px;
+  min-height: 30px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 2px;
+}
+.tg-allday-chip {
+  font-size: .65rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+}
+.tg-allday-none {
+  background: var(--calendar-bg, #feffee);
+  color: var(--calendar-text-dark, #244673);
+  border: 1px solid var(--calendar-border, #3F59A6);
+}
+
 .tg-now-line {
   position: absolute; left: 0; right: 0;
   border-top: 2px solid #dc3545; pointer-events: none; z-index: 3;

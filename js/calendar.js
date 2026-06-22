@@ -382,27 +382,25 @@ async function renderWeekView() {
 
     listView.innerHTML = '<p class="small text-muted p-3">Loading…</p>';
 
-    // Anchor to Monday of the selected week
+    // Find Sunday of the selected week
     const anchor = new Date((selectedDate || isoDate(currentYear, currentMonth + 1, 1)) + 'T00:00:00');
-    const dow    = anchor.getDay(); // 0=Sun
-    const monday = new Date(anchor);
-    monday.setDate(anchor.getDate() - (dow === 0 ? 6 : dow - 1));
-    const friday = new Date(monday); friday.setDate(monday.getDate() + 4);
+    const sunday = new Date(anchor);
+    sunday.setDate(anchor.getDate() - anchor.getDay());
+    const saturday = new Date(sunday); saturday.setDate(sunday.getDate() + 6);
 
     const monthLabel = document.getElementById('month-label');
     if (monthLabel) {
         const fmt = { month: 'short', day: 'numeric' };
-        const s = monday.toLocaleDateString('en-US', fmt);
-        const e = friday.toLocaleDateString('en-US', { ...fmt, year: 'numeric' });
+        const s = sunday.toLocaleDateString('en-US', fmt);
+        const e = saturday.toLocaleDateString('en-US', { ...fmt, year: 'numeric' });
         monthLabel.textContent = `${s} – ${e}`;
     }
 
     const todayStr = isoDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
     const schedule = await getBellSchedule();
 
-    // Mon–Fri only (school week)
-    const days = Array.from({ length: 5 }, (_, i) => {
-        const d = new Date(monday); d.setDate(monday.getDate() + i);
+    const days = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(sunday); d.setDate(sunday.getDate() + i);
         const dateStr = isoDate(d.getFullYear(), d.getMonth() + 1, d.getDate());
         const info    = specialDates.get(dateStr);
         const cfg     = info ? (TYPE_CONFIG[info.type] || TYPE_CONFIG.none) : null;
@@ -412,19 +410,25 @@ async function renderWeekView() {
         return { d, dateStr, info, cfg, periods, colors };
     });
 
-    const headerCols = days.map(({ d, dateStr, cfg }) => {
+    // Header: clean — day name + number only, no type info (goes in all-day row)
+    const headerCols = days.map(({ d, dateStr }) => {
         const isToday = dateStr === todayStr;
         const isSel   = dateStr === selectedDate;
         const name    = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
         const num     = d.getDate();
-        const hdStyle = cfg?.bg ? `background:${cfg.bg};color:${cfg.text}` : '';
-        const chip    = cfg?.bg ? `<div class="tg-day-type-chip">${cfg.label}</div>` : '';
         return `<div class="tg-day-header${isToday ? ' tg-today' : ''}${isSel ? ' tg-selected' : ''}"
-                     style="${hdStyle}" data-date="${dateStr}">
+                     data-date="${dateStr}">
             <div class="tg-day-name">${name}</div>
             <div class="tg-day-num-wrap"><span class="tg-day-num${isToday ? ' tg-today-circle' : ''}">${num}</span></div>
-            ${chip}
         </div>`;
+    }).join('');
+
+    // All-day row: shows schedule-type chip per day using school colors
+    const alldayCols = days.map(({ dateStr, info, cfg }) => {
+        const chip = cfg?.bg
+            ? `<div class="tg-allday-chip" style="background:${cfg.bg};color:${cfg.text};border:1px solid ${cfg.border}">${cfg.label}</div>`
+            : (info?.description ? `<div class="tg-allday-chip tg-allday-none">${info.description}</div>` : '');
+        return `<div class="tg-allday-col" data-date="${dateStr}">${chip}</div>`;
     }).join('');
 
     const dayCols = days.map(({ dateStr, periods, colors }) =>
@@ -443,15 +447,19 @@ async function renderWeekView() {
             <div class="tg-header-gutter"></div>
             ${headerCols}
         </div>
+        <div class="tg-allday-row">
+            <div class="tg-allday-label">All day</div>
+            <div class="tg-allday-area" style="grid-template-columns:repeat(7,1fr)">${alldayCols}</div>
+        </div>
         <div class="tg-body" style="height:${bodyH}px">
             <div class="tg-time-col">${tgHourRows()}</div>
-            <div class="tg-days-area" style="grid-template-columns:repeat(5,1fr)">${dayCols}</div>
+            <div class="tg-days-area" style="grid-template-columns:repeat(7,1fr)">${dayCols}</div>
         </div>
     </div>`;
 
-    listView.querySelectorAll('.tg-day-header').forEach(h => {
-        h.addEventListener('click', () => {
-            selectedDate = h.dataset.date;
+    listView.querySelectorAll('[data-date]').forEach(el => {
+        el.addEventListener('click', () => {
+            selectedDate = el.dataset.date;
             const [y, mo] = selectedDate.split('-').map(Number);
             currentYear = y; currentMonth = mo - 1;
             updateDaySidebar(selectedDate);
@@ -491,33 +499,41 @@ async function renderDayView() {
 
     const todayStr = isoDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
     const isToday  = dateStr === todayStr;
-    const hdStyle  = cfg?.bg ? `background:${cfg.bg};color:${cfg.text}` : 'background:#f8f9fa;color:#495057';
 
-    const headerHtml = `
-    <div class="tg-day-header tg-day-header--single${isToday ? ' tg-today' : ''}" style="${hdStyle}">
-        <div class="tg-day-name">${dateObj.toLocaleDateString('en-US',{weekday:'long'}).toUpperCase()}</div>
-        <div class="tg-day-num-wrap">
-            <span class="tg-day-num${isToday ? ' tg-today-circle' : ''}">${d}</span>
-        </div>
-        ${cfg?.label ? `<div style="font-size:.75rem;margin-top:2px">${cfg.label}</div>` : ''}
-        ${info?.description ? `<div style="font-size:.72rem;opacity:.8;margin-top:2px">${info.description}</div>` : ''}
-    </div>`;
+    // All-day chip: shows schedule type and any description
+    let alldayContent = '';
+    if (cfg?.bg) {
+        const extra = info?.description ? ` — ${info.description}` : '';
+        alldayContent = `<div class="tg-allday-chip" style="background:${cfg.bg};color:${cfg.text};border:1px solid ${cfg.border}">${cfg.label}${extra}</div>`;
+    } else if (info?.description) {
+        alldayContent = `<div class="tg-allday-chip tg-allday-none">${info.description}</div>`;
+    }
 
     const bodyH = (GRID_END - GRID_START) * HOUR_PX;
-    const noSchd = !periods.length
-        ? `<div class="tg-no-schedule">No bell schedule configured for this day.</div>`
-        : tgEventBlocks(periods, colors);
+    const periodBlocks = periods.length ? tgEventBlocks(periods, colors)
+        : `<div class="tg-no-schedule">No bell schedule configured for this day.</div>`;
 
     listView.innerHTML = `
     <div class="tg-view">
         <div class="tg-header">
             <div class="tg-header-gutter"></div>
-            ${headerHtml}
+            <div class="tg-day-header tg-day-header--single${isToday ? ' tg-today' : ''}">
+                <div class="tg-day-name">${dateObj.toLocaleDateString('en-US',{weekday:'long'}).toUpperCase()}</div>
+                <div class="tg-day-num-wrap">
+                    <span class="tg-day-num${isToday ? ' tg-today-circle' : ''}">${d}</span>
+                </div>
+            </div>
+        </div>
+        <div class="tg-allday-row">
+            <div class="tg-allday-label">All day</div>
+            <div class="tg-allday-area" style="grid-template-columns:1fr">
+                <div class="tg-allday-col">${alldayContent}</div>
+            </div>
         </div>
         <div class="tg-body" style="height:${bodyH}px">
             <div class="tg-time-col">${tgHourRows()}</div>
             <div class="tg-days-area" style="grid-template-columns:1fr">
-                <div class="tg-day-col">${tgHourLines()}${tgCurrentTimeLine(dateStr)}${noSchd}</div>
+                <div class="tg-day-col">${tgHourLines()}${tgCurrentTimeLine(dateStr)}${periodBlocks}</div>
             </div>
         </div>
     </div>`;
