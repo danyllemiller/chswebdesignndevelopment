@@ -879,7 +879,7 @@ hr { border-color: var(--calendar-border) !important; opacity: 1; }
 
 .roadmap-card .card-header {
   background-color: var(--secondary-color) !important;
-  color: var(--accent-turquoise) !important;
+  color: var(--calendar-text-dark) !important;
 }
 
 /* Materials Hub Card */
