@@ -53,8 +53,10 @@
     input[type=date].has-date { border-color: #198754; background: #f0fff4; }
 
     #smart-panel { border: 2px solid #6610f2 !important; }
-    #smart-panel .card-header { background: #f3f0ff; border-bottom: 2px solid #6610f2; cursor: pointer; }
-    #smart-chevron { transition: transform 0.2s; color: #5a23a0; }
+    #smart-panel .card-header { background: #6610f2 !important; color: #fff !important; border-bottom: 2px solid #4a0db0; cursor: pointer; }
+    #smart-panel .card-header span, #smart-panel .card-header i { color: #fff !important; }
+    #smart-panel .card-header .text-muted { color: #d8c8ff !important; }
+    #smart-chevron { transition: transform 0.2s; }
   </style>
 </head>
 <body>
@@ -117,9 +119,9 @@
   <div id="smart-panel" class="card mb-3">
     <div class="card-header d-flex justify-content-between align-items-center"
          onclick="toggleSmartPanel()">
-      <span class="fw-bold" style="color:#5a23a0">
+      <span class="fw-bold">
         <i class="fas fa-magic me-2"></i>Smart Auto-Schedule
-        <span class="text-muted fw-normal small ms-2">— compute due dates from the school calendar</span>
+        <span class="fw-normal small ms-2" style="opacity:0.8">— compute due dates from the school calendar</span>
       </span>
       <i class="fas fa-chevron-down" id="smart-chevron"></i>
     </div>
