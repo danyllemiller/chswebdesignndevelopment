@@ -27,6 +27,7 @@
 /* Accent Colors */
   --tertiary-color: #6d916c;          /* Muted Sage Green - Main Accent */
   --accent-lavender: #846c91;         /* Muted Dusty Lavender */
+  --accent-slate: #846c91;            /* Alias for accent-lavender — used by bg-success card headers */
   --accent-teal: #6c8c91;             /* Muted Steel Teal */
   --accent-blue-gray: #5c669e;        /* Muted Blue-Grey Transition */
   --accent-periwinkle: #7a82ab;        /* Soft Periwinkle Grey */
@@ -324,19 +325,20 @@ width: 47px; height: 47px; background-color: var(--accent-lavender);
 
 /* CARD & MODAL COLORS */
 .card { border-color: var(--calendar-border) !important; }
-.card-header { background-color: var(--primary-color) !important; color: var(--secondary-color) !important; }
-.card-header.bg-primary { background-color: var(--primary-color) !important; color: var(--secondary-color) !important; }
-.card-header.bg-secondary { background-color: var(--tertiary-color) !important; color: var(--secondary-color) !important; }
-.card-header.bg-success { background-color: var(--accent-slate) !important; color: var(--secondary-color) !important; }
-.card-header.bg-danger { background-color: var(--primary-darkest) !important; color: var(--secondary-color) !important; }
+.card-header { background-color: var(--primary-color) !important; color: #ffffff !important; }
+.card-header.bg-primary { background-color: var(--primary-color) !important; color: #ffffff !important; }
+.card-header.bg-secondary { background-color: var(--tertiary-color) !important; color: #ffffff !important; }
+.card-header.bg-success { background-color: var(--accent-slate) !important; color: #ffffff !important; }
+.card-header.bg-danger { background-color: var(--primary-darkest) !important; color: #ffffff !important; }
+.card-header.bg-dark { background-color: var(--calendar-text-dark) !important; color: #ffffff !important; }
 .card-header.bg-warning { background-color: var(--accent-warm) !important; color: var(--calendar-text-dark) !important; }
 .card-header.bg-info { background-color: var(--accent-turquoise) !important; color: var(--calendar-text-dark) !important; }
 
-.modal-header { background-color: var(--primary-color) !important; color: var(--secondary-color) !important; }
-.modal-header.bg-primary { background-color: var(--primary-color) !important; color: var(--secondary-color) !important; }
-.modal-header.bg-secondary { background-color: var(--tertiary-color) !important; color: var(--secondary-color) !important; }
-.modal-header.bg-success { background-color: var(--accent-slate) !important; color: var(--secondary-color) !important; }
-.modal-header.bg-danger { background-color: var(--primary-darkest) !important; color: var(--secondary-color) !important; }
+.modal-header { background-color: var(--primary-color) !important; color: #ffffff !important; }
+.modal-header.bg-primary { background-color: var(--primary-color) !important; color: #ffffff !important; }
+.modal-header.bg-secondary { background-color: var(--tertiary-color) !important; color: #ffffff !important; }
+.modal-header.bg-success { background-color: var(--accent-slate) !important; color: #ffffff !important; }
+.modal-header.bg-danger { background-color: var(--primary-darkest) !important; color: #ffffff !important; }
 .modal-header.bg-warning { background-color: var(--accent-warm) !important; color: var(--calendar-text-dark) !important; }
 .modal-header.bg-info { background-color: var(--accent-turquoise) !important; color: var(--calendar-text-dark) !important; }
 
