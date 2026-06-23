@@ -229,6 +229,75 @@ router.get('/admin/sections', async (req, res) => {
     }
 });
 
+// --- ADMIN ADD SECTION ---
+router.post('/admin/sections', async (req, res) => {
+    const { section_id, course_id } = req.body || {};
+    if (!section_id) return res.status(400).json({ error: 'section_id is required' });
+    const sid = String(section_id).trim();
+    const cid = course_id ? String(course_id).trim() : null;
+
+    let connection;
+    try {
+        connection = await getDbConnection();
+        await connection.execute(`CREATE TABLE IF NOT EXISTS courses (
+            course_id   VARCHAR(50) PRIMARY KEY,
+            course_name VARCHAR(100) NOT NULL DEFAULT '',
+            department  VARCHAR(100) NOT NULL DEFAULT ''
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+        await connection.execute(`CREATE TABLE IF NOT EXISTS class_sections (
+            section_id VARCHAR(50) PRIMARY KEY,
+            course_id  VARCHAR(50) DEFAULT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
+        // Ensure the course row exists
+        if (cid) {
+            const COURSE_NAMES = {
+                '10003GS': 'Computer Science', '05254G1S': 'Web Design 1',
+                '05254G2S': 'Web Design 2',    '05254ES':  'Applied Science'
+            };
+            const cname = COURSE_NAMES[cid] || cid;
+            await connection.execute(
+                'INSERT IGNORE INTO courses (course_id, course_name, department) VALUES (?, ?, ?)',
+                [cid, cname, '']
+            );
+        }
+        await connection.execute(
+            'INSERT INTO class_sections (section_id, course_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE course_id = VALUES(course_id)',
+            [sid, cid]
+        );
+        await connection.end();
+        res.json({ success: true, section_id: sid });
+    } catch (err) {
+        if (connection) try { await connection.end(); } catch(_) {}
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- ADMIN DELETE SECTION ---
+router.delete('/admin/sections/:section_id', async (req, res) => {
+    const sid = String(req.params.section_id || '').trim();
+    if (!sid) return res.status(400).json({ error: 'section_id required' });
+
+    let connection;
+    try {
+        connection = await getDbConnection();
+        const [rows] = await connection.execute(
+            'SELECT COUNT(*) AS cnt FROM students WHERE section_id = ?', [sid]
+        );
+        if (rows[0].cnt > 0) {
+            await connection.end();
+            return res.status(409).json({ error: `Cannot delete — ${rows[0].cnt} student(s) still enrolled in this section.` });
+        }
+        await connection.execute('DELETE FROM class_sections WHERE section_id = ?', [sid]);
+        await connection.end();
+        res.json({ success: true });
+    } catch (err) {
+        if (connection) try { await connection.end(); } catch(_) {}
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // --- ADMIN UPLOAD ROSTER ---
 router.post('/admin/upload-roster', async (req, res) => {
     let students = req.body;

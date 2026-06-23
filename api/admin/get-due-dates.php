@@ -17,11 +17,14 @@ while ($row = $result->fetch_assoc()) {
     $exams[$row['exam_id']] = $row;
 }
 
-// Distinct class periods from roster
+// Distinct class periods: class_sections catalog + any enrolled student sections
 $sections = [];
 $sr = $db->query(
-    "SELECT DISTINCT section_id FROM students
+    "SELECT section_id FROM class_sections
      WHERE section_id IS NOT NULL AND section_id != ''
+     UNION
+     SELECT DISTINCT section_id FROM students
+     WHERE section_id IS NOT NULL AND section_id != '' AND section_id != 'Teacher'
      ORDER BY section_id"
 );
 if ($sr) {

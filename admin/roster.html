@@ -49,6 +49,9 @@
           <li class="nav-item">
             <button class="nav-link fw-bold" id="tab-bulk" data-bs-toggle="pill" data-bs-target="#pills-bulk" type="button">📁 Bulk Upload</button>
           </li>
+          <li class="nav-item">
+            <button class="nav-link fw-bold" id="tab-sections" data-bs-toggle="pill" data-bs-target="#pills-sections" type="button">🗂️ Manage Sections</button>
+          </li>
         </ul>
 
         <div id="statusMessage" class="alert d-none text-center fw-bold small"></div>
@@ -122,6 +125,59 @@
                 </div>
             </div>
             <button id="addSingleBtn" class="btn btn-primary w-100 fw-bold">Add to Roster</button>
+          </div>
+
+          <!-- MANAGE SECTIONS TAB -->
+          <div class="tab-pane fade" id="pills-sections">
+            <h5 class="text-danger fw-bold mb-3">Class Section Catalog</h5>
+            <p class="text-muted small mb-3">Sections must exist here before students can be added to them. The Due Date Manager and roster upload both pull from this list.</p>
+
+            <!-- Add Section Form -->
+            <div class="card border-danger mb-4">
+              <div class="card-header bg-danger text-white fw-bold small">Add New Section</div>
+              <div class="card-body">
+                <div class="row g-2 align-items-end">
+                  <div class="col-md-4">
+                    <label class="form-label small fw-semibold mb-1">Section ID</label>
+                    <input type="text" id="new-section-id" class="form-control" placeholder="e.g. CS-A5, WD1-B4">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small fw-semibold mb-1">Course</label>
+                    <select id="new-section-course" class="form-select">
+                      <option value="10003GS">Computer Science</option>
+                      <option value="05254G1S">Web Design 1</option>
+                      <option value="05254G2S">Web Design 2</option>
+                      <option value="05254ES">Applied Science</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <button id="addSectionBtn" class="btn btn-danger w-100 fw-bold">Add Section</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Existing Sections Table -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fw-semibold small text-muted">Existing Sections</span>
+              <button id="refreshSectionCatalog" class="btn btn-sm btn-outline-secondary">🔄 Refresh</button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-sm table-hover">
+                <thead class="table-danger">
+                  <tr>
+                    <th>Section ID</th>
+                    <th>Course ID</th>
+                    <th>Course Name</th>
+                    <th>Department</th>
+                    <th class="text-center">Delete</th>
+                  </tr>
+                </thead>
+                <tbody id="sectionCatalogBody">
+                  <tr><td colspan="5" class="text-center text-muted py-3">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <!-- BULK CSV TAB -->
