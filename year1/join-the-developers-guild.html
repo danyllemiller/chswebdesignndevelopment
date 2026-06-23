@@ -649,13 +649,148 @@
 
                         <div class="col-lg-4 mt-4 mt-lg-0 text-center">
                             <figure class="mb-4 text-center">
-                                <a href="/images/join-the-developers-guild/figure-05.png" target="_blank" rel="noopener">
-                                    <img src="/images/join-the-developers-guild/figure-05.png" alt="DNS Flowchart" class="img-fluid rounded shadow-sm border w-100">
-                                </a>
+                                <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+                                    <svg id="dns-flowchart-svg" viewBox="0 0 340 530"
+                                         style="width:100%;min-width:280px;height:auto;display:block;"
+                                         aria-label="Interactive DNS Lookup Flowchart">
+                                        <defs>
+                                            <style>
+                                                .dns-node{cursor:pointer;}
+                                                .dns-node:hover .dns-box{opacity:.82;}
+                                            </style>
+                                        </defs>
+
+                                        <!-- Arrow shafts + heads (drawn before nodes so nodes sit on top) -->
+                                        <g stroke="#9ca3af" stroke-width="1.5">
+                                            <line x1="170" y1="53"  x2="170" y2="73"/>
+                                            <line x1="170" y1="119" x2="170" y2="139"/>
+                                            <line x1="170" y1="185" x2="170" y2="205"/>
+                                            <line x1="170" y1="251" x2="170" y2="271"/>
+                                            <line x1="170" y1="317" x2="170" y2="337"/>
+                                            <line x1="170" y1="383" x2="170" y2="403"/>
+                                            <line x1="170" y1="449" x2="170" y2="469"/>
+                                        </g>
+                                        <g fill="#9ca3af">
+                                            <polygon points="165,73  175,73  170,79"/>
+                                            <polygon points="165,139 175,139 170,145"/>
+                                            <polygon points="165,205 175,205 170,211"/>
+                                            <polygon points="165,271 175,271 170,277"/>
+                                            <polygon points="165,337 175,337 170,343"/>
+                                            <polygon points="165,403 175,403 170,409"/>
+                                            <polygon points="165,469 175,469 170,475"/>
+                                        </g>
+
+                                        <!-- Step 1 — You Type a URL (pill, start) -->
+                                        <g class="dns-node" data-dns="type" onclick="dnsShow('type')">
+                                            <rect class="dns-box" x="20" y="15" width="300" height="36" rx="18" fill="#c7d2fe" stroke="#818cf8" stroke-width="1.5"/>
+                                            <text x="170" y="29" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">1 · You Type a URL</text>
+                                            <text x="170" y="43" text-anchor="middle" font-size="9" fill="#4338ca">e.g. chswebdesignndevelopment.com</text>
+                                        </g>
+
+                                        <!-- Step 2 — Browser Cache -->
+                                        <g class="dns-node" data-dns="brcache" onclick="dnsShow('brcache')">
+                                            <rect class="dns-box" x="20" y="81" width="300" height="36" rx="8" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1.5"/>
+                                            <text x="170" y="95" text-anchor="middle" font-size="12" font-weight="700" fill="#065f46">2 · Browser Cache</text>
+                                            <text x="170" y="109" text-anchor="middle" font-size="9" fill="#065f46">Fastest — already visited recently?</text>
+                                        </g>
+
+                                        <!-- Step 3 — OS / hosts Cache -->
+                                        <g class="dns-node" data-dns="oscache" onclick="dnsShow('oscache')">
+                                            <rect class="dns-box" x="20" y="147" width="300" height="36" rx="8" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1.5"/>
+                                            <text x="170" y="161" text-anchor="middle" font-size="12" font-weight="700" fill="#065f46">3 · OS / hosts File Cache</text>
+                                            <text x="170" y="175" text-anchor="middle" font-size="9" fill="#065f46">Your computer's local lookup table</text>
+                                        </g>
+
+                                        <!-- Step 4 — Recursive Resolver -->
+                                        <g class="dns-node" data-dns="resolver" onclick="dnsShow('resolver')">
+                                            <rect class="dns-box" x="20" y="213" width="300" height="36" rx="8" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+                                            <text x="170" y="227" text-anchor="middle" font-size="12" font-weight="700" fill="#5b21b6">4 · Recursive Resolver (ISP)</text>
+                                            <text x="170" y="241" text-anchor="middle" font-size="9" fill="#5b21b6">Asks the DNS hierarchy on your behalf</text>
+                                        </g>
+
+                                        <!-- Step 5 — Root Name Server -->
+                                        <g class="dns-node" data-dns="root" onclick="dnsShow('root')">
+                                            <rect class="dns-box" x="20" y="279" width="300" height="36" rx="8" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+                                            <text x="170" y="293" text-anchor="middle" font-size="12" font-weight="700" fill="#5b21b6">5 · Root Name Server</text>
+                                            <text x="170" y="307" text-anchor="middle" font-size="9" fill="#5b21b6">Top of the hierarchy — 13 clusters worldwide</text>
+                                        </g>
+
+                                        <!-- Step 6 — TLD Name Server -->
+                                        <g class="dns-node" data-dns="tld" onclick="dnsShow('tld')">
+                                            <rect class="dns-box" x="20" y="345" width="300" height="36" rx="8" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+                                            <text x="170" y="359" text-anchor="middle" font-size="12" font-weight="700" fill="#5b21b6">6 · TLD Name Server (.com)</text>
+                                            <text x="170" y="373" text-anchor="middle" font-size="9" fill="#5b21b6">Handles .com, .org, .net and other extensions</text>
+                                        </g>
+
+                                        <!-- Step 7 — Authoritative Name Server -->
+                                        <g class="dns-node" data-dns="auth" onclick="dnsShow('auth')">
+                                            <rect class="dns-box" x="20" y="411" width="300" height="36" rx="8" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+                                            <text x="170" y="425" text-anchor="middle" font-size="12" font-weight="700" fill="#5b21b6">7 · Authoritative Name Server</text>
+                                            <text x="170" y="439" text-anchor="middle" font-size="9" fill="#5b21b6">Holds the actual DNS records for the domain</text>
+                                        </g>
+
+                                        <!-- Step 8 — IP Found (pill, end) -->
+                                        <g class="dns-node" data-dns="connect" onclick="dnsShow('connect')">
+                                            <rect class="dns-box" x="20" y="477" width="300" height="36" rx="18" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+                                            <text x="170" y="491" text-anchor="middle" font-size="12" font-weight="700" fill="#1e40af">8 · IP Found &#8594; Browser Connects</text>
+                                            <text x="170" y="505" text-anchor="middle" font-size="9" fill="#1e40af">Result cached — next visit is instant</text>
+                                        </g>
+
+                                        <!-- Hint -->
+                                        <text x="170" y="523" text-anchor="middle" font-size="9" fill="#9ca3af">Click any step to learn more</text>
+                                    </svg>
+                                </div>
+
+                                <!-- Tooltip panel -->
+                                <div id="dns-info-panel" style="display:none;background:#f0f4ff;border-left:4px solid #3730a3;padding:10px 14px;margin-top:8px;border-radius:4px;font-size:.875rem;text-align:left;" role="status" aria-live="polite">
+                                    <strong id="dns-info-title"></strong><span id="dns-info-body"></span>
+                                </div>
+
                                 <figcaption class="p-3 small text-muted text-start bg-site-secondary border rounded mt-2 shadow-sm">
                                     <strong>Figure 1.5:</strong> A visual flowchart of the DNS lookup process.
                                 </figcaption>
                             </figure>
+
+                            <script>
+                            (function () {
+                                var DNS = {
+                                    type:     { t: `Step 1: You Type a URL`,
+                                                b: ` — The moment you type a domain name (like "google.com") and press Enter, your browser needs to translate that human-readable name into a numeric IP address — something like 142.250.80.46. That translation is DNS, the Domain Name System.` },
+                                    brcache:  { t: `Step 2: Browser Cache`,
+                                                b: ` — Your browser keeps a short-term memory of domains it has recently resolved. If you visited the site in the last few minutes (within the record's TTL), the IP is already saved locally. No network request needed — the lookup is instant.` },
+                                    oscache:  { t: `Step 3: OS / hosts File Cache`,
+                                                b: ` — Your operating system also maintains its own DNS cache. It checks the "hosts file" too — a plain-text file that manually maps domain names to IPs. Web devs use the hosts file to test sites locally (e.g. pointing a real domain to 127.0.0.1) before the site goes live.` },
+                                    resolver: { t: `Step 4: Recursive Resolver (ISP)`,
+                                                b: ` — If no cache has the answer, the request goes to a recursive resolver — usually your ISP's DNS server, or a public one like Cloudflare (1.1.1.1) or Google (8.8.8.8). This server acts as your agent: it queries the DNS hierarchy on your behalf so you don't have to.` },
+                                    root:     { t: `Step 5: Root Name Server`,
+                                                b: ` — There are 13 root server clusters distributed worldwide, operated by ICANN and partner organizations. They don't know the final IP address, but they know which server to ask next: the TLD name server responsible for the domain's extension (.com, .org, .net, etc.).` },
+                                    tld:      { t: `Step 6: TLD Name Server`,
+                                                b: ` — The Top-Level Domain server manages all domains under a given extension. The .com TLD server, for example, handles every .com domain on the internet. It doesn't know the final IP either, but it knows which authoritative name server is responsible for the specific domain you're looking for.` },
+                                    auth:     { t: `Step 7: Authoritative Name Server`,
+                                                b: ` — This is the final authority. It holds the actual DNS records for the domain — specifically the "A record" (IPv4) or "AAAA record" (IPv6) that maps the domain name to an IP address. This server is typically managed by whoever registered the domain or their hosting provider.` },
+                                    connect:  { t: `Step 8: IP Found — Browser Connects`,
+                                                b: ` — The IP address travels back through the resolver chain to your browser. The resolver caches it (so the next request skips steps 4–7), and your browser opens a TCP connection to the server at that IP address. The entire lookup typically takes just 20–120 milliseconds.` }
+                                };
+                                window.dnsShow = function (id) {
+                                    var panel = document.getElementById('dns-info-panel');
+                                    var d = DNS[id];
+                                    if (!d) return;
+                                    if (panel.dataset.active === id && panel.style.display !== 'none') {
+                                        panel.style.display = 'none';
+                                        panel.dataset.active = '';
+                                        document.querySelectorAll('#dns-flowchart-svg .dns-box').forEach(function(r){ r.style.opacity=''; });
+                                        return;
+                                    }
+                                    document.getElementById('dns-info-title').textContent = d.t;
+                                    document.getElementById('dns-info-body').textContent  = d.b;
+                                    panel.style.display = 'block';
+                                    panel.dataset.active = id;
+                                    document.querySelectorAll('#dns-flowchart-svg .dns-box').forEach(function(r){ r.style.opacity='.4'; });
+                                    var sel = document.querySelector('#dns-flowchart-svg [data-dns="' + id + '"] .dns-box');
+                                    if (sel) sel.style.opacity = '1';
+                                };
+                            })();
+                            </script>
                         </div>
                     </div>
 
@@ -722,13 +857,169 @@
                         
                         <div class="col-lg-4 mt-4 mt-lg-0 text-center">
                             <figure class="mb-4 text-center">
-                                <a href="/images/join-the-developers-guild/figure-06.png" target="_blank" rel="noopener">
-                                    <img src="/images/join-the-developers-guild/figure-06.png" alt="URL and HTTPS Breakdown" class="img-fluid rounded shadow-sm border w-100">
-                                </a>
+                                <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+                                    <svg id="url-ssl-svg" viewBox="0 0 340 516"
+                                         style="width:100%;min-width:280px;height:auto;display:block;"
+                                         aria-label="Interactive URL anatomy and SSL encryption diagram">
+                                        <defs><style>.url-node{cursor:pointer;}.url-node:hover .url-box{opacity:.82;}</style></defs>
+
+                                        <!-- ══ URL ANATOMY HEADER ══ -->
+                                        <rect x="10" y="10" width="320" height="26" rx="5" fill="#3730a3"/>
+                                        <text x="170" y="27" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">URL Anatomy</text>
+
+                                        <!-- Browser address bar mock-up -->
+                                        <rect x="10" y="44" width="320" height="30" rx="15" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+                                        <text y="63" font-size="10">
+                                            <tspan x="24" font-weight="700" fill="#065f46">https://</tspan><tspan fill="#4b5563">www.</tspan><tspan font-weight="700" fill="#5b21b6">example</tspan><tspan fill="#92400e">.com</tspan><tspan fill="#4b5563">/page</tspan>
+                                        </text>
+
+                                        <text x="170" y="87" text-anchor="middle" font-size="9" fill="#9ca3af" font-style="italic">Click any component to learn more</text>
+
+                                        <!-- Row 1: https:// — Protocol -->
+                                        <g class="url-node" data-url="protocol" onclick="urlShow('protocol')">
+                                            <rect class="url-box" x="10" y="93" width="320" height="32" rx="6" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1.5"/>
+                                            <line x1="107" y1="97" x2="107" y2="121" stroke="#6ee7b7" stroke-width="1" opacity=".6"/>
+                                            <text x="58" y="107" text-anchor="middle" font-size="10" font-weight="700" font-family="monospace" fill="#065f46">https://</text>
+                                            <text x="115" y="107" font-size="10" font-weight="700" fill="#065f46">Protocol</text>
+                                            <text x="115" y="119" font-size="9" fill="#065f46">The "how" — HTTP vs HTTPS (secure)</text>
+                                        </g>
+
+                                        <!-- Row 2: www. — Subdomain -->
+                                        <g class="url-node" data-url="subdomain" onclick="urlShow('subdomain')">
+                                            <rect class="url-box" x="10" y="131" width="320" height="32" rx="6" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+                                            <line x1="107" y1="135" x2="107" y2="159" stroke="#93c5fd" stroke-width="1" opacity=".6"/>
+                                            <text x="58" y="145" text-anchor="middle" font-size="10" font-weight="700" font-family="monospace" fill="#1e40af">www.</text>
+                                            <text x="115" y="145" font-size="10" font-weight="700" fill="#1e40af">Subdomain</text>
+                                            <text x="115" y="157" font-size="9" fill="#1e40af">Optional prefix — not always "www"</text>
+                                        </g>
+
+                                        <!-- Row 3: example — Domain Name -->
+                                        <g class="url-node" data-url="domain" onclick="urlShow('domain')">
+                                            <rect class="url-box" x="10" y="169" width="320" height="32" rx="6" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+                                            <line x1="107" y1="173" x2="107" y2="197" stroke="#c4b5fd" stroke-width="1" opacity=".6"/>
+                                            <text x="58" y="183" text-anchor="middle" font-size="10" font-weight="700" font-family="monospace" fill="#5b21b6">example</text>
+                                            <text x="115" y="183" font-size="10" font-weight="700" fill="#5b21b6">Domain Name</text>
+                                            <text x="115" y="195" font-size="9" fill="#5b21b6">The brand — registered and unique</text>
+                                        </g>
+
+                                        <!-- Row 4: .com — TLD -->
+                                        <g class="url-node" data-url="tld" onclick="urlShow('tld')">
+                                            <rect class="url-box" x="10" y="207" width="320" height="32" rx="6" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+                                            <line x1="107" y1="211" x2="107" y2="235" stroke="#fcd34d" stroke-width="1" opacity=".6"/>
+                                            <text x="58" y="221" text-anchor="middle" font-size="10" font-weight="700" font-family="monospace" fill="#92400e">.com</text>
+                                            <text x="115" y="221" font-size="10" font-weight="700" fill="#92400e">Top-Level Domain</text>
+                                            <text x="115" y="233" font-size="9" fill="#92400e">Category: .com .org .edu .gov…</text>
+                                        </g>
+
+                                        <!-- Row 5: /page — Path -->
+                                        <g class="url-node" data-url="path" onclick="urlShow('path')">
+                                            <rect class="url-box" x="10" y="245" width="320" height="32" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.5"/>
+                                            <line x1="107" y1="249" x2="107" y2="273" stroke="#d1d5db" stroke-width="1" opacity=".6"/>
+                                            <text x="58" y="259" text-anchor="middle" font-size="10" font-weight="700" font-family="monospace" fill="#374151">/page</text>
+                                            <text x="115" y="259" font-size="10" font-weight="700" fill="#374151">URL Path</text>
+                                            <text x="115" y="271" font-size="9" fill="#374151">Specific file or folder on the server</text>
+                                        </g>
+
+                                        <!-- Divider -->
+                                        <line x1="10" y1="291" x2="330" y2="291" stroke="#e5e7eb" stroke-width="1"/>
+
+                                        <!-- ══ SSL / TLS HEADER ══ -->
+                                        <rect x="10" y="297" width="320" height="26" rx="5" fill="#065f46"/>
+                                        <text x="170" y="314" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">SSL / TLS Encryption</text>
+
+                                        <!-- SSL Step 1 — Client Hello -->
+                                        <g class="url-node" data-url="ssl1" onclick="urlShow('ssl1')">
+                                            <rect class="url-box" x="10" y="333" width="320" height="34" rx="6" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+                                            <line x1="46" y1="337" x2="46" y2="363" stroke="#93c5fd" stroke-width="1" opacity=".6"/>
+                                            <text x="28" y="351" text-anchor="middle" font-size="14" font-weight="700" fill="#1e40af">&#8594;</text>
+                                            <text x="54" y="348" font-size="10" font-weight="700" fill="#1e40af">1. Client Hello</text>
+                                            <text x="54" y="360" font-size="9" fill="#1e40af">Browser: "Let's connect — what encryption do you support?"</text>
+                                        </g>
+
+                                        <!-- SSL Step 2 — Server Certificate -->
+                                        <g class="url-node" data-url="ssl2" onclick="urlShow('ssl2')">
+                                            <rect class="url-box" x="10" y="375" width="320" height="34" rx="6" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1.5"/>
+                                            <line x1="46" y1="379" x2="46" y2="405" stroke="#6ee7b7" stroke-width="1" opacity=".6"/>
+                                            <text x="28" y="393" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">&#8592;</text>
+                                            <text x="54" y="390" font-size="10" font-weight="700" fill="#065f46">2. Server Certificate</text>
+                                            <text x="54" y="402" font-size="9" fill="#065f46">Server sends its SSL cert + public key to verify identity</text>
+                                        </g>
+
+                                        <!-- SSL Step 3 — Key Exchange -->
+                                        <g class="url-node" data-url="ssl3" onclick="urlShow('ssl3')">
+                                            <rect class="url-box" x="10" y="417" width="320" height="34" rx="6" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+                                            <line x1="46" y1="421" x2="46" y2="447" stroke="#93c5fd" stroke-width="1" opacity=".6"/>
+                                            <text x="28" y="435" text-anchor="middle" font-size="14" font-weight="700" fill="#1e40af">&#8594;</text>
+                                            <text x="54" y="432" font-size="10" font-weight="700" fill="#1e40af">3. Key Exchange</text>
+                                            <text x="54" y="444" font-size="9" fill="#1e40af">Browser encrypts a session key using the server's public key</text>
+                                        </g>
+
+                                        <!-- SSL Step 4 — Encrypted Channel -->
+                                        <g class="url-node" data-url="ssl4" onclick="urlShow('ssl4')">
+                                            <rect class="url-box" x="10" y="459" width="320" height="34" rx="6" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+                                            <line x1="46" y1="463" x2="46" y2="489" stroke="#fcd34d" stroke-width="1" opacity=".6"/>
+                                            <text x="28" y="477" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">&#8652;</text>
+                                            <text x="54" y="474" font-size="10" font-weight="700" fill="#92400e">4. Encrypted Channel Active</text>
+                                            <text x="54" y="486" font-size="9" fill="#92400e">Both share the session key — all data now encrypted</text>
+                                        </g>
+
+                                        <!-- Hint -->
+                                        <text x="170" y="508" text-anchor="middle" font-size="9" fill="#9ca3af">Click any step to learn more</text>
+                                    </svg>
+                                </div>
+
+                                <!-- Tooltip panel -->
+                                <div id="url-info-panel" style="display:none;background:#f0f4ff;border-left:4px solid #3730a3;padding:10px 14px;margin-top:8px;border-radius:4px;font-size:.875rem;text-align:left;" role="status" aria-live="polite">
+                                    <strong id="url-info-title"></strong><span id="url-info-body"></span>
+                                </div>
+
                                 <figcaption class="p-2 small text-muted text-center">
                                     <strong>Figure 1.6:</strong> A breakdown of URL anatomy and SSL secure encryption.
                                 </figcaption>
                             </figure>
+
+                            <script>
+                            (function () {
+                                var URL_DATA = {
+                                    protocol: { t: `Protocol (https://)`,
+                                                b: ` — The protocol defines HOW the browser communicates with the server. HTTP (HyperText Transfer Protocol) is the basic web protocol. HTTPS adds encryption — the "S" stands for Secure. Any site that handles logins, payments, or private data must use HTTPS. Browsers now warn users when a site is HTTP-only.` },
+                                    subdomain: { t: `Subdomain (www.)`,
+                                                 b: ` — A subdomain is a prefix that can point to a different section or server under the same domain. "www" is the most common but is optional — many modern sites work fine without it. Other examples: "mail.google.com", "shop.apple.com", "docs.github.com". You can create custom subdomains on your own domain.` },
+                                    domain:    { t: `Domain Name (example)`,
+                                                 b: ` — The domain name is the unique, human-readable identifier for a website. You register it through a domain registrar (like GoDaddy, Namecheap, or Google Domains). No two registrants can own the same domain + TLD combination. This is the "brand" of the web address — protect it carefully.` },
+                                    tld:       { t: `Top-Level Domain (.com)`,
+                                                 b: ` — The TLD is the extension at the end of the domain name. .com (commercial) is the most recognized worldwide. Others: .org (nonprofits), .edu (US universities), .gov (US government), .io (popular with tech startups), .net (network services). Country-specific TLDs also exist: .us, .uk, .ca, .jp.` },
+                                    path:      { t: `URL Path (/page)`,
+                                                 b: ` — The path tells the server which specific file or resource you want. It mirrors the folder structure on the server: "/year1/index.html" means the "index.html" file inside the "year1" folder. If no path is specified, the server typically returns the default file — usually "index.html" or "default.html".` },
+                                    ssl1:      { t: `Step 1: Client Hello`,
+                                                 b: ` — Your browser starts the TLS handshake by sending a "Client Hello" message to the server. This includes: the TLS versions the browser supports, a list of cipher suites (encryption algorithms it knows), and a random number used later in the key exchange process.` },
+                                    ssl2:      { t: `Step 2: Server Certificate`,
+                                                 b: ` — The server responds with its SSL/TLS certificate — a digital document issued by a trusted Certificate Authority (CA) like DigiCert or Let's Encrypt. The cert contains the server's public key and proves the server is who it claims to be. Your browser verifies the cert is valid, not expired, and signed by a CA it trusts.` },
+                                    ssl3:      { t: `Step 3: Key Exchange`,
+                                                 b: ` — The browser generates a session key — a random symmetric key used to encrypt all data in this session. It encrypts that session key using the server's public key from the certificate. Only the server's private key can decrypt it. Once the server decrypts and confirms, both sides have the shared secret.` },
+                                    ssl4:      { t: `Step 4: Encrypted Channel Active`,
+                                                 b: ` — Both browser and server now share the same session key. From this point on, all data sent in either direction is symmetrically encrypted using that shared secret. The padlock icon appears in your browser's address bar. The entire handshake typically takes under 100 milliseconds.` }
+                                };
+                                window.urlShow = function (id) {
+                                    var panel = document.getElementById('url-info-panel');
+                                    var d = URL_DATA[id];
+                                    if (!d) return;
+                                    if (panel.dataset.active === id && panel.style.display !== 'none') {
+                                        panel.style.display = 'none';
+                                        panel.dataset.active = '';
+                                        document.querySelectorAll('#url-ssl-svg .url-box').forEach(function(r){ r.style.opacity=''; });
+                                        return;
+                                    }
+                                    document.getElementById('url-info-title').textContent = d.t;
+                                    document.getElementById('url-info-body').textContent  = d.b;
+                                    panel.style.display = 'block';
+                                    panel.dataset.active = id;
+                                    document.querySelectorAll('#url-ssl-svg .url-box').forEach(function(r){ r.style.opacity='.4'; });
+                                    var sel = document.querySelector('#url-ssl-svg [data-url="' + id + '"] .url-box');
+                                    if (sel) sel.style.opacity = '1';
+                                };
+                            })();
+                            </script>
                         </div>
                     </div>
 
