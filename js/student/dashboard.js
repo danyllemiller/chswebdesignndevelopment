@@ -33,6 +33,30 @@ injectTurnInModal();
 
 let currentTurnInState = null; 
 
+// Maps exam_id → chapter page URL + anchor so gradebook columns link directly to the lesson.
+const ASSIGNMENT_PAGE_LINKS = {
+    // Chapter 1 — Web Design
+    'ch1_lab_exec_sum':        '/year1/join-the-developers-guild.html#section-business-plan',
+    'ch1_proj_m2':             '/year1/join-the-developers-guild.html#section-business-plan',
+    'ch1_lab_infra':           '/year1/join-the-developers-guild.html#section-history-infra',
+    'ch1_lab_dns':             '/year1/join-the-developers-guild.html#section-dns',
+    'ch1_lab_url':             '/year1/join-the-developers-guild.html#section-urls',
+    'ch1_lab_know_your_guild': '/year1/join-the-developers-guild.html#section-ctso-origins',
+    'ch1_lab_mock_meeting':    '/year1/join-the-developers-guild.html#section-parliamentary',
+    'ch1_lab_service_proposal':'/year1/join-the-developers-guild.html#section-service-wbl',
+    'ch1_lab_portfolio_audit': '/year1/join-the-developers-guild.html#section-professional-image',
+    'ch1_lab_cte_advocate':    '/year1/join-the-developers-guild.html#section-cte-relevance',
+    'ch1_lab_job_app':         '/year1/join-the-developers-guild.html#section-soft-skills',
+    'ch1_proj_m1':             '/year1/join-the-developers-guild.html#section-soft-skills',
+    'ch1_lab_client_neg':      '/year1/join-the-developers-guild.html#section-workflow',
+    'ch1_proj_m4':             '/year1/join-the-developers-guild.html#section-workflow',
+    'ch1_lab_code_conduct':    '/year1/join-the-developers-guild.html#section-ethics',
+    'ch1_proj_m5':             '/year1/join-the-developers-guild.html#section-ethics',
+    'ch1_lab_root':            '/year1/join-the-developers-guild.html#section-root-setup',
+    'ch1_milestone_setup':     '/year1/join-the-developers-guild.html#section-root-setup',
+    'ch1_proj_m3':             '/year1/join-the-developers-guild.html#section-urls',
+};
+
 // Mirrors the identical function in admin/gradebook.js so column labels match exactly
 function abbreviateAssignmentName(name) {
     let abbr = name.replace(/\s*[\[\(]\d+\s*pts?[\]\)]/i, '').trim();
@@ -348,11 +372,17 @@ function renderGradeTable(keys, myGrades, studentId, registryData, studentPeriod
             if (regInfo.instructions) tooltipText += ` | Instructions: ${regInfo.instructions.replace(/"/g, "'")}`;
         }
 
+        const examId = regInfo?.exam_id || key;
+        const pageLink = ASSIGNMENT_PAGE_LINKS[examId] || ASSIGNMENT_PAGE_LINKS[key];
+        const linkIcon = pageLink
+            ? `<a href="${pageLink}" target="_blank" rel="noopener" title="Go to lesson" style="color:inherit;opacity:0.7;" onclick="event.stopPropagation();"><i class="fas fa-book-open" style="font-size:0.65rem;"></i></a>`
+            : '';
         headHtml += `<th class="header-main-blue" data-bs-toggle="tooltip" data-bs-placement="top" title="${escapeHtml(tooltipText)}">
             <div class="h-100 d-flex flex-column align-items-center justify-content-end pb-2" style="cursor: help;">
                 <span class="vertical-text mb-2">${displayLabel}</span>
+                ${linkIcon}
             </div>
-        </th>`; 
+        </th>`;
     });
     headHtml += '</tr>';
     thead.innerHTML = headHtml;
