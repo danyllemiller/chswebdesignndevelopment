@@ -46,21 +46,37 @@ while ($g = $gradesResult->fetch_assoc()) {
 }
 $gradesStmt->close();
 
-// Merge: every exam gets its score attached (null if not yet submitted)
+// Merge exams with grades; only include assignments that have a due date
+// for this student's section (or a global due date). Always include anything
+// the student already has a grade for so they can see submitted work.
 $assignments = [];
 while ($row = $examsResult->fetch_assoc()) {
-    $eid   = $row['exam_id'];
-    $grade = $gradesMap[$eid] ?? null;
+    $eid         = $row['exam_id'];
+    $grade       = $gradesMap[$eid] ?? null;
+    $periodDates = $row['period_due_dates'] ? json_decode($row['period_due_dates'], true) : [];
+
+    // Pick the most specific due date for this student
+    if ($sectionId && isset($periodDates[$sectionId]) && $periodDates[$sectionId]) {
+        $effectiveDue = $periodDates[$sectionId];
+    } elseif ($row['due_date']) {
+        $effectiveDue = $row['due_date'];
+    } else {
+        $effectiveDue = null;
+    }
+
+    // Skip assignments with no due date unless the student already submitted it
+    if (!$effectiveDue && !$grade) continue;
+
     $assignments[] = [
-        'exam_id'      => $eid,
-        'title'        => $row['title'],
-        'total_points' => $row['total_points'],
-        'due_date'     => $row['due_date'],
-        'instructions' => $row['instructions'],
-        'course_id'    => $row['course_id'],
+        'exam_id'          => $eid,
+        'title'            => $row['title'],
+        'total_points'     => $row['total_points'],
+        'due_date'         => $effectiveDue,
+        'instructions'     => $row['instructions'],
+        'course_id'        => $row['course_id'],
         'period_due_dates' => $row['period_due_dates'],
-        'score'        => $grade ? $grade['score']        : null,
-        'timestamp'    => $grade ? $grade['timestamp']    : null,
+        'score'            => $grade ? $grade['score']     : null,
+        'timestamp'        => $grade ? $grade['timestamp'] : null,
     ];
 }
 
