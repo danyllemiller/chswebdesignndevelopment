@@ -1401,24 +1401,380 @@
 
                             <p class="small mt-3">Style was separated from structure in 1996 with CSS. While <strong>XML</strong> and <strong>WML</strong> exist, HTML/CSS remain essential. Developers use <strong>scripting languages</strong> to create <strong>active content</strong>.</p>
                             
-                            <h5 class="fw-bold mt-4 text-primary">Timeline History</h5>
-                            <div class="row small mb-5">
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold text-dark">HTML Versions</h6>
-                                    <ul class="ps-3">
-                                        <li class="mb-1">HTML 4.01 (1999)</li>
-                                        <li class="mb-1">XHTML (2000)</li>
-                                        <li>HTML5 (2014)</li>
-                                    </ul>
+                            <h5 class="fw-bold mt-5 text-primary">Web Technology Timeline (1991 – Present)</h5>
+
+                            <!-- Legend -->
+                            <div class="d-flex flex-wrap gap-2 mb-4 small">
+                                <span class="badge rounded-pill px-3 py-1" style="background:#1e40af;">HTML</span>
+                                <span class="badge rounded-pill px-3 py-1" style="background:#5b21b6;">CSS</span>
+                                <span class="badge rounded-pill px-3 py-1" style="background:#b45309;">JavaScript / ECMAScript</span>
+                                <span class="badge rounded-pill px-3 py-1" style="background:#065f46;">PHP &amp; Server-Side</span>
+                                <span class="badge rounded-pill px-3 py-1" style="background:#9d174d;">Databases</span>
+                                <span class="badge rounded-pill px-3 py-1" style="background:#0c4a6e;">Browsers &amp; Engines</span>
+                                <span class="badge rounded-pill px-3 py-1" style="background:#374151;">Tools &amp; Frameworks</span>
+                            </div>
+
+                            <!-- Timeline -->
+                            <div class="position-relative ps-4 mb-5" style="border-left:3px solid #e5e7eb;">
+
+                                <style>
+                                .tl-dot{position:absolute;left:-1.45rem;top:.35rem;width:.9rem;height:.9rem;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px currentColor;}
+                                .tl-entry{position:relative;margin-bottom:.9rem;}
+                                .tl-year{font-weight:700;font-size:.7rem;letter-spacing:.04em;color:#6b7280;display:inline-block;width:2.8rem;flex-shrink:0;}
+                                .tl-tag{font-size:.68rem;font-weight:700;padding:.1rem .45rem;border-radius:999px;color:#fff;white-space:nowrap;flex-shrink:0;}
+                                .tl-desc{font-size:.8rem;color:#374151;line-height:1.45;}
+                                </style>
+
+                                <!-- 1991 -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#1e40af;background:#1e40af;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">1991</span>
+                                        <span class="tl-tag" style="background:#1e40af;">HTML</span>
+                                        <span class="tl-desc"><strong>HTML 1.0</strong> — Tim Berners-Lee publishes the original HTML spec at CERN. The first website ever goes live on August 6, 1991.</span>
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold text-dark">CSS Versions</h6>
-                                    <ul class="ps-3">
-                                        <li class="mb-1">CSS 1 (1996)</li>
-                                        <li class="mb-1">CSS 2.1 (2011)</li>
-                                        <li>CSS 3 (Ongoing)</li>
-                                    </ul>
+
+                                <!-- 1993 -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#0c4a6e;background:#0c4a6e;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">1993</span>
+                                        <span class="tl-tag" style="background:#0c4a6e;">Browser</span>
+                                        <span class="tl-desc"><strong>NCSA Mosaic</strong> — The first graphical web browser, making the web accessible to non-technical users for the first time.</span>
+                                    </div>
                                 </div>
+
+                                <!-- 1994 -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#065f46;background:#065f46;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">1994</span>
+                                        <span class="tl-tag" style="background:#065f46;">PHP</span>
+                                        <span class="tl-desc"><strong>PHP/FI</strong> — Rasmus Lerdorf releases "Personal Home Page Tools," the embryo of modern PHP. Server-side scripting is born.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 1995 (HTML 2) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#1e40af;background:#1e40af;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">1995</span>
+                                        <span class="tl-tag" style="background:#1e40af;">HTML</span>
+                                        <span class="tl-desc"><strong>HTML 2.0</strong> — First formal HTML standard published by the IETF, codifying existing browser behavior.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 1995 (JS) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#b45309;background:#b45309;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">1995</span>
+                                        <span class="tl-tag" style="background:#b45309;">JavaScript</span>
+                                        <span class="tl-desc"><strong>JavaScript 1.0</strong> — Brendan Eich at Netscape builds it in <em>10 days</em>. Originally called Mocha, then LiveScript, then JavaScript (for marketing reasons).</span>
+                                    </div>
+                                </div>
+
+                                <!-- 1995 (MySQL) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#9d174d;background:#9d174d;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">1995</span>
+                                        <span class="tl-tag" style="background:#9d174d;">Database</span>
+                                        <span class="tl-desc"><strong>MySQL 1.0</strong> — Released by MySQL AB. Becomes the dominant open-source relational database powering the web (later "LAMP" stack).</span>
+                                    </div>
+                                </div>
+
+                                <!-- 1996 (CSS) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#5b21b6;background:#5b21b6;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">1996</span>
+                                        <span class="tl-tag" style="background:#5b21b6;">CSS</span>
+                                        <span class="tl-desc"><strong>CSS 1</strong> — W3C publishes the first CSS spec. Style is finally separated from structure. Properties like color, font, and margins are standardized.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 1997 (ECMAScript) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#b45309;background:#b45309;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">1997</span>
+                                        <span class="tl-tag" style="background:#b45309;">JavaScript</span>
+                                        <span class="tl-desc"><strong>ECMAScript 1</strong> — JavaScript standardized by ECMA International. "ECMAScript" is the spec name; "JavaScript" is the browser name.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 1997 (PHP 3) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#065f46;background:#065f46;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">1997</span>
+                                        <span class="tl-tag" style="background:#065f46;">PHP</span>
+                                        <span class="tl-desc"><strong>PHP 3</strong> — Complete rewrite. PHP becomes a genuine programming language with database connectivity. The "P" now stands for "PHP" (recursive acronym).</span>
+                                    </div>
+                                </div>
+
+                                <!-- 1998 (CSS 2) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#5b21b6;background:#5b21b6;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">1998</span>
+                                        <span class="tl-tag" style="background:#5b21b6;">CSS</span>
+                                        <span class="tl-desc"><strong>CSS 2</strong> — Adds positioning, z-index, media types, and the box model. Still the foundation of how CSS layout works today.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 1999 (HTML 4.01) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#1e40af;background:#1e40af;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">1999</span>
+                                        <span class="tl-tag" style="background:#1e40af;">HTML</span>
+                                        <span class="tl-desc"><strong>HTML 4.01</strong> — The dominant web standard for over a decade. Introduced accessibility attributes and forms improvements.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2000 (XHTML) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#1e40af;background:#1e40af;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2000</span>
+                                        <span class="tl-tag" style="background:#1e40af;">HTML</span>
+                                        <span class="tl-desc"><strong>XHTML 1.0</strong> — HTML reformulated as XML. Stricter syntax rules (lowercase tags, quoted attributes). Fell out of favor as HTML5 emerged.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2000 (PHP 4) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#065f46;background:#065f46;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2000</span>
+                                        <span class="tl-tag" style="background:#065f46;">PHP</span>
+                                        <span class="tl-desc"><strong>PHP 4</strong> — Powers the early web boom. WordPress, early Facebook, and millions of sites run on PHP 4 + MySQL (the "LAMP" stack).</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2002 (JSON) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#374151;background:#374151;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2002</span>
+                                        <span class="tl-tag" style="background:#374151;">Data Format</span>
+                                        <span class="tl-desc"><strong>JSON</strong> (JavaScript Object Notation) — Douglas Crockford formalizes JSON. It becomes the universal data exchange format for APIs, replacing verbose XML.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2004 (PHP 5) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#065f46;background:#065f46;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2004</span>
+                                        <span class="tl-tag" style="background:#065f46;">PHP</span>
+                                        <span class="tl-desc"><strong>PHP 5</strong> — Full object-oriented programming (OOP) support. PDO for database access. The foundation modern PHP is built on.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2005 (Ajax) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#b45309;background:#b45309;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2005</span>
+                                        <span class="tl-tag" style="background:#b45309;">JavaScript</span>
+                                        <span class="tl-desc"><strong>Ajax popularized</strong> — Gmail and Google Maps show the world that web apps can update without full page reloads. Marks the beginning of Web 2.0.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2005 (MySQL 5) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#9d174d;background:#9d174d;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2005</span>
+                                        <span class="tl-tag" style="background:#9d174d;">Database</span>
+                                        <span class="tl-desc"><strong>MySQL 5.0</strong> — Adds stored procedures, triggers, and views. SQL on the web matures into a full enterprise-grade database.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2006 (jQuery) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#374151;background:#374151;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2006</span>
+                                        <span class="tl-tag" style="background:#374151;">Framework</span>
+                                        <span class="tl-desc"><strong>jQuery 1.0</strong> — "Write less, do more." Simplifies DOM manipulation and cross-browser compatibility. Used on 75%+ of websites at its peak.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2008 (Chrome + V8) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#0c4a6e;background:#0c4a6e;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2008</span>
+                                        <span class="tl-tag" style="background:#0c4a6e;">Browser</span>
+                                        <span class="tl-desc"><strong>Chrome + V8 Engine</strong> — Google's browser launches with the V8 JS engine, making JavaScript 10× faster. Kicks off a browser performance arms race.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2009 (Node.js) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#b45309;background:#b45309;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2009</span>
+                                        <span class="tl-tag" style="background:#b45309;">JavaScript</span>
+                                        <span class="tl-desc"><strong>Node.js</strong> — Ryan Dahl brings JavaScript to the server using V8. Developers can now build full-stack applications in one language.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2009 (ES5) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#b45309;background:#b45309;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2009</span>
+                                        <span class="tl-tag" style="background:#b45309;">JavaScript</span>
+                                        <span class="tl-desc"><strong>ECMAScript 5</strong> — Adds strict mode, Array.forEach, JSON.parse, and getter/setter support. The first major JS update in 10 years.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2010 (Bootstrap) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#374151;background:#374151;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2010</span>
+                                        <span class="tl-tag" style="background:#374151;">Framework</span>
+                                        <span class="tl-desc"><strong>Bootstrap</strong> — Twitter releases its CSS framework. Responsive, mobile-first grid systems become standard practice overnight.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2011 (CSS 2.1) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#5b21b6;background:#5b21b6;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2011</span>
+                                        <span class="tl-tag" style="background:#5b21b6;">CSS</span>
+                                        <span class="tl-desc"><strong>CSS 2.1</strong> — Reaches W3C Recommendation status after years of revision. Browsers finally reach consistent CSS 2.1 support.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2012 (TypeScript) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#374151;background:#374151;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2012</span>
+                                        <span class="tl-tag" style="background:#374151;">Language</span>
+                                        <span class="tl-desc"><strong>TypeScript</strong> — Microsoft releases a typed superset of JavaScript. Adds compile-time type checking to catch bugs before they reach the browser.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2013 (React) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#374151;background:#374151;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2013</span>
+                                        <span class="tl-tag" style="background:#374151;">Framework</span>
+                                        <span class="tl-desc"><strong>React</strong> — Facebook open-sources its component-based UI library. The component model changes how developers think about building interfaces.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2014 (HTML5) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#1e40af;background:#1e40af;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2014</span>
+                                        <span class="tl-tag" style="background:#1e40af;">HTML</span>
+                                        <span class="tl-desc"><strong>HTML5</strong> — W3C Recommendation. Native video, audio, canvas, localStorage, semantic elements (&lt;header&gt;, &lt;nav&gt;, &lt;article&gt;), and form validation. Flash made obsolete.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2014 (Vue.js) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#374151;background:#374151;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2014</span>
+                                        <span class="tl-tag" style="background:#374151;">Framework</span>
+                                        <span class="tl-desc"><strong>Vue.js</strong> — Evan You releases a lightweight, approachable alternative to Angular and React. Becomes the #2 frontend framework globally.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2015 (ES6) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#b45309;background:#b45309;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2015</span>
+                                        <span class="tl-tag" style="background:#b45309;">JavaScript</span>
+                                        <span class="tl-desc"><strong>ES6 / ES2015</strong> — The biggest JS update in history. Arrow functions, classes, modules, Promises, let/const, template literals, destructuring. Modern JS is born.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2015 (PHP 7) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#065f46;background:#065f46;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2015</span>
+                                        <span class="tl-tag" style="background:#065f46;">PHP</span>
+                                        <span class="tl-desc"><strong>PHP 7</strong> — 2× performance improvement over PHP 5. Type declarations, scalar type hints, and the null coalescing operator (??) modernize the language.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2017 (CSS Grid) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#5b21b6;background:#5b21b6;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2017</span>
+                                        <span class="tl-tag" style="background:#5b21b6;">CSS</span>
+                                        <span class="tl-desc"><strong>CSS Grid</strong> — Two-dimensional layout system lands in all major browsers. Replaces float hacks and table layouts. Flexbox (2012) + Grid = modern CSS layout.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2018 (WebAssembly) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#374151;background:#374151;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2018</span>
+                                        <span class="tl-tag" style="background:#374151;">Web Standard</span>
+                                        <span class="tl-desc"><strong>WebAssembly (Wasm)</strong> — W3C standard allowing C, C++, Rust, and Go code to run in browsers at near-native speed. Games, video editing, and AI tools in the browser become viable.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2018 (MySQL 8) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#9d174d;background:#9d174d;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2018</span>
+                                        <span class="tl-tag" style="background:#9d174d;">Database</span>
+                                        <span class="tl-desc"><strong>MySQL 8.0</strong> — Window functions, JSON table functions, and invisible indexes. MySQL solidifies its position as the world's most popular open-source database.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2020 (PHP 8) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#065f46;background:#065f46;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2020</span>
+                                        <span class="tl-tag" style="background:#065f46;">PHP</span>
+                                        <span class="tl-desc"><strong>PHP 8.0</strong> — JIT (Just-In-Time) compiler, named arguments, match expressions, and union types. PHP's largest feature release. Used by 75%+ of all websites.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2022 (CSS Container Queries) -->
+                                <div class="tl-entry">
+                                    <span class="tl-dot" style="color:#5b21b6;background:#5b21b6;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2022</span>
+                                        <span class="tl-tag" style="background:#5b21b6;">CSS</span>
+                                        <span class="tl-desc"><strong>CSS Container Queries</strong> — Components can now respond to the size of their <em>parent container</em>, not just the browser viewport. A decade-old developer request finally answered.</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2024 (Modern CSS) -->
+                                <div class="tl-entry" style="margin-bottom:0;">
+                                    <span class="tl-dot" style="color:#5b21b6;background:#5b21b6;"></span>
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <span class="tl-year">2024+</span>
+                                        <span class="tl-tag" style="background:#5b21b6;">CSS</span>
+                                        <span class="tl-desc"><strong>CSS Living Standard</strong> — :has() selector, CSS Layers (@layer), Anchor Positioning, and CSS Subgrid. The web platform continues shipping new features every year. Mastering the fundamentals keeps you current through every update.</span>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                         <div class="col-lg-4 mt-4 mt-lg-0 text-center">
