@@ -1492,6 +1492,10 @@
                             .wdlc-hotspot:hover,.wdlc-hotspot.wdlc-active{background:rgba(91,200,245,.22);box-shadow:0 0 0 2px rgba(91,200,245,.7);}
                             #fig-wdlc img,#fig-wdlc:hover img{transform:none!important;filter:none!important;position:static!important;z-index:auto!important;}
                             #fig-wdlc,#fig-wdlc:hover{z-index:auto;}
+                            #fig-careers img,#fig-careers:hover img{transform:none!important;filter:none!important;position:static!important;z-index:auto!important;}
+                            #fig-careers,#fig-careers:hover{z-index:auto;}
+                            .career-hotspot{position:absolute;cursor:pointer;border-radius:6px;transition:background .15s,box-shadow .15s;z-index:10;}
+                            .career-hotspot:hover,.career-hotspot.career-active{background:rgba(91,200,245,.22);box-shadow:0 0 0 2px rgba(91,200,245,.7);}
                             </style>
 
                             <div class="tl-scroll">
@@ -1651,164 +1655,53 @@
                             <h2 class="section-title mt-0">The Blueprint: How Websites Are Made</h2>
                             <p>Professional websites are not built in one sitting. Every successful web project — from a local restaurant menu site to an enterprise e-commerce platform — follows a <strong>Web Development Life Cycle (WDLC)</strong>. This is a repeating, structured process that ensures the final product actually solves the client's problem. Skipping phases is how projects go over budget, miss deadlines, and disappoint clients.</p>
 
-                            <div class="card roadmap-card border-primary bg-light shadow-sm mb-4 mt-4">
-                                <div class="card-header bg-primary text-white fw-bold">The 8-Phase Web Development Life Cycle</div>
-                                <div class="card-body small">
-                                    <ol class="ps-3 mb-0">
-                                        <li class="mb-3"><strong>Research &amp; Analysis</strong> — Understand the client, their competitors, and their target audience before a single line of code is written. Who are the users? What problem does the site solve? What do competitors do well or poorly? This phase produces a <em>creative brief</em> and <em>competitive analysis</em>.</li>
-                                        <li class="mb-3"><strong>Planning</strong> — Define scope, timeline, and budget. Create a <em>sitemap</em> (the page structure) and identify all required functionality. A signed project agreement protects both agency and client. This is where the Project Management Triangle (Fast / Good / Cheap — pick two) becomes real.</li>
-                                        <li class="mb-3"><strong>Design</strong> — Translate research into visual concepts. <em>Wireframes</em> sketch layout without color. <em>Mockups</em> in Figma or Adobe XD add color palette, typography, and imagery. Client approves the mockup before development begins.</li>
-                                        <li class="mb-3"><strong>Content</strong> — Gather or create all words, photos, videos, and files that populate the site. Content is the biggest bottleneck in most projects — clients routinely underestimate how much effort this requires. Without real content, development is just building a shell.</li>
-                                        <li class="mb-3"><strong>Development</strong> — Write the actual code: HTML for structure, CSS for visual style, JavaScript for interactivity. Connect to databases or APIs if needed. Build the CMS if the client will update content themselves. This is the primary skill this course trains you for.</li>
-                                        <li class="mb-3"><strong>Testing</strong> — Systematically break the site before users do. Test across browsers (Chrome, Firefox, Safari, Edge) and screen sizes. Check for broken links, slow load times, accessibility issues (WCAG), form validation, and security vulnerabilities. Document and fix every bug found.</li>
-                                        <li class="mb-3"><strong>Deployment</strong> — Move the site from development to the live production server. Configure DNS records, set up SSL/HTTPS, run final checks. Modern agencies use <em>CI/CD pipelines</em> to automate safe, fast deployments.</li>
-                                        <li class="mb-0"><strong>Maintenance</strong> — The site is live — the work continues. Update content, patch security vulnerabilities, monitor uptime, optimize performance, and respond to client feedback. Most agencies offer monthly retainer packages, creating recurring revenue. Then the cycle begins again with new research.</li>
-                                    </ol>
+                            <figure id="fig-wdlc" class="mb-4 mt-4">
+                                <div id="wdlc-img-wrap" style="position:relative;width:100%;border-radius:8px;overflow:hidden;border:1px solid #dee2e6;box-shadow:0 2px 8px rgba(0,0,0,.1);">
+                                    <img src="../images/join-the-developers-guild/WDLC.png" alt="The 8-Phase Web Development Life Cycle — click a phase to explore" style="width:100%;display:block;border-radius:8px;" draggable="false">
+                                    <!-- Phase 8: top left -->
+                                    <div class="wdlc-hotspot" data-wdlc="maintenance" onclick="wdlcShow('maintenance',event)" title="Phase 8: Maintenance"  style="left:2%;top:3%;width:27%;height:33%;"></div>
+                                    <!-- Phase 1: top center -->
+                                    <div class="wdlc-hotspot" data-wdlc="research"    onclick="wdlcShow('research',event)"    title="Phase 1: Research"    style="left:30%;top:3%;width:30%;height:33%;"></div>
+                                    <!-- Phase 2: top right -->
+                                    <div class="wdlc-hotspot" data-wdlc="planning"    onclick="wdlcShow('planning',event)"    title="Phase 2: Planning"    style="left:61%;top:3%;width:33%;height:33%;"></div>
+                                    <!-- Phase 3: right side -->
+                                    <div class="wdlc-hotspot" data-wdlc="design"      onclick="wdlcShow('design',event)"      title="Phase 3: Design"      style="left:70%;top:35%;width:28%;height:28%;"></div>
+                                    <!-- Phase 4: bottom right -->
+                                    <div class="wdlc-hotspot" data-wdlc="content"     onclick="wdlcShow('content',event)"     title="Phase 4: Content"     style="left:61%;top:64%;width:32%;height:32%;"></div>
+                                    <!-- Phase 5: bottom center -->
+                                    <div class="wdlc-hotspot" data-wdlc="development" onclick="wdlcShow('development',event)" title="Phase 5: Development" style="left:30%;top:64%;width:30%;height:32%;"></div>
+                                    <!-- Phase 6: bottom left -->
+                                    <div class="wdlc-hotspot" data-wdlc="testing"     onclick="wdlcShow('testing',event)"     title="Phase 6: Testing"     style="left:2%;top:64%;width:27%;height:32%;"></div>
+                                    <!-- Phase 7: left side -->
+                                    <div class="wdlc-hotspot" data-wdlc="deployment"  onclick="wdlcShow('deployment',event)"  title="Phase 7: Deployment"  style="left:2%;top:35%;width:28%;height:28%;"></div>
                                 </div>
-                            </div>
+                                <figcaption class="p-2 small text-muted text-center">
+                                    <strong>Figure 1.10:</strong> The WDLC — click each phase to explore. The cycle repeats: after Maintenance, teams return to Research.
+                                </figcaption>
+                            </figure>
 
                             <div class="p-4 bg-site-secondary border border-primary rounded shadow-sm small text-dark mb-4">
                                 <h6 class="fw-bold text-primary mb-2">Agency Insight: Why the Cycle Never Ends</h6>
                                 <p class="mb-0">Notice that after Maintenance, the cycle restarts with Research. User behavior changes, technology evolves, search engine algorithms update, and client businesses grow. A website that is not actively maintained will decay — security holes appear, speed degrades, content becomes outdated, and competitors overtake it in search rankings. The most successful agencies sell ongoing maintenance contracts, not one-time builds. <strong>Recurring revenue is the goal.</strong></p>
                             </div>
                         </div>
-                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
-                            <figure class="mb-4 text-center" id="fig-wdlc">
-                                <div class="border rounded shadow-sm p-2 bg-white" style="overflow:hidden;">
-<div id="wdlc-img-wrap" style="position:relative;display:inline-block;width:100%;max-width:420px;">
-  <img src="../images/join-the-developers-guild/WDLC.png" alt="Web Development Life Cycle — click a phase to explore" style="width:100%;display:block;border-radius:6px;" draggable="false">
-  <!-- Phase 1: top center     — center (50%, 8%)  → left=39%, top=2%  -->
-  <div class="wdlc-hotspot" data-wdlc="research"    onclick="wdlcShow('research',event)"    title="Phase 1: Research"    style="left:39%;top:2%;width:22%;height:12%;"></div>
-  <!-- Phase 2: right col, y1  — center (84%, 29%) → left=73%, top=23% -->
-  <div class="wdlc-hotspot" data-wdlc="planning"    onclick="wdlcShow('planning',event)"    title="Phase 2: Planning"    style="left:73%;top:23%;width:22%;height:12%;"></div>
-  <!-- Phase 3: right col, y2  — center (84%, 50%) → left=73%, top=44% -->
-  <div class="wdlc-hotspot" data-wdlc="design"      onclick="wdlcShow('design',event)"      title="Phase 3: Design"      style="left:73%;top:44%;width:22%;height:12%;"></div>
-  <!-- Phase 4: right col, y3  — center (84%, 71%) → left=73%, top=65% -->
-  <div class="wdlc-hotspot" data-wdlc="content"     onclick="wdlcShow('content',event)"     title="Phase 4: Content"     style="left:73%;top:65%;width:22%;height:12%;"></div>
-  <!-- Phase 5: bottom center  — center (50%, 91%) → left=39%, top=85% -->
-  <div class="wdlc-hotspot" data-wdlc="development" onclick="wdlcShow('development',event)" title="Phase 5: Development" style="left:39%;top:85%;width:22%;height:12%;"></div>
-  <!-- Phase 6: left col, y3   — center (5%,  71%) → left=5%,  top=65% -->
-  <div class="wdlc-hotspot" data-wdlc="testing"     onclick="wdlcShow('testing',event)"     title="Phase 6: Testing"     style="left:5%;top:65%;width:22%;height:12%;"></div>
-  <!-- Phase 7: left col, y2   — center (5%,  50%) → left=5%,  top=44% -->
-  <div class="wdlc-hotspot" data-wdlc="deployment"  onclick="wdlcShow('deployment',event)"  title="Phase 7: Deployment"  style="left:5%;top:44%;width:22%;height:12%;"></div>
-  <!-- Phase 8: left col, y1   — center (5%,  29%) → left=5%,  top=23% -->
-  <div class="wdlc-hotspot" data-wdlc="maintenance" onclick="wdlcShow('maintenance',event)" title="Phase 8: Maintenance"  style="left:5%;top:23%;width:22%;height:12%;"></div>
-</div>
-<svg id="wdlc-svg" viewBox="0 0 1 1" xmlns="http://www.w3.org/2000/svg" style="display:none;" aria-hidden="true">
-    <defs>
-      <marker id="aw-flow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
-        <path d="M0,1 L8,4.5 L0,8 Z" fill="#5bc8f5"/>
-      </marker>
-      <marker id="aw-iter" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-        <path d="M0,0.5 L5,3 L0,5.5 Z" fill="#f59e0b"/>
-      </marker>
-      <marker id="aw-flow-rev" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto-start-reverse">
-        <path d="M0,1 L8,4.5 L0,8 Z" fill="#5bc8f5"/>
-      </marker>
-    </defs>
-    <!-- Oval track -->
-    <rect x="125" y="75" width="110" height="410" rx="55" fill="#0f2645" stroke="#5bc8f5" stroke-width="3"/>
-    <rect x="143" y="93" width="74" height="374" rx="41" fill="#162d50" stroke="#1e4a7a" stroke-width="1"/>
-    <!-- Center text -->
-    <text x="180" y="252.0" text-anchor="middle" font-size="11" font-weight="800" fill="white" letter-spacing="1">THE 8-PHASE</text>
-    <text x="180" y="268.0" text-anchor="middle" font-size="11" font-weight="800" fill="white" letter-spacing="1">WEB DEVELOPMENT</text>
-    <text x="180" y="288.0" text-anchor="middle" font-size="11" font-weight="800" fill="white" letter-spacing="1">LIFE CYCLE</text>
-    <text x="180" y="308.0" text-anchor="middle" font-size="8" fill="#5bc8f5" letter-spacing="0.5">click any phase</text>
-    <!-- Main flow arrows -->
-    <path d="M255,224 L255,261" fill="none" stroke="#5bc8f5" stroke-width="3.5" marker-end="url(#aw-flow)"/>
-    <path d="M255,299 L255,336" fill="none" stroke="#5bc8f5" stroke-width="3.5" marker-end="url(#aw-flow)"/>
-    <path d="M105,336 L105,299" fill="none" stroke="#5bc8f5" stroke-width="3.5" marker-end="url(#aw-flow)"/>
-    <path d="M105,261 L105,224" fill="none" stroke="#5bc8f5" stroke-width="3.5" marker-end="url(#aw-flow)"/>
-    <path d="M193.9,67.0 Q250,102.5 235,187" fill="none" stroke="#5bc8f5" stroke-width="3.5" marker-end="url(#aw-flow)"/>
-    <path d="M253.0,355.0 Q250,457.5 193.9,477.0" fill="none" stroke="#5bc8f5" stroke-width="3.5" marker-end="url(#aw-flow)"/>
-    <path d="M166.1,477.0 Q110,457.5 107,355" fill="none" stroke="#5bc8f5" stroke-width="3.5" marker-end="url(#aw-flow)"/>
-    <path d="M107,205 Q110,102.5 166.1,67.0" fill="none" stroke="#5bc8f5" stroke-width="3.5" marker-end="url(#aw-flow)"/>
-    <!-- Backward iteration arrows -->
-    <path d="M244,262 L244,223" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#aw-iter)"/>
-    <path d="M244,337 L244,298" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#aw-iter)"/>
-    <path d="M116,298 L116,187" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#aw-iter)"/>
-    <path d="M116,373 L116,262" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#aw-iter)"/>
-    <path d="M240,205 Q265,60 196,80" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#aw-iter)"/>
-    <path d="M196,480 Q265,500 240,355" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#aw-iter)"/>
-    <path d="M120,355 Q95,500 164,480" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#aw-iter)"/>
-    <path d="M164,80 Q95,60 120,205" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#aw-iter)"/>
-    <!-- Phase labels -->
-    <text x="180" y="21" text-anchor="middle" font-size="8" font-weight="800" fill="#1d4ed8" letter-spacing="0.3">1. RESEARCH</text>
-    <text x="180" y="31" text-anchor="middle" font-size="6.5" fill="#94a3b8">Understand clients,</text>
-    <text x="180" y="40" text-anchor="middle" font-size="6.5" fill="#94a3b8">users, competitors.</text>
-    <text x="180" y="49" text-anchor="middle" font-size="6.5" fill="#94a3b8">Creative brief.</text>
-    <text x="267" y="197" text-anchor="start" font-size="8" font-weight="800" fill="#15803d" letter-spacing="0.3">2. PLANNING</text>
-    <text x="267" y="207" text-anchor="start" font-size="6.5" fill="#94a3b8">Define scope, timeline,</text>
-    <text x="267" y="216" text-anchor="start" font-size="6.5" fill="#94a3b8">budget, sitemap &</text>
-    <text x="267" y="225" text-anchor="start" font-size="6.5" fill="#94a3b8">functionality.</text>
-    <text x="267" y="272" text-anchor="start" font-size="8" font-weight="800" fill="#7c3aed" letter-spacing="0.3">3. DESIGN</text>
-    <text x="267" y="282" text-anchor="start" font-size="6.5" fill="#94a3b8">Wireframes, mockups</text>
-    <text x="267" y="291" text-anchor="start" font-size="6.5" fill="#94a3b8">(color, type, layout).</text>
-    <text x="267" y="300" text-anchor="start" font-size="6.5" fill="#94a3b8">Client approval.</text>
-    <text x="267" y="347" text-anchor="start" font-size="8" font-weight="800" fill="#b45309" letter-spacing="0.3">4. CONTENT</text>
-    <text x="267" y="357" text-anchor="start" font-size="6.5" fill="#94a3b8">Gather/create words,</text>
-    <text x="267" y="366" text-anchor="start" font-size="6.5" fill="#94a3b8">photos, videos.</text>
-    <text x="267" y="375" text-anchor="start" font-size="6.5" fill="#94a3b8">Populate the shell.</text>
-    <text x="180" y="521" text-anchor="middle" font-size="8" font-weight="800" fill="#0f172a" letter-spacing="0.3">5. DEVELOPMENT</text>
-    <text x="180" y="531" text-anchor="middle" font-size="6.5" fill="#94a3b8">Write HTML/CSS/JS.</text>
-    <text x="180" y="540" text-anchor="middle" font-size="6.5" fill="#94a3b8">Database/API.</text>
-    <text x="180" y="549" text-anchor="middle" font-size="6.5" fill="#94a3b8">CMS build.</text>
-    <text x="93" y="347" text-anchor="end" font-size="8" font-weight="800" fill="#be123c" letter-spacing="0.3">6. TESTING</text>
-    <text x="93" y="357" text-anchor="end" font-size="6.5" fill="#94a3b8">Break the site!</text>
-    <text x="93" y="366" text-anchor="end" font-size="6.5" fill="#94a3b8">Cross-browser testing.</text>
-    <text x="93" y="375" text-anchor="end" font-size="6.5" fill="#94a3b8">Fix bugs.</text>
-    <text x="93" y="272" text-anchor="end" font-size="8" font-weight="800" fill="#0e7490" letter-spacing="0.3">7. DEPLOYMENT</text>
-    <text x="93" y="282" text-anchor="end" font-size="6.5" fill="#94a3b8">Move to production.</text>
-    <text x="93" y="291" text-anchor="end" font-size="6.5" fill="#94a3b8">Configure DNS, SSL.</text>
-    <text x="93" y="300" text-anchor="end" font-size="6.5" fill="#94a3b8">CI/CD pipeline.</text>
-    <text x="93" y="197" text-anchor="end" font-size="8" font-weight="800" fill="#374151" letter-spacing="0.3">8. MAINTENANCE</text>
-    <text x="93" y="207" text-anchor="end" font-size="6.5" fill="#94a3b8">Site is live! Patch,</text>
-    <text x="93" y="216" text-anchor="end" font-size="6.5" fill="#94a3b8">monitor, update.</text>
-    <text x="93" y="225" text-anchor="end" font-size="6.5" fill="#94a3b8">Recurring revenue.</text>
-    <!-- Phase nodes -->
-    <g data-wdlc="research" onclick="wdlcShow('research', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="180" cy="75" r="16" fill="#1d4ed8" stroke="#fff" stroke-width="2.5"/>
-      <text x="180" y="80" text-anchor="middle" font-size="13" fill="white" font-weight="800">1</text>
-    </g>
-    <g data-wdlc="planning" onclick="wdlcShow('planning', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="235" cy="205" r="16" fill="#15803d" stroke="#fff" stroke-width="2.5"/>
-      <text x="235" y="210" text-anchor="middle" font-size="13" fill="white" font-weight="800">2</text>
-    </g>
-    <g data-wdlc="design" onclick="wdlcShow('design', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="235" cy="280" r="16" fill="#7c3aed" stroke="#fff" stroke-width="2.5"/>
-      <text x="235" y="285" text-anchor="middle" font-size="13" fill="white" font-weight="800">3</text>
-    </g>
-    <g data-wdlc="content" onclick="wdlcShow('content', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="235" cy="355" r="16" fill="#b45309" stroke="#fff" stroke-width="2.5"/>
-      <text x="235" y="360" text-anchor="middle" font-size="13" fill="white" font-weight="800">4</text>
-    </g>
-    <g data-wdlc="development" onclick="wdlcShow('development', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="180" cy="485" r="16" fill="#0f172a" stroke="#fff" stroke-width="2.5"/>
-      <text x="180" y="490" text-anchor="middle" font-size="13" fill="white" font-weight="800">5</text>
-    </g>
-    <g data-wdlc="testing" onclick="wdlcShow('testing', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="125" cy="355" r="16" fill="#be123c" stroke="#fff" stroke-width="2.5"/>
-      <text x="125" y="360" text-anchor="middle" font-size="13" fill="white" font-weight="800">6</text>
-    </g>
-    <g data-wdlc="deployment" onclick="wdlcShow('deployment', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="125" cy="280" r="16" fill="#0e7490" stroke="#fff" stroke-width="2.5"/>
-      <text x="125" y="285" text-anchor="middle" font-size="13" fill="white" font-weight="800">7</text>
-    </g>
-    <g data-wdlc="maintenance" onclick="wdlcShow('maintenance', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="125" cy="205" r="16" fill="#374151" stroke="#fff" stroke-width="2.5"/>
-      <text x="125" y="210" text-anchor="middle" font-size="13" fill="white" font-weight="800">8</text>
-    </g>
-    <!-- Legend -->
-    <line x1="8" y1="532" x2="26" y2="532" stroke="#5bc8f5" stroke-width="2.5" marker-end="url(#aw-flow)"/>
-    <text x="30" y="536" font-size="7" fill="#94a3b8">main flow</text>
-    <line x1="110" y1="532" x2="125" y2="532" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#aw-iter)"/>
-    <text x="129" y="536" font-size="7" fill="#94a3b8">iterate back</text>
-</svg>
+                        <div class="col-lg-4 mt-4 mt-lg-0">
+                            <div class="card border-primary shadow-sm mb-4">
+                                <div class="card-header bg-primary text-white fw-bold small">8-Phase Quick Reference</div>
+                                <div class="card-body small py-2" style="font-size:.78rem;">
+                                    <ol class="mb-0 ps-3">
+                                        <li class="mb-1"><strong>Research &amp; Analysis</strong></li>
+                                        <li class="mb-1"><strong>Planning</strong></li>
+                                        <li class="mb-1"><strong>Design</strong></li>
+                                        <li class="mb-1"><strong>Content</strong></li>
+                                        <li class="mb-1"><strong>Development</strong></li>
+                                        <li class="mb-1"><strong>Testing</strong></li>
+                                        <li class="mb-1"><strong>Deployment</strong></li>
+                                        <li class="mb-0"><strong>Maintenance</strong></li>
+                                    </ol>
+                                    <p class="mt-2 mb-0 text-muted" style="font-size:.72rem;"><em>Click any phase in the diagram to explore each step.</em></p>
                                 </div>
-                                <figcaption class="p-2 small text-muted text-center">
-                                    <strong>Figure 1.10:</strong> The WDLC — click each phase to explore. Amber arrows show where teams iterate between phases before moving forward.
-                                </figcaption>
-                            </figure>
+                            </div>
                             <script>
                             (function () {
                             var WDLC = {
@@ -1847,19 +1740,56 @@
                             <h2 class="section-title mt-0">Choose Your "Class": Developer Careers</h2>
                             <p>The industry is split into specialized roles. Which path will you follow?</p>
                             
-                            <ul class="small mb-4">
-                                <li class="mb-2"><strong>Front-End Developer:</strong> Writes the code that runs in the browser and users interact with (HTML/CSS/JS).</li>
-                                <li class="mb-2"><strong>Back-End Developer:</strong> Concerned with logic, databases, and server-side processing hidden from the user.</li>
-                                <li class="mb-2"><strong>Full-Stack Developer:</strong> Has the skills to work on both the front-end and the back-end.</li>
-                                <li class="mb-2"><strong>UI/UX Designer:</strong> UI focuses on visuals; UX focuses on psychology and how the site "feels." They use tools like Figma to design the <strong>Surface Layer</strong> (skin) and create <strong>User Flows</strong> (the path a user takes).</li>
-                                <li class="mb-2"><strong>UX Researcher:</strong> Conducts interviews and usability tests to learn how people use a product.</li>
-                                <li class="mb-2"><strong>Project Manager:</strong> Acts as the "Bridge" between client needs and the dev team, managing timelines.</li>
-                                <li class="mb-2"><strong>Product Manager:</strong> Manages a product's entire lifecycle from original idea to final launch.</li>
-                                <li class="mb-2"><strong>Database Administrator (DBA):</strong> Ensures data is organized, secure, and always available.</li>
-                                <li class="mb-2"><strong>DevOps Engineer:</strong> Focuses on keeping servers online and ensuring code deploys smoothly.</li>
-                                <li class="mb-2"><strong>Quality Assurance (QA) Tester:</strong> Paid to break things. They find and document bugs before launch.</li>
-                                <li><strong>Freelancer:</strong> Self-employed developer working for various clients on a project-by-project basis.</li>
-                            </ul>
+                            <figure id="fig-careers" class="mb-4">
+                                <div id="careers-img-wrap" style="position:relative;width:100%;border-radius:8px;overflow:hidden;border:1px solid #dee2e6;box-shadow:0 2px 8px rgba(0,0,0,.1);">
+                                    <img src="../images/join-the-developers-guild/roles-in-tech.png" alt="Developer career roles — click a role to learn more" style="width:100%;display:block;border-radius:8px;" draggable="false">
+                                    <!-- Row 1 -->
+                                    <div class="career-hotspot" data-career="frontend"   onclick="careerShow('frontend',event)"   title="Front-End Developer"       style="left:2%;top:2%;width:30%;height:31%;"></div>
+                                    <div class="career-hotspot" data-career="backend"    onclick="careerShow('backend',event)"    title="Back-End Developer"        style="left:34%;top:2%;width:30%;height:31%;"></div>
+                                    <div class="career-hotspot" data-career="fullstack"  onclick="careerShow('fullstack',event)"  title="Full-Stack Developer"      style="left:66%;top:2%;width:32%;height:31%;"></div>
+                                    <!-- Row 2 -->
+                                    <div class="career-hotspot" data-career="uiux"       onclick="careerShow('uiux',event)"       title="UI/UX Designer"            style="left:2%;top:35%;width:30%;height:31%;"></div>
+                                    <div class="career-hotspot" data-career="uxresearch" onclick="careerShow('uxresearch',event)" title="UX Researcher"             style="left:34%;top:35%;width:30%;height:31%;"></div>
+                                    <div class="career-hotspot" data-career="pm"         onclick="careerShow('pm',event)"         title="Project Manager"           style="left:66%;top:35%;width:32%;height:31%;"></div>
+                                    <!-- Row 3 -->
+                                    <div class="career-hotspot" data-career="dba"        onclick="careerShow('dba',event)"        title="Database Administrator"    style="left:2%;top:68%;width:30%;height:30%;"></div>
+                                    <div class="career-hotspot" data-career="devops"     onclick="careerShow('devops',event)"     title="DevOps Engineer"           style="left:34%;top:68%;width:30%;height:30%;"></div>
+                                    <div class="career-hotspot" data-career="qa"         onclick="careerShow('qa',event)"         title="QA Tester"                 style="left:66%;top:68%;width:32%;height:30%;"></div>
+                                </div>
+                                <figcaption class="p-2 small text-muted">
+                                    <strong>Figure 1.11:</strong> Click any role to explore what they do, what skills they need, and what they earn in Nevada.
+                                </figcaption>
+                            </figure>
+                            <script>
+                            (function(){
+                            var CAREERS = {
+                                frontend:   { t: 'Front-End Developer', b: 'Builds everything users see and interact with — HTML structure, CSS styling, and JavaScript interactivity. Responsible for responsive design, accessibility (WCAG), and cross-browser compatibility. Nevada median: ~$72,000/yr (BLS 2023).' },
+                                backend:    { t: 'Back-End Developer', b: 'Handles the server, database, and application logic hidden from users. Works with PHP, Python, Node.js, and databases like MySQL or PostgreSQL. Processes logins, payments, and data storage. Nevada median: ~$85,000/yr.' },
+                                fullstack:  { t: 'Full-Stack Developer', b: 'Works on both front-end (what users see) and back-end (servers &amp; databases). The most versatile role — can build an entire web application solo. Highest demand across the Nevada job market.' },
+                                uiux:       { t: 'UI / UX Designer', b: 'UI (User Interface) = visual design — colors, typography, layout. UX (User Experience) = psychology — how the site feels and flows. Uses Figma or Adobe XD to create wireframes and mockups before any code is written.' },
+                                uxresearch: { t: 'UX Researcher', b: 'Conducts user interviews, surveys, and usability tests to understand how real people use a product. Turns behavioral data into design recommendations. Often works closely with UI/UX Designers.' },
+                                pm:         { t: 'Project Manager', b: 'The bridge between client and dev team. Manages timelines, scope, budgets, and communication. Uses the Project Management Triangle (Fast / Good / Cheap — pick two) every day. Nevada median: ~$85,000/yr.' },
+                                dba:        { t: 'Database Administrator (DBA)', b: 'Ensures data is organized, secure, backed up, and always available. Designs database schemas, writes complex SQL queries, and optimizes performance. Critical in healthcare, finance, and state government tech roles in Nevada.' },
+                                devops:     { t: 'DevOps Engineer', b: 'Keeps servers online and ensures code deploys safely and automatically. Manages CI/CD pipelines, containerization (Docker/Kubernetes), and cloud infrastructure (AWS/Azure). Growing fast in Nevada's expanding tech sector.' },
+                                qa:         { t: 'QA Tester — Quality Assurance', b: 'Paid to break things — professionally. Finds, documents, and tracks bugs before they reach real users. Tests across browsers, devices, and screen sizes. Every dev team needs a dedicated QA engineer.' }
+                            };
+                            window.careerShow = function(id, evt) {
+                                var d = CAREERS[id]; if (!d) return;
+                                if (evt) evt.stopPropagation();
+                                var tip = document.getElementById('_webtip_');
+                                if (tip && tip.style.display !== 'none' && tip.dataset.active === 'career:'+id) {
+                                    tip.style.display = 'none'; tip.dataset.active = '';
+                                    document.querySelectorAll('.career-hotspot').forEach(function(h){ h.classList.remove('career-active'); });
+                                    return;
+                                }
+                                document.querySelectorAll('.career-hotspot').forEach(function(h){ h.classList.remove('career-active'); });
+                                var sel = document.querySelector('.career-hotspot[data-career="'+id+'"]');
+                                if (sel) sel.classList.add('career-active');
+                                window.showWebTip(evt, d.t, '<p style="margin:0">'+d.b+'</p>');
+                                var t2 = document.getElementById('_webtip_'); if (t2) t2.dataset.active = 'career:'+id;
+                            };
+                            })();
+                            </script>
 
                             <!-- BUSINESS PLAN INTEGRATION: STAFFING -->
                             <div class="card border-dark shadow-sm my-4 mt-5">
@@ -2058,14 +1988,6 @@
                             </script>
                         </div>
                         <div class="col-lg-4 mt-4 mt-lg-0 text-center">
-                            <figure class="mb-4 text-center">
-                                <a href="/images/join-the-developers-guild/roles-in-tech.png" target="_blank" rel="noopener">
-                                    <img src="/images/join-the-developers-guild/roles-in-tech.png" alt="Professional Roles in the Tech Industry — cartoon infographic showing front-end, back-end, full-stack, UX, DevOps, QA, and project manager" class="img-fluid rounded shadow-sm border w-100">
-                                </a>
-                                <figcaption class="p-2 small text-muted text-center">
-                                    <strong>Figure 1.11:</strong> Professional roles in the tech industry span front-end, back-end, and full-stack development, UX/UI design, database administration, DevOps engineering, QA testing, and project management.
-                                </figcaption>
-                            </figure>
                             
                             <div class="card roadmap-card border-warning bg-light shadow-sm mt-4 text-start">
                                 <div class="card-header bg-warning text-dark fw-bold">Architecture Rule</div>
