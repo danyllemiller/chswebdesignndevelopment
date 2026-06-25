@@ -923,30 +923,30 @@
                                 <li class="mb-1">Only the server has the <strong>Private Key</strong> to open the mailbox and get the secret code. Handshake complete.</li>
                             </ol>
 
-                            <div class="card border-success bg-success bg-opacity-10 shadow-sm my-4">
-                                <div class="card-header bg-success text-white fw-bold small">
+                            <div class="card shadow-sm my-4" style="border:2px solid var(--primary-color);">
+                                <div class="card-header fw-bold small text-white" style="background:var(--primary-color);">
                                     The TLS Handshake at a Glance — How HTTPS Protects You
                                 </div>
-                                <div class="card-body p-3">
+                                <div class="card-body p-3" style="background:var(--secondary-color);">
                                     <div class="d-flex flex-column gap-2 small">
                                         <div class="d-flex align-items-start gap-2">
-                                            <span class="badge bg-primary" style="min-width:1.6rem;font-size:.8rem;line-height:1.6;">1</span>
+                                            <span class="badge text-white" style="min-width:1.6rem;font-size:.8rem;line-height:1.6;background:var(--primary-color);">1</span>
                                             <div><strong>Client Hello</strong> — Your browser sends a greeting: "Here are the encryption methods I support. Let's negotiate."</div>
                                         </div>
                                         <div class="d-flex align-items-start gap-2">
-                                            <span class="badge bg-success" style="min-width:1.6rem;font-size:.8rem;line-height:1.6;">2</span>
+                                            <span class="badge text-white" style="min-width:1.6rem;font-size:.8rem;line-height:1.6;background:var(--accent-teal);">2</span>
                                             <div><strong>Server Certificate</strong> — The server responds with its SSL/TLS certificate, signed by a trusted <strong>Certificate Authority (CA)</strong> like DigiCert or Let's Encrypt, proving identity.</div>
                                         </div>
                                         <div class="d-flex align-items-start gap-2">
-                                            <span class="badge bg-warning text-dark" style="min-width:1.6rem;font-size:.8rem;line-height:1.6;">3</span>
+                                            <span class="badge text-white" style="min-width:1.6rem;font-size:.8rem;line-height:1.6;background:var(--accent-blue-gray);">3</span>
                                             <div><strong>Key Exchange</strong> — Your browser generates a random <strong>session key</strong> and encrypts it using the server's public key. Only the server's private key can decrypt it.</div>
                                         </div>
                                         <div class="d-flex align-items-start gap-2">
-                                            <span class="badge bg-danger" style="min-width:1.6rem;font-size:.8rem;line-height:1.6;">4</span>
+                                            <span class="badge text-white" style="min-width:1.6rem;font-size:.8rem;line-height:1.6;background:var(--tertiary-color);">4</span>
                                             <div><strong>Encrypted Channel Active</strong> — Both sides share the session key. All data now flows encrypted. The <strong>padlock icon</strong> appears. Entire handshake: under 100ms.</div>
                                         </div>
                                     </div>
-                                    <p class="mb-0 mt-3 small text-muted fst-italic">Click the SSL steps in Figure 1.6 (right panel) for deeper detail on each phase.</p>
+                                    <p class="mb-0 mt-3 small fst-italic" style="color:var(--primary-dark);">Click the SSL steps in Figure 1.6 (right panel) for deeper detail on each phase.</p>
                                 </div>
                             </div>
 
