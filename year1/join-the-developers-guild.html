@@ -204,7 +204,7 @@
 
                             <script>
                             /* Global floating tooltip used by all interactive SVGs */
-                            window.showWebTip = function(trigEl, titleHtml, bodyHtml) {
+                            window.showWebTip = function(evt, titleHtml, bodyHtml) {
                                 var tip = document.getElementById('_webtip_');
                                 if (!tip) {
                                     tip = document.createElement('div');
@@ -215,20 +215,26 @@
                                 }
                                 document.getElementById('_webtip_title_').innerHTML = titleHtml;
                                 document.getElementById('_webtip_body_').innerHTML  = bodyHtml;
+                                /* Position off-screen first so we can measure actual height */
+                                tip.style.left = '-9999px'; tip.style.top = '-9999px';
                                 tip.style.display = 'block';
-                                if (trigEl) {
-                                    var r = trigEl.getBoundingClientRect();
-                                    var tw = 320, vw = window.innerWidth, vh = window.innerHeight;
-                                    var left = r.right + 12;
-                                    if (left + tw > vw - 10) left = r.left - tw - 12;
-                                    if (left < 10) left = 10;
-                                    var top = Math.max(10, Math.min(r.top, vh - tip.offsetHeight - 10));
-                                    tip.style.left = left + 'px';
-                                    tip.style.top  = top  + 'px';
+                                var tw = tip.offsetWidth || 300, th = tip.offsetHeight || 200;
+                                var vw = window.innerWidth, vh = window.innerHeight;
+                                var left, top;
+                                if (evt && evt.clientX !== undefined) {
+                                    var mx = evt.clientX, my = evt.clientY;
+                                    left = mx + 18;
+                                    if (left + tw > vw - 8) left = mx - tw - 18;
+                                    if (left < 8) left = 8;
+                                    top = my + 18;
+                                    if (top + th > vh - 8) top = my - th - 18;
+                                    if (top < 8) top = 8;
                                 } else {
-                                    tip.style.left = Math.max(10, (window.innerWidth - 320) / 2) + 'px';
-                                    tip.style.top  = '80px';
+                                    left = Math.max(8, (vw - tw) / 2);
+                                    top  = 80;
                                 }
+                                tip.style.left = left + 'px';
+                                tip.style.top  = top  + 'px';
                             };
                             document.addEventListener('click', function(e) {
                                 var t = document.getElementById('_webtip_');
@@ -267,9 +273,8 @@
                                     document.querySelectorAll('#dev-community-svg .dc-rect').forEach(function(r){ r.style.opacity='.4'; });
                                     var sel = document.querySelector('#dev-community-svg [data-dc="'+id+'"] .dc-rect');
                                     if (sel) sel.style.opacity = '1';
-                                    var trig = evt ? (evt.target.closest ? evt.target.closest('[data-dc]') : evt.target) : null;
                                     var body = '<p style="margin:0">' + d.b.replace(/^\s*—\s*/, '') + '</p>';
-                                    window.showWebTip(trig, d.t, body);
+                                    window.showWebTip(evt, d.t, body);
                                     var t2 = document.getElementById('_webtip_'); if (t2) t2.dataset.active = 'dc:'+id;
                                 };
                             })();
@@ -866,9 +871,8 @@
                                     document.querySelectorAll('#dns-flowchart-svg .dns-box').forEach(function(r){ r.style.opacity='.4'; });
                                     var sel = document.querySelector('#dns-flowchart-svg [data-dns="'+id+'"] .dns-box');
                                     if (sel) sel.style.opacity = '1';
-                                    var trig = evt ? (evt.target.closest ? evt.target.closest('[data-dns]') : evt.target) : null;
                                     var body = '<p style="margin:0">' + d.b.replace(/^\s*—\s*/, '') + '</p>';
-                                    window.showWebTip(trig, d.t, body);
+                                    window.showWebTip(evt, d.t, body);
                                     var t2 = document.getElementById('_webtip_'); if (t2) t2.dataset.active = 'dns:'+id;
                                 };
                             })();
@@ -1116,9 +1120,8 @@
                                     document.querySelectorAll('#url-ssl-svg .url-box').forEach(function(r){ r.style.opacity='.4'; });
                                     var sel = document.querySelector('#url-ssl-svg [data-url="'+id+'"] .url-box');
                                     if (sel) sel.style.opacity = '1';
-                                    var trig = evt ? (evt.target.closest ? evt.target.closest('[data-url]') : evt.target) : null;
                                     var body = '<p style="margin:0">' + d.b.replace(/^\s*—\s*/, '') + '</p>';
-                                    window.showWebTip(trig, d.t, body);
+                                    window.showWebTip(evt, d.t, body);
                                     var t2 = document.getElementById('_webtip_'); if (t2) t2.dataset.active = 'url:'+id;
                                 };
                             })();
@@ -1795,8 +1798,7 @@
                                 if (tip && tip.style.display !== 'none' && tip.dataset.active === 'tl:'+id) {
                                     tip.style.display = 'none'; tip.dataset.active = ''; return;
                                 }
-                                var trig = evt ? (evt.target.closest ? evt.target.closest('.tl-h-card') : evt.target) : null;
-                                window.showWebTip(trig, d.t, '<p style="margin:0">'+d.b+'</p>');
+                                window.showWebTip(evt, d.t, '<p style="margin:0">'+d.b+'</p>');
                                 var t2 = document.getElementById('_webtip_'); if (t2) t2.dataset.active = 'tl:'+id;
                             };
                             })();
@@ -1946,8 +1948,7 @@
                                 document.querySelectorAll('#wdlc-svg .wdlc-node circle').forEach(function(c){ c.style.opacity='.4'; });
                                 var sel = document.querySelector('#wdlc-svg [data-wdlc="'+id+'"] circle');
                                 if (sel) sel.style.opacity = '1';
-                                var trig = evt ? (evt.target.closest ? evt.target.closest('[data-wdlc]') : evt.target) : null;
-                                window.showWebTip(trig, d.t, '<p style="margin:0">'+d.b+'</p>');
+                                window.showWebTip(evt, d.t, '<p style="margin:0">'+d.b+'</p>');
                                 var t2 = document.getElementById('_webtip_'); if (t2) t2.dataset.active = 'wdlc:'+id;
                             };
                             })();
