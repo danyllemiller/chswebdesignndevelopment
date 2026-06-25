@@ -1484,6 +1484,8 @@
                             .tl-irow{display:flex;align-items:center;gap:3px;cursor:pointer;padding:2px 3px;border-radius:3px;justify-content:center;transition:background .1s;}
                             .tl-irow:hover{background:#f1f5f9;}
                             .tl-irow .tl-ts{margin-top:0;}
+                            .wdlc-hotspot{position:absolute;cursor:pointer;border-radius:6px;transition:background .15s,box-shadow .15s;}
+                            .wdlc-hotspot:hover,.wdlc-hotspot.wdlc-active{background:rgba(91,200,245,.22);box-shadow:0 0 0 2px rgba(91,200,245,.7);}
                             </style>
 
                             <div class="tl-scroll">
@@ -1667,7 +1669,26 @@
                         <div class="col-lg-4 mt-4 mt-lg-0 text-center">
                             <figure class="mb-4 text-center" id="fig-wdlc">
                                 <div class="border rounded shadow-sm p-2 bg-white" style="overflow:hidden;">
-<svg id="wdlc-svg" viewBox="0 0 360 560" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:420px;display:block;margin:0 auto;" role="img" aria-label="Interactive WDLC diagram">
+<div id="wdlc-img-wrap" style="position:relative;display:inline-block;width:100%;max-width:420px;">
+  <img src="../images/join-the-developers-guild/WDLC.png" alt="Web Development Life Cycle — click a phase to explore" style="width:100%;display:block;border-radius:6px;" draggable="false">
+  <!-- Phase 1: Research — top center -->
+  <div class="wdlc-hotspot" data-wdlc="research"    onclick="wdlcShow('research',event)"    title="Phase 1: Research"    style="left:32%;top:3%;width:36%;height:8%;"></div>
+  <!-- Phase 2: Planning — upper right -->
+  <div class="wdlc-hotspot" data-wdlc="planning"    onclick="wdlcShow('planning',event)"    title="Phase 2: Planning"    style="left:60%;top:27%;width:38%;height:9%;"></div>
+  <!-- Phase 3: Design — mid right -->
+  <div class="wdlc-hotspot" data-wdlc="design"      onclick="wdlcShow('design',event)"      title="Phase 3: Design"      style="left:60%;top:44%;width:38%;height:9%;"></div>
+  <!-- Phase 4: Content — lower right -->
+  <div class="wdlc-hotspot" data-wdlc="content"     onclick="wdlcShow('content',event)"     title="Phase 4: Content"     style="left:60%;top:61%;width:38%;height:9%;"></div>
+  <!-- Phase 5: Development — bottom center -->
+  <div class="wdlc-hotspot" data-wdlc="development" onclick="wdlcShow('development',event)" title="Phase 5: Development" style="left:32%;top:84%;width:36%;height:8%;"></div>
+  <!-- Phase 6: Testing — lower left -->
+  <div class="wdlc-hotspot" data-wdlc="testing"     onclick="wdlcShow('testing',event)"     title="Phase 6: Testing"     style="left:2%;top:61%;width:38%;height:9%;"></div>
+  <!-- Phase 7: Deployment — mid left -->
+  <div class="wdlc-hotspot" data-wdlc="deployment"  onclick="wdlcShow('deployment',event)"  title="Phase 7: Deployment"  style="left:2%;top:44%;width:38%;height:9%;"></div>
+  <!-- Phase 8: Maintenance — upper left -->
+  <div class="wdlc-hotspot" data-wdlc="maintenance" onclick="wdlcShow('maintenance',event)" title="Phase 8: Maintenance"  style="left:2%;top:27%;width:38%;height:9%;"></div>
+</div>
+<svg id="wdlc-svg" viewBox="0 0 1 1" xmlns="http://www.w3.org/2000/svg" style="display:none;" aria-hidden="true">
     <defs>
       <marker id="aw-flow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
         <path d="M0,1 L8,4.5 L0,8 Z" fill="#5bc8f5"/>
@@ -1800,12 +1821,12 @@
                                 var tip = document.getElementById('_webtip_');
                                 if (tip && tip.style.display !== 'none' && tip.dataset.active === 'wdlc:'+id) {
                                     tip.style.display = 'none'; tip.dataset.active = '';
-                                    document.querySelectorAll('#wdlc-svg .wdlc-node circle').forEach(function(c){ c.style.opacity=''; });
+                                    document.querySelectorAll('.wdlc-hotspot').forEach(function(h){ h.classList.remove('wdlc-active'); });
                                     return;
                                 }
-                                document.querySelectorAll('#wdlc-svg .wdlc-node circle').forEach(function(c){ c.style.opacity='.4'; });
-                                var sel = document.querySelector('#wdlc-svg [data-wdlc="'+id+'"] circle');
-                                if (sel) sel.style.opacity = '1';
+                                document.querySelectorAll('.wdlc-hotspot').forEach(function(h){ h.classList.remove('wdlc-active'); });
+                                var sel = document.querySelector('.wdlc-hotspot[data-wdlc="'+id+'"]');
+                                if (sel) sel.classList.add('wdlc-active');
                                 window.showWebTip(evt, d.t, '<p style="margin:0">'+d.b+'</p>');
                                 var t2 = document.getElementById('_webtip_'); if (t2) t2.dataset.active = 'wdlc:'+id;
                             };
