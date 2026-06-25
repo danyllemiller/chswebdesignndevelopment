@@ -1404,8 +1404,9 @@
                         </div>
                     </div>
 
+
                     <!-- ROW 10: LANGUAGES -->
-                    <div class="row mb-5 pb-4 border-bottom align-items-start mt-5">
+                    <div class="row mb-4 align-items-start mt-5">
                         <div class="col-lg-8 pe-lg-5">
                             <h2 class="section-title mt-0">Building the Web: The 3 Languages</h2>
                             <table class="table table-bordered table-sm small shadow-sm mt-3 bg-white mb-4">
@@ -1413,18 +1414,34 @@
                                     <tr><th>Language</th><th>Nickname</th><th>Job (Part of Speech)</th></tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td class="fw-bold">HTML</td><td>The "Bones"</td><td>Structure &amp; Content (Nouns).</td></tr>
-                                    <tr><td class="fw-bold">CSS</td><td>The "Clothes"</td><td>Style &amp; Appearance (Adjectives).</td></tr>
-                                    <tr><td class="fw-bold">JavaScript (JS)</td><td>The "Brains"</td><td>Interactivity &amp; Action (Verbs).</td></tr>
+                                    <tr><td class="fw-bold">HTML</td><td>The &ldquo;Bones&rdquo;</td><td>Structure &amp; Content (Nouns).</td></tr>
+                                    <tr><td class="fw-bold">CSS</td><td>The &ldquo;Clothes&rdquo;</td><td>Style &amp; Appearance (Adjectives).</td></tr>
+                                    <tr><td class="fw-bold">JavaScript (JS)</td><td>The &ldquo;Brains&rdquo;</td><td>Interactivity &amp; Action (Verbs).</td></tr>
                                 </tbody>
                             </table>
 
                             <p class="small mt-3">Style was separated from structure in 1996 with CSS. While <strong>XML</strong> and <strong>WML</strong> exist, HTML/CSS remain essential. Developers use <strong>scripting languages</strong> to create <strong>active content</strong>.</p>
-                            
-                            <h5 class="fw-bold mt-5 text-primary">Web Technology Timeline (1991 – Present)</h5>
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                            <figure class="mb-4 text-center">
+                                <a href="/images/join-the-developers-guild/Gemini_Generated_Image_hb99r7hb99r7hb99.png" target="_blank" rel="noopener">
+                                    <img src="/images/join-the-developers-guild/Gemini_Generated_Image_hb99r7hb99r7hb99.png" alt="Four-panel analogy: HTML as skeleton, CSS as outfit and skin, JavaScript as nervous system, combined as a complete interactive person" class="img-fluid rounded shadow-sm border w-100">
+                                </a>
+                                <figcaption class="p-2 small text-muted text-center">
+                                    <strong>Figure 1.9:</strong> HTML is the skeleton (structure), CSS is the outfit and skin (appearance), JavaScript is the nervous system (behavior) &mdash; together they form every interactive website.
+                                </figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <!-- Full-width Web Technology Timeline -->
+                    <div class="row mb-5 pb-4 border-bottom">
+                        <div class="col-12">
+                            <h5 class="fw-bold mt-2 text-primary">Web Technology Timeline (1991 &ndash; Present)</h5>
+                            <p class="small text-muted mb-3"><em>Click any dot or card to learn more about that milestone. Years with multiple releases show all items.</em></p>
 
                             <!-- Legend -->
-                            <div class="d-flex flex-wrap gap-2 mb-4 small">
+                            <div class="d-flex flex-wrap gap-2 mb-3 small">
                                 <span class="badge rounded-pill px-3 py-1" style="background:#1e40af;">HTML</span>
                                 <span class="badge rounded-pill px-3 py-1" style="background:#5b21b6;">CSS</span>
                                 <span class="badge rounded-pill px-3 py-1" style="background:#b45309;">JavaScript / ECMAScript</span>
@@ -1434,362 +1451,161 @@
                                 <span class="badge rounded-pill px-3 py-1" style="background:#374151;">Tools &amp; Frameworks</span>
                             </div>
 
-                            <!-- Timeline -->
                             <style>
-                            .tl-snake-row { display:flex; position:relative; align-items:flex-start; }
-                            .tl-snake-row::before { content:''; position:absolute; top:9px; left:0; right:0; height:2px; background:#e5e7eb; z-index:0; }
-                            .tl-h-card { flex:1; min-width:0; cursor:pointer; text-align:center; padding:0 3px; }
-                            .tl-h-card:hover .tl-h-dot { transform:scale(1.25); }
-                            .tl-h-dot { width:18px; height:18px; border-radius:50%; border:3px solid #fff; margin:0 auto 5px; position:relative; z-index:1; transition:transform .18s; }
-                            .tl-h-content { }
-                            .tl-h-year { font-size:.58rem; font-weight:700; color:#6b7280; letter-spacing:.03em; line-height:1; }
-                            .tl-h-badge { display:inline-block; font-size:.55rem; font-weight:700; padding:.1rem .3rem; border-radius:999px; color:#fff; margin:.15rem 0; white-space:nowrap; line-height:1.4; }
-                            .tl-h-title { font-size:.62rem; font-weight:700; color:#1e293b; line-height:1.3; }
-                            .tl-conn-r { height:20px; border-right:2px solid #e5e7eb; border-bottom:2px solid #e5e7eb; border-radius:0 0 10px 0; }
-                            .tl-conn-l { height:20px; border-left:2px solid #e5e7eb; border-bottom:2px solid #e5e7eb; border-radius:0 0 0 10px; }
+                            .tl-scroll{overflow-x:auto;overflow-y:visible;padding-bottom:16px;border-radius:8px;}
+                            .tl-canvas{
+                                display:grid;
+                                grid-template-rows:120px 46px 120px;
+                                grid-template-columns:repeat(26,108px);
+                                position:relative;
+                                min-width:max-content;
+                                padding:0 8px;
+                            }
+                            .tl-track{
+                                position:absolute;left:0;right:0;
+                                top:143px;
+                                height:4px;
+                                background:linear-gradient(90deg,#000099 0%,#6c8c91 48%,#6d916c 100%);
+                                z-index:0;pointer-events:none;border-radius:4px;
+                            }
+                            .tl-uc{grid-row:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:6px 4px 0;position:relative;z-index:1;}
+                            .tl-dc{grid-row:2;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;z-index:2;cursor:pointer;}
+                            .tl-dc:hover .tl-node{transform:scale(1.3);}
+                            .tl-lc{grid-row:3;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0 4px 6px;position:relative;z-index:1;}
+                            .tl-node{width:22px;height:22px;border-radius:50%;border:3px solid white;flex-shrink:0;transition:transform .15s;}
+                            .tl-stem{width:2px;height:14px;background:#cbd5e1;flex-shrink:0;}
+                            .tl-yr{font-size:.58rem;font-weight:700;color:#475569;white-space:nowrap;line-height:1.2;padding:2px 0;}
+                            .tl-card{background:white;border-radius:6px;padding:5px 6px;box-shadow:0 2px 8px rgba(0,0,0,.1);font-size:.58rem;text-align:center;width:94px;cursor:pointer;transition:box-shadow .15s,transform .15s;}
+                            .tl-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.18);transform:translateY(-2px);}
+                            .tl-bs{display:inline-block;font-size:.44rem;font-weight:700;padding:.04rem .2rem;border-radius:999px;color:#fff;margin:.04rem .02rem;white-space:nowrap;line-height:1.4;}
+                            .tl-ts{font-size:.54rem;font-weight:700;color:#1e293b;line-height:1.2;margin-top:2px;display:block;}
+                            .tl-irow{display:flex;align-items:center;gap:3px;cursor:pointer;padding:2px 3px;border-radius:3px;justify-content:center;transition:background .1s;}
+                            .tl-irow:hover{background:#f1f5f9;}
+                            .tl-irow .tl-ts{margin-top:0;}
                             </style>
 
-                            <p class="small text-muted mb-3"><em>Click any milestone to learn more.</em></p>
-
-                            <div class="d-flex gap-1 tl-snake-row mb-0">
-                                <div class="tl-h-card" onclick="tlShow('html10', event)">
-                                    <div class="tl-h-dot" style="background:#1e40af;box-shadow:0 0 0 2px #1e40af;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">1991</div>
-                                        <span class="tl-h-badge" style="background:#1e40af;">HTML</span>
-                                        <div class="tl-h-title">HTML 1.0</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('mosaic', event)">
-                                    <div class="tl-h-dot" style="background:#0c4a6e;box-shadow:0 0 0 2px #0c4a6e;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">1993</div>
-                                        <span class="tl-h-badge" style="background:#0c4a6e;">Browser</span>
-                                        <div class="tl-h-title">NCSA Mosaic</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('phpfi', event)">
-                                    <div class="tl-h-dot" style="background:#065f46;box-shadow:0 0 0 2px #065f46;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">1994</div>
-                                        <span class="tl-h-badge" style="background:#065f46;">PHP</span>
-                                        <div class="tl-h-title">PHP/FI</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('html20', event)">
-                                    <div class="tl-h-dot" style="background:#1e40af;box-shadow:0 0 0 2px #1e40af;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">1995</div>
-                                        <span class="tl-h-badge" style="background:#1e40af;">HTML</span>
-                                        <div class="tl-h-title">HTML 2.0</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('js', event)">
-                                    <div class="tl-h-dot" style="background:#b45309;box-shadow:0 0 0 2px #b45309;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">1995</div>
-                                        <span class="tl-h-badge" style="background:#b45309;">JS</span>
-                                        <div class="tl-h-title">JavaScript</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tl-conn-r"></div>
-                            <div class="d-flex gap-1 tl-snake-row flex-row-reverse mb-0">
-                                <div class="tl-h-card" onclick="tlShow('mysql', event)">
-                                    <div class="tl-h-dot" style="background:#9d174d;box-shadow:0 0 0 2px #9d174d;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">1995</div>
-                                        <span class="tl-h-badge" style="background:#9d174d;">DB</span>
-                                        <div class="tl-h-title">MySQL</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('css1', event)">
-                                    <div class="tl-h-dot" style="background:#5b21b6;box-shadow:0 0 0 2px #5b21b6;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">1996</div>
-                                        <span class="tl-h-badge" style="background:#5b21b6;">CSS</span>
-                                        <div class="tl-h-title">CSS Level 1</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('ecma1', event)">
-                                    <div class="tl-h-dot" style="background:#b45309;box-shadow:0 0 0 2px #b45309;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">1997</div>
-                                        <span class="tl-h-badge" style="background:#b45309;">JS</span>
-                                        <div class="tl-h-title">ECMAScript 1</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('php3', event)">
-                                    <div class="tl-h-dot" style="background:#065f46;box-shadow:0 0 0 2px #065f46;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">1997</div>
-                                        <span class="tl-h-badge" style="background:#065f46;">PHP</span>
-                                        <div class="tl-h-title">PHP 3</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('css2', event)">
-                                    <div class="tl-h-dot" style="background:#5b21b6;box-shadow:0 0 0 2px #5b21b6;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">1998</div>
-                                        <span class="tl-h-badge" style="background:#5b21b6;">CSS</span>
-                                        <div class="tl-h-title">CSS Level 2</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tl-conn-l"></div>
-                            <div class="d-flex gap-1 tl-snake-row mb-0">
-                                <div class="tl-h-card" onclick="tlShow('html401', event)">
-                                    <div class="tl-h-dot" style="background:#1e40af;box-shadow:0 0 0 2px #1e40af;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">1999</div>
-                                        <span class="tl-h-badge" style="background:#1e40af;">HTML</span>
-                                        <div class="tl-h-title">HTML 4.01</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('xhtml', event)">
-                                    <div class="tl-h-dot" style="background:#1e40af;box-shadow:0 0 0 2px #1e40af;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2000</div>
-                                        <span class="tl-h-badge" style="background:#1e40af;">HTML</span>
-                                        <div class="tl-h-title">XHTML 1.0</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('php4', event)">
-                                    <div class="tl-h-dot" style="background:#065f46;box-shadow:0 0 0 2px #065f46;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2000</div>
-                                        <span class="tl-h-badge" style="background:#065f46;">PHP</span>
-                                        <div class="tl-h-title">PHP 4</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('json', event)">
-                                    <div class="tl-h-dot" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2002</div>
-                                        <span class="tl-h-badge" style="background:#374151;">Tools</span>
-                                        <div class="tl-h-title">JSON</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('php5', event)">
-                                    <div class="tl-h-dot" style="background:#065f46;box-shadow:0 0 0 2px #065f46;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2004</div>
-                                        <span class="tl-h-badge" style="background:#065f46;">PHP</span>
-                                        <div class="tl-h-title">PHP 5</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tl-conn-r"></div>
-                            <div class="d-flex gap-1 tl-snake-row flex-row-reverse mb-0">
-                                <div class="tl-h-card" onclick="tlShow('ajax', event)">
-                                    <div class="tl-h-dot" style="background:#b45309;box-shadow:0 0 0 2px #b45309;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2005</div>
-                                        <span class="tl-h-badge" style="background:#b45309;">JS</span>
-                                        <div class="tl-h-title">Ajax</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('mysql5', event)">
-                                    <div class="tl-h-dot" style="background:#9d174d;box-shadow:0 0 0 2px #9d174d;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2005</div>
-                                        <span class="tl-h-badge" style="background:#9d174d;">DB</span>
-                                        <div class="tl-h-title">MySQL 5.0</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('jquery', event)">
-                                    <div class="tl-h-dot" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2006</div>
-                                        <span class="tl-h-badge" style="background:#374151;">Tools</span>
-                                        <div class="tl-h-title">jQuery</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('chrome', event)">
-                                    <div class="tl-h-dot" style="background:#0c4a6e;box-shadow:0 0 0 2px #0c4a6e;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2008</div>
-                                        <span class="tl-h-badge" style="background:#0c4a6e;">Browser</span>
-                                        <div class="tl-h-title">Chrome + V8</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('nodejs', event)">
-                                    <div class="tl-h-dot" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2009</div>
-                                        <span class="tl-h-badge" style="background:#374151;">Tools</span>
-                                        <div class="tl-h-title">Node.js</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tl-conn-l"></div>
-                            <div class="d-flex gap-1 tl-snake-row mb-0">
-                                <div class="tl-h-card" onclick="tlShow('es5', event)">
-                                    <div class="tl-h-dot" style="background:#b45309;box-shadow:0 0 0 2px #b45309;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2009</div>
-                                        <span class="tl-h-badge" style="background:#b45309;">JS</span>
-                                        <div class="tl-h-title">ES5</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('bootstrap', event)">
-                                    <div class="tl-h-dot" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2010</div>
-                                        <span class="tl-h-badge" style="background:#374151;">Tools</span>
-                                        <div class="tl-h-title">Bootstrap</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('css21', event)">
-                                    <div class="tl-h-dot" style="background:#5b21b6;box-shadow:0 0 0 2px #5b21b6;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2011</div>
-                                        <span class="tl-h-badge" style="background:#5b21b6;">CSS</span>
-                                        <div class="tl-h-title">CSS 2.1</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('typescript', event)">
-                                    <div class="tl-h-dot" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2012</div>
-                                        <span class="tl-h-badge" style="background:#374151;">Tools</span>
-                                        <div class="tl-h-title">TypeScript</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('react', event)">
-                                    <div class="tl-h-dot" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2013</div>
-                                        <span class="tl-h-badge" style="background:#374151;">Tools</span>
-                                        <div class="tl-h-title">React</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tl-conn-r"></div>
-                            <div class="d-flex gap-1 tl-snake-row flex-row-reverse mb-0">
-                                <div class="tl-h-card" onclick="tlShow('html5', event)">
-                                    <div class="tl-h-dot" style="background:#1e40af;box-shadow:0 0 0 2px #1e40af;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2014</div>
-                                        <span class="tl-h-badge" style="background:#1e40af;">HTML</span>
-                                        <div class="tl-h-title">HTML5</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('vuejs', event)">
-                                    <div class="tl-h-dot" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2014</div>
-                                        <span class="tl-h-badge" style="background:#374151;">Tools</span>
-                                        <div class="tl-h-title">Vue.js</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('es6', event)">
-                                    <div class="tl-h-dot" style="background:#b45309;box-shadow:0 0 0 2px #b45309;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2015</div>
-                                        <span class="tl-h-badge" style="background:#b45309;">JS</span>
-                                        <div class="tl-h-title">ES6 / ES2015</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('php7', event)">
-                                    <div class="tl-h-dot" style="background:#065f46;box-shadow:0 0 0 2px #065f46;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2015</div>
-                                        <span class="tl-h-badge" style="background:#065f46;">PHP</span>
-                                        <div class="tl-h-title">PHP 7</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('cssgrid', event)">
-                                    <div class="tl-h-dot" style="background:#5b21b6;box-shadow:0 0 0 2px #5b21b6;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2017</div>
-                                        <span class="tl-h-badge" style="background:#5b21b6;">CSS</span>
-                                        <div class="tl-h-title">CSS Grid</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tl-conn-l"></div>
-                            <div class="d-flex gap-1 tl-snake-row mb-0">
-                                <div class="tl-h-card" onclick="tlShow('wasm', event)">
-                                    <div class="tl-h-dot" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2018</div>
-                                        <span class="tl-h-badge" style="background:#374151;">Tools</span>
-                                        <div class="tl-h-title">WebAssembly</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('mysql8', event)">
-                                    <div class="tl-h-dot" style="background:#9d174d;box-shadow:0 0 0 2px #9d174d;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2018</div>
-                                        <span class="tl-h-badge" style="background:#9d174d;">DB</span>
-                                        <div class="tl-h-title">MySQL 8</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('php8', event)">
-                                    <div class="tl-h-dot" style="background:#065f46;box-shadow:0 0 0 2px #065f46;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2020</div>
-                                        <span class="tl-h-badge" style="background:#065f46;">PHP</span>
-                                        <div class="tl-h-title">PHP 8</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('container_q', event)">
-                                    <div class="tl-h-dot" style="background:#5b21b6;box-shadow:0 0 0 2px #5b21b6;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2022</div>
-                                        <span class="tl-h-badge" style="background:#5b21b6;">CSS</span>
-                                        <div class="tl-h-title">Container Queries</div>
-                                    </div>
-                                </div>
-                                <div class="tl-h-card" onclick="tlShow('css2024', event)">
-                                    <div class="tl-h-dot" style="background:#5b21b6;box-shadow:0 0 0 2px #5b21b6;"></div>
-                                    <div class="tl-h-content">
-                                        <div class="tl-h-year">2024+</div>
-                                        <span class="tl-h-badge" style="background:#5b21b6;">CSS</span>
-                                        <div class="tl-h-title">CSS Living Std</div>
-                                    </div>
+                            <div class="tl-scroll">
+                                <div class="tl-canvas">
+                                    <div class="tl-track"></div>
+                                    <div class="tl-uc" style="grid-column:1;"><div class="tl-card" onclick="tlShow('html10',event)" style="border-top:3px solid #1e40af;"><span class="tl-bs" style="background:#1e40af;">HTML</span><div class="tl-ts">HTML 1.0</div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:1;" onclick="tlShow('html10',event)"><div class="tl-node" style="background:#1e40af;box-shadow:0 0 0 2px #1e40af;"></div><div class="tl-yr">1991</div></div>
+                                    <div class="tl-lc" style="grid-column:1;"></div>
+                                    <div class="tl-uc" style="grid-column:2;"></div>
+                                    <div class="tl-dc" style="grid-column:2;" onclick="tlShow('mosaic',event)"><div class="tl-yr">1993</div><div class="tl-node" style="background:#0c4a6e;box-shadow:0 0 0 2px #0c4a6e;"></div></div>
+                                    <div class="tl-lc" style="grid-column:2;"><div class="tl-stem"></div><div class="tl-card" onclick="tlShow('mosaic',event)" style="border-top:3px solid #0c4a6e;"><span class="tl-bs" style="background:#0c4a6e;">Browser</span><div class="tl-ts">NCSA Mosaic</div></div></div>
+                                    <div class="tl-uc" style="grid-column:3;"><div class="tl-card" onclick="tlShow('phpfi',event)" style="border-top:3px solid #065f46;"><span class="tl-bs" style="background:#065f46;">PHP</span><div class="tl-ts">PHP/FI</div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:3;" onclick="tlShow('phpfi',event)"><div class="tl-node" style="background:#065f46;box-shadow:0 0 0 2px #065f46;"></div><div class="tl-yr">1994</div></div>
+                                    <div class="tl-lc" style="grid-column:3;"></div>
+                                    <div class="tl-uc" style="grid-column:4;"></div>
+                                    <div class="tl-dc" style="grid-column:4;" onclick="tlShowGroup(['html20','js','mysql'],'1995',event)"><div class="tl-yr">1995</div><div class="tl-node" style="background:#1e40af;box-shadow:0 0 0 2px #1e40af;"></div></div>
+                                    <div class="tl-lc" style="grid-column:4;"><div class="tl-stem"></div><div class="tl-card" style="border-top:3px solid #1e40af;"><div class="tl-irow" onclick="tlShow('html20',event);event.stopPropagation();"><span class="tl-bs" style="background:#1e40af;">HTML</span><span class="tl-ts">HTML 2.0</span></div><div class="tl-irow" onclick="tlShow('js',event);event.stopPropagation();"><span class="tl-bs" style="background:#b45309;">JS</span><span class="tl-ts">JavaScript</span></div><div class="tl-irow" onclick="tlShow('mysql',event);event.stopPropagation();"><span class="tl-bs" style="background:#9d174d;">DB</span><span class="tl-ts">MySQL</span></div></div></div>
+                                    <div class="tl-uc" style="grid-column:5;"><div class="tl-card" onclick="tlShow('css1',event)" style="border-top:3px solid #5b21b6;"><span class="tl-bs" style="background:#5b21b6;">CSS</span><div class="tl-ts">CSS Level 1</div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:5;" onclick="tlShow('css1',event)"><div class="tl-node" style="background:#5b21b6;box-shadow:0 0 0 2px #5b21b6;"></div><div class="tl-yr">1996</div></div>
+                                    <div class="tl-lc" style="grid-column:5;"></div>
+                                    <div class="tl-uc" style="grid-column:6;"></div>
+                                    <div class="tl-dc" style="grid-column:6;" onclick="tlShowGroup(['ecma1','php3'],'1997',event)"><div class="tl-yr">1997</div><div class="tl-node" style="background:#b45309;box-shadow:0 0 0 2px #b45309;"></div></div>
+                                    <div class="tl-lc" style="grid-column:6;"><div class="tl-stem"></div><div class="tl-card" style="border-top:3px solid #b45309;"><div class="tl-irow" onclick="tlShow('ecma1',event);event.stopPropagation();"><span class="tl-bs" style="background:#b45309;">JS</span><span class="tl-ts">ECMAScript 1</span></div><div class="tl-irow" onclick="tlShow('php3',event);event.stopPropagation();"><span class="tl-bs" style="background:#065f46;">PHP</span><span class="tl-ts">PHP 3</span></div></div></div>
+                                    <div class="tl-uc" style="grid-column:7;"><div class="tl-card" onclick="tlShow('css2',event)" style="border-top:3px solid #5b21b6;"><span class="tl-bs" style="background:#5b21b6;">CSS</span><div class="tl-ts">CSS Level 2</div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:7;" onclick="tlShow('css2',event)"><div class="tl-node" style="background:#5b21b6;box-shadow:0 0 0 2px #5b21b6;"></div><div class="tl-yr">1998</div></div>
+                                    <div class="tl-lc" style="grid-column:7;"></div>
+                                    <div class="tl-uc" style="grid-column:8;"></div>
+                                    <div class="tl-dc" style="grid-column:8;" onclick="tlShow('html401',event)"><div class="tl-yr">1999</div><div class="tl-node" style="background:#1e40af;box-shadow:0 0 0 2px #1e40af;"></div></div>
+                                    <div class="tl-lc" style="grid-column:8;"><div class="tl-stem"></div><div class="tl-card" onclick="tlShow('html401',event)" style="border-top:3px solid #1e40af;"><span class="tl-bs" style="background:#1e40af;">HTML</span><div class="tl-ts">HTML 4.01</div></div></div>
+                                    <div class="tl-uc" style="grid-column:9;"><div class="tl-card" style="border-top:3px solid #1e40af;"><div class="tl-irow" onclick="tlShow('xhtml',event);event.stopPropagation();"><span class="tl-bs" style="background:#1e40af;">HTML</span><span class="tl-ts">XHTML 1.0</span></div><div class="tl-irow" onclick="tlShow('php4',event);event.stopPropagation();"><span class="tl-bs" style="background:#065f46;">PHP</span><span class="tl-ts">PHP 4</span></div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:9;" onclick="tlShowGroup(['xhtml','php4'],'2000',event)"><div class="tl-node" style="background:#1e40af;box-shadow:0 0 0 2px #1e40af;"></div><div class="tl-yr">2000</div></div>
+                                    <div class="tl-lc" style="grid-column:9;"></div>
+                                    <div class="tl-uc" style="grid-column:10;"></div>
+                                    <div class="tl-dc" style="grid-column:10;" onclick="tlShow('json',event)"><div class="tl-yr">2002</div><div class="tl-node" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div></div>
+                                    <div class="tl-lc" style="grid-column:10;"><div class="tl-stem"></div><div class="tl-card" onclick="tlShow('json',event)" style="border-top:3px solid #374151;"><span class="tl-bs" style="background:#374151;">Tools</span><div class="tl-ts">JSON</div></div></div>
+                                    <div class="tl-uc" style="grid-column:11;"><div class="tl-card" onclick="tlShow('php5',event)" style="border-top:3px solid #065f46;"><span class="tl-bs" style="background:#065f46;">PHP</span><div class="tl-ts">PHP 5</div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:11;" onclick="tlShow('php5',event)"><div class="tl-node" style="background:#065f46;box-shadow:0 0 0 2px #065f46;"></div><div class="tl-yr">2004</div></div>
+                                    <div class="tl-lc" style="grid-column:11;"></div>
+                                    <div class="tl-uc" style="grid-column:12;"></div>
+                                    <div class="tl-dc" style="grid-column:12;" onclick="tlShowGroup(['ajax','mysql5'],'2005',event)"><div class="tl-yr">2005</div><div class="tl-node" style="background:#b45309;box-shadow:0 0 0 2px #b45309;"></div></div>
+                                    <div class="tl-lc" style="grid-column:12;"><div class="tl-stem"></div><div class="tl-card" style="border-top:3px solid #b45309;"><div class="tl-irow" onclick="tlShow('ajax',event);event.stopPropagation();"><span class="tl-bs" style="background:#b45309;">JS</span><span class="tl-ts">Ajax</span></div><div class="tl-irow" onclick="tlShow('mysql5',event);event.stopPropagation();"><span class="tl-bs" style="background:#9d174d;">DB</span><span class="tl-ts">MySQL 5.0</span></div></div></div>
+                                    <div class="tl-uc" style="grid-column:13;"><div class="tl-card" onclick="tlShow('jquery',event)" style="border-top:3px solid #374151;"><span class="tl-bs" style="background:#374151;">Tools</span><div class="tl-ts">jQuery</div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:13;" onclick="tlShow('jquery',event)"><div class="tl-node" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div><div class="tl-yr">2006</div></div>
+                                    <div class="tl-lc" style="grid-column:13;"></div>
+                                    <div class="tl-uc" style="grid-column:14;"></div>
+                                    <div class="tl-dc" style="grid-column:14;" onclick="tlShow('chrome',event)"><div class="tl-yr">2008</div><div class="tl-node" style="background:#0c4a6e;box-shadow:0 0 0 2px #0c4a6e;"></div></div>
+                                    <div class="tl-lc" style="grid-column:14;"><div class="tl-stem"></div><div class="tl-card" onclick="tlShow('chrome',event)" style="border-top:3px solid #0c4a6e;"><span class="tl-bs" style="background:#0c4a6e;">Browser</span><div class="tl-ts">Chrome + V8</div></div></div>
+                                    <div class="tl-uc" style="grid-column:15;"><div class="tl-card" style="border-top:3px solid #374151;"><div class="tl-irow" onclick="tlShow('nodejs',event);event.stopPropagation();"><span class="tl-bs" style="background:#374151;">Tools</span><span class="tl-ts">Node.js</span></div><div class="tl-irow" onclick="tlShow('es5',event);event.stopPropagation();"><span class="tl-bs" style="background:#b45309;">JS</span><span class="tl-ts">ES5</span></div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:15;" onclick="tlShowGroup(['nodejs','es5'],'2009',event)"><div class="tl-node" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div><div class="tl-yr">2009</div></div>
+                                    <div class="tl-lc" style="grid-column:15;"></div>
+                                    <div class="tl-uc" style="grid-column:16;"></div>
+                                    <div class="tl-dc" style="grid-column:16;" onclick="tlShow('bootstrap',event)"><div class="tl-yr">2010</div><div class="tl-node" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div></div>
+                                    <div class="tl-lc" style="grid-column:16;"><div class="tl-stem"></div><div class="tl-card" onclick="tlShow('bootstrap',event)" style="border-top:3px solid #374151;"><span class="tl-bs" style="background:#374151;">Tools</span><div class="tl-ts">Bootstrap</div></div></div>
+                                    <div class="tl-uc" style="grid-column:17;"><div class="tl-card" onclick="tlShow('css21',event)" style="border-top:3px solid #5b21b6;"><span class="tl-bs" style="background:#5b21b6;">CSS</span><div class="tl-ts">CSS 2.1</div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:17;" onclick="tlShow('css21',event)"><div class="tl-node" style="background:#5b21b6;box-shadow:0 0 0 2px #5b21b6;"></div><div class="tl-yr">2011</div></div>
+                                    <div class="tl-lc" style="grid-column:17;"></div>
+                                    <div class="tl-uc" style="grid-column:18;"></div>
+                                    <div class="tl-dc" style="grid-column:18;" onclick="tlShow('typescript',event)"><div class="tl-yr">2012</div><div class="tl-node" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div></div>
+                                    <div class="tl-lc" style="grid-column:18;"><div class="tl-stem"></div><div class="tl-card" onclick="tlShow('typescript',event)" style="border-top:3px solid #374151;"><span class="tl-bs" style="background:#374151;">Tools</span><div class="tl-ts">TypeScript</div></div></div>
+                                    <div class="tl-uc" style="grid-column:19;"><div class="tl-card" onclick="tlShow('react',event)" style="border-top:3px solid #374151;"><span class="tl-bs" style="background:#374151;">Tools</span><div class="tl-ts">React</div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:19;" onclick="tlShow('react',event)"><div class="tl-node" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div><div class="tl-yr">2013</div></div>
+                                    <div class="tl-lc" style="grid-column:19;"></div>
+                                    <div class="tl-uc" style="grid-column:20;"></div>
+                                    <div class="tl-dc" style="grid-column:20;" onclick="tlShowGroup(['html5','vuejs'],'2014',event)"><div class="tl-yr">2014</div><div class="tl-node" style="background:#1e40af;box-shadow:0 0 0 2px #1e40af;"></div></div>
+                                    <div class="tl-lc" style="grid-column:20;"><div class="tl-stem"></div><div class="tl-card" style="border-top:3px solid #1e40af;"><div class="tl-irow" onclick="tlShow('html5',event);event.stopPropagation();"><span class="tl-bs" style="background:#1e40af;">HTML</span><span class="tl-ts">HTML5</span></div><div class="tl-irow" onclick="tlShow('vuejs',event);event.stopPropagation();"><span class="tl-bs" style="background:#374151;">Tools</span><span class="tl-ts">Vue.js</span></div></div></div>
+                                    <div class="tl-uc" style="grid-column:21;"><div class="tl-card" style="border-top:3px solid #b45309;"><div class="tl-irow" onclick="tlShow('es6',event);event.stopPropagation();"><span class="tl-bs" style="background:#b45309;">JS</span><span class="tl-ts">ES6 / ES2015</span></div><div class="tl-irow" onclick="tlShow('php7',event);event.stopPropagation();"><span class="tl-bs" style="background:#065f46;">PHP</span><span class="tl-ts">PHP 7</span></div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:21;" onclick="tlShowGroup(['es6','php7'],'2015',event)"><div class="tl-node" style="background:#b45309;box-shadow:0 0 0 2px #b45309;"></div><div class="tl-yr">2015</div></div>
+                                    <div class="tl-lc" style="grid-column:21;"></div>
+                                    <div class="tl-uc" style="grid-column:22;"></div>
+                                    <div class="tl-dc" style="grid-column:22;" onclick="tlShow('cssgrid',event)"><div class="tl-yr">2017</div><div class="tl-node" style="background:#5b21b6;box-shadow:0 0 0 2px #5b21b6;"></div></div>
+                                    <div class="tl-lc" style="grid-column:22;"><div class="tl-stem"></div><div class="tl-card" onclick="tlShow('cssgrid',event)" style="border-top:3px solid #5b21b6;"><span class="tl-bs" style="background:#5b21b6;">CSS</span><div class="tl-ts">CSS Grid</div></div></div>
+                                    <div class="tl-uc" style="grid-column:23;"><div class="tl-card" style="border-top:3px solid #374151;"><div class="tl-irow" onclick="tlShow('wasm',event);event.stopPropagation();"><span class="tl-bs" style="background:#374151;">Tools</span><span class="tl-ts">WebAssembly</span></div><div class="tl-irow" onclick="tlShow('mysql8',event);event.stopPropagation();"><span class="tl-bs" style="background:#9d174d;">DB</span><span class="tl-ts">MySQL 8</span></div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:23;" onclick="tlShowGroup(['wasm','mysql8'],'2018',event)"><div class="tl-node" style="background:#374151;box-shadow:0 0 0 2px #374151;"></div><div class="tl-yr">2018</div></div>
+                                    <div class="tl-lc" style="grid-column:23;"></div>
+                                    <div class="tl-uc" style="grid-column:24;"></div>
+                                    <div class="tl-dc" style="grid-column:24;" onclick="tlShow('php8',event)"><div class="tl-yr">2020</div><div class="tl-node" style="background:#065f46;box-shadow:0 0 0 2px #065f46;"></div></div>
+                                    <div class="tl-lc" style="grid-column:24;"><div class="tl-stem"></div><div class="tl-card" onclick="tlShow('php8',event)" style="border-top:3px solid #065f46;"><span class="tl-bs" style="background:#065f46;">PHP</span><div class="tl-ts">PHP 8</div></div></div>
+                                    <div class="tl-uc" style="grid-column:25;"><div class="tl-card" onclick="tlShow('container_q',event)" style="border-top:3px solid #5b21b6;"><span class="tl-bs" style="background:#5b21b6;">CSS</span><div class="tl-ts">Container Queries</div></div><div class="tl-stem"></div></div>
+                                    <div class="tl-dc" style="grid-column:25;" onclick="tlShow('container_q',event)"><div class="tl-node" style="background:#5b21b6;box-shadow:0 0 0 2px #5b21b6;"></div><div class="tl-yr">2022</div></div>
+                                    <div class="tl-lc" style="grid-column:25;"></div>
+                                    <div class="tl-uc" style="grid-column:26;"></div>
+                                    <div class="tl-dc" style="grid-column:26;" onclick="tlShow('css2024',event)"><div class="tl-yr">2024+</div><div class="tl-node" style="background:#5b21b6;box-shadow:0 0 0 2px #5b21b6;"></div></div>
+                                    <div class="tl-lc" style="grid-column:26;"><div class="tl-stem"></div><div class="tl-card" onclick="tlShow('css2024',event)" style="border-top:3px solid #5b21b6;"><span class="tl-bs" style="background:#5b21b6;">CSS</span><div class="tl-ts">CSS Living Std</div></div></div>
                                 </div>
                             </div>
 
                             <script>
                             (function () {
                             var TL = {
-        'html10': { t: 'HTML 1.0 (1991)', b: 'Tim Berners-Lee published the original HTML spec at CERN on August 6, 1991. It defined just 18 tags — the absolute minimum needed to link documents together over the internet. The first public website was a plain text page describing the World Wide Web project itself. Every webpage you have ever visited traces its DNA back to this single moment.' },
-        'mosaic': { t: 'NCSA Mosaic (1993)', b: 'NCSA Mosaic, released in April 1993, was the first web browser to display images inline with text. Within months of its release, web traffic grew 341,634%. Its intuitive point-and-click interface transformed the web from a scientist\'s tool into a mass-market medium — and its lead developers went on to found Netscape.' },
-        'phpfi': { t: 'PHP/FI (1994)', b: 'PHP/FI was created in 1994 by Rasmus Lerdorf to track visitors to his online résumé. It was the first server-side scripting language designed specifically for the web. PHP/FI introduced the concept of embedding code directly in HTML — a pattern still used by over 77% of all websites today.' },
-        'html20': { t: 'HTML 2.0 (1995)', b: 'HTML 2.0 was the first official HTML standard, published by the IETF in November 1995. It formalized elements already in wide use — including forms, tables, and image tags — and defined how browsers should render them consistently. Before HTML 2.0, different browsers often rendered the same page completely differently.' },
-        'js': { t: 'JavaScript (1995)', b: 'JavaScript was created in just 10 days in May 1995 by Brendan Eich at Netscape Communications. Despite being named to capitalize on Java\'s popularity, it has almost nothing in common with Java. JavaScript was the first language that could run directly in the browser, enabling dynamic and interactive web pages — and today it is the world\'s most widely used programming language.' },
-        'mysql': { t: 'MySQL (1995)', b: 'MySQL was created in 1995 by Michael Widenius and David Axmark in Sweden. It became the go-to open-source database for web development because it was fast, free, and paired perfectly with PHP via the famous LAMP stack (Linux, Apache, MySQL, PHP). MySQL powers Wikipedia, Twitter, YouTube, and thousands of other major sites — Oracle acquired it in 2010 for over $1 billion.' },
-        'css1': { t: 'CSS Level 1 (1996)', b: 'CSS Level 1, published in December 1996, introduced the revolutionary concept of separating content (HTML) from presentation (style). Before CSS, visual design required ugly hacks — spacer GIFs, nested tables, and font tags scattered through every page. Though modest, CSS 1 set the stage for the entire modern design system developers use today.' },
-        'ecma1': { t: 'ECMAScript 1 (1997)', b: 'ECMAScript 1, published in June 1997, was the formal specification that standardized JavaScript. Before this, Netscape\'s JavaScript and Microsoft\'s JScript had diverged into incompatible versions — a nightmare for developers. ECMAScript gave the language an official standards body (TC39) whose decisions govern every JavaScript engine running today.' },
-        'php3': { t: 'PHP 3 (1997)', b: 'PHP 3 was a complete rewrite by Zeev Suraski and Andi Gutmans — students at the Technion Institute of Technology — who rebuilt the entire parser from scratch and officially renamed it \'PHP: Hypertext Preprocessor.\' It introduced a proper extension API and OOP basics, transforming PHP from a hobbyist script into a serious server-side language.' },
-        'css2': { t: 'CSS Level 2 (1998)', b: 'CSS Level 2, released in May 1998, introduced absolute and relative positioning, z-index stacking, media types for print vs. screen, and more powerful selectors. These features enabled the complex multi-column layouts previously only possible with table hacks. Full cross-browser implementation of CSS 2 would remain incomplete until the 2010s.' },
-        'html401': { t: 'HTML 4.01 (1999)', b: 'HTML 4.01, published in December 1999, was the last major version of \'classic\' HTML before the XML era. It standardized tables, frames, forms, and accessibility attributes like alt text. Three document types were introduced: Strict, Transitional, and Frameset. HTML 4.01 remained the dominant HTML standard for over a decade until HTML5 arrived.' },
-        'xhtml': { t: 'XHTML 1.0 (2000)', b: 'XHTML 1.0 was HTML 4.01 rewritten using strict XML syntax rules — requiring lowercase tags, mandatory closing tags, and quoted attributes. The W3C believed the future of the web was XML-based. But XHTML\'s strictness proved impractical — a single malformed tag broke the entire page — and the web community eventually abandoned it in favor of HTML5\'s forgiving approach.' },
-        'php4': { t: 'PHP 4 (2000)', b: 'PHP 4, released in May 2000, was built on the new Zend Engine 1.0 — a major performance improvement. It introduced output buffering, session management, and a more robust object system. PHP 4 powered the explosive growth of dynamic websites in the early 2000s, including early e-commerce platforms and blogging systems, and was installed on millions of web servers worldwide.' },
-        'json': { t: 'JSON (2002)', b: 'JSON (JavaScript Object Notation) was formalized by Douglas Crockford around 2001–2002. It is lightweight data format — essentially JavaScript object syntax stripped to its essentials. JSON replaced XML as the dominant format for APIs and AJAX data transfer because it is dramatically simpler to parse and write. Every modern web API, from Twitter to Google Maps, communicates primarily in JSON.' },
-        'php5': { t: 'PHP 5 (2004)', b: 'PHP 5, released in July 2004, brought the Zend Engine 2.0 and a completely rebuilt object-oriented system — finally making PHP competitive with Java and C# for enterprise applications. It introduced exception handling, interfaces, abstract classes, access modifiers, and PDO for database abstraction. PHP 5 powered the first decade of major web frameworks like Symfony, CakePHP, and CodeIgniter.' },
-        'ajax': { t: 'Ajax (2005)', b: 'Ajax wasn\'t a new technology but a name coined in 2005 by Jesse James Garrett for using JavaScript\'s XMLHttpRequest object to fetch data without reloading the page. Google used Ajax for Gmail and Google Maps, shocking users with their fluid, desktop-like responsiveness. Ajax launched the Web 2.0 era and fundamentally changed what users expect a website to be capable of.' },
-        'mysql5': { t: 'MySQL 5.0 (2005)', b: 'MySQL 5.0, released in October 2005, finally brought MySQL in line with enterprise database standards by adding stored procedures, triggers, and server-side cursors. These features were previously only available in commercial databases like Oracle and SQL Server. With MySQL 5.0, the LAMP stack reached full maturity and became the dominant web development platform worldwide.' },
-        'jquery': { t: 'jQuery (2006)', b: 'jQuery, released in August 2006 by John Resig, solved the era\'s biggest problem: catastrophic browser incompatibility. The same JavaScript that worked in Firefox would crash in Internet Explorer. jQuery\'s $() function abstracted all of that away with a clean, chainable API. At its peak, jQuery was used by over 70% of all websites — it single-handedly trained an entire generation of frontend developers.' },
-        'chrome': { t: 'Chrome + V8 (2008)', b: 'Google Chrome launched in September 2008 alongside the V8 JavaScript engine, which compiled JavaScript to native machine code instead of interpreting it — making JavaScript run 10–100× faster overnight. Chrome\'s DevTools, multi-process architecture, and automatic silent updates set new standards for browser engineering. Chrome now holds over 65% global browser market share.' },
-        'nodejs': { t: 'Node.js (2009)', b: 'Node.js, released by Ryan Dahl in May 2009, brought JavaScript to the server for the first time in a mainstream, production-ready way. Its non-blocking, event-driven I/O model makes it exceptionally efficient for real-time applications. Node broke the wall between frontend and backend — one language for the entire stack. npm, the Node Package Manager, became the world\'s largest software registry.' },
-        'es5': { t: 'ECMAScript 5 (2009)', b: 'ES5, released in December 2009, was the first major JavaScript update in ten years. It added strict mode, native JSON support, and essential Array methods — forEach, map, filter, and reduce. ES5 gave developers tools to write safer, more predictable code, which was essential as JavaScript applications grew to hundreds of thousands of lines and ran critical business logic.' },
-        'bootstrap': { t: 'Bootstrap (2010)', b: 'Bootstrap was released by Twitter engineers Mark Otto and Jacob Thornton in August 2010 — originally called \'Twitter Blueprint.\' When open-sourced, it exploded in popularity, providing a complete CSS framework with a responsive 12-column grid, pre-built UI components, and JavaScript plugins. Bootstrap democratized responsive web design, allowing developers without strong design skills to build professional-looking sites quickly.' },
-        'css21': { t: 'CSS 2.1 (2011)', b: 'CSS 2.1, finalized as a W3C Recommendation in June 2011, was a cleaned-up and corrected version of CSS 2. It removed features browsers never implemented, fixed specification inconsistencies, and accurately documented how browsers actually behaved. CSS 2.1 served as the stable authoritative reference during the critical period when CSS 3 modules were being developed — all modern CSS builds on its foundation.' },
-        'typescript': { t: 'TypeScript (2012)', b: 'TypeScript was released by Microsoft in October 2012, created by Anders Hejlsberg — the designer of C#. It adds optional static typing to JavaScript, allowing developers to catch type errors at compile time rather than in a user\'s browser at runtime. TypeScript compiles to plain JavaScript and works everywhere JavaScript works. For large codebases with dozens of developers, TypeScript\'s type system catches entire categories of bugs before any code ships.' },
-        'react': { t: 'React (2013)', b: 'React was open-sourced by Facebook in May 2013. It introduced the virtual DOM — a lightweight in-memory representation of the real DOM that React uses to calculate the minimum updates needed. React\'s component-based architecture, where the UI is built from small reusable pieces, revolutionized frontend development. Combined with JSX (HTML-like syntax inside JavaScript), React became the dominant frontend framework and spawned an entire ecosystem.' },
-        'html5': { t: 'HTML5 (2014)', b: 'HTML5 was finalized as a W3C Recommendation in October 2014, representing a decade of work after the W3C had tried to abandon HTML in favor of XHTML 2. HTML5 added native video and audio, the Canvas API for programmatic drawing, semantic elements (header, nav, main, article, section, footer), localStorage, WebSockets, and offline caching. It killed the Flash plugin and made rich media natively possible in every browser.' },
-        'vuejs': { t: 'Vue.js (2014)', b: 'Vue.js was released in February 2014 by Evan You, a former Google engineer who worked on Angular. He wanted \'just the view layer\' — something lighter and more approachable. Vue\'s progressive design means you can adopt it incrementally: add it to a single component of a legacy project rather than rewriting everything. Vue is particularly dominant in China and in projects where simplicity and learning curve matter most.' },
-        'es6': { t: 'ES6 / ES2015 (2015)', b: 'ECMAScript 2015 (ES6) was the largest single update in JavaScript history. It introduced: let and const, arrow functions, template literals, destructuring, spread operator, classes, Promises, modules (import/export), generators, Maps, Sets, and Symbols. ES6 transformed JavaScript from a scripting language into a serious application development language — most modern JavaScript assumes ES6 as its absolute baseline.' },
-        'php7': { t: 'PHP 7 (2015)', b: 'PHP 7, released in December 2015, delivered the most significant performance improvement in PHP\'s history — up to twice the speed of PHP 5.6 and three times faster than PHP 5.3. Built on the new Zend Engine 3.0, it added scalar type declarations, return types, the null coalescing operator (??), and the spaceship operator (<=>). Sites running WordPress and Laravel saw immediate dramatic gains.' },
-        'cssgrid': { t: 'CSS Grid (2017)', b: 'CSS Grid Layout, published as a W3C Recommendation in March 2017, was the first true two-dimensional layout system built into CSS. Before Grid, every complex layout required workarounds: floats, positioned elements, and Flexbox tricks. Grid lets developers define rows AND columns simultaneously, place items in any cell, and create overlapping elements easily. Grid and Flexbox together finally gave CSS the layout power developers had been hacking around for two decades.' },
-        'wasm': { t: 'WebAssembly (2018)', b: 'WebAssembly (Wasm) became a W3C standard in 2019, though it shipped in major browsers in 2017. It is a binary instruction format that runs in the browser at near-native speed — enabling C, C++, Rust, and Go code to run inside web pages without plugins. Figma\'s canvas renderer, AutoCAD for the web, and Google Earth all use Wasm. It represents the web becoming a universal runtime, not just a document delivery system.' },
-        'mysql8': { t: 'MySQL 8 (2018)', b: 'MySQL 8.0, released in April 2018, brought MySQL to full parity with modern database systems by adding window functions, common table expressions (CTEs), invisible indexes, and dramatically improved JSON support. MySQL 8.0 also made utf8mb4 (full Unicode including emoji) the default character set — finally ending years of character encoding workarounds that had plagued every developer who ever tried to store emoji in a database.' },
-        'php8': { t: 'PHP 8 (2020)', b: 'PHP 8.0, released in November 2020, introduced the most developer-experience improvements since PHP 7: named arguments, union types, match expressions, the nullsafe operator (?->), and the str_contains() / str_starts_with() / str_ends_with() functions. A new JIT (Just-In-Time) compiler further improved performance for compute-heavy tasks. PHP 8.1 added enums, fibers for async programming, and readonly properties.' },
-        'container_q': { t: 'Container Queries (2022)', b: 'CSS Container Queries, available in all major browsers by 2022, solved one of the most-requested CSS features in history. While media queries respond to the viewport (window) size, container queries respond to the SIZE OF A PARENT ELEMENT. A component can adapt its layout based on available space — regardless of where on the page it appears. This finally makes truly reusable, layout-agnostic CSS components possible without JavaScript workarounds.' },
-        'css2024': { t: 'CSS Living Standard (2024+)', b: 'The CSS Living Standard continues shipping powerful new features every year. Recent additions: :has() (the long-awaited parent selector), @layer (cascade layers for deterministic specificity), anchor positioning (attach tooltips to elements in CSS only), CSS Subgrid (align items to grandparent\'s grid), and scroll-driven animations (animate based on scroll position with zero JavaScript). Mastering CSS fundamentals ensures you stay current through every future update.' }
+                            'html10': { t: 'HTML 1.0 (1991)', b: 'Tim Berners-Lee published the original HTML spec at CERN on August 6, 1991. It defined just 18 tags — the absolute minimum needed to link documents together over the internet. Every webpage you have ever visited traces its DNA back to this single moment.' },
+                            'mosaic': { t: 'NCSA Mosaic (1993)', b: 'NCSA Mosaic, released in April 1993, was the first web browser to display images inline with text. Within months of its release, web traffic grew 341,634%. Its intuitive point-and-click interface transformed the web from a scientist’s tool into a mass-market medium.' },
+                            'phpfi': { t: 'PHP/FI (1994)', b: 'PHP/FI was created in 1994 by Rasmus Lerdorf to track visitors to his online résumé. It was the first server-side scripting language designed specifically for the web, introducing the concept of embedding code directly in HTML — still used by over 77% of all websites today.' },
+                            'html20': { t: 'HTML 2.0 (1995)', b: 'HTML 2.0 was the first official HTML standard, published by the IETF in November 1995. It formalized elements already in wide use — including forms, tables, and image tags — and defined how browsers should render them consistently.' },
+                            'js': { t: 'JavaScript (1995)', b: 'JavaScript was created in just 10 days in May 1995 by Brendan Eich at Netscape. Despite being named to capitalize on Java\'s popularity, it has almost nothing in common with Java. JavaScript was the first language that could run directly in the browser, and today is the world\'s most widely used programming language.' },
+                            'mysql': { t: 'MySQL (1995)', b: 'MySQL was created in 1995 in Sweden. It became the go-to open-source database for web development because it was fast, free, and paired perfectly with PHP via the famous LAMP stack. MySQL powers Wikipedia, Twitter, YouTube, and thousands of other major sites.' },
+                            'css1': { t: 'CSS Level 1 (1996)', b: 'CSS Level 1, published in December 1996, introduced the revolutionary concept of separating content (HTML) from presentation (style). Before CSS, visual design required ugly hacks — spacer GIFs, nested tables, and font tags scattered through every page.' },
+                            'ecma1': { t: 'ECMAScript 1 (1997)', b: 'ECMAScript 1, published in June 1997, was the formal specification that standardized JavaScript. Before this, Netscape\'s JavaScript and Microsoft\'s JScript had diverged into incompatible versions. ECMAScript gave the language an official standards body (TC39) whose decisions govern every JavaScript engine running today.' },
+                            'php3': { t: 'PHP 3 (1997)', b: 'PHP 3 was a complete rewrite by Zeev Suraski and Andi Gutmans who rebuilt the entire parser from scratch and officially renamed it PHP: Hypertext Preprocessor. It introduced a proper extension API and OOP basics, transforming PHP from a hobbyist script into a serious server-side language.' },
+                            'css2': { t: 'CSS Level 2 (1998)', b: 'CSS Level 2, released in May 1998, introduced absolute and relative positioning, z-index stacking, media types for print vs. screen, and more powerful selectors. These features enabled complex multi-column layouts previously only possible with table hacks.' },
+                            'html401': { t: 'HTML 4.01 (1999)', b: 'HTML 4.01, published in December 1999, was the last major version of classic HTML before the XML era. It standardized tables, frames, forms, and accessibility attributes like alt text. HTML 4.01 remained the dominant HTML standard for over a decade until HTML5 arrived.' },
+                            'xhtml': { t: 'XHTML 1.0 (2000)', b: 'XHTML 1.0 was HTML 4.01 rewritten using strict XML syntax rules. But XHTML\'s strictness proved impractical — a single malformed tag broke the entire page — and the web community eventually abandoned it in favor of HTML5\'s forgiving approach.' },
+                            'php4': { t: 'PHP 4 (2000)', b: 'PHP 4, released in May 2000, was built on the new Zend Engine 1.0 — a major performance improvement. It introduced output buffering, session management, and a more robust object system, powering the explosive growth of dynamic websites in the early 2000s.' },
+                            'json': { t: 'JSON (2002)', b: 'JSON (JavaScript Object Notation) was formalized by Douglas Crockford around 2001–2002. It replaced XML as the dominant format for APIs and AJAX data transfer because it is dramatically simpler to parse and write. Every modern web API communicates primarily in JSON.' },
+                            'php5': { t: 'PHP 5 (2004)', b: 'PHP 5, released in July 2004, brought the Zend Engine 2.0 and a completely rebuilt object-oriented system. It introduced exception handling, interfaces, abstract classes, and PDO for database abstraction. PHP 5 powered the first decade of major frameworks like Symfony, CakePHP, and CodeIgniter.' },
+                            'ajax': { t: 'Ajax (2005)', b: 'Ajax wasn\'t a new technology but a name coined in 2005 by Jesse James Garrett for using XMLHttpRequest to fetch data without reloading the page. Google used Ajax for Gmail and Google Maps, shocking users with their fluid, desktop-like responsiveness. Ajax launched the Web 2.0 era.' },
+                            'mysql5': { t: 'MySQL 5.0 (2005)', b: 'MySQL 5.0, released in October 2005, finally brought MySQL in line with enterprise database standards by adding stored procedures, triggers, and server-side cursors. With MySQL 5.0, the LAMP stack reached full maturity and became the dominant web development platform worldwide.' },
+                            'jquery': { t: 'jQuery (2006)', b: 'jQuery, released in August 2006 by John Resig, solved the era\'s biggest problem: catastrophic browser incompatibility. jQuery\'s $() function abstracted all of that away with a clean, chainable API. At its peak, jQuery was used by over 70% of all websites.' },
+                            'chrome': { t: 'Chrome + V8 (2008)', b: 'Google Chrome launched in September 2008 alongside the V8 JavaScript engine, which compiled JavaScript to native machine code — making JavaScript run 10–100× faster overnight. Chrome now holds over 65% global browser market share.' },
+                            'nodejs': { t: 'Node.js (2009)', b: 'Node.js, released by Ryan Dahl in May 2009, brought JavaScript to the server. Its non-blocking, event-driven I/O model makes it exceptionally efficient for real-time applications. Node broke the wall between frontend and backend — one language for the entire stack.' },
+                            'es5': { t: 'ECMAScript 5 (2009)', b: 'ES5, released in December 2009, was the first major JavaScript update in ten years. It added strict mode, native JSON support, and essential Array methods — forEach, map, filter, and reduce. ES5 gave developers tools to write safer, more predictable code.' },
+                            'bootstrap': { t: 'Bootstrap (2010)', b: 'Bootstrap was released by Twitter engineers Mark Otto and Jacob Thornton in August 2010. It provided a complete CSS framework with a responsive 12-column grid, pre-built UI components, and JavaScript plugins. Bootstrap democratized responsive web design for developers without strong design skills.' },
+                            'css21': { t: 'CSS 2.1 (2011)', b: 'CSS 2.1, finalized as a W3C Recommendation in June 2011, was a cleaned-up and corrected version of CSS 2. It removed features browsers never implemented, fixed specification inconsistencies, and accurately documented how browsers actually behaved.' },
+                            'typescript': { t: 'TypeScript (2012)', b: 'TypeScript was released by Microsoft in October 2012, created by Anders Hejlsberg — the designer of C#. It adds optional static typing to JavaScript, catching type errors at compile time rather than in a user\'s browser at runtime. For large codebases, TypeScript catches entire categories of bugs before any code ships.' },
+                            'react': { t: 'React (2013)', b: 'React was open-sourced by Facebook in May 2013. It introduced the virtual DOM and a component-based architecture where the UI is built from small reusable pieces. Combined with JSX, React became the dominant frontend framework and spawned an entire ecosystem.' },
+                            'html5': { t: 'HTML5 (2014)', b: 'HTML5 was finalized as a W3C Recommendation in October 2014. It added native video and audio, the Canvas API for programmatic drawing, semantic elements (header, nav, main, article, section, footer), localStorage, WebSockets, and offline caching. It killed the Flash plugin.' },
+                            'vuejs': { t: 'Vue.js (2014)', b: 'Vue.js was released in February 2014 by Evan You, a former Google engineer. He wanted just the view layer — something lighter and more approachable than Angular. Vue\'s progressive design means you can adopt it incrementally, adding it to one component of a legacy project.' },
+                            'es6': { t: 'ES6 / ES2015 (2015)', b: 'ECMAScript 2015 (ES6) was the largest single update in JavaScript history. It introduced: let and const, arrow functions, template literals, destructuring, spread operator, classes, Promises, modules (import/export), generators, Maps, Sets, and Symbols.' },
+                            'php7': { t: 'PHP 7 (2015)', b: 'PHP 7, released in December 2015, delivered the most significant performance improvement in PHP\'s history — up to twice the speed of PHP 5.6. Built on the new Zend Engine 3.0, it added scalar type declarations, return types, and the null coalescing operator (??).' },
+                            'cssgrid': { t: 'CSS Grid (2017)', b: 'CSS Grid Layout, published as a W3C Recommendation in March 2017, was the first true two-dimensional layout system built into CSS. Grid lets developers define rows AND columns simultaneously, place items in any cell, and create overlapping elements — something never possible cleanly before.' },
+                            'wasm': { t: 'WebAssembly (2018)', b: 'WebAssembly (Wasm) became a W3C standard in 2019 (shipped in browsers in 2017). It is a binary instruction format that runs in the browser at near-native speed, enabling C, C++, Rust, and Go code to run inside web pages. Figma and Google Earth use Wasm.' },
+                            'mysql8': { t: 'MySQL 8 (2018)', b: 'MySQL 8.0, released in April 2018, brought MySQL to full parity with modern databases by adding window functions, common table expressions (CTEs), and dramatically improved JSON support. It also made utf8mb4 (full Unicode including emoji) the default character set.' },
+                            'php8': { t: 'PHP 8 (2020)', b: 'PHP 8.0, released in November 2020, introduced named arguments, union types, match expressions, the nullsafe operator (?->), and the str_contains()/str_starts_with()/str_ends_with() functions. A new JIT compiler improved performance for compute-heavy tasks.' },
+                            'container_q': { t: 'Container Queries (2022)', b: 'CSS Container Queries, available in all major browsers by 2022, solve one of the most-requested CSS features in history. While media queries respond to the viewport size, container queries respond to the SIZE OF A PARENT ELEMENT — enabling truly reusable, layout-agnostic CSS components.' },
+                            'css2024': { t: 'CSS Living Standard (2024+)', b: 'The CSS Living Standard continues shipping powerful new features every year: :has() (the parent selector), @layer (cascade layers), anchor positioning, CSS Subgrid, and scroll-driven animations. Mastering CSS fundamentals ensures you stay current through every future update.' }
                             };
                             window.tlShow = function(id, evt) {
                                 var d = TL[id]; if (!d) return;
@@ -1801,18 +1617,21 @@
                                 window.showWebTip(evt, d.t, '<p style="margin:0">'+d.b+'</p>');
                                 var t2 = document.getElementById('_webtip_'); if (t2) t2.dataset.active = 'tl:'+id;
                             };
+                            window.tlShowGroup = function(ids, year, evt) {
+                                if (evt) evt.stopPropagation();
+                                var tip = document.getElementById('_webtip_');
+                                if (tip && tip.style.display !== 'none' && tip.dataset.active === 'tlg:'+year) {
+                                    tip.style.display = 'none'; tip.dataset.active = ''; return;
+                                }
+                                var parts = ids.map(function(id) {
+                                    var d = TL[id]; if (!d) return '';
+                                    return '<p style="margin:0 0 10px;"><strong>' + d.t + '</strong><br>' + d.b + '</p>';
+                                }).filter(Boolean).join('');
+                                window.showWebTip(evt, year + ' — Multiple Milestones', parts);
+                                var t2 = document.getElementById('_webtip_'); if (t2) t2.dataset.active = 'tlg:'+year;
+                            };
                             })();
                             </script>
-                        </div>
-                        <div class="col-lg-4 mt-4 mt-lg-0 text-center">
-                            <figure class="mb-4 text-center">
-                                <a href="/images/join-the-developers-guild/Gemini_Generated_Image_hb99r7hb99r7hb99.png" target="_blank" rel="noopener">
-                                    <img src="/images/join-the-developers-guild/Gemini_Generated_Image_hb99r7hb99r7hb99.png" alt="Four-panel analogy: HTML as skeleton, CSS as outfit and skin, JavaScript as nervous system, combined as a complete interactive person" class="img-fluid rounded shadow-sm border w-100">
-                                </a>
-                                <figcaption class="p-2 small text-muted text-center">
-                                    <strong>Figure 1.9:</strong> HTML is the skeleton (structure), CSS is the outfit and skin (appearance), JavaScript is the nervous system (behavior) — together they form every interactive website.
-                                </figcaption>
-                            </figure>
                         </div>
                     </div>
 
@@ -1846,7 +1665,7 @@
                         <div class="col-lg-4 mt-4 mt-lg-0 text-center">
                             <figure class="mb-4 text-center" id="fig-wdlc">
                                 <div class="border rounded shadow-sm p-2 bg-white" style="overflow:hidden;">
-<svg id="wdlc-svg" viewBox="0 0 300 295" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:300px;display:block;margin:0 auto;" role="img" aria-label="Interactive WDLC diagram">
+<svg id="wdlc-svg" viewBox="0 0 370 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:400px;display:block;margin:0 auto;" role="img" aria-label="Interactive WDLC diagram">
     <defs>
       <marker id="aw" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
         <path d="M0,1 L6,3.5 L0,6 Z" fill="#94a3b8"/>
@@ -1854,70 +1673,67 @@
       <marker id="aw-loop" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
         <path d="M0,0.5 L5,3 L0,5.5 Z" fill="#f59e0b"/>
       </marker>
-      <marker id="aw-loop-r" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto-start-reverse">
-        <path d="M6,0.5 L1,3 L6,5.5 Z" fill="#f59e0b"/>
-      </marker>
     </defs>
-    <circle cx="150" cy="150" r="100" fill="none" stroke="#e2e8f0" stroke-width="2.5" stroke-dasharray="5,4"/>
-    <path d="M174.2,53.0 A100,100 0 0,1 201.5,64.3" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
-    <path d="M235.7,98.5 A100,100 0 0,1 247.0,125.8" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
-    <path d="M247.0,174.2 A100,100 0 0,1 235.7,201.5" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
-    <path d="M201.5,235.7 A100,100 0 0,1 174.2,247.0" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
-    <path d="M125.8,247.0 A100,100 0 0,1 98.5,235.7" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
-    <path d="M64.3,201.5 A100,100 0 0,1 53.0,174.2" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
-    <path d="M53.0,125.8 A100,100 0 0,1 64.3,98.5" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
-    <path d="M98.5,64.3 A100,100 0 0,1 125.8,53.0" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
-    <path d="M169.4,58.0 Q173.0,94.5 201.3,71.3" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop)"/>
-    <path d="M169.4,58.0 Q173.0,94.5 201.3,71.3" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop-r)"/>
-    <path d="M228.7,98.7 Q205.5,127.0 242.0,130.6" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop)"/>
-    <path d="M228.7,98.7 Q205.5,127.0 242.0,130.6" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop-r)"/>
-    <path d="M242.0,169.4 Q205.5,173.0 228.7,201.3" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop)"/>
-    <path d="M242.0,169.4 Q205.5,173.0 228.7,201.3" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop-r)"/>
-    <path d="M130.6,242.0 Q127.0,205.5 98.7,228.7" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop)"/>
-    <path d="M130.6,242.0 Q127.0,205.5 98.7,228.7" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop-r)"/>
+    <ellipse cx="185.0" cy="165.0" rx="130.0" ry="105.0" fill="none" stroke="#e2e8f0" stroke-width="2.5" stroke-dasharray="5,4"/>
+    <path d="M212.0,62.3 A130.0,105.0 0 0,1 255.8,76.9" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
+    <path d="M294.0,107.8 A130.0,105.0 0 0,1 312.2,143.2" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
+    <path d="M312.2,186.8 A130.0,105.0 0 0,1 294.0,222.2" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
+    <path d="M255.8,253.1 A130.0,105.0 0 0,1 212.0,267.7" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
+    <path d="M158.0,267.7 A130.0,105.0 0 0,1 114.2,253.1" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
+    <path d="M76.0,222.2 A130.0,105.0 0 0,1 57.8,186.8" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
+    <path d="M57.8,143.2 A130.0,105.0 0 0,1 76.0,107.8" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
+    <path d="M114.2,76.9 A130.0,105.0 0 0,1 158.0,62.3" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aw)"/>
+    <path d="M293.9,73.8 Q255.8,17.2 185.0,36.0" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop)"/>
+    <path d="M339.0,165.0 Q355.9,103.8 293.9,73.8" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop)"/>
+    <path d="M293.9,256.2 Q355.9,226.2 339.0,165.0" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop)"/>
+    <path d="M185.0,294.0 Q255.8,312.8 293.9,256.2" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop)"/>
+    <path d="M76.1,256.2 Q114.2,312.8 185.0,294.0" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop)"/>
+    <path d="M31.0,165.0 Q14.1,226.2 76.1,256.2" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop)"/>
+    <path d="M76.1,73.8 Q14.1,103.8 31.0,165.0" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop)"/>
+    <path d="M185.0,36.0 Q114.2,17.2 76.1,73.8" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#aw-loop)"/>
     <g data-wdlc="research" onclick="wdlcShow('research', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="150.0" cy="50.0" r="21" fill="#1d4ed8" stroke="#fff" stroke-width="2"/>
-      <text x="150.0" y="47.0" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Rese</text>
-      <text x="150.0" y="58.0" text-anchor="middle" font-size="11" fill="white" font-weight="700">1</text>
+      <circle cx="185.0" cy="60.0" r="21.0" fill="#1d4ed8" stroke="#fff" stroke-width="2"/>
+      <text x="185.0" y="57.0" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Rese</text>
+      <text x="185.0" y="68.0" text-anchor="middle" font-size="11" fill="white" font-weight="700">1</text>
     </g>
     <g data-wdlc="planning" onclick="wdlcShow('planning', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="220.7" cy="79.3" r="21" fill="#15803d" stroke="#fff" stroke-width="2"/>
-      <text x="220.7" y="76.3" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Plan</text>
-      <text x="220.7" y="87.3" text-anchor="middle" font-size="11" fill="white" font-weight="700">2</text>
+      <circle cx="276.9" cy="90.8" r="21.0" fill="#15803d" stroke="#fff" stroke-width="2"/>
+      <text x="276.9" y="87.8" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Plan</text>
+      <text x="276.9" y="98.8" text-anchor="middle" font-size="11" fill="white" font-weight="700">2</text>
     </g>
     <g data-wdlc="design" onclick="wdlcShow('design', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="250.0" cy="150.0" r="21" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
-      <text x="250.0" y="147.0" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Desi</text>
-      <text x="250.0" y="158.0" text-anchor="middle" font-size="11" fill="white" font-weight="700">3</text>
+      <circle cx="315.0" cy="165.0" r="21.0" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
+      <text x="315.0" y="162.0" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Desi</text>
+      <text x="315.0" y="173.0" text-anchor="middle" font-size="11" fill="white" font-weight="700">3</text>
     </g>
     <g data-wdlc="content" onclick="wdlcShow('content', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="220.7" cy="220.7" r="21" fill="#b45309" stroke="#fff" stroke-width="2"/>
-      <text x="220.7" y="217.7" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Cont</text>
-      <text x="220.7" y="228.7" text-anchor="middle" font-size="11" fill="white" font-weight="700">4</text>
+      <circle cx="276.9" cy="239.2" r="21.0" fill="#b45309" stroke="#fff" stroke-width="2"/>
+      <text x="276.9" y="236.2" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Cont</text>
+      <text x="276.9" y="247.2" text-anchor="middle" font-size="11" fill="white" font-weight="700">4</text>
     </g>
     <g data-wdlc="development" onclick="wdlcShow('development', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="150.0" cy="250.0" r="21" fill="#0f172a" stroke="#fff" stroke-width="2"/>
-      <text x="150.0" y="247.0" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Deve</text>
-      <text x="150.0" y="258.0" text-anchor="middle" font-size="11" fill="white" font-weight="700">5</text>
+      <circle cx="185.0" cy="270.0" r="21.0" fill="#0f172a" stroke="#fff" stroke-width="2"/>
+      <text x="185.0" y="267.0" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Deve</text>
+      <text x="185.0" y="278.0" text-anchor="middle" font-size="11" fill="white" font-weight="700">5</text>
     </g>
     <g data-wdlc="testing" onclick="wdlcShow('testing', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="79.3" cy="220.7" r="21" fill="#be123c" stroke="#fff" stroke-width="2"/>
-      <text x="79.3" y="217.7" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Test</text>
-      <text x="79.3" y="228.7" text-anchor="middle" font-size="11" fill="white" font-weight="700">6</text>
+      <circle cx="93.1" cy="239.2" r="21.0" fill="#be123c" stroke="#fff" stroke-width="2"/>
+      <text x="93.1" y="236.2" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Test</text>
+      <text x="93.1" y="247.2" text-anchor="middle" font-size="11" fill="white" font-weight="700">6</text>
     </g>
     <g data-wdlc="deployment" onclick="wdlcShow('deployment', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="50.0" cy="150.0" r="21" fill="#0e7490" stroke="#fff" stroke-width="2"/>
-      <text x="50.0" y="147.0" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Depl</text>
-      <text x="50.0" y="158.0" text-anchor="middle" font-size="11" fill="white" font-weight="700">7</text>
+      <circle cx="55.0" cy="165.0" r="21.0" fill="#0e7490" stroke="#fff" stroke-width="2"/>
+      <text x="55.0" y="162.0" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Depl</text>
+      <text x="55.0" y="173.0" text-anchor="middle" font-size="11" fill="white" font-weight="700">7</text>
     </g>
     <g data-wdlc="maintenance" onclick="wdlcShow('maintenance', event)" style="cursor:pointer;" class="wdlc-node">
-      <circle cx="79.3" cy="79.3" r="21" fill="#374151" stroke="#fff" stroke-width="2"/>
-      <text x="79.3" y="76.3" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Main</text>
-      <text x="79.3" y="87.3" text-anchor="middle" font-size="11" fill="white" font-weight="700">8</text>
+      <circle cx="93.1" cy="90.8" r="21.0" fill="#374151" stroke="#fff" stroke-width="2"/>
+      <text x="93.1" y="87.8" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.75)" font-weight="400">Main</text>
+      <text x="93.1" y="98.8" text-anchor="middle" font-size="11" fill="white" font-weight="700">8</text>
     </g>
-    <text x="150" y="144" text-anchor="middle" font-size="8" fill="#94a3b8" font-weight="700">WDLC</text>
-    <text x="150" y="156" text-anchor="middle" font-size="7" fill="#cbd5e1">click any phase</text>
-    <rect x="8" y="278" width="10" height="6" rx="2" fill="#94a3b8"/><text x="22" y="284" font-size="7" fill="#94a3b8">main flow</text>    <line x1="80" y1="281" x2="95" y2="281" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#aw-loop)"/><text x="100" y="284" font-size="7" fill="#f59e0b">iteration loop</text>
+    <text x="185.0" y="158.0" text-anchor="middle" font-size="9" fill="#94a3b8" font-weight="700">WDLC</text>
+    <text x="185.0" y="172.0" text-anchor="middle" font-size="7" fill="#cbd5e1">click any phase</text>
+    <rect x="8" y="315" width="10" height="6" rx="2" fill="#94a3b8"/><text x="22" y="321" font-size="7" fill="#94a3b8">main flow</text>    <line x1="100" y1="318" x2="115" y2="318" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#aw-loop)"/><text x="120" y="321" font-size="7" fill="#f59e0b">iterate back</text>
 </svg>
                                 </div>
                                 <figcaption class="p-2 small text-muted text-center">
@@ -1986,14 +1802,191 @@
                                 </div>
                             </div>
 
-                            <h5 class="fw-bold mt-5 text-primary">Agency Open Positions & Pay Scales</h5>
+                            <h5 class="fw-bold mt-5 text-primary">Agency Open Positions &amp; Pay Scales</h5>
+                            <p class="small text-muted mb-3"><em>Click any position card to see the full job listing and Nevada workplace statistics.</em></p>
                             <div class="row g-3 small mb-5">
-                                <div class="col-md-4"><div class="card h-100 shadow-sm border-primary"><div class="card-header bg-primary text-white fw-bold">Intern</div><div class="card-body">Learning the ropes.<br><strong class="text-success">$15.00 / hr</strong></div></div></div>
-                                <div class="col-md-4"><div class="card h-100 shadow-sm border-primary"><div class="card-header bg-primary text-white fw-bold">Junior Developer</div><div class="card-body">Entry-level coding.<br><strong class="text-success">$20.00 / hr</strong></div></div></div>
-                                <div class="col-md-4"><div class="card h-100 shadow-sm border-primary"><div class="card-header bg-primary text-white fw-bold">Web Developer</div><div class="card-body">Core builder (Area Median).<br><strong class="text-success">$35.00 / hr</strong></div></div></div>
-                                <div class="col-md-6"><div class="card h-100 shadow-sm border-primary"><div class="card-header bg-primary text-white fw-bold">Senior Developer</div><div class="card-body">Advanced logic & leadership.<br><strong class="text-success">$45.00 / hr</strong></div></div></div>
-                                <div class="col-md-6"><div class="card h-100 shadow-sm border-primary"><div class="card-header bg-primary text-white fw-bold">Project Manager</div><div class="card-body">Client/Team Bridge.<br><strong class="text-success">$50.00 / hr</strong></div></div></div>
+
+                                <!-- Intern -->
+                                <div class="col-md-4">
+                                    <div class="card h-100 shadow-sm border-0 position-card" onclick="showAgencyRole('intern', event)" role="button" tabindex="0" style="cursor:pointer;border-left:4px solid var(--primary-color)!important;transition:box-shadow .15s,transform .15s;">
+                                        <div class="card-header fw-bold text-white" style="background:var(--primary-color);">🎓 Intern</div>
+                                        <div class="card-body pb-2">
+                                            <div class="fw-bold text-success fs-6">$15.00 / hr</div>
+                                            <div class="text-muted" style="font-size:.72rem;">~$31,200/yr full-time equiv.</div>
+                                            <hr class="my-2">
+                                            <div style="font-size:.68rem;" class="text-muted">NV entry-level tech · No exp. req. · <em>Click for full listing →</em></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Junior Developer -->
+                                <div class="col-md-4">
+                                    <div class="card h-100 shadow-sm border-0 position-card" onclick="showAgencyRole('junior', event)" role="button" tabindex="0" style="cursor:pointer;border-left:4px solid var(--accent-teal)!important;transition:box-shadow .15s,transform .15s;">
+                                        <div class="card-header fw-bold text-white" style="background:var(--accent-teal);">💻 Junior Developer</div>
+                                        <div class="card-body pb-2">
+                                            <div class="fw-bold text-success fs-6">$20.00 / hr</div>
+                                            <div class="text-muted" style="font-size:.72rem;">~$41,600/yr full-time equiv.</div>
+                                            <hr class="my-2">
+                                            <div style="font-size:.68rem;" class="text-muted">NV entry-level dev · 0–2 yrs exp · <em>Click for full listing →</em></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Web Developer -->
+                                <div class="col-md-4">
+                                    <div class="card h-100 shadow-sm border-0 position-card" onclick="showAgencyRole('webdev', event)" role="button" tabindex="0" style="cursor:pointer;border-left:4px solid var(--accent-blue-gray)!important;transition:box-shadow .15s,transform .15s;">
+                                        <div class="card-header fw-bold text-white" style="background:var(--accent-blue-gray);">🔧 Web Developer</div>
+                                        <div class="card-body pb-2">
+                                            <div class="fw-bold text-success fs-6">$35.00 / hr</div>
+                                            <div class="text-muted" style="font-size:.72rem;">~$72,800/yr full-time equiv.</div>
+                                            <hr class="my-2">
+                                            <div style="font-size:.68rem;" class="text-muted">NV median dev wage · 2–4 yrs exp · <em>Click for full listing →</em></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Senior Developer -->
+                                <div class="col-md-6">
+                                    <div class="card h-100 shadow-sm border-0 position-card" onclick="showAgencyRole('senior', event)" role="button" tabindex="0" style="cursor:pointer;border-left:4px solid var(--accent-lavender)!important;transition:box-shadow .15s,transform .15s;">
+                                        <div class="card-header fw-bold text-white" style="background:var(--accent-lavender);">⚡ Senior Developer</div>
+                                        <div class="card-body pb-2">
+                                            <div class="fw-bold text-success fs-6">$45.00 / hr</div>
+                                            <div class="text-muted" style="font-size:.72rem;">~$93,600/yr full-time equiv.</div>
+                                            <hr class="my-2">
+                                            <div style="font-size:.68rem;" class="text-muted">NV top-quartile dev · 4+ yrs exp · <em>Click for full listing →</em></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Project Manager -->
+                                <div class="col-md-6">
+                                    <div class="card h-100 shadow-sm border-0 position-card" onclick="showAgencyRole('pm', event)" role="button" tabindex="0" style="cursor:pointer;border-left:4px solid var(--tertiary-color)!important;transition:box-shadow .15s,transform .15s;">
+                                        <div class="card-header fw-bold text-white" style="background:var(--tertiary-color);">📋 Project Manager</div>
+                                        <div class="card-body pb-2">
+                                            <div class="fw-bold text-success fs-6">$50.00 / hr</div>
+                                            <div class="text-muted" style="font-size:.72rem;">~$104,000/yr full-time equiv.</div>
+                                            <hr class="my-2">
+                                            <div style="font-size:.68rem;" class="text-muted">NV IT PM range · 3–5 yrs exp · <em>Click for full listing →</em></div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
+                            <style>.position-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.15)!important;transform:translateY(-3px);}</style>
+                            <script>
+                            (function(){
+                            var ROLES = {
+                                intern: {
+                                    title: '🎓 Web Design Intern — Carson High Agency',
+                                    body:  '<div style="max-width:500px;">'
+                                         + '<p class="mb-2"><strong>Compensation:</strong> $15.00/hr &bull; ~$31,200/yr (full-time equivalent)</p>'
+                                         + '<p class="mb-2 text-muted" style="font-size:.8rem;"><em>Nevada context: NV minimum wage $12.00/hr (2025). Carson City median household income ~$62,000. Entry-level tech roles in Northern NV typically start $14&ndash;$18/hr. BLS projects +16% growth in Web Developer jobs through 2032 &mdash; much faster than average.</em></p>'
+                                         + '<hr class="my-2">'
+                                         + '<p class="mb-1 fw-bold">Job Description</p>'
+                                         + '<p class="mb-2" style="font-size:.82rem;">This is a learning-track role inside the CHS Web Design Agency. Interns assist senior team members across all WDLC phases &mdash; from research and wireframing to testing and deployment. You will build your portfolio while contributing to real client-facing work.</p>'
+                                         + '<p class="mb-1 fw-bold">Requirements</p>'
+                                         + '<ul style="font-size:.82rem;margin:0 0 8px;padding-left:16px;">'
+                                         + '<li>Currently enrolled in Web Design Track (Year 1)</li>'
+                                         + '<li>Basic understanding of HTML &amp; CSS</li>'
+                                         + '<li>Ability to follow direction and meet deadlines</li>'
+                                         + '<li>Professional communication &mdash; no prior experience required</li>'
+                                         + '</ul>'
+                                         + '<p class="mb-1 fw-bold">Skills Wanted</p>'
+                                         + '<p style="font-size:.82rem;margin:0;">Curiosity, attention to detail, ability to give and receive feedback, willingness to learn version control (Git). Basic Canva or Figma navigation a plus.</p>'
+                                         + '</div>'
+                                },
+                                junior: {
+                                    title: '💻 Junior Web Developer — Carson High Agency',
+                                    body:  '<div style="max-width:500px;">'
+                                         + '<p class="mb-2"><strong>Compensation:</strong> $20.00/hr &bull; ~$41,600/yr (full-time equivalent)</p>'
+                                         + '<p class="mb-2 text-muted" style="font-size:.8rem;"><em>Nevada context: Entry-level software/web dev roles in Northern NV: $38,000&ndash;$55,000/yr (ZipRecruiter NV, 2024). Reno/Sparks tech corridor growing with Tesla Gigafactory and Switch Data Center presence. Remote-eligible junior dev roles common in the NV market.</em></p>'
+                                         + '<hr class="my-2">'
+                                         + '<p class="mb-1 fw-bold">Job Description</p>'
+                                         + '<p class="mb-2" style="font-size:.82rem;">Junior Developers build and maintain client websites under supervision of a Senior Developer. You own your assigned pages end-to-end &mdash; writing clean, semantic HTML/CSS, implementing JavaScript interactions, and submitting pull requests for review.</p>'
+                                         + '<p class="mb-1 fw-bold">Requirements</p>'
+                                         + '<ul style="font-size:.82rem;margin:0 0 8px;padding-left:16px;">'
+                                         + '<li>0&ndash;2 years experience or equivalent coursework</li>'
+                                         + '<li>Proficient in HTML5, CSS3, and basic JavaScript</li>'
+                                         + '<li>Familiarity with responsive design and Bootstrap</li>'
+                                         + '<li>Can commit and push via Git</li>'
+                                         + '</ul>'
+                                         + '<p class="mb-1 fw-bold">Skills Wanted</p>'
+                                         + '<p style="font-size:.82rem;margin:0;">Problem-solving, browser DevTools debugging, reading documentation independently, comfort with VS Code, basic understanding of how servers and DNS work.</p>'
+                                         + '</div>'
+                                },
+                                webdev: {
+                                    title: '🔧 Web Developer — Carson High Agency',
+                                    body:  '<div style="max-width:500px;">'
+                                         + '<p class="mb-2"><strong>Compensation:</strong> $35.00/hr &bull; ~$72,800/yr (full-time equivalent)</p>'
+                                         + '<p class="mb-2 text-muted" style="font-size:.8rem;"><em>Nevada context: BLS OES (Nevada, 2023) &mdash; median annual wage for Web Developers: $72,290. Top NV employers include gaming/hospitality tech, state government, Carson Tahoe Healthcare IT, and remote-first companies employing NV residents. Nevada has no state income tax.</em></p>'
+                                         + '<hr class="my-2">'
+                                         + '<p class="mb-1 fw-bold">Job Description</p>'
+                                         + '<p class="mb-2" style="font-size:.82rem;">Web Developers are the core builders of the agency. You lead client projects from signed contract through deployment, make architectural decisions, write both front-end and back-end code, and mentor junior team members. Your work is the foundation every other role builds on.</p>'
+                                         + '<p class="mb-1 fw-bold">Requirements</p>'
+                                         + '<ul style="font-size:.82rem;margin:0 0 8px;padding-left:16px;">'
+                                         + '<li>2&ndash;4 years professional web development experience</li>'
+                                         + '<li>Strong HTML, CSS, JavaScript &mdash; plus one back-end language (PHP, Python, or Node.js)</li>'
+                                         + '<li>Database fundamentals (SQL/MySQL)</li>'
+                                         + '<li>Git workflow, pull requests, code review</li>'
+                                         + '<li>Experience deploying to live servers (FTP, SSH, or CI/CD)</li>'
+                                         + '</ul>'
+                                         + '<p class="mb-1 fw-bold">Skills Wanted</p>'
+                                         + '<p style="font-size:.82rem;margin:0;">Full-stack thinking, RESTful API integration, accessibility standards (WCAG), performance optimization, accurate project timeline estimation.</p>'
+                                         + '</div>'
+                                },
+                                senior: {
+                                    title: '⚡ Senior Developer — Carson High Agency',
+                                    body:  '<div style="max-width:500px;">'
+                                         + '<p class="mb-2"><strong>Compensation:</strong> $45.00/hr &bull; ~$93,600/yr (full-time equivalent)</p>'
+                                         + '<p class="mb-2 text-muted" style="font-size:.8rem;"><em>Nevada context: Senior Software/Web Dev wages in NV top quartile: $85,000&ndash;$110,000/yr (BLS 2023). Switch Data Center (Las Vegas) and Tesla (Sparks) drive NV tech demand. Many senior NV developers work remotely for Bay Area or Seattle companies at higher salaries while benefiting from NV cost of living and zero state income tax.</em></p>'
+                                         + '<hr class="my-2">'
+                                         + '<p class="mb-1 fw-bold">Job Description</p>'
+                                         + '<p class="mb-2" style="font-size:.82rem;">Senior Developers own the technical direction of multiple projects simultaneously. You set coding standards, conduct code reviews, solve hard architectural problems, and are the last line of defense before deployment. Clients and Project Managers rely on you when scope changes or bugs threaten the launch.</p>'
+                                         + '<p class="mb-1 fw-bold">Requirements</p>'
+                                         + '<ul style="font-size:.82rem;margin:0 0 8px;padding-left:16px;">'
+                                         + '<li>4+ years of professional web development experience</li>'
+                                         + '<li>Expert-level front-end AND back-end proficiency</li>'
+                                         + '<li>Database design and query optimization (MySQL, PostgreSQL)</li>'
+                                         + '<li>Security fundamentals (HTTPS, input sanitization, auth flows)</li>'
+                                         + '<li>Experience leading or mentoring other developers</li>'
+                                         + '</ul>'
+                                         + '<p class="mb-1 fw-bold">Skills Wanted</p>'
+                                         + '<p style="font-size:.82rem;margin:0;">System architecture, DevOps basics (hosting, CI/CD, monitoring), technical writing, translating business requirements into technical specs, TypeScript or framework experience (React, Vue, Laravel).</p>'
+                                         + '</div>'
+                                },
+                                pm: {
+                                    title: '📋 Project Manager — Carson High Agency',
+                                    body:  '<div style="max-width:500px;">'
+                                         + '<p class="mb-2"><strong>Compensation:</strong> $50.00/hr &bull; ~$104,000/yr (full-time equivalent)</p>'
+                                         + '<p class="mb-2 text-muted" style="font-size:.8rem;"><em>Nevada context: IT Project Manager median wage in NV: ~$95,000&ndash;$115,000/yr (BLS OES 2023). PMI projects 25 million new PM roles needed globally by 2030. Carson City state government, healthcare, and hospitality sectors all hire IT PMs. PMP certification adds $10,000&ndash;$20,000/yr to NV salaries on average.</em></p>'
+                                         + '<hr class="my-2">'
+                                         + '<p class="mb-1 fw-bold">Job Description</p>'
+                                         + '<p class="mb-2" style="font-size:.82rem;">The Project Manager bridges clients and the development team. You own the project timeline, budget, and communication. You run kickoff meetings, write project agreements, track milestones, and ensure deliverables ship on time and within scope. When something goes wrong &mdash; and it will &mdash; you solve it before it becomes a crisis.</p>'
+                                         + '<p class="mb-1 fw-bold">Requirements</p>'
+                                         + '<ul style="font-size:.82rem;margin:0 0 8px;padding-left:16px;">'
+                                         + '<li>3&ndash;5 years experience in a web or tech environment</li>'
+                                         + '<li>Strong written and verbal communication skills</li>'
+                                         + '<li>Experience with project management tools (Asana, Trello, Jira, or similar)</li>'
+                                         + '<li>Understanding of the full WDLC &mdash; enough to spot technical risks</li>'
+                                         + '<li>Ability to manage client expectations professionally under pressure</li>'
+                                         + '</ul>'
+                                         + '<p class="mb-1 fw-bold">Skills Wanted</p>'
+                                         + '<p style="font-size:.82rem;margin:0;">Contract writing, risk management, Agile/Scrum familiarity, budget tracking, conflict resolution, capacity planning across a team of 3&ndash;8 people. PMP or Scrum certification strongly preferred.</p>'
+                                         + '</div>'
+                                }
+                            };
+                            window.showAgencyRole = function(id, evt) {
+                                var d = ROLES[id]; if (!d) return;
+                                if (evt) evt.stopPropagation();
+                                var tip = document.getElementById('_webtip_');
+                                if (tip && tip.style.display !== 'none' && tip.dataset.active === 'role:'+id) {
+                                    tip.style.display = 'none'; tip.dataset.active = ''; return;
+                                }
+                                window.showWebTip(evt, d.title, d.body);
+                                var t2 = document.getElementById('_webtip_'); if (t2) t2.dataset.active = 'role:'+id;
+                            };
+                            })();
+                            </script>
                         </div>
                         <div class="col-lg-4 mt-4 mt-lg-0 text-center">
                             <figure class="mb-4 text-center">
@@ -3023,6 +3016,82 @@
                                     </ol>
                                     <p class="mb-3 text-danger fw-bold">Turn In: Screenshot of your complete folder setup.</p>
                                     <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                                </div>
+                            </div>
+
+                            <!-- ════════════════════════════════════════════ -->
+                            <!-- PART MILESTONES: Assembly checkpoints       -->
+                            <!-- ════════════════════════════════════════════ -->
+
+                            <div class="alert alert-primary border-primary shadow-sm mb-2 mt-5 py-2 px-3 small">
+                                <strong>📁 Final Project Assembly Check</strong> — Before submitting the Final Project, each of its three parts should be fully drafted. Complete the three milestone check-ins below first.
+                            </div>
+
+                            <!-- PART 1 MILESTONE: AGENCY BUSINESS PLAN -->
+                            <div class="card border-primary shadow-sm my-4">
+                                <div class="card-header fw-bold text-white" style="background:var(--primary-color);">
+                                    📄 Milestone: Part 1 — The Agency Business Plan [Draft]
+                                </div>
+                                <div class="card-body small">
+                                    <p><strong>Objective:</strong> Assemble your two completed milestones (Executive Summary + Digital Real Estate) alongside three new sections into a single, complete Agency Business Plan document.</p>
+                                    <p class="mb-1 fw-bold text-muted">Carry over from earlier milestones ✓</p>
+                                    <ul class="mb-3 ps-3">
+                                        <li class="mb-1">Executive Summary (polished from your <em>Milestone: The Executive Summary</em>)</li>
+                                        <li class="mb-1">Domain name, DNS strategy &amp; hosting plan (from your <em>Milestone: Digital Real Estate</em>)</li>
+                                    </ul>
+                                    <p class="mb-1 fw-bold">Add now:</p>
+                                    <ol class="mb-3">
+                                        <li class="mb-2">Write a <strong>Company Description</strong>: What does your agency do? What is your specialty (branding, e-commerce, portfolios)? What types of sites will you build for Carson Valley clients?</li>
+                                        <li class="mb-2">Define your <strong>Target Market</strong>: Who in Carson City/Minden/Gardnerville will you serve? (Local shops, state government, healthcare, real estate, restaurants?) Give at least 3 specific examples.</li>
+                                        <li class="mb-2">Write a <strong>Services &amp; Pricing</strong> section: List 3–5 services your agency offers (e.g., Basic Brochure Site, E-Commerce Store, Monthly Maintenance Retainer) with a starting price for each.</li>
+                                    </ol>
+                                    <p class="mb-3 text-danger fw-bold">Turn In: One complete "Agency Business Plan" document with all five sections assembled.</p>
+                                    <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                                </div>
+                            </div>
+
+                            <!-- PART 2 MILESTONE: EMPLOYEE HANDBOOK -->
+                            <div class="card border-primary shadow-sm my-4">
+                                <div class="card-header fw-bold text-white" style="background:var(--primary-color);">
+                                    📋 Milestone: Part 2 — The Employee Handbook [Draft]
+                                </div>
+                                <div class="card-body small">
+                                    <p><strong>Objective:</strong> Combine your Code of Conduct milestone with two new sections to create a complete Employee Handbook — the document every new hire at your agency will read on day one.</p>
+                                    <p class="mb-1 fw-bold text-muted">Carry over from earlier milestones ✓</p>
+                                    <ul class="mb-3 ps-3">
+                                        <li class="mb-1">Code of Conduct: file naming rules, IP policy, accessibility mandate, &amp; dark patterns ban (from your <em>Milestone: The Code of Conduct</em>)</li>
+                                    </ul>
+                                    <p class="mb-1 fw-bold">Add now:</p>
+                                    <ol class="mb-3">
+                                        <li class="mb-2">Write <strong>Job Descriptions</strong> for 3–5 roles in your agency. For each role include: job title, a 2–3 sentence summary of responsibilities, required skills, and starting pay rate. (Reference the Agency Open Positions cards above.)</li>
+                                        <li class="mb-2">Write a <strong>Conflict Resolution Policy</strong>: a 1-paragraph written procedure describing how your agency resolves disputes between team members — reference parliamentary procedure. What happens if two developers disagree on a design decision? Who decides? How?</li>
+                                    </ol>
+                                    <p class="mb-3 text-danger fw-bold">Turn In: One "Employee Handbook" document with all three sections (Job Descriptions + Code of Conduct + Conflict Resolution).</p>
+                                    <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                                </div>
+                            </div>
+
+                            <!-- PART 3 MILESTONE: AGENCY APPLICATION -->
+                            <div class="card border-primary shadow-sm my-4">
+                                <div class="card-header fw-bold text-white" style="background:var(--primary-color);">
+                                    📝 Milestone: Part 3 — Your Agency Application [Final Polish]
+                                </div>
+                                <div class="card-body small">
+                                    <p><strong>Objective:</strong> Review your Agency Job Application milestone and finalize it as the formal Part 3 submission — the document you are "handing in" to apply for a role in your own agency.</p>
+                                    <p class="mb-1 fw-bold text-muted">Carry over from earlier milestones ✓</p>
+                                    <ul class="mb-3 ps-3">
+                                        <li class="mb-1">Professional cover letter (from your <em>Milestone: Agency Job Application</em>)</li>
+                                        <li class="mb-1">Conflict resolution paragraph (from your <em>Milestone: Agency Job Application</em>)</li>
+                                        <li class="mb-1">Portfolio folder screenshot showing correct file naming (from your <em>Milestone: Agency Job Application</em>)</li>
+                                    </ul>
+                                    <p class="mb-1 fw-bold">Polish &amp; verify:</p>
+                                    <ol class="mb-3">
+                                        <li class="mb-2">Re-read your cover letter. Does it reference the specific role <strong>you defined in Part 2</strong> (your own Job Descriptions)? If not, update it to match.</li>
+                                        <li class="mb-2">Proofread for grammar, professional tone, and completeness. This will be in your agency's files — treat it like a real job application.</li>
+                                        <li class="mb-2">Add a <strong>portfolio link</strong> or working URL if you have one from the Digital Real Estate milestone. Even a placeholder domain name counts.</li>
+                                    </ol>
+                                    <p class="mb-3 text-danger fw-bold">Turn In: Your finalized Agency Application document (cover letter + conflict resolution + folder screenshot + optional portfolio URL).</p>
+                                    <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
                                 </div>
                             </div>
 
