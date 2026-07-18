@@ -423,16 +423,21 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
         const lines = text.split('\n');
         const students = [];
 
-        lines.forEach(line => {
+        lines.forEach((line, idx) => {
             const cols = line.split(',');
-            if (cols.length >= 4) {
-                students.push({
-                    first_name: cols[0].trim(),
-                    last_name:  cols[1].trim(),
-                    student_id: cols[2].trim(),
-                    course_id:  cols[3].trim()
-                });
-            }
+            if (cols.length < 4) return;
+            const rawCourseCol = cols[3].trim();
+            // Skip header rows (first token not a number or empty student ID)
+            const sid = cols[2].trim();
+            if (!sid || isNaN(Number(sid))) return;
+            // School CSVs may have "05254GIF-101 WEB DESIGN I" — take first token only
+            const course_id = rawCourseCol.split(' ')[0].trim();
+            students.push({
+                first_name: cols[0].trim(),
+                last_name:  cols[1].trim(),
+                student_id: sid,
+                course_id
+            });
         });
 
         // Client-side validation: ensure all course_id values exist in the catalog
