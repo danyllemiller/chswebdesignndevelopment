@@ -417,8 +417,38 @@
           <li><strong>Null vs Undefined:</strong> What is the difference? <strong><code>null</code></strong> is an <em>intentional</em> empty value (a box you purposely left empty). <strong><code>undefined</code></strong> means no value was assigned yet (you simply haven't defined it).</li>
         </ul>
 
-        <div class="alert alert-info py-2 px-3 small border-info shadow-sm mb-5">
+        <div class="alert alert-info py-2 px-3 small border-info shadow-sm mb-3">
             Which of the following is NOT a primitive data type in JavaScript? An <strong>Object</strong>! Primitives are simple values; Objects are complex and hold multiple values.
+        </div>
+
+        <!-- PRIMITIVE VS OBJECT: VALUE VS REFERENCE -->
+        <div class="card border-warning shadow-sm mb-5 text-start">
+          <div class="card-header bg-warning text-dark fw-bold d-flex align-items-center gap-2">
+            Key Concept: Primitives vs. Objects
+            <span class="badge bg-primary ms-1">NV 5.3.1</span>
+          </div>
+          <div class="card-body small p-4">
+            <div class="row">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <h6 class="fw-bold text-success">Primitives — Stored By Value</h6>
+                <p class="mb-2">String, Number, Boolean, <code>null</code>, <code>undefined</code> are all <strong>primitives</strong>. When you copy a primitive, you get an independent copy of the actual data.</p>
+                <pre class="p-2 rounded mb-0 no-copy"><code>let a = 10;
+let b = a;  // b gets a COPY of 10
+b = 99;
+console.log(a); // Still 10!
+console.log(b); // 99</code></pre>
+              </div>
+              <div class="col-md-6">
+                <h6 class="fw-bold text-primary">Objects — Stored By Reference</h6>
+                <p class="mb-2">Arrays and Objects (<code>[]</code>, <code>{}</code>, functions) are stored <strong>by reference</strong> — the variable holds a pointer to the data in memory, not the data itself.</p>
+                <pre class="p-2 rounded mb-0 no-copy"><code>let pet1 = { name: "Sparky" };
+let pet2 = pet1; // pet2 points to SAME object
+pet2.name = "Fluffy";
+console.log(pet1.name); // "Fluffy"!
+// Both variables share one object.</code></pre>
+              </div>
+            </div>
+          </div>
         </div>
 
         <h5 class="fw-bold mt-4">JavaScript Operators Reference</h5>
@@ -459,7 +489,7 @@
               <td class="bg-site-secondary">What is the mathematical result of <code>10 % 3</code>? It is <strong>1</strong>. It returns the <strong>remainder</strong> of division.</td>
             </tr>
             <tr>
-              <td rowspan="2" class="align-middle text-center fw-bold">Assignment</td>
+              <td rowspan="5" class="align-middle text-center fw-bold">Assignment <span class="badge bg-primary ms-1" style="font-size:.6rem;">NV 5.3.1</span></td>
               <td class="text-center"><code>=</code></td>
               <td>Assign a value</td>
               <td>Setting an initial value: <code>let score = 0;</code></td>
@@ -468,6 +498,21 @@
               <td class="text-center"><code>+=</code></td>
               <td>Add &amp; assign</td>
               <td>What does the <code>+=</code> operator do? It adds a value to the existing value of the variable: <code>score += 10;</code></td>
+            </tr>
+            <tr>
+              <td class="text-center"><code>-=</code></td>
+              <td>Subtract &amp; assign</td>
+              <td>Reduces a value in place: <code>health -= 10;</code> is shorthand for <code>health = health - 10;</code></td>
+            </tr>
+            <tr>
+              <td class="text-center bg-site-secondary"><code>++</code></td>
+              <td class="bg-site-secondary"><strong>Increment</strong></td>
+              <td class="bg-site-secondary">Adds 1 to a variable: <code>score++;</code> is shorthand for <code>score = score + 1;</code> Extremely common in loops and score counters.</td>
+            </tr>
+            <tr>
+              <td class="text-center bg-site-secondary"><code>--</code></td>
+              <td class="bg-site-secondary"><strong>Decrement</strong></td>
+              <td class="bg-site-secondary">Subtracts 1 from a variable: <code>lives--;</code> is shorthand for <code>lives = lives - 1;</code> Common for countdown timers and removing items.</td>
             </tr>
             <tr>
               <td rowspan="3" class="align-middle text-center fw-bold">Comparison</td>
@@ -506,6 +551,41 @@
             <h5 class="fw-bold text-primary">Strict Equality (===)</h5>
             <p class="small">The <code>===</code> operator is the <strong>professional standard</strong>. It checks both Value and Data Type. If they aren't exactly the same, it is false. Emphasize the professional standard of Strict Equality (===) over loose equality (==) to prevent client data errors.</p>
             <pre class="p-2 rounded small no-copy"><code>console.log(5 === "5"); // Output: false</code></pre>
+          </div>
+        </div>
+
+        <!-- CAMELCASE NAMING CONVENTION -->
+        <div class="card border-info shadow-sm mb-4 mt-5 text-start">
+          <div class="card-header bg-info text-dark fw-bold d-flex align-items-center gap-2">
+            Clean Code: camelCase Naming Convention
+            <span class="badge bg-primary ms-1">WRS 1.1.1</span>
+            <span class="badge bg-primary ms-1">WRS 1.1.2</span>
+            <span class="badge bg-primary ms-1">WRS 1.1.4</span>
+          </div>
+          <div class="card-body small p-4">
+            <p class="mb-3">The JavaScript industry standard for naming variables and functions is <strong>camelCase</strong>: start with a lowercase letter, then capitalize the first letter of each subsequent word. <em>No spaces, no underscores, no hyphens.</em></p>
+            <div class="row">
+              <div class="col-md-6">
+                <h6 class="fw-bold text-success">Correct — camelCase</h6>
+                <pre class="p-2 rounded mb-0 no-copy"><code>let firstName = "Penny";
+let cartTotal = 0;
+let isLoggedIn = true;
+
+function getUserData() { }
+function calculateTax() { }
+function isAdoptionOpen() { }</code></pre>
+              </div>
+              <div class="col-md-6">
+                <h6 class="fw-bold text-danger">Incorrect — other conventions</h6>
+                <pre class="p-2 rounded mb-0 no-copy"><code>let first_name = "Penny";  // snake_case
+let CartTotal = 0;         // PascalCase (for Classes!)
+let ISTAXABLE = true;      // SCREAMING_CASE
+
+function GetUserData() { } // PascalCase (for Classes!)
+function calculate_tax() { } // snake_case (Python style)</code></pre>
+              </div>
+            </div>
+            <p class="mb-0 mt-3 text-muted"><strong>Rule of Thumb:</strong> Variables and functions use camelCase. Classes use PascalCase (Chapter 10). True constants that never change may use UPPER_SNAKE_CASE (e.g., <code>const MAX_HEALTH = 100;</code>).</p>
           </div>
         </div>
 
@@ -585,9 +665,68 @@ let result = multiply(5, 2);</code></pre>
         <p>What are 'Parameters' in a function? They are the variables declared inside the parentheses (like <code>a</code> and <code>b</code> above) that act as 'ingredients' for the function to use. If a function is defined as <code>function multiply(a, b)</code>, what happens when you call <code>multiply(5, 2)</code>? It assigns 5 to 'a' and 2 to 'b' for that specific execution.</p>
         <p>What does the <strong>return</strong> keyword do? It stops the function and sends a specific value back out to wherever the function was called. Without it, the function does its work in secret and gives you nothing back!</p>
 
+        <!-- RETURN WITH VS WITHOUT -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h6 class="fw-bold text-danger">Without <code>return</code> — Result is lost</h6>
+            <pre class="p-2 rounded no-copy"><code>function addTax(price) {
+    let total = price * 1.08;
+    // No return — total disappears!
+}
+
+let finalPrice = addTax(50);
+console.log(finalPrice);
+// Output: undefined</code></pre>
+          </div>
+          <div class="col-md-6">
+            <h6 class="fw-bold text-success">With <code>return</code> — Value sent back <span class="badge bg-primary ms-1" style="font-size:.6rem;">NV 5.3.2</span></h6>
+            <pre class="p-2 rounded no-copy"><code>function addTax(price) {
+    let total = price * 1.08;
+    return total; // Sends value OUT
+}
+
+let finalPrice = addTax(50);
+console.log(finalPrice);
+// Output: 54</code></pre>
+          </div>
+        </div>
+        <div class="alert alert-warning py-2 px-3 small border-0 mb-4">
+          <strong>Rule:</strong> If your function calculates or builds something that another part of the program needs to USE, you must <code>return</code> it. A function without <code>return</code> is useful for "side effects" only — like updating the DOM — but gives back <code>undefined</code> if you try to store its output.
+        </div>
+
         <h5 class="fw-bold mt-4 text-primary">The Bubble: Scope &amp; Errors</h5>
         <p>What is 'Scope' in programming? It is the rule defining where variables can be 'seen' or used. A variable declared <em>outside</em> a function has <strong>Global Scope</strong>. A variable declared <em>inside</em> a function using <code>let</code> is trapped inside that specific function (<strong>Local Scope</strong>).</p>
         <p>If you try to use a Local variable outside of its function, or use a variable that hasn't been declared at all, what happens? You get a <strong>ReferenceError</strong> because it is trying to 'refer' to something it can't find.</p>
+
+        <!-- SCOPE CODE EXAMPLE -->
+        <div class="card border-secondary shadow-sm mb-4 text-start">
+          <div class="card-header bg-secondary text-white fw-bold d-flex align-items-center gap-2">
+            Scope Example: Global vs. Local
+            <span class="badge bg-primary ms-1">NV 5.3.2</span>
+          </div>
+          <div class="card-body p-3">
+            <pre class="p-3 rounded no-copy mb-0"><code>// --- GLOBAL SCOPE ---
+// Declared outside any function = visible EVERYWHERE
+let agencyName = "CHS Web Design";
+
+function greetClient() {
+    // --- LOCAL SCOPE ---
+    // Declared inside the function = ONLY visible here
+    let clientName = "PixelPaws";
+
+    // Can access BOTH global and local variables here
+    console.log(agencyName + " welcomes " + clientName);
+}
+
+greetClient(); // Output: "CHS Web Design welcomes PixelPaws"
+
+// ERROR! clientName is local — it doesn't exist out here
+console.log(clientName); // Uncaught ReferenceError: clientName is not defined</code></pre>
+          </div>
+          <div class="card-footer bg-light small">
+            <strong>Why Local Scope matters:</strong> If every variable were Global, two scripts running on the same page could accidentally overwrite each other's data. Keeping variables Local to their function is a security and stability best practice.
+          </div>
+        </div>
 
         <h5 class="fw-bold mt-4 text-primary">Template Literals</h5>
         <p>What is the purpose of Template Literals (backticks <code>` `</code>)? To easily inject JavaScript variables directly into text strings using <code>${ }</code>. Example: <code>`Hello ${userName}!`</code>.</p>
@@ -870,6 +1009,70 @@ renderPets();</code></pre>
           <li class="mb-2"><strong>Reference Error:</strong> Trying to use a variable that hasn't been declared or doesn't exist. The browser is trying to 'refer' to something it can't find.</li>
           <li class="mb-0"><strong>Logic Error:</strong> Code runs without crashing, but gives the wrong result (e.g., mixing up lowercase vs uppercase property names).</li>
         </ul>
+
+        <!-- CONSOLE DEBUGGING SECTION -->
+        <h5 class="fw-bold mt-5 text-primary d-flex align-items-center gap-2">
+          Browser Console Debugging
+          <span class="badge bg-primary ms-1">WRS 1.2.3</span>
+        </h5>
+        <p>Open the Console by pressing <strong>F12</strong> (or Right-Click &rarr; Inspect &rarr; Console). It is your most powerful debugging tool.</p>
+
+        <table class="table table-bordered table-sm small bg-white shadow-sm mt-3 mb-4 text-start">
+          <thead class="bg-light"><tr><th>Console Method</th><th>What It Does</th><th>When to Use It</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>console.log(value)</code></td>
+              <td>Prints any value to the console in white/grey text. Invisible to regular users.</td>
+              <td>Checking variable values, confirming a function ran, tracing program flow.</td>
+            </tr>
+            <tr>
+              <td><code>console.error(message)</code></td>
+              <td>Prints a message in <strong class="text-danger">red text</strong> with an error icon. Shows the stack trace.</td>
+              <td>Use in your own code to flag intentional error states (e.g., "User submitted empty form").</td>
+            </tr>
+            <tr>
+              <td><code>console.warn(message)</code></td>
+              <td>Prints in yellow text. A non-fatal notice.</td>
+              <td>Deprecation warnings or near-miss conditions that aren't full errors.</td>
+            </tr>
+            <tr>
+              <td><code>console.table(array)</code></td>
+              <td>Renders an array of objects as a formatted table.</td>
+              <td>Debugging your <code>pets</code> array or any list of objects.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h6 class="fw-bold text-danger mt-4">Reading Red Error Messages</h6>
+        <p class="small">When you see a red error in the console, it always follows this pattern: <code>Uncaught [ErrorType]: [description] at [file]:[line number]</code>. The line number is the key — click it to jump directly to the problem in your code.</p>
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="card border-danger shadow-sm text-start h-100">
+              <div class="card-header bg-danger text-white small fw-bold">Uncaught ReferenceError</div>
+              <div class="card-body small p-3">
+                <p class="mb-1"><strong>What it means:</strong> You're trying to use a variable or function name that does not exist at all.</p>
+                <pre class="p-2 rounded mb-0 no-copy"><code>// ReferenceError Example:
+console.log(userNam);
+// "userNam is not defined"
+// Fix: check spelling — it's "userName"</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-warning shadow-sm text-start h-100">
+              <div class="card-header bg-warning text-dark small fw-bold">Uncaught TypeError</div>
+              <div class="card-body small p-3">
+                <p class="mb-1"><strong>What it means:</strong> You're trying to do something to a value that is the wrong type — like calling a method on <code>null</code>.</p>
+                <pre class="p-2 rounded mb-0 no-copy"><code>// TypeError Example:
+let btn = document.querySelector("#fakeid");
+btn.addEventListener("click", fn);
+// "Cannot read properties of null"
+// Fix: check that #fakeid exists in HTML</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- WALKTHROUGH 9: Find a Bug -->
         <h3 class="section-title d-flex align-items-center mt-5 text-primary">

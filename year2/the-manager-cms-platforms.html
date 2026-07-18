@@ -120,6 +120,61 @@
     <!-- SECTION 2: PLATFORMS & CMS CONCEPTS -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Static vs. Dynamic: The Core Distinction</h2>
+        <p>Before pitching a platform, a professional agency developer must understand the fundamental difference between how static and dynamic sites work.</p>
+
+        <!-- STATIC VS DYNAMIC COMPARISON TABLE -->
+        <div class="card border-primary shadow-sm mb-5 text-start">
+          <div class="card-header bg-primary text-white fw-bold small d-flex align-items-center gap-2">
+            Static Websites vs. Dynamic CMS-Powered Sites
+            <span class="badge bg-light text-primary ms-1">NV 5.5.2</span>
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-bordered table-sm small mb-0 text-start">
+              <thead class="bg-light">
+                <tr><th>Feature</th><th>Static Website (HTML/CSS)</th><th>Dynamic CMS Site (WordPress etc.)</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>How pages are served</strong></td>
+                  <td>Pre-built HTML files sent directly to the browser. No processing.</td>
+                  <td>PHP queries the database, assembles the page, and sends HTML on each request.</td>
+                </tr>
+                <tr>
+                  <td><strong>Speed</strong></td>
+                  <td class="text-success fw-bold">Very fast — no server processing needed.</td>
+                  <td>Slower (can be optimized with caching plugins).</td>
+                </tr>
+                <tr>
+                  <td><strong>Security</strong></td>
+                  <td class="text-success fw-bold">Very secure — no database, no login, no attack surface.</td>
+                  <td>More attack surface: database, login page, plugin vulnerabilities.</td>
+                </tr>
+                <tr>
+                  <td><strong>Updating content</strong></td>
+                  <td class="text-danger">Hard — must edit code files and re-deploy every change.</td>
+                  <td class="text-success fw-bold">Easy — log in to the dashboard, type, click Publish. No code.</td>
+                </tr>
+                <tr>
+                  <td><strong>Server requirement</strong></td>
+                  <td class="text-success fw-bold">Any basic file host or CDN works (no PHP/database needed).</td>
+                  <td>Requires PHP + MySQL database on the server.</td>
+                </tr>
+                <tr>
+                  <td><strong>Best for</strong></td>
+                  <td>Portfolio sites, landing pages, small brochure sites that rarely change.</td>
+                  <td>Blogs, business sites, e-commerce — anything updated frequently by a non-developer.</td>
+                </tr>
+                <tr>
+                  <td><strong>Cost</strong></td>
+                  <td class="text-success fw-bold">Cheapest hosting possible (GitHub Pages = free).</td>
+                  <td>Requires managed hosting with PHP/MySQL support.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <h2 class="section-title mt-0">The Matrix: Pitching Platforms to Clients</h2>
         <p>How can you tell if a piece of software is truly a CMS? <strong>It separates the content creation from the code structure and design.</strong> This means your articles are stored in a database, and your design is stored in a Theme. If a Theme is the "clothes" of a website, what is the database? <strong>The brain/memory that remembers the content.</strong></p>
         
@@ -263,6 +318,46 @@
         </ul>
         
         <p>Which piece of content relies heavily on <strong>Categories</strong> and <strong>Tags</strong> for searching? <strong>Posts.</strong> Categories are for broad topics (e.g., "News", "Events"), while Tags are for specific, detailed keywords. Because there can be hundreds of posts, they need organization labels.</p>
+
+        <!-- CATEGORIES VS TAGS COMPARISON -->
+        <div class="card border-info shadow-sm mb-4 text-start">
+          <div class="card-header bg-info text-dark fw-bold small d-flex align-items-center gap-2">
+            Categories vs. Tags — Know the Difference
+            <span class="badge bg-primary ms-1">NV 5.5.2</span>
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-bordered table-sm small mb-0 text-start">
+              <thead class="bg-light"><tr><th>Feature</th><th>Categories</th><th>Tags</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>Purpose</strong></td>
+                  <td>Broad, hierarchical groupings — the main topic of a post.</td>
+                  <td>Specific, non-hierarchical keywords — details about the post.</td>
+                </tr>
+                <tr>
+                  <td><strong>Hierarchy</strong></td>
+                  <td>Can have <em>parent</em> and <em>child</em> categories (e.g., Drinks &rarr; Espresso).</td>
+                  <td>Flat — no parent/child relationship.</td>
+                </tr>
+                <tr>
+                  <td><strong>Required?</strong></td>
+                  <td>Yes — every Post must have at least one Category.</td>
+                  <td>Optional — use them when they add useful context.</td>
+                </tr>
+                <tr>
+                  <td><strong>Example</strong></td>
+                  <td>Post about a pumpkin latte &rarr; Category: "Seasonal Flavors"</td>
+                  <td>Tags: "pumpkin," "fall," "limited edition," "espresso"</td>
+                </tr>
+                <tr>
+                  <td><strong>Analogy</strong></td>
+                  <td>Like a book's <em>chapter heading</em> — broad and structural.</td>
+                  <td>Like a book's <em>index entries</em> — specific and cross-referencing.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
         <p>What is the difference between a 'Draft' and a 'Published' post? <strong>Drafts are saved in the back-end but hidden from the public; Published posts are live.</strong></p>
 
         <h5 class="fw-bold mt-4 text-primary">Settings &amp; Permalinks</h5>
@@ -343,11 +438,20 @@
         <p>What controls the 'Look' or visual design of a WordPress site? <strong>A Theme.</strong> This dictates your global colors, typography, and layout structure. If you want to build a highly customized page layout for a client that the standard Block Editor can't handle, what type of plugin would you install? A <strong>Page Builder Plugin (like Elementor or Divi).</strong></p>
         
         <h5 class="fw-bold mt-4 text-primary">Widgets &amp; Menus</h5>
-        <p>Themes give you control over sidebars and footers using Widgets. What is a 'Widget' in the context of a CMS? <strong>A small block that performs a specific function, often placed in sidebars or footers (like a search bar or calendar).</strong> Where would you typically place a copyright notice that needs to appear on every single page of the site? <strong>In the Footer (via Widgets or Theme Customizer).</strong></p>
+        <p>Themes give you control over sidebars and footers using <strong>Widgets</strong>. What is a Widget? <strong>A small, self-contained module that adds specific functionality (a search bar, recent posts list, calendar, or social feed) and can be dragged into designated "widgetized areas" — typically sidebars and footer columns — without writing any code.</strong> Where would you typically place a copyright notice that needs to appear on every single page of the site? <strong>In the Footer widget area (via Widgets or Theme Customizer).</strong></p>
         <p>Navigation is handled separately. Where do you manage the layout of your site's navigation links? <strong>Appearance &gt; Menus</strong>.</p>
-        
+
+        <h5 class="fw-bold mt-4 text-primary">Page Builders</h5>
+        <p>What is a <strong>Page Builder</strong>? A <strong>drag-and-drop visual editing tool</strong> (plugins like <strong>Elementor</strong>, <strong>Divi</strong>, or <strong>Beaver Builder</strong>) that lets you assemble complex page layouts by dragging content sections, columns, and pre-built widgets onto a live visual preview — no HTML or CSS knowledge required. When a client wants a unique homepage layout that Gutenberg's block editor can't handle, a Page Builder is the agency's power tool.</p>
+        <div class="alert alert-info py-2 px-3 small border-info mb-3">
+          <strong>Gutenberg vs. Page Builders:</strong> Gutenberg (the default block editor) is great for standard posts and pages. Page Builders are better for pixel-precise custom landing pages. However, heavy Page Builder plugins can slow down a site, so only install one if genuinely needed.
+        </div>
+
         <h5 class="fw-bold mt-4 text-primary">The Golden Rule: Child Themes</h5>
-        <p>What is the primary purpose of a Child Theme? <strong>To ensure custom code isn't deleted during theme updates.</strong> If you write custom CSS into a parent theme, and the developer pushes an update, your code will be wiped out! A child theme safely inherits the parent's design while protecting the agency's custom coding.</p>
+        <p>What is the primary purpose of a <strong>Child Theme</strong>? <strong>To preserve your custom code when the parent theme receives updates.</strong> Without a child theme, every time the parent theme developer releases a security patch or feature update, WordPress overwrites the theme files — and all of your custom CSS is permanently deleted. A child theme inherits 100% of the parent theme's design and functionality, but stores your customizations in a separate folder that updates never touch.</p>
+        <div class="bg-light p-3 rounded border shadow-sm small mb-4">
+          <strong>Child Theme Rule:</strong> Any time you write custom CSS or edit theme template files for a client, always do it in a child theme. The extra 10 minutes to set one up saves hours of re-coding after the inevitable theme update.
+        </div>
 
         <!-- LAB 3 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
@@ -385,7 +489,30 @@
         <h5 class="fw-bold mt-4 text-danger">The Danger of Plugin Bloat</h5>
         <p>What is the primary risk of installing too many WordPress plugins? <strong>They can slow down the site, cause conflicts, and create security vulnerabilities.</strong> This is known as "Plugin Bloat."</p>
         <p>Furthermore, what does it mean if a plugin has not been 'tested with your current version of WordPress'? <strong>It might be abandoned by its developer and could break your site or introduce security flaws.</strong> Updating vulnerable plugins immediately demonstrates the WRS skill of <strong>Probity / Ethical Adherence</strong>.</p>
-        
+
+        <!-- PLUGIN SECURITY CHECKLIST -->
+        <div class="card border-danger shadow-sm mt-3 mb-4 text-start">
+          <div class="card-header bg-danger text-white fw-bold small d-flex align-items-center gap-2">
+            Plugin Security Checklist — Before You Install
+            <span class="badge bg-light text-danger ms-1">NV 4.4.4</span>
+            <span class="badge bg-light text-danger ms-1">WRS 1.1.4</span>
+          </div>
+          <div class="card-body small p-4">
+            <p class="mb-3">Before installing any plugin for a client site, run through these checks in the WordPress Plugin Directory:</p>
+            <ul class="mb-3">
+              <li class="mb-2"><strong>Last Updated:</strong> Was it updated within the last 6 months? An abandoned plugin is a security time bomb — it won't be patched when WordPress releases security fixes.</li>
+              <li class="mb-2"><strong>Active Installations:</strong> Is it used by at least 1,000+ sites? Popular plugins get audited by the community. Obscure plugins with 50 installs may contain malicious code.</li>
+              <li class="mb-2"><strong>Star Rating:</strong> Does it have 4+ stars with a reasonable number of reviews? Read the 1-star reviews — they often expose critical bugs.</li>
+              <li class="mb-2"><strong>WordPress Compatibility:</strong> Does it say "Compatible with your version of WordPress"? If not, it may break your site.</li>
+              <li class="mb-2"><strong>Keep Plugins Updated:</strong> Enable automatic updates for plugins, or check for updates weekly. An out-of-date plugin is the #1 attack vector for hackers on WordPress sites.</li>
+              <li class="mb-0"><strong>Delete Unused Plugins:</strong> A deactivated plugin still exists in your files and can still be exploited. Delete any plugin you aren't actively using.</li>
+            </ul>
+            <div class="alert alert-warning py-2 px-3 mb-0">
+              <strong>Rule of Thumb:</strong> Ask yourself — "Can I build this feature with a block in Gutenberg instead?" Every plugin you <em>don't</em> install is a security risk you <em>don't</em> have.
+            </div>
+          </div>
+        </div>
+
         <h5 class="fw-bold mt-4 text-primary">Security &amp; Roles</h5>
         <p>How do you ensure a client's WordPress site remains secure from hackers? <strong>Regularly update the WordPress core, themes, and plugins to patch vulnerabilities.</strong> BUT wait! Before updating the WordPress core or installing a major plugin, what is the single most important action a professional developer must take? <strong>Perform a complete database and file Backup.</strong></p>
         <p>Why is it important to assign 'Roles' (like Editor, Author, Contributor) to users in a CMS? <strong>To restrict permissions so an author (like Manager Mike) can't accidentally delete the entire website or change the theme.</strong> Which user role has absolute total control over every aspect of a WordPress site? The <strong>Administrator</strong>.</p>
