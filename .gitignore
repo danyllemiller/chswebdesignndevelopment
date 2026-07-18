@@ -1,4 +1,5 @@
 *.zip
+!studentFiles/*.zip
 *.ttf
 *.ai
 *.mp4
