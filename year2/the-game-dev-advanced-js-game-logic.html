@@ -191,10 +191,91 @@ ctx.fillRect(50, 50, 40, 40);</code></pre>
       </div>
       
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <!-- FIGURE 10.2: INTERACTIVE CANVAS COORDINATE SYSTEM -->
         <figure class="mb-4">
-          <img src="/images/the-game-dev-advanced-js-game-logic/figure-02.png" alt="Canvas Coordinates" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Canvas+Coordinates'">
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+            <svg id="cnv-svg" viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:360px;height:auto;display:block;" aria-label="HTML Canvas coordinate system showing (0,0) at top-left with x increasing right and y increasing down">
+              <defs><style>.cnv-node{cursor:pointer;}.cnv-node:hover .cnv-rect{opacity:.82;}</style></defs>
+              <rect width="520" height="340" fill="#1e293b" rx="12"/>
+              <text x="260" y="24" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="12" font-weight="bold" fill="#94a3b8">HTML CANVAS COORDINATE SYSTEM</text>
+              <!-- Canvas rectangle -->
+              <rect x="50" y="44" width="420" height="240" rx="4" fill="#0f172a" stroke="#3b82f6" stroke-width="2"/>
+              <!-- Grid lines -->
+              <line x1="50" y1="44" x2="50" y2="284" stroke="#1e3a5f" stroke-width="1"/>
+              <line x1="50" y1="44" x2="470" y2="44" stroke="#1e3a5f" stroke-width="1"/>
+              <line x1="155" y1="44" x2="155" y2="284" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,4"/>
+              <line x1="260" y1="44" x2="260" y2="284" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,4"/>
+              <line x1="365" y1="44" x2="365" y2="284" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,4"/>
+              <line x1="50" y1="124" x2="470" y2="124" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,4"/>
+              <line x1="50" y1="204" x2="470" y2="204" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,4"/>
+              <!-- X axis arrow -->
+              <g class="cnv-node" data-cnv="xaxis" onclick="cnvShow('xaxis', event)">
+                <rect class="cnv-rect" x="50" y="284" width="420" height="24" rx="0" fill="transparent"/>
+                <line x1="50" y1="296" x2="470" y2="296" stroke="#f59e0b" stroke-width="2"/>
+                <polygon points="470,291 480,296 470,301" fill="#f59e0b"/>
+                <text x="488" y="300" font-family="Segoe UI,Arial,sans-serif" font-size="12" font-weight="bold" fill="#f59e0b">x</text>
+                <text x="150" y="314" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#f59e0b" text-anchor="middle">100</text>
+                <text x="260" y="314" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#f59e0b" text-anchor="middle">200</text>
+                <text x="365" y="314" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#f59e0b" text-anchor="middle">300</text>
+              </g>
+              <!-- Y axis arrow -->
+              <g class="cnv-node" data-cnv="yaxis" onclick="cnvShow('yaxis', event)">
+                <rect class="cnv-rect" x="12" y="44" width="30" height="240" rx="0" fill="transparent"/>
+                <line x1="26" y1="44" x2="26" y2="284" stroke="#4ade80" stroke-width="2"/>
+                <polygon points="21,284 26,295 31,284" fill="#4ade80"/>
+                <text x="26" y="311" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="12" font-weight="bold" fill="#4ade80">y</text>
+                <text x="40" y="128" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#4ade80" text-anchor="end">80</text>
+                <text x="40" y="208" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#4ade80" text-anchor="end">160</text>
+              </g>
+              <!-- Origin (0,0) corner -->
+              <g class="cnv-node" data-cnv="origin" onclick="cnvShow('origin', event)">
+                <rect class="cnv-rect" x="44" y="38" width="50" height="50" rx="4" fill="transparent"/>
+                <circle cx="50" cy="44" r="5" fill="#f87171" stroke="#ef4444" stroke-width="1.5"/>
+                <text x="56" y="58" font-family="Consolas,monospace" font-size="10" fill="#f87171">(0, 0)</text>
+              </g>
+              <!-- Sample sprite at (210, 120) -->
+              <g class="cnv-node" data-cnv="sprite" onclick="cnvShow('sprite', event)">
+                <rect class="cnv-rect" x="256" y="108" width="44" height="44" rx="4" fill="#1a2e1a" stroke="#22c55e" stroke-width="1.5"/>
+                <text x="278" y="134" text-anchor="middle" font-size="22">🚀</text>
+                <text x="278" y="100" text-anchor="middle" font-family="Consolas,monospace" font-size="9" fill="#4ade80">(210, 120)</text>
+                <!-- Dashed guide lines to axes -->
+                <line x1="50" y1="130" x2="260" y2="130" stroke="#22c55e" stroke-width="1" stroke-dasharray="3,3" opacity=".5"/>
+                <line x1="260" y1="44" x2="260" y2="130" stroke="#22c55e" stroke-width="1" stroke-dasharray="3,3" opacity=".5"/>
+              </g>
+              <!-- Corner labels -->
+              <text x="470" y="58" text-anchor="end" font-family="Consolas,monospace" font-size="9" fill="#475569">(canvas.width, 0)</text>
+              <text x="58" y="280" font-family="Consolas,monospace" font-size="9" fill="#475569">(0, canvas.height)</text>
+              <text x="470" y="280" text-anchor="end" font-family="Consolas,monospace" font-size="9" fill="#475569">(W, H)</text>
+              <!-- Math vs Canvas note -->
+              <rect x="50" y="184" width="155" height="36" rx="4" fill="#3c1f1f" stroke="#f87171" stroke-width="1"/>
+              <text x="128" y="198" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#f87171">⚠ Unlike math: y=0 is</text>
+              <text x="128" y="213" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#f87171">the TOP, not the bottom!</text>
+              <text x="260" y="326" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#9ca3af">Click any element to learn more</text>
+            </svg>
+          </div>
           <figcaption class="p-2 small text-muted text-center"><strong>Figure 10.2:</strong> Canvas (0,0) is Top-Left.</figcaption>
         </figure>
+        <script>
+        (function(){
+          if(!window.showWebTip){window.showWebTip=function(e,T,B){var t=document.getElementById('_webtip_');if(!t){t=document.createElement('div');t.id='_webtip_';t.style.cssText='position:fixed;z-index:9999;max-width:320px;min-width:220px;background:#1e293b;color:#f1f5f9;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);padding:14px 16px 12px;font-size:.82rem;line-height:1.6;display:none;pointer-events:auto;';var b=document.createElement('button');b.innerHTML='&#215;';b.style.cssText='position:absolute;top:6px;right:10px;background:none;border:none;color:#94a3b8;font-size:1.1rem;cursor:pointer;line-height:1;padding:0;';b.onclick=function(){var x=document.getElementById('_webtip_');x.style.display='none';x.dataset.active='';};var td=document.createElement('div');td.id='_webtip_title_';td.style.cssText='font-weight:700;font-size:.88rem;color:#e2e8f0;margin-bottom:7px;padding-right:20px;border-bottom:1px solid #334155;padding-bottom:6px;';var bd=document.createElement('div');bd.id='_webtip_body_';bd.style.color='#cbd5e1';t.appendChild(b);t.appendChild(td);t.appendChild(bd);document.body.appendChild(t);}document.getElementById('_webtip_title_').innerHTML=T;document.getElementById('_webtip_body_').innerHTML=B;t.style.left='-9999px';t.style.top='-9999px';t.style.display='block';var tw=t.offsetWidth||300,th=t.offsetHeight||200,vw=window.innerWidth,vh=window.innerHeight,l,tp;if(e&&e.clientX!==undefined){l=e.clientX+18;if(l+tw>vw-8)l=e.clientX-tw-18;if(l<8)l=8;tp=e.clientY+18;if(tp+th>vh-8)tp=e.clientY-th-18;if(tp<8)tp=8;}else{l=Math.max(8,(vw-tw)/2);tp=80;}t.style.left=l+'px';t.style.top=tp+'px';};document.addEventListener('click',function(e){var t=document.getElementById('_webtip_');if(t&&t.style.display!=='none'&&!t.contains(e.target)){t.style.display='none';t.dataset.active='';}});}
+          var CNV={
+            origin:{t:'Origin — (0, 0)',b:'The top-left corner of the canvas is always coordinate (0, 0). This is different from math class where (0,0) is at the bottom-left. In Canvas: x=0 is the left edge, y=0 is the TOP edge.'},
+            xaxis:{t:'X Axis — Horizontal',b:'X increases as you move to the right. <code style="color:#f59e0b">ctx.fillRect(200, 0, 50, 50)</code> starts 200 pixels from the left edge. The maximum x is <code style="color:#f59e0b">canvas.width</code>.'},
+            yaxis:{t:'Y Axis — Vertical (Flipped!)',b:'Y increases as you move DOWN — the opposite of math! <code style="color:#4ade80">ctx.fillRect(0, 120, 50, 50)</code> starts 120 pixels from the TOP. Moving a sprite down means ADDING to its y value.'},
+            sprite:{t:'Sprite at (210, 120)',b:'This rocket is positioned at x=210, y=120. In code: <code style="color:#22c55e">ctx.drawImage(rocket, 210, 120)</code>. To move it right: <code style="color:#22c55e">x += speed</code>. To move it down: <code style="color:#22c55e">y += speed</code>.'}
+          };
+          window.cnvShow=function(id,evt){
+            var d=CNV[id];if(!d)return;
+            if(evt)evt.stopPropagation();
+            var tip=document.getElementById('_webtip_');
+            if(tip&&tip.style.display!=='none'&&tip.dataset.active==='cnv:'+id){tip.style.display='none';tip.dataset.active='';document.querySelectorAll('#cnv-svg .cnv-rect').forEach(function(r){r.style.opacity='';});return;}
+            document.querySelectorAll('#cnv-svg .cnv-rect').forEach(function(r){r.style.opacity='.3';});
+            var sel=document.querySelector('#cnv-svg [data-cnv="'+id+'"] .cnv-rect');if(sel)sel.style.opacity='1';
+            window.showWebTip(evt,d.t,'<p style="margin:0">'+d.b+'</p>');
+            var t2=document.getElementById('_webtip_');if(t2)t2.dataset.active='cnv:'+id;
+          };
+        })();
+        </script>
         <div class="card roadmap-card border-warning shadow-sm mt-4 text-start">
             <div class="card-header bg-warning text-dark fw-bold">Pro Tip:</div>
             <div class="card-body small">

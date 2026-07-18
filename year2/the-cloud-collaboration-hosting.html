@@ -116,12 +116,91 @@
           </div>
         </div>
 
+        <!-- FIGURE 11.1: INTERACTIVE GIT BRANCHING DIAGRAM -->
         <figure class="mb-0 mt-4">
-          <a href="/images/the-cloud-professional-tools/figure-01.png" target="_blank" rel="noopener">
-            <img src="/images/the-cloud-professional-tools/figure-01.png" alt="Git Branching Model" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Git+Branching+Model'">
-          </a>
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+            <svg id="git-svg" viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:480px;height:auto;display:block;" aria-label="Git branching timeline showing main branch and feature branch workflow">
+              <defs><style>.git-node{cursor:pointer;}.git-node:hover .git-rect{opacity:.82;}</style></defs>
+              <rect width="720" height="280" fill="#1e293b" rx="12"/>
+              <text x="360" y="26" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="12" font-weight="bold" fill="#94a3b8" letter-spacing=".5">GIT BRANCHING — ISOLATING WORK FROM MAIN</text>
+              <!-- Labels -->
+              <text x="30" y="142" font-family="Segoe UI,Arial,sans-serif" font-size="11" font-weight="bold" fill="#f59e0b">main</text>
+              <text x="30" y="82" font-family="Segoe UI,Arial,sans-serif" font-size="11" font-weight="bold" fill="#818cf8">feature</text>
+              <!-- main branch line -->
+              <line x1="70" y1="138" x2="680" y2="138" stroke="#334155" stroke-width="2"/>
+              <!-- feature branch lines -->
+              <line x1="230" y1="138" x2="280" y2="78" stroke="#818cf8" stroke-width="2" stroke-dasharray="4,3"/>
+              <line x1="280" y1="78" x2="510" y2="78" stroke="#818cf8" stroke-width="2"/>
+              <line x1="510" y1="78" x2="560" y2="138" stroke="#818cf8" stroke-width="2" stroke-dasharray="4,3"/>
+              <!-- Commit: C1 main -->
+              <g class="git-node" data-git="c1" onclick="gitShow('c1', event)">
+                <circle class="git-rect" cx="130" cy="138" r="16" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/>
+                <text x="130" y="143" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#60a5fa">C1</text>
+                <text x="130" y="162" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">initial</text>
+              </g>
+              <!-- Commit: C2 main (branch point) -->
+              <g class="git-node" data-git="branch" onclick="gitShow('branch', event)">
+                <circle class="git-rect" cx="230" cy="138" r="16" fill="#1e3a5f" stroke="#f59e0b" stroke-width="2"/>
+                <text x="230" y="143" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#fbbf24">C2</text>
+                <text x="230" y="162" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#f59e0b">branch!</text>
+              </g>
+              <!-- Feature commits F1, F2 -->
+              <g class="git-node" data-git="feature" onclick="gitShow('feature', event)">
+                <circle class="git-rect" cx="340" cy="78" r="14" fill="#2e1f5e" stroke="#818cf8" stroke-width="2"/>
+                <text x="340" y="83" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#a5b4fc">F1</text>
+                <circle class="git-rect" cx="430" cy="78" r="14" fill="#2e1f5e" stroke="#818cf8" stroke-width="2"/>
+                <text x="430" y="83" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#a5b4fc">F2</text>
+                <rect x="270" y="44" width="184" height="20" rx="4" fill="#1e1a3a"/>
+                <text x="362" y="58" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#818cf8">feature/new-login — isolated work</text>
+              </g>
+              <!-- Merge commit C3 -->
+              <g class="git-node" data-git="merge" onclick="gitShow('merge', event)">
+                <circle class="git-rect" cx="560" cy="138" r="16" fill="#1a2e1a" stroke="#22c55e" stroke-width="2.5"/>
+                <text x="560" y="143" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#4ade80">C3</text>
+                <text x="560" y="162" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#22c55e">merge</text>
+              </g>
+              <!-- C4 after merge -->
+              <g class="git-node" data-git="main" onclick="gitShow('main', event)">
+                <circle class="git-rect" cx="650" cy="138" r="16" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/>
+                <text x="650" y="143" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#60a5fa">C4</text>
+                <text x="650" y="162" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">deploy</text>
+              </g>
+              <!-- main label badge -->
+              <rect x="62" y="125" width="44" height="20" rx="4" fill="#92400e"/>
+              <text x="84" y="139" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" font-weight="bold" fill="#fbbf24">HEAD</text>
+              <!-- Arrow labels -->
+              <text x="253" y="108" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#818cf8">git checkout -b</text>
+              <text x="530" y="118" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#22c55e">git merge</text>
+              <!-- Protected badge -->
+              <rect x="574" y="188" width="130" height="30" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+              <text x="639" y="207" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#f59e0b">🔒 main is protected</text>
+              <text x="360" y="262" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#9ca3af">Click any commit to learn more</text>
+            </svg>
+          </div>
           <figcaption class="p-2 small text-muted text-center"><strong>Figure 11.1:</strong> A Git branching timeline.</figcaption>
         </figure>
+        <script>
+        (function(){
+          if(!window.showWebTip){window.showWebTip=function(e,T,B){var t=document.getElementById('_webtip_');if(!t){t=document.createElement('div');t.id='_webtip_';t.style.cssText='position:fixed;z-index:9999;max-width:320px;min-width:220px;background:#1e293b;color:#f1f5f9;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);padding:14px 16px 12px;font-size:.82rem;line-height:1.6;display:none;pointer-events:auto;';var b=document.createElement('button');b.innerHTML='&#215;';b.style.cssText='position:absolute;top:6px;right:10px;background:none;border:none;color:#94a3b8;font-size:1.1rem;cursor:pointer;line-height:1;padding:0;';b.onclick=function(){var x=document.getElementById('_webtip_');x.style.display='none';x.dataset.active='';};var td=document.createElement('div');td.id='_webtip_title_';td.style.cssText='font-weight:700;font-size:.88rem;color:#e2e8f0;margin-bottom:7px;padding-right:20px;border-bottom:1px solid #334155;padding-bottom:6px;';var bd=document.createElement('div');bd.id='_webtip_body_';bd.style.color='#cbd5e1';t.appendChild(b);t.appendChild(td);t.appendChild(bd);document.body.appendChild(t);}document.getElementById('_webtip_title_').innerHTML=T;document.getElementById('_webtip_body_').innerHTML=B;t.style.left='-9999px';t.style.top='-9999px';t.style.display='block';var tw=t.offsetWidth||300,th=t.offsetHeight||200,vw=window.innerWidth,vh=window.innerHeight,l,tp;if(e&&e.clientX!==undefined){l=e.clientX+18;if(l+tw>vw-8)l=e.clientX-tw-18;if(l<8)l=8;tp=e.clientY+18;if(tp+th>vh-8)tp=e.clientY-th-18;if(tp<8)tp=8;}else{l=Math.max(8,(vw-tw)/2);tp=80;}t.style.left=l+'px';t.style.top=tp+'px';};document.addEventListener('click',function(e){var t=document.getElementById('_webtip_');if(t&&t.style.display!=='none'&&!t.contains(e.target)){t.style.display='none';t.dataset.active='';}});}
+          var GIT={
+            c1:{t:'Initial Commit (C1)',b:'The first commit on main. Everything starts here. A commit is a snapshot of your entire project at a moment in time — not just the changes, but the full state.'},
+            branch:{t:'Branch Point (C2)',b:'<code style="color:#fbbf24">git checkout -b feature/new-login</code> creates a new branch here. It\'s instant — Git just creates a new pointer to this commit. No files are copied.'},
+            feature:{t:'Feature Branch Commits (F1, F2)',b:'Work happens in isolation. Bugs here don\'t break main. Multiple developers can work on different features simultaneously on their own branches, never stepping on each other.'},
+            merge:{t:'Merge Commit (C3)',b:'<code style="color:#4ade80">git merge feature/new-login</code> — Git combines the histories. The feature\'s commits are preserved. If there are conflicts, Git pauses and asks you to resolve them manually.'},
+            main:{t:'main Branch',b:'The <code style="color:#fbbf24">main</code> branch is always production-ready. Direct commits to main are usually blocked via branch protection rules. All work arrives via Pull Requests that are reviewed before merging.'}
+          };
+          window.gitShow=function(id,evt){
+            var d=GIT[id];if(!d)return;
+            if(evt)evt.stopPropagation();
+            var tip=document.getElementById('_webtip_');
+            if(tip&&tip.style.display!=='none'&&tip.dataset.active==='git:'+id){tip.style.display='none';tip.dataset.active='';document.querySelectorAll('#git-svg .git-rect').forEach(function(r){r.style.opacity='';});return;}
+            document.querySelectorAll('#git-svg .git-rect').forEach(function(r){r.style.opacity='.35';});
+            var sel=document.querySelector('#git-svg [data-git="'+id+'"] .git-rect');if(sel)sel.style.opacity='1';
+            window.showWebTip(evt,d.t,'<p style="margin:0">'+d.b+'</p>');
+            var t2=document.getElementById('_webtip_');if(t2)t2.dataset.active='git:'+id;
+          };
+        })();
+        </script>
       </div>
     </div>
 
@@ -371,19 +450,230 @@
       </div>
       
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <!-- FIGURE 11.5: INTERACTIVE IaaS / PaaS / SaaS DIAGRAM -->
         <figure class="mb-4 mt-5 pt-3">
-          <a href="/images/the-cloud-professional-tools/figure-05.png" target="_blank" rel="noopener">
-            <img src="/images/the-cloud-professional-tools/figure-05.png" alt="IaaS PaaS SaaS Diagram" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x600?text=Service+Models'">
-          </a>
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+            <svg id="iaas-svg" viewBox="0 0 560 370" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:400px;height:auto;display:block;" aria-label="IaaS PaaS SaaS cloud service models showing which layers you manage versus the provider">
+              <defs><style>.iaas-node{cursor:pointer;}.iaas-node:hover .iaas-rect{opacity:.82;}</style></defs>
+              <rect width="560" height="370" fill="#1e293b" rx="12"/>
+              <text x="280" y="26" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="12" font-weight="bold" fill="#94a3b8">CLOUD SERVICE MODELS — WHO MANAGES WHAT</text>
+              <!-- Column headers (clickable) -->
+              <g class="iaas-node" data-iaas="onprem" onclick="iaasShow('onprem', event)">
+                <rect class="iaas-rect" x="10" y="38" width="118" height="30" rx="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+                <text x="69" y="58" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="bold" fill="#60a5fa">On-Premises</text>
+              </g>
+              <g class="iaas-node" data-iaas="iaas" onclick="iaasShow('iaas', event)">
+                <rect class="iaas-rect" x="140" y="38" width="118" height="30" rx="6" fill="#1a2e1a" stroke="#22c55e" stroke-width="1.5"/>
+                <text x="199" y="58" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="bold" fill="#4ade80">IaaS</text>
+              </g>
+              <g class="iaas-node" data-iaas="paas" onclick="iaasShow('paas', event)">
+                <rect class="iaas-rect" x="270" y="38" width="118" height="30" rx="6" fill="#2e1a47" stroke="#a855f7" stroke-width="1.5"/>
+                <text x="329" y="58" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="bold" fill="#c084fc">PaaS</text>
+              </g>
+              <g class="iaas-node" data-iaas="saas" onclick="iaasShow('saas', event)">
+                <rect class="iaas-rect" x="400" y="38" width="150" height="30" rx="6" fill="#3c1f1f" stroke="#f87171" stroke-width="1.5"/>
+                <text x="475" y="58" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="bold" fill="#f87171">SaaS</text>
+              </g>
+              <!-- Layer rows: top=Application, bottom=Hardware -->
+              <!-- Colors: YOU=green fill, PROVIDER=blue fill -->
+              <!-- Row definitions: label, y, on-prem color, IaaS color, PaaS color, SaaS color -->
+              <!-- Application -->
+              <text x="4" y="94" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#94a3b8" text-anchor="start">Application</text>
+              <rect x="10" y="82" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="69" y="98" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="140" y="82" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="199" y="98" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="270" y="82" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="329" y="98" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="400" y="82" width="150" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="475" y="98" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <!-- Data -->
+              <text x="4" y="120" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#94a3b8">Data</text>
+              <rect x="10" y="110" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="69" y="126" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="140" y="110" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="199" y="126" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="270" y="110" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="329" y="126" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="400" y="110" width="150" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="475" y="126" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <!-- Runtime -->
+              <text x="4" y="148" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#94a3b8">Runtime</text>
+              <rect x="10" y="138" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="69" y="154" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="140" y="138" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="199" y="154" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="270" y="138" width="118" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="329" y="154" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <rect x="400" y="138" width="150" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="475" y="154" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <!-- Middleware -->
+              <text x="4" y="176" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#94a3b8">Middleware</text>
+              <rect x="10" y="166" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="69" y="182" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="140" y="166" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="199" y="182" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="270" y="166" width="118" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="329" y="182" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <rect x="400" y="166" width="150" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="475" y="182" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <!-- OS -->
+              <text x="4" y="204" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#94a3b8">OS</text>
+              <rect x="10" y="194" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="69" y="210" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="140" y="194" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="199" y="210" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="270" y="194" width="118" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="329" y="210" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <rect x="400" y="194" width="150" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="475" y="210" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <!-- Virtualization -->
+              <text x="4" y="232" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#94a3b8">Virtualization</text>
+              <rect x="10" y="222" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="69" y="238" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="140" y="222" width="118" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="199" y="238" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <rect x="270" y="222" width="118" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="329" y="238" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <rect x="400" y="222" width="150" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="475" y="238" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <!-- Hardware -->
+              <text x="4" y="260" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#94a3b8">Hardware</text>
+              <rect x="10" y="250" width="118" height="24" rx="3" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="69" y="266" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#4ade80">YOU</text>
+              <rect x="140" y="250" width="118" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="199" y="266" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <rect x="270" y="250" width="118" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="329" y="266" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <rect x="400" y="250" width="150" height="24" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="475" y="266" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#60a5fa">PROVIDER</text>
+              <!-- Legend -->
+              <rect x="10" y="290" width="14" height="14" rx="2" fill="#1a4d1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="30" y="301" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#94a3b8">You manage</text>
+              <rect x="110" y="290" width="14" height="14" rx="2" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+              <text x="130" y="301" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#94a3b8">Provider manages</text>
+              <!-- Examples row -->
+              <text x="69" y="325" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#475569">Your own servers</text>
+              <text x="199" y="325" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#475569">AWS EC2, Azure VMs</text>
+              <text x="329" y="325" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#475569">Heroku, Render</text>
+              <text x="475" y="325" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#475569">Gmail, Shopify</text>
+              <text x="280" y="352" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#9ca3af">Click any column header to learn more</text>
+            </svg>
+          </div>
           <figcaption class="p-2 small text-muted text-center"><strong>Figure 11.5:</strong> Levels of Cloud Abstraction.</figcaption>
         </figure>
+        <script>
+        (function(){
+          if(!window.showWebTip){window.showWebTip=function(e,T,B){var t=document.getElementById('_webtip_');if(!t){t=document.createElement('div');t.id='_webtip_';t.style.cssText='position:fixed;z-index:9999;max-width:320px;min-width:220px;background:#1e293b;color:#f1f5f9;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);padding:14px 16px 12px;font-size:.82rem;line-height:1.6;display:none;pointer-events:auto;';var b=document.createElement('button');b.innerHTML='&#215;';b.style.cssText='position:absolute;top:6px;right:10px;background:none;border:none;color:#94a3b8;font-size:1.1rem;cursor:pointer;line-height:1;padding:0;';b.onclick=function(){var x=document.getElementById('_webtip_');x.style.display='none';x.dataset.active='';};var td=document.createElement('div');td.id='_webtip_title_';td.style.cssText='font-weight:700;font-size:.88rem;color:#e2e8f0;margin-bottom:7px;padding-right:20px;border-bottom:1px solid #334155;padding-bottom:6px;';var bd=document.createElement('div');bd.id='_webtip_body_';bd.style.color='#cbd5e1';t.appendChild(b);t.appendChild(td);t.appendChild(bd);document.body.appendChild(t);}document.getElementById('_webtip_title_').innerHTML=T;document.getElementById('_webtip_body_').innerHTML=B;t.style.left='-9999px';t.style.top='-9999px';t.style.display='block';var tw=t.offsetWidth||300,th=t.offsetHeight||200,vw=window.innerWidth,vh=window.innerHeight,l,tp;if(e&&e.clientX!==undefined){l=e.clientX+18;if(l+tw>vw-8)l=e.clientX-tw-18;if(l<8)l=8;tp=e.clientY+18;if(tp+th>vh-8)tp=e.clientY-th-18;if(tp<8)tp=8;}else{l=Math.max(8,(vw-tw)/2);tp=80;}t.style.left=l+'px';t.style.top=tp+'px';};document.addEventListener('click',function(e){var t=document.getElementById('_webtip_');if(t&&t.style.display!=='none'&&!t.contains(e.target)){t.style.display='none';t.dataset.active='';}});}
+          var IAAS={
+            onprem:{t:'On-Premises',b:'You own and manage everything — hardware, cooling, power, networking, OS, and application. Maximum control, maximum responsibility. You buy servers, rack them, and maintain them 24/7. Most large enterprises still have some on-prem infrastructure.'},
+            iaas:{t:'IaaS — Infrastructure as a Service',b:'The provider manages physical hardware and virtualization. You get virtual machines (VMs) and are responsible for the OS up. Examples: <strong>AWS EC2</strong>, <strong>Azure Virtual Machines</strong>, <strong>DigitalOcean Droplets</strong>. Great when you need OS-level control.'},
+            paas:{t:'PaaS — Platform as a Service',b:'The provider manages everything up through the runtime and middleware. You only manage your application code and data. Examples: <strong>Heroku</strong>, <strong>Render</strong>, <strong>Railway</strong>. Great for developers who don\'t want to manage servers — just deploy code.'},
+            saas:{t:'SaaS — Software as a Service',b:'The provider manages everything. You just use the software through a browser. Examples: <strong>Gmail</strong>, <strong>Shopify</strong>, <strong>Salesforce</strong>, <strong>Slack</strong>. Zero infrastructure responsibility — perfect for end users and businesses that want to focus on their work.'}
+          };
+          window.iaasShow=function(id,evt){
+            var d=IAAS[id];if(!d)return;
+            if(evt)evt.stopPropagation();
+            var tip=document.getElementById('_webtip_');
+            if(tip&&tip.style.display!=='none'&&tip.dataset.active==='iaas:'+id){tip.style.display='none';tip.dataset.active='';document.querySelectorAll('#iaas-svg .iaas-rect').forEach(function(r){r.style.opacity='';});return;}
+            document.querySelectorAll('#iaas-svg .iaas-rect').forEach(function(r){r.style.opacity='.35';});
+            var sel=document.querySelector('#iaas-svg [data-iaas="'+id+'"] .iaas-rect');if(sel)sel.style.opacity='1';
+            window.showWebTip(evt,d.t,'<p style="margin:0">'+d.b+'</p>');
+            var t2=document.getElementById('_webtip_');if(t2)t2.dataset.active='iaas:'+id;
+          };
+        })();
+        </script>
         
+        <!-- FIGURE 11.6: INTERACTIVE ELASTICITY GRAPH -->
         <figure class="mb-4 mt-5 pt-5">
-          <a href="/images/the-cloud-professional-tools/figure-06.png" target="_blank" rel="noopener">
-            <img src="/images/the-cloud-professional-tools/figure-06.png" alt="Elasticity Graph" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Elasticity+Graph'">
-          </a>
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+            <svg id="elastic-svg" viewBox="0 0 560 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:400px;height:auto;display:block;" aria-label="Cloud elasticity graph comparing fixed traditional infrastructure versus auto-scaling cloud resources over time">
+              <defs>
+                <style>.elastic-node{cursor:pointer;}.elastic-node:hover .elastic-rect{opacity:.82;}</style>
+                <clipPath id="chartClip"><rect x="60" y="30" width="460" height="200"/></clipPath>
+              </defs>
+              <rect width="560" height="320" fill="#1e293b" rx="12"/>
+              <text x="280" y="22" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="12" font-weight="bold" fill="#94a3b8">CLOUD ELASTICITY — SCALE UP AND DOWN AUTOMATICALLY</text>
+              <!-- Chart area background -->
+              <rect x="60" y="30" width="460" height="200" fill="#0f172a" rx="4"/>
+              <!-- Y axis -->
+              <line x1="60" y1="30" x2="60" y2="230" stroke="#334155" stroke-width="1.5"/>
+              <text x="55" y="34" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">20</text>
+              <text x="55" y="84" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">15</text>
+              <text x="55" y="134" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">10</text>
+              <text x="55" y="184" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">5</text>
+              <text x="55" y="230" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">0</text>
+              <text x="22" y="130" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#64748b" transform="rotate(-90,22,130)">Servers / Resources</text>
+              <!-- Y grid lines -->
+              <line x1="60" y1="84" x2="520" y2="84" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="3,4"/>
+              <line x1="60" y1="134" x2="520" y2="134" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="3,4"/>
+              <line x1="60" y1="184" x2="520" y2="184" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="3,4"/>
+              <!-- X axis -->
+              <line x1="60" y1="230" x2="520" y2="230" stroke="#334155" stroke-width="1.5"/>
+              <text x="60" y="244" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">6am</text>
+              <text x="137" y="244" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">9am</text>
+              <text x="214" y="244" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">12pm</text>
+              <text x="291" y="244" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">3pm</text>
+              <text x="368" y="244" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">6pm</text>
+              <text x="445" y="244" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">9pm</text>
+              <text x="520" y="244" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">12am</text>
+              <!-- Actual demand curve area (fill) -->
+              <polygon points="60,220 137,190 214,74 291,84 368,114 445,200 520,220 520,230 60,230" fill="#1a3a1a" opacity=".7" clip-path="url(#chartClip)"/>
+              <!-- Traditional flat line (clickable) -->
+              <g class="elastic-node" data-elastic="traditional" onclick="elasticShow('traditional', event)">
+                <rect class="elastic-rect" x="60" y="30" width="460" height="55" fill="transparent"/>
+                <line x1="60" y1="54" x2="520" y2="54" stroke="#f87171" stroke-width="2.5" stroke-dasharray="8,4"/>
+                <text x="525" y="58" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#f87171">Traditional</text>
+                <text x="525" y="68" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#475569">(always 20)</text>
+              </g>
+              <!-- Elastic (demand-following) line (clickable) -->
+              <g class="elastic-node" data-elastic="elastic" onclick="elasticShow('elastic', event)">
+                <rect class="elastic-rect" x="60" y="60" width="460" height="170" fill="transparent"/>
+                <polyline points="60,220 137,190 214,74 291,84 368,114 445,200 520,220" fill="none" stroke="#4ade80" stroke-width="2.5" clip-path="url(#chartClip)"/>
+                <text x="525" y="108" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#4ade80">Cloud</text>
+                <text x="525" y="118" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#64748b">(elastic)</text>
+              </g>
+              <!-- Waste area label -->
+              <g class="elastic-node" data-elastic="waste" onclick="elasticShow('waste', event)">
+                <rect class="elastic-rect" x="80" y="58" width="120" height="110" rx="4" fill="transparent"/>
+                <text x="140" y="115" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#f87171" opacity=".8">💸 Wasted</text>
+                <text x="140" y="127" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#f87171" opacity=".8">capacity</text>
+              </g>
+              <!-- Peak marker -->
+              <g class="elastic-node" data-elastic="peak" onclick="elasticShow('peak', event)">
+                <rect class="elastic-rect" x="195" y="56" width="36" height="36" rx="4" fill="transparent"/>
+                <circle cx="214" cy="74" r="6" fill="#fbbf24" stroke="#f59e0b" stroke-width="1.5"/>
+                <text x="214" y="66" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#fbbf24">Peak</text>
+              </g>
+              <!-- Savings callout -->
+              <rect x="60" y="258" width="460" height="28" rx="6" fill="#0f172a" stroke="#4ade80" stroke-width="1"/>
+              <text x="290" y="276" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#4ade80">⚡ Cloud saves money: you pay only for what you USE, not what you might need at peak</text>
+              <text x="280" y="308" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#9ca3af">Click any area to learn more</text>
+            </svg>
+          </div>
           <figcaption class="p-2 small text-muted text-center"><strong>Figure 11.6:</strong> Elasticity: Scaling up and down automatically.</figcaption>
         </figure>
+        <script>
+        (function(){
+          if(!window.showWebTip){window.showWebTip=function(e,T,B){var t=document.getElementById('_webtip_');if(!t){t=document.createElement('div');t.id='_webtip_';t.style.cssText='position:fixed;z-index:9999;max-width:320px;min-width:220px;background:#1e293b;color:#f1f5f9;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);padding:14px 16px 12px;font-size:.82rem;line-height:1.6;display:none;pointer-events:auto;';var b=document.createElement('button');b.innerHTML='&#215;';b.style.cssText='position:absolute;top:6px;right:10px;background:none;border:none;color:#94a3b8;font-size:1.1rem;cursor:pointer;line-height:1;padding:0;';b.onclick=function(){var x=document.getElementById('_webtip_');x.style.display='none';x.dataset.active='';};var td=document.createElement('div');td.id='_webtip_title_';td.style.cssText='font-weight:700;font-size:.88rem;color:#e2e8f0;margin-bottom:7px;padding-right:20px;border-bottom:1px solid #334155;padding-bottom:6px;';var bd=document.createElement('div');bd.id='_webtip_body_';bd.style.color='#cbd5e1';t.appendChild(b);t.appendChild(td);t.appendChild(bd);document.body.appendChild(t);}document.getElementById('_webtip_title_').innerHTML=T;document.getElementById('_webtip_body_').innerHTML=B;t.style.left='-9999px';t.style.top='-9999px';t.style.display='block';var tw=t.offsetWidth||300,th=t.offsetHeight||200,vw=window.innerWidth,vh=window.innerHeight,l,tp;if(e&&e.clientX!==undefined){l=e.clientX+18;if(l+tw>vw-8)l=e.clientX-tw-18;if(l<8)l=8;tp=e.clientY+18;if(tp+th>vh-8)tp=e.clientY-th-18;if(tp<8)tp=8;}else{l=Math.max(8,(vw-tw)/2);tp=80;}t.style.left=l+'px';t.style.top=tp+'px';};document.addEventListener('click',function(e){var t=document.getElementById('_webtip_');if(t&&t.style.display!=='none'&&!t.contains(e.target)){t.style.display='none';t.dataset.active='';}});}
+          var EL={
+            traditional:{t:'Traditional Infrastructure (Red Line)',b:'A company buys servers for peak demand — say, Black Friday traffic. Those servers sit mostly idle the other 364 days. You pay for 20 servers even when you only need 2. This overprovisioning wastes ~70-80% of capacity on average.'},
+            elastic:{t:'Cloud Elastic Scaling (Green Line)',b:'Cloud auto-scaling adds servers when traffic rises and removes them when it drops. At 3am when no one is online, you might run 1 server. At noon peak, automatically scale to 18. You only pay for what\'s running — pay-as-you-go pricing.'},
+            waste:{t:'Wasted Capacity 💸',b:'The gap between the red (traditional) and green (elastic) lines at low-traffic hours is pure waste. Traditional infrastructure costs the same whether it\'s at 5% or 100% utilization. Cloud computing eliminates this waste.'},
+            peak:{t:'Traffic Peak (Noon)',b:'This is why traditional infrastructure had to be so over-provisioned — you had to handle your busiest moment. Cloud auto-scaling means you only pay for full capacity during the actual peak, and scale back down immediately after.'}
+          };
+          window.elasticShow=function(id,evt){
+            var d=EL[id];if(!d)return;
+            if(evt)evt.stopPropagation();
+            var tip=document.getElementById('_webtip_');
+            if(tip&&tip.style.display!=='none'&&tip.dataset.active==='el:'+id){tip.style.display='none';tip.dataset.active='';document.querySelectorAll('#elastic-svg .elastic-rect').forEach(function(r){r.style.opacity='';});return;}
+            document.querySelectorAll('#elastic-svg .elastic-rect').forEach(function(r){r.style.opacity='.35';});
+            var sel=document.querySelector('#elastic-svg [data-elastic="'+id+'"] .elastic-rect');if(sel)sel.style.opacity='1';
+            window.showWebTip(evt,d.t,'<p style="margin:0">'+d.b+'</p>');
+            var t2=document.getElementById('_webtip_');if(t2)t2.dataset.active='el:'+id;
+          };
+        })();
+        </script>
       </div>
     </div>
 

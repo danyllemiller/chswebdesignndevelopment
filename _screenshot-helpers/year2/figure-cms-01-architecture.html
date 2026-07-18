@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Figure 12.2 – CMS Architecture</title>
+<style>
+  body { margin:0; background:#0f172a; display:flex; align-items:center; justify-content:center; min-height:100vh; font-family:'Segoe UI',Arial,sans-serif; }
+  .diagram { background:#1e293b; border-radius:14px; padding:36px 48px; width:660px; }
+  h2 { text-align:center; color:#94a3b8; font-size:.9rem; text-transform:uppercase; letter-spacing:1px; margin:0 0 30px; }
+  .layers { display:flex; flex-direction:column; gap:16px; }
+  .layer { border-radius:10px; padding:18px 24px; display:flex; align-items:center; gap:20px; }
+  .layer-icon { font-size:2rem; flex-shrink:0; width:52px; text-align:center; }
+  .layer-text h3 { margin:0 0 4px; font-size:.9rem; }
+  .layer-text p { margin:0; font-size:.75rem; line-height:1.5; color:#94a3b8; }
+  .layer-content  { background:#1e3a5f; border:2px solid #3b82f6; }
+  .layer-database { background:#1a2e1a; border:2px solid #22c55e; }
+  .layer-theme    { background:#2e1a47; border:2px solid #a855f7; }
+  .layer-content h3  { color:#60a5fa; }
+  .layer-database h3 { color:#4ade80; }
+  .layer-theme h3    { color:#c084fc; }
+  .arrows { display:flex; justify-content:center; align-items:center; gap:4px; color:#475569; font-size:1.2rem; }
+  .arrow-down { text-align:center; color:#475569; font-size:1.1rem; line-height:1; padding:2px 0; }
+  .output { background:#0f172a; border-radius:10px; padding:14px 24px; display:flex; align-items:center; gap:16px; margin-top:4px; border:2px dashed #334155; }
+  .output-icon { font-size:1.8rem; }
+  .output-text { font-size:.8rem; color:#64748b; }
+  .output-text strong { color:#94a3b8; display:block; margin-bottom:2px; }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <h2>CMS Architecture — Separating Content from Design</h2>
+  <div class="layers">
+
+    <div class="layer layer-content">
+      <div class="layer-icon">📝</div>
+      <div class="layer-text">
+        <h3>Content Layer</h3>
+        <p>Blog posts, pages, images, and media uploaded by the author. Written once — can be displayed anywhere, in any design.</p>
+      </div>
+    </div>
+
+    <div class="arrow-down">⬇</div>
+
+    <div class="layer layer-database">
+      <div class="layer-icon">🗄️</div>
+      <div class="layer-text">
+        <h3>Database Layer (MySQL)</h3>
+        <p>Stores all content as structured data — posts, users, comments, settings. The CMS queries this database to retrieve content on demand.</p>
+      </div>
+    </div>
+
+    <div class="arrow-down">⬇</div>
+
+    <div class="layer layer-theme">
+      <div class="layer-icon">🎨</div>
+      <div class="layer-text">
+        <h3>Theme / Presentation Layer</h3>
+        <p>Templates and CSS that control how content looks — fonts, colors, layout. Swap the theme and the entire site redesigns instantly, with zero content changes.</p>
+      </div>
+    </div>
+
+    <div class="arrow-down">⬇</div>
+
+    <div class="output">
+      <div class="output-icon">🌐</div>
+      <div class="output-text">
+        <strong>Rendered Webpage (HTML sent to browser)</strong>
+        Content + Database + Theme combine at request time to produce the final HTML page the visitor sees.
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

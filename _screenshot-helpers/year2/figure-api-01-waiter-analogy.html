@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Figure 13.2 – API Waiter Analogy</title>
+<style>
+  body { margin:0; background:#0f172a; display:flex; align-items:center; justify-content:center; min-height:100vh; font-family:'Segoe UI',Arial,sans-serif; }
+  .diagram { background:#1e293b; border-radius:14px; padding:36px 40px; width:700px; }
+  h2 { text-align:center; color:#94a3b8; font-size:.9rem; text-transform:uppercase; letter-spacing:1px; margin:0 0 32px; }
+  .actors { display:flex; align-items:center; gap:0; }
+  .actor { display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; }
+  .actor-icon { font-size:3.2rem; }
+  .actor-label { font-size:.85rem; font-weight:700; color:#e2e8f0; }
+  .actor-sublabel { font-size:.72rem; color:#64748b; text-align:center; line-height:1.4; }
+  .actor-box { background:#0f172a; border-radius:8px; padding:8px 12px; font-size:.7rem; color:#94a3b8; text-align:center; margin-top:4px; line-height:1.4; }
+  .client-box  { border:1px solid #3b82f6; }
+  .waiter-box  { border:1px solid #f59e0b; }
+  .kitchen-box { border:1px solid #10b981; }
+  .arrows { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; flex:0 0 80px; }
+  .arr-label { font-size:.65rem; color:#64748b; text-align:center; white-space:nowrap; }
+  .arr { font-size:1.4rem; }
+  .arr-req { color:#f59e0b; }
+  .arr-res { color:#10b981; }
+  .bottom-note { margin-top:28px; background:#0f172a; border-radius:8px; padding:14px 18px; font-size:.78rem; color:#64748b; text-align:center; border-left:3px solid #f59e0b; line-height:1.6; }
+  .http-row { display:flex; gap:10px; justify-content:center; margin-top:16px; flex-wrap:wrap; }
+  .http-badge { border-radius:6px; padding:4px 10px; font-family:Consolas,monospace; font-size:.75rem; font-weight:700; }
+  .get    { background:#1e3a5f; color:#60a5fa; }
+  .post   { background:#1a2e1a; color:#4ade80; }
+  .put    { background:#2e1a47; color:#c084fc; }
+  .delete { background:#3c1f1f; color:#f87171; }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <h2>The API as the Waiter / Messenger</h2>
+
+  <div class="actors">
+    <!-- CLIENT -->
+    <div class="actor">
+      <div class="actor-icon">👤</div>
+      <div class="actor-label">Client</div>
+      <div class="actor-sublabel">Your app<br>(the browser)</div>
+      <div class="actor-box client-box">"I'd like the<br>weather for<br>Las Vegas, please"</div>
+    </div>
+
+    <!-- Arrow: request -->
+    <div class="arrows">
+      <div class="arr-label">HTTP Request</div>
+      <div class="arr arr-req">→</div>
+      <div class="arr-label" style="color:#f59e0b;">GET /weather<br>?city=Las+Vegas</div>
+      <div style="height:16px;"></div>
+      <div class="arr-label" style="color:#10b981;">JSON response</div>
+      <div class="arr arr-res">←</div>
+      <div class="arr-label">HTTP Response</div>
+    </div>
+
+    <!-- API / WAITER -->
+    <div class="actor">
+      <div class="actor-icon">🧑‍💼</div>
+      <div class="actor-label">API</div>
+      <div class="actor-sublabel">The Waiter<br>(the middleman)</div>
+      <div class="actor-box waiter-box">Takes your order<br>to the kitchen.<br>Returns the food.<br>You never see<br>the kitchen.</div>
+    </div>
+
+    <!-- Arrow: to kitchen -->
+    <div class="arrows">
+      <div class="arr-label">DB query /<br>business logic</div>
+      <div class="arr arr-req">→</div>
+      <div style="height:20px;"></div>
+      <div class="arr arr-res">←</div>
+      <div class="arr-label">Processed data</div>
+    </div>
+
+    <!-- SERVER / KITCHEN -->
+    <div class="actor">
+      <div class="actor-icon">🍳</div>
+      <div class="actor-label">Server</div>
+      <div class="actor-sublabel">The Kitchen<br>(hidden backend)</div>
+      <div class="actor-box kitchen-box">Database, logic,<br>secrets. Client<br>never accesses<br>this directly.</div>
+    </div>
+  </div>
+
+  <div class="http-row">
+    <span class="http-badge get">GET — Read data</span>
+    <span class="http-badge post">POST — Send / Create</span>
+    <span class="http-badge put">PUT — Update</span>
+    <span class="http-badge delete">DELETE — Remove</span>
+  </div>
+
+  <div class="bottom-note">
+    The API is a <strong style="color:#f59e0b;">contract</strong> — it defines exactly what requests are allowed and what format the response comes back in (usually <strong style="color:#fff;">JSON</strong>). The client never needs to know how the server stores its data.
+  </div>
+</div>
+</body>
+</html>

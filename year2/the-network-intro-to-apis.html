@@ -171,12 +171,109 @@
       </div>
       
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <!-- FIGURE 13.2: INTERACTIVE API WAITER ANALOGY -->
         <figure class="mb-4">
-          <a href="/images/the-network-intro-to-apis/figure-01.png" target="_blank" rel="noopener">
-            <img src="/images/the-network-intro-to-apis/figure-01.png" alt="Diagram of a Client, API Waiter, and Server Kitchen" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=API+Waiter+Analogy'">
-          </a>
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+            <svg id="api-svg" viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:380px;height:auto;display:block;" aria-label="API Waiter analogy showing Client, API, and Server as restaurant actors">
+              <defs><style>.api-node{cursor:pointer;}.api-node:hover .api-rect{opacity:.82;}</style></defs>
+              <rect width="600" height="320" fill="#1e293b" rx="12"/>
+              <text x="300" y="26" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="12" font-weight="bold" fill="#94a3b8">THE API AS THE WAITER / MESSENGER</text>
+              <!-- CLIENT -->
+              <g class="api-node" data-api="client" onclick="apiShow('client', event)">
+                <rect class="api-rect" x="20" y="44" width="148" height="168" rx="10" fill="#0f172a" stroke="#3b82f6" stroke-width="2"/>
+                <text x="94" y="82" text-anchor="middle" font-size="36">👤</text>
+                <text x="94" y="104" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="bold" fill="#60a5fa">Client</text>
+                <text x="94" y="120" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#64748b">Your app / browser</text>
+                <rect x="34" y="130" width="120" height="70" rx="6" fill="#1e3a5f"/>
+                <text x="94" y="148" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#93c5fd">"Give me the weather</text>
+                <text x="94" y="162" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#93c5fd">for Las Vegas, please"</text>
+                <text x="94" y="180" text-anchor="middle" font-family="Consolas,monospace" font-size="9" fill="#475569">GET /weather?city=LV</text>
+              </g>
+              <!-- Arrow: request right -->
+              <g class="api-node" data-api="request" onclick="apiShow('request', event)">
+                <rect class="api-rect" x="168" y="80" width="68" height="96" rx="4" fill="transparent"/>
+                <text x="202" y="110" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#f59e0b">HTTP</text>
+                <text x="202" y="122" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#f59e0b">Request</text>
+                <line x1="170" y1="128" x2="232" y2="128" stroke="#f59e0b" stroke-width="2"/>
+                <polygon points="228,123 238,128 228,133" fill="#f59e0b"/>
+                <text x="202" y="150" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#22c55e">JSON</text>
+                <text x="202" y="162" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#22c55e">Response</text>
+                <line x1="236" y1="168" x2="170" y2="168" stroke="#22c55e" stroke-width="2"/>
+                <polygon points="174,163 164,168 174,173" fill="#22c55e"/>
+              </g>
+              <!-- API / WAITER -->
+              <g class="api-node" data-api="api" onclick="apiShow('api', event)">
+                <rect class="api-rect" x="236" y="44" width="128" height="168" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
+                <text x="300" y="82" text-anchor="middle" font-size="36">🧑‍💼</text>
+                <text x="300" y="104" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="bold" fill="#fbbf24">API</text>
+                <text x="300" y="120" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#64748b">The Waiter</text>
+                <rect x="250" y="130" width="100" height="70" rx="6" fill="#2d2200"/>
+                <text x="300" y="150" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#fcd34d">Takes your request</text>
+                <text x="300" y="164" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#fcd34d">to the kitchen.</text>
+                <text x="300" y="178" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#fcd34d">You never see back.</text>
+              </g>
+              <!-- Arrow: to kitchen -->
+              <g class="api-node" data-api="backplane" onclick="apiShow('backplane', event)">
+                <rect class="api-rect" x="364" y="80" width="68" height="96" rx="4" fill="transparent"/>
+                <text x="398" y="110" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#94a3b8">DB query /</text>
+                <text x="398" y="122" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#94a3b8">logic</text>
+                <line x1="366" y1="128" x2="428" y2="128" stroke="#94a3b8" stroke-width="2"/>
+                <polygon points="424,123 434,128 424,133" fill="#94a3b8"/>
+                <line x1="432" y1="168" x2="368" y2="168" stroke="#94a3b8" stroke-width="2"/>
+                <polygon points="372,163 362,168 372,173" fill="#94a3b8"/>
+                <text x="398" y="150" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#94a3b8">Processed</text>
+                <text x="398" y="162" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#94a3b8">data</text>
+              </g>
+              <!-- SERVER / KITCHEN -->
+              <g class="api-node" data-api="server" onclick="apiShow('server', event)">
+                <rect class="api-rect" x="432" y="44" width="148" height="168" rx="10" fill="#0f172a" stroke="#22c55e" stroke-width="2"/>
+                <text x="506" y="82" text-anchor="middle" font-size="36">🍳</text>
+                <text x="506" y="104" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="bold" fill="#4ade80">Server</text>
+                <text x="506" y="120" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#64748b">The Kitchen</text>
+                <rect x="446" y="130" width="120" height="70" rx="6" fill="#0a1f0a"/>
+                <text x="506" y="150" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#86efac">Database, logic,</text>
+                <text x="506" y="164" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#86efac">secrets. Client never</text>
+                <text x="506" y="178" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#86efac">accesses this directly.</text>
+              </g>
+              <!-- HTTP method badges -->
+              <rect x="20" y="228" width="80" height="22" rx="4" fill="#1e3a5f"/>
+              <text x="60" y="243" text-anchor="middle" font-family="Consolas,monospace" font-size="10" font-weight="bold" fill="#60a5fa">GET — Read</text>
+              <rect x="108" y="228" width="90" height="22" rx="4" fill="#1a2e1a"/>
+              <text x="153" y="243" text-anchor="middle" font-family="Consolas,monospace" font-size="10" font-weight="bold" fill="#4ade80">POST — Create</text>
+              <rect x="206" y="228" width="84" height="22" rx="4" fill="#2e1a47"/>
+              <text x="248" y="243" text-anchor="middle" font-family="Consolas,monospace" font-size="10" font-weight="bold" fill="#c084fc">PUT — Update</text>
+              <rect x="298" y="228" width="96" height="22" rx="4" fill="#3c1f1f"/>
+              <text x="346" y="243" text-anchor="middle" font-family="Consolas,monospace" font-size="10" font-weight="bold" fill="#f87171">DELETE — Remove</text>
+              <!-- Contract note -->
+              <rect x="20" y="258" width="560" height="30" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+              <text x="300" y="278" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#64748b">The API is a <tspan font-weight="bold" fill="#f59e0b">contract</tspan> — it defines what requests are allowed and what format the response comes back in (usually <tspan font-weight="bold" fill="#fff">JSON</tspan>)</text>
+              <text x="300" y="308" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#9ca3af">Click any actor to learn more</text>
+            </svg>
+          </div>
           <figcaption class="p-2 small text-muted text-center"><strong>Figure 13.2:</strong> The API as the Waiter/Messenger.</figcaption>
         </figure>
+        <script>
+        (function(){
+          if(!window.showWebTip){window.showWebTip=function(e,T,B){var t=document.getElementById('_webtip_');if(!t){t=document.createElement('div');t.id='_webtip_';t.style.cssText='position:fixed;z-index:9999;max-width:320px;min-width:220px;background:#1e293b;color:#f1f5f9;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);padding:14px 16px 12px;font-size:.82rem;line-height:1.6;display:none;pointer-events:auto;';var b=document.createElement('button');b.innerHTML='&#215;';b.style.cssText='position:absolute;top:6px;right:10px;background:none;border:none;color:#94a3b8;font-size:1.1rem;cursor:pointer;line-height:1;padding:0;';b.onclick=function(){var x=document.getElementById('_webtip_');x.style.display='none';x.dataset.active='';};var td=document.createElement('div');td.id='_webtip_title_';td.style.cssText='font-weight:700;font-size:.88rem;color:#e2e8f0;margin-bottom:7px;padding-right:20px;border-bottom:1px solid #334155;padding-bottom:6px;';var bd=document.createElement('div');bd.id='_webtip_body_';bd.style.color='#cbd5e1';t.appendChild(b);t.appendChild(td);t.appendChild(bd);document.body.appendChild(t);}document.getElementById('_webtip_title_').innerHTML=T;document.getElementById('_webtip_body_').innerHTML=B;t.style.left='-9999px';t.style.top='-9999px';t.style.display='block';var tw=t.offsetWidth||300,th=t.offsetHeight||200,vw=window.innerWidth,vh=window.innerHeight,l,tp;if(e&&e.clientX!==undefined){l=e.clientX+18;if(l+tw>vw-8)l=e.clientX-tw-18;if(l<8)l=8;tp=e.clientY+18;if(tp+th>vh-8)tp=e.clientY-th-18;if(tp<8)tp=8;}else{l=Math.max(8,(vw-tw)/2);tp=80;}t.style.left=l+'px';t.style.top=tp+'px';};document.addEventListener('click',function(e){var t=document.getElementById('_webtip_');if(t&&t.style.display!=='none'&&!t.contains(e.target)){t.style.display='none';t.dataset.active='';}});}
+          var API={
+            client:{t:'Client (The Diner)',b:'Your browser or app. It makes requests to the API but never talks directly to the database or server internals. It only knows how to ask the waiter — it never goes into the kitchen.'},
+            api:{t:'API (The Waiter)',b:'The API is the middleman. It receives requests in a defined format (URL + HTTP method), validates them, passes them to the server, and returns the response. It\'s a contract: both sides agree on the format.'},
+            server:{t:'Server (The Kitchen)',b:'The back-end: databases, business logic, authentication, secrets. The client never accesses this directly — it\'s hidden behind the API. This is why you can change your entire back-end without the client knowing.'},
+            request:{t:'HTTP Request → Response',b:'Requests carry a method (GET, POST, PUT, DELETE), a URL, and optional data. Responses carry a status code (200 OK, 404 Not Found, 500 Error) and usually a JSON body with the actual data.'},
+            backplane:{t:'Server-Side Processing',b:'The API passes the validated request to the server\'s business logic, which queries the database, applies rules, and returns processed data. This all happens hidden from the client — the kitchen prepares the meal, the waiter delivers it.'}
+          };
+          window.apiShow=function(id,evt){
+            var d=API[id];if(!d)return;
+            if(evt)evt.stopPropagation();
+            var tip=document.getElementById('_webtip_');
+            if(tip&&tip.style.display!=='none'&&tip.dataset.active==='api:'+id){tip.style.display='none';tip.dataset.active='';document.querySelectorAll('#api-svg .api-rect').forEach(function(r){r.style.opacity='';});return;}
+            document.querySelectorAll('#api-svg .api-rect').forEach(function(r){r.style.opacity='.35';});
+            var sel=document.querySelector('#api-svg [data-api="'+id+'"] .api-rect');if(sel)sel.style.opacity='1';
+            window.showWebTip(evt,d.t,'<p style="margin:0">'+d.b+'</p>');
+            var t2=document.getElementById('_webtip_');if(t2)t2.dataset.active='api:'+id;
+          };
+        })();
+        </script>
         
         <div class="card roadmap-card border-warning shadow-sm mt-4 text-start">
             <div class="card-header bg-warning text-dark fw-bold">Pro Tip:</div>
@@ -271,12 +368,117 @@
       </div>
       
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+          <!-- FIGURE 13.4: INTERACTIVE SYNC VS ASYNC DIAGRAM -->
           <figure class="mb-4">
-              <a href="/images/the-network-intro-to-apis/figure-03.png" target="_blank" rel="noopener">
-                <img src="/images/the-network-intro-to-apis/figure-03.png" alt="Visual comparison of synchronous vs asynchronous execution." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Sync+vs+Async'">
-              </a>
-              <figcaption class="p-2 small text-muted text-center"><strong>Figure 13.4:</strong> Synchronous vs Asynchronous execution.</figcaption>
+            <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+              <svg id="sync-svg" viewBox="0 0 580 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:380px;height:auto;display:block;" aria-label="Synchronous vs Asynchronous execution comparison showing blocking versus non-blocking task handling">
+                <defs><style>.sync-node{cursor:pointer;}.sync-node:hover .sync-rect{opacity:.82;}</style></defs>
+                <rect width="580" height="360" fill="#1e293b" rx="12"/>
+                <text x="290" y="26" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="12" font-weight="bold" fill="#94a3b8">SYNCHRONOUS vs ASYNCHRONOUS EXECUTION</text>
+                <!-- Column divider -->
+                <line x1="290" y1="36" x2="290" y2="330" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,4"/>
+                <!-- Left header: Sync -->
+                <g class="sync-node" data-sync="sync" onclick="syncShow('sync', event)">
+                  <rect class="sync-rect" x="10" y="38" width="270" height="28" rx="6" fill="#3c1f1f" stroke="#f87171" stroke-width="1.5"/>
+                  <text x="145" y="57" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="11" font-weight="bold" fill="#f87171">❌ Synchronous (Blocking)</text>
+                </g>
+                <!-- Right header: Async -->
+                <g class="sync-node" data-sync="async" onclick="syncShow('async', event)">
+                  <rect class="sync-rect" x="300" y="38" width="270" height="28" rx="6" fill="#0f2d1a" stroke="#4ade80" stroke-width="1.5"/>
+                  <text x="435" y="57" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="11" font-weight="bold" fill="#4ade80">✅ Asynchronous (Non-Blocking)</text>
+                </g>
+                <!-- Time axes -->
+                <line x1="36" y1="76" x2="36" y2="290" stroke="#475569" stroke-width="1.5"/>
+                <text x="32" y="76" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">0s</text>
+                <text x="32" y="136" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">2s</text>
+                <text x="32" y="196" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">4s</text>
+                <text x="32" y="256" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">6s</text>
+                <text x="36" y="295" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">↓</text>
+                <line x1="316" y1="76" x2="316" y2="290" stroke="#475569" stroke-width="1.5"/>
+                <text x="312" y="76" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">0s</text>
+                <text x="312" y="116" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">1s</text>
+                <text x="312" y="156" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">2s</text>
+                <text x="316" y="295" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#475569">↓</text>
+                <!-- SYNC: Task 1 blocking -->
+                <g class="sync-node" data-sync="blocking" onclick="syncShow('blocking', event)">
+                  <rect class="sync-rect" x="44" y="78" width="238" height="54" rx="5" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+                  <text x="163" y="98" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#60a5fa">fetch('/api/user')</text>
+                  <text x="163" y="112" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#64748b">⏳ WAITING for response...</text>
+                  <text x="163" y="124" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#f87171">Everything else BLOCKED</text>
+                </g>
+                <!-- SYNC: Task 2 blocked -->
+                <rect x="44" y="136" width="238" height="52" rx="5" fill="#1c1c2e" stroke="#374151" stroke-width="1.5" stroke-dasharray="5,3"/>
+                <text x="163" y="160" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#4b5563">fetch('/api/posts')</text>
+                <text x="163" y="175" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#4b5563">⛔ Can't start — blocked</text>
+                <!-- SYNC: Task 3 blocked -->
+                <rect x="44" y="192" width="238" height="52" rx="5" fill="#1c1c2e" stroke="#374151" stroke-width="1.5" stroke-dasharray="5,3"/>
+                <text x="163" y="216" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#4b5563">renderPage()</text>
+                <text x="163" y="231" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#4b5563">⛔ Can't start — blocked</text>
+                <!-- SYNC: Total -->
+                <g class="sync-node" data-sync="sync-time" onclick="syncShow('sync-time', event)">
+                  <rect class="sync-rect" x="44" y="252" width="238" height="36" rx="5" fill="#3c1f1f" stroke="#f87171" stroke-width="1.5"/>
+                  <text x="163" y="269" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="11" font-weight="bold" fill="#f87171">Total wait: ~6 seconds 😴</text>
+                  <text x="163" y="281" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#fca5a5">Page freezes the whole time</text>
+                </g>
+                <!-- ASYNC: Tasks start simultaneously -->
+                <g class="sync-node" data-sync="concurrent" onclick="syncShow('concurrent', event)">
+                  <rect class="sync-rect" x="324" y="78" width="116" height="30" rx="5" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+                  <text x="382" y="92" text-anchor="middle" font-family="Consolas,monospace" font-size="9" fill="#60a5fa">fetch('/api/user')</text>
+                  <text x="382" y="104" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#64748b">Started ↗</text>
+                  <rect x="448" y="78" width="116" height="30" rx="5" fill="#1a2e1a" stroke="#22c55e" stroke-width="1.5"/>
+                  <text x="506" y="92" text-anchor="middle" font-family="Consolas,monospace" font-size="9" fill="#4ade80">fetch('/api/posts')</text>
+                  <text x="506" y="104" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#64748b">Started ↗</text>
+                  <!-- Waiting bars -->
+                  <rect x="324" y="112" width="116" height="62" rx="4" fill="#1e3a5f" opacity=".6"/>
+                  <text x="382" y="142" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#60a5fa">⏳ waiting</text>
+                  <text x="382" y="155" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#64748b">(non-blocking)</text>
+                  <text x="382" y="171" text-anchor="middle" font-family="Consolas,monospace" font-size="9" fill="#60a5fa">✓ Done!</text>
+                  <rect x="448" y="112" width="116" height="92" rx="4" fill="#1a2e1a" opacity=".6"/>
+                  <text x="506" y="152" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#4ade80">⏳ waiting</text>
+                  <text x="506" y="165" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8" fill="#64748b">(non-blocking)</text>
+                  <text x="506" y="201" text-anchor="middle" font-family="Consolas,monospace" font-size="9" fill="#4ade80">✓ Done!</text>
+                </g>
+                <!-- ASYNC: JS keeps running -->
+                <rect x="324" y="180" width="116" height="24" rx="4" fill="#2e1a47" stroke="#a855f7" stroke-width="1"/>
+                <text x="382" y="196" text-anchor="middle" font-family="Consolas,monospace" font-size="8.5" fill="#c084fc">renderSkeleton() ▶</text>
+                <!-- ASYNC: Promise.all -->
+                <rect x="324" y="210" width="240" height="36" rx="5" fill="#1a2e1a" stroke="#22c55e" stroke-width="1.5"/>
+                <text x="444" y="225" text-anchor="middle" font-family="Consolas,monospace" font-size="9.5" fill="#4ade80">Promise.all([user, posts])</text>
+                <text x="444" y="240" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" fill="#64748b">Both resolved → renderPage()</text>
+                <!-- ASYNC: Total -->
+                <g class="sync-node" data-sync="async-time" onclick="syncShow('async-time', event)">
+                  <rect class="sync-rect" x="324" y="252" width="240" height="36" rx="5" fill="#0f2d1a" stroke="#4ade80" stroke-width="1.5"/>
+                  <text x="444" y="269" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="11" font-weight="bold" fill="#4ade80">Total wait: ~2 seconds ⚡</text>
+                  <text x="444" y="281" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#86efac">Page stays responsive</text>
+                </g>
+                <text x="290" y="344" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" fill="#9ca3af">Click any block to learn more</text>
+              </svg>
+            </div>
+            <figcaption class="p-2 small text-muted text-center"><strong>Figure 13.4:</strong> Synchronous vs Asynchronous execution.</figcaption>
           </figure>
+          <script>
+          (function(){
+            if(!window.showWebTip){window.showWebTip=function(e,T,B){var t=document.getElementById('_webtip_');if(!t){t=document.createElement('div');t.id='_webtip_';t.style.cssText='position:fixed;z-index:9999;max-width:320px;min-width:220px;background:#1e293b;color:#f1f5f9;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);padding:14px 16px 12px;font-size:.82rem;line-height:1.6;display:none;pointer-events:auto;';var b=document.createElement('button');b.innerHTML='&#215;';b.style.cssText='position:absolute;top:6px;right:10px;background:none;border:none;color:#94a3b8;font-size:1.1rem;cursor:pointer;line-height:1;padding:0;';b.onclick=function(){var x=document.getElementById('_webtip_');x.style.display='none';x.dataset.active='';};var td=document.createElement('div');td.id='_webtip_title_';td.style.cssText='font-weight:700;font-size:.88rem;color:#e2e8f0;margin-bottom:7px;padding-right:20px;border-bottom:1px solid #334155;padding-bottom:6px;';var bd=document.createElement('div');bd.id='_webtip_body_';bd.style.color='#cbd5e1';t.appendChild(b);t.appendChild(td);t.appendChild(bd);document.body.appendChild(t);}document.getElementById('_webtip_title_').innerHTML=T;document.getElementById('_webtip_body_').innerHTML=B;t.style.left='-9999px';t.style.top='-9999px';t.style.display='block';var tw=t.offsetWidth||300,th=t.offsetHeight||200,vw=window.innerWidth,vh=window.innerHeight,l,tp;if(e&&e.clientX!==undefined){l=e.clientX+18;if(l+tw>vw-8)l=e.clientX-tw-18;if(l<8)l=8;tp=e.clientY+18;if(tp+th>vh-8)tp=e.clientY-th-18;if(tp<8)tp=8;}else{l=Math.max(8,(vw-tw)/2);tp=80;}t.style.left=l+'px';t.style.top=tp+'px';};document.addEventListener('click',function(e){var t=document.getElementById('_webtip_');if(t&&t.style.display!=='none'&&!t.contains(e.target)){t.style.display='none';t.dataset.active='';}});}
+            var SYNC={
+              sync:{t:'Synchronous (Blocking)',b:'Each operation must fully complete before the next one starts. Like waiting in a single line — the second customer can\'t be served until the first is done. In JavaScript, this means the browser freezes until each network request resolves.'},
+              async:{t:'Asynchronous (Non-Blocking)',b:'Operations are kicked off and execution continues immediately — you don\'t wait for the result. When the result arrives, a callback or Promise resolves. Like a restaurant where the waiter takes all orders and multiple tables are served simultaneously.'},
+              blocking:{t:'Blocking fetch()',b:'In synchronous code, <code style="color:#60a5fa">fetch(\'/api/user\')</code> starts and nothing else can run until it finishes. If it takes 2 seconds, the UI is frozen for 2 seconds. Users see a frozen page. This is why blocking code is avoided in browsers.'},
+              concurrent:{t:'Concurrent fetches (Async)',b:'Both <code style="color:#60a5fa">fetch(\'/api/user\')</code> and <code style="color:#4ade80">fetch(\'/api/posts\')</code> start at the same moment. They run concurrently in the background. Meanwhile, JavaScript continues executing — you can render a skeleton UI while waiting.'},
+              'sync-time':{t:'6 Seconds Total — Blocked',b:'3 operations × 2 seconds each = 6 seconds of freezing. The user stares at a blank screen. This compounds badly with slow networks. This is why synchronous network code in the browser is either impossible or strongly discouraged.'},
+              'async-time':{t:'2 Seconds Total — Responsive',b:'Both fetches run simultaneously. The longer one (2s) determines total wait — not the sum. <code style="color:#4ade80">Promise.all()</code> waits for both and resolves when the last one completes. The page was already rendering a skeleton while waiting — much better UX.'}
+            };
+            window.syncShow=function(id,evt){
+              var d=SYNC[id];if(!d)return;
+              if(evt)evt.stopPropagation();
+              var tip=document.getElementById('_webtip_');
+              if(tip&&tip.style.display!=='none'&&tip.dataset.active==='sync:'+id){tip.style.display='none';tip.dataset.active='';document.querySelectorAll('#sync-svg .sync-rect').forEach(function(r){r.style.opacity='';});return;}
+              document.querySelectorAll('#sync-svg .sync-rect').forEach(function(r){r.style.opacity='.35';});
+              var sel=document.querySelector('#sync-svg [data-sync="'+id+'"] .sync-rect');if(sel)sel.style.opacity='1';
+              window.showWebTip(evt,d.t,'<p style="margin:0">'+d.b+'</p>');
+              var t2=document.getElementById('_webtip_');if(t2)t2.dataset.active='sync:'+id;
+            };
+          })();
+          </script>
           <div class="card roadmap-card border-warning shadow-sm mt-4 text-start">
             <div class="card-header bg-warning text-dark fw-bold">Pro Tip:</div>
             <div class="card-body small">

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Figure 14.2 – LocalStorage via Browser Console</title>
+<style>
+  body { margin: 0; background: #1e1e1e; font-family: 'Consolas', 'Courier New', monospace; }
+  /* Simulated Chrome DevTools console */
+  .devtools { width: 780px; margin: 0 auto; background: #1e1e1e; color: #d4d4d4; }
+  .devtools-tabs { display: flex; background: #2d2d2d; border-bottom: 1px solid #444; padding: 0 8px; }
+  .tab { padding: 8px 16px; font-size: 12px; color: #aaa; cursor: default; }
+  .tab.active { color: #4fc3f7; border-bottom: 2px solid #4fc3f7; }
+  .console-body { padding: 8px 0; min-height: 300px; }
+  .line { display: flex; padding: 3px 12px; font-size: 13px; line-height: 1.5; border-bottom: 1px solid #2a2a2a; }
+  .line:hover { background: #252525; }
+  .prompt { color: #4fc3f7; margin-right: 8px; user-select: none; }
+  .cmd { color: #ce9178; }
+  .output { color: #b5cea8; }
+  .output-str { color: #ce9178; }
+  .output-obj { color: #9cdcfe; }
+  .comment { color: #6a9955; font-style: italic; }
+  .error-line { background: #3c1f1f; }
+  .warn-line  { background: #3c2f00; }
+  .info { color: #75bfff; }
+  .divider { height: 1px; background: #3a3a3a; margin: 6px 0; }
+  /* Storage panel */
+  .storage-panel { border-top: 1px solid #444; }
+  .storage-tabs { display:flex; background: #252525; }
+  .storage-tab { padding: 6px 14px; font-size: 11px; color: #aaa; }
+  .storage-tab.active { color: #4fc3f7; border-bottom: 2px solid #4fc3f7; }
+  .storage-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .storage-table th { background: #2d2d2d; color: #888; font-weight: normal; padding: 6px 12px; text-align: left; border-bottom: 1px solid #3a3a3a; }
+  .storage-table td { padding: 6px 12px; color: #d4d4d4; border-bottom: 1px solid #2a2a2a; }
+  .storage-table tr:hover td { background: #252525; }
+  .key-col { color: #9cdcfe; }
+  .val-col { color: #ce9178; }
+</style>
+</head>
+<body>
+<div class="devtools">
+  <div class="devtools-tabs">
+    <div class="tab">Elements</div>
+    <div class="tab active">Console</div>
+    <div class="tab">Sources</div>
+    <div class="tab">Application</div>
+    <div class="tab">Network</div>
+  </div>
+
+  <div class="console-body">
+    <div class="line"><span class="comment">// Step 1: Save an order to localStorage</span></div>
+    <div class="line">
+      <span class="prompt">&gt;</span>
+      <span class="cmd">localStorage.setItem(<span class="output-str">'lastOrder'</span>, JSON.stringify({ item: <span class="output-str">'Propeller'</span>, qty: 2, price: 12.99 }))</span>
+    </div>
+    <div class="line"><span style="padding-left:20px;color:#888;">← undefined</span></div>
+
+    <div class="divider"></div>
+
+    <div class="line"><span class="comment">// Step 2: Read it back</span></div>
+    <div class="line">
+      <span class="prompt">&gt;</span>
+      <span class="cmd">localStorage.getItem(<span class="output-str">'lastOrder'</span>)</span>
+    </div>
+    <div class="line"><span style="padding-left:20px;" class="output-str">'{"item":"Propeller","qty":2,"price":12.99}'</span></div>
+
+    <div class="divider"></div>
+
+    <div class="line"><span class="comment">// Step 3: Parse it back into an object</span></div>
+    <div class="line">
+      <span class="prompt">&gt;</span>
+      <span class="cmd">JSON.parse(localStorage.getItem(<span class="output-str">'lastOrder'</span>))</span>
+    </div>
+    <div class="line">
+      <span style="padding-left:20px;" class="output-obj">▶ {item: 'Propeller', qty: 2, price: 12.99}</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="line"><span class="comment">// Step 4: Check how many keys are stored</span></div>
+    <div class="line">
+      <span class="prompt">&gt;</span>
+      <span class="cmd">localStorage.length</span>
+    </div>
+    <div class="line"><span style="padding-left:20px;" class="output">1</span></div>
+  </div>
+
+  <!-- Application > Local Storage panel -->
+  <div class="storage-panel">
+    <div class="storage-tabs">
+      <div class="storage-tab">Cookies</div>
+      <div class="storage-tab active">Local Storage › localhost</div>
+      <div class="storage-tab">Session Storage</div>
+    </div>
+    <table class="storage-table">
+      <thead>
+        <tr><th>Key</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="key-col">lastOrder</td>
+          <td class="val-col">{"item":"Propeller","qty":2,"price":12.99}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>

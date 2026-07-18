@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Figure 10.2 – Canvas (0,0) is Top-Left</title>
+<style>
+  body { margin:0; background:#1e1e2e; display:flex; align-items:center; justify-content:center; min-height:100vh; font-family:'Segoe UI',Arial,sans-serif; }
+</style>
+</head>
+<body>
+<svg width="660" height="400" viewBox="0 0 660 400">
+  <rect width="660" height="400" fill="#1e1e2e" rx="12"/>
+  <text x="330" y="30" text-anchor="middle" font-family="Segoe UI,Arial" font-size="13" font-weight="bold" fill="#cdd6f4" letter-spacing=".5">HTML5 CANVAS COORDINATE SYSTEM</text>
+
+  <!-- Canvas box -->
+  <rect x="100" y="55" width="460" height="290" fill="#11111b" stroke="#6c7086" stroke-width="2" rx="4"/>
+  <text x="330" y="75" text-anchor="middle" font-family="Consolas,monospace" font-size="11" fill="#6c7086">&lt;canvas width="460" height="290"&gt;</text>
+
+  <!-- X axis arrow -->
+  <line x1="100" y1="55" x2="555" y2="55" stroke="#89b4fa" stroke-width="2.5" marker-end="url(#xarr)"/>
+  <!-- Y axis arrow -->
+  <line x1="100" y1="55" x2="100" y2="340" stroke="#89b4fa" stroke-width="2.5" marker-end="url(#yarr)"/>
+
+  <defs>
+    <marker id="xarr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#89b4fa"/>
+    </marker>
+    <marker id="yarr" markerWidth="8" markerHeight="8" refX="3" refY="6" orient="auto">
+      <path d="M0,0 L6,0 L3,8 z" fill="#89b4fa"/>
+    </marker>
+  </defs>
+
+  <!-- Axis labels -->
+  <text x="565" y="59" font-family="Consolas,monospace" font-size="13" fill="#89b4fa" font-weight="bold">X →</text>
+  <text x="82" y="352" font-family="Consolas,monospace" font-size="13" fill="#89b4fa" font-weight="bold">Y ↓</text>
+
+  <!-- Origin point -->
+  <circle cx="100" cy="55" r="6" fill="#f38ba8"/>
+  <text x="108" y="48" font-family="Consolas,monospace" font-size="13" fill="#f38ba8" font-weight="bold">(0, 0)</text>
+  <text x="108" y="88" font-family="Segoe UI,Arial" font-size="10" fill="#f38ba8">← Origin: Top-Left corner</text>
+
+  <!-- Grid dots -->
+  <g opacity=".3">
+    <line x1="190" y1="55" x2="190" y2="345" stroke="#6c7086" stroke-width="1" stroke-dasharray="3,6"/>
+    <line x1="280" y1="55" x2="280" y2="345" stroke="#6c7086" stroke-width="1" stroke-dasharray="3,6"/>
+    <line x1="370" y1="55" x2="370" y2="345" stroke="#6c7086" stroke-width="1" stroke-dasharray="3,6"/>
+    <line x1="460" y1="55" x2="460" y2="345" stroke="#6c7086" stroke-width="1" stroke-dasharray="3,6"/>
+    <line x1="100" y1="130" x2="560" y2="130" stroke="#6c7086" stroke-width="1" stroke-dasharray="3,6"/>
+    <line x1="100" y1="200" x2="560" y2="200" stroke="#6c7086" stroke-width="1" stroke-dasharray="3,6"/>
+    <line x1="100" y1="275" x2="560" y2="275" stroke="#6c7086" stroke-width="1" stroke-dasharray="3,6"/>
+  </g>
+
+  <!-- X tick labels -->
+  <text x="190" y="48" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#6c7086">100</text>
+  <text x="280" y="48" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#6c7086">200</text>
+  <text x="370" y="48" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#6c7086">300</text>
+  <text x="460" y="48" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#6c7086">400</text>
+
+  <!-- Y tick labels -->
+  <text x="88" y="133" text-anchor="end" font-family="Consolas,monospace" font-size="10" fill="#6c7086">75</text>
+  <text x="88" y="203" text-anchor="end" font-family="Consolas,monospace" font-size="10" fill="#6c7086">150</text>
+  <text x="88" y="278" text-anchor="end" font-family="Consolas,monospace" font-size="10" fill="#6c7086">225</text>
+
+  <!-- Example point A -->
+  <circle cx="280" cy="200" r="8" fill="#a6e3a1" stroke="#1e1e2e" stroke-width="2"/>
+  <line x1="100" y1="200" x2="280" y2="200" stroke="#a6e3a1" stroke-width="1.5" stroke-dasharray="5,3" opacity=".6"/>
+  <line x1="280" y1="55" x2="280" y2="200" stroke="#a6e3a1" stroke-width="1.5" stroke-dasharray="5,3" opacity=".6"/>
+  <rect x="285" y="170" width="110" height="36" rx="4" fill="#1e1e2e" opacity=".9"/>
+  <text x="340" y="186" text-anchor="middle" font-family="Consolas,monospace" font-size="11" fill="#a6e3a1" font-weight="bold">Point A</text>
+  <text x="340" y="200" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#a6e3a1">(200, 150)</text>
+
+  <!-- Example point B (sprite/game object) -->
+  <rect x="400" y="248" width="36" height="36" rx="4" fill="#cba6f7" opacity=".9"/>
+  <text x="418" y="271" text-anchor="middle" font-family="Segoe UI,Arial" font-size="18">👾</text>
+  <rect x="440" y="245" width="115" height="42" rx="4" fill="#1e1e2e" opacity=".9"/>
+  <text x="498" y="261" text-anchor="middle" font-family="Consolas,monospace" font-size="11" fill="#cba6f7" font-weight="bold">Sprite</text>
+  <text x="498" y="277" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#cba6f7">x=300, y=195</text>
+
+  <!-- Bottom note -->
+  <text x="330" y="375" text-anchor="middle" font-family="Segoe UI,Arial" font-size="11" fill="#6c7086" font-style="italic">Unlike math class — Y increases downward, not upward!</text>
+</svg>
+</body>
+</html>

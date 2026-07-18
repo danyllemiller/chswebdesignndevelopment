@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Figure 11.1 – Git Branching Timeline</title>
+<style>
+  body { margin: 0; background: #0d1117; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; }
+  svg { display: block; }
+  .label { font-family: 'Segoe UI', Arial, sans-serif; }
+</style>
+</head>
+<body>
+<svg width="780" height="340" viewBox="0 0 780 340">
+  <!-- Background -->
+  <rect width="780" height="340" fill="#161b22" rx="12"/>
+  <text x="390" y="30" text-anchor="middle" font-family="Segoe UI,Arial" font-size="13" font-weight="bold" fill="#8b949e" letter-spacing="1">GIT BRANCHING TIMELINE</text>
+
+  <!-- MAIN branch line -->
+  <line x1="60" y1="120" x2="720" y2="120" stroke="#58a6ff" stroke-width="3"/>
+  <text x="30" y="124" font-family="Consolas,monospace" font-size="12" fill="#58a6ff" font-weight="bold">main</text>
+
+  <!-- FEATURE branch line -->
+  <path d="M 250 120 Q 270 120 290 160 L 480 160 Q 500 160 520 120" fill="none" stroke="#3fb950" stroke-width="3"/>
+  <text x="370" y="195" text-anchor="middle" font-family="Consolas,monospace" font-size="12" fill="#3fb950" font-weight="bold">feature/new-nav</text>
+
+  <!-- HOTFIX branch line -->
+  <path d="M 380 120 Q 395 120 410 80 L 530 80 Q 545 80 560 120" fill="none" stroke="#f78166" stroke-width="3"/>
+  <text x="470" y="65" text-anchor="middle" font-family="Consolas,monospace" font-size="12" fill="#f78166" font-weight="bold">hotfix/login-bug</text>
+
+  <!-- Commits on main -->
+  <circle cx="120" cy="120" r="10" fill="#58a6ff" stroke="#0d1117" stroke-width="2"/>
+  <circle cx="250" cy="120" r="10" fill="#58a6ff" stroke="#0d1117" stroke-width="2"/>
+  <circle cx="520" cy="120" r="10" fill="#3fb950" stroke="#0d1117" stroke-width="2"/>
+  <circle cx="560" cy="120" r="10" fill="#f78166" stroke="#0d1117" stroke-width="2"/>
+  <circle cx="660" cy="120" r="10" fill="#58a6ff" stroke="#0d1117" stroke-width="2"/>
+
+  <!-- Commits on feature -->
+  <circle cx="340" cy="160" r="8" fill="#3fb950" stroke="#0d1117" stroke-width="2"/>
+  <circle cx="420" cy="160" r="8" fill="#3fb950" stroke="#0d1117" stroke-width="2"/>
+  <circle cx="480" cy="160" r="8" fill="#3fb950" stroke="#0d1117" stroke-width="2"/>
+
+  <!-- Commits on hotfix -->
+  <circle cx="450" cy="80" r="8" fill="#f78166" stroke="#0d1117" stroke-width="2"/>
+  <circle cx="530" cy="80" r="8" fill="#f78166" stroke="#0d1117" stroke-width="2"/>
+
+  <!-- Merge arrows -->
+  <!-- feature merge into main -->
+  <line x1="520" y1="120" x2="520" y2="155" stroke="#3fb950" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <!-- hotfix merge into main -->
+  <line x1="560" y1="120" x2="560" y2="85" stroke="#f78166" stroke-width="1.5" stroke-dasharray="4,2"/>
+
+  <!-- Commit labels -->
+  <text x="120" y="148" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#8b949e">Initial</text>
+  <text x="250" y="148" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#8b949e">Branch out</text>
+  <text x="520" y="148" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#3fb950">Merge ↩</text>
+  <text x="560" y="148" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#f78166">Merge ↩</text>
+  <text x="660" y="148" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#58a6ff">Deploy 🚀</text>
+
+  <!-- HEAD tag -->
+  <rect x="630" y="95" width="50" height="18" rx="4" fill="#f0883e" opacity=".9"/>
+  <text x="655" y="108" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#fff" font-weight="bold">HEAD</text>
+
+  <!-- Tag on first commit -->
+  <rect x="92" y="95" width="56" height="18" rx="4" fill="#388bfd" opacity=".8"/>
+  <text x="120" y="108" text-anchor="middle" font-family="Consolas,monospace" font-size="10" fill="#fff">v1.0.0</text>
+
+  <!-- Legend -->
+  <rect x="30" y="270" width="720" height="52" rx="6" fill="#1c2128"/>
+  <circle cx="70" cy="296" r="7" fill="#58a6ff"/>
+  <text x="84" y="300" font-family="Segoe UI,Arial" font-size="11" fill="#8b949e">main branch</text>
+  <circle cx="200" cy="296" r="7" fill="#3fb950"/>
+  <text x="214" y="300" font-family="Segoe UI,Arial" font-size="11" fill="#8b949e">feature branch (new work)</text>
+  <circle cx="400" cy="296" r="7" fill="#f78166"/>
+  <text x="414" y="300" font-family="Segoe UI,Arial" font-size="11" fill="#8b949e">hotfix branch (emergency fix)</text>
+  <text x="390" y="318" text-anchor="middle" font-family="Segoe UI,Arial" font-size="10" fill="#6e7681" font-style="italic">Branches let teams work in parallel without breaking the main codebase</text>
+</svg>
+</body>
+</html>

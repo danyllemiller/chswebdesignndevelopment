@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Object-Fit Hover Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+      margin: 0;
+    }
+    h1 {
+      font-size: 1.1rem;
+      color: #444;
+      margin-bottom: 24px;
+    }
+    .gallery {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    figure {
+      margin: 0;
+      width: 240px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+    figure:hover {
+      transform: scale(1.2) translateX(-50px);
+    }
+    .hero-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+    }
+    figcaption {
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      color: #555;
+    }
+    .tip {
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: #888;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>CSS object-fit + Hover Effect Demo</h1>
+  <p class="tip">Hover over any card to see the scale + translateX effect.</p>
+
+  <div class="gallery">
+    <figure>
+      <img class="hero-img" src="https://picsum.photos/seed/drone1/480/320" alt="Drone Part 1">
+      <figcaption>Carbon Fiber Propeller — lightweight and durable</figcaption>
+    </figure>
+
+    <figure>
+      <img class="hero-img" src="https://picsum.photos/seed/drone2/480/320" alt="Drone Part 2">
+      <figcaption>Brushless Motor — 2300KV high-speed</figcaption>
+    </figure>
+
+    <figure>
+      <img class="hero-img" src="https://picsum.photos/seed/drone3/480/320" alt="Drone Part 3">
+      <figcaption>LiPo Battery — 3S 2200mAh</figcaption>
+    </figure>
+  </div>
+
+</body>
+</html>

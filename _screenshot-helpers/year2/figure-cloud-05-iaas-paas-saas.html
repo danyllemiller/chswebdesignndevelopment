@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Figure 11.5 – IaaS / PaaS / SaaS</title>
+<style>
+  body { margin: 0; background: #0f172a; display:flex; align-items:center; justify-content:center; min-height:100vh; font-family:'Segoe UI',Arial,sans-serif; }
+  .diagram { background:#1e293b; border-radius:14px; padding:36px 40px; width:680px; }
+  h2 { text-align:center; color:#94a3b8; font-size:.9rem; text-transform:uppercase; letter-spacing:1px; margin:0 0 28px; }
+  .columns { display:flex; gap:16px; align-items:flex-end; }
+  .col { flex:1; display:flex; flex-direction:column; gap:0; }
+  .col-title { text-align:center; font-weight:700; font-size:.85rem; padding:10px 8px; border-radius:8px 8px 0 0; margin-bottom:0; }
+  .layer { padding:10px 8px; text-align:center; font-size:.75rem; line-height:1.3; border-top:1px solid rgba(255,255,255,.08); }
+  .managed { color:#fff; font-weight:600; }
+  .unmanaged { color:#64748b; }
+  /* IaaS */
+  .iaas .col-title { background:#1d4ed8; color:#fff; }
+  .iaas .layer.managed { background:#1e3a5f; }
+  .iaas .layer.unmanaged { background:#1a2030; color:#475569; }
+  /* PaaS */
+  .paas .col-title { background:#7c3aed; color:#fff; }
+  .paas .layer.managed { background:#2e1a47; }
+  .paas .layer.unmanaged { background:#1a2030; color:#475569; }
+  /* SaaS */
+  .saas .col-title { background:#0f766e; color:#fff; }
+  .saas .layer.managed { background:#0f2d2a; }
+  /* On-Prem */
+  .onprem .col-title { background:#374151; color:#d1d5db; }
+  .onprem .layer { background:#1a2030; color:#475569; }
+  .legend { margin-top:20px; display:flex; gap:24px; justify-content:center; font-size:.72rem; }
+  .legend-item { display:flex; align-items:center; gap:6px; color:#94a3b8; }
+  .dot-you { width:10px;height:10px;border-radius:2px;background:#475569; }
+  .dot-provider { width:10px;height:10px;border-radius:2px;background:#3b82f6; }
+  .example { text-align:center; font-size:.7rem; color:#64748b; margin-top:6px; font-style:italic; }
+  .col-wrap { display:flex; flex-direction:column; }
+  .col-wrap .col-title { border-radius:8px 8px 0 0; }
+  .col-wrap .layer:last-child { border-radius:0 0 6px 6px; }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <h2>Levels of Cloud Abstraction</h2>
+  <div class="columns">
+
+    <!-- On-Premises -->
+    <div class="col-wrap onprem">
+      <div class="col-title">On-Premises</div>
+      <div class="layer">Application</div>
+      <div class="layer">Runtime</div>
+      <div class="layer">Middleware</div>
+      <div class="layer">OS</div>
+      <div class="layer">Virtualization</div>
+      <div class="layer">Servers</div>
+      <div class="layer">Storage</div>
+      <div class="layer">Networking</div>
+      <div class="example">Your own servers<br>(you manage all 8)</div>
+    </div>
+
+    <!-- IaaS -->
+    <div class="col-wrap iaas">
+      <div class="col-title">IaaS</div>
+      <div class="layer managed">Application</div>
+      <div class="layer managed">Runtime</div>
+      <div class="layer managed">Middleware</div>
+      <div class="layer managed">OS</div>
+      <div class="layer unmanaged">Virtualization</div>
+      <div class="layer unmanaged">Servers</div>
+      <div class="layer unmanaged">Storage</div>
+      <div class="layer unmanaged">Networking</div>
+      <div class="example">AWS EC2<br>Digital Ocean</div>
+    </div>
+
+    <!-- PaaS -->
+    <div class="col-wrap paas">
+      <div class="col-title">PaaS</div>
+      <div class="layer managed">Application</div>
+      <div class="layer managed">Runtime</div>
+      <div class="layer unmanaged">Middleware</div>
+      <div class="layer unmanaged">OS</div>
+      <div class="layer unmanaged">Virtualization</div>
+      <div class="layer unmanaged">Servers</div>
+      <div class="layer unmanaged">Storage</div>
+      <div class="layer unmanaged">Networking</div>
+      <div class="example">Heroku<br>Vercel · Netlify</div>
+    </div>
+
+    <!-- SaaS -->
+    <div class="col-wrap saas">
+      <div class="col-title">SaaS</div>
+      <div class="layer managed">Application</div>
+      <div class="layer managed">Runtime</div>
+      <div class="layer managed" style="background:#0f2d2a;">Middleware</div>
+      <div class="layer managed" style="background:#0f2d2a;">OS</div>
+      <div class="layer managed" style="background:#0f2d2a;">Virtualization</div>
+      <div class="layer managed" style="background:#0f2d2a;">Servers</div>
+      <div class="layer managed" style="background:#0f2d2a;">Storage</div>
+      <div class="layer managed" style="background:#0f2d2a;">Networking</div>
+      <div class="example">Gmail · Figma<br>Google Docs</div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="dot-provider" style="background:#3b82f6;"></div> Managed by you</div>
+    <div class="legend-item"><div class="dot-you" style="background:#1a2030;border:1px solid #334155;"></div> Managed by cloud provider</div>
+  </div>
+</div>
+</body>
+</html>

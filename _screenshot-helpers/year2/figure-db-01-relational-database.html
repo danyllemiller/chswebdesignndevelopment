@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Figure 14.1 – Relational Database Link Diagram</title>
+<style>
+  body { margin: 0; background: #1e1e2e; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; }
+  .diagram { background: #fff; border-radius: 12px; padding: 40px 48px; width: 700px; box-shadow: 0 8px 32px rgba(0,0,0,.4); }
+  h2 { text-align: center; color: #1a1a2e; font-size: 1rem; margin: 0 0 32px; letter-spacing: .5px; text-transform: uppercase; }
+  .tables { display: flex; gap: 32px; justify-content: center; align-items: flex-start; }
+  .tbl { border: 2px solid; border-radius: 8px; overflow: hidden; min-width: 160px; }
+  .tbl-users  { border-color: #3b82f6; }
+  .tbl-orders { border-color: #f59e0b; }
+  .tbl-products { border-color: #10b981; }
+  .tbl-head { padding: 8px 12px; font-weight: 700; font-size: .85rem; color: #fff; text-align: center; }
+  .tbl-users .tbl-head  { background: #3b82f6; }
+  .tbl-orders .tbl-head { background: #f59e0b; }
+  .tbl-products .tbl-head { background: #10b981; }
+  .tbl-row { padding: 6px 12px; font-size: .78rem; color: #333; border-top: 1px solid #e5e7eb; display: flex; gap: 8px; align-items: center; }
+  .tbl-row .pk { font-size: .65rem; background: #fee2e2; color: #dc2626; border-radius: 3px; padding: 1px 4px; font-weight: 700; }
+  .tbl-row .fk { font-size: .65rem; background: #dbeafe; color: #2563eb; border-radius: 3px; padding: 1px 4px; font-weight: 700; }
+  /* connector lines via SVG overlay */
+  .connector-wrap { position: relative; }
+  svg.connectors { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .legend { margin-top: 28px; display: flex; gap: 24px; justify-content: center; font-size: .75rem; color: #555; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-box { width: 12px; height: 12px; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <h2>Relational Database Link Diagram</h2>
+
+  <div style="position:relative;">
+    <div class="tables" id="tables">
+
+      <!-- USERS table -->
+      <div class="tbl tbl-users" id="t-users">
+        <div class="tbl-head">👤 USERS</div>
+        <div class="tbl-row"><span class="pk">PK</span> user_id</div>
+        <div class="tbl-row">username</div>
+        <div class="tbl-row">email</div>
+        <div class="tbl-row">password_hash</div>
+      </div>
+
+      <!-- ORDERS table -->
+      <div class="tbl tbl-orders" id="t-orders">
+        <div class="tbl-head">🧾 ORDERS</div>
+        <div class="tbl-row"><span class="pk">PK</span> order_id</div>
+        <div class="tbl-row"><span class="fk">FK</span> user_id</div>
+        <div class="tbl-row"><span class="fk">FK</span> product_id</div>
+        <div class="tbl-row">order_date</div>
+        <div class="tbl-row">quantity</div>
+      </div>
+
+      <!-- PRODUCTS table -->
+      <div class="tbl tbl-products" id="t-products">
+        <div class="tbl-head">📦 PRODUCTS</div>
+        <div class="tbl-row"><span class="pk">PK</span> product_id</div>
+        <div class="tbl-row">product_name</div>
+        <div class="tbl-row">price</div>
+        <div class="tbl-row">stock_qty</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-box" style="background:#fee2e2;border:1px solid #dc2626"></div> PK = Primary Key (unique row ID)</div>
+    <div class="legend-item"><div class="legend-box" style="background:#dbeafe;border:1px solid #2563eb"></div> FK = Foreign Key (links tables)</div>
+  </div>
+
+  <!-- Relationship arrows drawn with SVG after layout -->
+  <svg width="700" height="40" style="display:block;margin:0 auto;overflow:visible;">
+    <!-- Users → Orders -->
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#6b7280"/>
+      </marker>
+    </defs>
+    <line x1="175" y1="0" x2="256" y2="0" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+    <text x="215" y="-8" text-anchor="middle" font-size="10" fill="#3b82f6">user_id</text>
+    <!-- Products → Orders -->
+    <line x1="525" y1="0" x2="444" y2="0" stroke="#10b981" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+    <text x="485" y="-8" text-anchor="middle" font-size="10" fill="#10b981">product_id</text>
+  </svg>
+
+</div>
+</body>
+</html>

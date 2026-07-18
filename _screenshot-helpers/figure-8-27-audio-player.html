@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Audio Player</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: 60px auto; padding: 0 20px; background: #f9f9f9; }
+    h2 { font-size: 1.1rem; color: #333; margin-bottom: 12px; }
+    .audio-wrap { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 20px 24px; display: inline-block; }
+    p.label { font-size: 0.85rem; color: #666; margin: 0 0 10px; }
+  </style>
+</head>
+<body>
+
+  <div class="audio-wrap">
+    <p class="label">community-regulations.mp3</p>
+    <audio controls>
+      <!-- No real file needed — controls render even without a valid src -->
+      <source src="media/regulations.mp3" type="audio/mpeg">
+      <source src="media/regulations.ogg" type="audio/ogg">
+      Your browser does not support the audio element.
+    </audio>
+  </div>
+
+</body>
+</html>

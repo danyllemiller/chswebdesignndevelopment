@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Figure 14.5 – SQL Injection Diagram</title>
+<style>
+  body { margin: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; }
+  .diagram { background: #1e293b; border-radius: 12px; padding: 36px 44px; width: 720px; color: #e2e8f0; }
+  h2 { text-align:center; color:#f87171; font-size:1rem; margin:0 0 28px; letter-spacing:.5px; text-transform:uppercase; }
+  .row { display:flex; align-items:center; gap:0; margin-bottom:16px; }
+  .box { border-radius:8px; padding:12px 16px; font-size:.82rem; line-height:1.5; flex-shrink:0; }
+  .box-user   { background:#1d4ed8; border:2px solid #3b82f6; min-width:160px; }
+  .box-db     { background:#166534; border:2px solid #22c55e; min-width:160px; }
+  .box-evil   { background:#7f1d1d; border:2px solid #f87171; min-width:200px; }
+  .box-normal { background:#1e3a5f; border:2px solid #60a5fa; min-width:200px; }
+  .arrow { flex:1; position:relative; height:2px; margin:0 4px; }
+  .arrow-line { position:absolute; top:0; left:0; right:12px; height:2px; }
+  .arrow::after { content:'▶'; position:absolute; right:0; top:-9px; font-size:12px; }
+  .arrow-good .arrow-line { background:#60a5fa; }
+  .arrow-good::after { color:#60a5fa; }
+  .arrow-evil .arrow-line { background:#f87171; }
+  .arrow-evil::after { color:#f87171; }
+  .arrow-label { position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:.68rem; white-space:nowrap; }
+  code { font-family: 'Consolas','Courier New',monospace; font-size:.8rem; }
+  .label { font-size:.72rem; color:#94a3b8; margin-bottom:4px; }
+  .value { font-weight:600; }
+  .section-title { font-size:.75rem; color:#94a3b8; text-transform:uppercase; letter-spacing:.5px; margin:20px 0 8px; border-top:1px solid #334155; padding-top:16px; }
+  .highlight-evil { color:#fca5a5; }
+  .highlight-good { color:#86efac; }
+  .result-box { background:#0f172a; border-radius:6px; padding:10px 14px; font-size:.78rem; font-family:'Consolas','Courier New',monospace; margin-top:8px; }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <h2>⚠️ SQL Injection — How It Works</h2>
+
+  <!-- Normal flow -->
+  <div class="section-title">✅ Normal Login Attempt</div>
+  <div class="row">
+    <div class="box box-user">
+      <div class="label">User enters:</div>
+      <div class="value">username: <code class="highlight-good">alice</code></div>
+      <div class="value">password: <code class="highlight-good">mypassword</code></div>
+    </div>
+    <div class="arrow arrow-good" style="flex:1;position:relative;height:2px;margin:0 12px;">
+      <div class="arrow-line"></div>
+      <span style="position:absolute;right:0;top:-9px;font-size:12px;color:#60a5fa;">▶</span>
+      <span style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:.68rem;color:#60a5fa;white-space:nowrap;">SQL query built</span>
+    </div>
+    <div class="box box-normal">
+      <div class="label">Query sent to DB:</div>
+      <code>SELECT * FROM users<br>WHERE username='alice'<br>AND password='mypassword'</code>
+    </div>
+    <div class="arrow arrow-good" style="flex:1;position:relative;height:2px;margin:0 12px;">
+      <div class="arrow-line"></div>
+      <span style="position:absolute;right:0;top:-9px;font-size:12px;color:#60a5fa;">▶</span>
+    </div>
+    <div class="box box-db">
+      <div class="label">Result:</div>
+      <div class="highlight-good">✓ 1 row found<br>Login allowed</div>
+    </div>
+  </div>
+
+  <!-- Injection flow -->
+  <div class="section-title">🚨 SQL Injection Attack</div>
+  <div class="row">
+    <div class="box box-user">
+      <div class="label">Hacker enters:</div>
+      <div class="value">username: <code class="highlight-evil">admin'--</code></div>
+      <div class="value">password: <code class="highlight-evil">(anything)</code></div>
+    </div>
+    <div class="arrow arrow-evil" style="flex:1;position:relative;height:2px;margin:0 12px;">
+      <div class="arrow-line" style="background:#f87171;"></div>
+      <span style="position:absolute;right:0;top:-9px;font-size:12px;color:#f87171;">▶</span>
+      <span style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:.68rem;color:#f87171;white-space:nowrap;">injected SQL</span>
+    </div>
+    <div class="box box-evil">
+      <div class="label">Malicious query:</div>
+      <code>SELECT * FROM users<br>WHERE username=<span class="highlight-evil">'admin'--</span><br><span style="color:#64748b;text-decoration:line-through;">AND password='xxx'</span></code>
+      <div style="font-size:.68rem;color:#fca5a5;margin-top:6px;">-- comments out the password check!</div>
+    </div>
+    <div class="arrow arrow-evil" style="flex:1;position:relative;height:2px;margin:0 12px;">
+      <div class="arrow-line" style="background:#f87171;"></div>
+      <span style="position:absolute;right:0;top:-9px;font-size:12px;color:#f87171;">▶</span>
+    </div>
+    <div class="box box-db" style="background:#7f1d1d;border-color:#f87171;">
+      <div class="label">Result:</div>
+      <div class="highlight-evil">✗ No password<br>needed — access<br>GRANTED!</div>
+    </div>
+  </div>
+
+  <div style="background:#0f172a;border-radius:8px;padding:12px 16px;margin-top:16px;font-size:.78rem;color:#94a3b8;border-left:3px solid #f59e0b;">
+    <strong style="color:#fbbf24;">🛡️ Fix:</strong> Use <strong style="color:#fff;">Prepared Statements</strong> — they separate the SQL code from the user's input so special characters like <code>'</code> and <code>--</code> are treated as plain text, never as commands.
+  </div>
+</div>
+</body>
+</html>
