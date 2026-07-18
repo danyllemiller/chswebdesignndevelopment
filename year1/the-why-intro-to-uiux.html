@@ -205,6 +205,83 @@
       </div>
     </div>
 
+    <!-- ROW 3B: GESTALT PRINCIPLES -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="gestalt">
+          <h2 class="section-title mt-0">How the Brain Groups Things: Gestalt Principles</h2>
+          <p>The brain is a pattern-matching machine. It does not see individual pixels — it instantly organizes visual input into groups and structures. <strong>Gestalt Principles</strong> are the rules that describe <em>how</em> the brain does this. Understanding them lets you design layouts that feel natural and effortless, because you are working with the brain's hard-wired behavior instead of against it.</p>
+          <span class="badge bg-primary me-1">NV 4.3.1</span><span class="badge bg-primary me-1">NV 4.3.2</span>
+
+          <h5 class="fw-bold mt-4 text-primary">Proximity</h5>
+          <p class="small">Things close together are perceived as belonging together. Whitespace creates the "walls" of invisible groups.</p>
+          <div class="mb-3 p-3 border rounded small" style="background:#f8f9fa;">
+            <div style="display:flex; gap:32px; justify-content:center; align-items:flex-start; flex-wrap:wrap;">
+              <div>
+                <p class="text-muted text-center mb-1" style="font-size:0.7rem;">Without proximity</p>
+                <div style="display:flex; gap:4px; flex-wrap:wrap; width:120px; justify-content:center;">
+                  <div style="width:16px;height:16px;border-radius:50%;background:#6c757d;"></div>
+                  <div style="width:16px;height:16px;border-radius:50%;background:#6c757d;"></div>
+                  <div style="width:16px;height:16px;border-radius:50%;background:#6c757d;"></div>
+                  <div style="width:16px;height:16px;border-radius:50%;background:#6c757d;"></div>
+                  <div style="width:16px;height:16px;border-radius:50%;background:#6c757d;"></div>
+                  <div style="width:16px;height:16px;border-radius:50%;background:#6c757d;"></div>
+                </div>
+              </div>
+              <div>
+                <p class="text-muted text-center mb-1" style="font-size:0.7rem;">With proximity = 2 groups</p>
+                <div style="display:flex; gap:20px; justify-content:center;">
+                  <div style="display:flex; gap:3px;">
+                    <div style="width:16px;height:16px;border-radius:50%;background:#0d6efd;"></div>
+                    <div style="width:16px;height:16px;border-radius:50%;background:#0d6efd;"></div>
+                    <div style="width:16px;height:16px;border-radius:50%;background:#0d6efd;"></div>
+                  </div>
+                  <div style="display:flex; gap:3px;">
+                    <div style="width:16px;height:16px;border-radius:50%;background:#0d6efd;"></div>
+                    <div style="width:16px;height:16px;border-radius:50%;background:#0d6efd;"></div>
+                    <div style="width:16px;height:16px;border-radius:50%;background:#0d6efd;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-muted text-center mb-0 mt-2" style="font-size:0.7rem;">Same dots — spacing changes the perceived grouping</p>
+          </div>
+
+          <h5 class="fw-bold mt-4 text-primary">Similarity</h5>
+          <p class="small">Things that look alike (same color, shape, size, or style) are perceived as related. This is why navigation links all use the same color — the brain immediately groups them as "the same kind of thing."</p>
+          <div class="mb-3 p-3 border rounded small" style="background:#f8f9fa;">
+            <div style="display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap;">
+              <div style="width:20px;height:20px;border-radius:50%;background:#0d6efd;"></div>
+              <div style="width:20px;height:20px;background:#dc3545;"></div>
+              <div style="width:20px;height:20px;border-radius:50%;background:#0d6efd;"></div>
+              <div style="width:20px;height:20px;background:#dc3545;"></div>
+              <div style="width:20px;height:20px;border-radius:50%;background:#0d6efd;"></div>
+              <div style="width:20px;height:20px;background:#dc3545;"></div>
+            </div>
+            <p class="text-muted text-center mb-0 mt-2" style="font-size:0.7rem;">You instantly see two columns — circles (blue) and squares (red) — even though they alternate</p>
+          </div>
+
+          <h5 class="fw-bold mt-4 text-primary">Continuation</h5>
+          <p class="small">The eye prefers to follow a smooth, continuous path. Lines, arrows, and sequences lead the viewer's eye across the page. This is why a row of images draws the eye from left to right, and why a pointing hand in an ad always faces the CTA button.</p>
+
+          <h5 class="fw-bold mt-4 text-primary">Closure</h5>
+          <p class="small">The brain fills in missing information to complete a recognizable shape. Famous logos like NBC, FedEx, and the WWF panda exploit this. You don't need to draw everything — let the brain finish it.</p>
+
+          <h5 class="fw-bold mt-4 text-primary">Figure / Ground</h5>
+          <p class="small">The brain always separates a visual into a <strong>subject</strong> (figure) and a <strong>background</strong> (ground). High contrast, shadows, and borders push an element forward as the figure. Low contrast and flat color push it back into the ground. This is the exact principle behind modals, tooltips, and floating action buttons.</p>
+        </section>
+      </div>
+      <div class="col-lg-4">
+        <div class="card border-primary shadow-sm">
+          <div class="card-header bg-primary text-white fw-bold small">Why This Matters for Designers</div>
+          <div class="card-body small">
+            <p>Gestalt Principles explain <em>why</em> certain layouts feel "right" without the user knowing why. When you group related form fields together (Proximity), use consistent button styles (Similarity), and layer your modal over a dimmed background (Figure/Ground), you're using all three simultaneously.</p>
+            <p class="mb-0 text-muted fst-italic">Test: Look at any well-designed homepage and try to identify which principle is responsible for each layout decision.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ROW 4: ACCESSIBILITY -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
@@ -284,6 +361,82 @@
             <p class="mb-0">Why is Sarah's specific frustration about 'clutter' so important for our UI layout? What can we remove from the screen to help her?</p>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ROW 5B: UX VOCABULARY -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-12">
+        <section id="ux-vocabulary">
+          <h2 class="section-title mt-0 text-center">The UX Designer's Vocabulary</h2>
+          <p class="text-center mx-auto mb-4" style="max-width:800px;">These are the terms every professional uses in wireframe reviews, client briefs, and critique sessions. Know them cold — they are your design vocabulary. <span class="badge bg-primary me-1">NV 4.3.3</span><span class="badge bg-primary me-1">NV 4.4.4</span></p>
+
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="card h-100 shadow-sm border-primary">
+                <div class="card-header bg-primary text-white fw-bold small">Affordance</div>
+                <div class="card-body small">
+                  <p class="mb-2">An <strong>affordance</strong> is a design cue that signals how an object should be used — without needing a label. A button that looks raised and clickable <em>affords</em> clicking. A slider that looks like it can be dragged <em>affords</em> dragging.</p>
+                  <p class="mb-0 text-muted fst-italic">If users click on something that isn't a button, or ignore something that is, you have a broken affordance.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card h-100 shadow-sm border-success">
+                <div class="card-header bg-success text-white fw-bold small">CTA (Call to Action)</div>
+                <div class="card-body small">
+                  <p class="mb-2">The single most important interactive element on a page — the one action you want the user to take. <strong>"Sign Up Free," "Buy Now," "Download the Guide."</strong></p>
+                  <p class="mb-0 text-muted fst-italic">Rule: One primary CTA per page. Make it visually dominant. Every other element should support it, not compete with it.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card h-100 shadow-sm border-warning">
+                <div class="card-header bg-warning text-dark fw-bold small">The Fold</div>
+                <div class="card-body small">
+                  <p class="mb-2"><strong>The fold</strong> is the bottom edge of the browser window before any scrolling. Content "above the fold" is visible immediately. Content "below the fold" requires the user to scroll.</p>
+                  <p class="mb-0 text-muted fst-italic">Your headline, value proposition, and primary CTA must live above the fold. First impressions happen in under 50ms.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card h-100 shadow-sm border-info">
+                <div class="card-header bg-info text-white fw-bold small">Microcopy</div>
+                <div class="card-body small">
+                  <p class="mb-2"><strong>Microcopy</strong> is the tiny, functional text that guides users through an interface: button labels, form placeholder text, error messages, tooltip text, and confirmation messages.</p>
+                  <p class="mb-0 text-muted fst-italic">Compare: "Error" (bad microcopy) vs. "That email is already registered — <a href="#">Sign in instead?</a>" (good microcopy). Small words, massive impact on conversion.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card h-100 shadow-sm border-secondary">
+                <div class="card-header bg-secondary text-white fw-bold small">Tracking (Letter-Spacing)</div>
+                <div class="card-body small">
+                  <p class="mb-2"><strong>Tracking</strong> is the uniform spacing between all characters in a block of text. In CSS this is the <code>letter-spacing</code> property.</p>
+                  <div class="border rounded p-2 mb-2" style="background:#f8f9fa;">
+                    <p class="mb-1" style="letter-spacing:0; font-size:0.85rem;">Default tracking (0px)</p>
+                    <p class="mb-1" style="letter-spacing:3px; font-size:0.85rem;">Wide tracking (3px)</p>
+                    <p class="mb-0" style="letter-spacing:0.05em; font-size:0.85rem; text-transform:uppercase;">Caps + tracking = luxury feel</p>
+                  </div>
+                  <p class="mb-0 text-muted fst-italic">Wide tracking on all-caps headings is a classic luxury brand technique. Never use wide tracking on body text — it breaks readability.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card h-100 shadow-sm border-dark">
+                <div class="card-header bg-dark text-white fw-bold small">Leading (Line Height)</div>
+                <div class="card-body small">
+                  <p class="mb-2"><strong>Leading</strong> (rhymes with "bedding") is the vertical space between lines of text. In CSS this is the <code>line-height</code> property. The default browser value (~1.2) is too tight for body copy.</p>
+                  <div class="border rounded p-2 mb-2" style="background:#f8f9fa;">
+                    <p class="mb-2" style="line-height:1.1; font-size:0.8rem;">Tight leading (1.1). Hard to read. Lines feel cramped and the eye loses its place when scanning back to the next line.</p>
+                    <p class="mb-0" style="line-height:1.8; font-size:0.8rem;">Open leading (1.8). Easy to read. The eye flows comfortably from one line to the next without hunting.</p>
+                  </div>
+                  <p class="mb-0 text-muted fst-italic">Best practice: <code>line-height: 1.5</code> to <code>1.7</code> for body text.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
 
