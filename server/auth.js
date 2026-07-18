@@ -15,27 +15,41 @@ router.post('/login', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [results] = await connection.execute('SELECT * FROM students WHERE username = ?', [username]);
-        await connection.end();
 
-        if (results.length === 0) return res.status(401).json({ error: 'Invalid login' });
+        if (results.length === 0) { await connection.end(); return res.status(401).json({ error: 'Invalid login' }); }
 
         const user = results[0];
-        // Checking your schema columns
         const dbPassword = user.password || user.password_hash;
-        
-        if (!dbPassword) return res.status(401).json({ error: 'No password set' });
+        if (!dbPassword) { await connection.end(); return res.status(401).json({ error: 'No password set' }); }
 
         const match = await bcrypt.compare(password, dbPassword);
-        if (!match) return res.status(401).json({ error: 'Invalid login' });
+        if (!match) { await connection.end(); return res.status(401).json({ error: 'Invalid login' }); }
+
+        // Look up course info via section → class_sections → courses
+        const sectionId = String(user.section_id || user.sectionId || user.section || '').trim();
+        let courseInfo = {};
+        if (sectionId) {
+            const [courseRows] = await connection.execute(
+                `SELECT cs.course_id, c.course_name
+                 FROM class_sections cs
+                 LEFT JOIN courses c ON cs.course_id = c.course_id
+                 WHERE cs.section_id = ?`,
+                [sectionId]
+            );
+            courseInfo = courseRows[0] || {};
+        }
+        await connection.end();
 
         req.session.regenerate((err) => {
             if (err) return res.status(500).json({ error: 'Session error' });
             req.session.user = {
                 student_id: user.student_id,
                 username: user.username,
-                section_id: String(user.section_id || user.sectionId || user.section || '').trim(),
+                section_id: sectionId,
                 role: user.role,
-                must_change_password: Number(user.must_change_password || 0)
+                must_change_password: Number(user.must_change_password || 0),
+                course_id: courseInfo.course_id || null,
+                course_name: courseInfo.course_name || null
             };
             res.json({ success: true, user: req.session.user, must_change_password: Number(user.must_change_password || 0) });
         });

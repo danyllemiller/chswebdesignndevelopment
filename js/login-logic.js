@@ -110,7 +110,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Normalize and store section / course metadata so auth guard can detect student track reliably.
                 const userSection = String(data.user.section_id || data.user.section || data.user.period || data.user.studentClass || '').trim().toUpperCase();
-                const isCS = userSection.startsWith('CS') || userSection.startsWith('COMP') || userSection.includes('COMP');
+                const courseName = String(data.user.course_name || '').toUpperCase();
+                const isCS = courseName.includes('COMP') || courseName.includes('COMPUTER')
+                          || userSection.startsWith('CS') || userSection.startsWith('COMP') || userSection.includes('COMP');
                 const normalizedUser = {
                     ...data.user,
                     section_id: userSection,

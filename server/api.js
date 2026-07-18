@@ -4,20 +4,24 @@ const router = express.Router();
 const { getDbConnection } = require('./db');
 const bcrypt = require('bcrypt');
 
-const COURSE_CODE_MAP = {
-    WD1: '05254G1S',
-    WD2: '05254G2S',
-    AS: '05254ES',
-    CS: '10003GS'
-};
-
-function normalizeCourseCode(sectionId = '') {
+function normalizeCourseCodeLegacy(sectionId = '') {
     const s = String(sectionId).toUpperCase();
-    if (s.startsWith('WD1')) return COURSE_CODE_MAP.WD1;
-    if (s.startsWith('WD2')) return COURSE_CODE_MAP.WD2;
-    if (s.startsWith('AS')) return COURSE_CODE_MAP.AS;
-    if (s.startsWith('CS')) return COURSE_CODE_MAP.CS;
+    if (s.startsWith('WD1')) return '05254G1S';
+    if (s.startsWith('WD2')) return '05254G2S';
+    if (s.startsWith('AS'))  return '05254ES';
+    if (s.startsWith('CS'))  return '10003GS';
     return null;
+}
+
+async function resolveCourseId(connection, sectionId) {
+    // First try DB lookup (works for any section ID format)
+    const [rows] = await connection.execute(
+        'SELECT course_id FROM class_sections WHERE section_id = ?',
+        [sectionId]
+    );
+    if (rows.length && rows[0].course_id) return rows[0].course_id;
+    // Fall back to prefix matching for legacy section IDs
+    return normalizeCourseCodeLegacy(sectionId);
 }
 
 function clampScore(score, max = 100) {
@@ -46,7 +50,7 @@ router.get('/student/course-gradebook', async (req, res) => {
         }
 
         const sectionId = students[0].section_id || '';
-        const courseCode = normalizeCourseCode(sectionId);
+        const courseCode = await resolveCourseId(connection, sectionId);
         if (!courseCode) {
             await connection.end();
             return res.status(400).json({ error: 'Unable to resolve course for student section' });
@@ -622,7 +626,7 @@ router.get('/student/assignments-visible', async (req, res) => {
             return res.status(404).json({ error: 'Student not found' });
         }
 
-        const courseCode = normalizeCourseCode(students[0].section_id);
+        const courseCode = await resolveCourseId(connection, students[0].section_id);
         if (!courseCode) {
             await connection.end();
             return res.status(400).json({ error: 'Unable to resolve course for student section' });

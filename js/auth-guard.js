@@ -64,7 +64,12 @@ if (window.location.pathname.toLowerCase().includes('exams')) {
     console.log('🚨 EXAM BYPASS ACTIVE: Redirects disabled for this directory.');
 }
 
-function getCourseGroup(sectionId = '') {
+function getCourseGroup(sectionId = '', courseName = '') {
+    // Prefer course_name from DB — works with any section ID format
+    const n = String(courseName).toUpperCase();
+    if (n.includes('COMP') || n.includes('COMPUTER')) return 'CS';
+    if (n.includes('WEB') || n.includes('DESIGN')) return 'WD';
+    // Fall back to section_id prefix for legacy students
     const s = String(sectionId).toUpperCase();
     if (s.startsWith('CS') || s.startsWith('COMP') || s.includes('COMP')) return 'CS';
     if (s.startsWith('WD1') || s.startsWith('WD2') || s.startsWith('AS')) return 'WD';
@@ -159,7 +164,7 @@ function executeAuthCheck() {
     const userSection = String(user.section_id || user.section || user.period || user.studentClass || user.class || '').trim().toUpperCase();
     const normalizedSection = userSection;
     const isTeacher = user.role === 'admin' || user.section_id === 'Teacher' || (user.username && user.username.includes('damiller'));
-    const studentCourse = getCourseGroup(normalizedSection);
+    const studentCourse = getCourseGroup(normalizedSection, user.course_name || '');
     const isCSStudent = studentCourse === 'CS' || user.course === 'CS' || user.isCSStudent === true || /^(CS|COMP)/.test(normalizedSection);
     console.log('[auth-guard] user.section_id=', user.section_id, 'userSection=', normalizedSection, ' -> studentCourse=', studentCourse, 'isCSStudent=', isCSStudent, 'path=', currentPath);
 
