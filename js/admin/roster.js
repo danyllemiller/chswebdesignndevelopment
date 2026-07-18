@@ -47,7 +47,8 @@ function renderSectionCatalog(sections) {
             <td class="text-muted small">${escapeHtml(s.course_id)}</td>
             <td>${escapeHtml(s.course_name)}</td>
             <td class="small text-muted">${escapeHtml(s.school_year || '')}</td>
-            <td class="text-center">
+            <td class="text-center" style="white-space:nowrap">
+                <button class="btn btn-sm btn-outline-primary py-0 me-1" onclick="editSection('${escapeHtml(s.section_id)}','${escapeHtml(s.course_id)}','${escapeHtml(s.course_name)}','${escapeHtml(s.school_year||'')}')">✏️</button>
                 <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteSection('${escapeHtml(s.section_id)}','${escapeHtml(s.course_id)}')">🗑️</button>
             </td>
         </tr>
@@ -79,6 +80,14 @@ async function addSection() {
         showStatus(err.message, 'danger');
     }
 }
+
+window.editSection = function(sid, cid, cname, year) {
+    document.getElementById('editSection-id').value = sid;
+    document.getElementById('editSection-cid').value = cid;
+    document.getElementById('editSection-name').value = cname;
+    document.getElementById('editSection-year').value = year;
+    new bootstrap.Modal(document.getElementById('editSectionModal')).show();
+};
 
 window.deleteSection = async function(sid, cid) {
     if (!confirm(`Delete section "${sid}" (${cid})? This cannot be undone.`)) return;
@@ -539,6 +548,28 @@ document.getElementById('deleteSelectedBtn')?.addEventListener('click', deleteSe
 document.getElementById('addSectionBtn')?.addEventListener('click', addSection);
 document.getElementById('refreshSectionCatalog')?.addEventListener('click', fetchSections);
 document.getElementById('archiveYearBtn')?.addEventListener('click', archiveYear);
+
+document.getElementById('saveSectionBtn')?.addEventListener('click', async () => {
+    const sid   = document.getElementById('editSection-id').value.trim();
+    const cid   = document.getElementById('editSection-cid').value.trim();
+    const cname = document.getElementById('editSection-name').value.trim();
+    const year  = document.getElementById('editSection-year').value.trim();
+    try {
+        const res = await fetch(`/api/admin/sections/${encodeURIComponent(sid)}?course_id=${encodeURIComponent(cid)}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ course_name: cname, school_year: year })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        bootstrap.Modal.getInstance(document.getElementById('editSectionModal')).hide();
+        showStatus('Section updated.', 'success');
+        await populateYearDropdowns();
+        fetchSections();
+    } catch (err) {
+        showStatus(err.message, 'danger');
+    }
+});
 
 // Also handle the header "Select All" checkbox
 document.getElementById('selectAllCheckbox')?.addEventListener('change', (e) => {

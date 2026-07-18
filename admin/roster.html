@@ -188,7 +188,7 @@
                     <th>Course ID</th>
                     <th>Course Name</th>
                     <th>Year</th>
-                    <th class="text-center">Delete</th>
+                    <th class="text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="sectionCatalogBody">
@@ -269,10 +269,45 @@
     </div>
   </div>
 
+  <!-- Edit Section Modal -->
+  <div class="modal fade" id="editSectionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title fw-bold">Edit Section</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Period</label>
+              <input id="editSection-id" class="form-control" readonly>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Course ID</label>
+              <input id="editSection-cid" class="form-control" readonly>
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-semibold">Course Name</label>
+              <input id="editSection-name" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">School Year</label>
+              <input id="editSection-year" class="form-control" placeholder="e.g. 2026-2027">
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4">
+            <button id="saveSectionBtn" class="btn btn-danger w-100 fw-bold">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="footer-placeholder" class="no-print"></div>
 
 <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/admin/roster.js?v=3"></script>
+  <script src="/js/admin/roster.js?v=4"></script>
 </body>
 </html>

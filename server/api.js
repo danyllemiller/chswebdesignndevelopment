@@ -321,6 +321,49 @@ router.post('/admin/sections', async (req, res) => {
     }
 });
 
+// --- ADMIN UPDATE SECTION ---
+router.put('/admin/sections/:section_id', async (req, res) => {
+    const sid = String(req.params.section_id || '').trim();
+    const cid = String(req.query.course_id || '').trim();
+    const { course_name, school_year } = req.body || {};
+    if (!sid || !cid) return res.status(400).json({ error: 'section_id and course_id required' });
+
+    let connection;
+    try {
+        connection = await getDbConnection();
+        const updates = [];
+        const vals = [];
+        if (course_name !== undefined) {
+            updates.push('course_id = course_id'); // courses table updated separately
+        }
+        if (school_year !== undefined) {
+            updates.push('school_year = ?');
+            vals.push(String(school_year).trim());
+        }
+        if (updates.length > 0) {
+            const filtered = updates.filter(u => u !== 'course_id = course_id');
+            if (filtered.length > 0) {
+                await connection.execute(
+                    `UPDATE class_sections SET ${filtered.join(', ')} WHERE section_id = ? AND course_id = ?`,
+                    [...vals, sid, cid]
+                );
+            }
+        }
+        if (course_name !== undefined) {
+            await connection.execute(
+                'UPDATE courses SET course_name = ? WHERE course_id = ?',
+                [String(course_name).trim(), cid]
+            );
+        }
+        await connection.end();
+        res.json({ success: true });
+    } catch (err) {
+        if (connection) try { await connection.end(); } catch(_) {}
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // --- ADMIN DELETE SECTION ---
 router.delete('/admin/sections/:section_id', async (req, res) => {
     const sid = String(req.params.section_id || '').trim();
