@@ -216,15 +216,29 @@ router.get('/admin/roster', async (req, res) => {
     const year = req.query.year || null;
     try {
         const connection = await getDbConnection();
-        let sql = 'SELECT * FROM students';
-        const params = [];
+        let sql, params = [];
+
         if (year) {
-            sql += ' WHERE school_year = ?';
-            params.push(year);
+            // Specific year: use section's school_year if section exists, otherwise student's own
+            sql = `SELECT DISTINCT s.*
+                   FROM students s
+                   LEFT JOIN class_sections cs ON s.section_id = cs.section_id
+                   WHERE COALESCE(cs.school_year, s.school_year) = ?
+                   ORDER BY s.last_name ASC, s.first_name ASC`;
+            params = [year];
         } else {
-            sql += ' WHERE archived = 0';
+            // Active (Current): students in non-archived sections,
+            // OR students with no matching section who aren't explicitly archived
+            sql = `SELECT DISTINCT s.*
+                   FROM students s
+                   LEFT JOIN class_sections cs ON s.section_id = cs.section_id
+                   WHERE (
+                       cs.archived = 0
+                       OR (cs.section_id IS NULL AND (s.archived IS NULL OR s.archived = 0))
+                   )
+                   ORDER BY s.last_name ASC, s.first_name ASC`;
         }
-        sql += ' ORDER BY last_name ASC, first_name ASC';
+
         const [students] = await connection.execute(sql, params);
         await connection.end();
         res.json(students);
@@ -262,7 +276,12 @@ router.get('/admin/school-years', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(
-            'SELECT DISTINCT school_year FROM class_sections ORDER BY school_year DESC'
+            `SELECT DISTINCT school_year FROM (
+                SELECT school_year FROM class_sections WHERE school_year IS NOT NULL
+                UNION
+                SELECT school_year FROM students WHERE school_year IS NOT NULL
+             ) combined
+             ORDER BY school_year DESC`
         );
         await connection.end();
         res.json(rows.map(r => r.school_year).filter(Boolean));
