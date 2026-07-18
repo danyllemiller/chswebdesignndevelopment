@@ -249,6 +249,25 @@ window.deselectAllStudents = function() {
     updateSelectedCount();
 };
 
+window.archiveSelectedStudents = async function() {
+    if (selectedStudents.size === 0) return alert('No students selected.');
+    if (!confirm(`Archive ${selectedStudents.size} selected student(s)? Their data is preserved and can be viewed by selecting a past year.`)) return;
+    try {
+        const res = await fetch('/api/admin/archive-students', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_ids: Array.from(selectedStudents) })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        showStatus(`${data.archivedCount} student(s) archived successfully.`, 'success');
+        selectedStudents.clear();
+        fetchRoster();
+    } catch (err) {
+        showStatus(err.message, 'danger');
+    }
+};
+
 window.deleteSelectedStudents = async function() {
     if (selectedStudents.size === 0) return alert('No students selected.');
     
@@ -552,6 +571,7 @@ document.getElementById('refreshRosterBtn').addEventListener('click', fetchRoste
 // Bulk selection button handlers
 document.getElementById('selectAllBtn')?.addEventListener('click', selectAllStudents);
 document.getElementById('deselectAllBtn')?.addEventListener('click', deselectAllStudents);
+document.getElementById('archiveSelectedBtn')?.addEventListener('click', archiveSelectedStudents);
 document.getElementById('deleteSelectedBtn')?.addEventListener('click', deleteSelectedStudents);
 document.getElementById('addSectionBtn')?.addEventListener('click', addSection);
 document.getElementById('refreshSectionCatalog')?.addEventListener('click', fetchSections);

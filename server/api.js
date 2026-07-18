@@ -291,6 +291,26 @@ router.post('/admin/archive-year', async (req, res) => {
     }
 });
 
+// --- ADMIN ARCHIVE SELECTED STUDENTS ---
+router.post('/admin/archive-students', async (req, res) => {
+    const { student_ids } = req.body || {};
+    if (!Array.isArray(student_ids) || student_ids.length === 0)
+        return res.status(400).json({ error: 'student_ids array is required' });
+    try {
+        const connection = await getDbConnection();
+        const placeholders = student_ids.map(() => '?').join(',');
+        const [result] = await connection.execute(
+            `UPDATE students SET archived = 1 WHERE student_id IN (${placeholders})`,
+            student_ids
+        );
+        await connection.end();
+        res.json({ success: true, archivedCount: result.affectedRows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to archive students' });
+    }
+});
+
 // --- ADMIN ADD SECTION ---
 router.post('/admin/sections', async (req, res) => {
     const { section_id, course_id, course_name } = req.body || {};
