@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 15 Interactive: The Internet of Things (IoT)</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="/css/interactive.css" rel="stylesheet"/>
+
+  <style>
+    .iot-device {
+      display: inline-flex; flex-direction: column; align-items: center;
+      width: 64px; transition: transform .3s, opacity .3s;
+    }
+    .iot-device .icon-wrap {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; border: 2px solid rgba(255,255,255,.2);
+      transition: border-color .3s, box-shadow .3s;
+    }
+    .iot-device .icon-label {
+      font-size: .6rem; margin-top: 4px; color: rgba(255,255,255,.6);
+      text-align: center; line-height: 1.2;
+    }
+    .iot-line {
+      stroke: rgba(255,255,255,.15); stroke-width: 1.5;
+      stroke-dasharray: 5 4; transition: stroke .4s, opacity .4s;
+    }
+    .iot-line.active { stroke: #34d399; opacity: 1; }
+    .iot-device.hacked .icon-wrap { border-color: #f87171; box-shadow: 0 0 12px #f87171; }
+    .iot-device.safe .icon-wrap  { border-color: #34d399; box-shadow: 0 0 10px #34d399; }
+    .iot-device.edge .icon-wrap  { border-color: #60a5fa; box-shadow: 0 0 10px #60a5fa; }
+    .iot-device.dim  { opacity: .28; }
+    #iot-status {
+      font-size: .72rem; text-align: center; min-height: 2.2em;
+      transition: color .3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print"><div id="nav-placeholder"></div></div>
+
+  <section class="container-fluid my-5">
+    <div class="row"><div class="col-12 d-flex flex-column align-items-center">
+
+      <nav class="mb-4 w-100 d-flex justify-content-start small fw-bold container">
+        <a href="/year2/the-game-never-ends.html" class="text-decoration-none da-primary">
+          <i class="fas fa-angles-left me-1"></i> Back to Chapter 15 Reading
+        </a>
+      </nav>
+
+      <div id="interactive-module" class="d-flex justify-content-center w-100 py-4 mb-5">
+        <main class="container bg-white rounded-4 shadow-lg overflow-hidden border p-0 interactive-main">
+          <div class="row g-0 h-100 module-row">
+
+            <!-- Left: Visual Panel -->
+            <div class="col-12 col-md-6 code-panel bg-dark text-white p-4 p-md-5 d-flex flex-column justify-content-center position-relative">
+              <div class="position-absolute top-0 start-0 mt-3 ms-4 text-white-50 small text-uppercase fw-bold letter-spacing-wide">
+                <i class="fas fa-wifi me-2"></i> Smart Home Network
+              </div>
+
+              <!-- IoT device grid -->
+              <div class="mt-4 mb-3 position-relative" style="min-height:180px;">
+                <svg id="iot-lines" width="100%" height="100%" style="position:absolute;top:0;left:0;pointer-events:none;" viewBox="0 0 300 160" preserveAspectRatio="none">
+                  <!-- hub to each device -->
+                  <line id="l-fridge"  class="iot-line" x1="150" y1="80" x2="34"  y2="36"/>
+                  <line id="l-door"    class="iot-line" x1="150" y1="80" x2="100" y2="14"/>
+                  <line id="l-cam"     class="iot-line" x1="150" y1="80" x2="200" y2="14"/>
+                  <line id="l-thermo"  class="iot-line" x1="150" y1="80" x2="266" y2="36"/>
+                  <line id="l-laptop"  class="iot-line" x1="150" y1="80" x2="60"  y2="138"/>
+                  <line id="l-phone"   class="iot-line" x1="150" y1="80" x2="240" y2="138"/>
+                  <!-- hub to cloud -->
+                  <line id="l-cloud"   class="iot-line" x1="150" y1="80" x2="150" y2="8"/>
+                </svg>
+
+                <div class="d-flex justify-content-between align-items-start px-2">
+                  <div id="dev-fridge"  class="iot-device"><div class="icon-wrap bg-secondary bg-opacity-25">🧊</div><div class="icon-label">Smart<br>Fridge</div></div>
+                  <div id="dev-door"    class="iot-device"><div class="icon-wrap bg-secondary bg-opacity-25">🔐</div><div class="icon-label">Smart<br>Lock</div></div>
+                  <div id="dev-cloud"   class="iot-device"><div class="icon-wrap bg-secondary bg-opacity-25">☁️</div><div class="icon-label">Cloud<br>Server</div></div>
+                  <div id="dev-cam"     class="iot-device"><div class="icon-wrap bg-secondary bg-opacity-25">📷</div><div class="icon-label">Security<br>Cam</div></div>
+                  <div id="dev-thermo"  class="iot-device"><div class="icon-wrap bg-secondary bg-opacity-25">🌡️</div><div class="icon-label">Smart<br>Thermo</div></div>
+                </div>
+
+                <div class="d-flex justify-content-around align-items-center px-4 mt-2">
+                  <div id="dev-laptop" class="iot-device"><div class="icon-wrap bg-secondary bg-opacity-25">💻</div><div class="icon-label">Laptop</div></div>
+                  <div id="dev-hub"    class="iot-device" style="width:72px;"><div class="icon-wrap bg-secondary bg-opacity-25" style="width:52px;height:52px;font-size:1.6rem;">📡</div><div class="icon-label fw-bold" style="color:rgba(255,255,255,.85);">Hub</div></div>
+                  <div id="dev-phone"  class="iot-device"><div class="icon-wrap bg-secondary bg-opacity-25">📱</div><div class="icon-label">Phone</div></div>
+                </div>
+              </div>
+
+              <div id="iot-status" class="text-white-50 mt-2">All devices connected to home network</div>
+
+              <!-- Code snippet area -->
+              <div class="code-font fs-6 lh-lg mt-4" style="min-height:4rem;">
+                <div class="text-secondary mb-1">// IoT Sensor Data</div>
+                <span class="code-segment step-hidden text-info" data-steps="1,2,3">sensor</span><span class="code-segment step-hidden text-white" data-steps="1,2,3">.</span><span class="code-segment step-hidden text-warning" data-steps="1,2,3">collect</span><span class="code-segment step-hidden text-white" data-steps="1,2,3">(temperature);</span><br>
+                <span class="code-segment step-hidden text-info" data-steps="2,3">edge</span><span class="code-segment step-hidden text-white" data-steps="2,3">.</span><span class="code-segment step-hidden text-warning" data-steps="2,3">processLocally</span><span class="code-segment step-hidden text-white" data-steps="2,3">(data);</span><br>
+                <span class="code-segment step-hidden text-danger" data-steps="3">// WARNING: device never updated!</span>
+              </div>
+            </div>
+
+            <!-- Right: Content Panel -->
+            <div class="col-12 col-md-6 p-4 p-md-5 d-flex flex-column justify-content-between bg-white text-dark">
+              <div>
+                <div class="d-inline-block px-3 py-1 bg-success bg-opacity-10 text-success rounded-pill small fw-bold mb-4 text-uppercase letter-spacing-wide">Interactive Lesson</div>
+                <h2 class="display-6 fw-bold da-primary mb-2 mt-0">IoT & Edge Computing</h2>
+                <div class="d-flex gap-1 mb-5 mt-4" id="module-progress"></div>
+                <div id="module-content" class="content-min-height"></div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
+                <button class="btn-prev btn text-secondary fw-semibold border-0"><i class="fas fa-arrow-left me-2"></i> Back</button>
+                <button class="btn-next btn text-white bg-da-primary fw-semibold shadow-sm px-4 py-2">Next Step <i class="fas fa-arrow-right ms-2"></i></button>
+              </div>
+            </div>
+
+          </div>
+        </main>
+      </div>
+    </div></div>
+  </section>
+
+  <script src="/js/interactive.js"></script>
+  <script>
+    const steps = [
+      {
+        title: "What Is IoT?",
+        icon: "fa-wifi",
+        text: "<strong>The Internet of Things (IoT)</strong> is a network of physical devices — fridges, doorbells, thermostats, security cameras — connected to the internet and to each other. Each device uses <strong>sensors</strong> to collect real-world data (temperature, motion, sound) and sends it over the network. A smart streetlight that turns on when it detects a pedestrian is a classic IoT example."
+      },
+      {
+        title: "Edge Computing",
+        icon: "fa-microchip",
+        text: "<strong>Edge Computing</strong> means processing data directly on the device (or nearby) rather than sending everything to a distant cloud server. A smart thermostat that adjusts the heat by itself — without waiting for a cloud response — is using edge computing. The benefit: faster reactions, less bandwidth used, and the device still works even if the internet goes down."
+      },
+      {
+        title: "The Security Nightmare",
+        icon: "fa-skull-crossbones",
+        text: "IoT devices are a major security risk. Most are <strong>never updated</strong> after purchase, leaving known vulnerabilities unpatched forever. A hacked fridge or camera can become a backdoor into your entire home network — giving attackers access to your laptop and phone on the same Wi-Fi. This is why <strong>data privacy laws</strong> increasingly regulate how IoT devices collect and store data about your private life."
+      }
+    ];
+
+    const quiz = {
+      snippet: `<i class="fas fa-wifi da-primary me-2"></i> Internet of Things`,
+      question: "Why are IoT devices a major security risk compared to a regular laptop?",
+      options: [
+        { text: "They use more electricity and slow down the network", isCorrect: false },
+        { text: "They are rarely updated, leaving vulnerabilities open permanently", isCorrect: true },
+        { text: "They only work on 5G networks which are unsecured", isCorrect: false }
+      ],
+      correctText: "Exactly right! Unlike a laptop that gets weekly OS updates, most IoT devices ship with firmware that never gets patched — making them permanent backdoors once a vulnerability is discovered.",
+      incorrectText: "Think about what makes a device hard to secure over time. What happens when a company stops supporting a product but you keep using it?"
+    };
+
+    new InteractiveModule(steps, quiz, (step) => {
+      const allDevs = ['fridge','door','cloud','cam','thermo','laptop','hub','phone'];
+      const allLines = ['fridge','door','cloud','cam','thermo','laptop','phone'];
+
+      // Reset all
+      allDevs.forEach(d => {
+        const el = document.getElementById('dev-'+d);
+        if(el){ el.classList.remove('safe','hacked','edge','dim'); }
+      });
+      allLines.forEach(l => {
+        const el = document.getElementById('l-'+l);
+        if(el){ el.classList.remove('active'); }
+      });
+      document.getElementById('iot-status').style.color = 'rgba(255,255,255,.5)';
+
+      if(step === 1) {
+        // All devices safe, all lines active
+        allDevs.forEach(d => {
+          const el = document.getElementById('dev-'+d);
+          if(el) el.classList.add('safe');
+        });
+        allLines.forEach(l => {
+          const el = document.getElementById('l-'+l);
+          if(el) el.classList.add('active');
+        });
+        const st = document.getElementById('iot-status');
+        st.textContent = '7 IoT devices collecting sensor data';
+        st.style.color = '#34d399';
+      } else if(step === 2) {
+        // Edge: thermostat and fridge process locally, dim cloud
+        ['thermo','fridge','hub'].forEach(d => {
+          const el = document.getElementById('dev-'+d);
+          if(el) el.classList.add('edge');
+        });
+        ['laptop','phone','door','cam'].forEach(d => {
+          const el = document.getElementById('dev-'+d);
+          if(el) el.classList.add('safe');
+        });
+        document.getElementById('dev-cloud').classList.add('dim');
+        ['thermo','fridge'].forEach(l => {
+          const el = document.getElementById('l-'+l);
+          if(el) el.classList.add('active');
+        });
+        const st = document.getElementById('iot-status');
+        st.textContent = 'Edge: processing locally — no cloud needed';
+        st.style.color = '#60a5fa';
+      } else if(step === 3) {
+        // Fridge hacked → laptop and phone compromised
+        ['fridge','door','cam','thermo'].forEach(d => {
+          const el = document.getElementById('dev-'+d);
+          if(el) el.classList.add('hacked');
+        });
+        ['laptop','phone'].forEach(d => {
+          const el = document.getElementById('dev-'+d);
+          if(el) el.classList.add('hacked');
+        });
+        document.getElementById('dev-hub').classList.add('hacked');
+        document.getElementById('dev-cloud').classList.add('dim');
+        allLines.forEach(l => {
+          const el = document.getElementById('l-'+l);
+          if(el) el.classList.add('active');
+          if(el) el.style.stroke = '#f87171';
+        });
+        const st = document.getElementById('iot-status');
+        st.textContent = '⚠ Fridge hacked → entire network compromised';
+        st.style.color = '#f87171';
+      }
+    });
+  </script>
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>
