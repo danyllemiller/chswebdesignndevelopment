@@ -32,7 +32,7 @@ function renderSectionCatalog(sections) {
             <td class="text-muted small">${escapeHtml(s.course_id)}</td>
             <td>${escapeHtml(s.course_name)}</td>
             <td class="text-center">
-                <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteSection('${escapeHtml(s.section_id)}')">🗑️</button>
+                <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteSection('${escapeHtml(s.section_id)}','${escapeHtml(s.course_id)}')">🗑️</button>
             </td>
         </tr>
     `).join('');
@@ -64,10 +64,10 @@ async function addSection() {
     }
 }
 
-window.deleteSection = async function(sid) {
-    if (!confirm(`Delete section "${sid}"? This cannot be undone.`)) return;
+window.deleteSection = async function(sid, cid) {
+    if (!confirm(`Delete section "${sid}" (${cid})? This cannot be undone.`)) return;
     try {
-        const r = await fetch(`/api/admin/sections/${encodeURIComponent(sid)}`, { method: 'DELETE' });
+        const r = await fetch(`/api/admin/sections/${encodeURIComponent(sid)}?course_id=${encodeURIComponent(cid)}`, { method: 'DELETE' });
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || 'Failed');
         showStatus(`Section "${sid}" removed.`, 'success');

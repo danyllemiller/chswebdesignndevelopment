@@ -250,8 +250,9 @@ router.post('/admin/sections', async (req, res) => {
             'INSERT INTO courses (course_id, course_name, department) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE course_name = VALUES(course_name)',
             [cid, cname, '']
         );
+        // Composite PK (section_id, course_id) allows same period with multiple courses
         await connection.execute(
-            'INSERT INTO class_sections (section_id, course_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE course_id = VALUES(course_id)',
+            'INSERT IGNORE INTO class_sections (section_id, course_id) VALUES (?, ?)',
             [sid, cid]
         );
         await connection.end();
@@ -266,19 +267,25 @@ router.post('/admin/sections', async (req, res) => {
 // --- ADMIN DELETE SECTION ---
 router.delete('/admin/sections/:section_id', async (req, res) => {
     const sid = String(req.params.section_id || '').trim();
+    const cid = String(req.query.course_id || '').trim();
     if (!sid) return res.status(400).json({ error: 'section_id required' });
 
     let connection;
     try {
         connection = await getDbConnection();
+        // Only block delete if students are enrolled AND no other course covers this period
         const [rows] = await connection.execute(
             'SELECT COUNT(*) AS cnt FROM students WHERE section_id = ?', [sid]
         );
         if (rows[0].cnt > 0) {
             await connection.end();
-            return res.status(409).json({ error: `Cannot delete — ${rows[0].cnt} student(s) still enrolled in this section.` });
+            return res.status(409).json({ error: `Cannot delete — ${rows[0].cnt} student(s) still enrolled in period ${sid}.` });
         }
-        await connection.execute('DELETE FROM class_sections WHERE section_id = ?', [sid]);
+        const sql = cid
+            ? 'DELETE FROM class_sections WHERE section_id = ? AND course_id = ?'
+            : 'DELETE FROM class_sections WHERE section_id = ?';
+        const params = cid ? [sid, cid] : [sid];
+        await connection.execute(sql, params);
         await connection.end();
         res.json({ success: true });
     } catch (err) {
