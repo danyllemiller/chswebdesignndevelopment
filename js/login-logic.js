@@ -125,22 +125,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // If account is flagged, force immediate password change before any redirect.
                 if (Number(data.must_change_password || data.user?.must_change_password || 0) === 1) {
-                    const temporaryPassword = prompt("Your password was reset. Enter your current temporary password (your Student ID):");
-                    if (!temporaryPassword) {
-                        throw new Error('Password change is required before continuing.');
-                    }
-
-                    const newPassword = prompt("Create a new password (minimum 6 characters):");
-                    if (!newPassword || String(newPassword).length < 6) {
-                        throw new Error('New password must be at least 6 characters.');
-                    }
+                    let newPassword, confirmPassword;
+                    do {
+                        newPassword = prompt("Your account requires a new password.\n\nEnter a new password (minimum 6 characters):");
+                        if (!newPassword) throw new Error('Password change is required before continuing.');
+                        if (String(newPassword).length < 6) {
+                            alert('Password must be at least 6 characters. Please try again.');
+                            newPassword = null;
+                            continue;
+                        }
+                        confirmPassword = prompt("Confirm new password:");
+                        if (!confirmPassword) throw new Error('Password change is required before continuing.');
+                        if (newPassword !== confirmPassword) {
+                            alert('Passwords do not match. Please try again.');
+                            newPassword = null;
+                        }
+                    } while (!newPassword);
 
                     const changeResponse = await fetch('/api/change-password', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
                         body: JSON.stringify({
-                            current_password: temporaryPassword,
+                            current_password: String(data.user.student_id),
                             new_password: newPassword
                         })
                     });
@@ -152,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const updatedUser = { ...data.user, must_change_password: 0 };
                     localStorage.setItem('user', JSON.stringify(updatedUser));
-                    alert('Password updated successfully. You can now continue.');
+                    alert('Password set successfully. Welcome!');
                 }
                 
                 // TEACHER REDIRECT OVERRIDE

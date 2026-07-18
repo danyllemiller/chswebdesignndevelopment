@@ -52,16 +52,20 @@ if (!$user) {
     exit;
 }
 
-// Verify: bcrypt match, plain-text match (legacy), or temp-password equals student_id
-$valid = password_verify($currentPw, $user['password_hash'])
-      || $currentPw === $user['password_hash']
-      || $currentPw === $user['student_id'];
+// If the request came from an authenticated session, skip current-password check.
+// Otherwise verify: bcrypt, plain-text legacy, or temp-password equals student_id.
+$sessionVerified = !empty($sessionId);
+if (!$sessionVerified) {
+    $valid = password_verify($currentPw, $user['password_hash'])
+          || $currentPw === $user['password_hash']
+          || $currentPw === $user['student_id'];
 
-if (!$valid) {
-    $db->close();
-    http_response_code(401);
-    echo json_encode(['error' => 'Current password is incorrect']);
-    exit;
+    if (!$valid) {
+        $db->close();
+        http_response_code(401);
+        echo json_encode(['error' => 'Current password is incorrect']);
+        exit;
+    }
 }
 
 $hash = password_hash($newPw, PASSWORD_DEFAULT);
