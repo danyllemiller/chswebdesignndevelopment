@@ -734,6 +734,28 @@ h1 {
             <li class="mb-0"><strong>Element</strong> (<code>p</code>): The weakest. Styles all paragraphs of that type. (Lowest Specificity)</li>
         </ol>
 
+        <!-- SPECIFICITY SCORING TABLE -->
+        <div class="card border-warning shadow-sm my-4">
+          <div class="card-header bg-warning text-dark fw-bold"><span class="badge bg-dark text-warning me-1">NV 5.2.2</span> Specificity Scoring: The Math Behind the Fight</div>
+          <div class="card-body small bg-light">
+            <p class="mb-3">When two rules conflict, the browser calculates a <strong>specificity score</strong> for each selector. The selector with the <strong>highest score wins</strong>, regardless of which rule was written last in the file.</p>
+            <table class="table table-bordered table-sm small bg-white mb-3">
+              <thead class="bg-light"><tr><th>Selector Type</th><th>Example</th><th>Score</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Inline Style</strong> (inside the tag)</td><td><code>style="color: red;"</code></td><td class="fw-bold text-danger">1,0,0,0</td></tr>
+                <tr><td><strong>ID Selector</strong></td><td><code>#main-header</code></td><td class="fw-bold text-warning">0,1,0,0</td></tr>
+                <tr><td><strong>Class / Attribute / Pseudo-class</strong></td><td><code>.nav-link</code>, <code>[type]</code>, <code>:hover</code></td><td class="fw-bold text-primary">0,0,1,0</td></tr>
+                <tr><td><strong>Element / Pseudo-element</strong></td><td><code>p</code>, <code>h2</code>, <code>::before</code></td><td class="fw-bold text-secondary">0,0,0,1</td></tr>
+              </tbody>
+            </table>
+            <p class="mb-2 fw-bold">Worked Example — Three Rules, One Winner:</p>
+            <pre class="p-2 rounded bg-white border mb-2 no-copy"><code>p           { color: green; }   /* Score: 0,0,0,1  (element = 1 pt)  */
+.highlight  { color: blue;  }   /* Score: 0,0,1,0  (class   = 10 pts) */
+#intro      { color: red;   }   /* Score: 0,1,0,0  (ID      = 100 pts) */</code></pre>
+            <p class="mb-0 text-muted">Result: A paragraph with <code>class="highlight"</code> and <code>id="intro"</code> will be <strong style="color:red;">red</strong>. The ID selector always wins over class and element selectors.</p>
+          </div>
+        </div>
+
         <h5 class="fw-bold mt-4 text-primary">Target Practice: Advanced Selectors</h5>
         <p>Besides the big three, you can target elements based on their relationships or attributes.</p>
         
@@ -807,6 +829,52 @@ h1 {
             </tr>
           </tbody>
         </table>
+
+        <!-- SPECIFICITY BATTLE: INTERACTIVE DEMO -->
+        <div class="card border-danger shadow-sm my-4">
+          <div class="card-header bg-danger text-white fw-bold"><span class="badge bg-white text-danger me-1">NV 5.2.2</span> Specificity Battle: Who Wins?</div>
+          <div class="card-body bg-light small">
+            <p class="mb-3">Two developers each wrote a rule targeting the same <code>&lt;p&gt;</code> tag that has <code>class="intro"</code>. Which color will the text actually be? Check your reasoning before looking at the winner!</p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="card border-secondary h-100">
+                  <div class="card-header bg-secondary text-white fw-bold text-center">Rule 1</div>
+                  <div class="card-body">
+                    <pre class="p-2 rounded bg-white border mb-2 no-copy"><code>p {
+    color: green;
+}</code></pre>
+                    <p class="mb-0 text-center small text-muted">Score: <strong>0,0,0,1</strong><br>(element tag)</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card border-primary h-100">
+                  <div class="card-header bg-primary text-white fw-bold text-center">Rule 2</div>
+                  <div class="card-body">
+                    <pre class="p-2 rounded bg-white border mb-2 no-copy"><code>.intro {
+    color: blue;
+}</code></pre>
+                    <p class="mb-0 text-center small text-muted">Score: <strong>0,0,1,0</strong><br>(class selector)</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card border-success h-100">
+                  <div class="card-header bg-success text-white fw-bold text-center">Winner</div>
+                  <div class="card-body d-flex align-items-center justify-content-center">
+                    <div class="text-center">
+                      <p class="fw-bold mb-1" style="color:blue; font-size:1.3rem;">Blue wins.</p>
+                      <p class="mb-0 text-muted small">Class (0,0,<strong>1</strong>,0) beats Element (0,0,0,<strong>1</strong>). Rule 2 wins even though Rule 1 was written first in the file.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="alert alert-info small border-0 mt-3 mb-0 py-2">
+              <strong>DevTools Tip:</strong> In Chrome DevTools, when a CSS rule has been overridden by a more specific rule, it appears with a <s>strikethrough</s>. This is how you diagnose "why isn't my style applying?"
+            </div>
+          </div>
+        </div>
 
         <!-- GRADED LAB 3 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
@@ -963,6 +1031,33 @@ h1 {
           </tbody>
         </table>
 
+        <!-- GOOGLE FONTS INTEGRATION -->
+        <h5 class="fw-bold mt-5 text-primary"><span class="badge bg-primary me-1">NV 5.2.1</span> Integrating Google Fonts: Step by Step</h5>
+        <p>Google Fonts is a free library of hundreds of web fonts. Here is the professional three-step workflow to use them in any project:</p>
+        <div class="bg-light p-4 rounded border shadow-sm mb-5">
+          <ol class="small mb-0 ps-3">
+            <li class="mb-3"><strong>Choose your fonts:</strong> Go to <a href="https://fonts.google.com" target="_blank" rel="noopener">fonts.google.com</a>. Select a heading font (e.g., <em>Playfair Display</em>) and a body font (e.g., <em>Lato</em>). Add each to your bag, then click the basket and "Get embed code."</li>
+            <li class="mb-3"><strong>Add the <code>&lt;link&gt;</code> tags to your HTML <code>&lt;head&gt;</code></strong>, <em>before</em> your own stylesheet link:
+              <pre class="p-2 rounded mt-2 mb-0 bg-white border no-copy"><code>&lt;!-- Two preconnect tags speed up the font handshake --&gt;
+&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;
+&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;
+&lt;!-- The actual font import --&gt;
+&lt;link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet"&gt;</code></pre>
+            </li>
+            <li class="mb-0"><strong>Apply with <code>font-family</code> in your CSS:</strong>
+              <pre class="p-2 rounded mt-2 mb-0 bg-white border no-copy"><code>/* Heading font */
+h1, h2, h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Body font — applied to everything */
+body {
+    font-family: 'Lato', Arial, sans-serif;
+}</code></pre>
+            </li>
+          </ol>
+        </div>
+
         <h2 class="section-title mt-5">Go Big or Go Home: Sizing Your Text</h2>
         <ol class="small ps-3 mb-5">
             <li class="mb-3">
@@ -989,6 +1084,13 @@ h1 {
             <li class="mb-2" style="text-indent: 40px;"><code>text-indent</code>: Pushes the first line of a paragraph in.</li>
             <li class="mb-2" style="letter-spacing: 0.25em;"><code>letter-spacing</code>: Adjusts the space between characters.</li>
             <li class="mb-3" style="line-height: 2.5;"><code>line-height</code>: Adjusts the vertical space between lines of text. (<code>line-height: 1.6;</code> is great for reading).</li>
+            <li class="mb-2"><code>text-decoration</code>: Controls the line decoration on text. Common values:
+              <ul class="mt-1 ps-3">
+                <li><code>text-decoration: none;</code> — Removes the underline from links (used heavily in nav bars).</li>
+                <li><code>text-decoration: underline;</code> — Adds the classic underline.</li>
+                <li><code>text-decoration: line-through;</code> — Draws a strikethrough (great for "sale" prices).</li>
+              </ul>
+            </li>
             <li class="mb-0">
               The "font" Shorthand: A professional shortcut that combines many font properties.
               <pre class="p-3 border rounded shadow-sm mt-2 mb-0 no-copy"><code>p { font: italic bold 1rem/1.5 Georgia, serif; }</code></pre>

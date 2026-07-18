@@ -497,9 +497,34 @@
                             </ul>
                             
                             <h5 class="fw-bold mt-4">Adding Responsive Images to Your Website</h5>
-                            <pre class="p-3 border rounded shadow-sm mb-5"><code>&lt;img src="media/fallback.jpg" alt="Description"
+                            <pre class="p-3 border rounded shadow-sm mb-4"><code>&lt;img src="media/fallback.jpg" alt="Description"
     srcset="media/small.jpg 480w, media/large.jpg 800w"
     sizes="(max-width: 600px) 480px, 800px"&gt;</code></pre>
+
+                            <!-- PICTURE ELEMENT WITH WEBP FALLBACK -->
+                            <h5 class="fw-bold mt-4"><span class="badge bg-primary me-1">NV 4.5.4</span> The Modern Standard: <code>&lt;picture&gt;</code> with WebP Fallback</h5>
+                            <p>The <code>&lt;picture&gt;</code> element takes responsive images one step further. It lets you offer <strong>WebP</strong> to browsers that support it (for maximum compression) while falling back to JPG for older browsers. The browser reads the <code>&lt;source&gt;</code> tags from top to bottom and uses the first one it understands.</p>
+                            <div class="alert alert-info small border-0 border-start border-4 border-info shadow-sm mb-3">
+                              <strong>Why WebP?</strong> WebP images are typically 25–35% smaller in file size than equivalent JPGs with the same visual quality. Google created it specifically for the web. All modern browsers support it.
+                            </div>
+                            <pre class="p-3 border rounded shadow-sm mb-3"><code>&lt;picture&gt;
+    &lt;!-- Modern browsers will use WebP (smaller file size) --&gt;
+    &lt;source srcset="media/hero.webp" type="image/webp"&gt;
+    &lt;!-- Older browsers fall back to JPG --&gt;
+    &lt;img src="media/hero.jpg" alt="A drone flying over a mountain range"&gt;
+&lt;/picture&gt;</code></pre>
+                            <p class="small text-muted border-start border-3 border-success px-3 mb-5">
+                              <strong>Agency Tip:</strong> When you export images in Photoshop, use "Save for Web" and choose the WebP format for photos. Keep a JPG version as the fallback. This two-file approach is the professional standard for performance.
+                            </p>
+                            <h5 class="fw-bold mt-4"><span class="badge bg-primary me-1">NV 4.5.1</span> GIF vs. WebP Animation</h5>
+                            <p>Animated GIFs were the original way to add looping animations to websites — think reaction memes. But GIFs are surprisingly large files because they store every frame as a separate full image. <strong>Animated WebP</strong> achieves the same looping effect with dramatically smaller file sizes (often 60–80% smaller). Whenever you are tempted to drop a GIF on a site, ask yourself: can I export this as an animated WebP instead?</p>
+                            <table class="table table-bordered table-sm small bg-white shadow-sm mb-5">
+                              <thead class="bg-light"><tr><th>Format</th><th>Animation</th><th>Transparency</th><th>File Size</th><th>Best Use</th></tr></thead>
+                              <tbody>
+                                <tr><td class="fw-bold">GIF</td><td>Yes</td><td>Yes (1-bit)</td><td class="text-danger fw-bold">Large</td><td>Legacy support; simple memes</td></tr>
+                                <tr><td class="fw-bold">Animated WebP</td><td>Yes</td><td>Yes (full alpha)</td><td class="text-success fw-bold">Much Smaller</td><td>Modern replacement for animated GIFs</td></tr>
+                              </tbody>
+                            </table>
                         </div>
                         <div class="col-lg-4">
                             <div class="bg-light p-3 rounded border shadow-sm mb-4">
@@ -882,11 +907,35 @@
 
                             <p><strong>Why use a YouTube <code>&lt;iframe&gt;</code>?</strong> Because video files are huge! By embedding a video, you allow YouTube's massive servers to handle the heavy processing, saving you from paying for the massive bandwidth the video uses.</p>
 
-                            <h5 class="fw-bold mt-4">Adding an Iframe (YouTube) to Your Website</h5>
+                            <h5 class="fw-bold mt-4"><span class="badge bg-primary me-1">NV 4.5.5</span> Adding an Iframe (YouTube) to Your Website</h5>
                             <p>To make the iframe fluid so it adjusts to the screen size, it's common practice to use the <code>width="100%"</code> attribute.</p>
                             <pre class="p-3 border rounded shadow-sm mb-4"><code>&lt;div class="aspect-video"&gt;
     &lt;iframe width="100%" src="https://www.youtube.com/embed/VIDEO_ID" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;
 &lt;/div&gt;</code></pre>
+
+                            <h5 class="fw-bold mt-4 text-primary">Securing Iframes with the <code>sandbox</code> Attribute</h5>
+                            <p>By default, an embedded iframe has <strong>full permissions</strong> — it can run JavaScript, submit forms, and navigate the parent window. For untrusted third-party embeds (anything except your own content), you should use the <code>sandbox</code> attribute to restrict what the iframe is allowed to do.</p>
+                            <pre class="p-3 border rounded shadow-sm mb-3"><code>&lt;!-- SECURE EMBED: sandbox restricts all permissions by default --&gt;
+&lt;div class="aspect-video"&gt;
+    &lt;iframe
+        width="100%"
+        src="https://www.youtube.com/embed/VIDEO_ID"
+        frameborder="0"
+        allowfullscreen
+        sandbox="allow-scripts allow-same-origin"
+        loading="lazy"
+        title="Drone Flight Dynamics"&gt;
+    &lt;/iframe&gt;
+&lt;/div&gt;</code></pre>
+                            <table class="table table-bordered table-sm small bg-white shadow-sm mb-5">
+                              <thead class="bg-light"><tr><th><code>sandbox</code> Value</th><th>What It Allows</th></tr></thead>
+                              <tbody>
+                                <tr><td><code>sandbox</code> (empty)</td><td>Blocks <strong>everything</strong> — no scripts, no forms, no popups. Use as a starting point.</td></tr>
+                                <tr><td><code>allow-scripts</code></td><td>Permits JavaScript to run inside the iframe (needed for most video players).</td></tr>
+                                <tr><td><code>allow-same-origin</code></td><td>Allows the iframe to load resources from its own origin (needed for YouTube cookies/preferences).</td></tr>
+                                <tr><td><code>allow-forms</code></td><td>Allows the iframe to submit forms (only add if you specifically need it).</td></tr>
+                              </tbody>
+                            </table>
 
                             <h5 class="fw-bold mt-4">Video Formats Checklist</h5>
                             <p>If you choose to host the video files on your own server (The Pro Way), you must use specific file types.</p>
@@ -1298,8 +1347,37 @@
                                 </tbody>
                             </table>
                             
-                            <h5 class="fw-bold mt-4">Table Superpowers</h5>
+                            <h5 class="fw-bold mt-4"><span class="badge bg-primary me-1">NV 4.4.6</span> Table Superpowers: <code>colspan</code> &amp; <code>rowspan</code></h5>
                             <p>Use <strong><code>colspan</code></strong> to stretch a cell horizontally across multiple columns. Use <strong><code>rowspan</code></strong> to stretch a cell vertically across multiple rows. We will use <code>colspan="3"</code> in our lab to stretch a footer across the entire width.</p>
+                            <p>Here is an example showing both attributes together — a schedule table where "Monday" spans two rows and a footer cell spans all three columns:</p>
+                            <pre class="p-3 border rounded shadow-sm mb-5"><code>&lt;table&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;
+            &lt;th&gt;Day&lt;/th&gt;
+            &lt;th&gt;AM Session&lt;/th&gt;
+            &lt;th&gt;PM Session&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+        &lt;tr&gt;
+            &lt;!-- rowspan="2" makes "Monday" cover the next two rows vertically --&gt;
+            &lt;td rowspan="2"&gt;Monday&lt;/td&gt;
+            &lt;td&gt;Beginner Flight&lt;/td&gt;
+            &lt;td&gt;Advanced Maneuvers&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;!-- No first cell here — Monday already spans into this row --&gt;
+            &lt;td&gt;Regulations Review&lt;/td&gt;
+            &lt;td&gt;Free Practice&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+    &lt;tfoot&gt;
+        &lt;tr&gt;
+            &lt;!-- colspan="3" stretches this cell across all three columns --&gt;
+            &lt;td colspan="3"&gt;All sessions held at Carson City Airfield&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tfoot&gt;
+&lt;/table&gt;</code></pre>
                             
                             <h5 class="fw-bold mt-4">Adding a Data Table to Your Website</h5>
                             <pre class="p-3 border rounded shadow-sm mb-5"><code>&lt;table&gt;
@@ -1435,10 +1513,26 @@
                                 <strong class="text-info"><i class="fas fa-lightbulb me-1"></i> The 'Why':</strong> When you force a vertical photo into a horizontal box, it stretches and looks terrible. `object-fit: cover` fixes this instantly. Additionally, hover effects provide crucial UX feedback, telling the user without words that an element is interactive.
                             </div>
 
-                            <ul class="small mb-4">
-                                <li class="mb-3"><code>object-fit: cover;</code> – The image will scale and crop itself perfectly to fill the entire box without ever stretching. This is the gold standard for hero images and profile pictures.</li>
-                                <li class="mb-3"><code>object-fit: contain;</code> – The image will scale down until the entire picture fits inside the box, usually leaving blank letterbox space on the sides.</li>
-                            </ul>
+                            <table class="table table-bordered table-sm small bg-white shadow-sm mb-4">
+                              <thead class="bg-light"><tr><th>Value</th><th>What It Does</th><th>Best For</th></tr></thead>
+                              <tbody>
+                                <tr>
+                                  <td class="fw-bold"><code>object-fit: cover;</code></td>
+                                  <td>The image scales and <strong>crops</strong> itself to fill the entire box. No empty space, but the edges may be trimmed.</td>
+                                  <td class="text-success fw-bold">Hero images, profile pictures, gallery thumbnails.</td>
+                                </tr>
+                                <tr>
+                                  <td class="fw-bold"><code>object-fit: contain;</code></td>
+                                  <td>The image scales down until the entire picture fits inside the box, leaving letterbox bars on the sides or top/bottom.</td>
+                                  <td>Product photos where you must show the whole item.</td>
+                                </tr>
+                                <tr>
+                                  <td class="fw-bold"><code>object-fit: fill;</code></td>
+                                  <td>The image <strong>stretches</strong> to fill the box in both dimensions, distorting the aspect ratio. <span class="badge bg-danger">Avoid this</span> for photos.</td>
+                                  <td class="text-danger">Rarely useful — causes squishing. Mentioned here so you recognize what <em>not</em> to do.</td>
+                                </tr>
+                              </tbody>
+                            </table>
 
                             <h5 class="fw-bold mt-4">CSS Architect Reminders</h5>
                             <p class="small">A few key rules that power professional CSS design:</p>
