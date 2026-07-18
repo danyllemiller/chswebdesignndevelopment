@@ -231,36 +231,21 @@ router.get('/admin/sections', async (req, res) => {
 
 // --- ADMIN ADD SECTION ---
 router.post('/admin/sections', async (req, res) => {
-    const { section_id, course_id } = req.body || {};
+    const { section_id, course_id, course_name } = req.body || {};
     if (!section_id) return res.status(400).json({ error: 'section_id is required' });
-    const sid = String(section_id).trim();
-    const cid = course_id ? String(course_id).trim() : null;
+    if (!course_id)  return res.status(400).json({ error: 'course_id is required' });
+    const sid   = String(section_id).trim();
+    const cid   = String(course_id).trim();
+    const cname = course_name ? String(course_name).trim() : cid;
 
     let connection;
     try {
         connection = await getDbConnection();
-        await connection.execute(`CREATE TABLE IF NOT EXISTS courses (
-            course_id   VARCHAR(50) PRIMARY KEY,
-            course_name VARCHAR(100) NOT NULL DEFAULT '',
-            department  VARCHAR(100) NOT NULL DEFAULT ''
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
-        await connection.execute(`CREATE TABLE IF NOT EXISTS class_sections (
-            section_id VARCHAR(50) PRIMARY KEY,
-            course_id  VARCHAR(50) DEFAULT NULL
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
-
-        // Ensure the course row exists
-        if (cid) {
-            const COURSE_NAMES = {
-                '10003GS': 'Computer Science', '05254G1S': 'Web Design 1',
-                '05254G2S': 'Web Design 2',    '05254ES':  'Web Design AS'
-            };
-            const cname = COURSE_NAMES[cid] || cid;
-            await connection.execute(
-                'INSERT IGNORE INTO courses (course_id, course_name, department) VALUES (?, ?, ?)',
-                [cid, cname, '']
-            );
-        }
+        // Upsert course row with the name the teacher provided
+        await connection.execute(
+            'INSERT INTO courses (course_id, course_name, department) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE course_name = VALUES(course_name)',
+            [cid, cname, '']
+        );
         await connection.execute(
             'INSERT INTO class_sections (section_id, course_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE course_id = VALUES(course_id)',
             [sid, cid]

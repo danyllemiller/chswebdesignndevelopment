@@ -22,7 +22,7 @@ function renderSectionCatalog(sections) {
     if (!body) return;
 
     if (!Array.isArray(sections) || sections.length === 0) {
-        body.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">No sections yet. Add one above.</td></tr>';
+        body.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">No sections yet. Add one above.</td></tr>';
         return;
     }
 
@@ -31,7 +31,6 @@ function renderSectionCatalog(sections) {
             <td class="fw-bold">${escapeHtml(s.section_id)}</td>
             <td class="text-muted small">${escapeHtml(s.course_id)}</td>
             <td>${escapeHtml(s.course_name)}</td>
-            <td class="text-muted small">${escapeHtml(s.department)}</td>
             <td class="text-center">
                 <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteSection('${escapeHtml(s.section_id)}')">🗑️</button>
             </td>
@@ -41,18 +40,22 @@ function renderSectionCatalog(sections) {
 
 async function addSection() {
     const sid = document.getElementById('new-section-id')?.value.trim();
-    const cid = document.getElementById('new-section-course')?.value;
-    if (!sid) { showStatus('Enter a Section ID.', 'warning'); return; }
+    const cid = document.getElementById('new-section-course-id')?.value.trim();
+    const cname = document.getElementById('new-section-course-name')?.value.trim();
+    if (!sid) { showStatus('Select a period.', 'warning'); return; }
+    if (!cid) { showStatus('Enter a Course ID.', 'warning'); return; }
+    if (!cname) { showStatus('Enter a Course Name.', 'warning'); return; }
 
     try {
         const r = await fetch('/api/admin/sections', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ section_id: sid, course_id: cid })
+            body: JSON.stringify({ section_id: sid, course_id: cid, course_name: cname })
         });
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || 'Failed');
-        document.getElementById('new-section-id').value = '';
+        document.getElementById('new-section-course-id').value = '';
+        document.getElementById('new-section-course-name').value = '';
         showStatus(`Section "${sid}" added.`, 'success');
         fetchSections();
     } catch (err) {
