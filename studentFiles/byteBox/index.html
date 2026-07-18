@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ByteBox Arcade — Leaderboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0f;
+            color: #00ff88;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        h1 { font-size: 2rem; text-align: center; margin-bottom: 0.5rem; color: #00e5ff; }
+        p.subtitle { text-align: center; color: #888; margin-bottom: 2rem; }
+        .score-form {
+            max-width: 400px;
+            margin: 0 auto 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .score-form input {
+            padding: 0.6rem;
+            background: #1a1a2e;
+            border: 1px solid #00ff88;
+            color: #fff;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        .score-form button {
+            padding: 0.7rem;
+            background: #00ff88;
+            color: #0a0a0f;
+            border: none;
+            border-radius: 4px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #leaderboard {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        #leaderboard h2 { margin-bottom: 1rem; color: #ffcc00; }
+        #score-list { list-style: none; }
+        #score-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+        }
+        #status-msg { text-align: center; margin: 1rem; min-height: 1.5rem; color: #ffcc00; }
+    </style>
+</head>
+<body>
+
+    <h1>⚡ ByteBox Arcade</h1>
+    <p class="subtitle">Cosmic Comet — High Score Leaderboard</p>
+
+    <div class="score-form">
+        <input type="text" id="player-name" placeholder="Your Name" maxlength="20">
+        <input type="number" id="player-score" placeholder="Your Score" min="0">
+        <button id="save-btn">Save Score</button>
+    </div>
+
+    <p id="status-msg"></p>
+
+    <div id="leaderboard">
+        <h2>🏆 Top Scores</h2>
+        <ul id="score-list">
+            <!-- Scores will be loaded here by JavaScript -->
+        </ul>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>

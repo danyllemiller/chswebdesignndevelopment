@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Clicker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0d1117;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            color: #e6edf3;
+            padding: 1rem;
+        }
+        h1 { margin: 1rem 0 0.25rem; color: #58a6ff; }
+        #hud {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        canvas {
+            border: 2px solid #30363d;
+            border-radius: 8px;
+            background: #010409;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Cosmic Clicker</h1>
+
+    <div id="hud">
+        <span>Score: <strong id="score">0</strong></span>
+        <span>Time: <strong id="timer">30</strong>s</span>
+    </div>
+
+    <!-- The canvas: 800 wide, 500 tall -->
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+    <script src="script.js"></script>
+</body>
+</html>

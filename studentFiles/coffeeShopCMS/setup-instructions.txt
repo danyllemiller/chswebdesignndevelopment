@@ -1,0 +1,36 @@
+COFFEESHOP CMS — Chapter 12 Setup Instructions
+===============================================
+
+This project uses WordPress via LocalWP (not traditional HTML files).
+There are no starter code files to download — follow these steps to begin.
+
+STEP 1: Install LocalWP
+-----------------------
+Download LocalWP for free at: https://localwp.com
+Install and open it on your computer.
+
+STEP 2: Create Your Site
+------------------------
+1. Click the "+" button in LocalWP to create a new site.
+2. Name it exactly: CoffeeShopCMS
+3. Choose "Preferred" environment settings.
+4. Set a username and password you will remember (you'll use these to log in).
+5. Click "Add Site" and wait for LocalWP to finish setting it up.
+
+STEP 3: Open WordPress Admin
+-----------------------------
+1. In LocalWP, click "Admin" or "WP Admin" to open the dashboard in your browser.
+2. Log in with the username and password you just created.
+
+STEP 4: You're Ready
+---------------------
+Your Chapter 12 walkthroughs begin from the WordPress dashboard.
+Follow the chapter instructions to build your Local Legends Coffee Shop website.
+
+BRAND INFORMATION (use this for your coffee shop site):
+-------------------------------------------------------
+Client Name:    Local Legends Coffee Shop
+Tagline:        Carson City's Favorite Local Brew
+Colors:         Warm brown, cream, dark charcoal
+Pages to build: Home, Menu, About Us, Contact
+Categories:     Seasonal Flavors, Community Events

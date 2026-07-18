@@ -1,0 +1,60 @@
+PIXELPLAY ARCADE — Chapter 5 Starter Content
+=============================================
+
+Use this text when building your HTML pages in the chapter walkthroughs.
+You will create index.html, about.html, contact.html, and reviews.html from scratch.
+
+---
+INDEX PAGE (index.html)
+---
+Page Title: PixelPlay: Your Ultimate Retro Arcade Destination
+Meta Description: PixelPlay: Retro Arcade.
+
+H1: Welcome to PixelPlay
+
+Paragraph 1:
+Welcome to PixelPlay! We bring the ultimate arcade experience directly to your doorstep. Our high-tech arcade truck is packed with the latest consoles and classic retro games, perfect for any event.
+
+H2: Our Services
+
+Services list:
+- Mobile Arcade Rental
+- Birthday Party Packages
+- Corporate Events
+- School Fundraisers
+
+---
+ABOUT PAGE (about.html)
+---
+Page Title: About PixelPlay
+H1: About PixelPlay
+
+Paragraph:
+We are a local Carson City business with a passion for gaming. Founded in 2021, PixelPlay has brought the joy of classic and modern gaming to hundreds of events across Northern Nevada.
+
+---
+CONTACT PAGE (contact.html)
+---
+Page Title: Contact PixelPlay
+H1: Contact Us
+
+Form fields students will build:
+- Name (text input, id="name", required)
+- Email (email input, id="email", required)
+- Message (textarea, id="message", required)
+- Submit button: "Send Message"
+
+---
+REVIEWS PAGE (reviews.html)
+---
+Page Title: PixelPlay Reviews
+H1: What Our Customers Say
+
+Review 1:
+"Best birthday party ever!" — Sarah T.
+
+Review 2:
+"The kids couldn't stop playing. Absolutely worth every penny." — Mike D.
+
+Review 3:
+"Professional, fun, and super easy to book. Highly recommend!" — Jenna R.

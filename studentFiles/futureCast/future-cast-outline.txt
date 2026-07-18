@@ -1,0 +1,42 @@
+FUTURE-CAST EXPO — Chapter 15 Project Outline
+==============================================
+
+Your final deliverables for this chapter are:
+1. A slide deck (PDF or PPT) — see required sections below
+2. A Developer's Manifesto — use manifesto-template.html to build it
+
+---
+SLIDE DECK REQUIRED SECTIONS
+---
+
+Slide 1: Title Slide
+  - Your name
+  - "The Future Matrix: Today vs. 10 Years From Now"
+  - Class period and date
+
+Slide 2-3: AI Prompt Log (from Milestone 1)
+  - Include 3 examples of AI prompts you tested
+  - For each: the prompt you wrote, the output you got, and what you changed
+
+Slide 4-5: Ethics Case Study (from Milestone 2)
+  - A real-world example of Algorithmic Bias
+  - What went wrong, who was harmed, how it should have been prevented
+
+Slide 6-7: AR Integration Plan (from Milestone 3)
+  - Your proposed AR feature for a real local Carson City business
+  - What problem it solves, how it works, tools needed
+
+Slide 8-9: IoT Security Audit (from Milestone 4)
+  - Your fictional IoT device
+  - 2 benefits for the user
+  - 1 worst-case security vulnerability and how to prevent it
+
+Slide 10: Developer's Manifesto Summary
+  - 3 key ethical commitments from your full manifesto
+
+---
+LEVEL 4.0 CHALLENGE (optional for highest grade)
+---
+Add a deep technical feasibility study for your AR plan.
+Address how your technology could impact marginalized communities —
+both positively and negatively — and what you will do to protect them.

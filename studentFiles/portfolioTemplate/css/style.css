@@ -1,0 +1,165 @@
+/* =============================================
+   PORTFOLIO STARTER — Chapter 16
+   Replace the values below to brand your site
+   ============================================= */
+
+:root {
+    --primary:    #0ea5e9;   /* Your main accent color */
+    --bg:         #0f172a;   /* Page background */
+    --surface:    #1e293b;   /* Card/section background */
+    --text:       #e2e8f0;   /* Body text */
+    --text-muted: #94a3b8;   /* Subtitles and captions */
+    --radius:     10px;
+}
+
+/* ===================== RESET ===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+img { max-width: 100%; display: block; }
+a { color: var(--primary); text-decoration: none; }
+
+/* ===================== NAV ===================== */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-logo { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+
+nav ul { display: flex; gap: 1.5rem; list-style: none; }
+nav ul a { color: var(--text-muted); font-size: 0.95rem; }
+nav ul a:hover { color: var(--primary); }
+
+/* ===================== HERO ===================== */
+#hero {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+#hero h1 { font-size: clamp(2rem, 6vw, 3.5rem); margin-bottom: 1rem; }
+#hero p  { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 2rem; }
+
+.accent { color: var(--primary); }
+
+/* ===================== BUTTON ===================== */
+.btn {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    background: var(--primary);
+    color: #fff;
+    border-radius: var(--radius);
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.85; color: #fff; }
+
+/* ===================== SECTIONS ===================== */
+section {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+}
+
+section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--primary);
+    padding-left: 0.75rem;
+}
+
+/* ===================== ABOUT ===================== */
+.skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    list-style: none;
+    margin-top: 1.5rem;
+}
+
+.skills-list li {
+    background: var(--surface);
+    color: var(--primary);
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    border: 1px solid var(--primary);
+}
+
+/* ===================== PROJECTS GRID ===================== */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.project-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid #334155;
+    transition: transform 0.2s;
+}
+
+.project-card:hover { transform: translateY(-4px); }
+
+.project-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    background: #334155;
+}
+
+.card-body { padding: 1.25rem; }
+.card-body h3 { margin-bottom: 0.5rem; font-size: 1.1rem; }
+.card-body p  { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
+
+.card-links { display: flex; gap: 1rem; }
+.card-links a {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+.card-links a:hover { text-decoration: underline; }
+
+/* ===================== CONTACT ===================== */
+#contact { text-align: center; }
+#contact p { color: var(--text-muted); margin-bottom: 1.5rem; }
+#contact .btn { margin-bottom: 1.5rem; }
+
+.social-links { display: flex; gap: 1.5rem; justify-content: center; }
+.social-links a { color: var(--text-muted); font-size: 0.95rem; }
+.social-links a:hover { color: var(--primary); }
+
+/* ===================== FOOTER ===================== */
+footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    border-top: 1px solid #1e293b;
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 600px) {
+    nav ul { gap: 1rem; }
+    .projects-grid { grid-template-columns: 1fr; }
+}
