@@ -171,11 +171,147 @@
       
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
         <figure class="mb-4">
-          <a href="/images/chapter-18-launch/figure-02.png" target="_blank" rel="noopener">
-            <img src="https://placehold.co/600x400/1e293b/0ea5e9?text=CI/CD+Diagram" alt="Modern CI/CD Pipeline." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=CI/CD'">
-          </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 16.1:</strong> The modern CI/CD auto-deployment pipeline.</figcaption>
+          <svg id="cicd-svg" viewBox="0 0 340 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:340px;cursor:pointer;display:block;margin:0 auto;" role="img" aria-label="Interactive CI/CD pipeline diagram">
+            <style>
+              .cicd-node { cursor:pointer; }
+              .cicd-node:hover .cicd-rect { opacity:.85; }
+              .cicd-rect { transition: opacity .18s; }
+              .cicd-label { font-family:system-ui,sans-serif; pointer-events:none; }
+              .cicd-old .cicd-rect { fill:#7f1d1d; }
+              .cicd-new .cicd-rect { fill:#1e3a5f; }
+            </style>
+            <!-- Title -->
+            <text x="170" y="22" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#94a3b8" letter-spacing="1">CI/CD AUTO-DEPLOY PIPELINE</text>
+
+            <!-- ── OLD SCHOOL row ── -->
+            <text x="170" y="48" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#f87171" font-weight="700" letter-spacing="0.5">⚠ OLD SCHOOL (FTP)</text>
+
+            <!-- FTP: Local -->
+            <g class="cicd-node" data-cicd="ftp-local" onclick="cicdShow('ftp-local',event)">
+              <rect class="cicd-rect" x="14" y="56" width="82" height="52" rx="8" fill="#7f1d1d"/>
+              <text class="cicd-label" x="55" y="76" text-anchor="middle" font-size="16" fill="#fff">💻</text>
+              <text class="cicd-label" x="55" y="91" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fca5a5">Local Files</text>
+              <text class="cicd-label" x="55" y="103" text-anchor="middle" font-size="8" fill="#fca5a5">FileZilla</text>
+            </g>
+            <!-- FTP arrow -->
+            <line x1="97" y1="82" x2="130" y2="82" stroke="#f87171" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <polygon points="130,78 138,82 130,86" fill="#f87171"/>
+            <text x="113" y="78" text-anchor="middle" font-family="system-ui,sans-serif" font-size="7.5" fill="#f87171">FTP</text>
+            <!-- FTP: Server -->
+            <g class="cicd-node" data-cicd="ftp-server" onclick="cicdShow('ftp-server',event)">
+              <rect class="cicd-rect" x="138" y="56" width="82" height="52" rx="8" fill="#7f1d1d"/>
+              <text class="cicd-label" x="179" y="76" text-anchor="middle" font-size="16" fill="#fff">🖥️</text>
+              <text class="cicd-label" x="179" y="91" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fca5a5">Server</text>
+              <text class="cicd-label" x="179" y="103" text-anchor="middle" font-size="8" fill="#fca5a5">Manual upload</text>
+            </g>
+            <!-- Danger badge -->
+            <rect x="234" y="66" width="92" height="32" rx="6" fill="#450a0a"/>
+            <text x="280" y="79" text-anchor="middle" font-family="system-ui,sans-serif" font-size="8" fill="#f87171" font-weight="700">⚠ DANGER</text>
+            <text x="280" y="91" text-anchor="middle" font-family="system-ui,sans-serif" font-size="7.5" fill="#fca5a5">No undo, overwrites</text>
+            <text x="280" y="101" text-anchor="middle" font-family="system-ui,sans-serif" font-size="7.5" fill="#fca5a5">live files instantly</text>
+
+            <!-- Divider -->
+            <line x1="14" y1="126" x2="326" y2="126" stroke="#334155" stroke-width="1.5"/>
+            <text x="170" y="141" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#34d399" font-weight="700" letter-spacing="0.5">✅ NEW SCHOOL (CI/CD)</text>
+
+            <!-- Stage 1: Local Dev -->
+            <g class="cicd-node" data-cicd="local" onclick="cicdShow('local',event)">
+              <rect class="cicd-rect" x="107" y="150" width="126" height="62" rx="10" fill="#0f172a" stroke="#3b82f6" stroke-width="2"/>
+              <text class="cicd-label" x="170" y="174" text-anchor="middle" font-size="18" fill="#fff">💻</text>
+              <text class="cicd-label" x="170" y="192" text-anchor="middle" font-size="10" font-weight="700" fill="#93c5fd">1. Local Dev</text>
+              <text class="cicd-label" x="170" y="205" text-anchor="middle" font-size="8.5" fill="#64748b">Write &amp; save code</text>
+            </g>
+
+            <!-- Arrow down -->
+            <line x1="170" y1="213" x2="170" y2="238" stroke="#3b82f6" stroke-width="2"/>
+            <polygon points="164,238 176,238 170,248" fill="#3b82f6"/>
+            <text x="192" y="233" font-family="system-ui,sans-serif" font-size="8.5" fill="#60a5fa">git push</text>
+
+            <!-- Stage 2: GitHub -->
+            <g class="cicd-node" data-cicd="github" onclick="cicdShow('github',event)">
+              <rect class="cicd-rect" x="107" y="249" width="126" height="62" rx="10" fill="#0f172a" stroke="#8b5cf6" stroke-width="2"/>
+              <text class="cicd-label" x="170" y="273" text-anchor="middle" font-size="18" fill="#fff">🐙</text>
+              <text class="cicd-label" x="170" y="291" text-anchor="middle" font-size="10" font-weight="700" fill="#c4b5fd">2. GitHub</text>
+              <text class="cicd-label" x="170" y="304" text-anchor="middle" font-size="8.5" fill="#64748b">Webhook fires ⚡</text>
+            </g>
+
+            <!-- Arrow down -->
+            <line x1="170" y1="312" x2="170" y2="337" stroke="#8b5cf6" stroke-width="2"/>
+            <polygon points="164,337 176,337 170,347" fill="#8b5cf6"/>
+            <text x="192" y="332" font-family="system-ui,sans-serif" font-size="8.5" fill="#a78bfa">auto-build</text>
+
+            <!-- Stage 3: Netlify Build -->
+            <g class="cicd-node" data-cicd="netlify" onclick="cicdShow('netlify',event)">
+              <rect class="cicd-rect" x="107" y="348" width="126" height="62" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+              <text class="cicd-label" x="170" y="372" text-anchor="middle" font-size="18" fill="#fff">⚙️</text>
+              <text class="cicd-label" x="170" y="390" text-anchor="middle" font-size="10" font-weight="700" fill="#6ee7b7">3. Netlify Build</text>
+              <text class="cicd-label" x="170" y="403" text-anchor="middle" font-size="8.5" fill="#64748b">Test → Deploy → CDN</text>
+            </g>
+
+            <!-- Arrow down -->
+            <line x1="170" y1="411" x2="170" y2="436" stroke="#10b981" stroke-width="2"/>
+            <polygon points="164,436 176,436 170,446" fill="#10b981"/>
+            <text x="192" y="431" font-family="system-ui,sans-serif" font-size="8.5" fill="#34d399">live in ~30s</text>
+
+            <!-- Stage 4: Live Site -->
+            <g class="cicd-node" data-cicd="live" onclick="cicdShow('live',event)">
+              <rect class="cicd-rect" x="107" y="447" width="126" height="28" rx="8" fill="#052e16" stroke="#10b981" stroke-width="2"/>
+              <text class="cicd-label" x="170" y="466" text-anchor="middle" font-size="10" font-weight="700" fill="#34d399">🌐 Live Website</text>
+            </g>
+          </svg>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 16.1:</strong> The modern CI/CD auto-deployment pipeline. Click any stage.</figcaption>
         </figure>
+
+        <script>
+        var CICD={
+          'ftp-local':{t:'💻 Local Files (Old School)',b:'Using FTP software like FileZilla, a developer manually selects files on their computer and drags them onto the server. There\'s no history, no backup, and no safety net — one wrong move can overwrite the live site instantly.'},
+          'ftp-server':{t:'🖥️ Server — Direct FTP Upload',b:'The file lands directly on the production server with zero checks. If the file had a typo or was half-finished, it goes live immediately. This is why FTP is considered dangerous for modern team development.'},
+          'local':{t:'💻 Stage 1: Local Development',b:'You write and save code on your own computer using VS Code. Nothing is live yet — it only exists on your machine. When you\'re ready, you use Git to commit and push your changes.'},
+          'github':{t:'🐙 Stage 2: GitHub',b:'Your git push uploads the code to GitHub\'s remote repository. GitHub immediately fires a Webhook — a hidden "ping" that notifies Netlify: "Hey! New code just arrived. Go get it and deploy it."'},
+          'netlify':{t:'⚙️ Stage 3: Netlify Build Server',b:'Netlify\'s automated build server pulls your latest code, runs any build steps (like compressing files), and distributes the finished result across its global CDN. Your site goes live in roughly 30 seconds without you touching anything.'},
+          'live':{t:'🌐 Stage 4: Live Website on CDN',b:'Your site is now live and served from a Content Delivery Network — copies on servers around the world so it loads fast for everyone. The whole process is automatic, tracked, and reversible: if something breaks, you can roll back to a previous deploy in one click.'}
+        };
+        if(!window.showWebTip){
+          window.showWebTip=function(e,T,B){
+            var t=document.getElementById('_webtip_');
+            if(!t){
+              t=document.createElement('div');t.id='_webtip_';
+              t.style.cssText='position:fixed;z-index:9999;max-width:320px;min-width:220px;background:#1e293b;color:#e2e8f0;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.45);padding:0;overflow:hidden;display:none;';
+              var h=document.createElement('div');h.id='_webtip_title_';h.style.cssText='background:#0f172a;padding:10px 14px 8px;font-weight:700;font-size:.95rem;border-bottom:1px solid #334155;';
+              var b=document.createElement('div');b.id='_webtip_body_';b.style.cssText='padding:10px 14px 12px;font-size:.82rem;line-height:1.5;';
+              var x=document.createElement('button');x.innerHTML='✕';x.style.cssText='position:absolute;top:6px;right:10px;background:none;border:none;color:#94a3b8;font-size:1rem;cursor:pointer;padding:0;';
+              x.onclick=function(ev){ev.stopPropagation();t.style.display='none';t.dataset.active='';document.querySelectorAll('#cicd-svg .cicd-rect').forEach(function(r){r.style.opacity='';});};
+              t.appendChild(h);t.appendChild(b);t.appendChild(x);document.body.appendChild(t);
+            }
+            document.getElementById('_webtip_title_').innerHTML=T;
+            document.getElementById('_webtip_body_').innerHTML=B;
+            t.style.display='block';
+            var vw=window.innerWidth,vh=window.innerHeight,mx=e?e.clientX:vw/2,my=e?e.clientY:vh/2;
+            t.style.left=Math.min(mx+14,vw-334)+'px';
+            t.style.top=(my+t.offsetHeight+20>vh?my-t.offsetHeight-10:my+10)+'px';
+          };
+          document.addEventListener('click',function(e){
+            var t=document.getElementById('_webtip_');
+            if(t&&t.style.display!=='none'&&!t.contains(e.target)&&!e.target.closest('#cicd-svg')){
+              t.style.display='none';t.dataset.active='';
+              document.querySelectorAll('#cicd-svg .cicd-rect').forEach(function(r){r.style.opacity='';});
+            }
+          });
+        }
+        window.cicdShow=function(id,evt){
+          var d=CICD[id];if(!d)return;
+          if(evt)evt.stopPropagation();
+          var tip=document.getElementById('_webtip_');
+          if(tip&&tip.style.display!=='none'&&tip.dataset.active==='cicd:'+id){
+            tip.style.display='none';tip.dataset.active='';
+            document.querySelectorAll('#cicd-svg .cicd-rect').forEach(function(r){r.style.opacity='';});return;
+          }
+          document.querySelectorAll('#cicd-svg .cicd-rect').forEach(function(r){r.style.opacity='.3';});
+          var sel=document.querySelector('#cicd-svg [data-cicd="'+id+'"] .cicd-rect');if(sel)sel.style.opacity='1';
+          window.showWebTip(evt,d.t,'<p style="margin:0">'+d.b+'</p>');
+          var t2=document.getElementById('_webtip_');if(t2)t2.dataset.active='cicd:'+id;
+        };
+        </script>
       </div>
     </div>
 
