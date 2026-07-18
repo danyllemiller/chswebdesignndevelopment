@@ -657,6 +657,7 @@
                     <div id="section-dns" class="row mb-5 pb-4 border-bottom align-items-start mt-5">
                         <div class="col-lg-8 pe-lg-5">
                             <h2 class="section-title mt-0">How You "Get" a Website (The "Where")</h2>
+                            <p class="mb-3"><span class="badge bg-primary me-1">NV 6.1.1</span><span class="badge bg-primary me-1">NV 6.1.2</span><span class="badge bg-secondary me-1">NV 5.6.1</span><span class="badge bg-secondary me-1">NV 6.2.1</span></p>
                             <p>This is the most important concept to understand. Every interaction on the Web is powered by a <strong>client-server relationship</strong>. When you type a website's address into your <strong>web browser (the client)</strong>, your request is sent across the Internet to a powerful computer called a <strong>server</strong>, where the website's files are stored. The server finds those files (<strong>webpages</strong>) and sends them back to your browser, which displays the page on your screen. This constant back-and-forth of request and response is the engine that makes the Web possible.</p>
 
                             <h2 class="section-title mt-5">The Internet's Address Book</h2>
@@ -1169,8 +1170,24 @@
                                 <li class="mb-0"><strong>Glitch / Replit</strong> — Full-stack, collaborative, in-browser development with live hosting</li>
                             </ul>
                             
-                            <h5 class="fw-bold mt-4 text-primary">Speed Boost: CDNs (Content Delivery Networks)</h5>
+                            <h5 class="fw-bold mt-4 text-primary">Speed Boost: CDNs (Content Delivery Networks) <span class="badge bg-secondary ms-2">NV 6.2.1</span></h5>
                             <p>A <strong>CDN</strong> (Content Delivery Network) is a global network of servers placed in cities worldwide called <strong>edge servers</strong>. When a user requests your site, instead of fetching files from your origin server (which might be in Virginia), they download them from the nearest edge location — Los Angeles, London, or Tokyo. Static assets like images, CSS, fonts, and JavaScript are cached at these edges. The result: dramatically faster load times globally, reduced load on your origin server, and built-in DDoS protection. <strong>Cloudflare</strong> is the most widely used CDN — its basic tier is completely free.</p>
+
+                            <div class="card bg-white border-info shadow-sm mb-4">
+                                <div class="card-header bg-info text-white fw-bold small">How a CDN Works — Step by Step</div>
+                                <div class="card-body small">
+                                    <ol class="mb-0 ps-3">
+                                        <li class="mb-2"><strong>You upload your site</strong> to an <strong>origin server</strong> (e.g., your Netlify or AWS host in Virginia).</li>
+                                        <li class="mb-2">The CDN provider (<strong>Cloudflare, Fastly, AWS CloudFront</strong>) copies your static files — images, CSS, JS, fonts — to <strong>dozens of edge servers</strong> distributed globally.</li>
+                                        <li class="mb-2">A user in <strong>Tokyo</strong> requests your site. Instead of a round-trip to Virginia (200ms+), they receive the cached files from the Tokyo edge server (<strong>~8ms</strong>).</li>
+                                        <li class="mb-2">The CDN also handles <strong>DDoS attacks</strong> by absorbing malicious traffic across its massive distributed network before it ever reaches your origin.</li>
+                                        <li class="mb-0"><strong>Cache invalidation:</strong> When you update your site, you "purge" the CDN cache so edge servers fetch fresh files from your origin. TTL (Time To Live) settings control how long files are cached before re-checking.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <div class="alert alert-secondary small py-2 border-0">
+                                <strong>Agency Tip:</strong> A site loading in 3 seconds converts at half the rate of one loading in 1 second (Google, 2023). Selling CDN setup to local clients as a performance service is a real, billable agency offering. Even a <strong>free Cloudflare plan</strong> can cut load times by 50% for a typical small business site.
+                            </div>
 
                             <!-- LAB: DIGITAL REAL ESTATE (feeds Part 1 Business Plan, step 5) -->
                             <div class="card border-success shadow-sm mb-4 mt-5">
@@ -1255,6 +1272,7 @@
                     <div class="row mb-5 pb-4 border-bottom align-items-start mt-5">
                         <div class="col-lg-8 pe-lg-5">
                             <h2 class="section-title mt-0">Website Magic: The Art of Design</h2>
+                            <p class="mb-3"><span class="badge bg-primary me-1">NV 4.3.1</span><span class="badge bg-primary me-1">NV 5.1</span><span class="badge bg-primary me-1">NV 5.2</span></p>
                             <p>Good design is invisible — when it works perfectly, users never notice it. They simply enjoy the experience. Great web design is built on two foundations: the <strong>Elements of Art</strong> (the raw ingredients) and the <strong>Principles of Design</strong> (the rules for combining them). On top of that layer sit user-centered principles that ensure your design actually serves real people.</p>
 
                             <!-- ── ELEMENTS OF ART ── -->
@@ -1295,6 +1313,21 @@
                                 <li class="mb-2"><strong>Color Psychology:</strong> Colors trigger emotions — blues feel trustworthy (banks, healthcare), greens feel natural or safe (eco brands), reds feel urgent or exciting (sales, alerts).</li>
                                 <li class="mb-2"><strong>Alignment, Balance &amp; Contrast:</strong> Aligned elements feel intentional; misaligned elements feel careless. Contrast makes critical information impossible to miss.</li>
                             </ul>
+
+                            <!-- VISUAL HIERARCHY CALLOUT -->
+                            <div class="card border-primary shadow-sm my-4">
+                                <div class="card-header bg-primary text-white fw-bold"><span class="badge bg-warning text-dark me-2">Key Concept</span> Visual Hierarchy <span class="badge bg-light text-primary ms-2">NV 4.3.1</span></div>
+                                <div class="card-body small">
+                                    <p class="mb-2"><strong>Visual Hierarchy</strong> is the deliberate arrangement of design elements so the viewer's eye is guided through the content in the order <em>you</em> intend — most important first, least important last.</p>
+                                    <p class="mb-2">The three primary tools of visual hierarchy are:</p>
+                                    <ul class="mb-2 ps-3">
+                                        <li class="mb-1"><strong>Size:</strong> Larger elements are seen first. Your H1 headline should be the biggest text on the page.</li>
+                                        <li class="mb-1"><strong>Color &amp; Contrast:</strong> Bright, high-contrast elements stand out from the background. Your accent-color CTA button pops before gray body text.</li>
+                                        <li class="mb-1"><strong>Position:</strong> Elements higher on the page or at the top of the F/Z pattern are processed first. Put your most important message above the fold.</li>
+                                    </ul>
+                                    <p class="mb-0 fst-italic text-muted">A strong visual hierarchy means a user can understand what a page is about — and what to do next — within 3–5 seconds, without reading a single word.</p>
+                                </div>
+                            </div>
 
                             <!-- ── COLOR THEORY ── -->
                             <h5 class="fw-bold mt-4 text-primary">Color Theory Basics</h5>
@@ -1410,6 +1443,7 @@
                     <div class="row mb-4 align-items-start mt-5">
                         <div class="col-lg-8 pe-lg-5">
                             <h2 class="section-title mt-0">Building the Web: The 3 Languages</h2>
+                            <p class="mb-3"><span class="badge bg-primary me-1">NV 4.3.1</span><span class="badge bg-primary me-1">NV 5.1</span><span class="badge bg-primary me-1">NV 5.2</span></p>
                             <table class="table table-bordered table-sm small shadow-sm mt-3 bg-white mb-4">
                                 <thead class="bg-light text-center">
                                     <tr><th>Language</th><th>Nickname</th><th>Job (Part of Speech)</th></tr>
@@ -2023,6 +2057,7 @@
                     <div class="row mb-5 pb-4 border-bottom align-items-start mt-5">
                         <div class="col-lg-8 pe-lg-5">
                             <h2 class="section-title mt-0">Level Up Your Career with a CTSO</h2>
+                            <p class="mb-3"><span class="badge bg-primary me-1">NV 1.1</span><span class="badge bg-primary me-1">NV 1.2</span><span class="badge bg-secondary me-1">WRS 1.1.4</span></p>
                             <p><strong>What is it?</strong> A CTSO, or <strong>Career and Technical Student Organization</strong>, is like a school club on steroids. It’s an organization focused on giving you real-world skills and connections.</p>
                             <p>For us in tech, the big ones are:</p>
                             <ul class="small mb-4 ps-3">
@@ -2229,6 +2264,7 @@
                         <div class="col-lg-8 pe-lg-5">
 
                             <h2 class="section-title mt-0">The Art of Not Having a Terrible Meeting</h2>
+                            <p class="mb-3"><span class="badge bg-primary me-1">NV 1.1</span><span class="badge bg-primary me-1">NV 1.2</span><span class="badge bg-secondary me-1">WRS 1.1.4</span></p>
 
                             <p>Quick question: have you ever been in a group where everyone is talking over each other, no decisions get made, and 45 minutes later everyone leaves more frustrated than when they started? That's what happens without a system. <strong>Parliamentary Procedure</strong> is that system — and every professional organization on earth uses some version of it.</p>
 

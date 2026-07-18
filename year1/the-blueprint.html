@@ -342,7 +342,37 @@
             <section id="competition">
               <h2 class="section-title text-center">Phase 3: The Competition (SWOT & Matrix)</h2>
               <p class="text-center mx-auto" style="max-width: 800px;">To beat the competition, you first have to understand them. We use <strong>SWOT Analysis</strong> (Strengths, Weaknesses, Opportunities, Threats) to find where they are vulnerable.</p>
-              
+
+              <!-- SWOT 2x2 GRID -->
+              <div class="mx-auto mb-4" style="max-width: 700px;">
+                <div class="card shadow-sm border-0 overflow-hidden">
+                  <div class="card-header bg-dark text-white fw-bold text-center">SWOT Analysis: The 2×2 Grid</div>
+                  <div class="card-body p-0">
+                    <div class="row g-0">
+                      <div class="col-6 p-3 border-end border-bottom" style="background:#d1e7dd;">
+                        <p class="fw-bold text-success mb-1 small">Strengths (Internal)</p>
+                        <p class="small mb-0">What does your site/brand do <em>better</em> than the competition? These are advantages you control — unique features, strong content, brand loyalty.</p>
+                      </div>
+                      <div class="col-6 p-3 border-bottom" style="background:#f8d7da;">
+                        <p class="fw-bold text-danger mb-1 small">Weaknesses (Internal)</p>
+                        <p class="small mb-0">Where are you falling short? What do competitors do better? These are gaps you control and can work to fix — slow load times, thin content, weak design.</p>
+                      </div>
+                      <div class="col-6 p-3 border-end" style="background:#cff4fc;">
+                        <p class="fw-bold text-info mb-1 small">Opportunities (External)</p>
+                        <p class="small mb-0">What is happening in the market that you can take advantage of? Trends, underserved audiences, topics no one covers well — your "Blue Ocean."</p>
+                      </div>
+                      <div class="col-6 p-3" style="background:#fff3cd;">
+                        <p class="fw-bold text-warning mb-1 small">Threats (External)</p>
+                        <p class="small mb-0">What outside forces could hurt you? New competitors, algorithm changes, shifting user behavior, emerging technologies that could make your approach obsolete.</p>
+                      </div>
+                    </div>
+                    <div class="p-2 bg-light border-top text-center small">
+                      <strong>Internal factors</strong> (you control) are on the left column. <strong>External factors</strong> (market controls) are on the right column.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <table class="table table-bordered table-sm small text-center shadow-sm mx-auto" style="max-width: 900px;">
                 <thead>
                   <tr class="bg-site-secondary"><th class="text-start">Feature</th><th>PixelPlay (Us)</th><th>GameFAQs</th><th>Reddit</th><th>YouTube</th></tr>
@@ -594,7 +624,60 @@
                     </div>
                 </div>
               </div>
-              <p class="small mt-4 text-center"><strong>Keywords:</strong> Use <strong>Long-Tail Keywords</strong> (e.g., "best SNES RPGs with time travel") to capture users with specific intent.</p>
+              <!-- SEO CODE EXAMPLE -->
+              <div class="mx-auto mt-4" style="max-width: 900px;">
+                <div class="card border-dark shadow-sm">
+                  <div class="card-header bg-dark text-white fw-bold small">The Holy Trinity — What It Looks Like in Real HTML</div>
+                  <div class="card-body p-0">
+                    <pre class="mb-0 p-3 small" style="background:#1e1e1e; color:#d4d4d4; border-radius:0 0 4px 4px; overflow-x:auto;"><code><span style="color:#808080;">&lt;!-- 1. The &lt;title&gt; tag — appears in the browser tab and as the Google link --&gt;</span>
+<span style="color:#569cd6;">&lt;title&gt;</span><span style="color:#ce9178;">Super Metroid Walkthrough &amp; Boss Guide | PixelPlay</span><span style="color:#569cd6;">&lt;/title&gt;</span>
+
+<span style="color:#808080;">&lt;!-- 2. The &lt;meta description&gt; — the "ad copy" shown under your link in Google results --&gt;</span>
+<span style="color:#569cd6;">&lt;meta</span> <span style="color:#9cdcfe;">name</span><span style="color:#d4d4d4;">=</span><span style="color:#ce9178;">"description"</span>
+      <span style="color:#9cdcfe;">content</span><span style="color:#d4d4d4;">=</span><span style="color:#ce9178;">"Complete Super Metroid walkthrough with maps, boss strategies, and sequence breaks. Updated 2024."</span><span style="color:#569cd6;">&gt;</span>
+
+<span style="color:#808080;">&lt;!-- 3. The &lt;h1&gt; — the main visible headline; one per page only --&gt;</span>
+<span style="color:#569cd6;">&lt;h1&gt;</span><span style="color:#d4d4d4;">Super Metroid Complete Walkthrough</span><span style="color:#569cd6;">&lt;/h1&gt;</span></code></pre>
+                  </div>
+                </div>
+                <p class="small text-muted text-center mt-2">All three should include your <strong>target keyword</strong>. Google reads them as a confirmation that this page is genuinely about that topic.</p>
+              </div>
+
+              <!-- LONG-TAIL KEYWORD COMPARISON -->
+              <div class="mx-auto mt-4" style="max-width: 900px;">
+                <p class="fw-bold text-center mb-3">Short-Tail vs. Long-Tail Keywords</p>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="card border-secondary h-100 shadow-sm">
+                      <div class="card-header bg-secondary text-white fw-bold small">Short-Tail Keyword</div>
+                      <div class="card-body small">
+                        <p class="mb-2 fst-italic text-center fs-6">"RPG games"</p>
+                        <ul class="mb-0 ps-3">
+                          <li>Extremely <strong>high search volume</strong></li>
+                          <li>Extremely <strong>high competition</strong> — you're competing with Wikipedia, IGN, Metacritic</li>
+                          <li>Vague intent — user might want a list, a review, a forum, or a store</li>
+                          <li>As a new site, you will not rank here</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card border-success h-100 shadow-sm">
+                      <div class="card-header bg-success text-white fw-bold small">Long-Tail Keyword</div>
+                      <div class="card-body small">
+                        <p class="mb-2 fst-italic text-center fs-6">"best SNES RPGs with time travel"</p>
+                        <ul class="mb-0 ps-3">
+                          <li>Lower search volume — but the people who search it are <strong>exactly your audience</strong></li>
+                          <li>Very <strong>low competition</strong> — fewer pages target this specific phrase</li>
+                          <li>High intent — user knows exactly what they want</li>
+                          <li>This is where <strong>new sites win their first rankings</strong></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p class="small text-muted text-center mt-2">Strategy: Build 10 pages targeting long-tail keywords and own those niches before competing for the big terms.</p>
+              </div>
             </section>
           </div>
         </div>

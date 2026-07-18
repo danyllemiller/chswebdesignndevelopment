@@ -123,7 +123,52 @@
                     
                     <h5 class="fw-bold mt-4 text-primary">3. Patent &#8471; (The Invention Ledger)</h5>
                     <p>A patent protects a new, specific, and non-obvious way of doing something. This could be a new type of smartphone technology, a medical device, or even a piece of software technology, like Amazon's original 1-Click purchase system. As a web designer, you'll bump into this less often than copyright or trademark, but it's a huge part of the tech world that protects the "how-it-works" part of a new idea. Research the <a href="https://fairuse.stanford.edu/overview/public-domain/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Public Domain</a> rules to see when patents expire. Patents are the only IP type that is <em>not</em> automatic; you must apply for them and they expire after about 20 years.</p>
-                    
+
+                    <!-- IP COMPARISON TABLE -->
+                    <div class="card bg-white shadow-sm border-primary my-4">
+                        <div class="card-header bg-primary text-white fw-bold">The Big Three: Side-by-Side Comparison <span class="badge bg-warning text-dark ms-2 fw-normal">Key Concept</span></div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm small mb-0">
+                                    <thead class="table-light text-center">
+                                        <tr>
+                                            <th class="ps-3" style="width:22%"></th>
+                                            <th>Copyright ©</th>
+                                            <th>Trademark ™</th>
+                                            <th>Patent</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-bold ps-3 bg-light">What it protects</td>
+                                            <td>Creative works (art, writing, photos, code, music)</td>
+                                            <td>Brand identity (logos, names, slogans, sounds)</td>
+                                            <td>Inventions and new processes (physical or software)</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold ps-3 bg-light">How you get it</td>
+                                            <td><span class="text-success fw-bold">Automatic</span> the moment you create it — no registration required</td>
+                                            <td>Register with the <a href="https://www.uspto.gov/" target="_blank" rel="noopener" class="fw-bold">USPTO</a> for full legal protection</td>
+                                            <td><span class="text-danger fw-bold">Must apply</span> — complex, expensive process; not automatic</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold ps-3 bg-light">How long it lasts</td>
+                                            <td>Your lifetime + 70 years</td>
+                                            <td>Indefinitely, as long as it is renewed and actively used</td>
+                                            <td>~20 years, then it enters the <strong>Public Domain</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold ps-3 bg-light">Web design example</td>
+                                            <td>Your portfolio photos, original artwork, the code you write</td>
+                                            <td>Your agency's logo, name ("Carson Agency™"), or brand slogan</td>
+                                            <td>Amazon's original 1-Click Purchase system</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- BUSINESS PLAN INTEGRATION: STEP 3 -->
                     <div class="card border-dark shadow-sm my-4 mt-5">
                       <div class="card-header bg-dark text-white fw-bold">
@@ -401,7 +446,63 @@
                   <div class="col-lg-8 pe-lg-5">
                     <h2 class="section-title mt-0">Your Digital Compass: Ethics and NDAs</h2>
                     <p>Laws define the floor—the minimum you must do. Ethics define the ceiling—what you <strong>should</strong> do. Model legal and ethical use of information: Cite your sources, respect privacy, and avoid <strong><a href="https://www.deceptive.design/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Dark Patterns</a></strong>. Dark patterns are UI designs intended to trick users into choices they didn't mean to make, like "Sneak into Basket" fees or "Forced Continuity" subscriptions.</p>
-                    
+
+                    <!-- DARK PATTERNS DEDICATED SECTION -->
+                    <h5 class="fw-bold mt-5 text-danger">Dark Patterns: The Villain's Toolkit <span class="badge bg-danger ms-2 fw-normal small">Proficiency Scale Vocabulary</span></h5>
+                    <p>Dark patterns aren't accidents — they are <strong>intentional design traps</strong>. Designers deliberately use confusing layouts, misleading copy, or hidden options to manipulate users into purchases, subscriptions, or data-sharing they never intended. These tactics may boost short-term conversion rates, but they destroy long-term user trust and can violate consumer protection laws. As a professional designer, you must be able to recognize them — and refuse to build them. Hover each card to learn more.</p>
+
+                    <div class="row g-3 mb-4 mt-2">
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm border-danger" style="transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 6px 20px rgba(0,0,0,.15)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow=''">
+                                <div class="card-header bg-danger text-white fw-bold small">Roach Motel</div>
+                                <div class="card-body small">
+                                    <p class="mb-2"><strong>The Trap:</strong> Easy to check in, nearly impossible to check out. Companies make signing up a one-click process but require a letter, phone call, or 7-step buried workflow to cancel.</p>
+                                    <p class="mb-0 text-muted fst-italic">Example: A streaming service subscribes you in 30 seconds but requires navigating to Account &rsaquo; Billing &rsaquo; Subscriptions &rsaquo; Manage &rsaquo; Cancel to leave.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm border-warning" style="transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 6px 20px rgba(0,0,0,.15)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow=''">
+                                <div class="card-header bg-warning text-dark fw-bold small">Misdirection</div>
+                                <div class="card-body small">
+                                    <p class="mb-2"><strong>The Trap:</strong> Bright colors or large visuals pull the user's eye to an attractive element while disguising the real action being taken — like a pre-checked "I agree to charges" box tucked out of view.</p>
+                                    <p class="mb-0 text-muted fst-italic">Example: A giant "CONTINUE FOR FREE" button overshadows a tiny pre-checked box that auto-enrolls you in a paid plan after 30 days.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm border-info" style="transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 6px 20px rgba(0,0,0,.15)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow=''">
+                                <div class="card-header bg-info text-white fw-bold small">Trick Questions</div>
+                                <div class="card-body small">
+                                    <p class="mb-2"><strong>The Trap:</strong> Double-negative language in checkboxes deliberately confuses users reading quickly. They check or uncheck the opposite of their intent.</p>
+                                    <p class="mb-0 text-muted fst-italic">Example: "Uncheck this box if you do NOT wish to NOT receive marketing emails." — What does checking it actually mean?</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm border-secondary" style="transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 6px 20px rgba(0,0,0,.15)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow=''">
+                                <div class="card-header bg-secondary text-white fw-bold small">Hidden Costs (Sneak into Basket)</div>
+                                <div class="card-body small">
+                                    <p class="mb-2"><strong>The Trap:</strong> Fees, "service charges," or optional add-ons are silently added to the cart. The real total is only revealed at the final payment screen — after the user has already invested time browsing.</p>
+                                    <p class="mb-0 text-muted fst-italic">Example: A $15 concert ticket becomes $38 with "facility fees," "processing charges," and insurance visible only at checkout.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="card h-100 shadow-sm border-dark" style="transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.01)';this.style.boxShadow='0 6px 20px rgba(0,0,0,.15)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow=''">
+                                <div class="card-header bg-dark text-white fw-bold small">Forced Continuity (The "Free Trial" Trap)</div>
+                                <div class="card-body small">
+                                    <p class="mb-2"><strong>The Trap:</strong> A free trial requires a credit card and automatically converts to a paid subscription on Day 31 — with no reminder email, and a cancellation process buried three menus deep in account settings.</p>
+                                    <p class="mb-0 text-muted fst-italic">Example: A "Try 30 Days FREE" promotion charges your card on Day 31 with zero warning and makes cancellation intentionally difficult to find.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning small border-warning border mb-4">
+                        <strong>The Agency Liability Rule:</strong> The <a href="https://www.ftc.gov/" target="_blank" rel="noopener" class="fw-bold">FTC (Federal Trade Commission)</a> actively pursues dark pattern cases. In 2023, the FTC sued Amazon for $25 million over its Prime cancellation process — a textbook Roach Motel. Building dark patterns for a client does not just expose them to lawsuits; it exposes <em>your agency</em> as the designer to liability as well.
+                    </div>
+
                     <h2 class="section-title mt-5">The Secret-Keeper's Oath: Non-Disclosure Agreements (NDA)</h2>
                     <p>In the professional tech world, a <strong><a href="https://www.law.cornell.edu/wex/non-disclosure_agreement" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Non-Disclosure Agreement (NDA)</a></strong> is more than just a "pinky promise" 🤫. It is a legally binding contract that creates a "confidential relationship" between you and an employer or client. It is the primary tool used to protect <strong>Trade Secrets</strong>—proprietary information that gives a business a competitive edge.</p>
                     
