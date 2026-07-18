@@ -180,7 +180,15 @@
 
         <h5 class="fw-bold mt-4 text-primary">Layout Quirks & Tricks</h5>
         <ul class="small mb-4">
-            <li class="mb-2"><strong>Margin Collapse:</strong> When two vertical margins touch (like the bottom margin of an H1 and the top margin of a P), they don't add together. They <strong>collapse</strong> into a single margin equal to the larger of the two values.</li>
+            <li class="mb-2"><strong>Margin Collapse:</strong> When two vertical margins touch (like the bottom margin of an H1 and the top margin of a P), they don't add together. They <strong>collapse</strong> into a single margin equal to the larger of the two values.
+              <div class="card bg-light border-0 p-3 mt-2 shadow-sm">
+                <p class="small fw-bold mb-2 text-primary"><span class="badge bg-primary me-1">NV 5.2.3</span> Two Collapse Scenarios You Must Know:</p>
+                <ul class="small mb-0 ps-3">
+                  <li class="mb-2"><strong>Adjacent Siblings:</strong> An <code>&lt;h2&gt;</code> with <code>margin-bottom: 30px</code> directly above a <code>&lt;p&gt;</code> with <code>margin-top: 20px</code> — the actual gap is <strong>30px</strong>, not 50px. The smaller margin is absorbed.</li>
+                  <li class="mb-0"><strong>Parent-Child:</strong> If a <code>&lt;div&gt;</code> parent has no border or padding at the top, and the first child element has a <code>margin-top</code>, that margin will "bleed through" to the parent. Fix it by adding <code>padding-top: 1px;</code> or <code>overflow: hidden;</code> to the parent.</li>
+                </ul>
+              </div>
+            </li>
             <li class="mb-2"><strong>Centering a Block:</strong> What is the classic CSS technique to horizontally center a block-level element (like a container div) with a set width? You use <code>margin: 0 auto;</code>. Setting left and right margins to 'auto' forces the browser to split the remaining space equally.</li>
             <li class="mb-0"><strong>Overflow:</strong> If text is spilling out of its container, setting <code>overflow: scroll;</code> forces a scrollbar to appear inside the box.</li>
         </ul>
@@ -463,6 +471,41 @@
                 </tr>
             </tbody>
         </table>
+
+        <!-- MODERN CSS FUNCTIONS: DEDICATED SECTION -->
+        <h5 class="fw-bold mt-4 text-primary"><span class="badge bg-primary me-1">NV 5.2.6</span> Modern CSS Functions: <code>calc()</code>, <code>clamp()</code>, and <code>minmax()</code></h5>
+        <p>These three functions are the secret weapons of professional CSS layout. They let the browser do math and make decisions at render time instead of you hard-coding pixel values.</p>
+
+        <div class="card bg-light border-primary border-start border-3 shadow-sm p-3 mb-3">
+          <p class="fw-bold mb-1 text-primary"><code>calc()</code> — Do Math Directly in CSS</p>
+          <p class="small mb-2">Mix different unit types in a single expression. Perfect for layouts where you need to subtract a fixed amount from a flexible size.</p>
+          <pre class="p-2 rounded bg-white border mb-0 no-copy"><code>/* A sidebar + main content layout where the sidebar is 250px fixed */
+.main-content {
+    width: calc(100% - 250px); /* Remaining space after the sidebar */
+    padding: calc(1rem + 10px); /* Combine units */
+}</code></pre>
+        </div>
+
+        <div class="card bg-light border-success border-start border-3 shadow-sm p-3 mb-3">
+          <p class="fw-bold mb-1 text-success"><code>clamp(MIN, IDEAL, MAX)</code> — Fluid Typography</p>
+          <p class="small mb-2">Locks a value between a minimum floor and a maximum ceiling, with an ideal fluid value in between. This is the gold standard for responsive font sizes that scale with the viewport without media queries.</p>
+          <pre class="p-2 rounded bg-white border mb-0 no-copy"><code>/* Font is never smaller than 1rem or larger than 2rem,
+   but grows fluidly with the viewport in between */
+h1 {
+    font-size: clamp(1rem, 2.5vw, 2rem);
+}</code></pre>
+        </div>
+
+        <div class="card bg-light border-warning border-start border-3 shadow-sm p-3 mb-4">
+          <p class="fw-bold mb-1 text-warning"><code>minmax(MIN, MAX)</code> — Smart Grid Track Sizing</p>
+          <p class="small mb-2">Used <em>exclusively inside CSS Grid</em>. It tells a grid column or row: "be at least this wide, but you can grow up to this much." When combined with <code>auto-fit</code>, it creates responsive grids with zero media queries.</p>
+          <pre class="p-2 rounded bg-white border mb-0 no-copy"><code>/* Grid columns are at least 200px wide but grow to fill space equally */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}</code></pre>
+        </div>
 
         <h5 class="fw-bold mt-4 text-primary">The Magic Image Fix</h5>
         <p>What is the standard "magic fix" to ensure images never overflow their parent containers? Always set <code>max-width: 100%; height: auto;</code> globally on all images.</p>

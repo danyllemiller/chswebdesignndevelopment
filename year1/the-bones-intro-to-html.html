@@ -476,6 +476,47 @@
           </tbody>
         </table>
 
+        <!-- INLINE vs BLOCK: SPAN vs DIV EXPLICIT COMPARISON -->
+        <div class="card border-info shadow-sm my-4">
+          <div class="card-header bg-info text-white fw-bold"><span class="badge bg-white text-info me-2">NV 5.1.2</span> Spotlight: <code>&lt;div&gt;</code> vs. <code>&lt;span&gt;</code> — Block vs. Inline</div>
+          <div class="card-body small bg-light">
+            <p class="mb-3">These two are the most-used "generic" container elements, but they behave very differently in the document flow. Choosing the wrong one is a common beginner mistake.</p>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="card border-success h-100">
+                  <div class="card-header bg-success text-white fw-bold"><code>&lt;div&gt;</code> — Block Element</div>
+                  <div class="card-body small">
+                    <ul class="mb-0 ps-3">
+                      <li class="mb-1">Takes up <strong>the full width</strong> of its parent container.</li>
+                      <li class="mb-1">Always starts on a <strong>new line</strong>.</li>
+                      <li>Use it to <strong>group multiple elements</strong> (like a card, a hero section, or a grid row).</li>
+                    </ul>
+                    <pre class="p-2 rounded mt-3 bg-white border no-copy"><code>&lt;div class="card"&gt;
+  &lt;h2&gt;Title&lt;/h2&gt;
+  &lt;p&gt;Content&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card border-primary h-100">
+                  <div class="card-header bg-primary text-white fw-bold"><code>&lt;span&gt;</code> — Inline Element</div>
+                  <div class="card-body small">
+                    <ul class="mb-0 ps-3">
+                      <li class="mb-1">Only takes up as much space as its <strong>content needs</strong>.</li>
+                      <li class="mb-1">Does <strong>NOT</strong> start on a new line — it flows <em>within</em> text.</li>
+                      <li>Use it to <strong>style a specific word or phrase</strong> inside a paragraph.</li>
+                    </ul>
+                    <pre class="p-2 rounded mt-3 bg-white border no-copy"><code>&lt;p&gt;The price is
+  &lt;span class="price"&gt;$9.99&lt;/span&gt;
+  today only.&lt;/p&gt;</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- GRADED LAB 6 CARD (Content Blocks) -->
         <div class="card border-success shadow-sm my-4 text-start">
             <div class="card-header bg-success text-white fw-bold">Lab 6: Content Blocks [25 pts]</div>
@@ -783,6 +824,34 @@
         <h5 class="fw-bold mt-4 text-primary">Relative vs. Absolute Paths</h5>
         <p><strong>Absolute Path:</strong> The full URL to a completely different website (e.g., <code>https://google.com</code>).<br><strong>Relative Path:</strong> The path from the current file you are editing to a target file on your own computer (e.g., <code>about.html</code>). If you break a relative path, the user gets a 404 Error!</p>
 
+        <div class="card bg-light border-0 shadow-sm p-4 mb-5 mt-3">
+          <h6 class="fw-bold text-primary mb-3"><span class="badge bg-primary me-1">NV 5.1.2</span> Three Types of File Paths</h6>
+          <p class="small mb-3">Relative paths are the most important concept to master for local projects. Here are the three forms you will encounter:</p>
+          <table class="table table-bordered table-sm small bg-white mb-0">
+            <thead class="bg-light"><tr><th>Path Type</th><th>Example</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="fw-bold text-success">Same-Folder Relative</td>
+                <td><code>images/photo.jpg</code></td>
+                <td>The <code>images</code> folder is in the <strong>same directory</strong> as the current HTML file. Most common for beginner projects.</td>
+              </tr>
+              <tr>
+                <td class="fw-bold text-danger">Up-a-Folder Relative</td>
+                <td><code>../images/photo.jpg</code></td>
+                <td>The <code>../</code> means "go UP one folder level first, then look for the images folder." Used when your HTML file is inside a sub-folder.</td>
+              </tr>
+              <tr>
+                <td class="fw-bold text-primary">Root-Relative</td>
+                <td><code>/images/photo.jpg</code></td>
+                <td>The leading <code>/</code> means "start at the root of the web server." Works from any page on the site, but only on a live server — not if you double-click the file locally.</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="alert alert-warning small border-0 mt-3 mb-0 py-2">
+            <strong>Agency Rule:</strong> For student projects opened directly in a browser (not on a server), use the <strong>same-folder relative</strong> path (<code>images/photo.jpg</code>) to avoid broken links.
+          </div>
+        </div>
+
         <!-- WALKTHROUGH 9: Navigation -->
         <h3 class="section-title d-flex align-items-center mt-5 text-primary">
           Walkthrough: Link It All Together (Navigation)
@@ -872,6 +941,75 @@
 &lt;/form&gt;</code></pre>
                     </li>
                 </ol>
+            </div>
+
+            <!-- ADVANCED FORM ATTRIBUTES -->
+            <h5 class="fw-bold mt-5 text-primary"><span class="badge bg-primary me-1">NV 5.1.3</span> Advanced HTML5 Form Attributes</h5>
+            <p>The input attributes below make forms smarter. They allow the browser to do validation work for you <em>before</em> the data is ever sent to a server — no JavaScript required.</p>
+            <table class="table table-bordered table-sm small bg-white shadow-sm mt-3 mb-4">
+              <thead class="bg-light"><tr><th>Attribute</th><th>Example</th><th>What It Does</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>placeholder</code></td>
+                  <td><code>placeholder="e.g. John Doe"</code></td>
+                  <td>Shows hint text inside the field before the user types. Disappears when they start typing.</td>
+                </tr>
+                <tr>
+                  <td><code>type="email"</code></td>
+                  <td><code>&lt;input type="email"&gt;</code></td>
+                  <td>Validates that the input contains an <code>@</code> symbol. On mobile, pops up the email-friendly keyboard.</td>
+                </tr>
+                <tr>
+                  <td><code>type="number"</code></td>
+                  <td><code>&lt;input type="number" min="1" max="10"&gt;</code></td>
+                  <td>Accepts only numeric input. Shows a spinner. Use <code>min</code> and <code>max</code> to limit the allowed range.</td>
+                </tr>
+                <tr>
+                  <td><code>type="tel"</code></td>
+                  <td><code>&lt;input type="tel"&gt;</code></td>
+                  <td>Tells mobile devices to show the telephone keypad instead of the full keyboard.</td>
+                </tr>
+                <tr>
+                  <td><code>required</code></td>
+                  <td><code>&lt;input required&gt;</code></td>
+                  <td>Prevents the form from submitting if this field is empty. The browser shows a native error message.</td>
+                </tr>
+                <tr>
+                  <td><code>pattern</code></td>
+                  <td><code>pattern="[0-9]{5}"</code></td>
+                  <td>Validates the input against a Regular Expression (RegEx) pattern. The example forces exactly 5 digits — great for ZIP codes.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- FIELDSET & LEGEND -->
+            <h5 class="fw-bold mt-5 text-primary"><span class="badge bg-primary me-1">NV 5.1.3</span> Grouping Form Fields: <code>&lt;fieldset&gt;</code> &amp; <code>&lt;legend&gt;</code></h5>
+            <p>When a form has multiple sections (like "Personal Info" and "Event Details"), you should group them using <code>&lt;fieldset&gt;</code> and <code>&lt;legend&gt;</code>. This is both accessible and semantic — screen readers announce the group name before reading the fields inside it, giving context to visually impaired users.</p>
+            <pre class="p-3 border rounded shadow-sm mb-4 no-copy"><code>&lt;form&gt;
+  &lt;fieldset&gt;
+    &lt;legend&gt;Personal Information&lt;/legend&gt;
+
+    &lt;label for="fname"&gt;Full Name:&lt;/label&gt;
+    &lt;input type="text" id="fname" name="fname" placeholder="e.g. Alex Rivera" required&gt;
+
+    &lt;label for="phone"&gt;Phone Number:&lt;/label&gt;
+    &lt;input type="tel" id="phone" name="phone" placeholder="e.g. 775-555-0100"&gt;
+  &lt;/fieldset&gt;
+
+  &lt;fieldset&gt;
+    &lt;legend&gt;Event Details&lt;/legend&gt;
+
+    &lt;label for="guests"&gt;Number of Guests:&lt;/label&gt;
+    &lt;input type="number" id="guests" name="guests" min="1" max="50" required&gt;
+
+    &lt;label for="email2"&gt;Email:&lt;/label&gt;
+    &lt;input type="email" id="email2" name="email2" placeholder="e.g. alex@email.com" required&gt;
+  &lt;/fieldset&gt;
+
+  &lt;button type="submit"&gt;Reserve Now&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+            <div class="alert alert-info border-0 small shadow-sm mb-5">
+              <strong>Why this matters:</strong> A screen reader announces <em>"Personal Information — group"</em> when a user tabs into the first fieldset, providing context that a sighted user gets visually but a blind user needs explicitly. This is a WRS 1.1.1 / 1.1.2 accessibility requirement.
             </div>
 
             <!-- GRADED LAB 8 CARD (Forms) -->
@@ -974,6 +1112,44 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- VOCABULARY QUICK REFERENCE -->
+    <div class="row mb-5 pb-4 border-bottom">
+      <div class="col-12">
+        <h2 class="section-title mt-0 text-primary fw-bold text-center"><span class="badge bg-primary me-2">2.0 Level</span> Vocabulary Quick Reference</h2>
+        <p class="text-center text-muted small mb-4">These are the key terms you must know at the 2.0 proficiency level for Chapter 5. <span class="badge bg-primary me-1">NV 5.1.1</span><span class="badge bg-primary me-1">NV 5.1.2</span><span class="badge bg-primary me-1">NV 5.1.3</span><span class="badge bg-primary">NV 5.1.4</span></p>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <table class="table table-bordered table-sm small bg-white shadow-sm h-100">
+              <thead class="bg-primary text-white"><tr><th>Term</th><th>Definition</th></tr></thead>
+              <tbody>
+                <tr><td class="fw-bold">Tag</td><td>The markup code surrounded by angle brackets: <code>&lt;p&gt;</code> is an opening tag, <code>&lt;/p&gt;</code> is a closing tag.</td></tr>
+                <tr><td class="fw-bold">Element</td><td>The complete unit: opening tag + content + closing tag (e.g., <code>&lt;p&gt;Hello&lt;/p&gt;</code>).</td></tr>
+                <tr><td class="fw-bold">Attribute</td><td>Extra information added inside an opening tag (e.g., <code>href="about.html"</code>, <code>class="intro"</code>).</td></tr>
+                <tr><td class="fw-bold">Boilerplate</td><td>The required starter template every HTML file must have: <code>DOCTYPE</code>, <code>html</code>, <code>head</code>, <code>body</code>.</td></tr>
+                <tr><td class="fw-bold">Semantic</td><td>Tags whose name describes their content's purpose: <code>&lt;nav&gt;</code> = navigation, <code>&lt;article&gt;</code> = article, <code>&lt;footer&gt;</code> = footer.</td></tr>
+                <tr><td class="fw-bold">Non-Semantic</td><td>Tags with no inherent meaning like <code>&lt;div&gt;</code> and <code>&lt;span&gt;</code>. They exist purely for styling and grouping.</td></tr>
+                <tr><td class="fw-bold"><code>a</code></td><td>The anchor tag. Creates a hypertext link. Required attribute: <code>href</code> (the destination).</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <table class="table table-bordered table-sm small bg-white shadow-sm h-100">
+              <thead class="bg-primary text-white"><tr><th>Term</th><th>Definition</th></tr></thead>
+              <tbody>
+                <tr><td class="fw-bold"><code>ul</code> / <code>li</code></td><td>Unordered list / list item. Creates bullet-point lists. <code>&lt;ol&gt;</code> creates a numbered list.</td></tr>
+                <tr><td class="fw-bold"><code>h1</code>–<code>h6</code></td><td>Heading tags that define visual hierarchy. <code>&lt;h1&gt;</code> is the most important — only ONE per page (SEO rule).</td></tr>
+                <tr><td class="fw-bold"><code>p</code></td><td>Paragraph tag. A <strong>block-level</strong> element — it always starts on a new line.</td></tr>
+                <tr><td class="fw-bold"><code>div</code></td><td>Generic <strong>block-level</strong> container for grouping multiple elements together for layout or styling.</td></tr>
+                <tr><td class="fw-bold"><code>span</code></td><td>Generic <strong>inline</strong> container for styling a word or phrase within a block of text without breaking the line.</td></tr>
+                <tr><td class="fw-bold"><code>form</code></td><td>The wrapper for all user input fields. Sends data when a submit button is clicked.</td></tr>
+                <tr><td class="fw-bold"><code>label</code></td><td>Visible text description linked to an input using matching <code>for</code> and <code>id</code> attributes — required for accessibility.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- FINAL RECAP -->
