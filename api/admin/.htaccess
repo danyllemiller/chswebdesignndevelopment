@@ -1,6 +1,9 @@
 RewriteEngine On
 Options -Indexes
 
+# Route /api/admin/sections/{id} → sections.php with PATH_INFO
+RewriteRule ^sections/(.+)$ sections.php/$1 [L,QSA]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}.php -f
