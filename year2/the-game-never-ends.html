@@ -130,8 +130,28 @@
             <li class="mb-0"><strong>Code Generation:</strong> The "Copilot" mindset means viewing AI as <strong>a tool to boost human efficiency</strong>, not a replacement for human developers!</li>
         </ul>
 
-        <h5 class="fw-bold mt-4 text-primary">The Art of Prompt Engineering</h5>
+        <h5 class="fw-bold mt-4 text-primary">The Art of Prompt Engineering <span class="badge bg-primary ms-1" style="font-size:0.65rem;">NV 7.2.1</span></h5>
         <p>The process of carefully refining text inputs to get better AI results is called <strong>Prompt Engineering</strong>. A professional developer doesn't just ask an AI to "build a website." They provide technical context, constraints, and iterative feedback to generate usable code.</p>
+        <p class="small mb-2">A strong AI prompt contains four ingredients: <strong>Role</strong> (who the AI should act as), <strong>Context</strong> (background information), <strong>Specificity</strong> (exact requirements), and <strong>Format</strong> (how you want the output). Compare these two prompts:</p>
+        <div class="row g-3 mb-4 text-start">
+          <div class="col-md-6">
+            <div class="bg-dark text-light p-3 rounded shadow-sm h-100 border-start border-4 border-danger">
+              <p class="mb-2 small fw-bold text-danger">Weak Prompt (Vague)</p>
+              <p class="mb-0 small" style="font-style:italic;color:#fca5a5;">"Make me a button that does something when clicked."</p>
+              <hr style="border-color:#475569;">
+              <p class="mb-0 small text-muted">Result: generic code, likely not what you need, requires many follow-up clarifications.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="bg-dark text-light p-3 rounded shadow-sm h-100 border-start border-4 border-success">
+              <p class="mb-2 small fw-bold text-success">Strong Prompt (Specific)</p>
+              <p class="mb-0 small" style="font-style:italic;color:#86efac;">"Act as a senior JavaScript developer. Write a vanilla JS async function that fetches JSON from 'https://pokeapi.co/api/v2/pokemon/pikachu', displays the pokemon's name and sprite in a div with id='result', and shows an error message if the fetch fails. No frameworks."</p>
+              <hr style="border-color:#475569;">
+              <p class="mb-0 small text-muted">Result: targeted, production-ready code with the exact stack and behavior specified.</p>
+            </div>
+          </div>
+        </div>
+        <p class="small text-muted mb-4">The stronger prompt includes: <strong>Role</strong> (senior JS developer), <strong>Context</strong> (the API URL, HTML target), <strong>Specificity</strong> (async, error handling, no frameworks), and <strong>Format</strong> (a function). Iterating on prompts — refining them based on the output — is the professional workflow.</p>
 
         <!-- LAB 1 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
@@ -170,7 +190,8 @@
             <li class="mb-3"><strong>Algorithmic Bias:</strong> What is 'Algorithmic Bias'? <strong>When an AI system produces systematically prejudiced results due to flawed training data.</strong> It is usually caused by <strong>biased or incomplete training data</strong>, meaning the computer inherits human prejudices found in the data provided to it. Why must a developer test their AI integration for cultural bias? <strong>To ensure Cultural Competency and fairness for all users.</strong></li>
             <li class="mb-3"><strong>Hallucinations &amp; Deepfakes:</strong> An "AI Hallucination" occurs when <strong>an AI confidently generates false or fabricated information.</strong> Furthermore, a major ethical risk of Deepfake technology is <strong>the spread of misinformation and identity theft.</strong></li>
             <li class="mb-3"><strong>The Black Box Problem:</strong> This refers to <strong>the inability to understand exactly how the AI reached its decision.</strong> If an AI denies a user a loan, but the developers can't explain *why* it did so, that is a Black Box failure.</li>
-            <li class="mb-0"><strong>Copyright Issues:</strong> Who owns the copyright to AI-generated code? <strong>It is currently a highly debated legal gray area.</strong></li>
+            <li class="mb-3"><strong>Copyright Issues:</strong> Who owns the copyright to AI-generated code? <strong>It is currently a highly debated legal gray area.</strong></li>
+            <li class="mb-0"><strong>AI Accessibility — The Accent Gap:</strong> Voice-powered AI systems (like speech-to-text or voice assistants) are trained predominantly on certain accents and dialects. This means they can fail to recognize users with non-dominant accents — disproportionately affecting non-native English speakers, regional dialects, and communities of color. A developer building a voice interface has an ethical responsibility to test with diverse speakers. Which WRS skill does this require? <strong>Cultural Competency.</strong></li>
         </ul>
 
         <h5 class="fw-bold mt-4 text-primary">The Solution: Human-in-the-Loop</h5>
@@ -213,6 +234,28 @@
         <p>Virtual Reality (VR) differs from AR because VR <strong>completely immerses the user in a simulated environment</strong>. You cannot see the real world at all. Which device is most associated with Virtual Reality (VR)? <strong>A VR Headset or goggles.</strong></p>
         
         <p>In Augmented Reality (AR), what is the 'Augmentation'? <strong>Adding digital elements (graphics/sounds) to a live view of the real world.</strong> Pokemon Go, which places digital monsters on the real sidewalk via your phone screen, is an example of <strong>AR</strong>. Furthermore, which technology is best suited for 'trying on' a pair of sunglasses using a phone's camera? <strong>AR</strong>. Another example of AR in retail web development is <strong>a "Virtual Try-On" feature using the phone camera.</strong></p>
+
+        <h5 class="fw-bold mt-4 text-primary">AR vs. VR vs. MR — The Full Spectrum</h5>
+        <div class="row g-3 mb-4 text-start">
+          <div class="col-md-4">
+            <div class="p-3 rounded border border-primary shadow-sm h-100 bg-white">
+              <h6 class="fw-bold text-primary">AR — Augmented Reality</h6>
+              <p class="small mb-0">Digital content is <strong>overlaid on top of the real world</strong>. The user can still see their physical environment. The digital elements do NOT interact with real-world physics.<br><em>Examples: Pokemon Go, IKEA Place app, Snapchat filters.</em></p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 rounded border border-danger shadow-sm h-100 bg-white">
+              <h6 class="fw-bold text-danger">VR — Virtual Reality</h6>
+              <p class="small mb-0"><strong>Fully immersive</strong> — the real world is completely replaced by a simulated digital environment. The user cannot see their physical surroundings.<br><em>Examples: Meta Quest games, VR training simulations, virtual tours.</em></p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 rounded border border-success shadow-sm h-100 bg-white">
+              <h6 class="fw-bold text-success">MR — Mixed Reality</h6>
+              <p class="small mb-0">An advanced form of AR where digital objects are <strong>anchored to and interact with the physical world</strong>. A virtual ball can roll off a real table.<br><em>Examples: Microsoft HoloLens, Apple Vision Pro spatial computing.</em></p>
+            </div>
+          </div>
+        </div>
 
         <h5 class="fw-bold mt-4 text-primary">WebXR &amp; Alternative Interfaces</h5>
         <p>Which Web API allows browsers to access VR headsets and AR cameras? <strong>WebXR</strong>. Because WebXR interacts with physical hardware (cameras/headsets), it requires <strong>strict user permissions and security checks</strong>.</p>
@@ -258,7 +301,16 @@
 
         <h5 class="fw-bold mt-4 text-danger">The Security Nightmare</h5>
         <p>What is a major risk of IoT devices? <strong>Security vulnerabilities and hacking.</strong> Why are smart appliances (like IoT refrigerators) often targeted by hackers? <strong>They are rarely updated by users and serve as an easy backdoor into a home network.</strong> Data privacy laws are increasingly important in IoT to protect against <strong>unauthorized data mining of a user's private home life.</strong></p>
-        
+
+        <div class="alert alert-danger border-danger border-start border-4 shadow-sm small mt-3 mb-3 text-start">
+          <strong>The Three Specific IoT Security Risks Developers Must Know:</strong>
+          <ul class="mb-0 mt-2 ps-3">
+            <li class="mb-2"><strong>Weak Default Passwords:</strong> Most IoT devices ship with default credentials like <code>admin / password</code> that users never change. A script that tries common defaults can compromise thousands of devices in minutes — a common way attackers build botnets.</li>
+            <li class="mb-2"><strong>No Automatic Updates:</strong> Unlike your phone, most smart appliances never receive security patches. Once a vulnerability is discovered, it stays permanently exploitable for the lifetime of the device.</li>
+            <li class="mb-0"><strong>Large Attack Surface:</strong> Every additional IoT device on a home or business network is another potential entry point. One compromised smart bulb on the same network as a work laptop creates a path for attackers to reach sensitive corporate data.</li>
+          </ul>
+        </div>
+
         <p>Which WRS is critical when auditing the security vulnerabilities of a smart city? <strong>Analytical Reasoning</strong>!</p>
 
         <!-- LAB 4 CARD -->
@@ -302,7 +354,8 @@
               <p class="small mb-2"><strong>The Application:</strong> Which of the following best describes a Single Page Application (SPA)? <strong>A web app that loads a single HTML page and dynamically updates as the user interacts.</strong> In modern web development, which language is primarily used to build the interactive logic of a Web App? <strong>JavaScript</strong>. When a developer uses a 'Framework' like React or Vue, what is the primary benefit? <strong>It provides pre-written code and components to speed up development.</strong></p>
               <p class="small mb-2"><strong>The Design:</strong> What is the primary focus of a UX/UI Designer? <strong>The psychology, visual design, and user experience of the interface.</strong> What is the primary purpose of a 'Wireframe'? <strong>To create a visual blueprint of the layout and functionality.</strong> How does a Prototype differ from a Wireframe? <strong>A prototype is interactive and clickable, simulating the final product.</strong></p>
               <p class="small mb-2"><strong>The Hosting:</strong> What does 'Serverless Computing' mean? <strong>Developers upload code functions that run on demand, without managing the underlying physical server hardware.</strong> What does CDN stand for? <strong>Content Delivery Network.</strong> What makes a 'Headless CMS' different from traditional WordPress? <strong>It completely separates the back-end database from the front-end presentation layer.</strong></p>
-              <p class="small mb-0"><strong>The Workflow:</strong> What does the 'CI' in CI/CD pipeline stand for? <strong>Continuous Integration.</strong> Which software tool is the industry standard for Version Control? <strong>Git</strong>. What defines 'Open-Source' software? <strong>Software that anyone can inspect, modify, and enhance.</strong></p>
+              <p class="small mb-2"><strong>The Workflow:</strong> What does the 'CI' in CI/CD pipeline stand for? <strong>Continuous Integration.</strong> Which software tool is the industry standard for Version Control? <strong>Git</strong>. What defines 'Open-Source' software? <strong>Software that anyone can inspect, modify, and enhance.</strong></p>
+              <p class="small mb-0"><strong>Modern Architecture Patterns:</strong> What is a <strong>PWA (Progressive Web App)</strong>? <strong>A web app that uses service workers and a manifest file to behave like a native mobile app — installable on a home screen, works offline, and sends push notifications.</strong> What is <strong>JAMstack</strong>? <strong>An architecture pattern standing for JavaScript, APIs, and Markup — pre-built static HTML files served via CDN, with dynamic behavior handled by JavaScript calling APIs at runtime.</strong> JAMstack sites are extremely fast because there is no server rendering HTML on-demand. What does <strong>Serverless Functions</strong> mean in the JAMstack context? <strong>Small backend functions (like Netlify Functions or AWS Lambda) that run on-demand in the cloud — no server to manage — handling tasks like API key proxying, form submissions, or payments.</strong></p>
             </div>
           </div>
 

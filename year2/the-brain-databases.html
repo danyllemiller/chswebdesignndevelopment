@@ -137,6 +137,39 @@
             <li class="mb-0"><strong>Foreign Key:</strong> What is a Foreign Key? <strong>A column in one table that points back to the Primary Key of another table, creating a link between them.</strong> Think of a class roster sheet. Instead of writing out a student's full name on every sheet, the school just writes their Student ID (the Foreign Key). This is part of <strong>Data Normalization</strong>: Organizing data to reduce redundancy and improve data integrity (e.g., using Foreign Keys instead of typing a name 100 times to save the client server space!).</li>
         </ul>
 
+        <h5 class="fw-bold mt-4 text-primary">Data Normalization: Eliminating Redundancy <span class="badge bg-primary ms-1" style="font-size:0.65rem;">WRS 1.2.3</span></h5>
+        <p>What is <strong>Data Normalization</strong>? <strong>The process of organizing a database to reduce redundancy — avoiding storing the same data in multiple places — so that updates only need to happen in one location.</strong></p>
+        <div class="row g-3 mb-4 text-start">
+          <div class="col-md-6">
+            <div class="bg-light p-3 rounded border border-danger border-2 shadow-sm">
+              <p class="small fw-bold text-danger mb-2">Un-Normalized (BAD — Redundant)</p>
+              <table class="table table-bordered table-sm small mb-0">
+                <thead class="table-danger"><tr><th>score</th><th>username</th><th>city</th></tr></thead>
+                <tbody>
+                  <tr><td>985,000</td><td>CompetitiveCody</td><td>Carson City</td></tr>
+                  <tr><td>45,200</td><td>CompetitiveCody</td><td>Carson City</td></tr>
+                  <tr><td>71,000</td><td>CompetitiveCody</td><td>Carson City</td></tr>
+                </tbody>
+              </table>
+              <p class="small text-danger mt-2 mb-0">If Cody moves cities, we must update 3 rows. If we miss one, the data is inconsistent.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="bg-light p-3 rounded border border-success border-2 shadow-sm">
+              <p class="small fw-bold text-success mb-2">Normalized (GOOD — Foreign Key)</p>
+              <table class="table table-bordered table-sm small mb-0">
+                <thead class="table-success"><tr><th>score</th><th>user_id (FK)</th></tr></thead>
+                <tbody>
+                  <tr><td>985,000</td><td class="fw-bold text-danger">1</td></tr>
+                  <tr><td>45,200</td><td class="fw-bold text-danger">1</td></tr>
+                  <tr><td>71,000</td><td class="fw-bold text-danger">1</td></tr>
+                </tbody>
+              </table>
+              <p class="small text-success mt-2 mb-0">Cody's city is stored only once in the Users table. One update fixes everything.</p>
+            </div>
+          </div>
+        </div>
+
         <h5 class="fw-bold mt-4">Example: Linking User Data to Scores</h5>
         <p class="small text-muted mb-2">Notice how the HighScores table doesn't waste space writing out "CompetitiveCody" again. It just references his unique User ID (1).</p>
         
@@ -344,6 +377,35 @@
             <li class="mb-4">
               <strong class="fs-6 text-primary">2. NoSQL (Non-Relational): The "Scrapbook"</strong>
               <p class="mt-1 mb-1">Which type of database stores data as flexible 'documents' (like JSON objects) rather than rigid tables with predefined columns? <strong>NoSQL (like MongoDB or Firebase).</strong> In NoSQL, a 'Collection' is roughly equivalent to a Table, and a 'Document' is roughly equivalent to a Single Row/Record.</p>
+              <p class="mt-2 mb-1 small fw-bold">A MongoDB Document looks like this (contrast with the SQL table structure above):</p>
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <div class="bg-dark text-light p-3 rounded shadow-sm border-start border-4 border-warning">
+                    <p class="mb-1 small fw-bold text-warning">NoSQL (MongoDB Document)</p>
+                    <pre class="mb-0 text-light" style="font-size:0.8rem;white-space:pre-wrap;">{
+  "_id": "abc123",
+  "name": "CompetitiveCody",
+  "scores": [985000, 45200, 71000],
+  "badges": ["Speedrun", "NightOwl"],
+  "lastSeen": "2026-07-18"
+}</pre>
+                  </div>
+                  <p class="small text-muted mt-1">Flexible — each document can have different fields. Arrays and nested objects are allowed directly inside the document.</p>
+                </div>
+                <div class="col-md-6">
+                  <div class="bg-light p-3 rounded shadow-sm border-start border-4 border-primary">
+                    <p class="mb-1 small fw-bold text-primary">SQL (Relational Table Row)</p>
+                    <pre class="mb-0" style="font-size:0.8rem;white-space:pre-wrap;">id  | username         | email
+----|------------------|-------
+  1 | CompetitiveCody  | ...
+  2 | PixelPenny       | ...
+
+(scores live in a SEPARATE table
+linked by a Foreign Key)</pre>
+                  </div>
+                  <p class="small text-muted mt-1">Rigid schema — every row has the same columns. Related data requires separate tables and JOIN queries.</p>
+                </div>
+              </div>
             </li>
             <li class="mb-4">
               <strong class="fs-6 text-primary">3. The Cloud</strong>
@@ -465,6 +527,22 @@ if (savedScore !== null) {
           </tbody>
         </table>
 
+        <div class="alert alert-info border-info border-start border-4 shadow-sm small mt-4 mb-4 text-start">
+          <strong>CRUD Lifecycle — SQL Commands + HTTP Methods: <span class="badge bg-primary ms-1">NV 5.4.1</span></strong>
+          <p class="mt-2 mb-2">CRUD actions are universal. The same four operations appear in both your database (SQL) and your API layer (HTTP methods). When you understand this mapping, you can read any full-stack codebase instantly:</p>
+          <table class="table table-bordered table-sm small bg-white mb-0">
+            <thead class="bg-primary text-white text-center">
+              <tr><th>CRUD</th><th>SQL Command</th><th>HTTP Method</th><th>What It Does</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="fw-bold text-success text-center">Create</td><td class="text-center"><code>INSERT INTO</code></td><td class="text-center"><code class="text-success">POST</code></td><td>Add a new record / resource</td></tr>
+              <tr><td class="fw-bold text-primary text-center">Read</td><td class="text-center"><code>SELECT</code></td><td class="text-center"><code class="text-primary">GET</code></td><td>Retrieve existing data</td></tr>
+              <tr><td class="fw-bold text-warning text-center">Update</td><td class="text-center"><code>UPDATE</code></td><td class="text-center"><code class="text-warning">PUT / PATCH</code></td><td>Modify an existing record</td></tr>
+              <tr><td class="fw-bold text-danger text-center">Delete</td><td class="text-center"><code>DELETE</code></td><td class="text-center"><code class="text-danger">DELETE</code></td><td>Remove a record permanently</td></tr>
+            </tbody>
+          </table>
+        </div>
+
         <h5 class="fw-bold mt-4 text-primary">The Anatomy of a Read Operation (<code>SELECT</code>)</h5>
         <p>The <code>SELECT</code> query retrieves specific data. We use <strong>Indexes</strong> to massively speed up searches. What is an 'Index' in a database? <strong>A special data structure created to massively speed up search queries on a specific column, much like an index in a book.</strong> However, what is the primary drawback of adding an Index to every single column? <strong>It slows down INSERT, UPDATE, and DELETE operations because the index must also be updated every time.</strong></p>
         
@@ -498,11 +576,43 @@ LIMIT 10;</code></pre>
 VALUES ('Cosmic Comet', 999999, 1);</code></pre>
               </li>
               <li class="mb-0"><strong>Write a SELECT:</strong>
-                  <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>SELECT username, score_value FROM HighScores 
+                  <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>SELECT username, score_value FROM HighScores
 JOIN Users ON HighScores.user_id = Users.id
 ORDER BY score_value DESC LIMIT 10;</code></pre>
               </li>
           </ol>
+        </div>
+
+        <h3 class="section-title d-flex align-items-center mt-5 text-primary">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2 text-primary"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          Walkthrough: UPDATE and DELETE (Handle with Care)
+        </h3>
+        <div class="bg-light p-4 rounded shadow-sm border-start border-3 border-warning mb-5 text-start">
+          <p class="small fw-bold text-dark">The <code>UPDATE</code> and <code>DELETE</code> commands are the most dangerous in SQL. <strong>Always include a <code>WHERE</code> clause</strong> — without it, you modify or delete every single row in the table.</p>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <p class="small fw-bold text-warning mb-1">UPDATE — Modify an existing record</p>
+              <pre class="p-3 rounded mt-1 mb-0 no-copy"><code>-- Change Cody's email address
+UPDATE Users
+SET email = 'cody@example.com'
+WHERE id = 1;
+
+-- Without WHERE: ALL users get
+-- their email changed! ☠️</code></pre>
+            </div>
+            <div class="col-md-6">
+              <p class="small fw-bold text-danger mb-1">DELETE — Remove a specific record</p>
+              <pre class="p-3 rounded mt-1 mb-0 no-copy"><code>-- Delete one specific high score
+DELETE FROM HighScores
+WHERE id = 101;
+
+-- Without WHERE: EVERY score
+-- in the table is deleted! ☠️</code></pre>
+            </div>
+          </div>
+          <div class="alert alert-danger small py-2 px-3 mt-3 mb-0 border-danger border-start border-3">
+            <strong>The Golden Rule:</strong> Before running any <code>UPDATE</code> or <code>DELETE</code>, first run a <code>SELECT</code> with the same <code>WHERE</code> clause to preview exactly which rows will be affected. <span class="badge bg-primary ms-1">NV 5.4.1</span>
+          </div>
         </div>
 
         <!-- GRADED LAB 2 CARD -->
@@ -739,6 +849,58 @@ ORDER BY score_value DESC LIMIT 10;</code></pre>
         <div class="card bg-dark text-light p-3 small mb-4 shadow-sm border-0 mt-4 text-start">
           <p class="mb-2 text-warning">Plain Text (Sin): <code>"Cody123!"</code></p>
           <p class="mb-0 text-success">Hashed Value (Win): <code>$2b$12$Q.mP5jX1yZk...</code></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 6: GDPR/CCPA -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Legal Obligations: GDPR &amp; CCPA <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">WRS 1.1.2</span> <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">WRS 1.1.4</span></h2>
+        <p>When our agency builds a database that stores user data, we are not just engineers — we are data custodians with legal obligations. Two major privacy laws govern how user data must be handled:</p>
+
+        <div class="row g-3 mb-4 text-start">
+          <div class="col-md-6">
+            <div class="card border-primary shadow-sm h-100">
+              <div class="card-header bg-primary text-white fw-bold small">GDPR (European Union)</div>
+              <div class="card-body small p-3">
+                <p class="mb-1"><strong>General Data Protection Regulation</strong> — applies to any website that serves users in the EU, regardless of where the company is located.</p>
+                <ul class="mb-0 ps-3">
+                  <li class="mb-1"><strong>Right to Access:</strong> Users can request a copy of all data you hold on them.</li>
+                  <li class="mb-1"><strong>Right to Erasure ("Right to be Forgotten"):</strong> Users can request that all their data be permanently deleted.</li>
+                  <li class="mb-1"><strong>Data Minimization:</strong> Only collect data you actually need. Do not store a birth date if all you need is whether the user is 18+.</li>
+                  <li class="mb-0"><strong>Explicit Consent:</strong> Pre-checked consent boxes are illegal. Users must actively opt in.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-info shadow-sm h-100">
+              <div class="card-header bg-info text-white fw-bold small">CCPA (California, USA)</div>
+              <div class="card-body small p-3">
+                <p class="mb-1"><strong>California Consumer Privacy Act</strong> — applies to businesses that collect data from California residents.</p>
+                <ul class="mb-0 ps-3">
+                  <li class="mb-1"><strong>Right to Know:</strong> Users can ask what personal data is collected and why.</li>
+                  <li class="mb-1"><strong>Right to Delete:</strong> Users can request deletion of their personal information.</li>
+                  <li class="mb-1"><strong>Right to Opt-Out:</strong> Users can opt out of having their data sold to third parties.</li>
+                  <li class="mb-0"><strong>Non-Discrimination:</strong> You cannot penalize users who exercise their privacy rights.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-warning border-warning border-start border-4 shadow-sm small mt-2 text-start">
+          <strong>Agency Accountability:</strong> If our agency builds a client's database and it is breached due to negligence (plain-text passwords, no SQL sanitization, exposed credentials), the agency can be held legally and financially liable. Following GDPR/CCPA best practices protects both the client's users and the agency from lawsuits. Which WRS principle does this exemplify? <strong>Probity</strong> — acting with integrity and legal compliance even when it is inconvenient.
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0">
+        <div class="card roadmap-card border-warning shadow-sm text-start">
+          <div class="card-header bg-warning text-dark fw-bold">Let's Discuss:</div>
+          <div class="card-body small">
+            <p class="mb-2">A startup asks your agency to build a user database. They want to collect name, email, birth date, home address, and political party affiliation.</p>
+            <p class="mb-0">Which fields would you push back on under the <strong>Data Minimization Principle</strong>, and why?</p>
+          </div>
         </div>
       </div>
     </div>

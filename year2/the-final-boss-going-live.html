@@ -126,6 +126,35 @@
           <strong>The Danger:</strong> Why is the 'Old School' FTP method considered dangerous for modern team development? <strong>It is manual, error-prone, and can instantly overwrite live files with no 'undo' button.</strong>
         </div>
 
+        <h5 class="fw-bold mt-5 text-danger">FTP vs. SFTP: The Security Difference <span class="badge bg-primary ms-1" style="font-size:0.65rem;">NV 6.2.1</span></h5>
+        <p>Not all file transfer protocols are equal. What is the critical security difference between FTP and SFTP?</p>
+        <div class="row g-3 mb-4 text-start">
+          <div class="col-md-6">
+            <div class="card border-danger shadow-sm h-100">
+              <div class="card-header bg-danger text-white fw-bold small">FTP — File Transfer Protocol (Insecure)</div>
+              <div class="card-body small p-3">
+                <ul class="mb-0 ps-3">
+                  <li class="mb-1">Transmits all data — including your <strong>server username and password</strong> — in plain, unencrypted text.</li>
+                  <li class="mb-1">Any attacker who can intercept network traffic (e.g., on a public Wi-Fi) can steal your server credentials instantly.</li>
+                  <li class="mb-0">Never use plain FTP on a production server. It is like mailing your house key with the address written on the envelope.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-success shadow-sm h-100">
+              <div class="card-header bg-success text-white fw-bold small">SFTP — Secure File Transfer Protocol (Safe)</div>
+              <div class="card-body small p-3">
+                <ul class="mb-0 ps-3">
+                  <li class="mb-1"><strong>Encrypts the entire connection</strong> — credentials, file names, and file contents are all protected in transit using SSH.</li>
+                  <li class="mb-1">Industry standard for any server file transfers. FileZilla supports SFTP — simply select "SFTP" in the protocol dropdown when connecting.</li>
+                  <li class="mb-0">Always use SFTP (port 22) instead of FTP (port 21) on any live production server.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <h2 class="section-title mt-5">The "New School" Way: Git &amp; CI/CD</h2>
         <p>Modern developers hate dragging and dropping files manually. The industry standard is CI/CD. What does CI/CD stand for? <strong>Continuous Integration / Continuous Deployment.</strong></p>
         
@@ -327,6 +356,34 @@
         <h5 class="fw-bold mt-4 text-primary">Index &amp; Missing Files</h5>
         <p>Which file is automatically recognized as the default homepage by almost all web servers? <strong><code>index.html</code></strong>. If you name your homepage <code>main.html</code>, your live site will just show an ugly directory folder list.</p>
         <p>Furthermore, what happens if you deploy an HTML file but forget to deploy the <code>images</code> folder that goes with it? <strong>The images will show as broken links (404 errors) on the live site.</strong> What is a '404 Error'? <strong>Not Found (The requested page or file does not exist on the server).</strong></p>
+
+        <h5 class="fw-bold mt-5 text-danger">Server-Side Error Troubleshooting <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">WRS 1.2.3</span></h5>
+        <p>When your deployed site throws an error, the HTTP status code in the browser's Network tab tells you exactly where to look. Three common server errors you will encounter on launch day:</p>
+        <table class="table table-bordered small bg-white shadow-sm mt-3 mb-4 text-start">
+          <thead class="bg-dark text-white">
+            <tr><th>Error Code</th><th>Name</th><th>Common Cause</th><th>Fix</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="fw-bold text-danger text-center">403</td>
+              <td><strong>Forbidden</strong></td>
+              <td>File or directory permissions on the server are set incorrectly — the web server process cannot read the file.</td>
+              <td>Set file permissions to <code>644</code> and folder permissions to <code>755</code> via SFTP or cPanel.</td>
+            </tr>
+            <tr>
+              <td class="fw-bold text-danger text-center">404</td>
+              <td><strong>Not Found</strong></td>
+              <td>Wrong file path in HTML, file was not uploaded, or Linux case-sensitivity mismatch (<code>Logo.PNG</code> vs <code>logo.png</code>).</td>
+              <td>Verify the exact filename and path match. Check that the file was actually deployed to the server.</td>
+            </tr>
+            <tr>
+              <td class="fw-bold text-danger text-center">500</td>
+              <td><strong>Internal Server Error</strong></td>
+              <td>A bug in server-side code (PHP, Node.js, etc.), a misconfigured <code>.htaccess</code> file, or a missing dependency on the server.</td>
+              <td>Check the server error log (usually in cPanel or via SSH). Debug the server-side code — the error is not in your HTML/CSS.</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
          <div class="card roadmap-card border-warning shadow-sm mt-2 text-start">
@@ -351,7 +408,7 @@
         <ul class="small mb-4 bg-light p-3 rounded border shadow-sm text-start">
             <li class="mb-2">What is a DNS 'A Record' used for? <strong>Pointing a domain name to a specific numeric IP address.</strong></li>
             <li class="mb-2">What is a DNS 'CNAME Record' used for? <strong>Pointing a domain to another domain or subdomain URL (like a Netlify app link).</strong></li>
-            <li class="mb-0">If you change a DNS setting, why might your friend in another city not see the change immediately? <strong>The change has not fully propagated across the global DNS network yet.</strong> What does 'DNS Propagation' refer to? <strong>The time it takes for a new domain setting to spread to every internet provider across the globe.</strong></li>
+            <li class="mb-0">If you change a DNS setting, why might your friend in another city not see the change immediately? <strong>The change has not fully propagated across the global DNS network yet.</strong> What does 'DNS Propagation' refer to? <strong>The time it takes for a new domain setting to spread to every internet provider across the globe.</strong> How long does DNS propagation typically take? <strong>Between 24 and 72 hours in the worst case</strong>, though many providers update within minutes to a few hours. Do not panic if your domain shows a "site not found" error immediately after updating DNS records — this is expected.</li>
         </ul>
 
         <h5 class="fw-bold mt-4 text-primary">Security: HTTP vs HTTPS</h5>
@@ -381,7 +438,7 @@
             </li>
             <li class="mb-3">
               <strong class="text-primary fs-6">2. The "Link Rot" Test</strong>
-              <p class="mt-1 mb-0">What is 'Link Rot'? <strong>When hyperlinks point to pages or resources that have been deleted or moved (resulting in 404 errors).</strong> When an external link opens in the same tab and navigates the user away from your portfolio, it breaks best practices. What attribute fixes this? <strong><code>target="_blank"</code></strong>.</p>
+              <p class="mt-1 mb-0">What is 'Link Rot'? <strong>When hyperlinks point to pages or resources that have been deleted or moved (resulting in 404 errors).</strong> When an external link opens in the same tab and navigates the user away from your portfolio, it breaks best practices. What attribute fixes this? <strong><code>target="_blank"</code></strong>. Tools to automate link checking: <strong>W3C Link Checker</strong> (free, browser-based at validator.w3.org/checklink), <strong>Screaming Frog SEO Spider</strong> (desktop app, crawls the whole site), or browser extensions like "Check My Links." Run these before every major deployment.</p>
             </li>
             <li class="mb-3">
               <strong class="text-primary fs-6">3. The Accessibility &amp; Console Audits</strong>
@@ -389,9 +446,34 @@
             </li>
             <li class="mb-0">
               <strong class="text-primary fs-6">4. Google Lighthouse</strong>
-              <p class="mt-1 mb-0">What is Google Lighthouse? <strong>A free, professional auditing tool built into Chrome that grades your site's performance and accessibility.</strong> What does the 'Performance' score primarily measure? <strong>How fast the page loads and becomes interactive.</strong> What does the 'SEO' score measure? <strong>Search Engine Optimization; how well search engines can understand and rank your page.</strong> If your QA test reveals that your text is light gray on a white background, which Lighthouse score will drop? <strong>Accessibility</strong> (due to low color contrast).</p>
+              <p class="mt-1 mb-0">What is Google Lighthouse? <strong>A free, professional auditing tool built into Chrome that grades your site's performance and accessibility.</strong> What does the 'Performance' score primarily measure? <strong>How fast the page loads and becomes interactive.</strong> What does the 'SEO' score measure? <strong>Search Engine Optimization; how well search engines can understand and rank your page.</strong> If your QA test reveals that your text is light gray on a white background, which Lighthouse score will drop? <strong>Accessibility</strong> (due to low color contrast). The four Lighthouse categories are: <strong>Performance</strong> (load speed, Core Web Vitals), <strong>Accessibility</strong> (color contrast, alt text, ARIA labels), <strong>Best Practices</strong> (HTTPS active, no deprecated APIs, secure headers), and <strong>SEO</strong> (meta tags, mobile-friendly, crawlable links). A score of 90+ in all four categories is the professional standard for a client deliverable.</p>
             </li>
         </ul>
+
+        <h5 class="fw-bold mt-5 text-primary">5. Cross-Browser Testing Checklist <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">NV 6.2.1</span></h5>
+        <p>Your site may work perfectly in Chrome but break in Safari or Firefox due to CSS compatibility differences. Test in at least these four browsers before launch:</p>
+        <div class="row g-3 mb-4 text-start">
+          <div class="col-md-6">
+            <ul class="small mb-0 bg-light p-3 rounded border shadow-sm">
+              <li class="mb-2"><strong>Chrome</strong> — your primary dev browser; always test here first.</li>
+              <li class="mb-2"><strong>Firefox</strong> — handles CSS flexbox/grid slightly differently; test form layouts.</li>
+              <li class="mb-2"><strong>Safari</strong> — most critical: Safari on iOS/macOS has its own rendering engine (WebKit) and notoriously lags behind on new CSS features. Test on a real iPhone or Mac.</li>
+              <li class="mb-0"><strong>Edge</strong> — used by a significant portion of corporate/Windows users; important for B2B clients.</li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-info shadow-sm h-100">
+              <div class="card-header bg-info text-white fw-bold small">Testing Tools</div>
+              <div class="card-body small p-3">
+                <ul class="mb-0 ps-3">
+                  <li class="mb-2"><strong>BrowserStack</strong> (browserstack.com) — real device/browser testing in the cloud. Industry standard tool. Has a free tier.</li>
+                  <li class="mb-2"><strong>Chrome DevTools Device Emulation</strong> — toggle the device toolbar (F12 → phone icon) to simulate different screen sizes and mobile browsers.</li>
+                  <li class="mb-0"><strong>Can I Use</strong> (caniuse.com) — look up any CSS property or JS API to see which browsers support it before using it.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- LAB 3 & 4 CARDS -->
         <div class="row g-4 mt-4 text-start">
@@ -428,6 +510,59 @@
             <img src="/images/the-final-boss-going-live/figure-02.png" alt="Google Lighthouse Green Scores." class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/400x300/1e293b/10b981?text=Lighthouse+Report'">
             <figcaption class="p-2 small text-muted text-center"><strong>Figure 16.2:</strong> Aim for green in Google Lighthouse.</figcaption>
           </figure>
+      </div>
+    </div>
+
+    <!-- SECTION 5b: PRE-LAUNCH SECURITY CHECKLIST -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Pre-Launch Security Checklist <span class="badge bg-danger ms-1" style="font-size:0.7rem;">WRS 1.1.1</span> <span class="badge bg-danger ms-1" style="font-size:0.7rem;">WRS 1.1.2</span></h2>
+        <p>Before clicking the deploy button, run through this checklist. A professional agency never ships a site without completing every item.</p>
+        <div class="card border-danger shadow-sm">
+          <div class="card-header bg-danger text-white fw-bold">Pre-Launch Security &amp; Quality Checklist</div>
+          <ul class="list-group list-group-flush small">
+            <li class="list-group-item d-flex align-items-start gap-2">
+              <input type="checkbox" class="form-check-input mt-1 flex-shrink-0">
+              <span><strong>No sensitive <code>console.log()</code> statements</strong> — remove any logs that print user data, tokens, or server responses. Open the browser console and confirm it is clean.</span>
+            </li>
+            <li class="list-group-item d-flex align-items-start gap-2">
+              <input type="checkbox" class="form-check-input mt-1 flex-shrink-0">
+              <span><strong>No API keys in client-side code</strong> — search your JS files for any hardcoded secrets. Keys must be in server-side environment variables only.</span>
+            </li>
+            <li class="list-group-item d-flex align-items-start gap-2">
+              <input type="checkbox" class="form-check-input mt-1 flex-shrink-0">
+              <span><strong>All images have descriptive <code>alt</code> text</strong> — required for accessibility (WCAG) and Lighthouse Accessibility score.</span>
+            </li>
+            <li class="list-group-item d-flex align-items-start gap-2">
+              <input type="checkbox" class="form-check-input mt-1 flex-shrink-0">
+              <span><strong>All forms have validation</strong> — both client-side (HTML5 <code>required</code> attribute + JS) and server-side. Test with empty inputs, invalid emails, and extreme values.</span>
+            </li>
+            <li class="list-group-item d-flex align-items-start gap-2">
+              <input type="checkbox" class="form-check-input mt-1 flex-shrink-0">
+              <span><strong>HTTPS is active</strong> — the padlock icon must appear in the browser address bar. Netlify enables SSL automatically; verify it is active before sharing the URL.</span>
+            </li>
+            <li class="list-group-item d-flex align-items-start gap-2">
+              <input type="checkbox" class="form-check-input mt-1 flex-shrink-0">
+              <span><strong>A custom 404 page exists</strong> — configure your host to display a branded "Page Not Found" page instead of a generic server error. On Netlify, create a <code>404.html</code> file at the root.</span>
+            </li>
+            <li class="list-group-item d-flex align-items-start gap-2">
+              <input type="checkbox" class="form-check-input mt-1 flex-shrink-0">
+              <span><strong>All assets licensed for commercial use</strong> — verify that every image, font, and icon you used has a license that permits the client's commercial website. Document the licenses.</span>
+            </li>
+            <li class="list-group-item d-flex align-items-start gap-2 border-0">
+              <input type="checkbox" class="form-check-input mt-1 flex-shrink-0">
+              <span><strong>Google Lighthouse audit run</strong> — target 90+ in all four categories on the live URL (not localhost).</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0">
+        <div class="card roadmap-card border-warning shadow-sm text-start">
+          <div class="card-header bg-warning text-dark fw-bold">Pro Tip:</div>
+          <div class="card-body small">
+            <p class="mb-0">Save this checklist as a GitHub issue template in every client repository. Before every deploy, open a new issue, run through the checklist, and close it when all items are checked. This creates a documented audit trail — essential if a client ever disputes the quality of the delivered site.</p>
+          </div>
+        </div>
       </div>
     </div>
 
