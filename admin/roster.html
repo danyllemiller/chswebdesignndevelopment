@@ -74,6 +74,9 @@
                   <option value="student">Student</option>
                   <option value="teacher">Teacher</option>
                 </select>
+                <select id="yearFilter" class="form-select form-select-sm w-auto ms-2">
+                  <option value="">Active (Current)</option>
+                </select>
                 <button id="refreshRosterBtn" class="btn btn-sm btn-outline-primary ms-2">🔄 Refresh</button>
               </div>
             </div>
@@ -165,9 +168,17 @@
             </div>
 
             <!-- Existing Sections Table -->
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="fw-semibold small text-muted">Existing Sections</span>
-              <button id="refreshSectionCatalog" class="btn btn-sm btn-outline-secondary">🔄 Refresh</button>
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+              <div class="d-flex gap-2 align-items-center">
+                <span class="fw-semibold small text-muted">Existing Sections — Year:</span>
+                <select id="sectionYearFilter" class="form-select form-select-sm w-auto">
+                  <option value="">Active (Current)</option>
+                </select>
+              </div>
+              <div class="d-flex gap-2 align-items-center">
+                <button id="archiveYearBtn" class="btn btn-sm btn-warning fw-bold">📦 Archive Selected Year</button>
+                <button id="refreshSectionCatalog" class="btn btn-sm btn-outline-secondary">🔄 Refresh</button>
+              </div>
             </div>
             <div class="table-responsive">
               <table class="table table-bordered table-sm table-hover">
@@ -176,11 +187,12 @@
                     <th>Period</th>
                     <th>Course ID</th>
                     <th>Course Name</th>
+                    <th>Year</th>
                     <th class="text-center">Delete</th>
                   </tr>
                 </thead>
                 <tbody id="sectionCatalogBody">
-                  <tr><td colspan="4" class="text-center text-muted py-3">Loading…</td></tr>
+                  <tr><td colspan="5" class="text-center text-muted py-3">Loading…</td></tr>
                 </tbody>
               </table>
             </div>
@@ -261,6 +273,6 @@
 
 <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/admin/roster.js?v=2"></script>
+  <script src="/js/admin/roster.js?v=3"></script>
 </body>
 </html>

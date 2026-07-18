@@ -2,6 +2,21 @@ const statusDiv = document.getElementById('statusMessage');
 let availableSections = [];
 const selectedStudents = new Set();
 
+async function populateYearDropdowns() {
+    try {
+        const res = await fetch('/api/admin/school-years');
+        if (!res.ok) return;
+        const years = await res.json();
+        const options = years.map(y => `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`).join('');
+        const rosterYearFilter = document.getElementById('yearFilter');
+        const sectionYearFilter = document.getElementById('sectionYearFilter');
+        if (rosterYearFilter) rosterYearFilter.innerHTML = '<option value="">Active (Current)</option>' + options;
+        if (sectionYearFilter) sectionYearFilter.innerHTML = '<option value="">Active (Current)</option>' + options;
+    } catch (err) {
+        console.error('Failed to load school years', err);
+    }
+}
+
 function escapeHtml(value) {
     return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
@@ -22,15 +37,16 @@ function renderSectionCatalog(sections) {
     if (!body) return;
 
     if (!Array.isArray(sections) || sections.length === 0) {
-        body.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">No sections yet. Add one above.</td></tr>';
+        body.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">No sections yet. Add one above.</td></tr>';
         return;
     }
 
     body.innerHTML = sections.map(s => `
-        <tr>
+        <tr${s.archived ? ' class="table-secondary text-muted"' : ''}>
             <td class="fw-bold">${escapeHtml(s.section_id)}</td>
             <td class="text-muted small">${escapeHtml(s.course_id)}</td>
             <td>${escapeHtml(s.course_name)}</td>
+            <td class="small text-muted">${escapeHtml(s.school_year || '')}</td>
             <td class="text-center">
                 <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteSection('${escapeHtml(s.section_id)}','${escapeHtml(s.course_id)}')">🗑️</button>
             </td>
@@ -136,8 +152,10 @@ function populateSectionSelectors(sections) {
 }
 
 async function fetchSections() {
+    const year = document.getElementById('sectionYearFilter')?.value || '';
+    const url = year ? `/api/admin/sections?year=${encodeURIComponent(year)}` : '/api/admin/sections';
     try {
-        const response = await fetch('/api/admin/sections');
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to load section catalog');
         const data = await response.json();
         populateSectionSelectors(data);
@@ -146,6 +164,30 @@ async function fetchSections() {
         console.error(err);
         renderSectionCatalog([]);
         showStatus('Unable to load section catalog. Using fallback options.', 'warning');
+    }
+}
+
+async function archiveYear() {
+    const year = document.getElementById('sectionYearFilter')?.value || '';
+    if (!year) {
+        showStatus('Select a specific year to archive (not "Active").', 'warning');
+        return;
+    }
+    if (!confirm(`Archive ${year}? This will hide all sections and students from that year. Grade data is preserved.`)) return;
+    try {
+        const res = await fetch('/api/admin/archive-year', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ school_year: year })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        showStatus(`${year} archived — ${data.sections} section(s), ${data.students} student(s).`, 'success');
+        await populateYearDropdowns();
+        fetchSections();
+        fetchRoster();
+    } catch (err) {
+        showStatus(err.message, 'danger');
     }
 }
 
@@ -245,7 +287,9 @@ window.deleteSelectedStudents = async function() {
 async function fetchRoster() {
     const tbody = document.getElementById('rosterTableBody');
     try {
-        const response = await fetch('/api/admin/roster');
+        const year = document.getElementById('yearFilter')?.value || '';
+        const url = year ? `/api/admin/roster?year=${encodeURIComponent(year)}` : '/api/admin/roster';
+        const response = await fetch(url);
         const data = await response.json();
 
         // gather filters
@@ -494,6 +538,7 @@ document.getElementById('deselectAllBtn')?.addEventListener('click', deselectAll
 document.getElementById('deleteSelectedBtn')?.addEventListener('click', deleteSelectedStudents);
 document.getElementById('addSectionBtn')?.addEventListener('click', addSection);
 document.getElementById('refreshSectionCatalog')?.addEventListener('click', fetchSections);
+document.getElementById('archiveYearBtn')?.addEventListener('click', archiveYear);
 
 // Also handle the header "Select All" checkbox
 document.getElementById('selectAllCheckbox')?.addEventListener('change', (e) => {
@@ -505,6 +550,7 @@ document.getElementById('selectAllCheckbox')?.addEventListener('change', (e) => 
 });
 
 window.onload = async () => {
+    await populateYearDropdowns();
     fetchRoster();
     fetchSections();
 };
@@ -513,5 +559,7 @@ window.onload = async () => {
 document.getElementById('periodFilter')?.addEventListener('change', fetchRoster);
 document.getElementById('courseFilter')?.addEventListener('change', fetchRoster);
 document.getElementById('roleFilter')?.addEventListener('change', fetchRoster);
+document.getElementById('yearFilter')?.addEventListener('change', fetchRoster);
 document.getElementById('rosterSearch')?.addEventListener('input', fetchRoster);
+document.getElementById('sectionYearFilter')?.addEventListener('change', fetchSections);
 

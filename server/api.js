@@ -4,6 +4,12 @@ const router = express.Router();
 const { getDbConnection } = require('./db');
 const bcrypt = require('bcrypt');
 
+function getCurrentSchoolYear() {
+    const now = new Date();
+    const y = now.getFullYear();
+    return (now.getMonth() + 1) >= 7 ? `${y}-${y + 1}` : `${y - 1}-${y}`;
+}
+
 function normalizeCourseCodeLegacy(sectionId = '') {
     const s = String(sectionId).toUpperCase();
     if (s.startsWith('WD1')) return '05254G1S';
@@ -207,9 +213,19 @@ router.post('/student/submit-turnin', async (req, res) => {
 
 // --- ADMIN ROSTER ---
 router.get('/admin/roster', async (req, res) => {
+    const year = req.query.year || null;
     try {
         const connection = await getDbConnection();
-        const [students] = await connection.execute('SELECT * FROM students ORDER BY last_name ASC, first_name ASC');
+        let sql = 'SELECT * FROM students';
+        const params = [];
+        if (year) {
+            sql += ' WHERE school_year = ?';
+            params.push(year);
+        } else {
+            sql += ' WHERE archived = 0';
+        }
+        sql += ' ORDER BY last_name ASC, first_name ASC';
+        const [students] = await connection.execute(sql, params);
         await connection.end();
         res.json(students);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch roster.' }); }
@@ -217,19 +233,61 @@ router.get('/admin/roster', async (req, res) => {
 
 // --- ADMIN CLASS SECTIONS LIST ---
 router.get('/admin/sections', async (req, res) => {
+    const year = req.query.year || null;
     try {
         const connection = await getDbConnection();
-        const [sections] = await connection.execute(
-            `SELECT cs.section_id, cs.course_id, COALESCE(c.course_name, '') AS course_name, COALESCE(c.department, '') AS department
-             FROM class_sections cs
-             LEFT JOIN courses c ON cs.course_id = c.course_id
-             ORDER BY c.department ASC, c.course_name ASC, cs.section_id ASC`
-        );
+        let sql = `SELECT cs.section_id, cs.course_id, cs.school_year, cs.archived,
+                          COALESCE(c.course_name, '') AS course_name
+                   FROM class_sections cs
+                   LEFT JOIN courses c ON cs.course_id = c.course_id`;
+        const params = [];
+        if (year) {
+            sql += ' WHERE cs.school_year = ?';
+            params.push(year);
+        } else {
+            sql += ' WHERE cs.archived = 0';
+        }
+        sql += ' ORDER BY cs.section_id ASC, c.course_name ASC';
+        const [sections] = await connection.execute(sql, params);
         await connection.end();
         res.json(sections);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to fetch class section catalog.' });
+    }
+});
+
+// --- ADMIN SCHOOL YEARS LIST ---
+router.get('/admin/school-years', async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.execute(
+            'SELECT DISTINCT school_year FROM class_sections ORDER BY school_year DESC'
+        );
+        await connection.end();
+        res.json(rows.map(r => r.school_year).filter(Boolean));
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch school years' });
+    }
+});
+
+// --- ADMIN ARCHIVE YEAR ---
+router.post('/admin/archive-year', async (req, res) => {
+    const { school_year } = req.body || {};
+    if (!school_year) return res.status(400).json({ error: 'school_year is required' });
+    try {
+        const connection = await getDbConnection();
+        const [s] = await connection.execute(
+            'UPDATE class_sections SET archived = 1 WHERE school_year = ?', [school_year]
+        );
+        const [u] = await connection.execute(
+            'UPDATE students SET archived = 1 WHERE school_year = ?', [school_year]
+        );
+        await connection.end();
+        res.json({ success: true, school_year, sections: s.affectedRows, students: u.affectedRows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to archive year' });
     }
 });
 
@@ -241,22 +299,21 @@ router.post('/admin/sections', async (req, res) => {
     const sid   = String(section_id).trim();
     const cid   = String(course_id).trim();
     const cname = course_name ? String(course_name).trim() : cid;
+    const year  = getCurrentSchoolYear();
 
     let connection;
     try {
         connection = await getDbConnection();
-        // Upsert course row with the name the teacher provided
         await connection.execute(
             'INSERT INTO courses (course_id, course_name, department) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE course_name = VALUES(course_name)',
             [cid, cname, '']
         );
-        // Composite PK (section_id, course_id) allows same period with multiple courses
         await connection.execute(
-            'INSERT IGNORE INTO class_sections (section_id, course_id) VALUES (?, ?)',
-            [sid, cid]
+            'INSERT IGNORE INTO class_sections (section_id, course_id, school_year, archived) VALUES (?, ?, ?, 0)',
+            [sid, cid, year]
         );
         await connection.end();
-        res.json({ success: true, section_id: sid });
+        res.json({ success: true, section_id: sid, school_year: year });
     } catch (err) {
         if (connection) try { await connection.end(); } catch(_) {}
         console.error(err);
@@ -338,13 +395,16 @@ router.post('/admin/upload-roster', async (req, res) => {
 
         await connection.beginTransaction();
 
-        const stmt = `INSERT INTO students (student_id, first_name, last_name, section_id, role)
-                      VALUES (?, ?, ?, ?, ?)
+        const year = getCurrentSchoolYear();
+        const stmt = `INSERT INTO students (student_id, first_name, last_name, section_id, role, school_year, archived)
+                      VALUES (?, ?, ?, ?, ?, ?, 0)
                       ON DUPLICATE KEY UPDATE
                         first_name = VALUES(first_name),
                         last_name = VALUES(last_name),
                         section_id = VALUES(section_id),
-                        role = VALUES(role)`;
+                        role = VALUES(role),
+                        school_year = VALUES(school_year),
+                        archived = 0`;
 
         for (const student of cleaned) {
             const role = student.section_id === 'Teacher' ? 'teacher' : 'student';
@@ -353,7 +413,8 @@ router.post('/admin/upload-roster', async (req, res) => {
                 student.first_name,
                 student.last_name,
                 student.section_id,
-                role
+                role,
+                year
             ]);
         }
 
