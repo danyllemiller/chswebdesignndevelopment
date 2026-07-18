@@ -39,11 +39,11 @@ function renderSectionCatalog(sections) {
 }
 
 async function addSection() {
-    const sid = document.getElementById('new-section-id')?.value.trim();
-    const cid = document.getElementById('new-section-course-id')?.value.trim();
+    const sid   = document.getElementById('new-section-id')?.value.trim();
+    const cid   = document.getElementById('new-section-course-id')?.value.trim();
     const cname = document.getElementById('new-section-course-name')?.value.trim();
-    if (!sid) { showStatus('Select a period.', 'warning'); return; }
-    if (!cid) { showStatus('Enter a Course ID.', 'warning'); return; }
+    if (!sid)   { showStatus('Section ID is required.', 'warning'); return; }
+    if (!cid)   { showStatus('Enter a Course ID.', 'warning'); return; }
     if (!cname) { showStatus('Enter a Course Name.', 'warning'); return; }
 
     try {
@@ -56,6 +56,7 @@ async function addSection() {
         if (!r.ok) throw new Error(data.error || 'Failed');
         document.getElementById('new-section-course-id').value = '';
         document.getElementById('new-section-course-name').value = '';
+        document.getElementById('new-section-id').value = '';
         showStatus(`Section "${sid}" added.`, 'success');
         fetchSections();
     } catch (err) {

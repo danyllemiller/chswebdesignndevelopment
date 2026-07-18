@@ -136,9 +136,9 @@
               <div class="card-header bg-danger text-white fw-bold small">Add New Section</div>
               <div class="card-body">
                 <div class="row g-2 align-items-end">
-                  <div class="col-md-3">
-                    <label class="form-label small fw-semibold mb-1">Period (Section ID)</label>
-                    <select id="new-section-id" class="form-select">
+                  <div class="col-md-2">
+                    <label class="form-label small fw-semibold mb-1">Period</label>
+                    <select id="new-section-period" class="form-select" oninput="suggestSectionId()">
                       <option value="A1">A1</option>
                       <option value="A3">A3</option>
                       <option value="A5">A5</option>
@@ -151,18 +151,36 @@
                   </div>
                   <div class="col-md-3">
                     <label class="form-label small fw-semibold mb-1">Course ID</label>
-                    <input type="text" id="new-section-course-id" class="form-control" placeholder="e.g. 05254GIF-I01">
+                    <input type="text" id="new-section-course-id" class="form-control" placeholder="e.g. 05254G2S">
                   </div>
                   <div class="col-md-3">
                     <label class="form-label small fw-semibold mb-1">Course Name</label>
-                    <input type="text" id="new-section-course-name" class="form-control" placeholder="e.g. Web Design 1">
+                    <input type="text" id="new-section-course-name" class="form-control" placeholder="e.g. Web Design II" oninput="suggestSectionId()">
                   </div>
-                  <div class="col-md-3">
+                  <div class="col-md-2">
+                    <label class="form-label small fw-semibold mb-1">Section ID</label>
+                    <input type="text" id="new-section-id" class="form-control" placeholder="e.g. WD2-A3">
+                  </div>
+                  <div class="col-md-2">
                     <button id="addSectionBtn" class="btn btn-danger w-100 fw-bold">Add Section</button>
                   </div>
                 </div>
+                <div class="mt-1"><small class="text-muted">Section ID is auto-suggested — edit it if two classes share the same period.</small></div>
               </div>
             </div>
+            <script>
+            function suggestSectionId() {
+                const period = document.getElementById('new-section-period').value;
+                const name   = document.getElementById('new-section-course-name').value.toUpperCase();
+                let prefix = '';
+                if (name.includes('COMPUTER') || name.includes('COMP SCI')) prefix = 'CS';
+                else if (name.includes('WEB DESIGN AS') || name.includes('APPLIED')) prefix = 'AS';
+                else if (name.includes('WEB DESIGN II') || name.includes('WEB DESIGN 2')) prefix = 'WD2';
+                else if (name.includes('WEB DESIGN')) prefix = 'WD1';
+                document.getElementById('new-section-id').value = prefix ? prefix + '-' + period : period;
+            }
+            suggestSectionId();
+            </script>
 
             <!-- Existing Sections Table -->
             <div class="d-flex justify-content-between align-items-center mb-2">
