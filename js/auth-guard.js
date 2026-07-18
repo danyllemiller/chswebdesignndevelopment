@@ -1,5 +1,3 @@
-// MariaDB Transition Version
-
 // 1. THE SHIELD (Immediate)
 const hideStyle = document.createElement('style');
 hideStyle.id = 'auth-shield';

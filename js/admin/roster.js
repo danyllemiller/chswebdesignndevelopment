@@ -1,5 +1,3 @@
-/* /test-site/js/admin/roster.js */
-
 const statusDiv = document.getElementById('statusMessage');
 let availableSections = [];
 const selectedStudents = new Set();

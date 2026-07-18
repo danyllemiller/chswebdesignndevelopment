@@ -1,7 +1,6 @@
 // js/admin/admin-notebooks.js
 /**
  * Teacher Admin Digital Notebooks Controller
- * MariaDB Transition Version
  */
 
 let roster = [];

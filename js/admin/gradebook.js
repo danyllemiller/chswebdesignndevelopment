@@ -1,6 +1,3 @@
-// test-site/js/admin/gradebook.js
-// test-site/js/admin/gradebook.js
-
 /**
  * CHS Web Design - Master Teacher Gradebook Controller (MariaDB Edition)
  * This script powers the administrative gradebook interface, handling real-time MariaDB data synchronization 

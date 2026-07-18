@@ -1,7 +1,5 @@
-/* test-site/js/login-logic.js */
-
 /**
- * Student Portal Logic (MariaDB Transition)
+ * Student Portal Logic
  * Handles: Login, Registration, Conditional Clock-In, and Self-Service Password Resets
  */
 
@@ -59,7 +57,7 @@ function handleNavigationFlow(isCS = false) {
 }
 
 /**
- * Posts clock-in data to the local MariaDB server.
+ * Posts clock-in data to the server.
  */
 async function recordClockIn(type, answer = "N/A") {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -173,9 +171,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     // REGULAR SHIFT: Transition to Clock-In Question
                     document.getElementById('tab-login').parentElement.classList.add('d-none');
                     document.getElementById('tab-register').parentElement.classList.add('d-none');
-                    const testAlert = document.getElementById('test-mode-alert');
-                    if (testAlert) testAlert.classList.add('d-none');
-
                     const clockInTab = document.getElementById('tab-clockin');
                     clockInTab.parentElement.classList.remove('d-none');
                     clockInTab.click();
