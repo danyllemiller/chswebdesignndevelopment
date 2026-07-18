@@ -338,28 +338,35 @@ async function fetchRoster() {
         let passwordResetPendingCount = 0;
 
         data.forEach(s => {
-            // compute course name from availableSections
-            const sectionInfo = availableSections.find(sec => sec.section_id === s.section_id) || {};
-            const courseName = sectionInfo.course_name || '';
+            // Use server-resolved fields when available, fall back to local lookup
+            const courseId   = s.course_id || '';
+            const period     = s.display_period || s.section_id || '';
+            const courseName = s.display_course_name || (() => {
+                const sec = availableSections.find(sec => sec.section_id === s.section_id) || {};
+                return sec.course_name || '';
+            })();
 
             // filtering
-            if (periodFilterVal && periodFilterVal !== 'All' && s.section_id !== periodFilterVal) return;
-            if (courseFilterVal && courseFilterVal !== '' && (courseName !== courseFilterVal && (sectionInfo.course_id || '') !== courseFilterVal)) return;
+            if (periodFilterVal && periodFilterVal !== 'All' && period !== periodFilterVal) return;
+            if (courseFilterVal && courseFilterVal !== '') {
+                if (courseName !== courseFilterVal && courseId !== courseFilterVal) return;
+            }
             if (roleFilterVal && roleFilterVal !== 'All' && String(s.role || '').toLowerCase() !== roleFilterVal) return;
             if (searchVal) {
-                const hay = `${s.first_name || ''} ${s.last_name || ''} ${s.username || ''} ${s.student_id || ''}`.toLowerCase();
+                const hay = `${s.first_name || ''} ${s.last_name || ''} ${s.username || ''} ${s.student_id || ''} ${courseId}`.toLowerCase();
                 if (!hay.includes(searchVal)) return;
             }
             const row = document.createElement('tr');
             const resetPending = Number(s.must_change_password || 0) === 1;
             if (resetPending) passwordResetPendingCount += 1;
-            
+
             const isChecked = selectedStudents.has(s.student_id) ? 'checked' : '';
 
             row.innerHTML = `
                 <td class="text-center"><input type="checkbox" class="student-checkbox" data-student-id="${escapeHtml(s.student_id || '')}" ${isChecked} onchange="toggleStudentCheckbox('${escapeHtml(s.student_id || '')}')"></td>
-                <td>${escapeHtml(s.section_id || '')}</td>
-                <td>${escapeHtml(courseName || '')}</td>
+                <td class="small text-muted">${escapeHtml(courseId)}</td>
+                <td>${escapeHtml(period)}</td>
+                <td>${escapeHtml(courseName)}</td>
                 <td>${escapeHtml(s.last_name || '')}</td>
                 <td>${escapeHtml(s.first_name || '')}</td>
                 <td>
@@ -379,7 +386,7 @@ async function fetchRoster() {
         }
         updateSelectedCount();
     } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Failed to load roster.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-danger">Failed to load roster.</td></tr>';
     }
 }
 
@@ -421,23 +428,24 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
             if (cols.length >= 4) {
                 students.push({
                     first_name: cols[0].trim(),
-                    last_name: cols[1].trim(),
+                    last_name:  cols[1].trim(),
                     student_id: cols[2].trim(),
-                    section_id: cols[3].trim()
+                    course_id:  cols[3].trim()
                 });
             }
         });
 
-        // Client-side validation: ensure all section_id values exist in the catalog
+        // Client-side validation: ensure all course_id values exist in the catalog
+        const validCourseIds = new Set(availableSections.map(s => (s.course_id || '').trim()).filter(Boolean));
         const invalidRows = students.filter(s => {
-            const sid = (s.section_id || '').trim();
-            if (!sid) return true; // treat empty as invalid
-            return !availableSections.find(sec => sec.section_id === sid);
+            const cid = (s.course_id || '').trim();
+            if (!cid) return true;
+            return !validCourseIds.has(cid);
         });
 
         if (invalidRows.length > 0) {
-            const invalidList = Array.from(new Set(invalidRows.map(r => r.section_id)));
-            showStatus(`Invalid section IDs: ${invalidList.join(', ')} — upload canceled.`, 'danger');
+            const invalidList = Array.from(new Set(invalidRows.map(r => r.course_id)));
+            showStatus(`Unknown Course IDs: ${invalidList.join(', ')} — add these sections first, then re-upload.`, 'danger');
             return;
         }
 

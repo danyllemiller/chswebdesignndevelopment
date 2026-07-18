@@ -99,8 +99,9 @@
 <thead class="bg-primary text-white sticky-top">
                   <tr>
                     <th class="text-center"><input type="checkbox" id="selectAllCheckbox" title="Select All" onchange="document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = this.checked)"></th>
+                    <th>Course ID</th>
                     <th>Period</th>
-                    <th>Course</th>
+                    <th>Course Name</th>
                     <th>Last Name</th>
                     <th>First Name</th>
                     <th>Username</th>
@@ -109,7 +110,7 @@
                   </tr>
                 </thead>
                 <tbody id="rosterTableBody">
-                  <tr><td colspan="7" class="text-center py-4"><span class="spinner-border spinner-border-sm text-primary"></span> Loading...</td></tr>
+                  <tr><td colspan="9" class="text-center py-4"><span class="spinner-border spinner-border-sm text-primary"></span> Loading...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -202,7 +203,7 @@
           <!-- BULK CSV TAB -->
           <div class="tab-pane fade" id="pills-bulk">
             <div class="alert alert-warning small">
-                Upload CSV: <code>First Name, Last Name, ID, Period</code>.
+                Upload CSV: <code>First Name, Last Name, Student ID, Course ID</code> — use the Course ID from the school's system (e.g. <code>05254GIF-101</code>). The period is looked up automatically.
             </div>
             <input class="form-control mb-3" type="file" id="csvFileInput" accept=".csv">
             <button id="uploadBtn" class="btn btn-danger w-100 fw-bold">Process CSV Upload</button>
@@ -309,6 +310,6 @@
 
 <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/admin/roster.js?v=6"></script>
+  <script src="/js/admin/roster.js?v=7"></script>
 </body>
 </html>

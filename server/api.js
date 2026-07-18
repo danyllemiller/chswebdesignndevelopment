@@ -218,23 +218,29 @@ router.get('/admin/roster', async (req, res) => {
         const connection = await getDbConnection();
         let sql, params = [];
 
+        // Join class_sections twice: once via course_id (new), once via section_id (legacy fallback)
+        const baseSelect = `
+            SELECT DISTINCT s.*,
+                COALESCE(csc.section_id, csl.section_id, s.section_id)  AS display_period,
+                COALESCE(crc.course_name, crl.course_name, '')           AS display_course_name,
+                COALESCE(csc.school_year, csl.school_year, s.school_year) AS effective_year
+            FROM students s
+            LEFT JOIN class_sections csc ON s.course_id = csc.course_id
+            LEFT JOIN courses        crc ON s.course_id = crc.course_id
+            LEFT JOIN class_sections csl ON s.section_id = csl.section_id AND s.course_id IS NULL
+            LEFT JOIN courses        crl ON csl.course_id = crl.course_id AND s.course_id IS NULL`;
+
         if (year) {
-            // Specific year: use section's school_year if section exists, otherwise student's own
-            sql = `SELECT DISTINCT s.*
-                   FROM students s
-                   LEFT JOIN class_sections cs ON s.section_id = cs.section_id
-                   WHERE COALESCE(cs.school_year, s.school_year) = ?
+            sql = `${baseSelect}
+                   WHERE COALESCE(csc.school_year, csl.school_year, s.school_year) = ?
                    ORDER BY s.last_name ASC, s.first_name ASC`;
             params = [year];
         } else {
-            // Active (Current): students in non-archived sections,
-            // OR students with no matching section who aren't explicitly archived
-            sql = `SELECT DISTINCT s.*
-                   FROM students s
-                   LEFT JOIN class_sections cs ON s.section_id = cs.section_id
+            sql = `${baseSelect}
                    WHERE (
-                       cs.archived = 0
-                       OR (cs.section_id IS NULL AND (s.archived IS NULL OR s.archived = 0))
+                       csc.archived = 0
+                       OR csl.archived = 0
+                       OR (csc.section_id IS NULL AND csl.section_id IS NULL AND (s.archived IS NULL OR s.archived = 0))
                    )
                    ORDER BY s.last_name ASC, s.first_name ASC`;
         }
@@ -453,6 +459,8 @@ router.post('/admin/upload-roster', async (req, res) => {
             student_id: String(student.student_id || student.studentId || '').trim(),
             first_name: String(student.first_name || student.firstName || '').trim() || null,
             last_name: String(student.last_name || student.lastName || '').trim() || null,
+            // Accept course_id (new) or legacy section_id/period
+            course_id: String(student.course_id || student.courseId || '').trim() || null,
             section_id: String(student.section_id || student.sectionId || student.section || student.period || '').trim() || null
         }))
         .filter((student) => student.student_id);
@@ -465,40 +473,57 @@ router.post('/admin/upload-roster', async (req, res) => {
     try {
         connection = await getDbConnection();
 
-        // Validate provided section_id values against catalog
-        const [sectionsRows] = await connection.execute('SELECT section_id FROM class_sections');
-        const validSections = new Set((sectionsRows || []).map(r => String(r.section_id).trim()));
-        const invalidSections = Array.from(new Set(cleaned
-            .map(s => s.section_id || '')
-            .map(s => String(s).trim())
-            .filter(s => s.length > 0 && !validSections.has(s))
-        ));
+        // Build course_id → section_id lookup map from catalog
+        const [catalogRows] = await connection.execute('SELECT section_id, course_id FROM class_sections');
+        const courseToSection = {};
+        const validCourseIds = new Set();
+        const validSectionIds = new Set();
+        for (const r of catalogRows) {
+            courseToSection[String(r.course_id).trim()] = String(r.section_id).trim();
+            validCourseIds.add(String(r.course_id).trim());
+            validSectionIds.add(String(r.section_id).trim());
+        }
 
-        if (invalidSections.length > 0) {
+        // Resolve each student: prefer course_id lookup, fall back to section_id
+        const resolved = [];
+        const invalid = [];
+        for (const s of cleaned) {
+            if (s.course_id && validCourseIds.has(s.course_id)) {
+                resolved.push({ ...s, section_id: courseToSection[s.course_id] });
+            } else if (s.section_id && validSectionIds.has(s.section_id)) {
+                resolved.push({ ...s, course_id: s.course_id || null });
+            } else {
+                invalid.push(s.course_id || s.section_id || '(empty)');
+            }
+        }
+
+        if (invalid.length > 0) {
             await connection.end();
-            return res.status(400).json({ error: 'Invalid section_id values in payload', invalid: invalidSections });
+            return res.status(400).json({ error: 'Unknown course/section IDs in payload', invalid: Array.from(new Set(invalid)) });
         }
 
         await connection.beginTransaction();
 
         const year = getCurrentSchoolYear();
-        const stmt = `INSERT INTO students (student_id, first_name, last_name, section_id, role, school_year, archived)
-                      VALUES (?, ?, ?, ?, ?, ?, 0)
+        const stmt = `INSERT INTO students (student_id, first_name, last_name, section_id, course_id, role, school_year, archived)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, 0)
                       ON DUPLICATE KEY UPDATE
                         first_name = VALUES(first_name),
                         last_name = VALUES(last_name),
                         section_id = VALUES(section_id),
+                        course_id  = VALUES(course_id),
                         role = VALUES(role),
                         school_year = VALUES(school_year),
                         archived = 0`;
 
-        for (const student of cleaned) {
+        for (const student of resolved) {
             const role = student.section_id === 'Teacher' ? 'teacher' : 'student';
             await connection.execute(stmt, [
                 student.student_id,
                 student.first_name,
                 student.last_name,
                 student.section_id,
+                student.course_id,
                 role,
                 year
             ]);
