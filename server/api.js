@@ -236,7 +236,7 @@ router.get('/admin/sections', async (req, res) => {
     const year = req.query.year || null;
     try {
         const connection = await getDbConnection();
-        let sql = `SELECT cs.section_id, cs.course_id, cs.school_year, cs.archived,
+        let sql = `SELECT cs.section_id, cs.course_id, cs.school_year, cs.archived, cs.permanent,
                           COALESCE(c.course_name, '') AS course_name
                    FROM class_sections cs
                    LEFT JOIN courses c ON cs.course_id = c.course_id`;
@@ -278,10 +278,10 @@ router.post('/admin/archive-year', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [s] = await connection.execute(
-            'UPDATE class_sections SET archived = 1 WHERE school_year = ?', [school_year]
+            'UPDATE class_sections SET archived = 1 WHERE school_year = ? AND permanent = 0', [school_year]
         );
         const [u] = await connection.execute(
-            'UPDATE students SET archived = 1 WHERE school_year = ?', [school_year]
+            'UPDATE students SET archived = 1 WHERE school_year = ? AND section_id NOT IN (SELECT section_id FROM class_sections WHERE permanent = 1)', [school_year]
         );
         await connection.end();
         res.json({ success: true, school_year, sections: s.affectedRows, students: u.affectedRows });
@@ -331,23 +331,19 @@ router.put('/admin/sections/:section_id', async (req, res) => {
     let connection;
     try {
         connection = await getDbConnection();
-        const updates = [];
-        const vals = [];
-        if (course_name !== undefined) {
-            updates.push('course_id = course_id'); // courses table updated separately
+        const [pRows] = await connection.execute(
+            'SELECT permanent FROM class_sections WHERE section_id = ? AND course_id = ?', [sid, cid]
+        );
+        const isPermanent = pRows.length > 0 && pRows[0].permanent === 1;
+        if (isPermanent && school_year !== undefined) {
+            await connection.end();
+            return res.status(403).json({ error: 'School year cannot be changed for permanent sections.' });
         }
         if (school_year !== undefined) {
-            updates.push('school_year = ?');
-            vals.push(String(school_year).trim());
-        }
-        if (updates.length > 0) {
-            const filtered = updates.filter(u => u !== 'course_id = course_id');
-            if (filtered.length > 0) {
-                await connection.execute(
-                    `UPDATE class_sections SET ${filtered.join(', ')} WHERE section_id = ? AND course_id = ?`,
-                    [...vals, sid, cid]
-                );
-            }
+            await connection.execute(
+                'UPDATE class_sections SET school_year = ? WHERE section_id = ? AND course_id = ?',
+                [String(school_year).trim(), sid, cid]
+            );
         }
         if (course_name !== undefined) {
             await connection.execute(
@@ -373,7 +369,15 @@ router.delete('/admin/sections/:section_id', async (req, res) => {
     let connection;
     try {
         connection = await getDbConnection();
-        // Only block delete if students are enrolled AND no other course covers this period
+        const [permRows] = await connection.execute(
+            'SELECT permanent FROM class_sections WHERE section_id = ?' + (cid ? ' AND course_id = ?' : ''),
+            cid ? [sid, cid] : [sid]
+        );
+        if (permRows.some(r => r.permanent === 1)) {
+            await connection.end();
+            return res.status(403).json({ error: `"${sid}" is a permanent section and cannot be deleted.` });
+        }
+        // Only block delete if students are enrolled
         const [rows] = await connection.execute(
             'SELECT COUNT(*) AS cnt FROM students WHERE section_id = ?', [sid]
         );

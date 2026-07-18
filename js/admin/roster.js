@@ -41,18 +41,26 @@ function renderSectionCatalog(sections) {
         return;
     }
 
-    body.innerHTML = sections.map(s => `
-        <tr${s.archived ? ' class="table-secondary text-muted"' : ''}>
+    body.innerHTML = sections.map(s => {
+        const perm = s.permanent === 1 || s.permanent === true;
+        const yearCell = perm
+            ? '<span class="badge bg-secondary">🔒 Permanent</span>'
+            : escapeHtml(s.school_year || '');
+        const editBtn = perm
+            ? ''
+            : `<button class="btn btn-sm btn-outline-primary py-0 me-1" onclick="editSection('${escapeHtml(s.section_id)}','${escapeHtml(s.course_id)}','${escapeHtml(s.course_name)}','${escapeHtml(s.school_year||'')}')">✏️</button>`;
+        const delBtn = perm
+            ? '<button class="btn btn-sm btn-outline-secondary py-0" disabled title="Permanent — cannot delete">🔒</button>'
+            : `<button class="btn btn-sm btn-outline-danger py-0" onclick="deleteSection('${escapeHtml(s.section_id)}','${escapeHtml(s.course_id)}')">🗑️</button>`;
+        return `
+        <tr${s.archived ? ' class="table-secondary text-muted"' : (perm ? ' class="table-warning"' : '')}>
             <td class="fw-bold">${escapeHtml(s.section_id)}</td>
             <td class="text-muted small">${escapeHtml(s.course_id)}</td>
             <td>${escapeHtml(s.course_name)}</td>
-            <td class="small text-muted">${escapeHtml(s.school_year || '')}</td>
-            <td class="text-center" style="white-space:nowrap">
-                <button class="btn btn-sm btn-outline-primary py-0 me-1" onclick="editSection('${escapeHtml(s.section_id)}','${escapeHtml(s.course_id)}','${escapeHtml(s.course_name)}','${escapeHtml(s.school_year||'')}')">✏️</button>
-                <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteSection('${escapeHtml(s.section_id)}','${escapeHtml(s.course_id)}')">🗑️</button>
-            </td>
-        </tr>
-    `).join('');
+            <td class="small">${yearCell}</td>
+            <td class="text-center" style="white-space:nowrap">${editBtn}${delBtn}</td>
+        </tr>`;
+    }).join('');
 }
 
 async function addSection() {
