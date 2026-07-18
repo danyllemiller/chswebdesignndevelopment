@@ -342,10 +342,26 @@
                 <!-- ROW 6: PRIVACY LAWS -->
                 <div class="row mb-5 pb-4 border-bottom align-items-start">
                   <div class="col-lg-8 pe-lg-5">
-                    <h2 class="section-title mt-0">Privacy Laws: GDPR vs. Nevada</h2>
+                    <h2 class="section-title mt-0">Privacy Laws: A Global Landscape</h2>
                     <p>Governments have stepped in to protect users. First is the <strong><a href="https://gdpr-info.eu/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">GDPR (General Data Protection Regulation)</a></strong> from Europe. It uses an <strong>"OPT-IN"</strong> model. You cannot collect data unless the user gives specific consent. It also grants the <strong>"Right to be Forgotten,"</strong> where users can demand their data be deleted. Failure to comply can cost a company 4% of their global revenue.</p>
                     <p>Here in our state, we have the <strong><a href="https://www.leg.state.nv.us/nrs/NRS-603A.html#NRS603ASec300" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Nevada Consumer Privacy Act (SB220)</a></strong>. It uses an <strong>"OPT-OUT"</strong> model focused on the <strong>Sale of Data</strong>. It gives residents the right to tell a website, "STOP SELLING MY DATA" via a clear link. This represents the American philosophy of "Business First, with Consumer Protection," whereas the European model is "Privacy First."</p>
                     <p>As a developer, you must build for the strictest laws to ensure your site is legal globally. This is known as <strong>Privacy by Design</strong>.</p>
+
+                    <h5 class="fw-bold mt-4 text-primary">More U.S. State Laws: The American "Patchwork"</h5>
+                    <p>There is no single U.S. federal privacy law covering all industries. Instead, each state passes its own rules. <strong>California</strong> has the most comprehensive state privacy laws in the country:</p>
+                    <ul class="small ps-3 mb-3">
+                      <li class="mb-2"><strong>CCPA — California Consumer Privacy Act (2020):</strong> Gives California residents the right to <em>know</em> what data is collected about them, the right to <em>delete</em> it, and the right to <em>opt out</em> of having their data sold. Broader than Nevada SB220 — it covers data sharing, not just selling.</li>
+                      <li class="mb-2"><strong>CPRA — California Privacy Rights Act (2023):</strong> An upgrade to CCPA. It created a dedicated enforcement agency (the California Privacy Protection Agency), added new "sensitive personal information" categories, and now requires an <strong>opt-in</strong> for minors under 16.</li>
+                    </ul>
+                    <p>Other states — <strong>Virginia (CDPA)</strong>, <strong>Colorado (CPA)</strong>, <strong>Connecticut (CTDPA)</strong>, and <strong>Texas (TDPSA)</strong> — have all passed similar laws. Because there are so many overlapping state rules, developers target the <em>most restrictive</em> standard to stay compliant everywhere at once.</p>
+
+                    <h5 class="fw-bold mt-4 text-primary">U.S. Federal Laws: Special-Category Data</h5>
+                    <p>Even without a general federal privacy law, Congress has passed laws for specific types of data:</p>
+                    <ul class="small ps-3 mb-3">
+                      <li class="mb-2"><strong>COPPA — Children's Online Privacy Protection Act (1998):</strong> If your site knowingly collects data from children <strong>under age 13</strong>, you must get <em>verifiable parental consent</em> first. This is why every app says "You must be 13 or older to sign up." Violation fines: up to <strong>$51,744 per child per incident</strong>.</li>
+                      <li class="mb-2"><strong>HIPAA — Health Insurance Portability and Accountability Act (1996):</strong> Protects <strong>PHI (Protected Health Information)</strong> — any data that could identify a patient linked to their health records. If you ever build anything for a doctor's office, hospital, or insurance company, HIPAA governs every line of code you write. Violations can result in <em>criminal charges</em>.</li>
+                      <li class="mb-2"><strong>CAN-SPAM Act (2003):</strong> Governs commercial email marketing. Every marketing email must include a real physical mailing address and a working <strong>unsubscribe link</strong> honored within 10 business days. Sending spam can cost up to <strong>$50,120 per email</strong>.</li>
+                    </ul>
                   </div>
 
                   <div class="col-lg-4 mt-4 mt-lg-0 text-center">
@@ -357,6 +373,347 @@
                         <strong>Figure 2.6:</strong> Modern privacy laws like GDPR have fundamentally changed how we code forms.
                       </figcaption>
                     </figure>
+
+                    <div class="card border-warning bg-warning bg-opacity-10 mt-3">
+                      <div class="card-body small">
+                        <p class="fw-bold mb-1">&#127758; Key Exam Concepts</p>
+                        <ul class="mb-0 ps-3 text-start">
+                          <li class="mb-1"><strong>Opt-In:</strong> Data collection blocked by default — user must actively agree (GDPR model)</li>
+                          <li class="mb-1"><strong>Opt-Out:</strong> Data collection allowed by default — user must actively stop it (U.S. state model)</li>
+                          <li class="mb-1"><strong>Right to Erasure:</strong> User can demand their data be permanently deleted</li>
+                          <li class="mb-1"><strong>PII:</strong> Personally Identifiable Information — any data that can identify a specific person</li>
+                          <li class="mb-1"><strong>Data Minimization:</strong> Only collect data you actually need</li>
+                          <li><strong>Privacy by Design:</strong> Build privacy protection into the system from the start, not as an afterthought</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ROW 6b: INTERNATIONAL PRIVACY LAWS -->
+                <div class="row mb-5 pb-4 border-bottom">
+                  <div class="col-12">
+                    <h4 class="fw-bold text-primary mb-3">&#127758; International Privacy Laws</h4>
+                    <p class="mb-4">Privacy regulation is now a <em>global</em> issue. If a user from any of these countries visits your website and you collect their data, <strong>that country's law may apply to you</strong> — even if you're sitting in Nevada. This is called <strong>extraterritorial jurisdiction</strong>.</p>
+
+                    <!-- International Laws Cards -->
+                    <div class="row g-3 mb-4">
+
+                      <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-primary border-2">
+                          <div class="card-header bg-primary text-white py-2">
+                            <span class="fw-bold">&#127466;&#127482; UK GDPR</span>
+                            <span class="badge bg-light text-dark float-end mt-1">2021</span>
+                          </div>
+                          <div class="card-body small">
+                            <p class="mb-1"><strong>Full Name:</strong> United Kingdom General Data Protection Regulation</p>
+                            <p class="mb-1"><strong>Model:</strong> <span class="badge bg-success">Opt-In</span></p>
+                            <p class="mb-1"><strong>Key Right:</strong> Right to Erasure ("Right to be Forgotten")</p>
+                            <p class="mb-0"><strong>Penalty:</strong> £17.5 million or 4% of annual turnover</p>
+                          </div>
+                          <div class="card-footer small text-muted">After Brexit, the UK adopted its own version of the EU GDPR — nearly identical in rights and penalties. Companies must now satisfy <em>both</em> if serving UK and EU users.</div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-danger border-2">
+                          <div class="card-header bg-danger text-white py-2">
+                            <span class="fw-bold">&#127464;&#127462; Canada PIPEDA / Law 25</span>
+                            <span class="badge bg-light text-dark float-end mt-1">2000 / 2022</span>
+                          </div>
+                          <div class="card-body small">
+                            <p class="mb-1"><strong>Full Name:</strong> Personal Information Protection and Electronic Documents Act</p>
+                            <p class="mb-1"><strong>Model:</strong> <span class="badge bg-success">Opt-In</span> (meaningful consent)</p>
+                            <p class="mb-1"><strong>Key Right:</strong> Right to access and correct personal data</p>
+                            <p class="mb-0"><strong>Penalty:</strong> Up to $100,000 CAD per violation</p>
+                          </div>
+                          <div class="card-footer small text-muted">Canada's federal privacy law. Quebec's <strong>Law 25 (2022)</strong> raised the bar further — requiring privacy impact assessments and data minimization, mirroring GDPR-like standards.</div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-success border-2">
+                          <div class="card-header bg-success text-white py-2">
+                            <span class="fw-bold">&#127463;&#127479; Brazil LGPD</span>
+                            <span class="badge bg-light text-dark float-end mt-1">2020</span>
+                          </div>
+                          <div class="card-body small">
+                            <p class="mb-1"><strong>Full Name:</strong> Lei Geral de Proteção de Dados (General Data Protection Law)</p>
+                            <p class="mb-1"><strong>Model:</strong> <span class="badge bg-success">Opt-In</span></p>
+                            <p class="mb-1"><strong>Key Right:</strong> Right to deletion and data portability</p>
+                            <p class="mb-0"><strong>Penalty:</strong> Up to 2% of Brazilian revenue (R$50M max)</p>
+                          </div>
+                          <div class="card-footer small text-muted">Brazil's LGPD was closely modeled on GDPR. Brazil is the world's 6th most populous country — any global site likely serves Brazilian users and must comply.</div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-warning border-2">
+                          <div class="card-header bg-warning text-dark py-2">
+                            <span class="fw-bold">&#127471;&#127477; Japan APPI</span>
+                            <span class="badge bg-dark text-white float-end mt-1">2003 / 2022</span>
+                          </div>
+                          <div class="card-body small">
+                            <p class="mb-1"><strong>Full Name:</strong> Act on the Protection of Personal Information</p>
+                            <p class="mb-1"><strong>Model:</strong> <span class="badge bg-success">Opt-In</span></p>
+                            <p class="mb-1"><strong>Key Right:</strong> Right to disclosure and correction</p>
+                            <p class="mb-0"><strong>Penalty:</strong> Up to ¥100 million (~$650K USD)</p>
+                          </div>
+                          <div class="card-footer small text-muted">Major 2022 amendments brought APPI closer to GDPR: added a right to request deletion, breach notification requirements within 30 days, and expanded to cover pseudonymous data.</div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-info border-2">
+                          <div class="card-header bg-info text-dark py-2">
+                            <span class="fw-bold">&#127462;&#127482; Australia Privacy Act</span>
+                            <span class="badge bg-dark text-white float-end mt-1">1988 / 2023</span>
+                          </div>
+                          <div class="card-body small">
+                            <p class="mb-1"><strong>Full Name:</strong> Privacy Act 1988 + Australian Privacy Principles (APPs)</p>
+                            <p class="mb-1"><strong>Model:</strong> <span class="badge bg-success">Opt-In</span> (implied consent)</p>
+                            <p class="mb-1"><strong>Key Right:</strong> Right to access and correct personal information</p>
+                            <p class="mb-0"><strong>Penalty:</strong> Up to AUD $50 million per serious breach</p>
+                          </div>
+                          <div class="card-footer small text-muted">The 13 Australian Privacy Principles (APPs) set strict data handling rules. Penalties tripled in 2023 following major data breaches at Optus and Medibank affecting millions of Australians.</div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-dark border-2">
+                          <div class="card-header bg-dark text-white py-2">
+                            <span class="fw-bold">&#127464;&#127475; China PIPL</span>
+                            <span class="badge bg-light text-dark float-end mt-1">2021</span>
+                          </div>
+                          <div class="card-body small">
+                            <p class="mb-1"><strong>Full Name:</strong> Personal Information Protection Law</p>
+                            <p class="mb-1"><strong>Model:</strong> <span class="badge bg-success">Opt-In</span> (explicit separate consent)</p>
+                            <p class="mb-1"><strong>Key Right:</strong> Right to withdraw consent and data portability</p>
+                            <p class="mb-0"><strong>Penalty:</strong> ¥50 million or 5% annual revenue</p>
+                          </div>
+                          <div class="card-footer small text-muted">One of the world's strictest laws. Requires <strong>data localization</strong> — data about Chinese citizens must often stay on servers inside China. Extraterritorial reach: applies to any company processing data of Chinese residents.</div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-lg-4">
+                        <div class="card h-100" style="border-color:#006BB6 !important; border-width:2px !important; border-style:solid !important;">
+                          <div class="card-header text-white py-2" style="background-color:#006BB6;">
+                            <span class="fw-bold">&#127487;&#127462; South Africa POPIA</span>
+                            <span class="badge bg-light text-dark float-end mt-1">2021</span>
+                          </div>
+                          <div class="card-body small">
+                            <p class="mb-1"><strong>Full Name:</strong> Protection of Personal Information Act</p>
+                            <p class="mb-1"><strong>Model:</strong> <span class="badge bg-success">Opt-In</span></p>
+                            <p class="mb-1"><strong>Key Right:</strong> Right to access, correction, and deletion</p>
+                            <p class="mb-0"><strong>Penalty:</strong> Up to R10 million (~$550K USD) + possible imprisonment</p>
+                          </div>
+                          <div class="card-footer small text-muted">Africa's most comprehensive privacy law. POPIA covers all personal information processing in South Africa and is enforced by the <strong>Information Regulator</strong>. Criminal penalties make it unusually strict.</div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-lg-4">
+                        <div class="card h-100" style="border-color:#EF3340 !important; border-width:2px !important; border-style:solid !important;">
+                          <div class="card-header text-white py-2" style="background-color:#EF3340;">
+                            <span class="fw-bold">&#127481;&#127469; Thailand / &#127480;&#127468; Singapore PDPA</span>
+                            <span class="badge bg-light text-dark float-end mt-1">2012–2022</span>
+                          </div>
+                          <div class="card-body small">
+                            <p class="mb-1"><strong>Full Name:</strong> Personal Data Protection Act</p>
+                            <p class="mb-1"><strong>Model:</strong> <span class="badge bg-success">Opt-In</span> (consent-based)</p>
+                            <p class="mb-1"><strong>Key Right:</strong> Right to withdraw consent; right to erasure</p>
+                            <p class="mb-0"><strong>Penalty:</strong> Thailand: ฿5M / Singapore: SGD $1 million</p>
+                          </div>
+                          <div class="card-footer small text-muted">Both Thailand (enforced 2022) and Singapore (2012, amended 2020) adopted laws named "PDPA" based on similar consent-first frameworks — requiring purpose limitation and breach notification.</div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-lg-4">
+                        <div class="card h-100" style="border-color:#FF9933 !important; border-width:2px !important; border-style:solid !important;">
+                          <div class="card-header text-white py-2" style="background-color:#FF9933;">
+                            <span class="fw-bold">&#127470;&#127475; India DPDP Act</span>
+                            <span class="badge bg-light text-dark float-end mt-1">2023</span>
+                          </div>
+                          <div class="card-body small">
+                            <p class="mb-1"><strong>Full Name:</strong> Digital Personal Data Protection Act</p>
+                            <p class="mb-1"><strong>Model:</strong> <span class="badge bg-success">Opt-In</span> (consent-based)</p>
+                            <p class="mb-1"><strong>Key Right:</strong> Right to correction, erasure, and grievance redressal</p>
+                            <p class="mb-0"><strong>Penalty:</strong> Up to ₹250 crore (~$30M USD)</p>
+                          </div>
+                          <div class="card-footer small text-muted">India's first comprehensive data protection law, passed in 2023. With 1.4 billion people, India is now a major jurisdiction any global platform must consider. Rules around cross-border data transfers are still being finalized.</div>
+                        </div>
+                      </div>
+
+                    </div><!-- end row g-3 -->
+
+                    <!-- Comparison Table -->
+                    <h5 class="fw-bold mt-4 mb-3 text-primary">&#128203; Global Privacy Law Quick-Reference Table</h5>
+                    <p class="small text-muted mb-3">The EOP (End of Program) test may ask you to compare any of these laws. Use this table to study the key differences.</p>
+                    <div class="table-responsive">
+                      <table class="table table-bordered table-hover table-sm small align-middle">
+                        <thead class="table-dark">
+                          <tr>
+                            <th>Law</th>
+                            <th>Region</th>
+                            <th>Year</th>
+                            <th>Model</th>
+                            <th>Key Consumer Right</th>
+                            <th>Who It Protects From</th>
+                            <th>Max Penalty</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><strong>GDPR</strong></td>
+                            <td>European Union</td>
+                            <td>2018</td>
+                            <td><span class="badge bg-success">Opt-In</span></td>
+                            <td>Right to Erasure; Data Portability</td>
+                            <td>Any company serving EU residents</td>
+                            <td>€20M or 4% global revenue</td>
+                          </tr>
+                          <tr>
+                            <td><strong>UK GDPR</strong></td>
+                            <td>United Kingdom</td>
+                            <td>2021</td>
+                            <td><span class="badge bg-success">Opt-In</span></td>
+                            <td>Right to Erasure; Data Portability</td>
+                            <td>Any company serving UK residents</td>
+                            <td>£17.5M or 4% turnover</td>
+                          </tr>
+                          <tr>
+                            <td><strong>PIPEDA / Law 25</strong></td>
+                            <td>Canada</td>
+                            <td>2000 / 2022</td>
+                            <td><span class="badge bg-success">Opt-In</span></td>
+                            <td>Right to access &amp; correct data</td>
+                            <td>Businesses operating in Canada</td>
+                            <td>$100,000 CAD per violation</td>
+                          </tr>
+                          <tr>
+                            <td><strong>LGPD</strong></td>
+                            <td>Brazil</td>
+                            <td>2020</td>
+                            <td><span class="badge bg-success">Opt-In</span></td>
+                            <td>Right to deletion; portability</td>
+                            <td>Any company processing Brazilian data</td>
+                            <td>2% Brazil revenue (R$50M max)</td>
+                          </tr>
+                          <tr>
+                            <td><strong>CCPA / CPRA</strong></td>
+                            <td>California, USA</td>
+                            <td>2020 / 2023</td>
+                            <td><span class="badge bg-warning text-dark">Opt-Out</span> / Opt-In for minors</td>
+                            <td>Know, delete, opt out of data sale</td>
+                            <td>Businesses with CA customers</td>
+                            <td>$7,500 per intentional violation</td>
+                          </tr>
+                          <tr>
+                            <td><strong>Nevada SB220</strong></td>
+                            <td>Nevada, USA</td>
+                            <td>2019</td>
+                            <td><span class="badge bg-warning text-dark">Opt-Out</span></td>
+                            <td>Right to stop sale of personal data</td>
+                            <td>Businesses with NV customers</td>
+                            <td>Injunctive relief + damages</td>
+                          </tr>
+                          <tr>
+                            <td><strong>COPPA</strong></td>
+                            <td>USA (Federal)</td>
+                            <td>1998</td>
+                            <td><span class="badge bg-success">Opt-In</span> (parental)</td>
+                            <td>Parental consent before collecting child data</td>
+                            <td>Any U.S. site collecting data on under-13s</td>
+                            <td>$51,744 per child/per incident</td>
+                          </tr>
+                          <tr>
+                            <td><strong>HIPAA</strong></td>
+                            <td>USA (Federal)</td>
+                            <td>1996</td>
+                            <td><span class="badge bg-success">Opt-In</span></td>
+                            <td>Protected Health Information (PHI) privacy</td>
+                            <td>Healthcare providers, insurers, vendors</td>
+                            <td>$100–$50,000 per violation + criminal</td>
+                          </tr>
+                          <tr>
+                            <td><strong>CAN-SPAM</strong></td>
+                            <td>USA (Federal)</td>
+                            <td>2003</td>
+                            <td><span class="badge bg-warning text-dark">Opt-Out</span></td>
+                            <td>Unsubscribe from commercial email</td>
+                            <td>Any recipient of commercial email</td>
+                            <td>$50,120 per email</td>
+                          </tr>
+                          <tr>
+                            <td><strong>APPI</strong></td>
+                            <td>Japan</td>
+                            <td>2003 / 2022</td>
+                            <td><span class="badge bg-success">Opt-In</span></td>
+                            <td>Disclosure, correction, deletion</td>
+                            <td>Businesses handling Japanese personal data</td>
+                            <td>¥100 million (~$650K)</td>
+                          </tr>
+                          <tr>
+                            <td><strong>Privacy Act / APPs</strong></td>
+                            <td>Australia</td>
+                            <td>1988 / 2023</td>
+                            <td><span class="badge bg-success">Opt-In</span></td>
+                            <td>Access and correct personal information</td>
+                            <td>Organizations and agencies in Australia</td>
+                            <td>AUD $50 million</td>
+                          </tr>
+                          <tr>
+                            <td><strong>PIPL</strong></td>
+                            <td>China</td>
+                            <td>2021</td>
+                            <td><span class="badge bg-success">Opt-In</span> (explicit)</td>
+                            <td>Withdraw consent; data portability</td>
+                            <td>Any company processing Chinese resident data</td>
+                            <td>¥50M or 5% annual revenue</td>
+                          </tr>
+                          <tr>
+                            <td><strong>POPIA</strong></td>
+                            <td>South Africa</td>
+                            <td>2021</td>
+                            <td><span class="badge bg-success">Opt-In</span></td>
+                            <td>Access, correct, delete personal data</td>
+                            <td>Any organization in South Africa</td>
+                            <td>R10M + possible imprisonment</td>
+                          </tr>
+                          <tr>
+                            <td><strong>PDPA (Thailand/Singapore)</strong></td>
+                            <td>Southeast Asia</td>
+                            <td>2012–2022</td>
+                            <td><span class="badge bg-success">Opt-In</span></td>
+                            <td>Withdraw consent; erasure</td>
+                            <td>Businesses operating in Thailand/Singapore</td>
+                            <td>฿5M / SGD $1M</td>
+                          </tr>
+                          <tr>
+                            <td><strong>DPDP Act</strong></td>
+                            <td>India</td>
+                            <td>2023</td>
+                            <td><span class="badge bg-success">Opt-In</span></td>
+                            <td>Correction, erasure, grievance redressal</td>
+                            <td>Any company processing Indian citizen data</td>
+                            <td>₹250 crore (~$30M)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <!-- Privacy by Design Callout -->
+                    <div class="alert alert-primary mt-4 mb-0" role="alert">
+                      <h6 class="fw-bold alert-heading">&#127381; Privacy by Design: The Developer's Golden Rule</h6>
+                      <p class="mb-2">Because laws differ in almost every country, the professional approach is to build for the <strong>strictest standard globally</strong> from day one. This principle — <strong>Privacy by Design</strong> — means baking privacy into your architecture before you write a single line of data collection, rather than bolting it on afterward. Key practices:</p>
+                      <ul class="mb-0 small">
+                        <li><strong>Data Minimization:</strong> Only collect data you absolutely need for the feature to function.</li>
+                        <li><strong>Consent by Default:</strong> No data collection until the user explicitly agrees (Opt-In everywhere, not just where legally required).</li>
+                        <li><strong>Right to Erasure:</strong> Build a "delete my account" feature that actually deletes — including backups — from the start.</li>
+                        <li><strong>Breach Notification:</strong> Have a plan to notify users within 72 hours of discovering a data breach (GDPR requirement; best practice everywhere).</li>
+                        <li><strong>Data Localization Awareness:</strong> Some laws (China PIPL, Russia) require certain data to stay on servers <em>within that country</em> — a critical consideration for global deployments.</li>
+                      </ul>
+                    </div>
+
                   </div>
                 </div>
 
