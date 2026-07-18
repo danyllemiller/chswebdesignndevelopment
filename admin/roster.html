@@ -136,25 +136,47 @@
               <div class="card-header bg-danger text-white fw-bold small">Add New Section</div>
               <div class="card-body">
                 <div class="row g-2 align-items-end">
-                  <div class="col-md-4">
-                    <label class="form-label small fw-semibold mb-1">Section ID</label>
-                    <input type="text" id="new-section-id" class="form-control" placeholder="e.g. CS-A5, WD1-B4">
-                  </div>
-                  <div class="col-md-4">
+                  <div class="col-md-3">
                     <label class="form-label small fw-semibold mb-1">Course</label>
-                    <select id="new-section-course" class="form-select">
+                    <select id="new-section-course" class="form-select" oninput="updateSectionId()">
                       <option value="10003GS">Computer Science</option>
                       <option value="05254G1S">Web Design 1</option>
                       <option value="05254G2S">Web Design 2</option>
                       <option value="05254ES">Web Design AS</option>
                     </select>
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-3">
+                    <label class="form-label small fw-semibold mb-1">Period</label>
+                    <select id="new-section-period" class="form-select" oninput="updateSectionId()">
+                      <option value="A1">A1</option>
+                      <option value="A3">A3</option>
+                      <option value="A5">A5</option>
+                      <option value="A7">A7</option>
+                      <option value="B2">B2</option>
+                      <option value="B4">B4</option>
+                      <option value="B6">B6</option>
+                      <option value="B8">B8</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label small fw-semibold mb-1">Section ID <span class="text-muted fw-normal">(auto)</span></label>
+                    <input type="text" id="new-section-id" class="form-control bg-light" readonly>
+                  </div>
+                  <div class="col-md-3">
                     <button id="addSectionBtn" class="btn btn-danger w-100 fw-bold">Add Section</button>
                   </div>
                 </div>
               </div>
             </div>
+            <script>
+            const SECTION_PREFIX = {'10003GS':'CS','05254G1S':'WD1','05254G2S':'WD2','05254ES':'AS'};
+            function updateSectionId() {
+                const cid = document.getElementById('new-section-course').value;
+                const period = document.getElementById('new-section-period').value;
+                document.getElementById('new-section-id').value = (SECTION_PREFIX[cid] || cid) + '-' + period;
+            }
+            updateSectionId();
+            </script>
 
             <!-- Existing Sections Table -->
             <div class="d-flex justify-content-between align-items-center mb-2">

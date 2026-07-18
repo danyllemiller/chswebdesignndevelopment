@@ -253,7 +253,7 @@ router.post('/admin/sections', async (req, res) => {
         if (cid) {
             const COURSE_NAMES = {
                 '10003GS': 'Computer Science', '05254G1S': 'Web Design 1',
-                '05254G2S': 'Web Design 2',    '05254ES':  'Applied Science'
+                '05254G2S': 'Web Design 2',    '05254ES':  'Web Design AS'
             };
             const cname = COURSE_NAMES[cid] || cid;
             await connection.execute(
