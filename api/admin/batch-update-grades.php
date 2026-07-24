@@ -1,4 +1,6 @@
 <?php
+// DEPRECATED — superseded by POST /api/admin/batch-update-grades in server/api.js (writes to `responses` table).
+// This file writes to the legacy `grades` table and is not executed on the live Node/Express server.
 require_once __DIR__ . '/../db_config.php';
 corsHeaders();
 handleOptions();

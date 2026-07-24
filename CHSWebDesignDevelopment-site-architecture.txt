@@ -170,18 +170,25 @@ It reflects the current organization of static pages, JS assets, API routes, and
   - `js/examLogicCS.js`
   - supporting shared scripts like `js/loader.js`, `js/auth-guard.js`, `js/jquery.js`, `js/bootstrap.bundle.js`
 
-11. Current missing/mismatched routes
---------------------------------------
-- Some client pages expect API routes that are not present in `server.js`.
-- Known missing or incomplete backend routes:
-  - `/api/reset-password`
-  - `/api/admin/master-gradebook-data`
-  - `/api/admin/save-grade`
-  - `/api/admin/upload-roster`
-  - `/api/admin/reset-student`
-  - `/api/admin/delete-student`
-  - `/api/admin/batch-update-grades`
-- Because these are missing, some admin and student features may not work fully until they are implemented.
+11. Current route status (all implemented in server/api.js or server/auth.js)
+----------------------------------------------------------------------------
+All previously-listed "missing" routes now exist in Node. Summary:
+  - `POST /api/reset-password`             → server/auth.js (student self-service reset)
+  - `POST /api/admin/reset-password-default` → server/auth.js (admin-forced reset)
+  - `GET  /api/admin/master-gradebook-data` → server/api.js (reads `responses` table)
+  - `POST /api/admin/save-grade`           → server/api.js (inline cell save, `responses`)
+  - `POST /api/admin/batch-update-grades`  → server/api.js (Google Sheets sync, `responses`)
+  - `POST /api/admin/upload-roster`        → server/api.js
+  - `POST /api/admin/reset-student`        → server/api.js
+  - `DELETE /api/admin/delete-student`     → server/api.js
+  - `GET  /api/bell-schedule`              → server/api.js (mirrors PHP version for Node context)
+  - `GET  /api/admin/checklist`            → server/api.js (teacher multi-cadence checklist)
+  - `POST /api/admin/checklist/toggle`     → server/api.js
+  - `POST /api/admin/checklist/reset`      → server/api.js
+
+PHP files under api/admin/ are DEPRECATED — they write to a legacy `grades` table that is not
+read by any Node route. Node is the authoritative backend; PHP is never executed on the live server.
+Do not add new routes to PHP files.
 
 12. What is now authoritative
 -----------------------------

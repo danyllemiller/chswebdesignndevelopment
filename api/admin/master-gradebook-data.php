@@ -1,4 +1,6 @@
 <?php
+// DEPRECATED — superseded by GET /api/admin/master-gradebook-data in server/api.js (reads from `responses` table).
+// This file reads from the legacy `grades` table and is not executed on the live Node/Express server.
 require_once __DIR__ . '/../db_config.php';
 corsHeaders();
 handleOptions();
