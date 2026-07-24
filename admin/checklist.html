@@ -5,408 +5,595 @@
   <title>Teacher Admin | Checklist</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
-  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
   <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
 
   <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet" />
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
 
   <script src="/js/loader.js?v=6"></script>
   <script type="module" src="/js/auth-guard.js"></script>
 
   <style>
-    .checklist-item { transition: background 0.15s; border-radius: 6px; padding: 10px 12px; }
-    .checklist-item:hover { background: rgba(0,0,0,.04); }
-    .checklist-item.is-done label { text-decoration: line-through; color: #6c757d; }
-    .checklist-item .form-check-input { width: 1.25em; height: 1.25em; margin-top: 0.15em; cursor: pointer; }
-    .checklist-item label { cursor: pointer; font-size: .95rem; }
-    .flash-saved { animation: flashGreen 0.5s ease; }
-    @keyframes flashGreen { 0%{background:#d1fae5} 100%{background:transparent} }
-    .tab-cadence-badge { font-size: .75rem; font-weight: 600; letter-spacing: .03em; }
-    .progress { height: 10px; border-radius: 99px; }
-    .nav-pills .nav-link { font-size: .85rem; padding: .35rem .85rem; }
-    .section-header { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: #6c757d; font-weight: 700; margin: 1rem 0 .4rem; }
+    body { font-family: 'Inter', sans-serif; }
+
+    #checklist-tabs .nav-link {
+      border: 2px solid #000099;
+      color: #000099;
+      background: transparent;
+      font-size: .85rem;
+      transition: background .15s, color .15s;
+    }
+    #checklist-tabs .nav-link:hover:not(.active) {
+      background: rgba(0,0,153,.06);
+    }
+    #checklist-tabs .nav-link.active {
+      background-color: #000099;
+      color: #fff;
+      border-color: #000099;
+    }
+
+    .progress { border-radius: 6px; }
+    .progress-bar { transition: width .35s ease; }
+
+    .list-group-item { cursor: default; transition: background .12s; }
+    .list-group-item:hover { background: rgba(0,0,153,.035); }
+    .list-group-item.item-done .item-text { text-decoration: line-through; color: #888; }
+
+    .tab-accent-daily    { border-left: 4px solid #000099; }
+    .tab-accent-weekly   { border-left: 4px solid #0dcaf0; }
+    .tab-accent-biweekly { border-left: 4px solid #6f42c1; }
+    .tab-accent-monthly  { border-left: 4px solid #ffc107; }
+    .tab-accent-quarterly{ border-left: 4px solid #dc3545; }
+    .tab-accent-semester { border-left: 4px solid #6c757d; }
+
+    .badge-purple { background-color: #6f42c1 !important; color: #fff; }
+
+    .flash-ok { font-size: 1.05rem; }
+    @keyframes flashBounce {
+      0%   { opacity: 0; transform: scale(.5); }
+      40%  { opacity: 1; transform: scale(1.2); }
+      70%  { transform: scale(.95); }
+      100% { opacity: 0; transform: scale(1); }
+    }
+    .flash-anim { animation: flashBounce 1.1s ease forwards; }
+
+    .form-check-input { width: 1.2em; height: 1.2em; cursor: pointer; flex-shrink: 0; }
+    .form-check-input:checked { background-color: #000099; border-color: #000099; }
   </style>
 </head>
 <body class="bg-white">
 
-  <div class="container-fluid sticky-top px-0">
+  <div class="container-fluid sticky-top px-0 no-print">
     <div id="nav-placeholder"></div>
   </div>
 
-  <div class="container my-5" style="max-width:800px;">
-    <div class="card shadow-sm border-primary">
-      <div class="card-header bg-primary text-white py-3 d-flex align-items-center gap-3">
-        <i class="fas fa-clipboard-check fs-4"></i>
-        <div>
-          <h4 class="mb-0 gochi">Teacher Checklist</h4>
-          <small class="opacity-75">Items auto-reset at the start of each new day / week / month / period</small>
-        </div>
-        <span id="teacher-badge" class="badge bg-light text-primary ms-auto shadow-sm">Loading...</span>
+  <div class="container my-5">
+    <div class="card shadow-sm border-primary mx-auto" style="max-width: 920px;">
+      <div class="card-header bg-primary text-center py-3">
+        <h4 class="mb-0 text-white gochi">
+          <i class="fas fa-clipboard-check me-2"></i>Teacher Checklist
+        </h4>
       </div>
-
       <div class="card-body p-4">
-        <div id="login-error" class="alert alert-danger d-none">
-          <i class="fas fa-lock me-2"></i>You must be logged in as a teacher or admin to use this checklist.
+
+        <div id="auth-error" class="alert alert-warning fw-semibold text-center d-none">
+          <i class="fas fa-lock me-2"></i>Not logged in. Please <a href="/login.html" class="alert-link">sign in</a> to access this page.
         </div>
 
-        <!-- Tab Pills -->
-        <ul class="nav nav-pills flex-wrap gap-1 mb-4" id="checklist-tabs" role="tablist">
+        <ul class="nav nav-pills nav-justified gap-1 mb-4" id="checklist-tabs" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link active" data-cadence="daily" data-bs-toggle="pill" type="button">
+            <button class="nav-link active fw-bold w-100" id="pill-daily"
+              data-bs-toggle="pill" data-bs-target="#tab-daily"
+              type="button" role="tab" data-cadence="daily">
               <i class="fas fa-sun me-1"></i>Daily
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" data-cadence="weekly" data-bs-toggle="pill" type="button">
+            <button class="nav-link fw-bold w-100" id="pill-weekly"
+              data-bs-toggle="pill" data-bs-target="#tab-weekly"
+              type="button" role="tab" data-cadence="weekly">
               <i class="fas fa-calendar-week me-1"></i>Weekly
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" data-cadence="biweekly" data-bs-toggle="pill" type="button">
-              <i class="fas fa-calendar-alt me-1"></i>Bi-Weekly
+            <button class="nav-link fw-bold w-100" id="pill-biweekly"
+              data-bs-toggle="pill" data-bs-target="#tab-biweekly"
+              type="button" role="tab" data-cadence="biweekly">
+              <i class="fas fa-arrows-rotate me-1"></i>Bi-Weekly
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" data-cadence="monthly" data-bs-toggle="pill" type="button">
+            <button class="nav-link fw-bold w-100" id="pill-monthly"
+              data-bs-toggle="pill" data-bs-target="#tab-monthly"
+              type="button" role="tab" data-cadence="monthly">
               <i class="fas fa-calendar me-1"></i>Monthly
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" data-cadence="quarterly" data-bs-toggle="pill" type="button">
-              <i class="fas fa-chart-bar me-1"></i>Quarterly
+            <button class="nav-link fw-bold w-100" id="pill-quarterly"
+              data-bs-toggle="pill" data-bs-target="#tab-quarterly"
+              type="button" role="tab" data-cadence="quarterly">
+              <i class="fas fa-flag-checkered me-1"></i>Quarterly
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" data-cadence="semester" data-bs-toggle="pill" type="button">
+            <button class="nav-link fw-bold w-100" id="pill-semester"
+              data-bs-toggle="pill" data-bs-target="#tab-semester"
+              type="button" role="tab" data-cadence="semester">
               <i class="fas fa-graduation-cap me-1"></i>Semester
             </button>
           </li>
         </ul>
 
-        <!-- Period label + progress + actions -->
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3" id="checklist-meta">
-          <span id="period-label" class="badge bg-light text-dark border tab-cadence-badge"></span>
-          <div class="d-flex gap-2">
-            <button id="btn-mark-all" class="btn btn-sm btn-outline-success">
-              <i class="fas fa-check-double me-1"></i>Mark All Done
-            </button>
-            <button id="btn-reset-all" class="btn btn-sm btn-outline-danger">
-              <i class="fas fa-undo me-1"></i>Reset All
-            </button>
+        <div class="tab-content" id="checklist-content">
+          <div class="tab-pane fade show active" id="tab-daily" role="tabpanel">
+            <div class="text-center py-5"><span class="spinner-border text-primary"></span></div>
+          </div>
+          <div class="tab-pane fade" id="tab-weekly" role="tabpanel">
+            <div class="text-center py-5"><span class="spinner-border text-info"></span></div>
+          </div>
+          <div class="tab-pane fade" id="tab-biweekly" role="tabpanel">
+            <div class="text-center py-5"><span class="spinner-border" style="color:#6f42c1;"></span></div>
+          </div>
+          <div class="tab-pane fade" id="tab-monthly" role="tabpanel">
+            <div class="text-center py-5"><span class="spinner-border text-warning"></span></div>
+          </div>
+          <div class="tab-pane fade" id="tab-quarterly" role="tabpanel">
+            <div class="text-center py-5"><span class="spinner-border text-danger"></span></div>
+          </div>
+          <div class="tab-pane fade" id="tab-semester" role="tabpanel">
+            <div class="text-center py-5"><span class="spinner-border text-secondary"></span></div>
           </div>
         </div>
-        <div class="mb-1 d-flex justify-content-between small text-muted">
-          <span id="progress-label">Loading…</span>
-        </div>
-        <div class="progress mb-4">
-          <div id="progress-bar" class="progress-bar bg-success" role="progressbar" style="width:0%"></div>
+
+        <div class="text-center mt-4 pt-3 border-top">
+          <small class="text-muted">
+            <i class="fas fa-circle-info me-1"></i>Checked items auto-reset at the start of each new day/week/month/period.
+          </small>
         </div>
 
-        <!-- Quarterly / Semester event notice -->
-        <div id="event-notice" class="alert alert-info d-none small py-2 mb-3">
-          <i class="fas fa-calendar-check me-2"></i><span id="event-notice-text"></span>
-        </div>
-        <div id="no-event-notice" class="alert alert-secondary d-none small py-2 mb-3">
-          <i class="fas fa-info-circle me-2"></i><span id="no-event-text"></span>
-        </div>
-
-        <!-- Checklist items container -->
-        <div id="checklist-items">
-          <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
-        </div>
       </div>
     </div>
   </div>
 
+  <div id="footer-placeholder" class="no-print"></div>
+
   <script src="/js/bootstrap.bundle.js"></script>
-
   <script>
-  (async function () {
-    const SPECIAL_DATES_URL = '/special-dates.csv';
+  (function () {
 
-    // --- Cadence accent colors ---
-    const CADENCE_COLORS = {
-      daily:     'primary',
-      weekly:    'info',
-      biweekly:  'purple',
-      monthly:   'warning',
-      quarterly: 'danger',
-      semester:  'dark',
+    const ITEMS = {
+      daily: [
+        { key: 'd1', text: 'Take/submit attendance in Infinite Campus for every section, all 4 preps.' },
+        { key: 'd2', text: "Scan the site's admin gradebook for overnight exam/quiz/notebook submissions that need a human look." },
+        { key: 'd3', text: "Confirm today's agenda/warm-up is live and correct on the Google Slides Agenda for each prep." },
+        { key: 'd4', text: 'Check ParentSquare and email for messages needing a same-day reply.' },
+        { key: 'd5', text: 'Quick check of the student clock-in/timesheet log if running the classroom job simulation that day.' },
+        { key: 'd6', text: 'End of day: spot-check that grade entries saved correctly on the site.' }
+      ],
+      weekly: [
+        { key: 'w1', text: 'Pull scores from the course site and post/reconcile them in Infinite Campus.' },
+        { key: 'w2', text: 'Export the gradebook to CSV as a weekly backup, and use it to spot students below grade threshold in each of the 4 preps; send those students/parents a ParentSquare or email note.' },
+        { key: 'w3', text: "Skim self_assessments and notebook entries for the week's chapters — are students actually reflecting, or just clicking through?" },
+        { key: 'w4', text: "Update next week's due dates in the admin due-dates page, across all 4 preps." },
+        { key: 'w5', text: "Prep next week's warm-ups/bell-ringers per prep if not already templated out." }
+      ],
+      biweekly: [
+        { key: 'bw1', text: 'Pull a missing-work list per section from the site; message students/parents.' },
+        { key: 'bw2', text: 'Reconcile timesheets for students in the payroll/clock-in simulation.' }
+      ],
+      monthly: [
+        { key: 'm1', text: "Reconcile the site's student roster against Infinite Campus (adds, drops, schedule changes)." },
+        { key: 'm2', text: 'Review exam/quiz question banks for reported errors (mis-keyed answers, confusing wording).' },
+        { key: 'm3', text: 'Check Workplace Readiness Skills Assessment progress for completer-track seniors.' },
+        { key: 'm4', text: 'Flag completer-track students whose GPA has dropped below 3.0 in program courses.' },
+        { key: 'm5', text: "Skim the site's api/error_log for recurring backend failures." },
+        { key: 'm6', text: 'Review office-hours/appointment bookings — any pattern worth adjusting?' },
+        { key: 'm7', text: 'Reconcile pay_roles/timesheets if the classroom payroll simulation feeds any real rewards/grades.' }
+      ],
+      quarterly: [
+        { key: 'q1', text: "Verify quarter grades in Infinite Campus match the site's gradebook for all 4 preps before the deadline." },
+        { key: 'q2', text: 'Run End-of-Program-Assessment checkpoints for completer-track students.' },
+        { key: 'q3', text: 'Update proficiency scales for chapters taught this quarter.' },
+        { key: 'q4', text: 'Archive/export a snapshot of grades, responses, and notebook entries for records.' },
+        { key: 'q5', text: 'Revisit open TODO items on the site (grading logic fixes, cleanup) before they pile up.' },
+        { key: 'q6', text: 'Re-run the completer-status check (3.0 GPA + assessments passed) and notify newly eligible students.' }
+      ],
+      semester: [
+        { key: 's1', text: 'Finalize and submit semester grades to Infinite Campus; reconcile any gaps from the manual sync workaround.' },
+        { key: 's2', text: "Compare actual pacing against scope & sequence / year-at-a-glance plan for each prep; adjust next semester's plan." },
+        { key: 's3', text: 'Archive the full semester of clock-in/timesheet/payroll data.' },
+        { key: 's4', text: 'Run the full completer audit for graduating seniors: cord, seal, industry credential, college credit eligibility.' },
+        { key: 's5', text: 'Roll over class sections and rosters for the new semester; reset due-dates templates.' },
+        { key: 's6', text: "Site maintenance pass: fix long-standing broken routes before they block next semester's workflow." }
+      ]
     };
 
-    // --- State ---
-    let teacherId = null;
-    let currentCadence = 'daily';
-    let currentPeriodKey = null;
-    let currentItems = [];
-    let specialDates = [];
+    const CFG = {
+      daily:     { badgeClass: 'bg-primary',           accentClass: 'tab-accent-daily' },
+      weekly:    { badgeClass: 'bg-info text-dark',    accentClass: 'tab-accent-weekly' },
+      biweekly:  { badgeClass: 'badge-purple',         accentClass: 'tab-accent-biweekly' },
+      monthly:   { badgeClass: 'bg-warning text-dark', accentClass: 'tab-accent-monthly' },
+      quarterly: { badgeClass: 'bg-danger',            accentClass: 'tab-accent-quarterly' },
+      semester:  { badgeClass: 'bg-secondary',         accentClass: 'tab-accent-semester' }
+    };
 
-    // --- Auth ---
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    let teacherId = null;
+    let specialDates = null;
+    const loaded = new Set();
+
     function getTeacherId() {
       try {
         const u = JSON.parse(localStorage.getItem('user') || 'null');
-        return u && (u.role === 'admin' || u.role === 'teacher') ? u.student_id : null;
+        return u ? (u.student_id || null) : null;
       } catch (_) { return null; }
     }
 
-    // --- Special dates ---
-    async function loadSpecialDates() {
+    function esc(s) {
+      return String(s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      if (lines.length < 2) return [];
+      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
+      return lines.slice(1).map(line => {
+        const cols = [];
+        let inQ = false, cur = '';
+        for (let i = 0; i < line.length; i++) {
+          const c = line[i];
+          if (c === '"') { inQ = !inQ; }
+          else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+          else cur += c;
+        }
+        cols.push(cur.trim());
+        const obj = {};
+        headers.forEach((h, i) => { obj[h] = (cols[i] || '').replace(/^"|"$/g,'').trim(); });
+        return obj;
+      });
+    }
+
+    async function ensureSpecialDates() {
+      if (specialDates !== null) return;
       try {
-        const text = await fetch(SPECIAL_DATES_URL).then(r => r.text());
-        specialDates = text.trim().split('\n').slice(1).map(line => {
-          const parts = line.split(',');
-          return { date: (parts[0] || '').trim(), type: (parts[1] || '').trim(), desc: (parts[2] || '').trim() };
-        }).filter(r => r.date);
+        const res = await fetch('/special-dates.csv');
+        if (res.ok) specialDates = parseCSV(await res.text());
+        else specialDates = [];
       } catch (_) { specialDates = []; }
     }
 
-    function findEventDate(keywords) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      // future events first
-      const future = specialDates.filter(r => {
-        const d = new Date(r.date + 'T00:00:00');
-        return d >= today && keywords.some(k => r.desc.toLowerCase().includes(k.toLowerCase()));
-      }).sort((a, b) => a.date.localeCompare(b.date));
+    function isoWeekKey(date) {
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const day = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - day);
+      const jan1 = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      const wk = Math.ceil((((d - jan1) / 86400000) + 1) / 7);
+      return `${d.getUTCFullYear()}-W${String(wk).padStart(2,'0')}`;
+    }
+
+    function isoWeekNum(date) {
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const day = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - day);
+      const jan1 = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      return Math.ceil((((d - jan1) / 86400000) + 1) / 7);
+    }
+
+    function findNearestSpecialEvent(patterns, prefixMap) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const matches = (specialDates || [])
+        .filter(r => patterns.some(p => r.Description && r.Description.includes(p)))
+        .map(r => {
+          const dt = new Date(r.Date + 'T00:00:00');
+          let prefix = '';
+          for (const [pat, pre] of Object.entries(prefixMap)) {
+            if (r.Description && r.Description.includes(pat)) { prefix = pre; break; }
+          }
+          return { date: r.Date, desc: r.Description, dt, prefix };
+        })
+        .sort((a, b) => a.dt - b.dt);
+
+      const future = matches.filter(m => m.dt >= today);
       if (future.length) return future[0];
-      // fall back to most recent past
-      const past = specialDates.filter(r => {
-        const d = new Date(r.date + 'T00:00:00');
-        return d < today && keywords.some(k => r.desc.toLowerCase().includes(k.toLowerCase()));
-      }).sort((a, b) => b.date.localeCompare(a.date));
-      return past[0] || null;
+      const past = matches.filter(m => m.dt < today);
+      return past.length ? past[past.length - 1] : null;
     }
 
-    // --- Period key computation ---
-    function todayStr() {
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    }
+    function computePeriodKey(cadence) {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2,'0');
+      const d = String(today.getDate()).padStart(2,'0');
 
-    function isoWeekKey() {
-      const d = new Date();
-      const thu = new Date(d);
-      thu.setDate(d.getDate() + (4 - (d.getDay() || 7)));
-      const yearStart = new Date(thu.getFullYear(), 0, 1);
-      const wk = Math.ceil(((thu - yearStart) / 86400000 + 1) / 7);
-      return `${thu.getFullYear()}-W${String(wk).padStart(2,'0')}`;
-    }
+      if (cadence === 'daily')    return `${y}-${m}-${d}`;
+      if (cadence === 'weekly')   return isoWeekKey(today);
+      if (cadence === 'biweekly') return today.getDate() < 15 ? `${y}-${m}-01` : `${y}-${m}-15`;
+      if (cadence === 'monthly')  return `${y}-${m}`;
 
-    function getPeriodKey(cadence, eventDate) {
-      const d = new Date();
-      const y = d.getFullYear();
-      const m = String(d.getMonth()+1).padStart(2,'0');
-      switch (cadence) {
-        case 'daily':     return todayStr();
-        case 'weekly':    return isoWeekKey();
-        case 'biweekly':  return `${y}-${m}-${d.getDate() < 15 ? '01' : '15'}`;
-        case 'monthly':   return `${y}-${m}`;
-        case 'quarterly': return eventDate ? `Q-${eventDate.date}` : null;
-        case 'semester':  return eventDate ? `S-${eventDate.date}` : null;
+      if (cadence === 'quarterly') {
+        const ev = findNearestSpecialEvent(['End Q1','End Q3'], {'End Q1':'Q1','End Q3':'Q3'});
+        return ev ? `${ev.prefix}-${ev.date}` : null;
       }
-      return todayStr();
-    }
-
-    function getPeriodLabel(cadence, pKey, eventDate) {
-      const d = new Date();
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      switch (cadence) {
-        case 'daily':     return `Today: ${d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;
-        case 'weekly':    return `Week ${pKey.split('-W')[1]} · ${d.getFullYear()}`;
-        case 'biweekly':  return `${months[d.getMonth()]} ${d.getDate() < 15 ? '1st–14th' : '15th–end'} · ${d.getFullYear()}`;
-        case 'monthly':   return `${months[d.getMonth()]} ${d.getFullYear()}`;
-        case 'quarterly': return eventDate ? `Quarter End: ${eventDate.date}` : '';
-        case 'semester':  return eventDate ? `Semester End: ${eventDate.date}` : '';
+      if (cadence === 'semester') {
+        const ev = findNearestSpecialEvent(['End S1','Last Day of School'], {'End S1':'S1','Last Day of School':'S2'});
+        return ev ? `${ev.prefix}-${ev.date}` : null;
       }
-      return pKey;
+      return null;
     }
 
-    // --- UI helpers ---
-    function updateProgress() {
-      const total = currentItems.length;
-      const done = currentItems.filter(i => i.completed).length;
-      const pct = total ? Math.round((done / total) * 100) : 0;
-      document.getElementById('progress-bar').style.width = pct + '%';
-      document.getElementById('progress-label').textContent = `${done} of ${total} done`;
-    }
-
-    function renderItems() {
-      const container = document.getElementById('checklist-items');
-      if (!currentItems.length) {
-        container.innerHTML = '<p class="text-muted text-center py-4">No items for this period.</p>';
-        return;
+    function periodBadgeText(cadence, periodKey) {
+      const today = new Date();
+      if (cadence === 'daily') {
+        return `Today: ${DAYS[today.getDay()]} ${MONTHS[today.getMonth()]} ${today.getDate()}`;
       }
-      container.innerHTML = currentItems.map(item => `
-        <div class="checklist-item d-flex align-items-start gap-2 mb-1 ${item.completed ? 'is-done' : ''}" id="row-${item.key}">
-          <div class="form-check mb-0 d-flex align-items-start gap-2 w-100">
-            <input class="form-check-input mt-1 flex-shrink-0" type="checkbox" id="chk-${item.key}"
-              data-key="${item.key}" ${item.completed ? 'checked' : ''}>
-            <label class="form-check-label" for="chk-${item.key}">${item.text}</label>
+      if (cadence === 'weekly') {
+        return `Week ${isoWeekNum(today)}`;
+      }
+      if (cadence === 'biweekly') {
+        if (!periodKey) return '';
+        const pts = periodKey.split('-');
+        const yr = parseInt(pts[0],10), mo = parseInt(pts[1],10)-1, dy = parseInt(pts[2],10);
+        const endDay = dy < 15 ? 14 : new Date(yr, mo+1, 0).getDate();
+        return `${MONTHS[mo]} ${dy}–${endDay}, ${yr}`;
+      }
+      if (cadence === 'monthly') {
+        if (!periodKey) return '';
+        const pts = periodKey.split('-');
+        return `${MONTHS[parseInt(pts[1],10)-1]} ${pts[0]}`;
+      }
+      if ((cadence === 'quarterly' || cadence === 'semester') && periodKey) {
+        const parts = periodKey.split('-');
+        const prefix = parts[0];
+        const dateStr = parts.slice(1).join('-');
+        const dt = new Date(dateStr + 'T00:00:00');
+        return `${prefix} — ${MONTHS[dt.getMonth()]} ${dt.getDate()}, ${dt.getFullYear()}`;
+      }
+      return periodKey || '';
+    }
+
+    function getEventObj(cadence) {
+      if (cadence === 'quarterly')
+        return findNearestSpecialEvent(['End Q1','End Q3'], {'End Q1':'Q1','End Q3':'Q3'});
+      if (cadence === 'semester')
+        return findNearestSpecialEvent(['End S1','Last Day of School'], {'End S1':'S1','Last Day of School':'S2'});
+      return null;
+    }
+
+    function updateProgress(cadence) {
+      const list = document.getElementById(`list-${cadence}`);
+      if (!list) return;
+      const boxes = list.querySelectorAll('input[type=checkbox]');
+      const total = boxes.length;
+      const done = Array.from(boxes).filter(b => b.checked).length;
+      const pct = total ? Math.round(done/total*100) : 0;
+      const bar = document.getElementById(`progbar-${cadence}`);
+      const lbl = document.getElementById(`proglbl-${cadence}`);
+      if (bar) { bar.style.width = pct+'%'; bar.setAttribute('aria-valuenow', pct); }
+      if (lbl) lbl.textContent = `${done} of ${total} done`;
+    }
+
+    function flashItem(key) {
+      const el = document.getElementById(`flash-${key}`);
+      if (!el) return;
+      el.classList.remove('d-none','flash-anim');
+      void el.offsetWidth;
+      el.classList.add('flash-anim');
+      setTimeout(() => el.classList.add('d-none'), 1200);
+    }
+
+    function revertCheckbox(cb, row, wasChecked) {
+      cb.checked = wasChecked;
+      if (row) row.classList.toggle('item-done', wasChecked);
+    }
+
+    function buildTabHtml(cadence, periodKey, items, eventObj) {
+      const cfg = CFG[cadence];
+      const total = items.length;
+      const done = items.filter(i => i.completed).length;
+      const pct = total ? Math.round(done/total*100) : 0;
+      const isEventTab = cadence === 'quarterly' || cadence === 'semester';
+
+      let eventBadgeHtml = '';
+      if (isEventTab && eventObj) {
+        const today = new Date(); today.setHours(0,0,0,0);
+        const evDt = new Date(eventObj.date + 'T00:00:00');
+        const daysAway = Math.round((evDt - today) / 86400000);
+        const within21 = Math.abs(daysAway) <= 21;
+        eventBadgeHtml = `
+          <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+            <span class="badge bg-light text-muted border">
+              <i class="fas fa-calendar-day me-1"></i>${esc(eventObj.desc)} &mdash; ${esc(eventObj.date)}
+            </span>
+            ${within21 ? '<span class="badge bg-success"><i class="fas fa-bolt me-1"></i>Active now</span>' : ''}
+            <small class="text-muted">Items activate within 21 days of event</small>
+          </div>`;
+      }
+
+      const itemsHtml = items.map(item => `
+        <label class="list-group-item list-group-item-action d-flex align-items-start gap-3 py-3 ${cfg.accentClass}${item.completed ? ' item-done' : ''}" id="row-${item.key}">
+          <input class="form-check-input mt-1" type="checkbox" id="chk-${item.key}"
+            data-key="${item.key}" data-cadence="${cadence}" data-period="${esc(periodKey || '')}"
+            ${item.completed ? 'checked' : ''}
+            onchange="CL.toggle(this)">
+          <span class="flex-grow-1 lh-sm item-text">${esc(item.text)}</span>
+          <i class="fas fa-check-circle text-success flash-ok d-none" id="flash-${item.key}"></i>
+        </label>`).join('');
+
+      return `
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+          <div>
+            <span class="badge ${cfg.badgeClass} fs-6 px-3 py-2">
+              ${esc(periodBadgeText(cadence, periodKey))}
+            </span>
+            ${eventBadgeHtml}
+          </div>
+          <div class="d-flex gap-2 flex-shrink-0">
+            <button class="btn btn-sm btn-outline-success fw-semibold"
+              onclick="CL.markAll('${cadence}','${esc(periodKey || '')}')">
+              <i class="fas fa-check-double me-1"></i>Mark All Complete
+            </button>
+            <button class="btn btn-sm btn-outline-danger fw-semibold"
+              onclick="CL.resetAll('${cadence}','${esc(periodKey || '')}')">
+              <i class="fas fa-rotate-left me-1"></i>Reset All
+            </button>
           </div>
         </div>
-      `).join('');
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <small class="fw-semibold text-muted" id="proglbl-${cadence}">${done} of ${total} done</small>
+            <small class="text-muted">${pct}%</small>
+          </div>
+          <div class="progress" style="height:8px;">
+            <div class="progress-bar bg-success" id="progbar-${cadence}"
+              style="width:${pct}%" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" role="progressbar"></div>
+          </div>
+        </div>
+        <div class="list-group" id="list-${cadence}">${itemsHtml}</div>`;
+    }
 
-      container.querySelectorAll('.form-check-input').forEach(chk => {
-        chk.addEventListener('change', async () => {
-          const key = chk.dataset.key;
-          const completed = chk.checked;
-          const item = currentItems.find(i => i.key === key);
-          if (item) item.completed = completed;
-          const row = document.getElementById(`row-${key}`);
-          row.classList.toggle('is-done', completed);
-          row.classList.add('flash-saved');
-          row.addEventListener('animationend', () => row.classList.remove('flash-saved'), { once: true });
-          updateProgress();
-          await fetch('/api/admin/checklist/toggle', {
+    async function loadTab(cadence) {
+      if (loaded.has(cadence)) return;
+      const pane = document.getElementById(`tab-${cadence}`);
+      if (!pane) return;
+
+      if (cadence === 'quarterly' || cadence === 'semester') {
+        await ensureSpecialDates();
+      }
+
+      const periodKey = computePeriodKey(cadence);
+      const eventObj = getEventObj(cadence);
+
+      if ((cadence === 'quarterly' || cadence === 'semester') && !periodKey) {
+        const label = cadence === 'quarterly' ? 'quarterly' : 'semester';
+        pane.innerHTML = `
+          <div class="alert alert-secondary py-2 px-3 small">
+            <i class="fas fa-circle-info me-1"></i>No upcoming ${label} event found in special-dates.csv.
+          </div>`;
+        loaded.add(cadence);
+        return;
+      }
+
+      let apiItems = [];
+      try {
+        let url = `/api/admin/checklist?cadence=${encodeURIComponent(cadence)}&teacher_id=${encodeURIComponent(teacherId)}`;
+        if (periodKey) url += `&period_key=${encodeURIComponent(periodKey)}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          apiItems = data.items || [];
+        }
+      } catch (_) {}
+
+      const apiMap = Object.fromEntries(apiItems.map(i => [i.key, i]));
+      const items = ITEMS[cadence].map(def => ({
+        key: def.key,
+        text: def.text,
+        completed: !!(apiMap[def.key] && apiMap[def.key].completed)
+      }));
+
+      pane.innerHTML = buildTabHtml(cadence, periodKey, items, eventObj);
+      loaded.add(cadence);
+    }
+
+    window.CL = {
+      async toggle(cb) {
+        const key = cb.dataset.key;
+        const cadence = cb.dataset.cadence;
+        const period = cb.dataset.period;
+        const checked = cb.checked;
+        const row = document.getElementById(`row-${key}`);
+        if (row) row.classList.toggle('item-done', checked);
+        updateProgress(cadence);
+        try {
+          const res = await fetch('/api/admin/checklist/toggle', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ teacher_id: teacherId, cadence: currentCadence, item_key: key, period_key: currentPeriodKey, completed })
-          }).catch(console.error);
+            body: JSON.stringify({ teacher_id: teacherId, cadence, item_key: key, period_key: period, completed: checked })
+          });
+          const data = await res.json();
+          if (data && data.success) flashItem(key);
+          else revertCheckbox(cb, row, !checked);
+        } catch (_) { revertCheckbox(cb, row, !checked); }
+      },
+
+      async markAll(cadence, periodKey) {
+        const list = document.getElementById(`list-${cadence}`);
+        if (!list) return;
+        const boxes = Array.from(list.querySelectorAll('input[type=checkbox]')).filter(b => !b.checked);
+        for (const cb of boxes) {
+          cb.checked = true;
+          const row = document.getElementById(`row-${cb.dataset.key}`);
+          if (row) row.classList.add('item-done');
+          updateProgress(cadence);
+          try {
+            const res = await fetch('/api/admin/checklist/toggle', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ teacher_id: teacherId, cadence, item_key: cb.dataset.key, period_key: periodKey, completed: true })
+            });
+            const data = await res.json();
+            if (data && data.success) flashItem(cb.dataset.key);
+          } catch (_) {}
+        }
+      },
+
+      async resetAll(cadence, periodKey) {
+        const list = document.getElementById(`list-${cadence}`);
+        if (!list) return;
+        const boxes = Array.from(list.querySelectorAll('input[type=checkbox]')).filter(b => b.checked);
+        for (const cb of boxes) {
+          cb.checked = false;
+          const row = document.getElementById(`row-${cb.dataset.key}`);
+          if (row) row.classList.remove('item-done');
+          updateProgress(cadence);
+          try {
+            await fetch('/api/admin/checklist/toggle', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ teacher_id: teacherId, cadence, item_key: cb.dataset.key, period_key: periodKey, completed: false })
+            });
+          } catch (_) {}
+        }
+      }
+    };
+
+    function init() {
+      teacherId = getTeacherId();
+      if (!teacherId) {
+        document.getElementById('auth-error').classList.remove('d-none');
+        document.querySelectorAll('.tab-pane').forEach(p => { p.innerHTML = ''; });
+        return;
+      }
+
+      loadTab('daily');
+
+      document.querySelectorAll('#checklist-tabs .nav-link').forEach(btn => {
+        btn.addEventListener('shown.bs.tab', function () {
+          const cadence = this.dataset.cadence;
+          if (cadence) loadTab(cadence);
         });
       });
     }
 
-    async function loadChecklist(cadence, periodKey) {
-      document.getElementById('checklist-items').innerHTML =
-        '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
-      document.getElementById('progress-label').textContent = 'Loading…';
-      document.getElementById('progress-bar').style.width = '0%';
-
-      const url = `/api/admin/checklist?teacher_id=${encodeURIComponent(teacherId)}&cadence=${cadence}` +
-                  (periodKey ? `&period_key=${encodeURIComponent(periodKey)}` : '');
-      try {
-        const data = await fetch(url).then(r => r.json());
-        currentItems = data.items || [];
-        currentPeriodKey = data.period_key || periodKey;
-        renderItems();
-        updateProgress();
-      } catch (_) {
-        document.getElementById('checklist-items').innerHTML =
-          '<p class="text-danger text-center py-4">Failed to load checklist.</p>';
-      }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
     }
 
-    async function switchCadence(cadence) {
-      currentCadence = cadence;
-
-      // Clear event notices
-      document.getElementById('event-notice').classList.add('d-none');
-      document.getElementById('no-event-notice').classList.add('d-none');
-
-      let eventDate = null;
-      let periodKey = null;
-
-      if (cadence === 'quarterly') {
-        eventDate = findEventDate(['End Q1', 'End Q3']);
-        if (eventDate) {
-          const evtD = new Date(eventDate.date + 'T00:00:00');
-          const today = new Date(); today.setHours(0,0,0,0);
-          const diff = Math.ceil((evtD - today) / 86400000);
-          const notice = document.getElementById('event-notice');
-          const txt = document.getElementById('event-notice-text');
-          if (diff >= 0) txt.textContent = `Upcoming quarter end: ${eventDate.desc || eventDate.date} (${diff === 0 ? 'today' : `in ${diff} day${diff===1?'':'s'}`}).`;
-          else txt.textContent = `Last quarter end was ${eventDate.date} (${eventDate.desc || ''}).`;
-          notice.classList.remove('d-none');
-        } else {
-          const n = document.getElementById('no-event-notice');
-          document.getElementById('no-event-text').textContent = 'No quarterly end date found in special-dates.csv.';
-          n.classList.remove('d-none');
-        }
-        periodKey = getPeriodKey('quarterly', eventDate);
-      } else if (cadence === 'semester') {
-        eventDate = findEventDate(['End S1', 'Last Day of School']);
-        if (eventDate) {
-          const evtD = new Date(eventDate.date + 'T00:00:00');
-          const today = new Date(); today.setHours(0,0,0,0);
-          const diff = Math.ceil((evtD - today) / 86400000);
-          const notice = document.getElementById('event-notice');
-          const txt = document.getElementById('event-notice-text');
-          if (diff >= 0) txt.textContent = `Upcoming semester end: ${eventDate.desc || eventDate.date} (${diff === 0 ? 'today' : `in ${diff} day${diff===1?'':'s'}`}).`;
-          else txt.textContent = `Last semester end was ${eventDate.date} (${eventDate.desc || ''}).`;
-          notice.classList.remove('d-none');
-        } else {
-          const n = document.getElementById('no-event-notice');
-          document.getElementById('no-event-text').textContent = 'No semester end date found in special-dates.csv.';
-          n.classList.remove('d-none');
-        }
-        periodKey = getPeriodKey('semester', eventDate);
-      } else {
-        periodKey = getPeriodKey(cadence);
-      }
-
-      const label = getPeriodLabel(cadence, periodKey || '', eventDate);
-      document.getElementById('period-label').textContent = label;
-
-      if (!periodKey) {
-        document.getElementById('checklist-items').innerHTML =
-          '<p class="text-muted text-center py-4">No event date found — checklist unavailable for this period.</p>';
-        document.getElementById('progress-label').textContent = '0 of 0 done';
-        document.getElementById('progress-bar').style.width = '0%';
-        currentItems = [];
-        currentPeriodKey = null;
-        return;
-      }
-
-      await loadChecklist(cadence, periodKey);
-    }
-
-    // --- Mark all / Reset all ---
-    document.getElementById('btn-mark-all').addEventListener('click', async () => {
-      if (!currentPeriodKey) return;
-      currentItems.forEach(i => i.completed = true);
-      renderItems();
-      updateProgress();
-      for (const item of currentItems) {
-        await fetch('/api/admin/checklist/toggle', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ teacher_id: teacherId, cadence: currentCadence, item_key: item.key, period_key: currentPeriodKey, completed: true })
-        }).catch(console.error);
-      }
-    });
-
-    document.getElementById('btn-reset-all').addEventListener('click', async () => {
-      if (!currentPeriodKey) return;
-      if (!confirm('Reset all items for this period?')) return;
-      await fetch('/api/admin/checklist/reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ teacher_id: teacherId, cadence: currentCadence, period_key: currentPeriodKey })
-      }).catch(console.error);
-      currentItems.forEach(i => i.completed = false);
-      renderItems();
-      updateProgress();
-    });
-
-    // --- Tab switching ---
-    document.querySelectorAll('[data-cadence]').forEach(btn => {
-      btn.addEventListener('click', () => switchCadence(btn.dataset.cadence));
-    });
-
-    // --- Init ---
-    teacherId = getTeacherId();
-    if (!teacherId) {
-      document.getElementById('login-error').classList.remove('d-none');
-      document.getElementById('checklist-items').innerHTML = '';
-      document.getElementById('checklist-meta').classList.add('d-none');
-      document.getElementById('checklist-tabs').classList.add('d-none');
-      return;
-    }
-
-    try {
-      const u = JSON.parse(localStorage.getItem('user') || '{}');
-      document.getElementById('teacher-badge').textContent = `${u.username || teacherId}`;
-    } catch (_) {}
-
-    await loadSpecialDates();
-    await switchCadence('daily');
   })();
   </script>
 </body>
