@@ -3,6 +3,23 @@ const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('./db');
 const bcrypt = require('bcrypt');
+const fs   = require('fs').promises;
+const path = require('path');
+
+const REPO_ROOT = path.join(__dirname, '..');
+
+// ── Calendar: save uploaded CSV to special-dates.csv ──────────────────────────
+router.post('/save-csv.php', express.text({ type: '*/*', limit: '10mb' }), async (req, res) => {
+    try {
+        const text = typeof req.body === 'string' ? req.body : '';
+        await fs.writeFile(path.join(REPO_ROOT, 'special-dates.csv'), text, 'utf8');
+        const count = text.split(/\r?\n/)
+            .filter(l => l.trim() && !/^date/i.test(l.split(',')[0].trim())).length;
+        res.json({ success: true, count });
+    } catch (e) {
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
 
 function getCurrentSchoolYear() {
     const now = new Date();

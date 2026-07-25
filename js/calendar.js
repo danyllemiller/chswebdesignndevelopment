@@ -120,6 +120,12 @@ async function initCalendar() {
         reader.readAsText(file);
     });
 
+    // Load school calendar from the static CSV file (primary data source)
+    try {
+        const csvRes = await fetch('/special-dates.csv');
+        if (csvRes.ok) parseCSV(await csvRes.text());
+    } catch {}
+
     // Load school year boundary config
     try {
         const res = await fetch('/api/school-config.php');
