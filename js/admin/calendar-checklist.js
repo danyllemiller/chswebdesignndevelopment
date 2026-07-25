@@ -95,13 +95,16 @@
         if (cadence === 'daily') return !isWorkDay(viewedStr);
 
         if (cadence === 'weekly') {
-            const mon = new Date(anchor);
-            mon.setDate(anchor.getDate() - (anchor.getDay() + 6) % 7);
-            for (let i = 0; i < 5; i++) {
-                const d = new Date(mon); d.setDate(mon.getDate() + i);
-                if (isWorkDay(ds(d))) return false;   // found at least one work day
+            // Mirror renderWeekView in calendar.js: find Sunday of the displayed week,
+            // then check Mon(+1) through Fri(+5). The ISO-Monday formula breaks when
+            // anchor is a Sunday because it jumps back to the previous week.
+            const sun = new Date(anchor);
+            sun.setDate(anchor.getDate() - anchor.getDay());
+            for (let i = 1; i <= 5; i++) {
+                const d = new Date(sun); d.setDate(sun.getDate() + i);
+                if (isWorkDay(ds(d))) return false;
             }
-            return true;  // all 5 weekdays are holidays/off
+            return true;
         }
 
         return false;  // monthly: always show
