@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>WRS Practice Assessment — Web Design &amp; Development</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/web-app-manifest-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/favicon-512x512.png">
+
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/student-pages.css">
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body style="background-color: var(--site-secondary);">
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9 mx-auto">
+        <div id="exam-container" class="mt-4">
+          <div class="text-center p-5 bg-white shadow-sm rounded" style="border-top: 6px solid var(--primary-color);">
+            <div class="spinner-border" style="color: var(--primary-color);" role="status"></div>
+            <p class="mt-3 fw-bold" style="color: var(--primary-color);">Connecting to Digital Arts Cloud&hellip;</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="/js/wrsLogic.js?v=1"></script>
+  <script>
+  (function () {
+
+    // ── PART 1: TRUE / FALSE (20 items) ─────────────────────────────────────
+    // a: 'T' (True) or 'F' (False)
+    var tfSection = [
+      { q: "Creative employees who propose new workplace approaches are stepping outside their assigned job boundaries.", a: "F" },
+      { q: "Evaluating all available solutions before acting is better practice than choosing the first idea that seems workable.", a: "T" },
+      { q: "Waiting to be told what to do before starting a new task is a sign of professional self-direction.", a: "F" },
+      { q: "Using a company device for personal social media is acceptable as long as your assigned tasks are complete.", a: "F" },
+      { q: "Consistently arriving a few minutes early and prepared to work demonstrates a positive work ethic.", a: "T" },
+      { q: "The goal of resolving a workplace conflict is to identify which party was at fault.", a: "F" },
+      { q: "Paraphrasing a client's request back to them before beginning work is a professional listening technique.", a: "T" },
+      { q: "A professional must treat colleagues of all cultural backgrounds with equal respect.", a: "T" },
+      { q: "A client's negative feedback is best addressed by explaining why your original design decision was correct.", a: "F" },
+      { q: "Completing your own portion of a team project is sufficient — your teammates' work is their own responsibility.", a: "F" },
+      { q: "Understanding how your role contributes to your organization's goals is a core part of professional responsibility.", a: "T" },
+      { q: "Gross pay and net pay are the same amount on a paycheck.", a: "F" },
+      { q: "When an employer adopts new tools, the professional response is to learn them even if you preferred the old ones.", a: "T" },
+      { q: "Prioritizing tasks means completing the shortest task first so you can cross it off the list quickly.", a: "F" },
+      { q: "The most credible source for current web accessibility standards is always a popular social media post.", a: "F" },
+      { q: "Backing up project files regularly protects your work in the event of hardware failure or data corruption.", a: "T" },
+      { q: "A PDF is a good format for sharing a finished document with a client who may not have the software used to create it.", a: "T" },
+      { q: "A professional should match their language and tone to the audience and setting they are communicating in.", a: "T" },
+      { q: "An invoice is a document that requests payment from a client for services already delivered.", a: "T" },
+      { q: "Using a piece of equipment you have never been trained on is acceptable when the task is urgent.", a: "F" }
+    ];
+
+    // ── PART 2: MATCHING (4 sets × 5 items) ──────────────────────────────────
+    // choices: array of "A. Label" strings. answer: the letter.
+    var matchSection = [
+      {
+        title: "Set A — Match each workplace situation to the professional skill it best demonstrates.",
+        choices: [
+          "A. Critical Thinking",
+          "B. Integrity",
+          "C. Customer Service",
+          "D. Information Security",
+          "E. Teamwork",
+          "F. Work Ethic"
+        ],
+        items: [
+          { q: "You discover an error in a client invoice that has already been paid and immediately report it to your supervisor.", answer: "B" },
+          { q: "Two possible solutions exist for a client problem; you research both before recommending the better one.", answer: "A" },
+          { q: "A client is confused about their account; you pause your current task and guide them to a solution.", answer: "C" },
+          { q: "A coworker asks to use your login credentials to access a shared file. You decline and share it through proper channels.", answer: "D" },
+          { q: "You finish your portion of a group project a day early and offer to review a teammate's work before the deadline.", answer: "E" }
+        ]
+      },
+      {
+        title: "Set B — Match each description to the correct workplace document.",
+        choices: [
+          "A. Resume",
+          "B. Invoice",
+          "C. Work Order",
+          "D. Memo",
+          "E. Non-Disclosure Agreement",
+          "F. Safety Data Sheet"
+        ],
+        items: [
+          { q: "A billing document sent to a client requesting payment for a completed web design project.", answer: "B" },
+          { q: "A one-page summary of your education, skills, and work history submitted when applying for a job.", answer: "A" },
+          { q: "A legal agreement that restricts an employee from sharing a company's confidential information with outside parties.", answer: "E" },
+          { q: "A brief written communication distributed internally to inform staff about a schedule or policy change.", answer: "D" },
+          { q: "A written authorization that describes and approves a specific service to be performed for a customer.", answer: "C" }
+        ]
+      },
+      {
+        title: "Set C — Match each technology term to its correct definition.",
+        choices: [
+          "A. Firewall",
+          "B. Cloud Storage",
+          "C. Phishing",
+          "D. File-Naming Convention",
+          "E. Operating System",
+          "F. Bandwidth"
+        ],
+        items: [
+          { q: "A fraudulent message impersonating a trusted organization in order to steal passwords or credentials.", answer: "C" },
+          { q: "An agreed-upon system for naming files consistently so any team member can locate and identify them.", answer: "D" },
+          { q: "A security system that monitors and filters the network traffic entering and leaving a computer or network.", answer: "A" },
+          { q: "The core software layer that manages a computer's hardware and provides the environment for applications to run.", answer: "E" },
+          { q: "Remote servers that store, manage, and process data, accessible from anywhere via an internet connection.", answer: "B" }
+        ]
+      },
+      {
+        title: "Set D — Match each career or employment term to its correct definition.",
+        choices: [
+          "A. Net Pay",
+          "B. Mission Statement",
+          "C. Gross Pay",
+          "D. Ergonomics",
+          "E. Professional Development",
+          "F. Prioritizing"
+        ],
+        items: [
+          { q: "Your total earnings before any taxes or deductions are removed from your paycheck.", answer: "C" },
+          { q: "The amount you actually receive after all taxes and deductions have been taken out of your paycheck.", answer: "A" },
+          { q: "The design of work environments, tools, and processes to reduce physical strain and support worker health and safety.", answer: "D" },
+          { q: "Ongoing training, certifications, and coursework taken to keep professional skills current as the industry changes.", answer: "E" },
+          { q: "Organizing tasks by importance and deadline to maximize productivity and meet critical commitments first.", answer: "F" }
+        ]
+      }
+    ];
+
+    // ── PART 3: MULTIPLE CHOICE (40 items) ───────────────────────────────────
+    // answer must exactly match one of the options strings.
+    var mcSection = [
+      // Std 1 — Creativity & Innovation
+      {
+        q: "The software you normally use to export design files is unavailable on a client deadline day. The most resourceful response is to:",
+        options: [
+          "Wait for IT to restore the software before proceeding",
+          "Tell the client the deadline must be pushed back",
+          "Find an alternative tool that can produce the required output",
+          "Work on a different project until the software is fixed"
+        ],
+        answer: "Find an alternative tool that can produce the required output"
+      },
+      // Std 2 — Critical Thinking & Problem Solving
+      {
+        q: "A webpage you built displays correctly in Chrome but is broken in Safari. What should you do first?",
+        options: [
+          "Rebuild the page from scratch in a different framework",
+          "Tell users to switch to Chrome",
+          "Gather information about which elements are affected, then research the compatibility issue",
+          "Remove the features that look broken until the client complains"
+        ],
+        answer: "Gather information about which elements are affected, then research the compatibility issue"
+      },
+      // Std 3 — Initiative & Self-Direction
+      {
+        q: "Which behavior best demonstrates initiative in a workplace setting?",
+        options: [
+          "Completing all assigned tasks by their deadlines without exception",
+          "Finishing your work early and spending the rest of the day on personal tasks",
+          "Identifying a process that wastes team time and proposing a specific improvement",
+          "Asking your supervisor what to do each time you complete a task"
+        ],
+        answer: "Identifying a process that wastes team time and proposing a specific improvement"
+      },
+      // Std 4 — Integrity
+      {
+        q: "You overhear a coworker sharing confidential client information in a public area. The best action is:",
+        options: [
+          "Ignore it — monitoring coworkers is not your responsibility",
+          "Join the conversation to hear more context",
+          "Privately remind your coworker about the confidentiality policy",
+          "Report it publicly at the next team meeting to prevent it from happening again"
+        ],
+        answer: "Privately remind your coworker about the confidentiality policy"
+      },
+      // Std 5 — Work Ethic
+      {
+        q: "You realize at 7 a.m. that you will arrive 20 minutes late to work. The most professional action is:",
+        options: [
+          "Say nothing and hope no one notices",
+          "Text a coworker and ask them to cover for you",
+          "Call or message your supervisor before your shift begins",
+          "Leave work 20 minutes late at the end of the day to compensate"
+        ],
+        answer: "Call or message your supervisor before your shift begins"
+      },
+      // Std 6 — Conflict Resolution
+      {
+        q: "A conflict with a coworker has continued through two direct conversations without resolution. The appropriate next step is:",
+        options: [
+          "Stop collaborating with that person entirely",
+          "Bring it up at the next all-staff meeting",
+          "Involve a supervisor or a neutral mediator",
+          "Document the incidents and say nothing further"
+        ],
+        answer: "Involve a supervisor or a neutral mediator"
+      },
+      // Std 7 — Listening & Speaking
+      {
+        q: "During a discovery meeting, a client describes their vision in vague terms. The best response is:",
+        options: [
+          "Begin work based on your best interpretation of what they meant",
+          "Ask clarifying questions and summarize your understanding before leaving the meeting",
+          "Send a proposal that covers every possible interpretation",
+          "Ask them to return when they have more specific ideas"
+        ],
+        answer: "Ask clarifying questions and summarize your understanding before leaving the meeting"
+      },
+      // Std 8 — Respect for Diversity
+      {
+        q: "A new team member has an approved cultural accommodation that includes a brief daily break at a scheduled time. The appropriate response from teammates is:",
+        options: [
+          "Ask the team member to explain their cultural practice to the whole group",
+          "Treat the approved accommodation as routine and adjust scheduling accordingly",
+          "Report it to HR as a scheduling concern",
+          "Ask the team member to reschedule it for personal time outside of work"
+        ],
+        answer: "Treat the approved accommodation as routine and adjust scheduling accordingly"
+      },
+      // Std 9 — Customer Service
+      {
+        q: "A client is frustrated about a project delay caused by a third-party vendor your team did not control. The best first response is:",
+        options: [
+          "Explain clearly that the delay is the vendor's fault, not your team's",
+          "Offer a full refund immediately",
+          "Acknowledge the impact on the client and explain what your team is actively doing to resolve it",
+          "Transfer the client to the vendor's support contact"
+        ],
+        answer: "Acknowledge the impact on the client and explain what your team is actively doing to resolve it"
+      },
+      // Std 10 — Teamwork
+      {
+        q: "A teammate is falling behind on their portion of a shared project, putting the deadline at risk. The best first step is:",
+        options: [
+          "Redo their work yourself without telling them",
+          "Report them to the supervisor immediately",
+          "Talk with them directly to understand the situation and discuss how you might help",
+          "Let the deadline pass so the consequence becomes visible"
+        ],
+        answer: "Talk with them directly to understand the situation and discuss how you might help"
+      },
+      // Std 11 — Big-Picture Thinking
+      {
+        q: "A new plugin would improve your personal workflow by 2 hours per week but introduces a known security vulnerability. Considering the whole organization, this trade-off is:",
+        options: [
+          "Worthwhile, because the time savings are measurable and immediate",
+          "A decision only management is qualified to evaluate",
+          "Not worthwhile, because a security breach would cost far more than 2 hours per week",
+          "Acceptable as long as you are careful about how you use the plugin"
+        ],
+        answer: "Not worthwhile, because a security breach would cost far more than 2 hours per week"
+      },
+      // Std 12 — Career & Life Management
+      {
+        q: "Which is the strongest professional development goal statement?",
+        options: [
+          "Get better at web design this year",
+          "Complete the Google UX Design Certificate by December and publish two case studies to my portfolio",
+          "Do more networking and go to events",
+          "Learn whatever my employer needs me to learn"
+        ],
+        answer: "Complete the Google UX Design Certificate by December and publish two case studies to my portfolio"
+      },
+      // Std 13 — Continuous Learning
+      {
+        q: "Your employer replaces the project management platform your team has used for years with a completely different one. The most professional response is:",
+        options: [
+          "Request an exemption and continue using the old system",
+          "Continue with the old system until you are officially required to switch",
+          "Learn the new system, ask for help where needed, and share useful tips with teammates",
+          "Wait to see how many coworkers complain before deciding whether to comply"
+        ],
+        answer: "Learn the new system, ask for help where needed, and share useful tips with teammates"
+      },
+      // Std 14 — Efficiency & Productivity
+      {
+        q: "You have five tasks and cannot complete them all today. Which should you tackle first?",
+        options: [
+          "The one you find most interesting or enjoyable",
+          "The shortest one, so you can cross it off quickly and feel productive",
+          "The one with the nearest deadline and the greatest consequence if delayed",
+          "The one assigned most recently"
+        ],
+        answer: "The one with the nearest deadline and the greatest consequence if delayed"
+      },
+      // Std 15 — Information Literacy
+      {
+        q: "You find two articles with contradictory advice about a CSS technique. The best next step is:",
+        options: [
+          "Use the information that supports your current approach",
+          "Average the two recommendations and use the middle ground",
+          "Check the date, author credentials, and source authority of each, then verify with official documentation",
+          "Use whichever article appeared first in the search results"
+        ],
+        answer: "Check the date, author credentials, and source authority of each, then verify with official documentation"
+      },
+      // Std 16 — Information Security
+      {
+        q: "You receive an email from 'IT Support' asking you to click a link and re-enter your credentials. The correct action is:",
+        options: [
+          "Click the link but enter only your username, not your password",
+          "Reply to the email and ask for more details before clicking",
+          "Do not click the link — contact IT through official channels to verify the request",
+          "Forward the warning to coworkers before clicking the link yourself"
+        ],
+        answer: "Do not click the link — contact IT through official channels to verify the request"
+      },
+      // Std 17 — Information Technology
+      {
+        q: "A client requests a file that will look identical on every device and can be opened without purchasing specific software. The best format is:",
+        options: [
+          ".psd (Photoshop Document)",
+          ".indd (InDesign Document)",
+          ".pdf (Portable Document Format)",
+          ".docx (Microsoft Word Document)"
+        ],
+        answer: ".pdf (Portable Document Format)"
+      },
+      // Std 18 — Job-Specific Tools
+      {
+        q: "Before operating a piece of equipment you have never used before, you should first:",
+        options: [
+          "Watch a coworker use it once, then proceed on your own",
+          "Try it at the lowest setting until you figure it out through trial and error",
+          "Read the operating manual and confirm you are trained and authorized to use it",
+          "Ask a coworker to operate it for you whenever you need it completed"
+        ],
+        answer: "Read the operating manual and confirm you are trained and authorized to use it"
+      },
+      // Std 19 — Mathematics (applied)
+      {
+        q: "A client approves a 12-hour design project at $55 per hour. Stock photos cost $85 and domain registration costs $15. What is the total project quote?",
+        options: [
+          "$660",
+          "$745",
+          "$760",
+          "$775"
+        ],
+        answer: "$760"
+      },
+      // Std 20 — Professionalism
+      {
+        q: "Which best describes workplace-appropriate communication?",
+        options: [
+          "Using the same casual tone with clients that you use with close friends",
+          "Keeping all messages as brief as possible regardless of context or audience",
+          "Matching your language, tone, and level of formality to the audience and setting",
+          "Communicating only when it is strictly required by your job description"
+        ],
+        answer: "Matching your language, tone, and level of formality to the audience and setting"
+      },
+      // Std 21 — Reading & Writing
+      {
+        q: "Which workplace document is sent to a client to request payment for services already delivered?",
+        options: [
+          "Purchase Order",
+          "Invoice",
+          "Work Order",
+          "Internal Memo"
+        ],
+        answer: "Invoice"
+      },
+      // Std 22 — Workplace Safety
+      {
+        q: "You find a piece of equipment that is malfunctioning in a way that could injure someone. The safest response is:",
+        options: [
+          "Use it carefully and report it at the end of your shift",
+          "Set it aside and tell coworkers verbally not to use it",
+          "Tag it out of service and report it to your supervisor immediately",
+          "Attempt to repair it yourself before the next shift begins"
+        ],
+        answer: "Tag it out of service and report it to your supervisor immediately"
+      },
+      // Mixed review — policy / integrity
+      {
+        q: "An employee is asked by a supervisor to do something that conflicts with written company policy. The most professional response is:",
+        options: [
+          "Do it anyway, since the supervisor has authority and requested it directly",
+          "Refuse silently and say nothing about the reason",
+          "Follow the policy and politely explain the conflict to the supervisor",
+          "Find a creative way to do both the task and follow the policy simultaneously"
+        ],
+        answer: "Follow the policy and politely explain the conflict to the supervisor"
+      },
+      // Mixed — data security
+      {
+        q: "Which practice best protects confidential client project files?",
+        options: [
+          "Storing them on a personal USB drive for convenient access from any computer",
+          "Emailing them to your personal address for remote access",
+          "Using company-approved storage with access restricted to those who need the files",
+          "Saving them with an obscure filename so others are unlikely to open them"
+        ],
+        answer: "Using company-approved storage with access restricted to those who need the files"
+      },
+      // Math — effective hourly rate
+      {
+        q: "A project is billed at a flat fee of $3,200. Materials cost $480 and you spend 44 hours on the work. What is your effective hourly rate after subtracting material costs?",
+        options: [
+          "$72.73",
+          "$61.82",
+          "$62.27",
+          "$62.00"
+        ],
+        answer: "$61.82"
+      },
+      // Active listening
+      {
+        q: "Which behavior best demonstrates active listening during a client presentation?",
+        options: [
+          "Waiting for the client to finish speaking before forming your response",
+          "Taking notes and asking follow-up questions that build on what the client said",
+          "Agreeing with everything the client says to avoid creating conflict",
+          "Recording the meeting and reviewing it afterward instead of engaging live"
+        ],
+        answer: "Taking notes and asking follow-up questions that build on what the client said"
+      },
+      // Math — material ordering
+      {
+        q: "You must order lumber for 8 workstations. Each requires 4.5 feet. Lumber is sold in 10-foot sections only. What is the minimum number of sections to order?",
+        options: [
+          "3",
+          "4",
+          "5",
+          "36"
+        ],
+        answer: "4"
+      },
+      // Root cause analysis
+      {
+        q: "A problem you resolved two weeks ago has returned in exactly the same form. This most likely means:",
+        options: [
+          "Fixes expire and need to be reapplied on a schedule",
+          "You addressed a symptom of the problem rather than its root cause",
+          "Someone else undid your work without telling you",
+          "Some problems are fundamentally unsolvable"
+        ],
+        answer: "You addressed a symptom of the problem rather than its root cause"
+      },
+      // Source credibility
+      {
+        q: "You need current information about WCAG web accessibility compliance standards. The most credible source is:",
+        options: [
+          "A peer's personal design blog",
+          "A forum thread with many upvoted answers",
+          "The official W3C published guidelines at w3.org",
+          "A popular YouTube tutorial published three years ago"
+        ],
+        answer: "The official W3C published guidelines at w3.org"
+      },
+      // Career management
+      {
+        q: "Which best describes ongoing career management in a technical field?",
+        options: [
+          "Applying for every promotion that opens, regardless of readiness",
+          "Staying in one comfortable role until management asks you to move",
+          "Regularly comparing your current skills to where your industry is heading and addressing gaps proactively",
+          "Changing employers every two years to accumulate diverse experience"
+        ],
+        answer: "Regularly comparing your current skills to where your industry is heading and addressing gaps proactively"
+      },
+      // Constructive feedback in teamwork
+      {
+        q: "A teammate proposes an idea during brainstorming that you believe will not work. The most professional response is:",
+        options: [
+          "Explain immediately and directly why the idea will fail",
+          "Stay silent to avoid creating conflict",
+          "Ask a specific question about how the idea would handle a particular challenge",
+          "Offer your own competing idea without acknowledging theirs"
+        ],
+        answer: "Ask a specific question about how the idea would handle a particular challenge"
+      },
+      // Project planning
+      {
+        q: "You are given a large website redesign project due in three weeks. The most productive first step is:",
+        options: [
+          "Begin with the page or section you know best",
+          "Break the project into tasks with interim milestones and schedule time for each",
+          "Wait until you have a large, uninterrupted block of time to focus",
+          "Request a two-week extension up front to avoid time pressure"
+        ],
+        answer: "Break the project into tasks with interim milestones and schedule time for each"
+      },
+      // Payroll literacy
+      {
+        q: "Gross pay is best defined as:",
+        options: [
+          "The amount deposited directly to your bank account each pay period",
+          "Your total earnings before taxes and deductions are removed",
+          "The amount you pay in federal income tax each year",
+          "Your base salary not including any bonuses or overtime"
+        ],
+        answer: "Your total earnings before taxes and deductions are removed"
+      },
+      // Receiving feedback
+      {
+        q: "Which is the most appropriate way to respond to critical feedback on your design work?",
+        options: [
+          "Request a different reviewer for future projects",
+          "Ask clarifying questions and identify specific changes you will make next time",
+          "Accept it without comment and continue working exactly as before",
+          "Explain why the criticism does not apply in this particular case"
+        ],
+        answer: "Ask clarifying questions and identify specific changes you will make next time"
+      },
+      // Ergonomics
+      {
+        q: "Designing a workstation so that monitor height, keyboard position, and chair height minimize physical strain is called:",
+        options: [
+          "Professionalism",
+          "Ergonomics",
+          "Calibration",
+          "Standardization"
+        ],
+        answer: "Ergonomics"
+      },
+      // Handling unknown questions professionally
+      {
+        q: "A client asks a technical question you cannot accurately answer. The most professional response is:",
+        options: [
+          "Give your best guess to avoid appearing uninformed",
+          "Tell the client to look it up themselves",
+          "Tell the client you will find the accurate answer and follow up by a specific time",
+          "Redirect the client to another contact without explanation"
+        ],
+        answer: "Tell the client you will find the accurate answer and follow up by a specific time"
+      },
+      // Ethics in billing
+      {
+        q: "An invoice your team sent contains a $400 undercharge that the client has already paid. The most ethical action is:",
+        options: [
+          "Say nothing — the client was satisfied with the price they paid",
+          "Add the $400 to the next invoice without explanation",
+          "Notify your supervisor and issue a corrected invoice to the client",
+          "Split the difference and charge $200 more on the next project"
+        ],
+        answer: "Notify your supervisor and issue a corrected invoice to the client"
+      },
+      // Verification after deployment
+      {
+        q: "After deploying a bug fix to a client's live website, you should:",
+        options: [
+          "Notify the client and immediately move on to the next task",
+          "Move to the next task — if something is wrong, the client will report it",
+          "Verify the fix resolved the issue, test edge cases, and document what caused the original bug",
+          "Wait 24 hours for user feedback before declaring the fix successful"
+        ],
+        answer: "Verify the fix resolved the issue, test edge cases, and document what caused the original bug"
+      },
+      // Reliability
+      {
+        q: "Workplace reliability is best described as:",
+        options: [
+          "Never making a mistake on any assignment",
+          "Working more hours than are required by your schedule",
+          "Consistently delivering what you committed to, by the time you committed to it",
+          "Being liked and trusted by your teammates and clients"
+        ],
+        answer: "Consistently delivering what you committed to, by the time you committed to it"
+      },
+      // Scheduling & communication
+      {
+        q: "You discover you will need to miss a scheduled client meeting. The most professional action is:",
+        options: [
+          "Send a coworker to attend without notifying the client",
+          "Show up late and explain when you arrive",
+          "Notify the client as far in advance as possible and propose a new time",
+          "Skip the meeting and provide an explanation the following day"
+        ],
+        answer: "Notify the client as far in advance as possible and propose a new time"
+      },
+      // Workplace roles / org awareness
+      {
+        q: "An employee who understands how their daily tasks connect to the organization's overall goals is demonstrating:",
+        options: [
+          "Overstepping into management's responsibilities",
+          "Big-picture professional thinking",
+          "A desire for promotion",
+          "Unnecessary concern about things outside their job description"
+        ],
+        answer: "Big-picture professional thinking"
+      },
+      // Digital communication tone
+      {
+        q: "When sending a professional email to a client you have never met, you should:",
+        options: [
+          "Use the same casual abbreviations you use in text messages",
+          "Use a formal greeting, clear subject line, and proofread before sending",
+          "Keep it as short as possible to respect their time, even if it lacks detail",
+          "Copy your entire team on the message to show transparency"
+        ],
+        answer: "Use a formal greeting, clear subject line, and proofread before sending"
+      }
+    ];
+
+    // ── PART 4: LABELING (1 diagram) ─────────────────────────────────────────
+    // SVG shows an HTML semantic page layout with numbered regions.
+    // Students assign HTML element names from the word bank to each region.
+    var labelSection = [
+      {
+        title: "HTML Semantic Document Structure — Identify the numbered HTML element in each region of the webpage layout below.",
+        wordBank: ["article", "aside", "footer", "header", "main", "nav"],
+        items: [
+          { answer: "header" },
+          { answer: "nav" },
+          { answer: "main" },
+          { answer: "article" },
+          { answer: "aside" },
+          { answer: "footer" }
+        ],
+        svg: '<svg viewBox="0 0 522 310" style="width:100%;max-width:560px;display:block;margin:0 auto;border-radius:6px;border:1px solid #dee2e6;background:#f8f9fa;font-family:system-ui,sans-serif">'
+          // outer frame
+          + '<rect x="1" y="1" width="520" height="308" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="5"/>'
+
+          // ① HEADER
+          + '<rect x="8" y="8" width="506" height="56" fill="#cfe2ff" stroke="#0d6efd" stroke-width="1.5" rx="4"/>'
+          + '<circle cx="24" cy="24" r="12" fill="#0d6efd"/>'
+          + '<text x="24" y="29" text-anchor="middle" font-size="11" fill="white" font-weight="700">1</text>'
+          + '<text x="270" y="40" text-anchor="middle" font-size="12" fill="#084298">Branding · Logo · Site Title</text>'
+
+          // ② NAV
+          + '<rect x="8" y="70" width="506" height="32" fill="#d1e7dd" stroke="#198754" stroke-width="1.5" rx="4"/>'
+          + '<circle cx="24" cy="86" r="12" fill="#198754"/>'
+          + '<text x="24" y="91" text-anchor="middle" font-size="11" fill="white" font-weight="700">2</text>'
+          + '<text x="270" y="90" text-anchor="middle" font-size="11" fill="#0a3622">Navigation Links · Menu Items</text>'
+
+          // ③ MAIN
+          + '<rect x="8" y="108" width="330" height="162" fill="#fff3cd" stroke="#997404" stroke-width="1.5" rx="4"/>'
+          + '<circle cx="24" cy="124" r="12" fill="#fd7e14"/>'
+          + '<text x="24" y="129" text-anchor="middle" font-size="11" fill="white" font-weight="700">3</text>'
+          + '<text x="173" y="124" text-anchor="middle" font-size="11" fill="#664d03">Primary Content Area</text>'
+
+          // ④ ARTICLE inside MAIN
+          + '<rect x="18" y="136" width="310" height="124" fill="#ffe8d4" stroke="#e07b00" stroke-width="1.5" stroke-dasharray="6,3" rx="4"/>'
+          + '<circle cx="34" cy="152" r="12" fill="#e07b00"/>'
+          + '<text x="34" y="157" text-anchor="middle" font-size="11" fill="white" font-weight="700">4</text>'
+          + '<text x="173" y="200" text-anchor="middle" font-size="11" fill="#9c4b00">Self-contained, reusable content block</text>'
+
+          // ⑤ ASIDE
+          + '<rect x="344" y="108" width="170" height="162" fill="#e9ecef" stroke="#6c757d" stroke-width="1.5" rx="4"/>'
+          + '<circle cx="360" cy="124" r="12" fill="#6c757d"/>'
+          + '<text x="360" y="129" text-anchor="middle" font-size="11" fill="white" font-weight="700">5</text>'
+          + '<text x="429" y="196" text-anchor="middle" font-size="11" fill="#495057">Sidebar · Related Links</text>'
+
+          // ⑥ FOOTER
+          + '<rect x="8" y="276" width="506" height="28" fill="#adb5bd" stroke="#6c757d" stroke-width="1.5" rx="4"/>'
+          + '<circle cx="24" cy="290" r="12" fill="#495057"/>'
+          + '<text x="24" y="295" text-anchor="middle" font-size="11" fill="white" font-weight="700">6</text>'
+          + '<text x="270" y="294" text-anchor="middle" font-size="11" fill="#212529">Contact · Copyright · Credits</text>'
+          + '</svg>'
+      }
+    ];
+
+    // ── Launch the assessment ─────────────────────────────────────────────────
+    var config = {
+      chapterTitle:     'WRS Practice Assessment — Form A',
+      gradebookExamId:  'WRS-Practice-A',
+      tfSection:        tfSection,
+      matchSection:     matchSection,
+      mcSection:        mcSection,
+      labelSection:     labelSection
+    };
+
+    initWRS(config);
+
+  })();
+  </script>
+</body>
+</html>
