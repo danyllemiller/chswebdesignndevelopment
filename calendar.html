@@ -178,6 +178,36 @@
 
           </aside>
         </div>
+
+        <!-- Calendar Checklist Panel — teacher only, JS controls visibility -->
+        <div id="cal-checklist-wrap" class="d-none mt-3">
+          <div class="card shadow-sm border-0">
+            <div class="card-header d-flex align-items-center justify-content-between py-2 px-3"
+                 id="cal-cl-header" style="background:#003087;color:#fff;border-radius:.375rem .375rem 0 0">
+              <span class="fw-bold" style="font-size:.9rem">
+                <i class="fas fa-clipboard-check me-2"></i><span id="cal-cl-title">Today's Checklist</span>
+              </span>
+              <div class="d-flex gap-2 align-items-center">
+                <span id="cal-cl-badge" class="badge"
+                      style="background:rgba(255,255,255,0.22);color:#fff;font-size:.72rem"></span>
+                <button id="cal-cl-mark-all" type="button" class="btn btn-sm py-0 px-2"
+                        style="background:rgba(255,255,255,0.18);color:#fff;font-size:.72rem;border:1px solid rgba(255,255,255,0.35)">
+                  Mark All
+                </button>
+                <button id="cal-cl-reset" type="button" class="btn btn-sm py-0 px-2"
+                        style="background:transparent;color:rgba(255,255,255,0.8);font-size:.72rem;border:1px solid rgba(255,255,255,0.35)">
+                  Reset
+                </button>
+              </div>
+            </div>
+            <div id="cal-cl-body" class="card-body p-3">
+              <div class="text-center py-2 text-muted small">
+                <span class="spinner-border spinner-border-sm me-1"></span> Loading…
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -386,6 +416,7 @@
   <div id="footer-placeholder"></div>
   <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 
+  <script src="/js/admin/calendar-checklist.js"></script>
   <script type="module" src="/js/calendar.js?v=11"></script>
 </body>
 </html>
