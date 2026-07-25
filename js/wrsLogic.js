@@ -457,7 +457,7 @@
             var got = ans || '&mdash;';
             tfHtml += '<div class="mb-2 p-2 rounded small" style="page-break-inside:avoid;border:1px solid ' + (ok ? '#198754' : '#dc3545') + ';background:' + (ok ? '#f0fff4' : '#fff5f5') + '">'
                 + '<p class="mb-1 fw-bold">' + esc(item.q) + '</p>'
-                + '<p class="mb-0">Your answer: <strong>' + got + '</strong> &nbsp;&middot;&nbsp; Correct: <strong>' + item.a + '</strong> '
+                + '<p class="mb-0">Your answer: <strong>' + got + '</strong> '
                 + (ok ? '<span class="badge bg-success">&#10003; Correct</span>' : '<span class="badge bg-danger">&#10007; Incorrect</span>')
                 + '</p>' + (!ok ? hintHtml(item.hint) : '') + '</div>';
         });
@@ -480,7 +480,6 @@
                 return '<div class="ms-3 mb-2 p-2 rounded small" style="border:1px solid ' + (rowOk ? '#198754' : '#dc3545') + ';background:' + (rowOk ? '#f0fff4' : '#fff5f5') + '">'
                     + '<p class="mb-1 fw-semibold">' + esc(mi.q) + '</p>'
                     + '<p class="mb-0">Your: <strong>' + (picked ? esc(choiceLabel(picked)) : '&mdash;') + '</strong>'
-                    + (!rowOk ? ' &nbsp;&middot;&nbsp; Correct: <strong style="color:#198754">' + esc(choiceLabel(mi.answer)) + '</strong>' : '')
                     + ' ' + (rowOk ? '<span class="badge bg-success">&#10003;</span>' : '<span class="badge bg-danger">&#10007;</span>')
                     + '</p>' + (!rowOk ? hintHtml(mi.hint) : '') + '</div>';
             }).join('');
@@ -501,7 +500,6 @@
             mcHtml += '<div class="mb-2 p-2 rounded small" style="page-break-inside:avoid;border:1px solid ' + (ok ? '#198754' : '#dc3545') + ';background:' + (ok ? '#f0fff4' : '#fff5f5') + '">'
                 + '<p class="mb-1 fw-bold">' + esc(item.q) + '</p>'
                 + '<p class="mb-0">Your answer: <span style="color:' + (ok ? '#198754' : '#dc3545') + ';font-weight:700">' + esc(chosen) + '</span>'
-                + (!ok ? ' &nbsp;&middot;&nbsp; Correct: <span style="color:#198754;font-weight:700">' + esc(item.answer) + '</span>' : '')
                 + ' ' + (ok ? '<span class="badge bg-success">&#10003; Correct</span>' : '<span class="badge bg-danger">&#10007; Incorrect</span>')
                 + '</p>' + (!ok ? hintHtml(item.hint) : '') + '</div>';
         });
@@ -520,7 +518,6 @@
                 return '<div class="ms-3 mb-2 p-2 rounded small" style="border:1px solid ' + (rowOk ? '#198754' : '#dc3545') + ';background:' + (rowOk ? '#f0fff4' : '#fff5f5') + '">'
                     + '<p class="mb-1 fw-semibold">Region ' + (j + 1) + '</p>'
                     + '<p class="mb-0">Your: <strong>' + (picked ? esc(picked) : '&mdash;') + '</strong>'
-                    + (!rowOk ? ' &nbsp;&middot;&nbsp; Correct: <strong style="color:#198754">' + esc(mi.answer) + '</strong>' : '')
                     + ' ' + (rowOk ? '<span class="badge bg-success">&#10003;</span>' : '<span class="badge bg-danger">&#10007;</span>')
                     + '</p>' + (!rowOk ? hintHtml(mi.hint) : '') + '</div>';
             }).join('');
