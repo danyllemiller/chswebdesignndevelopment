@@ -18,9 +18,10 @@
         semester: "Semester Checklist",
     };
 
-    let _tid    = null;
-    let _view   = 'view-monthly';
+    let _tid     = null;
+    let _view    = 'view-monthly';
     let _sdCache = null;
+    let _loadGen = 0;
 
     function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -189,6 +190,8 @@
 
     async function loadView(viewId) {
         _view = viewId;
+        const gen = ++_loadGen;   // any older concurrent call will abort when it sees gen !== _loadGen
+
         const wrap   = document.getElementById('cal-checklist-wrap');
         const body   = document.getElementById('cal-cl-body');
         if (!wrap || !body) return;
@@ -213,6 +216,7 @@
             // Hide checklist on holidays / non-school weeks
             if (cadence === 'daily' || cadence === 'weekly') {
                 const sdates = await fetchSpecialDates();
+                if (gen !== _loadGen) return;   // a newer loadView already took over — abort
                 if (isHolidayPeriod(cadence, sdates)) {
                     const noun = cadence === 'daily' ? 'today' : 'this week';
                     body.innerHTML = `<p class="text-muted small fst-italic p-1 mb-0">
@@ -225,28 +229,33 @@
             }
 
             const data = await apiGet(cadence, pk);
+            if (gen !== _loadGen) return;
             body.innerHTML = '';
             renderSection(cadence, pk, data, body, false);
 
             if (cadence === 'monthly') {
                 const { year, month } = getDisplayedMonth();
                 const dates  = await fetchSpecialDates();
+                if (gen !== _loadGen) return;
 
                 const qRows = eventsInMonth(dates, ['End Q1','End Q3'], year, month);
                 for (const r of qRows.slice(0,1)) {
                     const qData = await apiGet('quarterly', `Q-${r.date}`);
+                    if (gen !== _loadGen) return;
                     renderSection('quarterly', `Q-${r.date}`, qData, body, true);
                 }
 
                 const sRows = eventsInMonth(dates, ['End S1','Last Day'], year, month);
                 for (const r of sRows.slice(0,1)) {
                     const sData = await apiGet('semester', `S-${r.date}`);
+                    if (gen !== _loadGen) return;
                     renderSection('semester', `S-${r.date}`, sData, body, true);
                 }
             }
 
             updateBadge();
         } catch {
+            if (gen !== _loadGen) return;
             body.innerHTML = '<p class="text-danger small p-2">Could not load checklist.</p>';
         }
     }
