@@ -246,12 +246,23 @@
         var answered = Object.keys(selObj).length;
         var allDone  = answered === item.items.length;
 
-        // Choices reference panel
+        // Track which letters are already used in this set
+        var usedLetters = {};
+        item.items.forEach(function (_, j) {
+            var picked = selObj[j];
+            if (picked) usedLetters[picked] = true;
+        });
+
+        // Choices reference panel — cross off letters already selected
         var choicesHtml = '<div class="p-3 mb-4 rounded border" style="background:#f8f9fa">'
             + '<p class="small fw-bold text-muted mb-2" style="text-transform:uppercase;letter-spacing:.05em">Answer Choices</p>'
             + '<div class="d-flex flex-wrap gap-2">'
             + item.choices.map(function (c) {
-                return '<span class="px-3 py-1 rounded border bg-white small fw-semibold">' + esc(c) + '</span>';
+                var letter = c.split('.')[0].trim();
+                var used   = !!usedLetters[letter];
+                return '<span class="px-3 py-1 rounded border small fw-semibold" style="background:#fff;'
+                    + (used ? 'text-decoration:line-through;opacity:.45;' : '')
+                    + '">' + esc(c) + '</span>';
             }).join('')
             + '</div></div>';
 
@@ -311,8 +322,18 @@
         var answered = Object.keys(selObj).length;
         var allDone  = answered === item.items.length;
 
+        // Track which words are already used in this diagram
+        var usedWords = {};
+        item.items.forEach(function (_, j) {
+            var picked = selObj[j];
+            if (picked) usedWords[picked] = true;
+        });
+
         var wbHtml = item.wordBank.map(function (w) {
-            return '<span class="badge bg-white border text-dark me-1 mb-1 fw-normal" style="font-size:.8rem">' + esc(w) + '</span>';
+            var used = !!usedWords[w];
+            return '<span class="badge bg-white border me-1 mb-1 fw-normal" style="font-size:.8rem;color:' + (used ? '#aaa' : '#000') + ';'
+                + (used ? 'text-decoration:line-through;opacity:.5;' : '')
+                + '">' + esc(w) + '</span>';
         }).join('');
 
         var rowsHtml = item.items.map(function (mi, j) {
