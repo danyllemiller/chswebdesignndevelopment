@@ -67,6 +67,14 @@
         return _sdCache;
     }
 
+    function getViewedDate() {
+        try {
+            const cd = localStorage.getItem('cal_date');
+            if (cd && /^\d{4}-\d{2}-\d{2}$/.test(cd)) return cd;
+        } catch {}
+        return todayStr();
+    }
+
     function isHolidayPeriod(cadence, dates) {
         function isWorkDay(dateStr) {
             const dow = new Date(dateStr + 'T00:00:00').getDay();
@@ -79,14 +87,16 @@
             return ['teacher work', 'teacher training', 'prof learning'].some(k => desc.includes(k));
         }
 
-        const today = new Date();
+        // Use the calendar's currently viewed date, not today
+        const viewedStr = getViewedDate();
+        const anchor    = new Date(viewedStr + 'T00:00:00');
         const ds = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
-        if (cadence === 'daily') return !isWorkDay(ds(today));
+        if (cadence === 'daily') return !isWorkDay(viewedStr);
 
         if (cadence === 'weekly') {
-            const mon = new Date(today);
-            mon.setDate(today.getDate() - (today.getDay() + 6) % 7);
+            const mon = new Date(anchor);
+            mon.setDate(anchor.getDate() - (anchor.getDay() + 6) % 7);
             for (let i = 0; i < 5; i++) {
                 const d = new Date(mon); d.setDate(mon.getDate() + i);
                 if (isWorkDay(ds(d))) return false;   // found at least one work day
