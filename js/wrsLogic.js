@@ -58,12 +58,14 @@
                          math: !!q.math, hint: q.hint || '' });
         });
 
-        // Label — each numbered region is its own question
+        // Label — entire diagram is one question; all regions answered together
         (cfg.labelSection || []).forEach(function (diag) {
-            diag.items.forEach(function (item, i) {
-                items.push({ type: 'label', regionNum: i + 1, answer: item.answer,
-                             svg: diag.svg, wordBank: diag.wordBank, title: diag.title,
-                             hint: item.hint || '' });
+            items.push({
+                type:     'labelSet',
+                title:    diag.title,
+                svg:      diag.svg,
+                wordBank: diag.wordBank,
+                items:    diag.items.slice()   // spatially numbered — keep order
             });
         });
 
@@ -171,8 +173,9 @@
         var mSets  = cfg.matchSection.length;
         var mItems = cfg.matchSection.reduce(function (s, st) { return s + st.items.length; }, 0);
         var mcCt   = cfg.mcSection.length;
-        var lItems = (cfg.labelSection || []).reduce(function (s, d) { return s + d.items.length; }, 0);
-        var total  = tfCt + mItems + mcCt + lItems;
+        var lDiags  = (cfg.labelSection || []).length;
+        var lItems  = (cfg.labelSection || []).reduce(function (s, d) { return s + d.items.length; }, 0);
+        var total   = tfCt + mItems + mcCt + lItems;
 
         $c().innerHTML = '<div class="card shadow border-primary mx-auto" style="max-width:580px">'
             + '<div class="card-header text-white text-center py-3" style="background:var(--primary-color,#003087)">'
@@ -193,7 +196,7 @@
             + '<li>' + tfCt + ' True / False</li>'
             + '<li>' + mItems + ' Matching (' + mSets + ' grouped sets of ' + Math.round(mItems / mSets) + ')</li>'
             + '<li>' + mcCt + ' Multiple Choice</li>'
-            + '<li>' + lItems + ' Labeling</li>'
+            + '<li>' + lItems + ' Labeling (' + lDiags + ' grouped diagram' + (lDiags !== 1 ? 's' : '') + ')</li>'
             + '</ul>'
             + '<p class="mt-2 mb-0 fst-italic">All question types are mixed and shuffled. No penalty for guessing. Passing score is <strong>75%</strong>.</p>'
             + '</div>'
@@ -205,10 +208,10 @@
     function renderQuestion() {
         if (_qIdx >= _flatQ.length) { renderResults(); return; }
         var item = _flatQ[_qIdx];
-        if      (item.type === 'tf')       renderTF(item);
+        if      (item.type === 'tf')        renderTF(item);
         else if (item.type === 'matchSet') renderMatchSet(item);
         else if (item.type === 'mc')       renderMC(item);
-        else if (item.type === 'label')    renderLabel(item);
+        else if (item.type === 'labelSet') renderLabelSet(item);
     }
 
     // ── Shared footer ─────────────────────────────────────────────────────────
@@ -304,34 +307,45 @@
         $c().innerHTML = cardShell('#003087', 'Multiple Choice', body, navFooter(sel !== undefined, '#003087'));
     }
 
-    // ── Labeling ──────────────────────────────────────────────────────────────
-    function renderLabel(item) {
-        var sel  = _ans[_qIdx] || '';
-        var opts = item.wordBank.map(function (w) {
-            return '<option value="' + esc(w) + '"' + (sel === w ? ' selected' : '') + '>' + esc(w) + '</option>';
-        }).join('');
+    // ── Labeling Set — all regions displayed together ──────────────────────────
+    function renderLabelSet(item) {
+        var selObj   = _ans[_qIdx] || {};
+        var answered = Object.keys(selObj).length;
+        var allDone  = answered === item.items.length;
+
         var wbHtml = item.wordBank.map(function (w) {
             return '<span class="badge bg-white border text-dark me-1 mb-1 fw-normal" style="font-size:.8rem">' + esc(w) + '</span>';
         }).join('');
+
+        var rowsHtml = item.items.map(function (mi, j) {
+            var picked  = selObj[j] || '';
+            var opts = item.wordBank.map(function (w) {
+                return '<option value="' + esc(w) + '"' + (picked === w ? ' selected' : '') + '>' + esc(w) + '</option>';
+            }).join('');
+            var rowBg     = picked ? '#fff8f0' : '#fff';
+            var rowBorder = picked ? '2px solid #fd7e14' : '2px solid #dee2e6';
+            return '<div class="mb-3 p-3 rounded d-flex align-items-center gap-3" style="background:' + rowBg + ';border:' + rowBorder + '">'
+                + '<div class="flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:28px;height:28px;min-width:28px;background:#fd7e14;color:#fff;font-size:.8rem">' + (j + 1) + '</div>'
+                + '<div class="flex-grow-1 fw-semibold small">Region ' + (j + 1) + '</div>'
+                + '<select class="form-select form-select-sm fw-bold flex-shrink-0" style="max-width:240px;color:#fd7e14" onchange="wrsSelectLabelSet(' + j + ',this.value)">'
+                + '<option value="">&mdash; choose label &mdash;</option>' + opts
+                + '</select>'
+                + '</div>';
+        }).join('');
+
         var body = '<div class="text-center mb-3">'
             + '<span class="badge mb-2 px-3 py-2 fw-semibold" style="background:#fd7e14;font-size:.78rem;letter-spacing:.05em">LABELING</span>'
             + '<p class="fw-bold mt-1 mb-0" style="font-size:.9rem">' + esc(item.title) + '</p>'
+            + '<p class="text-muted small mb-0">' + answered + ' of ' + item.items.length + ' labeled</p>'
             + '</div>'
             + '<div class="mb-3">' + item.svg + '</div>'
             + '<div class="p-3 bg-light rounded border mb-3">'
             + '<p class="small fw-bold text-muted mb-2" style="text-transform:uppercase;letter-spacing:.05em">Word Bank</p>'
             + '<div>' + wbHtml + '</div>'
             + '</div>'
-            + '<div class="p-3 rounded" style="background:#fff8f0;border:2px solid #fd7e14">'
-            + '<label class="fw-bold mb-2 d-block">'
-            + '<span class="badge me-2 fw-bold" style="background:#fd7e14">Region ' + item.regionNum + '</span>'
-            + 'What is the section labeled <strong>' + item.regionNum + '</strong> on this pay stub?'
-            + '</label>'
-            + '<select class="form-select fw-bold" style="color:#fd7e14;font-size:1rem" onchange="wrsSelectLabel(this.value)">'
-            + '<option value="">&mdash; select label &mdash;</option>' + opts
-            + '</select>'
-            + '</div>';
-        $c().innerHTML = cardShell('#fd7e14', 'Labeling', body, navFooter(!!sel, '#fd7e14'));
+            + rowsHtml;
+
+        $c().innerHTML = cardShell('#fd7e14', 'Labeling', body, navFooter(allDone, '#fd7e14'));
     }
 
     // ── Calculator widget ─────────────────────────────────────────────────────
@@ -386,9 +400,11 @@
             } else if (item.type === 'mc') {
                 t.mc++;
                 if (item.options[ans] === item.answer) r.mc++;
-            } else if (item.type === 'label') {
-                t.label++;
-                if (ans === item.answer) r.label++;
+            } else if (item.type === 'labelSet') {
+                item.items.forEach(function (mi, j) {
+                    t.label++;
+                    if ((ans || {})[j] === mi.answer) r.label++;
+                });
             }
         });
 
@@ -464,13 +480,23 @@
                     + '</p>' + (!ok ? hintHtml(item.hint) : '') + '</div>';
             }
 
-            if (item.type === 'label') {
-                ok  = ans === item.answer;
-                got = ans || '&mdash;';
-                rev.label += '<div class="mb-2 p-2 rounded small ' + (ok ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10') + '">'
-                    + '<p class="mb-1 fw-semibold">Region ' + item.regionNum + '</p>'
-                    + '<p class="mb-0">Your: <strong>' + esc(got) + '</strong> &nbsp;&middot;&nbsp; Correct: <strong>' + esc(item.answer) + '</strong> '
-                    + (ok ? '&#10003;' : '&#10007;') + '</p>' + (!ok ? hintHtml(item.hint) : '') + '</div>';
+            if (item.type === 'labelSet') {
+                var diagAnswers = ans || {};
+                var diagRight = 0;
+                var diagRows = item.items.map(function (mi, j) {
+                    var picked  = diagAnswers[j] || '';
+                    var rowOk   = picked === mi.answer;
+                    if (rowOk) diagRight++;
+                    return '<div class="ms-3 mb-2 p-2 rounded small ' + (rowOk ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10') + '">'
+                        + '<p class="mb-1 fw-semibold">Region ' + (j + 1) + '</p>'
+                        + '<p class="mb-0">Your: <strong>' + (picked ? esc(picked) : '&mdash;') + '</strong>'
+                        + (!rowOk ? ' &nbsp;&middot;&nbsp; Correct: <strong class="text-success">' + esc(mi.answer) + '</strong>' : '')
+                        + ' ' + (rowOk ? '&#10003;' : '&#10007;')
+                        + '</p>' + (!rowOk ? hintHtml(mi.hint) : '') + '</div>';
+                }).join('');
+                rev.label += '<div class="mb-3 p-2 rounded border ' + (diagRight === item.items.length ? 'border-success' : 'border-danger') + '">'
+                    + '<p class="mb-2 fw-bold small">' + esc(item.title) + ' <span class="badge ' + (diagRight === item.items.length ? 'bg-success' : 'bg-danger') + '">' + diagRight + '/' + item.items.length + '</span></p>'
+                    + diagRows + '</div>';
             }
         });
 
@@ -560,9 +586,11 @@
         renderMC(_flatQ[_qIdx]);
     };
 
-    window.wrsSelectLabel = function (val) {
-        _ans[_qIdx] = val || '';
-        renderLabel(_flatQ[_qIdx]);
+    // labelSet: itemIdx = region index (0-based), val = word bank string chosen
+    window.wrsSelectLabelSet = function (itemIdx, val) {
+        if (!_ans[_qIdx]) _ans[_qIdx] = {};
+        _ans[_qIdx][itemIdx] = val;
+        renderLabelSet(_flatQ[_qIdx]);
     };
 
     // ── Calculator ────────────────────────────────────────────────────────────
