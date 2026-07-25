@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>WRS Practice Assessment — Web Design &amp; Development</title>
+  <title>WRS Practice Assessment — Nevada CTE</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
   <link rel="shortcut icon" href="/images/favicon/favicon.ico">
@@ -39,40 +39,60 @@
     </div>
   </section>
 
-  <script src="/js/wrsLogic.js?v=1"></script>
+  <script src="/js/wrsLogic.js?v=2"></script>
   <script>
   (function () {
 
-    // ── PART 1: TRUE / FALSE (20 items) ─────────────────────────────────────
-    // a: 'T' (True) or 'F' (False)
+    // ── PART 1: TRUE / FALSE (20 items) ──────────────────────────────────────
+    // Nevada WRS Standards 1–22  |  a: 'T' or 'F'
     var tfSection = [
+      // Std 1 — Creativity & Innovation
       { q: "Creative employees who propose new workplace approaches are stepping outside their assigned job boundaries.", a: "F" },
+      // Std 2 — Critical Thinking
       { q: "Evaluating all available solutions before acting is better practice than choosing the first idea that seems workable.", a: "T" },
+      // Std 3 — Initiative & Self-Direction
       { q: "Waiting to be told what to do before starting a new task is a sign of professional self-direction.", a: "F" },
+      // Std 4 — Integrity
       { q: "Using a company device for personal social media is acceptable as long as your assigned tasks are complete.", a: "F" },
+      // Std 5 — Work Ethic
       { q: "Consistently arriving a few minutes early and prepared to work demonstrates a positive work ethic.", a: "T" },
+      // Std 6 — Conflict Resolution
       { q: "The goal of resolving a workplace conflict is to identify which party was at fault.", a: "F" },
+      // Std 7 — Listening & Speaking
       { q: "Paraphrasing a client's request back to them before beginning work is a professional listening technique.", a: "T" },
+      // Std 8 — Respect for Diversity
       { q: "A professional must treat colleagues of all cultural backgrounds with equal respect.", a: "T" },
-      { q: "A client's negative feedback is best addressed by explaining why your original design decision was correct.", a: "F" },
+      // Std 9 — Customer Service
+      { q: "A client's negative feedback is best addressed by explaining why your original decision was correct.", a: "F" },
+      // Std 10 — Teamwork
       { q: "Completing your own portion of a team project is sufficient — your teammates' work is their own responsibility.", a: "F" },
+      // Std 11 — Big-Picture Thinking
       { q: "Understanding how your role contributes to your organization's goals is a core part of professional responsibility.", a: "T" },
+      // Std 19 — Mathematics (payroll literacy)
       { q: "Gross pay and net pay are the same amount on a paycheck.", a: "F" },
+      // Std 13 — Continuous Learning
       { q: "When an employer adopts new tools, the professional response is to learn them even if you preferred the old ones.", a: "T" },
+      // Std 14 — Efficiency & Productivity
       { q: "Prioritizing tasks means completing the shortest task first so you can cross it off the list quickly.", a: "F" },
-      { q: "The most credible source for current web accessibility standards is always a popular social media post.", a: "F" },
+      // Std 15 — Information Literacy
+      { q: "A popular social media post is the most credible source for current professional standards or technical regulations in any field.", a: "F" },
+      // Std 16 — Information Security
       { q: "Backing up project files regularly protects your work in the event of hardware failure or data corruption.", a: "T" },
-      { q: "A PDF is a good format for sharing a finished document with a client who may not have the software used to create it.", a: "T" },
+      // Std 17 — Information Technology
+      { q: "A PDF is a good format for sharing a finished document with someone who may not have the software used to create it.", a: "T" },
+      // Std 20 — Professionalism
       { q: "A professional should match their language and tone to the audience and setting they are communicating in.", a: "T" },
+      // Std 21 — Reading & Writing
       { q: "An invoice is a document that requests payment from a client for services already delivered.", a: "T" },
+      // Std 22 — Workplace Safety
       { q: "Using a piece of equipment you have never been trained on is acceptable when the task is urgent.", a: "F" }
     ];
 
-    // ── PART 2: MATCHING (4 sets × 5 items) ──────────────────────────────────
-    // choices: array of "A. Label" strings. answer: the letter.
+    // ── PART 2: MATCHING (4 sets × 5 items = 20 items) ───────────────────────
+    // choices: "A. Label" strings.  answer: the letter only.
     var matchSection = [
       {
-        title: "Set A — Match each workplace situation to the professional skill it best demonstrates.",
+        title: "Set A — Match each workplace situation to the WRS skill it best demonstrates.",
         choices: [
           "A. Critical Thinking",
           "B. Integrity",
@@ -83,9 +103,9 @@
         ],
         items: [
           { q: "You discover an error in a client invoice that has already been paid and immediately report it to your supervisor.", answer: "B" },
-          { q: "Two possible solutions exist for a client problem; you research both before recommending the better one.", answer: "A" },
-          { q: "A client is confused about their account; you pause your current task and guide them to a solution.", answer: "C" },
-          { q: "A coworker asks to use your login credentials to access a shared file. You decline and share it through proper channels.", answer: "D" },
+          { q: "Two possible solutions exist for a problem; you research both before recommending the better one.", answer: "A" },
+          { q: "A customer is confused; you pause your current task and guide them step by step to a solution.", answer: "C" },
+          { q: "A coworker asks to use your login credentials to access a shared file. You decline and share it through proper channels instead.", answer: "D" },
           { q: "You finish your portion of a group project a day early and offer to review a teammate's work before the deadline.", answer: "E" }
         ]
       },
@@ -100,15 +120,15 @@
           "F. Safety Data Sheet"
         ],
         items: [
-          { q: "A billing document sent to a client requesting payment for a completed web design project.", answer: "B" },
+          { q: "A billing document sent to a client requesting payment for completed professional services.", answer: "B" },
           { q: "A one-page summary of your education, skills, and work history submitted when applying for a job.", answer: "A" },
-          { q: "A legal agreement that restricts an employee from sharing a company's confidential information with outside parties.", answer: "E" },
+          { q: "A legal agreement that restricts an employee from sharing a company's confidential information.", answer: "E" },
           { q: "A brief written communication distributed internally to inform staff about a schedule or policy change.", answer: "D" },
           { q: "A written authorization that describes and approves a specific service to be performed for a customer.", answer: "C" }
         ]
       },
       {
-        title: "Set C — Match each technology term to its correct definition.",
+        title: "Set C — Match each description to the correct technology or security term.",
         choices: [
           "A. Firewall",
           "B. Cloud Storage",
@@ -118,11 +138,11 @@
           "F. Bandwidth"
         ],
         items: [
-          { q: "A fraudulent message impersonating a trusted organization in order to steal passwords or credentials.", answer: "C" },
+          { q: "A fraudulent message that impersonates a trusted organization in order to steal passwords or credentials.", answer: "C" },
           { q: "An agreed-upon system for naming files consistently so any team member can locate and identify them.", answer: "D" },
-          { q: "A security system that monitors and filters the network traffic entering and leaving a computer or network.", answer: "A" },
-          { q: "The core software layer that manages a computer's hardware and provides the environment for applications to run.", answer: "E" },
-          { q: "Remote servers that store, manage, and process data, accessible from anywhere via an internet connection.", answer: "B" }
+          { q: "A security system that monitors and filters network traffic entering and leaving a computer or network.", answer: "A" },
+          { q: "Core software that manages a computer's hardware and provides the environment in which applications run.", answer: "E" },
+          { q: "Remote servers that store and process data, accessible from anywhere via an internet connection.", answer: "B" }
         ]
       },
       {
@@ -137,20 +157,23 @@
         ],
         items: [
           { q: "Your total earnings before any taxes or deductions are removed from your paycheck.", answer: "C" },
-          { q: "The amount you actually receive after all taxes and deductions have been taken out of your paycheck.", answer: "A" },
-          { q: "The design of work environments, tools, and processes to reduce physical strain and support worker health and safety.", answer: "D" },
+          { q: "The amount you actually receive in your paycheck after all taxes and deductions have been taken out.", answer: "A" },
+          { q: "The design of work environments and tools to reduce physical strain and support worker health and safety.", answer: "D" },
           { q: "Ongoing training, certifications, and coursework taken to keep professional skills current as the industry changes.", answer: "E" },
-          { q: "Organizing tasks by importance and deadline to maximize productivity and meet critical commitments first.", answer: "F" }
+          { q: "Organizing tasks by importance and deadline to maximize productivity and meet the most critical commitments first.", answer: "F" }
         ]
       }
     ];
 
     // ── PART 3: MULTIPLE CHOICE (40 items) ───────────────────────────────────
+    // Aligned to all 22 Nevada WRS/CTECS Standards.
+    // Extra emphasis on last year's weakest areas:
+    //   Std 19 Mathematics (61%), Std 17 IT (69.86%), Std 3 Initiative (66.72%)
     // answer must exactly match one of the options strings.
     var mcSection = [
       // Std 1 — Creativity & Innovation
       {
-        q: "The software you normally use to export design files is unavailable on a client deadline day. The most resourceful response is to:",
+        q: "The software you normally use to export deliverable files is unavailable on a client deadline day. The most resourceful response is to:",
         options: [
           "Wait for IT to restore the software before proceeding",
           "Tell the client the deadline must be pushed back",
@@ -159,27 +182,16 @@
         ],
         answer: "Find an alternative tool that can produce the required output"
       },
-      // Std 2 — Critical Thinking & Problem Solving
-      {
-        q: "A webpage you built displays correctly in Chrome but is broken in Safari. What should you do first?",
-        options: [
-          "Rebuild the page from scratch in a different framework",
-          "Tell users to switch to Chrome",
-          "Gather information about which elements are affected, then research the compatibility issue",
-          "Remove the features that look broken until the client complains"
-        ],
-        answer: "Gather information about which elements are affected, then research the compatibility issue"
-      },
-      // Std 3 — Initiative & Self-Direction
+      // Std 3 — Initiative & Self-Direction (weak: 66.72%)
       {
         q: "Which behavior best demonstrates initiative in a workplace setting?",
         options: [
-          "Completing all assigned tasks by their deadlines without exception",
-          "Finishing your work early and spending the rest of the day on personal tasks",
-          "Identifying a process that wastes team time and proposing a specific improvement",
+          "Completing all assigned tasks by their deadlines without doing anything extra",
+          "Finishing your assigned work early and spending the remainder of the day on personal tasks",
+          "Identifying an inefficient process and presenting your supervisor with a specific solution unprompted",
           "Asking your supervisor what to do each time you complete a task"
         ],
-        answer: "Identifying a process that wastes team time and proposing a specific improvement"
+        answer: "Identifying an inefficient process and presenting your supervisor with a specific solution unprompted"
       },
       // Std 4 — Integrity
       {
@@ -205,7 +217,7 @@
       },
       // Std 6 — Conflict Resolution
       {
-        q: "A conflict with a coworker has continued through two direct conversations without resolution. The appropriate next step is:",
+        q: "A workplace conflict with a coworker has continued through two direct conversations without resolution. The appropriate next step is:",
         options: [
           "Stop collaborating with that person entirely",
           "Bring it up at the next all-staff meeting",
@@ -227,18 +239,18 @@
       },
       // Std 8 — Respect for Diversity
       {
-        q: "A new team member has an approved cultural accommodation that includes a brief daily break at a scheduled time. The appropriate response from teammates is:",
+        q: "A new team member has an approved cultural accommodation that includes a brief daily break at a set time. Teammates should:",
         options: [
           "Ask the team member to explain their cultural practice to the whole group",
           "Treat the approved accommodation as routine and adjust scheduling accordingly",
           "Report it to HR as a scheduling concern",
-          "Ask the team member to reschedule it for personal time outside of work"
+          "Ask the team member to reschedule it for personal time"
         ],
         answer: "Treat the approved accommodation as routine and adjust scheduling accordingly"
       },
-      // Std 9 — Customer Service
+      // Std 9 — Customer Service Orientation
       {
-        q: "A client is frustrated about a project delay caused by a third-party vendor your team did not control. The best first response is:",
+        q: "A client is frustrated about a delay caused by a vendor your team did not control. The best first response is:",
         options: [
           "Explain clearly that the delay is the vendor's fault, not your team's",
           "Offer a full refund immediately",
@@ -260,34 +272,34 @@
       },
       // Std 11 — Big-Picture Thinking
       {
-        q: "A new plugin would improve your personal workflow by 2 hours per week but introduces a known security vulnerability. Considering the whole organization, this trade-off is:",
+        q: "A change that saves your team 2 hours per week also introduces a known security risk across the organization. The most responsible view is:",
         options: [
           "Worthwhile, because the time savings are measurable and immediate",
           "A decision only management is qualified to evaluate",
-          "Not worthwhile, because a security breach would cost far more than 2 hours per week",
-          "Acceptable as long as you are careful about how you use the plugin"
+          "Not worthwhile, because a security breach would cost far more than the weekly time savings",
+          "Acceptable as long as individual employees are careful"
         ],
-        answer: "Not worthwhile, because a security breach would cost far more than 2 hours per week"
+        answer: "Not worthwhile, because a security breach would cost far more than the weekly time savings"
       },
       // Std 12 — Career & Life Management
       {
         q: "Which is the strongest professional development goal statement?",
         options: [
-          "Get better at web design this year",
-          "Complete the Google UX Design Certificate by December and publish two case studies to my portfolio",
-          "Do more networking and go to events",
+          "Get better at my job this year",
+          "Earn an industry certification by December and present two completed projects in my portfolio",
+          "Do more networking and attend more events",
           "Learn whatever my employer needs me to learn"
         ],
-        answer: "Complete the Google UX Design Certificate by December and publish two case studies to my portfolio"
+        answer: "Earn an industry certification by December and present two completed projects in my portfolio"
       },
-      // Std 13 — Continuous Learning
+      // Std 13 — Continuous Learning & Adaptability
       {
-        q: "Your employer replaces the project management platform your team has used for years with a completely different one. The most professional response is:",
+        q: "Your employer replaces a platform your team has used for years with a completely different one. The most professional response is:",
         options: [
           "Request an exemption and continue using the old system",
           "Continue with the old system until you are officially required to switch",
           "Learn the new system, ask for help where needed, and share useful tips with teammates",
-          "Wait to see how many coworkers complain before deciding whether to comply"
+          "Wait to see how many coworkers complain before deciding"
         ],
         answer: "Learn the new system, ask for help where needed, and share useful tips with teammates"
       },
@@ -295,8 +307,8 @@
       {
         q: "You have five tasks and cannot complete them all today. Which should you tackle first?",
         options: [
-          "The one you find most interesting or enjoyable",
-          "The shortest one, so you can cross it off quickly and feel productive",
+          "The one you find most interesting",
+          "The shortest one, so you can cross it off quickly",
           "The one with the nearest deadline and the greatest consequence if delayed",
           "The one assigned most recently"
         ],
@@ -304,14 +316,14 @@
       },
       // Std 15 — Information Literacy
       {
-        q: "You find two articles with contradictory advice about a CSS technique. The best next step is:",
+        q: "You find two articles with contradictory advice about a workplace procedure. The best next step is:",
         options: [
           "Use the information that supports your current approach",
           "Average the two recommendations and use the middle ground",
-          "Check the date, author credentials, and source authority of each, then verify with official documentation",
+          "Check the date, author credentials, and source authority of each, then verify with an official primary source",
           "Use whichever article appeared first in the search results"
         ],
-        answer: "Check the date, author credentials, and source authority of each, then verify with official documentation"
+        answer: "Check the date, author credentials, and source authority of each, then verify with an official primary source"
       },
       // Std 16 — Information Security
       {
@@ -324,31 +336,31 @@
         ],
         answer: "Do not click the link — contact IT through official channels to verify the request"
       },
-      // Std 17 — Information Technology
+      // Std 17 — Information Technology (weak: 69.86%)
       {
-        q: "A client requests a file that will look identical on every device and can be opened without purchasing specific software. The best format is:",
+        q: "Which best describes a proper file management practice for workplace digital files?",
         options: [
-          ".psd (Photoshop Document)",
-          ".indd (InDesign Document)",
-          ".pdf (Portable Document Format)",
-          ".docx (Microsoft Word Document)"
+          "Save all working files to the desktop for quick access",
+          "Use descriptive, consistent file names and organize them in a logical folder structure",
+          "Keep one master document and overwrite it each time you make changes",
+          "Store work files only in your personal email as attachments for safekeeping"
         ],
-        answer: ".pdf (Portable Document Format)"
+        answer: "Use descriptive, consistent file names and organize them in a logical folder structure"
       },
-      // Std 18 — Job-Specific Tools
+      // Std 18 — Job-Specific Tools & Technologies
       {
-        q: "Before operating a piece of equipment you have never used before, you should first:",
+        q: "Before operating a piece of equipment you have never used, you should first:",
         options: [
           "Watch a coworker use it once, then proceed on your own",
           "Try it at the lowest setting until you figure it out through trial and error",
           "Read the operating manual and confirm you are trained and authorized to use it",
-          "Ask a coworker to operate it for you whenever you need it completed"
+          "Ask a coworker to operate it for you whenever you need it"
         ],
         answer: "Read the operating manual and confirm you are trained and authorized to use it"
       },
-      // Std 19 — Mathematics (applied)
+      // Std 19 — Mathematics: project quoting
       {
-        q: "A client approves a 12-hour design project at $55 per hour. Stock photos cost $85 and domain registration costs $15. What is the total project quote?",
+        q: "A client approves a 12-hour project at $55 per hour. Materials cost $85 and registration fees cost $15. What is the total project quote?",
         options: [
           "$660",
           "$745",
@@ -362,7 +374,7 @@
         q: "Which best describes workplace-appropriate communication?",
         options: [
           "Using the same casual tone with clients that you use with close friends",
-          "Keeping all messages as brief as possible regardless of context or audience",
+          "Keeping all messages as brief as possible regardless of context",
           "Matching your language, tone, and level of formality to the audience and setting",
           "Communicating only when it is strictly required by your job description"
         ],
@@ -370,7 +382,7 @@
       },
       // Std 21 — Reading & Writing
       {
-        q: "Which workplace document is sent to a client to request payment for services already delivered?",
+        q: "Which workplace document is sent to a customer requesting payment for services already delivered?",
         options: [
           "Purchase Order",
           "Invoice",
@@ -381,7 +393,7 @@
       },
       // Std 22 — Workplace Safety
       {
-        q: "You find a piece of equipment that is malfunctioning in a way that could injure someone. The safest response is:",
+        q: "You find equipment that is malfunctioning in a way that could injure someone. The safest response is:",
         options: [
           "Use it carefully and report it at the end of your shift",
           "Set it aside and tell coworkers verbally not to use it",
@@ -390,29 +402,29 @@
         ],
         answer: "Tag it out of service and report it to your supervisor immediately"
       },
-      // Mixed review — policy / integrity
+      // Std 4 — Integrity: policy conflict
       {
-        q: "An employee is asked by a supervisor to do something that conflicts with written company policy. The most professional response is:",
+        q: "An employee is asked by a supervisor to do something that conflicts with a written company policy. The most professional response is:",
         options: [
-          "Do it anyway, since the supervisor has authority and requested it directly",
-          "Refuse silently and say nothing about the reason",
+          "Do it anyway, since the supervisor has authority",
+          "Refuse silently and say nothing",
           "Follow the policy and politely explain the conflict to the supervisor",
-          "Find a creative way to do both the task and follow the policy simultaneously"
+          "Find a creative way to satisfy both requests simultaneously"
         ],
         answer: "Follow the policy and politely explain the conflict to the supervisor"
       },
-      // Mixed — data security
+      // Std 16 — Info Security: file storage
       {
-        q: "Which practice best protects confidential client project files?",
+        q: "Which practice best protects confidential client files?",
         options: [
           "Storing them on a personal USB drive for convenient access from any computer",
-          "Emailing them to your personal address for remote access",
-          "Using company-approved storage with access restricted to those who need the files",
+          "Emailing them to your personal account for remote access",
+          "Using company-approved storage with access restricted to authorized team members",
           "Saving them with an obscure filename so others are unlikely to open them"
         ],
-        answer: "Using company-approved storage with access restricted to those who need the files"
+        answer: "Using company-approved storage with access restricted to authorized team members"
       },
-      // Math — effective hourly rate
+      // Std 19 — Mathematics: effective hourly rate
       {
         q: "A project is billed at a flat fee of $3,200. Materials cost $480 and you spend 44 hours on the work. What is your effective hourly rate after subtracting material costs?",
         options: [
@@ -423,20 +435,20 @@
         ],
         answer: "$61.82"
       },
-      // Active listening
+      // Std 7 — Listening: active listening
       {
-        q: "Which behavior best demonstrates active listening during a client presentation?",
+        q: "Which behavior best demonstrates active listening during a client meeting?",
         options: [
           "Waiting for the client to finish speaking before forming your response",
           "Taking notes and asking follow-up questions that build on what the client said",
-          "Agreeing with everything the client says to avoid creating conflict",
-          "Recording the meeting and reviewing it afterward instead of engaging live"
+          "Agreeing with everything the client says to avoid conflict",
+          "Recording the meeting and reviewing it afterward rather than engaging live"
         ],
         answer: "Taking notes and asking follow-up questions that build on what the client said"
       },
-      // Math — material ordering
+      // Std 19 — Mathematics: material ordering
       {
-        q: "You must order lumber for 8 workstations. Each requires 4.5 feet. Lumber is sold in 10-foot sections only. What is the minimum number of sections to order?",
+        q: "You must order shelving for 8 workstations. Each requires 4.5 linear feet. Shelving is sold in 10-foot sections only. What is the minimum number of sections to order?",
         options: [
           "3",
           "4",
@@ -445,9 +457,9 @@
         ],
         answer: "4"
       },
-      // Root cause analysis
+      // Std 2 — Critical Thinking: root cause
       {
-        q: "A problem you resolved two weeks ago has returned in exactly the same form. This most likely means:",
+        q: "A workplace problem you resolved two weeks ago has returned in exactly the same form. This most likely means:",
         options: [
           "Fixes expire and need to be reapplied on a schedule",
           "You addressed a symptom of the problem rather than its root cause",
@@ -456,20 +468,20 @@
         ],
         answer: "You addressed a symptom of the problem rather than its root cause"
       },
-      // Source credibility
+      // Std 15 — Information Literacy: authoritative sources
       {
-        q: "You need current information about WCAG web accessibility compliance standards. The most credible source is:",
+        q: "You need current, authoritative information about federal workplace safety regulations. The most credible primary source is:",
         options: [
-          "A peer's personal design blog",
-          "A forum thread with many upvoted answers",
-          "The official W3C published guidelines at w3.org",
-          "A popular YouTube tutorial published three years ago"
+          "A coworker's recollection of rules from their training five years ago",
+          "The official OSHA website or the relevant federal agency's published regulations",
+          "An industry trade association's marketing brochure",
+          "A social media post with many shares and positive reactions"
         ],
-        answer: "The official W3C published guidelines at w3.org"
+        answer: "The official OSHA website or the relevant federal agency's published regulations"
       },
-      // Career management
+      // Std 12 — Career Management: long-term planning
       {
-        q: "Which best describes ongoing career management in a technical field?",
+        q: "Which best describes managing your career over time in a competitive field?",
         options: [
           "Applying for every promotion that opens, regardless of readiness",
           "Staying in one comfortable role until management asks you to move",
@@ -478,7 +490,7 @@
         ],
         answer: "Regularly comparing your current skills to where your industry is heading and addressing gaps proactively"
       },
-      // Constructive feedback in teamwork
+      // Std 10 — Teamwork: brainstorming feedback
       {
         q: "A teammate proposes an idea during brainstorming that you believe will not work. The most professional response is:",
         options: [
@@ -489,31 +501,31 @@
         ],
         answer: "Ask a specific question about how the idea would handle a particular challenge"
       },
-      // Project planning
+      // Std 14 — Efficiency: project planning
       {
-        q: "You are given a large website redesign project due in three weeks. The most productive first step is:",
+        q: "You are given a large project due in three weeks. The most productive first step is:",
         options: [
-          "Begin with the page or section you know best",
+          "Begin with the section you know best",
           "Break the project into tasks with interim milestones and schedule time for each",
           "Wait until you have a large, uninterrupted block of time to focus",
           "Request a two-week extension up front to avoid time pressure"
         ],
         answer: "Break the project into tasks with interim milestones and schedule time for each"
       },
-      // Payroll literacy
+      // Std 19 — Mathematics: payroll definition
       {
         q: "Gross pay is best defined as:",
         options: [
           "The amount deposited directly to your bank account each pay period",
           "Your total earnings before taxes and deductions are removed",
-          "The amount you pay in federal income tax each year",
-          "Your base salary not including any bonuses or overtime"
+          "The amount you owe in federal income tax each year",
+          "Your base salary not including any overtime or bonuses"
         ],
         answer: "Your total earnings before taxes and deductions are removed"
       },
-      // Receiving feedback
+      // Std 13 — Continuous Learning: receiving feedback
       {
-        q: "Which is the most appropriate way to respond to critical feedback on your design work?",
+        q: "Which is the most appropriate response to critical feedback on your work?",
         options: [
           "Request a different reviewer for future projects",
           "Ask clarifying questions and identify specific changes you will make next time",
@@ -522,18 +534,18 @@
         ],
         answer: "Ask clarifying questions and identify specific changes you will make next time"
       },
-      // Ergonomics
+      // Std 22 — Safety / Std 14 — Efficiency: ergonomics
       {
         q: "Designing a workstation so that monitor height, keyboard position, and chair height minimize physical strain is called:",
         options: [
-          "Professionalism",
+          "Standardization",
           "Ergonomics",
           "Calibration",
-          "Standardization"
+          "Professionalism"
         ],
         answer: "Ergonomics"
       },
-      // Handling unknown questions professionally
+      // Std 9 — Customer Service: unknown answers
       {
         q: "A client asks a technical question you cannot accurately answer. The most professional response is:",
         options: [
@@ -544,7 +556,7 @@
         ],
         answer: "Tell the client you will find the accurate answer and follow up by a specific time"
       },
-      // Ethics in billing
+      // Std 4 — Integrity: billing error
       {
         q: "An invoice your team sent contains a $400 undercharge that the client has already paid. The most ethical action is:",
         options: [
@@ -555,18 +567,18 @@
         ],
         answer: "Notify your supervisor and issue a corrected invoice to the client"
       },
-      // Verification after deployment
+      // Std 2 — Critical Thinking: verification after implementation
       {
-        q: "After deploying a bug fix to a client's live website, you should:",
+        q: "After implementing a fix to a reported workplace problem, you should:",
         options: [
-          "Notify the client and immediately move on to the next task",
-          "Move to the next task — if something is wrong, the client will report it",
-          "Verify the fix resolved the issue, test edge cases, and document what caused the original bug",
+          "Notify the relevant parties and immediately move to the next task",
+          "Move on — if something is still wrong, they will report it",
+          "Verify the fix resolved the issue, test edge cases, and document what caused the original problem",
           "Wait 24 hours for user feedback before declaring the fix successful"
         ],
-        answer: "Verify the fix resolved the issue, test edge cases, and document what caused the original bug"
+        answer: "Verify the fix resolved the issue, test edge cases, and document what caused the original problem"
       },
-      // Reliability
+      // Std 5 — Work Ethic: reliability
       {
         q: "Workplace reliability is best described as:",
         options: [
@@ -577,9 +589,9 @@
         ],
         answer: "Consistently delivering what you committed to, by the time you committed to it"
       },
-      // Scheduling & communication
+      // Std 20 — Professionalism: scheduling
       {
-        q: "You discover you will need to miss a scheduled client meeting. The most professional action is:",
+        q: "You discover you need to miss a scheduled client meeting. The most professional action is:",
         options: [
           "Send a coworker to attend without notifying the client",
           "Show up late and explain when you arrive",
@@ -588,9 +600,9 @@
         ],
         answer: "Notify the client as far in advance as possible and propose a new time"
       },
-      // Workplace roles / org awareness
+      // Std 11 — Big-Picture Thinking
       {
-        q: "An employee who understands how their daily tasks connect to the organization's overall goals is demonstrating:",
+        q: "An employee who understands how their daily tasks connect to the organization's overall mission is demonstrating:",
         options: [
           "Overstepping into management's responsibilities",
           "Big-picture professional thinking",
@@ -599,78 +611,127 @@
         ],
         answer: "Big-picture professional thinking"
       },
-      // Digital communication tone
+      // Std 20 — Professionalism: written communication
       {
         q: "When sending a professional email to a client you have never met, you should:",
         options: [
           "Use the same casual abbreviations you use in text messages",
-          "Use a formal greeting, clear subject line, and proofread before sending",
+          "Use a formal greeting, a clear subject line, and proofread carefully before sending",
           "Keep it as short as possible to respect their time, even if it lacks detail",
           "Copy your entire team on the message to show transparency"
         ],
-        answer: "Use a formal greeting, clear subject line, and proofread before sending"
+        answer: "Use a formal greeting, a clear subject line, and proofread carefully before sending"
+      },
+      // Std 3 — Initiative (weak: 66.72%) — second question
+      {
+        q: "You finish your assigned tasks an hour before the end of your shift. Which response best demonstrates initiative?",
+        options: [
+          "Use the remaining time for personal browsing until the shift ends",
+          "Clock out early since your assigned work is done",
+          "Ask your supervisor if there is additional work you can assist with",
+          "Wait at your desk so you appear to still be working"
+        ],
+        answer: "Ask your supervisor if there is additional work you can assist with"
+      },
+      // Std 17 — Information Technology (weak: 69.86%) — second question
+      {
+        q: "Which is the safest way to handle a suspicious link received in a workplace email?",
+        options: [
+          "Click the link to see where it goes, then decide if it is safe",
+          "Forward it to all coworkers to warn them",
+          "Delete the email and report it to IT through official channels",
+          "Reply to the sender asking if the link is real"
+        ],
+        answer: "Delete the email and report it to IT through official channels"
       }
     ];
 
-    // ── PART 4: LABELING (1 diagram) ─────────────────────────────────────────
-    // SVG shows an HTML semantic page layout with numbered regions.
-    // Students assign HTML element names from the word bank to each region.
+    // ── PART 4: LABELING — Pay Stub Anatomy ──────────────────────────────────
+    // Directly targets Std 19 (Mathematics/Payroll Literacy) — last year's
+    // weakest standard at 61.01%.  Std 12 (Career & Life Management) also.
     var labelSection = [
       {
-        title: "HTML Semantic Document Structure — Identify the numbered HTML element in each region of the webpage layout below.",
-        wordBank: ["article", "aside", "footer", "header", "main", "nav"],
+        title: "Pay Stub Anatomy — Identify the numbered section of this sample employee pay stub.",
+        wordBank: ["Employee Information", "Federal Income Tax", "Gross Pay", "Net Pay", "Pay Period", "Social Security"],
         items: [
-          { answer: "header" },
-          { answer: "nav" },
-          { answer: "main" },
-          { answer: "article" },
-          { answer: "aside" },
-          { answer: "footer" }
+          { answer: "Employee Information" },
+          { answer: "Pay Period" },
+          { answer: "Gross Pay" },
+          { answer: "Federal Income Tax" },
+          { answer: "Social Security" },
+          { answer: "Net Pay" }
         ],
-        svg: '<svg viewBox="0 0 522 310" style="width:100%;max-width:560px;display:block;margin:0 auto;border-radius:6px;border:1px solid #dee2e6;background:#f8f9fa;font-family:system-ui,sans-serif">'
-          // outer frame
-          + '<rect x="1" y="1" width="520" height="308" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="5"/>'
+        svg: '<svg viewBox="0 0 520 288" style="width:100%;max-width:560px;display:block;margin:0 auto;border-radius:6px;font-family:system-ui,sans-serif;border:1px solid #adb5bd">'
 
-          // ① HEADER
-          + '<rect x="8" y="8" width="506" height="56" fill="#cfe2ff" stroke="#0d6efd" stroke-width="1.5" rx="4"/>'
-          + '<circle cx="24" cy="24" r="12" fill="#0d6efd"/>'
-          + '<text x="24" y="29" text-anchor="middle" font-size="11" fill="white" font-weight="700">1</text>'
-          + '<text x="270" y="40" text-anchor="middle" font-size="12" fill="#084298">Branding · Logo · Site Title</text>'
+          // Title bar
+          + '<rect x="0" y="0" width="520" height="32" fill="#003087" rx="6"/>'
+          + '<rect x="0" y="20" width="520" height="12" fill="#003087"/>'
+          + '<text x="260" y="21" text-anchor="middle" font-size="12" fill="white" font-weight="700">SAMPLE EMPLOYER PAY STUB</text>'
 
-          // ② NAV
-          + '<rect x="8" y="70" width="506" height="32" fill="#d1e7dd" stroke="#198754" stroke-width="1.5" rx="4"/>'
-          + '<circle cx="24" cy="86" r="12" fill="#198754"/>'
-          + '<text x="24" y="91" text-anchor="middle" font-size="11" fill="white" font-weight="700">2</text>'
-          + '<text x="270" y="90" text-anchor="middle" font-size="11" fill="#0a3622">Navigation Links · Menu Items</text>'
+          // ① Employee Information
+          + '<rect x="5" y="36" width="252" height="58" fill="#dce8f5" stroke="#003087" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="20" cy="50" r="11" fill="#003087"/>'
+          + '<text x="20" y="55" text-anchor="middle" font-size="10" fill="white" font-weight="700">1</text>'
+          + '<text x="134" y="58" text-anchor="middle" font-size="11" fill="#1a1a2e" font-weight="600">Alex Johnson &nbsp;|&nbsp; ID: 10423</text>'
+          + '<text x="134" y="73" text-anchor="middle" font-size="10" fill="#444">Department: Operations &nbsp;&bull;&nbsp; Status: FT</text>'
+          + '<text x="134" y="86" text-anchor="middle" font-size="10" fill="#444">Hire Date: 08/15/2022</text>'
 
-          // ③ MAIN
-          + '<rect x="8" y="108" width="330" height="162" fill="#fff3cd" stroke="#997404" stroke-width="1.5" rx="4"/>'
-          + '<circle cx="24" cy="124" r="12" fill="#fd7e14"/>'
-          + '<text x="24" y="129" text-anchor="middle" font-size="11" fill="white" font-weight="700">3</text>'
-          + '<text x="173" y="124" text-anchor="middle" font-size="11" fill="#664d03">Primary Content Area</text>'
+          // ② Pay Period
+          + '<rect x="263" y="36" width="252" height="58" fill="#dce8f5" stroke="#003087" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="278" cy="50" r="11" fill="#003087"/>'
+          + '<text x="278" y="55" text-anchor="middle" font-size="10" fill="white" font-weight="700">2</text>'
+          + '<text x="389" y="58" text-anchor="middle" font-size="11" fill="#1a1a2e" font-weight="600">Jun 1, 2025 &ndash; Jun 15, 2025</text>'
+          + '<text x="389" y="73" text-anchor="middle" font-size="10" fill="#444">Pay Date: June 20, 2025</text>'
+          + '<text x="389" y="86" text-anchor="middle" font-size="10" fill="#444">Pay Type: Bi-Weekly Direct Deposit</text>'
 
-          // ④ ARTICLE inside MAIN
-          + '<rect x="18" y="136" width="310" height="124" fill="#ffe8d4" stroke="#e07b00" stroke-width="1.5" stroke-dasharray="6,3" rx="4"/>'
-          + '<circle cx="34" cy="152" r="12" fill="#e07b00"/>'
-          + '<text x="34" y="157" text-anchor="middle" font-size="11" fill="white" font-weight="700">4</text>'
-          + '<text x="173" y="200" text-anchor="middle" font-size="11" fill="#9c4b00">Self-contained, reusable content block</text>'
+          // Column headers
+          + '<rect x="5" y="98" width="252" height="18" fill="#dee2e6"/>'
+          + '<text x="131" y="111" text-anchor="middle" font-size="10" fill="#333" font-weight="700">EARNINGS</text>'
+          + '<rect x="263" y="98" width="252" height="18" fill="#dee2e6"/>'
+          + '<text x="389" y="111" text-anchor="middle" font-size="10" fill="#333" font-weight="700">DEDUCTIONS</text>'
 
-          // ⑤ ASIDE
-          + '<rect x="344" y="108" width="170" height="162" fill="#e9ecef" stroke="#6c757d" stroke-width="1.5" rx="4"/>'
-          + '<circle cx="360" cy="124" r="12" fill="#6c757d"/>'
-          + '<text x="360" y="129" text-anchor="middle" font-size="11" fill="white" font-weight="700">5</text>'
-          + '<text x="429" y="196" text-anchor="middle" font-size="11" fill="#495057">Sidebar · Related Links</text>'
+          // ③ Gross Pay
+          + '<rect x="5" y="118" width="252" height="68" fill="#fff3cd" stroke="#997404" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="20" cy="132" r="11" fill="#fd7e14"/>'
+          + '<text x="20" y="137" text-anchor="middle" font-size="10" fill="white" font-weight="700">3</text>'
+          + '<text x="131" y="138" text-anchor="middle" font-size="10" fill="#664d03">Regular: 80 hrs &times; $18.00 / hr</text>'
+          + '<line x1="25" y1="148" x2="248" y2="148" stroke="#997404" stroke-width="0.75"/>'
+          + '<text x="50" y="162" font-size="10" fill="#664d03" font-weight="700">Total Earnings:</text>'
+          + '<text x="248" y="162" text-anchor="end" font-size="11" fill="#664d03" font-weight="700">$1,440.00</text>'
+          + '<text x="131" y="178" text-anchor="middle" font-size="9" fill="#997404" font-style="italic">(all pay before any deductions)</text>'
 
-          // ⑥ FOOTER
-          + '<rect x="8" y="276" width="506" height="28" fill="#adb5bd" stroke="#6c757d" stroke-width="1.5" rx="4"/>'
-          + '<circle cx="24" cy="290" r="12" fill="#495057"/>'
-          + '<text x="24" y="295" text-anchor="middle" font-size="11" fill="white" font-weight="700">6</text>'
-          + '<text x="270" y="294" text-anchor="middle" font-size="11" fill="#212529">Contact · Copyright · Credits</text>'
+          // ④ Federal Income Tax
+          + '<rect x="263" y="118" width="252" height="32" fill="#f8d7da" stroke="#dc3545" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="278" cy="134" r="11" fill="#dc3545"/>'
+          + '<text x="278" y="139" text-anchor="middle" font-size="10" fill="white" font-weight="700">4</text>'
+          + '<text x="350" y="135" font-size="10" fill="#842029">Withheld for U.S. government:</text>'
+          + '<text x="510" y="135" text-anchor="end" font-size="10" fill="#842029" font-weight="700">$142.50</text>'
+
+          // ⑤ Social Security
+          + '<rect x="263" y="153" width="252" height="32" fill="#f8d7da" stroke="#dc3545" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="278" cy="169" r="11" fill="#dc3545"/>'
+          + '<text x="278" y="174" text-anchor="middle" font-size="10" fill="white" font-weight="700">5</text>'
+          + '<text x="350" y="170" font-size="10" fill="#842029">FICA (6.2% of gross pay):</text>'
+          + '<text x="510" y="170" text-anchor="end" font-size="10" fill="#842029" font-weight="700">$89.28</text>'
+
+          // Other deductions (unlabeled)
+          + '<rect x="263" y="188" width="252" height="32" fill="#f5c6cb" rx="3"/>'
+          + '<text x="350" y="200" font-size="10" fill="#842029">Medicare + State + Other:</text>'
+          + '<text x="510" y="200" text-anchor="end" font-size="10" fill="#842029">$64.08</text>'
+          + '<text x="400" y="214" font-size="9" fill="#842029" font-weight="700">Total Deductions: $295.86</text>'
+
+          // ⑥ Net Pay
+          + '<rect x="5" y="224" width="510" height="58" fill="#d1e7dd" stroke="#198754" stroke-width="2" rx="4"/>'
+          + '<circle cx="22" cy="241" r="12" fill="#198754"/>'
+          + '<text x="22" y="246" text-anchor="middle" font-size="11" fill="white" font-weight="700">6</text>'
+          + '<text x="260" y="248" text-anchor="middle" font-size="12" fill="#0a3622" font-weight="700">AMOUNT DEPOSITED TO YOUR ACCOUNT</text>'
+          + '<text x="260" y="268" text-anchor="middle" font-size="17" fill="#0a3622" font-weight="700">$1,144.14</text>'
+
           + '</svg>'
       }
     ];
 
-    // ── Launch the assessment ─────────────────────────────────────────────────
+    // ── Launch ────────────────────────────────────────────────────────────────
     var config = {
       chapterTitle:     'WRS Practice Assessment — Form A',
       gradebookExamId:  'WRS-Practice-A',
