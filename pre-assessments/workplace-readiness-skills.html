@@ -39,7 +39,7 @@
     </div>
   </section>
 
-  <script src="/js/wrsLogic.js?v=4"></script>
+  <script src="/js/wrsLogic.js?v=5"></script>
   <script>
   (function () {
 
@@ -85,7 +85,17 @@
       // Std 21 — Reading & Writing
       { q: "An invoice is a document that requests payment from a client for services already delivered.", a: "T" },
       // Std 22 — Workplace Safety
-      { q: "Using a piece of equipment you have never been trained on is acceptable when the task is urgent.", a: "F" }
+      { q: "Using a piece of equipment you have never been trained on is acceptable when the task is urgent.", a: "F" },
+      // Std 2 — Critical Thinking
+      { q: "Making a decision based on incomplete information is always better than waiting to gather more relevant facts.", a: "F" },
+      // Std 6 — Conflict Resolution
+      { q: "Ignoring a workplace conflict and hoping it resolves on its own is an effective long-term strategy.", a: "F" },
+      // Std 11 — Big-Picture Thinking
+      { q: "An employee who focuses only on their own tasks without considering how their work affects the team is demonstrating strong professionalism.", a: "F" },
+      // Std 21 — Reading & Writing
+      { q: "Proofreading a professional document before sending it is an optional step that experienced workers can skip.", a: "F" },
+      // Std 19 — Mathematics (basic percent)
+      { q: "A 15% tip on a $40.00 meal is $6.00.", a: "T" }
     ];
 
     // ── PART 2: MATCHING (4 sets × 5 items = 20 items) ───────────────────────
@@ -143,6 +153,24 @@
           { q: "A security system that monitors and filters network traffic entering and leaving a computer or network.", answer: "A" },
           { q: "Core software that manages a computer's hardware and provides the environment in which applications run.", answer: "E" },
           { q: "Remote servers that store and process data, accessible from anywhere via an internet connection.", answer: "B" }
+        ]
+      },
+      {
+        title: "Set E — Match each workplace career term to its correct definition.",
+        choices: [
+          "A. Cover Letter",
+          "B. Performance Review",
+          "C. Exit Interview",
+          "D. Onboarding",
+          "E. Mentorship",
+          "F. Reference"
+        ],
+        items: [
+          { q: "A formal meeting or written evaluation where a supervisor assesses your job performance and sets goals for improvement.", answer: "B" },
+          { q: "A letter submitted alongside a resume that introduces you and explains why you are the right candidate for a specific position.", answer: "A" },
+          { q: "The process a new employee goes through when starting a job, including orientation, training, and learning company policies.", answer: "D" },
+          { q: "A meeting conducted when an employee is leaving a company, used to gather honest feedback about their employment experience.", answer: "C" },
+          { q: "A person who can speak to your work ethic, skills, and character on your behalf when you apply for a job.", answer: "F" }
         ]
       },
       {
@@ -603,39 +631,6 @@
         ],
         answer: "Notify the client as far in advance as possible and propose a new time"
       },
-      // Std 11 — Big-Picture Thinking
-      {
-        q: "An employee who understands how their daily tasks connect to the organization's overall mission is demonstrating:",
-        options: [
-          "Overstepping into management's responsibilities",
-          "Big-picture professional thinking",
-          "A desire for promotion",
-          "Unnecessary concern about things outside their job description"
-        ],
-        answer: "Big-picture professional thinking"
-      },
-      // Std 20 — Professionalism: written communication
-      {
-        q: "When sending a professional email to a client you have never met, you should:",
-        options: [
-          "Use the same casual abbreviations you use in text messages",
-          "Use a formal greeting, a clear subject line, and proofread carefully before sending",
-          "Keep it as short as possible to respect their time, even if it lacks detail",
-          "Copy your entire team on the message to show transparency"
-        ],
-        answer: "Use a formal greeting, a clear subject line, and proofread carefully before sending"
-      },
-      // Std 3 — Initiative (weak: 66.72%) — second question
-      {
-        q: "You finish your assigned tasks an hour before the end of your shift. Which response best demonstrates initiative?",
-        options: [
-          "Use the remaining time for personal browsing until the shift ends",
-          "Clock out early since your assigned work is done",
-          "Ask your supervisor if there is additional work you can assist with",
-          "Wait at your desk so you appear to still be working"
-        ],
-        answer: "Ask your supervisor if there is additional work you can assist with"
-      },
       // Std 17 — Information Technology (weak: 69.86%) — second question
       {
         q: "Which is the safest way to handle a suspicious link received in a workplace email?",
@@ -646,6 +641,51 @@
           "Reply to the sender asking if the link is real"
         ],
         answer: "Delete the email and report it to IT through official channels"
+      },
+      // Std 19 — Mathematics: overtime pay (weak: 61%)
+      {
+        q: "Your hourly rate is $16.00. You work 40 regular hours and 5 overtime hours at 1.5x the regular rate. What is your gross pay for the week?",
+        options: [
+          "$640.00",
+          "$720.00",
+          "$760.00",
+          "$680.00"
+        ],
+        answer: "$760.00",
+        math: true
+      },
+      // Std 3 — Initiative (weak: 66.72%)
+      {
+        q: "Your supervisor is out sick and no one has been assigned to run the afternoon team meeting. The most initiative-driven response is:",
+        options: [
+          "Cancel the meeting and notify everyone by message",
+          "Wait for the supervisor to call in with instructions",
+          "Facilitate the meeting yourself, take notes, and share a summary with your supervisor afterward",
+          "Hold the meeting but delay every decision until the supervisor returns"
+        ],
+        answer: "Facilitate the meeting yourself, take notes, and share a summary with your supervisor afterward"
+      },
+      // Std 22 — Workplace Safety: chemical spill
+      {
+        q: "You discover a chemical spill in your workplace. The correct first response is:",
+        options: [
+          "Clean it up immediately to prevent anyone from slipping",
+          "Alert others to stay clear, follow the facility's spill protocol, and report it to your supervisor",
+          "Continue your own work until a qualified person arrives",
+          "Photograph the spill and file an incident report before taking any other action"
+        ],
+        answer: "Alert others to stay clear, follow the facility's spill protocol, and report it to your supervisor"
+      },
+      // Std 8 — Respect for Diversity / Std 6 — Conflict Resolution
+      {
+        q: "A coworker makes an offhand comment that another team member finds culturally disrespectful. As a bystander, the most professional first step is:",
+        options: [
+          "Stay out of it — it is between the two of them",
+          "Publicly defend the affected coworker in front of the whole team",
+          "Check in privately with the affected coworker and, if appropriate, report the incident through proper channels",
+          "Immediately tell the coworker who made the comment that they must apologize"
+        ],
+        answer: "Check in privately with the affected coworker and, if appropriate, report the incident through proper channels"
       }
     ];
 
