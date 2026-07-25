@@ -61,10 +61,40 @@
             const text = await (await fetch('/special-dates.csv')).text();
             _sdCache = text.split(/\r?\n/)
                 .filter(l => l.trim() && !/^date/i.test(l.split(',')[0].trim()))
-                .map(l => { const c = l.split(','); return { date: c[0]?.trim(), desc: c.slice(2).join(',').trim() }; })
+                .map(l => { const c = l.split(','); return { date: c[0]?.trim(), type: c[1]?.trim(), desc: c.slice(2).join(',').trim() }; })
                 .filter(r => r.date && /^\d{4}-\d{2}-\d{2}$/.test(r.date));
         } catch { _sdCache = []; }
         return _sdCache;
+    }
+
+    function isHolidayPeriod(cadence, dates) {
+        function isWorkDay(dateStr) {
+            const dow = new Date(dateStr + 'T00:00:00').getDay();
+            if (dow === 0 || dow === 6) return false;                // weekend
+            const row = dates.find(r => r.date === dateStr);
+            if (!row) return true;                                    // not in CSV → assume school
+            if (row.type !== 'OFF') return true;                      // A/B/C/etc → school day
+            // OFF day: teacher work days still count as work days
+            const desc = (row.desc || '').toLowerCase();
+            return ['teacher work', 'teacher training', 'prof learning'].some(k => desc.includes(k));
+        }
+
+        const today = new Date();
+        const ds = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+        if (cadence === 'daily') return !isWorkDay(ds(today));
+
+        if (cadence === 'weekly') {
+            const mon = new Date(today);
+            mon.setDate(today.getDate() - (today.getDay() + 6) % 7);
+            for (let i = 0; i < 5; i++) {
+                const d = new Date(mon); d.setDate(mon.getDate() + i);
+                if (isWorkDay(ds(d))) return false;   // found at least one work day
+            }
+            return true;  // all 5 weekdays are holidays/off
+        }
+
+        return false;  // monthly: always show
     }
 
     function eventsInMonth(dates, keywords, year, month) {
@@ -167,6 +197,20 @@
         if (!pk) { body.innerHTML = '<p class="text-muted small p-2 fst-italic">Period unavailable.</p>'; return; }
 
         try {
+            // Hide checklist on holidays / non-school weeks
+            if (cadence === 'daily' || cadence === 'weekly') {
+                const sdates = await fetchSpecialDates();
+                if (isHolidayPeriod(cadence, sdates)) {
+                    const noun = cadence === 'daily' ? 'today' : 'this week';
+                    body.innerHTML = `<p class="text-muted small fst-italic p-1 mb-0">
+                        <i class="fas fa-umbrella-beach me-1"></i>No school ${noun} — enjoy the break!
+                    </p>`;
+                    const badge = document.getElementById('cal-cl-badge');
+                    if (badge) badge.textContent = '';
+                    return;
+                }
+            }
+
             const data = await apiGet(cadence, pk);
             body.innerHTML = '';
             renderSection(cadence, pk, data, body, false);
