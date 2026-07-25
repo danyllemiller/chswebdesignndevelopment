@@ -229,15 +229,14 @@
     // ── True / False ──────────────────────────────────────────────────────────
     function renderTF(item) {
         var sel = _ans[_qIdx];
-        var body = '<div class="text-center mb-5">'
-            + '<span class="badge mb-3 px-3 py-2 fw-semibold" style="background:#003087;font-size:.78rem;letter-spacing:.05em">TRUE / FALSE</span>'
+        var body = calcWidget()
+            + '<div class="text-center mb-5">'
             + '<h4 class="fw-bold lh-base" style="font-size:1.1rem">' + esc(item.q) + '</h4>'
             + '</div>'
             + '<div class="d-flex justify-content-center gap-3">'
             + '<button onclick="wrsSelectTF(\'T\')" class="btn btn-lg px-5 fw-bold ' + (sel === 'T' ? 'btn-primary text-white' : 'btn-outline-secondary') + '" style="min-width:130px">True</button>'
             + '<button onclick="wrsSelectTF(\'F\')" class="btn btn-lg px-5 fw-bold ' + (sel === 'F' ? 'btn-danger text-white' : 'btn-outline-secondary') + '" style="min-width:130px">False</button>'
-            + '</div>'
-            + calcWidget();
+            + '</div>';
         $c().innerHTML = cardShell('#003087', 'True / False', body, navFooter(sel === 'T' || sel === 'F', '#003087'));
     }
 
@@ -274,14 +273,13 @@
                 + '</div>';
         }).join('');
 
-        var body = '<div class="text-center mb-3">'
-            + '<span class="badge mb-2 px-3 py-2 fw-semibold" style="background:#198754;font-size:.78rem;letter-spacing:.05em">MATCHING</span>'
+        var body = calcWidget()
+            + '<div class="text-center mb-3">'
             + '<p class="fw-bold mb-0 lh-base">' + esc(item.title) + '</p>'
             + '<p class="text-muted small mb-0">' + answered + ' of ' + item.items.length + ' matched</p>'
             + '</div>'
             + choicesHtml
-            + rowsHtml
-            + calcWidget();
+            + rowsHtml;
 
         $c().innerHTML = cardShell('#198754', 'Matching', body, navFooter(allDone, '#198754'));
     }
@@ -299,11 +297,10 @@
                 + '<span class="fw-semibold" style="pointer-events:none;font-size:.95rem">' + esc(opt) + '</span>'
                 + '</div></div>';
         }).join('');
-        var body = '<div class="text-center mb-4">'
-            + '<span class="badge mb-3 px-3 py-2 fw-semibold" style="background:#003087;font-size:.78rem;letter-spacing:.05em">MULTIPLE CHOICE</span>'
+        var body = calcWidget()
+            + '<div class="text-center mb-4">'
             + '<h4 class="fw-bold lh-base" style="font-size:1.1rem">' + esc(item.q) + '</h4>'
             + '</div>'
-            + calcWidget()
             + '<div>' + optHtml + '</div>';
         $c().innerHTML = cardShell('#003087', 'Multiple Choice', body, navFooter(sel !== undefined, '#003087'));
     }
@@ -334,8 +331,8 @@
                 + '</div>';
         }).join('');
 
-        var body = '<div class="text-center mb-3">'
-            + '<span class="badge mb-2 px-3 py-2 fw-semibold" style="background:#fd7e14;font-size:.78rem;letter-spacing:.05em">LABELING</span>'
+        var body = calcWidget()
+            + '<div class="text-center mb-3">'
             + '<p class="fw-bold mt-1 mb-0" style="font-size:.9rem">' + esc(item.title) + '</p>'
             + '<p class="text-muted small mb-0">' + answered + ' of ' + item.items.length + ' labeled</p>'
             + '</div>'
@@ -344,8 +341,7 @@
             + '<p class="small fw-bold text-muted mb-2" style="text-transform:uppercase;letter-spacing:.05em">Word Bank</p>'
             + '<div>' + wbHtml + '</div>'
             + '</div>'
-            + rowsHtml
-            + calcWidget();
+            + rowsHtml;
 
         $c().innerHTML = cardShell('#fd7e14', 'Labeling', body, navFooter(allDone, '#fd7e14'));
     }
