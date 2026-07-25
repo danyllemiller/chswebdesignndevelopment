@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>WRS Practice Assessment — Nevada CTE</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/web-app-manifest-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/favicon-512x512.png">
+
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/student-pages.css">
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+<div class="container-fluid sticky-top px-0 no-print">
+  <div id="nav-placeholder"></div>
+</div>
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9 mx-auto">
+        <div id="exam-container" class="mt-4">
+          <div class="text-center p-5 bg-white shadow-sm rounded" style="border-top: 6px solid var(--primary-color);">
+            <div class="spinner-border" style="color: var(--primary-color);" role="status"></div>
+            <p class="mt-3 fw-bold" style="color: var(--primary-color);">Connecting to Digital Arts Cloud&hellip;</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="/js/wrsLogic.js?v=6"></script>
+  <script>
+  (function () {
+
+    // ── PART 1: TRUE / FALSE (25 items) ──────────────────────────────────────
+    var tfSection = [
+      { q: "In brainstorming, the most creative process starts by accepting the very first idea someone suggests and building only on that.",
+        a: "F", hint: "Brainstorming's divergent phase generates many ideas without judgment before evaluating any—accepting the first idea shuts down creative exploration." },
+      { q: "Confirmation bias means deliberately seeking only information that confirms your existing beliefs or preferred conclusion.",
+        a: "T", hint: "Confirmation bias is a critical thinking threat—skilled professionals actively seek disconfirming evidence to test whether their beliefs hold up." },
+      { q: "Asking for help or guidance when assigned an unfamiliar task demonstrates poor initiative and professional weakness.",
+        a: "F", hint: "Asking for guidance on an unfamiliar task shows good judgment and saves the organization from costly mistakes—this is professional self-awareness, not weakness." },
+      { q: "Padding your hours on a timesheet is only considered fraud if the extra amount claimed is financially significant.",
+        a: "F", hint: "Any false claim on a timesheet—regardless of amount—is fraud and a serious integrity violation that can result in immediate termination." },
+      { q: "Consistently meeting deadlines without being reminded is considered a hallmark of strong professional work ethic.",
+        a: "T", hint: "Reliability—consistently delivering on commitments without supervision—is one of the most valued professional traits employers look for." },
+      { q: "In a successful workplace compromise, each party gives up something and gains something to reach a workable agreement.",
+        a: "T", hint: "Compromise requires mutual concession—both parties must receive something of value for an agreement to be sustainable and respected by both sides." },
+      { q: "Overusing filler words like 'um' and 'like' in professional spoken communication can undermine your credibility.",
+        a: "T", hint: "Excessive filler words signal uncertainty and under-preparation. Pausing silently while gathering your thoughts sounds far more confident." },
+      { q: "Using someone's preferred name and pronouns is an optional professional courtesy rather than a basic workplace standard.",
+        a: "F", hint: "Using preferred names and pronouns is a fundamental professional respect—it signals that each person's identity is valued in the workplace." },
+      { q: "A customer who has already posted a negative review cannot realistically be converted into a satisfied customer.",
+        a: "F", hint: "Studies show that customers whose complaints are resolved effectively often become more loyal than customers who never experienced a problem at all." },
+      { q: "In collaborative projects, credit for success should be shared across the whole team rather than attributed solely to the team leader.",
+        a: "T", hint: "Giving credit to the full team builds morale and accurately reflects how collaborative work actually happens—leaders who hoard credit lose team trust." },
+      { q: "Understanding how your department's budget connects to the organization's overall financial health is an example of big-picture thinking.",
+        a: "T", hint: "Professionals who understand the financial context of their department make better spending decisions and communicate more effectively with leadership." },
+      { q: "A SMART goal is one that is Specific, Measurable, Achievable, Relevant, and Time-bound.",
+        a: "T", hint: "SMART goals are the gold standard of professional goal-setting—vague goals like 'do better' are impossible to measure, track, or celebrate." },
+      { q: "Asking multiple questions during a training session is a sign that you were not paying close enough attention.",
+        a: "F", hint: "Questions during training signal active engagement and deep processing of new material—instructors value participants who probe for understanding." },
+      { q: "Delegation means assigning a task to someone else and taking no further personal responsibility for its outcome.",
+        a: "F", hint: "Effective delegation retains accountability—you assign the work, but you remain responsible for ensuring it is done correctly and on time." },
+      { q: "Clicking 'Accept All Cookies' on every website you visit is the most information-secure browsing practice.",
+        a: "F", hint: "Accepting all cookies enables extensive data tracking across many sites. Reviewing cookie settings and accepting only necessary ones protects your privacy." },
+      { q: "Two-factor authentication significantly reduces the risk of unauthorized account access even if your password is compromised.",
+        a: "T", hint: "2FA requires a second verification step that an attacker typically cannot complete—even with your stolen password, they cannot log in without that second factor." },
+      { q: "Keyboard shortcuts for common tasks can significantly increase your productivity in everyday professional software use.",
+        a: "T", hint: "Power users who master keyboard shortcuts work faster with less mouse switching—over a career, these small efficiency gains add up to significant time savings." },
+      { q: "When two tools produce the same professional result, the simpler tool is generally the better choice for everyday workplace use.",
+        a: "T", hint: "Simplicity reduces training time, error rates, and dependency on specialized knowledge. The best tool is the one that does the job reliably with the least complexity." },
+      { q: "Federal law requires overtime pay at 1.5 times the regular hourly rate for hours worked beyond 40 in a single workweek.",
+        a: "T", hint: "The FLSA (Fair Labor Standards Act) mandates time-and-a-half for overtime. Knowing your rights—including how overtime is calculated—is financial literacy." },
+      { q: "A professional who consistently shows up prepared and follows through on commitments is building a reputation for reliability.",
+        a: "T", hint: "Reliability is your professional brand. Every kept commitment builds trust; every missed one erodes it—consistently being the person others count on is invaluable." },
+      { q: "Using passive voice in professional writing generally makes your message clearer and more direct.",
+        a: "F", hint: "Active voice assigns action to a subject ('The manager approved the request') and is clearer and more direct than passive voice ('The request was approved')." },
+      { q: "The word 'ergonomics' refers to the science of designing workspaces and tools to fit the human body and reduce physical strain.",
+        a: "T", hint: "Ergonomics reduces injury risk and improves productivity—a well-designed workspace prevents the repetitive strain injuries that are among the most common workplace health issues." },
+      { q: "Setting personal professional learning goals for the quarter, without being prompted by management, is an example of taking initiative.",
+        a: "T", hint: "Self-directed goal-setting demonstrates that your professional development is internally motivated—a quality employers recognize and reward." },
+      { q: "If you work 44 hours in a week at $16.00 per hour, the overtime premium (the extra pay earned for the 4 overtime hours beyond 40) is $32.",
+        a: "T", hint: "Overtime premium = 4 hours × ($16 × 0.5) = 4 × $8 = $32. The full overtime pay is 4 × $24 = $96; the extra 'premium' portion is $32." },
+      { q: "The divergent phase of creative problem-solving is when you narrow down a list of ideas to select the single best solution.",
+        a: "F", hint: "Divergent thinking GENERATES many ideas without judgment. Convergent thinking narrows down and selects. You must diverge before you converge." }
+    ];
+
+    // ── PART 2: MATCHING (5 sets × 5 items = 25 items) ───────────────────────
+    var matchSection = [
+      {
+        title: "Match each scenario to the ethical principle it most clearly demonstrates or violates.",
+        choices: [
+          "A. Integrity",
+          "B. Conflict of Interest",
+          "C. Whistleblowing",
+          "D. Confidentiality",
+          "E. Accountability",
+          "F. Honesty"
+        ],
+        items: [
+          { q: "A manager chooses a vendor for a project because the vendor is her brother-in-law, without disclosing this relationship to her employer.",
+            answer: "B", hint: "A conflict of interest exists when personal relationships or financial gain could improperly influence professional decisions—disclosure is required." },
+          { q: "An employee who made an error in a client deliverable proactively informs the team and proposes a corrective action plan.",
+            answer: "E", hint: "Accountability means owning your mistakes and driving the solution—not hiding errors and hoping no one notices." },
+          { q: "A staff member reports a coworker's illegal dumping of company waste to the appropriate regulatory authority after internal reporting failed.",
+            answer: "C", hint: "Whistleblowing—reporting illegal or unethical acts through proper external channels—is legally protected in many contexts and ethically required." },
+          { q: "An employee doesn't tell a client the full truth about a project delay but frames the information technically accurately to avoid conflict.",
+            answer: "F", hint: "Honesty requires more than technical accuracy—it means not creating false impressions through selective framing or omission." },
+          { q: "A team member keeps a client's private financial information secure and never discusses it with anyone outside the project.",
+            answer: "D", hint: "Confidentiality means actively protecting private information—it is both a professional duty and often a legal requirement." }
+        ]
+      },
+      {
+        title: "Match each job search document or tool to its correct description.",
+        choices: [
+          "A. Cover Letter",
+          "B. Portfolio",
+          "C. LinkedIn Profile",
+          "D. Thank-You Note",
+          "E. Application Form",
+          "F. References List"
+        ],
+        items: [
+          { q: "A document sent to a hiring manager after a job interview to express gratitude and reiterate your interest in the position.",
+            answer: "D", hint: "Thank-you notes after interviews set you apart—most candidates skip them, so sending one signals professionalism and genuine interest." },
+          { q: "A curated online or physical collection of your best completed work that demonstrates your skills to potential employers.",
+            answer: "B", hint: "A strong portfolio shows rather than tells—it provides concrete evidence of your abilities that a resume alone cannot deliver." },
+          { q: "A standardized document provided by an employer that requests your personal information, work history, and qualifications in a specific format.",
+            answer: "E", hint: "Application forms must be completed exactly as instructed—incomplete or improperly formatted applications are often rejected before being read." },
+          { q: "A professional digital profile that showcases your career history, skills, and connections—often the first place employers search for candidates.",
+            answer: "C", hint: "Your LinkedIn profile is your professional public identity. An outdated or incomplete profile signals a lack of attention to career management." },
+          { q: "A document listing individuals who have agreed to speak about your professional qualifications to potential employers on your behalf.",
+            answer: "F", hint: "Always ask permission before listing someone as a reference—and keep them updated on your search so they are prepared when contacted." }
+        ]
+      },
+      {
+        title: "Match each description to the correct data privacy or information security concept.",
+        choices: [
+          "A. Data Breach",
+          "B. Phishing",
+          "C. Principle of Least Privilege",
+          "D. Multi-Factor Authentication",
+          "E. Data Encryption",
+          "F. Acceptable Use Policy"
+        ],
+        items: [
+          { q: "A company policy that defines what employees may and may not do with organization-owned technology and network resources.",
+            answer: "F", hint: "AUPs establish clear expectations for technology use—violating them can result in disciplinary action or legal consequences." },
+          { q: "The security principle that each user should only have access to the specific data and systems they need for their job function—no more.",
+            answer: "C", hint: "Least privilege limits damage from breaches and insider threats—if an account is compromised, the attacker can only access what that user was permitted to see." },
+          { q: "A security event in which unauthorized parties gain access to confidential data, often resulting in legal notification requirements.",
+            answer: "A", hint: "Data breaches have serious financial and legal consequences. Many states require notification to affected individuals within a specific timeframe." },
+          { q: "A security approach requiring two or more distinct forms of verification before granting access to an account or system.",
+            answer: "D", hint: "MFA is one of the most effective security controls available—even stolen passwords are useless without the additional verification factor." },
+          { q: "A deceptive attempt to steal credentials or sensitive information by impersonating a trustworthy source through email, text, or phone.",
+            answer: "B", hint: "Phishing attacks succeed because they create urgency and appear legitimate. Verify requests through independent official channels—never through links in the message." }
+        ]
+      },
+      {
+        title: "Match each financial or mathematical workplace term to its correct definition.",
+        choices: [
+          "A. Budget Variance",
+          "B. Net Income",
+          "C. Return on Investment (ROI)",
+          "D. Tax Bracket",
+          "E. Direct Deposit",
+          "F. Withholding"
+        ],
+        items: [
+          { q: "The difference between a planned budget amount and the actual amount spent—it can be favorable (under budget) or unfavorable (over budget).",
+            answer: "A", hint: "Tracking budget variance helps organizations spot cost problems early and adjust before a small overage becomes a financial crisis." },
+          { q: "A measure of how much gain or loss an investment or expense generated relative to its cost, expressed as a percentage.",
+            answer: "C", hint: "ROI = (Gain − Cost) ÷ Cost × 100%. Professionals use it to justify spending decisions and compare the value of competing investments." },
+          { q: "Income taxes deducted from an employee's paycheck before they receive it, remitted directly to the government on their behalf.",
+            answer: "F", hint: "Withholding is your employer pre-paying your income tax to the government. Your W-4 determines how much is withheld each pay period." },
+          { q: "A range of income levels taxed at the same marginal rate—higher income may push earnings into a higher bracket.",
+            answer: "D", hint: "Tax brackets apply marginally—only the portion of your income above a threshold is taxed at the higher rate, not your entire income." },
+          { q: "An electronic transfer of your paycheck directly into your bank account without requiring a paper check.",
+            answer: "E", hint: "Direct deposit is faster, more secure, and more reliable than paper checks—most employers require or strongly prefer it." }
+        ]
+      },
+      {
+        title: "Match each professional communication practice to its correct description.",
+        choices: [
+          "A. BLUF Method",
+          "B. Proofreading",
+          "C. Plain Language",
+          "D. Active Voice",
+          "E. Executive Summary",
+          "F. Tone"
+        ],
+        items: [
+          { q: "Writing or speaking style that places the main conclusion or action item at the very beginning so the reader knows immediately why the communication matters.",
+            answer: "A", hint: "BLUF (Bottom Line Up Front) respects the reader's time—busy professionals should not have to read to the end to discover your main point." },
+          { q: "A sentence construction where the subject performs the action ('The team completed the report') rather than receiving it ('The report was completed').",
+            answer: "D", hint: "Active voice is generally clearer, shorter, and more direct than passive voice—it is the preferred construction in professional writing." },
+          { q: "Reviewing a document carefully for errors in spelling, grammar, punctuation, and consistency before sending or submitting it.",
+            answer: "B", hint: "Proofreading is a non-negotiable professional step—a single careless error in an email or document can undermine your credibility instantly." },
+          { q: "Writing that uses clear, direct language accessible to the intended audience, avoiding unnecessary jargon or complexity.",
+            answer: "C", hint: "Plain language is not about being simplistic—it's about removing unnecessary complexity so readers can understand and act on information quickly." },
+          { q: "The overall attitude or emotional quality of a written or spoken message—professional, friendly, formal, urgent, or cautious.",
+            answer: "F", hint: "Tone shapes how a message is received. The same information delivered in a warm vs. cold tone creates entirely different reader reactions." }
+        ]
+      }
+    ];
+
+    // ── PART 3: MULTIPLE CHOICE (44 items) ───────────────────────────────────
+    var mcSection = [
+      {
+        q: "Design thinking is a problem-solving approach that differs from traditional approaches because it:",
+        options: ["Focuses exclusively on the technical specifications of a product or system","Begins with deep empathy for the user's experience before defining problems or generating solutions","Requires a team of professional designers to implement effectively","Applies only to physical product design—not to workplace process or service problems"],
+        answer: "Begins with deep empathy for the user's experience before defining problems or generating solutions",
+        hint: "Design thinking starts with 'Who is this for and what do they actually need?' before jumping to solutions—this prevents building the wrong thing well."
+      },
+      {
+        q: "Taking initiative on a project differs from overstepping boundaries because taking initiative:",
+        options: ["Is only possible for senior employees with established authority","Means acting within or just beyond your role to improve outcomes, while keeping your supervisor informed","Always requires pre-approval and a signed authorization form","Means doing whatever you think is best regardless of organizational structure or processes"],
+        answer: "Means acting within or just beyond your role to improve outcomes, while keeping your supervisor informed",
+        hint: "Initiative operates within professional context—the key is transparency with your supervisor. Overstepping ignores authority; initiative respects it while pushing boundaries thoughtfully."
+      },
+      {
+        q: "Reporting a coworker's serious policy violation is professionally difficult but necessary because:",
+        options: ["It shows management that you are competitive and aware of others' performance","Unaddressed violations create risk for the organization, other employees, and sometimes customers—protecting the whole is part of professional integrity","It gives you leverage in future performance discussions","It is legally required in all professional settings regardless of the nature of the violation"],
+        answer: "Unaddressed violations create risk for the organization, other employees, and sometimes customers—protecting the whole is part of professional integrity",
+        hint: "Professional integrity sometimes requires difficult acts. Staying silent about serious violations makes you complicit in their consequences."
+      },
+      {
+        q: "Accountability in the professional workplace means:",
+        options: ["Taking credit for successes while attributing failures to external factors","Owning your results—both the successes and the failures—and being transparent with your team when something goes wrong","Monitoring teammates to ensure they are meeting their commitments","Documenting all your actions so you have evidence if something is questioned later"],
+        answer: "Owning your results—both the successes and the failures—and being transparent with your team when something goes wrong",
+        hint: "Accountability is about ownership, not blame. Professionals who own their mistakes and focus on solutions earn far more trust than those who blame circumstances."
+      },
+      {
+        q: "A professional with strong work ethic receives critical performance feedback from their supervisor. Their most professional response is to:",
+        options: ["Explain the external factors that caused the performance issue before they were mentioned","Remain silent and wait until the supervisor stops speaking before leaving","Thank the supervisor, ask clarifying questions about how to improve, and create an action plan","Send a counter-proposal of their own performance metrics at the next review"],
+        answer: "Thank the supervisor, ask clarifying questions about how to improve, and create an action plan",
+        hint: "Receiving feedback well—without defensiveness—and turning it into an action plan is one of the highest demonstrations of professional work ethic and growth orientation."
+      },
+      {
+        q: "De-escalation techniques used in workplace conflict include:",
+        options: ["Matching the other person's emotional intensity to show you understand their level of concern","Speaking faster to keep the conversation moving before emotions escalate further","Lowering your voice, maintaining open body language, and acknowledging the other person's perspective before responding","Immediately involving HR so that all communication is documented from the start"],
+        answer: "Lowering your voice, maintaining open body language, and acknowledging the other person's perspective before responding",
+        hint: "De-escalation works by disrupting the escalation cycle—calm signals safety, and acknowledging someone's perspective reduces their need to fight to be heard."
+      },
+      {
+        q: "A win-win conflict resolution outcome means:",
+        options: ["One party wins completely and the other party accepts the result gracefully","Both parties compromise equally, each giving up exactly the same amount","A solution is found that addresses the core needs of both parties, even if each gives up some original position","The supervisor makes a final decision that both parties are required to accept"],
+        answer: "A solution is found that addresses the core needs of both parties, even if each gives up some original position",
+        hint: "Win-win solutions focus on interests (underlying needs), not positions (stated demands)—creative options often satisfy both parties' real needs even when positions seem incompatible."
+      },
+      {
+        q: "The BLUF method in professional writing stands for and is used to:",
+        options: ["Best Language, Useful Format—a standard for structuring reports in federal agencies","Bottom Line Up Front—placing your most important conclusion or action item at the beginning so readers immediately understand the purpose","Brief, Logical, Useful, Fact-based—a checklist for reviewing professional documents before sending","Bulleted, Listed, Underlined, Formatted—a visual formatting standard for executive presentations"],
+        answer: "Bottom Line Up Front—placing your most important conclusion or action item at the beginning so readers immediately understand the purpose",
+        hint: "BLUF respects the reader's time. Busy professionals should not have to read an entire document to find out why it was sent to them."
+      },
+      {
+        q: "Adjusting your communication style to fit different professional audiences is called:",
+        options: ["Code switching—a controversial practice that should be minimized in professional settings","Audience adaptation—a core professional communication skill that improves clarity and reception","Style inconsistency—a sign of poor professional identity and weak personal brand","Diplomatic communication—a skill reserved for leadership and management roles only"],
+        answer: "Audience adaptation—a core professional communication skill that improves clarity and reception",
+        hint: "Effective communicators adjust vocabulary, tone, detail level, and format based on who they are addressing—the same message requires different delivery for experts vs. general audiences."
+      },
+      {
+        q: "Microaggressions in the professional workplace are:",
+        options: ["Only a concern in workplaces with formally documented diversity policies","Technically aggressive actions that qualify as discrimination under federal law","Brief, everyday exchanges or comments that communicate subtle, often unintentional bias or negative messages toward members of marginalized groups","Rare events that only occur in workplaces with serious cultural problems"],
+        answer: "Brief, everyday exchanges or comments that communicate subtle, often unintentional bias or negative messages toward members of marginalized groups",
+        hint: "Microaggressions are harmful even when unintentional. Awareness—and a willingness to listen when someone names an impact—is foundational to an inclusive workplace."
+      },
+      {
+        q: "Cultural competence in the workplace is best defined as:",
+        options: ["The ability to speak multiple languages fluently","An ongoing practice of understanding, respecting, and effectively working with people from diverse cultural backgrounds","A formal certification required for customer-facing roles","Knowing the cultural holidays observed by your coworkers"],
+        answer: "An ongoing practice of understanding, respecting, and effectively working with people from diverse cultural backgrounds",
+        hint: "Cultural competence is developed continuously—it requires humility, curiosity, and a willingness to learn from experiences and feedback."
+      },
+      {
+        q: "The first-call resolution (FCR) metric in customer service measures:",
+        options: ["How quickly a customer service representative answers the phone","The percentage of customer issues resolved completely during the first contact without requiring callbacks or follow-up","How satisfied customers feel at the end of any interaction","The average cost of resolving a single customer issue across the team"],
+        answer: "The percentage of customer issues resolved completely during the first contact without requiring callbacks or follow-up",
+        hint: "FCR is a key customer service performance indicator—high FCR scores mean customers get their problems solved faster, which increases satisfaction and reduces costs."
+      },
+      {
+        q: "When a customer provides enthusiastic positive feedback about your service, the most professional response is:",
+        options: ["Thank them briefly and move on—no further action needed since the interaction went well","Thank them sincerely, ask if they would be willing to share their experience in a review or referral, and note what worked for future improvement","Share the feedback with your entire team immediately via group chat","Ask them why other interactions with the company may not have felt the same way"],
+        answer: "Thank them sincerely, ask if they would be willing to share their experience in a review or referral, and note what worked for future improvement",
+        hint: "Positive feedback is an opportunity—genuinely acknowledging it builds the relationship, and encouraging sharing (reviews, referrals) extends its value to the organization."
+      },
+      {
+        q: "Groupthink is problematic in team decision-making because it:",
+        options: ["Causes teams to make decisions too slowly by requiring unanimous agreement","Occurs when the desire for harmony or conformity overrides realistic evaluation of alternatives, leading to poor decisions","Makes it impossible for new team members to contribute meaningfully","Means the team leader always makes decisions without consulting the team"],
+        answer: "Occurs when the desire for harmony or conformity overrides realistic evaluation of alternatives, leading to poor decisions",
+        hint: "Groupthink silences dissent. Teams that make space for healthy disagreement consistently make better decisions than teams that suppress contrary views."
+      },
+      {
+        q: "Organizational culture affects an organization's big picture because:",
+        options: ["It determines the physical layout of the workplace, which affects employee productivity directly","It shapes how employees make decisions, treat each other and customers, and represent the organization—influencing every strategic outcome","It is a legally required component of all organizations with more than 50 employees","It only affects employee retention—organizational culture has no impact on external business performance"],
+        answer: "It shapes how employees make decisions, treat each other and customers, and represent the organization—influencing every strategic outcome",
+        hint: "Culture is often described as 'how we do things here'—it influences strategy, execution, and reputation in ways that formal policies alone cannot control."
+      },
+      {
+        q: "A company's SWOT analysis evaluates:",
+        options: ["Software, Workforce, Operations, and Technology—the four pillars of digital transformation","Strengths, Weaknesses, Opportunities, and Threats—internal and external factors that shape strategic planning","Sales, Wages, Output, and Timing—a financial performance model for quarterly reporting","Style, Writing, Organization, and Tone—a framework for evaluating professional communications"],
+        answer: "Strengths, Weaknesses, Opportunities, and Threats—internal and external factors that shape strategic planning",
+        hint: "SWOT analysis helps organizations understand what they do well, where they fall short, what external opportunities exist, and what risks they face—essential for strategic planning."
+      },
+      {
+        q: "The purpose of a professional LinkedIn profile in career management is to:",
+        options: ["Replicate your resume in a digital format so you can email a link instead of attaching a file","Build a professional public identity, demonstrate expertise, connect with peers and recruiters, and stay visible in your field","Document your daily work activities for your own professional reflection and goal tracking","Replace the need for a formal resume when applying for jobs at large companies"],
+        answer: "Build a professional public identity, demonstrate expertise, connect with peers and recruiters, and stay visible in your field",
+        hint: "LinkedIn is more than an online resume—it's your professional presence in a global network where employers actively search for talent and where industries share knowledge."
+      },
+      {
+        q: "Financial literacy as a career management skill includes:",
+        options: ["Understanding only how to file your taxes each year","Understanding your paycheck, managing a personal budget, building an emergency fund, and making informed decisions about benefits and retirement plans","Knowing how to invest in the stock market and maximize returns","Only applying to jobs that pay above the median salary for your field"],
+        answer: "Understanding your paycheck, managing a personal budget, building an emergency fund, and making informed decisions about benefits and retirement plans",
+        hint: "Financial literacy goes far beyond taxes—it's the ability to make informed decisions with your money throughout your career, from your first paycheck to retirement."
+      },
+      {
+        q: "GTD (Getting Things Done) methodology focuses on:",
+        options: ["Completing the highest number of tasks possible in the shortest amount of time","Capturing every commitment and task outside your head into a trusted system, then organizing and reviewing them regularly to ensure nothing falls through the cracks","Working without breaks to maximize the number of completed tasks per day","Prioritizing only the tasks assigned by your supervisor and ignoring self-identified items"],
+        answer: "Capturing every commitment and task outside your head into a trusted system, then organizing and reviewing them regularly to ensure nothing falls through the cracks",
+        hint: "GTD's core insight is that your brain is for thinking—not for storing commitments. An external trusted system frees mental energy for deep work."
+      },
+      {
+        q: "Automating a repetitive task in your workflow benefits the organization because:",
+        options: ["Automation always produces exactly the same results as manual work, making quality checks unnecessary","It eliminates the need for human oversight of that function entirely","It reduces time spent on low-value repetitive work, freeing human attention for judgment-intensive tasks that require experience and creativity","It ensures the task is completed even when employees are absent, eliminating the need for cross-training"],
+        answer: "It reduces time spent on low-value repetitive work, freeing human attention for judgment-intensive tasks that require experience and creativity",
+        hint: "Strategic automation multiplies human capacity—it handles the predictable so professionals can focus on problems that genuinely require human judgment."
+      },
+      {
+        q: "When researching a medical topic for a workplace wellness program, the most reliable type of source is:",
+        options: ["A wellness influencer's social media posts, since they are current and widely shared","A peer-reviewed medical journal article or information from a recognized health authority such as the CDC or NIH","A popular health magazine article, since it is written to be easily understood","An online forum where multiple people have shared personal experiences with the same health issue"],
+        answer: "A peer-reviewed medical journal article or information from a recognized health authority such as the CDC or NIH",
+        hint: "Medical decisions require evidence-based sources. Peer-reviewed research and recognized health authorities provide information that has been vetted by experts."
+      },
+      {
+        q: "Evaluating information using the CRAAP test checks for:",
+        options: ["Creativity, Reliability, Accuracy, Authority, and Purpose—a framework for evaluating creative work","Currency, Relevance, Authority, Accuracy, and Purpose—five criteria for evaluating the quality and credibility of an information source","Clarity, Readability, Accessibility, Appropriateness, and Professionalism—a standard for professional documents","Copyright, Rights, Attribution, Attribution, and Permission—a framework for legal use of information"],
+        answer: "Currency, Relevance, Authority, Accuracy, and Purpose—five criteria for evaluating the quality and credibility of an information source",
+        hint: "The CRAAP test gives you a systematic framework for evaluating any source—applying it protects you from using outdated, biased, or inaccurate information in professional work."
+      },
+      {
+        q: "The principle of least privilege in information security means:",
+        options: ["Senior employees should have fewer permissions to reduce the risk of accidental data leaks","Every user should have access only to the specific data and systems required for their current job function—nothing more","New employees should not have any system access until they complete a 90-day probationary period","All employees should share access credentials so that anyone can handle any task in an emergency"],
+        answer: "Every user should have access only to the specific data and systems required for their current job function—nothing more",
+        hint: "Least privilege limits the blast radius of any compromise—if an account is hacked, the attacker can only reach what that account was permitted to access."
+      },
+      {
+        q: "A ransomware attack most commonly begins with:",
+        options: ["Hackers physically breaking into an office and directly accessing server hardware","A user clicking a malicious link or opening an infected attachment, allowing malware to encrypt files and demand payment for their release","An automatic vulnerability scan that exploits unpatched software without any human action","Employees leaving company laptops on public transportation where they are found by malicious actors"],
+        answer: "A user clicking a malicious link or opening an infected attachment, allowing malware to encrypt files and demand payment for their release",
+        hint: "Ransomware almost always enters through human error—phishing emails that trick users into clicking. Security awareness training is the most effective preventive measure."
+      },
+      {
+        q: "The purpose of a content management system (CMS) in a professional setting is to:",
+        options: ["Replace the need for a professional web designer on any project","Allow authorized users to create, edit, organize, and publish digital content without needing to write code directly","Store all company email communications in a searchable archive","Manage employee access permissions for cloud-based services"],
+        answer: "Allow authorized users to create, edit, organize, and publish digital content without needing to write code directly",
+        hint: "CMS platforms like WordPress, Webflow, and Squarespace democratize content management—non-technical team members can update websites without developer assistance."
+      },
+      {
+        q: "Which best describes the function of metadata in a professional digital context?",
+        options: ["Metadata is the visible content of a file—the words, images, or data that users interact with directly","Metadata is information about a file—such as the author, creation date, file size, and modification history—that is stored within the file but not always visible","Metadata refers only to the file name and location within a folder structure","Metadata is a technical security layer added to files by IT departments to track access"],
+        answer: "Metadata is information about a file—such as the author, creation date, file size, and modification history—that is stored within the file but not always visible",
+        hint: "Metadata can reveal sensitive information (author names, tracked changes, location data) even in 'finished' files—professionals should clean metadata before sharing documents externally."
+      },
+      {
+        q: "Responsive web design means that a website:",
+        options: ["Loads faster than non-responsive websites because it uses less complex code","Automatically adjusts its layout and content presentation to display correctly across different device screen sizes, from phones to desktops","Only works on the most recently released devices to ensure a premium user experience","Responds to user input faster because of advanced backend programming"],
+        answer: "Automatically adjusts its layout and content presentation to display correctly across different device screen sizes, from phones to desktops",
+        hint: "Responsive design is now a baseline professional standard—with over 50% of web traffic on mobile devices, a site that only works on desktop fails most of its users."
+      },
+      {
+        q: "The best practice when preparing to share a professional presentation with someone who was not present at the meeting is to:",
+        options: ["Send only the slide deck without explanation, since the slides should be self-explanatory","Send the slides with a brief written summary explaining key decisions, action items, and context the slides don't convey on their own","Present it again live whenever possible—slides without context are useless","Remove all charts and visuals before sending since they may be misinterpreted without narration"],
+        answer: "Send the slides with a brief written summary explaining key decisions, action items, and context the slides don't convey on their own",
+        hint: "Slides are built for live delivery—they often rely on presenter narration to make sense. A summary bridges the gap for people who weren't in the room."
+      },
+      {
+        q: "The advantage of using a project management tool (like Asana or Trello) over a shared spreadsheet for team task tracking is:",
+        options: ["Project management tools are always less expensive than spreadsheet software","They provide features like task dependencies, automated reminders, deadline tracking, and role assignments that spreadsheets cannot replicate natively","They are easier to use for people who have never used computers before","Spreadsheets are never appropriate for professional task management"],
+        answer: "They provide features like task dependencies, automated reminders, deadline tracking, and role assignments that spreadsheets cannot replicate natively",
+        hint: "Project management tools are purpose-built for team coordination—they make project status visible to everyone and automate follow-up in ways spreadsheets require manual effort to replicate."
+      },
+      {
+        q: "You earn $18.00 per hour and work 42 hours in one week. What is your total gross pay for the week (including overtime at 1.5× the regular rate)?",
+        options: ["$756.00", "$774.00", "$792.00", "$810.00"],
+        answer: "$774.00",
+        math: true,
+        hint: "40 hrs × $18 = $720 (regular). 2 hrs × $27 (=$18×1.5) = $54 (overtime). Total: $720 + $54 = $774.00."
+      },
+      {
+        q: "A federal income tax rate of 22% applies to your gross pay of $580. How much is withheld?",
+        options: ["$117.60", "$121.60", "$127.60", "$131.60"],
+        answer: "$127.60",
+        math: true,
+        hint: "$580 × 0.22 = $127.60. Multiply the gross amount by the decimal form of the percentage: 22% = 0.22."
+      },
+      {
+        q: "Materials for a project cost $1,450 and labor costs $2,100. What is the total project cost?",
+        options: ["$3,450.00", "$3,500.00", "$3,550.00", "$3,600.00"],
+        answer: "$3,550.00",
+        math: true,
+        hint: "$1,450 + $2,100 = $3,550. Total project cost = materials + labor. Always add both components before presenting a client estimate."
+      },
+      {
+        q: "A client pays a $900 deposit on a $1,500 project. How much remains to be collected?",
+        options: ["$550.00", "$600.00", "$650.00", "$700.00"],
+        answer: "$600.00",
+        math: true,
+        hint: "$1,500 − $900 = $600. Tracking the remaining balance ensures you invoice correctly and the client understands what they still owe."
+      },
+      {
+        q: "Arriving at work consistently prepared, on time, and ready to engage is best described as:",
+        options: ["Customer service excellence","Professionalism and reliability—a foundational workplace reputation builder","Information security consciousness","Creative initiative"],
+        answer: "Professionalism and reliability—a foundational workplace reputation builder",
+        hint: "The most basic form of professionalism—showing up prepared and on time—is also among the most impactful. Reliability is the foundation of professional trust."
+      },
+      {
+        q: "Emotional intelligence (EQ) in a professional context refers to:",
+        options: ["The ability to memorize and recall large amounts of emotional and psychological data","The capacity to recognize, understand, and manage your own emotions and recognize and respond appropriately to others' emotions","The technical ability to measure emotional states using psychological assessment tools","A personality trait you are born with that cannot be developed through training or experience"],
+        answer: "The capacity to recognize, understand, and manage your own emotions and recognize and respond appropriately to others' emotions",
+        hint: "High EQ professionals manage stress, navigate conflict, and build relationships more effectively than high IQ alone predicts. EQ can be developed through intentional practice."
+      },
+      {
+        q: "Active voice vs. passive voice in professional writing: active voice is preferred because it:",
+        options: ["Sounds more formal and is therefore appropriate for all high-stakes professional documents","Is shorter, clearer, and makes it obvious who is responsible for taking action","Is grammatically correct while passive voice is technically an error","Is required by most professional style guides including AP and APA for all uses"],
+        answer: "Is shorter, clearer, and makes it obvious who is responsible for taking action",
+        hint: "Active: 'The manager approved the request.' Passive: 'The request was approved.' Active is clearer, shorter, and assigns responsibility. Use passive deliberately when the actor is unknown or intentionally de-emphasized."
+      },
+      {
+        q: "Before submitting a professional document, which final check is most important?",
+        options: ["Confirming that the document is the minimum required length to fulfill the assignment","Reading the document from the recipient's perspective to verify that the purpose is clear, the content is accurate, and the tone is appropriate","Running a word count to ensure the document meets density expectations","Checking that the font size is consistent throughout"],
+        answer: "Reading the document from the recipient's perspective to verify that the purpose is clear, the content is accurate, and the tone is appropriate",
+        hint: "Professional documents are communication tools for the reader. Reading as the recipient—not as the author—is the most important final check for clarity, accuracy, and impact."
+      },
+      {
+        q: "The hierarchy of controls in workplace safety lists the most effective type of control as:",
+        options: ["Administrative controls—policies and procedures that regulate how workers interact with hazards","Personal protective equipment (PPE)—gear worn to reduce exposure to hazards","Substitution or elimination—removing or replacing the hazard entirely so the risk no longer exists","Engineering controls—physical barriers or modifications that reduce exposure to hazards"],
+        answer: "Substitution or elimination—removing or replacing the hazard entirely so the risk no longer exists",
+        hint: "Elimination is the only control that removes the hazard entirely. Lower tiers (engineering, administrative, PPE) manage exposure to a hazard that still exists—they are less effective than removing it altogether."
+      },
+      {
+        q: "In the hierarchy of controls, Personal Protective Equipment (PPE) is considered which level—and why?",
+        options: ["The most effective level—it directly protects the worker at the point of contact","The second tier—just below engineering controls and above administrative controls","The least preferred level—it does not eliminate or reduce the hazard but only provides a barrier between the worker and the hazard that still exists","The middle tier—it is equally effective as engineering controls when properly used"],
+        answer: "The least preferred level—it does not eliminate or reduce the hazard but only provides a barrier between the worker and the hazard that still exists",
+        hint: "PPE is the last line of defense—when it fails (wrong fit, wrong type, not worn), the worker is fully exposed. Higher-level controls are always preferred when feasible."
+      },
+      {
+        q: "Volunteering for a task that is outside your current job description, when you have the capacity and the skill, demonstrates:",
+        options: ["Overreach that may be perceived negatively by teammates who own that area of work","Strong initiative and a growth-oriented mindset that benefits both you and your organization","Poor boundary management that will lead to being assigned too much work permanently","Lack of focus on your primary responsibilities"],
+        answer: "Strong initiative and a growth-oriented mindset that benefits both you and your organization",
+        hint: "Professionals who voluntarily expand their contributions are noticed. Employers consistently cite initiative as one of the most valued qualities they see in high-potential employees."
+      },
+      {
+        q: "Knowing when and how to cite sources in a professional document is important because it:",
+        options: ["Lengthens the document, making it appear more thoroughly researched","Gives credit to original authors, allows readers to verify information, and protects you and your organization from accusations of plagiarism","Is only legally required in academic settings—professional documents do not have citation requirements","Shows that you did more research than necessary, which may imply the problem is more complex than it needs to be"],
+        answer: "Gives credit to original authors, allows readers to verify information, and protects you and your organization from accusations of plagiarism",
+        hint: "Professional citation is both ethical and strategic—it demonstrates intellectual honesty and gives your arguments the credibility of verified sources."
+      },
+      {
+        q: "A professional who builds a reputation for reliability and follow-through over time benefits from:",
+        options: ["Being assigned more tasks than less reliable peers, with no additional compensation","Increased trust from supervisors, clients, and teammates—leading to greater autonomy, better opportunities, and stronger professional relationships","The ability to avoid all difficult or high-stakes assignments","Being excused from team meetings since their work can be trusted without monitoring"],
+        answer: "Increased trust from supervisors, clients, and teammates—leading to greater autonomy, better opportunities, and stronger professional relationships",
+        hint: "Trust is the currency of professional opportunity. Reliable professionals are given more important work, greater autonomy, and first consideration for advancement—because people bet on what they can count on."
+      }
+    ];
+
+    // ── PART 4: LABELING (1 diagram) ─────────────────────────────────────────
+    var labelSection = [
+      {
+        title: "Identify each numbered section of this sample job application form.",
+        wordBank: ["Applicant Signature", "Education & Training", "Employment History", "Personal Information", "Position Applied For", "References"],
+        items: [
+          { answer: "Personal Information", hint: "Personal Information identifies who you are to the employer—name, contact details, and address. All information must be accurate and current, as employers verify it during background checks." },
+          { answer: "Position Applied For", hint: "The Position Applied For section shows you applied intentionally for a specific role—leaving it blank or writing 'anything' signals lack of focus and reduces your chances of being considered." },
+          { answer: "Employment History", hint: "Employment History shows your relevant experience. Always list jobs in reverse chronological order (most recent first) and never leave unexplained gaps—employers will ask about them." },
+          { answer: "Education & Training", hint: "Education & Training shows your academic background and any certifications or specialized training relevant to the position. Industry certifications carry significant weight in technical fields." },
+          { answer: "References", hint: "References are people who can speak to your professional character and work quality. Always contact references before listing them—never list someone without their permission." },
+          { answer: "Applicant Signature", hint: "The Applicant Signature certifies that all information provided is truthful and complete. Providing false information on a job application is grounds for immediate termination—even years after hiring." }
+        ],
+        svg: '<svg viewBox="0 0 520 310" style="width:100%;max-width:560px;display:block;margin:0 auto;border-radius:6px;font-family:system-ui,sans-serif;border:1px solid #adb5bd">'
+          + '<rect x="0" y="0" width="520" height="32" fill="#003087" rx="6"/>'
+          + '<rect x="0" y="20" width="520" height="12" fill="#003087"/>'
+          + '<text x="260" y="21" text-anchor="middle" font-size="12" fill="white" font-weight="700">SAMPLE JOB APPLICATION FORM</text>'
+          + '<rect x="5" y="36" width="510" height="44" fill="#dce8f5" stroke="#003087" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="20" cy="52" r="11" fill="#003087"/>'
+          + '<text x="20" y="57" text-anchor="middle" font-size="10" fill="white" font-weight="700">1</text>'
+          + '<text x="260" y="50" text-anchor="middle" font-size="10" fill="#1a1a2e" font-weight="600">Full Name: Jordan Martinez     Phone: (775) 555-2247     DOB: 05/12/2002</text>'
+          + '<text x="260" y="64" text-anchor="middle" font-size="9" fill="#444">Address: 1500 Mountain View Drive, Carson City, NV  89706</text>'
+          + '<text x="260" y="74" text-anchor="middle" font-size="9" fill="#444">Email: jmartinez@email.com</text>'
+          + '<rect x="5" y="84" width="510" height="28" fill="#fff3cd" stroke="#997404" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="20" cy="99" r="11" fill="#fd7e14"/>'
+          + '<text x="20" y="104" text-anchor="middle" font-size="10" fill="white" font-weight="700">2</text>'
+          + '<text x="260" y="96" text-anchor="middle" font-size="10" fill="#664d03" font-weight="600">Position: Web Design Technician     |     Shift: Full-Time     |     Start Date: Available Immediately</text>'
+          + '<text x="260" y="108" text-anchor="middle" font-size="9" fill="#664d03">Desired Pay: $18–$22/hr</text>'
+          + '<rect x="5" y="116" width="510" height="52" fill="#e8f4f8" stroke="#0d6efd" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="20" cy="132" r="11" fill="#0d6efd"/>'
+          + '<text x="20" y="137" text-anchor="middle" font-size="10" fill="white" font-weight="700">3</text>'
+          + '<text x="260" y="130" text-anchor="middle" font-size="10" fill="#0a1628" font-weight="600">Previous Employer: Reno Tech Solutions | Title: IT Support Assistant</text>'
+          + '<text x="260" y="143" text-anchor="middle" font-size="9" fill="#0a1628">Dates: June 2024 – May 2025  |  Supervisor: M. Reyes  |  Reason for Leaving: Seeking Full-Time</text>'
+          + '<text x="260" y="156" text-anchor="middle" font-size="8" fill="#666" font-style="italic">Previous Employer: CHS Print Shop  |  June 2023 – May 2024  |  Part-Time Student Work</text>'
+          + '<rect x="5" y="172" width="252" height="52" fill="#e8f8ed" stroke="#198754" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="20" cy="188" r="11" fill="#198754"/>'
+          + '<text x="20" y="193" text-anchor="middle" font-size="10" fill="white" font-weight="700">4</text>'
+          + '<text x="134" y="186" text-anchor="middle" font-size="10" fill="#0a3622" font-weight="600">Carson High School</text>'
+          + '<text x="134" y="198" text-anchor="middle" font-size="9" fill="#0a3622">Web Design &amp; Development Program</text>'
+          + '<text x="134" y="210" text-anchor="middle" font-size="9" fill="#0a3622">Expected Graduation: June 2026</text>'
+          + '<text x="134" y="220" text-anchor="middle" font-size="8" fill="#0a3622" font-style="italic">Certifications: Adobe CC, HTML/CSS</text>'
+          + '<rect x="263" y="172" width="252" height="52" fill="#f8d7da" stroke="#dc3545" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="278" cy="188" r="11" fill="#dc3545"/>'
+          + '<text x="278" y="193" text-anchor="middle" font-size="10" fill="white" font-weight="700">5</text>'
+          + '<text x="389" y="185" text-anchor="middle" font-size="9" fill="#842029" font-weight="600">Ms. D. Miller — CHS Instructor</text>'
+          + '<text x="389" y="197" text-anchor="middle" font-size="8" fill="#842029">(775) 555-0100  |  dmiller@csd.edu</text>'
+          + '<text x="389" y="210" text-anchor="middle" font-size="9" fill="#842029" font-weight="600">Mr. J. Smith — Former Employer</text>'
+          + '<text x="389" y="222" text-anchor="middle" font-size="8" fill="#842029">(775) 555-0199  |  jsmith@renotech.com</text>'
+          + '<rect x="5" y="228" width="510" height="70" fill="#e8eaf6" stroke="#3949ab" stroke-width="2" rx="4"/>'
+          + '<circle cx="22" cy="246" r="12" fill="#3949ab"/>'
+          + '<text x="22" y="251" text-anchor="middle" font-size="11" fill="white" font-weight="700">6</text>'
+          + '<text x="260" y="247" text-anchor="middle" font-size="9" fill="#1a237e" font-weight="700">APPLICANT CERTIFICATION</text>'
+          + '<text x="260" y="261" text-anchor="middle" font-size="8" fill="#3949ab" font-style="italic">I certify that all information provided in this application is true, complete, and accurate to the best of my knowledge.</text>'
+          + '<text x="260" y="273" text-anchor="middle" font-size="8" fill="#3949ab" font-style="italic">I understand that any false statement may disqualify me or result in dismissal after employment.</text>'
+          + '<line x1="45" y1="286" x2="310" y2="286" stroke="#3949ab" stroke-width="1"/>'
+          + '<text x="180" y="295" text-anchor="middle" font-size="8" fill="#3949ab">Applicant Signature</text>'
+          + '<text x="430" y="290" text-anchor="middle" font-size="9" fill="#1a237e">Date: ___________</text>'
+          + '</svg>'
+      }
+    ];
+
+    // ── Launch ────────────────────────────────────────────────────────────────
+    var config = {
+      chapterTitle:    'WRS Practice Assessment',
+      gradebookExamId: 'WRS-Practice-D',
+      tfSection:       tfSection,
+      matchSection:    matchSection,
+      mcSection:       mcSection,
+      labelSection:    labelSection
+    };
+
+    initWRS(config);
+
+  })();
+  </script>
+<div id="footer-placeholder"></div>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

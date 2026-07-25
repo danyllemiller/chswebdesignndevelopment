@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>WRS Practice Assessment — Nevada CTE</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/web-app-manifest-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/favicon-512x512.png">
+
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/student-pages.css">
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+<div class="container-fluid sticky-top px-0 no-print">
+  <div id="nav-placeholder"></div>
+</div>
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9 mx-auto">
+        <div id="exam-container" class="mt-4">
+          <div class="text-center p-5 bg-white shadow-sm rounded" style="border-top: 6px solid var(--primary-color);">
+            <div class="spinner-border" style="color: var(--primary-color);" role="status"></div>
+            <p class="mt-3 fw-bold" style="color: var(--primary-color);">Connecting to Digital Arts Cloud&hellip;</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="/js/wrsLogic.js?v=6"></script>
+  <script>
+  (function () {
+
+    // ── PART 1: TRUE / FALSE (25 items) ──────────────────────────────────────
+    var tfSection = [
+      { q: "An employee who tries a new approach to solve a workplace problem, and it doesn't work, has demonstrated poor professional judgment.",
+        a: "F", hint: "Trying new approaches—even when they fail—is part of creative problem-solving. What matters is learning from the attempt." },
+      { q: "Before accepting information as fact, a professional should consider the source's authority, publication date, and purpose.",
+        a: "T", hint: "Evaluating the credibility of information before acting on it is the core of information literacy and critical thinking." },
+      { q: "Taking on an extra responsibility without being asked, when you have the capacity, demonstrates initiative.",
+        a: "T", hint: "Proactively identifying and addressing unmet needs—without waiting for direction—is the definition of self-direction and initiative." },
+      { q: "It is acceptable to take small office supplies home for personal use because the items have minimal monetary value.",
+        a: "F", hint: "Taking any company property without authorization—regardless of size—is considered theft and a violation of workplace integrity." },
+      { q: "Doing only the minimum amount of work required to avoid being fired demonstrates a strong work ethic.",
+        a: "F", hint: "Strong work ethic means going beyond the minimum—showing dedication, consistency, and genuine effort in all tasks." },
+      { q: "In a workplace conflict, the first step should always be to document the incident and submit a formal complaint to HR.",
+        a: "F", hint: "Direct, private conversation is the recommended first step in resolving most workplace conflicts before escalating to formal processes." },
+      { q: "It is appropriate to multitask on other work during a professional phone call as long as you can still hear the other person.",
+        a: "F", hint: "Multitasking during a phone call prevents true active listening and signals disrespect to the other party." },
+      { q: "Workplace diversity refers only to differences in race and gender.",
+        a: "F", hint: "Diversity encompasses race, gender, age, culture, religion, disability, sexual orientation, and many other dimensions of human difference." },
+      { q: "Promising a customer a specific resolution that you are not authorized to deliver is a good customer service strategy.",
+        a: "F", hint: "Making promises you cannot keep damages trust. Communicate what you CAN do and escalate if a resolution requires authorization you don't have." },
+      { q: "A team's overall success depends in part on the performance of its weakest contributor, not just its star performers.",
+        a: "T", hint: "Teams are interdependent—a chain is only as strong as its weakest link. Supporting struggling teammates is a professional responsibility." },
+      { q: "An employee should understand the organization's mission statement in order to make better decisions about their own priorities.",
+        a: "T", hint: "Knowing why your organization exists helps you make decisions that align with its goals—a sign of big-picture thinking." },
+      { q: "A resume should be updated only when you are actively looking for a new job.",
+        a: "F", hint: "Keeping your resume current means adding achievements, skills, and certifications as they happen—not scrambling when you need it." },
+      { q: "If you already know how to do something well, there is no need to seek additional training in that area.",
+        a: "F", hint: "Industries evolve constantly. Even experts need to keep up with new tools, regulations, and best practices in their field." },
+      { q: "Checking your personal phone frequently throughout the workday is an efficient use of downtime between tasks.",
+        a: "F", hint: "Frequent personal phone use during work hours disrupts focus and reduces productivity—even during brief pauses between tasks." },
+      { q: "A website ending in .gov is generally a more authoritative source for regulatory information than a personal blog.",
+        a: "T", hint: ".gov sites publish official government information—they are primary sources for policy, safety rules, and legal standards." },
+      { q: "Using the same password for all your work accounts saves time without creating significant security risk.",
+        a: "F", hint: "Reusing passwords means a single breach compromises all accounts. Use unique, strong passwords and a password manager." },
+      { q: "Sharing a large file with a colleague by attaching it to multiple emails is as secure and efficient as using approved file-sharing tools.",
+        a: "F", hint: "Email attachments risk exceeding size limits, version confusion, and security exposure. Approved file-sharing tools are designed for this purpose." },
+      { q: "Learning how to use multiple tools for the same task makes you more versatile and valuable in the workplace.",
+        a: "T", hint: "Proficiency with multiple tools means you can adapt when one is unavailable or when an employer uses a different platform." },
+      { q: "If an employee works 35 hours at $14.00 per hour, their gross pay is $490.00.",
+        a: "T", hint: "35 × $14 = $490. Gross pay is simply hours worked multiplied by the hourly rate, before any deductions." },
+      { q: "Arriving at a job interview in business casual attire when the dress code was not specified is a safe professional choice.",
+        a: "T", hint: "When in doubt, dress one level above what you expect the environment to be. It's easier to dress down than to recover from being underdressed." },
+      { q: "In professional writing, using bullet points and clear headers makes a document easier to scan and understand.",
+        a: "T", hint: "Structure and visual hierarchy are core professional writing skills—they help busy readers find key information quickly." },
+      { q: "Wearing personal protective equipment (PPE) is optional if you personally believe the risk of injury is low.",
+        a: "F", hint: "PPE requirements are mandatory, not suggestions. 'Low risk' is a judgment call that may be wrong—always follow required safety protocols." },
+      { q: "An employee who identifies a process that could save the company money should keep the idea to themselves to avoid appearing presumptuous.",
+        a: "F", hint: "Sharing cost-saving ideas through appropriate channels is exactly what initiative looks like—employers value this kind of proactive thinking." },
+      { q: "A 20% discount on a $75.00 item reduces the price to $55.00.",
+        a: "F", hint: "20% of $75 = $15 discount. $75 − $15 = $60, not $55. Always calculate the discount first, then subtract from the original price." },
+      { q: "If two credible sources disagree about a fact, the most professional response is to assume both are wrong.",
+        a: "F", hint: "Disagreement between credible sources calls for deeper investigation—check dates, methodology, and primary data to determine which is more reliable." }
+    ];
+
+    // ── PART 2: MATCHING (5 sets × 5 items = 25 items) ───────────────────────
+    var matchSection = [
+      {
+        title: "Match each workplace behavior to the WRS standard it best demonstrates.",
+        choices: [
+          "A. Work Ethic",
+          "B. Initiative",
+          "C. Listening & Speaking",
+          "D. Teamwork",
+          "E. Creativity",
+          "F. Professionalism"
+        ],
+        items: [
+          { q: "You notice a process your team uses is outdated; without being asked, you research alternatives and present a recommendation to your manager.",
+            answer: "B", hint: "Initiative is proactive problem-solving—identifying an issue and coming to your supervisor with a solution, not just the problem." },
+          { q: "During a fast-paced project review meeting, you take detailed notes on every point raised by team members so nothing is missed.",
+            answer: "C", hint: "Active note-taking during fast-paced discussions is a key listening skill that ensures nothing important is missed." },
+          { q: "A colleague is struggling with their workload; you complete your own tasks first, then proactively ask how you can help before the deadline.",
+            answer: "D", hint: "Proactively offering help to a struggling teammate—after completing your own work—is the definition of collaborative teamwork." },
+          { q: "You design a new way to organize your shared workspace that dramatically cuts the time the team spends searching for materials.",
+            answer: "E", hint: "Creative thinking applies to process improvement, not just artistic work. Finding smarter ways to work is a form of workplace innovation." },
+          { q: "You stay 15 extra minutes without being asked to finish a task to an acceptable standard before leaving for the day.",
+            answer: "A", hint: "Going beyond the clock to ensure quality output—without being required to—shows genuine dedication and strong work ethic." }
+        ]
+      },
+      {
+        title: "Match each description to the correct workplace communication document.",
+        choices: [
+          "A. Performance Appraisal",
+          "B. Agenda",
+          "C. Meeting Minutes",
+          "D. Organizational Chart",
+          "E. Policy Manual",
+          "F. Job Description"
+        ],
+        items: [
+          { q: "A document distributed before a meeting that lists the topics to be discussed and the order in which they will be addressed.",
+            answer: "B", hint: "Agendas set expectations before a meeting—they help participants prepare and keep discussion on track." },
+          { q: "A visual document that maps out reporting relationships and the formal structure of an organization's staff.",
+            answer: "D", hint: "An org chart shows who reports to whom—it helps new employees understand chain of command and communication pathways." },
+          { q: "A written record of what was discussed, decided, and assigned to individuals during a meeting.",
+            answer: "C", hint: "Meeting minutes are the official record of what happened—they hold attendees accountable to decisions and action items." },
+          { q: "A formal document that records how well an employee performed against their goals over a specific time period.",
+            answer: "A", hint: "Performance appraisals document achievement and set future goals—they are key tools in career development conversations." },
+          { q: "A written compilation of a company's rules, procedures, and expected employee behaviors.",
+            answer: "E", hint: "Policy manuals outline what is expected, prohibited, and how processes work—knowing yours protects both you and your employer." }
+        ]
+      },
+      {
+        title: "Match each description to the correct workplace safety or health term.",
+        choices: [
+          "A. OSHA",
+          "B. Ergonomics",
+          "C. PPE",
+          "D. Hazard",
+          "E. Safety Data Sheet",
+          "F. Incident Report"
+        ],
+        items: [
+          { q: "The federal agency responsible for establishing and enforcing workplace health and safety regulations across the United States.",
+            answer: "A", hint: "OSHA (Occupational Safety and Health Administration) sets the legal safety standards that all U.S. employers must follow." },
+          { q: "Protective gear worn to minimize exposure to hazards—such as gloves, hard hats, safety glasses, or respirators.",
+            answer: "C", hint: "PPE creates a physical barrier between you and workplace hazards. Wearing it correctly is required—not optional." },
+          { q: "A document that provides detailed safety information about a chemical substance, including safe handling and emergency procedures.",
+            answer: "E", hint: "SDS sheets are required for all hazardous chemicals in a workplace—knowing where they are can save lives." },
+          { q: "A formal written account of an injury, near-miss, or safety violation that occurred in the workplace.",
+            answer: "F", hint: "Incident reports create a documented record that can identify patterns, improve safety, and protect you legally if questioned later." },
+          { q: "Anything in a workplace that has the potential to cause harm, injury, or illness if not properly controlled.",
+            answer: "D", hint: "Hazard recognition is the first step in safety—you can't control a risk you haven't identified." }
+        ]
+      },
+      {
+        title: "Match each career or employment term to its correct definition.",
+        choices: [
+          "A. Benefits",
+          "B. Commission",
+          "C. Wage",
+          "D. Salary",
+          "E. Deductible",
+          "F. W-4"
+        ],
+        items: [
+          { q: "A tax form filled out by employees to tell their employer how much federal income tax to withhold from each paycheck.",
+            answer: "F", hint: "The W-4 determines your withholding amount. Filling it out incorrectly can mean owing a large tax bill or overpaying all year." },
+          { q: "A fixed annual amount paid to an employee regardless of the number of hours worked each week.",
+            answer: "D", hint: "Salaried employees receive the same amount regardless of hours worked—unlike hourly wages, which vary with time worked." },
+          { q: "A pay structure where an employee earns a percentage of each sale they make for the employer.",
+            answer: "B", hint: "Commission-based pay rewards higher performance but can create income variability—strong in good months, lower in slow ones." },
+          { q: "Pay calculated by multiplying hours worked by a set dollar amount per hour.",
+            answer: "C", hint: "Hourly wages multiply rate × hours—more hours means more pay, but also no pay for time not worked (holidays, illness)." },
+          { q: "Non-wage compensation provided by an employer, such as health insurance, retirement plans, or paid time off.",
+            answer: "A", hint: "Benefits add significant value beyond your paycheck—health insurance alone can be worth thousands of dollars annually." }
+        ]
+      },
+      {
+        title: "Match each description to the correct information literacy or research term.",
+        choices: [
+          "A. Primary Source",
+          "B. Secondary Source",
+          "C. Bias",
+          "D. Peer Review",
+          "E. Citation",
+          "F. Copyright"
+        ],
+        items: [
+          { q: "A document that presents firsthand, original information—such as a government report, legal text, or original research study.",
+            answer: "A", hint: "Primary sources are the most authoritative—they represent original data or official decisions, not someone else's interpretation." },
+          { q: "A reference note that identifies where information came from, giving credit to the original author or organization.",
+            answer: "E", hint: "Citations give credit, allow readers to verify claims, and protect you from plagiarism—they are required in professional and academic writing." },
+          { q: "The tendency of a source to present information in a way that favors a particular point of view or outcome.",
+            answer: "C", hint: "Every source has some perspective. Identifying potential bias helps you evaluate whether information is balanced and objective." },
+          { q: "A process where experts in a field evaluate a study or article before it is published to ensure accuracy and validity.",
+            answer: "D", hint: "Peer-reviewed sources have been vetted by experts—they are generally the gold standard for credible research." },
+          { q: "Legal protection that gives creators exclusive rights to their original works, such as text, images, music, or software.",
+            answer: "F", hint: "Copyright protects creative work automatically upon creation. Using copyrighted material without permission can have serious legal consequences." }
+        ]
+      }
+    ];
+
+    // ── PART 3: MULTIPLE CHOICE (44 items) ───────────────────────────────────
+    var mcSection = [
+      {
+        q: "You can only think of conventional solutions to a problem your supervisor asked you to solve creatively. The most professional next step is:",
+        options: ["Submit the conventional solution without mentioning the limitation","Ask a colleague for a completely different perspective before presenting anything","Give up and ask your supervisor to solve it","Submit multiple options and let the supervisor choose the most conventional"],
+        answer: "Ask a colleague for a completely different perspective before presenting anything",
+        hint: "Creativity includes knowing when to seek outside perspective. Collaboration is often the best source of fresh ideas."
+      },
+      {
+        q: "Before making a major workflow change for your team, the most responsible approach is to:",
+        options: ["Implement it immediately to show decisiveness","Test it on a small scale first and evaluate the results before rolling it out","Ask everyone if they like the idea and go with the majority vote","Wait for management to decide without offering input"],
+        answer: "Test it on a small scale first and evaluate the results before rolling it out",
+        hint: "Piloting changes on a small scale before full implementation is a fundamental critical thinking strategy—it reduces risk and provides evidence."
+      },
+      {
+        q: "A colleague presents a solution and asks for your opinion. The most thoughtful professional response is to:",
+        options: ["Agree to avoid conflict","Disagree immediately to appear analytical","Ask what specific problem the solution is designed to solve before evaluating it","Suggest an entirely different solution immediately"],
+        answer: "Ask what specific problem the solution is designed to solve before evaluating it",
+        hint: "Understanding the problem a solution targets is the first step to evaluating whether it's the right fix."
+      },
+      {
+        q: "After completing your work for the day with time remaining before end of shift, the best demonstration of initiative is:",
+        options: ["Log off early—you finished your assigned tasks","Browse the internet until the end of your shift","Ask your supervisor if there is anything else that needs to be done","Work on personal projects quietly at your desk"],
+        answer: "Ask your supervisor if there is anything else that needs to be done",
+        hint: "Seeking additional work when you have capacity—rather than filling time with personal activities—is a clear sign of strong initiative."
+      },
+      {
+        q: "You notice that a commonly used team reference document has outdated information. You should:",
+        options: ["Update it yourself without telling anyone","Ignore it since updating it is not your assigned task","Flag the issue to the appropriate person and offer to help update it","Print copies of the old version for everyone as a backup"],
+        answer: "Flag the issue to the appropriate person and offer to help update it",
+        hint: "Identifying a problem AND offering to help solve it—through appropriate channels—is the hallmark of professional initiative."
+      },
+      {
+        q: "You accidentally delete an important client file. You can restore it, but it will take two hours of extra work. You should:",
+        options: ["Work extra to fix it quietly without telling your supervisor","Tell your supervisor immediately and work to restore the file","Blame the deletion on a software glitch","Recreate it from memory and say nothing"],
+        answer: "Tell your supervisor immediately and work to restore the file",
+        hint: "Honesty about mistakes—especially when you can fix them—demonstrates integrity. Supervisors respect transparency over cover-ups."
+      },
+      {
+        q: "The most accurate description of a professional with a strong work ethic is someone who:",
+        options: ["Works the longest hours of anyone on the team","Completes tasks on time, communicates proactively, and maintains quality consistently","Never asks for help under any circumstances","Receives the highest performance score on every quarterly evaluation"],
+        answer: "Completes tasks on time, communicates proactively, and maintains quality consistently",
+        hint: "Work ethic is about consistency and reliability—not simply working more hours than others."
+      },
+      {
+        q: "Your team has a relaxed afternoon before a major deadline tomorrow. The best use of your time is to:",
+        options: ["Enjoy the break—you've earned it","Prepare materials and review your plan so tomorrow's work goes smoothly","Start the next project without finishing the current one","Take an extended lunch since work is slow"],
+        answer: "Prepare materials and review your plan so tomorrow's work goes smoothly",
+        hint: "Using slow periods to prepare for upcoming busy periods is a hallmark of strong work ethic and professional planning."
+      },
+      {
+        q: "Two team members have a recurring disagreement about how to handle client communication. The best solution is to:",
+        options: ["Let them work it out independently with no intervention","Pick one approach and enforce it without discussion","Facilitate a conversation where both perspectives are heard and a shared standard is agreed upon","Have them each continue communicating with clients in their own way"],
+        answer: "Facilitate a conversation where both perspectives are heard and a shared standard is agreed upon",
+        hint: "Conflict resolution seeks common ground—having both parties heard before reaching a shared decision is the professional approach."
+      },
+      {
+        q: "When presenting technical information to a mixed audience of experts and beginners, you should:",
+        options: ["Pitch the presentation at the most advanced level to impress the experts","Pitch it at the most basic level for everyone","Use technical terms for experts and offer to clarify further for those who want it","Ask beginners to research the topic before attending future meetings"],
+        answer: "Use technical terms for experts and offer to clarify further for those who want it",
+        hint: "Skilled communicators read the room and adapt—signaling that additional explanation is available respects both groups simultaneously."
+      },
+      {
+        q: "After someone shares difficult feedback about your work, the most professional response is to:",
+        options: ["Immediately defend your work and explain why you made each decision","Thank them and ask one clarifying question to ensure you understood correctly","Change the subject to avoid an uncomfortable conversation","Find logical errors in their critique to push back on their feedback"],
+        answer: "Thank them and ask one clarifying question to ensure you understood correctly",
+        hint: "Thanking someone for feedback and asking for clarification shows maturity and turns a difficult moment into professional growth."
+      },
+      {
+        q: "A team member from another country observes a holiday that no one else on the team recognizes. Your professional response should be:",
+        options: ["Ask them to celebrate it quietly so it doesn't distract the team","Acknowledge it professionally if they mention it and adjust shared deadlines if needed","Ask them to explain why their holiday is important to the whole team","Ignore it entirely and schedule meetings as normal"],
+        answer: "Acknowledge it professionally if they mention it and adjust shared deadlines if needed",
+        hint: "Professional acknowledgment and reasonable scheduling accommodation show respect for cultural diversity without making it awkward."
+      },
+      {
+        q: "Inclusive language in the workplace means:",
+        options: ["Using the exact same vocabulary with all employees regardless of individual preferences","Avoiding any specific cultural references entirely in all communications","Choosing words that respect each person's identity and avoid stereotypes or exclusionary assumptions","Using formal language at all times to treat everyone equally"],
+        answer: "Choosing words that respect each person's identity and avoid stereotypes or exclusionary assumptions",
+        hint: "Inclusive language is about intentionality—choosing words that make all team members feel valued and respected for who they are."
+      },
+      {
+        q: "A customer leaves a negative online review of your service. The best professional response is to:",
+        options: ["Ignore it—online reviews don't require a response from the business","Report it to the platform for removal since it damages your reputation","Respond professionally, thank them for their feedback, and address their concern directly","Respond defensively to correct inaccuracies and protect your reputation"],
+        answer: "Respond professionally, thank them for their feedback, and address their concern directly",
+        hint: "Professional responses to negative reviews show you value feedback and are committed to improvement—this reassures future customers as well."
+      },
+      {
+        q: "The most effective customer service technique when a customer is extremely upset is to:",
+        options: ["Match their emotional energy to demonstrate that you take the situation seriously","Stay calm, let them finish speaking, and then acknowledge their frustration before responding","Transfer them to a manager immediately regardless of the issue","Immediately offer a discount to resolve the situation as quickly as possible"],
+        answer: "Stay calm, let them finish speaking, and then acknowledge their frustration before responding",
+        hint: "De-escalation starts with calm listening. Letting an upset customer fully express their frustration before responding shows respect."
+      },
+      {
+        q: "During a team project, one member consistently takes over discussions and dismisses others' ideas. The most professional response is to:",
+        options: ["Match their dominant behavior so your ideas are also heard","Say nothing and allow them to lead the project entirely","Privately address the pattern with that person and suggest a structure for sharing contributions","Complain to other team members informally to build consensus against that person"],
+        answer: "Privately address the pattern with that person and suggest a structure for sharing contributions",
+        hint: "Addressing a team dynamic issue directly and privately—with a constructive suggestion—is the professional approach."
+      },
+      {
+        q: "Why is it important for frontline employees to understand their organization's revenue model?",
+        options: ["It isn't—that knowledge is reserved for management and executives","It helps them understand which tasks and customers have the greatest impact on the organization's survival","It makes them more likely to ask for a raise at their next review","It helps them complete their assigned tasks faster"],
+        answer: "It helps them understand which tasks and customers have the greatest impact on the organization's survival",
+        hint: "Understanding how the organization earns revenue helps employees prioritize correctly and communicate value to customers."
+      },
+      {
+        q: "A department proposes a cost-saving measure that improves their budget but reduces service quality for clients. From a big-picture perspective, this should be:",
+        options: ["Approved because saving money is always the most important organizational priority","Evaluated based on how the service quality reduction affects the whole organization's reputation and revenue","Decided solely by the department since it is their budget to manage","Rejected automatically because client satisfaction can never be compromised"],
+        answer: "Evaluated based on how the service quality reduction affects the whole organization's reputation and revenue",
+        hint: "Big-picture thinking weighs the full organizational impact—not just the departmental benefit—of any major decision."
+      },
+      {
+        q: "Which behavior best demonstrates strong career management?",
+        options: ["Waiting for promotions to be offered without actively seeking feedback on your performance","Scheduling regular check-ins with your supervisor to discuss your performance and career growth goals","Changing jobs every year to build a broad resume across many industries","Focusing exclusively on technical skills while ignoring professional communication and soft skills"],
+        answer: "Scheduling regular check-ins with your supervisor to discuss your performance and career growth goals",
+        hint: "Proactively managing your career means seeking feedback, setting goals with your supervisor, and tracking your own development."
+      },
+      {
+        q: "Which action best demonstrates a genuine commitment to continuous learning?",
+        options: ["Completing all required training and stopping there","Seeking out industry publications, webinars, and skills workshops on your own initiative","Memorizing your company's existing processes and applying them consistently","Only learning what is directly needed for your current job responsibilities"],
+        answer: "Seeking out industry publications, webinars, and skills workshops on your own initiative",
+        hint: "Continuous learners go beyond required training—they proactively seek knowledge that keeps them ahead of industry changes."
+      },
+      {
+        q: "The best way to apply a skill or concept learned in a training session is to:",
+        options: ["Save your training notes and return to review them at a later date when needed","Immediately try to use the new skill or knowledge on a relevant task","Share what you learned with everyone on your team whether or not they need it","Wait until your supervisor specifically asks you to apply what you learned"],
+        answer: "Immediately try to use the new skill or knowledge on a relevant task",
+        hint: "New skills decay rapidly without practice. Applying them to real tasks immediately after training is the most effective retention strategy."
+      },
+      {
+        q: "Which task management approach leads to the best long-term productivity?",
+        options: ["Tackling the most enjoyable task first each day so you start work in a positive mood","Scheduling the most cognitively demanding work during the time of day when your mental energy is highest","Handling all emails and messages before starting any other type of work","Completing tasks strictly in the order they were received regardless of urgency or importance"],
+        answer: "Scheduling the most cognitively demanding work during the time of day when your mental energy is highest",
+        hint: "Matching task difficulty to your energy levels—doing hard work when you're most alert—is a proven productivity strategy."
+      },
+      {
+        q: "Batching similar tasks together (such as answering all emails at once rather than throughout the day) is effective because:",
+        options: ["It allows you to postpone tasks you dislike without feeling guilty","It reduces the mental switching cost of jumping between different types of work","It makes you appear busier and more productive to colleagues and supervisors","It delays urgent requests, which actually reduces your overall stress"],
+        answer: "It reduces the mental switching cost of jumping between different types of work",
+        hint: "Task batching reduces cognitive switching costs—every time you change task types, your brain takes time to refocus. Batching keeps you in one mode longer."
+      },
+      {
+        q: "When reading a news article about a workplace regulation change, the best way to verify the information is to:",
+        options: ["Share it immediately if it seems important and relevant to your team","Check the article's date and author, then find the original official regulatory announcement","Accept it as accurate since it is a published article from a recognized outlet","Ask a coworker if they've also heard about the change"],
+        answer: "Check the article's date and author, then find the original official regulatory announcement",
+        hint: "News articles interpret regulations—they can contain errors or early information. Always verify with the original official source."
+      },
+      {
+        q: "When working remotely on company projects, the best practice for information security is to:",
+        options: ["Use public Wi-Fi since the data you're working with isn't particularly sensitive","Work from a personal device to avoid carrying company equipment back and forth","Connect to a company-approved VPN before accessing any company systems","Save files to personal cloud storage for quick access and convenience"],
+        answer: "Connect to a company-approved VPN before accessing any company systems",
+        hint: "A VPN encrypts your connection, protecting company data from interception on public or home networks that may not be secure."
+      },
+      {
+        q: "You receive a text message appearing to be from your bank, saying to call a number immediately to verify your account. You should:",
+        options: ["Call the number provided in the text message right away","Stop using that bank account until you can visit a branch in person","Look up your bank's official contact number independently and call that number instead","Reply to the text with your account information to complete the verification"],
+        answer: "Look up your bank's official contact number independently and call that number instead",
+        hint: "Smishing (SMS phishing) uses urgency to trick you into calling fake numbers. Always find contact info through official channels—never from the suspicious message itself."
+      },
+      {
+        q: "Which best describes cloud computing in a workplace context?",
+        options: ["Software that only runs on one specific computer and cannot be accessed remotely","Using internet-connected servers to store, manage, and process data instead of local hardware","A type of email encryption protocol used for secure business communication","A method for printing documents remotely from any location"],
+        answer: "Using internet-connected servers to store, manage, and process data instead of local hardware",
+        hint: "Cloud computing enables access from anywhere and scales easily—understanding its basics is essential workplace IT literacy."
+      },
+      {
+        q: "What does it mean to use 'version control' for a professional document?",
+        options: ["Locking a document so that no other team member can make any edits to it","Tracking changes over time so you can return to a previous version of the document if needed","Creating multiple copies with slightly different names to track evolution of ideas","Emailing the document to yourself regularly as a backup strategy"],
+        answer: "Tracking changes over time so you can return to a previous version of the document if needed",
+        hint: "Version control protects your work—if a mistake is made, you can restore a previous version rather than starting over from scratch."
+      },
+      {
+        q: "A coworker sends you a file and your computer warns it may contain malware. You should:",
+        options: ["Open it anyway since you personally trust the coworker who sent it","Delete it, let your coworker know, and report the incident to your IT department","Forward it to other coworkers to see if they can open it on their systems","Try opening it in a different application to see if the warning was a false alarm"],
+        answer: "Delete it, let your coworker know, and report the incident to your IT department",
+        hint: "Malware can infect a trusted contact's computer and spread automatically. Always report suspicious files to IT—even from known senders."
+      },
+      {
+        q: "Before using an unfamiliar software tool on a real client project, you should:",
+        options: ["Jump in and learn as you go—mistakes teach you faster than training","Complete any available training and practice on a test project before using it for real client work","Ask a coworker to do the technical parts for you while you handle communication","Skip it and use a tool you already know, even if a different tool is more appropriate for this task"],
+        answer: "Complete any available training and practice on a test project before using it for real client work",
+        hint: "Using an unfamiliar tool on real client work risks errors and quality issues. Training and practice first protects the client relationship."
+      },
+      {
+        q: "Keeping your software and tools regularly updated is important because:",
+        options: ["New versions always have better visual design and user interfaces","Updates frequently include security patches that protect against newly discovered vulnerabilities","Older versions stop working completely as soon as a new version is released","Employers require frequent updates for legal compliance and audit purposes only"],
+        answer: "Updates frequently include security patches that protect against newly discovered vulnerabilities",
+        hint: "Many cyberattacks exploit known vulnerabilities in outdated software. Keeping tools updated is a basic but critical security practice."
+      },
+      {
+        q: "You work a 7.5-hour shift and are paid $13.50 per hour. What is your gross pay for the shift?",
+        options: ["$91.25", "$99.00", "$101.25", "$108.00"],
+        answer: "$101.25",
+        math: true,
+        hint: "7.5 × $13.50 = $101.25. Multiply your hourly rate by exact hours worked—including decimal parts of an hour."
+      },
+      {
+        q: "Your paycheck shows gross pay of $820.00. Taxes and deductions total $187.60. What is your net pay?",
+        options: ["$622.40", "$632.40", "$642.40", "$652.40"],
+        answer: "$632.40",
+        math: true,
+        hint: "$820.00 − $187.60 = $632.40. Net pay = Gross pay minus total deductions."
+      },
+      {
+        q: "A project budget allows $2,400 for labor costs. Workers earn $20.00 per hour. How many labor hours can the project support?",
+        options: ["110 hours", "115 hours", "120 hours", "125 hours"],
+        answer: "120 hours",
+        math: true,
+        hint: "$2,400 ÷ $20/hr = 120 hours. Dividing total budget by the hourly rate gives the maximum hours available."
+      },
+      {
+        q: "You need to split a $346.50 expense equally among 3 team members. What does each person owe?",
+        options: ["$115.00", "$115.50", "$116.00", "$116.50"],
+        answer: "$115.50",
+        math: true,
+        hint: "$346.50 ÷ 3 = $115.50. Division distributes costs equally—always check the math before splitting expenses with teammates."
+      },
+      {
+        q: "Which behavior is most consistent with maintaining a professional reputation in any workplace?",
+        options: ["Sharing personal opinions about clients with trusted coworkers during breaks","Venting about workplace frustrations on your personal social media account","Maintaining confidentiality about client projects and colleagues' personal matters","Speaking critically about competitors when clients ask for a comparison"],
+        answer: "Maintaining confidentiality about client projects and colleagues' personal matters",
+        hint: "Professional reputation is built on trustworthiness. Confidentiality—even when not legally required—is a core professional value."
+      },
+      {
+        q: "You disagree with a decision made by your organization's leadership. The most professional response is to:",
+        options: ["Publicly criticize the decision on your personal social media to raise awareness","Refuse to implement the decision until leadership reconsiders","Voice your concern through the appropriate internal channel, then implement it professionally once the decision stands","Quit immediately if you feel strongly enough about the disagreement"],
+        answer: "Voice your concern through the appropriate internal channel, then implement it professionally once the decision stands",
+        hint: "Professionals express disagreement through proper channels—not publicly or through non-compliance. Once a decision is final, professional implementation is expected."
+      },
+      {
+        q: "Which is the best practice when writing a professional email?",
+        options: ["Use ALL CAPS for key points to make them stand out","Write in complete sentences, avoid slang, and proofread carefully before sending","Use abbreviations throughout to save the reader's reading time","Omit a greeting to appear more direct and efficient"],
+        answer: "Write in complete sentences, avoid slang, and proofread carefully before sending",
+        hint: "Professional emails represent you and your organization—clear sentences, standard language, and proofreading are non-negotiable standards."
+      },
+      {
+        q: "A technical report you are writing contains industry jargon that some readers may not know. You should:",
+        options: ["Remove all technical terms to make the document accessible to everyone","Keep all terminology and let unfamiliar readers research definitions on their own","Define technical terms the first time they appear in the document, or include a glossary","Avoid writing technical reports if your audience might not fully understand them"],
+        answer: "Define technical terms the first time they appear in the document, or include a glossary",
+        hint: "Defining terms at first use—or providing a glossary—makes technical writing accessible to all readers without dumbing down the content."
+      },
+      {
+        q: "You see a wet floor in a high-traffic area with no warning sign posted. The correct action is:",
+        options: ["Walk carefully and assume other employees will notice the hazard on their own","Place your bag or another object to block the area as a temporary barrier","Find a wet floor sign or immediately notify someone who can secure the area","Report it to your supervisor at the end of your shift in your daily update"],
+        answer: "Find a wet floor sign or immediately notify someone who can secure the area",
+        hint: "Slip-and-fall injuries happen in seconds. Immediate action to warn others—not delayed reporting—is the correct safety response."
+      },
+      {
+        q: "Which is the correct technique for lifting a heavy box at work?",
+        options: ["Lift quickly using your back muscles to complete the task faster","Bend at the knees, keep the load close to your body, and lift using your leg muscles","Ask someone else to do it—lifting heavy objects at work is never your personal responsibility","Tilt the box toward yourself and drag it carefully along the floor to avoid injury"],
+        answer: "Bend at the knees, keep the load close to your body, and lift using your leg muscles",
+        hint: "Back injuries are among the most common workplace injuries. Proper lifting technique—legs not back—is fundamental safety knowledge every professional needs."
+      },
+      {
+        q: "Before beginning maintenance work on an electrical system, the required safety step is to:",
+        options: ["Work as quickly as possible to minimize the time the system is exposed to risk","Test the circuit with a small tool before starting to confirm it is safe","Lock out and tag out the energy source before beginning any work on the system","Ask a coworker to stand nearby in case something unexpected goes wrong"],
+        answer: "Lock out and tag out the energy source before beginning any work on the system",
+        hint: "Lockout/Tagout (LOTO) procedures prevent equipment from being accidentally energized during maintenance—OSHA requires them for all energy source work."
+      },
+      {
+        q: "An employee who consistently shows up prepared, meets commitments, and communicates proactively when they cannot is demonstrating:",
+        options: ["Customer service skills","Professionalism and reliability","Advanced information literacy","Creative problem-solving"],
+        answer: "Professionalism and reliability",
+        hint: "Reliability—being consistently prepared, meeting commitments, and communicating proactively—is a cornerstone of workplace professionalism."
+      }
+    ];
+
+    // ── PART 4: LABELING (1 diagram) ─────────────────────────────────────────
+    var labelSection = [
+      {
+        title: "Identify each numbered section of this sample employee timesheet.",
+        wordBank: ["Employee Name", "Manager Approval", "Overtime Hours", "Regular Hours", "Total Hours", "Week Ending"],
+        items: [
+          { answer: "Employee Name", hint: "The Employee Name section identifies who worked the hours—including their ID and department—so pay can be calculated and attributed correctly." },
+          { answer: "Week Ending", hint: "The Week Ending date closes the pay period and determines which hours are included in this paycheck. Hourly employees are paid only for time within this window." },
+          { answer: "Regular Hours", hint: "Regular hours are all hours worked up to 40 in a week. These are paid at the standard hourly rate without any premium." },
+          { answer: "Overtime Hours", hint: "Overtime hours are any hours worked beyond 40 per week. Federal law requires overtime to be paid at 1.5× the regular rate (time and a half)." },
+          { answer: "Total Hours", hint: "Total Hours = Regular Hours + Overtime Hours. This is the complete count of hours worked in the pay period and drives the full gross pay calculation." },
+          { answer: "Manager Approval", hint: "The Manager Approval signature certifies that the recorded hours are accurate—it is required before payroll is processed and protects both the employee and the employer." }
+        ],
+        svg: '<svg viewBox="0 0 520 290" style="width:100%;max-width:560px;display:block;margin:0 auto;border-radius:6px;font-family:system-ui,sans-serif;border:1px solid #adb5bd">'
+          + '<rect x="0" y="0" width="520" height="32" fill="#003087" rx="6"/>'
+          + '<rect x="0" y="20" width="520" height="12" fill="#003087"/>'
+          + '<text x="260" y="21" text-anchor="middle" font-size="12" fill="white" font-weight="700">SAMPLE WEEKLY TIMESHEET</text>'
+          + '<rect x="5" y="36" width="252" height="44" fill="#dce8f5" stroke="#003087" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="20" cy="52" r="11" fill="#003087"/>'
+          + '<text x="20" y="57" text-anchor="middle" font-size="10" fill="white" font-weight="700">1</text>'
+          + '<text x="134" y="56" text-anchor="middle" font-size="11" fill="#1a1a2e" font-weight="600">Jordan Martinez | EMP-2247</text>'
+          + '<text x="134" y="72" text-anchor="middle" font-size="10" fill="#444">Dept: Customer Service | Status: FT</text>'
+          + '<rect x="263" y="36" width="252" height="44" fill="#dce8f5" stroke="#003087" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="278" cy="52" r="11" fill="#003087"/>'
+          + '<text x="278" y="57" text-anchor="middle" font-size="10" fill="white" font-weight="700">2</text>'
+          + '<text x="389" y="56" text-anchor="middle" font-size="11" fill="#1a1a2e" font-weight="600">Week Ending: June 20, 2025</text>'
+          + '<text x="389" y="72" text-anchor="middle" font-size="10" fill="#444">Pay Period: June 14–June 20, 2025</text>'
+          + '<rect x="5" y="84" width="510" height="15" fill="#dee2e6"/>'
+          + '<text x="65" y="95" text-anchor="middle" font-size="8" fill="#333" font-weight="700">DAY</text>'
+          + '<text x="210" y="95" text-anchor="middle" font-size="8" fill="#333" font-weight="700">HOURS WORKED</text>'
+          + '<text x="420" y="95" text-anchor="middle" font-size="8" fill="#333" font-weight="700">NOTES</text>'
+          + '<rect x="5" y="99" width="510" height="14" fill="#f8f9fa"/>'
+          + '<text x="65" y="110" text-anchor="middle" font-size="8" fill="#555">Monday</text>'
+          + '<text x="210" y="110" text-anchor="middle" font-size="8" fill="#555">8.0 hrs (7:00 AM – 3:30 PM)</text>'
+          + '<text x="420" y="110" text-anchor="middle" font-size="8" fill="#555">—</text>'
+          + '<rect x="5" y="113" width="510" height="14" fill="#fff"/>'
+          + '<text x="65" y="124" text-anchor="middle" font-size="8" fill="#555">Tuesday</text>'
+          + '<text x="210" y="124" text-anchor="middle" font-size="8" fill="#555">8.0 hrs (7:00 AM – 3:30 PM)</text>'
+          + '<text x="420" y="124" text-anchor="middle" font-size="8" fill="#555">—</text>'
+          + '<rect x="5" y="127" width="510" height="14" fill="#f8f9fa"/>'
+          + '<text x="65" y="138" text-anchor="middle" font-size="8" fill="#555">Wednesday</text>'
+          + '<text x="210" y="138" text-anchor="middle" font-size="8" fill="#555">10.0 hrs (7:00 AM – 5:30 PM)</text>'
+          + '<text x="420" y="138" text-anchor="middle" font-size="8" fill="#888" font-style="italic">2 hrs OT</text>'
+          + '<rect x="5" y="141" width="510" height="14" fill="#fff"/>'
+          + '<text x="65" y="152" text-anchor="middle" font-size="8" fill="#555">Thursday</text>'
+          + '<text x="210" y="152" text-anchor="middle" font-size="8" fill="#555">10.0 hrs (7:00 AM – 5:30 PM)</text>'
+          + '<text x="420" y="152" text-anchor="middle" font-size="8" fill="#888" font-style="italic">2 hrs OT</text>'
+          + '<rect x="5" y="155" width="510" height="14" fill="#f8f9fa"/>'
+          + '<text x="65" y="166" text-anchor="middle" font-size="8" fill="#555">Friday</text>'
+          + '<text x="210" y="166" text-anchor="middle" font-size="8" fill="#555">8.0 hrs (7:00 AM – 3:30 PM)</text>'
+          + '<text x="420" y="166" text-anchor="middle" font-size="8" fill="#555">—</text>'
+          + '<line x1="5" y1="171" x2="515" y2="171" stroke="#adb5bd" stroke-width="1"/>'
+          + '<rect x="5" y="174" width="160" height="42" fill="#fff3cd" stroke="#997404" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="22" cy="189" r="11" fill="#fd7e14"/>'
+          + '<text x="22" y="194" text-anchor="middle" font-size="10" fill="white" font-weight="700">3</text>'
+          + '<text x="90" y="192" text-anchor="middle" font-size="9" fill="#664d03" font-weight="700">Regular Hours</text>'
+          + '<text x="90" y="207" text-anchor="middle" font-size="14" fill="#664d03" font-weight="700">40.0</text>'
+          + '<rect x="172" y="174" width="160" height="42" fill="#f8d7da" stroke="#dc3545" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="189" cy="189" r="11" fill="#dc3545"/>'
+          + '<text x="189" y="194" text-anchor="middle" font-size="10" fill="white" font-weight="700">4</text>'
+          + '<text x="257" y="192" text-anchor="middle" font-size="9" fill="#842029" font-weight="700">Overtime Hours</text>'
+          + '<text x="257" y="207" text-anchor="middle" font-size="14" fill="#842029" font-weight="700">4.0</text>'
+          + '<rect x="339" y="174" width="176" height="42" fill="#d1e7dd" stroke="#198754" stroke-width="1.5" rx="3"/>'
+          + '<circle cx="356" cy="189" r="11" fill="#198754"/>'
+          + '<text x="356" y="194" text-anchor="middle" font-size="10" fill="white" font-weight="700">5</text>'
+          + '<text x="435" y="192" text-anchor="middle" font-size="9" fill="#0a3622" font-weight="700">Total Hours</text>'
+          + '<text x="435" y="207" text-anchor="middle" font-size="14" fill="#0a3622" font-weight="700">44.0</text>'
+          + '<rect x="5" y="222" width="510" height="58" fill="#e8eaf6" stroke="#3949ab" stroke-width="2" rx="4"/>'
+          + '<circle cx="22" cy="239" r="12" fill="#3949ab"/>'
+          + '<text x="22" y="244" text-anchor="middle" font-size="11" fill="white" font-weight="700">6</text>'
+          + '<text x="260" y="244" text-anchor="middle" font-size="10" fill="#1a237e" font-weight="700">SUPERVISOR AUTHORIZATION</text>'
+          + '<text x="260" y="258" text-anchor="middle" font-size="9" fill="#3949ab" font-style="italic">I verify that the hours above are accurate and approved for payroll processing.</text>'
+          + '<line x1="50" y1="271" x2="310" y2="271" stroke="#3949ab" stroke-width="1"/>'
+          + '<text x="180" y="279" text-anchor="middle" font-size="8" fill="#3949ab">Authorized Signature</text>'
+          + '<text x="430" y="271" text-anchor="middle" font-size="9" fill="#1a237e">Date: ___________</text>'
+          + '</svg>'
+      }
+    ];
+
+    // ── Launch ────────────────────────────────────────────────────────────────
+    var config = {
+      chapterTitle:    'WRS Practice Assessment',
+      gradebookExamId: 'WRS-Practice-B',
+      tfSection:       tfSection,
+      matchSection:    matchSection,
+      mcSection:       mcSection,
+      labelSection:    labelSection
+    };
+
+    initWRS(config);
+
+  })();
+  </script>
+<div id="footer-placeholder"></div>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>
