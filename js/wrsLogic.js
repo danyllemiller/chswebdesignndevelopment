@@ -434,109 +434,150 @@
         var pass = pct >= 75;
 
         var hintHtml = function (hint) {
-            return hint ? '<div class="mt-2 p-2 rounded" style="background:#fffde7;border-left:3px solid #ffc107"><small>&#x1F4A1; <strong>Study Hint:</strong> ' + esc(hint) + '</small></div>' : '';
+            return hint ? '<div class="mt-2 p-2 rounded" style="background:#fffde7;border-left:3px solid #ffc107;page-break-inside:avoid"><small>&#x1F4A1; <strong>Study Hint:</strong> ' + esc(hint) + '</small></div>' : '';
         };
 
-        // Build review HTML grouped by type
-        var rev = { tf: '', match: '', mc: '', label: '' };
+        // Section header helper
+        function secHead(label, right, total, color) {
+            return '<div class="d-flex align-items-center gap-2 mb-3 mt-4 no-print-break" style="border-bottom:3px solid ' + color + ';padding-bottom:6px">'
+                + '<span class="fw-bold fs-6" style="color:' + color + '">' + label + '</span>'
+                + '<span class="badge ms-auto" style="background:' + color + '">' + right + ' / ' + total + '</span>'
+                + '</div>';
+        }
 
+        // Build review HTML — all questions visible, no accordions
+        var sections = '';
+
+        // ── True / False ──────────────────────────────────────────────────────
+        var tfHtml = '';
         _flatQ.forEach(function (item, i) {
+            if (item.type !== 'tf') return;
             var ans = _ans[i];
-            var ok, got;
-
-            if (item.type === 'tf') {
-                ok  = ans === item.a;
-                got = ans || '&mdash;';
-                rev.tf += '<div class="mb-2 p-2 rounded small ' + (ok ? 'bg-success bg-opacity-10 border border-success' : 'bg-danger bg-opacity-10 border border-danger') + '">'
-                    + '<p class="mb-1 fw-bold">' + esc(item.q) + '</p>'
-                    + '<p class="mb-0">Your answer: <strong>' + got + '</strong> &nbsp;&middot;&nbsp; Correct: <strong>' + item.a + '</strong> '
-                    + (ok ? '<span class="badge bg-success">&#10003;</span>' : '<span class="badge bg-danger">&#10007;</span>')
-                    + '</p>' + (!ok ? hintHtml(item.hint) : '') + '</div>';
-            }
-
-            if (item.type === 'matchSet') {
-                var setAnswers = ans || {};
-                // Find full choice text from letter
-                function choiceLabel(letter) {
-                    var found = (item.choices || []).filter(function (c) { return c.split('.')[0].trim() === letter; })[0];
-                    return found || letter;
-                }
-                var setRight = 0;
-                var setRows = item.items.map(function (mi, j) {
-                    var picked = setAnswers[j] || '';
-                    var correct = mi.answer;
-                    var rowOk = picked === correct;
-                    if (rowOk) setRight++;
-                    return '<div class="ms-3 mb-2 p-2 rounded small ' + (rowOk ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10') + '">'
-                        + '<p class="mb-1 fw-semibold">' + esc(mi.q) + '</p>'
-                        + '<p class="mb-0">Your: <strong>' + (picked ? esc(choiceLabel(picked)) : '&mdash;') + '</strong>'
-                        + (!rowOk ? ' &nbsp;&middot;&nbsp; Correct: <strong class="text-success">' + esc(choiceLabel(correct)) + '</strong>' : '')
-                        + ' ' + (rowOk ? '&#10003;' : '&#10007;')
-                        + '</p>' + (!rowOk ? hintHtml(mi.hint) : '') + '</div>';
-                }).join('');
-                rev.match += '<div class="mb-3 p-2 rounded border ' + (setRight === item.items.length ? 'border-success' : 'border-danger') + '">'
-                    + '<p class="mb-2 fw-bold small">' + esc(item.title) + ' <span class="badge ' + (setRight === item.items.length ? 'bg-success' : 'bg-danger') + '">' + setRight + '/' + item.items.length + '</span></p>'
-                    + setRows + '</div>';
-            }
-
-            if (item.type === 'mc') {
-                var chosen = (ans !== undefined) ? item.options[ans] : 'Unanswered';
-                ok  = chosen === item.answer;
-                rev.mc += '<div class="mb-2 p-2 rounded small ' + (ok ? 'bg-success bg-opacity-10 border border-success' : 'bg-danger bg-opacity-10 border border-danger') + '">'
-                    + '<p class="mb-1 fw-bold">' + esc(item.q) + '</p>'
-                    + '<p class="mb-0">Your answer: <span class="' + (ok ? 'text-success' : 'text-danger') + ' fw-bold">' + esc(chosen) + '</span>'
-                    + (!ok ? ' &nbsp;&middot;&nbsp; Correct: <span class="text-success fw-bold">' + esc(item.answer) + '</span>' : '')
-                    + ' ' + (ok ? '<span class="badge bg-success">&#10003;</span>' : '<span class="badge bg-danger">&#10007;</span>')
-                    + '</p>' + (!ok ? hintHtml(item.hint) : '') + '</div>';
-            }
-
-            if (item.type === 'labelSet') {
-                var diagAnswers = ans || {};
-                var diagRight = 0;
-                var diagRows = item.items.map(function (mi, j) {
-                    var picked  = diagAnswers[j] || '';
-                    var rowOk   = picked === mi.answer;
-                    if (rowOk) diagRight++;
-                    return '<div class="ms-3 mb-2 p-2 rounded small ' + (rowOk ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10') + '">'
-                        + '<p class="mb-1 fw-semibold">Region ' + (j + 1) + '</p>'
-                        + '<p class="mb-0">Your: <strong>' + (picked ? esc(picked) : '&mdash;') + '</strong>'
-                        + (!rowOk ? ' &nbsp;&middot;&nbsp; Correct: <strong class="text-success">' + esc(mi.answer) + '</strong>' : '')
-                        + ' ' + (rowOk ? '&#10003;' : '&#10007;')
-                        + '</p>' + (!rowOk ? hintHtml(mi.hint) : '') + '</div>';
-                }).join('');
-                rev.label += '<div class="mb-3 p-2 rounded border ' + (diagRight === item.items.length ? 'border-success' : 'border-danger') + '">'
-                    + '<p class="mb-2 fw-bold small">' + esc(item.title) + ' <span class="badge ' + (diagRight === item.items.length ? 'bg-success' : 'bg-danger') + '">' + diagRight + '/' + item.items.length + '</span></p>'
-                    + diagRows + '</div>';
-            }
+            var ok  = ans === item.a;
+            var got = ans || '&mdash;';
+            tfHtml += '<div class="mb-2 p-2 rounded small" style="page-break-inside:avoid;border:1px solid ' + (ok ? '#198754' : '#dc3545') + ';background:' + (ok ? '#f0fff4' : '#fff5f5') + '">'
+                + '<p class="mb-1 fw-bold">' + esc(item.q) + '</p>'
+                + '<p class="mb-0">Your answer: <strong>' + got + '</strong> &nbsp;&middot;&nbsp; Correct: <strong>' + item.a + '</strong> '
+                + (ok ? '<span class="badge bg-success">&#10003; Correct</span>' : '<span class="badge bg-danger">&#10007; Incorrect</span>')
+                + '</p>' + (!ok ? hintHtml(item.hint) : '') + '</div>';
         });
+        sections += secHead('True / False', sc.tfRight, sc.tfTotal, '#003087') + tfHtml;
 
-        $c().innerHTML = '<div class="card shadow border-' + (pass ? 'success' : 'warning') + ' mx-auto" style="max-width:760px">'
+        // ── Matching ──────────────────────────────────────────────────────────
+        var matchHtml = '';
+        _flatQ.forEach(function (item, i) {
+            if (item.type !== 'matchSet') return;
+            var ans = _ans[i] || {};
+            function choiceLabel(letter) {
+                var found = (item.choices || []).filter(function (c) { return c.split('.')[0].trim() === letter; })[0];
+                return found || letter;
+            }
+            var setRight = 0;
+            var rowsHtml = item.items.map(function (mi, j) {
+                var picked = ans[j] || '';
+                var rowOk  = picked === mi.answer;
+                if (rowOk) setRight++;
+                return '<div class="ms-3 mb-2 p-2 rounded small" style="border:1px solid ' + (rowOk ? '#198754' : '#dc3545') + ';background:' + (rowOk ? '#f0fff4' : '#fff5f5') + '">'
+                    + '<p class="mb-1 fw-semibold">' + esc(mi.q) + '</p>'
+                    + '<p class="mb-0">Your: <strong>' + (picked ? esc(choiceLabel(picked)) : '&mdash;') + '</strong>'
+                    + (!rowOk ? ' &nbsp;&middot;&nbsp; Correct: <strong style="color:#198754">' + esc(choiceLabel(mi.answer)) + '</strong>' : '')
+                    + ' ' + (rowOk ? '<span class="badge bg-success">&#10003;</span>' : '<span class="badge bg-danger">&#10007;</span>')
+                    + '</p>' + (!rowOk ? hintHtml(mi.hint) : '') + '</div>';
+            }).join('');
+            matchHtml += '<div class="mb-3 p-2 rounded" style="page-break-inside:avoid;border:2px solid ' + (setRight === item.items.length ? '#198754' : '#dc3545') + ';background:#fafafa">'
+                + '<p class="mb-2 fw-bold small">' + esc(item.title)
+                + ' <span class="badge ' + (setRight === item.items.length ? 'bg-success' : 'bg-danger') + '">' + setRight + '/' + item.items.length + '</span></p>'
+                + rowsHtml + '</div>';
+        });
+        sections += secHead('Matching', sc.matchRight, sc.matchTotal, '#198754') + matchHtml;
+
+        // ── Multiple Choice ───────────────────────────────────────────────────
+        var mcHtml = '';
+        _flatQ.forEach(function (item, i) {
+            if (item.type !== 'mc') return;
+            var ans    = _ans[i];
+            var chosen = (ans !== undefined) ? item.options[ans] : 'Unanswered';
+            var ok     = chosen === item.answer;
+            mcHtml += '<div class="mb-2 p-2 rounded small" style="page-break-inside:avoid;border:1px solid ' + (ok ? '#198754' : '#dc3545') + ';background:' + (ok ? '#f0fff4' : '#fff5f5') + '">'
+                + '<p class="mb-1 fw-bold">' + esc(item.q) + '</p>'
+                + '<p class="mb-0">Your answer: <span style="color:' + (ok ? '#198754' : '#dc3545') + ';font-weight:700">' + esc(chosen) + '</span>'
+                + (!ok ? ' &nbsp;&middot;&nbsp; Correct: <span style="color:#198754;font-weight:700">' + esc(item.answer) + '</span>' : '')
+                + ' ' + (ok ? '<span class="badge bg-success">&#10003; Correct</span>' : '<span class="badge bg-danger">&#10007; Incorrect</span>')
+                + '</p>' + (!ok ? hintHtml(item.hint) : '') + '</div>';
+        });
+        sections += secHead('Multiple Choice', sc.mcRight, sc.mcTotal, '#003087') + mcHtml;
+
+        // ── Labeling ──────────────────────────────────────────────────────────
+        var labelHtml = '';
+        _flatQ.forEach(function (item, i) {
+            if (item.type !== 'labelSet') return;
+            var ans      = _ans[i] || {};
+            var diagRight = 0;
+            var rowsHtml = item.items.map(function (mi, j) {
+                var picked = ans[j] || '';
+                var rowOk  = picked === mi.answer;
+                if (rowOk) diagRight++;
+                return '<div class="ms-3 mb-2 p-2 rounded small" style="border:1px solid ' + (rowOk ? '#198754' : '#dc3545') + ';background:' + (rowOk ? '#f0fff4' : '#fff5f5') + '">'
+                    + '<p class="mb-1 fw-semibold">Region ' + (j + 1) + '</p>'
+                    + '<p class="mb-0">Your: <strong>' + (picked ? esc(picked) : '&mdash;') + '</strong>'
+                    + (!rowOk ? ' &nbsp;&middot;&nbsp; Correct: <strong style="color:#198754">' + esc(mi.answer) + '</strong>' : '')
+                    + ' ' + (rowOk ? '<span class="badge bg-success">&#10003;</span>' : '<span class="badge bg-danger">&#10007;</span>')
+                    + '</p>' + (!rowOk ? hintHtml(mi.hint) : '') + '</div>';
+            }).join('');
+            labelHtml += '<div class="mb-3 p-2 rounded" style="page-break-inside:avoid;border:2px solid ' + (diagRight === item.items.length ? '#198754' : '#dc3545') + ';background:#fafafa">'
+                + '<p class="mb-2 fw-bold small">' + esc(item.title)
+                + ' <span class="badge ' + (diagRight === item.items.length ? 'bg-success' : 'bg-danger') + '">' + diagRight + '/' + item.items.length + '</span></p>'
+                + rowsHtml + '</div>';
+        });
+        sections += secHead('Labeling', sc.labelRight, sc.labelTotal, '#fd7e14') + labelHtml;
+
+        var printStyle = '<style>'
+            + '@media print {'
+            + '  .no-print, .sticky-top, #footer-placeholder, .back-to-top, .wrs-no-print { display:none !important; }'
+            + '  body { font-size: 11pt; }'
+            + '  .card { box-shadow: none !important; border: 1px solid #ccc !important; }'
+            + '  .wrs-score-box { break-inside: avoid; }'
+            + '  .wrs-review { orphans: 3; widows: 3; }'
+            + '}'
+            + '</style>';
+
+        $c().innerHTML = printStyle
+            + '<div class="card shadow border-' + (pass ? 'success' : 'warning') + ' mx-auto" style="max-width:820px">'
             + '<div class="card-body p-4 p-md-5">'
+
+            // ── Score summary ──────────────────────────────────────────────
             + '<div class="text-center mb-4">'
             + '<h2 class="fw-bold text-' + (pass ? 'success' : 'primary') + ' mb-1">' + (pass ? 'Great Work!' : 'Assessment Complete') + '</h2>'
-            + '<p class="text-muted">' + esc(_lName) + ', ' + esc(_fName) + ' &middot; ' + esc(_sClass) + ' &middot; ' + esc(_origConfig.chapterTitle) + '</p>'
+            + '<p class="text-muted mb-0">' + esc(_lName) + ', ' + esc(_fName) + ' &middot; ' + esc(_sClass) + ' &middot; ' + esc(_origConfig.chapterTitle) + '</p>'
             + '</div>'
-            + '<div class="p-4 rounded border bg-light mb-4 text-center">'
+            + '<div class="p-4 rounded border bg-light mb-4 text-center wrs-score-box">'
             + '<div class="display-2 fw-bold text-' + (pass ? 'success' : 'warning') + ' mb-1">' + pct + '%</div>'
             + '<p class="fw-bold text-dark mb-3">' + sc.right + ' of ' + sc.total + ' correct</p>'
             + '<div class="row g-2 text-center">'
             + '<div class="col-3"><div class="fw-bold fs-5 text-primary">' + sc.tfRight + '/' + sc.tfTotal + '</div><div class="small text-muted">True / False</div></div>'
             + '<div class="col-3"><div class="fw-bold fs-5 text-success">' + sc.matchRight + '/' + sc.matchTotal + '</div><div class="small text-muted">Matching</div></div>'
             + '<div class="col-3"><div class="fw-bold fs-5 text-primary">' + sc.mcRight + '/' + sc.mcTotal + '</div><div class="small text-muted">Mult. Choice</div></div>'
-            + '<div class="col-3"><div class="fw-bold fs-5 text-warning">' + sc.labelRight + '/' + sc.labelTotal + '</div><div class="small text-muted">Labeling</div></div>'
+            + '<div class="col-3"><div class="fw-bold fs-5" style="color:#fd7e14">' + sc.labelRight + '/' + sc.labelTotal + '</div><div class="small text-muted">Labeling</div></div>'
             + '</div>'
-            + (pass ? '<div class="alert alert-success mt-3 mb-0 py-2 small">You are on track for the real WRS assessment!</div>' : '<div class="alert alert-warning mt-3 mb-0 py-2 small">Keep reviewing &mdash; you need 75% to pass the real assessment.</div>')
+            + (pass ? '<div class="alert alert-success mt-3 mb-0 py-2 small">You are on track for the real WRS assessment!</div>'
+                    : '<div class="alert alert-warning mt-3 mb-0 py-2 small">Keep reviewing &mdash; you need 75% to pass the real assessment.</div>')
             + '</div>'
-            + '<div class="accordion mb-4" id="wrsReviewAcc">'
-            + '<div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#wrs-rev-tf">True / False (' + sc.tfRight + '/' + sc.tfTotal + ')</button></h2><div id="wrs-rev-tf" class="accordion-collapse collapse" data-bs-parent="#wrsReviewAcc"><div class="accordion-body">' + rev.tf + '</div></div></div>'
-            + '<div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#wrs-rev-match">Matching (' + sc.matchRight + '/' + sc.matchTotal + ')</button></h2><div id="wrs-rev-match" class="accordion-collapse collapse" data-bs-parent="#wrsReviewAcc"><div class="accordion-body">' + rev.match + '</div></div></div>'
-            + '<div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#wrs-rev-mc">Multiple Choice (' + sc.mcRight + '/' + sc.mcTotal + ')</button></h2><div id="wrs-rev-mc" class="accordion-collapse collapse" data-bs-parent="#wrsReviewAcc"><div class="accordion-body">' + rev.mc + '</div></div></div>'
-            + '<div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#wrs-rev-label">Labeling (' + sc.labelRight + '/' + sc.labelTotal + ')</button></h2><div id="wrs-rev-label" class="accordion-collapse collapse" data-bs-parent="#wrsReviewAcc"><div class="accordion-body">' + rev.label + '</div></div></div>'
-            + '</div>'
-            + '<div class="d-flex justify-content-center gap-2 flex-wrap">'
-            + '<button onclick="window.print()" class="btn btn-outline-secondary px-4">Print Report</button>'
+
+            // ── Print button (hidden during print) ─────────────────────────
+            + '<div class="d-flex justify-content-center gap-2 flex-wrap mb-4 wrs-no-print">'
+            + '<button onclick="window.print()" class="btn btn-outline-secondary px-4">&#x1F5A8; Print Full Report</button>'
             + '<a href="/index.html" class="btn text-white px-4" style="background:var(--primary-color,#003087)">Return to Dashboard</a>'
-            + '</div></div></div>';
+            + '</div>'
+
+            // ── Full question review ────────────────────────────────────────
+            + '<div class="wrs-review">' + sections + '</div>'
+
+            + '<div class="d-flex justify-content-center gap-2 flex-wrap mt-4 wrs-no-print">'
+            + '<button onclick="window.print()" class="btn btn-outline-secondary px-4">&#x1F5A8; Print Full Report</button>'
+            + '<a href="/index.html" class="btn text-white px-4" style="background:var(--primary-color,#003087)">Return to Dashboard</a>'
+            + '</div>'
+
+            + '</div></div>';
 
         try {
             var stored = JSON.parse(localStorage.getItem('user') || '{}');
