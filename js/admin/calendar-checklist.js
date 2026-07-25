@@ -288,10 +288,10 @@
             if (e.target.closest('.event-list-row')) setTimeout(() => loadView('view-daily'), 30);
         });
 
-        // Month navigation may change which Q/S events are in the displayed month
+        // Reload checklist whenever the user navigates with Prev/Next in any view
         ['prev-month','next-month'].forEach(id => {
             document.getElementById(id)?.addEventListener('click', () => {
-                if (_view === 'view-monthly') setTimeout(() => loadView('view-monthly'), 60);
+                if (_view !== 'view-events') setTimeout(() => loadView(_view), 60);
             });
         });
 
