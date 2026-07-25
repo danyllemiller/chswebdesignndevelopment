@@ -236,7 +236,8 @@
             + '<div class="d-flex justify-content-center gap-3">'
             + '<button onclick="wrsSelectTF(\'T\')" class="btn btn-lg px-5 fw-bold ' + (sel === 'T' ? 'btn-primary text-white' : 'btn-outline-secondary') + '" style="min-width:130px">True</button>'
             + '<button onclick="wrsSelectTF(\'F\')" class="btn btn-lg px-5 fw-bold ' + (sel === 'F' ? 'btn-danger text-white' : 'btn-outline-secondary') + '" style="min-width:130px">False</button>'
-            + '</div>';
+            + '</div>'
+            + calcWidget();
         $c().innerHTML = cardShell('#003087', 'True / False', body, navFooter(sel === 'T' || sel === 'F', '#003087'));
     }
 
@@ -279,7 +280,8 @@
             + '<p class="text-muted small mb-0">' + answered + ' of ' + item.items.length + ' matched</p>'
             + '</div>'
             + choicesHtml
-            + rowsHtml;
+            + rowsHtml
+            + calcWidget();
 
         $c().innerHTML = cardShell('#198754', 'Matching', body, navFooter(allDone, '#198754'));
     }
@@ -297,12 +299,11 @@
                 + '<span class="fw-semibold" style="pointer-events:none;font-size:.95rem">' + esc(opt) + '</span>'
                 + '</div></div>';
         }).join('');
-        var mathHtml = item.math ? calcWidget() : '';
         var body = '<div class="text-center mb-4">'
             + '<span class="badge mb-3 px-3 py-2 fw-semibold" style="background:#003087;font-size:.78rem;letter-spacing:.05em">MULTIPLE CHOICE</span>'
             + '<h4 class="fw-bold lh-base" style="font-size:1.1rem">' + esc(item.q) + '</h4>'
             + '</div>'
-            + mathHtml
+            + calcWidget()
             + '<div>' + optHtml + '</div>';
         $c().innerHTML = cardShell('#003087', 'Multiple Choice', body, navFooter(sel !== undefined, '#003087'));
     }
@@ -343,9 +344,18 @@
             + '<p class="small fw-bold text-muted mb-2" style="text-transform:uppercase;letter-spacing:.05em">Word Bank</p>'
             + '<div>' + wbHtml + '</div>'
             + '</div>'
-            + rowsHtml;
+            + rowsHtml
+            + calcWidget();
 
         $c().innerHTML = cardShell('#fd7e14', 'Labeling', body, navFooter(allDone, '#fd7e14'));
+    }
+
+    // ── Save calc/scratch state before any re-render ─────────────────────────
+    function saveCalcState() {
+        var calcBody = document.getElementById('mathToolsBody');
+        _calcOpen    = !!(calcBody && calcBody.classList.contains('show'));
+        var scratch  = document.getElementById('wrs-scratch');
+        if (scratch) _scratchText = scratch.value;
     }
 
     // ── Calculator widget ─────────────────────────────────────────────────────
@@ -367,7 +377,7 @@
             + '<div class="accordion-item" style="border-color:#ffc107">'
             + '<h2 class="accordion-header">'
             + '<button class="accordion-button ' + (_calcOpen ? '' : 'collapsed') + ' fw-bold py-2" style="background:#fff8e1;color:#7c5700;font-size:.9rem" type="button" data-bs-toggle="collapse" data-bs-target="#mathToolsBody">'
-            + '&#x1F9EE; Calculator &amp; Scratch Pad &nbsp;<span class="badge bg-warning text-dark ms-1" style="font-size:.7rem">Math Tool</span>'
+            + '&#x1F9EE; Calculator &amp; Scratch Pad'
             + '</button></h2>'
             + '<div id="mathToolsBody" class="accordion-collapse collapse ' + (_calcOpen ? 'show' : '') + '">'
             + '<div class="accordion-body p-3" style="background:#fffdf0">'
@@ -566,28 +576,28 @@
 
     // ── Input handlers ────────────────────────────────────────────────────────
     window.wrsSelectTF = function (val) {
+        saveCalcState();
         _ans[_qIdx] = val;
         renderTF(_flatQ[_qIdx]);
     };
 
     // matchSet: itemIdx = row index within the set, val = letter chosen
     window.wrsSelectMatchSet = function (itemIdx, val) {
+        saveCalcState();
         if (!_ans[_qIdx]) _ans[_qIdx] = {};
         _ans[_qIdx][itemIdx] = val;
         renderMatchSet(_flatQ[_qIdx]);
     };
 
     window.wrsSelectMC = function (i) {
-        var calcBody = document.getElementById('mathToolsBody');
-        _calcOpen    = !!(calcBody && calcBody.classList.contains('show'));
-        var scratch  = document.getElementById('wrs-scratch');
-        if (scratch) _scratchText = scratch.value;
+        saveCalcState();
         _ans[_qIdx] = i;
         renderMC(_flatQ[_qIdx]);
     };
 
     // labelSet: itemIdx = region index (0-based), val = word bank string chosen
     window.wrsSelectLabelSet = function (itemIdx, val) {
+        saveCalcState();
         if (!_ans[_qIdx]) _ans[_qIdx] = {};
         _ans[_qIdx][itemIdx] = val;
         renderLabelSet(_flatQ[_qIdx]);
