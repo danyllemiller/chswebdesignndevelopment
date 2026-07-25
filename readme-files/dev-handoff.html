@@ -1,0 +1,737 @@
+<title>CHS Web Design Platform — Developer Handoff</title>
+<style>
+  :root {
+    --bg:       #0d1b2a;
+    --bg-card:  #142030;
+    --bg-code:  #0a1520;
+    --border:   #1e3248;
+    --accent:   #29b6d8;
+    --green:    #4ade80;
+    --amber:    #fbbf24;
+    --red:      #f87171;
+    --text:     #c8d8e8;
+    --text-dim: #6a8aaa;
+    --text-hd:  #e8f4ff;
+    --sidebar-w: 230px;
+    --mono: 'Cascadia Code','Fira Code','Consolas','Courier New',monospace;
+    --sans: -apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg:       #f0f4f8;
+      --bg-card:  #ffffff;
+      --bg-code:  #1a2b3c;
+      --border:   #d0dae6;
+      --text:     #1e2d3d;
+      --text-dim: #6a8aaa;
+      --text-hd:  #0d1b2a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:#0d1b2a; --bg-card:#142030; --bg-code:#0a1520; --border:#1e3248;
+    --text:#c8d8e8; --text-dim:#6a8aaa; --text-hd:#e8f4ff;
+  }
+  :root[data-theme="light"] {
+    --bg:#f0f4f8; --bg-card:#ffffff; --bg-code:#1a2b3c; --border:#d0dae6;
+    --text:#1e2d3d; --text-dim:#6a8aaa; --text-hd:#0d1b2a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  nav.sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .08em;
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .sidebar-logo strong { display: block; font-size: 13px; color: var(--text-hd); }
+  nav.sidebar ul { list-style: none; }
+  nav.sidebar ul li a {
+    display: block;
+    padding: 5px 20px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 12px;
+    font-family: var(--mono);
+    transition: color .15s, background .15s;
+    border-left: 2px solid transparent;
+  }
+  nav.sidebar ul li a:hover,
+  nav.sidebar ul li a.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+  nav.sidebar .nav-section {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    color: var(--text-dim);
+    padding: 12px 20px 4px;
+    text-transform: uppercase;
+  }
+
+  /* ── Main ── */
+  main {
+    flex: 1;
+    max-width: 820px;
+    padding: 48px 48px 80px;
+    overflow-x: hidden;
+  }
+
+  /* ── Sections ── */
+  section {
+    margin-bottom: 56px;
+    scroll-margin-top: 24px;
+  }
+  .section-heading {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-hd);
+    border-left: 3px solid var(--accent);
+    padding-left: 12px;
+    margin-bottom: 20px;
+    letter-spacing: -.01em;
+  }
+  h3 {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 24px 0 8px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  p { margin-bottom: 12px; color: var(--text); }
+
+  /* ── Code ── */
+  code {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    background: var(--bg-code);
+    color: #93e0f8;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin: 12px 0 20px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: #93e0f8;
+  }
+  pre .comment { color: #4a6880; }
+  pre .key     { color: #fbbf24; }
+  pre .val     { color: #86efac; }
+  pre .str     { color: #f9a8d4; }
+
+  /* ── Table ── */
+  .tbl-wrap { overflow-x: auto; margin: 12px 0 20px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    background: var(--bg-card);
+  }
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  td code { background: none; padding: 0; color: var(--accent); }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    vertical-align: middle;
+  }
+  .badge-green  { background: color-mix(in srgb, var(--green) 15%, transparent); color: var(--green); border: 1px solid color-mix(in srgb, var(--green) 30%, transparent); }
+  .badge-amber  { background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber); border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent); }
+  .badge-blue   { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+  .badge-red    { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); border: 1px solid color-mix(in srgb, var(--red) 30%, transparent); }
+
+  /* ── Callout ── */
+  .callout {
+    border-left: 3px solid var(--amber);
+    background: color-mix(in srgb, var(--amber) 6%, transparent);
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    margin: 12px 0 20px;
+    font-size: 13px;
+  }
+  .callout.info  { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  .callout.danger{ border-color: var(--red);   background: color-mix(in srgb, var(--red)   6%, transparent); }
+  .callout strong { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+
+  /* ── Divider ── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* ── Header strip ── */
+  .doc-header {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 48px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .doc-header strong { color: var(--text-hd); font-size: 13px; }
+  .doc-header .sep { color: var(--border); }
+
+  /* ── Flex layout wrapper ── */
+  .layout {
+    display: flex;
+    flex-direction: column;
+  }
+  .layout > .doc-header { order: -1; }
+  .layout > .body-row {
+    display: flex;
+    flex: 1;
+  }
+
+  @media (max-width: 700px) {
+    nav.sidebar { display: none; }
+    main { padding: 24px 16px 60px; }
+  }
+</style>
+
+<div class="layout">
+  <div class="doc-header">
+    <strong>CHS Web Design & Development</strong>
+    <span class="sep">|</span>
+    Developer Handoff Guide
+    <span class="sep">|</span>
+    v1.0 — July 2026
+    <span style="margin-left:auto">
+      <span class="badge badge-green">Node.js / Express</span>
+      &nbsp;
+      <span class="badge badge-blue">MySQL</span>
+      &nbsp;
+      <span class="badge badge-amber">PM2</span>
+    </span>
+  </div>
+
+  <div class="body-row">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <strong>chs-webdesign</strong>
+        /srv/chswebdesignndevelopment
+      </div>
+      <div class="nav-section">Overview</div>
+      <ul>
+        <li><a href="#arch">Architecture</a></li>
+        <li><a href="#stack">Tech Stack</a></li>
+        <li><a href="#infra">Infrastructure</a></li>
+      </ul>
+      <div class="nav-section">Server</div>
+      <ul>
+        <li><a href="#server">Express App</a></li>
+        <li><a href="#auth">Auth System</a></li>
+        <li><a href="#api">API Reference</a></li>
+      </ul>
+      <div class="nav-section">Database</div>
+      <ul>
+        <li><a href="#db">Connection</a></li>
+        <li><a href="#schema">Schema</a></li>
+      </ul>
+      <div class="nav-section">Frontend</div>
+      <ul>
+        <li><a href="#pages">Pages</a></li>
+        <li><a href="#calendar">Calendar</a></li>
+        <li><a href="#checklist">Checklist</a></li>
+        <li><a href="#auth-guard">Auth Guard</a></li>
+      </ul>
+      <div class="nav-section">Operations</div>
+      <ul>
+        <li><a href="#deploy">Deploy</a></li>
+        <li><a href="#pm2">PM2</a></li>
+        <li><a href="#calendar-csv">Calendar CSV</a></li>
+        <li><a href="#gotchas">Gotchas</a></li>
+      </ul>
+    </nav>
+
+    <main>
+
+      <!-- ARCHITECTURE -->
+      <section id="arch">
+        <div class="section-heading">System Architecture</div>
+        <p>
+          This is a classroom management web platform for a high school Web Design &amp; Development course. It serves
+          students, teachers (admin role), and handles gradebooks, calendars, timesheets, notebooks, and more.
+          Everything runs on a single VPS behind Nginx as a reverse proxy to a Node.js/Express process on port 3000.
+        </p>
+        <pre><span class="comment">── Request flow ─────────────────────────────────────────</span>
+Browser → Nginx (443) → Node/Express :3000
+                          ├── /api/*       → server/auth.js + server/api.js
+                          └── /*           → Static files from repo root</pre>
+
+        <p>There is <strong>no PHP runtime</strong> active — some legacy <code>.php</code> filenames exist in the repo but
+        Node routes intercept them at the API layer (e.g. <code>POST /api/save-csv.php</code>). Any
+        <code>.php</code> file served as static content will return raw source text, not executed output.</p>
+      </section>
+
+      <!-- TECH STACK -->
+      <section id="stack">
+        <div class="section-heading">Tech Stack</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Layer</th><th>Technology</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>Runtime</td><td><code>Node.js</code> + <code>Express 4</code></td><td>Entry: <code>server/server.js</code></td></tr>
+              <tr><td>Database</td><td><code>MySQL 8</code> via <code>mysql2</code></td><td>DB: <code>chs_gradebook</code></td></tr>
+              <tr><td>Session</td><td><code>express-session</code></td><td>In-memory; no Redis</td></tr>
+              <tr><td>Auth</td><td>bcrypt password hashes</td><td>Roles: <code>student</code>, <code>teacher</code>, <code>admin</code></td></tr>
+              <tr><td>Process mgr</td><td>PM2</td><td>App name: <code>guild-server</code></td></tr>
+              <tr><td>Reverse proxy</td><td>Nginx</td><td>Listens 80/443, proxies to :3000</td></tr>
+              <tr><td>Frontend</td><td>Vanilla JS (ES modules where noted) + Bootstrap 5</td><td>No build step</td></tr>
+              <tr><td>Calendar data</td><td><code>special-dates.csv</code> in repo root</td><td>Served as static file</td></tr>
+              <tr><td>Version control</td><td>GitHub</td><td><code>danyllemiller/chswebdesignndevelopment</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- INFRA -->
+      <section id="infra">
+        <div class="section-heading">Infrastructure</div>
+        <h3>VPS</h3>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>SSH alias</td><td><code>webServer</code></td></tr>
+              <tr><td>IP</td><td><code>100.108.216.90</code></td></tr>
+              <tr><td>SSH user</td><td><code>administrator</code></td></tr>
+              <tr><td>Repo path</td><td><code>/srv/chswebdesignndevelopment</code></td></tr>
+              <tr><td>Web root</td><td><code>/var/www/html</code> (Nginx static fallback — repo is the live root)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout info"><strong>SSH</strong> The SSH config alias <code>webServer</code> is defined in <code>~/.ssh/config</code> on the developer's Mac. New developer machines must add their own entry or use the full <code>administrator@100.108.216.90</code> form.</div>
+
+        <h3>Database</h3>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Host</td><td><code>localhost</code> (same VPS)</td></tr>
+              <tr><td>Database</td><td><code>chs_gradebook</code></td></tr>
+              <tr><td>User</td><td><code>root</code></td></tr>
+              <tr><td>Password</td><td><code>DB_PASSWORD_IN_DB_CONFIG</code> — see <code>server/db.js</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout danger"><strong>Never commit credentials</strong> The real DB password lives only in <code>server/db.js</code> on the VPS. That file is not in the repo. If you need to restore it, SSH in and re-create it from the template below.</div>
+<pre><span class="comment">// server/db.js (not in repo — create on server)</span>
+<span class="key">const</span> mysql = require(<span class="str">'mysql2/promise'</span>);
+
+<span class="key">async function</span> <span class="val">getDbConnection</span>() {
+    <span class="key">return</span> mysql.createConnection({
+        host:     <span class="str">'localhost'</span>,
+        user:     <span class="str">'root'</span>,
+        password: <span class="str">'DB_PASSWORD_IN_DB_CONFIG'</span>,
+        database: <span class="str">'chs_gradebook'</span>,
+    });
+}
+module.exports = { getDbConnection };</pre>
+      </section>
+
+      <!-- SERVER -->
+      <section id="server">
+        <div class="section-heading">Express Server</div>
+        <p>Entry point: <code>server/server.js</code>. Listens on port <code>3000</code>. Route priority matters —
+        API routes are mounted before the static-file middleware so URL paths like <code>/api/save-csv.php</code> are
+        handled by Node, not served as a PHP file.</p>
+<pre><span class="comment">// Mount order in server.js</span>
+app.use(<span class="str">'/api'</span>, authRoutes);     <span class="comment">// auth.js</span>
+app.use(<span class="str">'/api'</span>, apiRoutes);      <span class="comment">// api.js</span>
+app.use(<span class="str">'/'</span>,   express.static(…)); <span class="comment">// everything else</span></pre>
+
+        <div class="callout"><strong>Important</strong> After any change to <code>server/</code> files, you must restart PM2: <code>pm2 restart guild-server</code>. Changes to HTML, JS, or CSS in the repo root take effect immediately — no restart needed.</div>
+      </section>
+
+      <!-- AUTH -->
+      <section id="auth">
+        <div class="section-heading">Authentication System</div>
+        <p>Session-based auth via <code>express-session</code>. No JWT. Sessions are in memory (lost on PM2 restart).</p>
+
+        <h3>Roles</h3>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Role value</th><th>Capabilities</th></tr></thead>
+            <tbody>
+              <tr><td><code>student</code></td><td>Default. Access to personal gradebook, notebook, exams, timesheets.</td></tr>
+              <tr><td><code>teacher</code></td><td>All student capabilities + admin pages, checklist, roster management, master gradebook.</td></tr>
+              <tr><td><code>admin</code></td><td>Same as teacher in current implementation.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Frontend auth guard</h3>
+        <p>Every page loads <code>js/auth-guard.js</code> via the shared navbar include. It calls <code>GET /api/session</code>,
+        populates <code>window.dacAuthData</code>, and fires the <code>authComplete</code> DOM event. Scripts that need the
+        user object must listen for that event or check <code>window.dacAuthData</code> after it's set.</p>
+<pre><span class="comment">// Pattern used by all admin JS modules</span>
+document.addEventListener(<span class="str">'DOMContentLoaded'</span>, () => {
+    <span class="key">if</span> (window.dacAuthData) { setup(); <span class="key">return</span>; }
+    document.addEventListener(<span class="str">'authComplete'</span>, setup, { once: <span class="key">true</span> });
+});</pre>
+
+        <h3>Password reset flow</h3>
+        <p>Students self-service via <code>/passwordreset.html</code>. Temporary password = student ID; <code>must_change_password = 1</code>
+        flag forces password change on next login. Admins can also reset from the roster page.</p>
+      </section>
+
+      <!-- API -->
+      <section id="api">
+        <div class="section-heading">API Reference</div>
+        <p>All routes are defined in <code>server/api.js</code> (data) and <code>server/auth.js</code> (auth), both mounted at <code>/api</code>.</p>
+
+        <h3>Auth routes (<code>server/auth.js</code>)</h3>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/login</code></td><td>Validate credentials, create session</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/register</code></td><td>First-time account setup for rostered student</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/logout</code></td><td>Destroy session</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/change-password</code></td><td>Authenticated password change</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/reset-password</code></td><td>Self-service reset (verifies name + ID)</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/admin/reset-password-default</code></td><td>Admin resets a student to their ID as password</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Data routes (<code>server/api.js</code>) — selected</h3>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/student/course-gradebook</code></td><td>Student's assignment list with scores</td></tr>
+              <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/admin/master-gradebook-data</code></td><td>All students × all assignments for a section</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/admin/save-grade</code></td><td>Write a single grade</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/admin/batch-update-grades</code></td><td>Write grades for an entire assignment column</td></tr>
+              <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/admin/roster</code></td><td>All students, filterable by section/year</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/admin/upload-roster</code></td><td>CSV bulk import of students</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/clockin</code></td><td>Student clock-in / clock-out with warm-up answer</td></tr>
+              <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/bell-schedule</code></td><td>Daily period schedule with current period detection</td></tr>
+              <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/admin/checklist</code></td><td>Teacher task checklist by cadence + period key</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/admin/checklist/toggle</code></td><td>Check/uncheck a checklist item</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/admin/checklist/reset</code></td><td>Reset all items for a period</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/save-csv.php</code></td><td>Overwrite <code>special-dates.csv</code> from admin upload</td></tr>
+              <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/admin/notebooks/entries</code></td><td>All notebook entries for a student or section</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/student/notebook/save</code></td><td>Create or update a notebook entry</td></tr>
+              <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/admin/payroll/timesheets-period</code></td><td>Timesheet data for payroll period</td></tr>
+              <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/submit-exam</code></td><td>Record exam score + individual question responses</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- DB -->
+      <section id="db">
+        <div class="section-heading">Database Connection</div>
+        <p>Every route handler calls <code>getDbConnection()</code> from <code>server/db.js</code>, which creates a new
+        connection per request and the handler closes it with <code>connection.end()</code>. There is no connection pool.
+        For high-concurrency workloads, migrating to <code>mysql2</code>'s <code>createPool()</code> is the recommended improvement.</p>
+
+        <div class="callout"><strong>Heads up</strong> <code>server/db.js</code> is <em>not</em> in the git repository — it exists only on the VPS. If you re-clone to a new server, recreate the file from the template in the <a href="#infra">Infrastructure</a> section above.</div>
+      </section>
+
+      <!-- SCHEMA -->
+      <section id="schema">
+        <div class="section-heading">Database Schema</div>
+        <p>Database: <code>chs_gradebook</code>. Full column details are in <code>db-schema.txt</code> in the repo root. Key tables below.</p>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Table</th><th>Primary use</th><th>Key columns</th></tr></thead>
+            <tbody>
+              <tr><td><code>students</code></td><td>All users (students + teachers)</td><td><code>student_id</code> PK, <code>role</code>, <code>section_id</code>, <code>password</code> (bcrypt)</td></tr>
+              <tr><td><code>courses</code></td><td>Course catalog</td><td><code>course_id</code>, <code>course_name</code></td></tr>
+              <tr><td><code>class_sections</code></td><td>Maps sections to courses</td><td><code>section_id</code>, <code>course_id</code></td></tr>
+              <tr><td><code>exams</code></td><td>Assignments/assessments</td><td><code>exam_id</code>, <code>title</code>, <code>total_points</code>, <code>course_id</code></td></tr>
+              <tr><td><code>responses</code></td><td>Scores per student per exam</td><td><code>student_id</code>, <code>exam_id</code>, <code>score</code></td></tr>
+              <tr><td><code>student_responses</code></td><td>Per-question answers</td><td><code>question_id</code>, <code>student_answer</code>, <code>is_correct</code></td></tr>
+              <tr><td><code>questions</code></td><td>Exam question bank</td><td><code>exam_id</code>, <code>question_text</code>, options A–D, <code>correct_answer</code></td></tr>
+              <tr><td><code>notebook_entries</code></td><td>Student digital notebooks</td><td><code>student_id</code>, <code>chapter_id</code>, <code>category</code> (Notes/Do Now/Exit Ticket), <code>content</code></td></tr>
+              <tr><td><code>clockins</code></td><td>Warm-up / clock-in answers</td><td><code>student_id</code>, <code>type</code>, <code>answer</code>, <code>timestamp</code></td></tr>
+              <tr><td><code>timesheets</code></td><td>Student payroll hours</td><td><code>clock_in</code>, <code>clock_out</code>, <code>score</code></td></tr>
+              <tr><td><code>chapters</code></td><td>Course chapter list</td><td><code>chapter_number</code>, <code>course_id</code>, <code>is_visible</code></td></tr>
+              <tr><td><code>self_assessments</code></td><td>Student self-rating per chapter</td><td><code>student_id</code>, <code>chapter_id</code>, <code>level</code> (float)</td></tr>
+              <tr><td><code>daily_questions</code></td><td>Warm-up question bank</td><td><code>day_group</code>, <code>question_text</code>, <code>options</code> (JSON), <code>correct_answer</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout info"><strong>Checklist tables</strong> The teacher checklist (<code>/api/admin/checklist</code>) uses one or two additional tables created via the migration scripts in <code>migrations/</code>. Run those scripts on a fresh DB to create them.</div>
+      </section>
+
+      <!-- PAGES -->
+      <section id="pages">
+        <div class="section-heading">Key Pages</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>File</th><th>Role</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><code>index.html</code></td><td>Student home / dashboard</td><td>Bell schedule, daily warm-up, quick links</td></tr>
+              <tr><td><code>calendar.html</code></td><td>School calendar</td><td>Day/Week/Month/Events views; teacher checklist panel</td></tr>
+              <tr><td><code>admin.html</code></td><td>Teacher dashboard</td><td>Gradebook hub, roster, sections</td></tr>
+              <tr><td><code>admin-roster.html</code></td><td>Student roster management</td><td>CSV upload, password reset, section assignment</td></tr>
+              <tr><td><code>grading.html</code></td><td>Master gradebook</td><td>Inline grade editing, batch update</td></tr>
+              <tr><td><code>admin-notebooks.html</code></td><td>Notebook viewer</td><td>Teacher reads all student notebook entries</td></tr>
+              <tr><td><code>login.html</code></td><td>Login / register / password reset</td><td>Self-service flow; bcrypt on server</td></tr>
+              <tr><td><code>discipline.html</code></td><td>Discipline tracker</td><td>Teacher-only</td></tr>
+              <tr><td><code>year1/</code>, <code>year2/</code></td><td>Chapter content</td><td>16 chapters per year; static HTML with shared navbar</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CALENDAR -->
+      <section id="calendar">
+        <div class="section-heading">Calendar System</div>
+        <p>The calendar (<code>calendar.html</code> + <code>js/calendar.js</code>) is a custom-built vanilla JS module.
+        It renders Day, Week, Month, and Events list views using a school schedule pulled from <code>special-dates.csv</code>.</p>
+
+        <h3>Data source</h3>
+        <p><code>special-dates.csv</code> in the repo root is the single source of truth for school schedule data.
+        Format: one row per date, <code>YYYY-MM-DD,TYPE,Description</code>. The file is served as a static asset.
+        On startup, <code>calendar.js</code> fetches it and builds an internal <code>Map&lt;dateStr, {type, description}&gt;</code>.</p>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Type code</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>A</code></td><td>A-day (block schedule)</td></tr>
+              <tr><td><code>B</code></td><td>B-day</td></tr>
+              <tr><td><code>A_MIN</code></td><td>A-day with minimum schedule</td></tr>
+              <tr><td><code>B_MIN</code></td><td>B-day with minimum schedule</td></tr>
+              <tr><td><code>C</code></td><td>All-period day</td></tr>
+              <tr><td><code>S</code></td><td>Summer school</td></tr>
+              <tr><td><code>OFF</code></td><td>No school (holiday, break, teacher work day)</td></tr>
+              <tr><td><code>none</code></td><td>Non-school date with a note (holidays that fall on weekends, etc.)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Admin calendar upload</h3>
+        <p>Admin can replace <code>special-dates.csv</code> from the admin calendar settings page. The upload posts
+        to <code>POST /api/save-csv.php</code> (Node route in <code>server/api.js</code>), which writes the file
+        directly to the repo root on the server using <code>fs.writeFile</code>. <strong>The file is not committed
+        to git automatically</strong> — if the server file changes, commit it manually to keep the repo in sync.</p>
+
+        <h3>View state persistence</h3>
+        <p><code>calendar.js</code> is a <code>type="module"</code> script — all its state is module-private.
+        It writes <code>cal_view</code>, <code>cal_date</code>, <code>cal_year</code>, <code>cal_month</code> to
+        <code>localStorage</code> after every navigation so state survives page reloads.</p>
+      </section>
+
+      <!-- CHECKLIST -->
+      <section id="checklist">
+        <div class="section-heading">Teacher Checklist</div>
+        <p>Defined in <code>js/admin/calendar-checklist.js</code> (non-module IIFE). It renders below the calendar grid and
+        shows different task lists depending on the active calendar view.</p>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Calendar view</th><th>Checklist cadence</th><th>Holiday behavior</th></tr></thead>
+            <tbody>
+              <tr><td>Day</td><td>Daily tasks (today's date as period key)</td><td>Hides if today is OFF and not a teacher work day</td></tr>
+              <tr><td>Week</td><td>Weekly tasks (ISO week of today as period key)</td><td>Hides if Mon–Fri of the displayed week are all OFF</td></tr>
+              <tr><td>Month</td><td>Monthly tasks + Q/S addons if Q1/Q3 end or S1 end / last day falls in displayed month</td><td>Always shown</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Race condition guard</h3>
+        <p>The module uses a <code>_loadGen</code> counter. Each call to <code>loadView()</code> increments the counter
+        and captures its value as <code>gen</code>. After every <code>await</code>, the function checks
+        <code>gen === _loadGen</code>; if not, it aborts without touching the DOM. This prevents a slow monthly
+        fetch (which has more awaits for quarterly/semester sub-sections) from overwriting a later weekly result.</p>
+
+        <h3>Teacher work day detection</h3>
+        <p>An <code>OFF</code> date whose description contains <code>"teacher work"</code>, <code>"teacher training"</code>,
+        or <code>"prof learning"</code> (case-insensitive) is treated as a school day for the checklist. Teachers
+        are working even though students are off.</p>
+      </section>
+
+      <!-- AUTH GUARD -->
+      <section id="auth-guard">
+        <div class="section-heading">Frontend Auth Guard</div>
+        <p><code>js/auth-guard.js</code> is loaded by the shared navbar include (<code>includes/navbar.html</code>)
+        on every page. It calls <code>GET /api/session</code> and sets <code>window.dacAuthData</code>.
+        Teacher-only UI is gated on <code>window.dacAuthData?.isTeacher</code>.</p>
+        <p>Pages that need auth gate their logic behind the <code>authComplete</code> event. If <code>window.dacAuthData</code>
+        is already set when <code>DOMContentLoaded</code> fires (fast path), they call <code>setup()</code> directly.</p>
+      </section>
+
+      <!-- DEPLOY -->
+      <section id="deploy">
+        <div class="section-heading">Deployment Workflow</div>
+        <p>There is no CI/CD pipeline. Deploys are manual git pulls on the VPS.</p>
+        <pre><span class="comment"># 1. On dev machine — commit and push</span>
+git add &lt;files&gt;
+git commit -m "message"
+git push origin main
+
+<span class="comment"># 2. On VPS — pull</span>
+ssh webServer
+cd /srv/chswebdesignndevelopment
+git pull origin main
+
+<span class="comment"># 3. If you changed anything in server/ — restart PM2</span>
+pm2 restart guild-server</pre>
+
+        <div class="callout info"><strong>Static files only?</strong> HTML, CSS, and JS files in the repo root take effect immediately after a git pull — no PM2 restart needed. Only changes to <code>server/</code> require a restart.</div>
+      </section>
+
+      <!-- PM2 -->
+      <section id="pm2">
+        <div class="section-heading">PM2 Process Manager</div>
+        <pre><span class="comment"># Check status</span>
+pm2 status
+
+<span class="comment"># Restart app</span>
+pm2 restart guild-server
+
+<span class="comment"># View logs (last 50 lines)</span>
+pm2 logs guild-server --lines 50
+
+<span class="comment"># Tail live</span>
+pm2 logs guild-server
+
+<span class="comment"># Save process list across reboots</span>
+pm2 save
+pm2 startup</pre>
+        <p>The app name is <code>guild-server</code>. If for some reason it's not in the PM2 list, start it fresh:</p>
+        <pre>cd /srv/chswebdesignndevelopment
+pm2 start server/server.js --name guild-server
+pm2 save</pre>
+      </section>
+
+      <!-- CALENDAR CSV -->
+      <section id="calendar-csv">
+        <div class="section-heading">Updating the School Calendar</div>
+        <p>The canonical method is through the admin calendar settings page in the browser (uploads via API). For manual edits:</p>
+        <pre><span class="comment"># Edit directly on the server</span>
+ssh webServer
+nano /srv/chswebdesignndevelopment/special-dates.csv
+
+<span class="comment"># Or edit locally and push — the file is in git</span>
+<span class="comment"># Format: YYYY-MM-DD,TYPE,Description</span>
+<span class="comment"># Example:</span>
+2027-03-29,OFF,Start Spring Break
+2027-04-05,OFF,Staff Prof Learning</pre>
+
+        <div class="callout"><strong>Date format</strong> Dates <em>must</em> be <code>YYYY-MM-DD</code>. The CSV parser filters any row that doesn't match <code>/^\d{4}-\d{2}-\d{2}$/</code>, so <code>M/D/YY</code> format rows will be silently ignored.</div>
+      </section>
+
+      <!-- GOTCHAS -->
+      <section id="gotchas">
+        <div class="section-heading">Known Gotchas</div>
+
+        <h3>No PHP execution</h3>
+        <p>The server is Node.js only. Any <code>.php</code> filenames are legacy artifacts. Node routes in
+        <code>server/api.js</code> intercept them at the API layer. A raw <code>.php</code> file outside <code>/api</code>
+        will be served as plain text.</p>
+
+        <h3>Sessions reset on PM2 restart</h3>
+        <p><code>express-session</code> uses in-memory storage. Every <code>pm2 restart</code> signs all users out.
+        Logged-in teachers and students will need to re-authenticate. If this is a problem, add
+        <code>connect-redis</code> or <code>session-file-store</code>.</p>
+
+        <h3>calendar.js is a module — module-private state</h3>
+        <p>The calendar view state (<code>currentView</code>, <code>selectedDate</code>) lives inside the ES module scope
+        and cannot be read by other scripts. Communication happens through <code>localStorage</code> (<code>cal_date</code>,
+        <code>cal_view</code>, etc.) and DOM event delegation. Any new scripts that need to know what the calendar is
+        showing must read from <code>localStorage</code>, not from a global variable.</p>
+
+        <h3>selectDay() doesn't fire the radio change event</h3>
+        <p><code>calendar.js</code> programmatically sets <code>radio.checked = true</code> when a month-view day is
+        clicked — this does <em>not</em> fire the <code>change</code> event. The checklist module handles this by
+        also listening to <code>click</code> on <code>.calendar-day</code> cells with a small <code>setTimeout</code>
+        to let the calendar update <code>localStorage</code> first.</p>
+
+        <h3>db.js is not in git</h3>
+        <p>If you clone to a new machine or re-provision the VPS, you must manually recreate <code>server/db.js</code>
+        with the DB credentials. The template is in the <a href="#infra">Infrastructure</a> section.</p>
+
+        <h3>CSV cache-busting</h3>
+        <p>The browser caches <code>special-dates.csv</code>. JS files use <code>?v=N</code> query strings to bust
+        the cache when they change. The CSV itself has no cache-busting. If you update the file and teachers report
+        the old schedule still showing, a hard refresh (Cmd+Shift+R) clears it.</p>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // Highlight active sidebar link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const links    = document.querySelectorAll('nav.sidebar a');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`nav.sidebar a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -75% 0px' });
+  sections.forEach(s => obs.observe(s));
+</script>

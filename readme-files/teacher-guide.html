@@ -1,0 +1,587 @@
+<title>CHS Web Design Platform — Teacher Guide</title>
+<style>
+  :root {
+    --navy:      #002d6e;
+    --navy-mid:  #003d99;
+    --gold:      #c09000;
+    --gold-lt:   #f0c840;
+    --bg:        #f5f7fc;
+    --bg-card:   #ffffff;
+    --text:      #1a1a2e;
+    --text-mid:  #3d3d5c;
+    --text-dim:  #6b7a99;
+    --border:    #dce3f0;
+    --accent:    #002d6e;
+    --sans: -apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:      #0f1422;
+      --bg-card: #182035;
+      --text:    #e4ebff;
+      --text-mid:#b0bcd8;
+      --text-dim:#6b7a99;
+      --border:  #1e2d4a;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#f5f7fc; --bg-card:#ffffff; --text:#1a1a2e;
+    --text-mid:#3d3d5c; --text-dim:#6b7a99; --border:#dce3f0;
+  }
+  :root[data-theme="dark"] {
+    --bg:#0f1422; --bg-card:#182035; --text:#e4ebff;
+    --text-mid:#b0bcd8; --text-dim:#6b7a99; --border:#1e2d4a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: var(--navy);
+    color: #fff;
+    padding: 72px 40px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 28px,
+      rgba(255,255,255,.025) 28px,
+      rgba(255,255,255,.025) 29px
+    );
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold-lt);
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 18px;
+    text-wrap: balance;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--gold-lt);
+  }
+  .hero p {
+    max-width: 560px;
+    margin: 0 auto 32px;
+    color: rgba(255,255,255,.8);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .hero-badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .hero-badge {
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,.85);
+    letter-spacing: .04em;
+  }
+
+  /* ── Section wrapper ── */
+  .section { padding: 64px 0; }
+  .section.alt { background: var(--bg-card); }
+  .container { max-width: 960px; margin: 0 auto; padding: 0 32px; }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: clamp(22px, 3.5vw, 32px);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 12px;
+    text-wrap: balance;
+  }
+  .section-sub {
+    color: var(--text-dim);
+    max-width: 600px;
+    font-size: 15px;
+    margin-bottom: 40px;
+  }
+
+  /* ── Feature grid ── */
+  .feat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .feat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    position: relative;
+  }
+  .feat-card::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 3px;
+    background: var(--navy);
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+  .feat-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .feat-card p { font-size: 13.5px; color: var(--text-mid); line-height: 1.55; }
+  .section.alt .feat-card { background: var(--bg); }
+
+  /* ── How-to steps ── */
+  .how-to { margin-top: 48px; }
+  .how-to + .how-to { margin-top: 56px; border-top: 1px solid var(--border); padding-top: 56px; }
+  .how-to-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  .how-to-num {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: var(--navy);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .how-to-title {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .how-to-desc { color: var(--text-mid); font-size: 14px; }
+  .steps {
+    display: grid;
+    gap: 12px;
+    margin-left: 60px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 12px;
+    align-items: baseline;
+  }
+  .step-n {
+    width: 24px;
+    height: 24px;
+    background: color-mix(in srgb, var(--navy) 12%, transparent);
+    color: var(--navy);
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  :root[data-theme="dark"] .step-n,
+  @media (prefers-color-scheme: dark) {
+    .step-n { background: rgba(41,182,216,.15); color: #93e0f8; }
+  }
+  .step-body { font-size: 14px; color: var(--text-mid); }
+  .step-body strong { color: var(--text); font-weight: 600; }
+
+  /* ── Tip box ── */
+  .tip {
+    border-left: 3px solid var(--gold);
+    background: color-mix(in srgb, var(--gold) 8%, transparent);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 13.5px;
+    color: var(--text-mid);
+    margin: 20px 0 0 60px;
+  }
+  .tip strong { color: var(--gold); font-weight: 700; }
+
+  /* ── Screen mockup ── */
+  .screen-mock {
+    background: var(--navy);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 24px 0 0 60px;
+    font-size: 12px;
+    font-family: -apple-system, sans-serif;
+  }
+  .screen-bar {
+    background: rgba(255,255,255,.08);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .screen-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .screen-body { padding: 16px; color: rgba(255,255,255,.75); }
+  .screen-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .screen-chip {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    padding: 3px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .chip-a   { background: rgba(41,182,216,.2); color: #93e0f8; }
+  .chip-b   { background: rgba(74,222,128,.2); color: #86efac; }
+  .chip-off { background: rgba(248,113,113,.2); color: #fca5a5; }
+  .chip-min { background: rgba(251,191,36,.2);  color: #fde68a; }
+  .chip-c   { background: rgba(167,139,250,.2); color: #c4b5fd; }
+
+  /* ── Pricing/CTA box ── */
+  .cta-box {
+    background: var(--navy);
+    color: #fff;
+    border-radius: 12px;
+    padding: 48px 40px;
+    text-align: center;
+  }
+  .cta-box h2 {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: clamp(22px,3.5vw,32px);
+    margin-bottom: 12px;
+  }
+  .cta-box p { color: rgba(255,255,255,.75); max-width: 480px; margin: 0 auto 28px; font-size: 15px; }
+  .cta-btn {
+    display: inline-block;
+    background: var(--gold-lt);
+    color: var(--navy);
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: .05em;
+    padding: 12px 32px;
+    border-radius: 6px;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: var(--border); margin: 0 32px; }
+
+  @media (max-width: 600px) {
+    .hero { padding: 48px 20px 40px; }
+    .container { padding: 0 16px; }
+    .steps, .tip, .screen-mock { margin-left: 0; }
+    .how-to-header { flex-direction: column; gap: 8px; }
+  }
+</style>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">CHS Web Design &amp; Development</div>
+  <h1>Every part of your class,<br><em>finally in one place.</em></h1>
+  <p>A purpose-built classroom platform that handles your gradebook, attendance, calendar, student notebooks, and daily task checklist — so you can focus on teaching.</p>
+  <div class="hero-badges">
+    <span class="hero-badge">Smart School Calendar</span>
+    <span class="hero-badge">Live Gradebook</span>
+    <span class="hero-badge">Student Notebooks</span>
+    <span class="hero-badge">Daily Task Checklist</span>
+    <span class="hero-badge">Payroll &amp; Timesheets</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section">
+  <div class="container">
+    <div class="section-label">What's Included</div>
+    <div class="section-title">Built for the way you actually teach</div>
+    <div class="section-sub">Everything was designed around the real daily rhythm of a classroom — not a generic learning management system.</div>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <h3>School Calendar</h3>
+        <p>See A-days, B-days, minimum days, and breaks at a glance in Day, Week, Month, or Events view. Upload your district calendar once and it's live for every device.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Teacher Task Checklist</h3>
+        <p>A contextual task list that changes as you switch views. Daily tasks today, weekly tasks this week, monthly tasks this month — and it automatically hides during breaks.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Live Gradebook</h3>
+        <p>Enter grades inline, update an entire column at once, and view each student's running average. Organized by course and section.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Student Notebooks</h3>
+        <p>Students write notes, Do Nows, and Exit Tickets directly in the platform. You can browse every student's entries by chapter from your teacher view.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Roster &amp; Sections</h3>
+        <p>Upload your class roster via CSV, create sections, assign students, reset passwords, and archive past years — all without touching a database.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Payroll &amp; Timesheets</h3>
+        <p>Students clock in with a warm-up answer each day. You get a full timesheet report by student and by period for payroll processing.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Exam &amp; Quiz Engine</h3>
+        <p>Question banks tied to chapter numbers. Students take exams, scores post automatically, and you see per-question breakdowns to identify gaps.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Bell Schedule</h3>
+        <p>The home dashboard always shows the current period with a live countdown — students know exactly where they should be.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Secure Login</h3>
+        <p>Every student has a personal login. Passwords are hashed with industry-standard bcrypt. Students can self-service reset with their ID if they get locked out.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- HOW-TO: CALENDAR -->
+<div class="section alt">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <div class="section-title">Step-by-step walkthroughs</div>
+    <div class="section-sub">You don't need to configure anything to get started. Here's how to use each major feature.</div>
+
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">1</div>
+        <div>
+          <div class="how-to-title">Using the School Calendar</div>
+          <div class="how-to-desc">Navigate to <strong>Calendar</strong> in the top nav. Four views are available at the top of the page.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body"><strong>Month view</strong> shows the full month with color-coded day types. Click any day to jump to that day's detail.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body"><strong>Week view</strong> shows the 5-day block with period times. Use the Previous / Next arrows to move between weeks.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body"><strong>Day view</strong> shows a single day with all periods and the day type (A-day, B-day, minimum day, etc.).</div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body"><strong>Events view</strong> is a filterable list of upcoming dates — good for sharing with students or parents.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">5</div>
+          <div class="step-body">To <strong>update the calendar</strong> (new school year, schedule changes): go to the Admin settings page, upload your CSV file in <code>YYYY-MM-DD,TYPE,Description</code> format, and it updates immediately for everyone.</div>
+        </div>
+      </div>
+      <div class="screen-mock">
+        <div class="screen-bar">
+          <div class="screen-dot" style="background:#ff5f57"></div>
+          <div class="screen-dot" style="background:#febc2e"></div>
+          <div class="screen-dot" style="background:#28c840"></div>
+          <span style="color:rgba(255,255,255,.4);font-size:11px;margin-left:8px">Calendar — Week of Mar 10, 2027</span>
+        </div>
+        <div class="screen-body">
+          <div class="screen-row"><span class="screen-chip chip-c">All Periods</span> <span>Mon Mar 15</span></div>
+          <div class="screen-row"><span class="screen-chip chip-a">A-Day</span> <span>Tue Mar 16</span></div>
+          <div class="screen-row"><span class="screen-chip chip-min">A-Min</span> <span>Wed Mar 17 — St. Patrick's Day</span></div>
+          <div class="screen-row"><span class="screen-chip chip-b">B-Day</span> <span>Thu Mar 18</span></div>
+          <div class="screen-row"><span class="screen-chip chip-b">B-Day</span> <span style="color:rgba(255,255,255,.5)">Fri Mar 19 — End Q3</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">2</div>
+        <div>
+          <div class="how-to-title">Your Teacher Checklist</div>
+          <div class="how-to-desc">The checklist appears automatically below the calendar when you're logged in as a teacher. It adjusts based on your current view.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body">In <strong>Day view</strong>, you see today's task list. Check items off as you complete them throughout the day.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body">In <strong>Week view</strong>, you see this week's recurring tasks. The badge counter (e.g. "3/7") shows your progress.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body">In <strong>Month view</strong>, you see monthly tasks. If the displayed month contains a quarter-end or semester-end, quarterly and semester checklists appear automatically below.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body">During <strong>school breaks</strong> — any week where Monday through Friday are all non-school days — the checklist panel automatically hides. No action needed.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">5</div>
+          <div class="step-body">Use <strong>Mark All</strong> to check everything at once, or <strong>Reset</strong> to start the period fresh.</div>
+        </div>
+      </div>
+      <div class="tip"><strong>Teacher Work Days:</strong> Days marked as "Teacher Work Day," "Teacher Training," or "Professional Learning" in the calendar still show the checklist — because you're at school, even if students aren't.</div>
+    </div>
+
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">3</div>
+        <div>
+          <div class="how-to-title">Managing Your Gradebook</div>
+          <div class="how-to-desc">Navigate to <strong>Gradebook</strong> from the admin dashboard. Grades live in the database — nothing to export or upload.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body">Select a <strong>section</strong> from the dropdown. All students and assignments for that section load automatically.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body">Click any cell to <strong>edit a grade inline</strong>. Press Enter or click away to save.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body">To <strong>grade the whole class</strong> on one assignment at once, use the column header menu → "Batch Update." Enter a score once; click each student who earned it.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body">Students see <strong>only their own grades</strong> when they log in — they can't see classmates' scores.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">4</div>
+        <div>
+          <div class="how-to-title">Setting Up Your Roster</div>
+          <div class="how-to-desc">Go to <strong>Admin → Roster</strong> at the start of each semester to load your class.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body">Create your <strong>sections</strong> first (Admin → Sections). One section per class period.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body"><strong>Upload a CSV</strong> with your student roster. Required columns: <code>student_id</code>, <code>first_name</code>, <code>last_name</code>, <code>section_id</code>. Students are added or updated — existing records are not overwritten.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body">Students <strong>register on first login</strong> at the login page — they set their own username and password using their student ID to verify.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body">If a student forgets their password, they can <strong>self-reset</strong> with their name, ID, and username. Or you can reset it from the Roster page in one click — their ID becomes the temporary password, and they're prompted to change it immediately.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">5</div>
+          <div class="step-body">At the end of the year, use <strong>Archive Year</strong> to preserve records and clear the active roster for the incoming class.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">5</div>
+        <div>
+          <div class="how-to-title">Timesheets &amp; Payroll</div>
+          <div class="how-to-desc">Students clock in at the start of class by answering a warm-up question. You get a complete record for payroll.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body">Students see a <strong>warm-up prompt</strong> on their home page at the start of each period. Answering it records their clock-in time.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body">Go to <strong>Admin → Payroll</strong> to view timesheets. Filter by student or by date range.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body">The <strong>Period Report</strong> tab shows total hours per student for a pay period, ready for payroll submission.</div>
+        </div>
+      </div>
+      <div class="tip"><strong>Tip:</strong> Each student's role (e.g. Junior Designer, Developer) carries a different hourly rate defined in the Pay Roles table. Update rates in Admin → Payroll before running period reports.</div>
+    </div>
+
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">6</div>
+        <div>
+          <div class="how-to-title">Reading Student Notebooks</div>
+          <div class="how-to-desc">Navigate to <strong>Admin → Notebooks</strong> to see every student's written work.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body">Filter by <strong>section</strong>, <strong>student</strong>, or <strong>chapter</strong> to narrow the view.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body">Entry categories — <strong>Notes</strong>, <strong>Do Now</strong>, <strong>Exit Ticket</strong>, <strong>Worksheet</strong> — are displayed as labeled tabs so you can quickly find what you're grading.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body">Each entry shows the <strong>timestamp</strong>, so you can verify students completed work during class time.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="section">
+  <div class="container">
+    <div class="cta-box">
+      <h2>Ready to run your class without the paperwork?</h2>
+      <p>Everything you need — calendar, grades, notebooks, timesheets, exams — in a single platform built specifically for your classroom.</p>
+      <a class="cta-btn" href="/login.html">Get Started</a>
+    </div>
+  </div>
+</div>
