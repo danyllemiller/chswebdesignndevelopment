@@ -32,33 +32,38 @@
         return a;
     }
 
-    // Flatten the config into one shuffled question array.
-    // Each item gets a `type` field and carries everything it needs to render.
+    // Flatten config into one shuffled question array.
+    // Matching SETs stay together as one unit (type: 'matchSet') with items shuffled internally.
     function buildFlat(cfg) {
         var items = [];
 
-        // T/F
+        // T/F — each statement is its own question
         cfg.tfSection.forEach(function (item) {
-            items.push({ type: 'tf', q: item.q, a: item.a });
+            items.push({ type: 'tf', q: item.q, a: item.a, hint: item.hint || '' });
         });
 
-        // Matching — each individual item carries its set's choices
+        // Matching — each SET is one question; items within the set are shuffled
         cfg.matchSection.forEach(function (set) {
-            set.items.forEach(function (item) {
-                items.push({ type: 'match', q: item.q, answer: item.answer, choices: set.choices });
+            items.push({
+                type:    'matchSet',
+                title:   set.title || 'Match each statement to the correct answer.',
+                items:   shuffle(set.items.slice()),
+                choices: set.choices
             });
         });
 
         // MC — shuffle each question's answer options independently
         cfg.mcSection.forEach(function (q) {
-            items.push({ type: 'mc', q: q.q, options: shuffle(q.options), answer: q.answer, math: !!q.math });
+            items.push({ type: 'mc', q: q.q, options: shuffle(q.options), answer: q.answer,
+                         math: !!q.math, hint: q.hint || '' });
         });
 
-        // Label — each numbered region is its own question, carrying the diagram
+        // Label — each numbered region is its own question
         (cfg.labelSection || []).forEach(function (diag) {
             diag.items.forEach(function (item, i) {
                 items.push({ type: 'label', regionNum: i + 1, answer: item.answer,
-                             svg: diag.svg, wordBank: diag.wordBank, title: diag.title });
+                             svg: diag.svg, wordBank: diag.wordBank, title: diag.title,
+                             hint: item.hint || '' });
             });
         });
 
@@ -163,6 +168,7 @@
     function renderStart() {
         var cfg    = _origConfig;
         var tfCt   = cfg.tfSection.length;
+        var mSets  = cfg.matchSection.length;
         var mItems = cfg.matchSection.reduce(function (s, st) { return s + st.items.length; }, 0);
         var mcCt   = cfg.mcSection.length;
         var lItems = (cfg.labelSection || []).reduce(function (s, d) { return s + d.items.length; }, 0);
@@ -182,10 +188,10 @@
             + '<div class="h5 mb-0 fw-bold text-primary">' + esc(_sClass) + '</div></div>'
             + '</div></div>'
             + '<div class="alert alert-light border small mb-4">'
-            + '<strong>' + total + ' questions &mdash; fully randomized</strong>'
+            + '<strong>' + total + ' scoreable items &mdash; fully randomized</strong>'
             + '<ul class="mb-0 mt-2">'
             + '<li>' + tfCt + ' True / False</li>'
-            + '<li>' + mItems + ' Matching</li>'
+            + '<li>' + mItems + ' Matching (' + mSets + ' grouped sets of ' + Math.round(mItems / mSets) + ')</li>'
             + '<li>' + mcCt + ' Multiple Choice</li>'
             + '<li>' + lItems + ' Labeling</li>'
             + '</ul>'
@@ -199,21 +205,22 @@
     function renderQuestion() {
         if (_qIdx >= _flatQ.length) { renderResults(); return; }
         var item = _flatQ[_qIdx];
-        if      (item.type === 'tf')    renderTF(item);
-        else if (item.type === 'match') renderMatch(item);
-        else if (item.type === 'mc')    renderMC(item);
-        else if (item.type === 'label') renderLabel(item);
+        if      (item.type === 'tf')       renderTF(item);
+        else if (item.type === 'matchSet') renderMatchSet(item);
+        else if (item.type === 'mc')       renderMC(item);
+        else if (item.type === 'label')    renderLabel(item);
     }
 
     // ── Shared footer ─────────────────────────────────────────────────────────
-    function navFooter(sel, accent) {
-        var isFirst  = _qIdx === 0;
-        var isLast   = _qIdx === _flatQ.length - 1;
+    // canProceed: boolean — controls whether Next/Submit is enabled
+    function navFooter(canProceed, accent) {
+        var isFirst   = _qIdx === 0;
+        var isLast    = _qIdx === _flatQ.length - 1;
         var nextLabel = isLast ? 'Submit Assessment' : 'Next &rarr;';
         var nextStyle = isLast ? 'background:#ffc107' : 'background:' + accent;
         var nextClass = isLast ? 'text-dark' : 'text-white';
         return '<button onclick="wrsPrev()" class="btn btn-outline-secondary fw-bold px-4" ' + (isFirst ? 'disabled' : '') + '>&larr; Back</button>'
-            + '<button onclick="wrsNext()" class="btn fw-bold px-5 ' + nextClass + '" style="' + nextStyle + '" ' + (sel !== undefined && sel !== '' ? '' : 'disabled') + '>' + nextLabel + '</button>';
+            + '<button onclick="wrsNext()" class="btn fw-bold px-5 ' + nextClass + '" style="' + nextStyle + '" ' + (canProceed ? '' : 'disabled') + '>' + nextLabel + '</button>';
     }
 
     // ── True / False ──────────────────────────────────────────────────────────
@@ -227,35 +234,51 @@
             + '<button onclick="wrsSelectTF(\'T\')" class="btn btn-lg px-5 fw-bold ' + (sel === 'T' ? 'btn-primary text-white' : 'btn-outline-secondary') + '" style="min-width:130px">True</button>'
             + '<button onclick="wrsSelectTF(\'F\')" class="btn btn-lg px-5 fw-bold ' + (sel === 'F' ? 'btn-danger text-white' : 'btn-outline-secondary') + '" style="min-width:130px">False</button>'
             + '</div>';
-        $c().innerHTML = cardShell('#003087', 'True / False', body, navFooter(sel, '#003087'));
+        $c().innerHTML = cardShell('#003087', 'True / False', body, navFooter(sel === 'T' || sel === 'F', '#003087'));
     }
 
-    // ── Matching ──────────────────────────────────────────────────────────────
-    function renderMatch(item) {
-        var sel = _ans[_qIdx] || '';
+    // ── Matching Set — all items displayed together ────────────────────────────
+    function renderMatchSet(item) {
+        var selObj   = _ans[_qIdx] || {};
+        var answered = Object.keys(selObj).length;
+        var allDone  = answered === item.items.length;
+
+        // Choices reference panel
         var choicesHtml = '<div class="p-3 mb-4 rounded border" style="background:#f8f9fa">'
             + '<p class="small fw-bold text-muted mb-2" style="text-transform:uppercase;letter-spacing:.05em">Answer Choices</p>'
+            + '<div class="d-flex flex-wrap gap-2">'
             + item.choices.map(function (c) {
-                var letter  = c.split('.')[0].trim();
-                var active  = sel === letter;
-                return '<div class="d-inline-block me-1 mb-1 px-3 py-1 rounded border fw-semibold small" style="background:' + (active ? '#198754' : '#fff') + ';color:' + (active ? '#fff' : '#333') + ';border-color:' + (active ? '#198754' : '#dee2e6') + '!important">' + esc(c) + '</div>';
+                return '<span class="px-3 py-1 rounded border bg-white small fw-semibold">' + esc(c) + '</span>';
             }).join('')
-            + '</div>';
-        var opts = item.choices.map(function (c) {
-            var letter = c.split('.')[0].trim();
-            return '<option value="' + letter + '"' + (sel === letter ? ' selected' : '') + '>' + esc(c) + '</option>';
+            + '</div></div>';
+
+        // Build rows — one per item in the set
+        var rowsHtml = item.items.map(function (mi, j) {
+            var picked = selObj[j] || '';
+            var opts = item.choices.map(function (c) {
+                var letter = c.split('.')[0].trim();
+                return '<option value="' + esc(letter) + '"' + (picked === letter ? ' selected' : '') + '>' + esc(c) + '</option>';
+            }).join('');
+            var rowBg = picked ? '#f0fff4' : '#fff';
+            var rowBorder = picked ? '2px solid #198754' : '2px solid #dee2e6';
+            return '<div class="mb-3 p-3 rounded d-flex align-items-center gap-3" style="background:' + rowBg + ';border:' + rowBorder + '">'
+                + '<div class="flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:28px;height:28px;min-width:28px;background:#198754;color:#fff;font-size:.8rem">' + (j + 1) + '</div>'
+                + '<div class="flex-grow-1 fw-semibold small lh-base">' + esc(mi.q) + '</div>'
+                + '<select class="form-select form-select-sm fw-bold flex-shrink-0" style="max-width:220px;color:#198754" onchange="wrsSelectMatchSet(' + j + ',this.value)">'
+                + '<option value="">&mdash; choose &mdash;</option>' + opts
+                + '</select>'
+                + '</div>';
         }).join('');
+
         var body = '<div class="text-center mb-3">'
-            + '<span class="badge mb-3 px-3 py-2 fw-semibold" style="background:#198754;font-size:.78rem;letter-spacing:.05em">MATCHING</span>'
+            + '<span class="badge mb-2 px-3 py-2 fw-semibold" style="background:#198754;font-size:.78rem;letter-spacing:.05em">MATCHING</span>'
+            + '<p class="fw-bold mb-0 lh-base">' + esc(item.title) + '</p>'
+            + '<p class="text-muted small mb-0">' + answered + ' of ' + item.items.length + ' matched</p>'
             + '</div>'
             + choicesHtml
-            + '<div class="p-4 rounded mb-2" style="background:#f0fff4;border:2px solid #198754">'
-            + '<p class="fw-bold mb-3 lh-base">' + esc(item.q) + '</p>'
-            + '<select class="form-select fw-bold" style="color:#198754;font-size:1rem" onchange="wrsSelectMatch(this.value)">'
-            + '<option value="">&mdash; Choose the correct letter &mdash;</option>' + opts
-            + '</select>'
-            + '</div>';
-        $c().innerHTML = cardShell('#198754', 'Matching', body, navFooter(sel, '#198754'));
+            + rowsHtml;
+
+        $c().innerHTML = cardShell('#198754', 'Matching', body, navFooter(allDone, '#198754'));
     }
 
     // ── Multiple Choice ───────────────────────────────────────────────────────
@@ -278,7 +301,7 @@
             + '</div>'
             + mathHtml
             + '<div>' + optHtml + '</div>';
-        $c().innerHTML = cardShell('#003087', 'Multiple Choice', body, navFooter(sel, '#003087'));
+        $c().innerHTML = cardShell('#003087', 'Multiple Choice', body, navFooter(sel !== undefined, '#003087'));
     }
 
     // ── Labeling ──────────────────────────────────────────────────────────────
@@ -308,7 +331,7 @@
             + '<option value="">&mdash; select label &mdash;</option>' + opts
             + '</select>'
             + '</div>';
-        $c().innerHTML = cardShell('#fd7e14', 'Labeling', body, navFooter(sel, '#fd7e14'));
+        $c().innerHTML = cardShell('#fd7e14', 'Labeling', body, navFooter(!!sel, '#fd7e14'));
     }
 
     // ── Calculator widget ─────────────────────────────────────────────────────
@@ -352,14 +375,24 @@
 
         _flatQ.forEach(function (item, i) {
             var ans = _ans[i];
-            t[item.type]++;
-            if (item.type === 'tf'    && ans === item.a)                      r.tf++;
-            if (item.type === 'match' && ans === item.answer)                 r.match++;
-            if (item.type === 'mc'    && item.options[ans] === item.answer)   r.mc++;
-            if (item.type === 'label' && ans === item.answer)                 r.label++;
+            if (item.type === 'tf') {
+                t.tf++;
+                if (ans === item.a) r.tf++;
+            } else if (item.type === 'matchSet') {
+                item.items.forEach(function (mi, j) {
+                    t.match++;
+                    if ((ans || {})[j] === mi.answer) r.match++;
+                });
+            } else if (item.type === 'mc') {
+                t.mc++;
+                if (item.options[ans] === item.answer) r.mc++;
+            } else if (item.type === 'label') {
+                t.label++;
+                if (ans === item.answer) r.label++;
+            }
         });
 
-        var total = _flatQ.length;
+        var total = t.tf + t.match + t.mc + t.label;
         var right = r.tf + r.match + r.mc + r.label;
         return { tfRight: r.tf, tfTotal: t.tf, matchRight: r.match, matchTotal: t.match,
                  mcRight: r.mc, mcTotal: t.mc, labelRight: r.label, labelTotal: t.label,
@@ -374,8 +407,13 @@
         var pct  = Math.round(sc.right / sc.total * 100);
         var pass = pct >= 75;
 
-        // Build review lists grouped by type
+        var hintHtml = function (hint) {
+            return hint ? '<div class="mt-2 p-2 rounded" style="background:#fffde7;border-left:3px solid #ffc107"><small>&#x1F4A1; <strong>Study Hint:</strong> ' + esc(hint) + '</small></div>' : '';
+        };
+
+        // Build review HTML grouped by type
         var rev = { tf: '', match: '', mc: '', label: '' };
+
         _flatQ.forEach(function (item, i) {
             var ans = _ans[i];
             var ok, got;
@@ -387,16 +425,34 @@
                     + '<p class="mb-1 fw-bold">' + esc(item.q) + '</p>'
                     + '<p class="mb-0">Your answer: <strong>' + got + '</strong> &nbsp;&middot;&nbsp; Correct: <strong>' + item.a + '</strong> '
                     + (ok ? '<span class="badge bg-success">&#10003;</span>' : '<span class="badge bg-danger">&#10007;</span>')
-                    + '</p></div>';
+                    + '</p>' + (!ok ? hintHtml(item.hint) : '') + '</div>';
             }
-            if (item.type === 'match') {
-                ok  = ans === item.answer;
-                got = ans || '&mdash;';
-                rev.match += '<div class="mb-2 p-2 rounded small ' + (ok ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10') + '">'
-                    + '<p class="mb-1 fw-semibold">' + esc(item.q) + '</p>'
-                    + '<p class="mb-0">Your: <strong>' + got + '</strong> &nbsp;&middot;&nbsp; Correct: <strong>' + item.answer + '</strong> '
-                    + (ok ? '&#10003;' : '&#10007;') + '</p></div>';
+
+            if (item.type === 'matchSet') {
+                var setAnswers = ans || {};
+                // Find full choice text from letter
+                function choiceLabel(letter) {
+                    var found = (item.choices || []).filter(function (c) { return c.split('.')[0].trim() === letter; })[0];
+                    return found || letter;
+                }
+                var setRight = 0;
+                var setRows = item.items.map(function (mi, j) {
+                    var picked = setAnswers[j] || '';
+                    var correct = mi.answer;
+                    var rowOk = picked === correct;
+                    if (rowOk) setRight++;
+                    return '<div class="ms-3 mb-2 p-2 rounded small ' + (rowOk ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10') + '">'
+                        + '<p class="mb-1 fw-semibold">' + esc(mi.q) + '</p>'
+                        + '<p class="mb-0">Your: <strong>' + (picked ? esc(choiceLabel(picked)) : '&mdash;') + '</strong>'
+                        + (!rowOk ? ' &nbsp;&middot;&nbsp; Correct: <strong class="text-success">' + esc(choiceLabel(correct)) + '</strong>' : '')
+                        + ' ' + (rowOk ? '&#10003;' : '&#10007;')
+                        + '</p>' + (!rowOk ? hintHtml(mi.hint) : '') + '</div>';
+                }).join('');
+                rev.match += '<div class="mb-3 p-2 rounded border ' + (setRight === item.items.length ? 'border-success' : 'border-danger') + '">'
+                    + '<p class="mb-2 fw-bold small">' + esc(item.title) + ' <span class="badge ' + (setRight === item.items.length ? 'bg-success' : 'bg-danger') + '">' + setRight + '/' + item.items.length + '</span></p>'
+                    + setRows + '</div>';
             }
+
             if (item.type === 'mc') {
                 var chosen = (ans !== undefined) ? item.options[ans] : 'Unanswered';
                 ok  = chosen === item.answer;
@@ -405,15 +461,16 @@
                     + '<p class="mb-0">Your answer: <span class="' + (ok ? 'text-success' : 'text-danger') + ' fw-bold">' + esc(chosen) + '</span>'
                     + (!ok ? ' &nbsp;&middot;&nbsp; Correct: <span class="text-success fw-bold">' + esc(item.answer) + '</span>' : '')
                     + ' ' + (ok ? '<span class="badge bg-success">&#10003;</span>' : '<span class="badge bg-danger">&#10007;</span>')
-                    + '</p></div>';
+                    + '</p>' + (!ok ? hintHtml(item.hint) : '') + '</div>';
             }
+
             if (item.type === 'label') {
                 ok  = ans === item.answer;
                 got = ans || '&mdash;';
                 rev.label += '<div class="mb-2 p-2 rounded small ' + (ok ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10') + '">'
                     + '<p class="mb-1 fw-semibold">Region ' + item.regionNum + '</p>'
                     + '<p class="mb-0">Your: <strong>' + esc(got) + '</strong> &nbsp;&middot;&nbsp; Correct: <strong>' + esc(item.answer) + '</strong> '
-                    + (ok ? '&#10003;' : '&#10007;') + '</p></div>';
+                    + (ok ? '&#10003;' : '&#10007;') + '</p>' + (!ok ? hintHtml(item.hint) : '') + '</div>';
             }
         });
 
@@ -451,7 +508,7 @@
                 await fetch('/api/submit-exam', {
                     method:  'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body:    JSON.stringify({ student_id: stored.student_id, exam_id: _gbExamId, score: 15, total_points: 15 })
+                    body:    JSON.stringify({ student_id: stored.student_id, exam_id: _gbExamId, score: sc.right, total_points: sc.total })
                 });
             }
         } catch (e) { console.warn('WRS gradebook sync failed:', e.message); }
@@ -487,9 +544,11 @@
         renderTF(_flatQ[_qIdx]);
     };
 
-    window.wrsSelectMatch = function (val) {
-        _ans[_qIdx] = val || '';
-        renderMatch(_flatQ[_qIdx]);
+    // matchSet: itemIdx = row index within the set, val = letter chosen
+    window.wrsSelectMatchSet = function (itemIdx, val) {
+        if (!_ans[_qIdx]) _ans[_qIdx] = {};
+        _ans[_qIdx][itemIdx] = val;
+        renderMatchSet(_flatQ[_qIdx]);
     };
 
     window.wrsSelectMC = function (i) {
