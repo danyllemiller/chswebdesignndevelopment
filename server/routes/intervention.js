@@ -761,4 +761,340 @@ router.post('/admin/intervention/prompts/:day_number', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update prompt' }); }
 });
 
+
+// ════════════════════════════════════════════════════════════════════════════
+// PLANNER SYNC — preferences, todos, habits
+// ════════════════════════════════════════════════════════════════════════════
+
+const PLANNER_DDL = [
+`CREATE TABLE IF NOT EXISTS planner_preferences (
+    id             INT AUTO_INCREMENT PRIMARY KEY,
+    student_id     VARCHAR(50) NOT NULL UNIQUE,
+    schedule_json  TEXT,
+    colors_json    TEXT,
+    stickers_json  TEXT,
+    decor_json     TEXT,
+    countdowns_json TEXT,
+    updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_student (student_id)
+)`,
+`CREATE TABLE IF NOT EXISTS planner_todos (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    student_id  VARCHAR(50) NOT NULL,
+    todo_id     VARCHAR(80) NOT NULL,
+    text_val    TEXT NOT NULL,
+    due_date    DATE,
+    priority    VARCHAR(20) DEFAULT 'medium',
+    done        TINYINT(1) DEFAULT 0,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_todo (student_id, todo_id),
+    INDEX idx_student (student_id)
+)`,
+`CREATE TABLE IF NOT EXISTS planner_habits (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    student_id  VARCHAR(50) NOT NULL,
+    habit_id    VARCHAR(80) NOT NULL,
+    text_val    VARCHAR(255) NOT NULL,
+    color       VARCHAR(30),
+    sort_order  INT DEFAULT 0,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_habit (student_id, habit_id),
+    INDEX idx_student (student_id)
+)`,
+`CREATE TABLE IF NOT EXISTS planner_habit_log (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    student_id  VARCHAR(50) NOT NULL,
+    habit_id    VARCHAR(80) NOT NULL,
+    log_date    DATE NOT NULL,
+    UNIQUE KEY uq_log (student_id, habit_id, log_date),
+    INDEX idx_student (student_id)
+)`
+];
+
+async function ensurePlannerTables(connection) {
+    for (const stmt of PLANNER_DDL) {
+        await connection.execute(stmt);
+    }
+}
+
+// ── Preferences (schedule, colors, stickers, decor, countdowns) ───────────
+
+router.get('/intervention/planner-prefs', async (req, res) => {
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id required' });
+    try {
+        const connection = await getDbConnection();
+        await ensurePlannerTables(connection);
+        const [rows] = await connection.execute(
+            'SELECT * FROM planner_preferences WHERE student_id = ? LIMIT 1', [student_id]
+        );
+        await connection.end();
+        if (!rows.length) return res.json({ prefs: null });
+        const r = rows[0];
+        res.json({ prefs: {
+            schedule:    r.schedule_json    ? JSON.parse(r.schedule_json)    : {},
+            colors:      r.colors_json      ? JSON.parse(r.colors_json)      : {},
+            stickers:    r.stickers_json    ? JSON.parse(r.stickers_json)    : {},
+            decor:       r.decor_json       ? JSON.parse(r.decor_json)       : {},
+            countdowns:  r.countdowns_json  ? JSON.parse(r.countdowns_json)  : []
+        }});
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch prefs' }); }
+});
+
+router.put('/intervention/planner-prefs', async (req, res) => {
+    const { student_id, schedule, colors, stickers, decor, countdowns } = req.body;
+    if (!student_id) return res.status(400).json({ error: 'student_id required' });
+    try {
+        const connection = await getDbConnection();
+        await ensurePlannerTables(connection);
+        await connection.execute(
+            `INSERT INTO planner_preferences (student_id, schedule_json, colors_json, stickers_json, decor_json, countdowns_json)
+             VALUES (?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+               schedule_json    = COALESCE(VALUES(schedule_json),    schedule_json),
+               colors_json      = COALESCE(VALUES(colors_json),      colors_json),
+               stickers_json    = COALESCE(VALUES(stickers_json),    stickers_json),
+               decor_json       = COALESCE(VALUES(decor_json),       decor_json),
+               countdowns_json  = COALESCE(VALUES(countdowns_json),  countdowns_json)`,
+            [
+                student_id,
+                schedule   !== undefined ? JSON.stringify(schedule)   : null,
+                colors     !== undefined ? JSON.stringify(colors)     : null,
+                stickers   !== undefined ? JSON.stringify(stickers)   : null,
+                decor      !== undefined ? JSON.stringify(decor)      : null,
+                countdowns !== undefined ? JSON.stringify(countdowns) : null
+            ]
+        );
+        await connection.end();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save prefs' }); }
+});
+
+// ── To-dos ────────────────────────────────────────────────────────────────
+
+router.get('/intervention/todos', async (req, res) => {
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id required' });
+    try {
+        const connection = await getDbConnection();
+        await ensurePlannerTables(connection);
+        const [rows] = await connection.execute(
+            'SELECT todo_id AS id, text_val AS text, due_date AS date, priority, done FROM planner_todos WHERE student_id = ? ORDER BY due_date ASC, created_at ASC',
+            [student_id]
+        );
+        await connection.end();
+        res.json({ todos: rows.map(r => ({ ...r, done: !!r.done })) });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch todos' }); }
+});
+
+// Upsert all todos at once (client sends full list)
+router.put('/intervention/todos', async (req, res) => {
+    const { student_id, todos } = req.body;
+    if (!student_id || !Array.isArray(todos)) return res.status(400).json({ error: 'student_id and todos[] required' });
+    try {
+        const connection = await getDbConnection();
+        await ensurePlannerTables(connection);
+        // Delete todos no longer in list
+        const ids = todos.map(t => t.id).filter(Boolean);
+        if (ids.length) {
+            const placeholders = ids.map(() => '?').join(',');
+            await connection.execute(
+                `DELETE FROM planner_todos WHERE student_id = ? AND todo_id NOT IN (${placeholders})`,
+                [student_id, ...ids]
+            );
+        } else {
+            await connection.execute('DELETE FROM planner_todos WHERE student_id = ?', [student_id]);
+        }
+        // Upsert each
+        for (const t of todos) {
+            if (!t.id || !t.text) continue;
+            await connection.execute(
+                `INSERT INTO planner_todos (student_id, todo_id, text_val, due_date, priority, done)
+                 VALUES (?, ?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE text_val = VALUES(text_val), due_date = VALUES(due_date),
+                   priority = VALUES(priority), done = VALUES(done)`,
+                [student_id, t.id, t.text, t.date || null, t.priority || 'medium', t.done ? 1 : 0]
+            );
+        }
+        await connection.end();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save todos' }); }
+});
+
+// ── Habits ────────────────────────────────────────────────────────────────
+
+router.get('/intervention/habits', async (req, res) => {
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id required' });
+    try {
+        const connection = await getDbConnection();
+        await ensurePlannerTables(connection);
+        const [habits] = await connection.execute(
+            'SELECT habit_id AS id, text_val AS text, color, sort_order FROM planner_habits WHERE student_id = ? ORDER BY sort_order, created_at',
+            [student_id]
+        );
+        const [logs] = await connection.execute(
+            'SELECT habit_id, log_date FROM planner_habit_log WHERE student_id = ? AND log_date >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)',
+            [student_id]
+        );
+        await connection.end();
+        // Build log map: {habitId: {ymd: true}}
+        const logMap = {};
+        logs.forEach(l => {
+            const ymd = l.log_date instanceof Date ? l.log_date.toISOString().split('T')[0] : String(l.log_date).split('T')[0];
+            if (!logMap[l.habit_id]) logMap[l.habit_id] = {};
+            logMap[l.habit_id][ymd] = true;
+        });
+        res.json({ habits, log: logMap });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch habits' }); }
+});
+
+// Upsert full habits list
+router.put('/intervention/habits', async (req, res) => {
+    const { student_id, habits } = req.body;
+    if (!student_id || !Array.isArray(habits)) return res.status(400).json({ error: 'student_id and habits[] required' });
+    try {
+        const connection = await getDbConnection();
+        await ensurePlannerTables(connection);
+        const ids = habits.map(h => h.id).filter(Boolean);
+        if (ids.length) {
+            const ph = ids.map(() => '?').join(',');
+            await connection.execute(`DELETE FROM planner_habits WHERE student_id = ? AND habit_id NOT IN (${ph})`, [student_id, ...ids]);
+        } else {
+            await connection.execute('DELETE FROM planner_habits WHERE student_id = ?', [student_id]);
+        }
+        for (let i = 0; i < habits.length; i++) {
+            const h = habits[i];
+            if (!h.id || !h.text) continue;
+            await connection.execute(
+                `INSERT INTO planner_habits (student_id, habit_id, text_val, color, sort_order)
+                 VALUES (?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE text_val = VALUES(text_val), color = VALUES(color), sort_order = VALUES(sort_order)`,
+                [student_id, h.id, h.text, h.color || null, i]
+            );
+        }
+        await connection.end();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save habits' }); }
+});
+
+// Toggle a habit log entry for a date
+router.post('/intervention/habits/log', async (req, res) => {
+    const { student_id, habit_id, log_date, done } = req.body;
+    if (!student_id || !habit_id || !log_date) return res.status(400).json({ error: 'student_id, habit_id, log_date required' });
+    try {
+        const connection = await getDbConnection();
+        await ensurePlannerTables(connection);
+        if (done) {
+            await connection.execute(
+                `INSERT IGNORE INTO planner_habit_log (student_id, habit_id, log_date) VALUES (?, ?, ?)`,
+                [student_id, habit_id, log_date]
+            );
+        } else {
+            await connection.execute(
+                `DELETE FROM planner_habit_log WHERE student_id = ? AND habit_id = ? AND log_date = ?`,
+                [student_id, habit_id, log_date]
+            );
+        }
+        await connection.end();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to log habit' }); }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// TEACHER VIEW — read any enrolled student's planner data
+// ════════════════════════════════════════════════════════════════════════════
+
+router.get('/teacher/planner/students', async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await ensureTables(connection);
+        const [rows] = await connection.execute(`
+            SELECT ie.student_id,
+                   COALESCE(s.first_name, ie.student_id) AS first_name,
+                   COALESCE(s.last_name, '')              AS last_name,
+                   ie.section_id
+            FROM intervention_enrollments ie
+            LEFT JOIN students s ON ie.student_id = s.student_id
+            ORDER BY last_name ASC, first_name ASC
+        `);
+        await connection.end();
+        res.json({ students: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch students' }); }
+});
+
+router.get('/teacher/planner/:student_id/prefs', async (req, res) => {
+    const { student_id } = req.params;
+    try {
+        const connection = await getDbConnection();
+        await ensurePlannerTables(connection);
+        const [rows] = await connection.execute(
+            'SELECT * FROM planner_preferences WHERE student_id = ? LIMIT 1', [student_id]
+        );
+        await connection.end();
+        if (!rows.length) return res.json({ prefs: null });
+        const r = rows[0];
+        res.json({ prefs: {
+            schedule:   r.schedule_json   ? JSON.parse(r.schedule_json)   : {},
+            colors:     r.colors_json     ? JSON.parse(r.colors_json)     : {},
+            stickers:   r.stickers_json   ? JSON.parse(r.stickers_json)   : {},
+            decor:      r.decor_json      ? JSON.parse(r.decor_json)      : {},
+            countdowns: r.countdowns_json ? JSON.parse(r.countdowns_json) : []
+        }});
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch prefs' }); }
+});
+
+router.get('/teacher/planner/:student_id/todos', async (req, res) => {
+    const { student_id } = req.params;
+    try {
+        const connection = await getDbConnection();
+        await ensurePlannerTables(connection);
+        const [rows] = await connection.execute(
+            'SELECT todo_id AS id, text_val AS text, due_date AS date, priority, done FROM planner_todos WHERE student_id = ? ORDER BY due_date ASC, created_at ASC',
+            [student_id]
+        );
+        await connection.end();
+        res.json({ todos: rows.map(r => ({ ...r, done: !!r.done })) });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch todos' }); }
+});
+
+router.get('/teacher/planner/:student_id/habits', async (req, res) => {
+    const { student_id } = req.params;
+    try {
+        const connection = await getDbConnection();
+        await ensurePlannerTables(connection);
+        const [habits] = await connection.execute(
+            'SELECT habit_id AS id, text_val AS text, color, sort_order FROM planner_habits WHERE student_id = ? ORDER BY sort_order, created_at',
+            [student_id]
+        );
+        const [logs] = await connection.execute(
+            'SELECT habit_id, log_date FROM planner_habit_log WHERE student_id = ? AND log_date >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)',
+            [student_id]
+        );
+        await connection.end();
+        const logMap = {};
+        logs.forEach(l => {
+            const ymd = l.log_date instanceof Date ? l.log_date.toISOString().split('T')[0] : String(l.log_date).split('T')[0];
+            if (!logMap[l.habit_id]) logMap[l.habit_id] = {};
+            logMap[l.habit_id][ymd] = true;
+        });
+        res.json({ habits, log: logMap });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch habits' }); }
+});
+
+router.get('/teacher/planner/:student_id/tests', async (req, res) => {
+    const { student_id } = req.params;
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(TESTS_DDL);
+        const [rows] = await connection.execute(
+            'SELECT * FROM intervention_tests WHERE student_id = ? ORDER BY test_date ASC',
+            [student_id]
+        );
+        await connection.end();
+        res.json({ tests: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch tests' }); }
+});
+
 module.exports = router;

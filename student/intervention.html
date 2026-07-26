@@ -230,6 +230,20 @@
     </div>
   </div>
 
+  <!-- Teacher view banner: hidden by default, shown when teacher is viewing a student -->
+  <div id="teacherBanner" class="d-none bg-warning border-bottom border-dark px-4 py-2 sticky-top" style="z-index:1030;">
+    <div class="container d-flex align-items-center gap-3 flex-wrap">
+      <i class="fas fa-chalkboard-teacher fa-lg text-dark"></i>
+      <strong class="text-dark">Teacher View — Read Only</strong>
+      <select class="form-select form-select-sm" id="studentPicker" style="max-width:260px;">
+        <option value="">Select a student…</option>
+      </select>
+      <button class="btn btn-sm btn-dark ms-auto" id="btnExitTeacherView">
+        <i class="fas fa-times me-1"></i>Exit Student View
+      </button>
+    </div>
+  </div>
+
   <div class="container pb-5">
 
     <!-- Tab Nav -->
@@ -252,10 +266,10 @@
         <button class="btn btn-sm btn-outline-secondary" id="btnPrintPlanner">
           <i class="fas fa-print me-1"></i>Print Planner
         </button>
-        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#scheduleModal">
+        <button class="btn btn-sm btn-outline-secondary intv-edit-only" data-bs-toggle="modal" data-bs-target="#scheduleModal">
           <i class="fas fa-calendar-week me-1"></i>My Schedule
         </button>
-        <button class="btn btn-sm btn-outline-secondary" id="btnToggleDecor">
+        <button class="btn btn-sm btn-outline-secondary intv-edit-only" id="btnToggleDecor">
           <i class="fas fa-palette me-1"></i>Decorate My Planner
         </button>
       </div>
@@ -338,7 +352,7 @@
             <small class="fw-bold text-muted d-block mb-2 text-uppercase" style="font-size:.65rem;">
               Stickers — click a sticker, then click a calendar day
             </small>
-            <div class="d-flex flex-wrap gap-1" id="stickerPalette">
+            <div class="d-flex flex-wrap gap-1 intv-edit-only" id="stickerPalette">
               <button class="sticker-btn" data-sticker="⭐">⭐</button>
               <button class="sticker-btn" data-sticker="🌟">🌟</button>
               <button class="sticker-btn" data-sticker="🌈">🌈</button>
@@ -431,7 +445,7 @@
       <div class="row g-3">
         <div class="col-lg-4">
           <div class="card shadow-sm border-0">
-            <div class="card-header bg-white border-0 pt-3">
+            <div class="card-header bg-white border-0 pt-3 intv-edit-only">
               <h6 class="fw-bold text-success mb-0"><i class="fas fa-plus me-2"></i>Add Task</h6>
             </div>
             <div class="card-body">
@@ -514,7 +528,7 @@
               <small class="text-muted">Check off each day — streaks build automatically</small>
             </div>
             <div class="card-body" id="habitTracker"></div>
-            <div class="card-footer bg-white border-0">
+            <div class="card-footer bg-white border-0 intv-edit-only">
               <div class="input-group input-group-sm">
                 <input type="text" class="form-control" id="newHabitText" placeholder="Add a new habit…">
                 <button class="btn btn-success" id="btnAddHabit"><i class="fas fa-plus"></i></button>
@@ -1046,6 +1060,9 @@
     let submitAssignmentId = null;
     let mySchedule = {};   // {A1:'English', A3:'Math', A5:'Intervention', A7:'PE', B2:'History', ...}
     let periodColors = {}; // {A1:'#4a90d9', A3:'#6d916c', ...} — student-chosen per-period colors
+    let viewingStudentId = null; // non-null when teacher is viewing a student
+    let isReadOnly = false;      // true when teacher is viewing a student's planner
+    const targetSid = () => viewingStudentId || user?.student_id;
 
     const DEFAULT_PERIOD_COLORS = {
       A1:'#4a90d9', A3:'#6d916c', A5:'#e67e22', A7:'#9b59b6',
@@ -1063,24 +1080,115 @@
     // ── Init ──────────────────────────────────────────────────────────────
     let isEnrolledInIntv = false;
 
+    async function loadPlannerPrefs(sid) {
+      // Try server first, fall back to localStorage for offline resilience
+      try {
+        const prefix = isReadOnly ? `/api/teacher/planner/${sid}/prefs` : `/api/intervention/planner-prefs?student_id=${sid}`;
+        const data = await apiFetch(prefix);
+        if (data?.prefs) {
+          mySchedule   = data.prefs.schedule   || {};
+          periodColors = data.prefs.colors     || {};
+          dayStickers  = data.prefs.stickers   || {};
+          decorPrefs   = data.prefs.decor      || {};
+          countdowns   = data.prefs.countdowns || [];
+          if (!isReadOnly) {
+            localStorage.setItem(`intv_sched_${sid}`,    JSON.stringify(mySchedule));
+            localStorage.setItem(`intv_period_colors_${sid}`, JSON.stringify(periodColors));
+            localStorage.setItem(`intv_stickers_${sid}`, JSON.stringify(dayStickers));
+            localStorage.setItem(`intv_decor_${sid}`,    JSON.stringify(decorPrefs));
+            localStorage.setItem(`intv_cd_${sid}`,       JSON.stringify(countdowns));
+          }
+          return;
+        }
+      } catch (_) {}
+      // Offline fallback
+      if (!isReadOnly) {
+        mySchedule   = JSON.parse(localStorage.getItem(`intv_sched_${sid}`) || '{}');
+        periodColors = JSON.parse(localStorage.getItem(`intv_period_colors_${sid}`) || '{}');
+        dayStickers  = JSON.parse(localStorage.getItem(`intv_stickers_${sid}`) || '{}');
+        decorPrefs   = JSON.parse(localStorage.getItem(`intv_decor_${sid}`) || '{}');
+        countdowns   = JSON.parse(localStorage.getItem(`intv_cd_${sid}`) || '[]');
+      }
+    }
+
+    async function syncPrefsToServer() {
+      if (isReadOnly || !user?.student_id) return;
+      apiFetch('/api/intervention/planner-prefs', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          student_id: user.student_id,
+          schedule:   mySchedule,
+          colors:     periodColors,
+          stickers:   dayStickers,
+          decor:      decorPrefs,
+          countdowns
+        })
+      }).catch(() => {}); // background — don't block UI
+    }
+
     async function init() {
       user = getLoggedInUser();
       if (!user?.student_id) return;
 
-      // Load per-student decoration prefs now that we know the student_id
-      decorPrefs   = JSON.parse(localStorage.getItem(`intv_decor_${user.student_id}`) || '{}');
-      dayStickers  = JSON.parse(localStorage.getItem(`intv_stickers_${user.student_id}`) || '{}');
-      mySchedule   = JSON.parse(localStorage.getItem(`intv_sched_${user.student_id}`) || '{}');
-      periodColors = JSON.parse(localStorage.getItem(`intv_period_colors_${user.student_id}`) || '{}');
+      // Teacher mode: show banner, load student list
+      const isTeacher = user.isTeacher || user.role === 'teacher';
+      if (isTeacher) {
+        document.getElementById('teacherBanner').classList.remove('d-none');
+        try {
+          const data = await apiFetch('/api/teacher/planner/students');
+          const picker = document.getElementById('studentPicker');
+          (data.students || []).forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.student_id;
+            opt.textContent = `${s.last_name}, ${s.first_name} (${s.student_id})`;
+            picker.appendChild(opt);
+          });
+          picker.addEventListener('change', () => {
+            if (picker.value) loadStudentPlanner(picker.value);
+          });
+        } catch (_) {}
+        document.getElementById('btnExitTeacherView').addEventListener('click', () => {
+          viewingStudentId = null; isReadOnly = false;
+          document.getElementById('teacherBanner').classList.add('d-none');
+          // Reload teacher's own data
+          loadStudentPlanner(user.student_id);
+        });
+      }
+
+      await loadStudentPlanner(user.student_id);
+    }
+
+    async function loadStudentPlanner(sid) {
+      viewingStudentId = (sid !== user.student_id) ? sid : null;
+      isReadOnly = !!viewingStudentId;
+
+      // Apply read-only UI guards
+      document.querySelectorAll('.intv-edit-only').forEach(el => {
+        el.style.display = isReadOnly ? 'none' : '';
+      });
+      if (isReadOnly) {
+        document.getElementById('plannerTitle').textContent = 'Viewing Student Planner';
+      }
+
+      await loadPlannerPrefs(sid);
       loadDecorPrefs();
+
+      const sid = targetSid();
 
       // Check intervention enrollment — determines which tabs are visible
       try {
-        const status = await apiFetch(`/api/intervention/status?student_id=${user.student_id}`);
+        const status = await apiFetch(`/api/intervention/status?student_id=${sid}`);
         isEnrolledInIntv = status.enrolled === true;
       } catch (_) { isEnrolledInIntv = false; }
 
-      if (isEnrolledInIntv) {
+      if (isReadOnly) {
+        // Teacher viewing a student — title set already, show enrollment context
+        const picker = document.getElementById('studentPicker');
+        const selText = picker.options[picker.selectedIndex]?.text || sid;
+        document.getElementById('plannerSubtitle').textContent =
+          `${isEnrolledInIntv ? 'Intervention' : 'General'} — ${selText}`;
+      } else if (isEnrolledInIntv) {
         document.getElementById('plannerTitle').textContent = 'Growth Mindset Planner';
         document.getElementById('plannerSubtitle').textContent =
           `Welcome, ${user.first_name || user.username} — Intervention`;
@@ -1109,9 +1217,7 @@
         loadTests()
       ]);
 
-      // Load localStorage-based features
-      loadTodos();
-      loadHabits();
+      await Promise.all([loadTodos(), loadHabits()]);
 
       loadJournal();
       renderCalendar();
@@ -1130,7 +1236,7 @@
 
     // ── Data loaders ──────────────────────────────────────────────────────
     async function loadAssignments() {
-      const data = await apiFetch(`/api/intervention/assignments?student_id=${user.student_id}`);
+      const data = await apiFetch(`/api/intervention/assignments?student_id=${targetSid()}`);
       assignments = data.assignments || [];
       const passed  = assignments.filter(a => a.submitted && a.passed).length;
       const total   = assignments.length;
@@ -1138,12 +1244,16 @@
     }
 
     async function loadGoals() {
-      const data = await apiFetch(`/api/intervention/goals?student_id=${user.student_id}`);
+      const sid = targetSid();
+      const url = isReadOnly
+        ? `/api/admin/intervention/goals/${sid}`
+        : `/api/intervention/goals?student_id=${sid}`;
+      const data = await apiFetch(url);
       goals = data.goals || [];
     }
 
     async function loadGradeLog() {
-      const data = await apiFetch(`/api/intervention/grade-log?student_id=${user.student_id}`);
+      const data = await apiFetch(`/api/intervention/grade-log?student_id=${targetSid()}`);
       gradeLog = data.grades || [];
     }
 
@@ -1197,16 +1307,26 @@
     }
 
     async function loadJournal() {
-      const data = await apiFetch(`/api/intervention/journal?student_id=${user.student_id}&date=${todayStr}`);
-      const entry = (data.entries || [])[0];
-      if (entry) document.getElementById('journalTextarea').value = entry.content || '';
+      const sid = targetSid();
+      const journalUrl = isReadOnly
+        ? `/api/admin/intervention/journal/${sid}`
+        : `/api/intervention/journal?student_id=${sid}&date=${todayStr}`;
+
+      if (!isReadOnly) {
+        const data = await apiFetch(journalUrl);
+        const entry = (data.entries || [])[0];
+        if (entry) document.getElementById('journalTextarea').value = entry.content || '';
+      }
 
       // Today's prompt
       const todayPrompt = prompts[0]?.prompt || '';
       document.getElementById('journalPromptText').textContent = todayPrompt || 'Reflect on your learning today.';
 
       // History
-      const hist = await apiFetch(`/api/intervention/journal?student_id=${user.student_id}`);
+      const histUrl = isReadOnly
+        ? `/api/admin/intervention/journal/${sid}`
+        : `/api/intervention/journal?student_id=${sid}`;
+      const hist = await apiFetch(histUrl);
       renderJournalHistory(hist.entries || []);
     }
 
@@ -1635,10 +1755,14 @@
     let pendingSticker = null;
 
     function saveDecorPrefs() {
+      if (isReadOnly) return;
       localStorage.setItem(`intv_decor_${user.student_id}`, JSON.stringify(decorPrefs));
+      syncPrefsToServer();
     }
     function saveDayStickers() {
+      if (isReadOnly) return;
       localStorage.setItem(`intv_stickers_${user.student_id}`, JSON.stringify(dayStickers));
+      syncPrefsToServer();
     }
 
     function hexToRgba(hex, alpha) {
@@ -1743,7 +1867,7 @@
     // Placing stickers on calendar days — hook into calDayClick
     const _origCalDayClick = window.calDayClick;
     window.calDayClick = function(ymd) {
-      if (pendingSticker) {
+      if (pendingSticker && !isReadOnly) {
         if (pendingSticker === '❌') {
           delete dayStickers[ymd];
         } else {
@@ -2233,6 +2357,7 @@
     document.getElementById('scheduleModal').addEventListener('show.bs.modal', loadScheduleIntoModal);
 
     document.getElementById('btnSaveSchedule').addEventListener('click', () => {
+      if (isReadOnly) return;
       ['A1','A3','A5','A7','B2','B4','B6','B8'].forEach(k => {
         const el = document.getElementById(`sch${k}`);
         if (el) mySchedule[k] = el.value.trim();
@@ -2241,6 +2366,7 @@
       });
       localStorage.setItem(`intv_sched_${user.student_id}`, JSON.stringify(mySchedule));
       localStorage.setItem(`intv_period_colors_${user.student_id}`, JSON.stringify(periodColors));
+      syncPrefsToServer();
       bootstrap.Modal.getInstance(document.getElementById('scheduleModal'))?.hide();
       if (currentView === 'day') renderCalendar();
     });
@@ -2250,12 +2376,32 @@
     const TODOS_KEY = () => `intv_todos_${user.student_id}`;
     const CD_KEY    = () => `intv_cd_${user.student_id}`;
 
-    function loadTodos() {
-      todos     = JSON.parse(localStorage.getItem(TODOS_KEY()) || '[]');
+    async function loadTodos() {
+      const sid = targetSid();
+      const url = isReadOnly
+        ? `/api/teacher/planner/${sid}/todos`
+        : `/api/intervention/todos?student_id=${sid}`;
+      try {
+        const data = await apiFetch(url);
+        todos = data.todos || [];
+        if (!isReadOnly) localStorage.setItem(TODOS_KEY(), JSON.stringify(todos));
+      } catch (_) {
+        todos = JSON.parse(localStorage.getItem(TODOS_KEY()) || '[]');
+      }
+      // Countdowns stay in localStorage (no server sync yet)
       countdowns = JSON.parse(localStorage.getItem(CD_KEY()) || '[]');
     }
 
-    function saveTodos() { localStorage.setItem(TODOS_KEY(), JSON.stringify(todos)); }
+    function saveTodos() {
+      localStorage.setItem(TODOS_KEY(), JSON.stringify(todos));
+      if (!isReadOnly && user?.student_id) {
+        apiFetch('/api/intervention/todos', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ student_id: user.student_id, todos })
+        }).catch(() => {});
+      }
+    }
     function saveCountdowns() { localStorage.setItem(CD_KEY(), JSON.stringify(countdowns)); }
 
     function renderTodos(filterDate = '') {
@@ -2368,7 +2514,11 @@
     let tests = [];
 
     async function loadTests(all = false) {
-      const data = await apiFetch(`/api/intervention/tests?student_id=${user.student_id}${all ? '&all=1' : ''}`);
+      const sid = targetSid();
+      const url = isReadOnly
+        ? `/api/teacher/planner/${sid}/tests`
+        : `/api/intervention/tests?student_id=${sid}${all ? '&all=1' : ''}`;
+      const data = await apiFetch(url);
       tests = data.tests || [];
     }
 
@@ -2437,17 +2587,48 @@
       await loadTests(true); renderTests();
     });
 
-    // ── Habit tracker (localStorage) ─────────────────────────────────────
+    // ── Habit tracker (server-synced) ────────────────────────────────────
     const HABITS_KEY = () => `intv_habits_${user.student_id}`;
     const HABIT_LOG_KEY = () => `intv_habitlog_${user.student_id}`;
     let habitList = [], habitLog = {};
 
-    function loadHabits() {
-      habitList = JSON.parse(localStorage.getItem(HABITS_KEY()) || '[]');
-      habitLog  = JSON.parse(localStorage.getItem(HABIT_LOG_KEY()) || '{}');
+    async function loadHabits() {
+      const sid = targetSid();
+      const url = isReadOnly
+        ? `/api/teacher/planner/${sid}/habits`
+        : `/api/intervention/habits?student_id=${sid}`;
+      try {
+        const data = await apiFetch(url);
+        habitList = (data.habits || []).map(h => ({ id: h.id, name: h.text, color: h.color }));
+        habitLog  = data.log || {};
+        if (!isReadOnly) {
+          localStorage.setItem(HABITS_KEY(), JSON.stringify(habitList));
+          localStorage.setItem(HABIT_LOG_KEY(), JSON.stringify(habitLog));
+        }
+      } catch (_) {
+        habitList = JSON.parse(localStorage.getItem(HABITS_KEY()) || '[]');
+        habitLog  = JSON.parse(localStorage.getItem(HABIT_LOG_KEY()) || '{}');
+      }
     }
-    function saveHabits() { localStorage.setItem(HABITS_KEY(), JSON.stringify(habitList)); }
-    function saveHabitLog() { localStorage.setItem(HABIT_LOG_KEY(), JSON.stringify(habitLog)); }
+
+    function saveHabits() {
+      localStorage.setItem(HABITS_KEY(), JSON.stringify(habitList));
+      if (!isReadOnly && user?.student_id) {
+        apiFetch('/api/intervention/habits', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            student_id: user.student_id,
+            habits: habitList.map(h => ({ id: h.id, text: h.name, color: h.color || null }))
+          })
+        }).catch(() => {});
+      }
+    }
+
+    function saveHabitLog() {
+      localStorage.setItem(HABIT_LOG_KEY(), JSON.stringify(habitLog));
+      // Individual log toggles are synced immediately via the /habits/log endpoint in logHabit()
+    }
 
     const weekDaysBack = () => {
       const days = [];
@@ -2508,15 +2689,23 @@
     }
 
     window.logHabit = (id, val) => {
+      if (isReadOnly) return;
       if (!habitLog[id]) habitLog[id] = {};
       if (val) habitLog[id][todayStr] = true;
       else delete habitLog[id][todayStr];
       saveHabitLog();
+      // Sync this log entry to server immediately
+      apiFetch('/api/intervention/habits/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: user.student_id, habit_id: id, log_date: todayStr, done: val })
+      }).catch(() => {});
       renderHabitTracker();
       renderHabitGrid();
     };
 
     window.deleteHabit = (id) => {
+      if (isReadOnly) return;
       habitList = habitList.filter(h => h.id !== id);
       delete habitLog[id];
       saveHabits(); saveHabitLog();
@@ -2524,6 +2713,7 @@
     };
 
     document.getElementById('btnAddHabit').addEventListener('click', () => {
+      if (isReadOnly) return;
       const text = document.getElementById('newHabitText').value.trim();
       if (!text) return;
       habitList.push({ id: Date.now().toString(), name: text });
@@ -2539,7 +2729,11 @@
 
     // ── Journal export ────────────────────────────────────────────────────
     async function getAllJournalEntries() {
-      const data = await apiFetch(`/api/intervention/journal?student_id=${user.student_id}`);
+      const sid = targetSid();
+      const url = isReadOnly
+        ? `/api/admin/intervention/journal/${sid}`
+        : `/api/intervention/journal?student_id=${sid}`;
+      const data = await apiFetch(url);
       return (data.entries || []).sort((a, b) => a.entry_date.localeCompare(b.entry_date));
     }
 
