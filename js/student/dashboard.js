@@ -204,6 +204,8 @@ calculateGradeStats(keys, myGrades);
             
     } catch (e) {
         console.error("Error loading grades:", e);
+        const gb = document.getElementById('gradeTableContainer') || document.getElementById('statsContainer')?.parentElement;
+        if (gb) gb.insertAdjacentHTML('afterbegin', `<div class="alert alert-danger mt-3"><strong>Could not load your gradebook.</strong> Please refresh the page or contact your teacher if this persists.</div>`);
     }
 }
 
@@ -563,7 +565,11 @@ window.saveSelfAssessment = async function(chapterId, level) {
         
         console.log("[Dashboard] Pre-Scale synced to gradebook:", scaleExamId, "10 FIXED points");
         loadGrades();
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        console.error(e);
+        const container = document.getElementById('selfAssessmentContainer');
+        if (container) container.insertAdjacentHTML('afterbegin', `<div class="alert alert-warning small py-2">Self-assessment save failed. Please try again.</div>`);
+    }
 };
 
 // --- SELF-ASSESSMENT CHART RENDERING ---
@@ -736,7 +742,11 @@ async function processTurnIn() {
             body: JSON.stringify({ student_id: studentId, assignment_name: assignmentName, note: note, timestamp: new Date().toISOString() })
         });
         location.reload();
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        console.error(e);
+        const btn = document.getElementById('btnConfirmTurnIn');
+        if (btn) btn.insertAdjacentHTML('beforebegin', `<div class="text-danger small mb-2">Turn-in failed. Please try again.</div>`);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', loadGrades);
