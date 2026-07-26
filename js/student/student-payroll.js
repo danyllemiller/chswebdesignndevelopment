@@ -312,8 +312,18 @@ async function buildPayrollUI(student_id) {
 
         payPeriods = Object.values(periodsMap).sort((a, b) => b.info.id - a.info.id);
         payPeriods.forEach(p => p.shifts.sort((a, b) => new Date(b.date) - new Date(a.date)));
-        
-        renderCurrentPeriod();
+
+        if (payPeriods.length === 0) {
+            document.getElementById('currentPeriodLabel').innerText = 'No shifts logged yet';
+            document.getElementById('studentTimesheetBody').innerHTML = `
+                <tr><td colspan="7" class="text-center p-5 text-muted">
+                    <i class="fas fa-clock fa-2x mb-3 d-block opacity-50"></i>
+                    No shifts have been recorded yet.<br>
+                    <span class="small">Use the <strong>Timeclock</strong> below to clock in when the school year begins.</span>
+                </td></tr>`;
+        } else {
+            renderCurrentPeriod();
+        }
     } catch (e) {
         console.error("Timesheet fetch error:", e);
     }
