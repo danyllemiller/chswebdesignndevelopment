@@ -485,6 +485,8 @@ window.manageStudent = async (id, name) => {
         document.getElementById('edit-student-id').value = s.student_id || '';
         document.getElementById('edit-username').value = s.username || '';
         document.getElementById('edit-role').value = s.role || 'student';
+        const posEl = document.getElementById('edit-payroll-title');
+        if (posEl) posEl.value = s.payroll_title || 'Intern';
         // ensure editPeriod options exist; if not, fall back to simple text
         const editPeriodEl = document.getElementById('editPeriod');
         if (editPeriodEl) {
@@ -555,7 +557,8 @@ document.getElementById('saveStudentBtn').addEventListener('click', async () => 
         last_name: document.getElementById('edit-last-name').value.trim(),
         username: document.getElementById('edit-username').value.trim() || null,
         section_id: document.getElementById('editPeriod') ? document.getElementById('editPeriod').value : null,
-        role: document.getElementById('edit-role').value || 'student'
+        role: document.getElementById('edit-role').value || 'student',
+        payroll_title: document.getElementById('edit-payroll-title')?.value || 'Intern'
     };
     const pw = document.getElementById('edit-password').value;
     if (pw && pw.length > 0) payload.password = pw;

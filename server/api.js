@@ -595,7 +595,11 @@ router.get('/admin/student', async (req, res) => {
 
     try {
         const connection = await getDbConnection();
-        const [rows] = await connection.execute('SELECT student_id, first_name, last_name, username, section_id, role FROM students WHERE student_id = ? LIMIT 1', [student_id]);
+        const [rows] = await connection.execute(
+            `SELECT s.student_id, s.first_name, s.last_name, s.username, s.section_id, s.role,
+                    COALESCE(pr.title, 'Intern') AS payroll_title, COALESCE(pr.hourly_rate, 15.00) AS hourly_rate
+             FROM students s LEFT JOIN payroll_roster pr ON s.student_id = pr.student_id
+             WHERE s.student_id = ? LIMIT 1`, [student_id]);
         await connection.end();
         if (rows.length === 0) return res.status(404).json({ error: 'Student not found' });
         res.json(rows[0]);
@@ -605,9 +609,17 @@ router.get('/admin/student', async (req, res) => {
     }
 });
 
+const AGENCY_PAY_SCALES = {
+    'Intern': 15.00, 'Junior Developer': 20.00, 'Web Developer': 35.00,
+    'Senior Developer': 45.00, 'Project Manager': 50.00, 'UI/UX Designer': 40.00,
+    'Brand Strategist': 38.00, 'Motion Graphics Designer': 42.00, 'Content Creator': 22.00,
+    'Social Media Manager': 24.00, 'Client Relations Manager': 35.00,
+    'IT Support Specialist': 27.00, 'Office Manager': 28.00, 'Accountant': 32.00
+};
+
 // --- ADMIN SAVE/UPDATE SINGLE STUDENT ---
 router.post('/admin/save-student', async (req, res) => {
-    const { student_id, first_name, last_name, username, section_id, role, password } = req.body || {};
+    const { student_id, first_name, last_name, username, section_id, role, password, payroll_title } = req.body || {};
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
 
     try {
@@ -653,8 +665,19 @@ router.post('/admin/save-student', async (req, res) => {
         params.push(student_id);
         const sql = `UPDATE students SET ${updates.join(', ')} WHERE student_id = ?`;
         const [result] = await connection.execute(sql, params);
-        await connection.end();
 
+        // upsert payroll position if provided
+        if (payroll_title && AGENCY_PAY_SCALES[payroll_title] !== undefined) {
+            const rate = AGENCY_PAY_SCALES[payroll_title];
+            await connection.execute(
+                `INSERT INTO payroll_roster (student_id, title, hourly_rate)
+                 VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE title = VALUES(title), hourly_rate = VALUES(hourly_rate)`,
+                [student_id, payroll_title, rate]
+            );
+        }
+
+        await connection.end();
         res.json({ success: true, affectedRows: result.affectedRows });
     } catch (err) {
         console.error(err && err.stack ? err.stack : err);

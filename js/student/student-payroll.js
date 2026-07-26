@@ -17,9 +17,18 @@ import { apiFetch } from '../modules/api-client.js';
 const PAY_SCALES = {
     "Intern": 15.00,
     "Junior Developer": 20.00,
-    "Web Developer": 35.00, // Area Median
+    "Web Developer": 35.00,
     "Senior Developer": 45.00,
-    "Project Manager": 50.00
+    "Project Manager": 50.00,
+    "UI/UX Designer": 40.00,
+    "Brand Strategist": 38.00,
+    "Motion Graphics Designer": 42.00,
+    "Content Creator": 22.00,
+    "Social Media Manager": 24.00,
+    "Client Relations Manager": 35.00,
+    "IT Support Specialist": 27.00,
+    "Office Manager": 28.00,
+    "Accountant": 32.00
 };
 const DEFAULT_ROLE = "Web Developer";
 const ON_TIME_BONUS = 5.00; // Flat bonus per on-time punch
