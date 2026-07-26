@@ -57,9 +57,12 @@
     .cal-day.other-month { color: #ccc; background: #f8f8f8; cursor: default; }
     .cal-day.cal-empty { border: none; background: transparent; cursor: default; }
     .cal-day-num { font-weight: 700; font-size: .82rem; font-family: var(--p-font-heading); }
-    .cal-block-badge { font-size: .6rem; font-weight: 700; padding: 1px 5px; border-radius: 10px; display: inline-block; }
-    .cal-block-a { background: #e3f2fd; color: #1565c0; }
-    .cal-block-b { background: #fce4ec; color: #880e4f; }
+    .cal-block-badge { font-size: .62rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; }
+    .cal-block-a     { background: #e3f2fd; color: #1565c0; }
+    .cal-block-b     { background: #fce4ec; color: #880e4f; }
+    .cal-block-c     { background: #e9ecef; color: #495057; }
+    .cal-block-a-min { background: #dcedc8; color: #33691e; font-size: .58rem; }
+    .cal-block-b-min { background: #f3e5f5; color: #6a1b9a; font-size: .58rem; }
     .cal-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
     .cal-dot-assign { background: var(--p-accent); }
     .cal-dot-off { background: #bbb; }
@@ -81,6 +84,35 @@
     .sticker-btn { font-size: 1.4rem; cursor: pointer; border: none; background: transparent; padding: 2px 4px; border-radius: 6px; transition: transform .15s; line-height: 1; }
     .sticker-btn:hover { transform: scale(1.25); background: #f8f9fa; }
     .cal-sticker { font-size: .95rem; line-height: 1; display: block; margin-top: 1px; }
+
+    /* ── Planner Day-View time grid ─────────────────────────────────── */
+    .iv-tg-view { display: flex; flex-direction: column; border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden; background: #fff; }
+    .iv-tg-header { display: flex; background: #f8f9fa; border-bottom: 1px solid #dee2e6; }
+    .iv-tg-header-gutter { width: 52px; min-width: 52px; border-right: 1px solid #dee2e6; }
+    .iv-tg-day-header { flex: 1; padding: 8px 10px 6px; text-align: center; }
+    .iv-tg-day-name { font-size: .65rem; font-weight: 700; letter-spacing: .06em; opacity: .7; }
+    .iv-tg-day-num-wrap { display: flex; justify-content: center; margin: 2px 0; }
+    .iv-tg-day-num { font-size: 1.6rem; font-weight: 500; line-height: 1.1; color: #212529; }
+    .iv-tg-today-circle { background: #0d6efd; color: #fff; border-radius: 50%; width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 600; }
+    .iv-tg-allday-row { display: flex; border-bottom: 1px solid #dee2e6; min-height: 30px; }
+    .iv-tg-allday-label { width: 52px; min-width: 52px; font-size: .6rem; color: #888; text-align: right; padding: 6px 6px 0; border-right: 1px solid #dee2e6; }
+    .iv-tg-allday-area { flex: 1; padding: 4px 8px; display: flex; align-items: center; }
+    .iv-tg-allday-chip { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: .78rem; font-weight: 600; }
+    .iv-tg-body { display: flex; overflow: hidden; position: relative; }
+    .iv-tg-time-col { width: 52px; min-width: 52px; border-right: 1px solid #dee2e6; }
+    .iv-tg-hour-cell { height: 56px; font-size: .62rem; color: #888; text-align: right; padding-right: 6px; padding-top: 3px; border-top: 1px solid #dee2e6; }
+    .iv-tg-hour-cell:first-child { border-top: none; }
+    .iv-tg-days-area { flex: 1; position: relative; }
+    .iv-tg-day-col { position: relative; height: 100%; }
+    .iv-tg-hour-line { position: absolute; left: 0; right: 0; height: 1px; background: #e9ecef; }
+    .iv-tg-event { position: absolute; left: 4px; right: 4px; border-radius: 6px; padding: 5px 9px; overflow: hidden; color: #fff; font-size: .8rem; box-shadow: 0 1px 4px rgba(0,0,0,.18); }
+    .iv-tg-event-label { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .iv-tg-event-time { font-size: .65rem; opacity: .88; }
+    .iv-tg-no-schedule { padding: 24px; color: #888; font-size: .88rem; text-align: center; }
+    .iv-tg-now-line { position: absolute; left: 0; right: 0; height: 2px; background: #dc3545; z-index: 2; pointer-events: none; }
+    .iv-tg-now-line::before { content: ''; position: absolute; left: -4px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: #dc3545; }
+    /* period color swatch in schedule modal */
+    .period-color-input { width: 30px; height: 30px; padding: 1px; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; flex-shrink: 0; }
 
     /* Journal */
     .journal-prompt-box { background: var(--p-accent-light); border-left: 4px solid var(--p-accent); border-radius: 6px; padding: 14px 16px; font-size: .95rem; font-family: var(--p-font-body); }
@@ -347,8 +379,11 @@
 
       <!-- Legend -->
       <div class="d-flex flex-wrap gap-3 small text-muted">
-        <span><span class="cal-block-badge cal-block-a">A</span> A-Day</span>
-        <span><span class="cal-block-badge cal-block-b">B</span> B-Day</span>
+        <span><span class="cal-block-badge cal-block-a me-1">A</span> A-Day</span>
+        <span><span class="cal-block-badge cal-block-b me-1">B</span> B-Day</span>
+        <span><span class="cal-block-badge cal-block-c me-1">C</span> All-Period</span>
+        <span><span class="cal-block-badge cal-block-a-min me-1">a</span> Min A-Day</span>
+        <span><span class="cal-block-badge cal-block-b-min me-1">b</span> Min B-Day</span>
         <span><span class="cal-dot cal-dot-assign me-1"></span>Assignment due</span>
         <span><span class="badge bg-secondary me-1" style="font-size:.6rem;">OFF</span>No school</span>
       </div>
@@ -781,29 +816,53 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <p class="text-muted small mb-3">Enter your class schedule so the Day View can show your periods each day.</p>
+          <p class="text-muted small mb-3">Enter your class names and pick a color for each period — colors show in Day View.</p>
           <div class="row g-4">
             <div class="col-md-6">
               <h6 class="fw-bold mb-3"><span class="cal-block-badge cal-block-a me-2">A</span>A-Day Schedule</h6>
               <div class="mb-2"><label class="form-label small fw-bold">Period 1</label>
-                <input type="text" class="form-control form-control-sm" id="schA1" placeholder="e.g. AP English"></div>
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="text" class="form-control form-control-sm" id="schA1" placeholder="e.g. AP English">
+                  <input type="color" class="period-color-input" id="colorA1" value="#4a90d9" title="Period color">
+                </div></div>
               <div class="mb-2"><label class="form-label small fw-bold">Period 3</label>
-                <input type="text" class="form-control form-control-sm" id="schA3" placeholder="e.g. Chemistry"></div>
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="text" class="form-control form-control-sm" id="schA3" placeholder="e.g. Chemistry">
+                  <input type="color" class="period-color-input" id="colorA3" value="#6d916c" title="Period color">
+                </div></div>
               <div class="mb-2"><label class="form-label small fw-bold">Period 5 / Intervention</label>
-                <input type="text" class="form-control form-control-sm" id="schA5" placeholder="e.g. Intervention / Math"></div>
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="text" class="form-control form-control-sm" id="schA5" placeholder="e.g. Intervention / Math">
+                  <input type="color" class="period-color-input" id="colorA5" value="#e67e22" title="Period color">
+                </div></div>
               <div class="mb-2"><label class="form-label small fw-bold">Period 7</label>
-                <input type="text" class="form-control form-control-sm" id="schA7" placeholder="e.g. PE / Elective"></div>
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="text" class="form-control form-control-sm" id="schA7" placeholder="e.g. PE / Elective">
+                  <input type="color" class="period-color-input" id="colorA7" value="#9b59b6" title="Period color">
+                </div></div>
             </div>
             <div class="col-md-6">
               <h6 class="fw-bold mb-3"><span class="cal-block-badge cal-block-b me-2">B</span>B-Day Schedule</h6>
               <div class="mb-2"><label class="form-label small fw-bold">Period 2</label>
-                <input type="text" class="form-control form-control-sm" id="schB2" placeholder="e.g. US History"></div>
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="text" class="form-control form-control-sm" id="schB2" placeholder="e.g. US History">
+                  <input type="color" class="period-color-input" id="colorB2" value="#e74c3c" title="Period color">
+                </div></div>
               <div class="mb-2"><label class="form-label small fw-bold">Period 4</label>
-                <input type="text" class="form-control form-control-sm" id="schB4" placeholder="e.g. Spanish"></div>
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="text" class="form-control form-control-sm" id="schB4" placeholder="e.g. Spanish">
+                  <input type="color" class="period-color-input" id="colorB4" value="#1abc9c" title="Period color">
+                </div></div>
               <div class="mb-2"><label class="form-label small fw-bold">Period 6</label>
-                <input type="text" class="form-control form-control-sm" id="schB6" placeholder="e.g. Web Design"></div>
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="text" class="form-control form-control-sm" id="schB6" placeholder="e.g. Web Design">
+                  <input type="color" class="period-color-input" id="colorB6" value="#f39c12" title="Period color">
+                </div></div>
               <div class="mb-2"><label class="form-label small fw-bold">Period 8</label>
-                <input type="text" class="form-control form-control-sm" id="schB8" placeholder="e.g. Art / Elective"></div>
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="text" class="form-control form-control-sm" id="schB8" placeholder="e.g. Art / Elective">
+                  <input type="color" class="period-color-input" id="colorB8" value="#2980b9" title="Period color">
+                </div></div>
             </div>
           </div>
         </div>
@@ -848,8 +907,25 @@
     let user, assignments = [], goals = [], gradeLog = [], prompts = [], calEvents = {};
     let calYear, calMonth, calDay, currentView = 'month';
     let schoolSpecialDates = {}, bellSchedule = [];  // from school calendar (schoolSpecialDates: {date → {type,label}})
+
+    function blockBadgeInfo(type) {
+      switch (type) {
+        case 'A':     return { label: 'A', cls: 'cal-block-a' };
+        case 'B':     return { label: 'B', cls: 'cal-block-b' };
+        case 'C':     return { label: 'C', cls: 'cal-block-c' };
+        case 'A_MIN': return { label: 'a', cls: 'cal-block-a-min' };
+        case 'B_MIN': return { label: 'b', cls: 'cal-block-b-min' };
+        default:      return null;
+      }
+    }
     let submitAssignmentId = null;
-    let mySchedule = {};  // {A1:'English', A3:'Math', A5:'Intervention', A7:'PE', B2:'History', ...}
+    let mySchedule = {};   // {A1:'English', A3:'Math', A5:'Intervention', A7:'PE', B2:'History', ...}
+    let periodColors = {}; // {A1:'#4a90d9', A3:'#6d916c', ...} — student-chosen per-period colors
+
+    const DEFAULT_PERIOD_COLORS = {
+      A1:'#4a90d9', A3:'#6d916c', A5:'#e67e22', A7:'#9b59b6',
+      B2:'#e74c3c', B4:'#1abc9c', B6:'#f39c12', B8:'#2980b9'
+    };
 
     const today = new Date();
     calYear  = today.getFullYear();
@@ -870,6 +946,7 @@
       decorPrefs   = JSON.parse(localStorage.getItem(`intv_decor_${user.student_id}`) || '{}');
       dayStickers  = JSON.parse(localStorage.getItem(`intv_stickers_${user.student_id}`) || '{}');
       mySchedule   = JSON.parse(localStorage.getItem(`intv_sched_${user.student_id}`) || '{}');
+      periodColors = JSON.parse(localStorage.getItem(`intv_period_colors_${user.student_id}`) || '{}');
       loadDecorPrefs();
 
       // Check intervention enrollment — determines which tabs are visible
@@ -1049,26 +1126,26 @@
         const sdInfo = schoolSpecialDates[ymd];
         const sdLabel = sdInfo?.label || '';
         const sdType  = sdInfo?.type  || '';
+        const badge   = !isWeekend ? blockBadgeInfo(sdType) : null;
+        const isSchoolDay = badge !== null; // any known block type = school day
         const isOff = !!sdInfo || isWeekend;
         const isToday = ymd === todayStr;
         const events = calEvents[ymd] || [];
-        // A/B day badge from CSV type field
-        const blockType = !isWeekend && (sdType === 'A' || sdType === 'B') ? sdType : null;
 
         let cls = 'cal-day';
         if (isToday) cls += ' today';
-        if (sdInfo && sdType !== 'A' && sdType !== 'B') cls += ' day-off';
+        if (sdInfo && !isSchoolDay) cls += ' day-off';
 
         const dots = events.map(e =>
           `<span class="cal-dot cal-dot-assign" title="${e.label}${e.submitted ? ' ✓' : ''}"></span>`
         ).join('');
 
-        const offLabel = isWeekend ? '' : (sdLabel && sdType !== 'A' && sdType !== 'B' ? `<div class="cal-day-label text-muted">${sdLabel}</div>` : '');
+        const offLabel = isWeekend ? '' : (sdLabel && !isSchoolDay ? `<div class="cal-day-label text-muted">${sdLabel}</div>` : '');
 
         html += `<div class="${cls}" data-ymd="${ymd}" onclick="window.calDayClick('${ymd}')">
           <div class="d-flex justify-content-between align-items-start">
             <span class="cal-day-num">${d}</span>
-            ${blockType ? `<span class="cal-block-badge cal-block-${blockType.toLowerCase()}">${blockType}</span>` : ''}
+            ${badge ? `<span class="cal-block-badge ${badge.cls}">${badge.label}</span>` : ''}
           </div>
           ${offLabel}
           <div class="d-flex flex-wrap gap-1 mt-1">${dots}</div>
@@ -1086,11 +1163,17 @@
 
     function renderWeekView() {
       const grid = document.getElementById('weekGrid');
-      // Find Monday of current week containing calYear/calMonth/1 as anchor
-      const anchor = new Date(calYear, calMonth, 1);
+      // Find Monday of the week containing the currently selected day
+      const anchor = new Date(calYear, calMonth, calDay);
       const dow = anchor.getDay();
       const monday = new Date(anchor);
       monday.setDate(anchor.getDate() - (dow === 0 ? 6 : dow - 1));
+
+      // Update month label to show week range
+      const friday = new Date(monday); friday.setDate(monday.getDate() + 4);
+      const mLabel = monday.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      const fLabel = friday.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      document.getElementById('calMonthLabel').textContent = `${mLabel} – ${fLabel}`;
 
       let html = '';
       const dayNames = ['Mon','Tue','Wed','Thu','Fri'];
@@ -1101,13 +1184,17 @@
         const isToday = ymd === todayStr;
         const events = calEvents[ymd] || [];
         const sdInfo = schoolSpecialDates[ymd];
-        const blockType = sdInfo?.type === 'A' || sdInfo?.type === 'B' ? sdInfo.type : null;
+        const badge  = blockBadgeInfo(sdInfo?.type || '');
+        const isSchoolDay = badge !== null;
+        const sticker = dayStickers[ymd] || '';
 
         html += `<div class="week-col ${isToday ? 'border-2' : ''}" style="${isToday ? `border-color:var(--p-accent)!important` : ''}">
-          <div class="week-day-name">${dayNames[i]} ${dt.getMonth()+1}/${dt.getDate()}
-            ${blockType ? `<span class="cal-block-badge cal-block-${blockType.toLowerCase()} ms-1">${blockType}</span>` : ''}
+          <div class="week-day-name d-flex align-items-center gap-1 flex-wrap">
+            <span>${dayNames[i]} ${dt.getMonth()+1}/${dt.getDate()}</span>
+            ${badge ? `<span class="cal-block-badge ${badge.cls}">${badge.label}</span>` : ''}
+            ${sticker ? `<span style="font-size:1rem;line-height:1;">${sticker}</span>` : ''}
           </div>
-          ${sdInfo && !blockType ? `<small class="badge bg-secondary">${sdInfo.label}</small>` : ''}
+          ${sdInfo && !isSchoolDay ? `<small class="badge bg-secondary">${sdInfo.label}</small>` : ''}
           ${events.map(e => `<div class="small ${e.submitted ? 'text-success' : ''} mb-1">
             <i class="fas fa-${e.submitted ? 'check-circle text-success' : 'circle text-muted'} me-1"></i>${e.label}
           </div>`).join('')}
@@ -1375,6 +1462,9 @@
       if (currentView === 'day') {
         const d = new Date(calYear, calMonth, calDay - 1);
         calYear = d.getFullYear(); calMonth = d.getMonth(); calDay = d.getDate();
+      } else if (currentView === 'week') {
+        const d = new Date(calYear, calMonth, calDay - 7);
+        calYear = d.getFullYear(); calMonth = d.getMonth(); calDay = d.getDate();
       } else {
         calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
       }
@@ -1383,6 +1473,9 @@
     document.getElementById('calNext').addEventListener('click', () => {
       if (currentView === 'day') {
         const d = new Date(calYear, calMonth, calDay + 1);
+        calYear = d.getFullYear(); calMonth = d.getMonth(); calDay = d.getDate();
+      } else if (currentView === 'week') {
+        const d = new Date(calYear, calMonth, calDay + 7);
         calYear = d.getFullYear(); calMonth = d.getMonth(); calDay = d.getDate();
       } else {
         calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
@@ -1584,49 +1677,145 @@
       document.getElementById('calMonthLabel').textContent = dayLabel;
 
       const sdInfo = schoolSpecialDates[ymd];
-      const blockType = sdInfo?.type === 'A' || sdInfo?.type === 'B' ? sdInfo.type : null;
+      const sdType  = sdInfo?.type || '';
+      const badge   = !isWeekend ? blockBadgeInfo(sdType) : null;
+      const blockBase = sdType.startsWith('A') ? 'A' : sdType.startsWith('B') ? 'B' : null;
+      const isToday  = ymd === todayStr;
+      const stickerEmoji = dayStickers[ymd] || '';
 
-      let html = '';
+      // ── Time-grid constants ────────────────────────────────────────────────
+      const HOUR_PX = 56, GRID_START = 7, GRID_END = 18;
+      const bodyH = (GRID_END - GRID_START) * HOUR_PX;
 
-      // Special date / no-school alert
-      if (sdInfo && !blockType) {
-        html += `<div class="alert alert-secondary py-2 mb-3"><i class="fas fa-info-circle me-2"></i>${sdInfo.label}</div>`;
+      function fmt12(hhmm) {
+        const [h, m] = hhmm.split(':').map(Number);
+        return `${h % 12 || 12}:${String(m).padStart(2,'0')} ${h >= 12 ? 'PM' : 'AM'}`;
+      }
+      function toTop(hhmm) {
+        const [h, m] = hhmm.split(':').map(Number);
+        return ((h * 60 + m) - GRID_START * 60) * (HOUR_PX / 60);
+      }
+      function toDur(s, e) {
+        const [hs, ms] = s.split(':').map(Number);
+        const [he, me] = e.split(':').map(Number);
+        return ((he * 60 + me) - (hs * 60 + ms)) * (HOUR_PX / 60);
       }
 
-      if (isWeekend) {
-        html += `<div class="text-muted text-center py-4"><i class="fas fa-couch fa-2x mb-2 d-block"></i>Weekend — enjoy the break!</div>`;
-      } else {
-        // A/B block indicator
-        const effectiveBlock = blockType || '?';
-        html += `<div class="mb-3 d-flex align-items-center gap-2">
-          <span class="cal-block-badge cal-block-${(effectiveBlock || 'a').toLowerCase()}">${effectiveBlock}</span>
-          <span class="fw-bold">${effectiveBlock !== '?' ? effectiveBlock + '-Day Schedule' : 'Schedule (block unknown)'}</span>
-          <button class="btn btn-sm btn-outline-secondary ms-auto py-0 px-2" data-bs-toggle="modal" data-bs-target="#scheduleModal">
-            <i class="fas fa-pencil-alt me-1"></i>Edit Schedule
-          </button>
-        </div>`;
+      // Hour labels + grid lines
+      let hourRows = '', hourLines = '';
+      for (let h = GRID_START; h < GRID_END; h++) {
+        hourRows += `<div class="iv-tg-hour-cell">${h % 12 || 12} ${h >= 12 ? 'PM' : 'AM'}</div>`;
+        hourLines += `<div class="iv-tg-hour-line" style="top:${(h - GRID_START) * HOUR_PX}px"></div>`;
+      }
 
-        // Class schedule for the block
-        const periods = effectiveBlock === 'B'
-          ? [['B2','Period 2'],['B4','Period 4'],['B6','Period 6'],['B8','Period 8']]
-          : [['A1','Period 1'],['A3','Period 3'],['A5','Period 5'],['A7','Period 7']];
+      // Current time indicator
+      let nowLine = '';
+      if (isToday) {
+        const now = new Date();
+        const h = now.getHours(), m = now.getMinutes();
+        if (h >= GRID_START && h < GRID_END) {
+          const top = (h - GRID_START) * HOUR_PX + (m / 60) * HOUR_PX;
+          nowLine = `<div class="iv-tg-now-line" style="top:${top}px"></div>`;
+        }
+      }
 
-        const hasSchedule = periods.some(([k]) => mySchedule[k]);
-        html += `<div class="card shadow-sm border-0 mb-3">
-          <div class="card-header bg-white fw-bold border-0 pt-3 pb-2"><i class="fas fa-clock me-2 text-success"></i>My Classes Today</div>
-          <div class="card-body p-0">`;
-        periods.forEach(([key, lbl]) => {
-          const cls = mySchedule[key] || '';
-          html += `<div class="day-period-row px-3">
-            <span class="day-period-label">${key}</span>
-            <span class="day-period-class ${cls ? '' : 'text-muted fst-italic'}">${cls || 'Not set'}</span>
+      // Bell schedule periods for this day (from API data already loaded)
+      let bsPeriods = [];
+      if (badge && sdType && bellSchedule.length) {
+        bsPeriods = bellSchedule
+          .filter(r => r.schedule_type === sdType)
+          .sort((a, b) => a.start_time.localeCompare(b.start_time));
+      }
+
+      // Build period event blocks
+      let periodBlocks = '';
+      if (bsPeriods.length) {
+        bsPeriods.forEach(p => {
+          const top    = Math.max(0, toTop(p.start_time));
+          const height = Math.max(22, toDur(p.start_time, p.end_time));
+          if (top >= bodyH) return;
+          const color     = periodColors[p.period_label] || DEFAULT_PERIOD_COLORS[p.period_label] || '#6c757d';
+          const className = mySchedule[p.period_label] || p.course_name || '';
+          const label     = p.period_label + (className ? ' · ' + className : '');
+          periodBlocks += `<div class="iv-tg-event" style="top:${top}px;height:${height}px;background:${color}">
+            <div class="iv-tg-event-label">${label}</div>
+            <div class="iv-tg-event-time">${fmt12(p.start_time)}–${fmt12(p.end_time)}</div>
           </div>`;
         });
-        if (!hasSchedule) html += `<div class="px-3 pb-2"><small class="text-muted">Click "Edit Schedule" above to add your classes.</small></div>`;
-        html += `</div></div>`;
+      } else if (!isWeekend && blockBase) {
+        // No bell schedule from API — distribute periods evenly across grid
+        const pKeys = blockBase === 'B' ? ['B2','B4','B6','B8'] : ['A1','A3','A5','A7'];
+        const step = Math.floor((bodyH - 30) / pKeys.length);
+        pKeys.forEach((k, i) => {
+          const top    = 20 + i * step;
+          const height = step - 6;
+          const color  = periodColors[k] || DEFAULT_PERIOD_COLORS[k] || '#6c757d';
+          const cls    = mySchedule[k] ? ' · ' + mySchedule[k] : '';
+          periodBlocks += `<div class="iv-tg-event" style="top:${top}px;height:${height}px;background:${color}">
+            <div class="iv-tg-event-label">${k}${cls}</div>
+          </div>`;
+        });
       }
 
-      // Assignments due
+      if (!periodBlocks) {
+        periodBlocks = `<div class="iv-tg-no-schedule">${
+          isWeekend ? 'Weekend — enjoy the break! 🛋️' :
+          (sdInfo && !badge ? sdInfo.label || 'No school' : 'No bell schedule configured')
+        }</div>`;
+      }
+
+      // All-day row: block badge + sticker + label
+      let alldayContent = '';
+      if (isWeekend) {
+        alldayContent = `<span class="iv-tg-allday-chip" style="background:#f8f9fa;color:#6c757d">Weekend</span>`;
+        if (stickerEmoji) alldayContent += `<span class="ms-2" style="font-size:1.2rem;">${stickerEmoji}</span>`;
+      } else if (badge || sdInfo) {
+        const chipBg  = blockBase === 'A' ? '#d4edda' : blockBase === 'B' ? '#cce5ff' : '#e9ecef';
+        const chipClr = blockBase === 'A' ? '#155724' : blockBase === 'B' ? '#004085' : '#495057';
+        const typeLabel = blockBase === 'A' ? 'A-Day' : blockBase === 'B' ? 'B-Day' : (sdType === 'C' ? 'All-Period Day' : (sdType || ''));
+        const extra = sdInfo?.label && sdInfo.label !== typeLabel ? ` — ${sdInfo.label}` : '';
+        alldayContent = `<span class="d-flex align-items-center gap-2 flex-wrap">`;
+        if (badge) alldayContent += `<span class="cal-block-badge ${badge.cls}">${badge.label}</span>`;
+        alldayContent += `<span class="iv-tg-allday-chip" style="background:${chipBg};color:${chipClr}">${typeLabel}${extra}</span>`;
+        if (stickerEmoji) alldayContent += `<span style="font-size:1.2rem;">${stickerEmoji}</span>`;
+        alldayContent += `</span>`;
+      } else if (stickerEmoji) {
+        alldayContent = `<span style="font-size:1.2rem;">${stickerEmoji}</span>`;
+      }
+
+      // Day number circle
+      const dayNumEl = isToday
+        ? `<span class="iv-tg-today-circle">${calDay}</span>`
+        : `<span class="iv-tg-day-num">${calDay}</span>`;
+
+      // ── Assemble time grid ─────────────────────────────────────────────────
+      let html = `
+        <div class="d-flex justify-content-end mb-2">
+          <button class="btn btn-sm btn-outline-secondary py-0 px-2" data-bs-toggle="modal" data-bs-target="#scheduleModal">
+            <i class="fas fa-palette me-1"></i>Edit Schedule &amp; Colors
+          </button>
+        </div>
+        <div class="iv-tg-view mb-3">
+          <div class="iv-tg-header">
+            <div class="iv-tg-header-gutter"></div>
+            <div class="iv-tg-day-header">
+              <div class="iv-tg-day-name">${dt.toLocaleDateString('en-US',{weekday:'long'}).toUpperCase()}</div>
+              <div class="iv-tg-day-num-wrap">${dayNumEl}</div>
+            </div>
+          </div>
+          ${alldayContent ? `<div class="iv-tg-allday-row">
+            <div class="iv-tg-allday-label">All day</div>
+            <div class="iv-tg-allday-area">${alldayContent}</div>
+          </div>` : ''}
+          <div class="iv-tg-body" style="height:${bodyH}px">
+            <div class="iv-tg-time-col">${hourRows}</div>
+            <div class="iv-tg-days-area">
+              <div class="iv-tg-day-col">${hourLines}${nowLine}${periodBlocks}</div>
+            </div>
+          </div>
+        </div>`;
+
+      // ── Assignments due ────────────────────────────────────────────────────
       const events = calEvents[ymd] || [];
       if (events.length) {
         html += `<div class="card shadow-sm border-0 mb-3">
@@ -1642,7 +1831,7 @@
         html += `</div></div>`;
       }
 
-      // To-dos due
+      // ── To-dos due ────────────────────────────────────────────────────────
       const dueTodos = todos.filter(t => t.date === ymd && !t.done);
       if (dueTodos.length) {
         html += `<div class="card shadow-sm border-0 mb-3">
@@ -1658,7 +1847,7 @@
         html += `</div></div>`;
       }
 
-      // Tests/quizzes on this day
+      // ── Tests/quizzes ──────────────────────────────────────────────────────
       const dueTests = tests.filter(t => t.test_date === ymd);
       if (dueTests.length) {
         const typeIcon = { test:'📝', quiz:'⚡', project:'📁', presentation:'🎤', AP:'🏫', SAT:'📊', ACT:'📊', other:'📌' };
@@ -1678,7 +1867,6 @@
         html += `</div></div>`;
       }
 
-      if (!html) html = `<p class="text-muted text-center py-5">Nothing scheduled for this day.</p>`;
       document.getElementById('dayViewContent').innerHTML = html;
     }
 
@@ -1737,6 +1925,8 @@
       ['A1','A3','A5','A7','B2','B4','B6','B8'].forEach(k => {
         const el = document.getElementById(`sch${k}`);
         if (el) el.value = mySchedule[k] || '';
+        const cp = document.getElementById(`color${k}`);
+        if (cp) cp.value = periodColors[k] || DEFAULT_PERIOD_COLORS[k] || '#888888';
       });
     }
 
@@ -1746,8 +1936,11 @@
       ['A1','A3','A5','A7','B2','B4','B6','B8'].forEach(k => {
         const el = document.getElementById(`sch${k}`);
         if (el) mySchedule[k] = el.value.trim();
+        const cp = document.getElementById(`color${k}`);
+        if (cp) periodColors[k] = cp.value;
       });
       localStorage.setItem(`intv_sched_${user.student_id}`, JSON.stringify(mySchedule));
+      localStorage.setItem(`intv_period_colors_${user.student_id}`, JSON.stringify(periodColors));
       bootstrap.Modal.getInstance(document.getElementById('scheduleModal'))?.hide();
       if (currentView === 'day') renderCalendar();
     });
