@@ -1,6 +1,71 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// ── User sticker upload ───────────────────────────────────────────────────────
+const STICKERS_ROOT = path.join(__dirname, '../../images/stickers');
+
+const stickerStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const sid = req.query.student_id;
+        if (!sid) return cb(new Error('student_id required'));
+        const dir = path.join(STICKERS_ROOT, `user_${sid}`);
+        fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const ext  = path.extname(file.originalname).toLowerCase();
+        const base = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9._-]/g, '_');
+        // Avoid collisions with a short timestamp prefix
+        cb(null, `${Date.now()}_${base}${ext}`);
+    }
+});
+
+const stickerUpload = multer({
+    storage: stickerStorage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        const ok = /\.(png|jpe?g|gif|webp|svg)$/i.test(path.extname(file.originalname));
+        cb(null, ok);
+    }
+});
+
+// GET  /api/intervention/stickers?student_id=xxx  — list uploaded stickers
+router.get('/intervention/stickers', (req, res) => {
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id required' });
+    const dir = path.join(STICKERS_ROOT, `user_${student_id}`);
+    if (!fs.existsSync(dir)) return res.json({ stickers: [] });
+    try {
+        const files = fs.readdirSync(dir).filter(f => /\.(png|jpe?g|gif|webp|svg)$/i.test(f));
+        res.json({ stickers: files.map(f => ({ filename: f, url: `/images/stickers/user_${student_id}/${f}` })) });
+    } catch { res.json({ stickers: [] }); }
+});
+
+// POST /api/intervention/stickers/upload?student_id=xxx  — upload a sticker
+router.post('/intervention/stickers/upload', (req, res) => {
+    stickerUpload.single('sticker')(req, res, (err) => {
+        if (err) return res.status(400).json({ error: err.message });
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+        const sid = req.query.student_id;
+        if (!sid) return res.status(400).json({ error: 'student_id required' });
+        res.json({ success: true, filename: req.file.filename, url: `/images/stickers/user_${sid}/${req.file.filename}` });
+    });
+});
+
+// DELETE /api/intervention/stickers/:filename?student_id=xxx  — remove a sticker
+router.delete('/intervention/stickers/:filename', (req, res) => {
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id required' });
+    const filePath = path.join(STICKERS_ROOT, `user_${student_id}`, req.params.filename);
+    // Prevent path traversal
+    if (!filePath.startsWith(STICKERS_ROOT)) return res.status(400).json({ error: 'Invalid path' });
+    try { fs.unlinkSync(filePath); } catch { /* already gone */ }
+    res.json({ success: true });
+});
 
 // ── Built-in growth mindset prompts, one per scheduled intervention day ──────
 const BUILT_IN_PROMPTS = [

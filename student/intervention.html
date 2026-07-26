@@ -125,15 +125,18 @@
     .sticker-drawer-footer { padding:10px 12px; border-top:1px solid #dee2e6; flex-shrink:0; }
     .sticker-cat-label { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#6c757d; margin:10px 0 6px; }
     .sticker-cat-label:first-child { margin-top:0; }
-    .sticker-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:4px; }
+    .sticker-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:4px; margin-bottom:4px; }
     .sticker-item {
-      cursor:pointer; border-radius:8px; border:2px solid transparent;
-      padding:4px; background:#f8f9fa; display:flex; align-items:center;
+      cursor:pointer; border-radius:6px; border:2px solid transparent;
+      padding:3px; background:#f8f9fa; display:flex; align-items:center;
       justify-content:center; aspect-ratio:1; transition:border-color .12s, transform .12s;
+      position:relative;
     }
-    .sticker-item:hover { transform:scale(1.08); border-color:#adb5bd; }
+    .sticker-item:hover { transform:scale(1.1); border-color:#adb5bd; }
     .sticker-item.selected { border-color:#0d6efd; box-shadow:0 0 0 2px #0d6efd44; }
     .sticker-item img { width:100%; height:100%; object-fit:contain; pointer-events:none; }
+    .sticker-item .sticker-delete { display:none; position:absolute; top:-4px; right:-4px; width:14px; height:14px; background:#dc3545; color:#fff; border-radius:50%; font-size:9px; align-items:center; justify-content:center; cursor:pointer; line-height:1; }
+    .sticker-item:hover .sticker-delete { display:flex; }
     .cal-sticker { display:block; margin-top:1px; line-height:1; }
     .cal-sticker img { width:28px; height:28px; object-fit:contain; }
 
@@ -623,7 +626,7 @@
 
   <!-- ── DAY DETAIL MODAL ──────────────────────────────────────────────── -->
   <div class="modal fade" id="dayModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
         <div class="modal-header bg-success text-white py-2">
           <h6 class="modal-title fw-bold" id="dayModalTitle"></h6>
@@ -639,8 +642,14 @@
               <button class="btn btn-sm btn-outline-danger py-0 px-2 d-none" id="btnRemoveDaySticker" style="font-size:.72rem;">Remove</button>
             </div>
           </div>
-          <div id="dayModalStickerPicker" class="d-none" style="max-height:220px;overflow-y:auto;">
+          <div id="dayModalStickerPicker" class="d-none" style="height:240px;min-height:120px;overflow-y:auto;resize:vertical;border:1px solid #dee2e6;border-radius:6px;padding:6px;">
             <div id="dayModalStickerGrid"></div>
+            <div class="border-top mt-2 pt-2">
+              <label class="btn btn-sm btn-outline-secondary w-100" style="cursor:pointer;font-size:.76rem;">
+                <i class="fas fa-upload me-1"></i>Upload My Own Sticker
+                <input type="file" accept="image/*" class="d-none" id="modalStickerUploadInput">
+              </label>
+            </div>
           </div>
           <button class="btn btn-sm btn-outline-secondary w-100 py-1" id="btnToggleDayStickerPicker" style="font-size:.78rem;">
             <i class="fas fa-sticky-note me-1"></i>Add / Change Sticker
@@ -1316,12 +1325,14 @@
     }
 
     // ── Calendar rendering ────────────────────────────────────────────────
-    function stickerHTML(filename, size = '1.1rem') {
-      if (!filename) return '';
-      if (filename.endsWith('.png')) {
-        return `<img src="/images/stickers/${encodeURIComponent(filename)}" alt="${filename.replace('.png','')}" style="width:${size};height:${size};object-fit:contain;vertical-align:middle;">`;
+    function stickerHTML(value, size = '1.1rem') {
+      if (!value) return '';
+      if (value.startsWith('/') || value.startsWith('http') || /\.(png|jpe?g|gif|webp|svg)$/i.test(value)) {
+        const src = (value.startsWith('/') || value.startsWith('http')) ? value : `/images/stickers/${encodeURIComponent(value)}`;
+        const label = value.split('/').pop().replace(/\.[^.]+$/, '');
+        return `<img src="${src}" alt="${label}" style="width:${size};height:${size};object-fit:contain;vertical-align:middle;">`;
       }
-      return `<span style="font-size:${size};line-height:1;">${filename}</span>`; // legacy emoji
+      return `<span style="font-size:${size};line-height:1;">${value}</span>`; // legacy emoji
     }
 
     function buildCalEvents() {
@@ -1557,21 +1568,30 @@
         bootstrap.Modal.getInstance(document.getElementById('dayModal'))?.hide();
       };
 
-      // Build sticker grid (reuse STICKER_CATEGORIES)
-      stickerGrid.innerHTML = STICKER_CATEGORIES.map(cat => `
+      // Build sticker grid — user stickers first, then built-in categories
+      function makeModalStickerItem(url, label) {
+        const safe = url.replace(/'/g, "\\'");
+        return `<div class="sticker-item" title="${label}" onclick="
+          dayStickers['${ymd}']='${safe}';
+          saveDayStickers();
+          renderCalendar();
+          bootstrap.Modal.getInstance(document.getElementById('dayModal'))?.hide();">
+          <img src="${url}" alt="${label}">
+        </div>`;
+      }
+
+      const mySection = userStickers.length
+        ? `<div class="sticker-cat-label">My Stickers</div><div class="sticker-grid">${
+            userStickers.map(s => makeModalStickerItem(s.url, s.filename)).join('')
+          }</div>` : '';
+
+      const builtInSection = STICKER_CATEGORIES.map(cat => `
         <div class="sticker-cat-label">${cat.name}</div>
         <div class="sticker-grid">
-          ${cat.stickers.map(f => {
-            const enc = encodeURIComponent(f);
-            return `<div class="sticker-item" title="${f.replace('.png','')}" onclick="
-              dayStickers['${ymd}']='${f}';
-              saveDayStickers();
-              renderCalendar();
-              bootstrap.Modal.getInstance(document.getElementById('dayModal'))?.hide();">
-              <img src="/images/stickers/${enc}" alt="${f.replace('.png','')}">
-            </div>`;
-          }).join('')}
+          ${cat.stickers.map(f => makeModalStickerItem(`/images/stickers/${encodeURIComponent(f)}`, f.replace('.png',''))).join('')}
         </div>`).join('');
+
+      stickerGrid.innerHTML = mySection + builtInSection;
 
       togglePickerBtn.onclick = () => {
         stickerPicker.classList.toggle('d-none');
@@ -1862,6 +1882,35 @@
     let decorPrefs = JSON.parse(localStorage.getItem(`intv_decor_${user?.student_id || 'guest'}`) || '{}');
     let dayStickers = JSON.parse(localStorage.getItem(`intv_stickers_${user?.student_id || 'guest'}`) || '{}');
     let pendingSticker = null;
+    let userStickers = []; // { filename, url } — user-uploaded custom stickers
+
+    async function loadUserStickers() {
+      if (!user?.student_id) return;
+      try {
+        const data = await apiFetch(`/api/intervention/stickers?student_id=${user.student_id}`);
+        userStickers = data.stickers || [];
+      } catch { userStickers = []; }
+    }
+
+    async function uploadSticker(file, onDone) {
+      if (!user?.student_id) return;
+      const fd = new FormData();
+      fd.append('sticker', file);
+      try {
+        const res = await fetch(`/api/intervention/stickers/upload?student_id=${user.student_id}`, { method:'POST', body: fd });
+        const data = await res.json();
+        if (data.url) { await loadUserStickers(); onDone(); }
+        else alert('Upload failed: ' + (data.error || 'unknown error'));
+      } catch (e) { alert('Upload failed: ' + e.message); }
+    }
+
+    async function deleteUserSticker(filename, onDone) {
+      try {
+        await apiFetch(`/api/intervention/stickers/${encodeURIComponent(filename)}?student_id=${user.student_id}`, { method:'DELETE' });
+        await loadUserStickers();
+        onDone();
+      } catch { /* ignore */ }
+    }
 
     function saveDecorPrefs() {
       if (isReadOnly) return;
@@ -2037,27 +2086,44 @@
     function buildStickerDrawer() {
       const body = document.getElementById('stickerDrawerBody');
       if (!body) return;
-      body.innerHTML = STICKER_CATEGORIES.map(cat => `
+
+      // My Stickers section (user-uploaded)
+      const mySection = userStickers.length ? `
+        <div class="sticker-cat-label">My Stickers</div>
+        <div class="sticker-grid">
+          ${userStickers.map(s => `
+            <div class="sticker-item" data-sticker="${s.url}" data-filename="${s.filename}" title="${s.filename}">
+              <img src="${s.url}" alt="${s.filename}">
+              <span class="sticker-delete" title="Delete">×</span>
+            </div>`).join('')}
+        </div>` : '';
+
+      // Built-in categories
+      const builtIn = STICKER_CATEGORIES.map(cat => `
         <div class="sticker-cat-label">${cat.name}</div>
         <div class="sticker-grid">
           ${cat.stickers.map(f => {
             const enc = encodeURIComponent(f);
-            return `<div class="sticker-item" data-sticker="${f}" title="${f.replace('.png','')}">
+            return `<div class="sticker-item" data-sticker="/images/stickers/${enc}" title="${f.replace('.png','')}">
               <img src="/images/stickers/${enc}" alt="${f.replace('.png','')}">
             </div>`;
           }).join('')}
         </div>`).join('');
 
+      body.innerHTML = mySection + builtIn;
+
+      // Select a sticker
       body.querySelectorAll('.sticker-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const file = item.dataset.sticker;
-          pendingSticker = pendingSticker === file ? null : file;
+        item.addEventListener('click', (e) => {
+          if (e.target.classList.contains('sticker-delete')) return; // handled separately
+          const src = item.dataset.sticker;
+          pendingSticker = pendingSticker === src ? null : src;
           body.querySelectorAll('.sticker-item').forEach(i => i.classList.remove('selected'));
           const status = document.getElementById('stickerStatus');
           const statusSpan = status?.querySelector('.flex-grow-1');
           if (pendingSticker) {
             item.classList.add('selected');
-            document.getElementById('stickerStatusImg').src = `/images/stickers/${encodeURIComponent(file)}`;
+            document.getElementById('stickerStatusImg').src = src;
             if (statusSpan) statusSpan.textContent = 'Click a calendar day to place';
             status?.classList.remove('d-none');
           } else {
@@ -2065,7 +2131,25 @@
           }
         });
       });
+
+      // Delete user sticker
+      body.querySelectorAll('.sticker-delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const item = btn.closest('.sticker-item');
+          const filename = item?.dataset.filename;
+          if (!filename || !confirm(`Remove "${filename}"?`)) return;
+          deleteUserSticker(filename, buildStickerDrawer);
+        });
+      });
     }
+
+    // Upload from drawer
+    document.getElementById('stickerDrawer')?.addEventListener('change', async (e) => {
+      const input = e.target.closest('input[type="file"]');
+      if (!input || !input.files[0]) return;
+      await uploadSticker(input.files[0], () => { input.value = ''; buildStickerDrawer(); });
+    });
 
     function openStickerDrawer() {
       document.getElementById('stickerDrawer').classList.add('open');
@@ -2094,19 +2178,38 @@
       status?.classList.remove('d-none');
     });
 
-    buildStickerDrawer();
+    // Load user stickers then build drawer; wire modal upload input
+    loadUserStickers().then(buildStickerDrawer);
 
-    function makeStickerEl(filename) {
+    document.getElementById('modalStickerUploadInput')?.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      await uploadSticker(file, async () => {
+        e.target.value = '';
+        // Rebuild the modal grid (re-open the picker section)
+        const grid = document.getElementById('dayModalStickerGrid');
+        if (grid) {
+          const mySection = userStickers.length
+            ? `<div class="sticker-cat-label">My Stickers</div><div class="sticker-grid">${
+                userStickers.map(s => `<div class="sticker-item" title="${s.filename}" onclick="dayStickers[document.getElementById('dayModalTitle').dataset.ymd||'']='${s.url.replace(/'/g,"\\'")}';saveDayStickers();renderCalendar();bootstrap.Modal.getInstance(document.getElementById('dayModal'))?.hide();"><img src="${s.url}" alt="${s.filename}"></div>`).join('')
+              }</div>` : '';
+          // Full rebuild is cleaner — just close and let next open rebuild
+          buildStickerDrawer();
+        }
+      });
+    });
+
+    function makeStickerEl(value) {
+      // value is either a full URL (/images/stickers/...) or a bare filename or a legacy emoji
       const span = document.createElement('span');
       span.className = 'cal-sticker';
-      if (filename && filename.endsWith('.png')) {
+      if (value && (value.startsWith('/') || value.startsWith('http') || /\.(png|jpe?g|gif|webp|svg)$/i.test(value))) {
         const img = document.createElement('img');
-        img.src = `/images/stickers/${encodeURIComponent(filename)}`;
-        img.alt = filename.replace('.png', '');
-        img.title = filename.replace('.png', '');
+        img.src = value.startsWith('/') || value.startsWith('http') ? value : `/images/stickers/${encodeURIComponent(value)}`;
+        img.alt = value.split('/').pop().replace(/\.[^.]+$/, '');
         span.appendChild(img);
-      } else if (filename) {
-        span.textContent = filename; // legacy emoji fallback
+      } else if (value) {
+        span.textContent = value; // legacy emoji fallback
       }
       return span;
     }
@@ -3080,6 +3183,10 @@
     </div>
     <div class="sticker-drawer-body" id="stickerDrawerBody"></div>
     <div class="sticker-drawer-footer">
+      <label class="btn btn-sm btn-outline-secondary w-100 mb-2" style="cursor:pointer;">
+        <i class="fas fa-upload me-1"></i>Upload My Own Sticker
+        <input type="file" accept="image/*" class="d-none" id="drawerStickerUploadInput">
+      </label>
       <button class="btn btn-sm btn-outline-danger w-100" id="btnEraseSticker">
         <i class="fas fa-eraser me-1"></i>Erase sticker from a day
       </button>
