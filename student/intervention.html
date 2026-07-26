@@ -150,12 +150,17 @@
 
     /* ── PRINT — physical weekly planner spread ──────────────────────────── */
     @media print {
-      /* body.pp-planner class is added by JS before calling window.print() */
       body.pp-planner > *:not(#print-planner-area) { display: none !important; }
       body.pp-planner #print-planner-area { display: block !important; }
       @page { size: letter landscape; margin: 0.4in; }
+      /* Cover */
       .pp-cover { text-align: center; page-break-after: always; padding: 2in 1in; }
       .pp-cover h1 { font-size: 28pt; }
+      .pp-cover p  { font-size: 14pt; color: #555; }
+      /* Section break */
+      .pp-section { page-break-before: always; margin-bottom: 12pt; }
+      .pp-section-title { font-size: 15pt; font-weight: bold; border-bottom: 2pt solid #333; margin-bottom: 10pt; padding-bottom: 4pt; }
+      /* Weekly planner */
       .pp-week { page-break-inside: avoid; page-break-after: always; }
       .pp-week-header { font-size: 13pt; font-weight: bold; border-bottom: 2pt solid #333; margin-bottom: 8pt; padding-bottom: 4pt; }
       .pp-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6pt; }
@@ -166,6 +171,38 @@
       .pp-lines    { margin-top: 6pt; }
       .pp-line     { border-bottom: 0.5pt solid #ddd; min-height: 14pt; }
       .pp-off      { background: #f5f5f5; color: #aaa; }
+      /* Monthly grid */
+      .pp-month-header { font-size: 14pt; font-weight: bold; margin-bottom: 6pt; }
+      .pp-month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3pt; margin-bottom: 16pt; }
+      .pp-month-dow { font-size: 7pt; font-weight: bold; text-align: center; text-transform: uppercase; color: #666; border-bottom: 0.5pt solid #ccc; padding-bottom: 2pt; margin-bottom: 2pt; }
+      .pp-month-cell { border: 0.5pt solid #ddd; border-radius: 3pt; padding: 3pt 4pt; min-height: 0.7in; vertical-align: top; }
+      .pp-month-cell.other-month { background: #f9f9f9; color: #bbb; }
+      .pp-month-cell.pp-off-day  { background: #f5f5f5; }
+      .pp-month-num { font-size: 9pt; font-weight: bold; }
+      .pp-month-badge { font-size: 6pt; font-weight: bold; border-radius: 50%; width: 11pt; height: 11pt; display: inline-flex; align-items: center; justify-content: center; margin-left: 2pt; }
+      .pp-month-badge-a { background: #e3f2fd; color: #1565c0; }
+      .pp-month-badge-b { background: #fce4ec; color: #880e4f; }
+      .pp-month-badge-c { background: #e9ecef; color: #495057; }
+      .pp-month-badge-amin { background: #dcedc8; color: #33691e; }
+      .pp-month-evt { font-size: 6pt; color: #333; padding: 1pt 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      /* Day view */
+      .pp-day-view { page-break-inside: avoid; page-break-after: always; }
+      .pp-day-view-header { font-size: 13pt; font-weight: bold; border-bottom: 2pt solid #333; margin-bottom: 8pt; padding-bottom: 4pt; }
+      .pp-day-period { display: grid; grid-template-columns: 80pt 1fr; gap: 4pt; border-bottom: 0.5pt solid #eee; padding: 4pt 0; font-size: 8pt; }
+      .pp-day-period-label { font-weight: bold; color: #444; }
+      /* To-do list */
+      .pp-todo-item { display: flex; gap: 6pt; font-size: 9pt; padding: 3pt 0; border-bottom: 0.25pt solid #eee; }
+      .pp-todo-box  { width: 9pt; height: 9pt; border: 0.75pt solid #666; flex-shrink: 0; margin-top: 1pt; }
+      .pp-todo-date { font-size: 7pt; color: #888; min-width: 55pt; }
+      /* Tests */
+      .pp-test-item { font-size: 9pt; padding: 3pt 6pt; border-left: 3pt solid #333; margin-bottom: 4pt; }
+      .pp-test-class { font-weight: bold; }
+      .pp-test-date  { font-size: 7pt; color: #666; }
+      /* Journal */
+      .pp-jentry { page-break-inside: avoid; margin-bottom: 18pt; }
+      .pp-jentry-date { font-size: 11pt; font-weight: bold; border-bottom: 1pt solid #bbb; margin-bottom: 4pt; padding-bottom: 3pt; }
+      .pp-jentry-prompt { font-size: 8pt; font-style: italic; color: #666; margin-bottom: 4pt; }
+      .pp-jentry-body { font-size: 9pt; line-height: 1.5; }
     }
   </style>
 </head>
@@ -498,14 +535,6 @@
 
     <!-- ══ JOURNAL TAB ══════════════════════════════════════════════════════ -->
     <div id="tab-journal" class="d-none">
-      <div class="d-flex justify-content-end mb-2 gap-2">
-        <button class="btn btn-sm btn-outline-success" id="btnExportPdf">
-          <i class="fas fa-file-pdf me-1"></i>Export PDF
-        </button>
-        <button class="btn btn-sm btn-outline-primary" id="btnExportPptx">
-          <i class="fas fa-file-powerpoint me-1"></i>Export PPTX
-        </button>
-      </div>
       <div class="row g-3">
         <div class="col-lg-7">
           <div class="card shadow-sm border-0">
@@ -869,6 +898,102 @@
         <div class="modal-footer py-2">
           <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
           <button class="btn btn-success btn-sm fw-bold" id="btnSaveSchedule">Save Schedule</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Print Options Modal ─────────────────────────────────────────────── -->
+  <div class="modal fade" id="printModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header py-2">
+          <h5 class="modal-title fw-bold"><i class="fas fa-print me-2 text-success"></i>Print Planner</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted small mb-3">Choose what to include and the date range for each section.</p>
+          <div class="d-flex flex-column gap-3">
+
+            <!-- Monthly Calendar -->
+            <div class="border rounded p-3">
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="prtMonth" checked>
+                <label class="form-check-label fw-bold" for="prtMonth"><i class="fas fa-calendar me-2 text-primary"></i>Monthly Calendar</label>
+              </div>
+              <div class="row g-2 ms-3" id="prtMonthRange">
+                <div class="col-6"><label class="form-label small mb-1">From</label><input type="month" class="form-control form-control-sm" id="prtMonthFrom"></div>
+                <div class="col-6"><label class="form-label small mb-1">To</label><input type="month" class="form-control form-control-sm" id="prtMonthTo"></div>
+              </div>
+            </div>
+
+            <!-- Weekly Planner -->
+            <div class="border rounded p-3">
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="prtWeek">
+                <label class="form-check-label fw-bold" for="prtWeek"><i class="fas fa-calendar-week me-2 text-success"></i>Weekly Planner</label>
+              </div>
+              <div class="row g-2 ms-3" id="prtWeekRange">
+                <div class="col-6"><label class="form-label small mb-1">Start week of</label><input type="date" class="form-control form-control-sm" id="prtWeekFrom"></div>
+                <div class="col-6"><label class="form-label small mb-1">End week of</label><input type="date" class="form-control form-control-sm" id="prtWeekTo"></div>
+              </div>
+            </div>
+
+            <!-- Day View -->
+            <div class="border rounded p-3">
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="prtDay">
+                <label class="form-check-label fw-bold" for="prtDay"><i class="fas fa-calendar-day me-2 text-warning"></i>Day View</label>
+              </div>
+              <div class="row g-2 ms-3" id="prtDayRange">
+                <div class="col-6"><label class="form-label small mb-1">From</label><input type="date" class="form-control form-control-sm" id="prtDayFrom"></div>
+                <div class="col-6"><label class="form-label small mb-1">To</label><input type="date" class="form-control form-control-sm" id="prtDayTo"></div>
+              </div>
+            </div>
+
+            <!-- To-Do List -->
+            <div class="border rounded p-3">
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="prtTodo">
+                <label class="form-check-label fw-bold" for="prtTodo"><i class="fas fa-check-square me-2 text-info"></i>To-Do List</label>
+              </div>
+              <div class="row g-2 ms-3" id="prtTodoRange">
+                <div class="col-6"><label class="form-label small mb-1">From</label><input type="date" class="form-control form-control-sm" id="prtTodoFrom"></div>
+                <div class="col-6"><label class="form-label small mb-1">To</label><input type="date" class="form-control form-control-sm" id="prtTodoTo"></div>
+              </div>
+            </div>
+
+            <!-- Tests & Quizzes -->
+            <div class="border rounded p-3">
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="prtTests">
+                <label class="form-check-label fw-bold" for="prtTests"><i class="fas fa-pencil-alt me-2 text-danger"></i>Tests &amp; Quizzes</label>
+              </div>
+              <div class="row g-2 ms-3" id="prtTestsRange">
+                <div class="col-6"><label class="form-label small mb-1">From</label><input type="date" class="form-control form-control-sm" id="prtTestsFrom"></div>
+                <div class="col-6"><label class="form-label small mb-1">To</label><input type="date" class="form-control form-control-sm" id="prtTestsTo"></div>
+              </div>
+            </div>
+
+            <!-- Journal Entries -->
+            <div class="border rounded p-3">
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="prtJournal">
+                <label class="form-check-label fw-bold" for="prtJournal"><i class="fas fa-book-open me-2 text-secondary"></i>Journal Entries</label>
+              </div>
+              <div class="row g-2 ms-3" id="prtJournalRange">
+                <div class="col-6"><label class="form-label small mb-1">From</label><input type="date" class="form-control form-control-sm" id="prtJournalFrom"></div>
+                <div class="col-6"><label class="form-label small mb-1">To (leave blank for all)</label><input type="date" class="form-control form-control-sm" id="prtJournalTo"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="modal-footer py-2">
+          <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success btn-sm fw-bold" id="btnDoPrint">
+            <i class="fas fa-print me-1"></i>Print
+          </button>
         </div>
       </div>
     </div>
@@ -1872,52 +1997,227 @@
 
     // ── Print Planner ─────────────────────────────────────────────────────
     document.getElementById('btnPrintPlanner').addEventListener('click', () => {
-      // Build week containing current view anchor
-      const anchor = currentView === 'day'
-        ? new Date(calYear, calMonth, calDay)
-        : new Date(calYear, calMonth, 1);
+      // Pre-fill date defaults based on current view
+      const today = new Date();
+      const ym = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      const ymd2 = d => toYMD(d);
+      // Month defaults: current month only
+      document.getElementById('prtMonthFrom').value = ym(new Date(calYear, calMonth));
+      document.getElementById('prtMonthTo').value   = ym(new Date(calYear, calMonth));
+      // Week defaults: Monday of current week
+      const anchor = new Date(calYear, calMonth, calDay);
       const dow = anchor.getDay();
-      const monday = new Date(anchor);
-      monday.setDate(anchor.getDate() - (dow === 0 ? 6 : dow - 1));
+      const mon = new Date(anchor); mon.setDate(anchor.getDate() - (dow === 0 ? 6 : dow - 1));
+      const fri = new Date(mon); fri.setDate(mon.getDate() + 4);
+      document.getElementById('prtWeekFrom').value = ymd2(mon);
+      document.getElementById('prtWeekTo').value   = ymd2(fri);
+      // Day defaults: today
+      document.getElementById('prtDayFrom').value  = todayStr;
+      document.getElementById('prtDayTo').value    = todayStr;
+      // Todo/tests defaults: today + 30 days
+      const future = new Date(today); future.setDate(today.getDate() + 30);
+      document.getElementById('prtTodoFrom').value   = todayStr;
+      document.getElementById('prtTodoTo').value     = ymd2(future);
+      document.getElementById('prtTestsFrom').value  = todayStr;
+      document.getElementById('prtTestsTo').value    = ymd2(future);
+      document.getElementById('prtJournalFrom').value = '2026-08-01';
+      document.getElementById('prtJournalTo').value   = '';
+      new bootstrap.Modal(document.getElementById('printModal')).show();
+    });
 
-      const days = Array.from({length: 7}, (_, i) => {
-        const d = new Date(monday); d.setDate(monday.getDate() + i); return d;
-      });
-      const weekLabel = `${days[0].toLocaleDateString('en-US',{month:'long',day:'numeric'})} – ${days[6].toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`;
+    // Toggle range visibility when checkbox changes
+    ['Month','Week','Day','Todo','Tests','Journal'].forEach(k => {
+      const cb = document.getElementById(`prt${k}`);
+      const rng = document.getElementById(`prt${k}Range`);
+      if (cb && rng) {
+        const upd = () => { rng.style.opacity = cb.checked ? '1' : '.4'; rng.style.pointerEvents = cb.checked ? '' : 'none'; };
+        cb.addEventListener('change', upd); upd();
+      }
+    });
+
+    function mondayOf(dateStr) {
+      const d = new Date(dateStr + 'T12:00:00');
+      const dow = d.getDay();
+      d.setDate(d.getDate() - (dow === 0 ? 6 : dow - 1));
+      return d;
+    }
+
+    document.getElementById('btnDoPrint').addEventListener('click', async () => {
       const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.student_id;
-
       const printArea = document.getElementById('print-planner-area');
-      printArea.innerHTML = `
-        <div class="pp-cover">
-          <h1>${name}'s Planner</h1>
-          <p>${new Date(calYear, calMonth).toLocaleDateString('en-US',{month:'long',year:'numeric'})}</p>
-        </div>
-        <div class="pp-week">
-          <div class="pp-week-header">Week of ${weekLabel}</div>
-          <div class="pp-days">
-            ${days.map(d => {
+      let html = `<div class="pp-cover"><h1>${name}'s Planner</h1><p>Printed ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</p></div>`;
+
+      // ── Monthly Calendar ──────────────────────────────────────────────
+      if (document.getElementById('prtMonth').checked) {
+        const fromM = document.getElementById('prtMonthFrom').value;
+        const toM   = document.getElementById('prtMonthTo').value;
+        if (fromM && toM) {
+          let [fy, fm] = fromM.split('-').map(Number);
+          const [ty, tm] = toM.split('-').map(Number);
+          while (fy < ty || (fy === ty && fm <= tm)) {
+            const daysInMonth = new Date(fy, fm, 0).getDate();
+            const firstDow = new Date(fy, fm - 1, 1).getDay();
+            const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            let grid = '';
+            ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => { grid += `<div class="pp-month-dow">${d}</div>`; });
+            for (let i = 0; i < firstDow; i++) grid += `<div class="pp-month-cell other-month"></div>`;
+            for (let d = 1; d <= daysInMonth; d++) {
+              const dt = new Date(fy, fm - 1, d);
+              const ymd = toYMD(dt);
+              const isWknd = dt.getDay() === 0 || dt.getDay() === 6;
+              const sd = schoolSpecialDates[ymd];
+              const b = blockBadgeInfo(sd?.type || '');
+              const evts = calEvents[ymd] || [];
+              const stk = dayStickers[ymd] || '';
+              const badgeHtml = b ? `<span class="pp-month-badge pp-month-badge-${b.cls.replace('cal-block-','').replace('-','')}">${b.label}</span>` : '';
+              grid += `<div class="pp-month-cell ${isWknd || (sd && !b) ? 'pp-off-day' : ''}">
+                <div><span class="pp-month-num">${d}</span>${badgeHtml}${stk ? ` <span>${stk}</span>` : ''}</div>
+                ${evts.slice(0,3).map(e => `<div class="pp-month-evt">${e.label.slice(0,22)}</div>`).join('')}
+              </div>`;
+            }
+            html += `<div class="pp-section"><div class="pp-month-header">${months[fm-1]} ${fy}</div><div class="pp-month-grid">${grid}</div></div>`;
+            fm++; if (fm > 12) { fm = 1; fy++; }
+          }
+        }
+      }
+
+      // ── Weekly Planner ────────────────────────────────────────────────
+      if (document.getElementById('prtWeek').checked) {
+        const fromW = document.getElementById('prtWeekFrom').value;
+        const toW   = document.getElementById('prtWeekTo').value;
+        if (fromW && toW) {
+          let mon = mondayOf(fromW);
+          const endMon = mondayOf(toW);
+          endMon.setDate(endMon.getDate() + 7);
+          while (mon < endMon) {
+            const days = Array.from({length:7}, (_, i) => { const d = new Date(mon); d.setDate(mon.getDate()+i); return d; });
+            const wlbl = `${days[0].toLocaleDateString('en-US',{month:'long',day:'numeric'})} – ${days[6].toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`;
+            html += `<div class="pp-week"><div class="pp-week-header">Week of ${wlbl}</div><div class="pp-days">`;
+            days.forEach(d => {
               const ymd = toYMD(d);
-              const sdInfo = schoolSpecialDates[ymd];
+              const sd = schoolSpecialDates[ymd];
+              const b = blockBadgeInfo(sd?.type || '');
               const evts = calEvents[ymd] || [];
               const tdos = todos.filter(t => t.date === ymd && !t.done);
               const tsts = tests.filter(t => t.test_date === ymd);
-              const isOff = (d.getDay() === 0 || d.getDay() === 6) || (!!sdInfo && sdInfo.type !== 'A' && sdInfo.type !== 'B');
-              const blockType = sdInfo?.type === 'A' || sdInfo?.type === 'B' ? sdInfo.type : '';
-              return `<div class="pp-day-col ${isOff ? 'pp-off' : ''}">
-                <div class="pp-day-name">${d.toLocaleDateString('en-US',{weekday:'short'})} ${blockType ? `[${blockType}]` : ''}</div>
+              const isOff = (d.getDay() === 0 || d.getDay() === 6) || (sd && !b);
+              const stk = dayStickers[ymd] ? ` ${dayStickers[ymd]}` : '';
+              html += `<div class="pp-day-col ${isOff ? 'pp-off' : ''}">
+                <div class="pp-day-name">${d.toLocaleDateString('en-US',{weekday:'short'})} ${b ? `[${b.label}]` : ''}${stk}</div>
                 <div class="pp-day-num">${d.getDate()}</div>
-                ${isOff && sdInfo ? `<div class="pp-event">${sdInfo.label}</div>` : ''}
-                ${evts.map(e => `<div class="pp-event">${e.submitted ? '✓ ' : ''}${e.label}</div>`).join('')}
-                ${tsts.map(t => `<div class="pp-event">📝 ${t.class_name}${t.title ? ` – ${t.title}` : ''}</div>`).join('')}
+                ${isOff && sd ? `<div class="pp-event">${sd.label}</div>` : ''}
+                ${evts.map(e => `<div class="pp-event">${e.submitted?'✓ ':''}${e.label}</div>`).join('')}
+                ${tsts.map(t => `<div class="pp-event">📝 ${t.class_name}${t.title?` – ${t.title}`:''}</div>`).join('')}
                 ${tdos.map(t => `<div class="pp-event">□ ${t.text}</div>`).join('')}
                 <div class="pp-lines">${'<div class="pp-line"></div>'.repeat(8)}</div>
               </div>`;
-            }).join('')}
-          </div>
-        </div>`;
+            });
+            html += `</div></div>`;
+            mon.setDate(mon.getDate() + 7);
+          }
+        }
+      }
+
+      // ── Day View ──────────────────────────────────────────────────────
+      if (document.getElementById('prtDay').checked) {
+        const fromD = document.getElementById('prtDayFrom').value;
+        const toD   = document.getElementById('prtDayTo').value;
+        if (fromD && toD) {
+          let cur = new Date(fromD + 'T12:00:00');
+          const end = new Date(toD + 'T12:00:00');
+          while (cur <= end) {
+            const ymd = toYMD(cur);
+            const sd = schoolSpecialDates[ymd];
+            const b = blockBadgeInfo(sd?.type || '');
+            const pKeys = sd?.type?.startsWith('B') ? ['B2','B4','B6','B8'] : ['A1','A3','A5','A7'];
+            const dayLbl = cur.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+            const stk = dayStickers[ymd] ? ` ${dayStickers[ymd]}` : '';
+            html += `<div class="pp-day-view"><div class="pp-day-view-header">${dayLbl} ${b ? `[${b.label}]` : ''}${stk}</div>`;
+            // Bell schedule periods or fallback to block periods
+            const bps = b && bellSchedule.length
+              ? bellSchedule.filter(r => r.schedule_type === sd.type).sort((a,c) => a.start_time.localeCompare(c.start_time))
+              : [];
+            if (bps.length) {
+              bps.forEach(p => {
+                const cls = mySchedule[p.period_label] || p.course_name || '';
+                html += `<div class="pp-day-period"><div class="pp-day-period-label">${p.period_label}${cls?' · '+cls:''}</div><div>${p.start_time.slice(0,5)}–${p.end_time.slice(0,5)}</div></div>`;
+              });
+            } else if (b) {
+              pKeys.forEach(k => {
+                const cls = mySchedule[k] || '';
+                html += `<div class="pp-day-period"><div class="pp-day-period-label">${k}${cls?' · '+cls:''}</div><div class="pp-lines" style="flex:1">${'<div class="pp-line"></div>'.repeat(3)}</div></div>`;
+              });
+            }
+            html += `<div class="pp-lines">${'<div class="pp-line"></div>'.repeat(10)}</div></div>`;
+            cur.setDate(cur.getDate() + 1);
+          }
+        }
+      }
+
+      // ── To-Do List ────────────────────────────────────────────────────
+      if (document.getElementById('prtTodo').checked) {
+        const fromT = document.getElementById('prtTodoFrom').value;
+        const toT   = document.getElementById('prtTodoTo').value;
+        const filtered = todos.filter(t => (!fromT || t.date >= fromT) && (!toT || t.date <= toT));
+        html += `<div class="pp-section"><div class="pp-section-title"><i class="fas fa-check-square"></i> To-Do List</div>`;
+        if (filtered.length) {
+          filtered.sort((a,b) => a.date.localeCompare(b.date)).forEach(t => {
+            const d = new Date(t.date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+            html += `<div class="pp-todo-item"><div class="pp-todo-box"></div><div class="pp-todo-date">${d}</div><div>${t.text}</div></div>`;
+          });
+        } else {
+          html += `<p style="font-size:9pt;color:#888;">No to-do items in this date range.</p>`;
+        }
+        html += `</div>`;
+      }
+
+      // ── Tests & Quizzes ───────────────────────────────────────────────
+      if (document.getElementById('prtTests').checked) {
+        const fromT = document.getElementById('prtTestsFrom').value;
+        const toT   = document.getElementById('prtTestsTo').value;
+        const filtered = tests.filter(t => (!fromT || t.test_date >= fromT) && (!toT || t.test_date <= toT));
+        html += `<div class="pp-section"><div class="pp-section-title"><i class="fas fa-pencil-alt"></i> Tests &amp; Quizzes</div>`;
+        if (filtered.length) {
+          filtered.sort((a,b) => a.test_date.localeCompare(b.test_date)).forEach(t => {
+            const d = new Date(t.test_date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+            html += `<div class="pp-test-item"><div class="pp-test-class">${t.class_name}${t.title?` — ${t.title}`:''}</div><div class="pp-test-date">${d} · ${t.test_type}</div></div>`;
+          });
+        } else {
+          html += `<p style="font-size:9pt;color:#888;">No tests in this date range.</p>`;
+        }
+        html += `</div>`;
+      }
+
+      // ── Journal Entries ───────────────────────────────────────────────
+      if (document.getElementById('prtJournal').checked) {
+        const fromJ = document.getElementById('prtJournalFrom').value;
+        const toJ   = document.getElementById('prtJournalTo').value;
+        const allEntries = await getAllJournalEntries();
+        const filtered = allEntries.filter(e => (!fromJ || e.entry_date >= fromJ) && (!toJ || e.entry_date <= toJ));
+        html += `<div class="pp-section"><div class="pp-section-title"><i class="fas fa-book-open"></i> Journal Entries</div>`;
+        if (filtered.length) {
+          filtered.forEach(e => {
+            const d = new Date(e.entry_date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+            html += `<div class="pp-jentry">
+              <div class="pp-jentry-date">${d}</div>
+              ${e.prompt ? `<div class="pp-jentry-prompt">Prompt: ${e.prompt}</div>` : ''}
+              <div class="pp-jentry-body">${(e.content || '').replace(/\n/g,'<br>')}</div>
+            </div>`;
+          });
+        } else {
+          html += `<p style="font-size:9pt;color:#888;">No journal entries in this date range.</p>`;
+        }
+        html += `</div>`;
+      }
+
+      bootstrap.Modal.getInstance(document.getElementById('printModal'))?.hide();
+      printArea.innerHTML = html;
       document.body.classList.add('pp-planner');
       window.print();
-      setTimeout(() => document.body.classList.remove('pp-planner'), 800);
+      setTimeout(() => {
+        document.body.classList.remove('pp-planner');
+        printArea.innerHTML = '';
+      }, 1200);
     });
 
     // ── Student schedule modal ────────────────────────────────────────────
@@ -2243,75 +2543,6 @@
       return (data.entries || []).sort((a, b) => a.entry_date.localeCompare(b.entry_date));
     }
 
-    document.getElementById('btnExportPdf').addEventListener('click', async () => {
-      const entries = await getAllJournalEntries();
-      if (!entries.length) { alert('No journal entries to export yet.'); return; }
-      const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.student_id;
-      const printArea = document.getElementById('print-journal-area');
-      printArea.innerHTML = `
-        <h1 style="color:#2e7d32;font-size:22pt;margin-bottom:4pt;">Growth Mindset Journal</h1>
-        <p style="color:#555;font-size:10pt;margin-bottom:24pt;">${name} · Exported ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</p>
-        ${entries.map(e => {
-          const dt = new Date(e.entry_date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-          return `<div class="journal-print-entry">
-            <div class="journal-print-header">${dt}</div>
-            ${e.prompt ? `<div class="journal-print-prompt">Prompt: ${e.prompt}</div>` : ''}
-            <div class="journal-print-body">${(e.content || '').replace(/\n/g,'<br>')}</div>
-            <div class="journal-print-divider"></div>
-          </div>`;
-        }).join('')}`;
-      printArea.style.display = 'block';
-      window.print();
-      setTimeout(() => { printArea.style.display = 'none'; }, 1000);
-    });
-
-    document.getElementById('btnExportPptx').addEventListener('click', async () => {
-      const btn = document.getElementById('btnExportPptx');
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Generating…';
-      try {
-        const entries = await getAllJournalEntries();
-        if (!entries.length) { alert('No journal entries to export yet.'); return; }
-        await window.loadPptxGen();
-        const pptx = new window.PptxGenJS();
-        pptx.layout = 'LAYOUT_WIDE';
-        pptx.title = 'Growth Mindset Journal';
-
-        const GREEN = '2e7d32', LIGHT_GREEN = 'e8f5e9', DARK = '212121', GRAY = '757575';
-
-        // Title slide
-        const title = pptx.addSlide();
-        title.background = { color: GREEN };
-        title.addText('Growth Mindset Journal', { x:0.5, y:1.5, w:12, h:1.2, fontSize:40, bold:true, color:'FFFFFF', align:'center' });
-        const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.student_id;
-        title.addText(name, { x:0.5, y:2.9, w:12, h:0.6, fontSize:20, color:'FFFFFF', align:'center' });
-        title.addText(`${entries.length} entries · Exported ${new Date().toLocaleDateString()}`, { x:0.5, y:3.6, w:12, h:0.5, fontSize:14, color:'A5D6A7', align:'center' });
-
-        for (const e of entries) {
-          const slide = pptx.addSlide();
-          slide.background = { color: LIGHT_GREEN };
-          const dt = new Date(e.entry_date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-          // Date header bar
-          slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:13.33, h:0.9, fill:{ color: GREEN } });
-          slide.addText(dt, { x:0.3, y:0.1, w:12.7, h:0.7, fontSize:18, bold:true, color:'FFFFFF' });
-          // Prompt (if any)
-          let bodyY = 1.1;
-          if (e.prompt) {
-            slide.addText(`Prompt: ${e.prompt}`, { x:0.4, y:bodyY, w:12.5, h:0.8, fontSize:11, italic:true, color:GRAY, wrap:true });
-            bodyY += 0.9;
-          }
-          // Content
-          const content = e.content || '(No entry written)';
-          slide.addText(content, { x:0.4, y:bodyY, w:12.5, h:7.5 - bodyY, fontSize:14, color:DARK, wrap:true, valign:'top' });
-        }
-
-        await pptx.writeFile({ fileName: `growth-mindset-journal-${user.student_id}.pptx` });
-      } catch (err) {
-        console.error(err);
-        alert('Export failed. Please try again.');
-      } finally {
-        btn.disabled = false; btn.innerHTML = '<i class="fas fa-file-powerpoint me-1"></i>Export PPTX';
-      }
-    });
 
     init();
   </script>
