@@ -380,7 +380,7 @@
 
           <!-- Week view (hidden by default) -->
           <div id="weekView" class="d-none">
-            <div class="d-grid gap-2" style="grid-template-columns: repeat(5,1fr); display:grid;" id="weekGrid"></div>
+            <div class="d-grid gap-2" style="grid-template-columns: repeat(7,1fr); display:grid;" id="weekGrid"></div>
           </div>
 
           <!-- Day view (hidden by default) -->
@@ -428,6 +428,9 @@
               </div>
               <button class="btn btn-success btn-sm fw-bold w-100" id="btnAddTodo">
                 <i class="fas fa-plus me-1"></i>Add Task
+              </button>
+              <button class="btn btn-outline-secondary btn-sm w-100 mt-1 d-none" id="btnCancelEditTodo">
+                Cancel Edit
               </button>
             </div>
           </div>
@@ -743,7 +746,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header bg-success text-white py-2">
-          <h6 class="modal-title fw-bold"><i class="fas fa-pencil-alt me-2"></i>Add Test / Quiz</h6>
+          <h6 class="modal-title fw-bold" id="testModalTitle"><i class="fas fa-pencil-alt me-2"></i>Add Test / Quiz</h6>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
@@ -1402,14 +1405,14 @@
       monday.setDate(anchor.getDate() - (dow === 0 ? 6 : dow - 1));
 
       // Update month label to show week range
-      const friday = new Date(monday); friday.setDate(monday.getDate() + 4);
+      const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
       const mLabel = monday.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      const fLabel = friday.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-      document.getElementById('calMonthLabel').textContent = `${mLabel} – ${fLabel}`;
+      const sLabel = sunday.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      document.getElementById('calMonthLabel').textContent = `${mLabel} – ${sLabel}`;
 
       let html = '';
-      const dayNames = ['Mon','Tue','Wed','Thu','Fri'];
-      for (let i = 0; i < 5; i++) {
+      const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      for (let i = 0; i < 7; i++) {
         const dt = new Date(monday);
         dt.setDate(monday.getDate() + i);
         const ymd = toYMD(dt);
@@ -1424,7 +1427,8 @@
         const dayTests = tests.filter(t => t.test_date === ymd);
         const assignEvents = events.filter(e => e.type === 'assign');
 
-        html += `<div class="week-col ${isToday ? 'border-2' : ''}" style="${isToday ? `border-color:var(--p-accent)!important` : ''}">
+        const isWeekendCol = i >= 5;
+        html += `<div class="week-col ${isToday ? 'border-2' : ''}" style="${isToday ? `border-color:var(--p-accent)!important` : ''}${isWeekendCol ? ';background:#f8f9fa;' : ''}">
           <div class="week-day-name d-flex align-items-center gap-1 flex-wrap">
             <span>${dayNames[i]} ${dt.getMonth()+1}/${dt.getDate()}</span>
             ${badge ? `<span class="cal-block-badge ${badge.cls}">${badge.label}</span>` : ''}
@@ -2545,14 +2549,15 @@
       const priorityColor = { high: 'danger', normal: 'secondary', low: 'light' };
       el.innerHTML = list.map(t => {
         const dt = t.date ? new Date(t.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-        return `<div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom todo-row ${t.done ? 'opacity-50' : ''}" style="cursor:pointer">
+        return `<div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom todo-row ${t.done ? 'opacity-50' : ''}">
           <input type="checkbox" class="form-check-input mt-0 flex-shrink-0" ${t.done ? 'checked' : ''} onchange="window.toggleTodo('${t.id}')">
           <div class="flex-grow-1 ${t.done ? 'text-decoration-line-through text-muted' : ''}">
             <span class="small fw-bold">${t.text}</span>
             ${dt ? `<span class="text-muted small ms-2"><i class="fas fa-calendar me-1"></i>${dt}</span>` : ''}
           </div>
           <span class="badge bg-${priorityColor[t.priority] || 'secondary'} text-${t.priority === 'low' ? 'dark' : 'white'}" style="font-size:.6rem;">${t.priority}</span>
-          <button class="btn btn-sm p-0 text-muted" onclick="window.deleteTodo('${t.id}')"><i class="fas fa-times" style="font-size:.7rem;"></i></button>
+          <button class="btn btn-sm p-0 text-primary intv-edit-only" onclick="window.editTodo('${t.id}')" title="Edit"><i class="fas fa-pencil-alt" style="font-size:.7rem;"></i></button>
+          <button class="btn btn-sm p-0 text-muted intv-edit-only" onclick="window.deleteTodo('${t.id}')" title="Delete"><i class="fas fa-times" style="font-size:.7rem;"></i></button>
         </div>`;
       }).join('');
     }
@@ -2580,20 +2585,57 @@
       }).join('');
     }
 
+    let editingTodoId = null;
+
+    function resetTodoForm() {
+      editingTodoId = null;
+      document.getElementById('todoText').value = '';
+      document.getElementById('todoDate').value = '';
+      document.getElementById('todoPriority').value = 'normal';
+      document.getElementById('btnAddTodo').innerHTML = '<i class="fas fa-plus me-1"></i>Add Task';
+      document.getElementById('btnAddTodo').className = 'btn btn-success btn-sm fw-bold w-100';
+      document.getElementById('btnCancelEditTodo').classList.add('d-none');
+    }
+
     document.getElementById('btnAddTodo').addEventListener('click', () => {
       const text = document.getElementById('todoText').value.trim();
       if (!text) return;
-      const todo = { id: Date.now().toString(), text, date: document.getElementById('todoDate').value || '', priority: document.getElementById('todoPriority').value, done: false };
-      todos.push(todo);
+      if (editingTodoId) {
+        const t = todos.find(x => x.id === editingTodoId);
+        if (t) {
+          t.text     = text;
+          t.date     = document.getElementById('todoDate').value || '';
+          t.priority = document.getElementById('todoPriority').value;
+        }
+        resetTodoForm();
+      } else {
+        const todo = { id: Date.now().toString(), text, date: document.getElementById('todoDate').value || '', priority: document.getElementById('todoPriority').value, done: false };
+        todos.push(todo);
+      }
       saveTodos();
       renderTodos(document.getElementById('todoFilterDate')?.value || '');
       renderCalendar();
-      document.getElementById('todoText').value = '';
     });
+
+    document.getElementById('btnCancelEditTodo').addEventListener('click', resetTodoForm);
 
     document.getElementById('todoText').addEventListener('keydown', e => {
       if (e.key === 'Enter') document.getElementById('btnAddTodo').click();
     });
+
+    window.editTodo = (id) => {
+      const t = todos.find(x => x.id === id);
+      if (!t) return;
+      editingTodoId = id;
+      document.getElementById('todoText').value    = t.text;
+      document.getElementById('todoDate').value    = t.date || '';
+      document.getElementById('todoPriority').value = t.priority || 'normal';
+      document.getElementById('btnAddTodo').innerHTML = '<i class="fas fa-save me-1"></i>Save Changes';
+      document.getElementById('btnAddTodo').className = 'btn btn-primary btn-sm fw-bold w-100';
+      document.getElementById('btnCancelEditTodo').classList.remove('d-none');
+      document.getElementById('todoText').focus();
+      document.getElementById('todoText').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
 
     window.toggleTodo = (id) => {
       const t = todos.find(x => x.id === id);
@@ -2678,26 +2720,60 @@
               <button class="btn btn-sm ${t.studied ? 'btn-success' : 'btn-outline-success'} py-0 px-2" onclick="window.toggleStudied(${t.id}, ${!t.studied})" title="Studied?">
                 <i class="fas fa-${t.studied ? 'check' : 'book-open'}" style="font-size:.75rem;"></i>
               </button>
-              <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="window.deleteTest(${t.id})"><i class="fas fa-trash" style="font-size:.7rem;"></i></button>
+              <button class="btn btn-sm btn-outline-primary py-0 px-2 intv-edit-only" onclick="window.editTest(${t.id})" title="Edit"><i class="fas fa-pencil-alt" style="font-size:.7rem;"></i></button>
+              <button class="btn btn-sm btn-outline-danger py-0 px-2 intv-edit-only" onclick="window.deleteTest(${t.id})"><i class="fas fa-trash" style="font-size:.7rem;"></i></button>
             </div>
           </div>
         </div>`;
       }).join('');
     }
 
+    let editingTestId = null;
+
+    function resetTestModal() {
+      editingTestId = null;
+      document.getElementById('testModalTitle').innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Add Test / Quiz';
+      document.getElementById('btnSaveTest').textContent = 'Add to Planner';
+      ['testClass','testTitle','testNotes'].forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('testDate').value = '';
+      document.getElementById('testType').value = 'quiz';
+    }
+
+    document.getElementById('testModal').addEventListener('hidden.bs.modal', resetTestModal);
+
     document.getElementById('btnSaveTest').addEventListener('click', async () => {
       const cls = document.getElementById('testClass').value.trim();
       const date = document.getElementById('testDate').value;
       if (!cls || !date) { alert('Class and date are required.'); return; }
-      await apiFetch('/api/intervention/tests', { method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ student_id: user.student_id, class_name: cls, test_type: document.getElementById('testType').value,
-          title: document.getElementById('testTitle').value, test_date: date, notes: document.getElementById('testNotes').value }) });
+      const payload = { student_id: user.student_id, class_name: cls,
+        test_type: document.getElementById('testType').value,
+        title: document.getElementById('testTitle').value,
+        test_date: date, notes: document.getElementById('testNotes').value };
+      if (editingTestId) {
+        await apiFetch(`/api/intervention/tests/${editingTestId}`, { method:'PUT', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(payload) });
+      } else {
+        await apiFetch('/api/intervention/tests', { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(payload) });
+      }
       bootstrap.Modal.getInstance(document.getElementById('testModal'))?.hide();
-      ['testClass','testTitle','testNotes'].forEach(id => { document.getElementById(id).value = ''; });
-      document.getElementById('testDate').value = '';
       await loadTests(); renderTests();
-      renderCalendar(); // tests also appear on calendar
+      renderCalendar();
     });
+
+    window.editTest = (id) => {
+      const t = tests.find(x => x.id === id);
+      if (!t) return;
+      editingTestId = id;
+      document.getElementById('testModalTitle').innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Edit Test / Quiz';
+      document.getElementById('btnSaveTest').textContent = 'Save Changes';
+      document.getElementById('testClass').value = t.class_name || '';
+      document.getElementById('testType').value  = t.test_type  || 'quiz';
+      document.getElementById('testTitle').value = t.title      || '';
+      document.getElementById('testDate').value  = t.test_date  || '';
+      document.getElementById('testNotes').value = t.notes      || '';
+      new bootstrap.Modal(document.getElementById('testModal')).show();
+    };
 
     window.toggleStudied = async (id, val) => {
       await apiFetch(`/api/intervention/tests/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'},

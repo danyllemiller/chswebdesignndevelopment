@@ -440,15 +440,32 @@ router.post('/intervention/tests', async (req, res) => {
 // Toggle studied / update notes
 router.put('/intervention/tests/:id', async (req, res) => {
     const { id } = req.params;
-    const { student_id, studied, notes } = req.body;
+    const { student_id, studied, notes, class_name, test_type, title, test_date } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
         const connection = await getDbConnection();
         await connection.execute(TESTS_DDL);
-        await connection.execute(
-            'UPDATE intervention_tests SET studied = COALESCE(?, studied), notes = COALESCE(?, notes) WHERE id = ? AND student_id = ?',
-            [studied != null ? (studied ? 1 : 0) : null, notes ?? null, id, student_id]
-        );
+        if (class_name !== undefined || test_type !== undefined || title !== undefined || test_date !== undefined) {
+            // Full edit
+            await connection.execute(
+                `UPDATE intervention_tests SET
+                    class_name = COALESCE(?, class_name),
+                    test_type  = COALESCE(?, test_type),
+                    title      = COALESCE(?, title),
+                    test_date  = COALESCE(?, test_date),
+                    studied    = COALESCE(?, studied),
+                    notes      = COALESCE(?, notes)
+                 WHERE id = ? AND student_id = ?`,
+                [class_name ?? null, test_type ?? null, title ?? null, test_date ?? null,
+                 studied != null ? (studied ? 1 : 0) : null, notes ?? null, id, student_id]
+            );
+        } else {
+            // Toggle-only (studied/notes)
+            await connection.execute(
+                'UPDATE intervention_tests SET studied = COALESCE(?, studied), notes = COALESCE(?, notes) WHERE id = ? AND student_id = ?',
+                [studied != null ? (studied ? 1 : 0) : null, notes ?? null, id, student_id]
+            );
+        }
         await connection.end();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update test' }); }
