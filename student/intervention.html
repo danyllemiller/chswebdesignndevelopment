@@ -122,8 +122,11 @@
   <div class="container pb-5">
 
     <!-- Tab Nav -->
-    <ul class="nav nav-tabs intv-nav mb-3" id="intv-tabs">
+    <ul class="nav nav-tabs intv-nav mb-3 flex-wrap" id="intv-tabs">
       <li class="nav-item"><a class="nav-link active" data-tab="planner" href="#"><i class="fas fa-calendar-alt me-1"></i>Planner</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="todo" href="#"><i class="fas fa-check-square me-1"></i>To-Do</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="tests" href="#"><i class="fas fa-pencil-alt me-1"></i>Tests &amp; Quizzes</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="habits" href="#"><i class="fas fa-fire me-1"></i>Habits</a></li>
       <li class="nav-item"><a class="nav-link" data-tab="journal" href="#"><i class="fas fa-book-open me-1"></i>Journal</a></li>
       <li class="nav-item"><a class="nav-link" data-tab="goals" href="#"><i class="fas fa-bullseye me-1"></i>Goals</a></li>
       <li class="nav-item"><a class="nav-link" data-tab="assignments" href="#"><i class="fas fa-tasks me-1"></i>Assignments</a></li>
@@ -249,6 +252,113 @@
         <span><span class="cal-block-badge cal-block-b">B</span> B-Day</span>
         <span><span class="cal-dot cal-dot-assign me-1"></span>Assignment due</span>
         <span><span class="badge bg-secondary me-1" style="font-size:.6rem;">OFF</span>No school</span>
+      </div>
+    </div>
+
+    <!-- ══ TO-DO TAB ════════════════════════════════════════════════════════ -->
+    <div id="tab-todo" class="d-none">
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+              <h6 class="fw-bold text-success mb-0"><i class="fas fa-plus me-2"></i>Add Task</h6>
+            </div>
+            <div class="card-body">
+              <div class="mb-2">
+                <input type="text" class="form-control" id="todoText" placeholder="What do you need to do?">
+              </div>
+              <div class="row g-2 mb-2">
+                <div class="col-8">
+                  <input type="date" class="form-control form-control-sm" id="todoDate">
+                </div>
+                <div class="col-4">
+                  <select class="form-select form-select-sm" id="todoPriority">
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+              </div>
+              <button class="btn btn-success btn-sm fw-bold w-100" id="btnAddTodo">
+                <i class="fas fa-plus me-1"></i>Add Task
+              </button>
+            </div>
+          </div>
+
+          <!-- Countdowns -->
+          <div class="card shadow-sm border-0 mt-3">
+            <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold text-success mb-0"><i class="fas fa-hourglass-half me-2"></i>Countdowns</h6>
+              <button class="btn btn-sm btn-outline-success py-0" id="btnAddCountdown"><i class="fas fa-plus"></i></button>
+            </div>
+            <div class="card-body" id="countdownList">
+              <p class="text-muted small text-center">No countdowns. Add one!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-8">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <h6 class="fw-bold text-success mb-0" id="todoDateHeading">All Tasks</h6>
+              <div class="d-flex gap-2 align-items-center">
+                <input type="date" class="form-control form-control-sm" id="todoFilterDate" style="width:auto">
+                <button class="btn btn-sm btn-outline-secondary" id="btnClearTodoFilter">All</button>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              <div id="todoList" style="max-height:480px;overflow-y:auto;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TESTS & QUIZZES TAB ═══════════════════════════════════════════════ -->
+    <div id="tab-tests" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+          <h6 class="fw-bold text-success mb-0">Upcoming Tests &amp; Quizzes</h6>
+          <small class="text-muted">Past 7 days shown by default</small>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-outline-secondary" id="btnShowAllTests">Show All</button>
+          <button class="btn btn-sm btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#testModal">
+            <i class="fas fa-plus me-1"></i>Add Test/Quiz
+          </button>
+        </div>
+      </div>
+      <div id="testsList">
+        <div class="text-center py-5 text-muted"><div class="spinner-border text-success"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ HABITS TAB ════════════════════════════════════════════════════════ -->
+    <div id="tab-habits" class="d-none">
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+              <h6 class="fw-bold text-success mb-0"><i class="fas fa-fire me-2"></i>My Habits</h6>
+              <small class="text-muted">Check off each day — streaks build automatically</small>
+            </div>
+            <div class="card-body" id="habitTracker"></div>
+            <div class="card-footer bg-white border-0">
+              <div class="input-group input-group-sm">
+                <input type="text" class="form-control" id="newHabitText" placeholder="Add a new habit…">
+                <button class="btn btn-success" id="btnAddHabit"><i class="fas fa-plus"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+              <h6 class="fw-bold text-success mb-0">This Week's Habit Grid</h6>
+            </div>
+            <div class="card-body" id="habitGrid"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -488,6 +598,81 @@
     </div>
   </div>
 
+  <!-- ── TEST / QUIZ MODAL ─────────────────────────────────────────────── -->
+  <div class="modal fade" id="testModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white py-2">
+          <h6 class="modal-title fw-bold"><i class="fas fa-pencil-alt me-2"></i>Add Test / Quiz</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-2">
+            <div class="col-7">
+              <label class="form-label fw-bold small">Class <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="testClass" placeholder="e.g. AP Biology">
+            </div>
+            <div class="col-5">
+              <label class="form-label fw-bold small">Type</label>
+              <select class="form-select" id="testType">
+                <option value="quiz">Quiz</option>
+                <option value="test">Test</option>
+                <option value="project">Project</option>
+                <option value="presentation">Presentation</option>
+                <option value="AP">AP Exam</option>
+                <option value="SAT">SAT</option>
+                <option value="ACT">ACT</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-bold small">Title / Topic (optional)</label>
+              <input type="text" class="form-control" id="testTitle" placeholder="e.g. Chapter 5 — Cell Division">
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-bold small">Date <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" id="testDate">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-bold small">Study Notes (optional)</label>
+              <textarea class="form-control" id="testNotes" rows="2" placeholder="What do you need to review?"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer py-2">
+          <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success btn-sm fw-bold" id="btnSaveTest">Add to Planner</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── COUNTDOWN MODAL ───────────────────────────────────────────────── -->
+  <div class="modal fade" id="countdownModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white py-2">
+          <h6 class="modal-title fw-bold"><i class="fas fa-hourglass-half me-2"></i>Add Countdown</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Event Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="cdName" placeholder="e.g. Prom, AP Exam, Summer Break">
+          </div>
+          <div>
+            <label class="form-label fw-bold small">Date <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="cdDate">
+          </div>
+        </div>
+        <div class="modal-footer py-2">
+          <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success btn-sm fw-bold" id="btnSaveCountdown">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- PptxGenJS loaded on demand when student clicks Export PPTX -->
   <script>
   window.loadPptxGen = () => new Promise((resolve, reject) => {
@@ -550,14 +735,27 @@
         loadGoals(),
         loadGradeLog(),
         loadPrompts(),
-        loadSchoolCalendar()
+        loadSchoolCalendar(),
+        loadTests()
       ]);
+
+      // Load localStorage-based features
+      loadTodos();
+      loadHabits();
 
       loadJournal();
       renderCalendar();
       renderAssignmentsTab();
       renderGoals();
       renderGradesTab();
+
+      // New feature renders
+      document.getElementById('todoDate').value = todayStr;
+      renderTodos();
+      renderCountdowns();
+      renderTests();
+      renderHabitTracker();
+      renderHabitGrid();
     }
 
     // ── Data loaders ──────────────────────────────────────────────────────
@@ -941,7 +1139,7 @@
 
     // ── Tab navigation ────────────────────────────────────────────────────
     function showTab(name) {
-      ['planner','journal','goals','assignments','grades'].forEach(t => {
+      ['planner','todo','tests','habits','journal','goals','assignments','grades'].forEach(t => {
         document.getElementById(`tab-${t}`).classList.toggle('d-none', t !== name);
       });
       document.querySelectorAll('.intv-nav .nav-link').forEach(a => {
@@ -1116,6 +1314,298 @@
       });
     });
     calObserver.observe(document.getElementById('calGrid'), { childList: true, subtree: true });
+
+    // ── To-Do list (localStorage) ─────────────────────────────────────────
+    let todos = [], countdowns = [];
+    const TODOS_KEY = () => `intv_todos_${user.student_id}`;
+    const CD_KEY    = () => `intv_cd_${user.student_id}`;
+
+    function loadTodos() {
+      todos     = JSON.parse(localStorage.getItem(TODOS_KEY()) || '[]');
+      countdowns = JSON.parse(localStorage.getItem(CD_KEY()) || '[]');
+    }
+
+    function saveTodos() { localStorage.setItem(TODOS_KEY(), JSON.stringify(todos)); }
+    function saveCountdowns() { localStorage.setItem(CD_KEY(), JSON.stringify(countdowns)); }
+
+    function renderTodos(filterDate = '') {
+      const el = document.getElementById('todoList');
+      let list = todos;
+      if (filterDate) {
+        list = todos.filter(t => t.date === filterDate);
+        document.getElementById('todoDateHeading').textContent =
+          new Date(filterDate + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+      } else {
+        document.getElementById('todoDateHeading').textContent = 'All Tasks';
+      }
+      // Sort: incomplete first, then by date, then by priority
+      const priorityOrder = { high: 0, normal: 1, low: 2 };
+      list = [...list].sort((a, b) => {
+        if (a.done !== b.done) return a.done ? 1 : -1;
+        if (a.date && b.date && a.date !== b.date) return a.date.localeCompare(b.date);
+        return (priorityOrder[a.priority] || 1) - (priorityOrder[b.priority] || 1);
+      });
+      if (!list.length) { el.innerHTML = '<p class="text-muted small text-center py-4">No tasks. Add one!</p>'; return; }
+      const priorityColor = { high: 'danger', normal: 'secondary', low: 'light' };
+      el.innerHTML = list.map(t => {
+        const dt = t.date ? new Date(t.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+        return `<div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom todo-row ${t.done ? 'opacity-50' : ''}" style="cursor:pointer">
+          <input type="checkbox" class="form-check-input mt-0 flex-shrink-0" ${t.done ? 'checked' : ''} onchange="window.toggleTodo('${t.id}')">
+          <div class="flex-grow-1 ${t.done ? 'text-decoration-line-through text-muted' : ''}">
+            <span class="small fw-bold">${t.text}</span>
+            ${dt ? `<span class="text-muted small ms-2"><i class="fas fa-calendar me-1"></i>${dt}</span>` : ''}
+          </div>
+          <span class="badge bg-${priorityColor[t.priority] || 'secondary'} text-${t.priority === 'low' ? 'dark' : 'white'}" style="font-size:.6rem;">${t.priority}</span>
+          <button class="btn btn-sm p-0 text-muted" onclick="window.deleteTodo('${t.id}')"><i class="fas fa-times" style="font-size:.7rem;"></i></button>
+        </div>`;
+      }).join('');
+    }
+
+    function renderCountdowns() {
+      const el = document.getElementById('countdownList');
+      const now = new Date(); now.setHours(0,0,0,0);
+      // Remove past countdowns
+      countdowns = countdowns.filter(c => new Date(c.date + 'T00:00:00') >= now);
+      saveCountdowns();
+      if (!countdowns.length) { el.innerHTML = '<p class="text-muted small text-center">No countdowns.</p>'; return; }
+      el.innerHTML = countdowns.map(c => {
+        const diff = Math.ceil((new Date(c.date + 'T00:00:00') - now) / 86400000);
+        return `<div class="d-flex justify-content-between align-items-center mb-2">
+          <div>
+            <div class="fw-bold small">${c.name}</div>
+            <small class="text-muted">${new Date(c.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</small>
+          </div>
+          <div class="text-center ms-2">
+            <div class="fw-bold text-success" style="font-size:1.2rem;line-height:1;">${diff}</div>
+            <small class="text-muted">day${diff === 1 ? '' : 's'}</small>
+          </div>
+          <button class="btn btn-sm p-0 text-muted ms-1" onclick="window.deleteCountdown('${c.id}')"><i class="fas fa-times" style="font-size:.7rem;"></i></button>
+        </div>`;
+      }).join('');
+    }
+
+    document.getElementById('btnAddTodo').addEventListener('click', () => {
+      const text = document.getElementById('todoText').value.trim();
+      if (!text) return;
+      const todo = { id: Date.now().toString(), text, date: document.getElementById('todoDate').value || '', priority: document.getElementById('todoPriority').value, done: false };
+      todos.push(todo);
+      saveTodos();
+      renderTodos(document.getElementById('todoFilterDate').value || '');
+      document.getElementById('todoText').value = '';
+    });
+
+    document.getElementById('todoText').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btnAddTodo').click();
+    });
+
+    window.toggleTodo = (id) => {
+      const t = todos.find(x => x.id === id);
+      if (t) { t.done = !t.done; saveTodos(); renderTodos(document.getElementById('todoFilterDate').value || ''); }
+    };
+    window.deleteTodo = (id) => {
+      todos = todos.filter(x => x.id !== id);
+      saveTodos();
+      renderTodos(document.getElementById('todoFilterDate').value || '');
+    };
+
+    document.getElementById('todoFilterDate').addEventListener('change', e => renderTodos(e.target.value));
+    document.getElementById('btnClearTodoFilter').addEventListener('click', () => {
+      document.getElementById('todoFilterDate').value = '';
+      renderTodos('');
+    });
+
+    document.getElementById('btnAddCountdown').addEventListener('click', () => {
+      new bootstrap.Modal(document.getElementById('countdownModal')).show();
+    });
+    document.getElementById('btnSaveCountdown').addEventListener('click', () => {
+      const name = document.getElementById('cdName').value.trim();
+      const date = document.getElementById('cdDate').value;
+      if (!name || !date) return;
+      countdowns.push({ id: Date.now().toString(), name, date });
+      saveCountdowns();
+      renderCountdowns();
+      bootstrap.Modal.getInstance(document.getElementById('countdownModal'))?.hide();
+      document.getElementById('cdName').value = '';
+      document.getElementById('cdDate').value = '';
+    });
+    window.deleteCountdown = (id) => {
+      countdowns = countdowns.filter(c => c.id !== id);
+      saveCountdowns();
+      renderCountdowns();
+    };
+
+    // ── Test / Quiz tracker ───────────────────────────────────────────────
+    let tests = [];
+
+    async function loadTests(all = false) {
+      const data = await apiFetch(`/api/intervention/tests?student_id=${user.student_id}${all ? '&all=1' : ''}`);
+      tests = data.tests || [];
+    }
+
+    function renderTests() {
+      const el = document.getElementById('testsList');
+      if (!tests.length) { el.innerHTML = '<p class="text-muted text-center py-5">No tests logged. Add one using the button above.</p>'; return; }
+      const today2 = new Date(); today2.setHours(0,0,0,0);
+      const typeIcon = { test:'📝', quiz:'⚡', project:'📁', presentation:'🎤', AP:'🏫', SAT:'📊', ACT:'📊', other:'📌' };
+      el.innerHTML = tests.map(t => {
+        const dt = new Date(t.test_date + 'T12:00:00');
+        const daysUntil = Math.ceil((dt - today2) / 86400000);
+        const isPast = daysUntil < 0;
+        const urgency = !isPast && daysUntil <= 2 ? 'border-danger' : !isPast && daysUntil <= 7 ? 'border-warning' : '';
+        const dateLabel = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+        const countLabel = isPast ? `${Math.abs(daysUntil)}d ago` : daysUntil === 0 ? 'TODAY' : `in ${daysUntil}d`;
+        const urgencyColor = isPast ? 'text-muted' : daysUntil === 0 ? 'text-danger fw-bold' : daysUntil <= 2 ? 'text-danger' : daysUntil <= 7 ? 'text-warning' : 'text-success';
+        return `<div class="assign-card ${t.studied ? 'done' : ''} ${urgency}">
+          <div class="d-flex align-items-start gap-3">
+            <div class="text-center flex-shrink-0" style="min-width:48px">
+              <div style="font-size:1.5rem;">${typeIcon[t.test_type] || '📌'}</div>
+              <small class="${urgencyColor} fw-bold" style="font-size:.65rem;">${countLabel}</small>
+            </div>
+            <div class="flex-grow-1">
+              <div class="fw-bold">${t.class_name} <span class="badge bg-light text-dark border ms-1" style="font-size:.65rem;">${t.test_type}</span></div>
+              ${t.title ? `<div class="text-muted small">${t.title}</div>` : ''}
+              <div class="text-muted small"><i class="fas fa-calendar me-1"></i>${dateLabel}</div>
+              ${t.notes ? `<div class="mt-1 small bg-light rounded p-1">${t.notes}</div>` : ''}
+            </div>
+            <div class="d-flex flex-column gap-1 ms-2">
+              <button class="btn btn-sm ${t.studied ? 'btn-success' : 'btn-outline-success'} py-0 px-2" onclick="window.toggleStudied(${t.id}, ${!t.studied})" title="Studied?">
+                <i class="fas fa-${t.studied ? 'check' : 'book-open'}" style="font-size:.75rem;"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="window.deleteTest(${t.id})"><i class="fas fa-trash" style="font-size:.7rem;"></i></button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    document.getElementById('btnSaveTest').addEventListener('click', async () => {
+      const cls = document.getElementById('testClass').value.trim();
+      const date = document.getElementById('testDate').value;
+      if (!cls || !date) { alert('Class and date are required.'); return; }
+      await apiFetch('/api/intervention/tests', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ student_id: user.student_id, class_name: cls, test_type: document.getElementById('testType').value,
+          title: document.getElementById('testTitle').value, test_date: date, notes: document.getElementById('testNotes').value }) });
+      bootstrap.Modal.getInstance(document.getElementById('testModal'))?.hide();
+      ['testClass','testTitle','testNotes'].forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('testDate').value = '';
+      await loadTests(); renderTests();
+      renderCalendar(); // tests also appear on calendar
+    });
+
+    window.toggleStudied = async (id, val) => {
+      await apiFetch(`/api/intervention/tests/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ student_id: user.student_id, studied: val }) });
+      await loadTests(); renderTests();
+    };
+    window.deleteTest = async (id) => {
+      if (!confirm('Remove this test?')) return;
+      await apiFetch(`/api/intervention/tests/${id}?student_id=${user.student_id}`, { method:'DELETE' });
+      tests = tests.filter(t => t.id !== id); renderTests();
+    };
+
+    document.getElementById('btnShowAllTests').addEventListener('click', async () => {
+      await loadTests(true); renderTests();
+    });
+
+    // ── Habit tracker (localStorage) ─────────────────────────────────────
+    const HABITS_KEY = () => `intv_habits_${user.student_id}`;
+    const HABIT_LOG_KEY = () => `intv_habitlog_${user.student_id}`;
+    let habitList = [], habitLog = {};
+
+    function loadHabits() {
+      habitList = JSON.parse(localStorage.getItem(HABITS_KEY()) || '[]');
+      habitLog  = JSON.parse(localStorage.getItem(HABIT_LOG_KEY()) || '{}');
+    }
+    function saveHabits() { localStorage.setItem(HABITS_KEY(), JSON.stringify(habitList)); }
+    function saveHabitLog() { localStorage.setItem(HABIT_LOG_KEY(), JSON.stringify(habitLog)); }
+
+    const weekDaysBack = () => {
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
+        days.push(d.toISOString().split('T')[0]);
+      }
+      return days;
+    };
+
+    function calcStreak(habitId) {
+      let streak = 0;
+      const d = new Date(); d.setHours(0,0,0,0);
+      while (true) {
+        const ymd = d.toISOString().split('T')[0];
+        if (habitLog[habitId]?.[ymd]) { streak++; d.setDate(d.getDate() - 1); }
+        else break;
+      }
+      return streak;
+    }
+
+    function renderHabitTracker() {
+      const el = document.getElementById('habitTracker');
+      if (!habitList.length) { el.innerHTML = '<p class="text-muted small text-center">No habits yet. Add one below!</p>'; return; }
+      el.innerHTML = habitList.map(h => {
+        const done = habitLog[h.id]?.[todayStr];
+        const streak = calcStreak(h.id);
+        return `<div class="d-flex align-items-center gap-2 mb-2">
+          <div class="goal-check ${done ? 'done' : ''}" onclick="window.logHabit('${h.id}', ${!done})" style="flex-shrink:0;">
+            ${done ? '<i class="fas fa-check" style="font-size:.7rem;"></i>' : ''}
+          </div>
+          <div class="flex-grow-1">
+            <div class="small fw-bold ${done ? 'text-success' : ''}">${h.name}</div>
+            ${streak > 0 ? `<small class="text-warning">🔥 ${streak} day streak</small>` : ''}
+          </div>
+          <button class="btn btn-sm p-0 text-muted" onclick="window.deleteHabit('${h.id}')"><i class="fas fa-times" style="font-size:.7rem;"></i></button>
+        </div>`;
+      }).join('');
+    }
+
+    function renderHabitGrid() {
+      const el = document.getElementById('habitGrid');
+      const days = weekDaysBack();
+      const dayLabels = days.map(d => new Date(d + 'T12:00:00').toLocaleDateString('en-US',{weekday:'short'}));
+
+      if (!habitList.length) { el.innerHTML = '<p class="text-muted small text-center">Add habits to see your weekly grid.</p>'; return; }
+
+      el.innerHTML = `<div class="table-responsive"><table class="table table-sm text-center" style="font-size:.8rem;">
+        <thead><tr><th class="text-start">Habit</th>${dayLabels.map((l,i) => `<th ${days[i] === todayStr ? 'class="text-success fw-bold"' : ''}>${l}<br><small class="text-muted">${days[i].slice(5)}</small></th>`).join('')}</tr></thead>
+        <tbody>${habitList.map(h =>
+          `<tr><td class="text-start fw-bold">${h.name}</td>
+          ${days.map(d => {
+            const done = habitLog[h.id]?.[d];
+            return `<td><span style="font-size:1rem;">${done ? '✅' : '⬜'}</span></td>`;
+          }).join('')}</tr>`
+        ).join('')}</tbody>
+      </table></div>`;
+    }
+
+    window.logHabit = (id, val) => {
+      if (!habitLog[id]) habitLog[id] = {};
+      if (val) habitLog[id][todayStr] = true;
+      else delete habitLog[id][todayStr];
+      saveHabitLog();
+      renderHabitTracker();
+      renderHabitGrid();
+    };
+
+    window.deleteHabit = (id) => {
+      habitList = habitList.filter(h => h.id !== id);
+      delete habitLog[id];
+      saveHabits(); saveHabitLog();
+      renderHabitTracker(); renderHabitGrid();
+    };
+
+    document.getElementById('btnAddHabit').addEventListener('click', () => {
+      const text = document.getElementById('newHabitText').value.trim();
+      if (!text) return;
+      habitList.push({ id: Date.now().toString(), name: text });
+      saveHabits();
+      document.getElementById('newHabitText').value = '';
+      renderHabitTracker();
+      renderHabitGrid();
+    });
+
+    document.getElementById('newHabitText').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btnAddHabit').click();
+    });
 
     // ── Journal export ────────────────────────────────────────────────────
     async function getAllJournalEntries() {

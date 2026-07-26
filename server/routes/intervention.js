@@ -388,6 +388,86 @@ router.delete('/intervention/grade-log/:id', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete grade entry' }); }
 });
 
+// ── Test / Exam tracker (DB-backed so it survives device changes) ─────────────
+
+const TESTS_DDL = `
+CREATE TABLE IF NOT EXISTS intervention_tests (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    student_id   VARCHAR(50) NOT NULL,
+    class_name   VARCHAR(100) NOT NULL,
+    test_type    ENUM('test','quiz','project','presentation','AP','SAT','ACT','other') DEFAULT 'test',
+    title        VARCHAR(255),
+    test_date    DATE NOT NULL,
+    studied      TINYINT(1) DEFAULT 0,
+    notes        TEXT,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_student_date (student_id, test_date)
+)`;
+
+// Get upcoming (and recent) tests for a student
+router.get('/intervention/tests', async (req, res) => {
+    const { student_id, all } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id required' });
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(TESTS_DDL);
+        const cutoff = all ? '1970-01-01' : new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+        const [rows] = await connection.execute(
+            'SELECT * FROM intervention_tests WHERE student_id = ? AND test_date >= ? ORDER BY test_date ASC',
+            [student_id, cutoff]
+        );
+        await connection.end();
+        res.json({ tests: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch tests' }); }
+});
+
+// Add a test/quiz
+router.post('/intervention/tests', async (req, res) => {
+    const { student_id, class_name, test_type, title, test_date, notes } = req.body;
+    if (!student_id || !class_name || !test_date) return res.status(400).json({ error: 'student_id, class_name, and test_date required' });
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(TESTS_DDL);
+        const [result] = await connection.execute(
+            'INSERT INTO intervention_tests (student_id, class_name, test_type, title, test_date, notes) VALUES (?, ?, ?, ?, ?, ?)',
+            [student_id, class_name, test_type || 'test', title || null, test_date, notes || null]
+        );
+        await connection.end();
+        res.json({ success: true, id: result.insertId });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to add test' }); }
+});
+
+// Toggle studied / update notes
+router.put('/intervention/tests/:id', async (req, res) => {
+    const { id } = req.params;
+    const { student_id, studied, notes } = req.body;
+    if (!student_id) return res.status(400).json({ error: 'student_id required' });
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(TESTS_DDL);
+        await connection.execute(
+            'UPDATE intervention_tests SET studied = COALESCE(?, studied), notes = COALESCE(?, notes) WHERE id = ? AND student_id = ?',
+            [studied != null ? (studied ? 1 : 0) : null, notes ?? null, id, student_id]
+        );
+        await connection.end();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update test' }); }
+});
+
+// Delete a test
+router.delete('/intervention/tests/:id', async (req, res) => {
+    const { id } = req.params;
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id required' });
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(TESTS_DDL);
+        await connection.execute('DELETE FROM intervention_tests WHERE id = ? AND student_id = ?', [id, student_id]);
+        await connection.end();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete test' }); }
+});
+
 // ════════════════════════════════════════════════════════════════════════════
 // ADMIN ROUTES
 // ════════════════════════════════════════════════════════════════════════════
