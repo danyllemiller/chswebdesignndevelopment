@@ -160,7 +160,9 @@ async function buildPayrollUI(student_id) {
                             <tr>
                                 <th>Date</th>
                                 <th>Clock In</th>
+                                <th>In Status</th>
                                 <th>Clock Out</th>
+                                <th>Out Status</th>
                                 <th>Time Logged</th>
                                 <th>Est. Gross Earnings</th>
                             </tr>
@@ -306,8 +308,8 @@ async function buildPayrollUI(student_id) {
                 periodsMap[pp.id] = { info: pp, shifts: [], totals: { mins: 0, gross: 0, bonusCount: 0 } };
             }
             
-            const dur = Math.round((new Date(data.clockOutTime) - new Date(data.clockInTime)) / 60000);
-            const bonus = (data.statusIn === "On Time" ? 1 : 0) + (data.statusOut === "On Time" ? 1 : 0);
+            const dur = Math.round((new Date(data.date + 'T' + data.clock_out) - new Date(data.date + 'T' + data.clock_in)) / 60000);
+            const bonus = (data.in_answer === "On Time" ? 1 : 0) + (data.out_answer === "On Time" ? 1 : 0);
             const gross = (dur/60 * currentRate) + (bonus * ON_TIME_BONUS);
             
             data.calcMins = dur;
@@ -350,15 +352,16 @@ function renderCurrentPeriod() {
         const friendlyDate = new Date(data.date + "T12:00:00").toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
         tableHtml += `<tr class="text-center">
             <td class="fw-bold text-start">${friendlyDate}</td>
-            <td>${new Date(data.clockInTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
-            <td>${data.statusIn || '--'}</td>
-            <td>${new Date(data.clockOutTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
-            <td>${data.statusOut || '--'}</td>
+            <td>${data.clock_in ? new Date(data.date + 'T' + data.clock_in).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--'}</td>
+            <td>${data.in_answer || '--'}</td>
+            <td>${data.clock_out ? new Date(data.date + 'T' + data.clock_out).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--'}</td>
+            <td>${data.out_answer || '--'}</td>
             <td class="fw-bold text-dark">${Math.floor(data.calcMins/60)}h ${data.calcMins%60}m</td>
             <td class="text-success fw-bold">$${data.calcGross.toFixed(2)}</td>
         </tr>`;
     });
     document.getElementById('studentTimesheetBody').innerHTML = tableHtml;
+    document.getElementById('btnViewPaystub').disabled = false;
 }
 
 function changePeriod(direction) {

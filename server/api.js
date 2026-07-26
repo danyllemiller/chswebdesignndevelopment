@@ -119,13 +119,76 @@ router.get('/timeclock/status', async (req, res) => {
     const { student_id } = req.query;
     try {
         const connection = await getDbConnection();
+        const today = new Date().toISOString().split('T')[0];
         const [rows] = await connection.execute(
-            'SELECT * FROM clockins WHERE student_id = ? ORDER BY timestamp DESC LIMIT 1',
-            [student_id]
+            'SELECT * FROM clockins WHERE student_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC LIMIT 1',
+            [student_id, today]
         );
         await connection.end();
-        res.json(rows.length > 0 ? rows[0] : { status: 'out' });
+        if (rows.length === 0) return res.json({ mode: 'in' });
+        const type = rows[0].type;
+        res.json({ mode: type === 'out' ? 'done' : 'out', ...rows[0] });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch status' }); }
+});
+
+// --- TIMECLOCK QUESTION ---
+router.get('/timeclock/question', async (req, res) => {
+    const { type } = req.query;
+    const today = new Date().toISOString().split('T')[0];
+    const isCS = String(type).startsWith('CS');
+    const defaultOptions = JSON.stringify(['On Time', 'A few minutes late (1-5 min)', 'Tardy (5+ min late)']);
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.execute(
+            'SELECT wd_question, cs_question FROM teacher_daily_questions WHERE date = ?',
+            [today]
+        );
+        await connection.end();
+        const dailyQ = rows[0];
+        const baseText = isCS
+            ? (dailyQ?.cs_question || '')
+            : (dailyQ?.wd_question || '');
+        const questionText = baseText
+            ? `${baseText}\n\nAlso — how are you arriving today?`
+            : 'How are you arriving today?';
+        res.json({ question_text: questionText, options: defaultOptions });
+    } catch (err) {
+        res.json({ question_text: 'How are you arriving today?', options: defaultOptions });
+    }
+});
+
+// --- TIMECLOCK SAVE ---
+router.post('/timeclock/save', async (req, res) => {
+    const { student_id, section_id, mode, answer } = req.body;
+    if (!student_id || !mode) return res.status(400).json({ error: 'student_id and mode are required' });
+    const today = new Date().toISOString().split('T')[0];
+    try {
+        const connection = await getDbConnection();
+        if (mode === 'in') {
+            await connection.execute(
+                'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',
+                [student_id, section_id || '', 'in', answer || '']
+            );
+            await connection.execute(
+                `INSERT INTO timesheets (student_id, date, clock_in, in_answer)
+                 VALUES (?, ?, CURTIME(), ?)
+                 ON DUPLICATE KEY UPDATE clock_in = CURTIME(), in_answer = VALUES(in_answer)`,
+                [student_id, today, answer || '']
+            );
+        } else if (mode === 'out') {
+            await connection.execute(
+                'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',
+                [student_id, section_id || '', 'out', answer || '']
+            );
+            await connection.execute(
+                `UPDATE timesheets SET clock_out = CURTIME(), out_answer = ?
+                 WHERE student_id = ? AND date = ? AND clock_out IS NULL`,
+                [answer || '', student_id, today]
+            );
+        }
+        await connection.end();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Timeclock save failed.' }); }
 });
 
 // --- SUBMIT EXAM ---
@@ -763,6 +826,25 @@ router.post('/admin/save-assignment', async (req, res) => {
         await connection.end();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save assignment' }); }
+});
+
+// --- ADMIN EDIT ASSIGNMENT ---
+router.post('/admin/edit-assignment', async (req, res) => {
+    const { old_exam_id, exam_id, title, total_points, course_id } = req.body;
+    if (!old_exam_id || !exam_id) return res.status(400).json({ error: 'old_exam_id and exam_id are required' });
+    try {
+        const connection = await getDbConnection();
+        if (old_exam_id !== exam_id) {
+            await connection.execute('UPDATE responses SET exam_id = ? WHERE exam_id = ?', [exam_id, old_exam_id]);
+            await connection.execute('UPDATE exams SET exam_id = ?, title = ?, total_points = ?, course_id = ? WHERE exam_id = ?',
+                [exam_id, title, total_points, course_id, old_exam_id]);
+        } else {
+            await connection.execute('UPDATE exams SET title = ?, total_points = ?, course_id = ? WHERE exam_id = ?',
+                [title, total_points, course_id, exam_id]);
+        }
+        await connection.end();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to edit assignment' }); }
 });
 
 // --- ADMIN DELETE ASSIGNMENT ---

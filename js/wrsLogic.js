@@ -447,7 +447,7 @@
         $c().innerHTML = '<div class="text-center p-5 bg-white shadow-sm rounded"><div class="spinner-border text-primary"></div><h3 class="mt-4 text-primary">Calculating results&hellip;</h3></div>';
 
         var sc   = gradeAll();
-        var pct  = Math.round(sc.right / sc.total * 100);
+        var pct  = sc.total > 0 ? Math.round(sc.right / sc.total * 100) : 0;
         var pass = pct >= 75;
 
         var hintHtml = function (hint) {

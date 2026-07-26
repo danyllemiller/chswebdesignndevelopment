@@ -52,15 +52,17 @@ async function checkStatus() {
         const optsContainer = document.getElementById('tc-options-container');
         const btn = document.getElementById('tc-submit-btn');
 
-        window.timeclock.currentMode = statusData.mode; // Track globally
+        // Normalize mode: API returns raw 'type' field ('in'/'out') or {mode} if already normalized
+        const mode = statusData.mode || (statusData.type === 'out' ? 'done' : statusData.type === 'in' ? 'out' : 'in');
+        window.timeclock.currentMode = mode;
 
-        if (statusData.mode === 'done') {
+        if (mode === 'done') {
             document.getElementById('tc-form').style.display = 'none';
             document.getElementById('tc-success-msg').classList.remove('d-none');
             return;
         }
 
-        if (statusData.mode === 'in') {
+        if (mode === 'in') {
             // DETECT TRACK: CS vs WD
             const isCS = studentData.section_id.startsWith('CS');
             const category = isCS ? 'CS_IN' : 'WD_IN';
@@ -80,7 +82,7 @@ async function checkStatus() {
             `).join('');
             btn.innerText = "Submit & Clock In";
         } 
-        else if (statusData.mode === 'out') {
+        else if (mode === 'out') {
             label.innerText = "Daily Reflection";
             optsContainer.innerHTML = `<textarea id="tc-out-answer" class="form-control" rows="3" required></textarea>`;
             btn.innerText = "Submit & Clock Out";
@@ -96,7 +98,9 @@ async function handleTimeclockSubmit(e) {
     let answer = "";
     
     if (mode === 'in') {
-        answer = document.querySelector('input[name="tc-radio"]:checked').value;
+        const checked = document.querySelector('input[name="tc-radio"]:checked');
+        if (!checked) return;
+        answer = checked.value;
     } else {
         answer = document.getElementById('tc-out-answer').value;
     }
@@ -104,10 +108,11 @@ async function handleTimeclockSubmit(e) {
     try {
         await apiFetch('/api/timeclock/save', {
             method: 'POST',
-            body: JSON.stringify({ 
-                student_id: studentData.student_id, 
-                mode: mode, 
-                answer: answer 
+            body: JSON.stringify({
+                student_id: studentData.student_id,
+                section_id: studentData.section_id,
+                mode: mode,
+                answer: answer
             })
         });
         location.reload();

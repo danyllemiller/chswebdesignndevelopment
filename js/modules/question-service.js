@@ -11,9 +11,9 @@ export async function getDailyQuestions(date) {
 }
 
 export async function saveDailyQuestions(date, wd_question, cs_question) {
-    return await apiFetch('/api/admin/save-daily-questions', {
+    return await apiFetch('/api/admin/daily-questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date, wd_question, cs_question })
+        body: JSON.stringify({ date, wdQuestion: wd_question, csQuestion: cs_question })
     });
 }

@@ -554,13 +554,19 @@ function applyFiltersAndRender() {
 window.addEventListener('DOMContentLoaded', () => {
     const user = JSON.parse(localStorage.getItem('user'));
     
-    if (!user || (user.role !== 'admin' && user.period !== 'Teacher' && !user.username.includes('damiller'))) {
+    if (!user || (user.role !== 'admin' && user.section_id !== 'Teacher' && !user.username?.includes('damiller'))) {
         window.location.replace("/login-test.html");
         return;
     }
     
     injectModals();
     loadData();
+
+    document.getElementById('periodFilter')?.addEventListener('change', (e) => {
+        document.getElementById('studentFilter').value = 'All';
+        updateStudentDropdown(getFilteredStudents(e.target.value, 'All'));
+        applyFiltersAndRender();
+    });
 });
 
 async function loadData() {
@@ -627,12 +633,6 @@ async function loadData() {
         }
 
         applyFiltersAndRender();
-        
-        document.getElementById('periodFilter').addEventListener('change', (e) => {
-            document.getElementById('studentFilter').value = 'All';
-            updateStudentDropdown(getFilteredStudents(e.target.value, 'All'));
-            applyFiltersAndRender();
-        });
     } catch (e) {
         console.error(e);
         document.getElementById('gradebookBody').innerHTML = '<tr><td colspan="100%" class="text-center p-5 text-danger"><h4>Failed to load MariaDB Server Data</h4></td></tr>';
