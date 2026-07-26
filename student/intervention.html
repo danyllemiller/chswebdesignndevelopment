@@ -52,6 +52,18 @@
     .week-col { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; min-height: 180px; }
     .week-day-name { font-weight: 700; font-size: .8rem; color: var(--intv-green); margin-bottom: 6px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
 
+    /* Decoration panel */
+    .decor-panel { background: #fff; border: 1px solid #dee2e6; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; }
+    .decor-panel.collapsed { display: none; }
+    .theme-swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform .15s; }
+    .theme-swatch:hover { transform: scale(1.15); }
+    .theme-swatch.active { border-color: #333; }
+    .font-chip { padding: 4px 12px; border-radius: 20px; border: 1.5px solid #dee2e6; cursor: pointer; font-size: .82rem; transition: all .15s; }
+    .font-chip.active { border-color: var(--intv-accent); background: var(--intv-green-light); }
+    .sticker-btn { font-size: 1.4rem; cursor: pointer; border: none; background: transparent; padding: 2px 4px; border-radius: 6px; transition: transform .15s; line-height: 1; }
+    .sticker-btn:hover { transform: scale(1.25); background: #f8f9fa; }
+    .cal-sticker { font-size: .95rem; line-height: 1; display: block; margin-top: 1px; }
+
     /* Journal */
     .journal-prompt-box { background: var(--intv-green-light); border-left: 4px solid var(--intv-accent); border-radius: 6px; padding: 14px 16px; font-size: .95rem; }
     .journal-entry-card { border-left: 3px solid #dee2e6; padding-left: 12px; margin-bottom: 12px; }
@@ -120,6 +132,84 @@
 
     <!-- ══ PLANNER TAB ══════════════════════════════════════════════════════ -->
     <div id="tab-planner">
+
+      <!-- Decoration toolbar toggle -->
+      <div class="d-flex justify-content-end mb-2">
+        <button class="btn btn-sm btn-outline-secondary" id="btnToggleDecor">
+          <i class="fas fa-palette me-1"></i>Decorate My Planner
+        </button>
+      </div>
+
+      <!-- Decoration panel -->
+      <div class="decor-panel collapsed" id="decorPanel">
+        <div class="row g-3 align-items-start">
+          <!-- Theme colors -->
+          <div class="col-auto">
+            <small class="fw-bold text-muted d-block mb-2 text-uppercase" style="font-size:.65rem;">Theme Color</small>
+            <div class="d-flex gap-2 flex-wrap" id="themeSwatches">
+              <div class="theme-swatch" data-color="green"  style="background:#2e7d32" title="Forest"></div>
+              <div class="theme-swatch" data-color="purple" style="background:#6a1b9a" title="Purple"></div>
+              <div class="theme-swatch" data-color="blue"   style="background:#1565c0" title="Blue"></div>
+              <div class="theme-swatch" data-color="pink"   style="background:#c2185b" title="Pink"></div>
+              <div class="theme-swatch" data-color="teal"   style="background:#00695c" title="Teal"></div>
+              <div class="theme-swatch" data-color="orange" style="background:#e65100" title="Orange"></div>
+              <div class="theme-swatch" data-color="red"    style="background:#b71c1c" title="Red"></div>
+              <div class="theme-swatch" data-color="dark"   style="background:#212121" title="Midnight"></div>
+            </div>
+          </div>
+          <!-- Font -->
+          <div class="col-auto">
+            <small class="fw-bold text-muted d-block mb-2 text-uppercase" style="font-size:.65rem;">Font Style</small>
+            <div class="d-flex gap-2 flex-wrap" id="fontChips">
+              <div class="font-chip" data-font="Inter" style="font-family:Inter,sans-serif">Clean</div>
+              <div class="font-chip" data-font="Georgia" style="font-family:Georgia,serif">Classic</div>
+              <div class="font-chip" data-font="'Courier New'" style="font-family:'Courier New',monospace">Mono</div>
+              <div class="font-chip" data-font="'Comic Sans MS'" style="font-family:'Comic Sans MS',cursive">Fun</div>
+              <div class="font-chip" data-font="'Trebuchet MS'" style="font-family:'Trebuchet MS',sans-serif">Modern</div>
+            </div>
+          </div>
+          <!-- Stickers -->
+          <div class="col-12">
+            <small class="fw-bold text-muted d-block mb-2 text-uppercase" style="font-size:.65rem;">
+              Stickers — click a sticker, then click a calendar day
+            </small>
+            <div class="d-flex flex-wrap gap-1" id="stickerPalette">
+              <button class="sticker-btn" data-sticker="⭐">⭐</button>
+              <button class="sticker-btn" data-sticker="🌟">🌟</button>
+              <button class="sticker-btn" data-sticker="🌈">🌈</button>
+              <button class="sticker-btn" data-sticker="🔥">🔥</button>
+              <button class="sticker-btn" data-sticker="💪">💪</button>
+              <button class="sticker-btn" data-sticker="🎯">🎯</button>
+              <button class="sticker-btn" data-sticker="✅">✅</button>
+              <button class="sticker-btn" data-sticker="🎉">🎉</button>
+              <button class="sticker-btn" data-sticker="💡">💡</button>
+              <button class="sticker-btn" data-sticker="📚">📚</button>
+              <button class="sticker-btn" data-sticker="🧠">🧠</button>
+              <button class="sticker-btn" data-sticker="🌱">🌱</button>
+              <button class="sticker-btn" data-sticker="🦋">🦋</button>
+              <button class="sticker-btn" data-sticker="🏆">🏆</button>
+              <button class="sticker-btn" data-sticker="💜">💜</button>
+              <button class="sticker-btn" data-sticker="💚">💚</button>
+              <button class="sticker-btn" data-sticker="💙">💙</button>
+              <button class="sticker-btn" data-sticker="❤️">❤️</button>
+              <button class="sticker-btn" data-sticker="🩷">🩷</button>
+              <button class="sticker-btn" data-sticker="🌸">🌸</button>
+              <button class="sticker-btn" data-sticker="☀️">☀️</button>
+              <button class="sticker-btn" data-sticker="⚡">⚡</button>
+              <button class="sticker-btn" data-sticker="🎵">🎵</button>
+              <button class="sticker-btn" data-sticker="🌙">🌙</button>
+              <button class="sticker-btn" data-sticker="🦄">🦄</button>
+              <button class="sticker-btn" data-sticker="🐉">🐉</button>
+              <button class="sticker-btn" data-sticker="🍀">🍀</button>
+              <button class="sticker-btn" data-sticker="🎨">🎨</button>
+              <button class="sticker-btn" data-sticker="🎭">🎭</button>
+              <button class="sticker-btn" data-sticker="❌" title="Erase sticker">❌</button>
+            </div>
+            <small class="text-muted mt-2 d-block" id="stickerModeLabel"></small>
+          </div>
+        </div>
+      </div>
+
       <div class="card shadow-sm border-0 mb-3">
         <div class="card-body pb-2">
           <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
@@ -164,6 +254,14 @@
 
     <!-- ══ JOURNAL TAB ══════════════════════════════════════════════════════ -->
     <div id="tab-journal" class="d-none">
+      <div class="d-flex justify-content-end mb-2 gap-2">
+        <button class="btn btn-sm btn-outline-success" id="btnExportPdf">
+          <i class="fas fa-file-pdf me-1"></i>Export PDF
+        </button>
+        <button class="btn btn-sm btn-outline-primary" id="btnExportPptx">
+          <i class="fas fa-file-powerpoint me-1"></i>Export PPTX
+        </button>
+      </div>
       <div class="row g-3">
         <div class="col-lg-7">
           <div class="card shadow-sm border-0">
@@ -390,6 +488,30 @@
     </div>
   </div>
 
+  <!-- PptxGenJS loaded on demand when student clicks Export PPTX -->
+  <script>
+  window.loadPptxGen = () => new Promise((resolve, reject) => {
+    if (window.PptxGenJS) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js';
+    s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  </script>
+
+  <style>
+    @media print {
+      body > *:not(#print-journal-area) { display: none !important; }
+      #print-journal-area { display: block !important; }
+      .journal-print-entry { page-break-inside: avoid; margin-bottom: 24pt; }
+      .journal-print-header { color: #2e7d32; font-size: 14pt; font-weight: bold; }
+      .journal-print-prompt { color: #555; font-size: 9pt; font-style: italic; margin: 4pt 0; }
+      .journal-print-body { font-size: 11pt; line-height: 1.6; }
+      .journal-print-divider { border-top: 1px solid #ccc; margin: 16pt 0; }
+    }
+  </style>
+  <div id="print-journal-area" style="display:none;font-family:Georgia,serif;padding:24pt 48pt;"></div>
+
   <script type="module">
     import { getLoggedInUser } from '/js/modules/user-session.js';
     import { apiFetch }        from '/js/modules/api-client.js';
@@ -411,6 +533,11 @@
     async function init() {
       user = getLoggedInUser();
       if (!user?.student_id) return;
+
+      // Load per-student decoration prefs now that we know the student_id
+      decorPrefs   = JSON.parse(localStorage.getItem(`intv_decor_${user.student_id}`) || '{}');
+      dayStickers  = JSON.parse(localStorage.getItem(`intv_stickers_${user.student_id}`) || '{}');
+      loadDecorPrefs();
 
       document.getElementById('plannerSubtitle').textContent =
         `Welcome, ${user.first_name || user.username} — Intervention Planner`;
@@ -851,6 +978,219 @@
       document.getElementById('viewWeek').classList.replace('btn-outline-success','btn-success');
       document.getElementById('viewMonth').classList.replace('btn-success','btn-outline-success');
       renderCalendar();
+    });
+
+    // ── Decoration system ─────────────────────────────────────────────────
+    const THEMES = {
+      green:  { main:'#2e7d32', light:'#e8f5e9', accent:'#43a047' },
+      purple: { main:'#6a1b9a', light:'#f3e5f5', accent:'#8e24aa' },
+      blue:   { main:'#1565c0', light:'#e3f2fd', accent:'#1976d2' },
+      pink:   { main:'#c2185b', light:'#fce4ec', accent:'#e91e63' },
+      teal:   { main:'#00695c', light:'#e0f2f1', accent:'#00897b' },
+      orange: { main:'#e65100', light:'#fff3e0', accent:'#f57c00' },
+      red:    { main:'#b71c1c', light:'#ffebee', accent:'#e53935' },
+      dark:   { main:'#212121', light:'#f5f5f5', accent:'#424242' }
+    };
+
+    let decorPrefs = JSON.parse(localStorage.getItem(`intv_decor_${user?.student_id || 'guest'}`) || '{}');
+    let dayStickers = JSON.parse(localStorage.getItem(`intv_stickers_${user?.student_id || 'guest'}`) || '{}');
+    let pendingSticker = null;
+
+    function saveDecorPrefs() {
+      localStorage.setItem(`intv_decor_${user.student_id}`, JSON.stringify(decorPrefs));
+    }
+    function saveDayStickers() {
+      localStorage.setItem(`intv_stickers_${user.student_id}`, JSON.stringify(dayStickers));
+    }
+
+    function applyTheme(colorKey) {
+      const t = THEMES[colorKey] || THEMES.green;
+      document.documentElement.style.setProperty('--intv-green', t.main);
+      document.documentElement.style.setProperty('--intv-green-light', t.light);
+      document.documentElement.style.setProperty('--intv-accent', t.accent);
+      document.querySelectorAll('.theme-swatch').forEach(s => s.classList.toggle('active', s.dataset.color === colorKey));
+      decorPrefs.color = colorKey;
+      saveDecorPrefs();
+    }
+
+    function applyFont(fontFamily) {
+      document.body.style.fontFamily = `${fontFamily}, sans-serif`;
+      document.querySelectorAll('.font-chip').forEach(c => c.classList.toggle('active', c.dataset.font === fontFamily));
+      decorPrefs.font = fontFamily;
+      saveDecorPrefs();
+    }
+
+    // Load saved prefs on init
+    function loadDecorPrefs() {
+      if (decorPrefs.color) applyTheme(decorPrefs.color);
+      else document.querySelector('.theme-swatch[data-color="green"]')?.classList.add('active');
+      if (decorPrefs.font) applyFont(decorPrefs.font);
+      else document.querySelector('.font-chip[data-font="Inter"]')?.classList.add('active');
+    }
+
+    // Toggle decor panel
+    document.getElementById('btnToggleDecor').addEventListener('click', () => {
+      const panel = document.getElementById('decorPanel');
+      panel.classList.toggle('collapsed');
+      document.getElementById('btnToggleDecor').innerHTML = panel.classList.contains('collapsed')
+        ? '<i class="fas fa-palette me-1"></i>Decorate My Planner'
+        : '<i class="fas fa-times me-1"></i>Close Decorator';
+    });
+
+    // Theme swatches
+    document.querySelectorAll('.theme-swatch').forEach(s => {
+      s.addEventListener('click', () => applyTheme(s.dataset.color));
+    });
+
+    // Font chips
+    document.querySelectorAll('.font-chip').forEach(c => {
+      c.addEventListener('click', () => applyFont(c.dataset.font));
+    });
+
+    // Sticker palette
+    document.querySelectorAll('.sticker-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sticker = btn.dataset.sticker;
+        pendingSticker = pendingSticker === sticker ? null : sticker;
+        document.querySelectorAll('.sticker-btn').forEach(b => b.style.outline = '');
+        if (pendingSticker) {
+          btn.style.outline = '2px solid var(--intv-accent)';
+          document.getElementById('stickerModeLabel').textContent =
+            pendingSticker === '❌'
+              ? 'Click any calendar day to remove its sticker.'
+              : `Click a calendar day to place ${pendingSticker}`;
+        } else {
+          document.getElementById('stickerModeLabel').textContent = '';
+        }
+      });
+    });
+
+    // Placing stickers on calendar days — hook into calDayClick
+    const _origCalDayClick = window.calDayClick;
+    window.calDayClick = function(ymd) {
+      if (pendingSticker) {
+        if (pendingSticker === '❌') {
+          delete dayStickers[ymd];
+        } else {
+          dayStickers[ymd] = pendingSticker;
+        }
+        saveDayStickers();
+        renderCalendar();
+        return;
+      }
+      _origCalDayClick(ymd);
+    };
+
+    // Inject stickers into cal day render — override renderMonthView to insert sticker after build
+    const _origRenderCalendar = renderCalendar;
+    function renderCalendarWithStickers() {
+      _origRenderCalendar();
+      // After DOM is built, inject sticker spans
+      document.querySelectorAll('.cal-day[data-ymd]').forEach(el => {
+        const ymd = el.dataset.ymd;
+        if (dayStickers[ymd]) {
+          const existing = el.querySelector('.cal-sticker');
+          if (!existing) {
+            const span = document.createElement('span');
+            span.className = 'cal-sticker';
+            span.textContent = dayStickers[ymd];
+            el.appendChild(span);
+          } else {
+            existing.textContent = dayStickers[ymd];
+          }
+        }
+      });
+    }
+    // Re-point all calender render calls
+    const renderCalendar_orig_ref = renderCalendar;
+    // We can't easily override a const, so patch after renderCalendar executes via MutationObserver
+    const calObserver = new MutationObserver(() => {
+      document.querySelectorAll('.cal-day[data-ymd]').forEach(el => {
+        const ymd = el.dataset.ymd;
+        if (dayStickers[ymd] && !el.querySelector('.cal-sticker')) {
+          const span = document.createElement('span');
+          span.className = 'cal-sticker';
+          span.textContent = dayStickers[ymd];
+          el.appendChild(span);
+        }
+      });
+    });
+    calObserver.observe(document.getElementById('calGrid'), { childList: true, subtree: true });
+
+    // ── Journal export ────────────────────────────────────────────────────
+    async function getAllJournalEntries() {
+      const data = await apiFetch(`/api/intervention/journal?student_id=${user.student_id}`);
+      return (data.entries || []).sort((a, b) => a.entry_date.localeCompare(b.entry_date));
+    }
+
+    document.getElementById('btnExportPdf').addEventListener('click', async () => {
+      const entries = await getAllJournalEntries();
+      if (!entries.length) { alert('No journal entries to export yet.'); return; }
+      const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.student_id;
+      const printArea = document.getElementById('print-journal-area');
+      printArea.innerHTML = `
+        <h1 style="color:#2e7d32;font-size:22pt;margin-bottom:4pt;">Growth Mindset Journal</h1>
+        <p style="color:#555;font-size:10pt;margin-bottom:24pt;">${name} · Exported ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</p>
+        ${entries.map(e => {
+          const dt = new Date(e.entry_date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+          return `<div class="journal-print-entry">
+            <div class="journal-print-header">${dt}</div>
+            ${e.prompt ? `<div class="journal-print-prompt">Prompt: ${e.prompt}</div>` : ''}
+            <div class="journal-print-body">${(e.content || '').replace(/\n/g,'<br>')}</div>
+            <div class="journal-print-divider"></div>
+          </div>`;
+        }).join('')}`;
+      printArea.style.display = 'block';
+      window.print();
+      setTimeout(() => { printArea.style.display = 'none'; }, 1000);
+    });
+
+    document.getElementById('btnExportPptx').addEventListener('click', async () => {
+      const btn = document.getElementById('btnExportPptx');
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Generating…';
+      try {
+        const entries = await getAllJournalEntries();
+        if (!entries.length) { alert('No journal entries to export yet.'); return; }
+        await window.loadPptxGen();
+        const pptx = new window.PptxGenJS();
+        pptx.layout = 'LAYOUT_WIDE';
+        pptx.title = 'Growth Mindset Journal';
+
+        const GREEN = '2e7d32', LIGHT_GREEN = 'e8f5e9', DARK = '212121', GRAY = '757575';
+
+        // Title slide
+        const title = pptx.addSlide();
+        title.background = { color: GREEN };
+        title.addText('Growth Mindset Journal', { x:0.5, y:1.5, w:12, h:1.2, fontSize:40, bold:true, color:'FFFFFF', align:'center' });
+        const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.student_id;
+        title.addText(name, { x:0.5, y:2.9, w:12, h:0.6, fontSize:20, color:'FFFFFF', align:'center' });
+        title.addText(`${entries.length} entries · Exported ${new Date().toLocaleDateString()}`, { x:0.5, y:3.6, w:12, h:0.5, fontSize:14, color:'A5D6A7', align:'center' });
+
+        for (const e of entries) {
+          const slide = pptx.addSlide();
+          slide.background = { color: LIGHT_GREEN };
+          const dt = new Date(e.entry_date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+          // Date header bar
+          slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:13.33, h:0.9, fill:{ color: GREEN } });
+          slide.addText(dt, { x:0.3, y:0.1, w:12.7, h:0.7, fontSize:18, bold:true, color:'FFFFFF' });
+          // Prompt (if any)
+          let bodyY = 1.1;
+          if (e.prompt) {
+            slide.addText(`Prompt: ${e.prompt}`, { x:0.4, y:bodyY, w:12.5, h:0.8, fontSize:11, italic:true, color:GRAY, wrap:true });
+            bodyY += 0.9;
+          }
+          // Content
+          const content = e.content || '(No entry written)';
+          slide.addText(content, { x:0.4, y:bodyY, w:12.5, h:7.5 - bodyY, fontSize:14, color:DARK, wrap:true, valign:'top' });
+        }
+
+        await pptx.writeFile({ fileName: `growth-mindset-journal-${user.student_id}.pptx` });
+      } catch (err) {
+        console.error(err);
+        alert('Export failed. Please try again.');
+      } finally {
+        btn.disabled = false; btn.innerHTML = '<i class="fas fa-file-powerpoint me-1"></i>Export PPTX';
+      }
     });
 
     init();
