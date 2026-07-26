@@ -1174,8 +1174,6 @@
       await loadPlannerPrefs(sid);
       loadDecorPrefs();
 
-      const sid = targetSid();
-
       // Check intervention enrollment — determines which tabs are visible
       try {
         const status = await apiFetch(`/api/intervention/status?student_id=${sid}`);
