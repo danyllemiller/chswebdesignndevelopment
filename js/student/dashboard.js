@@ -55,6 +55,11 @@ const ASSIGNMENT_PAGE_LINKS = {
     'ch1_lab_root':            '/year1/join-the-developers-guild.html#section-root-setup',
     'ch1_milestone_setup':     '/year1/join-the-developers-guild.html#section-root-setup',
     'ch1_proj_m3':             '/year1/join-the-developers-guild.html#section-urls',
+    // WRS Practice Assessments
+    'WRS-Practice-A':          '/pre-assessments/workplace-readiness-skills.html',
+    'WRS-Practice-B':          '/pre-assessments/workplace-readiness-skills-b.html',
+    'WRS-Practice-C':          '/pre-assessments/workplace-readiness-skills-c.html',
+    'WRS-Practice-D':          '/pre-assessments/workplace-readiness-skills-d.html',
 };
 
 // Mirrors the identical function in admin/gradebook.js so column labels match exactly
