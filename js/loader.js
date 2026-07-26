@@ -186,6 +186,7 @@ function filterNavigation(authData) {
     const adminMenu = document.getElementById('admin-menu-item');
     const studentMenuWD = document.getElementById('student-menu-wd');
     const studentMenuCS = document.getElementById('student-menu-cs');
+    const studentMenuINTV = document.getElementById('student-menu-intv');
     const webDesignNav = document.getElementById('nav-web-design');
     const compSciNav = document.getElementById('nav-computer-science');
     console.log('[filterNavigation] DOM elements found:', { loginMenu: !!loginMenu, adminMenu: !!adminMenu, studentMenuWD: !!studentMenuWD, studentMenuCS: !!studentMenuCS, webDesignNav: !!webDesignNav, compSciNav: !!compSciNav });
@@ -194,6 +195,7 @@ function filterNavigation(authData) {
         if (loginMenu) loginMenu.style.display = '';
         if (studentMenuWD) studentMenuWD.style.setProperty('display', 'none', 'important');
         if (studentMenuCS) studentMenuCS.style.setProperty('display', 'none', 'important');
+        if (studentMenuINTV) studentMenuINTV.style.setProperty('display', 'none', 'important');
         if (adminMenu) adminMenu.style.setProperty('display', 'none', 'important');
         if (webDesignNav) webDesignNav.style.display = '';
         if (compSciNav) compSciNav.style.display = '';
@@ -210,6 +212,7 @@ function filterNavigation(authData) {
         }
         if (studentMenuWD) studentMenuWD.style.setProperty('display', 'none', 'important');
         if (studentMenuCS) studentMenuCS.style.setProperty('display', 'none', 'important');
+        if (studentMenuINTV) studentMenuINTV.style.setProperty('display', 'none', 'important');
         if (webDesignNav) webDesignNav.style.display = '';
         if (compSciNav) compSciNav.style.display = '';
     } else {
@@ -239,10 +242,20 @@ const studentClass = String(
         // Use explicit course first, then fall back to class-based inference
         const isCS = explicitCourse === 'CS' || authData.isCSStudent === true || courseFromClass === 'CS' || /^(CS|COMP)/.test(studentClass) || studentClass.includes('CS') || studentClass.includes('COMP');
         const isWD = explicitCourse === 'WD' || courseFromClass === 'WD' || /^(WD|AS)/.test(studentClass) || studentClass.includes('WD') || studentClass.includes('WEB');
-        
-        console.log('[filterNavigation STUDENT] studentClass=', studentClass, 'explicitCourse=', explicitCourse, 'courseFromClass=', courseFromClass, 'isCS=', isCS, 'isWD=', isWD, 'authData.isCSStudent=', authData.isCSStudent);
+        const isINTV = !isCS && !isWD && (studentClass === 'INTV' || studentClass === 'INTERVENTION' || studentClass.startsWith('INTV'));
 
-        if (isCS && !isWD) {
+        console.log('[filterNavigation STUDENT] studentClass=', studentClass, 'explicitCourse=', explicitCourse, 'courseFromClass=', courseFromClass, 'isCS=', isCS, 'isWD=', isWD, 'isINTV=', isINTV, 'authData.isCSStudent=', authData.isCSStudent);
+
+        if (isINTV) {
+            if (webDesignNav) webDesignNav.style.setProperty('display', 'none', 'important');
+            if (compSciNav) compSciNav.style.setProperty('display', 'none', 'important');
+            if (studentMenuWD) studentMenuWD.style.setProperty('display', 'none', 'important');
+            if (studentMenuCS) studentMenuCS.style.setProperty('display', 'none', 'important');
+            if (studentMenuINTV) {
+                studentMenuINTV.classList.remove('d-none');
+                studentMenuINTV.style.setProperty('display', 'block', 'important');
+            }
+        } else if (isCS && !isWD) {
             console.log('[filterNavigation] APPLYING CS-ONLY RULES');
             if (webDesignNav) {
                 webDesignNav.style.setProperty('display', 'none', 'important');
@@ -283,6 +296,7 @@ const studentClass = String(
             // but hide the student-specific dropdowns until course is detected.
             if (studentMenuWD) studentMenuWD.style.setProperty('display', 'none', 'important');
             if (studentMenuCS) studentMenuCS.style.setProperty('display', 'none', 'important');
+            if (studentMenuINTV) studentMenuINTV.style.setProperty('display', 'none', 'important');
         }
     }
 
@@ -292,6 +306,7 @@ const studentClass = String(
         const adminMenu = document.getElementById('admin-menu-item');
         const studentMenuWD = document.getElementById('student-menu-wd');
         const studentMenuCS = document.getElementById('student-menu-cs');
+        const studentMenuINTV = document.getElementById('student-menu-intv');
         const webDesignNav = document.getElementById('nav-web-design');
         const compSciNav = document.getElementById('nav-computer-science');
 
@@ -312,10 +327,18 @@ const studentClass = String(
                     null;
         const isCS = authData.course === 'CS' || authData.isCSStudent === true || courseFromClass === 'CS' || /^(CS|COMP)/.test(studentClass) || studentClass.includes('CS') || studentClass.includes('COMP');
         const isWD = authData.course === 'WD' || courseFromClass === 'WD' || /^(WD|AS)/.test(studentClass) || studentClass.includes('WD') || studentClass.includes('WEB');
+        const isINTV = !isCS && !isWD && (studentClass === 'INTV' || studentClass === 'INTERVENTION' || studentClass.startsWith('INTV'));
 
         if (authData.isTeacher) return;
 
-        if (isCS && !isWD) {
+        if (isINTV) {
+            if (studentMenuWD) studentMenuWD.style.setProperty('display', 'none', 'important');
+            if (studentMenuCS) studentMenuCS.style.setProperty('display', 'none', 'important');
+            if (studentMenuINTV) {
+                studentMenuINTV.classList.remove('d-none');
+                studentMenuINTV.style.setProperty('display', 'block', 'important');
+            }
+        } else if (isCS && !isWD) {
             console.log('[filterNavigation DEFENSIVE CHECK] Re-enforcing CS-only nav');
             if (webDesignNav && webDesignNav.style.display !== 'none') {
                 webDesignNav.style.setProperty('display', 'none', 'important');
@@ -325,6 +348,7 @@ const studentClass = String(
                 studentMenuWD.style.setProperty('display', 'none', 'important');
                 console.log('[filterNavigation] studentMenuWD was re-hidden');
             }
+            if (studentMenuINTV) studentMenuINTV.style.setProperty('display', 'none', 'important');
         } else if (isWD && !isCS) {
             console.log('[filterNavigation DEFENSIVE CHECK] Re-enforcing WD-only nav');
             if (compSciNav && compSciNav.style.display === 'none') {
@@ -335,6 +359,7 @@ const studentClass = String(
                 studentMenuCS.style.setProperty('display', 'none', 'important');
                 console.log('[filterNavigation] studentMenuCS was re-hidden');
             }
+            if (studentMenuINTV) studentMenuINTV.style.setProperty('display', 'none', 'important');
         }
     }, 50);
 }
