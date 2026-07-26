@@ -410,6 +410,12 @@
               <h6 class="fw-bold text-success mb-0"><i class="fas fa-plus me-2"></i>Add Task</h6>
             </div>
             <div class="card-body">
+              <div class="btn-group w-100 mb-2" role="group" aria-label="Item type">
+                <input type="radio" class="btn-check" name="todoItemType" id="typeIsTodo" value="todo" checked>
+                <label class="btn btn-sm btn-outline-secondary" for="typeIsTodo"><i class="fas fa-check-square me-1"></i>To-Do</label>
+                <input type="radio" class="btn-check" name="todoItemType" id="typeIsAssignment" value="assignment">
+                <label class="btn btn-sm btn-outline-primary" for="typeIsAssignment"><i class="fas fa-book me-1"></i>Assignment</label>
+              </div>
               <div class="mb-2">
                 <input type="text" class="form-control" id="todoText" placeholder="What do you need to do?">
               </div>
@@ -1453,11 +1459,14 @@
           ${assignEvents.map(e => `<div class="small ${e.submitted ? 'text-success' : ''} mb-1">
             <i class="fas fa-${e.submitted ? 'check-circle text-success' : 'circle text-muted'} me-1"></i>${e.label}
           </div>`).join('')}
-          ${dayTodos.map(t => `
-            <div class="week-cal-item item-todo${t.done ? ' item-done' : ''}">
+          ${dayTodos.map(t => {
+            const isAssign = t.itemType === 'assignment';
+            const ic = isAssign ? '📚' : '☐';
+            return `<div class="week-cal-item item-todo${t.done ? ' item-done' : ''}">
               <input type="checkbox" ${t.done ? 'checked' : ''} onchange="window.toggleTodo('${t.id}')">
-              <span>${t.text.slice(0,28)}${t.text.length > 28 ? '…' : ''}</span>
-            </div>`).join('')}
+              <span>${ic} ${t.text.slice(0,25)}${t.text.length > 25 ? '…' : ''}</span>
+            </div>`;
+          }).join('')}
           ${dayTests.map(t => `
             <div class="week-cal-item item-test${t.studied ? ' item-done' : ''}">
               <input type="checkbox" ${t.studied ? 'checked' : ''} onchange="window.toggleStudied(${t.id}, ${!t.studied})">
@@ -1475,9 +1484,9 @@
       const label = dt.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
       document.getElementById('dayModalTitle').textContent = label;
 
-      // Build body: school info + assignments + todos + tests
+      // Build body: school info + teacher assignments + student todos + tests
       const assignEvts = events.filter(e => e.type === 'assign');
-      const todoEvts   = events.filter(e => e.type === 'todo');
+      const todoEvts   = todos.filter(t => t.date === ymd);   // use live todos array directly
       const testEvts   = events.filter(e => e.type === 'test');
 
       let body = '';
@@ -1495,20 +1504,23 @@
       }
       if (todoEvts.length) {
         body += `<div class="day-detail-section"><h6 class="small fw-bold">To-Do / Assignments</h6>`;
-        todoEvts.forEach(e => {
+        todoEvts.forEach(t => {
+          const isAssign = t.itemType === 'assignment';
+          const icon = isAssign ? '📚' : '☐';
           body += `<div class="d-flex align-items-center gap-2 mb-1">
-            <input type="checkbox" class="form-check-input mt-0" ${e.done ? 'checked' : ''} onchange="window.toggleTodo('${e.id}');bootstrap.Modal.getInstance(document.getElementById('dayModal'))?.hide();">
-            <span class="small ${e.done ? 'text-decoration-line-through text-muted' : ''}">${e.label}</span>
+            <input type="checkbox" class="form-check-input mt-0" ${t.done ? 'checked' : ''} onchange="window.toggleTodo('${t.id}')">
+            <span class="small ${t.done ? 'text-decoration-line-through text-muted' : ''}">${icon} ${t.text}</span>
           </div>`;
         });
         body += `</div>`;
       }
-      if (testEvts.length) {
+      const dayTests = tests.filter(t => t.test_date === ymd);
+      if (dayTests.length) {
         body += `<div class="day-detail-section"><h6 class="small fw-bold">Tests &amp; Quizzes</h6>`;
-        testEvts.forEach(e => {
+        dayTests.forEach(t => {
           body += `<div class="d-flex align-items-center gap-2 mb-1">
-            <input type="checkbox" class="form-check-input mt-0" ${e.studied ? 'checked' : ''} onchange="window.toggleStudied(${e.id},${!e.studied});bootstrap.Modal.getInstance(document.getElementById('dayModal'))?.hide();">
-            <span class="small ${e.studied ? 'text-decoration-line-through text-muted' : ''}">📝 ${e.label}</span>
+            <input type="checkbox" class="form-check-input mt-0" ${t.studied ? 'checked' : ''} onchange="window.toggleStudied(${t.id},${!t.studied})">
+            <span class="small ${t.studied ? 'text-decoration-line-through text-muted' : ''}">📝 ${t.class_name}${t.title ? ` — ${t.title}` : ''}</span>
           </div>`;
         });
         body += `</div>`;
@@ -2278,13 +2290,13 @@
           </div>
         </div>`;
 
-      // ── Assignments due ────────────────────────────────────────────────────
-      const events = calEvents[ymd] || [];
-      if (events.length) {
+      // ── Teacher-assigned work due ──────────────────────────────────────────
+      const teacherAssigns = (calEvents[ymd] || []).filter(e => e.type === 'assign');
+      if (teacherAssigns.length) {
         html += `<div class="card shadow-sm border-0 mb-3">
           <div class="card-header bg-white fw-bold border-0 pt-3 pb-2"><i class="fas fa-tasks me-2 text-success"></i>Assignments Due</div>
           <div class="card-body">`;
-        events.forEach(e => {
+        teacherAssigns.forEach(e => {
           html += `<div class="d-flex align-items-center gap-2 mb-2">
             <i class="fas fa-${e.submitted ? 'check-circle text-success' : 'circle text-muted'}"></i>
             <span>${e.label}</span>
@@ -2294,14 +2306,17 @@
         html += `</div></div>`;
       }
 
-      // ── To-dos due ────────────────────────────────────────────────────────
+      // ── To-dos / student assignments due ──────────────────────────────────
       const dueTodos = todos.filter(t => t.date === ymd);
       if (dueTodos.length) {
         html += `<div class="day-cal-section section-todo">
           <div class="fw-bold mb-2" style="font-size:.85rem;"><i class="fas fa-check-square me-2 text-success"></i>To-Do / Assignments</div>`;
         dueTodos.forEach(t => {
+          const isAssign = t.itemType === 'assignment';
+          const icon = isAssign ? 'fa-book text-primary' : 'fa-check-square text-success';
           html += `<div class="day-cal-item${t.done ? ' item-done' : ''}">
             <input type="checkbox" class="form-check-input" ${t.done ? 'checked' : ''} onchange="window.toggleTodo('${t.id}')">
+            <i class="fas ${icon}" style="font-size:.85rem;flex-shrink:0;"></i>
             <span class="item-label flex-grow-1 small">${t.text}</span>
             <span class="badge bg-${t.priority === 'high' ? 'danger' : t.priority === 'low' ? 'light text-dark border' : 'secondary'}" style="font-size:.6rem;">${t.priority}</span>
           </div>`;
@@ -2638,12 +2653,19 @@
       const priorityColor = { high: 'danger', normal: 'secondary', low: 'light' };
       el.innerHTML = list.map(t => {
         const dt = t.date ? new Date(t.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+        const isAssign = t.itemType === 'assignment';
+        const typeIcon = isAssign ? 'fa-book text-primary' : 'fa-check-square text-success';
+        const typeBadge = isAssign
+          ? `<span class="badge bg-primary" style="font-size:.58rem;">assignment</span>`
+          : `<span class="badge bg-success" style="font-size:.58rem;">to-do</span>`;
         return `<div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom todo-row ${t.done ? 'opacity-50' : ''}">
           <input type="checkbox" class="form-check-input mt-0 flex-shrink-0" ${t.done ? 'checked' : ''} onchange="window.toggleTodo('${t.id}')">
+          <i class="fas ${typeIcon} flex-shrink-0" style="font-size:.8rem;"></i>
           <div class="flex-grow-1 ${t.done ? 'text-decoration-line-through text-muted' : ''}">
             <span class="small fw-bold">${t.text}</span>
             ${dt ? `<span class="text-muted small ms-2"><i class="fas fa-calendar me-1"></i>${dt}</span>` : ''}
           </div>
+          ${typeBadge}
           <span class="badge bg-${priorityColor[t.priority] || 'secondary'} text-${t.priority === 'low' ? 'dark' : 'white'}" style="font-size:.6rem;">${t.priority}</span>
           <button class="btn btn-sm p-0 text-primary intv-edit-only" onclick="window.editTodo('${t.id}')" title="Edit"><i class="fas fa-pencil-alt" style="font-size:.7rem;"></i></button>
           <button class="btn btn-sm p-0 text-muted intv-edit-only" onclick="window.deleteTodo('${t.id}')" title="Delete"><i class="fas fa-times" style="font-size:.7rem;"></i></button>
@@ -2676,11 +2698,20 @@
 
     let editingTodoId = null;
 
+    function getItemType() {
+      return document.querySelector('input[name="todoItemType"]:checked')?.value || 'todo';
+    }
+    function setItemType(val) {
+      const el = document.querySelector(`input[name="todoItemType"][value="${val}"]`);
+      if (el) el.checked = true;
+    }
+
     function resetTodoForm() {
       editingTodoId = null;
       document.getElementById('todoText').value = '';
       document.getElementById('todoDate').value = '';
       document.getElementById('todoPriority').value = 'normal';
+      setItemType('todo');
       document.getElementById('btnAddTodo').innerHTML = '<i class="fas fa-plus me-1"></i>Add Task';
       document.getElementById('btnAddTodo').className = 'btn btn-success btn-sm fw-bold w-100';
       document.getElementById('btnCancelEditTodo').classList.add('d-none');
@@ -2695,10 +2726,11 @@
           t.text     = text;
           t.date     = document.getElementById('todoDate').value || '';
           t.priority = document.getElementById('todoPriority').value;
+          t.itemType = getItemType();
         }
         resetTodoForm();
       } else {
-        const todo = { id: Date.now().toString(), text, date: document.getElementById('todoDate').value || '', priority: document.getElementById('todoPriority').value, done: false };
+        const todo = { id: Date.now().toString(), text, date: document.getElementById('todoDate').value || '', priority: document.getElementById('todoPriority').value, itemType: getItemType(), done: false };
         todos.push(todo);
       }
       saveTodos();
@@ -2716,9 +2748,10 @@
       const t = todos.find(x => x.id === id);
       if (!t) return;
       editingTodoId = id;
-      document.getElementById('todoText').value    = t.text;
-      document.getElementById('todoDate').value    = t.date || '';
+      document.getElementById('todoText').value     = t.text;
+      document.getElementById('todoDate').value     = t.date || '';
       document.getElementById('todoPriority').value = t.priority || 'normal';
+      setItemType(t.itemType || 'todo');
       document.getElementById('btnAddTodo').innerHTML = '<i class="fas fa-save me-1"></i>Save Changes';
       document.getElementById('btnAddTodo').className = 'btn btn-primary btn-sm fw-bold w-100';
       document.getElementById('btnCancelEditTodo').classList.remove('d-none');
