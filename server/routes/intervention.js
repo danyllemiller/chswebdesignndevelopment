@@ -866,7 +866,8 @@ const PLANNER_DDL = [
     todo_id     VARCHAR(80) NOT NULL,
     text_val    TEXT NOT NULL,
     due_date    DATE,
-    priority    VARCHAR(20) DEFAULT 'medium',
+    priority    VARCHAR(20) DEFAULT 'normal',
+    item_type   VARCHAR(20) DEFAULT 'todo',
     done        TINYINT(1) DEFAULT 0,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -898,6 +899,10 @@ async function ensurePlannerTables(connection) {
     for (const stmt of PLANNER_DDL) {
         await connection.execute(stmt);
     }
+    // Add item_type column to planner_todos if it doesn't exist yet (migration for existing tables)
+    await connection.execute(`
+        ALTER TABLE planner_todos ADD COLUMN IF NOT EXISTS item_type VARCHAR(20) DEFAULT 'todo'
+    `).catch(() => {});
 }
 
 // ── Preferences (schedule, colors, stickers, decor, countdowns) ───────────
@@ -955,6 +960,12 @@ router.put('/intervention/planner-prefs', async (req, res) => {
 
 // ── To-dos ────────────────────────────────────────────────────────────────
 
+const fmtDate = (d) => {
+    if (!d) return null;
+    if (d instanceof Date) return d.toISOString().split('T')[0];
+    return String(d).split('T')[0];
+};
+
 router.get('/intervention/todos', async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
@@ -962,11 +973,11 @@ router.get('/intervention/todos', async (req, res) => {
         const connection = await getDbConnection();
         await ensurePlannerTables(connection);
         const [rows] = await connection.execute(
-            'SELECT todo_id AS id, text_val AS text, due_date AS date, priority, done FROM planner_todos WHERE student_id = ? ORDER BY due_date ASC, created_at ASC',
+            'SELECT todo_id AS id, text_val AS text, due_date AS date, priority, item_type AS itemType, done FROM planner_todos WHERE student_id = ? ORDER BY due_date ASC, created_at ASC',
             [student_id]
         );
         await connection.end();
-        res.json({ todos: rows.map(r => ({ ...r, done: !!r.done })) });
+        res.json({ todos: rows.map(r => ({ ...r, date: fmtDate(r.date), done: !!r.done, itemType: r.itemType || 'todo' })) });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch todos' }); }
 });
 
@@ -991,12 +1002,13 @@ router.put('/intervention/todos', async (req, res) => {
         // Upsert each
         for (const t of todos) {
             if (!t.id || !t.text) continue;
+            const dueDate = t.date ? String(t.date).split('T')[0] : null;
             await connection.execute(
-                `INSERT INTO planner_todos (student_id, todo_id, text_val, due_date, priority, done)
-                 VALUES (?, ?, ?, ?, ?, ?)
+                `INSERT INTO planner_todos (student_id, todo_id, text_val, due_date, priority, item_type, done)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)
                  ON DUPLICATE KEY UPDATE text_val = VALUES(text_val), due_date = VALUES(due_date),
-                   priority = VALUES(priority), done = VALUES(done)`,
-                [student_id, t.id, t.text, t.date || null, t.priority || 'medium', t.done ? 1 : 0]
+                   priority = VALUES(priority), item_type = VALUES(item_type), done = VALUES(done)`,
+                [student_id, t.id, t.text, dueDate, t.priority || 'normal', t.itemType || 'todo', t.done ? 1 : 0]
             );
         }
         await connection.end();
@@ -1133,11 +1145,11 @@ router.get('/teacher/planner/:student_id/todos', async (req, res) => {
         const connection = await getDbConnection();
         await ensurePlannerTables(connection);
         const [rows] = await connection.execute(
-            'SELECT todo_id AS id, text_val AS text, due_date AS date, priority, done FROM planner_todos WHERE student_id = ? ORDER BY due_date ASC, created_at ASC',
+            'SELECT todo_id AS id, text_val AS text, due_date AS date, priority, item_type AS itemType, done FROM planner_todos WHERE student_id = ? ORDER BY due_date ASC, created_at ASC',
             [student_id]
         );
         await connection.end();
-        res.json({ todos: rows.map(r => ({ ...r, done: !!r.done })) });
+        res.json({ todos: rows.map(r => ({ ...r, date: fmtDate(r.date), done: !!r.done, itemType: r.itemType || 'todo' })) });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch todos' }); }
 });
 

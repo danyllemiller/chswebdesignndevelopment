@@ -2723,14 +2723,18 @@
       countdowns = JSON.parse(localStorage.getItem(CD_KEY()) || '[]');
     }
 
-    function saveTodos() {
+    async function saveTodos() {
       localStorage.setItem(TODOS_KEY(), JSON.stringify(todos));
       if (!isReadOnly && user?.student_id) {
-        apiFetch('/api/intervention/todos', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ student_id: user.student_id, todos })
-        }).catch(() => {});
+        try {
+          await apiFetch('/api/intervention/todos', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: user.student_id, todos })
+          });
+        } catch (err) {
+          console.error('Failed to save tasks to server:', err);
+        }
       }
     }
     function saveCountdowns() { localStorage.setItem(CD_KEY(), JSON.stringify(countdowns)); }
@@ -2820,7 +2824,7 @@
       document.getElementById('btnCancelEditTodo').classList.add('d-none');
     }
 
-    document.getElementById('btnAddTodo').addEventListener('click', () => {
+    document.getElementById('btnAddTodo').addEventListener('click', async () => {
       const text = document.getElementById('todoText').value.trim();
       if (!text) return;
       if (editingTodoId) {
@@ -2836,7 +2840,7 @@
         const todo = { id: Date.now().toString(), text, date: document.getElementById('todoDate').value || '', priority: document.getElementById('todoPriority').value, itemType: getItemType(), done: false };
         todos.push(todo);
       }
-      saveTodos();
+      await saveTodos();
       renderTodos(document.getElementById('todoFilterDate')?.value || '');
       renderCalendar();
     });
@@ -2862,18 +2866,18 @@
       document.getElementById('todoText').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     };
 
-    window.toggleTodo = (id) => {
+    window.toggleTodo = async (id) => {
       const t = todos.find(x => x.id === id);
       if (t) {
         t.done = !t.done;
-        saveTodos();
+        await saveTodos();
         renderTodos(document.getElementById('todoFilterDate')?.value || '');
         renderCalendar();
       }
     };
-    window.deleteTodo = (id) => {
+    window.deleteTodo = async (id) => {
       todos = todos.filter(x => x.id !== id);
-      saveTodos();
+      await saveTodos();
       renderTodos(document.getElementById('todoFilterDate')?.value || '');
       renderCalendar();
     };
