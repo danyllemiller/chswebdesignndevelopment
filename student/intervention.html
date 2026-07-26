@@ -15,15 +15,16 @@
   <style>
     /* ── Planner theme tokens (defaults match the site palette) ───────────
        These are the ONLY variables decoration JS should write to.          */
-    .planner-page {
+    /* Theme vars scoped to content area between header and footer */
+    #planner-content {
       --p-bg:      #ffffff;
-      --p-text:    var(--primary-color, #000099);
-      --p-accent:  var(--tertiary-color, #6d916c);
+      --p-text:    #000099;
+      --p-accent:  #6d916c;
       --p-accent-light: rgba(109,145,108,.12);
       --p-header:  var(--primary-color, #000099);
-      --p-font-title:   var(--font-family-monospace, 'Courier New');
-      --p-font-heading: var(--font-family-monospace, 'Courier New');
-      --p-font-body:    var(--font-family-base, 'Edu NSW ACT Foundation');
+      --p-font-title:   'Courier New', monospace;
+      --p-font-heading: 'Courier New', monospace;
+      --p-font-body:    'Edu NSW ACT Foundation', cursive;
       background: var(--p-bg);
       color: var(--p-text);
       font-family: var(--p-font-body);
@@ -78,6 +79,15 @@
 
     /* Decoration panel */
     .decor-panel { background: var(--p-bg); border: 1px solid #dee2e6; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; }
+    .theme-card { width: 68px; cursor: pointer; border-radius: 8px; overflow: hidden; border: 2px solid transparent; transition: border-color .15s, transform .15s; flex-shrink: 0; }
+    .theme-card:hover { transform: translateY(-2px); }
+    .theme-card.active { border-color: #333; box-shadow: 0 0 0 2px #333; }
+    .theme-card-swatch { height: 36px; display: flex; }
+    .theme-card-accent { width: 18px; }
+    .theme-card-name { font-size: .58rem; font-weight: 700; text-align: center; padding: 3px 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .font-theme-btn { padding: 6px 14px; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; font-size: .82rem; background: var(--p-bg); color: var(--p-text); transition: border-color .15s; white-space: nowrap; }
+    .font-theme-btn:hover { border-color: #888; }
+    .font-theme-btn.active { border-color: var(--p-accent); background: var(--p-accent); color: #fff; }
     .decor-panel.collapsed { display: none; }
     .color-picker-group { display: flex; align-items: center; gap: 8px; }
     .color-picker-group input[type="color"] { width: 36px; height: 36px; padding: 2px; border-radius: 50%; border: 2px solid #dee2e6; cursor: pointer; }
@@ -244,6 +254,7 @@
     </div>
   </div>
 
+  <div id="planner-content">
   <div class="container pb-5">
 
     <!-- Tab Nav -->
@@ -276,76 +287,20 @@
 
       <!-- Decoration panel -->
       <div class="decor-panel collapsed" id="decorPanel">
-        <div class="row g-3 align-items-start">
-          <!-- Theme colors -->
-          <div class="col-12 col-md-5">
-            <small class="fw-bold text-muted d-block mb-2 text-uppercase" style="font-size:.65rem;">Theme Colors</small>
-            <div class="row g-2">
-              <div class="col-4">
-                <label class="form-label fw-bold mb-1" style="font-size:.7rem;">Background</label>
-                <div class="color-picker-group">
-                  <input type="color" id="cpBg" value="#ffffff" title="Background color">
-                  <small id="cpBgHex" class="text-muted">#ffffff</small>
-                </div>
-              </div>
-              <div class="col-4">
-                <label class="form-label fw-bold mb-1" style="font-size:.7rem;">Text</label>
-                <div class="color-picker-group">
-                  <input type="color" id="cpText" value="#000099" title="Text color">
-                  <small id="cpTextHex" class="text-muted">#000099</small>
-                </div>
-              </div>
-              <div class="col-4">
-                <label class="form-label fw-bold mb-1" style="font-size:.7rem;">Accent</label>
-                <div class="color-picker-group">
-                  <input type="color" id="cpAccent" value="#6d916c" title="Accent color">
-                  <small id="cpAccentHex" class="text-muted">#6d916c</small>
-                </div>
-              </div>
-            </div>
+        <div class="row g-3">
+          <!-- Color themes -->
+          <div class="col-12">
+            <small class="fw-bold text-muted d-block mb-2 text-uppercase" style="font-size:.65rem;">Color Theme</small>
+            <div class="d-flex flex-wrap gap-2" id="colorThemeGallery"></div>
           </div>
-          <!-- Font theme -->
-          <div class="col-12 col-md-5">
+          <!-- Font themes -->
+          <div class="col-12">
             <small class="fw-bold text-muted d-block mb-2 text-uppercase" style="font-size:.65rem;">Font Theme</small>
-            <div class="row g-2">
-              <div class="col-4">
-                <label class="form-label fw-bold mb-1" style="font-size:.7rem;">Title</label>
-                <select class="form-select form-select-sm" id="fontTitle">
-                  <option value="'Courier New',monospace">Courier New</option>
-                  <option value="'Edu NSW ACT Foundation',cursive">Edu NSW ACT</option>
-                  <option value="Georgia,serif">Georgia</option>
-                  <option value="Inter,sans-serif">Inter</option>
-                  <option value="'Comic Sans MS',cursive">Comic Sans</option>
-                  <option value="'Trebuchet MS',sans-serif">Trebuchet</option>
-                </select>
-              </div>
-              <div class="col-4">
-                <label class="form-label fw-bold mb-1" style="font-size:.7rem;">Headings</label>
-                <select class="form-select form-select-sm" id="fontHeading">
-                  <option value="'Courier New',monospace">Courier New</option>
-                  <option value="'Edu NSW ACT Foundation',cursive">Edu NSW ACT</option>
-                  <option value="Georgia,serif">Georgia</option>
-                  <option value="Inter,sans-serif">Inter</option>
-                  <option value="'Comic Sans MS',cursive">Comic Sans</option>
-                  <option value="'Trebuchet MS',sans-serif">Trebuchet</option>
-                </select>
-              </div>
-              <div class="col-4">
-                <label class="form-label fw-bold mb-1" style="font-size:.7rem;">Body Text</label>
-                <select class="form-select form-select-sm" id="fontBody">
-                  <option value="'Edu NSW ACT Foundation',cursive">Edu NSW ACT</option>
-                  <option value="'Courier New',monospace">Courier New</option>
-                  <option value="Georgia,serif">Georgia</option>
-                  <option value="Inter,sans-serif">Inter</option>
-                  <option value="'Comic Sans MS',cursive">Comic Sans</option>
-                  <option value="'Trebuchet MS',sans-serif">Trebuchet</option>
-                </select>
-              </div>
-            </div>
+            <div class="d-flex flex-wrap gap-2" id="fontThemeGallery"></div>
           </div>
           <!-- Reset -->
-          <div class="col-12 col-md-2 d-flex align-items-end">
-            <button class="btn btn-sm btn-outline-secondary w-100" id="btnResetTheme">Reset to Default</button>
+          <div class="col-12">
+            <button class="btn btn-sm btn-outline-secondary" id="btnResetTheme">Reset to Default</button>
           </div>
           <!-- Stickers -->
           <div class="col-12">
@@ -649,6 +604,7 @@
       </div>
     </div>
   </div>
+  </div><!-- /#planner-content -->
 
   <!-- ── DAY DETAIL MODAL ──────────────────────────────────────────────── -->
   <div class="modal fade" id="dayModal" tabindex="-1">
@@ -1768,70 +1724,114 @@
       return `rgba(${r},${g},${b},${alpha})`;
     }
 
-    // Load saved prefs on init — applies stored color/font tokens to .planner-page (body)
-    function loadDecorPrefs() {
-      const bg     = decorPrefs['--p-bg']     || '#ffffff';
-      const text   = decorPrefs['--p-text']   || '#000099';
-      const accent = decorPrefs['--p-accent'] || '#6d916c';
+    // ── Theme definitions (like MS Word / PowerPoint themes) ─────────────
+    const COLOR_THEMES = [
+      { id:'default',   name:'Default',   bg:'#ffffff', text:'#000099', accent:'#6d916c' },
+      { id:'ocean',     name:'Ocean',     bg:'#e8f4fd', text:'#0d2b4e', accent:'#0077b6' },
+      { id:'forest',    name:'Forest',    bg:'#f0f7f0', text:'#1b3a1e', accent:'#2d6a4f' },
+      { id:'sunset',    name:'Sunset',    bg:'#fff8f0', text:'#4a2000', accent:'#e07020' },
+      { id:'lavender',  name:'Lavender',  bg:'#f5f0ff', text:'#2d1b6e', accent:'#7c3aed' },
+      { id:'parchment', name:'Parchment', bg:'#fdf6e3', text:'#4a3000', accent:'#b5860d' },
+      { id:'rose',      name:'Rosé',      bg:'#fff0f5', text:'#4a0020', accent:'#c0256a' },
+      { id:'slate',     name:'Slate',     bg:'#f0f4f8', text:'#1e2d3d', accent:'#4a6fa5' },
+      { id:'lemon',     name:'Lemon',     bg:'#fffde7', text:'#2e2000', accent:'#c49a00' },
+      { id:'midnight',  name:'Midnight',  bg:'#1a1a2e', text:'#e0e0ff', accent:'#4fc3f7' },
+    ];
 
-      // Update color picker values + hex labels
-      const cpBg = document.getElementById('cpBg');
-      const cpTx = document.getElementById('cpText');
-      const cpAc = document.getElementById('cpAccent');
-      if (cpBg) { cpBg.value = bg;     document.getElementById('cpBgHex').textContent   = bg; }
-      if (cpTx) { cpTx.value = text;   document.getElementById('cpTextHex').textContent = text; }
-      if (cpAc) { cpAc.value = accent; document.getElementById('cpAccentHex').textContent = accent; }
+    const FONT_THEMES = [
+      { id:'classic',  name:'Classic',   sample:"Aa",  title:"'Courier New',monospace",   heading:"'Courier New',monospace",    body:"'Edu NSW ACT Foundation',cursive" },
+      { id:'modern',   name:'Modern',    sample:"Aa",  title:"system-ui,sans-serif",       heading:"system-ui,sans-serif",       body:"system-ui,sans-serif" },
+      { id:'elegant',  name:'Elegant',   sample:"Aa",  title:"Georgia,serif",              heading:"Georgia,serif",              body:"Georgia,serif" },
+      { id:'playful',  name:'Playful',   sample:"Aa",  title:"'Trebuchet MS',sans-serif",  heading:"'Trebuchet MS',sans-serif",  body:"'Comic Sans MS',cursive" },
+      { id:'retro',    name:'Retro',     sample:"Aa",  title:"'Courier New',monospace",    heading:"'Courier New',monospace",    body:"'Courier New',monospace" },
+    ];
 
-      // Apply to CSS tokens on body
-      document.body.style.setProperty('--p-bg',   bg);
-      document.body.style.setProperty('--p-text',  text);
-      document.body.style.setProperty('--p-accent', accent);
-      document.body.style.setProperty('--p-accent-light', hexToRgba(accent, 0.12));
+    const pc = () => document.getElementById('planner-content'); // target for CSS vars
 
-      // Font tokens
-      const ft = decorPrefs['--p-font-title'];
-      const fh = decorPrefs['--p-font-heading'];
-      const fb = decorPrefs['--p-font-body'];
-      const selT = document.getElementById('fontTitle');
-      const selH = document.getElementById('fontHeading');
-      const selB = document.getElementById('fontBody');
-      if (ft && selT) { document.body.style.setProperty('--p-font-title', ft);   selT.value = ft; }
-      if (fh && selH) { document.body.style.setProperty('--p-font-heading', fh); selH.value = fh; }
-      if (fb && selB) { document.body.style.setProperty('--p-font-body', fb);    selB.value = fb; }
+    function applyColorTheme(t) {
+      const el = pc(); if (!el) return;
+      el.style.setProperty('--p-bg',           t.bg);
+      el.style.setProperty('--p-text',          t.text);
+      el.style.setProperty('--p-accent',        t.accent);
+      el.style.setProperty('--p-accent-light',  hexToRgba(t.accent, 0.12));
     }
 
-    // Color pickers
-    [['cpBg','--p-bg','cpBgHex'],['cpText','--p-text','cpTextHex'],['cpAccent','--p-accent','cpAccentHex']].forEach(([id, token, hexId]) => {
-      document.getElementById(id)?.addEventListener('input', e => {
-        document.body.style.setProperty(token, e.target.value);
-        document.getElementById(hexId).textContent = e.target.value;
-        if (token === '--p-accent') document.body.style.setProperty('--p-accent-light', hexToRgba(e.target.value, 0.12));
-        decorPrefs[token] = e.target.value;
-        saveDecorPrefs();
-      });
-    });
+    function applyFontTheme(f) {
+      const el = pc(); if (!el) return;
+      el.style.setProperty('--p-font-title',   f.title);
+      el.style.setProperty('--p-font-heading', f.heading);
+      el.style.setProperty('--p-font-body',    f.body);
+    }
 
-    // Font selectors
-    [['fontTitle','--p-font-title'],['fontHeading','--p-font-heading'],['fontBody','--p-font-body']].forEach(([id, token]) => {
-      document.getElementById(id)?.addEventListener('change', e => {
-        document.body.style.setProperty(token, e.target.value);
-        decorPrefs[token] = e.target.value;
-        saveDecorPrefs();
+    function buildThemeGalleries() {
+      const cg = document.getElementById('colorThemeGallery');
+      const fg = document.getElementById('fontThemeGallery');
+      if (!cg || !fg) return;
+
+      const activeColor = decorPrefs['colorTheme'] || 'default';
+      const activeFont  = decorPrefs['fontTheme']  || 'classic';
+
+      cg.innerHTML = COLOR_THEMES.map(t => `
+        <div class="theme-card ${t.id === activeColor ? 'active' : ''}" data-color-theme="${t.id}" title="${t.name}">
+          <div class="theme-card-swatch" style="background:${t.bg}">
+            <div class="theme-card-accent" style="background:${t.accent}"></div>
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+              <span style="font-size:.55rem;font-weight:700;color:${t.text};">${t.name}</span>
+            </div>
+          </div>
+          <div class="theme-card-name" style="background:${t.accent};color:#fff;">${t.name}</div>
+        </div>`).join('');
+
+      fg.innerHTML = FONT_THEMES.map(f => `
+        <button class="font-theme-btn ${f.id === activeFont ? 'active' : ''}" data-font-theme="${f.id}"
+          style="font-family:${f.heading};">${f.name}</button>`).join('');
+
+      cg.querySelectorAll('.theme-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const t = COLOR_THEMES.find(x => x.id === card.dataset.colorTheme);
+          if (!t) return;
+          applyColorTheme(t);
+          decorPrefs['colorTheme'] = t.id;
+          cg.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          saveDecorPrefs();
+        });
       });
-    });
+
+      fg.querySelectorAll('.font-theme-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const f = FONT_THEMES.find(x => x.id === btn.dataset.fontTheme);
+          if (!f) return;
+          applyFontTheme(f);
+          decorPrefs['fontTheme'] = f.id;
+          fg.querySelectorAll('.font-theme-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          // Update button colors after font theme change
+          btn.style.background = 'var(--p-accent)';
+          btn.style.color = '#fff';
+          btn.style.borderColor = 'var(--p-accent)';
+          saveDecorPrefs();
+        });
+      });
+    }
+
+    function loadDecorPrefs() {
+      // Apply saved color theme
+      const ct = COLOR_THEMES.find(t => t.id === (decorPrefs['colorTheme'] || 'default')) || COLOR_THEMES[0];
+      applyColorTheme(ct);
+      // Apply saved font theme
+      const ft = FONT_THEMES.find(f => f.id === (decorPrefs['fontTheme'] || 'classic')) || FONT_THEMES[0];
+      applyFontTheme(ft);
+      // Build the gallery UI
+      buildThemeGalleries();
+    }
 
     // Reset button
     document.getElementById('btnResetTheme')?.addEventListener('click', () => {
-      ['--p-bg','--p-text','--p-accent','--p-accent-light','--p-font-title','--p-font-heading','--p-font-body'].forEach(t => {
-        document.body.style.removeProperty(t);
-        delete decorPrefs[t];
-      });
-      const cpBg = document.getElementById('cpBg');
-      if (cpBg) { cpBg.value = '#ffffff'; document.getElementById('cpBgHex').textContent = '#ffffff'; }
-      const cpTx = document.getElementById('cpText');
-      if (cpTx) { cpTx.value = '#000099'; document.getElementById('cpTextHex').textContent = '#000099'; }
-      const cpAc = document.getElementById('cpAccent');
-      if (cpAc) { cpAc.value = '#6d916c'; document.getElementById('cpAccentHex').textContent = '#6d916c'; }
+      decorPrefs = {};
+      applyColorTheme(COLOR_THEMES[0]);
+      applyFontTheme(FONT_THEMES[0]);
+      buildThemeGalleries();
       saveDecorPrefs();
     });
 
