@@ -258,6 +258,20 @@
       .pp-jentry-date { font-size: 11pt; font-weight: bold; border-bottom: 1pt solid #bbb; margin-bottom: 4pt; padding-bottom: 3pt; }
       .pp-jentry-prompt { font-size: 8pt; font-style: italic; color: #666; margin-bottom: 4pt; }
       .pp-jentry-body { font-size: 9pt; line-height: 1.5; }
+      /* Habits */
+      .pp-habit-table { width: 100%; border-collapse: collapse; font-size: 7pt; }
+      .pp-habit-table th { font-weight: bold; text-align: center; padding: 2pt 1pt; border: 0.25pt solid #ddd; background: #f5f5f5; }
+      .pp-habit-table td { padding: 2pt 3pt; border: 0.25pt solid #ddd; }
+      .pp-habit-name { font-weight: bold; font-size: 8pt; min-width: 80pt; }
+      .pp-habit-check { text-align: center; }
+      .pp-habit-check.done { background: #4caf50; color: white; font-weight: bold; }
+      /* Goals */
+      .pp-goals-cadence { font-size: 11pt; font-weight: bold; color: #444; margin: 10pt 0 4pt; border-bottom: 0.5pt solid #ccc; padding-bottom: 3pt; }
+      .pp-goal-item { display: flex; gap: 6pt; font-size: 9pt; padding: 3pt 0; border-bottom: 0.25pt solid #eee; align-items: flex-start; }
+      .pp-goal-box { width: 9pt; height: 9pt; border: 0.75pt solid #666; border-radius: 50%; flex-shrink: 0; margin-top: 2pt; }
+      .pp-goal-box.done { background: #333; }
+      .pp-goal-target { font-size: 7pt; color: #888; margin-top: 1pt; }
+      .pp-goal-notes { font-size: 7pt; color: #666; font-style: italic; margin-top: 1pt; }
     }
   </style>
 </head>
@@ -995,6 +1009,24 @@
                 <div class="col-6"><label class="form-label small mb-1">From</label><input type="date" class="form-control form-control-sm" id="prtJournalFrom"></div>
                 <div class="col-6"><label class="form-label small mb-1">To (leave blank for all)</label><input type="date" class="form-control form-control-sm" id="prtJournalTo"></div>
               </div>
+            </div>
+
+            <!-- Habits -->
+            <div class="border rounded p-3">
+              <div class="form-check mb-1">
+                <input class="form-check-input" type="checkbox" id="prtHabits">
+                <label class="form-check-label fw-bold" for="prtHabits"><i class="fas fa-fire me-2 text-warning"></i>Habits</label>
+              </div>
+              <p class="text-muted small ms-4 mb-0">Prints your habit list with a 28-day completion grid.</p>
+            </div>
+
+            <!-- Goals -->
+            <div class="border rounded p-3">
+              <div class="form-check mb-1">
+                <input class="form-check-input" type="checkbox" id="prtGoals">
+                <label class="form-check-label fw-bold" for="prtGoals"><i class="fas fa-bullseye me-2 text-success"></i>Goals</label>
+              </div>
+              <p class="text-muted small ms-4 mb-0">Prints all goals grouped by type (Daily, Weekly, Unit, Yearly).</p>
             </div>
 
           </div>
@@ -2665,6 +2697,62 @@
         } else {
           html += `<p style="font-size:9pt;color:#888;">No journal entries in this date range.</p>`;
         }
+        html += `</div>`;
+      }
+
+      // ── Habits ────────────────────────────────────────────────────────────
+      if (document.getElementById('prtHabits').checked) {
+        const days28 = [];
+        for (let i = 27; i >= 0; i--) {
+          const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
+          days28.push(d.toISOString().split('T')[0]);
+        }
+        html += `<div class="pp-section"><div class="pp-section-title">Habits — Last 28 Days</div>`;
+        if (habitList.length) {
+          html += `<table class="pp-habit-table"><thead><tr><th class="pp-habit-name">Habit</th>`;
+          days28.forEach(d => {
+            const dt = new Date(d + 'T12:00:00');
+            html += `<th>${dt.getDate()}<br>${dt.toLocaleDateString('en-US',{month:'short'})}</th>`;
+          });
+          html += `</tr></thead><tbody>`;
+          habitList.forEach(h => {
+            html += `<tr><td class="pp-habit-name">${h.name}</td>`;
+            days28.forEach(d => {
+              const done = !!(habitLog[h.id]?.[d]);
+              html += `<td class="pp-habit-check${done ? ' done' : ''}">${done ? '✓' : ''}</td>`;
+            });
+            html += `</tr>`;
+          });
+          html += `</tbody></table>`;
+        } else {
+          html += `<p style="font-size:9pt;color:#888;">No habits set up yet.</p>`;
+        }
+        html += `</div>`;
+      }
+
+      // ── Goals ─────────────────────────────────────────────────────────────
+      if (document.getElementById('prtGoals').checked) {
+        const cadenceLabels = { daily: 'Daily Goals', weekly: 'Weekly Goals', unit: 'Unit Goals', yearly: 'Yearly Goals' };
+        html += `<div class="pp-section"><div class="pp-section-title">Goals</div>`;
+        let hasAnyGoal = false;
+        ['daily','weekly','unit','yearly'].forEach(c => {
+          const list = goals.filter(g => g.cadence === c);
+          if (!list.length) return;
+          hasAnyGoal = true;
+          html += `<div class="pp-goals-cadence">${cadenceLabels[c]}</div>`;
+          list.forEach(g => {
+            const done = !!g.achieved_at;
+            html += `<div class="pp-goal-item">
+              <div class="pp-goal-box${done ? ' done' : ''}"></div>
+              <div>
+                <div style="${done ? 'text-decoration:line-through;color:#999;' : ''}">${g.title}</div>
+                ${g.notes ? `<div class="pp-goal-notes">${g.notes}</div>` : ''}
+                ${g.target_date ? `<div class="pp-goal-target">Target: ${g.target_date}</div>` : ''}
+              </div>
+            </div>`;
+          });
+        });
+        if (!hasAnyGoal) html += `<p style="font-size:9pt;color:#888;">No goals set up yet.</p>`;
         html += `</div>`;
       }
 
