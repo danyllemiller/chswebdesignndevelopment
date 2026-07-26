@@ -108,8 +108,7 @@
     .color-picker-group { display: flex; align-items: center; gap: 8px; }
     .color-picker-group input[type="color"] { width: 36px; height: 36px; padding: 2px; border-radius: 50%; border: 2px solid #dee2e6; cursor: pointer; }
     /* ── Sticker drawer ─────────────────────────────────────── */
-    .sticker-drawer-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.25); z-index:1045; }
-    .sticker-drawer-backdrop.open { display:block; }
+    .sticker-drawer-backdrop { display:none; } /* removed — backdrop blocked calendar clicks */
     .sticker-drawer {
       position:fixed; top:0; right:-320px; width:300px; height:100vh;
       background:#fff; box-shadow:-4px 0 20px rgba(0,0,0,.18);
@@ -625,6 +624,22 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body" id="dayModalBody"></div>
+        <!-- Sticker picker (toggles open inside modal) -->
+        <div id="dayModalStickerSection" class="px-3 pb-2 border-top pt-2 d-none intv-edit-only">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <small class="fw-bold text-muted text-uppercase" style="font-size:.62rem;">Sticker</small>
+            <div class="d-flex gap-2 align-items-center">
+              <span id="dayModalCurrentSticker"></span>
+              <button class="btn btn-sm btn-outline-danger py-0 px-2 d-none" id="btnRemoveDaySticker" style="font-size:.72rem;">Remove</button>
+            </div>
+          </div>
+          <div id="dayModalStickerPicker" class="d-none" style="max-height:220px;overflow-y:auto;">
+            <div id="dayModalStickerGrid"></div>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary w-100 py-1" id="btnToggleDayStickerPicker" style="font-size:.78rem;">
+            <i class="fas fa-sticky-note me-1"></i>Add / Change Sticker
+          </button>
+        </div>
         <div class="modal-footer py-2">
           <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
           <button class="btn btn-success btn-sm fw-bold" id="btnGoToJournal" data-bs-dismiss="modal">
@@ -1460,11 +1475,16 @@
       const label = dt.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
       document.getElementById('dayModalTitle').textContent = label;
 
+      // Build body: school info + assignments + todos + tests
+      const assignEvts = events.filter(e => e.type === 'assign');
+      const todoEvts   = events.filter(e => e.type === 'todo');
+      const testEvts   = events.filter(e => e.type === 'test');
+
       let body = '';
       if (sdInfo) body += `<div class="day-detail-section"><span class="badge bg-secondary">${sdInfo.label || sdInfo.type}</span></div>`;
-      if (events.length) {
-        body += `<div class="day-detail-section"><h6>Assignments Due</h6>`;
-        events.forEach(e => {
+      if (assignEvts.length) {
+        body += `<div class="day-detail-section"><h6 class="small fw-bold">Assignments Due</h6>`;
+        assignEvts.forEach(e => {
           body += `<div class="d-flex align-items-center gap-2 mb-1">
             <i class="fas fa-${e.submitted ? 'check-circle text-success' : 'circle text-muted'}"></i>
             <span class="small">${e.label}</span>
@@ -1473,9 +1493,81 @@
         });
         body += `</div>`;
       }
-      if (!events.length && !sdInfo) body = '<p class="text-muted small mb-0">No assignments due on this day.</p>';
-
+      if (todoEvts.length) {
+        body += `<div class="day-detail-section"><h6 class="small fw-bold">To-Do / Assignments</h6>`;
+        todoEvts.forEach(e => {
+          body += `<div class="d-flex align-items-center gap-2 mb-1">
+            <input type="checkbox" class="form-check-input mt-0" ${e.done ? 'checked' : ''} onchange="window.toggleTodo('${e.id}');bootstrap.Modal.getInstance(document.getElementById('dayModal'))?.hide();">
+            <span class="small ${e.done ? 'text-decoration-line-through text-muted' : ''}">${e.label}</span>
+          </div>`;
+        });
+        body += `</div>`;
+      }
+      if (testEvts.length) {
+        body += `<div class="day-detail-section"><h6 class="small fw-bold">Tests &amp; Quizzes</h6>`;
+        testEvts.forEach(e => {
+          body += `<div class="d-flex align-items-center gap-2 mb-1">
+            <input type="checkbox" class="form-check-input mt-0" ${e.studied ? 'checked' : ''} onchange="window.toggleStudied(${e.id},${!e.studied});bootstrap.Modal.getInstance(document.getElementById('dayModal'))?.hide();">
+            <span class="small ${e.studied ? 'text-decoration-line-through text-muted' : ''}">📝 ${e.label}</span>
+          </div>`;
+        });
+        body += `</div>`;
+      }
+      if (!assignEvts.length && !todoEvts.length && !testEvts.length && !sdInfo) {
+        body = '<p class="text-muted small mb-0">Nothing scheduled for this day.</p>';
+      }
       document.getElementById('dayModalBody').innerHTML = body;
+
+      // Sticker section
+      const stickerSection = document.getElementById('dayModalStickerSection');
+      const currentStickerEl = document.getElementById('dayModalCurrentSticker');
+      const removeStickerBtn = document.getElementById('btnRemoveDaySticker');
+      const stickerPicker    = document.getElementById('dayModalStickerPicker');
+      const stickerGrid      = document.getElementById('dayModalStickerGrid');
+      const togglePickerBtn  = document.getElementById('btnToggleDayStickerPicker');
+
+      stickerSection.classList.remove('d-none');
+      stickerPicker.classList.add('d-none'); // reset collapsed
+
+      const cur = dayStickers[ymd];
+      if (cur) {
+        currentStickerEl.innerHTML = stickerHTML(cur, '28px');
+        removeStickerBtn.classList.remove('d-none');
+      } else {
+        currentStickerEl.innerHTML = '';
+        removeStickerBtn.classList.add('d-none');
+      }
+
+      removeStickerBtn.onclick = () => {
+        delete dayStickers[ymd];
+        saveDayStickers();
+        renderCalendar();
+        bootstrap.Modal.getInstance(document.getElementById('dayModal'))?.hide();
+      };
+
+      // Build sticker grid (reuse STICKER_CATEGORIES)
+      stickerGrid.innerHTML = STICKER_CATEGORIES.map(cat => `
+        <div class="sticker-cat-label">${cat.name}</div>
+        <div class="sticker-grid">
+          ${cat.stickers.map(f => {
+            const enc = encodeURIComponent(f);
+            return `<div class="sticker-item" title="${f.replace('.png','')}" onclick="
+              dayStickers['${ymd}']='${f}';
+              saveDayStickers();
+              renderCalendar();
+              bootstrap.Modal.getInstance(document.getElementById('dayModal'))?.hide();">
+              <img src="/images/stickers/${enc}" alt="${f.replace('.png','')}">
+            </div>`;
+          }).join('')}
+        </div>`).join('');
+
+      togglePickerBtn.onclick = () => {
+        stickerPicker.classList.toggle('d-none');
+        togglePickerBtn.innerHTML = stickerPicker.classList.contains('d-none')
+          ? '<i class="fas fa-sticky-note me-1"></i>Add / Change Sticker'
+          : '<i class="fas fa-chevron-up me-1"></i>Hide Stickers';
+      };
+
       document.getElementById('btnGoToJournal').onclick = () => {
         showTab('journal');
         loadJournalForDate(ymd);
@@ -1965,19 +2057,16 @@
 
     function openStickerDrawer() {
       document.getElementById('stickerDrawer').classList.add('open');
-      document.getElementById('stickerDrawerBackdrop').classList.add('open');
     }
     function closeStickerDrawer() {
       document.getElementById('stickerDrawer').classList.remove('open');
-      document.getElementById('stickerDrawerBackdrop').classList.remove('open');
       pendingSticker = null;
       document.getElementById('stickerStatus')?.classList.add('d-none');
-      document.querySelectorAll('.sticker-item').forEach(i => i.classList.remove('selected'));
+      document.querySelectorAll('#stickerDrawerBody .sticker-item').forEach(i => i.classList.remove('selected'));
     }
 
     document.getElementById('btnToggleStickerDrawer')?.addEventListener('click', openStickerDrawer);
     document.getElementById('btnCloseStickerDrawer')?.addEventListener('click', closeStickerDrawer);
-    document.getElementById('stickerDrawerBackdrop')?.addEventListener('click', closeStickerDrawer);
     document.getElementById('btnCancelSticker')?.addEventListener('click', () => {
       pendingSticker = null;
       document.getElementById('stickerStatus')?.classList.add('d-none');
@@ -2944,7 +3033,6 @@
     init();
   </script>
   <!-- ── Sticker Drawer ─────────────────────────────────────────────── -->
-  <div id="stickerDrawerBackdrop" class="sticker-drawer-backdrop"></div>
   <div id="stickerDrawer" class="sticker-drawer" role="dialog" aria-label="Sticker picker">
     <div class="sticker-drawer-header">
       <span class="fw-bold" style="font-size:.95rem;"><i class="fas fa-sticky-note me-2"></i>Stickers</span>
