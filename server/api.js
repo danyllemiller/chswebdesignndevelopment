@@ -12,5 +12,6 @@ router.use('/', require('./routes/projects'));
 router.use('/', require('./routes/assessments'));
 router.use('/', require('./routes/calendar'));
 router.use('/', require('./routes/files'));
+router.use('/', require('./routes/intervention'));
 
 module.exports = router;

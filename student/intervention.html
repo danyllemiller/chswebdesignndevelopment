@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Growth Mindset Planner | Intervention</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <script type="module" src="/js/auth-guard.js"></script>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <style>
+    :root {
+      --intv-green: #2e7d32;
+      --intv-green-light: #e8f5e9;
+      --intv-accent: #43a047;
+      --intv-gold: #f9a825;
+    }
+
+    .intv-header { background: linear-gradient(135deg, var(--intv-green) 0%, var(--intv-accent) 100%); }
+
+    /* Tabs */
+    .intv-nav .nav-link { color: #555; border-radius: 8px 8px 0 0; font-weight: 600; font-size: .9rem; }
+    .intv-nav .nav-link.active { background: #fff; color: var(--intv-green); border-bottom: 2px solid var(--intv-green); }
+
+    /* Calendar */
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .cal-day-header { text-align: center; font-size: .7rem; font-weight: 700; color: #888; padding: 4px 0; text-transform: uppercase; }
+    .cal-day {
+      border-radius: 6px; padding: 4px 3px; min-height: 64px; cursor: pointer;
+      border: 1px solid #e9ecef; background: #fff; font-size: .78rem; transition: background .15s;
+      position: relative;
+    }
+    .cal-day:hover:not(.cal-empty) { background: var(--intv-green-light); }
+    .cal-day.today { border: 2px solid var(--intv-accent); background: var(--intv-green-light); }
+    .cal-day.day-off { background: #fafafa; color: #bbb; cursor: default; }
+    .cal-day.other-month { color: #ccc; background: #fafafa; cursor: default; }
+    .cal-day.cal-empty { border: none; background: transparent; cursor: default; }
+    .cal-day-num { font-weight: 700; font-size: .82rem; }
+    .cal-block-badge { font-size: .6rem; font-weight: 700; padding: 1px 5px; border-radius: 10px; display: inline-block; }
+    .cal-block-a { background: #e3f2fd; color: #1565c0; }
+    .cal-block-b { background: #fce4ec; color: #880e4f; }
+    .cal-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .cal-dot-assign { background: var(--intv-accent); }
+    .cal-dot-off { background: #bbb; }
+    .cal-day-label { font-size: .6rem; line-height: 1.2; color: #555; margin-top: 2px; }
+
+    /* Week view */
+    .week-col { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; min-height: 180px; }
+    .week-day-name { font-weight: 700; font-size: .8rem; color: var(--intv-green); margin-bottom: 6px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+
+    /* Journal */
+    .journal-prompt-box { background: var(--intv-green-light); border-left: 4px solid var(--intv-accent); border-radius: 6px; padding: 14px 16px; font-size: .95rem; }
+    .journal-entry-card { border-left: 3px solid #dee2e6; padding-left: 12px; margin-bottom: 12px; }
+    .journal-entry-card:hover { border-left-color: var(--intv-accent); }
+
+    /* Goals */
+    .goal-card { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 10px; }
+    .goal-card.achieved { opacity: .6; text-decoration: line-through; }
+    .goal-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--intv-accent); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+    .goal-check.done { background: var(--intv-accent); color: #fff; }
+    .cadence-badge { font-size: .65rem; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 10px; }
+    .badge-daily   { background: #e3f2fd; color: #1565c0; }
+    .badge-weekly  { background: #e8f5e9; color: #2e7d32; }
+    .badge-unit    { background: #fff8e1; color: #f57f17; }
+    .badge-yearly  { background: #f3e5f5; color: #6a1b9a; }
+
+    /* Grade log */
+    .grade-log-row:hover { background: var(--intv-green-light); }
+    .pct-bar { height: 6px; border-radius: 3px; background: #e9ecef; overflow: hidden; }
+    .pct-fill { height: 100%; border-radius: 3px; transition: width .3s; }
+
+    /* Assignment cards */
+    .assign-card { border: 1px solid #dee2e6; border-radius: 8px; padding: 12px 16px; margin-bottom: 10px; }
+    .assign-card.done { border-color: var(--intv-accent); background: var(--intv-green-light); }
+    .pass-badge { font-size: .7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: var(--intv-accent); color: #fff; }
+
+    /* Day detail modal */
+    .day-detail-section { margin-bottom: 14px; }
+    .day-detail-section h6 { font-weight: 700; color: var(--intv-green); font-size: .85rem; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 8px; }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container-fluid sticky-top px-0">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <!-- Header -->
+  <div class="intv-header text-white py-4 px-4 mb-4">
+    <div class="container">
+      <div class="d-flex align-items-center gap-3">
+        <div class="bg-white bg-opacity-25 rounded-circle p-3">
+          <i class="fas fa-seedling fa-lg"></i>
+        </div>
+        <div>
+          <h3 class="mb-0 fw-bold" id="plannerTitle">Growth Mindset Planner</h3>
+          <small id="plannerSubtitle" class="opacity-75">Loading your planner…</small>
+        </div>
+        <div class="ms-auto text-end">
+          <div class="fw-bold fs-5" id="completionStat">–/–</div>
+          <small class="opacity-75">Assignments Passed</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container pb-5">
+
+    <!-- Tab Nav -->
+    <ul class="nav nav-tabs intv-nav mb-3" id="intv-tabs">
+      <li class="nav-item"><a class="nav-link active" data-tab="planner" href="#"><i class="fas fa-calendar-alt me-1"></i>Planner</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="journal" href="#"><i class="fas fa-book-open me-1"></i>Journal</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="goals" href="#"><i class="fas fa-bullseye me-1"></i>Goals</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="assignments" href="#"><i class="fas fa-tasks me-1"></i>Assignments</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="grades" href="#"><i class="fas fa-chart-bar me-1"></i>My Grades</a></li>
+    </ul>
+
+    <!-- ══ PLANNER TAB ══════════════════════════════════════════════════════ -->
+    <div id="tab-planner">
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body pb-2">
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-sm btn-outline-secondary" id="calPrev"><i class="fas fa-chevron-left"></i></button>
+              <h5 class="mb-0 fw-bold" id="calMonthLabel"></h5>
+              <button class="btn btn-sm btn-outline-secondary" id="calNext"><i class="fas fa-chevron-right"></i></button>
+              <button class="btn btn-sm btn-outline-success ms-1" id="calToday">Today</button>
+            </div>
+            <div class="btn-group btn-group-sm" role="group">
+              <button class="btn btn-success active" id="viewMonth">Month</button>
+              <button class="btn btn-outline-success" id="viewWeek">Week</button>
+            </div>
+          </div>
+
+          <!-- Month view -->
+          <div id="monthView">
+            <div class="cal-grid mb-1">
+              <div class="cal-day-header">Sun</div><div class="cal-day-header">Mon</div>
+              <div class="cal-day-header">Tue</div><div class="cal-day-header">Wed</div>
+              <div class="cal-day-header">Thu</div><div class="cal-day-header">Fri</div>
+              <div class="cal-day-header">Sat</div>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+          </div>
+
+          <!-- Week view (hidden by default) -->
+          <div id="weekView" class="d-none">
+            <div class="d-grid gap-2" style="grid-template-columns: repeat(5,1fr); display:grid;" id="weekGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="d-flex flex-wrap gap-3 small text-muted">
+        <span><span class="cal-block-badge cal-block-a">A</span> A-Day</span>
+        <span><span class="cal-block-badge cal-block-b">B</span> B-Day</span>
+        <span><span class="cal-dot cal-dot-assign me-1"></span>Assignment due</span>
+        <span><span class="badge bg-secondary me-1" style="font-size:.6rem;">OFF</span>No school</span>
+      </div>
+    </div>
+
+    <!-- ══ JOURNAL TAB ══════════════════════════════════════════════════════ -->
+    <div id="tab-journal" class="d-none">
+      <div class="row g-3">
+        <div class="col-lg-7">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3 pb-0">
+              <h6 class="fw-bold text-success mb-0"><i class="fas fa-edit me-2"></i>Today's Reflection</h6>
+              <small class="text-muted" id="journalDateLabel"></small>
+            </div>
+            <div class="card-body">
+              <div class="journal-prompt-box mb-3" id="journalPromptBox">
+                <small class="text-muted d-block mb-1 fw-bold text-uppercase" style="font-size:.65rem;">Today's Prompt</small>
+                <span id="journalPromptText">Loading…</span>
+              </div>
+              <textarea id="journalTextarea" class="form-control" rows="7" placeholder="Write your reflection here…"></textarea>
+              <div class="d-flex justify-content-between align-items-center mt-2">
+                <small class="text-muted" id="journalSaveStatus"></small>
+                <button class="btn btn-success btn-sm fw-bold" id="btnSaveJournal">
+                  <i class="fas fa-save me-1"></i>Save Reflection
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-0 pt-3 pb-0">
+              <h6 class="fw-bold text-success mb-0"><i class="fas fa-history me-2"></i>Past Entries</h6>
+            </div>
+            <div class="card-body overflow-auto" style="max-height: 420px;" id="journalHistory">
+              <div class="text-muted small text-center py-4">Loading…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ GOALS TAB ════════════════════════════════════════════════════════ -->
+    <div id="tab-goals" class="d-none">
+      <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-success btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#goalModal">
+          <i class="fas fa-plus me-1"></i>New Goal
+        </button>
+      </div>
+      <div class="row g-3" id="goalsContainer">
+        <div class="col-md-6"><div class="card border-0 shadow-sm"><div class="card-header bg-white fw-bold text-primary border-0 pt-3"><span class="badge-daily cadence-badge me-2">Daily</span>Daily Micro-Goals</div><div class="card-body" id="goals-daily"></div></div></div>
+        <div class="col-md-6"><div class="card border-0 shadow-sm"><div class="card-header bg-white fw-bold text-primary border-0 pt-3"><span class="badge-weekly cadence-badge me-2">Weekly</span>Weekly Goals</div><div class="card-body" id="goals-weekly"></div></div></div>
+        <div class="col-md-6"><div class="card border-0 shadow-sm"><div class="card-header bg-white fw-bold text-primary border-0 pt-3"><span class="badge-unit cadence-badge me-2">Unit</span>Marking Period Goals</div><div class="card-body" id="goals-unit"></div></div></div>
+        <div class="col-md-6"><div class="card border-0 shadow-sm"><div class="card-header bg-white fw-bold text-primary border-0 pt-3"><span class="badge-yearly cadence-badge me-2">Yearly</span>Academic Year Goals</div><div class="card-body" id="goals-yearly"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ══ ASSIGNMENTS TAB ══════════════════════════════════════════════════ -->
+    <div id="tab-assignments" class="d-none">
+      <div id="assignmentsContainer">
+        <div class="text-center py-5 text-muted"><div class="spinner-border text-success"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ GRADES TAB ═══════════════════════════════════════════════════════ -->
+    <div id="tab-grades" class="d-none">
+      <div class="row g-3">
+        <!-- Intervention P/F -->
+        <div class="col-lg-5">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+              <h6 class="fw-bold text-success mb-0"><i class="fas fa-check-circle me-2"></i>Intervention Grades</h6>
+              <small class="text-muted">Auto-tracked when you submit each assignment</small>
+            </div>
+            <div class="card-body p-0">
+              <table class="table table-sm mb-0">
+                <thead class="table-light"><tr><th>Assignment</th><th class="text-center">Status</th></tr></thead>
+                <tbody id="intv-grade-table"><tr><td colspan="2" class="text-center text-muted py-3">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- Self-reported all classes -->
+        <div class="col-lg-7">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="fw-bold text-success mb-0"><i class="fas fa-graduation-cap me-2"></i>All My Classes</h6>
+                <small class="text-muted">Self-reported — you enter these yourself</small>
+              </div>
+              <button class="btn btn-outline-success btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#gradeLogModal">
+                <i class="fas fa-plus me-1"></i>Add Grade
+              </button>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                  <thead class="table-light"><tr><th>Period</th><th>Class</th><th>Assignment</th><th>Score</th><th>Date</th><th></th></tr></thead>
+                  <tbody id="grade-log-table"><tr><td colspan="6" class="text-center text-muted py-3">Loading…</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DAY DETAIL MODAL ──────────────────────────────────────────────── -->
+  <div class="modal fade" id="dayModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white py-2">
+          <h6 class="modal-title fw-bold" id="dayModalTitle"></h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="dayModalBody"></div>
+        <div class="modal-footer py-2">
+          <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-success btn-sm fw-bold" id="btnGoToJournal" data-bs-dismiss="modal">
+            <i class="fas fa-book-open me-1"></i>Open Journal for This Day
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── GOAL MODAL ─────────────────────────────────────────────────────── -->
+  <div class="modal fade" id="goalModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white py-2">
+          <h6 class="modal-title fw-bold"><i class="fas fa-bullseye me-2"></i>New Goal</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Goal Type</label>
+            <select class="form-select" id="goalCadence">
+              <option value="daily">Daily Micro-Goal</option>
+              <option value="weekly">Weekly Goal</option>
+              <option value="unit">Marking Period Goal</option>
+              <option value="yearly">Academic Year Goal</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Goal <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="goalTitle" placeholder="What do you want to accomplish?">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Notes (optional)</label>
+            <textarea class="form-control" id="goalNotes" rows="2" placeholder="Why does this matter to you?"></textarea>
+          </div>
+          <div>
+            <label class="form-label fw-bold small">Target Date (optional)</label>
+            <input type="date" class="form-control" id="goalTargetDate">
+          </div>
+        </div>
+        <div class="modal-footer py-2">
+          <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success btn-sm fw-bold" id="btnSaveGoal">Save Goal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── GRADE LOG MODAL ────────────────────────────────────────────────── -->
+  <div class="modal fade" id="gradeLogModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white py-2">
+          <h6 class="modal-title fw-bold"><i class="fas fa-plus me-2"></i>Log a Grade</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-2">
+            <div class="col-4">
+              <label class="form-label fw-bold small">Period</label>
+              <input type="text" class="form-control" id="glPeriod" placeholder="e.g. 1st">
+            </div>
+            <div class="col-8">
+              <label class="form-label fw-bold small">Class Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="glClass" placeholder="e.g. AP English">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-bold small">Assignment (optional)</label>
+              <input type="text" class="form-control" id="glAssignment" placeholder="e.g. Essay #2">
+            </div>
+            <div class="col-4">
+              <label class="form-label fw-bold small">Score <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="glScore" placeholder="85">
+            </div>
+            <div class="col-4">
+              <label class="form-label fw-bold small">Out of</label>
+              <input type="number" class="form-control" id="glMax" placeholder="100" value="100">
+            </div>
+            <div class="col-4">
+              <label class="form-label fw-bold small">Date</label>
+              <input type="date" class="form-control" id="glDate">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer py-2">
+          <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success btn-sm fw-bold" id="btnSaveGradeLog">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ASSIGNMENT SUBMIT MODAL ───────────────────────────────────────── -->
+  <div class="modal fade" id="submitModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white py-2">
+          <h6 class="modal-title fw-bold" id="submitModalTitle"></h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="submitInstructions" class="mb-3 text-muted small"></div>
+          <label class="form-label fw-bold small">Your Response (optional)</label>
+          <textarea class="form-control" id="submitResponse" rows="4" placeholder="Paste a link, leave a note, or just hit Submit to mark as complete."></textarea>
+        </div>
+        <div class="modal-footer py-2">
+          <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success btn-sm fw-bold" id="btnConfirmSubmit">
+            <i class="fas fa-check me-1"></i>Submit (Pass)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getLoggedInUser } from '/js/modules/user-session.js';
+    import { apiFetch }        from '/js/modules/api-client.js';
+
+    // ── State ─────────────────────────────────────────────────────────────
+    let user, assignments = [], goals = [], gradeLog = [], prompts = [], calEvents = {};
+    let calYear, calMonth, currentView = 'month';
+    let schoolSpecialDates = {}, bellBlocks = {};   // from school calendar
+    let submitAssignmentId = null;
+
+    const today = new Date();
+    calYear  = today.getFullYear();
+    calMonth = today.getMonth();   // 0-indexed
+
+    const toYMD = d => d.toISOString().split('T')[0];
+    const todayStr = toYMD(today);
+
+    // ── Init ──────────────────────────────────────────────────────────────
+    async function init() {
+      user = getLoggedInUser();
+      if (!user?.student_id) return;
+
+      document.getElementById('plannerSubtitle').textContent =
+        `Welcome, ${user.first_name || user.username} — Intervention Planner`;
+      document.getElementById('journalDateLabel').textContent =
+        today.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+      document.getElementById('glDate').value = todayStr;
+
+      await Promise.all([
+        loadAssignments(),
+        loadGoals(),
+        loadGradeLog(),
+        loadPrompts(),
+        loadSchoolCalendar()
+      ]);
+
+      loadJournal();
+      renderCalendar();
+      renderAssignmentsTab();
+      renderGoals();
+      renderGradesTab();
+    }
+
+    // ── Data loaders ──────────────────────────────────────────────────────
+    async function loadAssignments() {
+      const data = await apiFetch(`/api/intervention/assignments?student_id=${user.student_id}`);
+      assignments = data.assignments || [];
+      const passed  = assignments.filter(a => a.submitted && a.passed).length;
+      const total   = assignments.length;
+      document.getElementById('completionStat').textContent = `${passed}/${total}`;
+    }
+
+    async function loadGoals() {
+      const data = await apiFetch(`/api/intervention/goals?student_id=${user.student_id}`);
+      goals = data.goals || [];
+    }
+
+    async function loadGradeLog() {
+      const data = await apiFetch(`/api/intervention/grade-log?student_id=${user.student_id}`);
+      gradeLog = data.grades || [];
+    }
+
+    async function loadPrompts() {
+      const data = await apiFetch('/api/intervention/prompts-all');
+      prompts = data.prompts || [];
+    }
+
+    async function loadSchoolCalendar() {
+      try {
+        // Bell schedule blocks (A/B) from DB
+        const bs = await apiFetch('/api/bell-schedule');
+        if (bs.schedule) {
+          bs.schedule.forEach(p => {
+            if (p.section_id) {
+              const key = p.section_id; // may map to a date or block type
+              bellBlocks[key] = p.schedule_type;
+            }
+          });
+        }
+        // Special dates (days off) from calendar settings
+        const cs = await apiFetch('/api/admin/calendar-settings').catch(() => null);
+        if (cs && cs.specialDates) {
+          cs.specialDates.forEach(d => { schoolSpecialDates[d.date] = d.label || 'No School'; });
+        }
+      } catch (_) {}
+    }
+
+    async function loadJournal() {
+      const data = await apiFetch(`/api/intervention/journal?student_id=${user.student_id}&date=${todayStr}`);
+      const entry = (data.entries || [])[0];
+      if (entry) document.getElementById('journalTextarea').value = entry.content || '';
+
+      // Today's prompt
+      const todayPrompt = prompts[0]?.prompt || '';
+      document.getElementById('journalPromptText').textContent = todayPrompt || 'Reflect on your learning today.';
+
+      // History
+      const hist = await apiFetch(`/api/intervention/journal?student_id=${user.student_id}`);
+      renderJournalHistory(hist.entries || []);
+    }
+
+    // ── Calendar rendering ────────────────────────────────────────────────
+    function buildCalEvents() {
+      calEvents = {};
+      assignments.forEach(a => {
+        if (a.due_date) {
+          const k = a.due_date.split('T')[0];
+          (calEvents[k] = calEvents[k] || []).push({ type: 'assign', label: a.title, passed: a.passed, submitted: a.submitted });
+        }
+      });
+    }
+
+    function renderCalendar() {
+      buildCalEvents();
+      const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      document.getElementById('calMonthLabel').textContent = `${months[calMonth]} ${calYear}`;
+
+      if (currentView === 'month') renderMonthView();
+      else renderWeekView();
+    }
+
+    function renderMonthView() {
+      const grid = document.getElementById('calGrid');
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      const prevDays = new Date(calYear, calMonth, 0).getDate();
+
+      let html = '';
+      // Previous month fill
+      for (let i = firstDay - 1; i >= 0; i--) {
+        html += `<div class="cal-day other-month"><span class="cal-day-num">${prevDays - i}</span></div>`;
+      }
+      // Current month
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dt = new Date(calYear, calMonth, d);
+        const ymd = toYMD(dt);
+        const dow = dt.getDay();
+        const isWeekend = dow === 0 || dow === 6;
+        const isOff = !!schoolSpecialDates[ymd] || isWeekend;
+        const isToday = ymd === todayStr;
+        const events = calEvents[ymd] || [];
+
+        let cls = 'cal-day';
+        if (isToday) cls += ' today';
+        if (isOff && !isWeekend) cls += ' day-off';
+
+        const dots = events.map(e =>
+          `<span class="cal-dot cal-dot-assign" title="${e.label}${e.submitted ? ' ✓' : ''}"></span>`
+        ).join('');
+
+        const offLabel = isWeekend ? '' : (schoolSpecialDates[ymd] ? `<div class="cal-day-label text-muted">${schoolSpecialDates[ymd]}</div>` : '');
+
+        html += `<div class="${cls}" data-ymd="${ymd}" onclick="window.calDayClick('${ymd}')">
+          <div class="d-flex justify-content-between align-items-start">
+            <span class="cal-day-num">${d}</span>
+          </div>
+          ${offLabel}
+          <div class="d-flex flex-wrap gap-1 mt-1">${dots}</div>
+          ${events.length ? `<div class="cal-day-label">${events.map(e => (e.submitted?'✓ ':'')+e.label.slice(0,18)).join('<br>')}</div>` : ''}
+        </div>`;
+      }
+      // Next month fill
+      const total = firstDay + daysInMonth;
+      const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+      for (let d = 1; d <= remaining; d++) {
+        html += `<div class="cal-day other-month"><span class="cal-day-num">${d}</span></div>`;
+      }
+      grid.innerHTML = html;
+    }
+
+    function renderWeekView() {
+      const grid = document.getElementById('weekGrid');
+      // Find Monday of current week containing calYear/calMonth/1 as anchor
+      const anchor = new Date(calYear, calMonth, 1);
+      const dow = anchor.getDay();
+      const monday = new Date(anchor);
+      monday.setDate(anchor.getDate() - (dow === 0 ? 6 : dow - 1));
+
+      let html = '';
+      const dayNames = ['Mon','Tue','Wed','Thu','Fri'];
+      for (let i = 0; i < 5; i++) {
+        const dt = new Date(monday);
+        dt.setDate(monday.getDate() + i);
+        const ymd = toYMD(dt);
+        const isToday = ymd === todayStr;
+        const events = calEvents[ymd] || [];
+        const off = schoolSpecialDates[ymd];
+
+        html += `<div class="week-col ${isToday ? 'border-success border-2' : ''}">
+          <div class="week-day-name">${dayNames[i]} ${dt.getMonth()+1}/${dt.getDate()}</div>
+          ${off ? `<small class="badge bg-secondary">${off}</small>` : ''}
+          ${events.map(e => `<div class="small ${e.submitted ? 'text-success' : 'text-dark'} mb-1">
+            <i class="fas fa-${e.submitted ? 'check-circle text-success' : 'circle text-muted'} me-1"></i>${e.label}
+          </div>`).join('')}
+        </div>`;
+      }
+      grid.innerHTML = html;
+    }
+
+    window.calDayClick = function(ymd) {
+      const events = calEvents[ymd] || [];
+      const off = schoolSpecialDates[ymd];
+      const dt = new Date(ymd + 'T12:00:00');
+      const label = dt.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+      document.getElementById('dayModalTitle').textContent = label;
+
+      let body = '';
+      if (off) body += `<div class="day-detail-section"><span class="badge bg-secondary">${off}</span></div>`;
+      if (events.length) {
+        body += `<div class="day-detail-section"><h6>Assignments Due</h6>`;
+        events.forEach(e => {
+          body += `<div class="d-flex align-items-center gap-2 mb-1">
+            <i class="fas fa-${e.submitted ? 'check-circle text-success' : 'circle text-muted'}"></i>
+            <span class="small">${e.label}</span>
+            ${e.submitted ? '<span class="pass-badge ms-auto">PASS</span>' : ''}
+          </div>`;
+        });
+        body += `</div>`;
+      }
+      if (!events.length && !off) body = '<p class="text-muted small mb-0">No assignments due on this day.</p>';
+
+      document.getElementById('dayModalBody').innerHTML = body;
+      document.getElementById('btnGoToJournal').onclick = () => {
+        showTab('journal');
+        loadJournalForDate(ymd);
+      };
+      new bootstrap.Modal(document.getElementById('dayModal')).show();
+    };
+
+    // ── Journal ───────────────────────────────────────────────────────────
+    function renderJournalHistory(entries) {
+      const el = document.getElementById('journalHistory');
+      if (!entries.length) { el.innerHTML = '<p class="text-muted small text-center">No past entries yet.</p>'; return; }
+      el.innerHTML = entries.slice(0, 30).map(e => {
+        const dt = new Date(e.entry_date + 'T12:00:00');
+        const label = dt.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+        const preview = (e.content || '').slice(0, 80) + ((e.content || '').length > 80 ? '…' : '');
+        return `<div class="journal-entry-card" onclick="window.loadJournalDate('${e.entry_date}')" style="cursor:pointer;">
+          <small class="fw-bold text-muted">${label}</small>
+          <p class="small mb-0 mt-1">${preview || '<em class="text-muted">Empty entry</em>'}</p>
+        </div>`;
+      }).join('');
+    }
+
+    async function loadJournalForDate(ymd) {
+      document.getElementById('journalDateLabel').textContent =
+        new Date(ymd + 'T12:00:00').toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+      const data = await apiFetch(`/api/intervention/journal?student_id=${user.student_id}&date=${ymd}`);
+      const entry = (data.entries || [])[0];
+      document.getElementById('journalTextarea').value = entry?.content || '';
+      document.getElementById('btnSaveJournal').dataset.date = ymd;
+    }
+
+    window.loadJournalDate = loadJournalForDate;
+
+    document.getElementById('btnSaveJournal').addEventListener('click', async () => {
+      const date = document.getElementById('btnSaveJournal').dataset.date || todayStr;
+      const content = document.getElementById('journalTextarea').value;
+      const prompt = document.getElementById('journalPromptText').textContent;
+      await apiFetch('/api/intervention/journal', { method: 'POST', headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ student_id: user.student_id, date, content, prompt }) });
+      document.getElementById('journalSaveStatus').textContent = 'Saved ✓';
+      setTimeout(() => { document.getElementById('journalSaveStatus').textContent = ''; }, 2000);
+      const hist = await apiFetch(`/api/intervention/journal?student_id=${user.student_id}`);
+      renderJournalHistory(hist.entries || []);
+    });
+
+    // ── Goals ─────────────────────────────────────────────────────────────
+    function renderGoals() {
+      ['daily','weekly','unit','yearly'].forEach(c => {
+        const el = document.getElementById(`goals-${c}`);
+        const list = goals.filter(g => g.cadence === c);
+        if (!list.length) { el.innerHTML = '<p class="text-muted small">No goals yet. Add one above.</p>'; return; }
+        el.innerHTML = list.map(g => {
+          const done = !!g.achieved_at;
+          return `<div class="goal-card ${done ? 'achieved' : ''}">
+            <div class="goal-check ${done ? 'done' : ''}" onclick="window.toggleGoal(${g.id}, ${done})">
+              ${done ? '<i class="fas fa-check" style="font-size:.7rem;"></i>' : ''}
+            </div>
+            <div class="flex-grow-1">
+              <div class="fw-bold small">${g.title}</div>
+              ${g.notes ? `<div class="text-muted" style="font-size:.75rem;">${g.notes}</div>` : ''}
+              ${g.target_date ? `<div class="text-muted" style="font-size:.7rem;">Target: ${g.target_date}</div>` : ''}
+            </div>
+            <button class="btn btn-sm p-0 text-muted" onclick="window.deleteGoal(${g.id})"><i class="fas fa-times" style="font-size:.7rem;"></i></button>
+          </div>`;
+        }).join('');
+      });
+    }
+
+    document.getElementById('btnSaveGoal').addEventListener('click', async () => {
+      const title = document.getElementById('goalTitle').value.trim();
+      if (!title) return;
+      await apiFetch('/api/intervention/goals', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ student_id: user.student_id, cadence: document.getElementById('goalCadence').value,
+          title, notes: document.getElementById('goalNotes').value, target_date: document.getElementById('goalTargetDate').value || null }) });
+      bootstrap.Modal.getInstance(document.getElementById('goalModal'))?.hide();
+      document.getElementById('goalTitle').value = '';
+      document.getElementById('goalNotes').value = '';
+      document.getElementById('goalTargetDate').value = '';
+      const data = await apiFetch(`/api/intervention/goals?student_id=${user.student_id}`);
+      goals = data.goals || [];
+      renderGoals();
+    });
+
+    window.toggleGoal = async (id, currentlyDone) => {
+      await apiFetch(`/api/intervention/goals/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ student_id: user.student_id, achieved: !currentlyDone }) });
+      const data = await apiFetch(`/api/intervention/goals?student_id=${user.student_id}`);
+      goals = data.goals || [];
+      renderGoals();
+    };
+
+    window.deleteGoal = async (id) => {
+      if (!confirm('Delete this goal?')) return;
+      await apiFetch(`/api/intervention/goals/${id}?student_id=${user.student_id}`, { method:'DELETE' });
+      goals = goals.filter(g => g.id !== id);
+      renderGoals();
+    };
+
+    // ── Assignments tab ───────────────────────────────────────────────────
+    function renderAssignmentsTab() {
+      const el = document.getElementById('assignmentsContainer');
+      if (!assignments.length) { el.innerHTML = '<p class="text-muted text-center py-5">No assignments posted yet.</p>'; return; }
+      el.innerHTML = assignments.map(a => {
+        const due = a.due_date ? new Date(a.due_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+        return `<div class="assign-card ${a.submitted ? 'done' : ''}">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              ${a.day_number ? `<small class="text-muted fw-bold">Day ${a.day_number}</small>` : ''}
+              <div class="fw-bold">${a.title}</div>
+              ${a.instructions ? `<div class="text-muted small mt-1">${a.instructions}</div>` : ''}
+              ${due ? `<small class="text-muted">Due: ${due}</small>` : ''}
+            </div>
+            <div class="ms-3 flex-shrink-0">
+              ${a.submitted
+                ? `<span class="pass-badge">PASS ✓</span>`
+                : `<button class="btn btn-success btn-sm fw-bold" onclick="window.openSubmit(${a.id},'${a.title.replace(/'/g,"\\'")}','${(a.instructions||'').replace(/'/g,"\\'")}')">
+                    <i class="fas fa-check me-1"></i>Submit
+                  </button>`}
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    window.openSubmit = (id, title, instructions) => {
+      submitAssignmentId = id;
+      document.getElementById('submitModalTitle').textContent = title;
+      document.getElementById('submitInstructions').textContent = instructions || '';
+      document.getElementById('submitResponse').value = '';
+      new bootstrap.Modal(document.getElementById('submitModal')).show();
+    };
+
+    document.getElementById('btnConfirmSubmit').addEventListener('click', async () => {
+      if (!submitAssignmentId) return;
+      await apiFetch('/api/intervention/submit', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ student_id: user.student_id, assignment_id: submitAssignmentId,
+          response_text: document.getElementById('submitResponse').value }) });
+      bootstrap.Modal.getInstance(document.getElementById('submitModal'))?.hide();
+      await loadAssignments();
+      renderAssignmentsTab();
+      renderGradesTab();
+      renderCalendar();
+    });
+
+    // ── Grades tab ────────────────────────────────────────────────────────
+    function renderGradesTab() {
+      // Intervention pass/fail
+      const tbl = document.getElementById('intv-grade-table');
+      if (!assignments.length) { tbl.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-3">No assignments yet.</td></tr>'; }
+      else tbl.innerHTML = assignments.map(a =>
+        `<tr><td class="small">${a.day_number ? `Day ${a.day_number}: ` : ''}${a.title}</td>
+         <td class="text-center">${a.submitted ? '<span class="pass-badge">PASS</span>' : '<span class="badge bg-light text-muted border">Pending</span>'}</td></tr>`
+      ).join('');
+
+      // Self-reported
+      const glt = document.getElementById('grade-log-table');
+      if (!gradeLog.length) { glt.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No grades logged yet. Click "+ Add Grade" to start.</td></tr>'; return; }
+      glt.innerHTML = gradeLog.map(g => {
+        const pct = g.max_score ? Math.round((g.score / g.max_score) * 100) : null;
+        const color = pct == null ? '#6c757d' : pct >= 70 ? '#43a047' : pct >= 60 ? '#f9a825' : '#e53935';
+        const dt = g.grade_date ? new Date(g.grade_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+        return `<tr class="grade-log-row">
+          <td class="small fw-bold">${g.period_label || '–'}</td>
+          <td class="small">${g.class_name}</td>
+          <td class="small text-muted">${g.assignment || '–'}</td>
+          <td class="small">
+            <div class="fw-bold" style="color:${color}">${g.score}/${g.max_score}</div>
+            ${pct != null ? `<div class="pct-bar mt-1"><div class="pct-fill" style="width:${pct}%;background:${color}"></div></div>` : ''}
+          </td>
+          <td class="small text-muted">${dt}</td>
+          <td><button class="btn btn-sm p-0 text-muted" onclick="window.deleteGradeLog(${g.id})"><i class="fas fa-times" style="font-size:.7rem;"></i></button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    document.getElementById('btnSaveGradeLog').addEventListener('click', async () => {
+      const score = document.getElementById('glScore').value;
+      const cls = document.getElementById('glClass').value.trim();
+      if (!cls || score === '') return;
+      await apiFetch('/api/intervention/grade-log', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ student_id: user.student_id, period_label: document.getElementById('glPeriod').value,
+          class_name: cls, assignment: document.getElementById('glAssignment').value,
+          score: parseFloat(score), max_score: parseFloat(document.getElementById('glMax').value) || 100,
+          grade_date: document.getElementById('glDate').value }) });
+      bootstrap.Modal.getInstance(document.getElementById('gradeLogModal'))?.hide();
+      const data = await apiFetch(`/api/intervention/grade-log?student_id=${user.student_id}`);
+      gradeLog = data.grades || [];
+      renderGradesTab();
+      ['glPeriod','glClass','glAssignment','glScore'].forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('glMax').value = '100';
+      document.getElementById('glDate').value = todayStr;
+    });
+
+    window.deleteGradeLog = async (id) => {
+      if (!confirm('Remove this entry?')) return;
+      await apiFetch(`/api/intervention/grade-log/${id}?student_id=${user.student_id}`, { method:'DELETE' });
+      gradeLog = gradeLog.filter(g => g.id !== id);
+      renderGradesTab();
+    };
+
+    // ── Tab navigation ────────────────────────────────────────────────────
+    function showTab(name) {
+      ['planner','journal','goals','assignments','grades'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.toggle('d-none', t !== name);
+      });
+      document.querySelectorAll('.intv-nav .nav-link').forEach(a => {
+        a.classList.toggle('active', a.dataset.tab === name);
+      });
+    }
+
+    document.querySelectorAll('.intv-nav .nav-link').forEach(a => {
+      a.addEventListener('click', e => { e.preventDefault(); showTab(a.dataset.tab); });
+    });
+
+    // ── Calendar controls ─────────────────────────────────────────────────
+    document.getElementById('calPrev').addEventListener('click', () => {
+      calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar();
+    });
+    document.getElementById('calNext').addEventListener('click', () => {
+      calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar();
+    });
+    document.getElementById('calToday').addEventListener('click', () => {
+      calYear = today.getFullYear(); calMonth = today.getMonth(); renderCalendar();
+    });
+    document.getElementById('viewMonth').addEventListener('click', () => {
+      currentView = 'month';
+      document.getElementById('monthView').classList.remove('d-none');
+      document.getElementById('weekView').classList.add('d-none');
+      document.getElementById('viewMonth').classList.replace('btn-outline-success','btn-success');
+      document.getElementById('viewWeek').classList.replace('btn-success','btn-outline-success');
+      renderCalendar();
+    });
+    document.getElementById('viewWeek').addEventListener('click', () => {
+      currentView = 'week';
+      document.getElementById('weekView').classList.remove('d-none');
+      document.getElementById('monthView').classList.add('d-none');
+      document.getElementById('viewWeek').classList.replace('btn-outline-success','btn-success');
+      document.getElementById('viewMonth').classList.replace('btn-success','btn-outline-success');
+      renderCalendar();
+    });
+
+    init();
+  </script>
+</body>
+</html>

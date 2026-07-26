@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Intervention Admin | Growth Mindset</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <script type="module" src="/js/auth-guard-admin.js"></script>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <style>
+    :root {
+      --intv-green: #2e7d32;
+      --intv-green-light: #e8f5e9;
+      --intv-accent: #43a047;
+    }
+    .intv-header { background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%); }
+    .admin-nav .nav-link { color: #555; font-weight: 600; font-size: .88rem; border-radius: 8px 8px 0 0; }
+    .admin-nav .nav-link.active { background: #fff; color: var(--intv-green); border-bottom: 2px solid var(--intv-green); }
+
+    /* Stat cards */
+    .stat-card { border: none; border-radius: 10px; }
+    .stat-card .stat-val { font-size: 2rem; font-weight: 700; line-height: 1; }
+    .stat-card .stat-lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
+
+    /* Student row */
+    .student-row { cursor: pointer; }
+    .student-row:hover { background: var(--intv-green-light); }
+    .progress-pill { height: 8px; border-radius: 4px; background: #e9ecef; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; background: var(--intv-accent); }
+
+    /* Prompt editor */
+    .prompt-card { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; transition: border-color .15s; }
+    .prompt-card:hover { border-color: var(--intv-accent); }
+    .prompt-card.overridden { border-color: var(--intv-gold, #f9a825); background: #fffde7; }
+    .prompt-day-badge { width: 32px; height: 32px; border-radius: 50%; background: var(--intv-green-light); color: var(--intv-green); font-weight: 700; font-size: .8rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* Assignment cards */
+    .assign-admin-card { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; }
+
+    /* Journal / goal viewer */
+    .journal-view-entry { border-left: 3px solid var(--intv-accent); padding: 8px 12px; margin-bottom: 10px; background: #f8f9fa; border-radius: 0 6px 6px 0; }
+
+    /* Roster completion column */
+    .pass-chip  { background: #e8f5e9; color: #2e7d32; font-size: .65rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+    .fail-chip  { background: #fce4ec; color: #880e4f; font-size: .65rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container-fluid sticky-top px-0">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <!-- Header -->
+  <div class="intv-header text-white py-3 px-4 mb-4">
+    <div class="container">
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="bg-white bg-opacity-25 rounded-circle p-2">
+          <i class="fas fa-seedling fa-lg"></i>
+        </div>
+        <div>
+          <h4 class="mb-0 fw-bold">Intervention — Admin</h4>
+          <small class="opacity-75">Growth Mindset Planner</small>
+        </div>
+        <div class="ms-auto d-flex gap-3 flex-wrap">
+          <div class="text-center">
+            <div class="fw-bold fs-5" id="statEnrolled">–</div>
+            <small class="opacity-75">Enrolled</small>
+          </div>
+          <div class="text-center">
+            <div class="fw-bold fs-5" id="statAssignments">–</div>
+            <small class="opacity-75">Assignments</small>
+          </div>
+          <div class="text-center">
+            <div class="fw-bold fs-5" id="statSubmissions">–</div>
+            <small class="opacity-75">Submissions</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container pb-5">
+
+    <!-- Tab Nav -->
+    <ul class="nav nav-tabs admin-nav mb-3" id="admin-tabs">
+      <li class="nav-item"><a class="nav-link active" data-tab="roster" href="#"><i class="fas fa-users me-1"></i>Roster &amp; Completion</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="assignments" href="#"><i class="fas fa-tasks me-1"></i>Assignments</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="prompts" href="#"><i class="fas fa-comment-dots me-1"></i>Prompts</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="journals" href="#"><i class="fas fa-book-open me-1"></i>Journals</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="goals" href="#"><i class="fas fa-bullseye me-1"></i>Goals</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="enroll" href="#"><i class="fas fa-user-plus me-1"></i>Enrollment</a></li>
+    </ul>
+
+    <!-- ══ ROSTER & COMPLETION TAB ══════════════════════════════════════════ -->
+    <div id="tab-roster">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold text-success mb-0">Student Completion Overview</h6>
+          <input class="form-control form-control-sm w-auto" id="rosterSearch" placeholder="Search name or ID…" style="min-width:180px">
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Student</th>
+                <th>ID</th>
+                <th>Progress</th>
+                <th class="text-center">Passed</th>
+                <th class="text-center">Pending</th>
+                <th class="text-center">Journal Entries</th>
+                <th class="text-center">Goals</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="rosterTbody"><tr><td colspan="8" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-success"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ASSIGNMENTS TAB ══════════════════════════════════════════════════ -->
+    <div id="tab-assignments" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h6 class="fw-bold text-success mb-0">Manage Assignments</h6>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
+            <i class="fas fa-upload me-1"></i>Bulk Import
+          </button>
+          <button class="btn btn-success btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#assignModal">
+            <i class="fas fa-plus me-1"></i>New Assignment
+          </button>
+        </div>
+      </div>
+      <div id="assignList">
+        <div class="text-center py-5 text-muted"><div class="spinner-border text-success"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ PROMPTS TAB ══════════════════════════════════════════════════════ -->
+    <div id="tab-prompts" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+          <h6 class="fw-bold text-success mb-0">Growth Mindset Prompts</h6>
+          <small class="text-muted">37 built-in prompts — override any day by clicking Edit</small>
+        </div>
+        <span class="badge bg-light text-dark border" id="overrideBadge">0 overridden</span>
+      </div>
+      <div id="promptList">
+        <div class="text-center py-5 text-muted"><div class="spinner-border text-success"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ JOURNALS TAB ═════════════════════════════════════════════════════ -->
+    <div id="tab-journals" class="d-none">
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+              <h6 class="fw-bold text-success mb-0">Select Student</h6>
+            </div>
+            <div class="card-body p-0">
+              <div id="journalStudentList" class="list-group list-group-flush" style="max-height:400px;overflow-y:auto;">
+                <div class="text-center text-muted py-4">Loading…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+              <h6 class="fw-bold text-success mb-0" id="journalViewTitle">Select a student</h6>
+              <small class="text-muted" id="journalViewSub"></small>
+            </div>
+            <div class="card-body" id="journalViewBody" style="max-height:500px;overflow-y:auto;">
+              <p class="text-muted small text-center py-4">Select a student to view their journal entries.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ GOALS TAB ════════════════════════════════════════════════════════ -->
+    <div id="tab-goals" class="d-none">
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+              <h6 class="fw-bold text-success mb-0">Select Student</h6>
+            </div>
+            <div class="card-body p-0">
+              <div id="goalStudentList" class="list-group list-group-flush" style="max-height:400px;overflow-y:auto;">
+                <div class="text-center text-muted py-4">Loading…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+              <h6 class="fw-bold text-success mb-0" id="goalViewTitle">Select a student</h6>
+            </div>
+            <div class="card-body" id="goalViewBody" style="max-height:500px;overflow-y:auto;">
+              <p class="text-muted small text-center py-4">Select a student to view their goals.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ENROLLMENT TAB ══════════════════════════════════════════════════ -->
+    <div id="tab-enroll" class="d-none">
+      <div class="row g-3">
+        <div class="col-lg-6">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+              <h6 class="fw-bold text-success mb-0">Currently Enrolled</h6>
+              <small class="text-muted">Students in the INTV section</small>
+            </div>
+            <div class="card-body p-0">
+              <table class="table table-sm mb-0">
+                <thead class="table-light"><tr><th>Name</th><th>ID</th><th class="text-center">Enrolled</th><th></th></tr></thead>
+                <tbody id="enrolledTbody"><tr><td colspan="4" class="text-center text-muted py-3">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+              <h6 class="fw-bold text-success mb-0">Add Student to Intervention</h6>
+            </div>
+            <div class="card-body">
+              <div class="row g-2 mb-2">
+                <div class="col-12">
+                  <label class="form-label fw-bold small">Student ID <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="enrollStudentId" placeholder="e.g. S12345">
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-bold small">School Year</label>
+                  <input type="text" class="form-control" id="enrollYear" placeholder="e.g. 2025-2026">
+                </div>
+              </div>
+              <div class="border rounded p-2 mb-3 bg-light">
+                <small class="fw-bold text-muted d-block mb-1 text-uppercase" style="font-size:.65rem;">Intervention-only students only</small>
+                <small class="text-muted d-block mb-2" style="font-size:.72rem;">Leave blank if the student is already in a WD or CS section.</small>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <input type="text" class="form-control form-control-sm" id="enrollFirst" placeholder="First name">
+                  </div>
+                  <div class="col-6">
+                    <input type="text" class="form-control form-control-sm" id="enrollLast" placeholder="Last name">
+                  </div>
+                  <div class="col-6">
+                    <input type="text" class="form-control form-control-sm" id="enrollUsername" placeholder="Username (login)">
+                  </div>
+                  <div class="col-6">
+                    <input type="password" class="form-control form-control-sm" id="enrollPassword" placeholder="Password (default: ID)">
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-success fw-bold" id="btnEnroll">
+                <i class="fas fa-user-plus me-1"></i>Enroll Student
+              </button>
+              <div id="enrollMsg" class="mt-2 small"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ASSIGNMENT MODAL ───────────────────────────────────────────────── -->
+  <div class="modal fade" id="assignModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white py-2">
+          <h6 class="modal-title fw-bold" id="assignModalTitle"><i class="fas fa-tasks me-2"></i>New Assignment</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editAssignId">
+          <div class="row g-2">
+            <div class="col-4">
+              <label class="form-label fw-bold small">Day # (1-37)</label>
+              <input type="number" class="form-control" id="assignDay" min="1" max="37" placeholder="1">
+            </div>
+            <div class="col-8">
+              <label class="form-label fw-bold small">Title <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="assignTitle" placeholder="Assignment title">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-bold small">Instructions</label>
+              <textarea class="form-control" id="assignInstructions" rows="3" placeholder="What should students do?"></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-bold small">Due Date (optional)</label>
+              <input type="date" class="form-control" id="assignDue">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer py-2">
+          <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success btn-sm fw-bold" id="btnSaveAssign">Save Assignment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BULK IMPORT MODAL ──────────────────────────────────────────────── -->
+  <div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white py-2">
+          <h6 class="modal-title fw-bold"><i class="fas fa-upload me-2"></i>Bulk Import Assignments</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-muted">Paste JSON — an array of objects. Each object needs at minimum <code>title</code>. Optional fields: <code>day_number</code>, <code>instructions</code>, <code>due_date</code> (YYYY-MM-DD).</p>
+          <div class="bg-light rounded p-2 mb-3" style="font-size:.75rem;font-family:monospace">
+            [{"day_number":1,"title":"Growth Mindset Intro","instructions":"Read the article and reflect","due_date":"2025-09-05"},…]
+          </div>
+          <textarea class="form-control" id="importJson" rows="8" placeholder="Paste JSON here…" style="font-family:monospace;font-size:.8rem;"></textarea>
+          <div id="importMsg" class="mt-2 small"></div>
+        </div>
+        <div class="modal-footer py-2">
+          <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success btn-sm fw-bold" id="btnImport">Import</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PROMPT EDIT MODAL ──────────────────────────────────────────────── -->
+  <div class="modal fade" id="promptModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white py-2">
+          <h6 class="modal-title fw-bold" id="promptModalTitle">Edit Day Prompt</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editPromptDay">
+          <div class="bg-light rounded p-2 mb-3 small text-muted">
+            <strong>Built-in prompt:</strong>
+            <div id="builtInPromptText" class="mt-1"></div>
+          </div>
+          <label class="form-label fw-bold small">Override (leave blank to restore built-in)</label>
+          <textarea class="form-control" id="promptOverrideText" rows="4" placeholder="Type your override prompt here, or leave blank to use the built-in."></textarea>
+        </div>
+        <div class="modal-footer py-2">
+          <button class="btn btn-outline-danger btn-sm" id="btnClearPrompt">Clear Override</button>
+          <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success btn-sm fw-bold" id="btnSavePrompt">Save Prompt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STUDENT DETAIL MODAL ───────────────────────────────────────────── -->
+  <div class="modal fade" id="studentDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white py-2">
+          <h6 class="modal-title fw-bold" id="sdModalTitle"></h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="sdModalBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { apiFetch } from '/js/modules/api-client.js';
+
+    // ── State ─────────────────────────────────────────────────────────────
+    let rosterData = [], assignments = [], prompts = [], enrolledList = [];
+    let currentStudents = [];  // all enrolled students for journal/goal viewer
+
+    // ── Init ──────────────────────────────────────────────────────────────
+    async function init() {
+      await Promise.all([
+        loadRoster(),
+        loadAssignments(),
+        loadPrompts(),
+        loadEnrolled()
+      ]);
+      renderRoster();
+      renderAssignments();
+      renderPrompts();
+      renderStudentPicker('journalStudentList', openJournalView);
+      renderStudentPicker('goalStudentList', openGoalView);
+      renderEnrolled();
+    }
+
+    // ── Data ──────────────────────────────────────────────────────────────
+    async function loadRoster() {
+      const data = await apiFetch('/api/admin/intervention/roster').catch(() => ({ students: [] }));
+      rosterData = data.students || [];
+      document.getElementById('statEnrolled').textContent = rosterData.length;
+      const totalSubs = rosterData.reduce((s, r) => s + (r.submissions_count || 0), 0);
+      document.getElementById('statSubmissions').textContent = totalSubs;
+      currentStudents = rosterData;
+    }
+
+    async function loadAssignments() {
+      const data = await apiFetch('/api/admin/intervention/assignments').catch(() => ({ assignments: [] }));
+      assignments = data.assignments || [];
+      document.getElementById('statAssignments').textContent = assignments.length;
+    }
+
+    async function loadPrompts() {
+      const data = await apiFetch('/api/intervention/prompts-all').catch(() => ({ prompts: [] }));
+      prompts = data.prompts || [];
+    }
+
+    async function loadEnrolled() {
+      const data = await apiFetch('/api/admin/intervention/roster').catch(() => ({ students: [] }));
+      enrolledList = data.students || [];
+    }
+
+    // ── Roster tab ────────────────────────────────────────────────────────
+    function renderRoster(filter = '') {
+      const tbody = document.getElementById('rosterTbody');
+      const list = filter
+        ? rosterData.filter(s => `${s.first_name} ${s.last_name} ${s.student_id}`.toLowerCase().includes(filter.toLowerCase()))
+        : rosterData;
+
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">${filter ? 'No match.' : 'No students enrolled yet. Use the Enrollment tab.'}</td></tr>`;
+        return;
+      }
+
+      const totalAssign = assignments.length || 1;
+      tbody.innerHTML = list.map(s => {
+        const passed = s.submissions_count || 0;
+        const pct = Math.round((passed / totalAssign) * 100);
+        const pending = totalAssign - passed;
+        return `<tr class="student-row" onclick="window.openStudentDetail('${s.student_id}')">
+          <td class="fw-bold">${s.last_name}, ${s.first_name}</td>
+          <td class="text-muted small">${s.student_id}</td>
+          <td style="min-width:120px">
+            <div class="d-flex align-items-center gap-2">
+              <div class="progress-pill flex-grow-1"><div class="progress-fill" style="width:${pct}%"></div></div>
+              <small class="text-muted fw-bold" style="width:32px;text-align:right">${pct}%</small>
+            </div>
+          </td>
+          <td class="text-center"><span class="pass-chip">${passed}</span></td>
+          <td class="text-center"><span class="fail-chip">${pending}</span></td>
+          <td class="text-center text-muted small">${s.journal_count || 0}</td>
+          <td class="text-center text-muted small">${s.goal_count || 0}</td>
+          <td><i class="fas fa-chevron-right text-muted" style="font-size:.7rem;"></i></td>
+        </tr>`;
+      }).join('');
+    }
+
+    document.getElementById('rosterSearch').addEventListener('input', e => renderRoster(e.target.value));
+
+    window.openStudentDetail = async (sid) => {
+      const s = rosterData.find(r => r.student_id === sid);
+      if (!s) return;
+      document.getElementById('sdModalTitle').textContent = `${s.first_name} ${s.last_name} (${sid})`;
+      document.getElementById('sdModalBody').innerHTML = '<div class="text-center py-3"><div class="spinner-border text-success"></div></div>';
+      new bootstrap.Modal(document.getElementById('studentDetailModal')).show();
+
+      const [subData, jData, gData] = await Promise.all([
+        apiFetch(`/api/admin/intervention/submissions?student_id=${sid}`).catch(() => ({ submissions: [] })),
+        apiFetch(`/api/admin/intervention/journal/${sid}`).catch(() => ({ entries: [] })),
+        apiFetch(`/api/admin/intervention/goals/${sid}`).catch(() => ({ goals: [] }))
+      ]);
+
+      const subs = subData.submissions || [];
+      const subMap = {};
+      subs.forEach(s => { subMap[s.assignment_id] = s; });
+
+      const assignRows = assignments.map(a => {
+        const sub = subMap[a.id];
+        const dt = sub?.submitted_at ? new Date(sub.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+        return `<tr>
+          <td class="small">${a.day_number ? `Day ${a.day_number}: ` : ''}${a.title}</td>
+          <td class="text-center">${sub ? '<span class="pass-chip">PASS</span>' : '<span class="badge bg-light text-muted border" style="font-size:.65rem;">Pending</span>'}</td>
+          <td class="small text-muted">${dt}</td>
+          <td class="small text-muted" style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sub?.response_text || ''}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="4" class="text-center text-muted">No assignments yet.</td></tr>';
+
+      const journalRows = (jData.entries || []).slice(0,5).map(e => {
+        const dt = new Date(e.entry_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+        return `<div class="journal-view-entry"><strong class="small text-success">${dt}</strong>
+          <p class="small mb-0 mt-1">${(e.content || '').slice(0,120) + (e.content?.length > 120 ? '…' : '')}</p></div>`;
+      }).join('') || '<p class="text-muted small">No journal entries.</p>';
+
+      const goals = (gData.goals || []).slice(0,6).map(g =>
+        `<div class="d-flex align-items-center gap-2 mb-1">
+          <i class="fas fa-${g.achieved_at ? 'check-circle text-success' : 'circle text-muted'}" style="font-size:.85rem;"></i>
+          <span class="small">${g.title}</span>
+          <span class="badge bg-light text-muted border ms-auto" style="font-size:.6rem;">${g.cadence}</span>
+        </div>`
+      ).join('') || '<p class="text-muted small">No goals set.</p>';
+
+      document.getElementById('sdModalBody').innerHTML = `
+        <div class="row g-3">
+          <div class="col-12">
+            <h6 class="fw-bold small text-success">Assignments</h6>
+            <div class="table-responsive"><table class="table table-sm">
+              <thead class="table-light"><tr><th>Assignment</th><th class="text-center">Status</th><th>Submitted</th><th>Response</th></tr></thead>
+              <tbody>${assignRows}</tbody>
+            </table></div>
+          </div>
+          <div class="col-md-6"><h6 class="fw-bold small text-success">Recent Journal Entries</h6>${journalRows}</div>
+          <div class="col-md-6"><h6 class="fw-bold small text-success">Goals</h6>${goals}</div>
+        </div>`;
+    };
+
+    // ── Assignments tab ───────────────────────────────────────────────────
+    function renderAssignments() {
+      const el = document.getElementById('assignList');
+      if (!assignments.length) { el.innerHTML = '<p class="text-muted text-center py-5">No assignments yet. Create one or use Bulk Import.</p>'; return; }
+      el.innerHTML = assignments.map(a => {
+        const due = a.due_date ? new Date(a.due_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '–';
+        return `<div class="assign-admin-card">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="d-flex align-items-center gap-2">
+                ${a.day_number ? `<span class="badge bg-success" style="font-size:.68rem;">Day ${a.day_number}</span>` : ''}
+                <span class="fw-bold">${a.title}</span>
+              </div>
+              ${a.instructions ? `<div class="small text-muted mt-1">${a.instructions}</div>` : ''}
+              <small class="text-muted">Due: ${due}</small>
+            </div>
+            <div class="d-flex gap-1 ms-2">
+              <button class="btn btn-sm btn-outline-secondary" onclick="window.editAssignment(${a.id})"><i class="fas fa-edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="window.deleteAssignment(${a.id})"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    document.getElementById('btnSaveAssign').addEventListener('click', async () => {
+      const title = document.getElementById('assignTitle').value.trim();
+      if (!title) { alert('Title is required.'); return; }
+      const editId = document.getElementById('editAssignId').value;
+      const body = {
+        day_number: parseInt(document.getElementById('assignDay').value) || null,
+        title, instructions: document.getElementById('assignInstructions').value,
+        due_date: document.getElementById('assignDue').value || null
+      };
+      if (editId) {
+        await apiFetch(`/api/admin/intervention/assignments/${editId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      } else {
+        await apiFetch('/api/admin/intervention/assignments', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      }
+      bootstrap.Modal.getInstance(document.getElementById('assignModal'))?.hide();
+      await loadAssignments();
+      renderAssignments();
+    });
+
+    window.editAssignment = (id) => {
+      const a = assignments.find(x => x.id === id);
+      if (!a) return;
+      document.getElementById('editAssignId').value = id;
+      document.getElementById('assignModalTitle').textContent = 'Edit Assignment';
+      document.getElementById('assignDay').value = a.day_number || '';
+      document.getElementById('assignTitle').value = a.title;
+      document.getElementById('assignInstructions').value = a.instructions || '';
+      document.getElementById('assignDue').value = a.due_date ? a.due_date.split('T')[0] : '';
+      new bootstrap.Modal(document.getElementById('assignModal')).show();
+    };
+
+    window.deleteAssignment = async (id) => {
+      if (!confirm('Delete this assignment? Student submissions will remain.')) return;
+      await apiFetch(`/api/admin/intervention/assignments/${id}`, { method:'DELETE' });
+      assignments = assignments.filter(a => a.id !== id);
+      renderAssignments();
+      document.getElementById('statAssignments').textContent = assignments.length;
+    };
+
+    // Reset new assignment form when modal opens fresh
+    document.getElementById('assignModal').addEventListener('show.bs.modal', e => {
+      if (!e.relatedTarget) return; // opened programmatically by editAssignment — skip
+      document.getElementById('editAssignId').value = '';
+      document.getElementById('assignModalTitle').textContent = 'New Assignment';
+      document.getElementById('assignDay').value = '';
+      document.getElementById('assignTitle').value = '';
+      document.getElementById('assignInstructions').value = '';
+      document.getElementById('assignDue').value = '';
+    });
+
+    document.getElementById('btnImport').addEventListener('click', async () => {
+      const raw = document.getElementById('importJson').value;
+      const msgEl = document.getElementById('importMsg');
+      let parsed;
+      try { parsed = JSON.parse(raw); } catch { msgEl.textContent = 'Invalid JSON.'; msgEl.className = 'mt-2 small text-danger'; return; }
+      if (!Array.isArray(parsed)) { msgEl.textContent = 'Must be a JSON array.'; msgEl.className = 'mt-2 small text-danger'; return; }
+      const data = await apiFetch('/api/admin/intervention/assignments/import', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ assignments: parsed }) });
+      if (data.success) {
+        msgEl.textContent = `Imported ${data.imported} assignment(s).`;
+        msgEl.className = 'mt-2 small text-success';
+        await loadAssignments();
+        renderAssignments();
+        setTimeout(() => { bootstrap.Modal.getInstance(document.getElementById('importModal'))?.hide(); }, 1200);
+      } else {
+        msgEl.textContent = data.error || 'Import failed.';
+        msgEl.className = 'mt-2 small text-danger';
+      }
+    });
+
+    // ── Prompts tab ───────────────────────────────────────────────────────
+    function renderPrompts() {
+      const el = document.getElementById('promptList');
+      const overrides = prompts.filter(p => p.is_override).length;
+      document.getElementById('overrideBadge').textContent = `${overrides} overridden`;
+      if (!prompts.length) { el.innerHTML = '<p class="text-muted text-center py-4">Loading…</p>'; return; }
+      el.innerHTML = prompts.map(p => `
+        <div class="prompt-card ${p.is_override ? 'overridden' : ''}">
+          <div class="d-flex align-items-start gap-3">
+            <div class="prompt-day-badge">${p.day_number}</div>
+            <div class="flex-grow-1">
+              ${p.is_override ? '<span class="badge bg-warning text-dark mb-1" style="font-size:.6rem;">OVERRIDDEN</span>' : ''}
+              <div class="small" style="line-height:1.5">${p.prompt}</div>
+            </div>
+            <button class="btn btn-sm btn-outline-success ms-2" onclick="window.editPrompt(${p.day_number})">
+              <i class="fas fa-edit"></i>
+            </button>
+          </div>
+        </div>`
+      ).join('');
+    }
+
+    window.editPrompt = (dayNum) => {
+      const p = prompts.find(x => x.day_number === dayNum);
+      if (!p) return;
+      document.getElementById('editPromptDay').value = dayNum;
+      document.getElementById('promptModalTitle').textContent = `Edit Day ${dayNum} Prompt`;
+      document.getElementById('builtInPromptText').textContent = p.is_override ? '(override active — see current text below)' : p.prompt;
+      document.getElementById('promptOverrideText').value = p.is_override ? p.prompt : '';
+      new bootstrap.Modal(document.getElementById('promptModal')).show();
+    };
+
+    document.getElementById('btnSavePrompt').addEventListener('click', async () => {
+      const day = document.getElementById('editPromptDay').value;
+      const text = document.getElementById('promptOverrideText').value.trim();
+      if (!text) { document.getElementById('btnClearPrompt').click(); return; }
+      await apiFetch(`/api/admin/intervention/prompts/${day}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ prompt: text }) });
+      bootstrap.Modal.getInstance(document.getElementById('promptModal'))?.hide();
+      await loadPrompts();
+      renderPrompts();
+    });
+
+    document.getElementById('btnClearPrompt').addEventListener('click', async () => {
+      const day = document.getElementById('editPromptDay').value;
+      await apiFetch(`/api/admin/intervention/prompts/${day}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ prompt: null }) });
+      bootstrap.Modal.getInstance(document.getElementById('promptModal'))?.hide();
+      await loadPrompts();
+      renderPrompts();
+    });
+
+    // ── Journal / Goal viewer ─────────────────────────────────────────────
+    function renderStudentPicker(elId, clickHandler) {
+      const el = document.getElementById(elId);
+      if (!currentStudents.length) { el.innerHTML = '<p class="text-muted small text-center py-3">No enrolled students.</p>'; return; }
+      el.innerHTML = currentStudents.map(s =>
+        `<button class="list-group-item list-group-item-action py-2 px-3 text-start" onclick="window.__${elId}_cb('${s.student_id}')">
+          <div class="fw-bold small">${s.last_name}, ${s.first_name}</div>
+          <div class="text-muted" style="font-size:.72rem;">${s.student_id}</div>
+        </button>`
+      ).join('');
+      window[`__${elId}_cb`] = clickHandler;
+    }
+
+    async function openJournalView(sid) {
+      const s = currentStudents.find(r => r.student_id === sid);
+      document.getElementById('journalViewTitle').textContent = s ? `${s.first_name} ${s.last_name}` : sid;
+      document.getElementById('journalViewSub').textContent = `${s?.journal_count || 0} journal entries`;
+      document.getElementById('journalViewBody').innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-success"></div></div>';
+      const data = await apiFetch(`/api/admin/intervention/journal/${sid}`).catch(() => ({ entries: [] }));
+      const entries = data.entries || [];
+      if (!entries.length) { document.getElementById('journalViewBody').innerHTML = '<p class="text-muted small text-center">No journal entries yet.</p>'; return; }
+      document.getElementById('journalViewBody').innerHTML = entries.map(e => {
+        const dt = new Date(e.entry_date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+        return `<div class="journal-view-entry">
+          <strong class="small text-success">${dt}</strong>
+          ${e.prompt ? `<div class="text-muted" style="font-size:.72rem;font-style:italic;">Prompt: ${e.prompt.slice(0,80)}…</div>` : ''}
+          <p class="small mb-0 mt-1">${e.content || '<em class="text-muted">Empty entry</em>'}</p>
+        </div>`;
+      }).join('');
+    }
+
+    async function openGoalView(sid) {
+      const s = currentStudents.find(r => r.student_id === sid);
+      document.getElementById('goalViewTitle').textContent = s ? `${s.first_name} ${s.last_name}` : sid;
+      document.getElementById('goalViewBody').innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-success"></div></div>';
+      const data = await apiFetch(`/api/admin/intervention/goals/${sid}`).catch(() => ({ goals: [] }));
+      const goals = data.goals || [];
+      if (!goals.length) { document.getElementById('goalViewBody').innerHTML = '<p class="text-muted small text-center">No goals set yet.</p>'; return; }
+      const cadences = ['daily','weekly','unit','yearly'];
+      document.getElementById('goalViewBody').innerHTML = cadences.map(c => {
+        const list = goals.filter(g => g.cadence === c);
+        if (!list.length) return '';
+        const labels = { daily:'Daily', weekly:'Weekly', unit:'Marking Period', yearly:'Academic Year' };
+        return `<div class="mb-3">
+          <h6 class="small fw-bold text-success border-bottom pb-1">${labels[c]}</h6>
+          ${list.map(g => `<div class="d-flex align-items-start gap-2 mb-1">
+            <i class="fas fa-${g.achieved_at ? 'check-circle text-success' : 'circle text-muted'} mt-1" style="font-size:.8rem;"></i>
+            <div>
+              <div class="small fw-bold ${g.achieved_at ? 'text-decoration-line-through text-muted' : ''}">${g.title}</div>
+              ${g.notes ? `<div class="text-muted" style="font-size:.72rem;">${g.notes}</div>` : ''}
+              ${g.target_date ? `<div class="text-muted" style="font-size:.7rem;">Target: ${g.target_date}</div>` : ''}
+            </div>
+          </div>`).join('')}
+        </div>`;
+      }).join('');
+    }
+
+    // ── Enrollment tab ────────────────────────────────────────────────────
+    function renderEnrolled() {
+      const tbody = document.getElementById('enrolledTbody');
+      if (!enrolledList.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No students enrolled.</td></tr>'; return; }
+      tbody.innerHTML = enrolledList.map(s => {
+        const dt = s.enrolled_at ? new Date(s.enrolled_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : (s.school_year || '–');
+        return `<tr>
+          <td class="small fw-bold">${s.last_name}, ${s.first_name}</td>
+          <td class="small text-muted">${s.student_id}</td>
+          <td class="small text-center text-muted">${dt}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="window.unenroll('${s.student_id}')" title="Remove">
+              <i class="fas fa-user-minus" style="font-size:.75rem;"></i>
+            </button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    document.getElementById('btnEnroll').addEventListener('click', async () => {
+      const sid  = document.getElementById('enrollStudentId').value.trim();
+      const yr   = document.getElementById('enrollYear').value.trim();
+      const msg  = document.getElementById('enrollMsg');
+      if (!sid) { msg.textContent = 'Student ID is required.'; msg.className = 'mt-2 small text-danger'; return; }
+      const payload = { student_id: sid, school_year: yr || null };
+      const first = document.getElementById('enrollFirst').value.trim();
+      const last  = document.getElementById('enrollLast').value.trim();
+      const uname = document.getElementById('enrollUsername').value.trim();
+      const pwd   = document.getElementById('enrollPassword').value;
+      if (first) payload.first_name = first;
+      if (last)  payload.last_name  = last;
+      if (uname) payload.username   = uname;
+      if (pwd)   payload.password   = pwd;
+      const data = await apiFetch('/api/admin/intervention/enroll', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload) });
+      if (data.success) {
+        msg.textContent = 'Student enrolled successfully.';
+        msg.className = 'mt-2 small text-success';
+        ['enrollStudentId','enrollYear','enrollFirst','enrollLast','enrollUsername','enrollPassword'].forEach(id => { document.getElementById(id).value = ''; });
+        await loadEnrolled();
+        await loadRoster();
+        renderEnrolled();
+        renderRoster();
+        renderStudentPicker('journalStudentList', openJournalView);
+        renderStudentPicker('goalStudentList', openGoalView);
+      } else {
+        msg.textContent = data.error || 'Enrollment failed.';
+        msg.className = 'mt-2 small text-danger';
+      }
+      setTimeout(() => { msg.textContent = ''; }, 3000);
+    });
+
+    window.unenroll = async (sid) => {
+      if (!confirm(`Remove ${sid} from intervention? Their data will be preserved.`)) return;
+      await apiFetch('/api/admin/intervention/enroll', { method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ student_id: sid }) });
+      await loadEnrolled();
+      await loadRoster();
+      renderEnrolled();
+      renderRoster();
+      renderStudentPicker('journalStudentList', openJournalView);
+      renderStudentPicker('goalStudentList', openGoalView);
+    };
+
+    // ── Tab navigation ────────────────────────────────────────────────────
+    document.querySelectorAll('.admin-nav .nav-link').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const tab = a.dataset.tab;
+        ['roster','assignments','prompts','journals','goals','enroll'].forEach(t => {
+          document.getElementById(`tab-${t}`).classList.toggle('d-none', t !== tab);
+        });
+        document.querySelectorAll('.admin-nav .nav-link').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
+      });
+    });
+
+    init();
+  </script>
+</body>
+</html>
