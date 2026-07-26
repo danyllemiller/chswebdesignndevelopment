@@ -1,213 +1,402 @@
-CHS Web Design & Development Site Architecture
-===============================================
+CHS Web Design & Development — Site Architecture
+=================================================
+Last updated: July 2026
 
-This document describes the current structure of `chswebdesignndevelopment`, what connects to what, and how the application behaves today.
-It reflects the current organization of static pages, JS assets, API routes, and database dependencies.
+This document is the authoritative reference for how the site is built, what connects
+to what, and what you need to know to maintain or extend it.
 
-1. Repository layout
---------------------
-- Root folder: `/srv/chswebdesignndevelopment`
-- Main server file: `server.js`
-- Static content is served directly from the repo root via Express `express.static(__dirname)`.
-- JS assets are organized under `js/`.
-- CSS under `css/`.
-- Pages are mostly plain HTML served directly, with client-side JS driving behavior.
-- Exam pages remain exactly where they are in `exams/` and are intentionally unchanged.
+════════════════════════════════════════════════════════════════════════════════════════
+1. REPOSITORY & DEPLOYMENT
+════════════════════════════════════════════════════════════════════════════════════════
 
-2. `js/` organization today
----------------------------
-- `js/games/` now contains public review-game scripts used by `reviewGames/*.html` pages:
-  - `js/games/hollywood.js`
-  - `js/games/jeopardy.js`
-  - `js/games/millionaire.js`
-  - `js/games/wordgames.js`
-  - `js/games/review_games_logic.js`
-  - `js/games/smarter.js`
-- `js/student/` contains private student-page logic:
-  - `js/student/dashboard.js`
-  - `js/student/student-files.js`
-  - `js/student/student-notes.js`
-  - `js/student/student-payroll.js`
-  - `js/student/timeclock.js`
-- `js/admin/` contains admin portal logic:
-  - `js/admin/roster.js`
-  - `js/admin/gradebook.js`
-- `js/data/` now only contains the curriculum data scripts that `admin.html` uses to populate Firestore via the migration dashboard.
-  - These are not used by student pages directly.
-- Shared site utilities and entrypoint scripts remain at top-level `js/`:
-  - `js/auth-guard.js`
-  - `js/bootstrap.bundle.js`
-  - `js/jquery.js`
-  - `js/loader.js`
-  - `js/login-logic.js`
-  - `js/examLogic.js`
-  - `js/examLogicCS.js`
-  - `js/preTestLogic.js`
-  - `js/quizLogic.js`
-  - `js/prof-scales.js`
-  - `js/prof-scales-cs-firebase.js`
-  - `js/interactive.js`
-  - `js/cs-interactive.js`
+Production server
+  Host     : 100.108.216.90  (SSH alias: webServer)
+  User     : administrator
+  Repo     : /srv/chswebdesignndevelopment   ← clone lives here, NOT /var/www/html
+  Process  : PM2, app name "guild-server"
 
-3. Server backend
-------------------
-- `server.js` runs an Express server on port `3000`.
-- It serves static content from the repo root.
-- It supports sessions using `express-session` with `cookie.secure = false`.
-- It uses `mysql2/promise` to connect to a MariaDB/MySQL database named `chs_gradebook`.
-- Database connect logic:
-  - primary: `host: localhost`, `user: root`, `password: chs_password`.
-  - fallback for Linux socket path: `/var/run/mysqld/mysqld.sock`, `user: root`, empty password.
+Typical deploy workflow
+  ssh webServer
+  cd /srv/chswebdesignndevelopment
+  git pull
+  pm2 restart guild-server
+  pm2 status guild-server          ← verify it stayed up
 
-4. Main database and API flows
-------------------------------
-- Primary data storage for login, roster, grades, exams, and admin metadata is the MariaDB database.
-- The main app is a hybrid static + API system:
-  - static HTML pages load in the browser
-  - client JS calls server API endpoints under `/api/`
-- Implemented API routes in `server.js`:
-  - `POST /api/register` — register new student accounts by validating student_id against the roster.
-  - `POST /api/login` — authenticate username/password and create session data.
-  - `POST /api/logout` — destroy session and clear cookie.
-  - `POST /api/clockin` — save student clock-in activity.
-  - `POST /api/verify-user` — lookup a student by username for exam verification.
-  - `POST /api/submit-exam` — save exam results.
-  - `GET /api/student/grades` — fetch grades for a student.
-  - `GET /api/questions` — fetch exam question payloads.
-  - `GET /api/admin/roster` — return the full roster for admin pages.
-  - `POST /api/admin/save-assignment` — create or update assignment metadata.
-  - `POST /api/admin/edit-assignment` — edit an existing assignment.
-  - `POST /api/admin/delete-assignment` — delete an assignment.
+Never edit files directly on the server. Commit locally → push → pull on server.
+The server runs on port 3000. nginx or a reverse proxy may front it on 80/443.
 
-5. Auth and login flow
------------------------
-- `login.html` is the main login/registration page.
-- It loads:
-  - `/js/loader.js?v=6`
-  - `/js/login-logic.js`
-  - `/js/auth-guard.js`
-  - `/js/bootstrap.bundle.js`
-  - `/js/jquery.js`
-- `js/login-logic.js` handles:
-  - login POST to `/api/login`
-  - registration POST to `/api/register`
-  - optional clock-in flow for overtime/regular shifts
-  - password reset if the client uses `/api/reset-password` (note: this route is not implemented in `server.js`)
-- After successful login, the client stores `user` in `localStorage` and redirects students to `/student/grades.html` or admins to `/admin/gradebook.html`.
+Database
+  Engine   : MariaDB
+  Database : chs_gradebook
+  User     : root
+  Password : DB_PASSWORD_IN_DB_CONFIG   (actual value is in server/db.js)
 
-6. Student page flow
----------------------
-- Student pages are under `student/` and use the new `js/student/` folder.
-- Key student pages:
-  - `/student/grades.html` — student gradebook dashboard
-  - `/student/files.html` — student file manager
-  - `/student/notes.html` — student notes page
-- Page-specific JS:
-  - `/student/grades.html` loads `js/student/dashboard.js`, `js/student/student-payroll.js`, `js/student/timeclock.js`.
-  - `/student/files.html` loads `js/student/student-files.js`.
-  - `/student/notes.html` loads `js/student/student-notes.js`.
-- These pages depend on the logged-in user session and backend APIs.
+════════════════════════════════════════════════════════════════════════════════════════
+2. FOLDER STRUCTURE (what matters)
+════════════════════════════════════════════════════════════════════════════════════════
 
-7. Exam page flow
-------------------
-- `exams/` pages are left in place and are a core part of the application.
-- They continue to use `js/examLogic.js` and `js/examLogicCS.js`.
-- Exam logic:
-  - verifies a user by posting to `/api/verify-user`
-  - loads questions from `/api/questions?exam_id={id}`
-  - submits results to `/api/submit-exam`
-- These pages are intentionally preserved exactly in their current locations.
+/
+├── server/
+│   ├── server.js          Express entry point, port 3000
+│   ├── api.js             Route aggregator — 11 lines, imports all route files
+│   ├── auth.js            Login / logout / register / password-reset routes
+│   ├── db.js              getDbConnection() — MariaDB connection factory
+│   ├── helpers.js         Shared utilities (getCurrentSchoolYear, resolveCourseId,
+│   │                        clampScore) used across route modules
+│   └── routes/
+│       ├── timeclock.js   Clock-in/out, daily questions, timesheet injection
+│       ├── gradebook.js   Student/admin gradebook, assignments CRUD, grade save
+│       ├── roster.js      Admin roster, sections, school years, student CRUD
+│       ├── payroll.js     Student/admin payroll views, timesheets, role updates
+│       ├── notebooks.js   Admin notebook viewer, student notebook CRUD
+│       ├── projects.js    Project specs, submissions, peer/self/auto evaluations
+│       ├── assessments.js Self-assessments, CS exams, exam progress, rubrics,
+│       │                    review-game questions, CS notebook, student profile
+│       ├── calendar.js    Calendar settings, bell schedule, teacher checklist
+│       └── files.js       CSV upload (special-dates.csv), shared-files inbox
+│
+├── js/
+│   ├── modules/           ES module helpers (api-client.js, question-service.js, …)
+│   ├── student/           Private student-page scripts
+│   │   ├── dashboard.js
+│   │   ├── timeclock.js
+│   │   ├── student-payroll.js
+│   │   ├── student-files.js
+│   │   └── student-notes.js
+│   ├── admin/             Admin portal scripts
+│   │   ├── gradebook.js
+│   │   └── roster.js
+│   ├── games/             Public review-game scripts
+│   └── (top-level)        auth-guard.js, examLogic.js, examLogicCS.js, loader.js,
+│                          login-logic.js, preTestLogic.js, wrsLogic.js, …
+│
+├── admin/                 Admin HTML portal pages (USE THESE — not root-level dupes)
+│   ├── gradebook.html
+│   ├── roster.html
+│   ├── payroll.html
+│   ├── notebooks.html
+│   ├── timeclock.html
+│   ├── checklist.html     calls PHP for due-dates data
+│   └── due-dates.html     calls PHP
+│
+├── student/               Student HTML pages (grades, payroll, files, notes, …)
+├── exams/                 Static exam HTML pages (unchanged — intentional)
+├── compsci/               CS track content pages
+├── reviewGames/           Public game pages
+├── api/                   PHP API files — PARTIALLY STILL IN USE (see section 5)
+└── (root)                 index.html, login.html, calendar.html, and legacy dupes:
+                           admin.html, admin-roster.html, admin-notebooks.html,
+                           admin-files.html  ← OLD DUPLICATES, not the live admin
 
-8. Public game/review pages
-----------------------------
-- Public review/game pages are under `reviewGames/`.
-- They now load their game logic from `js/games/`.
-- Example public game scripts:
-  - `js/games/review_games_logic.js`
-  - `js/games/jeopardy.js`
-  - `js/games/hollywood.js`
-  - `js/games/millionaire.js`
-  - `js/games/wordgames.js`
-  - `js/games/smarter.js`
-- These scripts are separate from private student pages and are only used by review game content.
+════════════════════════════════════════════════════════════════════════════════════════
+3. SERVER BACKEND — HOW IT'S ORGANIZED
+════════════════════════════════════════════════════════════════════════════════════════
 
-9. Data files and migration
------------------------------
-- Static curriculum data files in `js/data/` are no longer consumed by normal student pages.
-- `admin.html` still uses a subset of `js/data/*.js` scripts to bootstrap Firestore content via the migration dashboard.
-- In practice:
-  - normal site navigation and exams do not depend on `js/data/`
-  - the database is now the authoritative source for content
-- Remaining `js/data/` resources are only for admin migration and not for active student page delivery.
+server/server.js mounts two Express routers at /api:
+  app.use('/api', require('./auth'));   // login, logout, register, password reset
+  app.use('/api', require('./api'));    // all other routes (75 routes total)
 
-10. Exact page-to-JS connections
----------------------------------
-- `/login.html`
-  - `js/loader.js`
-  - `js/login-logic.js`
-  - `js/auth-guard.js`
-- `/student/grades.html`
-  - `js/student/dashboard.js`
-  - `js/student/student-payroll.js`
-  - `js/student/timeclock.js`
-- `/student/files.html`
-  - `js/student/student-files.js`
-- `/student/notes.html`
-  - `js/student/student-notes.js`
-- `/admin.html`
-  - `js/admin/roster.js`
-  - `js/admin/gradebook.js`
-  - `js/data/*.js` (migration seeding only)
-- `/reviewGames/*.html`
-  - `js/games/review_games_logic.js`
-  - `js/games/jeopardy.js`
-  - `js/games/hollywood.js`
-  - `js/games/millionaire.js`
-  - `js/games/wordgames.js`
-  - `js/games/smarter.js`
-- `/exams/*.html`
-  - `js/examLogic.js`
-  - `js/examLogicCS.js`
-  - supporting shared scripts like `js/loader.js`, `js/auth-guard.js`, `js/jquery.js`, `js/bootstrap.bundle.js`
+server/api.js is now a clean 11-line aggregator:
+  router.use('/', require('./routes/timeclock'));
+  router.use('/', require('./routes/gradebook'));
+  ... (9 domain route files total)
 
-11. Current route status (all implemented in server/api.js or server/auth.js)
-----------------------------------------------------------------------------
-All previously-listed "missing" routes now exist in Node. Summary:
-  - `POST /api/reset-password`             → server/auth.js (student self-service reset)
-  - `POST /api/admin/reset-password-default` → server/auth.js (admin-forced reset)
-  - `GET  /api/admin/master-gradebook-data` → server/api.js (reads `responses` table)
-  - `POST /api/admin/save-grade`           → server/api.js (inline cell save, `responses`)
-  - `POST /api/admin/batch-update-grades`  → server/api.js (Google Sheets sync, `responses`)
-  - `POST /api/admin/upload-roster`        → server/api.js
-  - `POST /api/admin/reset-student`        → server/api.js
-  - `DELETE /api/admin/delete-student`     → server/api.js
-  - `GET  /api/bell-schedule`              → server/api.js (mirrors PHP version for Node context)
-  - `GET  /api/admin/checklist`            → server/api.js (teacher multi-cadence checklist)
-  - `POST /api/admin/checklist/toggle`     → server/api.js
-  - `POST /api/admin/checklist/reset`      → server/api.js
+Each route file is self-contained: it imports only what it needs from db.js and
+helpers.js and exports a single Express router. No route is defined in api.js itself.
 
-PHP files under api/admin/ are DEPRECATED — they write to a legacy `grades` table that is not
-read by any Node route. Node is the authoritative backend; PHP is never executed on the live server.
-Do not add new routes to PHP files.
+helpers.js exports three functions used across multiple route modules:
+  getCurrentSchoolYear()            → "2025-2026" (July 1 cutover)
+  resolveCourseId(conn, sectionId)  → MariaDB lookup first, then legacy prefix fallback
+  clampScore(score, max)            → bounds-check a numeric score
 
-12. What is now authoritative
------------------------------
-- Student authentication, roster lookup, grade storage, and exam questions are all backed by MariaDB via the `server.js` API.
-- Public game logic is in `js/games/` and served as static scripts.
-- The `exams/` folder remains the core assessment content and is still active.
-- The `admin.html` migration page is a separate Firestore seed tool and does not represent the main student experience.
+════════════════════════════════════════════════════════════════════════════════════════
+4. ALL API ROUTES (prefix: /api)
+════════════════════════════════════════════════════════════════════════════════════════
 
-13. How to run the site today
-------------------------------
-- Start the app from `/srv/chswebdesignndevelopment`:
-  - `node server/server.js`
-- Open a browser to `http://localhost:3000/login.html` or any other page.
-- The server will serve static HTML and respond to `/api/*` calls.
-- Make sure the MariaDB service is available and the `chs_gradebook` database is accessible.
+AUTH  (server/auth.js)
+  POST   /api/login
+  POST   /api/logout
+  POST   /api/register
+  POST   /api/verify-user
+  POST   /api/reset-password
+  POST   /api/admin/reset-password-default
 
-14. Notes on cleanup
----------------------
-- The JS folder has been reorganized so public games and private student pages are separated.
-- The `js/data/` folder is no longer the source of active student content.
-- Exam pages remain untouched where they are, as requested.
+TIMECLOCK  (server/routes/timeclock.js)
+  POST   /api/clockin                     legacy clock-in (kept for compatibility)
+  GET    /api/timeclock/status            today's mode: 'in' | 'out' | 'done'
+  GET    /api/timeclock/question          daily teacher question + punctuality options
+  POST   /api/timeclock/save             write to clockins + timesheets tables
+  GET    /api/admin/daily-questions       fetch teacher's wd/cs questions for a date
+  POST   /api/admin/daily-questions       save/update teacher's daily questions
+  POST   /api/admin/inject-timesheets     admin testing tool: write fake timesheet rows
 
+GRADEBOOK  (server/routes/gradebook.js)
+  GET    /api/student/course-gradebook    student's assignments + scores for their course
+  POST   /api/submit-exam                save exam score (keeps highest score only)
+  GET    /api/student/grades             all scores for a student
+  POST   /api/admin/clear-all-assignments wipe all exams + responses (destructive!)
+  POST   /api/admin/save-assignment       create/update an exam record
+  POST   /api/admin/edit-assignment       rename exam (cascades to responses table)
+  POST   /api/admin/delete-assignment     delete exam + all responses for it
+  GET    /api/admin/master-gradebook-data all students, assignments, grades for admin UI
+  POST   /api/admin/save-grade           inline cell grade save
+  POST   /api/admin/batch-update-grades  batch grade sync (used by Google Sheets import)
+
+ROSTER  (server/routes/roster.js)
+  GET    /api/admin/roster               filtered student list (by year or active only)
+  GET    /api/admin/sections             class sections (by year or active only)
+  GET    /api/admin/school-years         distinct school year values across all tables
+  POST   /api/admin/archive-year         archive all non-permanent sections for a year
+  POST   /api/admin/archive-students     archive specific students by ID array
+  POST   /api/admin/sections             create new section + course record
+  PUT    /api/admin/sections/:section_id  update section's school_year or course_name
+  DELETE /api/admin/sections/:section_id  delete section (blocked if students enrolled)
+  POST   /api/admin/upload-roster        bulk upsert students from JSON array
+  POST   /api/admin/reset-student        clear username/password for a student
+  GET    /api/admin/student              single student record + payroll_roster join
+  POST   /api/admin/save-student         update student fields + optional payroll_title
+  DELETE /api/admin/delete-student       remove a student record
+  POST   /api/admin/delete-multiple-students bulk delete by ID array
+
+PAYROLL  (server/routes/payroll.js)
+  GET    /api/payroll/roster             single student's pay info (by username)
+  GET    /api/payroll/timesheets         all timesheet rows for a student
+  GET    /api/admin/payroll/roster        all students with pay role info (no teachers)
+  GET    /api/admin/payroll/timesheets-daily  all timesheets for a specific date
+  GET    /api/admin/payroll/timesheets-period timesheets for a date range
+  POST   /api/admin/update-student-role  set a student's role_id FK into pay_roles
+
+NOTEBOOKS  (server/routes/notebooks.js)
+  GET    /api/admin/notebooks/roster     student list for notebook dashboard
+  GET    /api/admin/notebooks/entries    notebook entries for a student (optional chapter)
+  GET    /api/student/notebook           student's own notebook entries
+  POST   /api/student/notebook/save      create or update a notebook entry
+  POST   /api/student/notebook/delete    delete a notebook entry
+
+PROJECTS  (server/routes/projects.js)
+  GET    /api/student/assignments-visible  assignments filtered to a student's course
+  POST   /api/admin/project-spec         create/update a chapter project definition
+  GET    /api/projects/specs             list active specs for a course
+  POST   /api/student/project-submission  record file submission metadata
+  POST   /api/student/project-evaluation  save self/peer/auto score + recompute aggregate
+  GET    /api/student/project-aggregate   current aggregate + all evaluations for a project
+
+ASSESSMENTS  (server/routes/assessments.js)
+  GET    /api/student/self-assessments   all self-assessment records for a student
+  POST   /api/student/save-self-assessment  upsert a chapter self-assessment level
+  POST   /api/student/submit-turnin      record an assignment turn-in event
+  GET    /api/student/profile            student record lookup by username
+  POST   /api/student/help-request       toggle help_requested flag on student row
+  GET    /api/cs-exam-questions          CS quiz questions by unit (0-8 or "a")
+  GET    /api/student/cs-notebook        CS notebook entries (from turnins table)
+  POST   /api/student/cs-notebook        upsert a CS notebook entry
+  GET    /api/student/exam-progress      load in-progress exam state (resume on refresh)
+  POST   /api/student/exam-progress      save exam progress checkpoint
+  DELETE /api/student/exam-progress      clear progress after submission
+  GET    /api/admin/rubrics              list all rubrics
+  POST   /api/admin/rubrics/save         create/update a rubric
+  DELETE /api/admin/rubrics/:id          delete a rubric
+  GET    /api/review-questions           fetch review game questions (by chapter/grade)
+  POST   /api/admin/review-questions/seed bulk-insert review questions
+  DELETE /api/admin/review-questions      truncate the review_questions table
+
+CALENDAR  (server/routes/calendar.js)
+  GET    /api/admin/calendar-settings    fetch calendar config JSON
+  POST   /api/admin/calendar-settings    save/replace calendar config JSON
+  GET    /api/bell-schedule              bell schedule rows (optional ?type= filter)
+  GET    /api/admin/checklist            teacher checklist items + saved state
+  POST   /api/admin/checklist/toggle     mark a checklist item completed/incomplete
+  POST   /api/admin/checklist/reset      reset all items for a cadence+period_key
+
+FILES  (server/routes/files.js)
+  POST   /api/save-csv.php              write special-dates.csv to repo root
+  GET    /api/student/shared-files       student's shared-file inbox
+  POST   /api/student/share-file        send a file link to another student
+  DELETE /api/student/shared-file/:id    remove a shared-file entry
+
+════════════════════════════════════════════════════════════════════════════════════════
+5. PHP API — WHAT'S STILL ALIVE
+════════════════════════════════════════════════════════════════════════════════════════
+
+The api/ folder contains PHP files. Most are dead. Three things are still called by
+active pages and must NOT be deleted:
+
+  api/calendar.php           called by js/calendar.js (or the calendar page directly)
+  api/due-dates.php          called by admin/due-dates.html and admin/checklist.html
+  api/special-dates.csv      read by calendar.php; written by POST /api/save-csv.php
+
+Do not add new features to PHP. All new routes go into Node (server/routes/).
+The PHP files that wrote to the legacy `grades` table are truly dead and ignored.
+
+════════════════════════════════════════════════════════════════════════════════════════
+6. DATABASE TABLES
+════════════════════════════════════════════════════════════════════════════════════════
+
+Tables created at setup (originally documented in db-schema.txt):
+
+  students             Student roster. PK: student_id (varchar 50).
+                       Columns added via ALTER TABLE after initial schema:
+                         course_id, school_year, archived (0/1), help_requested (0/1)
+  class_sections       Maps section_id → course_id. Columns added after initial schema:
+                         school_year varchar, archived tinyint(1), permanent tinyint(1)
+  courses              course_id → course_name, department
+  exams                Assignment/exam metadata. PK: exam_id (varchar 50).
+  responses            Grade records. One row per (student_id, exam_id).
+                       score stored as varchar — empty string means "not yet graded".
+  questions            CS exam question bank. FK: exam_id.
+  clockins             Raw clock-in/out events. type = 'in' | 'out'.
+  timesheets           One row per (student_id, date).
+                       clock_in / clock_out store TIME values (inserted via CURTIME()).
+                       Note: db-schema.txt incorrectly shows these as datetime — the
+                       live columns are TIME. The Node routes and client JS both treat
+                       them as HH:MM:SS strings and combine with `date` for parsing.
+  self_assessments     Chapter proficiency sliders. Unique on (student_id, chapter_id).
+  notebook_entries     Student WD notebook entries. FK: student_id.
+  pay_roles            Pay grade catalog. id → title, hourly_rate.
+  chapters             Chapter metadata per course.
+  student_responses    Per-question answer records (CS exam detail logging).
+  daily_questions      Static punctuality question bank for timeclock UI.
+
+Tables created on first request (CREATE TABLE IF NOT EXISTS in route handlers):
+
+  teacher_daily_questions  Teacher-set daily wd/cs questions by date. Written by
+                           POST /api/admin/daily-questions.
+  payroll_roster           student_id → agency title + hourly_rate. Written by
+                           POST /api/admin/save-student when payroll_title is provided.
+  exam_progress            In-progress exam state. One row per (student_id, exam_id).
+  rubrics                  Admin-defined rubric templates (JSON criteria).
+  review_questions         Review game question bank (chapter, grade, q, a, options).
+  teacher_checklist_state  Teacher multi-cadence checklist completion tracking.
+  bell_schedule            Bell schedule periods. Populated manually by admin.
+  calendar_settings        Single-row JSON blob for calendar configuration.
+  shared_files             Student peer file-sharing inbox.
+  chapter_projects         Project workflow specs per chapter.
+  project_submissions      File submission metadata per project attempt.
+  project_evaluations      Self/peer/auto scores per project.
+  project_grade_aggregates Computed average of the three evaluation types, written back
+                           to responses table for gradebook display.
+  turnins                  CS notebook entries AND legacy turn-in events (shared table).
+
+Agency pay scale (defined in server/routes/roster.js — AGENCY_PAY_SCALES):
+  Intern $15 · Junior Developer $20 · Web Developer $35 · Senior Developer $45
+  Project Manager $50 · UI/UX Designer $40 · Brand Strategist $38
+  Motion Graphics Designer $42 · Content Creator $22 · Social Media Manager $24
+  Client Relations Manager $35 · IT Support Specialist $27
+  Office Manager $28 · Accountant $32
+
+════════════════════════════════════════════════════════════════════════════════════════
+7. COURSE ID MAPPING
+════════════════════════════════════════════════════════════════════════════════════════
+
+The DB's authoritative mapping is class_sections (section_id → course_id).
+For sections that predate that table, resolveCourseId() in helpers.js falls back:
+
+  WD1*  → 05254G1S  (Web Design 1)
+  WD2*  → 05254G2S  (Web Design 2)
+  AS*   → 05254ES   (Applied Studies / Adobe)
+  CS*   → 10003GS   (Computer Science)
+
+════════════════════════════════════════════════════════════════════════════════════════
+8. STUDENT FLOW — HOW A STUDENT USES THE SITE
+════════════════════════════════════════════════════════════════════════════════════════
+
+1. /login.html → POST /api/login → session cookie set
+2. Redirect to /student/grades.html (dashboard.js)
+   - GET /api/student/profile (by username from session)
+   - GET /api/student/course-gradebook  → grade table
+   - GET /api/student/self-assessments  → self-assessment sliders
+   - POST /api/student/save-self-assessment (on slider change)
+3. Timeclock widget (timeclock.js)
+   - GET /api/timeclock/status → determine mode (in/out/done)
+   - GET /api/timeclock/question → fetch punctuality question
+   - POST /api/timeclock/save  → write clock event to clockins + timesheets
+4. Payroll view (student-payroll.js)
+   - GET /api/student/profile → student_id
+   - GET /api/payroll/timesheets → timesheet rows
+5. WD exam pages (examLogic.js)
+   - POST /api/verify-user
+   - GET /api/questions?exam_id=…  (PHP route — api/get-questions.php, still live)
+   - POST /api/submit-exam
+6. CS exam pages (preTestLogicCS.js / cs-interactive.js)
+   - GET /api/cs-exam-questions?unit=1
+   - GET/POST /api/student/exam-progress  (resume-on-refresh)
+   - DELETE /api/student/exam-progress  (on submit)
+   - POST /api/submit-exam
+   - GET/POST /api/student/cs-notebook
+
+════════════════════════════════════════════════════════════════════════════════════════
+9. ADMIN FLOW — HOW THE TEACHER USES THE SITE
+════════════════════════════════════════════════════════════════════════════════════════
+
+All active admin pages are under admin/ (not root-level duplicates).
+
+admin/gradebook.html   → js/admin/gradebook.js
+  GET  /api/admin/master-gradebook-data
+  POST /api/admin/save-grade
+  POST /api/admin/batch-update-grades
+  POST /api/admin/save-assignment, edit-assignment, delete-assignment
+  POST /api/admin/clear-all-assignments
+
+admin/roster.html      → js/admin/roster.js
+  GET  /api/admin/roster, sections, school-years, student
+  POST /api/admin/upload-roster, save-student, reset-student
+  POST /api/admin/archive-year, archive-students
+  POST/PUT/DELETE /api/admin/sections, delete-student, delete-multiple-students
+
+admin/payroll.html
+  GET  /api/admin/payroll/roster, timesheets-daily, timesheets-period
+  POST /api/admin/save-student (to set payroll_title → payroll_roster table)
+
+admin/notebooks.html
+  GET  /api/admin/notebooks/roster, entries
+
+admin/timeclock.html
+  GET  /api/admin/daily-questions
+  POST /api/admin/daily-questions
+
+admin/checklist.html
+  GET  /api/admin/checklist
+  POST /api/admin/checklist/toggle, checklist/reset
+  Also calls: api/due-dates.php (PHP — still live)
+
+════════════════════════════════════════════════════════════════════════════════════════
+10. HOW TO ADD A NEW API ROUTE
+════════════════════════════════════════════════════════════════════════════════════════
+
+1. Pick the correct domain file under server/routes/ (or create a new one if the
+   domain doesn't fit any existing file).
+2. Add the route handler. Import from '../db' and '../helpers' as needed.
+3. If you created a new routes file, add one line to server/api.js:
+     router.use('/', require('./routes/mynewfile'));
+4. Test locally: run `node server/server.js` and hit the endpoint.
+5. Commit + push + ssh webServer + git pull + pm2 restart guild-server.
+6. Add the route to section 4 of this document.
+
+Never add routes directly to server/api.js — it is only an aggregator.
+Never add routes to PHP files.
+
+════════════════════════════════════════════════════════════════════════════════════════
+11. KNOWN DEAD CODE
+════════════════════════════════════════════════════════════════════════════════════════
+
+Root-level admin HTML duplicates (real pages are in admin/ folder):
+  /admin.html, /admin-roster.html, /admin-notebooks.html, /admin-files.html
+
+Legacy Firebase/Firestore JS files in js/ root — not referenced by any content page.
+  These predate the MariaDB migration and can be deleted.
+
+PHP files in api/ not called by any active page:
+  Everything except api/calendar.php, api/due-dates.php, api/special-dates.csv.
+
+════════════════════════════════════════════════════════════════════════════════════════
+12. ENVIRONMENT NOTES
+════════════════════════════════════════════════════════════════════════════════════════
+
+Node version  : v24 (via nvm, path: ~/.nvm/versions/node/v24.17.0/)
+Key packages  : express, mysql2, bcrypt, express-session, multer
+PM2 app name  : guild-server
+Session secret: stored in server/server.js
+
+No .env file is used. DB credentials live in server/db.js.
+NEVER commit plaintext credentials to git output, logs, or documentation.
+Use DB_PASSWORD_IN_DB_CONFIG as the placeholder in any public-facing context.
