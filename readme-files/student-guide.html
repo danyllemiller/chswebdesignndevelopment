@@ -1,0 +1,734 @@
+<title>CHS Web Design Platform — Student Guide</title>
+<style>
+  :root {
+    --navy:      #002d6e;
+    --navy-mid:  #003d99;
+    --gold:      #c09000;
+    --gold-lt:   #f0c840;
+    --bg:        #f5f7fc;
+    --bg-card:   #ffffff;
+    --text:      #1a1a2e;
+    --text-mid:  #3d3d5c;
+    --text-dim:  #6b7a99;
+    --border:    #dce3f0;
+    --sans: -apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:      #0f1422;
+      --bg-card: #182035;
+      --text:    #e4ebff;
+      --text-mid:#b0bcd8;
+      --text-dim:#6b7a99;
+      --border:  #1e2d4a;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#f5f7fc; --bg-card:#ffffff; --text:#1a1a2e;
+    --text-mid:#3d3d5c; --text-dim:#6b7a99; --border:#dce3f0;
+  }
+  :root[data-theme="dark"] {
+    --bg:#0f1422; --bg-card:#182035; --text:#e4ebff;
+    --text-mid:#b0bcd8; --text-dim:#6b7a99; --border:#1e2d4a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: var(--navy);
+    color: #fff;
+    padding: 72px 40px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 28px,
+      rgba(255,255,255,.025) 28px,
+      rgba(255,255,255,.025) 29px
+    );
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold-lt);
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 18px;
+    text-wrap: balance;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--gold-lt);
+  }
+  .hero p {
+    max-width: 560px;
+    margin: 0 auto 32px;
+    color: rgba(255,255,255,.8);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .hero-badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .hero-badge {
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,.85);
+    letter-spacing: .04em;
+  }
+
+  /* ── Section wrapper ── */
+  .section { padding: 64px 0; }
+  .section.alt { background: var(--bg-card); }
+  .container { max-width: 960px; margin: 0 auto; padding: 0 32px; }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: clamp(22px, 3.5vw, 32px);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 12px;
+    text-wrap: balance;
+  }
+  .section-sub {
+    color: var(--text-dim);
+    max-width: 600px;
+    font-size: 15px;
+    margin-bottom: 40px;
+  }
+
+  /* ── Feature grid ── */
+  .feat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .feat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    position: relative;
+  }
+  .feat-card::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 3px;
+    background: var(--navy);
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+  .feat-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .feat-card p { font-size: 13.5px; color: var(--text-mid); line-height: 1.55; }
+  .section.alt .feat-card { background: var(--bg); }
+
+  /* ── How-to steps ── */
+  .how-to { margin-top: 48px; }
+  .how-to + .how-to { margin-top: 56px; border-top: 1px solid var(--border); padding-top: 56px; }
+  .how-to-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  .how-to-num {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: var(--navy);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .how-to-title {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .how-to-desc { color: var(--text-mid); font-size: 14px; }
+  .steps {
+    display: grid;
+    gap: 12px;
+    margin-left: 60px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 12px;
+    align-items: baseline;
+  }
+  .step-n {
+    width: 24px;
+    height: 24px;
+    background: color-mix(in srgb, var(--navy) 12%, transparent);
+    color: var(--navy);
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  :root[data-theme="dark"] .step-n { background: rgba(41,182,216,.15); color: #93e0f8; }
+  @media (prefers-color-scheme: dark) {
+    .step-n { background: rgba(41,182,216,.15); color: #93e0f8; }
+  }
+  .step-body { font-size: 14px; color: var(--text-mid); }
+  .step-body strong { color: var(--text); font-weight: 600; }
+
+  /* ── Tip box ── */
+  .tip {
+    border-left: 3px solid var(--gold);
+    background: color-mix(in srgb, var(--gold) 8%, transparent);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 13.5px;
+    color: var(--text-mid);
+    margin: 20px 0 0 60px;
+  }
+  .tip strong { color: var(--gold); font-weight: 700; }
+
+  /* ── Screen mockup ── */
+  .screen-mock {
+    background: var(--navy);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 24px 0 0 60px;
+    font-size: 12px;
+    font-family: -apple-system, sans-serif;
+  }
+  .screen-bar {
+    background: rgba(255,255,255,.08);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .screen-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .screen-body { padding: 16px; color: rgba(255,255,255,.75); }
+  .screen-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .screen-chip {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    padding: 3px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .chip-a   { background: rgba(41,182,216,.2); color: #93e0f8; }
+  .chip-b   { background: rgba(74,222,128,.2); color: #86efac; }
+  .chip-off { background: rgba(248,113,113,.2); color: #fca5a5; }
+  .chip-min { background: rgba(251,191,36,.2);  color: #fde68a; }
+  .chip-c   { background: rgba(167,139,250,.2); color: #c4b5fd; }
+  .chip-grn { background: rgba(74,222,128,.2);  color: #86efac; }
+  .chip-yel { background: rgba(251,191,36,.2);  color: #fde68a; }
+  .chip-emp { background: rgba(41,182,216,.15); color: #93e0f8; }
+
+  /* Screen stat row (for grades/portal mockups) */
+  .screen-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,.06);
+    border-radius: 5px;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+  }
+  .screen-stat-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.5); }
+  .screen-stat-val   { font-size: 13px; font-weight: 800; color: #fff; }
+  .screen-divider { height: 1px; background: rgba(255,255,255,.08); margin: 10px 0; }
+
+  /* ── CTA box ── */
+  .cta-box {
+    background: var(--navy);
+    color: #fff;
+    border-radius: 12px;
+    padding: 48px 40px;
+    text-align: center;
+  }
+  .cta-box h2 {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: clamp(22px,3.5vw,32px);
+    margin-bottom: 12px;
+  }
+  .cta-box p { color: rgba(255,255,255,.75); max-width: 480px; margin: 0 auto 28px; font-size: 15px; }
+  .cta-btn {
+    display: inline-block;
+    background: var(--gold-lt);
+    color: var(--navy);
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: .05em;
+    padding: 12px 32px;
+    border-radius: 6px;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: var(--border); margin: 0 32px; }
+
+  @media (max-width: 600px) {
+    .hero { padding: 48px 20px 40px; }
+    .container { padding: 0 16px; }
+    .steps, .tip, .screen-mock { margin-left: 0; }
+    .how-to-header { flex-direction: column; gap: 8px; }
+  }
+</style>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">CHS Web Design &amp; Development</div>
+  <h1>Your grades, your habits, your work —<br><em>all in one place.</em></h1>
+  <p>Everything you need for class lives here: your schedule, grades, notebook, planner, timesheet, and exams — organized and accessible from any device.</p>
+  <div class="hero-badges">
+    <span class="hero-badge">School Calendar</span>
+    <span class="hero-badge">My Progress Report</span>
+    <span class="hero-badge">Digital Notebook</span>
+    <span class="hero-badge">Student Planner</span>
+    <span class="hero-badge">Employee Portal</span>
+    <span class="hero-badge">Exams &amp; Quizzes</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section">
+  <div class="container">
+    <div class="section-label">Your Toolkit</div>
+    <div class="section-title">Everything built around your school day</div>
+    <div class="section-sub">Every tool here was made for this classroom specifically — not a generic app adapted for school use.</div>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <h3>School Calendar</h3>
+        <p>See A-days, B-days, minimum days, and breaks at a glance. Know exactly which classes you have today and what's coming up — Day, Week, Month, or Events view.</p>
+      </div>
+      <div class="feat-card">
+        <h3>My Progress Report</h3>
+        <p>See your grades for every assignment, your overall percentage, letter grade, and a proficiency growth chart — your teacher's live gradebook, filtered to just your scores.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Digital Notebook</h3>
+        <p>Write your Notes, Do Nows, Exit Tickets, and Worksheets directly in the platform. Entries are saved by chapter so you can find anything you've written quickly.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Student Planner</h3>
+        <p>Log grades from every class, track habits with a 28-day heat map, set goals by day and marking period, manage a to-do list, and keep a daily journal — all in one tab.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Employee Portal</h3>
+        <p>Clock in at the start of class by answering the warm-up question. View your logged shifts, hours, estimated earnings, and generate a full pay-period earnings statement.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Exams &amp; Quizzes</h3>
+        <p>Take chapter exams and quizzes directly in the platform. Scores post automatically when you submit and appear in your progress report.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Bell Schedule</h3>
+        <p>The home page always shows the current period with a live countdown. No guessing where you should be — the schedule updates automatically for A-days and B-days.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Secure Account</h3>
+        <p>Your account is yours alone. Your password is stored with industry-standard encryption. If you get locked out, you can self-reset using your student ID — no waiting for the teacher.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- HOW-TO WALKTHROUGHS -->
+<div class="section alt">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <div class="section-title">Step-by-step guides</div>
+    <div class="section-sub">New to the platform? Start here. Each guide walks you through one tool from start to finish.</div>
+
+    <!-- 1. Account Setup -->
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">1</div>
+        <div>
+          <div class="how-to-title">Setting Up Your Account</div>
+          <div class="how-to-desc">Your teacher adds you to the roster before the first day. You register and set your own password on your first visit to <strong>/login.html</strong>.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body">On the login page, click <strong>First time? Register here</strong>. Enter your student ID, first name, and last name exactly as they appear on your schedule.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body">Choose a <strong>username</strong> (letters and numbers only) and a <strong>password</strong> that is at least 8 characters. Write these down — you will need them every day.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body">After registering, log in normally with your new username and password. You land on the home dashboard.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body">If you forget your password, click <strong>Forgot password?</strong> on the login page. Enter your student ID and username — your password resets to your student ID, and you are prompted to set a new one immediately.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">5</div>
+          <div class="step-body">Your account works on any device — phone, Chromebook, or desktop. Your planner, notebook, and grades sync automatically.</div>
+        </div>
+      </div>
+      <div class="tip"><strong>If registration fails:</strong> Your student ID may not be in the system yet. Let your teacher know and they will add you from the Roster page — usually takes less than a minute.</div>
+    </div>
+
+    <!-- 2. School Calendar -->
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">2</div>
+        <div>
+          <div class="how-to-title">The School Calendar</div>
+          <div class="how-to-desc">Navigate to <strong>Calendar</strong> in the top nav. Four views are available at the top of the page — pick whichever works for how you think about time.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body"><strong>Month view</strong> shows the full month with color-coded day types. A-days and B-days are labeled so you know which classes meet.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body"><strong>Week view</strong> shows a 5-day block with period times. Use Previous / Next to move between weeks.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body"><strong>Day view</strong> shows a single day with all periods and the day type (A-day, B-day, minimum day, etc.).</div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body"><strong>Events view</strong> lists upcoming dates — useful for seeing test days, minimum days, and breaks at a glance.</div>
+        </div>
+      </div>
+      <div class="screen-mock">
+        <div class="screen-bar">
+          <div class="screen-dot" style="background:#ff5f57"></div>
+          <div class="screen-dot" style="background:#febc2e"></div>
+          <div class="screen-dot" style="background:#28c840"></div>
+          <span style="color:rgba(255,255,255,.4);font-size:11px;margin-left:8px">Calendar — Week of Mar 10, 2027</span>
+        </div>
+        <div class="screen-body">
+          <div class="screen-row"><span class="screen-chip chip-c">All Periods</span> <span>Mon Mar 15</span></div>
+          <div class="screen-row"><span class="screen-chip chip-a">A-Day</span> <span>Tue Mar 16</span></div>
+          <div class="screen-row"><span class="screen-chip chip-min">A-Min</span> <span>Wed Mar 17 — St. Patrick's Day</span></div>
+          <div class="screen-row"><span class="screen-chip chip-b">B-Day</span> <span>Thu Mar 18</span></div>
+          <div class="screen-row"><span class="screen-chip chip-b">B-Day</span> <span style="color:rgba(255,255,255,.5)">Fri Mar 19 — End Q3</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. My Progress Report -->
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">3</div>
+        <div>
+          <div class="how-to-title">My Progress Report</div>
+          <div class="how-to-desc">Navigate to <strong>My Grades</strong> in the top nav. This is a live view of your teacher's gradebook — your scores only, no one else's.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body">The <strong>summary cards</strong> at the top show your current overall grade, how many assignments you have completed out of the total, and your points earned.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body">The <strong>gradebook table</strong> below lists every assignment with your score, the maximum points, and the percentage. Missing scores show as blank.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body">The <strong>Achievements</strong> section shows any badges you have earned — attendance, perfect scores, on-time submissions, and others.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body">The <strong>Proficiency Growth</strong> chart at the bottom plots your self-assessment scores over time. It shows whether your confidence and skill are trending up, and your teacher uses it to spot where to give extra help.</div>
+        </div>
+      </div>
+      <div class="screen-mock">
+        <div class="screen-bar">
+          <div class="screen-dot" style="background:#ff5f57"></div>
+          <div class="screen-dot" style="background:#febc2e"></div>
+          <div class="screen-dot" style="background:#28c840"></div>
+          <span style="color:rgba(255,255,255,.4);font-size:11px;margin-left:8px">My Progress Report — Taylor M.</span>
+        </div>
+        <div class="screen-body">
+          <div class="screen-stat">
+            <span class="screen-stat-label">Overall Grade</span>
+            <span class="screen-stat-val" style="color:#86efac;">88%&nbsp; B+</span>
+          </div>
+          <div class="screen-stat">
+            <span class="screen-stat-label">Assignments Completed</span>
+            <span class="screen-stat-val">18 / 22</span>
+          </div>
+          <div class="screen-stat">
+            <span class="screen-stat-label">Points Earned</span>
+            <span class="screen-stat-val">452 pts</span>
+          </div>
+          <div class="screen-divider"></div>
+          <div class="screen-row" style="font-size:11px; color:rgba(255,255,255,.5);">Unit 4 — Responsive CSS Grid &nbsp;·&nbsp; <span style="color:#86efac;">95 / 100</span></div>
+          <div class="screen-row" style="font-size:11px; color:rgba(255,255,255,.5);">Do Now 4.2 — Flexbox Quiz &nbsp;·&nbsp; <span style="color:#fde68a;">78 / 100</span></div>
+          <div class="screen-row" style="font-size:11px; color:rgba(255,255,255,.5);">Portfolio Project 2 &nbsp;·&nbsp; <span style="color:#86efac;">100 / 100</span></div>
+        </div>
+      </div>
+      <div class="tip"><strong>Grades update in real time.</strong> As soon as your teacher enters a score, it appears on this page. If you just turned something in and it is not showing yet, your teacher has not graded it — no need to email.</div>
+    </div>
+
+    <!-- 4. My Notebook -->
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">4</div>
+        <div>
+          <div class="how-to-title">My Notebook</div>
+          <div class="how-to-desc">Navigate to <strong>My Notebook</strong> in the top nav. This is your digital binder — every entry you write is saved to the server and accessible from any device.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body">Select the <strong>chapter</strong> you are working on from the chapter picker at the top. Entries are organized by chapter so you can find them later.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body">Click <strong>New Entry</strong> and choose the entry type: <strong>Notes</strong>, <strong>Do Now</strong>, <strong>Exit Ticket</strong>, or <strong>Worksheet</strong>. Give it a title and write your entry.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body">Click <strong>Save Entry</strong>. The entry appears in the list below, timestamped with the time you submitted it. Your teacher can see this timestamp — it shows you completed the work during class.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body">To <strong>edit</strong> an entry, click the pencil icon next to it. Changes save automatically when you click Save.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">5</div>
+          <div class="step-body">Use the <strong>category filter</strong> tabs (Notes / Do Now / Exit Ticket / Worksheet) to quickly find the type of entry you are looking for across all chapters.</div>
+        </div>
+      </div>
+      <div class="tip"><strong>Do Nows and Exit Tickets are graded on completion, not correctness.</strong> Write your honest answer — the timestamp shows you were present and engaged, and that is what counts.</div>
+    </div>
+
+    <!-- 5. The Student Planner -->
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">5</div>
+        <div>
+          <div class="how-to-title">The Student Planner</div>
+          <div class="how-to-desc">Navigate to <strong>My Planner</strong> in the top nav. Six tabs organize everything: Grades, Habits, Goals, To-Do, Journal, and Calendar. Your data is saved on the server and syncs across all your devices.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body"><strong>First-time setup — Schedule:</strong> Click the settings gear at the top right. Under Schedule, enter the class name for each of your 8 periods (A1, A3, A5, A7 on A-days; B2, B4, B6, B8 on B-days). This pre-fills every grade log entry so you never have to re-type your class names.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body"><strong>Grades tab:</strong> All 8 of your periods appear as cards (2 per row). Each card shows the period, your class name, overall grade percentage, and letter grade. Click <strong>+ Add</strong> on any card to log a grade for that class — the period is already selected, so just enter the assignment name, score, and date.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body"><strong>Weighted categories:</strong> Click the gear icon (⚙) on any period card to define grade categories — for example: Homework 20%, Quizzes 25%, Tests 40%, Projects 15%. When you tag each grade entry to a category, the planner switches from a simple average to a weighted average automatically.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body"><strong>Habits tab:</strong> Add habits you want to build (one check-in per day). A 28-day heat map shows your consistency at a glance — darker squares mean more days completed. Tap the suggestion chips for common school habits to add them with one click.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">5</div>
+          <div class="step-body"><strong>Goals tab:</strong> Set goals by cadence — daily micro-goals, weekly goals, marking period goals, and year-end goals. An achievement dashboard tracks how many you complete. Suggested school goals are available as one-click chips.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">6</div>
+          <div class="step-body"><strong>To-Do &amp; Calendar tabs:</strong> Add assignments and due dates to your to-do list, then view them on the planner calendar. The calendar shows A-days and B-days synced to the school schedule — you always know which classes meet on which day.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">7</div>
+          <div class="step-body"><strong>Journal tab:</strong> Write daily reflections. Entries are private — only you can see them. Use it to track how class is going, note things to ask about, or just decompress.</div>
+        </div>
+      </div>
+      <div class="tip"><strong>Your teacher can view your planner in read-only mode.</strong> They can see your logged grades, habits, and goals — but cannot edit anything. This is so they can spot if you are struggling and offer help before grades slip.</div>
+      <div class="screen-mock">
+        <div class="screen-bar">
+          <div class="screen-dot" style="background:#ff5f57"></div>
+          <div class="screen-dot" style="background:#febc2e"></div>
+          <div class="screen-dot" style="background:#28c840"></div>
+          <span style="color:rgba(255,255,255,.4);font-size:11px;margin-left:8px">My Grades — All Classes</span>
+        </div>
+        <div class="screen-body">
+          <div class="screen-row"><span class="screen-chip chip-a">A1</span> <span>Web Design 1 &nbsp;·&nbsp; <strong style="color:#86efac;">A&nbsp; 94%</strong> &nbsp;(weighted)</span></div>
+          <div class="screen-row"><span class="screen-chip chip-a">A3</span> <span>AP English &nbsp;·&nbsp; <strong style="color:#86efac;">B+&nbsp; 88%</strong></span></div>
+          <div class="screen-row"><span class="screen-chip chip-b">B2</span> <span>Algebra II &nbsp;·&nbsp; <strong style="color:#fde68a;">C+&nbsp; 78%</strong></span></div>
+          <div class="screen-row"><span class="screen-chip chip-b">B4</span> <span>Computer Science &nbsp;·&nbsp; <strong style="color:#86efac;">A−&nbsp; 91%</strong> &nbsp;(weighted)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Employee Portal -->
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">6</div>
+        <div>
+          <div class="how-to-title">My Employee Portal</div>
+          <div class="how-to-desc">Navigate to <strong>My Grades</strong> — the Employee Portal appears at the top of that page. Your portal shows your role, hourly rate, shift history, and a paystub generator organized by bi-weekly pay periods.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body"><strong>Clocking in:</strong> At the start of class, answer the warm-up question on your home page. Submitting the answer records your clock-in timestamp automatically — you do not click a separate button.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body"><strong>Clocking out</strong> works the same way at the end of class. Your total time for that shift is calculated when both punches are recorded.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body">In the <strong>Shift Logs</strong> table, each row shows the date, clock-in and clock-out times, on-time status, total hours logged, and estimated gross earnings for that shift.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body">Use the <strong>Previous / Next</strong> arrows at the top of the portal to browse earlier pay periods. Each period is 14 days. The current period is shown by default.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">5</div>
+          <div class="step-body">Click <strong>Generate Paystub</strong> to open your earnings statement for the selected pay period. It shows regular pay, performance bonuses (earned for on-time clock-ins and clock-outs), tax withholdings, and net pay.</div>
+        </div>
+      </div>
+      <div class="tip"><strong>On-Time Bonus:</strong> Each on-time clock-in or clock-out earns you a $5.00 performance bonus on top of your hourly rate — that's up to $10 extra per class day. Being punctual literally pays.</div>
+      <div class="screen-mock">
+        <div class="screen-bar">
+          <div class="screen-dot" style="background:#ff5f57"></div>
+          <div class="screen-dot" style="background:#febc2e"></div>
+          <div class="screen-dot" style="background:#28c840"></div>
+          <span style="color:rgba(255,255,255,.4);font-size:11px;margin-left:8px">My Employee Portal — Junior Developer · $20.00/hr</span>
+        </div>
+        <div class="screen-body">
+          <div class="screen-stat">
+            <span class="screen-stat-label">Pay Period</span>
+            <span class="screen-stat-val" style="font-size:11px;">Jan 6 – Jan 19, 2027</span>
+          </div>
+          <div class="screen-stat">
+            <span class="screen-stat-label">Period Hours</span>
+            <span class="screen-stat-val" style="color:#86efac;">12h 30m</span>
+          </div>
+          <div class="screen-stat">
+            <span class="screen-stat-label">Period Gross Pay</span>
+            <span class="screen-stat-val" style="color:#86efac;">$310.00</span>
+          </div>
+          <div class="screen-divider"></div>
+          <div class="screen-row" style="font-size:10px; gap:6px;">
+            <span class="screen-chip chip-emp">Tue Jan 7</span>
+            <span style="color:rgba(255,255,255,.6)">8:01 AM → 9:48 AM</span>
+            <span style="color:rgba(255,255,255,.4)">On Time · On Time</span>
+            <span style="color:#86efac; margin-left:auto;">$46.00</span>
+          </div>
+          <div class="screen-row" style="font-size:10px; gap:6px;">
+            <span class="screen-chip chip-emp">Thu Jan 9</span>
+            <span style="color:rgba(255,255,255,.6)">8:04 AM → 9:51 AM</span>
+            <span style="color:rgba(255,255,255,.4)">On Time · On Time</span>
+            <span style="color:#86efac; margin-left:auto;">$46.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Exams & Quizzes -->
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">7</div>
+        <div>
+          <div class="how-to-title">Exams &amp; Quizzes</div>
+          <div class="how-to-desc">Your teacher will tell you when to start an exam and give you the link. Scores post automatically when you submit — no waiting for a teacher to enter them.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body">Open the exam link your teacher provides. The exam is tied to a specific chapter — make sure you are on the right one before you start.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body">Answer each question and click <strong>Submit</strong> when you are finished. Do not close the tab mid-exam — your progress is not auto-saved until you submit.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body">After submitting, your score appears on-screen immediately. The score also posts to your <strong>My Progress Report</strong> page so you can track it alongside your other grades.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body">If something goes wrong during the exam (page crash, network drop), let your teacher know right away. They can see submission records on the admin side and reset your attempt if needed.</div>
+        </div>
+      </div>
+      <div class="tip"><strong>Pre-assessments vs. Chapter Exams:</strong> Pre-assessments at the start of a unit measure what you already know — they do not count against your grade. Chapter and summative exams are graded. Your teacher will make clear which is which before you start.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="section">
+  <div class="container">
+    <div class="cta-box">
+      <h2>Ready to get to work?</h2>
+      <p>Log in with your student account to access your grades, notebook, planner, and everything else your class uses every day.</p>
+      <a class="cta-btn" href="/login.html">Log In</a>
+    </div>
+  </div>
+</div>
