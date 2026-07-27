@@ -223,7 +223,7 @@
     flex-shrink: 0;
     margin-top: 1px;
   }
-  :root[data-theme="dark"] .step-n,
+  :root[data-theme="dark"] .step-n { background: rgba(41,182,216,.15); color: #93e0f8; }
   @media (prefers-color-scheme: dark) {
     .step-n { background: rgba(41,182,216,.15); color: #93e0f8; }
   }
@@ -324,6 +324,7 @@
     <span class="hero-badge">Student Notebooks</span>
     <span class="hero-badge">Daily Task Checklist</span>
     <span class="hero-badge">Payroll &amp; Timesheets</span>
+    <span class="hero-badge">Student Planner</span>
   </div>
 </div>
 
@@ -369,6 +370,10 @@
       <div class="feat-card">
         <h3>Secure Login</h3>
         <p>Every student has a personal login. Passwords are hashed with industry-standard bcrypt. Students can self-service reset with their ID if they get locked out.</p>
+      </div>
+      <div class="feat-card">
+        <h3>Student Planner</h3>
+        <p>A personal academic planner for each student — grade log organized by period, habit tracker with heat map, goals dashboard, to-do list, journal, and a school calendar. You can view any student's planner in read-only mode from your teacher view.</p>
       </div>
     </div>
   </div>
@@ -572,6 +577,61 @@
       </div>
     </div>
 
+    <div class="how-to">
+      <div class="how-to-header">
+        <div class="how-to-num">7</div>
+        <div>
+          <div class="how-to-title">The Student Planner</div>
+          <div class="how-to-desc">Students access their planner at <strong>Student Tools → My Planner</strong>. You can view any student's planner in read-only mode from the teacher dashboard.</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body"><strong>First-time setup — Schedule:</strong> The student opens the Schedule settings and enters their class name for each of the 8 periods (A1, A3, A5, A7 on A-days; B2, B4, B6, B8 on B-days). These period names pre-fill every grade log entry automatically.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body"><strong>My Grades tab:</strong> All 8 periods appear as cards (2 per row). Each card shows the period label, class name, overall grade percentage, and letter grade in the header. Students click the <strong>+ Add</strong> button on a specific period card to log a grade — the period is pre-selected, so they only need to enter the assignment, score, and date.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body"><strong>Weighted grade categories:</strong> The gear icon (⚙) on each period card opens a category editor. Students (or you) can define categories — e.g. Homework 20%, Quizzes 25%, Tests 40%, Projects 15% — and set the weights. When grades are tagged to a category, the period grade switches from a simple average to a weighted average automatically.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body"><strong>Habits tab:</strong> Students add habits to track (up to one per day). A 28-day color heat map shows streak and consistency at a glance — darker squares mean more days completed. Suggested school habits (homework, reading, studying, etc.) are available as one-click chips.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">5</div>
+          <div class="step-body"><strong>Goals tab:</strong> Students set goals by cadence — daily micro-goals, weekly goals, marking period goals, and academic year goals. An achievement dashboard tracks completion. Suggested school-related goals are available as one-click chips.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">6</div>
+          <div class="step-body"><strong>To-Do &amp; Calendar tabs:</strong> Students manage assignments and deadlines in the to-do list. The planner calendar shows A-days and B-days synced to the school schedule so students always know which classes meet on which day.</div>
+        </div>
+        <div class="step">
+          <div class="step-n">7</div>
+          <div class="step-body"><strong>Viewing a student's planner as a teacher:</strong> From the Roster or gradebook, click the planner icon next to a student's name. The planner opens in read-only mode — you can see their grades, habits, goals, and to-dos but cannot edit anything.</div>
+        </div>
+      </div>
+      <div class="tip"><strong>Grade categories are saved per student:</strong> Each student's weighted category setup (and all their grade entries) is stored on the server and persists across logins and devices. Changes you see in the teacher read-only view are always current.</div>
+      <div class="screen-mock">
+        <div class="screen-bar">
+          <div class="screen-dot" style="background:#ff5f57"></div>
+          <div class="screen-dot" style="background:#febc2e"></div>
+          <div class="screen-dot" style="background:#28c840"></div>
+          <span style="color:rgba(255,255,255,.4);font-size:11px;margin-left:8px">My Grades — All Classes</span>
+        </div>
+        <div class="screen-body">
+          <div class="screen-row"><span class="screen-chip chip-a">A1</span> <span>Web Design 1 &nbsp;·&nbsp; <strong style="color:#86efac;">A&nbsp; 94%</strong> &nbsp;(weighted)</span></div>
+          <div class="screen-row"><span class="screen-chip chip-a">A3</span> <span>AP English &nbsp;·&nbsp; <strong style="color:#86efac;">B+&nbsp; 88%</strong></span></div>
+          <div class="screen-row"><span class="screen-chip chip-b">B2</span> <span>Computer Science &nbsp;·&nbsp; <strong style="color:#fde68a;">C+&nbsp; 78%</strong></span></div>
+          <div class="screen-row"><span class="screen-chip chip-b">B4</span> <span>Web Design 2 AS &nbsp;·&nbsp; <strong style="color:#86efac;">A−&nbsp; 91%</strong> &nbsp;(weighted)</span></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -580,7 +640,7 @@
   <div class="container">
     <div class="cta-box">
       <h2>Ready to run your class without the paperwork?</h2>
-      <p>Everything you need — calendar, grades, notebooks, timesheets, exams — in a single platform built specifically for your classroom.</p>
+      <p>Everything you need — calendar, grades, notebooks, timesheets, exams, and a full student planner — in a single platform built specifically for your classroom.</p>
       <a class="cta-btn" href="/login.html">Get Started</a>
     </div>
   </div>
