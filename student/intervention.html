@@ -762,6 +762,10 @@
         </div>
         <div class="modal-body">
           <div class="row g-2">
+            <div class="col-12 d-none" id="glPeriodLabelRow">
+              <label class="form-label fw-bold small">Period &amp; Class</label>
+              <div id="glPeriodLabel" class="form-control bg-light fw-bold" style="pointer-events:none;"></div>
+            </div>
             <div class="col-12" id="glSchedulePickerRow">
               <label class="form-label fw-bold small">Period &amp; Class <span class="text-danger">*</span></label>
               <select class="form-select" id="glPeriodSel" onchange="
@@ -2022,7 +2026,7 @@
           </div>`;
         }).join('') : `<div class="text-muted text-center py-2" style="font-size:.78rem;">No grades yet</div>`;
 
-        return `<div class="col-6 col-md-4 col-lg-3">
+        return `<div class="col-6">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background:${col};color:#fff;">
               <div class="overflow-hidden flex-grow-1 me-1">
@@ -2066,10 +2070,9 @@
 
     document.getElementById('btnSaveGradeLog').addEventListener('click', async () => {
       const score = document.getElementById('glScore').value;
-      const selVal = document.getElementById('glPeriodSel').value;
-      const selParts = (selVal && selVal !== '__other__') ? selVal.split('|') : null;
-      const cls = (selParts && selParts[1]) || document.getElementById('glClass').value.trim();
-      const periodLabel = (selParts && selParts[0]) || document.getElementById('glPeriod').value.trim();
+      // Period/class always comes from hidden inputs set by openGradeLogForPeriod
+      const cls = document.getElementById('glClass').value.trim();
+      const periodLabel = document.getElementById('glPeriod').value.trim();
       if (!cls) { alert('Please select a period / class.'); return; }
       if (score === '') { alert('Please enter a score.'); return; }
       await apiFetch('/api/intervention/grade-log', { method:'POST', headers:{'Content-Type':'application/json'},
@@ -2082,6 +2085,7 @@
       const data = await apiFetch(`/api/intervention/grade-log?student_id=${user.student_id}`);
       gradeLog = data.grades || [];
       renderGradesTab();
+      // Reset modal fields and restore picker row
       ['glPeriod','glClass','glAssignment','glScore','glCategory'].forEach(id => { document.getElementById(id).value = ''; });
       document.getElementById('glCategoryRow').classList.add('d-none');
       document.getElementById('glMax').value = '100';
@@ -2089,10 +2093,20 @@
       document.getElementById('glPeriodSel').value = '';
       document.getElementById('glPeriodWrap').classList.add('d-none');
       document.getElementById('glClassWrap').classList.add('d-none');
+      document.getElementById('glPeriodLabelRow').classList.add('d-none');
+      document.getElementById('glSchedulePickerRow').classList.remove('d-none');
     });
 
     document.getElementById('gradeLogModal').addEventListener('show.bs.modal', () => {
       if (!document.getElementById('glDate').value) document.getElementById('glDate').value = todayStr;
+    });
+    document.getElementById('gradeLogModal').addEventListener('hidden.bs.modal', () => {
+      // Restore picker state in case modal was dismissed without saving
+      document.getElementById('glPeriodLabelRow').classList.add('d-none');
+      document.getElementById('glSchedulePickerRow').classList.remove('d-none');
+      ['glPeriod','glClass','glAssignment','glScore','glCategory'].forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('glCategoryRow').classList.add('d-none');
+      document.getElementById('glMax').value = '100';
     });
 
     window.populateCategorySelect = (period) => {
@@ -2110,23 +2124,17 @@
 
     window.openGradeLogForPeriod = (period) => {
       if (isReadOnly) return;
-      populateScheduleSelects();
-      const gSel = document.getElementById('glPeriodSel');
-      const cls  = mySchedule[period] || '';
-      const optVal = `${period}|${cls}`;
-      if (cls && [...gSel.options].find(o => o.value === optVal)) {
-        gSel.value = optVal;
-        document.getElementById('glPeriod').value = period;
-        document.getElementById('glClass').value  = cls;
-        document.getElementById('glPeriodWrap').classList.add('d-none');
-        document.getElementById('glClassWrap').classList.add('d-none');
-      } else {
-        gSel.value = '__other__';
-        document.getElementById('glPeriodWrap').classList.remove('d-none');
-        document.getElementById('glClassWrap').classList.remove('d-none');
-        document.getElementById('glPeriod').value = period;
-        document.getElementById('glClass').value  = cls;
-      }
+      const cls = mySchedule[period] || '';
+      // Set hidden inputs — save handler reads these
+      document.getElementById('glPeriod').value = period;
+      document.getElementById('glClass').value  = cls;
+      // Hide the dropdown; show a read-only label instead
+      document.getElementById('glSchedulePickerRow').classList.add('d-none');
+      document.getElementById('glPeriodWrap').classList.add('d-none');
+      document.getElementById('glClassWrap').classList.add('d-none');
+      const labelRow = document.getElementById('glPeriodLabelRow');
+      labelRow.classList.remove('d-none');
+      document.getElementById('glPeriodLabel').textContent = cls ? `${period} · ${cls}` : period;
       window.populateCategorySelect(period);
       document.getElementById('glDate').value = todayStr;
       bootstrap.Modal.getOrCreateInstance(document.getElementById('gradeLogModal')).show();
