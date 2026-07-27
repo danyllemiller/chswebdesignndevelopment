@@ -1434,7 +1434,6 @@
         }).join('');
 
         const offLabel = isWeekend ? '' : (sdLabel && !isSchoolDay ? `<div class="cal-day-label text-muted">${sdLabel}</div>` : '');
-        const monthSticker = dayStickers[ymd] ? `<span style="display:block;margin-top:2px;">${stickerHTML(dayStickers[ymd], '20px')}</span>` : '';
 
         html += `<div class="${cls}" data-ymd="${ymd}" onclick="window.calDayClick('${ymd}')">
           <div class="d-flex justify-content-between align-items-start">
@@ -1442,13 +1441,13 @@
             ${badge ? `<span class="cal-block-badge ${badge.cls}">${badge.label}</span>` : ''}
           </div>
           ${offLabel}
-          ${monthSticker}
           <div class="d-flex flex-wrap gap-1 mt-1">${dots}</div>
           ${events.length ? `<div class="cal-day-label">${events.slice(0,3).map(e => {
             const done = e.done || e.submitted || e.studied;
             const icon = e.type === 'test' ? '📝 ' : e.type === 'todo' ? (done ? '✓ ' : '☐ ') : (done ? '✓ ' : '');
             return `<span style="${done ? 'opacity:.5;text-decoration:line-through' : ''}">${icon}${e.label.slice(0,16)}</span>`;
           }).join('<br>')}${events.length > 3 ? `<br><span class="text-muted">+${events.length - 3} more</span>` : ''}</div>` : ''}
+          ${dayStickers[ymd] ? `<div style="text-align:center;margin-top:4px;">${stickerHTML(dayStickers[ymd], '28px')}</div>` : ''}
         </div>`;
       }
       // Next month fill
@@ -1496,7 +1495,6 @@
           <div class="week-day-name d-flex align-items-center gap-1 flex-wrap">
             <span>${dayNames[i]} ${dt.getMonth()+1}/${dt.getDate()}</span>
             ${badge ? `<span class="cal-block-badge ${badge.cls}">${badge.label}</span>` : ''}
-            ${sticker ? stickerHTML(sticker, '1.1rem') : ''}
           </div>
           ${sdInfo && !isSchoolDay ? `<small class="badge bg-secondary">${sdInfo.label}</small>` : ''}
           ${assignEvents.map(e => `<div class="small ${e.submitted ? 'text-success' : ''} mb-1">
@@ -1515,6 +1513,7 @@
               <input type="checkbox" ${t.studied ? 'checked' : ''} onchange="window.toggleStudied(${t.id}, ${!t.studied})">
               <span>📝 ${t.class_name.slice(0,22)}${t.class_name.length > 22 ? '…' : ''}</span>
             </div>`).join('')}
+          ${sticker ? `<div style="text-align:center;margin-top:8px;">${stickerHTML(sticker, '2.4rem')}</div>` : ''}
         </div>`;
       }
       grid.innerHTML = html;
@@ -2377,11 +2376,10 @@
         }</div>`;
       }
 
-      // All-day row: block badge + sticker + label
+      // All-day row: block badge only (sticker is now in the day header)
       let alldayContent = '';
       if (isWeekend) {
         alldayContent = `<span class="iv-tg-allday-chip" style="background:#f8f9fa;color:#6c757d">Weekend</span>`;
-        if (stickerEmoji) alldayContent += `<span class="ms-2">${stickerHTML(stickerEmoji, '1.4rem')}</span>`;
       } else if (badge || sdInfo) {
         const chipBg  = blockBase === 'A' ? '#d4edda' : blockBase === 'B' ? '#cce5ff' : '#e9ecef';
         const chipClr = blockBase === 'A' ? '#155724' : blockBase === 'B' ? '#004085' : '#495057';
@@ -2390,10 +2388,7 @@
         alldayContent = `<span class="d-flex align-items-center gap-2 flex-wrap">`;
         if (badge) alldayContent += `<span class="cal-block-badge ${badge.cls}">${badge.label}</span>`;
         alldayContent += `<span class="iv-tg-allday-chip" style="background:${chipBg};color:${chipClr}">${typeLabel}${extra}</span>`;
-        if (stickerEmoji) alldayContent += stickerHTML(stickerEmoji, '1.4rem');
         alldayContent += `</span>`;
-      } else if (stickerEmoji) {
-        alldayContent = stickerHTML(stickerEmoji, '1.4rem');
       }
 
       // Day number circle
@@ -2412,8 +2407,13 @@
           <div class="iv-tg-header">
             <div class="iv-tg-header-gutter"></div>
             <div class="iv-tg-day-header">
-              <div class="iv-tg-day-name">${dt.toLocaleDateString('en-US',{weekday:'long'}).toUpperCase()}</div>
-              <div class="iv-tg-day-num-wrap">${dayNumEl}</div>
+              <div class="d-flex align-items-center justify-content-center gap-3">
+                <div>
+                  <div class="iv-tg-day-name">${dt.toLocaleDateString('en-US',{weekday:'long'}).toUpperCase()}</div>
+                  <div class="iv-tg-day-num-wrap">${dayNumEl}</div>
+                </div>
+                ${stickerEmoji ? `<div style="line-height:1;">${stickerHTML(stickerEmoji, '3rem')}</div>` : ''}
+              </div>
             </div>
           </div>
           ${alldayContent ? `<div class="iv-tg-allday-row">
