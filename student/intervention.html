@@ -662,27 +662,10 @@
             </div>
           </div>
         </div>
-        <!-- Self-reported all classes — expands to full width for non-intervention students -->
-        <div class="col-lg-7" id="grade-log-section">
-          <div class="card shadow-sm border-0">
-            <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
-              <div>
-                <h6 class="fw-bold text-success mb-0"><i class="fas fa-graduation-cap me-2"></i>All My Classes</h6>
-                <small class="text-muted">Self-reported — you enter these yourself</small>
-              </div>
-              <button class="btn btn-outline-success btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#gradeLogModal">
-                <i class="fas fa-plus me-1"></i>Add Grade
-              </button>
-            </div>
-            <div class="card-body p-0">
-              <div class="table-responsive">
-                <table class="table table-sm mb-0">
-                  <thead class="table-light"><tr><th>Period</th><th>Class</th><th>Assignment</th><th>Score</th><th>Date</th><th></th></tr></thead>
-                  <tbody id="grade-log-table"><tr><td colspan="6" class="text-center text-muted py-3">Loading…</td></tr></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+        <!-- Self-reported all classes -->
+        <div class="col-12" id="grade-log-section">
+          <h6 class="fw-bold text-success mb-3"><i class="fas fa-graduation-cap me-2"></i>All My Classes <small class="fw-normal text-muted">— click <strong>+&nbsp;Add</strong> inside a period to log a grade</small></h6>
+          <div class="row g-3" id="grade-log-grid"><div class="col-12 text-center text-muted py-4">Loading…</div></div>
         </div>
       </div>
     </div>
@@ -1939,31 +1922,67 @@
          <td class="text-center">${a.submitted ? '<span class="pass-badge">PASS</span>' : '<span class="badge bg-light text-muted border">Pending</span>'}</td></tr>`
       ).join('');
 
-      // Self-reported
-      const glt = document.getElementById('grade-log-table');
-      if (!gradeLog.length) { glt.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No grades logged yet. Click "+ Add Grade" to start.</td></tr>'; return; }
-      glt.innerHTML = gradeLog.map(g => {
-        const pct = g.max_score ? Math.round((g.score / g.max_score) * 100) : null;
-        const color = pct == null ? '#6c757d' : pct >= 70 ? '#43a047' : pct >= 60 ? '#f9a825' : '#e53935';
-        const dt = g.grade_date ? new Date(g.grade_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-        return `<tr class="grade-log-row">
-          <td class="small fw-bold">${g.period_label || '–'}</td>
-          <td class="small">${g.class_name}</td>
-          <td class="small text-muted">${g.assignment || '–'}</td>
-          <td class="small">
-            <div class="fw-bold" style="color:${color}">${g.score}/${g.max_score}</div>
-            ${pct != null ? `<div class="pct-bar mt-1"><div class="pct-fill" style="width:${pct}%;background:${color}"></div></div>` : ''}
-          </td>
-          <td class="small text-muted">${dt}</td>
-          <td><button class="btn btn-sm p-0 text-muted" onclick="window.deleteGradeLog(${g.id})"><i class="fas fa-times" style="font-size:.7rem;"></i></button></td>
-        </tr>`;
+      // Self-reported — period cards
+      const grid = document.getElementById('grade-log-grid');
+      const ALL_PERIODS = ['A1','A3','A5','A7','B2','B4','B6','B8'];
+      grid.innerHTML = ALL_PERIODS.map(p => {
+        const cls = mySchedule[p] || '';
+        const col  = (periodColors[p] || DEFAULT_PERIOD_COLORS[p] || '#6c757d');
+        const entries = gradeLog.filter(g => g.period_label === p);
+        const rowsHtml = entries.length ? entries.map(g => {
+          const pct = g.max_score ? Math.round((g.score / g.max_score) * 100) : null;
+          const gc  = pct == null ? '#6c757d' : pct >= 70 ? '#43a047' : pct >= 60 ? '#f9a825' : '#e53935';
+          const dt  = g.grade_date ? new Date(g.grade_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+          return `<div class="d-flex align-items-center gap-2 py-1 border-bottom">
+            <div class="flex-grow-1 overflow-hidden">
+              <div class="small fw-bold text-truncate">${g.assignment || '(grade)'}</div>
+              <div style="font-size:.67rem;color:#888;">${dt}</div>
+            </div>
+            <div class="text-end flex-shrink-0">
+              <div class="small fw-bold" style="color:${gc}">${g.score}/${g.max_score}</div>
+              ${pct != null ? `<div style="font-size:.67rem;color:${gc}">${pct}%</div>` : ''}
+            </div>
+            <button class="btn p-0 text-muted flex-shrink-0 intv-edit-only" onclick="window.deleteGradeLog(${g.id})" style="line-height:1;font-size:.7rem;">✕</button>
+          </div>`;
+        }).join('') : `<div class="text-muted text-center py-2" style="font-size:.78rem;">No grades yet</div>`;
+
+        return `<div class="col-6 col-md-4 col-lg-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background:${col};color:#fff;">
+              <div class="overflow-hidden">
+                <div class="fw-bold" style="font-size:.82rem;line-height:1.2;">${p}</div>
+                ${cls ? `<div style="font-size:.7rem;opacity:.88;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px;">${cls}</div>` : ''}
+              </div>
+              <button class="btn btn-sm py-0 px-2 fw-bold intv-edit-only" style="background:rgba(255,255,255,.22);color:#fff;border:1px solid rgba(255,255,255,.45);font-size:.72rem;" onclick="window.openGradeLogForPeriod('${p}')">
+                <i class="fas fa-plus" style="font-size:.6rem;"></i> Add
+              </button>
+            </div>
+            <div class="card-body p-2" style="max-height:180px;overflow-y:auto;">${rowsHtml}</div>
+          </div>
+        </div>`;
       }).join('');
+
+      // Grades without a period (legacy entries)
+      const unassigned = gradeLog.filter(g => !ALL_PERIODS.includes(g.period_label));
+      if (unassigned.length) {
+        const rows = unassigned.map(g => {
+          const pct = g.max_score ? Math.round((g.score / g.max_score) * 100) : null;
+          const gc  = pct == null ? '#6c757d' : pct >= 70 ? '#43a047' : pct >= 60 ? '#f9a825' : '#e53935';
+          const dt  = g.grade_date ? new Date(g.grade_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+          return `<div class="d-flex align-items-center gap-2 py-1 border-bottom">
+            <div class="flex-grow-1"><div class="small fw-bold">${g.class_name}</div><div class="text-muted" style="font-size:.67rem;">${g.assignment || ''} ${dt}</div></div>
+            <div class="small fw-bold" style="color:${gc}">${g.score}/${g.max_score}</div>
+            <button class="btn p-0 text-muted intv-edit-only" onclick="window.deleteGradeLog(${g.id})" style="font-size:.7rem;">✕</button>
+          </div>`;
+        }).join('');
+        grid.innerHTML += `<div class="col-12"><div class="card border-0 shadow-sm"><div class="card-header bg-secondary text-white py-2 fw-bold" style="font-size:.82rem;">Other / Unassigned</div><div class="card-body p-2">${rows}</div></div></div>`;
+      }
     }
 
     document.getElementById('btnSaveGradeLog').addEventListener('click', async () => {
       const score = document.getElementById('glScore').value;
       const cls = document.getElementById('glClass').value.trim();
-      if (!cls || score === '') return;
+      if (!cls || score === '') { alert('Please select a period/class and enter a score.'); return; }
       await apiFetch('/api/intervention/grade-log', { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ student_id: user.student_id, period_label: document.getElementById('glPeriod').value,
           class_name: cls, assignment: document.getElementById('glAssignment').value,
@@ -1980,6 +1999,33 @@
       document.getElementById('glPeriodWrap').classList.add('d-none');
       document.getElementById('glClassWrap').classList.add('d-none');
     });
+
+    document.getElementById('gradeLogModal').addEventListener('show.bs.modal', () => {
+      if (!document.getElementById('glDate').value) document.getElementById('glDate').value = todayStr;
+    });
+
+    window.openGradeLogForPeriod = (period) => {
+      if (isReadOnly) return;
+      populateScheduleSelects();
+      const gSel = document.getElementById('glPeriodSel');
+      const cls  = mySchedule[period] || '';
+      const optVal = `${period}|${cls}`;
+      if (cls && [...gSel.options].find(o => o.value === optVal)) {
+        gSel.value = optVal;
+        document.getElementById('glPeriod').value = period;
+        document.getElementById('glClass').value  = cls;
+        document.getElementById('glPeriodWrap').classList.add('d-none');
+        document.getElementById('glClassWrap').classList.add('d-none');
+      } else {
+        gSel.value = '__other__';
+        document.getElementById('glPeriodWrap').classList.remove('d-none');
+        document.getElementById('glClassWrap').classList.remove('d-none');
+        document.getElementById('glPeriod').value = period;
+        document.getElementById('glClass').value  = cls;
+      }
+      document.getElementById('glDate').value = todayStr;
+      new bootstrap.Modal(document.getElementById('gradeLogModal')).show();
+    };
 
     window.deleteGradeLog = async (id) => {
       if (!confirm('Remove this entry?')) return;
@@ -2954,43 +3000,41 @@
 
     function populateScheduleSelects() {
       const periods = ['A1','A3','A5','A7','B2','B4','B6','B8'];
-      const filled = periods.filter(k => mySchedule[k]);
+      const filled  = periods.filter(k => mySchedule[k]);
+
+      function rebuild(sel, makeVal) {
+        if (!sel) return;
+        sel.innerHTML = '';
+        sel.add(new Option('— Pick from your schedule —', ''));
+        filled.forEach(k => sel.add(new Option(`${k} · ${mySchedule[k]}`, makeVal(k))));
+        sel.add(new Option('Other / Type below…', '__other__'));
+        sel.value = '';
+      }
 
       // ── Test/Quiz modal ───────────────────────────────────────────────────
       const tSel = document.getElementById('testClassSel');
+      rebuild(tSel, k => mySchedule[k]);
       if (tSel) {
-        const prev = tSel.value;
-        while (tSel.options.length > 1) tSel.remove(1); // keep placeholder
-        filled.forEach(k => {
-          const opt = new Option(`${k} · ${mySchedule[k]}`, mySchedule[k]);
-          tSel.insertBefore(opt, tSel.lastElementChild);
-        });
-        // restore previous or show "Other" input if no schedule
-        if (prev && filled.map(k => mySchedule[k]).includes(prev)) {
-          tSel.value = prev;
-        } else if (!filled.length) {
+        if (!filled.length) {
           tSel.classList.add('d-none');
           document.getElementById('testClass').classList.remove('d-none');
+        } else {
+          tSel.classList.remove('d-none');
         }
       }
 
       // ── Grade Log modal ───────────────────────────────────────────────────
       const gSel = document.getElementById('glPeriodSel');
-      if (gSel) {
-        while (gSel.options.length > 1) gSel.remove(1); // keep placeholder
-        filled.forEach(k => {
-          const opt = new Option(`${k} · ${mySchedule[k]}`, `${k}|${mySchedule[k]}`);
-          gSel.insertBefore(opt, gSel.lastElementChild);
-        });
-        const row = document.getElementById('glSchedulePickerRow');
-        if (!filled.length) {
-          // no schedule — hide select, show manual fields immediately
-          if (row) row.classList.add('d-none');
-          document.getElementById('glPeriodWrap')?.classList.remove('d-none');
-          document.getElementById('glClassWrap')?.classList.remove('d-none');
-        } else {
-          if (row) row.classList.remove('d-none');
-        }
+      rebuild(gSel, k => `${k}|${mySchedule[k]}`);
+      const row = document.getElementById('glSchedulePickerRow');
+      if (!filled.length) {
+        if (row) row.classList.add('d-none');
+        document.getElementById('glPeriodWrap')?.classList.remove('d-none');
+        document.getElementById('glClassWrap')?.classList.remove('d-none');
+      } else {
+        if (row) row.classList.remove('d-none');
+        document.getElementById('glPeriodWrap')?.classList.add('d-none');
+        document.getElementById('glClassWrap')?.classList.add('d-none');
       }
     }
 
