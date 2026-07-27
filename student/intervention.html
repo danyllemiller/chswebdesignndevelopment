@@ -779,11 +779,33 @@
         </div>
         <div class="modal-body">
           <div class="row g-2">
-            <div class="col-4">
-              <label class="form-label fw-bold small">Period</label>
-              <input type="text" class="form-control" id="glPeriod" placeholder="e.g. 1st">
+            <div class="col-12" id="glSchedulePickerRow">
+              <label class="form-label fw-bold small">Period &amp; Class <span class="text-danger">*</span></label>
+              <select class="form-select" id="glPeriodSel" onchange="
+                const v=this.value;
+                const pw=document.getElementById('glPeriodWrap');
+                const cw=document.getElementById('glClassWrap');
+                if(!v){
+                  pw.classList.add('d-none');cw.classList.add('d-none');
+                  document.getElementById('glPeriod').value='';document.getElementById('glClass').value='';
+                } else if(v==='__other__'){
+                  pw.classList.remove('d-none');cw.classList.remove('d-none');
+                  document.getElementById('glPeriod').value='';document.getElementById('glClass').value='';
+                } else {
+                  const p=v.split('|');
+                  document.getElementById('glPeriod').value=p[0]||'';
+                  document.getElementById('glClass').value=p[1]||'';
+                  pw.classList.add('d-none');cw.classList.add('d-none');
+                }">
+                <option value="">— Pick from your schedule —</option>
+                <option value="__other__">Other / Type manually…</option>
+              </select>
             </div>
-            <div class="col-8">
+            <div class="col-4 d-none" id="glPeriodWrap">
+              <label class="form-label fw-bold small">Period</label>
+              <input type="text" class="form-control" id="glPeriod" placeholder="e.g. A1">
+            </div>
+            <div class="col-8 d-none" id="glClassWrap">
               <label class="form-label fw-bold small">Class Name <span class="text-danger">*</span></label>
               <input type="text" class="form-control" id="glClass" placeholder="e.g. AP English">
             </div>
@@ -848,7 +870,15 @@
           <div class="row g-2">
             <div class="col-7">
               <label class="form-label fw-bold small">Class <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="testClass" placeholder="e.g. AP Biology">
+              <select class="form-select" id="testClassSel" onchange="
+                const v=this.value;
+                const inp=document.getElementById('testClass');
+                if(v==='__other__'||!v){inp.classList.remove('d-none');if(v==='__other__')inp.value='';inp.focus();}
+                else{inp.classList.add('d-none');inp.value=v;}">
+                <option value="">— Pick from your schedule —</option>
+                <option value="__other__">Other / Type below…</option>
+              </select>
+              <input type="text" class="form-control mt-1 d-none" id="testClass" placeholder="e.g. AP Biology">
             </div>
             <div class="col-5">
               <label class="form-label fw-bold small">Type</label>
@@ -1254,6 +1284,7 @@
 
       await loadPlannerPrefs(sid);
       loadDecorPrefs();
+      populateScheduleSelects();
 
       // Check intervention enrollment — determines which tabs are visible
       try {
@@ -1945,6 +1976,9 @@
       ['glPeriod','glClass','glAssignment','glScore'].forEach(id => { document.getElementById(id).value = ''; });
       document.getElementById('glMax').value = '100';
       document.getElementById('glDate').value = todayStr;
+      document.getElementById('glPeriodSel').value = '';
+      document.getElementById('glPeriodWrap').classList.add('d-none');
+      document.getElementById('glClassWrap').classList.add('d-none');
     });
 
     window.deleteGradeLog = async (id) => {
@@ -2915,7 +2949,50 @@
       syncPrefsToServer();
       bootstrap.Modal.getInstance(document.getElementById('scheduleModal'))?.hide();
       if (currentView === 'day') renderCalendar();
+      populateScheduleSelects();
     });
+
+    function populateScheduleSelects() {
+      const periods = ['A1','A3','A5','A7','B2','B4','B6','B8'];
+      const filled = periods.filter(k => mySchedule[k]);
+
+      // ── Test/Quiz modal ───────────────────────────────────────────────────
+      const tSel = document.getElementById('testClassSel');
+      if (tSel) {
+        const prev = tSel.value;
+        while (tSel.options.length > 1) tSel.remove(1); // keep placeholder
+        filled.forEach(k => {
+          const opt = new Option(`${k} · ${mySchedule[k]}`, mySchedule[k]);
+          tSel.insertBefore(opt, tSel.lastElementChild);
+        });
+        // restore previous or show "Other" input if no schedule
+        if (prev && filled.map(k => mySchedule[k]).includes(prev)) {
+          tSel.value = prev;
+        } else if (!filled.length) {
+          tSel.classList.add('d-none');
+          document.getElementById('testClass').classList.remove('d-none');
+        }
+      }
+
+      // ── Grade Log modal ───────────────────────────────────────────────────
+      const gSel = document.getElementById('glPeriodSel');
+      if (gSel) {
+        while (gSel.options.length > 1) gSel.remove(1); // keep placeholder
+        filled.forEach(k => {
+          const opt = new Option(`${k} · ${mySchedule[k]}`, `${k}|${mySchedule[k]}`);
+          gSel.insertBefore(opt, gSel.lastElementChild);
+        });
+        const row = document.getElementById('glSchedulePickerRow');
+        if (!filled.length) {
+          // no schedule — hide select, show manual fields immediately
+          if (row) row.classList.add('d-none');
+          document.getElementById('glPeriodWrap')?.classList.remove('d-none');
+          document.getElementById('glClassWrap')?.classList.remove('d-none');
+        } else {
+          if (row) row.classList.remove('d-none');
+        }
+      }
+    }
 
     // ── To-Do list (localStorage) ─────────────────────────────────────────
     let todos = [], countdowns = [];
@@ -3179,6 +3256,8 @@
       document.getElementById('testModalTitle').innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Add Test / Quiz';
       document.getElementById('btnSaveTest').textContent = 'Add to Planner';
       ['testClass','testTitle','testNotes'].forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('testClassSel').value = '';
+      document.getElementById('testClass').classList.add('d-none');
       document.getElementById('testDate').value = '';
       document.getElementById('testType').value = 'quiz';
     }
@@ -3211,7 +3290,14 @@
       editingTestId = id;
       document.getElementById('testModalTitle').innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Edit Test / Quiz';
       document.getElementById('btnSaveTest').textContent = 'Save Changes';
-      document.getElementById('testClass').value = t.class_name || '';
+      const tSel = document.getElementById('testClassSel');
+      const tInput = document.getElementById('testClass');
+      const matchOpt = [...tSel.options].find(o => o.value === (t.class_name || ''));
+      if (matchOpt) {
+        tSel.value = t.class_name || ''; tInput.value = t.class_name || ''; tInput.classList.add('d-none');
+      } else {
+        tSel.value = '__other__'; tInput.value = t.class_name || ''; tInput.classList.remove('d-none');
+      }
       document.getElementById('testType').value  = t.test_type  || 'quiz';
       document.getElementById('testTitle').value = t.title      || '';
       document.getElementById('testDate').value  = t.test_date  || '';
