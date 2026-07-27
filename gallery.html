@@ -81,6 +81,15 @@
     .no-items i { font-size: 3rem; opacity: .3; margin-bottom: 1rem; }
 
     #adminPanel { background: #fff3cd; border-radius: 10px; padding: 1.25rem; margin-bottom: 1.5rem; }
+
+    /* Visibility badges */
+    .vis-badge { display: inline-flex; align-items: center; gap: 4px; font-size: .68rem; font-weight: 700; border-radius: 4px; padding: 2px 6px; margin-top: 4px; }
+    .vis-public     { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .vis-classmates { background: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
+    .vis-private    { background: #fce7f3; color: #9d174d; border: 1px solid #f9a8d4; }
+
+    .vis-option { border: 2px solid #dee2e6; border-radius: 8px; padding: .6rem .8rem; cursor: pointer; transition: border-color .15s; }
+    .vis-option:has(input:checked) { border-color: #000099; background: #f0f2ff; }
   </style>
 </head>
 <body class="bg-light">
@@ -177,6 +186,23 @@
               <button type="button" class="btn btn-sm btn-outline-secondary tech-chip" data-tag="Node.js">Node.js</button>
             </div>
           </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Who can see this?</label>
+            <div class="d-flex flex-column gap-2">
+              <label class="vis-option d-flex align-items-start gap-2">
+                <input type="radio" name="submitVis" value="classmates" checked class="mt-1">
+                <div><div class="fw-bold small">👥 Classmates <span class="text-muted fw-normal">(Default)</span></div><div class="text-muted" style="font-size:.78rem;">Enrolled Web Design students and your teacher</div></div>
+              </label>
+              <label class="vis-option d-flex align-items-start gap-2">
+                <input type="radio" name="submitVis" value="public" class="mt-1">
+                <div><div class="fw-bold small">🌐 Public</div><div class="text-muted" style="font-size:.78rem;">Anyone who visits the gallery — no login needed</div></div>
+              </label>
+              <label class="vis-option d-flex align-items-start gap-2">
+                <input type="radio" name="submitVis" value="private" class="mt-1">
+                <div><div class="fw-bold small">🔒 Private</div><div class="text-muted" style="font-size:.78rem;">Only you and your teacher can see this</div></div>
+              </label>
+            </div>
+          </div>
           <div id="submitError" class="alert alert-danger d-none"></div>
         </div>
         <div class="modal-footer">
@@ -236,6 +262,11 @@ function buildCard(item, isAdmin = false, isPending = false) {
     adminControls = `<button class="btn btn-sm btn-warning ms-2 fw-bold btn-review" data-id="${item.id}" data-title="${escHtml(item.title)}" data-student="${escHtml(item.first_name || '')}"><i class="fas fa-check me-1"></i>Review</button>`;
   }
 
+  const visMap = { public: ['🌐','Public','vis-public'], classmates: ['👥','Classmates','vis-classmates'], private: ['🔒','Private','vis-private'] };
+  const vk = item.visibility || 'classmates';
+  const [visIcon, visLabel, visCls] = visMap[vk] || visMap.classmates;
+  const visBadge = `<span class="vis-badge ${visCls}">${visIcon} ${visLabel}</span>`;
+
   return `
     <div class="project-card${isPending ? ' pending-card' : ''}" data-section="${escHtml(item.section_id || '')}" data-title="${escHtml(item.title)}">
       <div class="project-thumb" style="background:${bg}">
@@ -252,9 +283,49 @@ function buildCard(item, isAdmin = false, isPending = false) {
           <span class="ms-2 text-muted">${date}</span>
         </div>
         ${tagsHtml ? `<div class="mb-2">${tagsHtml}</div>` : ''}
-        <div class="d-flex align-items-center gap-2 mt-2">
+        <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
           ${viewBtn}
+          ${visBadge}
           ${adminControls}
+        </div>
+      </div>
+    </div>`;
+}
+
+function buildMyCard(item) {
+  const statusBadge = item.is_approved
+    ? `<span class="badge bg-success">Approved</span>`
+    : `<span class="badge bg-warning text-dark">Pending Review</span>`;
+  const visMap = { public: ['🌐','Public','vis-public'], classmates: ['👥','Classmates','vis-classmates'], private: ['🔒','Private','vis-private'] };
+  const vk = item.visibility || 'classmates';
+  const [visIcon, visLabel, visCls] = visMap[vk] || visMap.classmates;
+  const bg   = cardColor(item.title);
+  const icon = cardIcon(item.title);
+  const thumb = item.thumbnail_url ? `<img src="${escHtml(item.thumbnail_url)}" alt="${escHtml(item.title)}" onerror="this.style.display='none'">` : '';
+  const tags = (item.tech_tags || '').split(',').filter(Boolean);
+  const tagsHtml = tags.map(t => `<span class="tag">${escHtml(t.trim())}</span>`).join('');
+  const date = new Date(item.submitted_at).toLocaleDateString('en-US', { month:'short', year:'numeric' });
+  const viewBtn = item.project_url
+    ? `<a href="${escHtml(item.project_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary fw-bold"><i class="fas fa-external-link-alt me-1"></i>View</a>`
+    : '';
+  return `
+    <div class="project-card" data-id="${item.id}">
+      <div class="project-thumb" style="background:${bg}">${thumb}<i class="fas ${icon}"></i></div>
+      <div class="card-body">
+        <div class="card-title">${escHtml(item.title)}</div>
+        <div class="card-meta"><span class="ms-0 text-muted">${date}</span></div>
+        ${tagsHtml ? `<div class="mb-2">${tagsHtml}</div>` : ''}
+        <div class="d-flex align-items-center gap-2 flex-wrap mt-2">
+          ${viewBtn}
+          ${statusBadge}
+        </div>
+        <div class="mt-2 d-flex align-items-center gap-2">
+          <span class="vis-badge ${visCls}">${visIcon} ${visLabel}</span>
+          <select class="form-select form-select-sm w-auto vis-changer" data-id="${item.id}" style="font-size:.75rem;">
+            <option value="public"     ${vk==='public'     ?'selected':''}>🌐 Public</option>
+            <option value="classmates" ${vk==='classmates' ?'selected':''}>👥 Classmates</option>
+            <option value="private"    ${vk==='private'    ?'selected':''}>🔒 Private</option>
+          </select>
         </div>
       </div>
     </div>`;
@@ -273,7 +344,8 @@ let pendingReviewId = null;
 
 async function loadGallery() {
   try {
-    const data = await apiFetch('/api/gallery/public');
+    const qs = user ? `?student_id=${encodeURIComponent(user.student_id)}` : '';
+    const data = await apiFetch(`/api/gallery/feed${qs}`);
     allItems = data.items || [];
     renderGallery();
   } catch {
@@ -317,7 +389,7 @@ function openApproveModal(btn) {
   document.getElementById('approveModalBody').innerHTML = `
     <p class="mb-1"><strong>Project:</strong> ${escHtml(btn.dataset.title)}</p>
     <p><strong>By:</strong> ${escHtml(btn.dataset.student)}</p>
-    <p class="text-muted small">Approving will make this project visible in the public gallery.</p>`;
+    <p class="text-muted small">Approving will publish this project at the student's chosen visibility level. You can change visibility any time after approval.</p>`;
   bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal')).show();
 }
 
@@ -328,12 +400,26 @@ async function loadMySubs() {
     const items = data.items || [];
     if (!items.length) return;
     document.getElementById('mySection').classList.remove('d-none');
-    document.getElementById('myGrid').innerHTML = items.map(item => {
-      const statusBadge = item.is_approved
-        ? `<span class="badge bg-success">Approved</span>`
-        : `<span class="badge bg-warning text-dark">Pending Review</span>`;
-      return buildCard({ ...item, first_name: 'Me' }).replace('</div>', `${statusBadge}</div>`);
-    }).join('');
+    const grid = document.getElementById('myGrid');
+    grid.innerHTML = items.map(item => buildMyCard(item)).join('');
+    grid.querySelectorAll('.vis-changer').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        const itemId = Number(sel.dataset.id);
+        const newVis = sel.value;
+        try {
+          await apiFetch(`/api/gallery/my/${itemId}/visibility`, {
+            method: 'PUT',
+            body: JSON.stringify({ student_id: user.student_id, visibility: newVis })
+          });
+          loadMySubs();
+          // Reload main gallery too so visibility change takes effect for viewer
+          await loadGallery();
+          loadSectionFilters();
+        } catch (e) {
+          alert('Could not update visibility: ' + (e.message || 'Unknown error'));
+        }
+      });
+    });
   } catch { /* non-critical */ }
 }
 
@@ -404,7 +490,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           thumbnail_url: document.getElementById('submitThumb').value.trim(),
           tech_tags:     selectedTags,
           section_id:    user.section_id,
-          school_year:   String(new Date().getFullYear())
+          school_year:   String(new Date().getFullYear()),
+          visibility:    document.querySelector('input[name="submitVis"]:checked')?.value || 'classmates'
         })
       });
       bootstrap.Modal.getOrCreateInstance(document.getElementById('submitModal')).hide();
@@ -419,7 +506,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!pendingReviewId) return;
     await apiFetch(`/api/admin/gallery/${pendingReviewId}`, {
       method: 'PUT',
-      body: JSON.stringify({ is_approved: true, is_public: true, approved_by: user?.username })
+      body: JSON.stringify({ is_approved: true, approved_by: user?.username })
     });
     bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal')).hide();
     await loadGallery();
