@@ -1925,10 +1925,19 @@
       // Self-reported — period cards
       const grid = document.getElementById('grade-log-grid');
       const ALL_PERIODS = ['A1','A3','A5','A7','B2','B4','B6','B8'];
+      const letterGrade = pct => pct >= 93 ? 'A' : pct >= 90 ? 'A−' : pct >= 87 ? 'B+' : pct >= 83 ? 'B' : pct >= 80 ? 'B−' : pct >= 77 ? 'C+' : pct >= 73 ? 'C' : pct >= 70 ? 'C−' : pct >= 67 ? 'D+' : pct >= 63 ? 'D' : pct >= 60 ? 'D−' : 'F';
+
       grid.innerHTML = ALL_PERIODS.map(p => {
-        const cls = mySchedule[p] || '';
-        const col  = (periodColors[p] || DEFAULT_PERIOD_COLORS[p] || '#6c757d');
+        const cls     = mySchedule[p] || '';
+        const col     = (periodColors[p] || DEFAULT_PERIOD_COLORS[p] || '#6c757d');
         const entries = gradeLog.filter(g => g.period_label === p);
+
+        // Weighted overall: sum of scores / sum of max scores
+        const totalScore = entries.reduce((s, g) => s + (g.score || 0), 0);
+        const totalMax   = entries.reduce((s, g) => s + (g.max_score || 0), 0);
+        const overallPct = totalMax > 0 ? Math.round(totalScore / totalMax * 100) : null;
+        const letter     = overallPct != null ? letterGrade(overallPct) : null;
+
         const rowsHtml = entries.length ? entries.map(g => {
           const pct = g.max_score ? Math.round((g.score / g.max_score) * 100) : null;
           const gc  = pct == null ? '#6c757d' : pct >= 70 ? '#43a047' : pct >= 60 ? '#f9a825' : '#e53935';
@@ -1949,11 +1958,14 @@
         return `<div class="col-6 col-md-4 col-lg-3">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background:${col};color:#fff;">
-              <div class="overflow-hidden">
-                <div class="fw-bold" style="font-size:.82rem;line-height:1.2;">${p}</div>
-                ${cls ? `<div style="font-size:.7rem;opacity:.88;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px;">${cls}</div>` : ''}
+              <div class="overflow-hidden flex-grow-1 me-2">
+                <div class="d-flex align-items-baseline gap-2">
+                  <span class="fw-bold" style="font-size:.85rem;">${p}</span>
+                  ${letter != null ? `<span style="font-size:1.05rem;font-weight:900;line-height:1;">${letter}</span><span style="font-size:.72rem;opacity:.9;">${overallPct}%</span>` : ''}
+                </div>
+                ${cls ? `<div style="font-size:.68rem;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cls}</div>` : ''}
               </div>
-              <button class="btn btn-sm py-0 px-2 fw-bold intv-edit-only" style="background:rgba(255,255,255,.22);color:#fff;border:1px solid rgba(255,255,255,.45);font-size:.72rem;" onclick="window.openGradeLogForPeriod('${p}')">
+              <button class="btn btn-sm py-0 px-2 fw-bold intv-edit-only flex-shrink-0" style="background:rgba(255,255,255,.22);color:#fff;border:1px solid rgba(255,255,255,.45);font-size:.72rem;" onclick="window.openGradeLogForPeriod('${p}')">
                 <i class="fas fa-plus" style="font-size:.6rem;"></i> Add
               </button>
             </div>
