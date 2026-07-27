@@ -908,6 +908,10 @@ async function ensurePlannerTables(connection) {
     await connection.execute(`
         ALTER TABLE planner_todos ADD COLUMN IF NOT EXISTS item_type VARCHAR(20) DEFAULT 'todo'
     `).catch(() => {});
+    // Add grade_categories_json column to planner_preferences if it doesn't exist yet
+    await connection.execute(`
+        ALTER TABLE planner_preferences ADD COLUMN IF NOT EXISTS grade_categories_json LONGTEXT DEFAULT NULL
+    `).catch(() => {});
 }
 
 // ── Preferences (schedule, colors, stickers, decor, countdowns) ───────────
@@ -925,37 +929,40 @@ router.get('/intervention/planner-prefs', async (req, res) => {
         if (!rows.length) return res.json({ prefs: null });
         const r = rows[0];
         res.json({ prefs: {
-            schedule:    r.schedule_json    ? JSON.parse(r.schedule_json)    : {},
-            colors:      r.colors_json      ? JSON.parse(r.colors_json)      : {},
-            stickers:    r.stickers_json    ? JSON.parse(r.stickers_json)    : {},
-            decor:       r.decor_json       ? JSON.parse(r.decor_json)       : {},
-            countdowns:  r.countdowns_json  ? JSON.parse(r.countdowns_json)  : []
+            schedule:         r.schedule_json         ? JSON.parse(r.schedule_json)         : {},
+            colors:           r.colors_json           ? JSON.parse(r.colors_json)           : {},
+            stickers:         r.stickers_json         ? JSON.parse(r.stickers_json)         : {},
+            decor:            r.decor_json            ? JSON.parse(r.decor_json)            : {},
+            countdowns:       r.countdowns_json       ? JSON.parse(r.countdowns_json)       : [],
+            gradeCategories:  r.grade_categories_json ? JSON.parse(r.grade_categories_json) : {}
         }});
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch prefs' }); }
 });
 
 router.put('/intervention/planner-prefs', async (req, res) => {
-    const { student_id, schedule, colors, stickers, decor, countdowns } = req.body;
+    const { student_id, schedule, colors, stickers, decor, countdowns, gradeCategories } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
         const connection = await getDbConnection();
         await ensurePlannerTables(connection);
         await connection.execute(
-            `INSERT INTO planner_preferences (student_id, schedule_json, colors_json, stickers_json, decor_json, countdowns_json)
-             VALUES (?, ?, ?, ?, ?, ?)
+            `INSERT INTO planner_preferences (student_id, schedule_json, colors_json, stickers_json, decor_json, countdowns_json, grade_categories_json)
+             VALUES (?, ?, ?, ?, ?, ?, ?)
              ON DUPLICATE KEY UPDATE
-               schedule_json    = COALESCE(VALUES(schedule_json),    schedule_json),
-               colors_json      = COALESCE(VALUES(colors_json),      colors_json),
-               stickers_json    = COALESCE(VALUES(stickers_json),    stickers_json),
-               decor_json       = COALESCE(VALUES(decor_json),       decor_json),
-               countdowns_json  = COALESCE(VALUES(countdowns_json),  countdowns_json)`,
+               schedule_json          = COALESCE(VALUES(schedule_json),          schedule_json),
+               colors_json            = COALESCE(VALUES(colors_json),            colors_json),
+               stickers_json          = COALESCE(VALUES(stickers_json),          stickers_json),
+               decor_json             = COALESCE(VALUES(decor_json),             decor_json),
+               countdowns_json        = COALESCE(VALUES(countdowns_json),        countdowns_json),
+               grade_categories_json  = COALESCE(VALUES(grade_categories_json),  grade_categories_json)`,
             [
                 student_id,
-                schedule   !== undefined ? JSON.stringify(schedule)   : null,
-                colors     !== undefined ? JSON.stringify(colors)     : null,
-                stickers   !== undefined ? JSON.stringify(stickers)   : null,
-                decor      !== undefined ? JSON.stringify(decor)      : null,
-                countdowns !== undefined ? JSON.stringify(countdowns) : null
+                schedule         !== undefined ? JSON.stringify(schedule)         : null,
+                colors           !== undefined ? JSON.stringify(colors)           : null,
+                stickers         !== undefined ? JSON.stringify(stickers)         : null,
+                decor            !== undefined ? JSON.stringify(decor)            : null,
+                countdowns       !== undefined ? JSON.stringify(countdowns)       : null,
+                gradeCategories  !== undefined ? JSON.stringify(gradeCategories)  : null
             ]
         );
         await connection.end();
