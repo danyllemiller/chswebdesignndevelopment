@@ -1769,7 +1769,7 @@
         bootstrap.Modal.getInstance(document.getElementById('dayModal'))?.hide();
         setView('day');
       };
-      new bootstrap.Modal(document.getElementById('dayModal')).show();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('dayModal')).show();
     };
 
     // ── Journal ───────────────────────────────────────────────────────────
@@ -1947,7 +1947,7 @@
       document.getElementById('submitModalTitle').textContent = title;
       document.getElementById('submitInstructions').textContent = instructions || '';
       document.getElementById('submitResponse').value = '';
-      new bootstrap.Modal(document.getElementById('submitModal')).show();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('submitModal')).show();
     };
 
     document.getElementById('btnConfirmSubmit').addEventListener('click', async () => {
@@ -2070,6 +2070,7 @@
       const selParts = (selVal && selVal !== '__other__') ? selVal.split('|') : null;
       const cls = (selParts && selParts[1]) || document.getElementById('glClass').value.trim();
       const periodLabel = (selParts && selParts[0]) || document.getElementById('glPeriod').value.trim();
+      console.log('[GradeLog save] selVal:', JSON.stringify(selVal), '| cls:', JSON.stringify(cls), '| score:', JSON.stringify(score));
       if (!cls || score === '') { alert('Please select a period/class and enter a score.'); return; }
       await apiFetch('/api/intervention/grade-log', { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ student_id: user.student_id, period_label: periodLabel,
@@ -2128,7 +2129,7 @@
       }
       window.populateCategorySelect(period);
       document.getElementById('glDate').value = todayStr;
-      new bootstrap.Modal(document.getElementById('gradeLogModal')).show();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('gradeLogModal')).show();
     };
 
     window.deleteGradeLog = async (id) => {
@@ -2820,7 +2821,7 @@
       document.getElementById('prtTestsTo').value    = ymd2(future);
       document.getElementById('prtJournalFrom').value = '2026-08-01';
       document.getElementById('prtJournalTo').value   = '';
-      new bootstrap.Modal(document.getElementById('printModal')).show();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('printModal')).show();
     });
 
     // Toggle range visibility when checkbox changes
@@ -3141,7 +3142,7 @@
       document.getElementById('gradeCatTitle').innerHTML =
         `<i class="fas fa-balance-scale me-2"></i>Grade Categories — ${period}${cls ? ' · ' + cls : ''}`;
       renderCatRows(gradeCategories[period] || []);
-      new bootstrap.Modal(document.getElementById('gradeCatModal')).show();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('gradeCatModal')).show();
     };
 
     document.getElementById('btnAddGradeCat').addEventListener('click', () => {
@@ -3403,7 +3404,7 @@
     });
 
     document.getElementById('btnAddCountdown').addEventListener('click', () => {
-      new bootstrap.Modal(document.getElementById('countdownModal')).show();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('countdownModal')).show();
     });
     document.getElementById('btnSaveCountdown').addEventListener('click', () => {
       const name = document.getElementById('cdName').value.trim();
@@ -3524,7 +3525,7 @@
       document.getElementById('testTitle').value = t.title      || '';
       document.getElementById('testDate').value  = t.test_date  || '';
       document.getElementById('testNotes').value = t.notes      || '';
-      new bootstrap.Modal(document.getElementById('testModal')).show();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('testModal')).show();
     };
 
     window.toggleStudied = async (id, val) => {
@@ -3766,7 +3767,7 @@
             `<span class="suggest-chip d-block mb-1" style="border-radius:8px;" onclick="
               document.getElementById('goalCadence').value='${c}';
               document.getElementById('goalTitle').value=this.dataset.title;
-              new bootstrap.Modal(document.getElementById('goalModal')).show();" data-title="${t.replace(/'/g,'&#39;')}">
+              bootstrap.Modal.getOrCreateInstance(document.getElementById('goalModal')).show();" data-title="${t.replace(/'/g,'&#39;')}">
               ${t}</span>`
           ).join('')}
         </div>`
