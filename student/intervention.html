@@ -2066,10 +2066,13 @@
 
     document.getElementById('btnSaveGradeLog').addEventListener('click', async () => {
       const score = document.getElementById('glScore').value;
-      const cls = document.getElementById('glClass').value.trim();
+      const selVal = document.getElementById('glPeriodSel').value;
+      const selParts = (selVal && selVal !== '__other__') ? selVal.split('|') : null;
+      const cls = (selParts && selParts[1]) || document.getElementById('glClass').value.trim();
+      const periodLabel = (selParts && selParts[0]) || document.getElementById('glPeriod').value.trim();
       if (!cls || score === '') { alert('Please select a period/class and enter a score.'); return; }
       await apiFetch('/api/intervention/grade-log', { method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ student_id: user.student_id, period_label: document.getElementById('glPeriod').value,
+        body: JSON.stringify({ student_id: user.student_id, period_label: periodLabel,
           class_name: cls, assignment: document.getElementById('glAssignment').value,
           category: document.getElementById('glCategory').value || null,
           score: parseFloat(score), max_score: parseFloat(document.getElementById('glMax').value) || 100,
