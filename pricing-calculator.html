@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Client Pricing Calculator | CHS Web Design &amp; Development</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet"/>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    .calc-hero {
+      background: linear-gradient(135deg, #000099 0%, #1f246b 100%);
+      color: #fff;
+      padding: 56px 32px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .calc-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(-45deg, transparent, transparent 30px, rgba(255,255,255,.025) 30px, rgba(255,255,255,.025) 31px);
+      pointer-events: none;
+    }
+    .calc-hero h1 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 800; }
+    .calc-hero p  { color: rgba(255,255,255,.82); max-width: 560px; margin: .5rem auto 0; font-size: 1.05rem; }
+
+    /* Form card */
+    .calc-card { border: 1px solid #dee2e6; border-radius: 12px; background: #fff; }
+    .calc-card .calc-card-header { background: linear-gradient(135deg, #000099, #1f246b); color: #fff; border-radius: 11px 11px 0 0; padding: .875rem 1.25rem; font-weight: 700; }
+
+    /* Addon toggle chips */
+    .addon-chip { display: inline-flex; align-items: center; gap: 6px; padding: .4rem .85rem; border: 2px solid #dee2e6; border-radius: 20px; cursor: pointer; font-size: .85rem; font-weight: 600; background: #fff; transition: all .15s; user-select: none; }
+    .addon-chip.active { border-color: #000099; background: #f0f2ff; color: #000099; }
+    .addon-chip input { display: none; }
+
+    /* Complexity radio */
+    .complexity-option { flex: 1; }
+    .complexity-option input { display: none; }
+    .complexity-option .opt-label {
+      display: block; text-align: center; padding: .6rem .5rem; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; font-size: .85rem; font-weight: 600; transition: all .15s;
+    }
+    .complexity-option input:checked + .opt-label { border-color: #000099; background: #f0f2ff; color: #000099; }
+
+    /* Proposal output */
+    #proposalOutput { display: none; }
+    .proposal-doc { background: #fff; border: 1px solid #dee2e6; border-radius: 12px; overflow: hidden; }
+    .proposal-header { background: linear-gradient(135deg, #000099, #1f246b); color: #fff; padding: 2rem 2.5rem; }
+    .proposal-header h2 { font-weight: 800; margin: 0 0 .25rem; font-size: 1.6rem; }
+    .proposal-header p  { margin: 0; opacity: .82; font-size: .95rem; }
+    .proposal-body { padding: 2rem 2.5rem; }
+    .line-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    .line-table th { background: #f8f9fa; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: #6b7a99; padding: .6rem 1rem; text-align: left; border-bottom: 2px solid #dee2e6; }
+    .line-table td { padding: .65rem 1rem; border-bottom: 1px solid #f0f0f0; font-size: .92rem; vertical-align: middle; }
+    .line-table .amount { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+    .line-table .category-row td { background: #f8f9fa; font-weight: 700; font-size: .8rem; color: #000099; text-transform: uppercase; letter-spacing: .05em; padding: .4rem 1rem; }
+    .total-row { background: linear-gradient(135deg, #000099, #1f246b); color: #fff; }
+    .total-row td { padding: .85rem 1rem; font-weight: 800; font-size: 1.05rem; }
+    .total-row .amount { font-size: 1.3rem; }
+
+    .proposal-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .meta-block { background: #f8f9fa; border-radius: 8px; padding: .875rem 1rem; }
+    .meta-block .label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #6b7a99; margin-bottom: .25rem; }
+    .meta-block .value { font-weight: 700; color: #000099; }
+
+    .signature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
+    .sig-block { border-top: 1px solid #dee2e6; padding-top: .5rem; }
+    .sig-block .sig-label { font-size: .78rem; color: #6b7a99; }
+
+    .terms-box { background: #f8f9fa; border-radius: 8px; padding: 1rem; margin-top: 1.5rem; font-size: .8rem; color: #6b7a99; line-height: 1.6; }
+
+    /* Print */
+    @media print {
+      .no-print, nav, footer, .calc-hero, #calculatorSection, .back-to-top { display: none !important; }
+      #proposalOutput { display: block !important; }
+      .proposal-doc { border: none; box-shadow: none; }
+    }
+
+    /* Rate display badges */
+    .rate-badge { font-size: .72rem; background: #e8ecff; color: #000099; border-radius: 4px; padding: 1px 6px; margin-left: 4px; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <!-- Hero -->
+  <div class="calc-hero no-print">
+    <h1 class="gochi"><i class="fas fa-calculator me-2"></i>Client Pricing Calculator</h1>
+    <p>Build a professional project proposal in minutes. Fill in the details, click Generate, then print or share with your client.</p>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="container-ultrawide py-4">
+    <div class="row g-4" id="calculatorSection">
+
+      <!-- LEFT: Form -->
+      <div class="col-lg-5">
+        <div class="calc-card">
+          <div class="calc-card-header"><i class="fas fa-sliders-h me-2"></i>Project Details</div>
+          <div class="card-body p-4">
+
+            <!-- Client info -->
+            <h6 class="fw-bold text-primary mb-3"><i class="fas fa-user me-2"></i>Client & Agency</h6>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Your Name / Agency <span class="text-danger">*</span></label>
+              <input type="text" id="agencyName" class="form-control" placeholder="e.g. Your Name – CHS Web Guild">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Client / Business Name <span class="text-danger">*</span></label>
+              <input type="text" id="clientName" class="form-control" placeholder="e.g. Miller's Bakery">
+            </div>
+            <div class="mb-4">
+              <label class="form-label small fw-bold">Project Description <span class="text-muted fw-normal">(optional)</span></label>
+              <textarea id="projectDesc" class="form-control" rows="2" placeholder="Brief summary of what the client needs…"></textarea>
+            </div>
+
+            <hr>
+
+            <!-- Scope -->
+            <h6 class="fw-bold text-primary mb-3 mt-3"><i class="fas fa-file-alt me-2"></i>Project Scope</h6>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Number of Pages <span class="rate-badge">$150/page</span></label>
+              <input type="number" id="pageCount" class="form-control" value="5" min="1" max="100">
+              <div class="form-text">Includes home page. Each additional interior page adds to the cost.</div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small fw-bold d-block mb-2">Design Complexity</label>
+              <div class="d-flex gap-2">
+                <label class="complexity-option">
+                  <input type="radio" name="complexity" value="0.75">
+                  <span class="opt-label">Basic<br><small class="text-muted fw-normal">0.75×</small></span>
+                </label>
+                <label class="complexity-option">
+                  <input type="radio" name="complexity" value="1.0" checked>
+                  <span class="opt-label">Standard<br><small class="text-muted fw-normal">1.0×</small></span>
+                </label>
+                <label class="complexity-option">
+                  <input type="radio" name="complexity" value="1.5">
+                  <span class="opt-label">Premium<br><small class="text-muted fw-normal">1.5×</small></span>
+                </label>
+                <label class="complexity-option">
+                  <input type="radio" name="complexity" value="2.0">
+                  <span class="opt-label">Custom<br><small class="text-muted fw-normal">2.0×</small></span>
+                </label>
+              </div>
+            </div>
+
+            <hr>
+
+            <!-- Add-ons -->
+            <h6 class="fw-bold text-primary mb-3 mt-3"><i class="fas fa-puzzle-piece me-2"></i>Add-On Services</h6>
+            <div class="d-flex flex-wrap gap-2 mb-4">
+              <label class="addon-chip" data-cost="275" data-label="CMS Integration">
+                <input type="checkbox" id="addon-cms">
+                <i class="fas fa-database"></i> CMS <span class="rate-badge">$275</span>
+              </label>
+              <label class="addon-chip" data-cost="650" data-label="E-Commerce / Shop">
+                <input type="checkbox" id="addon-ecom">
+                <i class="fas fa-shopping-cart"></i> E-Commerce <span class="rate-badge">$650</span>
+              </label>
+              <label class="addon-chip" data-cost="300" data-label="SEO Setup">
+                <input type="checkbox" id="addon-seo">
+                <i class="fas fa-search"></i> SEO <span class="rate-badge">$300</span>
+              </label>
+              <label class="addon-chip" data-cost="175" data-label="Logo Design">
+                <input type="checkbox" id="addon-logo">
+                <i class="fas fa-paint-brush"></i> Logo <span class="rate-badge">$175</span>
+              </label>
+              <label class="addon-chip" data-cost="100" data-label="Analytics Setup">
+                <input type="checkbox" id="addon-analytics">
+                <i class="fas fa-chart-bar"></i> Analytics <span class="rate-badge">$100</span>
+              </label>
+              <label class="addon-chip" data-cost="125" data-label="Contact Forms & Integrations">
+                <input type="checkbox" id="addon-forms">
+                <i class="fas fa-envelope"></i> Forms <span class="rate-badge">$125</span>
+              </label>
+              <label class="addon-chip" data-cost="200" data-label="Blog / News Section">
+                <input type="checkbox" id="addon-blog">
+                <i class="fas fa-newspaper"></i> Blog <span class="rate-badge">$200</span>
+              </label>
+              <label class="addon-chip" data-cost="150" data-label="Social Media Integration">
+                <input type="checkbox" id="addon-social">
+                <i class="fas fa-share-alt"></i> Social <span class="rate-badge">$150</span>
+              </label>
+            </div>
+
+            <hr>
+
+            <!-- Revisions & Timeline -->
+            <h6 class="fw-bold text-primary mb-3 mt-3"><i class="fas fa-redo me-2"></i>Revisions & Timeline</h6>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-bold">Included Revisions</label>
+                <input type="number" id="revisionsIncluded" class="form-control" value="3" min="0" max="20">
+                <div class="form-text">Shown in proposal (no cost).</div>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold">Extra Revisions <span class="rate-badge">$60/ea</span></label>
+                <input type="number" id="revisionsExtra" class="form-control" value="0" min="0" max="50">
+                <div class="form-text">Beyond the included amount.</div>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small fw-bold">Delivery Timeline</label>
+              <select id="timeline" class="form-select">
+                <option value="0">Standard (4–6 weeks) — no rush fee</option>
+                <option value="0.15">Expedited (2–3 weeks) — +15%</option>
+                <option value="0.25">Rush (1 week) — +25%</option>
+              </select>
+            </div>
+
+            <hr>
+
+            <!-- Recurring -->
+            <h6 class="fw-bold text-primary mb-3 mt-3"><i class="fas fa-sync-alt me-2"></i>Ongoing Services <span class="text-muted fw-normal small">(optional)</span></h6>
+            <div class="row g-3 mb-4">
+              <div class="col-6">
+                <label class="form-label small fw-bold">Annual Hosting <span class="rate-badge">$120/yr</span></label>
+                <input type="number" id="hostingYears" class="form-control" value="0" min="0" max="10">
+                <div class="form-text">Years of hosting pre-paid.</div>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold">Maintenance <span class="rate-badge">$75/mo</span></label>
+                <input type="number" id="maintenanceMonths" class="form-control" value="0" min="0" max="24">
+                <div class="form-text">Months of retainer.</div>
+              </div>
+            </div>
+
+            <div id="formError" class="alert alert-danger d-none mb-3"></div>
+
+            <button id="btnGenerate" class="btn btn-primary btn-lg w-100 fw-bold">
+              <i class="fas fa-file-invoice me-2"></i>Generate Proposal
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Proposal preview placeholder -->
+      <div class="col-lg-7">
+        <div id="proposalPlaceholder" class="text-center text-muted py-5 mt-3">
+          <i class="fas fa-file-invoice" style="font-size:3.5rem; opacity:.2;"></i>
+          <p class="mt-3">Fill in the form and click <strong>Generate Proposal</strong> to see a printable quote here.</p>
+        </div>
+      </div>
+
+    </div><!-- /#calculatorSection -->
+
+    <!-- Proposal Output (also used for print) -->
+    <div id="proposalOutput" class="mt-4">
+      <div class="d-flex justify-content-end gap-2 mb-3 no-print">
+        <button class="btn btn-outline-secondary" onclick="document.getElementById('calculatorSection').scrollIntoView({behavior:'smooth'})"><i class="fas fa-edit me-1"></i>Edit</button>
+        <button class="btn btn-primary fw-bold" onclick="window.print()"><i class="fas fa-print me-2"></i>Print / Save PDF</button>
+      </div>
+      <div class="proposal-doc">
+        <div class="proposal-header">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+              <div style="font-size:.8rem; opacity:.7; text-transform:uppercase; letter-spacing:.08em; margin-bottom:.25rem;">Project Proposal</div>
+              <h2 id="p-title">Web Design & Development</h2>
+              <p id="p-desc" class="mb-0"></p>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:.75rem; opacity:.7;">Prepared by</div>
+              <div id="p-agency" style="font-weight:800; font-size:1.1rem;"></div>
+              <div id="p-date" style="font-size:.8rem; opacity:.8;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="proposal-body">
+
+          <div class="proposal-meta">
+            <div class="meta-block">
+              <div class="label">Prepared For</div>
+              <div id="p-client" class="value">—</div>
+            </div>
+            <div class="meta-block">
+              <div class="label">Estimated Timeline</div>
+              <div id="p-timeline" class="value">—</div>
+            </div>
+            <div class="meta-block">
+              <div class="label">Revisions Included</div>
+              <div id="p-revisions" class="value">—</div>
+            </div>
+            <div class="meta-block">
+              <div class="label">Proposal Valid For</div>
+              <div class="value">30 Days</div>
+            </div>
+          </div>
+
+          <table class="line-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th class="amount" style="text-align:right">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="p-lineItems"></tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td><i class="fas fa-check-circle me-2"></i>Project Total</td>
+                <td class="amount">$<span id="p-total">0.00</span></td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div class="terms-box">
+            <strong>Payment Terms:</strong> 50% deposit due upon project kickoff. Remaining 50% due upon delivery before launch.
+            All prices are quoted in USD. This proposal is valid for 30 days from the date above.
+            Additional scope changes beyond this quote will require a change order.
+            Included revisions apply to design changes only; structural/content changes are billed separately.
+          </div>
+
+          <div class="signature-row mt-4">
+            <div class="sig-block">
+              <div style="height:40px;"></div>
+              <div class="sig-label">Client Signature &amp; Date</div>
+              <div id="p-client-sig" class="fw-bold mt-1"></div>
+            </div>
+            <div class="sig-block">
+              <div style="height:40px;"></div>
+              <div class="sig-label">Designer / Agency Signature &amp; Date</div>
+              <div id="p-agency-sig" class="fw-bold mt-1"></div>
+            </div>
+          </div>
+
+          <p class="text-muted small text-center mt-4 mb-0">
+            Generated with the CHS Web Design &amp; Development Agency Calculator · chswebdesignndevelopment.com
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <a href="#" class="back-to-top text-decoration-none no-print" title="Back to Top">🚀</a>
+
+<script>
+const RATES = {
+  baseSite:           350,   // Base project fee
+  perPage:            150,   // Per page (complexity multiplied)
+  revisionExtra:       60,   // Per revision beyond included
+  hostingAnnual:      120,   // Per year of hosting
+  maintenanceMonthly:  75,   // Per month of maintenance
+};
+
+const TIMELINE_LABELS = {
+  '0':    'Standard (4–6 weeks)',
+  '0.15': 'Expedited (2–3 weeks)',
+  '0.25': 'Rush (1 week)',
+};
+
+function fmt(n) { return Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+// Addon chip toggles
+document.querySelectorAll('.addon-chip').forEach(chip => {
+  chip.addEventListener('click', () => chip.classList.toggle('active'));
+});
+
+document.getElementById('btnGenerate').addEventListener('click', generate);
+
+function generate() {
+  const errEl = document.getElementById('formError');
+  errEl.classList.add('d-none');
+
+  const agency  = document.getElementById('agencyName').value.trim();
+  const client  = document.getElementById('clientName').value.trim();
+  if (!agency || !client) {
+    errEl.textContent = 'Please enter your name and the client name before generating.';
+    errEl.classList.remove('d-none');
+    return;
+  }
+
+  const pages             = Math.max(1, parseInt(document.getElementById('pageCount').value) || 1);
+  const complexity        = parseFloat(document.querySelector('input[name="complexity"]:checked').value);
+  const revisionsIncluded = parseInt(document.getElementById('revisionsIncluded').value) || 0;
+  const revisionsExtra    = Math.max(0, parseInt(document.getElementById('revisionsExtra').value) || 0);
+  const timelineRate      = parseFloat(document.getElementById('timeline').value) || 0;
+  const hostingYears      = Math.max(0, parseInt(document.getElementById('hostingYears').value) || 0);
+  const maintenanceMonths = Math.max(0, parseInt(document.getElementById('maintenanceMonths').value) || 0);
+  const projectDesc       = document.getElementById('projectDesc').value.trim();
+
+  const complexityLabel = { '0.75':'Basic', '1.0':'Standard', '1.5':'Premium', '2.0':'Custom' }[String(complexity)] || 'Standard';
+
+  let lines = [];
+  let subtotal = 0;
+
+  // ── Core ──────────────────────────────────────────────
+  lines.push({ cat: true, desc: 'Core Development' });
+
+  lines.push({ desc: 'Base Project Setup & Configuration', amt: RATES.baseSite });
+  subtotal += RATES.baseSite;
+
+  const pageCost = pages * RATES.perPage * complexity;
+  lines.push({ desc: `${pages} Page${pages !== 1 ? 's' : ''} · ${complexityLabel} Design (${complexity}× rate)`, amt: pageCost });
+  subtotal += pageCost;
+
+  // ── Add-ons ───────────────────────────────────────────
+  const activeAddons = [...document.querySelectorAll('.addon-chip.active')];
+  if (activeAddons.length) {
+    lines.push({ cat: true, desc: 'Add-On Services' });
+    activeAddons.forEach(chip => {
+      const cost  = Number(chip.dataset.cost);
+      const label = chip.dataset.label;
+      lines.push({ desc: label, amt: cost });
+      subtotal += cost;
+    });
+  }
+
+  // ── Revisions ─────────────────────────────────────────
+  if (revisionsExtra > 0) {
+    lines.push({ cat: true, desc: 'Revisions' });
+    const revCost = revisionsExtra * RATES.revisionExtra;
+    lines.push({ desc: `${revisionsExtra} Additional Revision${revisionsExtra !== 1 ? 's' : ''} (beyond ${revisionsIncluded} included)`, amt: revCost });
+    subtotal += revCost;
+  }
+
+  // ── Timeline rush fee ─────────────────────────────────
+  if (timelineRate > 0) {
+    const rushCost = Math.round(subtotal * timelineRate);
+    lines.push({ cat: true, desc: 'Timeline Adjustment' });
+    lines.push({ desc: `${timelineRate === 0.15 ? 'Expedited' : 'Rush'} Delivery Fee (+${Math.round(timelineRate * 100)}%)`, amt: rushCost });
+    subtotal += rushCost;
+  }
+
+  // ── Recurring ─────────────────────────────────────────
+  const hasRecurring = hostingYears > 0 || maintenanceMonths > 0;
+  if (hasRecurring) {
+    lines.push({ cat: true, desc: 'Ongoing Services' });
+    if (hostingYears > 0) {
+      const cost = hostingYears * RATES.hostingAnnual;
+      lines.push({ desc: `Web Hosting (${hostingYears} year${hostingYears !== 1 ? 's' : ''} pre-paid)`, amt: cost });
+      subtotal += cost;
+    }
+    if (maintenanceMonths > 0) {
+      const cost = maintenanceMonths * RATES.maintenanceMonthly;
+      lines.push({ desc: `Monthly Maintenance Retainer (${maintenanceMonths} month${maintenanceMonths !== 1 ? 's' : ''})`, amt: cost });
+      subtotal += cost;
+    }
+  }
+
+  // ── Render ────────────────────────────────────────────
+  const tbody = document.getElementById('p-lineItems');
+  tbody.innerHTML = lines.map(l => l.cat
+    ? `<tr class="category-row"><td colspan="2">${esc(l.desc)}</td></tr>`
+    : `<tr><td>${esc(l.desc)}</td><td class="amount">$${fmt(l.amt)}</td></tr>`
+  ).join('');
+
+  document.getElementById('p-title').textContent  = (projectDesc ? projectDesc : 'Web Design & Development') ;
+  document.getElementById('p-desc').textContent   = projectDesc ? '' : 'Custom responsive website proposal';
+  document.getElementById('p-agency').textContent = agency;
+  document.getElementById('p-client').textContent = client;
+  document.getElementById('p-agency-sig').textContent = agency;
+  document.getElementById('p-client-sig').textContent = client;
+  document.getElementById('p-date').textContent   = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  document.getElementById('p-timeline').textContent = TIMELINE_LABELS[String(timelineRate)];
+  document.getElementById('p-revisions').textContent = revisionsIncluded + ' revision' + (revisionsIncluded !== 1 ? 's' : '');
+  document.getElementById('p-total').textContent  = fmt(subtotal);
+
+  // Show output, scroll to it
+  document.getElementById('proposalPlaceholder').style.display = 'none';
+  const output = document.getElementById('proposalOutput');
+  output.style.display = 'block';
+  output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
