@@ -54,6 +54,7 @@
     }
     .cal-day:hover:not(.cal-empty) { background: var(--p-accent-light); }
     .cal-day.today { border: 2px solid var(--p-accent); background: var(--p-accent-light); }
+    .cal-day.cal-selected:not(.today) { border: 2px solid #0d6efd; box-shadow: 0 0 0 2px rgba(13,110,253,.2); }
     .cal-day.day-off { background: #fafafa; color: #bbb; cursor: default; }
     .cal-day.other-month { color: #ccc; background: #f8f8f8; cursor: default; }
     .cal-day.cal-empty { border: none; background: transparent; cursor: default; }
@@ -1073,6 +1074,7 @@
     // ── State ─────────────────────────────────────────────────────────────
     let user, assignments = [], goals = [], gradeLog = [], prompts = [], calEvents = {};
     let calYear, calMonth, calDay, currentView = 'month';
+    let calSelectedYMD = ''; // full YYYY-MM-DD of the day the user last explicitly selected
     let schoolSpecialDates = {}, bellSchedule = [];  // from school calendar (schoolSpecialDates: {date → {type,label}})
 
     function blockBadgeInfo(type) {
@@ -1104,6 +1106,7 @@
 
     const toYMD = d => d.toISOString().split('T')[0];
     const todayStr = toYMD(today);
+    calSelectedYMD = todayStr;
 
     // ── Init ──────────────────────────────────────────────────────────────
     let isEnrolledInIntv = false;
@@ -1425,6 +1428,7 @@
 
         let cls = 'cal-day';
         if (isToday) cls += ' today';
+        if (ymd === calSelectedYMD && !isToday) cls += ' cal-selected';
         if (sdInfo && !isSchoolDay) cls += ' day-off';
 
         const dots = events.map(e => {
@@ -1491,8 +1495,9 @@
         const assignEvents = events.filter(e => e.type === 'assign');
 
         const isWeekendCol = i >= 5;
-        html += `<div class="week-col ${isToday ? 'border-2' : ''}" style="${isToday ? `border-color:var(--p-accent)!important` : ''}${isWeekendCol ? ';background:#f8f9fa;' : ''}">
-          <div class="week-day-name d-flex align-items-center gap-1 flex-wrap">
+        const isSelected = ymd === calSelectedYMD;
+        html += `<div class="week-col ${isToday ? 'border-2' : isSelected ? 'border-2' : ''}" style="${isToday ? `border-color:var(--p-accent)!important;` : isSelected ? `border-color:#0d6efd!important;box-shadow:0 0 0 2px rgba(13,110,253,.15);` : ''}${isWeekendCol ? 'background:#f8f9fa;' : ''}">
+          <div class="week-day-name d-flex align-items-center gap-1 flex-wrap" onclick="window.selectCalDay('${ymd}')" title="View ${dayNames[i]} ${dt.getMonth()+1}/${dt.getDate()} in Day view" style="cursor:pointer;">
             <span>${dayNames[i]} ${dt.getMonth()+1}/${dt.getDate()}</span>
             ${badge ? `<span class="cal-block-badge ${badge.cls}">${badge.label}</span>` : ''}
           </div>
@@ -1631,9 +1636,11 @@
         showTab('journal');
         loadJournalForDate(ymd);
       };
-      // Set calDay so Day view is ready for this date
+      // Set calDay so Week/Day view uses this date
+      calSelectedYMD = ymd;
       const parts = ymd.split('-');
       calYear = parseInt(parts[0]); calMonth = parseInt(parts[1]) - 1; calDay = parseInt(parts[2]);
+      renderMonthView(); // refresh selected highlight without closing modal
       // Add a View Day button dynamically
       const footer = document.querySelector('#dayModal .modal-footer');
       let dvBtn = document.getElementById('btnModalViewDay');
@@ -1863,9 +1870,11 @@
       if (currentView === 'day') {
         const d = new Date(calYear, calMonth, calDay - 1);
         calYear = d.getFullYear(); calMonth = d.getMonth(); calDay = d.getDate();
+        calSelectedYMD = toYMD(d);
       } else if (currentView === 'week') {
         const d = new Date(calYear, calMonth, calDay - 7);
         calYear = d.getFullYear(); calMonth = d.getMonth(); calDay = d.getDate();
+        calSelectedYMD = toYMD(d);
       } else {
         calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
       }
@@ -1875,16 +1884,20 @@
       if (currentView === 'day') {
         const d = new Date(calYear, calMonth, calDay + 1);
         calYear = d.getFullYear(); calMonth = d.getMonth(); calDay = d.getDate();
+        calSelectedYMD = toYMD(d);
       } else if (currentView === 'week') {
         const d = new Date(calYear, calMonth, calDay + 7);
         calYear = d.getFullYear(); calMonth = d.getMonth(); calDay = d.getDate();
+        calSelectedYMD = toYMD(d);
       } else {
         calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
       }
       renderCalendar();
     });
     document.getElementById('calToday').addEventListener('click', () => {
-      calYear = today.getFullYear(); calMonth = today.getMonth(); calDay = today.getDate(); renderCalendar();
+      calYear = today.getFullYear(); calMonth = today.getMonth(); calDay = today.getDate();
+      calSelectedYMD = todayStr;
+      renderCalendar();
     });
     function setView(v) {
       currentView = v;
@@ -1904,6 +1917,14 @@
     document.getElementById('viewMonth').addEventListener('click', () => setView('month'));
     document.getElementById('viewWeek').addEventListener('click', () => setView('week'));
     document.getElementById('viewDay').addEventListener('click', () => setView('day'));
+
+    // Selecting a day from week view header → jump to day view
+    window.selectCalDay = (ymd) => {
+      calSelectedYMD = ymd;
+      const parts = ymd.split('-');
+      calYear = parseInt(parts[0]); calMonth = parseInt(parts[1]) - 1; calDay = parseInt(parts[2]);
+      setView('day');
+    };
 
     // ── Decoration system ─────────────────────────────────────────────────
     let decorPrefs = JSON.parse(localStorage.getItem(`intv_decor_${user?.student_id || 'guest'}`) || '{}');
