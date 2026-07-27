@@ -2,123 +2,315 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Level 1 | CHS Web Design &amp; Development</title>
+  <title>Web Design I | CHS Web Design &amp; Development</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
   <link rel="shortcut icon" href="/images/favicon/favicon.ico">
   <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
-  
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
   <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-  <!-- Auth Guard formats the navigation menus! -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <script type="module" src="/js/auth-guard.js"></script>
-  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css" />
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet"/>
   <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/loader.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <style>
+    .course-hero {
+      background: linear-gradient(135deg, #000099 0%, #1f246b 100%);
+      color: #fff;
+      padding: 60px 32px 52px;
+      position: relative;
+      overflow: hidden;
+    }
+    .course-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(-45deg, transparent, transparent 30px, rgba(255,255,255,.025) 30px, rgba(255,255,255,.025) 31px);
+      pointer-events: none;
+    }
+    .course-hero .eyebrow { font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin-bottom: .5rem; }
+    .course-hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; margin-bottom: .5rem; }
+    .course-hero .subtitle { color: rgba(255,255,255,.82); font-size: 1.05rem; max-width: 560px; }
+    .course-hero .hero-badges { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.25rem; }
+    .hero-badge { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); border-radius: 20px; padding: .3rem .85rem; font-size: .8rem; font-weight: 600; }
+
+    .unit-card {
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      background: #fff;
+      padding: 1rem 1.25rem;
+      margin-bottom: .75rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: box-shadow .15s, transform .15s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .unit-card:hover { box-shadow: 0 4px 16px rgba(0,0,50,.1); transform: translateY(-2px); color: inherit; }
+    .unit-num {
+      min-width: 2.5rem; height: 2.5rem;
+      background: var(--primary-color, #000099);
+      color: #fff;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem; flex-shrink: 0;
+    }
+    .unit-card .unit-title { font-weight: 700; font-size: .95rem; color: var(--primary-color, #000099); margin-bottom: .15rem; }
+    .unit-card .unit-desc  { font-size: .82rem; color: #6b7a99; margin: 0; }
+    .unit-card .unit-icon  { color: rgba(0,0,153,.35); font-size: .85rem; margin-left: auto; align-self: center; }
+
+    .semester-label {
+      font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--primary-color, #000099); margin: 1.5rem 0 .75rem; padding-bottom: .4rem;
+      border-bottom: 2px solid #e8ecff;
+    }
+
+    .outcome-item { display: flex; align-items: flex-start; gap: .6rem; margin-bottom: .6rem; font-size: .88rem; }
+    .outcome-item .outcome-icon { color: #28a745; margin-top: 2px; flex-shrink: 0; }
+
+    .cte-card {
+      background: linear-gradient(135deg, #e8ecff, #f0f8e8);
+      border: 1px solid #c8d8ff;
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+    .cte-award { display: flex; align-items: center; gap: .6rem; margin-bottom: .4rem; font-size: .85rem; }
+    .cte-award i { color: #c09000; }
+
+    .tools-card {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+    }
+    .tools-card-header {
+      background: linear-gradient(135deg, #000099, #1f246b);
+      color: #fff;
+      border-radius: 9px 9px 0 0;
+      padding: .75rem 1.1rem;
+      font-weight: 700;
+      font-size: .9rem;
+    }
+    .tool-link { display: flex; align-items: center; gap: .6rem; padding: .55rem 1rem; font-size: .85rem; text-decoration: none; color: #1f246b; border-bottom: 1px solid #f0f0f0; transition: background .12s; }
+    .tool-link:hover { background: #f0f2ff; color: #000099; }
+    .tool-link:last-child { border-bottom: none; }
+    .tool-link i { width: 18px; text-align: center; color: #000099; }
+  </style>
 </head>
-<body>
-  <!--Navigation-->
-  <div class="container-fluid sticky-top">
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
     <div id="nav-placeholder"></div>
   </div>
 
-  <section class="container-ultrawide my-5">
-    <h1 class="text-center">CHS Web Design Track</h1>
-    
-    <div class="syllabus-header-card text-center">
-       <h2 class="gochi">Web Design I (Level 1A &amp; 1B)</h2>
-       <p class="mb-0">Building the Foundations | Year 1</p>
+  <!-- Hero -->
+  <div class="course-hero no-print">
+    <div class="container-ultrawide">
+      <div class="eyebrow"><i class="fas fa-laptop me-2"></i>CHS Web Design Track · Year 1</div>
+      <h1 class="gochi">Web Design I</h1>
+      <p class="subtitle">Build the foundations of a professional web career — from design thinking and wireframes to HTML, CSS, and your first JavaScript-powered portfolio.</p>
+      <div class="hero-badges">
+        <span class="hero-badge"><i class="fas fa-calendar me-1"></i>2 Semesters</span>
+        <span class="hero-badge"><i class="fas fa-layer-group me-1"></i>8 Units</span>
+        <span class="hero-badge"><i class="fas fa-graduation-cap me-1"></i>CTE Pathway</span>
+        <span class="hero-badge"><i class="fas fa-university me-1"></i>Up to 9 College Credits</span>
+      </div>
     </div>
+  </div>
 
-    <div class="row">
+  <div class="container-ultrawide my-4">
+    <div class="row g-4">
+
+      <!-- MAIN CONTENT -->
       <div class="col-lg-8">
-        <section id="description">
+
+        <!-- Course Description -->
+        <section id="description" class="mb-4">
           <h2 class="section-title">Course Description</h2>
-          <p><strong>Semester 1 (Foundations)</strong> focuses on the professional "design-first" process. Students learn career professionalism (SkillsUSA), web ethics, and law. They analyze audiences and create sitemaps/wireframes before writing HTML5.</p>
-          <p><strong>Semester 2 (Front-End)</strong> brings sites to life. Students master CSS (Box Model, Flexbox, Grid) and responsive layouts. They learn to embed media and ensure ADA compliance, finishing with a JavaScript-powered portfolio.</p>
+          <p><strong>Semester 1 (Design First)</strong> establishes the professional mindset before a single line of code is written. Students study web history, ethics, copyright law, and career paths. They learn audience analysis, user personas, and information architecture — then wireframe and sitemap a full website before opening a code editor.</p>
+          <p class="mb-0"><strong>Semester 2 (Building & Launching)</strong> brings everything to life. Students master CSS layout systems (Box Model, Flexbox, Grid), responsive design, and accessibility compliance. The year concludes with a JavaScript-powered personal portfolio — the first piece of your professional career.</p>
         </section>
 
+        <!-- Units -->
         <section id="units">
-          <h2 class="section-title">Key Learning Units</h2>
-          
-          <div class="card roadmap-card">
-            <div class="card-body">
-              <h5 class="fw-bold"><span class="module-num">1</span> The Developer's World</h5>
-              <p class="mb-0 text-muted small">History of the web, W3C standards, and the Guild mindset.</p>
-            </div>
-          </div>
+          <h2 class="section-title">Course Units</h2>
 
-          <div class="card roadmap-card">
-            <div class="card-body">
-              <h5 class="fw-bold"><span class="module-num">2</span> The Project Blueprint</h5>
-              <p class="mb-0 text-muted small">ADDIE Cycle, User Personas, SEO, and Wireframing.</p>
-            </div>
-          </div>
+          <div class="semester-label"><i class="fas fa-seedling me-2"></i>Semester 1 — Design Foundations</div>
 
-          <div class="card roadmap-card">
-            <div class="card-body">
-              <h5 class="fw-bold"><span class="module-num">3</span> Structural Bones</h5>
-              <p class="mb-0 text-muted small">HTML5 Semantic markup, lists, and link architecture.</p>
+          <a href="/year1/join-the-developers-guild.html" class="unit-card">
+            <div class="unit-num">1</div>
+            <div>
+              <div class="unit-title">The Developer's World</div>
+              <p class="unit-desc">History of the web, W3C standards, browser evolution, and the Developer's Guild mindset.</p>
             </div>
-          </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
 
-          <div class="card roadmap-card">
-            <div class="card-body">
-              <h5 class="fw-bold"><span class="module-num">4</span> Visual Presentation</h5>
-              <p class="mb-0 text-muted small">Responsive CSS, Flexbox, and CSS Grid Mastery.</p>
+          <a href="/year1/the-rules-how-not-to-get-sued.html" class="unit-card">
+            <div class="unit-num">2</div>
+            <div>
+              <div class="unit-title">The "Rules" — Web Law &amp; Ethics</div>
+              <p class="unit-desc">Copyright, Creative Commons, ADA compliance, privacy law, and how not to get sued.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <a href="/year1/the-blueprint.html" class="unit-card">
+            <div class="unit-num">3</div>
+            <div>
+              <div class="unit-title">The Blueprint — Planning &amp; Design Process</div>
+              <p class="unit-desc">ADDIE cycle, user personas, SEO basics, sitemaps, and wireframing with industry tools.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <a href="/year1/the-why-intro-to-uiux.html" class="unit-card">
+            <div class="unit-num">4</div>
+            <div>
+              <div class="unit-title">The "Why" — UI/UX Design</div>
+              <p class="unit-desc">Design principles, color theory, typography, visual hierarchy, and usability testing.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <div class="semester-label mt-4"><i class="fas fa-code me-2"></i>Semester 2 — Building the Web</div>
+
+          <a href="/year1/the-bones-intro-to-html.html" class="unit-card">
+            <div class="unit-num">5</div>
+            <div>
+              <div class="unit-title">The "Bones" — HTML5</div>
+              <p class="unit-desc">Semantic HTML5 structure, document flow, lists, tables, forms, and link architecture.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <a href="/year1/the-clothes-intro-to-css.html" class="unit-card">
+            <div class="unit-num">6</div>
+            <div>
+              <div class="unit-title">The "Clothes" — CSS3</div>
+              <p class="unit-desc">Selectors, the Box Model, positioning, transitions, and styling a full multi-page site.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <a href="/year1/the-style-advanced-css-layout.html" class="unit-card">
+            <div class="unit-num">7</div>
+            <div>
+              <div class="unit-title">The "Style" — Advanced CSS Layout</div>
+              <p class="unit-desc">Flexbox, CSS Grid, responsive breakpoints, and building mobile-first layouts.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <a href="/year1/sights-sounds-making-it-pop-html-media.html" class="unit-card">
+            <div class="unit-num">8</div>
+            <div>
+              <div class="unit-title">Sights &amp; Sounds — HTML Media</div>
+              <p class="unit-desc">Embedding images, audio, video, and animation; performance optimization and ADA media requirements.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+        </section>
+
+        <!-- Guild & Tools callout -->
+        <section id="guild" class="mt-5">
+          <h2 class="section-title">The Developer's Guild</h2>
+          <p>This class runs like a real studio. Every student is an employee — you clock in, earn a simulated paycheck, track your own grades and habits, and contribute work to the Guild Gallery. These aren't gimmicks; they're the professional habits the industry actually looks for.</p>
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                  <div class="fw-bold mb-1"><i class="fas fa-chart-line me-2 text-primary"></i>My Grades</div>
+                  <p class="small text-muted mb-0">Live progress dashboard showing weighted category scores, habit streaks, and attendance — visible any time from the Student Tools menu.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                  <div class="fw-bold mb-1"><i class="fas fa-seedling me-2 text-success"></i>My Planner</div>
+                  <p class="small text-muted mb-0">Daily habit tracker and journal built into your student dashboard. Contributes to the Career Readiness grade category.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                  <div class="fw-bold mb-1"><i class="fas fa-clock me-2 text-warning"></i>Employee Portal</div>
+                  <p class="small text-muted mb-0">Clock in and out daily like a real job. On-time punches earn a $5 bonus. Your paycheck is generated every two weeks.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                  <div class="fw-bold mb-1"><i class="fas fa-paint-brush me-2 text-info"></i>Guild Gallery</div>
+                  <p class="small text-muted mb-0">Your finished projects live here. Choose who can see them: Public, Classmates only, or Private.</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
+
       </div>
 
+      <!-- SIDEBAR -->
       <div class="col-lg-4">
         <div class="sidebar-sticky">
-          <div class="card shadow-sm mb-4">
-            <div class="card-header bg-site-primary fw-bold">Course Outcomes</div>
+
+          <!-- Outcomes -->
+          <div class="card shadow-sm mb-4 border-0">
+            <div class="card-header fw-bold" style="background:linear-gradient(135deg,#000099,#1f246b);color:#fff;border-radius:8px 8px 0 0;">Course Outcomes</div>
             <div class="card-body">
-              <ul class="list-unstyled small mb-0">
-                <li class="mb-2">✔️ Design multi-page websites</li>
-                <li class="mb-2">✔️ Write/Debug HTML5 &amp; CSS3</li>
-                <li class="mb-2">✔️ Remediate ADA/A11y issues</li>
-                <li>✔️ Basic DOM Manipulation (JS)</li>
-              </ul>
+              <div class="outcome-item"><i class="fas fa-check-circle outcome-icon"></i><span>Design multi-page websites from wireframe to launch</span></div>
+              <div class="outcome-item"><i class="fas fa-check-circle outcome-icon"></i><span>Write and debug semantic HTML5 &amp; CSS3</span></div>
+              <div class="outcome-item"><i class="fas fa-check-circle outcome-icon"></i><span>Build responsive, mobile-first layouts with Flexbox &amp; Grid</span></div>
+              <div class="outcome-item"><i class="fas fa-check-circle outcome-icon"></i><span>Identify and remediate ADA / accessibility issues</span></div>
+              <div class="outcome-item"><i class="fas fa-check-circle outcome-icon"></i><span>Manipulate the DOM with basic JavaScript</span></div>
+              <div class="outcome-item mb-0"><i class="fas fa-check-circle outcome-icon"></i><span>Present a finished portfolio to a real audience</span></div>
             </div>
           </div>
 
-          <div class="card roadmap-card mb-4 border-info">
-            <div class="card-body">
-              <h6 class="card-title fw-bold">Requirements</h6>
-              <p class="small text-muted mb-0">Length: 2 Semesters</p>
-              <p class="small text-muted">Pathway: CTE Web Design</p>
+          <!-- CTE Completer -->
+          <div class="cte-card mb-4">
+            <h6 class="fw-bold mb-3"><i class="fas fa-trophy me-2 text-warning"></i>CTE Completer Goal</h6>
+            <p class="small text-muted mb-3">Complete the full program (Web Design I → II → AS) with a 3.0+ GPA and pass your final assessments to earn:</p>
+            <div class="cte-award"><i class="fas fa-certificate"></i><span class="small">Graduation Red Cord</span></div>
+            <div class="cte-award"><i class="fas fa-medal"></i><span class="small">College &amp; Career Ready Seal</span></div>
+            <div class="cte-award"><i class="fas fa-id-card"></i><span class="small">Industry Credential</span></div>
+            <div class="cte-award mb-0"><i class="fas fa-university"></i><span class="small">Up to 9 College Credits</span></div>
+          </div>
+
+          <!-- Quick links -->
+          <div class="tools-card mb-4">
+            <div class="tools-card-header"><i class="fas fa-link me-2"></i>Student Tools</div>
+            <div>
+              <a href="/student/grades.html" class="tool-link"><i class="fas fa-chart-line"></i>My Grades</a>
+              <a href="/student/planner.html" class="tool-link"><i class="fas fa-seedling"></i>My Planner</a>
+              <a href="/gallery.html" class="tool-link"><i class="fas fa-paint-brush"></i>Guild Gallery</a>
+              <a href="/rank.html" class="tool-link"><i class="fas fa-trophy"></i>Guild Rankings</a>
+              <a href="/student/paystubs.html" class="tool-link"><i class="fas fa-file-invoice-dollar"></i>My Paystubs</a>
+              <a href="/calendar.html" class="tool-link"><i class="fas fa-calendar-alt"></i>Calendar</a>
             </div>
           </div>
-          <div class="card roadmap-card mb-4 border-success shadow-sm">
-            <div class="card-body">
-              <h6 class="card-title fw-bold text-success">🏆 CTE Completer Goal</h6>
-              <p class="small text-muted mb-2">Complete the program (3.0+ GPA) and pass your final assessments to earn:</p>
-              <ul class="small text-muted mb-0 ps-3">
-                <li>Graduation Red Cord</li>
-                <li>College & Career Ready Seal</li>
-                <li>Industry Credential</li>
-                <li>Up to 9 College Credits</li>
-              </ul>
-            </div>
-          </div>
-          <!-- Integrated button from Homepage selected code -->
-          <a href="level2andUp.html" class="btn btn-primary w-100 mb-2">Web Design II & AS (Advanced Studies)</a>
-          <a href="discipline.html" class="btn btn-outline-danger w-100 mb-2">Discipline & Tardies Plan</a>
+
+          <a href="/level2andUp.html" class="btn btn-primary w-100 mb-2 fw-bold"><i class="fas fa-arrow-right me-2"></i>Web Design II &amp; AS →</a>
+          <a href="/grading.html" class="btn btn-outline-primary w-100 mb-2">Grading Policy</a>
+          <a href="/discipline.html" class="btn btn-outline-danger w-100 mb-2">Discipline &amp; Tardies</a>
+          <a href="/readme-files/student-guide.html" class="btn btn-outline-secondary w-100">Student How-To Guide</a>
         </div>
       </div>
+
     </div>
-  </section>
+  </div>
 
-<div id="footer-placeholder"></div>
-<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+  <div id="footer-placeholder"></div>
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 </body>
-
 </html>

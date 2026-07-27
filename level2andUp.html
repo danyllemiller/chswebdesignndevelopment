@@ -2,98 +2,308 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Advanced Web | CHS Web Design &amp; Development</title>
+  <title>Web Design II &amp; AS | CHS Web Design &amp; Development</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
   <link rel="shortcut icon" href="/images/favicon/favicon.ico">
   <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
-  
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
   <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-  <!-- Auth Guard formats the navigation menus! -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <script type="module" src="/js/auth-guard.js"></script>
-  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css" />
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet"/>
   <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/loader.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <style>
+    .course-hero {
+      background: linear-gradient(135deg, #1f246b 0%, #0d0e3a 100%);
+      color: #fff;
+      padding: 60px 32px 52px;
+      position: relative;
+      overflow: hidden;
+    }
+    .course-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(-45deg, transparent, transparent 30px, rgba(255,255,255,.025) 30px, rgba(255,255,255,.025) 31px);
+      pointer-events: none;
+    }
+    .course-hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #c09000, #f0c840, #c09000);
+    }
+    .course-hero .eyebrow { font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin-bottom: .5rem; }
+    .course-hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; margin-bottom: .5rem; }
+    .course-hero .subtitle { color: rgba(255,255,255,.82); font-size: 1.05rem; max-width: 560px; }
+    .course-hero .hero-badges { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.25rem; }
+    .hero-badge { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); border-radius: 20px; padding: .3rem .85rem; font-size: .8rem; font-weight: 600; }
+
+    .unit-card {
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      background: #fff;
+      padding: 1rem 1.25rem;
+      margin-bottom: .75rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: box-shadow .15s, transform .15s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .unit-card:hover { box-shadow: 0 4px 16px rgba(0,0,50,.1); transform: translateY(-2px); color: inherit; }
+    .unit-num {
+      min-width: 2.5rem; height: 2.5rem;
+      background: var(--primary-color, #000099);
+      color: #fff;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem; flex-shrink: 0;
+    }
+    .unit-num.gold { background: linear-gradient(135deg, #c09000, #f0c840); color: #002d6e; }
+    .unit-card .unit-title { font-weight: 700; font-size: .95rem; color: var(--primary-color, #000099); margin-bottom: .15rem; }
+    .unit-card .unit-desc  { font-size: .82rem; color: #6b7a99; margin: 0; }
+    .unit-card .unit-icon  { color: rgba(0,0,153,.35); font-size: .85rem; margin-left: auto; align-self: center; }
+
+    .semester-label {
+      font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--primary-color, #000099); margin: 1.5rem 0 .75rem; padding-bottom: .4rem;
+      border-bottom: 2px solid #e8ecff;
+    }
+
+    .skill-pill { display: inline-flex; align-items: center; gap: 5px; background: #f0f2ff; color: #000099; border: 1px solid #c8d0f0; border-radius: 20px; padding: .3rem .8rem; font-size: .8rem; font-weight: 600; margin: .25rem; }
+
+    .agency-card {
+      background: linear-gradient(135deg, #f0f8e8, #e8ecff);
+      border: 1px solid #c8d8ff;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .agency-card h5 { color: #000099; font-weight: 800; }
+
+    .tools-card { background: #fff; border: 1px solid #dee2e6; border-radius: 10px; }
+    .tools-card-header { background: linear-gradient(135deg, #000099, #1f246b); color: #fff; border-radius: 9px 9px 0 0; padding: .75rem 1.1rem; font-weight: 700; font-size: .9rem; }
+    .tool-link { display: flex; align-items: center; gap: .6rem; padding: .55rem 1rem; font-size: .85rem; text-decoration: none; color: #1f246b; border-bottom: 1px solid #f0f0f0; transition: background .12s; }
+    .tool-link:hover { background: #f0f2ff; color: #000099; }
+    .tool-link:last-child { border-bottom: none; }
+    .tool-link i { width: 18px; text-align: center; color: #000099; }
+
+    .outcome-item { display: flex; align-items: flex-start; gap: .6rem; margin-bottom: .6rem; font-size: .88rem; }
+    .outcome-item .outcome-icon { color: #28a745; margin-top: 2px; flex-shrink: 0; }
+  </style>
 </head>
-<body>
-  <div class="container-fluid sticky-top">
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
     <div id="nav-placeholder"></div>
   </div>
 
-  <section class="container-ultrawide my-5">
-    <h1 class="text-center">CHS Web Design Track</h1>
-    
-    <div class="syllabus-header-card text-center">
-       <h2 class="gochi">Web Design II, III &amp; AS</h2>
-       <p class="mb-0">Full-Stack Development | Year 2+</p>
+  <!-- Hero -->
+  <div class="course-hero no-print">
+    <div class="container-ultrawide">
+      <div class="eyebrow"><i class="fas fa-rocket me-2"></i>CHS Web Design Track · Year 2 &amp; Beyond</div>
+      <h1 class="gochi">Web Design II, III &amp; AS</h1>
+      <p class="subtitle">You can build websites. Now learn to build <em>products</em> — full-stack apps powered by APIs, databases, and real deployment pipelines. Real clients. Real deadlines. Real stakes.</p>
+      <div class="hero-badges">
+        <span class="hero-badge"><i class="fas fa-calendar me-1"></i>Year 2+</span>
+        <span class="hero-badge"><i class="fas fa-layer-group me-1"></i>8 Advanced Units</span>
+        <span class="hero-badge"><i class="fas fa-briefcase me-1"></i>In-Class Agency</span>
+        <span class="hero-badge"><i class="fas fa-university me-1"></i>Up to 9 College Credits</span>
+      </div>
     </div>
+  </div>
 
-    <div class="row">
+  <div class="container-ultrawide my-4">
+    <div class="row g-4">
+
+      <!-- MAIN CONTENT -->
       <div class="col-lg-8">
-        <section id="description">
+
+        <!-- Description -->
+        <section id="description" class="mb-4">
           <h2 class="section-title">Capstone Description</h2>
-          <p>This course transitions students from front-end designers to full-stack engineers. Students master the "back-end" by connecting applications to live databases and third-party APIs. We emphasize professional version control (Git) and cloud deployment.</p>
+          <p>This course transitions students from front-end designers into full-stack engineers. The focus shifts from "how to build a page" to "how to build a system." Students connect applications to live databases, consume third-party APIs, and ship real products to real users using professional tools: Git, GitHub, Figma, WordPress, and cloud hosting.</p>
+          <p class="mb-0">Advanced Studies (AS) students operate as a working in-class agency — taking on community and school projects with actual clients, stakeholders, and deadlines. Your code runs in production.</p>
         </section>
 
-        <section id="advanced-units">
+        <!-- Units -->
+        <section id="units">
           <h2 class="section-title">Advanced Units</h2>
-          
-          <div class="card roadmap-card">
-            <div class="card-body">
-              <h5 class="fw-bold"><span class="module-num">5</span> Advanced UI/UX &amp; Cloud</h5>
-              <p class="mb-0 text-muted small">Pro Figma prototyping, Git/GitHub collaboration, and Netlify hosting.</p>
-            </div>
-          </div>
 
-          <div class="card roadmap-card">
-            <div class="card-body">
-              <h5 class="fw-bold"><span class="module-num">6</span> Persistent Data (SQL)</h5>
-              <p class="mb-0 text-muted small">Relational database architecture and writing SQL queries.</p>
-            </div>
-          </div>
+          <div class="semester-label"><i class="fas fa-brain me-2"></i>Year 2 — Full-Stack Development</div>
 
-          <div class="card roadmap-card">
-            <div class="card-body">
-              <h5 class="fw-bold"><span class="module-num">7</span> CMS Management</h5>
-              <p class="mb-0 text-muted small">WordPress configuration, custom themes, and no-code strategy.</p>
+          <a href="/year2/the-brains-intro-to-javascript.html" class="unit-card">
+            <div class="unit-num">9</div>
+            <div>
+              <div class="unit-title">The "Brains" — Introduction to JavaScript</div>
+              <p class="unit-desc">Variables, functions, events, DOM manipulation, and making web pages actually do things.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <a href="/year2/the-game-dev-advanced-js-game-logic.html" class="unit-card">
+            <div class="unit-num">10</div>
+            <div>
+              <div class="unit-title">Advanced JavaScript — Game Logic &amp; Animation</div>
+              <p class="unit-desc">Arrays, loops, conditionals, Canvas API, and building interactive projects from scratch.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <a href="/year2/the-cloud-collaboration-hosting.html" class="unit-card">
+            <div class="unit-num">11</div>
+            <div>
+              <div class="unit-title">The Cloud — Git, GitHub &amp; Deployment</div>
+              <p class="unit-desc">Version control with Git, team collaboration on GitHub, and shipping to live hosting via Netlify or a VPS.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <a href="/year2/the-manager-cms-platforms.html" class="unit-card">
+            <div class="unit-num">12</div>
+            <div>
+              <div class="unit-title">The "Manager" — CMS Platforms</div>
+              <p class="unit-desc">WordPress setup, custom themes, plugin strategy, and deciding when to code vs. when to use a CMS.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <a href="/year2/the-network-intro-to-apis.html" class="unit-card">
+            <div class="unit-num">13</div>
+            <div>
+              <div class="unit-title">The "Network" — APIs &amp; JSON</div>
+              <p class="unit-desc">REST API concepts, fetch(), JSON parsing, and connecting your front-end to live data sources.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <a href="/year2/the-brain-databases.html" class="unit-card">
+            <div class="unit-num">14</div>
+            <div>
+              <div class="unit-title">The "Brain" — Databases &amp; SQL</div>
+              <p class="unit-desc">Relational database design, SQL queries, connecting a Node.js/PHP backend to MariaDB/MySQL.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <div class="semester-label mt-4 border-bottom-0" style="border-bottom: 2px solid #e8ecff !important;"><i class="fas fa-star me-2" style="color:#c09000"></i>Advanced Studies (AS) — Agency Tier</div>
+
+          <a href="/year2/the-game-never-ends.html" class="unit-card">
+            <div class="unit-num gold">15</div>
+            <div>
+              <div class="unit-title">The Future — Emerging Tech &amp; Specialization</div>
+              <p class="unit-desc">AI tools in dev workflows, security fundamentals, performance optimization, and choosing your career track.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+
+          <a href="/year2/the-final-boss-going-live.html" class="unit-card">
+            <div class="unit-num gold">16</div>
+            <div>
+              <div class="unit-title">The "Launch" — Final Boss</div>
+              <p class="unit-desc">Ship a production-ready capstone project: real server, real domain, real client, full documentation.</p>
+            </div>
+            <i class="fas fa-chevron-right unit-icon"></i>
+          </a>
+        </section>
+
+        <!-- In-Class Agency -->
+        <section id="agency" class="mt-5">
+          <h2 class="section-title">The In-Class Agency</h2>
+          <div class="agency-card mb-4">
+            <h5><i class="fas fa-briefcase me-2"></i>You Are the Studio</h5>
+            <p class="mb-3">Advanced students don't just do assignments — they run an agency. You take on real community projects, set your own timelines, and deliver to stakeholders outside this classroom. Past projects have included migrating local non-profits to WordPress, building custom dashboards for the school, and creating apps used by staff daily.</p>
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <div class="small fw-bold text-primary mb-1"><i class="fas fa-clock me-2"></i>Employee Portal</div>
+                <p class="small text-muted mb-0">Clock in and out like a real job. Your time is tracked, your paychecks are issued bi-weekly, and on-time punches earn a bonus.</p>
+              </div>
+              <div class="col-sm-6">
+                <div class="small fw-bold text-primary mb-1"><i class="fas fa-trophy me-2"></i>Guild Rankings</div>
+                <p class="small text-muted mb-0">Your Guild Score (grades 50%, habits 25%, attendance 25%) puts you on the class leaderboard. Top performers get featured projects.</p>
+              </div>
+              <div class="col-sm-6">
+                <div class="small fw-bold text-primary mb-1"><i class="fas fa-paint-brush me-2"></i>Guild Gallery</div>
+                <p class="small text-muted mb-0">Your finished projects are published here. You control visibility — Public, Classmates, or Private — and can update it any time.</p>
+              </div>
+              <div class="col-sm-6">
+                <div class="small fw-bold text-primary mb-1"><i class="fas fa-calculator me-2"></i>Client Proposals</div>
+                <p class="small text-muted mb-0">Use the built-in Pricing Calculator to quote real clients — itemized line items, project totals, and a printable professional proposal.</p>
+              </div>
             </div>
           </div>
         </section>
 
-        <section id="internship">
-          <h2 class="section-title">In-Class Internships</h2>
-          <p>Advanced students work with community stakeholders on real projects, such as migrating "Entrepreneurs In Action" to WordPress or building custom apps for the CHS Career Closet.</p>
+        <!-- Full-stack skills -->
+        <section id="skills" class="mt-4">
+          <h2 class="section-title">Skills You Leave With</h2>
+          <div>
+            <span class="skill-pill"><i class="fab fa-js-square"></i> JavaScript (ES6+)</span>
+            <span class="skill-pill"><i class="fab fa-node-js"></i> Node.js / Express</span>
+            <span class="skill-pill"><i class="fas fa-database"></i> SQL / MariaDB</span>
+            <span class="skill-pill"><i class="fab fa-git-alt"></i> Git / GitHub</span>
+            <span class="skill-pill"><i class="fab fa-wordpress"></i> WordPress</span>
+            <span class="skill-pill"><i class="fas fa-network-wired"></i> REST APIs</span>
+            <span class="skill-pill"><i class="fas fa-server"></i> Linux / VPS Hosting</span>
+            <span class="skill-pill"><i class="fab fa-figma"></i> Figma (Advanced)</span>
+            <span class="skill-pill"><i class="fas fa-shield-alt"></i> Web Security Basics</span>
+            <span class="skill-pill"><i class="fas fa-project-diagram"></i> Agile Workflow</span>
+          </div>
         </section>
+
       </div>
 
+      <!-- SIDEBAR -->
       <div class="col-lg-4">
         <div class="sidebar-sticky">
-          <div class="card shadow-sm mb-4">
-            <div class="card-header bg-site-primary fw-bold">Full-Stack Skills</div>
+
+          <!-- Outcomes -->
+          <div class="card shadow-sm mb-4 border-0">
+            <div class="card-header fw-bold" style="background:linear-gradient(135deg,#1f246b,#0d0e3a);color:#fff;border-radius:8px 8px 0 0;">Advanced Outcomes</div>
             <div class="card-body">
-              <ul class="list-unstyled small mb-0">
-                <li class="mb-2">🚀 GitHub Version Control</li>
-                <li class="mb-2">🚀 SQL &amp; NoSQL Databases</li>
-                <li class="mb-2">🚀 WordPress &amp; CMS Tech</li>
-                <li>🚀 API Integration (JSON)</li>
-              </ul>
+              <div class="outcome-item"><i class="fas fa-check-circle outcome-icon"></i><span>Build and deploy full-stack web applications</span></div>
+              <div class="outcome-item"><i class="fas fa-check-circle outcome-icon"></i><span>Write SQL queries and design relational schemas</span></div>
+              <div class="outcome-item"><i class="fas fa-check-circle outcome-icon"></i><span>Consume and build REST APIs with JSON</span></div>
+              <div class="outcome-item"><i class="fas fa-check-circle outcome-icon"></i><span>Use Git and GitHub on a real team project</span></div>
+              <div class="outcome-item"><i class="fas fa-check-circle outcome-icon"></i><span>Configure and customize WordPress for a client</span></div>
+              <div class="outcome-item mb-0"><i class="fas fa-check-circle outcome-icon"></i><span>Ship a capstone project to a live production server</span></div>
             </div>
           </div>
 
-          <a href="contact.html" class="btn btn-outline-primary w-100">Project Inquiry</a>
+          <!-- Quick links -->
+          <div class="tools-card mb-4">
+            <div class="tools-card-header"><i class="fas fa-link me-2"></i>Student Tools</div>
+            <div>
+              <a href="/student/grades.html" class="tool-link"><i class="fas fa-chart-line"></i>My Grades</a>
+              <a href="/student/planner.html" class="tool-link"><i class="fas fa-seedling"></i>My Planner</a>
+              <a href="/gallery.html" class="tool-link"><i class="fas fa-paint-brush"></i>Guild Gallery</a>
+              <a href="/rank.html" class="tool-link"><i class="fas fa-trophy"></i>Guild Rankings</a>
+              <a href="/student/paystubs.html" class="tool-link"><i class="fas fa-file-invoice-dollar"></i>My Paystubs</a>
+              <a href="/pricing-calculator.html" class="tool-link"><i class="fas fa-calculator"></i>Pricing Calculator</a>
+              <a href="/calendar.html" class="tool-link"><i class="fas fa-calendar-alt"></i>Calendar</a>
+            </div>
+          </div>
+
+          <a href="/contact.html" class="btn btn-primary w-100 mb-2 fw-bold"><i class="fas fa-envelope me-2"></i>Project Inquiry</a>
+          <a href="/level1.html" class="btn btn-outline-primary w-100 mb-2"><i class="fas fa-arrow-left me-2"></i>Web Design I</a>
+          <a href="/grading.html" class="btn btn-outline-secondary w-100 mb-2">Grading Policy</a>
+          <a href="/readme-files/student-guide.html" class="btn btn-outline-secondary w-100">Student How-To Guide</a>
         </div>
       </div>
+
     </div>
-  </section>
+  </div>
 
-<div id="footer-placeholder"></div>
-<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+  <div id="footer-placeholder"></div>
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 </body>
-
 </html>

@@ -7,87 +7,292 @@
 
   <link rel="shortcut icon" href="/images/favicon/favicon.ico">
   <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
-  
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
   <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <script type="module" src="/js/auth-guard.js"></script>
-  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css" />
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet"/>
   <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/loader.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+
+  <style>
+    .grading-hero {
+      background: linear-gradient(135deg, #000099 0%, #1f246b 100%);
+      color: #fff;
+      padding: 56px 32px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .grading-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(-45deg, transparent, transparent 30px, rgba(255,255,255,.025) 30px, rgba(255,255,255,.025) 31px);
+      pointer-events: none;
+    }
+    .grading-hero .eyebrow { font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin-bottom: .5rem; }
+    .grading-hero h1 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 800; margin-bottom: .4rem; }
+    .grading-hero p  { color: rgba(255,255,255,.82); max-width: 520px; margin: 0; font-size: 1rem; }
+
+    /* Weight bars */
+    .weight-block { margin-bottom: 1.25rem; }
+    .weight-block .weight-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .35rem; }
+    .weight-block .weight-name  { font-weight: 700; font-size: .95rem; }
+    .weight-block .weight-pct   { font-size: 1.3rem; font-weight: 800; color: var(--primary-color, #000099); }
+    .weight-block .weight-bar   { height: 10px; border-radius: 5px; background: #e9ecef; overflow: hidden; }
+    .weight-block .weight-fill  { height: 100%; border-radius: 5px; transition: width 1s ease; }
+    .weight-block .weight-desc  { font-size: .82rem; color: #6b7a99; margin-top: .3rem; }
+
+    .fill-assign  { background: linear-gradient(90deg, #000099, #3a3fb0); }
+    .fill-project { background: linear-gradient(90deg, #6d916c, #45b065); }
+    .fill-exam    { background: linear-gradient(90deg, #c09000, #f0c840); }
+    .fill-career  { background: linear-gradient(90deg, #45b7aa, #2d9e92); }
+
+    .weight-card {
+      border: 1px solid #dee2e6;
+      border-radius: 12px;
+      background: #fff;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .weight-card-title {
+      font-size: .75rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;
+      color: #fff; background: linear-gradient(135deg, #000099, #1f246b);
+      border-radius: 6px; padding: .35rem .75rem; display: inline-block; margin-bottom: 1.25rem;
+    }
+
+    /* Career Readiness breakdown */
+    .cr-item { display: flex; align-items: flex-start; gap: .875rem; padding: .875rem 0; border-bottom: 1px solid #f0f0f0; }
+    .cr-item:last-child { border-bottom: none; }
+    .cr-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+    .cr-item .cr-body .cr-label { font-weight: 700; font-size: .9rem; margin-bottom: .15rem; }
+    .cr-item .cr-body .cr-detail { font-size: .82rem; color: #6b7a99; margin: 0; }
+
+    .fine-print-item { display: flex; align-items: flex-start; gap: .6rem; padding: .6rem 0; border-bottom: 1px solid #f5f5f5; font-size: .85rem; }
+    .fine-print-item:last-child { border-bottom: none; }
+    .fine-print-item i { margin-top: 2px; flex-shrink: 0; }
+
+    .gradebook-callout {
+      background: linear-gradient(135deg, #e8ecff, #f0f8e8);
+      border: 1px solid #c8d8ff;
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+    }
+  </style>
 </head>
-<body>
-  <div class="container-fluid sticky-top">
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
     <div id="nav-placeholder"></div>
   </div>
 
-  <section class="container-ultrawide my-5">
-    <h1 class="text-center">CHS Web Design Track</h1>
-    
-    <div class="syllabus-header-card text-center">
-       <h2 class="gochi">Grading Policy</h2>
-       <p class="mb-0">Standards-Based Assessment | Carson High School</p>
+  <!-- Hero -->
+  <div class="grading-hero no-print">
+    <div class="container-ultrawide">
+      <div class="eyebrow"><i class="fas fa-balance-scale me-2"></i>CHS Web Design Track</div>
+      <h1 class="gochi">Grading Policy</h1>
+      <p>Standards-based assessment at Carson High School. Your grade reflects mastery — not just completion.</p>
     </div>
+  </div>
 
-    <div class="row">
+  <div class="container-ultrawide my-4">
+    <div class="row g-4">
+
+      <!-- MAIN CONTENT -->
       <div class="col-lg-8">
-        <section id="policy">
+
+        <section id="overview" class="mb-2">
           <h2 class="section-title">Assessment Overview</h2>
-          <p>Grades provide feedback on your progress toward mastering web standards. We use the official Carson High School grading scale across all assessments, including labs, projects, and career readiness tasks.</p>
-          
-          <div class="card mb-4">
-            <div class="card-header bg-site-primary fw-bold">Web Design I Weights</div>
-            <div class="card-body">
-              <p class="mb-1"><strong>50% Assignments &amp; Skills:</strong> Technical computer-based work and written theory.</p>
-              <p class="mb-1"><strong>20% Projects &amp; Quizzes:</strong> Unit exams (written and practical).</p>
-              <p class="mb-1"><strong>20% Semester Exams:</strong> Final demonstrations of mastery.</p>
-              <p class="mb-0"><strong>10% Career Readiness:</strong> Professionalism, time management, and participation.</p>
+          <p>Grades provide feedback on your progress toward mastering professional web standards. We use the official Carson High School grading scale across all assessments — labs, projects, career readiness, and exams. Every category has a specific weight that reflects its importance to your development as a web professional.</p>
+        </section>
+
+        <!-- WD1 weights -->
+        <div class="weight-card">
+          <div class="weight-card-title"><i class="fas fa-laptop me-2"></i>Web Design I — Category Weights</div>
+
+          <div class="weight-block">
+            <div class="weight-label">
+              <span class="weight-name"><i class="fas fa-tasks me-2" style="color:#000099"></i>Assignments &amp; Skills</span>
+              <span class="weight-pct">50%</span>
             </div>
+            <div class="weight-bar"><div class="weight-fill fill-assign" style="width:50%"></div></div>
+            <div class="weight-desc">Technical computer-based labs and written theory work. The largest category — daily quality of work matters most.</div>
           </div>
 
-          <div class="card mb-4">
-            <div class="card-header bg-site-primary fw-bold">Web Design II, III &amp; AS Weights</div>
-            <div class="card-body">
-              <p class="mb-1"><strong>35% Assignments &amp; Skills:</strong> High-level coding and implementation.</p>
-              <p class="mb-1"><strong>35% Projects &amp; Quizzes:</strong> Unit projects and research.</p>
-              <p class="mb-1"><strong>20% Semester Exams:</strong> Advanced technical applications.</p>
-              <p class="mb-0"><strong>10% Career Readiness:</strong> Workplace professionalism and ethics.</p>
+          <div class="weight-block">
+            <div class="weight-label">
+              <span class="weight-name"><i class="fas fa-project-diagram me-2" style="color:#6d916c"></i>Projects &amp; Quizzes</span>
+              <span class="weight-pct">20%</span>
+            </div>
+            <div class="weight-bar"><div class="weight-fill fill-project" style="width:20%"></div></div>
+            <div class="weight-desc">Unit exams (written and practical), quizzes, and major project deliverables.</div>
+          </div>
+
+          <div class="weight-block">
+            <div class="weight-label">
+              <span class="weight-name"><i class="fas fa-file-alt me-2" style="color:#c09000"></i>Semester Exams</span>
+              <span class="weight-pct">20%</span>
+            </div>
+            <div class="weight-bar"><div class="weight-fill fill-exam" style="width:20%"></div></div>
+            <div class="weight-desc">End-of-semester demonstrations of full-course mastery. Cumulative and performance-based.</div>
+          </div>
+
+          <div class="weight-block">
+            <div class="weight-label">
+              <span class="weight-name"><i class="fas fa-user-tie me-2" style="color:#45b7aa"></i>Career Readiness</span>
+              <span class="weight-pct">10%</span>
+            </div>
+            <div class="weight-bar"><div class="weight-fill fill-career" style="width:10%"></div></div>
+            <div class="weight-desc">Professionalism, time management, habit tracking, and participation. See breakdown below.</div>
+          </div>
+        </div>
+
+        <!-- WD2+ weights -->
+        <div class="weight-card">
+          <div class="weight-card-title"><i class="fas fa-rocket me-2"></i>Web Design II, III &amp; AS — Category Weights</div>
+
+          <div class="weight-block">
+            <div class="weight-label">
+              <span class="weight-name"><i class="fas fa-tasks me-2" style="color:#000099"></i>Assignments &amp; Skills</span>
+              <span class="weight-pct">35%</span>
+            </div>
+            <div class="weight-bar"><div class="weight-fill fill-assign" style="width:35%"></div></div>
+            <div class="weight-desc">High-level coding labs, implementation tasks, and technical skill demonstrations.</div>
+          </div>
+
+          <div class="weight-block">
+            <div class="weight-label">
+              <span class="weight-name"><i class="fas fa-project-diagram me-2" style="color:#6d916c"></i>Projects &amp; Quizzes</span>
+              <span class="weight-pct">35%</span>
+            </div>
+            <div class="weight-bar"><div class="weight-fill fill-project" style="width:35%"></div></div>
+            <div class="weight-desc">Unit projects, client deliverables, research, and in-class agency work. Weight increases at this level because projects are the product.</div>
+          </div>
+
+          <div class="weight-block">
+            <div class="weight-label">
+              <span class="weight-name"><i class="fas fa-file-alt me-2" style="color:#c09000"></i>Semester Exams</span>
+              <span class="weight-pct">20%</span>
+            </div>
+            <div class="weight-bar"><div class="weight-fill fill-exam" style="width:20%"></div></div>
+            <div class="weight-desc">Advanced technical applications and full-stack demonstrations of end-of-semester mastery.</div>
+          </div>
+
+          <div class="weight-block">
+            <div class="weight-label">
+              <span class="weight-name"><i class="fas fa-user-tie me-2" style="color:#45b7aa"></i>Career Readiness</span>
+              <span class="weight-pct">10%</span>
+            </div>
+            <div class="weight-bar"><div class="weight-fill fill-career" style="width:10%"></div></div>
+            <div class="weight-desc">Workplace professionalism, ethics, and the daily habits that define your professional reputation.</div>
+          </div>
+        </div>
+
+        <!-- Career Readiness breakdown -->
+        <section id="career-readiness">
+          <h2 class="section-title">Career Readiness — What Counts</h2>
+          <p>The 10% Career Readiness category isn't participation points. It reflects the habits that separate someone who can code from someone who can <em>hold a job</em>. Here's exactly what feeds into it:</p>
+
+          <div class="weight-card">
+            <div class="cr-item">
+              <div class="cr-icon" style="background:#e8ecff;"><i class="fas fa-clock" style="color:#000099"></i></div>
+              <div class="cr-body">
+                <div class="cr-label">Clock-In Punctuality</div>
+                <p class="cr-detail">Use the Employee Portal (on My Grades) to clock in when class starts and out when it ends. On-time punches earn a <strong>$5 bonus</strong> on your bi-weekly simulated paycheck. Tardiness is tracked — just like a real job. Your attendance data directly feeds your Guild Score.</p>
+              </div>
+            </div>
+            <div class="cr-item">
+              <div class="cr-icon" style="background:#f0f8e8;"><i class="fas fa-seedling" style="color:#28a745"></i></div>
+              <div class="cr-body">
+                <div class="cr-label">Daily Habit Tracker (My Planner)</div>
+                <p class="cr-detail">My Planner on your student dashboard tracks daily habits — focus, effort, preparation, mindset. Completing your daily tracker consistently shows you're showing up mentally, not just physically. Habit data is averaged over the last 28 days and contributes 25% of your Guild Score.</p>
+              </div>
+            </div>
+            <div class="cr-item">
+              <div class="cr-icon" style="background:#fff8e1;"><i class="fas fa-comments" style="color:#c09000"></i></div>
+              <div class="cr-body">
+                <div class="cr-label">Classroom Conduct &amp; Professionalism</div>
+                <p class="cr-detail">Respectful communication, following directions without reminders, helping classmates, and representing the studio well during client interactions. This is the part of the job description that says "team player."</p>
+              </div>
+            </div>
+            <div class="cr-item">
+              <div class="cr-icon" style="background:#e8f7f6;"><i class="fas fa-tasks" style="color:#45b7aa"></i></div>
+              <div class="cr-body">
+                <div class="cr-label">Time Management &amp; Self-Direction</div>
+                <p class="cr-detail">Do you use work time to work? Do you start tasks without being told twice? Do you manage your own deadlines? At the advanced level this is especially critical — the in-class agency doesn't have a supervisor hovering over you.</p>
+              </div>
             </div>
           </div>
         </section>
 
+        <!-- Academic Integrity -->
         <section id="plagiarism">
           <h2 class="section-title">Academic Integrity</h2>
-          <p>Plagiarism includes turning in someone else's work as your own or copying exact code without attribution. Students caught plagiarizing (both the giver and the taker) will be given a <strong>ZERO</strong>.</p>
+          <p>Plagiarism means turning in someone else's work as your own or copying code without attribution. Both the giver and the taker receive a <strong>ZERO</strong>. Using AI tools (ChatGPT, Claude, Copilot) is allowed for learning and assistance — submitting AI output as your own original work without understanding or attribution is not. If you use it, cite it and be able to explain every line.</p>
         </section>
+
       </div>
 
+      <!-- SIDEBAR -->
       <div class="col-lg-4">
         <div class="sidebar-sticky">
-          <div class="card shadow-sm mb-4">
-            <div class="card-header bg-site-primary fw-bold">The Fine Print</div>
-            <div class="card-body p-0">
-              <ul class="list-group list-group-flush small">
-                <li class="list-group-item"><strong>No Extra Credit:</strong> I grade on mastery. Do the assigned work well.</li>
-                <li class="list-group-item"><strong>Redos:</strong> Redo any project until you are happy (within the current or next unit).</li>
-                <li class="list-group-item"><strong>Life Happens:</strong> Request extensions 24 hours in advance via email.</li>
-                <li class="list-group-item"><strong>Late Penalty:</strong> Work is accepted for 60% (D-) after the grace period.</li>
-              </ul>
+
+          <!-- The Fine Print -->
+          <div class="card shadow-sm mb-4 border-0">
+            <div class="card-header fw-bold" style="background:linear-gradient(135deg,#000099,#1f246b);color:#fff;border-radius:8px 8px 0 0;"><i class="fas fa-file-contract me-2"></i>The Fine Print</div>
+            <div class="card-body py-2 px-3">
+              <div class="fine-print-item">
+                <i class="fas fa-times-circle text-danger"></i>
+                <span><strong>No Extra Credit.</strong> Grades reflect mastery. Do the assigned work well.</span>
+              </div>
+              <div class="fine-print-item">
+                <i class="fas fa-redo text-success"></i>
+                <span><strong>Redos Welcome.</strong> Redo any project until you're satisfied — within the current or immediately following unit.</span>
+              </div>
+              <div class="fine-print-item">
+                <i class="fas fa-heartbeat text-warning"></i>
+                <span><strong>Life Happens.</strong> Request extensions at least 24 hours in advance by email. Don't wait until the day of.</span>
+              </div>
+              <div class="fine-print-item">
+                <i class="fas fa-clock text-secondary"></i>
+                <span><strong>Late Penalty.</strong> Work submitted after the grace period is accepted for a maximum of 60% (D−).</span>
+              </div>
             </div>
           </div>
 
-          <a href="expectations.html" class="btn btn-outline-primary w-100 mb-2">Back to Expectations</a>
+          <!-- Live gradebook callout -->
+          <div class="gradebook-callout mb-4">
+            <div class="fw-bold mb-2"><i class="fas fa-chart-line me-2 text-primary"></i>Track Your Own Grades</div>
+            <p class="small text-muted mb-3">Your weighted category scores, habit streaks, and attendance record are visible any time on the <strong>My Grades</strong> page. No waiting for a report card — you can see exactly where you stand right now.</p>
+            <a href="/student/grades.html" class="btn btn-primary btn-sm fw-bold w-100"><i class="fas fa-chart-line me-2"></i>Go to My Grades</a>
+          </div>
+
+          <!-- Guild Score -->
+          <div class="card shadow-sm mb-4 border-0">
+            <div class="card-header fw-bold" style="background:linear-gradient(135deg,#c09000,#f0c840);color:#002d6e;border-radius:8px 8px 0 0;"><i class="fas fa-trophy me-2"></i>Guild Score</div>
+            <div class="card-body small">
+              <p class="mb-2">Your Guild Score is a separate class ranking built from three signals:</p>
+              <div class="d-flex justify-content-between mb-1 fw-bold"><span>Grades</span><span class="text-primary">50%</span></div>
+              <div class="d-flex justify-content-between mb-1 fw-bold"><span>Habits (Planner)</span><span style="color:#6d916c">25%</span></div>
+              <div class="d-flex justify-content-between mb-3 fw-bold"><span>Attendance (Clock-In)</span><span style="color:#45b7aa">25%</span></div>
+              <a href="/rank.html" class="btn btn-outline-warning btn-sm w-100 fw-bold">View Guild Rankings</a>
+            </div>
+          </div>
+
+          <a href="/level1.html" class="btn btn-outline-primary w-100 mb-2">Web Design I Overview</a>
+          <a href="/level2andUp.html" class="btn btn-outline-primary w-100 mb-2">Web Design II &amp; AS</a>
+          <a href="/expectations.html" class="btn btn-outline-secondary w-100">Classroom Expectations</a>
         </div>
       </div>
+
     </div>
-  </section>
+  </div>
 
-<div id="footer-placeholder"></div>
-<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+  <div id="footer-placeholder"></div>
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 </body>
-
 </html>
