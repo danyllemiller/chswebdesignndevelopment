@@ -2070,8 +2070,8 @@
       const selParts = (selVal && selVal !== '__other__') ? selVal.split('|') : null;
       const cls = (selParts && selParts[1]) || document.getElementById('glClass').value.trim();
       const periodLabel = (selParts && selParts[0]) || document.getElementById('glPeriod').value.trim();
-      console.log('[GradeLog save] selVal:', JSON.stringify(selVal), '| cls:', JSON.stringify(cls), '| score:', JSON.stringify(score));
-      if (!cls || score === '') { alert('Please select a period/class and enter a score.'); return; }
+      if (!cls) { alert('Please select a period / class.'); return; }
+      if (score === '') { alert('Please enter a score.'); return; }
       await apiFetch('/api/intervention/grade-log', { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ student_id: user.student_id, period_label: periodLabel,
           class_name: cls, assignment: document.getElementById('glAssignment').value,
