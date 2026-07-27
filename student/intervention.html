@@ -70,7 +70,7 @@
     .goal-stat-num { font-size:2.2rem; font-weight:900; line-height:1; }
     /* ── Example suggestion chips ───────────────────────── */
     .suggest-chip { display:inline-flex; align-items:center; gap:4px; border:1px dashed #adb5bd; border-radius:20px; padding:3px 10px; font-size:.72rem; cursor:pointer; margin:3px; background:var(--p-bg); color:var(--p-text); transition:background .15s,border-color .15s; }
-    .suggest-chip:hover { background:var(--p-accent-light); border-color:var(--p-accent); }
+    .suggest-chip:hover { background:#edf4ed; border-color:var(--p-accent); color:#1a3a1a !important; }
     .cal-day.day-off { background: #fafafa; color: #bbb; cursor: default; }
     .cal-day.other-month { color: #ccc; background: #f8f8f8; cursor: default; }
     .cal-day.cal-empty { border: none; background: transparent; cursor: default; }
@@ -610,15 +610,15 @@
       <div id="goalStats" class="mb-3"></div>
 
       <!-- Example goals (collapsible) -->
-      <div class="card shadow-sm border-0 mb-3 intv-edit-only">
-        <div class="card-header bg-white border-0 py-2">
-          <details>
-            <summary class="fw-bold small text-success" style="cursor:pointer;list-style:none;">
-              <i class="fas fa-lightbulb me-1 text-warning"></i>Goal Ideas — click any to add it
-            </summary>
-            <div class="row g-2 mt-2" id="goalSuggestions"></div>
-          </details>
-        </div>
+      <div class="card shadow-sm border-0 mb-3 intv-edit-only" style="background:var(--p-bg);">
+        <details>
+          <summary class="card-header bg-white border-0 py-2 fw-bold small text-success" style="cursor:pointer;list-style:none;border-radius:inherit;">
+            <i class="fas fa-lightbulb me-1 text-warning"></i>Goal Ideas — click any to add it
+          </summary>
+          <div class="card-body pt-2 pb-3" style="background:var(--p-bg);">
+            <div class="row g-2" id="goalSuggestions"></div>
+          </div>
+        </details>
       </div>
 
       <!-- Add button -->
@@ -3390,6 +3390,14 @@
     };
 
     // ── Suggested habits ─────────────────────────────────────────────────
+    window.addHabitSuggestion = (name) => {
+      if (isReadOnly || habitList.find(h => h.name === name)) return;
+      habitList.push({ id: Date.now().toString(), name });
+      saveHabits();
+      renderHabitTracker();
+      renderHabitGrid();
+    };
+
     const HABIT_SUGGESTIONS = [
       { emoji: '📚', text: 'Study notes for 20 minutes' },
       { emoji: '✅', text: 'Check assignment board' },
@@ -3407,10 +3415,7 @@
     const habitSugEl = document.getElementById('habitSuggestions');
     if (habitSugEl) {
       habitSugEl.innerHTML = HABIT_SUGGESTIONS.map(s =>
-        `<span class="suggest-chip" onclick="
-          if(habitList.find(h=>h.name===this.dataset.name)){return;}
-          habitList.push({id:Date.now().toString(),name:this.dataset.name});
-          saveHabits();renderHabitTracker();renderHabitGrid();" data-name="${s.emoji} ${s.text}">
+        `<span class="suggest-chip" onclick="window.addHabitSuggestion(this.dataset.name)" data-name="${s.emoji} ${s.text}">
           ${s.emoji} ${s.text}</span>`
       ).join('');
     }
