@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>My Paystubs | CHS Web Design &amp; Development</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/student-pages.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet"/>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    .period-card {
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      background: #fff;
+      transition: box-shadow .2s;
+    }
+    .period-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+    .period-card .period-header {
+      background: linear-gradient(135deg, #000099, #1f246b);
+      color: #fff;
+      border-radius: 9px 9px 0 0;
+      padding: 1rem 1.25rem .75rem;
+    }
+    .period-card.estimated .period-header { background: linear-gradient(135deg, #5c669e, #7a82ab); }
+    .period-card .period-body { padding: 1rem 1.25rem; }
+
+    .stat-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; opacity: .75; }
+    .stat-val   { font-size: 1.4rem; font-weight: 800; }
+
+    /* Paystub print layout */
+    .paystub-doc {
+      font-family: 'Courier New', Courier, monospace;
+      border: 2px solid #222;
+      border-radius: 6px;
+      background: #fff;
+      color: #000;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .paystub-doc .stub-header { border-bottom: 2px solid #222; padding: 1rem 1.5rem; }
+    .paystub-doc .stub-body   { padding: 1.25rem 1.5rem; }
+    .paystub-doc table { width: 100%; font-size: .85rem; }
+    .paystub-doc table th { border-bottom: 1px solid #222; padding-bottom: .25rem; }
+    .paystub-doc table td { padding: .2rem 0; }
+
+    /* W-2 style */
+    .w2-doc {
+      border: 2px solid #000099;
+      border-radius: 8px;
+      background: #f0f2ff;
+      padding: 1.5rem;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .w2-box {
+      border: 1px solid #000099;
+      background: #fff;
+      border-radius: 4px;
+      padding: .5rem .75rem;
+      margin-bottom: .5rem;
+    }
+    .w2-box-label { font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: #000099; }
+    .w2-box-val   { font-size: 1.25rem; font-weight: 800; color: #1a1a2e; }
+
+    .status-finalized { background: #d1fae5; color: #065f46; }
+    .status-estimated { background: #fef3c7; color: #92400e; }
+
+    @media print {
+      .no-print { display: none !important; }
+      .paystub-doc, .w2-doc { border-color: #000 !important; }
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container my-5">
+
+    <div class="d-flex align-items-center mb-4">
+      <div>
+        <h1 class="gochi text-primary mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>My Paystubs</h1>
+        <p class="text-muted mb-0" id="subtitleLine">Loading employee records…</p>
+      </div>
+      <div class="ms-auto d-flex gap-2">
+        <select id="yearSelect" class="form-select form-select-sm fw-bold" style="width:110px;"></select>
+        <button class="btn btn-outline-primary btn-sm fw-bold" onclick="window.print()"><i class="fas fa-print me-1"></i>Print</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" id="paystubTabs">
+      <li class="nav-item"><a class="nav-link active fw-bold" id="tab-periods" data-bs-toggle="tab" href="#panePeriods"><i class="fas fa-calendar-alt me-1"></i>Pay Periods</a></li>
+      <li class="nav-item"><a class="nav-link fw-bold" id="tab-tax" data-bs-toggle="tab" href="#paneTax"><i class="fas fa-landmark me-1"></i>Tax Summary (W-2)</a></li>
+    </ul>
+
+    <div class="tab-content">
+
+      <!-- ── Pay Periods Tab ── -->
+      <div class="tab-pane fade show active" id="panePeriods">
+        <div id="periodsContainer">
+          <div class="text-center text-muted py-5">
+            <div class="spinner-border text-primary mb-3"></div>
+            <p>Fetching payroll records…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tax Summary Tab ── -->
+      <div class="tab-pane fade" id="paneTax">
+        <div id="taxContainer">
+          <div class="text-center text-muted py-5">
+            <div class="spinner-border text-primary mb-3"></div>
+            <p>Loading year-end summary…</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Paystub Detail Modal -->
+  <div class="modal fade" id="paystubModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-body p-0">
+          <div id="paystubModalContent" class="p-3 p-md-4"></div>
+        </div>
+        <div class="modal-footer bg-light no-print">
+          <button class="btn btn-outline-primary btn-sm" onclick="window.print()"><i class="fas fa-print me-1"></i>Print</button>
+          <button class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <a href="#" class="back-to-top text-decoration-none no-print" title="Back to Top">🚀</a>
+
+<script type="module">
+import { getLoggedInUser } from '/js/modules/user-session.js';
+import { apiFetch } from '/js/modules/api-client.js';
+
+const user = getLoggedInUser();
+if (!user) { location.href = '/login.html'; }
+
+const ON_TIME_BONUS = 5.00;
+const ANCHOR_DATE   = new Date('2026-08-02T00:00:00');
+
+function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+function getPayPeriodForDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  const diffDays = Math.floor((d - ANCHOR_DATE) / 86400000);
+  const periodsPassed = Math.floor(diffDays / 14);
+  const ppStart = new Date(ANCHOR_DATE.getTime() + periodsPassed * 14 * 86400000);
+  const ppEnd   = new Date(ppStart.getTime() + 13 * 86400000);
+  const fmt = dt => `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+  return { start: fmt(ppStart), end: fmt(ppEnd) };
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function fmtMoney(n) { return '$' + Number(n || 0).toFixed(2); }
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let currentStudentName = '';
+let currentRole        = 'Web Developer';
+let currentRate        = 35.00;
+
+// ── Render finalized paystub card ─────────────────────────────────
+function renderFinalCard(stub) {
+  return `
+    <div class="period-card mb-4">
+      <div class="period-header">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="small opacity-75 mb-1"><i class="fas fa-calendar-check me-1"></i>Pay Period</div>
+            <div class="fw-bold fs-5">${fmtDate(stub.period_start)} – ${fmtDate(stub.period_end)}</div>
+          </div>
+          <span class="badge status-finalized fw-bold"><i class="fas fa-check-circle me-1"></i>Official</span>
+        </div>
+        <div class="row g-2 mt-2">
+          <div class="col-4">
+            <div class="stat-label">Role</div>
+            <div class="fw-bold small">${escHtml(stub.role_title)}</div>
+          </div>
+          <div class="col-4">
+            <div class="stat-label">Rate</div>
+            <div class="fw-bold small">${fmtMoney(stub.hourly_rate)}/hr</div>
+          </div>
+          <div class="col-4">
+            <div class="stat-label">Gross Pay</div>
+            <div class="fw-bold fs-6 text-warning">${fmtMoney(stub.gross_pay)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="period-body">
+        <div class="row g-2 text-center mb-3">
+          <div class="col-6 col-sm-3">
+            <div class="stat-label">Hours</div>
+            <div class="stat-val text-primary">${Number(stub.regular_hours).toFixed(2)}</div>
+          </div>
+          <div class="col-6 col-sm-3">
+            <div class="stat-label">Bonuses</div>
+            <div class="stat-val text-success">${stub.bonus_count}</div>
+          </div>
+          <div class="col-6 col-sm-3">
+            <div class="stat-label">Deductions</div>
+            <div class="stat-val text-danger">−${fmtMoney(stub.total_deductions)}</div>
+          </div>
+          <div class="col-6 col-sm-3">
+            <div class="stat-label">Net Pay</div>
+            <div class="stat-val text-success">${fmtMoney(stub.net_pay)}</div>
+          </div>
+        </div>
+        <button class="btn btn-outline-primary btn-sm fw-bold" onclick="showStubModal(${JSON.stringify(stub).replace(/"/g,'&quot;')})">
+          <i class="fas fa-file-invoice-dollar me-1"></i>View Earnings Statement
+        </button>
+        <span class="ms-3 text-muted small">YTD Gross: ${fmtMoney(stub.ytd_gross)}</span>
+      </div>
+    </div>`;
+}
+
+// ── Render estimated card (computed from timesheets) ───────────────
+function renderEstimatedCard(period, shifts) {
+  let totalMins = 0, bonusCount = 0;
+  for (const t of shifts) {
+    if (t.clock_in && t.clock_out) {
+      const mins = Math.round((new Date(`${t.date}T${t.clock_out}`) - new Date(`${t.date}T${t.clock_in}`)) / 60000);
+      if (mins > 0) totalMins += mins;
+    }
+    if (t.in_answer  === 'On Time') bonusCount++;
+    if (t.out_answer === 'On Time') bonusCount++;
+  }
+  const hours     = totalMins / 60;
+  const gross     = hours * currentRate + bonusCount * ON_TIME_BONUS;
+  const fedTax    = gross * 0.10;
+  const ssTax     = gross * 0.062;
+  const medTax    = gross * 0.0145;
+  const totalDed  = fedTax + ssTax + medTax;
+  const net       = gross - totalDed;
+  const stub = {
+    period_start: period.start, period_end: period.end,
+    role_title: currentRole, hourly_rate: currentRate,
+    regular_hours: hours.toFixed(4), bonus_count: bonusCount, bonus_rate: ON_TIME_BONUS,
+    gross_pay: gross.toFixed(2), fed_tax: fedTax.toFixed(2), ss_tax: ssTax.toFixed(2),
+    med_tax: medTax.toFixed(2), total_deductions: totalDed.toFixed(2), net_pay: net.toFixed(2), ytd_gross: '—'
+  };
+  return `
+    <div class="period-card estimated mb-4">
+      <div class="period-header">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="small opacity-75 mb-1"><i class="fas fa-calendar me-1"></i>Pay Period</div>
+            <div class="fw-bold fs-5">${fmtDate(period.start)} – ${fmtDate(period.end)}</div>
+          </div>
+          <span class="badge status-estimated fw-bold"><i class="fas fa-clock me-1"></i>Estimated</span>
+        </div>
+        <div class="row g-2 mt-2">
+          <div class="col-4"><div class="stat-label">Role</div><div class="fw-bold small">${escHtml(currentRole)}</div></div>
+          <div class="col-4"><div class="stat-label">Rate</div><div class="fw-bold small">${fmtMoney(currentRate)}/hr</div></div>
+          <div class="col-4"><div class="stat-label">Est. Gross</div><div class="fw-bold fs-6 text-warning">${fmtMoney(gross)}</div></div>
+        </div>
+      </div>
+      <div class="period-body">
+        <div class="row g-2 text-center mb-3">
+          <div class="col-6 col-sm-3"><div class="stat-label">Hours</div><div class="stat-val text-primary">${hours.toFixed(2)}</div></div>
+          <div class="col-6 col-sm-3"><div class="stat-label">Bonuses</div><div class="stat-val text-success">${bonusCount}</div></div>
+          <div class="col-6 col-sm-3"><div class="stat-label">Deductions</div><div class="stat-val text-danger">−${fmtMoney(totalDed)}</div></div>
+          <div class="col-6 col-sm-3"><div class="stat-label">Est. Net</div><div class="stat-val text-success">${fmtMoney(net)}</div></div>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm fw-bold" onclick="showStubModal(${JSON.stringify(stub).replace(/"/g,'&quot;')})">
+          <i class="fas fa-file-invoice-dollar me-1"></i>View Estimated Statement
+        </button>
+        <span class="ms-2 text-muted small">${shifts.length} shift${shifts.length !== 1 ? 's' : ''} this period</span>
+      </div>
+    </div>`;
+}
+
+// ── Paystub document modal ─────────────────────────────────────────
+window.showStubModal = function(stub) {
+  if (typeof stub === 'string') stub = JSON.parse(stub.replace(/&quot;/g, '"'));
+  const isEstimated = !stub.run_by;
+  document.getElementById('paystubModalContent').innerHTML = `
+    <div class="paystub-doc">
+      <div class="stub-header">
+        <div class="row align-items-start">
+          <div class="col-7">
+            <div class="fw-bold fs-5 text-uppercase" style="letter-spacing:-1px">CHS Web Design Studio</div>
+            <div class="small">1111 N Saliman Rd · Carson City, NV 89701</div>
+          </div>
+          <div class="col-5 text-end">
+            <div class="fw-bold fs-5 text-success">${isEstimated ? 'ESTIMATED STATEMENT' : 'EARNINGS STATEMENT'}</div>
+            <div class="small fw-bold">Pay Period: ${fmtDate(stub.period_start)} – ${fmtDate(stub.period_end)}</div>
+            <div class="small fw-bold">Pay Date: ${fmtDate(stub.period_end)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="stub-body">
+        <div class="border border-dark p-2 mb-3">
+          <div class="row small fw-bold">
+            <div class="col-6 border-end border-dark">EMPLOYEE: <span class="text-primary">${escHtml(currentStudentName)}</span></div>
+            <div class="col-6">TITLE: <span class="text-primary">${escHtml(stub.role_title)}</span></div>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-7 mb-3 mb-md-0">
+            <div class="fw-bold text-decoration-underline mb-2 small">EARNINGS</div>
+            <table class="table table-sm table-borderless small fw-bold mb-0">
+              <thead class="border-bottom border-dark">
+                <tr><th>Description</th><th class="text-center">Rate</th><th class="text-center">Hrs/Qty</th><th class="text-end">Total</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Regular Pay</td>
+                  <td class="text-center">${fmtMoney(stub.hourly_rate)}</td>
+                  <td class="text-center">${Number(stub.regular_hours).toFixed(2)}</td>
+                  <td class="text-end">${fmtMoney(Number(stub.regular_hours) * Number(stub.hourly_rate))}</td>
+                </tr>
+                <tr>
+                  <td>Performance Bonus</td>
+                  <td class="text-center">${fmtMoney(stub.bonus_rate || 5)}</td>
+                  <td class="text-center">${stub.bonus_count}</td>
+                  <td class="text-end">${fmtMoney(Number(stub.bonus_count) * Number(stub.bonus_rate || 5))}</td>
+                </tr>
+              </tbody>
+              <tfoot class="border-top border-dark">
+                <tr><td colspan="3"><strong>GROSS PAY</strong></td><td class="text-end text-success fs-6">${fmtMoney(stub.gross_pay)}</td></tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="col-5">
+            <div class="fw-bold text-decoration-underline mb-2 small">TAXES &amp; WITHHOLDINGS</div>
+            <table class="table table-sm table-borderless small fw-bold text-danger mb-0">
+              <thead class="border-bottom border-dark">
+                <tr><th>Description</th><th class="text-end">Amount</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Federal Income Tax</td><td class="text-end">−${fmtMoney(stub.fed_tax)}</td></tr>
+                <tr><td>Social Security (FICA)</td><td class="text-end">−${fmtMoney(stub.ss_tax)}</td></tr>
+                <tr><td>Medicare (FICA)</td><td class="text-end">−${fmtMoney(stub.med_tax)}</td></tr>
+              </tbody>
+              <tfoot class="border-top border-dark">
+                <tr><td><strong>TOTAL DEDUCTIONS</strong></td><td class="text-end">−${fmtMoney(stub.total_deductions)}</td></tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        <div class="row bg-light border border-2 border-dark p-2 align-items-center mx-0">
+          <div class="col-6 small fw-bold text-muted">YTD GROSS: ${stub.ytd_gross !== '—' ? fmtMoney(stub.ytd_gross) : '—'}</div>
+          <div class="col-6 text-end"><strong>NET PAY:</strong> <span class="text-success fs-4 fw-bold">${fmtMoney(stub.net_pay)}</span></div>
+        </div>
+        <div class="text-center mt-3 text-muted" style="font-size:.65rem;">
+          ${isEstimated ? 'ESTIMATED — ' : ''}SIMULATED EARNINGS STATEMENT FOR EDUCATIONAL PURPOSES ONLY. NO REAL CURRENCY IS EXCHANGED.
+        </div>
+      </div>
+    </div>`;
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('paystubModal')).show();
+};
+
+// ── Main init ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!user) return;
+
+  // Get role & rate
+  try {
+    const roster = await apiFetch(`/api/payroll/roster?username=${encodeURIComponent(user.username)}`);
+    currentStudentName = `${roster.first_name || ''} ${roster.last_name || ''}`.trim() || user.username;
+    if (roster.title) currentRole = roster.title;
+    if (roster.hourly_rate) currentRate = Number(roster.hourly_rate);
+  } catch { currentStudentName = user.username; }
+
+  document.getElementById('subtitleLine').textContent = `${currentRole} · ${currentStudentName}`;
+
+  // Populate year selector
+  const currentYear = new Date().getFullYear();
+  const yearSel = document.getElementById('yearSelect');
+  for (let y = currentYear; y >= currentYear - 2; y--) {
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y; yearSel.appendChild(opt);
+  }
+
+  await loadPeriodsTab();
+  await loadTaxTab(currentYear);
+
+  yearSel.addEventListener('change', () => loadTaxTab(Number(yearSel.value)));
+});
+
+async function loadPeriodsTab() {
+  try {
+    // Load finalized paystubs
+    const stubData = await apiFetch(`/api/paystubs/my?student_id=${encodeURIComponent(user.student_id)}`);
+    const finalStubs = stubData.paystubs || [];
+    const finalPeriodKeys = new Set(finalStubs.map(s => s.period_start + '_' + s.period_end));
+
+    // Load timesheets to generate estimated periods
+    const tsData  = await apiFetch(`/api/payroll/timesheets?student_id=${encodeURIComponent(user.student_id)}`);
+    const shifts  = tsData.timesheets || [];
+
+    // Group timesheets by pay period
+    const periodMap = {};
+    shifts.forEach(t => {
+      const pp  = getPayPeriodForDate(t.date);
+      const key = pp.start + '_' + pp.end;
+      if (!periodMap[key]) periodMap[key] = { period: pp, shifts: [] };
+      periodMap[key].shifts.push(t);
+    });
+
+    // Sort periods newest first
+    const allPeriods = Object.values(periodMap).sort((a, b) => b.period.end.localeCompare(a.period.end));
+
+    let html = '';
+    if (!finalStubs.length && !allPeriods.length) {
+      html = `<div class="text-center text-muted py-5"><i class="fas fa-clock fa-3x mb-3 d-block opacity-25"></i><p>No shifts logged yet. Use the timeclock to clock in when the school year begins.</p></div>`;
+    } else {
+      // Show finalized stubs first (they match timesheets for same period but are official)
+      const shownKeys = new Set();
+      for (const stub of finalStubs) {
+        shownKeys.add(stub.period_start + '_' + stub.period_end);
+        html += renderFinalCard(stub);
+      }
+      // Show estimated periods not yet finalized
+      for (const { period, shifts: s } of allPeriods) {
+        const key = period.start + '_' + period.end;
+        if (!shownKeys.has(key)) html += renderEstimatedCard(period, s);
+      }
+    }
+    document.getElementById('periodsContainer').innerHTML = html;
+  } catch {
+    document.getElementById('periodsContainer').innerHTML = `<div class="alert alert-danger">Could not load payroll records.</div>`;
+  }
+}
+
+async function loadTaxTab(year) {
+  document.getElementById('taxContainer').innerHTML = `<div class="text-center text-muted py-4"><div class="spinner-border text-primary mb-3"></div><p>Computing ${year} totals…</p></div>`;
+  try {
+    const data = await apiFetch(`/api/paystubs/ytd?student_id=${encodeURIComponent(user.student_id)}&year=${year}`);
+    const ytd = data.ytd;
+    if (!ytd || !Number(ytd.total_gross)) {
+      document.getElementById('taxContainer').innerHTML = `<div class="text-center text-muted py-5"><i class="fas fa-file-alt fa-3x mb-3 d-block opacity-25"></i><p>No finalized pay periods for ${year} yet. Tax summary generates after payroll is run for this year.</p></div>`;
+      return;
+    }
+    document.getElementById('taxContainer').innerHTML = `
+      <div class="w2-doc">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <div class="fw-bold fs-5 text-primary" style="font-family:Georgia,serif">CHS Web Design Studio</div>
+            <div class="text-muted small">1111 N Saliman Rd · Carson City, NV 89701</div>
+          </div>
+          <div class="text-end">
+            <div class="fw-bold fs-4 text-primary">W-2</div>
+            <div class="small fw-bold">Wage and Tax Statement</div>
+            <div class="badge bg-primary">${year}</div>
+          </div>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <div class="w2-box">
+              <div class="w2-box-label">Box a — Employee Name</div>
+              <div class="w2-box-val">${escHtml(currentStudentName)}</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="w2-box">
+              <div class="w2-box-label">Job Title</div>
+              <div class="w2-box-val">${escHtml(ytd.role_title || currentRole)}</div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-6 col-sm-3">
+            <div class="w2-box">
+              <div class="w2-box-label">Box 1 — Wages, Tips, Other</div>
+              <div class="w2-box-val">${fmtMoney(ytd.total_gross)}</div>
+            </div>
+          </div>
+          <div class="col-6 col-sm-3">
+            <div class="w2-box">
+              <div class="w2-box-label">Box 2 — Federal Income Tax Withheld</div>
+              <div class="w2-box-val">${fmtMoney(ytd.total_fed_tax)}</div>
+            </div>
+          </div>
+          <div class="col-6 col-sm-3">
+            <div class="w2-box">
+              <div class="w2-box-label">Box 4 — Social Security Tax Withheld</div>
+              <div class="w2-box-val">${fmtMoney(ytd.total_ss_tax)}</div>
+            </div>
+          </div>
+          <div class="col-6 col-sm-3">
+            <div class="w2-box">
+              <div class="w2-box-label">Box 6 — Medicare Tax Withheld</div>
+              <div class="w2-box-val">${fmtMoney(ytd.total_med_tax)}</div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-2">
+          <div class="col-4">
+            <div class="w2-box">
+              <div class="w2-box-label">Total Hours Worked</div>
+              <div class="w2-box-val">${Number(ytd.total_hours).toFixed(1)} hrs</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="w2-box">
+              <div class="w2-box-label">On-Time Bonuses</div>
+              <div class="w2-box-val">${ytd.total_bonuses}</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="w2-box" style="border-color:#065f46; background:#d1fae5;">
+              <div class="w2-box-label" style="color:#065f46;">Net Pay (Take-Home)</div>
+              <div class="w2-box-val" style="color:#065f46;">${fmtMoney(ytd.total_net_pay)}</div>
+            </div>
+          </div>
+        </div>
+        <div class="text-center mt-3 small text-muted">
+          SIMULATED W-2 FOR EDUCATIONAL PURPOSES ONLY · ${ytd.period_count} Pay Period${ytd.period_count !== 1 ? 's' : ''} · ${year} Tax Year
+        </div>
+      </div>`;
+  } catch {
+    document.getElementById('taxContainer').innerHTML = `<div class="alert alert-danger">Could not load tax summary.</div>`;
+  }
+}
+</script>
+</body>
+</html>

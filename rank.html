@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Guild Rankings | CHS Web Design &amp; Development</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet"/>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    /* Podium */
+    .podium { display: flex; align-items: flex-end; justify-content: center; gap: 1rem; margin: 2rem 0 3rem; }
+    .podium-slot { text-align: center; }
+    .podium-block {
+      border-radius: 8px 8px 0 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+      padding-bottom: .75rem; min-width: 110px;
+    }
+    .podium-block.first  { height: 140px; background: linear-gradient(180deg, #f0c840, #c09000); }
+    .podium-block.second { height: 100px; background: linear-gradient(180deg, #d0d8e8, #a0aec0); }
+    .podium-block.third  { height: 80px;  background: linear-gradient(180deg, #d4a574, #a0764a); }
+    .podium-medal { font-size: 1.75rem; margin-bottom: .25rem; }
+    .podium-score { font-size: 1.25rem; font-weight: 800; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.3); }
+    .podium-name  { font-size: .85rem; font-weight: 700; color: var(--primary-color, #000099); margin-top: .4rem; }
+    .podium-section { font-size: .7rem; color: #6b7a99; }
+
+    /* Leaderboard table */
+    .rank-table { font-size: .9rem; }
+    .rank-table thead th { background: var(--primary-color, #000099); color: #fff; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; border: none; padding: .75rem 1rem; }
+    .rank-table tbody tr { transition: background .15s; }
+    .rank-table tbody tr:hover { background: #f0f2ff; }
+    .rank-table tbody td { padding: .65rem 1rem; vertical-align: middle; border-bottom: 1px solid #f0f0f0; }
+    .rank-table tr.is-me { background: #fffde7 !important; }
+    .rank-table tr.is-me td { font-weight: 700; }
+
+    .rank-num { font-weight: 800; font-size: 1.1rem; color: var(--primary-color, #000099); min-width: 2.5rem; }
+    .rank-num.gold   { color: #c09000; }
+    .rank-num.silver { color: #a0aec0; }
+    .rank-num.bronze { color: #a0764a; }
+
+    .score-bar { height: 6px; border-radius: 3px; background: #e9ecef; overflow: hidden; margin-top: 3px; min-width: 80px; }
+    .score-bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+    .bar-grade  { background: var(--primary-color, #000099); }
+    .bar-habit  { background: #6d916c; }
+    .bar-attend { background: #45b7aa; }
+
+    .guild-score-badge {
+      font-size: 1.1rem; font-weight: 800;
+      padding: .3rem .8rem; border-radius: 20px;
+      background: var(--primary-color, #000099);
+      color: #fff;
+    }
+
+    .score-col-label { font-size: .7rem; font-weight: 700; color: #6b7a99; text-transform: uppercase; letter-spacing: .06em; }
+
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+
+    /* No data row */
+    .no-data-row td { color: #adb5bd; font-style: italic; }
+  </style>
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+
+    <div class="row align-items-center mb-4">
+      <div class="col">
+        <h1 class="gochi text-primary mb-0"><i class="fas fa-trophy me-2"></i>Guild Rankings</h1>
+        <p class="text-muted mb-0">Scores update based on grade log, habit tracker, and clock-in attendance.</p>
+      </div>
+      <div class="col-auto">
+        <select id="sectionSelect" class="form-select form-select-sm fw-bold" style="min-width:140px;">
+          <option value="">All Sections</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Score legend -->
+    <div class="d-flex gap-3 mb-4 flex-wrap">
+      <span class="small"><span class="legend-dot" style="background:var(--primary-color,#000099)"></span> Grades (50%)</span>
+      <span class="small"><span class="legend-dot" style="background:#6d916c"></span> Habits (25%)</span>
+      <span class="small"><span class="legend-dot" style="background:#45b7aa"></span> Attendance (25%)</span>
+      <span class="small text-muted ms-2"><i class="fas fa-info-circle me-1"></i>Last 90 days · Habits last 28 days</span>
+    </div>
+
+    <!-- Podium (top 3) -->
+    <div id="podiumContainer">
+      <div class="text-center text-muted py-4">
+        <div class="spinner-border text-primary mb-3"></div>
+        <p>Computing Guild Scores…</p>
+      </div>
+    </div>
+
+    <!-- Full leaderboard table -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table rank-table mb-0">
+            <thead>
+              <tr>
+                <th style="width:60px">#</th>
+                <th>Name</th>
+                <th>Section</th>
+                <th style="width:110px">Guild Score</th>
+                <th style="min-width:90px"><span class="legend-dot" style="background:var(--primary-color,#000099)"></span>Grades</th>
+                <th style="min-width:90px"><span class="legend-dot" style="background:#6d916c"></span>Habits</th>
+                <th style="min-width:90px"><span class="legend-dot" style="background:#45b7aa"></span>Attend</th>
+              </tr>
+            </thead>
+            <tbody id="rankBody">
+              <tr><td colspan="7" class="text-center p-5 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-muted small mt-3"><i class="fas fa-lock me-1"></i>Rankings are visible only to logged-in class members. Last names shown to teachers only.</p>
+
+  </section>
+
+  <div id="footer-placeholder"></div>
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+
+<script type="module">
+import { getLoggedInUser } from '/js/modules/user-session.js';
+import { apiFetch } from '/js/modules/api-client.js';
+
+const user      = getLoggedInUser();
+const isTeacher = user && (user.role === 'admin' || user.section_id === 'Teacher');
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function displayName(s) {
+  if (!s) return '—';
+  if (isTeacher) return `${escHtml(s.first_name)} ${escHtml(s.last_name)}`;
+  if (user && s.student_id === user.student_id) return `${escHtml(s.first_name)} ${escHtml(s.last_name)} <span class="badge bg-warning text-dark ms-1" style="font-size:.65rem;">You</span>`;
+  return `${escHtml(s.first_name)} ${s.last_name ? s.last_name[0] + '.' : ''}`;
+}
+
+function bar(val, cls) {
+  const pct = Math.min(Math.max(val || 0, 0), 100);
+  return `<div class="score-bar"><div class="score-bar-fill ${cls}" style="width:${pct}%"></div></div>`;
+}
+
+function medalClass(rank) {
+  if (rank === 1) return 'gold';
+  if (rank === 2) return 'silver';
+  if (rank === 3) return 'bronze';
+  return '';
+}
+
+function renderPodium(top3) {
+  const slots = [
+    { data: top3[1], medal: '🥈', cls: 'second', pos: 2 },
+    { data: top3[0], medal: '🥇', cls: 'first',  pos: 1 },
+    { data: top3[2], medal: '🥉', cls: 'third',  pos: 3 },
+  ];
+  const html = `<div class="podium">
+    ${slots.map(slot => slot.data ? `
+      <div class="podium-slot">
+        <div class="podium-name">${displayName(slot.data)}</div>
+        <div class="podium-section">${escHtml(slot.data.section_id || '')}</div>
+        <div class="podium-block ${slot.cls}">
+          <div class="podium-medal">${slot.medal}</div>
+          <div class="podium-score">${slot.data.guild_score ?? '—'}</div>
+        </div>
+      </div>` : `<div class="podium-slot"><div class="podium-block ${slot.cls}"></div></div>`
+    ).join('')}
+  </div>`;
+  document.getElementById('podiumContainer').innerHTML = html;
+}
+
+function renderTable(leaderboard) {
+  if (!leaderboard.length) {
+    document.getElementById('rankBody').innerHTML = `<tr><td colspan="7" class="text-center text-muted p-5">No ranking data yet. Use the planner grade log, habit tracker, and clock in to earn a Guild Score.</td></tr>`;
+    return;
+  }
+  const rows = leaderboard.map(s => {
+    const isMe = user && s.student_id === user.student_id;
+    const rankDisp = s.rank ? `<span class="rank-num ${medalClass(s.rank)}">${s.rank}</span>` : '<span class="rank-num text-muted">—</span>';
+    return `<tr class="${isMe ? 'is-me' : ''}${s.guild_score === null ? ' no-data-row' : ''}">
+      <td>${rankDisp}</td>
+      <td>${displayName(s)}</td>
+      <td><span class="badge bg-light text-primary border">${escHtml(s.section_id || '—')}</span></td>
+      <td><span class="guild-score-badge">${s.guild_score ?? '—'}</span></td>
+      <td>
+        <div class="score-col-label">${s.grade_score.toFixed(0)}%</div>
+        ${bar(s.grade_score, 'bar-grade')}
+      </td>
+      <td>
+        <div class="score-col-label">${s.habit_score.toFixed(0)}%</div>
+        ${bar(s.habit_score, 'bar-habit')}
+      </td>
+      <td>
+        <div class="score-col-label">${s.attend_score.toFixed(0)}%</div>
+        ${bar(s.attend_score, 'bar-attend')}
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('rankBody').innerHTML = rows;
+}
+
+async function loadSections() {
+  try {
+    const data = await apiFetch('/api/rank/sections');
+    const sel = document.getElementById('sectionSelect');
+    (data.sections || []).forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = s;
+      sel.appendChild(opt);
+    });
+  } catch { /* sections are cosmetic */ }
+}
+
+async function loadLeaderboard(section) {
+  document.getElementById('rankBody').innerHTML = `<tr><td colspan="7" class="text-center p-5 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Computing scores…</td></tr>`;
+  try {
+    const qs = section ? `?section_id=${encodeURIComponent(section)}` : '';
+    const data = await apiFetch(`/api/rank/leaderboard${qs}`);
+    const lb = data.leaderboard || [];
+    renderPodium(lb.filter(s => s.guild_score !== null).slice(0, 3));
+    renderTable(lb);
+  } catch {
+    document.getElementById('rankBody').innerHTML = `<tr><td colspan="7" class="text-center text-danger p-5">Could not load rankings.</td></tr>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadSections();
+  await loadLeaderboard('');
+  document.getElementById('sectionSelect').addEventListener('change', e => loadLeaderboard(e.target.value));
+});
+</script>
+</body>
+</html>

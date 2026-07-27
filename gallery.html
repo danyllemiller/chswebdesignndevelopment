@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Guild Gallery | CHS Web Design &amp; Development</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet"/>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    .gallery-hero {
+      background: linear-gradient(135deg, var(--primary-dark, #1f246b) 0%, var(--primary-color, #000099) 100%);
+      color: #fff;
+      padding: 64px 32px 56px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .gallery-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        -45deg, transparent, transparent 28px,
+        rgba(255,255,255,.03) 28px, rgba(255,255,255,.03) 29px
+      );
+      pointer-events: none;
+    }
+    .gallery-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; margin-bottom: .5rem; }
+    .gallery-hero p  { color: rgba(255,255,255,.8); font-size: 1.05rem; max-width: 520px; margin: 0 auto 1.5rem; }
+
+    .filter-bar { background: #fff; border-bottom: 1px solid #dee2e6; padding: .75rem 0; position: sticky; top: 72px; z-index: 100; }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .project-card { border: 1px solid #dee2e6; border-radius: 12px; overflow: hidden; transition: box-shadow .2s, transform .2s; background: #fff; }
+    .project-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.12); transform: translateY(-3px); }
+
+    .project-thumb {
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: rgba(255,255,255,.9);
+      position: relative;
+      overflow: hidden;
+    }
+    .project-thumb img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+
+    .project-card .card-body { padding: 1rem 1.25rem .75rem; }
+    .project-card .card-title { font-weight: 700; font-size: 1rem; margin-bottom: .25rem; color: var(--primary-color, #000099); }
+    .project-card .card-meta  { font-size: .8rem; color: #6b7a99; margin-bottom: .5rem; }
+
+    .tag { font-size: .7rem; font-weight: 700; background: #f0f2ff; color: #000099; border-radius: 4px; padding: 2px 7px; margin-right: 4px; display: inline-block; margin-bottom: 4px; }
+
+    .featured-badge { position: absolute; top: 10px; left: 10px; background: #f0c840; color: #002d6e; font-size: .65rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; }
+
+    .pending-card { border-color: #ffc107; background: #fffef4; }
+    .pending-badge { background: #ffc107; color: #000; font-size: .65rem; font-weight: 800; padding: 2px 7px; border-radius: 4px; }
+
+    .no-items { text-align: center; color: #6b7a99; padding: 4rem 1rem; }
+    .no-items i { font-size: 3rem; opacity: .3; margin-bottom: 1rem; }
+
+    #adminPanel { background: #fff3cd; border-radius: 10px; padding: 1.25rem; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body class="bg-light">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <!-- Hero -->
+  <div class="gallery-hero">
+    <h1 class="gochi"><i class="fas fa-paint-brush me-2"></i>Guild Gallery</h1>
+    <p>Real projects built by real students. These are the things made in this class.</p>
+    <button id="btnOpenSubmit" class="btn btn-outline-light fw-bold d-none">
+      <i class="fas fa-plus me-1"></i> Submit Your Project
+    </button>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar no-print">
+    <div class="container-ultrawide">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="text-muted small fw-bold me-1">Filter:</span>
+        <button class="btn btn-sm btn-primary active" data-filter="">All Projects</button>
+        <div id="sectionFilters"></div>
+        <div class="ms-auto d-flex gap-2">
+          <input type="text" id="searchBox" class="form-control form-control-sm" placeholder="Search projects…" style="width:180px;">
+          <button id="btnAdminPanel" class="btn btn-sm btn-warning fw-bold d-none"><i class="fas fa-shield-alt me-1"></i>Admin</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-ultrawide py-4">
+
+    <!-- Admin pending panel -->
+    <div id="adminPanel" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-clock me-2 text-warning"></i>Pending Approval</h5>
+        <span id="pendingCount" class="badge bg-warning text-dark">0</span>
+      </div>
+      <div id="pendingGrid" class="gallery-grid"></div>
+    </div>
+
+    <!-- Public gallery -->
+    <div id="galleryGrid" class="gallery-grid">
+      <div class="no-items col-span-all" style="grid-column: 1 / -1;">
+        <div class="spinner-border text-primary mb-3"></div>
+        <p>Loading gallery…</p>
+      </div>
+    </div>
+
+    <!-- My submissions (logged-in students) -->
+    <div id="mySection" class="d-none mt-5">
+      <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-user me-2"></i>My Submissions</h5>
+      <div id="myGrid" class="gallery-grid"></div>
+    </div>
+
+  </div>
+
+  <!-- Submit Modal -->
+  <div class="modal fade" id="submitModal" tabindex="-1" aria-labelledby="submitModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="submitModalLabel"><i class="fas fa-plus me-2"></i>Submit a Project</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Project Title <span class="text-danger">*</span></label>
+            <input type="text" id="submitTitle" class="form-control" placeholder="My Awesome Portfolio">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Description</label>
+            <textarea id="submitDesc" class="form-control" rows="3" placeholder="What did you build? What technologies did you use?"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Live URL (optional)</label>
+            <input type="url" id="submitUrl" class="form-control" placeholder="https://yoursite.com">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Thumbnail URL (optional)</label>
+            <input type="url" id="submitThumb" class="form-control" placeholder="Link to a screenshot image">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Tech Stack</label>
+            <div class="d-flex flex-wrap gap-2" id="techChips">
+              <button type="button" class="btn btn-sm btn-outline-secondary tech-chip" data-tag="HTML">HTML</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary tech-chip" data-tag="CSS">CSS</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary tech-chip" data-tag="JavaScript">JavaScript</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary tech-chip" data-tag="Bootstrap">Bootstrap</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary tech-chip" data-tag="Figma">Figma</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary tech-chip" data-tag="PHP">PHP</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary tech-chip" data-tag="Node.js">Node.js</button>
+            </div>
+          </div>
+          <div id="submitError" class="alert alert-danger d-none"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="btnSubmitConfirm" class="btn btn-primary fw-bold">Submit for Review</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Approve Modal -->
+  <div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title fw-bold">Review Submission</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="approveModalBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger btn-sm" id="btnReject">Remove</button>
+          <button type="button" class="btn btn-success fw-bold" id="btnApprove">Approve &amp; Make Public</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+
+<script type="module">
+import { getLoggedInUser } from '/js/modules/user-session.js';
+import { apiFetch } from '/js/modules/api-client.js';
+
+const THUMB_COLORS = ['#000099','#1f246b','#6d916c','#846c91','#6c8c91','#e07a5f','#45b7aa','#7a82ab'];
+const THUMB_ICONS  = ['fa-globe','fa-laptop-code','fa-code','fa-paint-brush','fa-layer-group','fa-palette','fa-cube','fa-sitemap'];
+
+function cardColor(title) { let h = 0; for (const c of title) h = (h * 31 + c.charCodeAt(0)) & 0xffffffff; return THUMB_COLORS[Math.abs(h) % THUMB_COLORS.length]; }
+function cardIcon(title)  { let h = 0; for (const c of title) h = (h * 17 + c.charCodeAt(0)) & 0xffffffff; return THUMB_ICONS[Math.abs(h) % THUMB_ICONS.length]; }
+
+function buildCard(item, isAdmin = false, isPending = false) {
+  const tags = (item.tech_tags || '').split(',').filter(Boolean);
+  const bg   = cardColor(item.title);
+  const icon = cardIcon(item.title);
+  const thumb = item.thumbnail_url
+    ? `<img src="${escHtml(item.thumbnail_url)}" alt="${escHtml(item.title)}" onerror="this.style.display='none'">`
+    : '';
+  const featured = item.featured ? `<span class="featured-badge"><i class="fas fa-star me-1"></i>Featured</span>` : '';
+  const tagsHtml = tags.map(t => `<span class="tag">${escHtml(t.trim())}</span>`).join('');
+  const date     = new Date(item.submitted_at).toLocaleDateString('en-US', { month:'short', year:'numeric' });
+  const viewBtn  = item.project_url
+    ? `<a href="${escHtml(item.project_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary fw-bold"><i class="fas fa-external-link-alt me-1"></i>View</a>`
+    : `<span class="text-muted small">No live link</span>`;
+
+  let adminControls = '';
+  if (isPending && isAdmin) {
+    adminControls = `<button class="btn btn-sm btn-warning ms-2 fw-bold btn-review" data-id="${item.id}" data-title="${escHtml(item.title)}" data-student="${escHtml(item.first_name || '')}"><i class="fas fa-check me-1"></i>Review</button>`;
+  }
+
+  return `
+    <div class="project-card${isPending ? ' pending-card' : ''}" data-section="${escHtml(item.section_id || '')}" data-title="${escHtml(item.title)}">
+      <div class="project-thumb" style="background:${bg}">
+        ${thumb}
+        ${featured}
+        ${isPending ? '<span class="featured-badge" style="background:#ffc107;color:#000;">Pending</span>' : ''}
+        <i class="fas ${icon}"></i>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${escHtml(item.title)}</div>
+        <div class="card-meta">
+          <i class="fas fa-user-circle me-1"></i>${escHtml(item.first_name || 'Student')}
+          ${item.section_id ? ` · <span class="badge bg-light text-primary border">${escHtml(item.section_id)}</span>` : ''}
+          <span class="ms-2 text-muted">${date}</span>
+        </div>
+        ${tagsHtml ? `<div class="mb-2">${tagsHtml}</div>` : ''}
+        <div class="d-flex align-items-center gap-2 mt-2">
+          ${viewBtn}
+          ${adminControls}
+        </div>
+      </div>
+    </div>`;
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+let allItems   = [];
+let user       = null;
+let isTeacher  = false;
+let activeFilter = '';
+let pendingReviewId = null;
+
+async function loadGallery() {
+  try {
+    const data = await apiFetch('/api/gallery/public');
+    allItems = data.items || [];
+    renderGallery();
+  } catch {
+    document.getElementById('galleryGrid').innerHTML = `<div class="no-items" style="grid-column:1/-1"><i class="fas fa-exclamation-circle d-block mb-3"></i><p>Could not load gallery.</p></div>`;
+  }
+}
+
+function renderGallery() {
+  const search = (document.getElementById('searchBox').value || '').toLowerCase();
+  const filtered = allItems.filter(item => {
+    const sectionMatch = !activeFilter || item.section_id === activeFilter;
+    const searchMatch  = !search || item.title.toLowerCase().includes(search) || (item.description || '').toLowerCase().includes(search);
+    return sectionMatch && searchMatch;
+  });
+  const grid = document.getElementById('galleryGrid');
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="no-items" style="grid-column:1/-1"><i class="fas fa-search d-block mb-3"></i><p>No projects match this filter.</p></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(item => buildCard(item)).join('');
+}
+
+async function loadAdminPending() {
+  try {
+    const data = await apiFetch('/api/admin/gallery');
+    const pending = (data.items || []).filter(i => !i.is_approved);
+    document.getElementById('pendingCount').textContent = pending.length;
+    if (!pending.length) {
+      document.getElementById('pendingGrid').innerHTML = `<p class="text-muted small mb-0">No pending submissions.</p>`;
+    } else {
+      document.getElementById('pendingGrid').innerHTML = pending.map(i => buildCard(i, true, true)).join('');
+      document.getElementById('pendingGrid').querySelectorAll('.btn-review').forEach(btn => {
+        btn.addEventListener('click', () => openApproveModal(btn));
+      });
+    }
+  } catch { /* non-critical */ }
+}
+
+function openApproveModal(btn) {
+  pendingReviewId = Number(btn.dataset.id);
+  document.getElementById('approveModalBody').innerHTML = `
+    <p class="mb-1"><strong>Project:</strong> ${escHtml(btn.dataset.title)}</p>
+    <p><strong>By:</strong> ${escHtml(btn.dataset.student)}</p>
+    <p class="text-muted small">Approving will make this project visible in the public gallery.</p>`;
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal')).show();
+}
+
+async function loadMySubs() {
+  if (!user) return;
+  try {
+    const data = await apiFetch(`/api/gallery/my?student_id=${encodeURIComponent(user.student_id)}`);
+    const items = data.items || [];
+    if (!items.length) return;
+    document.getElementById('mySection').classList.remove('d-none');
+    document.getElementById('myGrid').innerHTML = items.map(item => {
+      const statusBadge = item.is_approved
+        ? `<span class="badge bg-success">Approved</span>`
+        : `<span class="badge bg-warning text-dark">Pending Review</span>`;
+      return buildCard({ ...item, first_name: 'Me' }).replace('</div>', `${statusBadge}</div>`);
+    }).join('');
+  } catch { /* non-critical */ }
+}
+
+async function loadSectionFilters() {
+  const sections = [...new Set(allItems.map(i => i.section_id).filter(Boolean))].sort();
+  const container = document.getElementById('sectionFilters');
+  container.innerHTML = sections.map(s =>
+    `<button class="btn btn-sm btn-outline-primary" data-filter="${escHtml(s)}">${escHtml(s)}</button>`
+  ).join('');
+  container.querySelectorAll('[data-filter]').forEach(btn => btn.addEventListener('click', () => setFilter(btn.dataset.filter)));
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('[data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+  renderGallery();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  user = getLoggedInUser();
+  isTeacher = user && (user.role === 'admin' || user.section_id === 'Teacher');
+
+  await loadGallery();
+  loadSectionFilters();
+
+  if (user) {
+    document.getElementById('btnOpenSubmit').classList.remove('d-none');
+    loadMySubs();
+    if (isTeacher) {
+      document.getElementById('btnAdminPanel').classList.remove('d-none');
+      loadAdminPending();
+    }
+  }
+
+  document.getElementById('btnAdminPanel').addEventListener('click', () => {
+    document.getElementById('adminPanel').classList.toggle('d-none');
+  });
+
+  document.getElementById('searchBox').addEventListener('input', renderGallery);
+
+  document.querySelectorAll('.filter-bar [data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => setFilter(btn.dataset.filter));
+  });
+
+  // Tech chip toggle
+  document.querySelectorAll('.tech-chip').forEach(chip => {
+    chip.addEventListener('click', () => chip.classList.toggle('btn-primary', !chip.classList.contains('btn-primary')));
+  });
+
+  document.getElementById('btnOpenSubmit').addEventListener('click', () => {
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('submitModal')).show();
+  });
+
+  document.getElementById('btnSubmitConfirm').addEventListener('click', async () => {
+    const title = document.getElementById('submitTitle').value.trim();
+    const errEl = document.getElementById('submitError');
+    errEl.classList.add('d-none');
+    if (!title) { errEl.textContent = 'Project title is required.'; errEl.classList.remove('d-none'); return; }
+    const selectedTags = [...document.querySelectorAll('.tech-chip.btn-primary')].map(c => c.dataset.tag).join(',');
+    try {
+      await apiFetch('/api/gallery/submit', {
+        method: 'POST',
+        body: JSON.stringify({
+          student_id:    user.student_id,
+          title,
+          description:   document.getElementById('submitDesc').value.trim(),
+          project_url:   document.getElementById('submitUrl').value.trim(),
+          thumbnail_url: document.getElementById('submitThumb').value.trim(),
+          tech_tags:     selectedTags,
+          section_id:    user.section_id,
+          school_year:   String(new Date().getFullYear())
+        })
+      });
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('submitModal')).hide();
+      loadMySubs();
+    } catch (e) {
+      errEl.textContent = e.message || 'Failed to submit. Please try again.';
+      errEl.classList.remove('d-none');
+    }
+  });
+
+  document.getElementById('btnApprove').addEventListener('click', async () => {
+    if (!pendingReviewId) return;
+    await apiFetch(`/api/admin/gallery/${pendingReviewId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ is_approved: true, is_public: true, approved_by: user?.username })
+    });
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal')).hide();
+    await loadGallery();
+    loadSectionFilters();
+    loadAdminPending();
+  });
+
+  document.getElementById('btnReject').addEventListener('click', async () => {
+    if (!pendingReviewId) return;
+    await apiFetch(`/api/gallery/${pendingReviewId}`, { method: 'DELETE' });
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal')).hide();
+    loadAdminPending();
+  });
+});
+</script>
+</body>
+</html>

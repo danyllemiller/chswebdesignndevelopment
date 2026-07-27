@@ -13,5 +13,8 @@ router.use('/', require('./routes/assessments'));
 router.use('/', require('./routes/calendar'));
 router.use('/', require('./routes/files'));
 router.use('/', require('./routes/intervention'));
+router.use('/', require('./routes/gallery'));
+router.use('/', require('./routes/rank'));
+router.use('/', require('./routes/paystubs'));
 
 module.exports = router;
