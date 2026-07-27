@@ -1447,7 +1447,7 @@
             const icon = e.type === 'test' ? '📝 ' : e.type === 'todo' ? (done ? '✓ ' : '☐ ') : (done ? '✓ ' : '');
             return `<span style="${done ? 'opacity:.5;text-decoration:line-through' : ''}">${icon}${e.label.slice(0,16)}</span>`;
           }).join('<br>')}${events.length > 3 ? `<br><span class="text-muted">+${events.length - 3} more</span>` : ''}</div>` : ''}
-          ${dayStickers[ymd] ? `<div style="text-align:center;margin-top:4px;">${stickerHTML(dayStickers[ymd], '28px')}</div>` : ''}
+          ${dayStickers[ymd] ? `<div class="cal-sticker" style="text-align:center;margin-top:4px;">${stickerHTML(dayStickers[ymd], '28px')}</div>` : ''}
         </div>`;
       }
       // Next month fill
