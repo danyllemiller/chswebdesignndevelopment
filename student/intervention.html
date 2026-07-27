@@ -771,14 +771,17 @@
                 if(!v){
                   pw.classList.add('d-none');cw.classList.add('d-none');
                   document.getElementById('glPeriod').value='';document.getElementById('glClass').value='';
+                  window.populateCategorySelect('');
                 } else if(v==='__other__'){
                   pw.classList.remove('d-none');cw.classList.remove('d-none');
                   document.getElementById('glPeriod').value='';document.getElementById('glClass').value='';
+                  window.populateCategorySelect('');
                 } else {
                   const p=v.split('|');
                   document.getElementById('glPeriod').value=p[0]||'';
                   document.getElementById('glClass').value=p[1]||'';
                   pw.classList.add('d-none');cw.classList.add('d-none');
+                  window.populateCategorySelect(p[0]||'');
                 }">
                 <option value="">— Pick from your schedule —</option>
                 <option value="__other__">Other / Type manually…</option>
@@ -795,6 +798,12 @@
             <div class="col-12">
               <label class="form-label fw-bold small">Assignment (optional)</label>
               <input type="text" class="form-control" id="glAssignment" placeholder="e.g. Essay #2">
+            </div>
+            <div class="col-12 d-none" id="glCategoryRow">
+              <label class="form-label fw-bold small">Category</label>
+              <select class="form-select" id="glCategory">
+                <option value="">— Select category —</option>
+              </select>
             </div>
             <div class="col-4">
               <label class="form-label fw-bold small">Score <span class="text-danger">*</span></label>
@@ -991,6 +1000,42 @@
     </div>
   </div>
 
+  <!-- ── Grade Category Modal ──────────────────────────────────────────────── -->
+  <div class="modal fade" id="gradeCatModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white py-2">
+          <h6 class="modal-title fw-bold" id="gradeCatTitle"><i class="fas fa-balance-scale me-2"></i>Grade Categories</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted small mb-3">Set how much each grade type counts toward your overall grade. Weights should add up to 100%.</p>
+          <div class="d-flex fw-bold small text-muted mb-1 px-1" style="gap:8px;">
+            <span style="flex:1;">Category Name</span>
+            <span style="width:80px;">Weight&nbsp;(%)</span>
+            <span style="width:24px;"></span>
+          </div>
+          <div id="gradeCatList"></div>
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <span id="gradeCatTotal" class="fw-bold small"></span>
+            <button class="btn btn-outline-success btn-sm" id="btnAddGradeCat">
+              <i class="fas fa-plus me-1"></i>Add Category
+            </button>
+          </div>
+          <div class="mt-2 pt-2 border-top">
+            <button class="btn btn-link btn-sm p-0 text-muted" id="btnDefaultGradeCats">
+              <i class="fas fa-magic me-1"></i>Fill in common defaults
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer py-2">
+          <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success btn-sm fw-bold" id="btnSaveGradeCat">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── Print Options Modal ─────────────────────────────────────────────── -->
   <div class="modal fade" id="printModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -1153,6 +1198,7 @@
     let submitAssignmentId = null;
     let mySchedule = {};   // {A1:'English', A3:'Math', A5:'Intervention', A7:'PE', B2:'History', ...}
     let periodColors = {}; // {A1:'#4a90d9', A3:'#6d916c', ...} — student-chosen per-period colors
+    let gradeCategories = {}; // {A1:[{id,name,weight},...], ...} — weighted grade categories per period
     let viewingStudentId = null; // non-null when teacher is viewing a student
     let isReadOnly = false;      // true when teacher is viewing a student's planner
     const targetSid = () => viewingStudentId || user?.student_id;
@@ -1180,28 +1226,31 @@
         const prefix = isReadOnly ? `/api/teacher/planner/${sid}/prefs` : `/api/intervention/planner-prefs?student_id=${sid}`;
         const data = await apiFetch(prefix);
         if (data?.prefs) {
-          mySchedule   = data.prefs.schedule   || {};
-          periodColors = data.prefs.colors     || {};
-          dayStickers  = data.prefs.stickers   || {};
-          decorPrefs   = data.prefs.decor      || {};
-          countdowns   = data.prefs.countdowns || [];
+          mySchedule      = data.prefs.schedule         || {};
+          periodColors    = data.prefs.colors           || {};
+          dayStickers     = data.prefs.stickers         || {};
+          decorPrefs      = data.prefs.decor            || {};
+          countdowns      = data.prefs.countdowns       || [];
+          gradeCategories = data.prefs.gradeCategories  || {};
           if (!isReadOnly) {
-            localStorage.setItem(`intv_sched_${sid}`,    JSON.stringify(mySchedule));
+            localStorage.setItem(`intv_sched_${sid}`,       JSON.stringify(mySchedule));
             localStorage.setItem(`intv_period_colors_${sid}`, JSON.stringify(periodColors));
-            localStorage.setItem(`intv_stickers_${sid}`, JSON.stringify(dayStickers));
-            localStorage.setItem(`intv_decor_${sid}`,    JSON.stringify(decorPrefs));
-            localStorage.setItem(`intv_cd_${sid}`,       JSON.stringify(countdowns));
+            localStorage.setItem(`intv_stickers_${sid}`,    JSON.stringify(dayStickers));
+            localStorage.setItem(`intv_decor_${sid}`,       JSON.stringify(decorPrefs));
+            localStorage.setItem(`intv_cd_${sid}`,          JSON.stringify(countdowns));
+            localStorage.setItem(`intv_grade_cats_${sid}`,  JSON.stringify(gradeCategories));
           }
           return;
         }
       } catch (_) {}
       // Offline fallback
       if (!isReadOnly) {
-        mySchedule   = JSON.parse(localStorage.getItem(`intv_sched_${sid}`) || '{}');
-        periodColors = JSON.parse(localStorage.getItem(`intv_period_colors_${sid}`) || '{}');
-        dayStickers  = JSON.parse(localStorage.getItem(`intv_stickers_${sid}`) || '{}');
-        decorPrefs   = JSON.parse(localStorage.getItem(`intv_decor_${sid}`) || '{}');
-        countdowns   = JSON.parse(localStorage.getItem(`intv_cd_${sid}`) || '[]');
+        mySchedule      = JSON.parse(localStorage.getItem(`intv_sched_${sid}`) || '{}');
+        periodColors    = JSON.parse(localStorage.getItem(`intv_period_colors_${sid}`) || '{}');
+        dayStickers     = JSON.parse(localStorage.getItem(`intv_stickers_${sid}`) || '{}');
+        decorPrefs      = JSON.parse(localStorage.getItem(`intv_decor_${sid}`) || '{}');
+        countdowns      = JSON.parse(localStorage.getItem(`intv_cd_${sid}`) || '[]');
+        gradeCategories = JSON.parse(localStorage.getItem(`intv_grade_cats_${sid}`) || '{}');
       }
     }
 
@@ -1212,11 +1261,12 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           student_id: user.student_id,
-          schedule:   mySchedule,
-          colors:     periodColors,
-          stickers:   dayStickers,
-          decor:      decorPrefs,
-          countdowns
+          schedule:        mySchedule,
+          colors:          periodColors,
+          stickers:        dayStickers,
+          decor:           decorPrefs,
+          countdowns,
+          gradeCategories
         })
       }).catch(() => {}); // background — don't block UI
     }
@@ -1932,11 +1982,28 @@
         const col     = (periodColors[p] || DEFAULT_PERIOD_COLORS[p] || '#6c757d');
         const entries = gradeLog.filter(g => g.period_label === p);
 
-        // Weighted overall: sum of scores / sum of max scores
-        const totalScore = entries.reduce((s, g) => s + (g.score || 0), 0);
-        const totalMax   = entries.reduce((s, g) => s + (g.max_score || 0), 0);
-        const overallPct = totalMax > 0 ? Math.round(totalScore / totalMax * 100) : null;
-        const letter     = overallPct != null ? letterGrade(overallPct) : null;
+        // Overall grade — weighted if categories set, simple otherwise
+        const cats = gradeCategories[p] || [];
+        let overallPct = null;
+        if (cats.length && entries.some(g => g.category)) {
+          let wSum = 0, wUsed = 0;
+          cats.forEach(cat => {
+            const ce = entries.filter(g => g.category === cat.name);
+            if (!ce.length) return;
+            const earned   = ce.reduce((s, g) => s + (g.score || 0), 0);
+            const possible = ce.reduce((s, g) => s + (g.max_score || 100), 0);
+            if (!possible) return;
+            wSum  += (earned / possible) * cat.weight;
+            wUsed += cat.weight;
+          });
+          if (wUsed > 0) overallPct = Math.round(wSum / wUsed * 100);
+        }
+        if (overallPct === null) {
+          const ts = entries.reduce((s, g) => s + (g.score || 0), 0);
+          const tm = entries.reduce((s, g) => s + (g.max_score || 0), 0);
+          overallPct = tm > 0 ? Math.round(ts / tm * 100) : null;
+        }
+        const letter = overallPct != null ? letterGrade(overallPct) : null;
 
         const rowsHtml = entries.length ? entries.map(g => {
           const pct = g.max_score ? Math.round((g.score / g.max_score) * 100) : null;
@@ -1945,7 +2012,7 @@
           return `<div class="d-flex align-items-center gap-2 py-1 border-bottom">
             <div class="flex-grow-1 overflow-hidden">
               <div class="small fw-bold text-truncate">${g.assignment || '(grade)'}</div>
-              <div style="font-size:.67rem;color:#888;">${dt}</div>
+              <div style="font-size:.67rem;color:#888;">${g.category ? `${g.category} · ` : ''}${dt}</div>
             </div>
             <div class="text-end flex-shrink-0">
               <div class="small fw-bold" style="color:${gc}">${g.score}/${g.max_score}</div>
@@ -1958,16 +2025,22 @@
         return `<div class="col-6 col-md-4 col-lg-3">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background:${col};color:#fff;">
-              <div class="overflow-hidden flex-grow-1 me-2">
+              <div class="overflow-hidden flex-grow-1 me-1">
                 <div class="d-flex align-items-baseline gap-2">
                   <span class="fw-bold" style="font-size:.85rem;">${p}</span>
                   ${letter != null ? `<span style="font-size:1.05rem;font-weight:900;line-height:1;">${letter}</span><span style="font-size:.72rem;opacity:.9;">${overallPct}%</span>` : ''}
+                  ${cats.length ? `<span style="font-size:.62rem;opacity:.75;">(weighted)</span>` : ''}
                 </div>
                 ${cls ? `<div style="font-size:.68rem;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cls}</div>` : ''}
               </div>
-              <button class="btn btn-sm py-0 px-2 fw-bold intv-edit-only flex-shrink-0" style="background:rgba(255,255,255,.22);color:#fff;border:1px solid rgba(255,255,255,.45);font-size:.72rem;" onclick="window.openGradeLogForPeriod('${p}')">
-                <i class="fas fa-plus" style="font-size:.6rem;"></i> Add
-              </button>
+              <div class="d-flex gap-1 flex-shrink-0 intv-edit-only">
+                <button class="btn btn-sm py-0 px-1" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);font-size:.65rem;" onclick="window.openCategoryModal('${p}')" title="Set grade categories">
+                  <i class="fas fa-cog"></i>
+                </button>
+                <button class="btn btn-sm py-0 px-2 fw-bold" style="background:rgba(255,255,255,.22);color:#fff;border:1px solid rgba(255,255,255,.45);font-size:.72rem;" onclick="window.openGradeLogForPeriod('${p}')">
+                  <i class="fas fa-plus" style="font-size:.6rem;"></i> Add
+                </button>
+              </div>
             </div>
             <div class="card-body p-2" style="max-height:180px;overflow-y:auto;">${rowsHtml}</div>
           </div>
@@ -1998,13 +2071,15 @@
       await apiFetch('/api/intervention/grade-log', { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ student_id: user.student_id, period_label: document.getElementById('glPeriod').value,
           class_name: cls, assignment: document.getElementById('glAssignment').value,
+          category: document.getElementById('glCategory').value || null,
           score: parseFloat(score), max_score: parseFloat(document.getElementById('glMax').value) || 100,
           grade_date: document.getElementById('glDate').value }) });
       bootstrap.Modal.getInstance(document.getElementById('gradeLogModal'))?.hide();
       const data = await apiFetch(`/api/intervention/grade-log?student_id=${user.student_id}`);
       gradeLog = data.grades || [];
       renderGradesTab();
-      ['glPeriod','glClass','glAssignment','glScore'].forEach(id => { document.getElementById(id).value = ''; });
+      ['glPeriod','glClass','glAssignment','glScore','glCategory'].forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('glCategoryRow').classList.add('d-none');
       document.getElementById('glMax').value = '100';
       document.getElementById('glDate').value = todayStr;
       document.getElementById('glPeriodSel').value = '';
@@ -2015,6 +2090,19 @@
     document.getElementById('gradeLogModal').addEventListener('show.bs.modal', () => {
       if (!document.getElementById('glDate').value) document.getElementById('glDate').value = todayStr;
     });
+
+    window.populateCategorySelect = (period) => {
+      const cats = (period && gradeCategories[period]) || [];
+      const sel  = document.getElementById('glCategory');
+      const row  = document.getElementById('glCategoryRow');
+      sel.innerHTML = '<option value="">— Select category (optional) —</option>';
+      if (cats.length) {
+        cats.forEach(c => sel.add(new Option(c.name, c.name)));
+        row.classList.remove('d-none');
+      } else {
+        row.classList.add('d-none');
+      }
+    };
 
     window.openGradeLogForPeriod = (period) => {
       if (isReadOnly) return;
@@ -2035,6 +2123,7 @@
         document.getElementById('glPeriod').value = period;
         document.getElementById('glClass').value  = cls;
       }
+      window.populateCategorySelect(period);
       document.getElementById('glDate').value = todayStr;
       new bootstrap.Modal(document.getElementById('gradeLogModal')).show();
     };
@@ -3008,6 +3097,80 @@
       bootstrap.Modal.getInstance(document.getElementById('scheduleModal'))?.hide();
       if (currentView === 'day') renderCalendar();
       populateScheduleSelects();
+    });
+
+    // ── Grade Category Modal ──────────────────────────────────────────────────
+    let editingCatPeriod = null;
+
+    const DEFAULT_GRADE_CATS = [
+      { name: 'Homework / Classwork', weight: 20 },
+      { name: 'Quizzes',              weight: 25 },
+      { name: 'Tests',                weight: 40 },
+      { name: 'Projects',             weight: 15 },
+    ];
+
+    function renderCatRows(cats) {
+      const el = document.getElementById('gradeCatList');
+      el.innerHTML = cats.map(c => `
+        <div class="d-flex align-items-center gap-2 mb-2 cat-row">
+          <input type="text" class="form-control form-control-sm cat-name" value="${c.name}" placeholder="e.g. Tests">
+          <input type="number" class="form-control form-control-sm cat-weight text-center" value="${c.weight}"
+                 min="0" max="100" style="width:80px;" oninput="updateCatTotal()">
+          <span class="text-muted flex-shrink-0" style="font-size:.8rem;">%</span>
+          <button class="btn p-0 text-muted flex-shrink-0" onclick="this.closest('.cat-row').remove();updateCatTotal();"
+                  style="font-size:.8rem;line-height:1;">✕</button>
+        </div>`).join('');
+      updateCatTotal();
+    }
+
+    window.updateCatTotal = function() {
+      const weights = [...document.querySelectorAll('#gradeCatList .cat-weight')].map(i => parseFloat(i.value) || 0);
+      const total = weights.reduce((a, b) => a + b, 0);
+      const el = document.getElementById('gradeCatTotal');
+      el.textContent = `Total: ${total}%`;
+      el.style.color = Math.abs(total - 100) < 0.5 ? '#28a745' : '#dc3545';
+    };
+
+    window.openCategoryModal = (period) => {
+      if (isReadOnly) return;
+      editingCatPeriod = period;
+      const cls = mySchedule[period] || '';
+      document.getElementById('gradeCatTitle').innerHTML =
+        `<i class="fas fa-balance-scale me-2"></i>Grade Categories — ${period}${cls ? ' · ' + cls : ''}`;
+      renderCatRows(gradeCategories[period] || []);
+      new bootstrap.Modal(document.getElementById('gradeCatModal')).show();
+    };
+
+    document.getElementById('btnAddGradeCat').addEventListener('click', () => {
+      const el = document.getElementById('gradeCatList');
+      const row = document.createElement('div');
+      row.className = 'd-flex align-items-center gap-2 mb-2 cat-row';
+      row.innerHTML = `<input type="text" class="form-control form-control-sm cat-name" placeholder="e.g. Participation">
+        <input type="number" class="form-control form-control-sm cat-weight text-center" value="0" min="0" max="100"
+               style="width:80px;" oninput="updateCatTotal()">
+        <span class="text-muted flex-shrink-0" style="font-size:.8rem;">%</span>
+        <button class="btn p-0 text-muted flex-shrink-0" onclick="this.closest('.cat-row').remove();updateCatTotal();"
+                style="font-size:.8rem;line-height:1;">✕</button>`;
+      el.appendChild(row);
+      row.querySelector('.cat-name').focus();
+      updateCatTotal();
+    });
+
+    document.getElementById('btnDefaultGradeCats').addEventListener('click', () => {
+      renderCatRows(DEFAULT_GRADE_CATS);
+    });
+
+    document.getElementById('btnSaveGradeCat').addEventListener('click', () => {
+      const cats = [...document.querySelectorAll('#gradeCatList .cat-row')].map(row => ({
+        name:   row.querySelector('.cat-name').value.trim(),
+        weight: parseFloat(row.querySelector('.cat-weight').value) || 0,
+      })).filter(c => c.name);
+
+      gradeCategories[editingCatPeriod] = cats;
+      localStorage.setItem(`intv_grade_cats_${user.student_id}`, JSON.stringify(gradeCategories));
+      syncPrefsToServer();
+      bootstrap.Modal.getInstance(document.getElementById('gradeCatModal'))?.hide();
+      renderGradesTab();
     });
 
     function populateScheduleSelects() {
