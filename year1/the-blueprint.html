@@ -288,6 +288,10 @@
                   </div>
                 </div>
               </div>
+
+              <div class="alert alert-warning small border-warning border mb-0">
+                <strong>Where Everyone Gets Ambushed:</strong> Students often build a persona that's just a demographic card — name, age, job — with no real research behind it. A persona with no Goals or Pain Points traced back to actual interview notes is just a stereotype with a fake name; it can't actually answer design questions like "would Ryan find this button easy to see?" because nothing about Ryan came from evidence.
+              </div>
             </section>
           </div>
           <div class="col-lg-4 mt-4 mt-lg-0 text-center">
@@ -296,6 +300,13 @@
                   <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
                 </div>
                 <p class="mb-0 small text-dark">How does 'Ryan' being a graphic designer influence how he might feel about a website that looks like it was made in 1999?</p>
+            </div>
+            <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+              <div class="d-flex align-items-center mb-2">
+                <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+              </div>
+              <p class="mb-2 small text-dark">A teammate builds a persona named "Alex, 25, likes video games." What's missing that would make this an actually useful design tool?</p>
+              <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">Real Goals and Pain Points sourced from actual research (interviews, surveys) — without them, "Alex" can't answer any real design question, because there's no evidence behind the character.</p></details>
             </div>
           </div>
         </div>
@@ -409,6 +420,10 @@
               </table>
               <p class="mt-2 small text-center"><strong>Analysis:</strong> Look at those red ❌'s! No one is offering high-score tracking. This is our "Blue Ocean."</p>
 
+              <div class="alert alert-warning small border-warning border mt-3 mb-4 mx-auto" style="max-width: 900px;">
+                <strong>Where Everyone Gets Ambushed:</strong> Students often confuse a <strong>Weakness</strong> (something wrong with your own site) with a <strong>Threat</strong> (something in the outside market that could hurt you) — "our site loads slowly" is a Weakness you control and can fix; "a bigger competitor might launch a leaderboard feature next month" is a Threat you don't control. Mixing these up in a real SWOT makes the analysis useless for deciding what to actually work on first.
+              </div>
+
               <!-- LAB 3 CARD -->
               <div class="card border-success shadow-sm my-4 mt-5 mx-auto" style="max-width: 800px;">
                   <div class="card-header bg-success text-white fw-bold">Lab 3: The Blue Ocean Map [25 pts]</div>
@@ -444,13 +459,19 @@
           <div class="col-lg-8 pe-lg-5">
             <section id="user-stories">
               <h2 class="section-title">Phase 4: The Features (User Stories & MoSCoW)</h2>
-              <p>We write <strong>User Stories</strong> to keep focus on benefits: <em>"As a [type of user], I want to [do a thing] so that I can [achieve a goal]."</em></p>
-              
+              <p><strong>The Why:</strong> A feature list like "add a leaderboard" tells a developer <em>what</em> to build but not <em>why</em> — so they make a dozen small decisions guessing at intent. A feature list built from real benefits keeps every decision traceable back to an actual user need.</p>
+              <p><strong>The What:</strong> We write <strong>User Stories</strong> to keep focus on benefits, not just tasks: <em>"As a [type of user], I want to [do a thing] so that I can [achieve a goal]."</em> The final clause — the "so that" — is the part most people skip, and it's the part that actually matters.</p>
+
               <div class="card roadmap-card bg-site-secondary text-center p-3 mb-3 border-0 shadow-sm">
                 <code class="fs-6 text-dark">"As a community member, I want to submit my high score with a screenshot so that I can get on the leaderboard."</code>
               </div>
 
+              <div class="alert alert-warning small border-warning border mb-4">
+                <strong>Where Everyone Gets Ambushed:</strong> Students often write "As a user, I want a leaderboard" and stop — that's a feature request wearing a User Story costume. Without the "so that" goal, nobody can tell whether a leaderboard that only shows the top 3 scores actually satisfies the real need, or whether the user really wanted to compare against their friends specifically.
+              </div>
+
               <h5 class="fw-bold mt-5 text-primary">The MoSCoW Method (MVP Priority)</h5>
+              <p><strong>The How:</strong> Once you have real User Stories, MoSCoW forces hard priority decisions instead of an endless wishlist:</p>
               <table class="table table-bordered table-sm small shadow-sm text-start">
                 <thead>
                   <tr class="bg-site-secondary text-center"><th>Priority</th><th>Stands For</th><th>Definition</th></tr>
@@ -462,6 +483,7 @@
                   <tr><td class="fw-bold bg-secondary text-white text-center">W</td><td class="fw-bold">Won't Have</td><td>Out of scope for "Release 1."</td></tr>
                 </tbody>
               </table>
+              <p class="small text-muted">If every feature ends up "Must Have," the method has failed — the whole point is forcing real trade-offs before a single line of code gets written.</p>
 
               <!-- LAB 4 CARD -->
               <div class="card border-success shadow-sm my-4 mt-5">
@@ -495,6 +517,13 @@
                 <div class="card-body">
                     <p class="mb-0"><strong>GIVEN:</strong> I am on the homepage<br><strong>WHEN:</strong> I type "Earthbound"<br><strong>THEN:</strong> Result appears.<br><strong>AND WHEN:</strong> I click result<br><strong>THEN:</strong> I see the game page.</p>
                 </div>
+            </div>
+            <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+              <div class="d-flex align-items-center mb-2">
+                <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+              </div>
+              <p class="mb-2 small text-dark">"As a user, I want a dark mode" is missing a piece that makes it a real User Story. What's missing, and why does it matter?</p>
+              <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">It's missing the "so that" goal. Without it, a developer can't tell if the real need is "so my eyes don't hurt at night" (which might just need lower brightness) or "so it matches my OS theme" (a totally different feature) — the goal is what tells you whether your solution actually solves the problem.</p></details>
             </div>
           </div>
         </div>
@@ -630,26 +659,63 @@
           <div class="col-lg-12">
             <section id="step-3-atomic">
               <h2 class="section-title text-center">Planning UI with "Atomic Design"</h2>
-              <p class="text-center mx-auto" style="max-width: 700px;">We build our code like LEGOs, breaking UIs down into smallest parts:</p>
+              <p class="text-center mx-auto" style="max-width: 800px;"><strong>The Why:</strong> Without a shared vocabulary, "redesign the search bar" means something different to every developer on the team — one rebuilds the whole thing from scratch, another just recolors it. <strong>Atomic Design</strong> gives every piece of a UI a name, the same way chemistry names atoms and molecules, so the whole team can talk about the exact same piece.</p>
+              <p class="text-center mx-auto" style="max-width: 800px;"><strong>The What:</strong> We build interfaces like LEGOs — the smallest parts combine into bigger, reusable parts:</p>
               <div class="row g-4 mt-2 mx-auto" style="max-width: 900px;">
                 <div class="col-md-4">
                   <div class="card h-100 shadow-sm border-primary text-start">
                     <div class="card-header bg-primary text-white fw-bold py-2">Atoms</div>
-                    <div class="card-body small">Basic HTML tags: <code>&lt;button&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;label&gt;</code>.</div>
+                    <div class="card-body small">The smallest, indivisible HTML elements: <code>&lt;button&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;label&gt;</code>. An atom on its own usually isn't useful yet.</div>
                   </div>
                 </div>
                 <div class="col-md-4">
                   <div class="card h-100 shadow-sm border-info text-start">
                     <div class="card-header bg-info text-white fw-bold py-2">Molecules</div>
-                    <div class="card-body small">Groups like a <strong>Search Form</strong> (Label + Input + Button).</div>
+                    <div class="card-body small">A small group of atoms working together as one functional unit — like a <strong>Search Form</strong> (Label + Input + Button).</div>
                   </div>
                 </div>
                 <div class="col-md-4">
                   <div class="card h-100 shadow-sm border-success text-start">
                     <div class="card-header bg-success text-white fw-bold py-2">Organisms</div>
-                    <div class="card-body small">Complex sections like a <strong>Site Header</strong> or <strong>Game Grid</strong>.</div>
+                    <div class="card-body small">Several molecules and atoms combined into a complex, standalone section — like a <strong>Site Header</strong> or <strong>Game Grid</strong>.</div>
                   </div>
                 </div>
+              </div>
+
+              <p class="mt-4"><strong>The How:</strong> Here's PixelPlay's search feature built up in real HTML, one level at a time:</p>
+              <div class="mx-auto" style="max-width: 900px;">
+                <div class="card border-dark shadow-sm mb-3">
+                  <div class="card-header bg-primary text-white fw-bold small">Step 1 — Atoms (individually meaningless)</div>
+                  <div class="card-body p-0">
+                    <pre class="mb-0 p-3 small" style="background:#1e1e1e; color:#d4d4d4; overflow-x:auto;"><code>&lt;label&gt;Search Guides&lt;/label&gt;
+&lt;input type="text" placeholder="Earthbound..."&gt;
+&lt;button&gt;Go&lt;/button&gt;</code></pre>
+                  </div>
+                </div>
+                <div class="card border-dark shadow-sm mb-3">
+                  <div class="card-header bg-info text-white fw-bold small">Step 2 — Molecule (the atoms now do a job together)</div>
+                  <div class="card-body p-0">
+                    <pre class="mb-0 p-3 small" style="background:#1e1e1e; color:#d4d4d4; overflow-x:auto;"><code>&lt;form class="search-form"&gt;
+  &lt;label&gt;Search Guides&lt;/label&gt;
+  &lt;input type="text" placeholder="Earthbound..."&gt;
+  &lt;button&gt;Go&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+                  </div>
+                </div>
+                <div class="card border-dark shadow-sm">
+                  <div class="card-header bg-success text-white fw-bold small">Step 3 — Organism (the molecule joins other molecules)</div>
+                  <div class="card-body p-0">
+                    <pre class="mb-0 p-3 small" style="background:#1e1e1e; color:#d4d4d4; overflow-x:auto;"><code>&lt;header class="site-header"&gt;
+  &lt;img class="logo" src="pixelplay-logo.png" alt="PixelPlay logo"&gt;
+  &lt;nav&gt;...&lt;/nav&gt;
+  &lt;form class="search-form"&gt;...&lt;/form&gt; &lt;!-- our molecule, reused here --&gt;
+&lt;/header&gt;</code></pre>
+                  </div>
+                </div>
+              </div>
+
+              <div class="alert alert-warning small border-warning border mt-4 mb-0 mx-auto" style="max-width: 900px;">
+                <strong>Where Everyone Gets Ambushed:</strong> Students often think Atomic Design means literally building a page atom-by-atom in some rigid order. It's a <em>naming and reuse</em> system, not a build sequence — the real payoff is that the search-form molecule gets written once and reused in the header, the sidebar, and the footer without being rebuilt from scratch each time.
               </div>
             </section>
           </div>
@@ -660,10 +726,19 @@
           <div class="col-lg-8 pe-lg-5">
             <section id="step-4-reading">
               <h2 class="section-title">Understanding "How" Users Read</h2>
-              <h6 class="fw-bold mt-4 text-primary">F-Pattern:</h6>
-              <p class="small mb-4">Used for text-heavy pages (Blogs). Users scan top, then down the left, then across again briefly.</p>
-              <h6 class="fw-bold mt-4 text-primary">Z-Pattern:</h6>
-              <p class="small mb-0">Used for simple, visual Homepages. Users scan top-left to top-right, diagonal down, then bottom-right.</p>
+              <p><strong>The Why:</strong> You can have a perfect wireframe with the right feature in the right priority order, and users will still miss it — if it isn't placed where their eyes actually travel. Eye-tracking studies on real websites found people don't read pages top-to-bottom like a book; they scan in one of two predictable shapes depending on what kind of page it is.</p>
+              <p><strong>The What:</strong> The <strong>F-Pattern</strong> and <strong>Z-Pattern</strong> are the two dominant scanning shapes, and each fits a different kind of content.</p>
+
+              <h6 class="fw-bold mt-4 text-primary">F-Pattern</h6>
+              <p class="small mb-4">Used for <strong>text-heavy pages</strong> (blogs, forums, long guides). Users read a full line across the top, then scan down the left edge reading only the first few words of each line, occasionally sweeping right on a line that grabs their attention — tracing a shape that looks like the letter F.</p>
+              <h6 class="fw-bold mt-4 text-primary">Z-Pattern</h6>
+              <p class="small mb-0">Used for <strong>simple, visual pages</strong> (homepages, landing pages) with far less text. Users scan top-left to top-right (the logo, then the nav), diagonally down across the middle of the page, then along the bottom-left to bottom-right — tracing a Z.</p>
+
+              <p class="mt-4"><strong>The How:</strong> This directly changes where you put things on PixelPlay's pages. On the text-heavy walkthrough page (F-Pattern), the most important information — "which boss, which strategy" — has to be in the <strong>first few words of the first line</strong> of each paragraph, because that's the only part of most lines a scanning reader actually processes. On the simple homepage (Z-Pattern), the logo goes top-left, the primary call-to-action button goes bottom-right — exactly where the Z-scan naturally ends, so it's the last thing a user's eye lands on before they decide what to click.</p>
+
+              <div class="alert alert-warning small border-warning border mb-0">
+                <strong>Where Everyone Gets Ambushed:</strong> Students often assume the pattern is fixed by the type of website ("blogs use F, homepages use Z") rather than by the actual content on that specific page. A homepage stuffed with three paragraphs of text will get scanned in an F-pattern regardless of what type of page it "is" — the amount and density of text on the page determines the pattern, not the page's category.
+              </div>
             </section>
           </div>
           <div class="col-lg-4 mt-4 mt-lg-0 text-center">
@@ -673,6 +748,13 @@
               </a>
               <figcaption class="p-2 small text-muted text-center"><strong>Figure 3.7:</strong> Eye-tracking scanning patterns.</figcaption>
             </figure>
+            <div class="bg-light p-3 rounded border shadow-sm mb-4 mt-4 text-start">
+              <div class="d-flex align-items-center mb-2">
+                <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+              </div>
+              <p class="mb-2 small text-dark">A wall-of-text forum page and a clean, image-heavy landing page sit side by side on the same site. Which reading pattern applies to each, and why aren't they the same?</p>
+              <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">The forum page gets an F-Pattern because it's text-dense — users skim down the left edge. The landing page gets a Z-Pattern because it's simple and visual. The difference comes from how much text is actually on each page, not from a fixed rule about page "types."</p></details>
+            </div>
           </div>
         </div>
 
