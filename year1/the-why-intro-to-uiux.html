@@ -81,7 +81,7 @@
             <div class="list-group list-group-flush small">
               <a href="/proficiencyScales/the-why-intro-to-uiux.html" class="list-group-item list-group-item-action text-primary fw-bold">🎯 1. Proficiency Scale</a>
               <a href="/pre-assessments/the-why-intro-to-uiux.html" class="list-group-item list-group-item-action text-dark">🚀 2. Pre-Assessment</a>
-              <a href="/notes/the-blueprint.html" class="list-group-item list-group-item-action text-dark" >📝 3. Guided Notes</a>
+              <a href="/notes/the-why-intro-to-uiux.html" class="list-group-item list-group-item-action text-dark" >📝 3. Guided Notes</a>
               <a href="#" class="list-group-item list-group-item-action text-dark">📁 4. Project Assets (.zip)</a>
             </div>
           </div>
@@ -92,11 +92,11 @@
           <div class="card-body small">
               <ul class="mb-0 ps-3">
                   <li class="mb-2"><strong>Define</strong> the distinct roles of "UI" (User Interface) and "UX" (User Experience) design.</li>
-                  <li class="mb-2"><strong>Explain</strong> why "good UX" is vital for a product's success using the Ketchup Bottle analogy.</li>
-                  <li class="mb-2"><strong>Apply</strong> the "Curb Cut Effect" to understand why accessibility benefits everyone.</li>
-                  <li class="mb-2"><strong>Master</strong> the "Mobile-First" strategy by prioritizing content for small screens.</li>
-                  <li class="mb-2"><strong>Identify</strong> industry-standard UI patterns like Cards, Modals, and Breadcrumbs.</li>
-                  <li class="mb-2"><strong>Create</strong> a professional High-Fidelity Mockup and Components using Adobe XD (or Figma).</li>
+                  <li class="mb-2"><strong>Explain and apply</strong> the 7 Elements and 8 Principles of Design to a real layout.</li>
+                  <li class="mb-2"><strong>Explain and apply</strong> color theory (the color wheel, harmony schemes, and the 60-30-10 rule) and effective typography.</li>
+                  <li class="mb-2"><strong>Evaluate</strong> the use of white space like a professional critique, not a "just fill it" instinct.</li>
+                  <li class="mb-2"><strong>Identify</strong> common layout techniques (grid, split-screen, full-bleed) and industry-standard UI patterns like Cards, Modals, and Breadcrumbs.</li>
+                  <li class="mb-2"><strong>Create</strong> a specific branding message and a professional High-Fidelity Mockup with reusable Components using Adobe XD (or Figma).</li>
                   <li><strong>Conduct</strong> a Usability Test to "debug" your design before writing code.</li>
               </ul>
           </div>
@@ -139,6 +139,112 @@
           <div class="card-body small">
             <p class="mb-0">Can you think of a website that looks amazing but is impossible to navigate? Is that a UI failure or a UX failure?</p>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2B: ELEMENTS OF DESIGN -->
+    <div id="elements-of-design" class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="elements">
+          <h2 class="section-title mt-0">The Raw Ingredients: Elements of Design</h2>
+          <p><strong>The Why:</strong> Before you can talk about a design being "good," you need words for what's actually on the screen. "Make it pop" isn't a design instruction a developer can act on. "Increase the contrast in value between the headline and the background" is. The <strong>Elements of Design</strong> are the raw, physical building blocks every visual design is made of — the vocabulary that makes precise feedback possible.</p>
+          <p><strong>The What:</strong> There are seven elements. Every single thing you've ever designed is built entirely from these:</p>
+          <div class="row g-3 mt-2">
+            <div class="col-md-6">
+              <div class="card h-100 shadow-sm border-primary text-start">
+                <div class="card-header bg-primary text-white fw-bold small">Line</div>
+                <div class="card-body small">A mark connecting two points. Lines divide sections, underline links, and guide the eye — a horizontal rule between a nav bar and hero image is a line doing structural work.</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card h-100 shadow-sm border-primary text-start">
+                <div class="card-header bg-primary text-white fw-bold small">Shape</div>
+                <div class="card-body small">A closed 2D area — a rounded-corner button, a circular avatar, a rectangular card. Rounded shapes read as friendly and approachable; sharp corners read as serious and technical.</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card h-100 shadow-sm border-primary text-start">
+                <div class="card-header bg-primary text-white fw-bold small">Color</div>
+                <div class="card-body small">Hue — the actual color itself (red, blue, green). Covered in depth in the Color Theory section below.</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card h-100 shadow-sm border-primary text-start">
+                <div class="card-header bg-primary text-white fw-bold small">Value</div>
+                <div class="card-body small">How light or dark something is, independent of color. A pale blue and a navy blue are the same hue at different values — value is what actually creates contrast and readability, not color alone.</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card h-100 shadow-sm border-primary text-start">
+                <div class="card-header bg-primary text-white fw-bold small">Texture</div>
+                <div class="card-body small">The surface quality something appears to have — a subtle drop shadow makes a card feel like it's floating above the page; a grain overlay can make a background feel tactile.</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card h-100 shadow-sm border-primary text-start">
+                <div class="card-header bg-primary text-white fw-bold small">Space</div>
+                <div class="card-body small">The area around and between elements — this is exactly what you called "white space" in Lab 1. Space isn't emptiness; it's an active design tool that creates breathing room and groups related items (see Gestalt Proximity below).</div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="card h-100 shadow-sm border-primary text-start">
+                <div class="card-header bg-primary text-white fw-bold small">Form</div>
+                <div class="card-body small">The 3D quality of an object — on a flat screen, we fake this with shadows, gradients, and highlights. A button with a subtle gradient and drop shadow appears to have "Form," which is exactly why it looks pressable.</div>
+              </div>
+            </div>
+          </div>
+
+          <p class="mt-4"><strong>The How:</strong> Look at Glitch Gaming's product card again: the rounded rectangle is <strong>Shape</strong>. The gap between the image and the price tag is <strong>Space</strong>. The bright accent color on the "Book Terminal" button versus the dark card background is <strong>Value</strong> contrast, not just Color. The subtle shadow under the card is <strong>Form</strong>. You were already using all seven elements — now you have the words for it.</p>
+
+          <div class="alert alert-warning small border-warning border mb-0">
+            <strong>Where Everyone Gets Ambushed:</strong> Students often think "Color" and "Value" are the same thing. They aren't — two colors can be wildly different hues (red and green) but have the exact same value (how light or dark), which is why a red/green combination often fails a contrast check even though the colors look "different." Accessibility contrast is a Value problem, not a Color problem.
+          </div>
+        </section>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+          <div class="d-flex align-items-center mb-2">
+            <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+          </div>
+          <p class="mb-2 small text-dark">A designer says a button "needs more contrast" but only changes its hue, not how light or dark it is. Will that fix a contrast problem?</p>
+          <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">Not necessarily. Contrast is primarily a Value problem (light vs. dark), not a Color/hue problem. Two different-looking colors can still have low value contrast and fail accessibility checks.</p></details>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2C: PRINCIPLES OF DESIGN -->
+    <div id="principles-of-design" class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="design-principles">
+          <h2 class="section-title mt-0">The Rulebook: Principles of Design</h2>
+          <p><strong>The Why:</strong> Knowing the seven elements is like knowing the alphabet — it doesn't mean you can write a sentence. The <strong>Principles of Design</strong> are the rules for <em>combining</em> elements so a layout feels intentional instead of random. (Note: this is a different framework from the "Core Principles of Good UX" — Clarity, Consistency, Feedback, Forgiveness — covered next, which are about <em>usability</em>. These principles are about visual <em>composition</em>.)</p>
+          <p><strong>The What:</strong> Eight principles govern how elements combine into a layout:</p>
+          <ul class="small ps-3 mb-4">
+            <li class="mb-2"><strong>Balance:</strong> Visual "weight" distributed evenly (or intentionally unevenly). A huge hero image on the left needs something — text, whitespace, a smaller image — to balance it on the right, or the page feels like it's tipping over.</li>
+            <li class="mb-2"><strong>Contrast:</strong> Deliberate difference (in value, size, or color) that makes one element stand out from another. This is how a CTA button gets noticed against a page full of body text.</li>
+            <li class="mb-2"><strong>Emphasis:</strong> Making the single most important element the visual focal point — usually through size, color, or position. A page can only have one "loudest" element before emphasis stops working.</li>
+            <li class="mb-2"><strong>Movement:</strong> Guiding the eye through a layout in a deliberate path — this is exactly what Gestalt's Continuation principle and the F/Z reading patterns from Chapter 3 are doing.</li>
+            <li class="mb-2"><strong>Pattern / Repetition:</strong> Reusing the same visual treatment (button style, spacing, icon style) throughout a design so it feels like one coherent system, not several different sites stapled together.</li>
+            <li class="mb-2"><strong>Proportion:</strong> The size relationship between elements. A headline should be dramatically larger than body text — if they're close in size, the hierarchy collapses and nothing looks more important than anything else.</li>
+            <li class="mb-2"><strong>Rhythm:</strong> A repeated visual "beat" — evenly spaced cards in a grid create a predictable rhythm the eye can comfortably scan across.</li>
+            <li class="mb-2"><strong>Unity:</strong> The feeling that every element belongs to the same design — achieved by consistent color palette, consistent spacing, and consistent typography across the whole site.</li>
+          </ul>
+
+          <p><strong>The How:</strong> Look back at Glitch Gaming's card design: the price tag is smaller than the title (<strong>Proportion</strong>), the "Book Terminal" button uses the one accent color reserved just for CTAs (<strong>Emphasis</strong> + <strong>Contrast</strong>), and every card in the grid uses identical padding and corner radius (<strong>Pattern</strong> + <strong>Unity</strong>).</p>
+
+          <div class="alert alert-warning small border-warning border mb-0">
+            <strong>Where Everyone Gets Ambushed:</strong> Students often think "Balance" means "symmetrical" — a mirror image on both sides. That's only <em>one</em> kind of balance (symmetrical). A large image on one side matched by a block of smaller text and whitespace on the other side is <strong>asymmetrical balance</strong>, and it's used constantly in modern web design because perfect symmetry can look stiff and boring.
+          </div>
+        </section>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+          <div class="d-flex align-items-center mb-2">
+            <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+          </div>
+          <p class="mb-2 small text-dark">A homepage has one big photo on the left and, on the right, a headline plus two short paragraphs with breathing room around them. Is this page unbalanced?</p>
+          <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">No — this is asymmetrical balance. The visual "weight" of the large photo is offset by the weight of the text block and surrounding space, even though the two sides aren't mirror images.</p></details>
         </div>
       </div>
     </div>
@@ -198,6 +304,16 @@
                   </ol>
                   <p class="mb-3 text-danger fw-bold">Turn In: Submit your annotated screenshot.</p>
                   <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                  <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                  <table class="table table-bordered table-sm small mb-0 bg-white">
+                    <tbody>
+                      <tr><td class="fw-bold" style="width:18%">4.0</td><td>Hierarchy ranking is accurate and the annotation explains <em>why</em> each element ranks where it does (size, contrast, position) — not just what it is.</td></tr>
+                      <tr><td class="fw-bold">3.0</td><td>Top 3 hierarchy elements are correctly numbered, the CTA is correctly identified, and white space is circled accurately.</td></tr>
+                      <tr><td class="fw-bold">2.0</td><td>Screenshot is annotated but the hierarchy ranking is questionable, or the CTA/white space isn't clearly marked.</td></tr>
+                      <tr><td class="fw-bold">1.0</td><td>Submitted, but the screenshot has no real annotation.</td></tr>
+                    </tbody>
+                  </table>
               </div>
           </div>
 
@@ -211,7 +327,6 @@
         <section id="gestalt">
           <h2 class="section-title mt-0">How the Brain Groups Things: Gestalt Principles</h2>
           <p>The brain is a pattern-matching machine. It does not see individual pixels — it instantly organizes visual input into groups and structures. <strong>Gestalt Principles</strong> are the rules that describe <em>how</em> the brain does this. Understanding them lets you design layouts that feel natural and effortless, because you are working with the brain's hard-wired behavior instead of against it.</p>
-          <span class="badge bg-primary me-1">NV 4.3.1</span><span class="badge bg-primary me-1">NV 4.3.2</span>
 
           <h5 class="fw-bold mt-4 text-primary">Proximity</h5>
           <p class="small">Things close together are perceived as belonging together. Whitespace creates the "walls" of invisible groups.</p>
@@ -326,9 +441,50 @@
             <p class="mb-0"><strong>The Design Solution:</strong> We will use a <strong>Dark Mode</strong> UI (to match her gaming setup) with high-contrast text and clear CTA buttons.</p>
           </div>
 
-          <h5 class="fw-bold mt-4 text-primary">Color Psychology & Typography</h5>
-          <p>We don't pick colors at random. Blue evokes Trust (Banking). Red evokes Urgency or Danger (Fast Food/Errors). Green evokes Success or Nature. We use the <strong>60-30-10 Rule</strong>: 60% Primary Color, 30% Secondary Color, 10% Accent Color (usually reserved strictly for Call to Action buttons!).</p>
-          <p>For Typography, we limit our designs to just two font families: A Heading font (to grab attention) and a highly readable Paragraph font.</p>
+          <h5 id="color-theory" class="fw-bold mt-4 text-primary">Color Theory: More Than a Favorite Color</h5>
+          <p><strong>The Why:</strong> "I like purple" is not a color strategy — it's a guess. Professional color choices are built from two layers: the psychology of what a color <em>means</em>, and the math of which colors <em>work together</em>. Skip either layer and a palette either sends the wrong message or physically clashes.</p>
+          <p><strong>The What:</strong> We don't pick colors at random. <strong>Color psychology</strong> is what a hue signals emotionally: Blue evokes Trust (Banking). Red evokes Urgency or Danger (Fast Food/Errors). Green evokes Success or Nature. Separately, the <strong>Color Wheel</strong> defines which combinations are mathematically harmonious:</p>
+          <ul class="small ps-3 mb-3">
+            <li class="mb-2"><strong>Complementary:</strong> Colors directly opposite on the wheel (blue/orange). Maximum contrast — great for making one CTA button impossible to miss.</li>
+            <li class="mb-2"><strong>Analogous:</strong> Colors next to each other (blue, teal, green). Low contrast, calm and cohesive — common for backgrounds and gradients.</li>
+            <li class="mb-2"><strong>Triadic:</strong> Three colors evenly spaced around the wheel. Vibrant and balanced, but harder to use without looking chaotic — needs one color to dominate.</li>
+            <li class="mb-2"><strong>Monochromatic:</strong> Different values and saturations of a single hue. The safest, most cohesive option — and exactly what powers the 60-30-10 rule below.</li>
+          </ul>
+          <p>Once you've picked a harmony scheme, apply the <strong>60-30-10 Rule</strong>: 60% Primary Color (dominant, usually backgrounds), 30% Secondary Color, 10% Accent Color — reserved strictly for Call-to-Action buttons, so the one color used least is the one that matters most.</p>
+
+          <div class="alert alert-warning small border-warning border mb-4">
+            <strong>Where Everyone Gets Ambushed:</strong> Students often pick a triadic or complementary scheme and use all colors in roughly equal amounts. Without the 60-30-10 ratio, even mathematically "correct" color harmony looks like visual noise — harmony tells you which colors can work together, not how much of each to use.
+          </div>
+
+          <h5 id="typography" class="fw-bold mt-4 text-primary">Typography: Choosing and Pairing Fonts</h5>
+          <p><strong>The Why:</strong> Text makes up most of what's actually on a web page. A gorgeous color palette on unreadable type is still a failed design — typography is doing the heavy lifting of communication.</p>
+          <p><strong>The What:</strong> Typefaces fall into a few families: <strong>Serif</strong> (has small decorative feet, e.g. Times New Roman — reads as traditional, trustworthy), <strong>Sans-Serif</strong> (no feet, clean lines, e.g. Helvetica — reads as modern, minimal), and <strong>Display/Script</strong> fonts (decorative, expressive — readable only in small doses, never for body text).</p>
+          <p><strong>The How:</strong> Professional practice limits a design to <strong>two font families</strong>: a Heading font (to grab attention and set personality) and a highly readable Paragraph font. A safe, reliable pairing rule: pick <em>contrast</em>, not <em>similarity</em> — pair a bold Display or Serif heading font with a clean Sans-Serif body font. Two similar-looking sans-serif fonts together just look like a mistake, not an intentional choice.</p>
+
+          <div class="alert alert-warning small border-warning border mb-4">
+            <strong>Where Everyone Gets Ambushed:</strong> Students confuse <strong>legibility</strong> (can you tell each letter apart — a font property) with <strong>readability</strong> (can you comfortably read a full paragraph — a layout property, driven by line-height/leading and line length). A perfectly legible font set at 1.1 line-height in a 100-character-wide column is still unreadable.
+          </div>
+
+          <h5 id="white-space" class="fw-bold mt-4 text-primary">White Space: The Element Everyone Underuses</h5>
+          <p><strong>The Why:</strong> New designers treat empty space as wasted space and try to fill every pixel. Professionals treat it as one of the most powerful tools available — it's the reason expensive brands "feel" expensive.</p>
+          <p><strong>The What:</strong> <strong>White space</strong> (or negative space) is the empty area around and between elements — it's the Space element from earlier, applied deliberately. There are two scales: <strong>Macro white space</strong> — the large gaps between major sections of a page — and <strong>Micro white space</strong> — the small gaps between a label and its input, or between a line of text and the next.</p>
+          <p><strong>The How:</strong> <strong>Evaluate</strong> white space the way a professional critique does: does the primary CTA have enough clear space around it that nothing competes for attention? Is there consistent micro spacing between form labels and fields, or does it vary randomly page to page? Cramped micro spacing (a button hugging its label text) reads as cheap; generous, consistent spacing reads as premium — this is the entire visual reason luxury brand sites feel different from bargain sites with identical content.</p>
+
+          <div class="alert alert-warning small border-warning border mb-0">
+            <strong>Where Everyone Gets Ambushed:</strong> Students often fill white space with a "just in case" element — an extra icon, an extra sentence, a decorative border — because empty space feels unfinished. Deliberately empty space is not unfinished; it's doing real work: separating unrelated content (Gestalt Proximity) and making the CTA the obvious next click.
+          </div>
+
+          <h5 id="branding-message" class="fw-bold mt-5 text-primary">Crafting Your Brand Message</h5>
+          <p><strong>The Why:</strong> Colors and fonts alone don't tell a customer what a business does or why they should care. Before Sarah's Glitch Gaming site gets a single pixel of visual design, it needs words that do that job — the <strong>branding message</strong>.</p>
+          <p><strong>The What:</strong> A branding message is a short, specific statement of who a business serves and why it's different — not a slogan chosen because it "sounds cool." A strong version follows a simple formula: <em>[Business] helps [specific audience] [achieve a specific outcome] by [what makes it different].</em></p>
+          <div class="card roadmap-card bg-site-secondary text-center p-3 mb-3 border-0 shadow-sm">
+            <code class="fs-6 text-dark">"Glitch Gaming helps Carson City's competitive gamers book a tournament-ready PC in under 60 seconds — no clutter, no confusion."</code>
+          </div>
+          <p><strong>The How:</strong> That one sentence should now drive every visual decision: it names the audience (competitive gamers), so the voice stays sharp and no-nonsense instead of playful; it names the outcome (fast booking), so the CTA button gets the emphasis; it names the differentiator (no clutter), so the whitespace-heavy, minimal layout isn't just a style preference — it's the brand message made visible.</p>
+
+          <div class="alert alert-warning small border-warning border mb-0">
+            <strong>Where Everyone Gets Ambushed:</strong> Students often write a branding message that's really just a slogan ("Game On!") with no actual information in it. A real branding message names a specific audience and a specific outcome — if the sentence could apply to any business in the category, it isn't doing its job yet.
+          </div>
 
           <!-- LAB 2 CARD -->
           <div class="card border-success shadow-sm my-4 mt-5 text-start">
@@ -337,12 +493,23 @@
                   <p><strong>Objective:</strong> Establish a cohesive, psychologically appropriate brand identity for your first agency client.</p>
                   <ol>
                       <li class="mb-2">Based on the Persona you created in Chapter 3, determine the "vibe" your Custom Website needs (e.g., Playful, Serious, Trustworthy).</li>
+                      <li class="mb-2">Write your client's <strong>branding message</strong> using the formula above: audience + outcome + differentiator, in one sentence.</li>
                       <li class="mb-2">Use <a href="https://coolors.co" target="_blank" class="fw-bold">Coolors.co</a> and <a href="https://fonts.google.com" target="_blank" class="fw-bold">Google Fonts</a> to create a "UI Kit" document.</li>
-                      <li class="mb-2">You must clearly define: 1 Primary Color (Hex Code), 1 Secondary Color, 1 Accent Color (for buttons), 1 Heading Font, and 1 Paragraph Font.</li>
+                      <li class="mb-2">You must clearly define: 1 Primary Color (Hex Code), 1 Secondary Color, 1 Accent Color (for buttons), 1 Heading Font, and 1 Paragraph Font, and name which color harmony scheme you used (Complementary, Analogous, Triadic, or Monochromatic).</li>
                       <li class="mb-2">Write 2 sentences explaining <em>why</em> you chose these colors based on color psychology and your target user.</li>
                   </ol>
-                  <p class="mb-3 text-danger fw-bold">Turn In: Submit your UI Kit document and justification.</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Submit your UI Kit document, branding message, and justification.</p>
                   <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                  <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                  <table class="table table-bordered table-sm small mb-0 bg-white">
+                    <tbody>
+                      <tr><td class="fw-bold" style="width:18%">4.0</td><td>Branding message names a specific audience, outcome, and differentiator — no business outside the client's niche could reuse it. Color harmony scheme is correctly named and applied; justification ties directly to the persona.</td></tr>
+                      <tr><td class="fw-bold">3.0</td><td>Branding message follows the formula completely. All UI Kit fields are present, correctly labeled, and the color harmony scheme is correctly identified.</td></tr>
+                      <tr><td class="fw-bold">2.0</td><td>Branding message is present but generic/slogan-like. UI Kit fields are present but justification doesn't reference color psychology or the persona.</td></tr>
+                      <tr><td class="fw-bold">1.0</td><td>Submitted, but missing the branding message or multiple UI Kit fields.</td></tr>
+                    </tbody>
+                  </table>
               </div>
           </div>
 
@@ -361,6 +528,13 @@
             <p class="mb-0">Why is Sarah's specific frustration about 'clutter' so important for our UI layout? What can we remove from the screen to help her?</p>
           </div>
         </div>
+        <div class="bg-light p-3 rounded border shadow-sm mt-4 text-start">
+          <div class="d-flex align-items-center mb-2">
+            <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+          </div>
+          <p class="mb-2 small text-dark">"Best Gaming Site Ever!" — is this a usable branding message? Why or why not?</p>
+          <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">No — it names no specific audience, no specific outcome, and no differentiator. It could be pasted onto any gaming site with zero changes, which means it isn't actually communicating anything about this specific business.</p></details>
+        </div>
       </div>
     </div>
 
@@ -369,7 +543,7 @@
       <div class="col-lg-12">
         <section id="ux-vocabulary">
           <h2 class="section-title mt-0 text-center">The UX Designer's Vocabulary</h2>
-          <p class="text-center mx-auto mb-4" style="max-width:800px;">These are the terms every professional uses in wireframe reviews, client briefs, and critique sessions. Know them cold — they are your design vocabulary. <span class="badge bg-primary me-1">NV 4.3.3</span><span class="badge bg-primary me-1">NV 4.4.4</span></p>
+          <p class="text-center mx-auto mb-4" style="max-width:800px;">These are the terms every professional uses in wireframe reviews, client briefs, and critique sessions. Know them cold — they are your design vocabulary.</p>
 
           <div class="row g-3">
             <div class="col-md-4">
@@ -444,8 +618,23 @@
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
         <section id="patterns">
-          <h2 class="section-title mt-0">Common UI "Design Patterns"</h2>
-          <p>Don't reinvent the wheel. Use standard patterns users already know.</p>
+          <h2 class="section-title mt-0">How the Page Is Built: Layout Techniques</h2>
+          <p><strong>The Why:</strong> Before you place a single card or button, you need a structural plan for the whole page — the same way a floor plan comes before furniture placement. Picking the wrong overall layout technique means fighting the structure for every section you add afterward.</p>
+          <p><strong>The What:</strong> These are the layout techniques you'll see (and use) constantly. Some connect directly to the F-Pattern and Z-Pattern reading behavior from Chapter 3 — the layout technique determines which reading pattern the page will actually get:</p>
+          <ul class="small ps-3 mb-4">
+            <li class="mb-2"><strong>Single-Column:</strong> Everything stacked vertically, one thing after another. Simple, mobile-friendly by default, and a natural fit for the F-Pattern on text-heavy pages.</li>
+            <li class="mb-2"><strong>Grid-Based Layout:</strong> Content organized into consistent rows and columns of equal-sized boxes — the structural technique behind a card-based UI pattern like Pinterest.</li>
+            <li class="mb-2"><strong>Split-Screen:</strong> The page divided into two large, distinct halves (often 50/50) — common for comparing two options or pairing an image with a signup form.</li>
+            <li class="mb-2"><strong>Asymmetrical Layout:</strong> Deliberately unequal column widths and off-center placement — creates visual energy and works with, not against, asymmetrical balance (see Principles of Design above).</li>
+            <li class="mb-2"><strong>Full-Bleed / Hero Layout:</strong> A single large image or video spans the entire browser width with no margin — built for the Z-Pattern, since there's minimal text to force an F-scan.</li>
+          </ul>
+
+          <div class="alert alert-warning small border-warning border mb-4">
+            <strong>Where Everyone Gets Ambushed:</strong> Students often pick a layout technique because it "looks modern" without checking whether it matches the content. A full-bleed hero layout built for a page that turns out to need three paragraphs of dense product specs will force an F-Pattern onto a structure designed for a Z-Pattern — the content and the layout technique have to agree with each other.
+          </div>
+
+          <h2 class="section-title mt-5">Common UI "Design Patterns"</h2>
+          <p>Once the overall layout technique is chosen, don't reinvent the wheel for the individual pieces inside it. Use standard patterns users already know.</p>
           <ul class="small mb-4">
             <li class="mb-3"><strong>The Card:</strong> A container that groups an image, headline, and text. (Think Pinterest or Amazon).</li>
             <li class="mb-3"><strong>The Hero:</strong> The massive, full-width section at the very top of the homepage to grab attention.</li>
@@ -477,6 +666,16 @@
                   </ol>
                   <p class="mb-3 text-danger fw-bold">Turn In: Upload a screenshot of your components with the layers panel visible, or share your XD/Figma link.</p>
                   <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                  <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                  <table class="table table-bordered table-sm small mb-0 bg-white">
+                    <tbody>
+                      <tr><td class="fw-bold" style="width:18%">4.0</td><td>Both elements are true reusable Components (not just grouped shapes), every layer is renamed professionally, and the components correctly use the UI Kit's colors and fonts.</td></tr>
+                      <tr><td class="fw-bold">3.0</td><td>Both elements are converted to Components, and layers are renamed with only minor exceptions.</td></tr>
+                      <tr><td class="fw-bold">2.0</td><td>Elements are built but not converted to true Components, or most layers are left with default names.</td></tr>
+                      <tr><td class="fw-bold">1.0</td><td>Submitted, but one of the two required elements is missing.</td></tr>
+                    </tbody>
+                  </table>
               </div>
           </div>
 
@@ -489,6 +688,13 @@
           </a>
           <figcaption class="p-2 small text-muted text-center"><strong>Figure 4.5:</strong> Standard UI Patterns used in modern web development.</figcaption>
         </figure>
+        <div class="bg-light p-3 rounded border shadow-sm mt-4 text-start">
+          <div class="d-flex align-items-center mb-2">
+            <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+          </div>
+          <p class="mb-2 small text-dark">A client wants their product comparison page (heavy on spec tables and text) built with a full-bleed hero layout. What's the mismatch?</p>
+          <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">Full-bleed hero layouts are built for minimal-text, Z-Pattern content. Dense spec tables and text need a structure that supports an F-Pattern scan, like a single-column or grid-based layout.</p></details>
+        </div>
       </div>
     </div>
 
@@ -539,6 +745,16 @@
                   </ol>
                   <p class="mb-3 text-danger fw-bold">Turn In: Submit the Share link to your prototype.</p>
                   <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                  <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                  <table class="table table-bordered table-sm small mb-0 bg-white">
+                    <tbody>
+                      <tr><td class="fw-bold" style="width:18%">4.0</td><td>All three links work exactly as specified and the flow feels like a real, testable app — a stranger could use it without instructions.</td></tr>
+                      <tr><td class="fw-bold">3.0</td><td>All three screens exist and all three required links function correctly when played.</td></tr>
+                      <tr><td class="fw-bold">2.0</td><td>Screens exist but one or more links are missing or point to the wrong screen.</td></tr>
+                      <tr><td class="fw-bold">1.0</td><td>Submitted, but fewer than three screens exist or no links are functional.</td></tr>
+                    </tbody>
+                  </table>
               </div>
           </div>
 
@@ -559,12 +775,13 @@
       <div class="col-lg-12">
         <section id="reality">
           <h2 class="section-title mt-0 text-center">The Reality Check: Usability Testing</h2>
-          <p class="text-center mx-auto mb-4" style="max-width: 800px;">You think your design is perfect. <strong>You are wrong.</strong> You suffer from "The Curse of Knowledge." Before coding, conduct a <strong>Usability Test</strong> (or "The Mom Test").</p>
-          
+          <p class="text-center mx-auto mb-2" style="max-width: 800px;"><strong>The Why:</strong> You think your design is perfect. <strong>You are wrong.</strong> You suffer from "The Curse of Knowledge" — you already know where every button is, so you can't see your own design the way a first-time visitor does. Skipping this step means finding out your navigation is confusing <em>after</em> you've already written the code, which is the most expensive time to find out.</p>
+          <p class="text-center mx-auto mb-4" style="max-width: 800px;"><strong>The What:</strong> A <strong>Usability Test</strong> (nicknamed "The Mom Test") is a structured procedure for watching a real person try to use your design and use their confusion to find problems before a client ever sees them.</p>
+
           <div class="row g-4 mx-auto" style="max-width: 1000px;">
             <div class="col-md-7">
               <div class="bg-white p-4 rounded border shadow-sm h-100 text-start">
-                  <h6 class="fw-bold text-primary mb-3">The Testing Protocol:</h6>
+                  <h6 class="fw-bold text-primary mb-3">The Testing Protocol (The How):</h6>
                   <ol class="small mb-0">
                     <li class="mb-2">Recruit a friend, parent, or classmate.</li>
                     <li class="mb-2">Show them your linked XD or Figma prototype.</li>
@@ -582,6 +799,10 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <div class="alert alert-warning small border-warning border mt-4 mx-auto mb-0" style="max-width: 1000px;">
+            <strong>Where Everyone Gets Ambushed:</strong> Students often "help" the tester the moment they hesitate — pointing at the right button or explaining what a label means. The second you explain something, the test stops measuring your design and starts measuring your explanation. If a real customer needs a tour guide standing next to them, the design already failed; that's exactly the data point a usability test exists to surface.
           </div>
 
           <!-- BUSINESS PLAN INTEGRATION: CLIENT APPROVAL -->
@@ -610,6 +831,31 @@
                   </ol>
                   <p class="mb-3 text-danger fw-bold mt-4">Turn In: Upload the link to your final Prototype, or upload the file directly.</p>
                   <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                  <h6 class="fw-bold mt-4 mb-2">📋 Grading Rubric (100 pts)</h6>
+                  <table class="table table-bordered small bg-white shadow-sm mb-0">
+                    <thead class="table-light text-center">
+                      <tr><th style="width:20%">Score</th><th>What It Looks Like</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="fw-bold text-center">4.0 (Advanced)<br><span class="text-primary">Digital Architect</span></td>
+                        <td>The mockup demonstrably applies the Elements and Principles of Design (correct value contrast, intentional balance, clear emphasis on the primary CTA), the branding message is visibly reflected in the visual choices, and the prototype link works flawlessly end to end.</td>
+                      </tr>
+                      <tr>
+                        <td class="fw-bold text-center">3.0 (Mastery)<br><span class="text-success">Practitioner</span></td>
+                        <td>Homepage and sub-page both use real content and the UI Kit's actual colors/fonts, the pages are linked and clickable, and the Accent Color clearly draws attention to the primary CTA.</td>
+                      </tr>
+                      <tr>
+                        <td class="fw-bold text-center">2.0 (Foundational)<br><span class="text-warning">Apprentice</span></td>
+                        <td>Mockup is submitted but still has placeholder "X" boxes or Lorem Ipsum text, or the pages aren't linked/clickable.</td>
+                      </tr>
+                      <tr>
+                        <td class="fw-bold text-center">1.0 (Novice)<br><span class="text-danger">Beginner</span></td>
+                        <td>Attempted, but the mockup doesn't connect back to the Chapter 3 wireframes or UI Kit.</td>
+                      </tr>
+                    </tbody>
+                  </table>
               </div>
           </div>
 
@@ -621,7 +867,7 @@
     <div class="row mt-5">
       <div class="col-lg-8 pe-lg-5">
           <h2 class="section-title text-primary fw-bold">The Final Download: Chapter Recap</h2>
-          <p>This chapter transformed you from a builder into a digital psychologist. We learned the critical difference between UI (Sensation) and UX (Solution). We mastered Visual Hierarchy, utilized Color Psychology, and applied the Mobile-First strategy to prioritize content. Finally, we learned how to build and link High-Fidelity Mockups in Adobe XD and Figma, allowing our agency to secure client approvals and save hundreds of hours of coding errors through rapid Usability Testing.</p>
+          <p>This chapter transformed you from a builder into a digital psychologist. We learned the critical difference between UI (Sensation) and UX (Solution), and the shared vocabulary — the Elements and Principles of Design — that lets a whole team critique a layout with precision instead of vague opinions. We mastered Visual Hierarchy and Gestalt principles, built real color theory and typography skills, chose layout techniques on purpose instead of by trend, and wrote a branding message specific enough to actually drive design decisions. Finally, we learned how to build and link High-Fidelity Mockups in Adobe XD and Figma, allowing our agency to secure client approvals and save hundreds of hours of coding errors through rapid Usability Testing.</p>
           <p class="text-muted small mt-5">Copyright - Danylle Miller Designs 2026</p>
       </div>
       <div class="col-lg-4 mt-4 mt-lg-0 d-flex flex-column justify-content-end pb-3">

@@ -1,0 +1,67 @@
+{
+  "chapter": 4,
+  "title": "The Artist (Intro to UI/UX)",
+  "page": "year1/the-why-intro-to-uiux.html",
+  "assessment_note": "Assessment for this chapter lives in external worksheets/tests, not an on-page question bank. assessed_by is descriptive only.",
+  "indicators": {
+    "2.2.1": {
+      "taught_in": "Color Theory: More Than a Favorite Color",
+      "anchor": "#color-theory",
+      "practiced_in": "Lab 2: Brand UI Kit (name the color harmony scheme + psychology justification)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "2.2.2": {
+      "taught_in": "The Rulebook: Principles of Design",
+      "anchor": "#design-principles",
+      "practiced_in": "Quick Check on symmetrical vs. asymmetrical balance; applied in the Milestone mockup's visual hierarchy",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "2.2.3": {
+      "taught_in": "The Raw Ingredients: Elements of Design",
+      "anchor": "#elements",
+      "practiced_in": "Lab 1: The Hierarchy Audit (identifying value contrast) + Quick Check",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "2.2.4": {
+      "taught_in": "Typography: Choosing and Pairing Fonts",
+      "anchor": "#typography",
+      "practiced_in": "Lab 2: Brand UI Kit (heading + paragraph font pairing)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "2.2.5": {
+      "taught_in": "White Space: The Element Everyone Underuses",
+      "anchor": "#white-space",
+      "practiced_in": "Lab 1: The Hierarchy Audit (circling white space used around the CTA)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.3.1": {
+      "taught_in": "How the Page Is Built: Layout Techniques",
+      "anchor": "#patterns",
+      "practiced_in": "Quick Check on layout technique vs. content mismatch; applied when choosing the Milestone mockup's structure",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.4.7": {
+      "taught_in": "Crafting Your Brand Message",
+      "anchor": "#branding-message",
+      "practiced_in": "Lab 2: Brand UI Kit (branding message requirement)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.6.4": {
+      "taught_in": "The Reality Check: Usability Testing",
+      "anchor": "#reality",
+      "practiced_in": "The Testing Protocol (peer usability test) + Let's Discuss reflection",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    }
+  },
+  "revisits": {
+    "4.3.4": "Not re-taught this chapter; responsive design was owned and taught in Chapter 3 (Wireframing for Responsive Design).",
+    "4.6.3": "Touched lightly via the accessibility 'Big Three Checks' (contrast, alt text, touch targets), but not formally taught/assessed here."
+  },
+  "wrs": {
+    "1.1.7": {
+      "taught_in": "Crafting Your Brand Message / Lab 2: Brand UI Kit",
+      "anchor": "#branding-message",
+      "student_action": "Students originate an audience-specific branding message and justify original color/font choices rather than copying a template"
+    }
+  }
+}
