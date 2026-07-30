@@ -34,8 +34,8 @@
       "assessed_by": ["q10", "q13"]
     },
     "3.2.2": {
-      "taught_in": "Locking the Doors: Practices Every Site Should Model",
-      "anchor": "#modeling-security-practices",
+      "taught_in": "The Security Checklist: Practices Every Site Should Model",
+      "anchor": "#the-secret-handshake",
       "practiced_in": "Security & Privacy Practices statement activity (write a client-facing policy for Vega's Tamale Co.)",
       "assessed_by": ["q11", "q12"]
     },
@@ -100,8 +100,8 @@
       "assessed_by": ["q31", "q32"]
     },
     "4.6.2": {
-      "taught_in": "Who Are You Actually Designing For?",
-      "anchor": "#who-are-you-actually-designing-for",
+      "taught_in": "Who Are You Actually Designing For? (within Make the Web for Everyone)",
+      "anchor": "#make-the-web-for-everyone",
       "practiced_in": "Lab 2: The Inclusive Design Proposal",
       "assessed_by": ["q33", "q34"]
     },
@@ -123,12 +123,12 @@
     },
     "1.1.5": {
       "taught_in": "Who Are You Actually Designing For? / Check Your Bias at the Door",
-      "anchor": "#who-are-you-actually-designing-for",
+      "anchor": "#make-the-web-for-everyone",
       "student_action": "Lab 2: The Inclusive Design Proposal — students design for a specific disability category and explain the benefit to a broader audience"
     },
     "1.3.3": {
-      "taught_in": "Locking the Doors: Practices Every Site Should Model",
-      "anchor": "#modeling-security-practices",
+      "taught_in": "The Security Checklist: Practices Every Site Should Model",
+      "anchor": "#the-secret-handshake",
       "student_action": "Security & Privacy Practices statement activity"
     }
   }
