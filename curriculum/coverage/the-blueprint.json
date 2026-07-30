@@ -1,0 +1,118 @@
+{
+  "chapter": 3,
+  "title": "The Blueprint (Research & Architecture)",
+  "page": "year1/the-blueprint.html",
+  "assessment_note": "Assessment for this chapter lives in external worksheets/tests, not an on-page question bank. assessed_by is descriptive only.",
+  "indicators": {
+    "2.4.1": {
+      "taught_in": "Getting Found the Other Way: Social Media & the Web",
+      "anchor": "#step-6-social",
+      "practiced_in": "Try it yourself: 3-post launch plan activity",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "2.4.2": {
+      "taught_in": "How Social Platforms and Web Links Actually Connect (within Getting Found the Other Way)",
+      "anchor": "#step-6-social",
+      "practiced_in": "Open Graph meta tag walkthrough + Quick Check",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "2.4.3": {
+      "taught_in": "Advertising, Marketing, Social Media & the Website: One Ecosystem (within Getting Found the Other Way)",
+      "anchor": "#step-6-social",
+      "practiced_in": "Try it yourself: 3-post launch plan activity",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "2.4.4": {
+      "taught_in": "Current Trends Worth Knowing (within Getting Found the Other Way)",
+      "anchor": "#step-6-social",
+      "practiced_in": "Let's Discuss reflection on a followed business's social-to-site linking",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "2.4.5": {
+      "taught_in": "Getting Found the Other Way: Social Media & the Web",
+      "anchor": "#step-6-social",
+      "practiced_in": "Try it yourself: 3-post launch plan activity (platform, post content, and site link for each post)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.1.1": {
+      "taught_in": "Phase 5: The Workflow (The \"ADDIE\" Model)",
+      "anchor": "#from-who-to-how",
+      "practiced_in": "Quick Check on identifying the Evaluate step",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.1.2": {
+      "taught_in": "Phase 5: The Workflow (The \"ADDIE\" Model)",
+      "anchor": "#from-who-to-how",
+      "practiced_in": "Milestone: Project 1 - The Blueprint (demonstrates the Analyze and Design phases as a real artifact)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.3.2": {
+      "taught_in": "The Sitemap (The \"Map\")",
+      "anchor": "#step-1-sitemap",
+      "practiced_in": "Lab 5: The File Tree Map",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.3.3": {
+      "taught_in": "Wireframing for Responsive Design (within The Wireframe)",
+      "anchor": "#step-2-wireframe",
+      "practiced_in": "Milestone: Project 1 - The Blueprint (Desktop + Mobile wireframe requirement)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.4.1": {
+      "taught_in": "Writing for the Web: Voice, Tone & Purpose",
+      "anchor": "#step-4b-writing",
+      "practiced_in": "Voice comparison exercise (two PixelPlay headline options)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.4.2": {
+      "taught_in": "Every Page Has a Job: Primary vs. Secondary Purpose (within Writing for the Web)",
+      "anchor": "#step-4b-writing",
+      "practiced_in": "Quick Check on the signup-banner scenario",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.4.3": {
+      "taught_in": "Who's Actually Reading This? Audience & Reading Level (within Writing for the Web)",
+      "anchor": "#step-4b-writing",
+      "practiced_in": "Applied to Ryan persona's target reading level",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.4.4": {
+      "taught_in": "Helping Google Find You (SEO)",
+      "anchor": "#step-5-seo",
+      "practiced_in": "Try it yourself: write 1 short-tail + 3 long-tail keywords",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.4.5": {
+      "taught_in": "Say It Right: Grammar & Proofreading",
+      "anchor": "#step-4c-grammar",
+      "practiced_in": "Try it yourself: proofread the sample client-site excerpt",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.4.8": {
+      "taught_in": "Beyond Keywords: Content Habits That Actually Rank (within Helping Google Find You)",
+      "anchor": "#step-5-seo",
+      "practiced_in": "Applied alongside the keyword-list activity",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    }
+  },
+  "revisits": {
+    "4.6.4": "Not directly re-taught this chapter; usability is touched implicitly via the Peer Review step in the Milestone and the wireframe hierarchy discussion, but formally owned by Chapter 4."
+  },
+  "wrs": {
+    "1.1.3": {
+      "taught_in": "Lab 1: The Pain Point Audit",
+      "anchor": "#research-overview",
+      "student_action": "Paired interview activity where students act as researcher and interviewee for each other"
+    },
+    "1.2.1": {
+      "taught_in": "Digging for the \"Why\" and Proving the \"What\"",
+      "anchor": "#research-overview",
+      "student_action": "Lab 1 interview practice with the 'don't lead the witness' open-ended question coaching"
+    },
+    "1.2.2": {
+      "taught_in": "Say It Right: Grammar & Proofreading",
+      "anchor": "#step-4c-grammar",
+      "student_action": "Proofreading Try It activity and all lab documentation write-ups (User Stories, Persona, Sitemap)"
+    }
+  }
+}
