@@ -1,0 +1,135 @@
+{
+  "chapter": 2,
+  "title": "The “Rules” (How Not to Get Sued)",
+  "page": "year1/the-rules-how-not-to-get-sued.html",
+  "indicators": {
+    "3.1.1": {
+      "taught_in": "Whose Stuff Is This Anyway? A Guide to Intellectual Property",
+      "anchor": "#whose-stuff-is-this-anyway",
+      "practiced_in": "Lab 1: The Asset Integrity Lab",
+      "assessed_by": ["q2", "q3"]
+    },
+    "3.1.2": {
+      "taught_in": "The Sharing Economy: Creative Commons and the Public Domain",
+      "anchor": "#the-sharing-economy",
+      "practiced_in": "Lab 1: The Asset Integrity Lab",
+      "assessed_by": ["q4", "q5"]
+    },
+    "3.1.3": {
+      "taught_in": "Citing Third-Party Work: Where the Line Actually Is",
+      "anchor": "#citing-third-party-work",
+      "practiced_in": "Lab 1: The Asset Integrity Lab (credits.txt citation format)",
+      "assessed_by": ["q6", "q7"]
+    },
+    "3.1.4": {
+      "taught_in": "Whose Stuff Is This Anyway? A Guide to Intellectual Property",
+      "anchor": "#whose-stuff-is-this-anyway",
+      "practiced_in": "Lab 1: The Asset Integrity Lab",
+      "assessed_by": ["q8", "q9"]
+    },
+    "3.2.1": {
+      "taught_in": "Build a Fortress: Web Security and User Privacy",
+      "anchor": "#your-digital-footprint",
+      "practiced_in": "In-section Quick Check reflection (Marisol's newsletter email-list scenario)",
+      "assessed_by": ["q10", "q13"]
+    },
+    "3.2.2": {
+      "taught_in": "Locking the Doors: Practices Every Site Should Model",
+      "anchor": "#modeling-security-practices",
+      "practiced_in": "Security & Privacy Practices statement activity (write a client-facing policy for Vega's Tamale Co.)",
+      "assessed_by": ["q11", "q12"]
+    },
+    "3.2.3": {
+      "taught_in": "Build a Fortress: Web Security and User Privacy",
+      "anchor": "#your-digital-footprint",
+      "practiced_in": "In-section Quick Check reflection (Marisol's newsletter email-list scenario)",
+      "assessed_by": ["q13", "q14"]
+    },
+    "3.2.4": {
+      "taught_in": "The Secret Handshake: HTTP vs. HTTPS",
+      "anchor": "#the-secret-handshake",
+      "practiced_in": "Milestone: The Ethics & A11y Audit (Lighthouse/SSL check on a live site)",
+      "assessed_by": ["q15", "q16"]
+    },
+    "3.2.5": {
+      "taught_in": "Privacy Laws: A Global Landscape",
+      "anchor": "#privacy-laws-a-global-landscape",
+      "practiced_in": "Milestone: The Ethics & A11y Audit",
+      "assessed_by": ["q17", "q18"]
+    },
+    "3.2.6": {
+      "taught_in": "Privacy Laws: A Global Landscape",
+      "anchor": "#privacy-laws-a-global-landscape",
+      "practiced_in": "Milestone: The Ethics & A11y Audit",
+      "assessed_by": ["q19", "q20"]
+    },
+    "3.2.7": {
+      "taught_in": "International Privacy Laws",
+      "anchor": "#international-privacy-laws",
+      "practiced_in": "Global Privacy Law Quick-Reference Table comparison + compare/contrast synthesis paragraph",
+      "assessed_by": ["q21", "q22"]
+    },
+    "3.2.8": {
+      "taught_in": "The Secret Handshake: HTTP vs. HTTPS",
+      "anchor": "#the-secret-handshake",
+      "practiced_in": "SSL/TLS Handshake walkthrough",
+      "assessed_by": ["q23", "q24"]
+    },
+    "3.3.1": {
+      "taught_in": "Your Digital Compass: Ethics and NDAs",
+      "anchor": "#your-digital-compass",
+      "practiced_in": "Dark pattern redesign activity (Marisol's pre-checked newsletter box)",
+      "assessed_by": ["q25", "q26"]
+    },
+    "3.3.2": {
+      "taught_in": "The Secret-Keeper's Oath: Non-Disclosure Agreements (NDA)",
+      "anchor": "#the-secret-keepers-oath",
+      "practiced_in": "NDA scenario analysis (Scenarios A–D)",
+      "assessed_by": ["q27", "q28"]
+    },
+    "3.3.3": {
+      "taught_in": "Check Your Bias at the Door",
+      "anchor": "#check-your-bias-at-the-door",
+      "practiced_in": "Milestone: The Ethics & A11y Audit (Inclusive Checklist review of site content)",
+      "assessed_by": ["q29", "q30"]
+    },
+    "4.6.1": {
+      "taught_in": "Make the Web for Everyone: Accessibility (a11y)",
+      "anchor": "#make-the-web-for-everyone",
+      "practiced_in": "Lab 2: The Inclusive Design Proposal",
+      "assessed_by": ["q31", "q32"]
+    },
+    "4.6.2": {
+      "taught_in": "Who Are You Actually Designing For?",
+      "anchor": "#who-are-you-actually-designing-for",
+      "practiced_in": "Lab 2: The Inclusive Design Proposal",
+      "assessed_by": ["q33", "q34"]
+    },
+    "4.6.5": {
+      "taught_in": "Make the Web for Everyone: Accessibility (a11y)",
+      "anchor": "#make-the-web-for-everyone",
+      "practiced_in": "Milestone: The Ethics & A11y Audit (Domino's case-study research)",
+      "assessed_by": ["q35", "q36"]
+    }
+  },
+  "revisits": {
+    "4.6.3": "Touched on lightly via the Curb Cut Effect and disability-category discussion, but not formally taught/assessed here — owned by Chapters 5–10."
+  },
+  "wrs": {
+    "1.1.2": {
+      "taught_in": "Your Digital Compass: Ethics and NDAs",
+      "anchor": "#your-digital-compass",
+      "student_action": "Dark pattern redesign activity + NDA scenario analysis — students choose the honest/legal option over the shortcut a client might request"
+    },
+    "1.1.5": {
+      "taught_in": "Who Are You Actually Designing For? / Check Your Bias at the Door",
+      "anchor": "#who-are-you-actually-designing-for",
+      "student_action": "Lab 2: The Inclusive Design Proposal — students design for a specific disability category and explain the benefit to a broader audience"
+    },
+    "1.3.3": {
+      "taught_in": "Locking the Doors: Practices Every Site Should Model",
+      "anchor": "#modeling-security-practices",
+      "student_action": "Security & Privacy Practices statement activity"
+    }
+  }
+}

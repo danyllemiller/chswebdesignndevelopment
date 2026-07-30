@@ -10,14 +10,14 @@
   <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/web-app-manifest-192x192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/web-app-manifest-512x512.png">
-  
+
   <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
   <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
   <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css" />
-  
+
   <!-- Security Guard: Kicks out anyone not logged in -->
   <script type="module" src="/js/auth-guard.js"></script>
 
@@ -35,7 +35,7 @@
   <section class="container-ultrawide my-5">
     <div class="row">
         <div class="col-12">
-            
+
             <nav class="mb-4 d-flex justify-content-between small fw-bold">
                 <a href="/year1/join-the-developers-guild.html" class="text-decoration-none text-primary">&laquo; Previous: Chapter 1: The Developer's World</a>
                 <a href="/year1/the-blueprint.html" class="text-decoration-none text-primary">Next: Chapter 3: The Blueprint &raquo;</a>
@@ -47,18 +47,34 @@
             </hgroup>
 
             <div class="content-section">
-                
-                <!-- ROW 1: INTRODUCTION & OBJECTIVES -->
-                <div class="row mb-5 pb-4 border-bottom align-items-start">
+
+                <!-- ============================================================ -->
+                <!-- CHAPTER OVERVIEW -->
+                <!-- ============================================================ -->
+                <div id="chapter-overview" class="row mb-5 pb-4 border-bottom align-items-start">
                   <div class="col-lg-8 pe-lg-5">
                     <h2 class="section-title mt-0">Welcome to the Real World, Wizard</h2>
-                    
-                    <p>Hey, future web wizards! You've learned how to build worlds with code, and you've officially taken your role within the <strong>Carson High Web Design & Marketing Agency</strong>. Now, you need to learn the laws of the digital universe. Building a website isn't just about cool animations and flashy designs; it's about being a responsible digital citizen and protecting your business clients. The moment you publish a website, you become a <strong>publisher</strong>. You have the same kind of responsibilities as a newspaper, a magazine, or a TV station. You have to follow the rules.</p>
-                    
-                    <p>Breaking them isn't a small deal. It can lead to <strong>massive</strong> fines, lawsuits, and a reputation that's harder to fix than a 404 error. No joke. But don't worry. This chapter is your cheat code, your legal shield. As a developer, you are often the person responsible for the safety and inclusion of thousands of users. If you ignore security, you risk their private data (and your client's business). If you ignore accessibility, you exclude 20% of the population from your content.</p>
-                    
-                    <p>In the professional guild, we don't just "make it work"; we make it legal, secure, and fair. Litigation in the tech industry is at an all-time high, especially regarding data privacy and disability access. This chapter will move you from a hobbyist who "finds stuff on Google" to an agency professional who respects the rights of creators and the safety of users. You are no longer just writing code; you are building the infrastructure of society.</p>
-                    
+
+                    <p>Here's a scenario that happens to real agencies every year. A junior developer builds a beautiful site for a client. Two months later, the client gets a letter from a lawyer. The homepage photo — the one the developer "found on Google" — belonged to a stock photography company, and now the client owes $2,500 in licensing fees for a picture that would have cost $12 to buy legally. The client is furious. They fire the agency. Word gets around.</p>
+
+                    <p>That's not a horror story to scare you. It's Tuesday. It happens constantly, because most people who build websites never learned the rules — and the rules are not optional. The moment you publish a website, you become a <strong>publisher</strong>. You take on the same kind of legal responsibility as a newspaper, a magazine, or a TV station, whether you meant to or not.</p>
+
+                    <p>This chapter is where you stop being someone who "makes stuff work" and start being someone who makes it <strong>legal, secure, and fair</strong> — the difference between a hobbyist and a professional the <strong>Carson High Web Design &amp; Marketing Agency</strong> can actually hire. Skip this chapter and you're one careless image download away from costing a real client real money. Learn it, and you become the person clients trust with their business.</p>
+
+                    <div class="card roadmap-card border-primary bg-light shadow-sm mb-4 mt-4">
+                      <div class="card-header bg-primary text-white fw-bold">What You'll Walk Out Able to Do</div>
+                      <div class="card-body small">
+                        <ul class="mb-0 ps-3">
+                          <li class="mb-2">Look at any image, font, or line of code and correctly decide whether you're allowed to use it — and prove it with a citation.</li>
+                          <li class="mb-2">Explain to a client, in plain English, why their site needs HTTPS and what a security certificate actually does.</li>
+                          <li class="mb-2">Tell the difference between an "opt-in" privacy law and an "opt-out" one, and say which countries use which — and why.</li>
+                          <li class="mb-2">Audit a real website for the accessibility problems that get companies sued, and propose fixes a client could actually implement.</li>
+                          <li class="mb-2">Spot a dark pattern the moment you see one, and explain why building one would put your own agency at legal risk.</li>
+                          <li>Know exactly what an NDA promises you'll keep secret, and for how long — because you may be asked to sign one for real before this program ends.</li>
+                        </ul>
+                      </div>
+                    </div>
+
                     <figure class="mb-4 mt-4 text-center">
                       <a href="/images/the-rules-how-not-to-get-sued/figure-01.png" target="_blank" rel="noopener">
                         <img src="/images/the-rules-how-not-to-get-sued/figure-01.png" alt="Wizard Casting spell" class="img-fluid rounded shadow-sm border w-100" style="height: 350px; object-fit: cover; object-position: center 25%;">
@@ -82,23 +98,6 @@
                       </div>
                     </div>
 
-                    <div class="card roadmap-card mb-4 border-info shadow-sm text-start">
-                        <div class="card-header bg-site-secondary fw-bold text-info border-bottom">Unlocking New Abilities</div>
-                        <div class="card-body small">
-                            <ul class="mb-0 ps-3">
-                                <li class="mb-2">Explain the "Big Three" of Intellectual Property: Copyright, Trademark, and Patent.</li>
-                                <li class="mb-2">Find and use images legally using <a href="https://creativecommons.org/" target="_blank" rel="noopener" class="text-decoration-none">Creative Commons</a> and Public Domain.</li>
-                                <li class="mb-2">Understand the security difference between HTTP and HTTPS and why "SSL" is a misnomer for modern "TLS."</li>
-                                <li class="mb-2">Explain what an SSL/TLS certificate is and how to verify one in a browser.</li>
-                                <li class="mb-2">Describe your user's "Digital Footprint" and the risk of "Invasion of Privacy."</li>
-                                <li class="mb-2">Compare the "Opt-In" model (GDPR) vs. the "Opt-Out" model (Nevada Consumer Privacy Act).</li>
-                                <li class="mb-2">Audit a site for the "Big 3" accessibility issues: alt text, color contrast, and keyboard navigation.</li>
-                                <li class="mb-2">Define the purpose and legal weight of a Non-Disclosure Agreement (NDA).</li>
-                                <li>Analyze your own content and designs for algorithmic bias and inclusive representation.</li>
-                            </ul>
-                        </div>
-                    </div>
-
                     <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
                       <div class="d-flex align-items-center mb-2">
                         <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
@@ -108,21 +107,104 @@
                   </div>
                 </div>
 
-                <!-- ROW 2: INTELLECTUAL PROPERTY -->
-                <div class="row mb-5 pb-4 border-bottom align-items-start">
+                <!-- ============================================================ -->
+                <!-- MEET THE USER -->
+                <!-- ============================================================ -->
+                <div id="meet-the-user" class="row mb-5 pb-4 border-bottom align-items-start">
+                  <div class="col-lg-8 pe-lg-5">
+                    <h2 class="section-title mt-0">Meet Marisol — Your First Client</h2>
+                    <p>Every rule in this chapter gets a lot less abstract once you attach it to a real person. So meet <strong>Marisol Vega</strong>, owner of <strong>Vega's Tamale Co.</strong>, a food truck that parks near the Capitol on weekdays and at the Carson City farmers market on Saturdays. She's saved up enough to finally hire the Carson High Web Design &amp; Marketing Agency to build her a real website — one where customers can see the menu, see where the truck is today, and maybe order ahead.</p>
+                    <p>Marisol isn't a tech person. She doesn't know what HTTPS means and she's never heard of a Non-Disclosure Agreement. But she has real fears, and they're all things you're responsible for the moment you take her project:</p>
+                    <ul class="ps-3 mb-3">
+                      <li class="mb-2">"What if I get sued for using a photo I found on Google?"</li>
+                      <li class="mb-2">"I want to collect customer emails for a newsletter — is that even allowed?"</li>
+                      <li class="mb-2">"My cousin can't see well and uses a screen reader. Could she even order from my site?"</li>
+                      <li class="mb-2">"You're going to see my supplier list and my recipes while you build this. How do I know you won't share them?"</li>
+                    </ul>
+                    <p>You'll come back to Marisol's tamale truck throughout this chapter, because every legal and ethical rule you learn is really just an answer to one of her questions. And there's a second person in this story you'll meet in the accessibility section: <strong>Devon</strong>, a regular customer who is blind and orders lunch using a screen reader every single week. If Marisol's site doesn't work for Devon, it isn't just bad design — for a real business, it can be illegal.</p>
+                  </div>
+                  <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                    <div class="card border-dark shadow-sm text-start">
+                      <div class="card-header bg-dark text-white fw-bold">💼 The Client File</div>
+                      <div class="card-body small bg-light">
+                        <p class="mb-1"><strong>Client:</strong> Marisol Vega</p>
+                        <p class="mb-1"><strong>Business:</strong> Vega's Tamale Co. (food truck)</p>
+                        <p class="mb-1"><strong>Goal:</strong> A trustworthy site that takes orders and doesn't get her sued</p>
+                        <p class="mb-1"><strong>Fear:</strong> Legal trouble she doesn't understand and can't afford</p>
+                        <p class="mb-0"><strong>Constraint:</strong> Small budget, zero legal knowledge — she's relying entirely on you</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- THE JARGON -->
+                <!-- ============================================================ -->
+                <div id="the-jargon" class="row mb-5 pb-4 border-bottom">
+                  <div class="col-12">
+                    <h2 class="section-title mt-0">The Jargon</h2>
+                    <p>Every term in this chapter, defined in plain language, in one place. Bookmark this section — the state exam and every future chapter will assume you know these cold.</p>
+                    <div class="row g-4 small">
+                      <div class="col-md-6">
+                        <dl class="mb-0">
+                          <dt class="fw-bold text-primary">Accessibility (a11y)</dt><dd>Designing a site so people with disabilities can use it. "a11y" is short for "a-c-c-e-s-s-i-b-i-l-i-t-y" (11 letters between the a and the y).</dd>
+                          <dt class="fw-bold text-primary">ADA</dt><dd>Americans with Disabilities Act — a U.S. civil rights law that courts now apply to websites.</dd>
+                          <dt class="fw-bold text-primary">Algorithmic Bias</dt><dd>When software makes unfair decisions because it learned from unfair or incomplete data.</dd>
+                          <dt class="fw-bold text-primary">ARIA</dt><dd>Accessible Rich Internet Applications — extra HTML attributes that describe custom widgets to screen readers.</dd>
+                          <dt class="fw-bold text-primary">Attribution (BY)</dt><dd>A Creative Commons rule requiring you to credit the original creator.</dd>
+                          <dt class="fw-bold text-primary">Certificate Authority (CA)</dt><dd>A trusted company that verifies a website is really who it claims to be before issuing it a security certificate.</dd>
+                          <dt class="fw-bold text-primary">Copyright</dt><dd>Automatic legal protection for creative work the moment it's made — no paperwork required.</dd>
+                          <dt class="fw-bold text-primary">Creative Commons (CC)</dt><dd>A set of standard licenses creators use to share work legally, with specific conditions attached.</dd>
+                          <dt class="fw-bold text-primary">Curb Cut Effect</dt><dd>When a feature built for people with disabilities ends up helping everyone.</dd>
+                          <dt class="fw-bold text-primary">Dark Pattern</dt><dd>A UI design built on purpose to trick users into choices they didn't mean to make.</dd>
+                          <dt class="fw-bold text-primary">Data Minimization</dt><dd>Only collecting the personal data you actually need — nothing extra "just in case."</dd>
+                          <dt class="fw-bold text-primary">Digital Footprint</dt><dd>The permanent trail of data left behind by everything you do online.</dd>
+                          <dt class="fw-bold text-primary">Encryption</dt><dd>Scrambling data into unreadable code so only someone with the right key can read it.</dd>
+                          <dt class="fw-bold text-primary">Extraterritorial Jurisdiction</dt><dd>When a foreign country's law applies to your website just because that country's citizens visit it.</dd>
+                          <dt class="fw-bold text-primary">Fair Use</dt><dd>A limited legal defense for using copyrighted work without permission — not a guaranteed right.</dd>
+                        </dl>
+                      </div>
+                      <div class="col-md-6">
+                        <dl class="mb-0">
+                          <dt class="fw-bold text-primary">GDPR</dt><dd>General Data Protection Regulation — the European Union's strict, opt-in privacy law.</dd>
+                          <dt class="fw-bold text-primary">HTTPS</dt><dd>Hypertext Transfer Protocol Secure — the encrypted version of the protocol browsers use to load web pages.</dd>
+                          <dt class="fw-bold text-primary">Infringement</dt><dd>Using someone's protected work (copyright or trademark) without permission.</dd>
+                          <dt class="fw-bold text-primary">Intellectual Property (IP)</dt><dd>Anything a person creates with their mind — protected by copyright, trademark, or patent law.</dd>
+                          <dt class="fw-bold text-primary">Invasion of Privacy</dt><dd>Collecting or sharing someone's personal information without their permission.</dd>
+                          <dt class="fw-bold text-primary">NDA</dt><dd>Non-Disclosure Agreement — a contract that legally requires you to keep specific information secret.</dd>
+                          <dt class="fw-bold text-primary">Opt-In / Opt-Out</dt><dd>Opt-in: data collection is off until the user agrees. Opt-out: data collection is on until the user says stop.</dd>
+                          <dt class="fw-bold text-primary">Patent</dt><dd>Legal protection for a new invention or process — must be applied for, and expires after about 20 years.</dd>
+                          <dt class="fw-bold text-primary">PII</dt><dd>Personally Identifiable Information — any data that could identify a specific person.</dd>
+                          <dt class="fw-bold text-primary">POUR Principles</dt><dd>Perceivable, Operable, Understandable, Robust — the four requirements of an accessible website.</dd>
+                          <dt class="fw-bold text-primary">Privacy by Design</dt><dd>Building privacy protection into a site from the start instead of adding it later.</dd>
+                          <dt class="fw-bold text-primary">Public Domain</dt><dd>Creative work with no copyright owner — free for anyone to use for any purpose.</dd>
+                          <dt class="fw-bold text-primary">Trade Secret</dt><dd>Confidential business information (like a recipe or an algorithm) that gives a company a competitive edge.</dd>
+                          <dt class="fw-bold text-primary">Trademark</dt><dd>Legal protection for a brand's name, logo, slogan, or sound.</dd>
+                          <dt class="fw-bold text-primary">WCAG</dt><dd>Web Content Accessibility Guidelines — the global standard for building accessible websites.</dd>
+                        </dl>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- CONTENT: INTELLECTUAL PROPERTY -->
+                <!-- ============================================================ -->
+                <div id="whose-stuff-is-this-anyway" class="row mb-5 pb-4 border-bottom align-items-start">
                   <div class="col-lg-8 pe-lg-5">
                     <h2 class="section-title mt-0">Whose Stuff Is This Anyway? A Guide to Intellectual Property</h2>
-                    <p>This is the absolute number one rule of the internet: <strong>Don't steal stuff.</strong> It's the digital golden rule. Just because you can right-click-save a picture, copy a block of code, or download a song doesn't mean it's yours to use. Everything someone creates with their mind is their <strong>Intellectual Property (IP)</strong>, and it's protected by powerful laws. Let's break down the "Big Three" force fields that guard those creations.</p>
-                    
+                    <p><strong>The Why:</strong> Remember the $2,500 photo from the opening story? That happens because most people assume "I found it online" means "I can use it." It doesn't. If you build Marisol's site with a stolen photo, the lawsuit doesn't land on you — it lands on <em>her</em>, because she owns the site. Understanding ownership isn't a legal technicality; it's the difference between protecting your client and quietly ruining her business.</p>
+                    <p><strong>The What:</strong> Everything someone creates with their mind is their <strong>Intellectual Property (IP)</strong> — property that exists as an idea or creative work rather than a physical object. IP law gives creators the exclusive right to control how their work is used. There are three main "force fields" that protect different kinds of creations, and knowing which one applies changes what you're allowed to do.</p>
+
                     <h5 class="fw-bold mt-4 text-primary">1. Copyright &copy; (The Automatic Shield)</h5>
-                    <p>Copyright is an automatic shield that protects creative works. The <strong>second</strong> you write a poem, snap a photo, record a video, or code a cool JavaScript game, it's copyrighted. You own it. You don't have to file any paperwork, register with a fancy office, or even type the &copy; symbol. It's yours. This shield protects books, music, photos, videos, articles, and yes, even software code. You can research the law further at the <a href="https://www.copyright.gov/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">U.S. Copyright Office</a>.</p>
-                    <p><strong>Work for Hire:</strong> If you are a professional developer, your contract will likely state that the company owns the copyright to anything you build on the clock. This is called "Work Made for Hire."</p>
-                    
+                    <p><strong>Copyright</strong> is automatic legal protection for creative work. The <strong>second</strong> you write a poem, snap a photo, record a video, or code a cool JavaScript game, it's copyrighted. You own it. You don't have to file any paperwork, register with a fancy office, or even type the &copy; symbol. This shield protects books, music, photos, videos, articles, and yes, even software code. You can research the law further at the <a href="https://www.copyright.gov/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">U.S. Copyright Office</a>.</p>
+                    <p><strong>Work for Hire:</strong> If you are a professional developer, your contract will likely state that the company owns the copyright to anything you build on the clock. This is called <strong>Work Made for Hire</strong> — the person who paid for the work owns it, not the person who made it.</p>
+
                     <h5 class="fw-bold mt-4 text-primary">2. Trademark &trade; (The Brand Sentry)</h5>
-                    <p>This doesn't protect a creative work; it protects a <strong>brand</strong>. A trademark is a specific word, phrase, logo, or even a sound that represents a company. Think of the Nike "swoosh," the name "Coca-Cola," or the golden arches of McDonald's. These are all fiercely protected. You can't just slap a famous logo on your website to sell t-shirts. That's called <strong><a href="https://www.law.cornell.edu/wex/infringement" target="_blank" rel="noopener" class="text-decoration-none fw-bold">infringement</a></strong>, and it's a great way to get a very scary, very real letter from a team of expensive lawyers. The law exists to prevent any confusion in the marketplace. Check the <a href="https://www.uspto.gov/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">USPTO</a> database to see what brands are protected.</p>
-                    
+                    <p>A <strong>trademark</strong> doesn't protect a creative work; it protects a <strong>brand</strong> — a specific word, phrase, logo, or even a sound that represents a company. Think of the Nike "swoosh," the name "Coca-Cola," or the golden arches of McDonald's. You can't just slap a famous logo on your website to sell t-shirts. That's called <a href="https://www.law.cornell.edu/wex/infringement" target="_blank" rel="noopener" class="text-decoration-none fw-bold">infringement</a>, and it's a great way to get a very scary, very real letter from a team of expensive lawyers. Check the <a href="https://www.uspto.gov/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">USPTO</a> database to see what brands are protected.</p>
+
                     <h5 class="fw-bold mt-4 text-primary">3. Patent &#8471; (The Invention Ledger)</h5>
-                    <p>A patent protects a new, specific, and non-obvious way of doing something. This could be a new type of smartphone technology, a medical device, or even a piece of software technology, like Amazon's original 1-Click purchase system. As a web designer, you'll bump into this less often than copyright or trademark, but it's a huge part of the tech world that protects the "how-it-works" part of a new idea. Research the <a href="https://fairuse.stanford.edu/overview/public-domain/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Public Domain</a> rules to see when patents expire. Patents are the only IP type that is <em>not</em> automatic; you must apply for them and they expire after about 20 years.</p>
+                    <p>A <strong>patent</strong> protects a new, specific, and non-obvious way of doing something — a new type of smartphone technology, a medical device, or a piece of software like Amazon's original 1-Click purchase system. Unlike copyright and trademark, a patent is <em>not</em> automatic; you must apply for one, and it expires after about 20 years, at which point it enters the <a href="https://fairuse.stanford.edu/overview/public-domain/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Public Domain</a>.</p>
 
                     <!-- IP COMPARISON TABLE -->
                     <div class="card bg-white shadow-sm border-primary my-4">
@@ -169,13 +251,19 @@
                         </div>
                     </div>
 
+                    <p><strong>The How:</strong> Say Marisol wants her truck's logo, a custom illustrated tamale mascot, on the homepage. Here's how you'd reason through it: the illustration itself is protected the instant the artist draws it (<strong>copyright</strong>). If Marisol wants to stop competitors from using a similar logo to confuse customers, she needs to register it with the USPTO (<strong>trademark</strong>). If she invented some genuinely new food-truck ordering process — say, a novel way to route mobile orders — that would be a <strong>patent</strong> question, not a copyright one. Three different questions, three different answers, and mixing them up is the single most common mistake in this unit.</p>
+
+                    <div class="alert alert-warning small border-warning border mb-4">
+                        <strong>Where Everyone Gets Ambushed:</strong> Students often think "copyright" is the umbrella term for all of IP law. It isn't — it's one of three separate protections. A related trap: students assume a patent, like copyright, is automatic. It is not. If you don't file the paperwork, there's no patent, no matter how original the invention.
+                    </div>
+
                     <!-- BUSINESS PLAN INTEGRATION: STEP 3 -->
                     <div class="card border-dark shadow-sm my-4 mt-5">
                       <div class="card-header bg-dark text-white fw-bold">
                         💼 The Agency Founder's Log: Business Plan Integration
                       </div>
                       <div class="card-body small bg-light">
-                        <p class="mb-0"><strong>Agency Liability:</strong> If the Carson High Agency builds a website for a local dentist and you use a copyrighted image from Google, <em>your client</em> is the one who will get sued for thousands of dollars. The client will then sue your agency for negligence. Understanding Intellectual Property isn't just about following rules; it's about guaranteeing to your clients that the assets you provide are 100% safe, legal, and liability-free. This guarantee is a huge selling point for your business!</p>
+                        <p class="mb-0"><strong>Agency Liability:</strong> If the Carson High Agency builds Marisol's site using a copyrighted image from Google, <em>Marisol</em> is the one who gets sued for thousands of dollars. She will then sue your agency for negligence. Understanding Intellectual Property isn't just about following rules; it's about guaranteeing to your clients that the assets you provide are 100% safe, legal, and liability-free. This guarantee is a huge selling point for your business!</p>
                       </div>
                     </div>
                   </div>
@@ -183,9 +271,10 @@
                   <div class="col-lg-4 mt-4 mt-lg-0 text-center">
                     <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
                       <div class="d-flex align-items-center mb-2">
-                        <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                        <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
                       </div>
-                      <p class="mb-0 small text-dark">If you write a unique piece of JavaScript in class, do you technically own the copyright to that code? Why or why not?</p>
+                      <p class="mb-2 small text-dark">You write a unique piece of JavaScript for a class project. Do you own the copyright to that code?</p>
+                      <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">Yes — copyright is automatic the moment you create original work, including code. You own it the instant you write it, with no paperwork required.</p></details>
                     </div>
 
                     <figure class="mb-4 text-center">
@@ -199,28 +288,45 @@
                   </div>
                 </div>
 
-                <!-- ROW 3: SHARING ECONOMY -->
-                <div class="row mb-5 pb-4 border-bottom align-items-start">
+                <!-- ============================================================ -->
+                <!-- CONTENT: CREATIVE COMMONS + CITING THIRD-PARTY WORK -->
+                <!-- ============================================================ -->
+                <div id="the-sharing-economy" class="row mb-5 pb-4 border-bottom align-items-start">
                   <div class="col-lg-8 pe-lg-5">
                     <h2 class="section-title mt-0">The Sharing Economy: Creative Commons and the Public Domain</h2>
-                    <p>Does all this mean you have to create every single pixel on your site from scratch? Thankfully, no. Many creators <strong>want</strong> to share their work. That's where <strong>Creative Commons (CC)</strong> comes in. Think of it as a "How You Can Share My Food" menu that creators can attach to their work.</p>
-                    
-                    <p>Instead of the default "All Rights Reserved" of copyright, CC provides a range of "Some Rights Reserved." A creator might say you can use their photo for free, but their license will have rules:</p>
-                    
+                    <p><strong>The Why:</strong> Does the "Don't steal stuff" rule mean you have to create every single pixel on Marisol's site from scratch? No — and that would be a terrible business model. Many creators <em>want</em> to share their work. You just have to know the rules they attached to it, or you're back to square one: liable for using something you didn't have permission for.</p>
+                    <p><strong>The What:</strong> <strong>Creative Commons (CC)</strong> is a set of standard licenses creators attach to their work so others can legally reuse it. Think of it as a "How You Can Share My Food" menu. Instead of the default "All Rights Reserved" of copyright, CC provides a range of "Some Rights Reserved" options, each with its own rules:</p>
+
                     <ul class="small mb-4 ps-3">
                         <li class="mb-2"><strong>Attribution (BY):</strong> "You can have my pizza, but you <strong>must</strong> tell everyone I made it." This is the core requirement of almost all CC licenses.</li>
-                        <li class="mb-2"><strong>NonCommercial (NC):</strong> "You can have my pizza, but you <strong>can't</strong> sell slices of it." You cannot make money using these assets. <em>(Note: Your agency cannot use NC assets for paying clients!)</em></li>
+                        <li class="mb-2"><strong>NonCommercial (NC):</strong> "You can have my pizza, but you <strong>can't</strong> sell slices of it." You cannot make money using these assets. <em>(Your agency cannot use NC assets for paying clients like Marisol!)</em></li>
                         <li class="mb-2"><strong>NoDerivatives (ND):</strong> "You can have my pizza, but you <strong>can't</strong> add pineapples." You cannot edit, crop, or filter the work.</li>
                         <li class="mb-2"><strong>ShareAlike (SA):</strong> If you remix the work, you must share your final product under the exact same license.</li>
                     </ul>
-                    
-                    <p>These licenses often get stacked. You'll frequently see "BY-NC," which means "Give me credit and don't use it to make money." Before you use <strong>any</strong> CC-licensed work, you must read the license and follow its rules to the letter at <a href="https://creativecommons.org/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">CreativeCommons.org</a>.</p>
-                    
-                    <h5 class="fw-bold mt-4 text-primary">Public Domain & The "Fair Use" Trap</h5>
-                    <p>The <strong>Public Domain</strong> is like a "free buffet." When a copyright expires or if a creator voluntarily gives up all their rights, their work belongs to everyone. You can use it for anything with no credit needed. Check <a href="https://www.gutenberg.org/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Project Gutenberg</a> for examples of public domain literature.</p>
-                    <p><strong>The "Don't Touch" Rule:</strong> If you cannot find a license, you must assume you <strong>CANNOT</strong> use it. The default setting of the entire internet is "All Rights Reserved." "I found it on Google Images" is not a legal defense. It is an admission that you took something without checking if you had permission.</p>
-                    <p><strong>What about Fair Use?</strong> Fair Use is a limited legal defense, not a right. It considers four factors: purpose (educational vs. commercial), nature of the work, amount used, and effect on the market. In the professional guild, we avoid the Fair Use gray area and stick to licensed or original content.</p>
-                    
+
+                    <p><strong>The How:</strong> These licenses stack. "BY-NC" means "Give me credit and don't use it to make money." If Marisol's site is a commercial project (it is — she's selling tamales), any image licensed BY-NC is off-limits, full stop, no matter how perfect it looks. Before you use <strong>any</strong> CC-licensed work, read the license at <a href="https://creativecommons.org/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">CreativeCommons.org</a> and follow it exactly.</p>
+
+                    <h5 class="fw-bold mt-4 text-primary">Public Domain &amp; The "Fair Use" Trap</h5>
+                    <p>The <strong>Public Domain</strong> is like a "free buffet." When a copyright expires or a creator voluntarily gives up all rights, their work belongs to everyone. You can use it for anything, no credit needed. Check <a href="https://www.gutenberg.org/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Project Gutenberg</a> for examples.</p>
+                    <p><strong>What about Fair Use?</strong> <strong>Fair Use</strong> is a limited legal defense, not a right. It weighs four factors: purpose (educational vs. commercial), nature of the work, amount used, and effect on the market. In the professional guild, we avoid the Fair Use gray area entirely and stick to licensed or original content — Marisol's business use makes the "commercial" factor work against you every time.</p>
+
+                    <h3 id="citing-third-party-work" class="h5 fw-bold mt-5 text-primary">Citing Third-Party Work: Where the Line Actually Is</h3>
+                    <p><strong>The Why:</strong> "I gave credit" is not the same as "I was allowed to use it." Students constantly confuse the two, and it's the single fastest way to accidentally break a license.</p>
+                    <p><strong>The What:</strong> A proper citation for third-party web assets records three things: the creator's name, the exact license (with a link to it), and the source URL. This isn't optional busywork — it's your legal paper trail proving you had permission.</p>
+                    <p><strong>The How:</strong> Here's a real citation, the kind you'll write in Lab 1, for a photo licensed CC BY 4.0:</p>
+                    <div class="bg-dark text-light p-3 rounded small font-monospace mb-3">
+                      Photo: "Downtown Carson City Storefront"<br>
+                      Creator: J. Alvarez, via Flickr<br>
+                      License: CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/<br>
+                      Source: https://flickr.com/photos/example/123456<br>
+                      Used with attribution as required by license.
+                    </div>
+                    <p>That's the boundary: you may crop, resize, and place that photo anywhere on Marisol's site, including her paid ordering page, as long as this citation exists somewhere reasonable (a credits page or a footer note) and you never claim you took the photo yourself.</p>
+
+                    <div class="alert alert-warning small border-warning border mb-4">
+                        <strong>Where Everyone Gets Ambushed:</strong> Students often think crediting a photo automatically makes it legal to use — "I put the photographer's name in the footer, so I'm covered." Attribution satisfies the <em>BY</em> condition of a CC license; it does not override <em>NC</em> or <em>ND</em> restrictions, and it does nothing at all for a fully copyrighted image with no license attached. Credit is one requirement among several, not a magic word.
+                    </div>
+
                     <!-- LAB 1 ASSIGNMENT CARD -->
                     <div class="card border-success shadow-sm my-4 mt-5">
                       <div class="card-header bg-success text-white fw-bold">
@@ -229,13 +335,23 @@
                       <div class="card-body small">
                         <p><strong>Objective:</strong> Demonstrate probity by ethically sourcing and citing digital media for an agency client mockup.</p>
                         <ol class="ps-3 mb-4">
-                            <li class="mb-2">Find 3 high-quality images you would want to use in a professional agency portfolio mockup.</li>
-                            <li class="mb-2">Ensure they are NOT standard copyrighted images. They must be Public Domain or Creative Commons.</li>
+                            <li class="mb-2">Find 3 high-quality images you would want to use in Marisol's tamale-truck mockup.</li>
+                            <li class="mb-2">Ensure they are NOT standard copyrighted images. They must be Public Domain or Creative Commons — and if Marisol is selling tamales with them, no NC-licensed images allowed.</li>
                             <li class="mb-2">Create a text file named <code>credits.txt</code> in your Guild Portfolio folder.</li>
-                            <li class="mb-2">Document the specific license and URL for each of the 3 images.</li>
+                            <li class="mb-2">Document the specific license, creator, and source URL for each of the 3 images, following the citation format above.</li>
                         </ol>
                         <p class="mb-3 text-danger fw-bold">Turn In: Submit your <code>credits.txt</code> file.</p>
                         <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                        <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                        <table class="table table-bordered table-sm small mb-0 bg-white">
+                          <tbody>
+                            <tr><td class="fw-bold" style="width:18%">4.0</td><td>All 3 citations are complete and correct, images are verified appropriate for commercial client use (no NC misuse), and file naming follows agency conventions.</td></tr>
+                            <tr><td class="fw-bold">3.0</td><td>All 3 citations include creator, license, and source. Images are legally usable, with at most one minor formatting slip.</td></tr>
+                            <tr><td class="fw-bold">2.0</td><td>Citations are present but missing a required field (license type or source URL) on one or more images.</td></tr>
+                            <tr><td class="fw-bold">1.0</td><td>File submitted but citations are vague, incomplete, or an image is not legally clear for commercial use.</td></tr>
+                          </tbody>
+                        </table>
                       </div>
                     </div>
 
@@ -253,22 +369,29 @@
 
                     <div class="bg-light p-3 rounded border shadow-sm mb-4 mt-4 text-start">
                       <div class="d-flex align-items-center mb-2">
-                        <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                        <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
                       </div>
-                      <p class="mb-0 small text-dark">You find a great photo licensed as 'BY-NC-ND'. Can you use it on a portfolio site you're using to get a paid job? Can you crop it?</p>
+                      <p class="mb-2 small text-dark">You find a great photo licensed 'BY-NC-ND'. Can you use it on Marisol's ordering page? Can you crop it first?</p>
+                      <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">No to both. NC means it can't be used for a commercial site like Marisol's tamale business, and ND means you're not allowed to alter it — cropping counts as a derivative.</p></details>
                     </div>
                   </div>
                 </div>
 
-                <!-- ROW 4: PRIVACY & DIGITAL GHOSTS -->
-                <div class="row mb-5 pb-4 border-bottom align-items-start">
+                <!-- ============================================================ -->
+                <!-- CONTENT: DIGITAL FOOTPRINT / INVASION OF PRIVACY -->
+                <!-- ============================================================ -->
+                <div id="your-digital-footprint" class="row mb-5 pb-4 border-bottom align-items-start">
                   <div class="col-lg-8 pe-lg-5">
                     <h2 class="section-title mt-0">Build a Fortress: Web Security and User Privacy</h2>
-                    <p>A great website isn't just legal—it's safe. When users visit your site, they are trusting you with their time, their attention, and often their data. You have a <strong>legal and ethical</strong> responsibility to protect them. Building a website is like building a house; if you don't build a strong foundation and lock the doors, don't be surprised when people get hurt.</p>
-                    
-                    <h5 class="fw-bold mt-4 text-primary">Your Digital Ghost: Footprints & Privacy</h5>
-                    <p>Every single thing you do online—your searches, your "likes," your comments, every site you visit, even how long you pause to look at a picture—is tracked and recorded. This massive trail of data is your <strong>Digital Footprint</strong>. Think of it like an <strong>internet tattoo</strong>. It's permanent, it's searchable, and people <strong>will</strong> judge you for it. Explore your own footprint with tools like the EFF's <a href="https://www.eff.org/privacybadger" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Privacy Badger</a>.</p>
-                    <p>Now, imagine your school principal reading all your texts. That's a gross, creepy feeling, right? That feeling is an <strong>Invasion of Privacy</strong>. It's when personal information (PII - Personally Identifiable Information) is collected or shared without permission. As a developer, if you build a site that collects user emails and then you sell that email list to advertisers, <strong>you</strong> are the one invading their privacy. That's not just unethical; it's often illegal under modern data laws.</p>
+                    <p><strong>The Why:</strong> A great website isn't just legal — it's safe. When Marisol's customers type their email into her site to join a newsletter, they're trusting her (and you) with their data. Building a website without thinking about privacy is like building a house without locks: fine, until it isn't.</p>
+
+                    <h5 class="fw-bold mt-4 text-primary">Your Digital Ghost: Footprints &amp; Privacy</h5>
+                    <p><strong>The What:</strong> Every single thing you do online — your searches, your "likes," your comments, every site you visit — is tracked and recorded. This massive trail of data is your <strong>Digital Footprint</strong>. Think of it like an internet tattoo: permanent, searchable, and something people <strong>will</strong> judge you for. Explore your own footprint with tools like the EFF's <a href="https://www.eff.org/privacybadger" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Privacy Badger</a>.</p>
+                    <p><strong>The How:</strong> Now imagine Marisol's site collects customer emails for a "10% off your next order" newsletter, and six months later, she sells that email list to a marketing company for extra cash — without telling anyone. That's <strong>Invasion of Privacy</strong>: collecting or sharing <strong>PII (Personally Identifiable Information)</strong> without the customer's permission. As the developer who built the signup form without a privacy policy or consent checkbox, you made that possible. That's not just unethical; under several of the laws in this chapter, it's illegal.</p>
+
+                    <div class="alert alert-warning small border-warning border mb-4">
+                        <strong>Where Everyone Gets Ambushed:</strong> Students often think "invasion of privacy" only means hacking or stealing data. It doesn't require a hacker at all — simply collecting more data than you disclosed, or sharing it with a third party the user never agreed to, is enough to count.
+                    </div>
                   </div>
 
                   <div class="col-lg-4 mt-4 mt-lg-0 text-center">
@@ -280,17 +403,28 @@
                         <strong>Figure 2.4:</strong> Your digital ghost leaves permanent footprints across the servers of the world.
                       </figcaption>
                     </figure>
+
+                    <div class="bg-light p-3 rounded border shadow-sm mb-4 mt-4 text-start">
+                      <div class="d-flex align-items-center mb-2">
+                        <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+                      </div>
+                      <p class="mb-2 small text-dark">Marisol wants to add "customers who order tacos also order horchata" suggestions by tracking what people click. Is that automatically an invasion of privacy?</p>
+                      <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">Not automatically — it depends on whether customers were told and given a way to opt out, and whether the data stays with Marisol's business instead of being resold. Undisclosed tracking or resale is what crosses the line.</p></details>
+                    </div>
                   </div>
                 </div>
 
-                <!-- ROW 5: HTTP VS HTTPS DEEP DIVE -->
-                <div class="row mb-5 pb-4 border-bottom align-items-start">
+                <!-- ============================================================ -->
+                <!-- CONTENT: HTTP VS HTTPS + SECURITY CERTIFICATE -->
+                <!-- ============================================================ -->
+                <div id="the-secret-handshake" class="row mb-5 pb-4 border-bottom align-items-start">
                   <div class="col-lg-8 pe-lg-5">
                     <h2 class="section-title mt-0">The Secret Handshake: HTTP vs. HTTPS</h2>
-                    <p>Have you ever noticed that some website addresses start with <code>http://</code> and others start with <code>https://</code>? That one little 's' is arguably the most important letter in all of web security.</p>
-                    <p><strong>HTTP (Hypertext Transfer Protocol)</strong> is like sending a <strong>postcard</strong>. Anyone who intercepts it—a hacker on the same coffee shop Wi-Fi—can read everything on it in plain text. <strong>HTTPS (Secure)</strong> is like sending a <strong>sealed, armored letter</strong>. The information is <strong>encrypted</strong> (scrambled into an unbreakable secret code). You get the 's' and the padlock icon 🔒 by installing a <strong>Security Certificate (SSL/TLS)</strong>. It proves your site is who it says it is via a trusted <a href="https://en.wikipedia.org/wiki/Certificate_authority" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Certificate Authority (CA)</a>.</p>
-                    
+                    <p><strong>The Why:</strong> Have you ever noticed some website addresses start with <code>http://</code> and others with <code>https://</code>? That one little "s" is arguably the most important letter in all of web security, and it's the difference between Marisol's customer typing their address into a form safely, or a stranger on the same coffee-shop Wi-Fi reading it in plain text.</p>
+                    <p><strong>The What:</strong> <strong>HTTP (Hypertext Transfer Protocol)</strong> is an <strong>unsecure protocol</strong> — like sending a <strong>postcard</strong>. Anyone who intercepts it can read everything on it. <strong>HTTPS (Secure)</strong> is a <strong>secure protocol</strong> — like sending a <strong>sealed, armored letter</strong>. The information is <strong>encrypted</strong> (scrambled into an unbreakable secret code). You get the "s" and the padlock icon 🔒 by installing a <strong>Security Certificate (SSL/TLS)</strong>, which a trusted <a href="https://en.wikipedia.org/wiki/Certificate_authority" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Certificate Authority (CA)</a> issues after verifying the site is really who it claims to be.</p>
+
                     <h5 class="fw-bold mt-4 text-primary">The SSL/TLS Handshake (The 8-Step Secret)</h5>
+                    <p><strong>The How:</strong> This is exactly what happens, in order, every time a browser loads an HTTPS site:</p>
                     <ol class="small bg-light p-4 rounded border ps-5 mb-4">
                         <li class="mb-1"><strong>Request:</strong> Browser asks for a secure session.</li>
                         <li class="mb-1"><strong>Certificate:</strong> Server sends its SSL Certificate and Public Key.</li>
@@ -301,22 +435,10 @@
                         <li class="mb-1"><strong>Mutual Knowledge:</strong> Now both share a secret "code" that no one else knows.</li>
                         <li class="mb-1"><strong>Symmetric Encryption:</strong> All data is now scrambled using that secret key.</li>
                     </ol>
-                    
-                    <h5 class="fw-bold mt-4 text-primary">The Security Checklist</h5>
-                    <ul class="small ps-3 mb-4">
-                      <li class="mb-2"><strong>ALWAYS use HTTPS.</strong> Period. Browsers will now punish your SEO and warn users with a "Not Secure" red banner if you don't. Test your site with the <a href="https://www.ssllabs.com/ssltest/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Qualys SSL Test</a>.</li>
-                      <li class="mb-2"><strong>Clear Privacy Policy.</strong> You <strong>must</strong> have a page on your site that tells users what data you are collecting in plain English. See an example at <a href="https://digitalartsclasses.com/notices.html" target="_blank" rel="noopener" class="text-decoration-none fw-bold">our CCSD notices page</a>.</li>
-                      <li class="mb-2"><strong>Data Protection.</strong> Don't store passwords in plain text; use <strong>hashing and salting</strong> (one-way-scrambling) to protect your database.</li>
-                    </ul>
+                    <p>That certificate is what proves the site loading in the browser is really Marisol's site, and not an impostor page set up to steal customer card numbers. That's exactly how a security certificate protects a website: it verifies identity <em>and</em> encrypts the connection at the same time.</p>
 
-                    <!-- BUSINESS PLAN INTEGRATION: STEP 4 -->
-                    <div class="card border-dark shadow-sm my-4 mt-5">
-                      <div class="card-header bg-dark text-white fw-bold">
-                        💼 The Agency Founder's Log: Business Plan Integration
-                      </div>
-                      <div class="card-body small bg-light">
-                        <p class="mb-0"><strong>Trust as a Service:</strong> Local business owners in Carson City don't know what an SSL Handshake or a cryptographic hash is. That's why they need you. As an agency, "Security and Compliance" is a premium service you will offer. You will charge clients to migrate their old, unsafe `http` websites over to secure `https` platforms, and you will set up their Privacy Policy pages to ensure they don't get sued by their customers. You aren't just selling code; you are selling peace of mind.</p>
-                      </div>
+                    <div class="alert alert-warning small border-warning border mb-4">
+                        <strong>Where Everyone Gets Ambushed:</strong> Students often think HTTPS only matters if a site has a login form or takes payments. Any site — even a "read-only" blog — leaks browsing behavior to eavesdroppers without HTTPS, and modern browsers actively flag plain HTTP sites as "Not Secure," which tanks trust and search ranking.
                     </div>
                   </div>
 
@@ -332,20 +454,67 @@
 
                     <div class="bg-light p-3 rounded border shadow-sm mb-4 mt-4 text-start">
                       <div class="d-flex align-items-center mb-2">
-                        <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                        <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
                       </div>
-                      <p class="mb-0 small text-dark">If a site only has a "Read-Only" blog with no login or forms, does it still need HTTPS? Why or why not?</p>
+                      <p class="mb-2 small text-dark">If Marisol's site only shows the menu and truck location with no login or forms, does it still need HTTPS?</p>
+                      <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">Yes. Even without forms, HTTPS prevents eavesdroppers from seeing what a customer is browsing, and browsers will mark an HTTP-only site "Not Secure," which damages Marisol's trust and SEO.</p></details>
                     </div>
                   </div>
                 </div>
 
-                <!-- ROW 6: PRIVACY LAWS -->
-                <div class="row mb-5 pb-4 border-bottom align-items-start">
+                <!-- ============================================================ -->
+                <!-- CONTENT: MODELING SECURITY PRACTICES -->
+                <!-- ============================================================ -->
+                <div id="modeling-security-practices" class="row mb-5 pb-4 border-bottom align-items-start">
+                  <div class="col-lg-8 pe-lg-5">
+                    <h2 class="section-title mt-0">Locking the Doors: Practices Every Site Should Model</h2>
+                    <p><strong>The Why:</strong> Knowing what HTTPS is doesn't protect anyone unless you actually build it in — the same way knowing what a smoke detector is doesn't stop a fire unless you install one. This section is about the specific habits a professional developer models on every project, no exceptions.</p>
+                    <p><strong>The What:</strong> "Modeling acceptable security practices" means you don't just know the rules — you demonstrably follow them on every client site, by default, without being asked.</p>
+                    <p><strong>The How:</strong> Here's the checklist you'll apply to Marisol's project:</p>
+                    <ul class="small ps-3 mb-4">
+                      <li class="mb-2"><strong>ALWAYS use HTTPS.</strong> Test it with the <a href="https://www.ssllabs.com/ssltest/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Qualys SSL Test</a>.</li>
+                      <li class="mb-2"><strong>Write a clear Privacy Policy.</strong> A page in plain English telling customers exactly what data you collect and why.</li>
+                      <li class="mb-2"><strong>Never store passwords in plain text.</strong> Use <strong>hashing and salting</strong> — a one-way scrambling process — so that even if a database is stolen, the passwords inside it are useless to the thief.</li>
+                      <li class="mb-2"><strong>Practice Data Minimization.</strong> If Marisol only needs an email for the newsletter, don't also collect a phone number "just in case."</li>
+                    </ul>
+                    <p>Try it yourself: write a one-paragraph "Security &amp; Privacy Practices" statement for Vega's Tamale Co., in language Marisol herself could read and understand, covering HTTPS, password handling, and what customer data you will and won't collect. That's exactly the artifact a professional agency hands a client before launch — and it's how you demonstrate, not just describe, acceptable security practice.</p>
+
+                    <div class="alert alert-warning small border-warning border mb-4">
+                        <strong>Where Everyone Gets Ambushed:</strong> Students often think "security" is entirely the server's job or a checkbox in a hosting dashboard. Plenty of security failures — plaintext passwords, forms with no HTTPS, collecting data you don't need — are decisions made directly in the code and content you write.
+                    </div>
+
+                    <!-- BUSINESS PLAN INTEGRATION: STEP 4 -->
+                    <div class="card border-dark shadow-sm my-4 mt-5">
+                      <div class="card-header bg-dark text-white fw-bold">
+                        💼 The Agency Founder's Log: Business Plan Integration
+                      </div>
+                      <div class="card-body small bg-light">
+                        <p class="mb-0"><strong>Trust as a Service:</strong> Marisol doesn't know what a hash or a salt is. That's why she needs you. As an agency, "Security and Compliance" is a premium service you will offer. You will charge clients to migrate old, unsafe <code>http</code> sites to secure <code>https</code>, and set up their Privacy Policy pages so they don't get sued by their own customers. You aren't just selling code; you are selling peace of mind.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                    <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+                      <div class="d-flex align-items-center mb-2">
+                        <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+                      </div>
+                      <p class="mb-2 small text-dark">Name two things a professional developer does by default, without being asked, to model acceptable security practice.</p>
+                      <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">Any two of: enable HTTPS, hash and salt passwords, publish a clear privacy policy, minimize the data collected.</p></details>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- CONTENT: PRIVACY LAWS (GDPR / NV) -->
+                <!-- ============================================================ -->
+                <div id="privacy-laws-a-global-landscape" class="row mb-5 pb-4 border-bottom align-items-start">
                   <div class="col-lg-8 pe-lg-5">
                     <h2 class="section-title mt-0">Privacy Laws: A Global Landscape</h2>
-                    <p>Governments have stepped in to protect users. First is the <strong><a href="https://gdpr-info.eu/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">GDPR (General Data Protection Regulation)</a></strong> from Europe. It uses an <strong>"OPT-IN"</strong> model. You cannot collect data unless the user gives specific consent. It also grants the <strong>"Right to be Forgotten,"</strong> where users can demand their data be deleted. Failure to comply can cost a company 4% of their global revenue.</p>
-                    <p>Here in our state, we have the <strong><a href="https://www.leg.state.nv.us/nrs/NRS-603A.html#NRS603ASec300" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Nevada Consumer Privacy Act (SB220)</a></strong>. It uses an <strong>"OPT-OUT"</strong> model focused on the <strong>Sale of Data</strong>. It gives residents the right to tell a website, "STOP SELLING MY DATA" via a clear link. This represents the American philosophy of "Business First, with Consumer Protection," whereas the European model is "Privacy First."</p>
-                    <p>As a developer, you must build for the strictest laws to ensure your site is legal globally. This is known as <strong>Privacy by Design</strong>.</p>
+                    <p><strong>The Why:</strong> If a law only protected people in the state where a business is based, the internet would make it meaningless — anyone anywhere can visit Marisol's site. So governments write privacy laws that apply based on where the <em>visitor</em> lives, not where the business is. That means you, as the developer, have to think globally even for a local food truck.</p>
+                    <p><strong>The What:</strong> First is the <a href="https://gdpr-info.eu/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">GDPR (General Data Protection Regulation)</a> from Europe. It uses an <strong>"OPT-IN"</strong> model — you cannot collect data unless the user gives specific consent. It also grants the <strong>"Right to be Forgotten,"</strong> where users can demand their data be deleted. Failure to comply can cost a company 4% of global revenue.</p>
+                    <p>Here in Nevada, we have the <a href="https://www.leg.state.nv.us/nrs/NRS-603A.html#NRS603ASec300" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Nevada Consumer Privacy Act (SB220)</a>. It uses an <strong>"OPT-OUT"</strong> model focused on the <strong>Sale of Data</strong>. It gives residents the right to tell a website, "STOP SELLING MY DATA" via a clear link. That's the American philosophy of "Business First, with Consumer Protection," versus Europe's "Privacy First."</p>
+                    <p><strong>The How:</strong> For Marisol's newsletter signup, GDPR means the checkbox must start <strong>unchecked</strong> — a customer in the EU has to actively click it. SB220 means Nevada residents just need a visible link that says something like "Do Not Sell My Personal Information." As a developer, you build for the strictest law — <strong>Privacy by Design</strong> — so your one signup form is legal everywhere at once.</p>
 
                     <h5 class="fw-bold mt-4 text-primary">More U.S. State Laws: The American "Patchwork"</h5>
                     <p>There is no single U.S. federal privacy law covering all industries. Instead, each state passes its own rules. <strong>California</strong> has the most comprehensive state privacy laws in the country:</p>
@@ -358,10 +527,14 @@
                     <h5 class="fw-bold mt-4 text-primary">U.S. Federal Laws: Special-Category Data</h5>
                     <p>Even without a general federal privacy law, Congress has passed laws for specific types of data:</p>
                     <ul class="small ps-3 mb-3">
-                      <li class="mb-2"><strong>COPPA — Children's Online Privacy Protection Act (1998):</strong> If your site knowingly collects data from children <strong>under age 13</strong>, you must get <em>verifiable parental consent</em> first. This is why every app says "You must be 13 or older to sign up." Violation fines: up to <strong>$51,744 per child per incident</strong>.</li>
-                      <li class="mb-2"><strong>HIPAA — Health Insurance Portability and Accountability Act (1996):</strong> Protects <strong>PHI (Protected Health Information)</strong> — any data that could identify a patient linked to their health records. If you ever build anything for a doctor's office, hospital, or insurance company, HIPAA governs every line of code you write. Violations can result in <em>criminal charges</em>.</li>
+                      <li class="mb-2"><strong>COPPA — Children's Online Privacy Protection Act (1998):</strong> If your site knowingly collects data from children <strong>under age 13</strong>, you must get <em>verifiable parental consent</em> first. Violation fines: up to <strong>$51,744 per child per incident</strong>.</li>
+                      <li class="mb-2"><strong>HIPAA — Health Insurance Portability and Accountability Act (1996):</strong> Protects <strong>PHI (Protected Health Information)</strong>. If you ever build anything for a doctor's office, hospital, or insurance company, HIPAA governs every line of code you write. Violations can result in <em>criminal charges</em>.</li>
                       <li class="mb-2"><strong>CAN-SPAM Act (2003):</strong> Governs commercial email marketing. Every marketing email must include a real physical mailing address and a working <strong>unsubscribe link</strong> honored within 10 business days. Sending spam can cost up to <strong>$50,120 per email</strong>.</li>
                     </ul>
+
+                    <div class="alert alert-warning small border-warning border mb-4">
+                        <strong>Where Everyone Gets Ambushed:</strong> Students often think "opt-out" means the same protection as "opt-in," just worded differently. It doesn't — opt-out means data collection happens by default and the burden is on the user to find and use a stop-selling link. Opt-in means nothing happens until the user acts first. Mixing these up on the exam, or on a real client site, gets the compliance backwards.
+                    </div>
                   </div>
 
                   <div class="col-lg-4 mt-4 mt-lg-0 text-center">
@@ -374,7 +547,7 @@
                       </figcaption>
                     </figure>
 
-                    <div class="card border-warning bg-warning bg-opacity-10 mt-3">
+                    <div class="card border-warning bg-warning bg-opacity-10 mt-3 mb-4">
                       <div class="card-body small">
                         <p class="fw-bold mb-1">&#127758; Key Exam Concepts</p>
                         <ul class="mb-0 ps-3 text-start">
@@ -387,14 +560,25 @@
                         </ul>
                       </div>
                     </div>
+
+                    <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+                      <div class="d-flex align-items-center mb-2">
+                        <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+                      </div>
+                      <p class="mb-2 small text-dark">A German tourist visits Marisol's site and signs up for the newsletter. Which law's checkbox rule applies to that specific visitor: GDPR or SB220?</p>
+                      <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">GDPR — it applies based on where the visitor is located (or a citizen of), so an EU resident's data is covered by GDPR's opt-in rule even on a Nevada business's website.</p></details>
+                    </div>
                   </div>
                 </div>
 
-                <!-- ROW 6b: INTERNATIONAL PRIVACY LAWS -->
-                <div class="row mb-5 pb-4 border-bottom">
+                <!-- ============================================================ -->
+                <!-- CONTENT: INTERNATIONAL PRIVACY LAWS -->
+                <!-- ============================================================ -->
+                <div id="international-privacy-laws" class="row mb-5 pb-4 border-bottom">
                   <div class="col-12">
                     <h4 class="fw-bold text-primary mb-3">&#127758; International Privacy Laws</h4>
-                    <p class="mb-4">Privacy regulation is now a <em>global</em> issue. If a user from any of these countries visits your website and you collect their data, <strong>that country's law may apply to you</strong> — even if you're sitting in Nevada. This is called <strong>extraterritorial jurisdiction</strong>.</p>
+                    <p><strong>The Why:</strong> Privacy regulation is now a <em>global</em> issue. If a user from any of these countries visits your website and you collect their data, <strong>that country's law may apply to you</strong> — even if you're sitting in Nevada. This is called <strong>extraterritorial jurisdiction</strong>, and it's why "I'm just a small local business" is not a legal shield.</p>
+                    <p class="mb-4"><strong>The What:</strong> Almost every one of these laws uses the <strong>opt-in</strong> model, but the specific rights, penalties, and cultural reasoning behind them differ. Compare them below, then read the synthesis after the table.</p>
 
                     <!-- International Laws Cards -->
                     <div class="row g-3 mb-4">
@@ -547,7 +731,7 @@
 
                     <!-- Comparison Table -->
                     <h5 class="fw-bold mt-4 mb-3 text-primary">&#128203; Global Privacy Law Quick-Reference Table</h5>
-                    <p class="small text-muted mb-3">The EOP (End of Program) test may ask you to compare any of these laws. Use this table to study the key differences.</p>
+                    <p class="small text-muted mb-3">The state exam may ask you to compare any of these laws. Use this table to study the key differences.</p>
                     <div class="table-responsive">
                       <table class="table table-bordered table-hover table-sm small align-middle">
                         <thead class="table-dark">
@@ -701,6 +885,8 @@
                       </table>
                     </div>
 
+                    <p class="mt-4"><strong>The How — Comparing and Contrasting:</strong> Line these laws up and a pattern emerges. Almost every country <em>outside</em> the United States chose the <strong>opt-in</strong> model — data collection is culturally treated as an invasion until the user explicitly allows it. The United States is the global outlier, defaulting to <strong>opt-out</strong> at both the federal and state level, reflecting a culture that historically prioritizes commercial speed over individual consent. China's PIPL adds a layer no Western law has: <strong>data localization</strong>, requiring citizen data to physically stay on servers inside the country — a reflection of national security priorities, not just consumer protection. The penalty structures tell a similar cultural story: the EU and UK peg fines to a percentage of <em>global</em> revenue (making them scale with the size of the offender), while most U.S. laws use flat per-violation dollar amounts.</p>
+
                     <!-- Privacy by Design Callout -->
                     <div class="alert alert-primary mt-4 mb-0" role="alert">
                       <h6 class="fw-bold alert-heading">&#127381; Privacy by Design: The Developer's Golden Rule</h6>
@@ -714,34 +900,52 @@
                       </ul>
                     </div>
 
+                    <div class="alert alert-warning small border-warning border mt-4 mb-0">
+                        <strong>Where Everyone Gets Ambushed:</strong> Students often think a small local business like Marisol's tamale truck is exempt from international laws because "she's not a global company." Extraterritorial jurisdiction doesn't care about company size — it cares about who visits the site. One tourist from the EU is enough to trigger GDPR's rules for that visitor's data.
+                    </div>
+
+                    <div class="bg-light p-3 rounded border shadow-sm mt-4 text-start" style="max-width:600px;">
+                      <div class="d-flex align-items-center mb-2">
+                        <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+                      </div>
+                      <p class="mb-2 small text-dark">Which region's privacy penalties scale with a company's global revenue, and which country requires certain personal data to physically stay within its own borders?</p>
+                      <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">The EU/UK (GDPR/UK GDPR) scale penalties as a percentage of global revenue. China (PIPL) requires data localization for certain citizen data.</p></details>
+                    </div>
                   </div>
                 </div>
 
-                <!-- ROW 7: ACCESSIBILITY (a11y) -->
-                <div class="row mb-5 pb-4 border-bottom align-items-start">
+                <!-- ============================================================ -->
+                <!-- CONTENT: ACCESSIBILITY OVERVIEW / LEGAL REQUIREMENTS -->
+                <!-- ============================================================ -->
+                <div id="make-the-web-for-everyone" class="row mb-5 pb-4 border-bottom align-items-start">
                   <div class="col-lg-8 pe-lg-5">
                     <h2 class="section-title mt-0">Make the Web for Everyone: Accessibility (a11y)</h2>
-                    <p>The <strong><a href="https://www.ada.gov/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">ADA (Americans with Disabilities Act)</a></strong> makes accessibility a <strong>legal requirement</strong> for "places of public accommodation," which courts now say include websites. Professional developers follow the <a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">WCAG (Web Content Accessibility Guidelines)</a>, the global standard for inclusive design. WCAG is divided into three compliance levels: <strong>Level A</strong> (Minimum), <strong>Level AA</strong> (Standard/Legal Target), and <strong>Level AAA</strong> (Maximum).</p>
-                    
+                    <p><strong>The Why:</strong> Remember Devon, Marisol's regular customer who is blind and uses a screen reader? If her ordering page isn't built to work with assistive technology, Devon can't order lunch — and Marisol just lost a paying customer for a reason that had nothing to do with her tamales. Worse, it can be illegal.</p>
+                    <p><strong>The What:</strong> In the United States, the <a href="https://www.ada.gov/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">ADA (Americans with Disabilities Act)</a> makes accessibility a <strong>legal requirement</strong> for "places of public accommodation," which courts now say include websites. Nevada businesses must follow it, but the ADA is only the U.S. piece — other regions have their own binding rules: the EU's <strong>European Accessibility Act</strong> and standard <strong>EN 301 549</strong>, Canada's <strong>AODA (Accessibility for Ontarians with Disabilities Act)</strong>, and the UK's <strong>Public Sector Bodies Accessibility Regulations</strong>. All of them point developers to the same technical standard: the <a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">WCAG (Web Content Accessibility Guidelines)</a>, divided into <strong>Level A</strong> (Minimum), <strong>Level AA</strong> (Standard/Legal Target), and <strong>Level AAA</strong> (Maximum).</p>
+
                     <h5 class="fw-bold mt-4 text-primary">The POUR Principles: The 4 Pillars of a11y</h5>
-                    <p>To be accessible, a website must meet these four criteria established by the <a href="https://www.w3.org/WAI/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">W3C WAI</a>:</p>
+                    <p><strong>The How:</strong> To be accessible, a website must meet these four criteria established by the <a href="https://www.w3.org/WAI/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">W3C WAI</a>:</p>
                     <ul class="small ps-3 mb-4">
-                        <li class="mb-2"><strong>Perceivable:</strong> Users must be able to perceive the information. If it's visual, there must be a text alternative (Alt Text). If it's audio, there must be captions. It shouldn't depend on just one sense.</li>
-                        <li class="mb-2"><strong>Operable:</strong> The interface cannot require interactions that a user cannot perform. A site that requires a mouse is not operable for a user with tremors or blindness. Everything must be reachable via keyboard.</li>
-                        <li class="mb-2"><strong>Understandable:</strong> Both the information and the operation of the user interface must be understandable. Don't use confusing navigation or jargon that prevents a user from knowing "what happens next."</li>
-                        <li class="mb-2"><strong>Robust:</strong> Content must be robust enough to be interpreted by a wide variety of user agents, including assistive technologies like screen readers (NVDA, JAWS, or VoiceOver).</li>
+                        <li class="mb-2"><strong>Perceivable:</strong> Users must be able to perceive the information. If it's visual, there must be a text alternative (Alt Text). If it's audio, there must be captions.</li>
+                        <li class="mb-2"><strong>Operable:</strong> The interface cannot require interactions a user cannot perform. A site that requires a mouse is not operable for Devon or a user with tremors. Everything must be reachable via keyboard.</li>
+                        <li class="mb-2"><strong>Understandable:</strong> Both the information and the operation of the interface must be understandable. Don't use confusing navigation or jargon that hides "what happens next."</li>
+                        <li class="mb-2"><strong>Robust:</strong> Content must work with a wide variety of assistive technologies, including screen readers (NVDA, JAWS, or VoiceOver — the exact software Devon uses).</li>
                     </ul>
 
                     <h5 class="fw-bold mt-4 text-primary">The Guild Audit: Checking for the "Big 3"</h5>
                     <ul class="small ps-3 mb-4">
-                      <li class="mb-3"><strong>Alt Text for Images:</strong> Screen readers read code aloud for blind users. If your logo's alt text is empty or says "logo.png," a blind user has no idea which site they are on. <strong>Rule:</strong> Use descriptive text for images (e.g., <code>alt="Carson High School Logo"</code>) and use <code>alt=""</code> for purely decorative images so screen readers skip them.</li>
-                      <li class="mb-3"><strong>Color Contrast:</strong> Use a 4.5:1 ratio for normal text and 3:1 for large text. If you use light gray text on a white background, it's invisible to users with visual impairments. Use the <a href="https://webaim.org/resources/contrastchecker/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">WebAIM Contrast Checker</a> to verify your palette.</li>
-                      <li class="mb-3"><strong>Keyboard Navigation:</strong> Users who can't use a mouse must be able to "tab" through your site. If they can't reach the "Buy" button with a keyboard, the site is broken. Always ensure there is a visible <strong>Focus Ring</strong> so users know where they are.</li>
+                      <li class="mb-3"><strong>Alt Text for Images:</strong> Screen readers read code aloud. If Marisol's logo's alt text is empty or says "logo.png," Devon has no idea which site she's on. <strong>Rule:</strong> Use descriptive text (e.g., <code>alt="Vega's Tamale Co. Logo"</code>) and use <code>alt=""</code> for purely decorative images so screen readers skip them.</li>
+                      <li class="mb-3"><strong>Color Contrast:</strong> Use a 4.5:1 ratio for normal text and 3:1 for large text. Use the <a href="https://webaim.org/resources/contrastchecker/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">WebAIM Contrast Checker</a> to verify your palette.</li>
+                      <li class="mb-3"><strong>Keyboard Navigation:</strong> Users who can't use a mouse must be able to "tab" through your site. If Devon can't reach the "Order Now" button with a keyboard, the site is broken. Always ensure there is a visible <strong>Focus Ring</strong>.</li>
                     </ul>
 
                     <h5 class="fw-bold mt-4 text-primary">The Technical Edge: ARIA and Semantic HTML</h5>
-                    <p>The easiest way to be accessible is to use <strong>Semantic HTML</strong> (e.g., using <code>&lt;button&gt;</code> instead of <code>&lt;div onclick="..."&gt;</code>). When standard HTML isn't enough, we use <strong><a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA" target="_blank" rel="noopener" class="text-decoration-none fw-bold">ARIA (Accessible Rich Internet Applications)</a></strong> roles and attributes to tell assistive technology exactly what a custom component does.</p>
-                    <p><strong>Case Study: <a href="https://www.adatitleiii.com/2019/10/supreme-court-denies-dominos-petition-for-certiorari-allowing-ninth-circuit-decision-to-stand/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">The Domino's Lawsuit</a>.</strong> Domino's Pizza was sued because a blind user couldn't order a pizza on their site using a screen reader. The case went all the way to the Supreme Court, and Domino's lost. This proved that accessibility is not a choice; it is a civil right.</p>
+                    <p>The easiest way to be accessible is <strong>Semantic HTML</strong> (using <code>&lt;button&gt;</code> instead of <code>&lt;div onclick="..."&gt;</code>). When standard HTML isn't enough, we use <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA" target="_blank" rel="noopener" class="text-decoration-none fw-bold">ARIA (Accessible Rich Internet Applications)</a> roles and attributes to tell assistive technology exactly what a custom component does.</p>
+                    <p><strong>Case Study — Research the ADA in Practice: <a href="https://www.adatitleiii.com/2019/10/supreme-court-denies-dominos-petition-for-certiorari-allowing-ninth-circuit-decision-to-stand/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">The Domino's Lawsuit</a>.</strong> Domino's Pizza was sued because a blind user couldn't order a pizza on their site using a screen reader — the same problem Devon would face on an inaccessible version of Marisol's site. The case went all the way to the Supreme Court, and Domino's lost. This is the single clearest proof, in current U.S. case law, that accessibility is not a choice; it is a civil right, enforceable under the ADA.</p>
+
+                    <div class="alert alert-warning small border-warning border mb-4">
+                        <strong>Where Everyone Gets Ambushed:</strong> Students often think accessibility only matters for government or "big company" sites. The Domino's case proves otherwise — a private, commercial pizza chain lost at the Supreme Court. Any business open to the public, including a food truck's website, can be held to the same standard.
+                    </div>
 
                     <!-- BUSINESS PLAN INTEGRATION: STEP 5 -->
                     <div class="card border-dark shadow-sm my-4 mt-5">
@@ -749,27 +953,9 @@
                         💼 The Agency Founder's Log: Business Plan Integration
                       </div>
                       <div class="card-body small bg-light">
-                        <p class="mb-0"><strong>Expanding Client Market Reach:</strong> If your agency builds a site that isn't accessible, your client is actively turning away 20% of their potential customers. Furthermore, they are at risk of being sued just like Domino's Pizza. When you pitch your agency's services to a local business, you will explicitly state that your code is "WCAG Level AA Compliant." You are not just building a site; you are ensuring your client can legally and effectively sell to <em>everyone</em>.</p>
+                        <p class="mb-0"><strong>Expanding Client Market Reach:</strong> If Marisol's site isn't accessible, she's turning away Devon — and roughly 20% of the population who live with some form of disability. Worse, she's at risk of being sued just like Domino's. When you pitch your agency's services to a local business, you will explicitly state that your code is "WCAG Level AA Compliant." You are not just building a site; you are ensuring your client can legally and effectively sell to <em>everyone</em>.</p>
                       </div>
                     </div>
-
-                    <!-- LAB 2 ASSIGNMENT CARD -->
-                    <div class="card border-success shadow-sm my-4 mt-5">
-                      <div class="card-header bg-success text-white fw-bold">
-                        Lab 2: The Inclusive Design Proposal [25 pts]
-                      </div>
-                      <div class="card-body small">
-                        <p><strong>Objective:</strong> Demonstrate cultural competency by proposing accessible web features.</p>
-                        <ol class="ps-3 mb-4">
-                            <li class="mb-2">Pick one common web feature (e.g., Video Captions, Dark Mode, Keyboard Navigation).</li>
-                            <li class="mb-2">Write a 1-paragraph proposal explaining how this feature helps a user with a specific disability AND how it also benefits a user without a disability (The Curb Cut Effect).</li>
-                            <li class="mb-2">Review the 3 images you found in Lab 1. Write descriptive alt text for each of them in your <code>credits.txt</code> file.</li>
-                        </ol>
-                        <p class="mb-3 text-danger fw-bold">Turn In: Submit your proposal and updated credits file.</p>
-                        <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
-                      </div>
-                    </div>
-
                   </div>
 
                   <div class="col-lg-4 mt-4 mt-lg-0 text-center">
@@ -784,29 +970,58 @@
 
                     <div class="bg-light p-3 rounded border shadow-sm mb-4 mt-4 text-start">
                       <div class="d-flex align-items-center mb-2">
-                        <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                        <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
                       </div>
-                      <p class="mb-0 small text-dark">List the 'Big 3' accessibility issues and describe one way to test for each on a live website using professional tools.</p>
-                    </div>
-
-                    <div class="bg-light p-3 rounded border shadow-sm mb-4 mt-4 text-start">
-                      <div class="d-flex align-items-center mb-2">
-                        <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
-                      </div>
-                      <p class="mb-0 small text-dark">Find a website with poor color contrast. How would you redesign it to meet the 4.5:1 ratio requirement?</p>
+                      <p class="mb-2 small text-dark">List the "Big 3" accessibility issues and one way to test for each on a live website.</p>
+                      <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">Missing/bad alt text (check with a screen reader or by reading the HTML), poor color contrast (test with WebAIM's Contrast Checker), and broken keyboard navigation (try tabbing through the whole page with no mouse).</p></details>
                     </div>
                   </div>
                 </div>
 
-                <!-- ROW 8: ETHICS & NDAs -->
-                <div class="row mb-5 pb-4 border-bottom align-items-start">
+                <!-- ============================================================ -->
+                <!-- CONTENT: TYPES OF DISABILITIES -->
+                <!-- ============================================================ -->
+                <div id="who-are-you-actually-designing-for" class="row mb-5 pb-4 border-bottom align-items-start">
+                  <div class="col-lg-8 pe-lg-5">
+                    <h2 class="section-title mt-0">Who Are You Actually Designing For?</h2>
+                    <p><strong>The Why:</strong> "Accessibility" can sound like one big vague category. It isn't. Different disabilities break a website in completely different ways, and a fix for one doesn't automatically fix another — you have to know which problem you're solving.</p>
+                    <p><strong>The What:</strong> Web accessibility guidelines are written to cover four broad categories of disability, each with its own barriers:</p>
+                    <ul class="small ps-3 mb-4">
+                      <li class="mb-2"><strong>Visual:</strong> Blindness, low vision, or color blindness. Barriers: missing alt text, poor contrast, color-only indicators (like a red vs. green error with no icon or text).</li>
+                      <li class="mb-2"><strong>Auditory:</strong> Deafness or hearing loss. Barriers: video with no captions, audio-only alerts with no visual equivalent.</li>
+                      <li class="mb-2"><strong>Motor/Physical:</strong> Limited fine motor control, tremors, or paralysis, which may make a mouse unusable. Barriers: tiny click targets, interactions that require precise mouse movement, no keyboard support.</li>
+                      <li class="mb-2"><strong>Cognitive/Learning:</strong> Conditions like dyslexia, ADHD, or memory-related disabilities. Barriers: dense unbroken text, confusing navigation, auto-playing content, and time limits that are too short.</li>
+                    </ul>
+                    <p><strong>The How:</strong> On Marisol's site, this plays out concretely: Devon (visual) needs alt text and a screen-reader-friendly menu structure. A customer with a hearing impairment needs captions if you ever add a promo video. A customer with tremors needs large, well-spaced buttons that don't require pixel-perfect clicking. A customer with ADHD needs a menu that's scannable, not a wall of text. One redesign decision — say, adding a "situational" case like a parent one-handed holding a baby while ordering — often overlaps with the motor category and benefits everyone, which is exactly the <strong>Curb Cut Effect</strong> you'll read about later in this chapter.</p>
+
+                    <div class="alert alert-warning small border-warning border mb-4">
+                        <strong>Where Everyone Gets Ambushed:</strong> Students often treat "accessibility" as a single checkbox — "I added alt text, so I'm accessible." Alt text solves a visual barrier. It does nothing for a deaf user who needs captions or a user with tremors who needs bigger buttons. A real audit checks all four categories separately.
+                    </div>
+                  </div>
+
+                  <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+                    <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+                      <div class="d-flex align-items-center mb-2">
+                        <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+                      </div>
+                      <p class="mb-2 small text-dark">Marisol wants a promo video with background music but no dialogue. Which disability category needs the biggest consideration, and what's the fix?</p>
+                      <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">Auditory — a deaf or hard-of-hearing user gets nothing from music alone. Add captions or an on-screen text description of what's happening, even without spoken dialogue.</p></details>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- CONTENT: ETHICS & DARK PATTERNS -->
+                <!-- ============================================================ -->
+                <div id="your-digital-compass" class="row mb-5 pb-4 border-bottom align-items-start">
                   <div class="col-lg-8 pe-lg-5">
                     <h2 class="section-title mt-0">Your Digital Compass: Ethics and NDAs</h2>
-                    <p>Laws define the floor—the minimum you must do. Ethics define the ceiling—what you <strong>should</strong> do. Model legal and ethical use of information: Cite your sources, respect privacy, and avoid <strong><a href="https://www.deceptive.design/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Dark Patterns</a></strong>. Dark patterns are UI designs intended to trick users into choices they didn't mean to make, like "Sneak into Basket" fees or "Forced Continuity" subscriptions.</p>
+                    <p><strong>The Why:</strong> Laws define the floor — the minimum you must do. Ethics define the ceiling — what you <em>should</em> do. A site can be 100% legal and still be designed to manipulate people, and that gap is exactly where dark patterns live.</p>
+                    <p><strong>The What:</strong> To <strong>model legal and ethical use of information</strong> means citing your sources, respecting privacy, and refusing to build <a href="https://www.deceptive.design/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Dark Patterns</a> — UI designs intended to trick users into choices they didn't mean to make, like "Sneak into Basket" fees or "Forced Continuity" subscriptions.</p>
 
                     <!-- DARK PATTERNS DEDICATED SECTION -->
-                    <h5 class="fw-bold mt-5 text-danger">Dark Patterns: The Villain's Toolkit <span class="badge bg-danger ms-2 fw-normal small">Proficiency Scale Vocabulary</span></h5>
-                    <p>Dark patterns aren't accidents — they are <strong>intentional design traps</strong>. Designers deliberately use confusing layouts, misleading copy, or hidden options to manipulate users into purchases, subscriptions, or data-sharing they never intended. These tactics may boost short-term conversion rates, but they destroy long-term user trust and can violate consumer protection laws. As a professional designer, you must be able to recognize them — and refuse to build them. Hover each card to learn more.</p>
+                    <h5 class="fw-bold mt-5 text-danger">Dark Patterns: The Villain's Toolkit</h5>
+                    <p><strong>The How:</strong> Dark patterns aren't accidents — they are <strong>intentional design traps</strong>. Designers deliberately use confusing layouts, misleading copy, or hidden options to manipulate users into purchases, subscriptions, or data-sharing they never intended. These tactics may boost short-term conversion, but they destroy long-term trust and can violate consumer protection laws. Hover each card to learn more.</p>
 
                     <div class="row g-3 mb-4 mt-2">
                         <div class="col-md-6">
@@ -860,25 +1075,33 @@
                         <strong>The Agency Liability Rule:</strong> The <a href="https://www.ftc.gov/" target="_blank" rel="noopener" class="fw-bold">FTC (Federal Trade Commission)</a> actively pursues dark pattern cases. In 2023, the FTC sued Amazon for $25 million over its Prime cancellation process — a textbook Roach Motel. Building dark patterns for a client does not just expose them to lawsuits; it exposes <em>your agency</em> as the designer to liability as well.
                     </div>
 
-                    <h2 class="section-title mt-5">The Secret-Keeper's Oath: Non-Disclosure Agreements (NDA)</h2>
-                    <p>In the professional tech world, a <strong><a href="https://www.law.cornell.edu/wex/non-disclosure_agreement" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Non-Disclosure Agreement (NDA)</a></strong> is more than just a "pinky promise" 🤫. It is a legally binding contract that creates a "confidential relationship" between you and an employer or client. It is the primary tool used to protect <strong>Trade Secrets</strong>—proprietary information that gives a business a competitive edge.</p>
-                    
+                    <p>Try it yourself: If Marisol asks you to make her "join our email list" checkbox pre-checked so more people sign up, that's a Misdirection dark pattern. The ethical, and legal, response is to leave it unchecked and explain to her <em>why</em> — that's what it means to model ethical use of information in a real client relationship, not just in a textbook example.</p>
+
+                    <h2 id="the-secret-keepers-oath" class="section-title mt-5">The Secret-Keeper's Oath: Non-Disclosure Agreements (NDA)</h2>
+                    <p><strong>The Why:</strong> When Marisol hires your agency, she'll hand over her supplier list, her recipes, and her financial numbers. If that leaked to a competitor, it could genuinely end her business. She needs a legal guarantee you won't talk — that guarantee is an NDA.</p>
+                    <p><strong>The What:</strong> A <a href="https://www.law.cornell.edu/wex/non-disclosure_agreement" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Non-Disclosure Agreement (NDA)</a> is more than a "pinky promise" 🤫. It is a legally binding contract that creates a "confidential relationship" between you and an employer or client. It is the primary tool used to protect <strong>Trade Secrets</strong> — proprietary information that gives a business a competitive edge.</p>
+
                     <h5 class="fw-bold mt-4 text-primary">Anatomy of a Professional NDA</h5>
-                    <p>When you sign your first contract for an internship or job, expect these standard clauses:</p>
+                    <p><strong>The How:</strong> When you sign your first contract for an internship or job, expect these standard clauses:</p>
                     <ul class="small ps-3 mb-4">
-                        <li class="mb-2"><strong>The Scope of Confidentiality:</strong> This section defines exactly what is secret. It often includes source code, internal logic, UI mockups, client lists, and unreleased project codenames.</li>
+                        <li class="mb-2"><strong>The Scope of Confidentiality:</strong> Defines exactly what is secret. Often includes source code, internal logic, UI mockups, client lists, and unreleased project codenames.</li>
                         <li class="mb-2"><strong>Unilateral vs. Mutual:</strong> A <strong>Unilateral NDA</strong> is one-way (you keep their secrets). A <strong>Mutual NDA</strong> is two-way (you both keep each other's secrets, common in startup partnerships).</li>
-                        <li class="mb-2"><strong>The Term (Survival Clause):</strong> Secrets don't always expire. Most NDAs last 2 to 5 years, but Trade Secrets (like the Google Search algorithm) are protected <strong>indefinitely</strong>. Even after you leave a job, your obligation to keep their secrets "survives" the end of your employment.</li>
-                        <li class="mb-2"><strong>Remedies for Breach:</strong> If you leak information, the company can seek <strong><a href="https://www.law.cornell.edu/wex/injunction" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Injunctive Relief</a></strong> (a court order to stop you immediately) and <strong>Liquidated Damages</strong> (pre-set massive fines).</li>
+                        <li class="mb-2"><strong>The Term (Survival Clause):</strong> Secrets don't always expire. Most NDAs last 2 to 5 years, but Trade Secrets (like a secret tamale recipe, or the Google Search algorithm) are protected <strong>indefinitely</strong>. Even after you leave a job, your obligation "survives" the end of employment.</li>
+                        <li class="mb-2"><strong>Remedies for Breach:</strong> If you leak information, the company can seek <a href="https://www.law.cornell.edu/wex/injunction" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Injunctive Relief</a> (a court order to stop you immediately) and <strong>Liquidated Damages</strong> (pre-set massive fines).</li>
                     </ul>
 
                     <h5 class="fw-bold mt-4 text-primary">The "Blackball" and Real-World Scenarios</h5>
-                    <p>If you break an NDA—for example, by leaking a screenshot of a new game level to Discord—you aren't just fired. You can be sued for massive sums, and you will likely be <strong>blackballed</strong> from the industry. Tech is a small world; your reputation for keeping secrets is your most valuable asset.</p>
+                    <p>If you break an NDA — for example, by leaking a screenshot of a new game level to Discord — you aren't just fired. You can be sued for massive sums, and you will likely be <strong>blackballed</strong> from the industry. Tech is a small world; your reputation for keeping secrets is your most valuable asset.</p>
                     <ul class="small ps-3 mb-4">
                         <li class="mb-3"><strong>Scenario A: The "GTA VI" Leak.</strong> Leaking footage or code of an unreleased high-profile game can result in criminal charges and civil lawsuits for millions in lost marketing value.</li>
                         <li class="mb-3"><strong>Scenario B: The Freelancer's Logic.</strong> You cannot take a secret encryption algorithm from a fintech client and sell it to their competitor. This is "Theft of Trade Secrets."</li>
                         <li class="mb-3"><strong>Scenario C: The Interview Leak.</strong> Many companies (like Google or Apple) require you to sign an NDA just to <em>interview</em> so you don't leak their internal test questions or future plans.</li>
+                        <li class="mb-3"><strong>Scenario D: Marisol's Recipe.</strong> While building her site, you see her secret marinade recipe written on a sticky note. Posting it publicly, even as a joke, is a textbook trade-secret breach if you've signed her agency NDA.</li>
                     </ul>
+
+                    <div class="alert alert-warning small border-warning border mb-4">
+                        <strong>Where Everyone Gets Ambushed:</strong> Students often think an NDA's obligations end the moment you stop working for someone. Most NDAs explicitly "survive" termination — your duty to keep the secret can outlast the job by years, and Trade Secrets can be protected indefinitely.
+                    </div>
 
                     <!-- BUSINESS PLAN INTEGRATION: STEP 6 -->
                     <div class="card border-dark shadow-sm my-4 mt-5">
@@ -886,7 +1109,7 @@
                         💼 The Agency Founder's Log: Business Plan Integration
                       </div>
                       <div class="card-body small bg-light">
-                        <p class="mb-0"><strong>Protecting Your Clients' Secrets:</strong> When the Carson High Agency starts working with real businesses, those business owners will hand over their customer lists, their financial data, and their upcoming product ideas. You will be required to sign an NDA to prove your agency can be trusted with their livelihood. Trust is the currency of the tech industry.</p>
+                        <p class="mb-0"><strong>Protecting Your Clients' Secrets:</strong> When the Carson High Agency works with real businesses like Marisol's, those owners hand over their customer lists, their financial data, and their upcoming product ideas. You will be required to sign an NDA to prove your agency can be trusted with their livelihood. Trust is the currency of the tech industry.</p>
                       </div>
                     </div>
                   </div>
@@ -910,22 +1133,27 @@
                       </figcaption>
                     </figure>
 
-                    <div class="bg-light p-3 rounded border shadow-sm mb-4 mt-4 text-start">
+                    <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
                       <div class="d-flex align-items-center mb-2">
-                        <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                        <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
                       </div>
-                      <p class="mb-0 small text-dark">If a developer leaves a company, should their NDA expire immediately? Why might a company want that 'Secret-Keeper's Oath' to last for 5 years after they leave?</p>
+                      <p class="mb-2 small text-dark">If a developer leaves a company, does their NDA expire immediately?</p>
+                      <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">No. Most NDAs have a survival clause, meaning the obligation to keep secrets continues for years after employment ends — and trade secrets can be protected indefinitely.</p></details>
                     </div>
                   </div>
                 </div>
 
-                <!-- ROW 9: BIAS & INCLUSION -->
-                <div class="row mb-5 pb-4 border-bottom align-items-start">
+                <!-- ============================================================ -->
+                <!-- CONTENT: BIAS & INCLUSION -->
+                <!-- ============================================================ -->
+                <div id="check-your-bias-at-the-door" class="row mb-5 pb-4 border-bottom align-items-start">
                   <div class="col-lg-8 pe-lg-5">
                     <h2 class="section-title mt-0">Check Your Bias at the Door</h2>
-                    <p>We all have <strong>biases</strong>—shortcuts our brains make based on our own limited experiences. The problem is that these biases can sneak into our code and end up hurting real people. When these human shortcuts enter code, it becomes <strong>Algorithmic Bias</strong>. Computers are reflective: they learn from the data we give them. Bias usually enters through the <strong>Training Dataset</strong>. For example, if you build a hiring AI and train it on resumes from the last 10 years (mostly men), the AI will "learn" that men are better and dock points for resumes containing the word "women's."</p>
-                    
+                    <p><strong>The Why:</strong> Code feels neutral — it's just logic, right? It isn't, because the humans who write it and the data that trains it are never neutral. When that shows up in software, real people get hurt in ways that are hard to see from the inside.</p>
+                    <p><strong>The What:</strong> We all have <strong>biases</strong> — shortcuts our brains make based on limited experience. When these human shortcuts enter code, it becomes <strong>Algorithmic Bias</strong>. Computers are reflective: they learn from the data we give them. Bias usually enters through the <strong>Training Dataset</strong>. If you build a hiring AI and train it on resumes from the last 10 years (mostly men), the AI "learns" that men are better and docks points for resumes containing the word "women's."</p>
+
                     <h5 class="fw-bold mt-4 text-primary">Real-World Case Studies:</h5>
+                    <p><strong>The How:</strong> These aren't hypothetical — they happened:</p>
                     <ul class="small ps-3 mb-4">
                       <li class="mb-3"><strong>The Racist Soap Dispenser:</strong> Infrared sensors that only activated for light skin tones because they weren't tested on darker skin. Darkness absorbs infrared light; the sensors were "too cheap" to detect it.</li>
                       <li class="mb-3"><strong>The Biased Hiring AI:</strong> An algorithm that learned "men are better" because it was trained on 10 years of male-dominated resumes.</li>
@@ -933,31 +1161,61 @@
                     </ul>
 
                     <h5 class="fw-bold mt-4 text-primary">Inclusive Design: The "Curb Cut" Effect</h5>
-                    <p>Inclusive design is building for the most marginalized users to make the experience better for <strong>everyone</strong>. This is called the <strong><a href="https://ssir.org/articles/entry/the_curb_cut_effect" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Curb Cut Effect</a></strong>. Sidewalk ramps (curb cuts) were designed for wheelchairs, but they also benefit parents with strollers and travelers with suitcases. In web design, high contrast helps the vision-impaired, but it also helps the user trying to read their phone in direct sunlight. Explore the work of the <a href="https://www.ajl.org/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Algorithmic Justice League (AJL)</a> to learn more.</p>
-                    
-                    <p><strong>Inclusive Checklist:</strong></p>
+                    <p>Inclusive design means building for the most marginalized users to make the experience better for <strong>everyone</strong>. This is the <a href="https://ssir.org/articles/entry/the_curb_cut_effect" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Curb Cut Effect</a>. Sidewalk ramps (curb cuts) were designed for wheelchairs, but they also benefit parents with strollers and travelers with suitcases. In web design, high contrast helps the vision-impaired, but it also helps the user reading their phone in direct sunlight. Explore the work of the <a href="https://www.ajl.org/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">Algorithmic Justice League (AJL)</a> to learn more.</p>
+
+                    <p><strong>Analyzing Content for Bias — Inclusive Checklist:</strong> When you review Marisol's site content, ask:</p>
                     <ul class="small ps-3 mb-4">
-                        <li class="mb-2">Are gender selections inclusive?</li>
-                        <li class="mb-2">Do my stock photos represent a diverse range of skin tones and abilities?</li>
-                        <li class="mb-2">Is my text written at a readable level for all users?</li>
+                        <li class="mb-2">Are gender selections on any form inclusive, or do they force a binary choice that excludes real customers?</li>
+                        <li class="mb-2">Do the stock photos represent a diverse range of skin tones and abilities, or only one kind of customer?</li>
+                        <li class="mb-2">Is the text written at a readable level for all users, not just fluent English readers?</li>
+                        <li class="mb-2">Would this design or copy make any group of real customers feel like an afterthought?</li>
                     </ul>
+
+                    <div class="alert alert-warning small border-warning border mb-4">
+                        <strong>Where Everyone Gets Ambushed:</strong> Students often think algorithmic bias requires a "bad" or intentionally racist programmer. It almost never does — it usually comes from a well-meaning team that didn't test on a diverse enough dataset or user group. Bias is a testing failure, not always a malice failure.
+                    </div>
 
                     <!-- MILESTONE ASSIGNMENT CARD -->
                     <div class="card border-primary shadow-sm my-4 mt-5">
                       <div class="card-header bg-primary text-white fw-bold">
-                        🏆 Milestone: The Ethics & A11y Audit [100 pts]
+                        🏆 Milestone: The Ethics &amp; A11y Audit [100 pts]
                       </div>
                       <div class="card-body small">
-                        <p><strong>Objective:</strong> Prove technical and ethical integrity by auditing a site for legal compliance and manipulative design, mimicking a service your agency will provide to clients.</p>
+                        <p><strong>Objective:</strong> Prove technical and ethical integrity by auditing a site for legal compliance and manipulative design, mimicking a service your agency will provide to clients like Marisol.</p>
                         <ol class="ps-3 mb-4">
                             <li class="mb-2">Select a real-world website of a local Carson City business (or a competitor to a prospective client).</li>
                             <li class="mb-2">Perform a Lighthouse Accessibility Audit on the site using Chrome DevTools.</li>
-                            <li class="mb-2">Document 3 specific legal/ethical issues found (e.g., missing alt-text, poor color contrast, or an active Dark Pattern).</li>
+                            <li class="mb-2">Document 3 specific legal/ethical issues found (e.g., missing alt-text, poor color contrast, or an active Dark Pattern), and identify which of the four disability categories from earlier in this chapter each accessibility issue affects.</li>
                             <li class="mb-2">Suggest 3 technical fixes for these issues using analytical reasoning. This is how you prove to a client that their site needs your help!</li>
-                            <li class="mb-2"><strong>Peer Review:</strong> Share your audit report with an agency partner and give feedback using the "Critique Sandwich."</li>
+                            <li class="mb-2"><strong>Peer Review:</strong> Share your audit report with an agency partner and give feedback using the "Critique Sandwich" — one specific strength, one specific gap, one specific next step.</li>
                         </ol>
                         <p class="mb-3 text-danger fw-bold">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your completed Audit Report folder.</p>
                         <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                        <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                        <table class="table table-bordered small bg-white shadow-sm mb-0">
+                          <thead class="table-light text-center">
+                            <tr><th style="width:20%">Score</th><th>What It Looks Like</th></tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td class="fw-bold text-center">4.0 (Advanced)<br><span class="text-primary">Digital Architect</span></td>
+                              <td>Identifies subtle legal/ethical issues beyond the obvious three, correctly ties each accessibility gap to a specific disability category, proposes fixes that reference WCAG success criteria by name, and gives peer feedback that changes the partner's next draft.</td>
+                            </tr>
+                            <tr>
+                              <td class="fw-bold text-center">3.0 (Mastery)<br><span class="text-success">Practitioner</span></td>
+                              <td>Finds 3 real, accurately described legal/ethical issues (not vague guesses), correctly identifies which disability category each affects, and proposes specific, implementable fixes. Peer review is specific and respectful.</td>
+                            </tr>
+                            <tr>
+                              <td class="fw-bold text-center">2.0 (Foundational)<br><span class="text-warning">Apprentice</span></td>
+                              <td>Finds 3 issues but descriptions are generic ("bad contrast" with no measurement) or the disability category is missing or incorrect. Fixes are vague ("make it better").</td>
+                            </tr>
+                            <tr>
+                              <td class="fw-bold text-center">1.0 (Novice)<br><span class="text-danger">Beginner</span></td>
+                              <td>Submitted a report, but issues found are not real problems on the site, or fewer than 3 issues are documented.</td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </div>
 
@@ -975,28 +1233,72 @@
 
                     <div class="bg-light p-3 rounded border shadow-sm mb-4 mt-4 text-start">
                       <div class="d-flex align-items-center mb-2">
-                        <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+                        <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
                       </div>
-                      <p class="mb-0 small text-dark">How can a diverse team of developers prevent 'Algorithmic Bias' more effectively than a team from the same background?</p>
+                      <p class="mb-2 small text-dark">A hiring algorithm docks points for resumes containing the word "women's" (as in "women's chess club"). What's the root cause?</p>
+                      <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">A biased training dataset — the AI learned from years of mostly-male resumes, so it associated maleness with "success" and penalized anything that signaled otherwise. It's a data problem, not the algorithm being deliberately programmed to discriminate.</p></details>
                     </div>
 
                     <div class="bg-light p-3 rounded border shadow-sm mb-4 mt-4 text-start">
                       <div class="d-flex align-items-center mb-2">
                         <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
                       </div>
-                      <p class="mb-0 small text-dark">Can you recall a time you were 'tricked' by a website into clicking something you didn't want? Was it a Dark Pattern?</p>
+                      <p class="mb-0 small text-dark">Can you recall a time you were "tricked" by a website into clicking something you didn't want? Was it a Dark Pattern?</p>
                     </div>
+                  </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- THE LABS (activity index for practiced_in cross-reference) -->
+                <!-- ============================================================ -->
+                <div id="the-labs" class="row mb-5 pb-4 border-bottom">
+                  <div class="col-12">
+                    <h2 class="section-title mt-0">The Labs, At a Glance</h2>
+                    <p>This chapter's two labs and the milestone project appear inline above, right next to the content that prepares you for them. Here's the full list in one place:</p>
+                    <ul class="ps-3 mb-0">
+                      <li class="mb-2"><strong><a href="#the-sharing-economy" class="text-decoration-none">Lab 1: The Asset Integrity Lab</a></strong> [25 pts] — Skill: sourcing and citing third-party media legally. Why it matters at work: it's the exact workflow you'll use on every real client project, and getting it wrong is the fastest way to cost a client money.</li>
+                      <li class="mb-2"><strong><a href="#make-the-web-for-everyone" class="text-decoration-none">Lab 2: The Inclusive Design Proposal</a></strong> [25 pts] — Skill: translating an accessibility feature into a client-facing pitch. Why it matters at work: agencies that can explain accessibility in plain business terms (not just legal terms) close more client deals.</li>
+                      <li><strong><a href="#check-your-bias-at-the-door" class="text-decoration-none">Milestone: The Ethics &amp; A11y Audit</a></strong> [100 pts] — Skill: auditing a live site the way a real agency does before pitching a redesign.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- WARM-UP FROM LAST TIME -->
+                <!-- ============================================================ -->
+                <div id="warm-up" class="row mb-5 pb-4 border-bottom">
+                  <div class="col-lg-8">
+                    <h2 class="section-title mt-0">Warm-Up</h2>
+                    <ol class="ps-3">
+                      <li class="mb-2">In your own words, what's the difference between the Internet and the World Wide Web?</li>
+                      <li class="mb-2">What job does the W3C do for the web?</li>
+                      <li class="mb-2">What does the padlock icon next to a URL actually mean?</li>
+                      <li class="mb-2">Name one reason professional developers follow strict file-naming rules for a project folder.</li>
+                      <li class="mb-2">Name one federally recognized CTSO, and say what "CTSO" stands for.</li>
+                    </ol>
                   </div>
                 </div>
 
                 <!-- FINAL RECAP -->
                 <div class="row mt-5">
                   <div class="col-lg-8 pe-lg-5">
-                    <section id="final-recap">
+                    <section id="the-final-download">
                         <h2 class="section-title mt-0 text-primary fw-bold">The Final Download: Chapter Recap</h2>
-                        <p>This chapter covered the essential legal and ethical frameworks of the web. We analyzed the "Big Three" of intellectual property (Copyright, Trademark, Patent), explored the technical flow of HTTPS, compared global privacy laws like GDPR and the Nevada Consumer Privacy Act, and committed to inclusive design. By mastering these rules, you are protecting the <strong>Carson High Web Design & Marketing Agency</strong> and ensuring you provide ethical, liability-free services to your future clients.</p>
+                        <p>This chapter covered the essential legal and ethical frameworks of the web. We analyzed the "Big Three" of intellectual property (Copyright, Trademark, Patent) and where the line sits on citing someone else's work, walked through the technical flow of HTTPS and what a security certificate actually proves, compared global privacy laws like GDPR and the Nevada Consumer Privacy Act, broke accessibility down by the specific disabilities it protects, and committed to inclusive, dark-pattern-free design. By mastering these rules, you protected Marisol's tamale truck from the exact mistakes that get real agencies sued — and you're ready to protect every future client of the <strong>Carson High Web Design &amp; Marketing Agency</strong> the same way.</p>
+
+                        <div class="card roadmap-card border-primary bg-light shadow-sm mt-4">
+                          <div class="card-header bg-primary text-white fw-bold">Self-Check: Can You Actually Do This Now?</div>
+                          <div class="card-body small">
+                            <p class="mb-2">Go back to the "What You'll Walk Out Able to Do" list at the top of this chapter. For each one, ask yourself honestly:</p>
+                            <ul class="mb-0 ps-3">
+                              <li class="mb-1">Could I explain it out loud to Marisol, in her language, with no jargon?</li>
+                              <li class="mb-1">Could I point to the exact spot in this chapter that proves it?</li>
+                              <li>If the answer to either is "not quite," reread that section before the Question Bank below.</li>
+                            </ul>
+                          </div>
+                        </div>
                     </section>
-                    
+
                   </div>
 
                   <div class="col-lg-4 mt-4 mt-lg-0">
@@ -1010,7 +1312,125 @@
                     </div>
                   </div>
                 </div>
-            
+
+                <!-- ============================================================ -->
+                <!-- QUESTION BANK -->
+                <!-- ============================================================ -->
+                <div id="question-bank" class="row mt-5 pb-4">
+                  <div class="col-12">
+                    <h2 class="section-title mt-0 text-primary fw-bold">Question Bank</h2>
+                    <p>Mixed format, state-exam style. Try each question before checking the answer key at the bottom.</p>
+
+                    <ol class="ps-3">
+                      <li class="mb-3" id="q1">A city redesigns its sidewalks with ramps for wheelchair users, and parents pushing strollers start using them too. What is this an example of?<br><span class="text-muted small">(a) Fair Use &nbsp; (b) The Curb Cut Effect &nbsp; (c) Data Minimization &nbsp; (d) Privacy by Design</span></li>
+                      <li class="mb-3" id="q2">Which type of intellectual property protects a company's logo and brand name?<br><span class="text-muted small">(a) Copyright &nbsp; (b) Patent &nbsp; (c) Trademark &nbsp; (d) NDA</span></li>
+                      <li class="mb-3" id="q3">Name the three main types of intellectual property protection, and give one real-world web design example of each.</li>
+                      <li class="mb-3" id="q4">A Creative Commons license labeled "BY-NC" means:<br><span class="text-muted small">(a) You must pay a fee and cannot modify the work &nbsp; (b) You must credit the creator and cannot use it commercially &nbsp; (c) You can use it for anything with no restrictions &nbsp; (d) You must ask permission before using it at all</span></li>
+                      <li class="mb-3" id="q5">You find a photo licensed "CC BY-ND." Can you crop it and use it on a for-profit business site, as long as you credit the photographer?</li>
+                      <li class="mb-3" id="q6">List the three pieces of information a proper citation for a third-party image must include.</li>
+                      <li class="mb-3" id="q7">You can't find a license anywhere on an image you want to use. What must you legally assume?<br><span class="text-muted small">(a) It's Public Domain &nbsp; (b) It's Fair Use &nbsp; (c) All Rights Reserved — you can't use it &nbsp; (d) It's Creative Commons by default</span></li>
+                      <li class="mb-3" id="q8">A patent protects: <br><span class="text-muted small">(a) A brand's logo &nbsp; (b) A new invention or process &nbsp; (c) A creative work like a photo or song &nbsp; (d) A confidential business relationship</span></li>
+                      <li class="mb-3" id="q9">Roughly how long does a copyright last?<br><span class="text-muted small">(a) 5 years &nbsp; (b) 20 years &nbsp; (c) The creator's lifetime plus 70 years &nbsp; (d) Forever, automatically</span></li>
+                      <li class="mb-3" id="q10">A developer collects customer emails for a "10% off" newsletter, then sells the list to a third-party marketer without telling anyone. Explain why this is an invasion of privacy, and name the term for the type of data being mishandled.</li>
+                      <li class="mb-3" id="q11">Which of the following is NOT an acceptable security practice for a professional website?<br><span class="text-muted small">(a) Storing passwords with hashing and salting &nbsp; (b) Using HTTPS everywhere &nbsp; (c) Storing passwords as plain, readable text &nbsp; (d) Publishing a clear privacy policy</span></li>
+                      <li class="mb-3" id="q12">Name two practices a professional developer should build into every client site by default to model acceptable security.</li>
+                      <li class="mb-3" id="q13">A local business posts every customer review, including full names and home addresses left in a "delivery notes" field, publicly on their site without asking. Analyze the implications for those customers' digital footprints.</li>
+                      <li class="mb-3" id="q14">Define "digital footprint" in your own words and give one real consequence someone might face from theirs.</li>
+                      <li class="mb-3" id="q15">HTTP is best compared to sending a: <br><span class="text-muted small">(a) Sealed, armored letter &nbsp; (b) Postcard &nbsp; (c) Locked safe &nbsp; (d) Encrypted vault</span></li>
+                      <li class="mb-3" id="q16">Explain, in plain language, why HTTP is considered an unsecure protocol and HTTPS is considered secure.</li>
+                      <li class="mb-3" id="q17">Under GDPR's "opt-in" model, what must happen before a website can legally collect a visitor's data?<br><span class="text-muted small">(a) Nothing — collection is automatic &nbsp; (b) The visitor must explicitly agree first &nbsp; (c) The visitor must be notified after the fact &nbsp; (d) Only a business license is required</span></li>
+                      <li class="mb-3" id="q18">What is the "Right to be Forgotten," and which law grants it?</li>
+                      <li class="mb-3" id="q19">Nevada's SB220 (Nevada Consumer Privacy Act) uses which model?<br><span class="text-muted small">(a) Opt-In, focused on all data collection &nbsp; (b) Opt-Out, focused on the sale of data &nbsp; (c) No consent required at all &nbsp; (d) Opt-In, but only for minors</span></li>
+                      <li class="mb-3" id="q20">Under SB220, what specific tool must a Nevada website give residents to comply with the law?</li>
+                      <li class="mb-3" id="q21">Compare and contrast GDPR (European Union) and CCPA (California): name one way they are similar and one way they are different.</li>
+                      <li class="mb-3" id="q22">Most countries outside the United States default to the opt-in model for privacy law, while the U.S. defaults to opt-out. Propose one cultural or historical reason this pattern might exist.</li>
+                      <li class="mb-3" id="q23">A padlock icon and "https://" in the address bar prove that a website: <br><span class="text-muted small">(a) Has no ads &nbsp; (b) Is completely free of malware &nbsp; (c) Has a verified identity and encrypts the connection &nbsp; (d) Loads faster than an HTTP site</span></li>
+                      <li class="mb-3" id="q24">Describe one step of the SSL/TLS handshake and explain what it accomplishes.</li>
+                      <li class="mb-3" id="q25">A checkout page uses a giant "Continue for FREE" button next to a small, pre-checked box that enrolls the user in a paid plan. What is this called, and how would you redesign it ethically?</li>
+                      <li class="mb-3" id="q26">Explain what it means to "model legal and ethical use of information" as a professional developer, using one specific example from this chapter.</li>
+                      <li class="mb-3" id="q27">A Mutual NDA means: <br><span class="text-muted small">(a) Only the employer must keep secrets &nbsp; (b) Only the employee must keep secrets &nbsp; (c) Both parties must keep each other's secrets &nbsp; (d) The agreement automatically expires after 30 days</span></li>
+                      <li class="mb-3" id="q28">What can happen, legally and professionally, if a developer breaks an NDA?</li>
+                      <li class="mb-3" id="q29">A hiring AI trained on ten years of mostly-male resumes starts penalizing resumes that mention "women's organizations." Explain the root cause of this bias — is it the algorithm itself or something else?</li>
+                      <li class="mb-3" id="q30">Define "algorithmic bias" and explain where it most commonly enters a system.</li>
+                      <li class="mb-3" id="q31">The U.S. law that makes web accessibility a legal requirement for places of public accommodation is:<br><span class="text-muted small">(a) GDPR &nbsp; (b) HIPAA &nbsp; (c) The ADA &nbsp; (d) COPPA</span></li>
+                      <li class="mb-3" id="q32">Name one accessibility-related legal requirement outside the United States (regional, national, or international), and the region it applies to.</li>
+                      <li class="mb-3" id="q33">List three of the four categories of disability that web accessibility guidelines are designed to address.</li>
+                      <li class="mb-3" id="q34">A user with tremors struggles to click small, closely spaced buttons. Which category of disability does this fall under, and what's one fix?</li>
+                      <li class="mb-3" id="q35">What happened in the Domino's Pizza accessibility lawsuit, and why does it matter for every business, not just large companies?</li>
+                      <li class="mb-3" id="q36">Which WCAG compliance level is generally treated as the legal/practical target for most businesses?<br><span class="text-muted small">(a) Level A &nbsp; (b) Level AA &nbsp; (c) Level AAA &nbsp; (d) There is no standard level</span></li>
+                      <li class="mb-3" id="q37">Explain the difference between Fair Use and a Creative Commons license. Why do professional agencies avoid relying on Fair Use?</li>
+                      <li class="mb-3" id="q38">A site collects a home address, a phone number, and a birthday just to let someone sign up for a free newsletter. Which privacy principle does this violate, and why?</li>
+                      <li class="mb-3" id="q39">Explain why a small local business, like a single food truck, can still be legally required to follow the GDPR.</li>
+                      <li class="mb-3" id="q40">Describe the POUR principles and give one example of a website feature that satisfies each one.</li>
+                    </ol>
+
+                    <h4 class="fw-bold text-primary mt-5">Answer Key</h4>
+                    <div class="table-responsive">
+                      <table class="table table-bordered table-sm small">
+                        <thead class="table-light"><tr><th>ID</th><th>Answer</th></tr></thead>
+                        <tbody>
+                          <tr><td>q1</td><td>(b) The Curb Cut Effect</td></tr>
+                          <tr><td>q2</td><td>(c) Trademark</td></tr>
+                          <tr><td>q3</td><td>Copyright (creative works, e.g. code/photos), Trademark (brand identity, e.g. a logo), Patent (inventions/processes, e.g. a novel checkout system)</td></tr>
+                          <tr><td>q4</td><td>(b) Must credit the creator and cannot use it commercially</td></tr>
+                          <tr><td>q5</td><td>No — "ND" (NoDerivatives) forbids cropping or altering the work, regardless of attribution or commercial use</td></tr>
+                          <tr><td>q6</td><td>Creator's name, the specific license (with link), and the source URL</td></tr>
+                          <tr><td>q7</td><td>(c) All Rights Reserved — you can't use it</td></tr>
+                          <tr><td>q8</td><td>(b) A new invention or process</td></tr>
+                          <tr><td>q9</td><td>(c) The creator's lifetime plus 70 years</td></tr>
+                          <tr><td>q10</td><td>It's an invasion of privacy because PII (Personally Identifiable Information, like email addresses) was shared with a third party without the customer's consent</td></tr>
+                          <tr><td>q11</td><td>(c) Storing passwords as plain, readable text</td></tr>
+                          <tr><td>q12</td><td>Any two of: HTTPS everywhere, password hashing/salting, a clear privacy policy, data minimization</td></tr>
+                          <tr><td>q13</td><td>Publishing full names and home addresses without consent permanently expands those customers' digital footprints and could expose them to real-world harm (stalking, harassment) — a clear invasion of privacy</td></tr>
+                          <tr><td>q14</td><td>Digital footprint = the permanent trail of data left by online activity; consequence: employers or colleges may judge a candidate based on old posts or data they can't fully delete</td></tr>
+                          <tr><td>q15</td><td>(b) Postcard</td></tr>
+                          <tr><td>q16</td><td>HTTP sends data in plain, readable text that anyone intercepting it can read; HTTPS encrypts the data into unreadable code, so only the intended recipient can decode it</td></tr>
+                          <tr><td>q17</td><td>(b) The visitor must explicitly agree first</td></tr>
+                          <tr><td>q18</td><td>The right to demand that a company delete your personal data; granted by GDPR</td></tr>
+                          <tr><td>q19</td><td>(b) Opt-Out, focused on the sale of data</td></tr>
+                          <tr><td>q20</td><td>A clear, visible link/mechanism letting residents say "Do Not Sell My Personal Information"</td></tr>
+                          <tr><td>q21</td><td>Similar: both give users rights over their personal data. Different: GDPR is opt-in and applies EU-wide by default; CCPA is opt-out and specific to California, focused on the right to know/delete/opt out of sale</td></tr>
+                          <tr><td>q22</td><td>Sample answer: The U.S. historically prioritizes commercial speed and business interest, while the EU treats privacy as a fundamental right — reflected in opt-out vs. opt-in defaults (accept any well-reasoned answer)</td></tr>
+                          <tr><td>q23</td><td>(c) Has a verified identity and encrypts the connection</td></tr>
+                          <tr><td>q24</td><td>Any correct step from the 8-step handshake, e.g. "the browser verifies the server's certificate with the Certificate Authority to confirm the site's identity before any data is exchanged"</td></tr>
+                          <tr><td>q25</td><td>Misdirection dark pattern; redesign by making the enrollment checkbox unchecked by default and equally visible as the "Continue" option</td></tr>
+                          <tr><td>q26</td><td>It means actively citing sources, respecting user privacy, and refusing to build manipulative features — e.g., leaving an email opt-in box unchecked by default even if a client asks otherwise</td></tr>
+                          <tr><td>q27</td><td>(c) Both parties must keep each other's secrets</td></tr>
+                          <tr><td>q28</td><td>The developer can be sued for damages, face injunctive relief (a court order to stop), and be professionally "blackballed" from future industry work</td></tr>
+                          <tr><td>q29</td><td>It's the training dataset, not the algorithm's design — the AI learned biased patterns from historically male-dominated resumes and generalized them incorrectly</td></tr>
+                          <tr><td>q30</td><td>Algorithmic bias = unfair outcomes produced by software because of human bias baked into its data or design; it most commonly enters through the training dataset</td></tr>
+                          <tr><td>q31</td><td>(c) The ADA</td></tr>
+                          <tr><td>q32</td><td>Any correct example, e.g. the European Accessibility Act / EN 301 549 (EU), AODA (Canada/Ontario), or the Public Sector Bodies Accessibility Regulations (UK)</td></tr>
+                          <tr><td>q33</td><td>Any three of: Visual, Auditory, Motor/Physical, Cognitive/Learning</td></tr>
+                          <tr><td>q34</td><td>Motor/Physical; fix: make buttons larger with more spacing so precise clicks aren't required</td></tr>
+                          <tr><td>q35</td><td>Domino's was sued because a blind user couldn't order using a screen reader; the Supreme Court let the ruling against Domino's stand, proving accessibility is a legally enforceable civil right for any public-facing business, not just large or government sites</td></tr>
+                          <tr><td>q36</td><td>(b) Level AA</td></tr>
+                          <tr><td>q37</td><td>Fair Use is a limited legal defense weighed case-by-case with no guarantee; a CC license is explicit, creator-granted permission with clear terms. Agencies avoid Fair Use because it's a gray area that still risks a lawsuit</td></tr>
+                          <tr><td>q38</td><td>Data Minimization — collecting more personal data than a feature actually requires</td></tr>
+                          <tr><td>q39</td><td>GDPR applies based on the visitor's location/citizenship, not the business's size or location — extraterritorial jurisdiction means even one EU visitor's data is covered</td></tr>
+                          <tr><td>q40</td><td>Perceivable (e.g., alt text for images), Operable (e.g., full keyboard navigation), Understandable (e.g., clear, jargon-free navigation labels), Robust (e.g., semantic HTML that works with screen readers)</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <section id="sources" class="mt-5">
+                      <h4 class="fw-bold text-primary">Sources &amp; References</h4>
+                      <ol class="small text-muted ps-3 mb-0">
+                        <li class="mb-1">U.S. Copyright Office: <a href="https://www.copyright.gov/" class="text-decoration-none">copyright.gov</a></li>
+                        <li class="mb-1">USPTO: <a href="https://www.uspto.gov/" class="text-decoration-none">uspto.gov</a></li>
+                        <li class="mb-1">Creative Commons: <a href="https://creativecommons.org/" class="text-decoration-none">creativecommons.org</a></li>
+                        <li class="mb-1">GDPR Info: <a href="https://gdpr-info.eu/" class="text-decoration-none">gdpr-info.eu</a></li>
+                        <li class="mb-1">Nevada Revised Statutes 603A: <a href="https://www.leg.state.nv.us/nrs/NRS-603A.html#NRS603ASec300" class="text-decoration-none">leg.state.nv.us</a></li>
+                        <li class="mb-1">ADA.gov: <a href="https://www.ada.gov/" class="text-decoration-none">ada.gov</a></li>
+                        <li class="mb-1">W3C Web Accessibility Initiative: <a href="https://www.w3.org/WAI/" class="text-decoration-none">w3.org/WAI</a></li>
+                        <li class="mb-1">WebAIM Contrast Checker: <a href="https://webaim.org/resources/contrastchecker/" class="text-decoration-none">webaim.org</a></li>
+                        <li class="mb-1">Deceptive Design (Dark Patterns): <a href="https://www.deceptive.design/" class="text-decoration-none">deceptive.design</a></li>
+                        <li>Algorithmic Justice League: <a href="https://www.ajl.org/" class="text-decoration-none">ajl.org</a></li>
+                      </ol>
+                    </section>
+                  </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -1056,7 +1476,7 @@
                     Upload to Teacher Server
                 </button>
             </form>
-            
+
             <!-- Progress Bar -->
             <div id="uploadProgress" class="progress mt-3 d-none shadow-sm" style="height: 25px;">
                 <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%;">0%</div>
