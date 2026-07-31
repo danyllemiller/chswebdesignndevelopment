@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Practice Quiz: Chapter 13 - The "Cloud"</title>
+  <title>Practice Quiz: Chapter 11 - The "Cloud"</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
   <link rel="shortcut icon" href="/images/favicon/favicon.ico">
@@ -51,8 +51,8 @@
   </section>
 
   <script>
-    // Full Chapter 13 Question Pool (52 Questions from Summative)
-    const ch13Pool = [
+    // Full Chapter 11 Question Pool (55 Questions from Summative)
+    const ch11Pool = [
         { question: "What is the main purpose of a Version Control System (VCS)?", options: ["To host websites.", "To track changes and act as a time machine for code.", "To write CSS faster.", "To compress images."], correct: 1 },
         { question: "Which of the following best describes Git?", options: ["A social media network for coders.", "Local version control software installed on your computer.", "A cloud hosting provider.", "A JavaScript framework."], correct: 1 },
         { question: "How is GitHub different from Git?", options: ["There is no difference.", "Git is for Mac; GitHub is for Windows.", "GitHub is a cloud hosting service specifically for your Git repositories.", "GitHub is an older version of Git."], correct: 2 },
@@ -104,11 +104,17 @@
         { question: "What is the 'Main' or 'Master' branch?", options: ["The developer with the most experience.", "The default, definitive timeline of your project's code.", "A specific GitHub server.", "The CSS file."], correct: 1 },
         { question: "How does version control act as a 'time machine'?", options: ["It predicts future code.", "It allows you to instantly rewind your project back to a previous, working commit if you break something.", "It makes the website load faster.", "It changes the date on your computer."], correct: 1 },
         { question: "Why do companies use a Hybrid Cloud?", options: ["To save electricity.", "To keep sensitive data locked in a Private Cloud while running public websites on a cheaper Public Cloud.", "Because AWS is too expensive.", "To avoid using GitHub."], correct: 1 },
-        { question: "Which tool do you install on your local computer to track version history?", options: ["GitHub", "Git", "AWS", "Netlify"], correct: 1 }
+        { question: "Which tool do you install on your local computer to track version history?", options: ["GitHub", "Git", "AWS", "Netlify"], correct: 1 },
+        { question: "What is the industry-standard '3-2-1 Rule' for data backups?", options: ["3 backups a day, 2 admins, 1 password", "3 copies of data, 2 media types, 1 copy off-site", "3 servers, 2 data centers, 1 provider", "3 minutes to restore, 2 clicks, 1 button"], correct: 1 },
+        { question: "Why isn't a Git repository a complete backup plan for a client's website?", options: ["Git only backs up images", "Git doesn't track any files at all", "Git tracks code, not the live database or uploaded media", "Git requires a paid subscription"], correct: 2 },
+        { question: "A host's guaranteed availability percentage (e.g., 99.9%) is called its:", options: ["Bandwidth", "Uptime SLA", "Elasticity Score", "Deployment Model"], correct: 1 },
+        { question: "Which server OS is free, open-source, and powers the majority of the web?", options: ["Windows Server", "macOS Server", "Linux", "MS-DOS"], correct: 2 },
+        { question: "Which of these is a recurring web server maintenance routine?", options: ["Renaming the domain weekly", "Applying security patches and renewing SSL certificates", "Rewriting the entire codebase monthly", "Changing hosting providers every week"], correct: 1 },
+        { question: "What is the risk of never testing a data backup restore?", options: ["None, backups always work", "The backup could be broken and you won't know until you need it", "Backups expire after one test", "Testing a restore deletes the backup"], correct: 1 }
     ];
 
     // Initialize the quiz: Pick 10 randomized questions
-    window.onload = () => initQuiz(ch13Pool);
+    window.onload = () => initQuiz(ch11Pool);
   </script>
 
 <div id="footer-nav"></div>

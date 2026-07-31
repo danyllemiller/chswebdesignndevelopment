@@ -206,7 +206,7 @@
     <!-- SECTION 2: GIT VS GITHUB -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">Clarifying the Confusion: Git vs. GitHub</h2>
+        <h2 class="section-title mt-0" id="local-vs-remote">Clarifying the Confusion: Git vs. GitHub</h2>
         <p>One of the biggest mistakes junior agency hires make is thinking "Git" and "GitHub" are the same thing. They are completely different tools that work together as a pair.</p>
         
         <ul class="small mb-5 bg-light p-4 rounded shadow-sm border">
@@ -221,7 +221,7 @@
             </li>
         </ul>
 
-        <h5 class="fw-bold mt-4 text-primary">Mastering the Workflow: Commits, Pushes, and Branches</h5>
+        <h5 class="fw-bold mt-4 text-primary" id="version-control-role">Mastering the Workflow: Commits, Pushes, and Branches</h5>
         <p>When working with a VCS, agency developers follow a specific ritual to keep client code safe:</p>
         <ul class="small mb-4">
             <li class="mb-3"><strong>Commit Message:</strong> Saving a permanent snapshot. A Commit Message is incredibly important because it <strong>documents exactly what was changed in that specific snapshot for the team.</strong></li>
@@ -259,7 +259,6 @@
         <div class="card border-dark shadow-sm mt-4 mb-4 text-start">
           <div class="card-header bg-dark text-white fw-bold d-flex align-items-center gap-2">
             Git Lifecycle Cheat Sheet — All 6 Core Commands
-            <span class="badge bg-primary ms-1">NV 5.6.3</span>
           </div>
           <div class="card-body p-0">
             <table class="table table-bordered table-sm small mb-0 text-start">
@@ -303,7 +302,6 @@
         <!-- MERGE CONFLICTS SECTION -->
         <h3 class="section-title mt-5 text-danger d-flex align-items-center gap-2">
           Merge Conflicts: When Two Developers Edit the Same Line
-          <span class="badge bg-primary ms-1" style="font-size:.65rem;">WRS 1.2.3</span>
         </h3>
         <p>A <strong>Merge Conflict</strong> occurs when Git cannot automatically combine two branches because both branches changed the <em>exact same line</em> of the same file. Git stops, marks the conflict in the file, and waits for a human to decide which version to keep.</p>
 
@@ -395,14 +393,38 @@
         <h2 class="section-title mt-0">The Client Hosting Problem: What Is "The Cloud?"</h2>
         <p>You can't host a modern client's website on your school laptop. Why? Because your laptop is slow, it goes offline the moment you close the lid, and it would <strong>crash instantly</strong> if 10,000 users visited at once. To serve a global audience, the agency must host the site on a machine that is insanely fast, connected to the fastest internet backbones on Earth, and <strong>NEVER</strong> turns off.</p>
         
-        <h5 class="fw-bold mt-4 text-primary">The Solution: Cloud Computing</h5>
+        <h5 class="fw-bold mt-4 text-primary" id="define-cloud">The Solution: Cloud Computing</h5>
         <p>There is no magic floating "Cloud." It's just someone else's computer. <strong>Cloud computing is often called a 'Nickname' because it actually refers to physical computers inside highly secured buildings called Data Centers.</strong> The agency rents computer power from these data centers over the internet. You pay for these resources using a <strong>Pay-As-You-Go</strong> model (like a water or power utility bill), paying by the minute or second based exactly on how much power you use.</p>
         
         <p>These massive Data Centers are filled with thousands of specialized, extremely powerful computers called <strong>Servers</strong>. Why do Data Centers need massive industrial cooling systems? <strong>Because thousands of servers generate extreme heat that would melt them.</strong> They also have giant <strong>Backup Generators</strong> to ensure servers stay powered and websites stay online even during city-wide power outages.</p>
         
         <p>Each server runs an <strong>Operating System (OS)</strong> like Linux or Windows. An OS on a server is responsible for <strong>managing the physical hardware and resources</strong> for the applications running on it.</p>
 
-        <h5 class="fw-bold mt-5 text-primary">The Big Three: Meet the Cloud Giants</h5>
+        <h5 class="fw-bold mt-4 text-primary" id="server-os">Which OS Runs the Web? Server Operating System Options</h5>
+        <p>Unlike your personal laptop, a server's OS almost never has a desktop or icons — you control it entirely through the terminal (CLI) you just learned in Section 3. Here are the options an agency actually chooses between:</p>
+        <table class="table table-bordered small bg-white shadow-sm mt-3 mb-4 text-start">
+          <thead class="bg-light"><tr><th>Server OS</th><th>Cost</th><th>Best For</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="fw-bold">Linux (Ubuntu Server, AlmaLinux, Debian)</td>
+              <td>Free / Open-Source</td>
+              <td>The overwhelming majority of the web. Powers most of AWS/Azure/GCP's cheapest instances. Runs the popular <strong>LAMP/LEMP stack</strong> (Linux, Apache or Nginx, MySQL, PHP).</td>
+            </tr>
+            <tr>
+              <td class="fw-bold">Windows Server</td>
+              <td>Paid License</td>
+              <td>Enterprise clients already locked into Microsoft tools (.NET applications, Active Directory, SQL Server integration).</td>
+            </tr>
+            <tr>
+              <td class="fw-bold">macOS Server</td>
+              <td>Paid License</td>
+              <td>Rare for public web hosting; mostly used for Apple-specific development and testing environments.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="small text-muted border-start border-3 border-primary px-3 mb-0">Why does Linux dominate web hosting? It's free (no per-server license fee), extremely stable under heavy traffic, and has a massive open-source community actively patching security holes — exactly what an agency needs when hosting dozens of client sites cost-effectively.</p>
+
+        <h5 class="fw-bold mt-5 text-primary" id="compare-cloud-platforms">The Big Three: Meet the Cloud Giants</h5>
         <p>Three gigantic companies control the vast majority of the world's cloud computing infrastructure. When companies like Netflix, Spotify, or Fortnite need servers, they rent them from these Big Three.</p>
         
         <table class="table table-bordered small bg-white shadow-sm mt-3 mb-0 text-start">
@@ -470,6 +492,52 @@
       </div>
     </div>
 
+    <!-- SECTION 4B: CHOOSING A HOST & MAINTENANCE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0" id="choosing-a-host">Server Ops 101: Choosing a Host &amp; Maintenance Routines</h2>
+        <p><strong>Why it matters:</strong> Picking a cloud provider (AWS vs. Azure vs. GCP) is a strategic decision. But once you've picked one, you still have to make a very concrete choice for a client: <em>which specific hosting plan</em>, and then keep that server healthy for years after launch. A cheap host that goes down during a client's product launch is an agency failure, not just a technical hiccup.</p>
+        <p><strong>What it is:</strong> When recommending a web host to a client, an agency developer evaluates several technical requirements side by side:</p>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>Uptime SLA:</strong> The provider's guaranteed availability, usually expressed as "99.9%" or "99.99%" uptime. The difference matters — 99.9% still allows ~8.7 hours of downtime a year; 99.99% allows only ~52 minutes.</li>
+            <li class="mb-2"><strong>Bandwidth &amp; Storage Limits:</strong> How much traffic and data the plan allows before extra charges or throttling kick in.</li>
+            <li class="mb-2"><strong>Support Response:</strong> 24/7 live chat with real engineers vs. a ticket queue with a 48-hour reply window — critical when a client's site goes down at 2 AM.</li>
+            <li class="mb-2"><strong>Security Features:</strong> Is SSL included for free? Is there a firewall or DDoS protection built in, or is that an extra purchase?</li>
+            <li class="mb-2"><strong>Room to Scale:</strong> Can this plan grow with the client, or will they need a painful migration the moment they get popular?</li>
+            <li class="mb-0"><strong>Price vs. Budget:</strong> Matching the hosting tier to what the client can actually afford long-term, not just the launch-month price.</li>
+        </ul>
+        <p>Once a site is live, hosting isn't "set it and forget it." Professional agencies run recurring <strong>maintenance routines</strong>:</p>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>Security Patching:</strong> Applying OS and software updates promptly — most real-world server breaches exploit known, already-patched vulnerabilities that nobody got around to installing.</li>
+            <li class="mb-2"><strong>Uptime &amp; Resource Monitoring:</strong> Watching CPU, RAM, and disk usage so you catch a slow server before it crashes, not after.</li>
+            <li class="mb-2"><strong>Log Review:</strong> Periodically checking server logs for errors or suspicious repeated login attempts.</li>
+            <li class="mb-2"><strong>SSL Certificate Renewal:</strong> Certificates expire (often yearly, or every 90 days with free providers like Let's Encrypt) — an expired certificate breaks HTTPS and scares away every visitor with a browser warning.</li>
+            <li class="mb-0"><strong>Software &amp; Plugin Updates:</strong> Keeping the CMS, database, and any installed plugins current to avoid known security holes.</li>
+        </ul>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> Choosing the cheapest host purely on sticker price, without checking the uptime SLA or what happens when something breaks. A $2/month host with no real support can cost a client far more in lost sales during an outage than a slightly pricier, reliable host ever would.
+        </div>
+        <div class="card border-secondary shadow-sm mb-0">
+          <div class="card-header bg-light fw-bold">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">A client wants the absolute cheapest hosting plan available. What technical requirement should you check before agreeing, and why?</p>
+            <details>
+              <summary class="fw-bold text-primary" style="cursor: pointer;">Show Answer</summary>
+              <p class="mb-0 mt-2">Check the uptime SLA and support response time. A rock-bottom price often comes with weaker guarantees — if the host goes down often or takes days to respond to a support ticket, the client's business pays the real cost in lost visitors and sales.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="card roadmap-card border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info border-bottom">E.O.P. Exam Tip:</div>
+          <div class="card-body small">
+              <p class="mb-0">"Uptime SLA," "bandwidth," "SSL renewal," and "security patching" are exactly the kind of terms that show up when comparing web hosts — know what each one actually controls.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- SECTION 5: SERVICE MODELS & DEPLOYMENT -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
@@ -508,10 +576,8 @@
         </ul>
 
         <!-- PROFESSIONAL README SECTION -->
-        <h3 class="section-title mt-5 text-primary d-flex align-items-center gap-2">
+        <h3 class="section-title mt-5 text-primary d-flex align-items-center gap-2" id="readme-practices">
           The Professional README: Your Project's Front Door
-          <span class="badge bg-primary ms-1" style="font-size:.65rem;">WRS 1.1.1</span>
-          <span class="badge bg-primary ms-1" style="font-size:.65rem;">WRS 1.1.5</span>
         </h3>
         <p>A <strong>README.md</strong> is the first file any developer, client, or recruiter reads when visiting a repository. Written in <strong>Markdown</strong> (a lightweight formatting syntax), a professional README communicates project purpose, setup, and usage without opening a single code file.</p>
 
@@ -793,6 +859,42 @@ MIT License — Copyright (c) 2026 CHS Web Design Agency</code></pre>
       </div>
     </div>
 
+    <!-- SECTION 5B: DATA BACKUP PROCEDURES -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0" id="backup-plan">Don't Lose It All: Data Backup Procedures</h2>
+        <p><strong>Why it matters:</strong> Early in this chapter you learned that Git is a "time machine" for your code. Here's the trap: <strong>Git tracks your code files — it does NOT back up a client's live database, uploaded images, or server configuration.</strong> A "git commit" is not a backup plan. If a client's database gets corrupted or a server is hacked, your Git history won't restore their customer orders or blog posts.</p>
+        <p><strong>What it is:</strong> A <strong>data backup procedures plan</strong> is a written policy defining exactly what gets backed up, how often, where the copies live, and how to restore them. The industry-standard guideline is the <strong>3-2-1 Rule</strong>:</p>
+        <ul class="small mb-4 bg-light p-3 rounded border shadow-sm">
+            <li class="mb-2"><strong>3</strong> total copies of your data (the original plus two backups).</li>
+            <li class="mb-2"><strong>2</strong> different types of storage media (e.g., the live server's disk AND a separate cloud storage bucket).</li>
+            <li class="mb-0"><strong>1</strong> copy stored off-site — somewhere physically or geographically separate, so a single disaster (fire, hardware failure, ransomware) can't wipe out every copy at once.</li>
+        </ul>
+        <p>For a client site, a backup plan typically specifies: automated <strong>daily</strong> database backups, a <strong>weekly</strong> full-site snapshot (files + database), and a defined <strong>retention window</strong> (e.g., keep the last 30 days of backups before old ones roll off).</p>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> Setting up automated backups and never actually testing a restore. A backup file that silently fails to save correctly — or that you've never practiced restoring from — is unverified, and you won't find out it's broken until the exact moment you desperately need it.
+        </div>
+        <div class="card border-secondary shadow-sm mb-0">
+          <div class="card-header bg-light fw-bold">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">Why isn't a Git repository, by itself, a complete backup plan for a client's website?</p>
+            <details>
+              <summary class="fw-bold text-primary" style="cursor: pointer;">Show Answer</summary>
+              <p class="mb-0 mt-2">Git only tracks the code files you've committed. It doesn't capture the live database (orders, user accounts, blog posts), uploaded media, or server configuration — all of which need their own backup procedure, separate from version control.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+          <div class="d-flex align-items-center mb-2">
+            <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+          </div>
+          <p class="mb-0 small text-dark">Why does the "1 off-site copy" part of the 3-2-1 Rule matter even if the other 2 copies are on reliable cloud servers?</p>
+        </div>
+      </div>
+    </div>
+
     <!-- MILESTONE -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-12">
@@ -855,11 +957,11 @@ MIT License — Copyright (c) 2026 CHS Web Design Agency</code></pre>
                     <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
                     <select id="uploadAssignment" class="form-select border-success" required>
                         <option value="" disabled selected>Select an assignment...</option>
-                        <option value="ch11_lab1">Lab 1: Terminal Lab (25 pts)</option>
-                        <option value="ch11_lab2">Lab 2: Git Snapshot Lab (25 pts)</option>
-                        <option value="ch11_lab3">Lab 3: The Cloud Push (25 pts)</option>
-                        <option value="ch11_lab4">Lab 4: Cloud Architecture Lab (25 pts)</option>
-                        <option value="ch11_milestone">Milestone: Project 4 Open Source Repo (100 pts)</option>
+                        <option value="ch11_lab1">Lab 1: Agency File Architecture Setup (25 pts)</option>
+                        <option value="ch11_lab2">Lab 2: Local Agency Backup (25 pts)</option>
+                        <option value="ch11_lab3">Lab 3: Syncing with the Agency Hub (25 pts)</option>
+                        <option value="ch11_lab4">Lab 4: Client Infrastructure Proposal (25 pts)</option>
+                        <option value="ch11_milestone">Milestone: Project 4 The Agency Codebase Sync (100 pts)</option>
                     </select>
                 </div>
 
