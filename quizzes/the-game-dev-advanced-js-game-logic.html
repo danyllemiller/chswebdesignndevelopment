@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Practice Quiz: Chapter 12 - The "Game Dev"</title>
+  <title>Practice Quiz: Chapter 10 - The "Game Dev"</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
   <link rel="shortcut icon" href="/images/favicon/favicon.ico">
@@ -52,8 +52,8 @@
   </section>
 
   <script>
-    // Chapter 12 Comprehensive Pool (52 Questions from Summative)
-    const ch12Pool = [
+    // Chapter 10 Comprehensive Pool (54 Questions from Summative)
+    const ch10Pool = [
         { question: "Which method tells the browser to perform an animation and requests a call to a function before the next repaint?", options: ["requestAnimationFrame()", "setInterval()", "setTimeout()", "animate()"], correct: 0 },
         { question: "When setting up a game loop, in what order should functions generally execute?", options: ["Clear canvas -> Update logic -> Draw objects", "Update logic -> Draw objects -> Clear", "Draw objects -> Clear -> Update", "Clear -> Draw -> Update"], correct: 0 },
         { question: "How do you stop a game loop triggered by requestAnimationFrame?", options: ["cancelAnimationFrame()", "stopAnimation()", "pause()", "break"], correct: 0 },
@@ -105,11 +105,13 @@
         { question: "What is 'Z-Index' equivalent in Canvas?", options: ["Drawing order (later items on top)", "CSS property", "3D depth", "ctx.setZIndex()"], correct: 0 },
         { question: "Which class property allows an instance to 'know' its health?", options: ["this.health", "Health variable", "CSS class", "Array index"], correct: 0 },
         { question: "How do you make an object 'bounce' off the bottom?", options: ["velocity.y *= -1", "velocity.y = 0", "y = 0", "delete object"], correct: 0 },
-        { question: "Primary purpose of 'Particle Systems'?", options: ["Effects like fire or explosions", "Inventory", "Database", "Image compression"], correct: 0 }
+        { question: "Primary purpose of 'Particle Systems'?", options: ["Effects like fire or explosions", "Inventory", "Database", "Image compression"], correct: 0 },
+        { question: "What does a JS linter (like JSHint/ESLint) do that the browser Console does not?", options: ["Flags likely bugs via static analysis, without running the code", "Deletes unused variables automatically", "Plays your game for you", "Compresses your image assets"], correct: 0 },
+        { question: "A finished game project like Cosmic Clicker is realistic material for which kind of event?", options: ["A CTSO web/app design competition", "A print portfolio only", "A server migration", "A CSS validation exam"], correct: 0 }
     ];
 
-    // Initialize the quiz: Pick 10 randomized questions from the pool of 52
-    window.onload = () => initQuiz(ch12Pool);
+    // Initialize the quiz: Pick 10 randomized questions from the pool of 54
+    window.onload = () => initQuiz(ch10Pool);
   </script>
   
 <div id="footer-nav"></div>

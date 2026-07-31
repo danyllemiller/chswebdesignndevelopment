@@ -122,7 +122,7 @@
     <!-- SECTION 2: THE CANVAS API & COORDINATES -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">The Canvas API &amp; Coordinates</h2>
+        <h2 class="section-title mt-0" id="canvas-interactivity">The Canvas API &amp; Coordinates</h2>
         <p>In standard web design, we use HTML elements like <code>&lt;div&gt;</code> and CSS rules to build grids. But if you want to build a promotional game with 500 asteroids flying across the screen, creating 500 HTML <code>div</code> elements will cause the user's browser to crash. The DOM is simply too heavy for that much movement.</p>
         
         <p>Instead, we use the HTML5 <strong><code>&lt;canvas&gt;</code></strong> tag. Which HTML element is designed for high-performance drawing via scripting? <strong><code>&lt;canvas&gt;</code></strong>. The canvas is literally just a blank digital painting frame. We use JavaScript to grab a set of "digital paintbrushes" and manually paint our graphics directly onto it.</p>
@@ -157,7 +157,6 @@
         <div class="card border-secondary shadow-sm mt-4 mb-5 text-start">
           <div class="card-header bg-secondary text-white fw-bold d-flex align-items-center gap-2">
             beginPath() + fillStyle + arc() — Used Together
-            <span class="badge bg-primary ms-1">NV 5.3.4</span>
           </div>
           <div class="card-body p-3">
             <p class="small mb-2">You must always use <code>beginPath()</code> <em>before</em> drawing a shape, and set <code>fillStyle</code> <em>before</em> calling <code>fill()</code>. Without <code>beginPath()</code>, the canvas re-draws old paths on top of new ones.</p>
@@ -527,7 +526,6 @@ if (rect1.x < rect2.x + rect2.width &&
         
         <h5 class="fw-bold mt-4 text-primary d-flex align-items-center gap-2">
           State Management
-          <span class="badge bg-primary ms-1">NV 7.1.3</span>
         </h5>
         <p>What is the purpose of a 'Game State' variable (like <code>gameState = 'menu'</code>)? <strong>To control which screens or logic blocks are active.</strong> A Game State variable is used to control which logic runs at different times.</p>
         <p>When building a Start Screen, how do you prevent the main game loop from running until a button is clicked? <strong>Wrap requestAnimationFrame inside a conditional state check</strong> (e.g. <code>if(gameState === 'playing') requestAnimationFrame(loop);</code>).</p>
@@ -584,7 +582,7 @@ document.addEventListener("keydown", function(e) {
         <h5 class="fw-bold mt-4 text-primary">Advanced Graphics</h5>
         <ul class="small mb-4">
             <li class="mb-2">
-              <strong>Sprite Sheets:</strong> <span class="badge bg-primary ms-1" style="font-size:.6rem;">NV 5.3.4</span> What is 'Sprite Sheet' animation? <strong>One large image file containing multiple animation frames arranged in a grid.</strong> This is much faster to load than 20 separate image files! You use the 9-parameter version of <code>drawImage()</code> to "cut out" the correct frame:
+              <strong>Sprite Sheets:</strong> What is 'Sprite Sheet' animation? <strong>One large image file containing multiple animation frames arranged in a grid.</strong> This is much faster to load than 20 separate image files! You use the 9-parameter version of <code>drawImage()</code> to "cut out" the correct frame:
               <pre class="p-2 rounded mt-2 mb-1 no-copy"><code>// drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
 // s = Source (where to cut FROM the sprite sheet)
 // d = Destination (where to draw ON the canvas)
@@ -607,6 +605,68 @@ ctx.drawImage(
         </ul>
         
         <p class="small text-muted mt-3">Need to center something exactly? What is the result of <code>canvas.width / 2</code>? <strong>The horizontal center of the canvas.</strong></p>
+      </div>
+    </div>
+
+    <!-- SECTION 6B: VALIDATING JS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0" id="js-validation">Validate Your Code: Linting Tools</h2>
+        <p><strong>Why it matters:</strong> A game with 500 lines of physics and collision math is exactly the kind of codebase where a single typo — a stray comma, an <code>=</code> instead of <code>===</code>, a variable you meant to declare but forgot — can silently produce the wrong behavior instead of an obvious crash. The browser console only tells you about errors that actually stop execution; it says nothing about the bugs that just quietly run wrong.</p>
+        <p><strong>What it is:</strong> A <strong>linter</strong> is an online or editor-integrated validation tool that reads your JavaScript <em>without running it</em> (this is called "static analysis") and flags suspicious patterns before they ever reach a player's browser. The two industry-standard tools are <strong>JSHint</strong> (jshint.com — paste code, get instant feedback) and <strong>ESLint</strong> (the professional standard, usually installed as a VS Code extension that underlines problems in real time as you type).</p>
+        <p><strong>How it works:</strong> Before turning in a milestone, paste your <code>script.js</code> into jshint.com. It will flag things like: undeclared variables (a likely typo), unreachable code after a <code>return</code>, and loose equality (<code>==</code>) where you probably meant strict equality (<code>===</code>) — exactly the kind of collision-detection bug that's brutal to track down by playtesting alone.</p>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> "No red errors in the Console" does NOT mean your code is correct — it only means nothing has crashed yet. A linter catches a whole category of bugs (typos, accidental global variables, loose equality) that run just fine but produce the wrong result, like a hitbox that "works" 90% of the time because of a subtle logic slip.
+        </div>
+        <div class="card border-secondary shadow-sm mb-0">
+          <div class="card-header bg-light fw-bold">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">Why can a game run with zero errors in the Console and still have serious bugs?</p>
+            <details>
+              <summary class="fw-bold text-primary" style="cursor: pointer;">Show Answer</summary>
+              <p class="mb-0 mt-2">The Console only reports errors that stop execution (crashes). Logic mistakes — like using <code>==</code> instead of <code>===</code>, or a collision check with the wrong variable — run without crashing but produce the wrong result. A linter performs static analysis to catch these before you even hit play.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="card roadmap-card border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info border-bottom">E.O.P. Exam Tip:</div>
+          <div class="card-body small">
+              <p class="mb-0">Don't confuse the browser <strong>Console</strong> (runtime errors, Chapter 9) with a <strong>Linter</strong> (static analysis, before runtime). Professionals use both.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 6C: CTSO COMPETITIONS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0" id="ctso-competitions">Beyond the Classroom: CTSO Competitions &amp; Events</h2>
+        <p><strong>Why it matters:</strong> The game you're building this chapter isn't just a grade — it's exactly the kind of polished, playable project that Career &amp; Technical Student Organizations (CTSOs) like <strong>SkillsUSA</strong> look for in their web/app design and promotional media competitive events. Participating in these events is one of the fastest ways to build a real portfolio, meet industry professionals, and get recognized beyond your own classroom.</p>
+        <p><strong>What it is:</strong> CTSO competitions run in tiers — local/regional, then state, then national — with each level qualifying top performers for the next. Categories relevant to this course include web design and interactive/promotional media, where a project like "Cosmic Clicker" (a working game loop, clean OOP code, no crashes, and a short presentation explaining your technical choices) is realistic competition-ready material.</p>
+        <p><strong>How it works:</strong> Your instructor can connect you with Carson High's CTSO chapter. Competitors typically prepare a project in advance, then present and defend their technical decisions to judges — which is exactly why commenting your code and being able to explain <em>why</em> you used a Class instead of separate variables (Section 4) is a real, judged skill, not just a classroom habit.</p>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> Waiting until senior year to get involved. Most students who succeed at state and national CTSO events started competing at the regional level early, building experience and a portfolio over multiple years — not trying to assemble one at the last minute.
+        </div>
+        <div class="card border-secondary shadow-sm mb-0">
+          <div class="card-header bg-light fw-bold">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">Why is a project like "Cosmic Clicker" realistic material for a CTSO web/app design competition, beyond just satisfying this chapter's rubric?</p>
+            <details>
+              <summary class="fw-bold text-primary" style="cursor: pointer;">Show Answer</summary>
+              <p class="mb-0 mt-2">It demonstrates real, in-demand technical skills (Canvas API, OOP, collision physics, state management) in a finished, playable form — the same qualities judges look for — and gives you a concrete project to present and defend, not just describe.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="bg-light p-3 rounded border shadow-sm mb-4">
+          <div class="d-flex align-items-center mb-2">
+            <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
+          </div>
+          <p class="mb-0 small text-dark">What would you want a competition judge to notice first about a game you built — the gameplay, the code, or your presentation?</p>
+        </div>
       </div>
     </div>
 

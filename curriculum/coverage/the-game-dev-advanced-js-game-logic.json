@@ -1,0 +1,48 @@
+{
+  "chapter": 10,
+  "title": "The Game Developer (Advanced JS & Game Logic)",
+  "page": "year2/the-game-dev-advanced-js-game-logic.html",
+  "assessment_note": "Assessment for this chapter lives in external worksheets/tests, not an on-page question bank. assessed_by is descriptive only.",
+  "indicators": {
+    "1.2.4": {
+      "taught_in": "Beyond the Classroom: CTSO Competitions & Events",
+      "anchor": "#ctso-competitions",
+      "practiced_in": "Let's Discuss prompt on what a competition judge would notice about a student game",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "1.2.5": {
+      "taught_in": "Beyond the Classroom: CTSO Competitions & Events",
+      "anchor": "#ctso-competitions",
+      "practiced_in": "Discussion of regional/state/national CTSO competition tiers",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "1.4.5": {
+      "taught_in": "Beyond the Classroom: CTSO Competitions & Events",
+      "anchor": "#ctso-competitions",
+      "practiced_in": "Discussion of presenting and defending a technical project (like Cosmic Clicker) to competition judges",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.3.4": {
+      "taught_in": "The Canvas API & Coordinates / Animation & The Game Loop / OOP & Classes / Physics, Collisions, & User Input / Advanced Game Logic & Graphics",
+      "anchor": "#canvas-interactivity",
+      "practiced_in": "Lab 1: Canvas Coordinate Art Lab, Lab 2: The Bouncing Box Lab, Lab 3: The Entity Factory, Lab 4: The Hitbox Detector, Milestone: Game Assembly & QA",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.3.6": {
+      "taught_in": "Validate Your Code: Linting Tools",
+      "anchor": "#js-validation",
+      "practiced_in": "Quick Check on why zero Console errors doesn't guarantee bug-free code",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    }
+  },
+  "revisits": {
+    "7.1.3": "Develop an app using a modern programming language and/or platform — practiced throughout via the Canvas/JS game build, not formally re-taught as its own concept this chapter."
+  },
+  "wrs": {
+    "1.2.8": {
+      "taught_in": "Milestone: Project 3 Game Assembly & QA (QA Check step)",
+      "anchor": "#js-validation",
+      "student_action": "Students organize a multi-lab build (Player, Enemies, Input, Collision) into one finished game and run a peer QA playtest — organizing and implementing a productive plan of work"
+    }
+  }
+}
