@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Chapter 11 Practice Quiz</title>
+  <title>Chapter 9 Practice Quiz</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
   <link rel="shortcut icon" href="/images/favicon/favicon.ico">
@@ -34,7 +34,7 @@
     <div class="row">
       <div class="col-lg-9">
         <hgroup class="mb-5 border-bottom pb-3">
-          <h1 class="display-5 fw-bold text-primary">Chapter 11 Skill Practice</h1>
+          <h1 class="display-5 fw-bold text-primary">Chapter 9 Skill Practice</h1>
           <p class="lead text-muted">Randomized Practice: 10 Questions from a pool of 30+</p>
         </hgroup>
 
@@ -49,10 +49,10 @@
         <!-- Quick Navigation -->
         <div class="row text-center g-3 mt-5 no-print border-top pt-4">
             <div class="col-6 col-md-3">
-                <a href="/year1/the-brains-intro-to-javascript.html" class="btn btn-outline-primary w-100 small py-2 rounded-pill text-decoration-none">Back to Lesson</a>
+                <a href="/year2/the-brains-intro-to-javascript.html" class="btn btn-outline-primary w-100 small py-2 rounded-pill text-decoration-none">Back to Lesson</a>
             </div>
             <div class="col-6 col-md-3">
-                <a href="/techTalkA-Zguide/the-brains-intro-to-javascript.html" class="btn btn-outline-primary w-100 small py-2 rounded-pill text-decoration-none">Tech Talk A-Z</a>
+                <a href="/techTalkA-ZGuide/the-brains-intro-to-javascript.html" class="btn btn-outline-primary w-100 small py-2 rounded-pill text-decoration-none">Tech Talk A-Z</a>
             </div>
             <div class="col-6 col-md-3">
                 <a href="/toLongDidntRead/the-brains-intro-to-javascript.html" class="btn btn-outline-primary w-100 small py-2 rounded-pill text-decoration-none">TL;DR Version</a>
@@ -67,8 +67,8 @@
   </section>
 
   <script>
-    // Chapter 11 Question Pool (30+ questions mapped to required exam concepts)
-    const ch11Pool = [
+    // Chapter 9 Question Pool (30+ questions mapped to required exam concepts)
+    const ch9Pool = [
         { question: "Which symbol is used for 'Strict Equality' (checking both value and type)?", options: ["==", "!==", "===", "="], correct: 2 },
         { question: "What is the mathematical result of 10 % 3?", options: ["10", "3", "0", "1"], correct: 3 },
         { question: "What is the result of the logic statement: (true && false)?", options: ["True", "False", "Null", "Undefined"], correct: 1 },
@@ -100,11 +100,13 @@
         { question: "What are 'Parameters' in a function?", options: ["The output.", "Variables inside parentheses acting as 'ingredients'.", "CSS styles.", "The trigger event."], correct: 1 },
         { question: "What is 'Scope' in programming?", options: ["The window size.", "Rules defining where variables can be used.", "Code speed.", "Line count."], correct: 1 },
         { question: "A variable declared inside a function using 'let' is:", options: ["Global.", "Local (accessible only inside that function).", "Saved to a database.", "A constant."], correct: 1 },
-        { question: "What does the += operator do?", options: ["Assigns a new value.", "Subtracts.", "Adds a value to the existing value.", "Multiplies."], correct: 2 }
+        { question: "What does the += operator do?", options: ["Assigns a new value.", "Subtracts.", "Adds a value to the existing value.", "Multiplies."], correct: 2 },
+        { question: "In a classic image rollover, which event swaps the image back to normal when the mouse leaves?", options: ["'mouseover'", "'mouseout'", "'click'", "'submit'"], correct: 1 },
+        { question: "Which property do you change on an <img> element to swap the picture it displays?", options: [".src", ".alt", ".value", ".href"], correct: 0 }
     ];
 
     // Initialize the quiz: Picks 10 random questions from the 32+ pool
-    window.onload = () => initQuiz(ch11Pool);
+    window.onload = () => initQuiz(ch9Pool);
   </script>
 
 <div id="footer-nav"></div>

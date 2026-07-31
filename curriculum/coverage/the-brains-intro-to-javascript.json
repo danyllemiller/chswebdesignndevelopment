@@ -1,0 +1,34 @@
+{
+  "chapter": 9,
+  "title": "The “Brains” (Intro to JavaScript)",
+  "page": "year2/the-brains-intro-to-javascript.html",
+  "assessment_note": "Assessment for this chapter lives in external worksheets/tests, not an on-page question bank. assessed_by is descriptive only.",
+  "indicators": {
+    "5.3.1": {
+      "taught_in": "Web Technologies Overview (within The Two Brains: Client-Side vs. Server-Side)",
+      "anchor": "#web-scripting-tech",
+      "practiced_in": "Discussion of HTML/CSS/JS/jQuery/PHP/Python/Ruby/Node.js and where each runs",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.3.2": {
+      "taught_in": "Walkthrough: The Classic Image Rollover / Walkthrough: Form Validation",
+      "anchor": "#image-rollover",
+      "practiced_in": "Lab 4: The Interactive Wire Lab, Milestone: Profile App Assembly",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.3.3": {
+      "taught_in": "The Two Brains: Client-Side vs. Server-Side",
+      "anchor": "#client-vs-server",
+      "practiced_in": "Discussion contrasting instant client-side interactivity vs. server-side logins/database work",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.3.5": {
+      "taught_in": "Static vs. Dynamic: The \"Poster\" vs. The \"Robot\"",
+      "anchor": "#static-vs-dynamic",
+      "practiced_in": "Discussion of static poster sites vs. dynamic reactive sites (PixelPaws filtering example)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    }
+  },
+  "revisits": {},
+  "wrs": {}
+}
