@@ -1,0 +1,40 @@
+{
+  "chapter": 12,
+  "title": "The “Manager” (CMS Platforms)",
+  "page": "year2/the-manager-cms-platforms.html",
+  "assessment_note": "Assessment for this chapter lives in external worksheets/tests, not an on-page question bank. assessed_by is descriptive only.",
+  "indicators": {
+    "2.5.2": {
+      "taught_in": "Integrating a Shopping Cart: WooCommerce Step-by-Step",
+      "anchor": "#shopping-cart-integration",
+      "practiced_in": "Discussion of installing WooCommerce, adding products, and connecting a payment gateway",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.5.1": {
+      "taught_in": "The Matrix: Pitching Platforms to Clients (3 Tiers of Web Creation)",
+      "anchor": "#identify-cms",
+      "practiced_in": "Lab 1: The Platform Pitch Matrix",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.5.2": {
+      "taught_in": "Beyond Blogs: CMS Trends & Learning Management Systems",
+      "anchor": "#cms-trends",
+      "practiced_in": "Quick Check on why Canvas is a specialized CMS",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.5.3": {
+      "taught_in": "Where This All Came From: WYSIWYG Software",
+      "anchor": "#wysiwyg-software",
+      "practiced_in": "Quick Check connecting Gutenberg Block Editor to WYSIWYG history/Dreamweaver",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    }
+  },
+  "revisits": {},
+  "wrs": {
+    "1.2.10": {
+      "taught_in": "Meet the Client: \"Manager Mike\" (Chapter Overview)",
+      "anchor": "#identify-cms",
+      "student_action": "Students build and hand off a client-ready CMS site (Local Legends Coffee) with a clean, non-technical dashboard, demonstrating helpful, knowledgeable service to a non-technical client"
+    }
+  }
+}

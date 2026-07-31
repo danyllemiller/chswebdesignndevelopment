@@ -127,7 +127,6 @@
         <div class="card border-primary shadow-sm mb-5 text-start">
           <div class="card-header bg-primary text-white fw-bold small d-flex align-items-center gap-2">
             Static Websites vs. Dynamic CMS-Powered Sites
-            <span class="badge bg-light text-primary ms-1">NV 5.5.2</span>
           </div>
           <div class="card-body p-0">
             <table class="table table-bordered table-sm small mb-0 text-start">
@@ -175,7 +174,7 @@
           </div>
         </div>
 
-        <h2 class="section-title mt-0">The Matrix: Pitching Platforms to Clients</h2>
+        <h2 class="section-title mt-0" id="identify-cms">The Matrix: Pitching Platforms to Clients</h2>
         <p>How can you tell if a piece of software is truly a CMS? <strong>It separates the content creation from the code structure and design.</strong> This means your articles are stored in a database, and your design is stored in a Theme. If a Theme is the "clothes" of a website, what is the database? <strong>The brain/memory that remembers the content.</strong></p>
         
         <p>Because they are separate, what happens to your blog posts if you switch to a completely different WordPress Theme? <strong>The design changes, but the text and posts remain perfectly intact!</strong> Can you switch WordPress Themes without losing your Media Library uploads? Yes! The <strong>Media Library</strong> is the digital warehouse where all uploaded photos and videos are stored separately.</p>
@@ -205,8 +204,8 @@
             </tr>
             <tr>
               <td class="fw-bold text-center align-middle">Self-Hosted CMS (Owner)</td>
-              <td class="align-middle">WordPress.org, Drupal</td>
-              <td>Which platform represents the 'Owner' model where you download free software and host it yourself? <strong>WordPress.org</strong>. Why is WordPress.org the professional standard over website builders like Wix? Because of <strong>total freedom and ownership of every line of code.</strong></td>
+              <td class="align-middle">WordPress.org, Drupal, Joomla</td>
+              <td>Which platform represents the 'Owner' model where you download free software and host it yourself? <strong>WordPress.org</strong>. Why is WordPress.org the professional standard over website builders like Wix? Because of <strong>total freedom and ownership of every line of code.</strong> <strong>Joomla</strong> is another open-source, self-hosted CMS — more flexible than WordPress for complex, multi-user sites, but with a steeper learning curve and a much smaller plugin ecosystem.</td>
             </tr>
           </tbody>
         </table>
@@ -214,6 +213,28 @@
         <div class="alert alert-info py-2 px-3 small border-info shadow-sm mt-4 mb-5 text-start">
             <strong>The King of the Web:</strong> WordPress powers over 40% of the entire internet. What does it mean that WordPress is 'Open-Source'? <strong>The source code is free and available for anyone to inspect, modify, and enhance.</strong> What programming language powers the logic and templates of WordPress? <strong>PHP</strong>. <br><br>
             <em>Note: Which of the following is NOT a popular Content Management System? <strong>Photoshop!</strong> That is a photo editor, not a website manager!</em>
+        </div>
+
+        <h5 class="fw-bold mt-5 text-primary" id="cms-trends">Beyond Blogs: CMS Trends &amp; Learning Management Systems</h5>
+        <p>Not every CMS is built for the same job. Trends in how CMS platforms are used keep evolving:</p>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>Blogging:</strong> The original use case — reverse-chronological Posts, exactly what you're building for Local Legends Coffee.</li>
+            <li class="mb-2"><strong>Online Magazines &amp; News:</strong> Heavy use of Categories, multiple Authors with different Roles, and high publishing frequency (think IGN or the Nevada Appeal from the start of this chapter).</li>
+            <li class="mb-0"><strong>Corporate Websites:</strong> Fewer Posts, more static Pages (About, Services, Careers) — content changes rarely, so structure and Permalinks matter more than publishing speed.</li>
+        </ul>
+        <p>There's also a specialized category of CMS you already use every day without thinking about it: the <strong>Learning Management System (LMS)</strong>. An LMS is a CMS purpose-built for education — instead of managing blog Posts, it manages courses, assignments, grades, and student submissions. <strong>Canvas</strong> (the platform your own school likely uses), <strong>Google Classroom</strong>, and <strong>Moodle</strong> are all LMS platforms.</p>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> Students often don't realize Canvas <em>is</em> a CMS. The pattern is identical: content (assignments, announcements) is stored in a database, separate from the "theme" (your school's Canvas branding/layout) — the exact Content/Database/Theme architecture from Figure 12.2, just applied to coursework instead of blog posts.
+        </div>
+        <div class="card border-secondary shadow-sm mb-0">
+          <div class="card-header bg-light fw-bold">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">Why is Canvas considered a specialized type of CMS rather than something completely different?</p>
+            <details>
+              <summary class="fw-bold text-primary" style="cursor: pointer;">Show Answer</summary>
+              <p class="mb-0 mt-2">It follows the same core CMS pattern — content (assignments, grades, announcements) is separated from presentation (the platform's layout/theme) and stored in a database, managed through a dashboard without needing to touch code. It's just specialized for education instead of blogging or e-commerce.</p>
+            </details>
+          </div>
         </div>
 
         <!-- LAB 1 CARD -->
@@ -323,7 +344,6 @@
         <div class="card border-info shadow-sm mb-4 text-start">
           <div class="card-header bg-info text-dark fw-bold small d-flex align-items-center gap-2">
             Categories vs. Tags — Know the Difference
-            <span class="badge bg-primary ms-1">NV 5.5.2</span>
           </div>
           <div class="card-body p-0">
             <table class="table table-bordered table-sm small mb-0 text-start">
@@ -447,6 +467,23 @@
           <strong>Gutenberg vs. Page Builders:</strong> Gutenberg (the default block editor) is great for standard posts and pages. Page Builders are better for pixel-precise custom landing pages. However, heavy Page Builder plugins can slow down a site, so only install one if genuinely needed.
         </div>
 
+        <h5 class="fw-bold mt-4 text-primary" id="wysiwyg-software">Where This All Came From: WYSIWYG Software</h5>
+        <p>Gutenberg and Page Builders like Elementor belong to a much older category of tool: <strong>WYSIWYG</strong> software, pronounced "wizzy-wig," standing for <strong>"What You See Is What You Get."</strong> A WYSIWYG editor lets you build a page visually — dragging, dropping, and formatting — while the software writes the underlying HTML/CSS for you behind the scenes, instead of you hand-typing every tag.</p>
+        <p>The classic, historical example is <strong>Adobe Dreamweaver</strong>: a desktop application (predating modern CMS platforms) that let designers lay out entire websites visually and export the generated HTML/CSS files directly, with no server or database involved at all. Today's WYSIWYG tools have largely moved <em>inside</em> the CMS itself — the Gutenberg Block Editor and Page Builder plugins you just learned are both modern, browser-based WYSIWYG editors.</p>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> WYSIWYG tools are fast, but the HTML they auto-generate is often bloated with extra <code>&lt;div&gt;</code> tags and inline styles compared to hand-written code. A professional developer still needs to know how to read and clean up that generated markup — WYSIWYG speeds up building, it doesn't replace understanding HTML/CSS.
+        </div>
+        <div class="card border-secondary shadow-sm mb-4">
+          <div class="card-header bg-light fw-bold">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">What does "WYSIWYG" stand for, and how is the Gutenberg Block Editor an example of it?</p>
+            <details>
+              <summary class="fw-bold text-primary" style="cursor: pointer;">Show Answer</summary>
+              <p class="mb-0 mt-2">"What You See Is What You Get." Gutenberg lets you visually arrange blocks (text, images) and see the finished layout as you build it, while WordPress generates the actual HTML behind the scenes — the same core idea pioneered by desktop tools like Adobe Dreamweaver.</p>
+            </details>
+          </div>
+        </div>
+
         <h5 class="fw-bold mt-4 text-primary">The Golden Rule: Child Themes</h5>
         <p>What is the primary purpose of a <strong>Child Theme</strong>? <strong>To preserve your custom code when the parent theme receives updates.</strong> Without a child theme, every time the parent theme developer releases a security patch or feature update, WordPress overwrites the theme files — and all of your custom CSS is permanently deleted. A child theme inherits 100% of the parent theme's design and functionality, but stores your customizations in a separate folder that updates never touch.</p>
         <div class="bg-light p-3 rounded border shadow-sm small mb-4">
@@ -485,7 +522,20 @@
       <div class="col-lg-8 pe-lg-5">
         <h2 class="section-title mt-0">Plugins, Security, &amp; SEO</h2>
         <p>In the 'Smartphone' analogy, what do WordPress Plugins represent? <strong>The apps you download to give the phone new powers.</strong> What is used to add new functionality (like a store or contact form) to a WordPress site? <strong>A Plugin.</strong> (For example, what is 'WooCommerce'? The most popular e-commerce plugin that turns a WordPress site into an online store!)</p>
-        
+
+        <h5 class="fw-bold mt-4 text-primary" id="shopping-cart-integration">Integrating a Shopping Cart: WooCommerce Step-by-Step</h5>
+        <p>Say Manager Mike wants to sell bags of his coffee beans online, not just advertise the shop. That means integrating a real shopping cart, not just a plugin install:</p>
+        <ol class="small mb-4">
+            <li class="mb-2"><strong>Install WooCommerce:</strong> Go to <strong>Plugins &gt; Add New</strong>, search "WooCommerce," install and activate. A setup wizard walks you through store basics (currency, location, units).</li>
+            <li class="mb-2"><strong>Add Products:</strong> WooCommerce creates a new "Products" content type (alongside Pages and Posts). Each product gets a price, description, inventory count, and a Featured Image — just like writing a Post.</li>
+            <li class="mb-2"><strong>Connect a Payment Gateway:</strong> WooCommerce doesn't process money itself — it hands the transaction to a <strong>Payment Gateway</strong> (Stripe or PayPal are the most common) that securely charges the customer's card and deposits funds into the client's bank account.</li>
+            <li class="mb-2"><strong>The Cart &amp; Checkout Pages:</strong> WooCommerce automatically generates a Cart page (where items a shopper has added are listed) and a Checkout page (where they enter shipping/payment info) — you don't hand-code these, but you can style them via your Theme.</li>
+            <li class="mb-0"><strong>Require HTTPS:</strong> A store <em>must</em> run on SSL/HTTPS (Chapter 11) before going live — browsers block card entry on insecure pages, and payment processors legally require it.</li>
+        </ol>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> Installing WooCommerce and adding products isn't enough to accept real money — forgetting to configure a Payment Gateway means the checkout page exists but every purchase attempt will fail. Always test a complete purchase (using the gateway's "test mode") before launching a client's store.
+        </div>
+
         <h5 class="fw-bold mt-4 text-danger">The Danger of Plugin Bloat</h5>
         <p>What is the primary risk of installing too many WordPress plugins? <strong>They can slow down the site, cause conflicts, and create security vulnerabilities.</strong> This is known as "Plugin Bloat."</p>
         <p>Furthermore, what does it mean if a plugin has not been 'tested with your current version of WordPress'? <strong>It might be abandoned by its developer and could break your site or introduce security flaws.</strong> Updating vulnerable plugins immediately demonstrates the WRS skill of <strong>Probity / Ethical Adherence</strong>.</p>
@@ -494,8 +544,6 @@
         <div class="card border-danger shadow-sm mt-3 mb-4 text-start">
           <div class="card-header bg-danger text-white fw-bold small d-flex align-items-center gap-2">
             Plugin Security Checklist — Before You Install
-            <span class="badge bg-light text-danger ms-1">NV 4.4.4</span>
-            <span class="badge bg-light text-danger ms-1">WRS 1.1.4</span>
           </div>
           <div class="card-body small p-4">
             <p class="mb-3">Before installing any plugin for a client site, run through these checks in the WordPress Plugin Directory:</p>
