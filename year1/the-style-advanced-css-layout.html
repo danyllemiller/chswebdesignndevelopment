@@ -182,7 +182,7 @@
         <ul class="small mb-4">
             <li class="mb-2"><strong>Margin Collapse:</strong> When two vertical margins touch (like the bottom margin of an H1 and the top margin of a P), they don't add together. They <strong>collapse</strong> into a single margin equal to the larger of the two values.
               <div class="card bg-light border-0 p-3 mt-2 shadow-sm">
-                <p class="small fw-bold mb-2 text-primary"><span class="badge bg-primary me-1">NV 5.2.3</span> Two Collapse Scenarios You Must Know:</p>
+                <p class="small fw-bold mb-2 text-primary">Two Collapse Scenarios You Must Know:</p>
                 <ul class="small mb-0 ps-3">
                   <li class="mb-2"><strong>Adjacent Siblings:</strong> An <code>&lt;h2&gt;</code> with <code>margin-bottom: 30px</code> directly above a <code>&lt;p&gt;</code> with <code>margin-top: 20px</code> — the actual gap is <strong>30px</strong>, not 50px. The smaller margin is absorbed.</li>
                   <li class="mb-0"><strong>Parent-Child:</strong> If a <code>&lt;div&gt;</code> parent has no border or padding at the top, and the first child element has a <code>margin-top</code>, that margin will "bleed through" to the parent. Fix it by adding <code>padding-top: 1px;</code> or <code>overflow: hidden;</code> to the parent.</li>
@@ -227,7 +227,7 @@
     <!-- SECTION 3: FLEXBOX -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">Flexbox: 1-Dimensional Layouts</h2>
+        <h2 class="section-title mt-0" id="flexbox">Flexbox: 1-Dimensional Layouts</h2>
         <p>For years, developers used complicated "float hacks" to put boxes next to each other. Now, we use <strong>Flexbox (Flexible Box Module)</strong>. Flexbox is designed for laying out items in a <strong>single row or a single column (1-Dimensional)</strong>. It is the absolute gold standard for navigation bars, aligning icons, and perfectly centering content.</p>
         
         <h5 class="fw-bold mt-4 text-primary">The Golden Rule of Flex</h5>
@@ -308,7 +308,7 @@
     <!-- SECTION 4: CSS GRID -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">CSS Grid: 2-Dimensional Architecture</h2>
+        <h2 class="section-title mt-0" id="css-grid">CSS Grid: 2-Dimensional Architecture</h2>
         <p>While Flexbox is great for a single line of items, <strong>CSS Grid</strong> is primarily designed for <strong>2-Dimensional layouts (Rows AND Columns simultaneously)</strong>. It allows you to build the "skeleton" of your entire client webpage with incredible precision.</p>
         
         <h5 class="fw-bold mt-4 text-primary">Defining the Grid and the "fr" Unit</h5>
@@ -380,7 +380,7 @@
     <!-- SECTION 5: POSITIONING -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">Positioning &amp; Z-Index</h2>
+        <h2 class="section-title mt-0" id="positioning">Positioning &amp; Z-Index</h2>
         <p>Sometimes you need to break an element out of the normal flow and place it exactly where you want it on the screen.</p>
         
         <h5 class="fw-bold mt-4 text-primary">The <code>position</code> Property Values</h5>
@@ -433,8 +433,8 @@
       </div>
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
           <figure class="mb-0 text-center">
-              <img src="/images/the-style-advanced-css-layout/figure-06.png" alt="Z-Index visualization" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Z-Index+Stacking'">
-              <figcaption class="p-2 small text-muted text-center"><strong>Figure 7.5:</strong> Z-Index 3D Stacking Order</figcaption>
+              <img src="/images/the-style-advanced-css-layout/figure-07.png" alt="CSS code showing position: relative on a parent article acting as an anchor, and position: absolute with z-index on a child badge element" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Z-Index+Stacking'">
+              <figcaption class="p-2 small text-muted text-center"><strong>Figure 7.5:</strong> Positioning a "New!" Badge with <code>relative</code> + <code>absolute</code> + <code>z-index</code></figcaption>
           </figure>
       </div>
     </div>
@@ -442,7 +442,7 @@
     <!-- SECTION 6: RESPONSIVE UNITS -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">Responsive Sizing: Stop Using Pixels!</h2>
+        <h2 class="section-title mt-0" id="responsive-sizing">Responsive Sizing: Stop Using Pixels!</h2>
         <p>What happens if a block element's width is set to <code>1000px</code>, but the user's screen is only 400px wide? The browser creates an annoying horizontal scrollbar. To fix this, modern web design relies on relative units and mathematical functions.</p>
         
         <h5 class="fw-bold mt-4 text-primary">The Relative Units</h5>
@@ -473,7 +473,7 @@
         </table>
 
         <!-- MODERN CSS FUNCTIONS: DEDICATED SECTION -->
-        <h5 class="fw-bold mt-4 text-primary"><span class="badge bg-primary me-1">NV 5.2.6</span> Modern CSS Functions: <code>calc()</code>, <code>clamp()</code>, and <code>minmax()</code></h5>
+        <h5 class="fw-bold mt-4 text-primary">Modern CSS Functions: <code>calc()</code>, <code>clamp()</code>, and <code>minmax()</code></h5>
         <p>These three functions are the secret weapons of professional CSS layout. They let the browser do math and make decisions at render time instead of you hard-coding pixel values.</p>
 
         <div class="card bg-light border-primary border-start border-3 shadow-sm p-3 mb-3">
@@ -512,6 +512,10 @@ h1 {
 
       </div>
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+          <figure class="mb-4 text-center">
+              <img src="/images/the-style-advanced-css-layout/figure-11.png" alt="Side-by-side comparison of a static, non-responsive layout versus a responsive Flexbox/Grid layout across desktop, tablet, and phone" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Responsive+Layout'">
+              <figcaption class="p-2 small text-muted text-center"><strong>Figure 7.6:</strong> Static vs. Responsive Layout</figcaption>
+          </figure>
           <div class="card roadmap-card border-warning shadow-sm mt-4 text-start">
             <div class="card-header bg-warning text-dark fw-bold">Let's Discuss:</div>
             <div class="card-body small">
@@ -521,10 +525,63 @@ h1 {
       </div>
     </div>
 
+    <!-- SECTION 6B: CSS PREPROCESSORS -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0" id="css-preprocessors">Beyond Vanilla CSS: What is a Preprocessor?</h2>
+        <p><strong>Why it matters:</strong> As a client's site grows past a handful of pages, plain CSS starts to show its limits — you can't do real math with variables, you can't nest a selector inside its parent visually, and you can't break a giant stylesheet into reusable pieces without a pile of separate <code>&lt;link&gt;</code> tags. Professional agencies solve this with a <strong>CSS preprocessor</strong>.</p>
+        <p><strong>What it is:</strong> A CSS preprocessor is a scripting language — <strong>Sass (.scss)</strong> and <strong>LESS</strong> are the two most common — that extends CSS with programming-style features. You write your styles in the preprocessor's language, then a <strong>compiler</strong> converts ("compiles") that file down into plain, ordinary <code>.css</code> that browsers can actually read. Browsers never see the <code>.scss</code> file directly.</p>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>Variables:</strong> Sass variables (<code>$primary-color: #005A9C;</code>) work like the CSS custom properties (<code>--primary-color</code>) you already learned in Chapter 6 — but Sass variables existed years before browsers supported native CSS variables, and they can also do math and get processed entirely before the browser ever loads the page.</li>
+            <li class="mb-2"><strong>Nesting:</strong> You can visually nest a child selector inside its parent, matching your HTML's structure, instead of retyping <code>nav</code> in front of every rule.</li>
+            <li class="mb-2"><strong>Partials &amp; Imports:</strong> You can split one giant stylesheet into small files (like <code>_buttons.scss</code>, <code>_nav.scss</code>) and combine them into a single compiled <code>.css</code> file — organized for the developer, but still just one fast file for the browser.</li>
+            <li class="mb-0"><strong>Mixins:</strong> Reusable "recipes" of CSS declarations you can drop into any rule, similar to a function.</li>
+        </ul>
+        <pre class="p-3 border rounded shadow-sm mb-4 no-copy"><code>// style.scss (what the developer writes)
+$primary-color: #005A9C;
+
+nav {
+    background: $primary-color;
+
+    a {              // nested selector = "nav a" once compiled
+        color: white;
+    }
+}</code></pre>
+        <pre class="p-3 border rounded shadow-sm mb-4 no-copy"><code>/* style.css (what the compiler outputs, and what the browser reads) */
+nav {
+    background: #005A9C;
+}
+nav a {
+    color: white;
+}</code></pre>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> A <code>.scss</code> file is <em>not</em> valid CSS and browsers cannot render it. If you link a <code>.scss</code> file directly in a <code>&lt;link rel="stylesheet"&gt;</code> tag, nothing will happen — you must run it through a compiler (built into most modern code editors and build tools) first, and link the resulting <code>.css</code> output file instead.
+        </div>
+        <div class="card border-secondary shadow-sm mb-0">
+          <div class="card-header bg-light fw-bold">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">Why can't a browser directly render a <code>.scss</code> file the way it renders a <code>.css</code> file?</p>
+            <details>
+              <summary class="fw-bold text-primary" style="cursor: pointer;">Show Answer</summary>
+              <p class="mb-0 mt-2">Browsers only understand standard CSS syntax. Sass adds extra features (variables, nesting, math, mixins) that aren't part of the CSS language, so a compiler has to translate the <code>.scss</code> file into plain <code>.css</code> before a browser can use it.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="card roadmap-card border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info border-bottom">E.O.P. Exam Tip:</div>
+          <div class="card-body small">
+              <p class="mb-0">Don't confuse a Sass variable (<code>$name</code>, resolved at compile time, before the browser ever sees it) with a native CSS custom property (<code>--name</code>, resolved live in the browser and changeable with JavaScript).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- SECTION 7: MEDIA QUERIES -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">Media Queries &amp; Mobile-First Design</h2>
+        <h2 class="section-title mt-0" id="media-queries">Media Queries &amp; Mobile-First Design</h2>
         <p>To truly change the layout based on the screen size, we use a <strong>Media Query</strong>. It is an "If-Then" statement for your website. <em>If</em> the screen matches a condition, <em>then</em> apply these specific CSS rules.</p>
         
         <h5 class="fw-bold mt-4 text-primary">The Mandatory HTML Tag</h5>
@@ -567,8 +624,8 @@ h1 {
       </div>
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
          <figure class="mb-0 text-center">
-          <img src="/images/the-style-advanced-css-layout/figure-14.png" class="img-fluid rounded border shadow-sm w-100" alt="Breakpoints" onerror="this.src='https://placehold.co/600x400?text=Breakpoints'">
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 7.6:</strong> Responsive Breakpoints</figcaption>
+          <img src="/images/the-style-advanced-css-layout/figure-15.png" class="img-fluid rounded border shadow-sm w-100" alt="The Curiosity Corner website rendered responsively across desktop, tablet, and smartphone views" onerror="this.src='https://placehold.co/600x400?text=Breakpoints'">
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 7.7:</strong> Responsive Breakpoints Across Devices</figcaption>
         </figure>
       </div>
     </div>

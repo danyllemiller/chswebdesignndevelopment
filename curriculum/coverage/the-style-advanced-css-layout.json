@@ -1,0 +1,36 @@
+{
+  "chapter": 7,
+  "title": "The “Style” (Advanced CSS Layout)",
+  "page": "year1/the-style-advanced-css-layout.html",
+  "assessment_note": "Assessment for this chapter lives in external worksheets/tests, not an on-page question bank. assessed_by is descriptive only.",
+  "indicators": {
+    "4.3.4": {
+      "taught_in": "Responsive Sizing: Stop Using Pixels! / Media Queries & Mobile-First Design",
+      "anchor": "#responsive-sizing",
+      "practiced_in": "Labs 7-9: Breakpoints & Refactoring, Milestone: Project 3 Architecture (mobile polish + peer QA on physical phones)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.2.6": {
+      "taught_in": "Flexbox: 1-Dimensional Layouts / CSS Grid: 2-Dimensional Architecture / Positioning & Z-Index",
+      "anchor": "#flexbox",
+      "practiced_in": "Labs 2 & 3: Flexbox & Centering, Labs 4 & 5: Grid Skeleton & Gallery, Lab 6: The Sticky Header",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.2.8": {
+      "taught_in": "Beyond Vanilla CSS: What is a Preprocessor?",
+      "anchor": "#css-preprocessors",
+      "practiced_in": "Quick Check on why .scss files must be compiled before a browser can read them",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    }
+  },
+  "revisits": {
+    "4.6.3": "Not formally re-taught this chapter; formally owned by Chapter 5."
+  },
+  "wrs": {
+    "1.2.3": {
+      "taught_in": "Milestone: Project 3 Architecture (Debugging step)",
+      "anchor": "#css-grid",
+      "student_action": "Students use the Computed tab in DevTools to analyze box-sizing math and margin collapse, and must diagnose and fix horizontal-scrollbar and overlapping-text bugs found during peer phone testing — recognizing, analyzing, and solving problems that arise while completing an assigned task"
+    }
+  }
+}

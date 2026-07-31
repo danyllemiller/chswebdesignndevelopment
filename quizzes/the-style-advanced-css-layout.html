@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Review Quiz: Chapter 9 - The "Style"</title>
+  <title>Review Quiz: Chapter 7 - The "Style"</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
   <link rel="shortcut icon" href="/images/favicon/favicon.ico">
@@ -23,7 +23,7 @@
     <div class="row">
       <div class="col-lg-9">
         <hgroup class="mb-5 border-bottom pb-3 text-center">
-          <h1 class="display-5 fw-bold text-primary">Practice: Chapter 9 Style</h1>
+          <h1 class="display-5 fw-bold text-primary">Practice: Chapter 7 Style</h1>
           <p class="lead text-muted">Test your knowledge of Advanced Layout Architecture.</p>
         </hgroup>
         <div id="quiz-questions" class="mb-5"></div>
@@ -32,7 +32,7 @@
   </section>
 
   <script>
-    const ch9Pool = [
+    const ch7Pool = [
         { question: "Calculated width of 100px width + 10px padding + 5px border in content-box?", options: ["100px", "115px", "130px", "110px"], correct: 2 },
         { question: "Which unit is 1% of browser window's width?", options: ["vh", "em", "rem", "vw"], correct: 3 },
         { question: "Position relative to nearest non-static ancestor?", options: ["absolute", "fixed", "sticky", "relative"], correct: 0 },
@@ -47,9 +47,12 @@
         { question: "Targets landscape orientation phones?", options: ["@media (max-width: sideways)", "@media (orientation: landscape)", "@media (rotation: horizontal)", "@media (screen-flip: true)"], correct: 1 },
         { question: "The rem unit is relative to which font size?", options: ["Parent", "Body", "Root (html)", "Viewport"], correct: 2 },
         { question: "Strategy of designing phone-first then adding larger styles?", options: ["Desktop-Down", "Mobile-First", "Responsive-Last", "Scale-Up"], correct: 1 },
-        { question: "Which z-index value appears 'behind' the default layer?", options: ["0", "1", "100", "-1"], correct: 3 }
+        { question: "Which z-index value appears 'behind' the default layer?", options: ["0", "1", "100", "-1"], correct: 3 },
+        { question: "What must happen to a .scss file before a browser can render it?", options: ["Nothing, browsers read .scss natively", "It must be compiled into plain .css", "It must be renamed to .css", "It must be minified"], correct: 1 },
+        { question: "In Sass, which symbol prefixes a variable, as opposed to a native CSS custom property?", options: ["--name", "#name", "$name", "@name"], correct: 2 },
+        { question: "Which layout module is best for a single row or column of items?", options: ["CSS Grid", "Flexbox", "Float", "Table"], correct: 1 }
     ];
-    window.onload = () => initQuiz(ch9Pool);
+    window.onload = () => initQuiz(ch7Pool);
   </script>
 <div id="footer-nav"></div>
 <div id="footer-placeholder"></div>
