@@ -132,6 +132,31 @@
       </div>
     </div>
 
+    <!-- SECTION 1B: WHY HTML EXISTS -->
+    <div id="why-html" class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="purpose-of-html">
+          <h2 class="section-title mt-0">Why Does HTML Even Exist?</h2>
+          <p><strong>The Why:</strong> Every device in the world — a Mac, a Windows PC, an iPhone, an Android tablet — renders things differently on the inside. If every browser maker invented its own private way to describe a webpage, a site built for Chrome could look broken or refuse to load in Safari. Olivia, our mom trying to book a mobile arcade truck, doesn't care what phone she owns — she just needs the page to work.</p>
+          <p><strong>The What:</strong> <strong>HTML (Hypertext Markup Language)</strong> solves this by acting as a shared, universal set of instructions every browser agrees to understand. It isn't a programming language — it has no math, no logic, no "if this, then that." Its only job is to <strong>mark up</strong> content so a browser knows what each piece is: "this is a heading," "this is a paragraph," "this is a link." The browser then decides how to actually draw it on whatever screen it's running on.</p>
+          <p><strong>The How:</strong> Because HTML is standardized by the W3C (the same organization from Chapter 1), the exact same <code>index.html</code> file renders correctly whether it's opened on a $2,000 laptop or a five-year-old phone. That's the entire reason PixelPlay only needs <em>one</em> set of HTML files instead of a different version of the site for every possible device.</p>
+
+          <div class="alert alert-warning small border-warning border mb-0">
+            <strong>Where Everyone Gets Ambushed:</strong> Students often call HTML a "programming language." It isn't — it has no logic or calculations, which is exactly why it's called a <strong>markup</strong> language instead. That distinction matters: it's also why HTML alone can't "do" things like validate a form or calculate a total — that's what JavaScript is for, much later in this course.
+          </div>
+        </section>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+          <div class="d-flex align-items-center mb-2">
+            <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+          </div>
+          <p class="mb-2 small text-dark">Is HTML a programming language? What's the actual term for what it is, and why does the difference matter?</p>
+          <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">No — HTML is a markup language. It describes and labels content (headings, paragraphs, links) but has no logic or calculations. That's why tasks like validating a form or doing math require JavaScript, not HTML.</p></details>
+        </div>
+      </div>
+    </div>
+
     <!-- SECTION 2: DETECTIVE & ABILITIES -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
@@ -165,10 +190,26 @@
     </div>
 
     <!-- SECTION 3: THE BOILERPLATE -->
-    <div class="row mb-5 pb-4 border-bottom align-items-start">
+    <div id="the-boilerplate" class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
         <h2 class="section-title mt-0">What is an HTML File? (The Boilerplate)</h2>
         <p>Every HTML file starts with a friendly greeting called the <strong>document type declaration</strong>, or <strong>doctype</strong>. It's a special tag that tells the browser what kind of code it's about to read. For HTML5, the newest version, it's super simple: <code>&lt;!DOCTYPE html&gt;</code>.</p>
+
+        <h5 id="html-versions" class="fw-bold mt-4 text-primary">Wait, There's More Than One Version?</h5>
+        <p><strong>The Why:</strong> That one-line doctype used to be a nightmare. Older versions required a doctype so long and specific that developers copy-pasted it from a cheat sheet every single time. Knowing why HTML5 changed that tells you a lot about what the language actually needed to become.</p>
+        <p><strong>The What:</strong> HTML has gone through several major versions:</p>
+        <ul class="small ps-3 mb-3">
+          <li class="mb-2"><strong>HTML (1991) &amp; HTML 2.0 (1995):</strong> The original, extremely limited version — just enough tags to link text documents together.</li>
+          <li class="mb-2"><strong>HTML 4.01 (1999):</strong> Added tables, forms, and more layout control, but developers frequently mixed content with visual styling directly in the markup — a mess by modern standards.</li>
+          <li class="mb-2"><strong>XHTML (2000):</strong> A stricter version that forced HTML to follow XML's rulebook — every tag had to be closed, all lowercase, no exceptions. Powerful, but unforgiving; one missing slash could break an entire page.</li>
+          <li class="mb-2"><strong>HTML5 (2014–present):</strong> The current standard. It relaxed XHTML's strict rules, added the semantic tags this whole chapter is built around (<code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;article&gt;</code>), and added native support for audio, video, and forms validation without needing extra plugins like Flash.</li>
+        </ul>
+        <p><strong>The How:</strong> The old HTML 4.01 doctype looked like this — a URL you had to memorize or copy: <code>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;</code>. HTML5's version needs none of that, because HTML5 assumes every modern browser already knows the rules. That single line, <code>&lt;!DOCTYPE html&gt;</code>, is a small detail that tells you a lot about how the language matured — simpler for developers, but only because a decade of standards work happened first.</p>
+
+        <div class="alert alert-warning small border-warning border mb-5">
+          <strong>Where Everyone Gets Ambushed:</strong> Students often think "HTML5" is just a marketing label for "modern HTML," like a software update number. It's an actual, specific version with its own rulebook — for example, HTML5 is more forgiving about unclosed tags than XHTML was, but that doesn't mean sloppy code is fine. It's still bad practice, and it's exactly what the W3C Validator later in this chapter is built to catch.
+        </div>
+
         <p>You can think of every HTML document as a family tree with three main parts. This whole structure is called the "boilerplate."</p>
         <ul class="small mb-5 ps-3">
           <li class="mb-3"><strong>&lt;html&gt;:</strong> The root element that holds everything together. A common and important attribute to add to this tag is <code>lang</code> (language), like <code>&lt;html lang="en"&gt;</code>. This tells search engines and screen readers that the page is in English, which is important for accessibility and SEO.</li>
@@ -220,6 +261,16 @@
                 </ol>
                 <p class="mb-3 text-danger fw-bold">Turn In: Upload your completed <code>index.html</code> file.</p>
                 <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                <table class="table table-bordered table-sm small mb-0 bg-white">
+                  <tbody>
+                    <tr><td class="fw-bold" style="width:18%">4.0</td><td>All 3 files exist with the exact required names, each has a complete, correct boilerplate, and titles/descriptions are specific to the client theme, not placeholder text.</td></tr>
+                    <tr><td class="fw-bold">3.0</td><td>All 3 files exist, named correctly, each with a complete boilerplate and an updated title and meta description.</td></tr>
+                    <tr><td class="fw-bold">2.0</td><td>Files exist but are misnamed, missing a boilerplate piece, or titles/descriptions weren't updated from the default.</td></tr>
+                    <tr><td class="fw-bold">1.0</td><td>Submitted, but fewer than 3 files, or the boilerplate is incomplete.</td></tr>
+                  </tbody>
+                </table>
             </div>
         </div>
 
@@ -247,7 +298,7 @@
     </div>
 
     <!-- SECTION 4: TAGS & NESTING -->
-    <div class="row mb-5 pb-4 border-bottom align-items-start">
+    <div id="what-is-a-tag" class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
         <h2 class="section-title mt-0">What is an HTML "Tag"?</h2>
         <p>HTML is all about using <strong>element tags</strong> to mark different parts of your page. Most tags come in pairs, with a starting tag and an ending tag. This creates an <strong>element</strong>.</p>
@@ -300,6 +351,16 @@
                 </ol>
                 <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated <code>index.html</code> file.</p>
                 <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                <table class="table table-bordered table-sm small mb-0 bg-white">
+                  <tbody>
+                    <tr><td class="fw-bold" style="width:18%">4.0</td><td>Heading levels precisely mirror the Figma mockup's visual hierarchy with no skipped levels, exactly one <code>&lt;h1&gt;</code>, and body text correctly uses <code>&lt;p&gt;</code> throughout.</td></tr>
+                    <tr><td class="fw-bold">3.0</td><td>Correct heading scale used for all text, exactly one <code>&lt;h1&gt;</code>, paragraphs correctly tagged.</td></tr>
+                    <tr><td class="fw-bold">2.0</td><td>Headings are present but hierarchy doesn't match the mockup (e.g., skips from h1 to h4), or more than one h1 is used.</td></tr>
+                    <tr><td class="fw-bold">1.0</td><td>Submitted, but text isn't marked up with heading tags at all (e.g., bolded paragraphs instead).</td></tr>
+                  </tbody>
+                </table>
             </div>
         </div>
 
@@ -410,6 +471,16 @@
                 </ol>
                 <p class="mb-3 text-danger fw-bold">Turn In: Upload your structurally sound <code>index.html</code> file.</p>
                 <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                <table class="table table-bordered table-sm small mb-0 bg-white">
+                  <tbody>
+                    <tr><td class="fw-bold" style="width:18%">4.0</td><td>All 3 pages share an identical, correctly-nested header/main/footer skeleton, and the footer copyright notice is present on every page.</td></tr>
+                    <tr><td class="fw-bold">3.0</td><td>All 3 pages have header, main, and footer correctly nested with a copyright notice in the footer.</td></tr>
+                    <tr><td class="fw-bold">2.0</td><td>Skeleton is present on index.html but wasn't copied consistently to about.html and contact.html.</td></tr>
+                    <tr><td class="fw-bold">1.0</td><td>Submitted, but semantic tags are missing or generic &lt;div&gt;s were used instead.</td></tr>
+                  </tbody>
+                </table>
             </div>
         </div>
 
@@ -478,7 +549,7 @@
 
         <!-- INLINE vs BLOCK: SPAN vs DIV EXPLICIT COMPARISON -->
         <div class="card border-info shadow-sm my-4">
-          <div class="card-header bg-info text-white fw-bold"><span class="badge bg-white text-info me-2">NV 5.1.2</span> Spotlight: <code>&lt;div&gt;</code> vs. <code>&lt;span&gt;</code> — Block vs. Inline</div>
+          <div class="card-header bg-info text-white fw-bold">Spotlight: <code>&lt;div&gt;</code> vs. <code>&lt;span&gt;</code> — Block vs. Inline</div>
           <div class="card-body small bg-light">
             <p class="mb-3">These two are the most-used "generic" container elements, but they behave very differently in the document flow. Choosing the wrong one is a common beginner mistake.</p>
             <div class="row g-3">
@@ -529,6 +600,16 @@
                 </ol>
                 <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated <code>index.html</code> file.</p>
                 <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                <table class="table table-bordered table-sm small mb-0 bg-white">
+                  <tbody>
+                    <tr><td class="fw-bold" style="width:18%">4.0</td><td>Section boundaries precisely match the mockup's thematic zones, each section has an appropriate heading, and nesting inside &lt;main&gt; is flawless.</td></tr>
+                    <tr><td class="fw-bold">3.0</td><td>Thematic zones are correctly wrapped in &lt;section&gt; tags, all correctly nested inside &lt;main&gt;.</td></tr>
+                    <tr><td class="fw-bold">2.0</td><td>Sections exist but zones are arbitrary (not matched to real thematic content), or nesting inside &lt;main&gt; is broken.</td></tr>
+                    <tr><td class="fw-bold">1.0</td><td>Submitted, but no &lt;section&gt; tags were used, or content wasn't grouped at all.</td></tr>
+                  </tbody>
+                </table>
             </div>
         </div>
 
@@ -640,6 +721,16 @@
                 </ol>
                 <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated <code>index.html</code> file with the list structure.</p>
                 <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                <table class="table table-bordered table-sm small mb-0 bg-white">
+                  <tbody>
+                    <tr><td class="fw-bold" style="width:18%">4.0</td><td>Nav is correctly nested inside header, uses a semantic &lt;ul&gt;/&lt;li&gt; structure, and item labels clearly describe their destination.</td></tr>
+                    <tr><td class="fw-bold">3.0</td><td>&lt;nav&gt; contains a &lt;ul&gt; with 3 correctly nested &lt;li&gt; items labeled Home, About, Contact.</td></tr>
+                    <tr><td class="fw-bold">2.0</td><td>List exists but isn't wrapped in &lt;nav&gt;, or list items aren't properly nested inside the &lt;ul&gt;.</td></tr>
+                    <tr><td class="fw-bold">1.0</td><td>Submitted, but no list structure was used for navigation.</td></tr>
+                  </tbody>
+                </table>
             </div>
         </div>
 
@@ -787,6 +878,16 @@
                 </ol>
                 <p class="mb-3 text-danger fw-bold">Turn In: Upload the HTML file containing your placeholders.</p>
                 <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                <table class="table table-bordered table-sm small mb-0 bg-white">
+                  <tbody>
+                    <tr><td class="fw-bold" style="width:18%">4.0</td><td>Images are placed exactly where the mockup shows them, and every alt text is specific enough that a screen reader user would understand the final image without ever seeing it.</td></tr>
+                    <tr><td class="fw-bold">3.0</td><td>Images are placed in the correct spots with placeholder src values, and every image has descriptive alt text.</td></tr>
+                    <tr><td class="fw-bold">2.0</td><td>Images are present but alt text is missing on some, generic ("image1"), or copy-pasted identically across different images.</td></tr>
+                    <tr><td class="fw-bold">1.0</td><td>Submitted, but images are missing alt attributes entirely.</td></tr>
+                  </tbody>
+                </table>
             </div>
         </div>
 
@@ -811,7 +912,7 @@
     </div>
 
     <!-- SECTION 11: HYPERTEXT & NAVIGATION -->
-    <div class="row mb-5 pb-4 border-bottom align-items-start">
+    <div id="hypertext-links" class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
         <h2 class="section-title mt-0">Hypertext Links</h2>
         <p>What made the World Wide Web different from just reading a digital book? It's right in the name of the language: HyperText. Links are created with the <code>&lt;a&gt;</code> (anchor) tag. <strong>href</strong> is the address, and the content between the tags is the clickable part.</p>
@@ -821,11 +922,11 @@
           <li class="mb-0"><code>target="_blank"</code> forces the link to open in a brand new tab.</li>
         </ul>
         
-        <h5 class="fw-bold mt-4 text-primary">Relative vs. Absolute Paths</h5>
+        <h5 id="relative-vs-absolute-paths" class="fw-bold mt-4 text-primary">Relative vs. Absolute Paths</h5>
         <p><strong>Absolute Path:</strong> The full URL to a completely different website (e.g., <code>https://google.com</code>).<br><strong>Relative Path:</strong> The path from the current file you are editing to a target file on your own computer (e.g., <code>about.html</code>). If you break a relative path, the user gets a 404 Error!</p>
 
         <div class="card bg-light border-0 shadow-sm p-4 mb-5 mt-3">
-          <h6 class="fw-bold text-primary mb-3"><span class="badge bg-primary me-1">NV 5.1.2</span> Three Types of File Paths</h6>
+          <h6 class="fw-bold text-primary mb-3">Three Types of File Paths</h6>
           <p class="small mb-3">Relative paths are the most important concept to master for local projects. Here are the three forms you will encounter:</p>
           <table class="table table-bordered table-sm small bg-white mb-0">
             <thead class="bg-light"><tr><th>Path Type</th><th>Example</th><th>Meaning</th></tr></thead>
@@ -885,6 +986,16 @@
                 </ol>
                 <p class="mb-3 text-danger fw-bold">Turn In: Upload your fully linked <code>index.html</code> file.</p>
                 <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                <table class="table table-bordered table-sm small mb-0 bg-white">
+                  <tbody>
+                    <tr><td class="fw-bold" style="width:18%">4.0</td><td>Every link on every page works correctly with same-folder relative paths, and the site can be navigated end-to-end with zero 404 errors.</td></tr>
+                    <tr><td class="fw-bold">3.0</td><td>All navigation links use correct relative paths and the nav menu is present and functional on every page.</td></tr>
+                    <tr><td class="fw-bold">2.0</td><td>Links are present but some use incorrect paths (absolute URLs to local files, or wrong relative paths) causing broken links.</td></tr>
+                    <tr><td class="fw-bold">1.0</td><td>Submitted, but navigation isn't copied to all pages or links aren't functional.</td></tr>
+                  </tbody>
+                </table>
             </div>
         </div>
 
@@ -944,7 +1055,7 @@
             </div>
 
             <!-- ADVANCED FORM ATTRIBUTES -->
-            <h5 class="fw-bold mt-5 text-primary"><span class="badge bg-primary me-1">NV 5.1.3</span> Advanced HTML5 Form Attributes</h5>
+            <h5 class="fw-bold mt-5 text-primary">Advanced HTML5 Form Attributes</h5>
             <p>The input attributes below make forms smarter. They allow the browser to do validation work for you <em>before</em> the data is ever sent to a server — no JavaScript required.</p>
             <table class="table table-bordered table-sm small bg-white shadow-sm mt-3 mb-4">
               <thead class="bg-light"><tr><th>Attribute</th><th>Example</th><th>What It Does</th></tr></thead>
@@ -983,7 +1094,7 @@
             </table>
 
             <!-- FIELDSET & LEGEND -->
-            <h5 class="fw-bold mt-5 text-primary"><span class="badge bg-primary me-1">NV 5.1.3</span> Grouping Form Fields: <code>&lt;fieldset&gt;</code> &amp; <code>&lt;legend&gt;</code></h5>
+            <h5 class="fw-bold mt-5 text-primary">Grouping Form Fields: <code>&lt;fieldset&gt;</code> &amp; <code>&lt;legend&gt;</code></h5>
             <p>When a form has multiple sections (like "Personal Info" and "Event Details"), you should group them using <code>&lt;fieldset&gt;</code> and <code>&lt;legend&gt;</code>. This is both accessible and semantic — screen readers announce the group name before reading the fields inside it, giving context to visually impaired users.</p>
             <pre class="p-3 border rounded shadow-sm mb-4 no-copy"><code>&lt;form&gt;
   &lt;fieldset&gt;
@@ -1009,7 +1120,7 @@
   &lt;button type="submit"&gt;Reserve Now&lt;/button&gt;
 &lt;/form&gt;</code></pre>
             <div class="alert alert-info border-0 small shadow-sm mb-5">
-              <strong>Why this matters:</strong> A screen reader announces <em>"Personal Information — group"</em> when a user tabs into the first fieldset, providing context that a sighted user gets visually but a blind user needs explicitly. This is a WRS 1.1.1 / 1.1.2 accessibility requirement.
+              <strong>Why this matters:</strong> A screen reader announces <em>"Personal Information — group"</em> when a user tabs into the first fieldset, providing context that a sighted user gets visually but a blind user needs explicitly.
             </div>
 
             <!-- GRADED LAB 8 CARD (Forms) -->
@@ -1025,6 +1136,16 @@
                     </ol>
                     <p class="mb-3 text-danger fw-bold">Turn In: Upload your completed <code>contact.html</code> file.</p>
                     <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                    <h6 class="fw-bold mt-4 mb-2">Rubric</h6>
+                    <table class="table table-bordered table-sm small mb-0 bg-white">
+                      <tbody>
+                        <tr><td class="fw-bold" style="width:18%">4.0</td><td>Every input has a correctly matched label, appropriate input types (email, text) are used throughout, and required fields correctly block blank submission.</td></tr>
+                        <tr><td class="fw-bold">3.0</td><td>Name, email, and message inputs are present, each with a correctly linked label (matching for/id), and a working submit button.</td></tr>
+                        <tr><td class="fw-bold">2.0</td><td>Form is present but one or more inputs lack a properly linked label, or the wrong input type is used.</td></tr>
+                        <tr><td class="fw-bold">1.0</td><td>Submitted, but the form is missing required fields or has no labels at all.</td></tr>
+                      </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -1078,8 +1199,48 @@
       </div>
     </div>
 
+    <!-- SECTION 13B: OPTIMIZING FOR ASSISTIVE TECHNOLOGY -->
+    <div id="optimizing-for-special-needs" class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <section id="assistive-tech">
+          <h2 class="section-title mt-0">Building for Every User: Optimizing HTML for Special Needs</h2>
+          <p><strong>The Why:</strong> You've already been optimizing for special needs throughout this whole chapter without a name for it: writing <code>alt</code> text, linking every <code>&lt;label&gt;</code> to its input, grouping fields with <code>&lt;fieldset&gt;</code>. Here's why that matters as a single skill, not scattered rules: roughly 1 in 4 adults in the U.S. lives with some kind of disability, and for a site like Olivia's mobile arcade booking page, a broken form or a missing label doesn't just look bad — it can mean a real customer physically cannot complete the booking.</p>
+          <p><strong>The What:</strong> "Optimizing for special needs" means writing HTML that works correctly with <strong>assistive technology</strong> — screen readers, keyboard-only navigation, switch devices, and voice control — not just with a mouse and healthy eyesight. Every tag choice you've made this chapter feeds into one of these three access needs:</p>
+          <ul class="small ps-3 mb-3">
+            <li class="mb-2"><strong>Vision:</strong> Served by <code>alt</code> text on every image, and by using real heading tags (<code>&lt;h1&gt;</code>–<code>&lt;h6&gt;</code>) instead of just making text bold — screen readers use headings to build a jump-to-section menu that a sighted user gets for free just by scanning the page.</li>
+            <li class="mb-2"><strong>Motor control:</strong> Served by making sure every interactive element — every link, every form field, every button — can be reached and activated using only the Tab and Enter keys, with no mouse at all.</li>
+            <li class="mb-2"><strong>Cognition:</strong> Served by <code>&lt;fieldset&gt;</code>/<code>&lt;legend&gt;</code> grouping and clear <code>&lt;label&gt;</code> text, which reduce how much a user has to hold in memory to understand a form.</li>
+          </ul>
+          <p><strong>The How:</strong> One easy, high-impact addition: a <strong>skip navigation link</strong>. A keyboard-only user has to press Tab through your entire <code>&lt;nav&gt;</code> menu just to reach the main content — every single page load. A skip link fixes that:</p>
+          <pre class="p-3 rounded mb-3 no-copy"><code>&lt;body&gt;
+  &lt;a href="#main-content" class="skip-link"&gt;Skip to main content&lt;/a&gt;
+  &lt;header&gt;
+    &lt;nav&gt;...&lt;/nav&gt;
+  &lt;/header&gt;
+  &lt;main id="main-content"&gt;
+    ...
+  &lt;/main&gt;
+&lt;/body&gt;</code></pre>
+          <p class="small">This link is normally hidden off-screen with CSS, and only becomes visible when a keyboard user tabs to it — the very first stop on the page. Clicking or pressing Enter jumps straight past the whole navigation menu to <code>id="main-content"</code>.</p>
+
+          <div class="alert alert-warning small border-warning border mb-0">
+            <strong>Where Everyone Gets Ambushed:</strong> Students often treat accessibility as one giant checklist item done at the very end, right before turning in a project. It doesn't work that way — a missing <code>alt</code> attribute or an unlabeled input is a small fix while you're writing that line of code, and a much bigger one to hunt down later across five different pages. Optimize as you build, not after.
+          </div>
+        </section>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+          <div class="d-flex align-items-center mb-2">
+            <h5 class="fw-bold text-primary mb-0">Quick Check:</h5>
+          </div>
+          <p class="mb-2 small text-dark">Why does a "Skip to main content" link matter for a keyboard-only user, even though a mouse user never notices it's there?</p>
+          <details class="small"><summary class="fw-bold text-success" style="cursor:pointer;">Check your answer</summary><p class="mb-0 mt-2">Without it, a keyboard user must press Tab through every single navigation link on every page load just to reach the actual content. The skip link lets them jump straight to <code>&lt;main&gt;</code> in one keypress.</p></details>
+        </div>
+      </div>
+    </div>
+
     <!-- NEW SECTION 14: W3C VALIDATION MILESTONE -->
-    <div class="row mb-5 pb-4 border-bottom align-items-start">
+    <div id="zero-error-audit" class="row mb-5 pb-4 border-bottom align-items-start">
         <div class="col-lg-12">
             <h2 class="section-title mt-0 text-center">Quality Assurance: The Zero Error Audit</h2>
             <p class="text-center mx-auto mb-4" style="max-width: 800px;">You have now coded the entirety of your Figma design in raw HTML. Before we start styling it with CSS, we must ensure the structural foundation is flawless. If your HTML foundation is cracked (missing closing tags, incorrect attributes), your CSS house will eventually collapse.</p>
@@ -1109,6 +1270,31 @@
                     </ol>
                     <p class="mb-3 text-danger fw-bold mt-4">Turn In: Upload a screenshot showing the green "Document checking completed. No errors or warnings to show" message, or upload your fully repaired Custom Website Folder.</p>
                     <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+
+                    <h6 class="fw-bold mt-4 mb-2">📋 Grading Rubric (50 pts)</h6>
+                    <table class="table table-bordered small bg-white shadow-sm mb-0">
+                      <thead class="table-light text-center">
+                        <tr><th style="width:20%">Score</th><th>What It Looks Like</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="fw-bold text-center">4.0 (Advanced)<br><span class="text-primary">Digital Architect</span></td>
+                          <td>All three pages pass W3C Validation with zero errors and zero warnings, and the screenshot proof is clearly labeled per page.</td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold text-center">3.0 (Mastery)<br><span class="text-success">Practitioner</span></td>
+                          <td>All three pages (index, about, contact) pass W3C Validation with zero errors.</td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold text-center">2.0 (Foundational)<br><span class="text-warning">Apprentice</span></td>
+                          <td>Some pages still show validation errors, or only one page was checked and repaired.</td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold text-center">1.0 (Novice)<br><span class="text-danger">Beginner</span></td>
+                          <td>Attempted, but no evidence the validator was actually run on the submitted files.</td>
+                        </tr>
+                      </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -1118,7 +1304,7 @@
     <div class="row mb-5 pb-4 border-bottom">
       <div class="col-12">
         <h2 class="section-title mt-0 text-primary fw-bold text-center"><span class="badge bg-primary me-2">2.0 Level</span> Vocabulary Quick Reference</h2>
-        <p class="text-center text-muted small mb-4">These are the key terms you must know at the 2.0 proficiency level for Chapter 5. <span class="badge bg-primary me-1">NV 5.1.1</span><span class="badge bg-primary me-1">NV 5.1.2</span><span class="badge bg-primary me-1">NV 5.1.3</span><span class="badge bg-primary">NV 5.1.4</span></p>
+        <p class="text-center text-muted small mb-4">These are the key terms you must know at the 2.0 proficiency level for Chapter 5.</p>
         <div class="row g-3">
           <div class="col-md-6">
             <table class="table table-bordered table-sm small bg-white shadow-sm h-100">

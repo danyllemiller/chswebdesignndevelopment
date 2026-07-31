@@ -1,0 +1,61 @@
+{
+  "chapter": 5,
+  "title": "The “Bones” (Intro to HTML)",
+  "page": "year1/the-bones-intro-to-html.html",
+  "assessment_note": "Assessment for this chapter lives in external worksheets/tests, not an on-page question bank. assessed_by is descriptive only.",
+  "indicators": {
+    "4.2.3": {
+      "taught_in": "Relative vs. Absolute Paths (within Hypertext Links)",
+      "anchor": "#relative-vs-absolute-paths",
+      "practiced_in": "Lab 4: The Network Link Lab",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "4.6.3": {
+      "taught_in": "Building for Every User: Optimizing HTML for Special Needs",
+      "anchor": "#optimizing-for-special-needs",
+      "practiced_in": "Lab 8: Full Contact Form (labels) + Lab 7: Image Placeholders (alt text)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.1.1": {
+      "taught_in": "Why Does HTML Even Exist?",
+      "anchor": "#why-html",
+      "practiced_in": "Quick Check on markup vs. programming language",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.1.2": {
+      "taught_in": "Wait, There's More Than One Version? (within What is an HTML File?)",
+      "anchor": "#html-versions",
+      "practiced_in": "Comparison of the HTML 4.01 vs. HTML5 doctype",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.1.3": {
+      "taught_in": "What is an HTML \"Tag\"? / The Big 5 Semantic Tags / Text-Level Elements",
+      "anchor": "#what-is-a-tag",
+      "practiced_in": "Lab 5: The Global Skeleton, Lab 6: Content Blocks",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.1.4": {
+      "taught_in": "What is an HTML File? (The Boilerplate)",
+      "anchor": "#the-boilerplate",
+      "practiced_in": "Lab 1: Project 2 Setup, Lab 2: Typography Translation, and all page-building walkthroughs",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.1.5": {
+      "taught_in": "Quality Assurance: The Zero Error Audit",
+      "anchor": "#zero-error-audit",
+      "practiced_in": "Milestone: Zero Error Audit (W3C Validator on all 3 pages)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    }
+  },
+  "revisits": {
+    "4.2.1": "Not re-taught this chapter; directory structure is referenced (project folder setup in Lab 1) but formally owned by Chapter 1.",
+    "4.2.2": "Not re-taught this chapter; file naming conventions are applied throughout (index.html, about.html, etc.) but formally owned by Chapter 1."
+  },
+  "wrs": {
+    "1.3.2": {
+      "taught_in": "Chapter Overview: Your Coding \"Toolbox\"",
+      "anchor": "#overview",
+      "student_action": "All labs require proficient file management (creating, naming, and organizing index.html/about.html/contact.html/etc. in a project folder) using a professional code editor"
+    }
+  }
+}
