@@ -251,11 +251,15 @@
       <strong>
        File Paths Matter:
       </strong>
-      Use relative paths (
+      Use same-folder relative paths (
       <code>
-       /folder/page.html
+       page.html
       </code>
-      ) to link between your site's pages so your links don't break.
+      or
+      <code>
+       images/photo.jpg
+      </code>
+      ) to link between your site's pages so your links don't break when opened locally.
      </li>
      <li>
       <strong>
@@ -274,6 +278,44 @@
        &amp;nbsp;
       </code>
       for a space) to display special symbols.
+     </li>
+     <li>
+      <strong>
+       HTML is Markup, Not Programming:
+      </strong>
+      It has no logic or math - it just labels content so every browser understands it the same way. HTML5 is the current version; older ones were HTML 4.01 and the stricter XHTML.
+     </li>
+     <li>
+      <strong>
+       Forms Need Labels:
+      </strong>
+      Every
+      <code>
+       &lt;input&gt;
+      </code>
+      needs a matching
+      <code>
+       &lt;label&gt;
+      </code>
+      (linked with
+      <code>
+       for
+      </code>
+      /
+      <code>
+       id
+      </code>
+      ) so screen readers can announce what the field is for.
+     </li>
+     <li>
+      <strong>
+       Validate Before You Style:
+      </strong>
+      Run every page through the
+      <code>
+       W3C Validator
+      </code>
+      before moving on to CSS - broken HTML underneath will cause broken CSS on top.
      </li>
     </ol>
    </article>

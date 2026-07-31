@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Practice Quiz: Chapter 7 - The "Bones"</title>
+  <title>Practice Quiz: Chapter 5 - The "Bones"</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
   <link rel="shortcut icon" href="/images/favicon/favicon.ico">
@@ -23,8 +23,8 @@
     <div id="nav-placeholder"></div>
   </div>
   <section class="container my-5 text-center">
-    <h1 class="display-5 fw-bold text-primary border-bottom pb-3">Chapter 7 Practice Quiz</h1>
-    <p class="lead text-muted">10 randomized questions from the exhaustive Chapter 7 bank.</p>
+    <h1 class="display-5 fw-bold text-primary border-bottom pb-3">Chapter 5 Practice Quiz</h1>
+    <p class="lead text-muted">Randomized questions from the exhaustive Chapter 5 bank.</p>
     <div id="quiz-questions" class="text-start mt-5"></div>
   </section>
 
@@ -44,7 +44,15 @@
         { question: "What attribute is used for a hyperlink destination?", options: ["href", "src", "link", "to"], correct: 0 },
         { question: "Which tag is an 'Empty Element'?", options: ["<br>", "<p>", "<div>", "<a>"], correct: 0 },
         { question: "Where do meta tags live?", options: ["<head>", "<body>", "<footer>", "<header>"], correct: 0 },
-        { question: "Which entity creates the open standards for the web?", options: ["W3C", "ICANN", "Google", "NASA"], correct: 0 }
+        { question: "Which entity creates the open standards for the web?", options: ["W3C", "ICANN", "Google", "NASA"], correct: 0 },
+        { question: "HTML is best described as a:", options: ["Markup language", "Programming language", "Database query language", "Scripting language"], correct: 0 },
+        { question: "Which HTML version came before HTML5 and enforced very strict rules, like requiring every tag to close?", options: ["XHTML", "HTML 1.0", "CSS3", "HTML5.1"], correct: 0 },
+        { question: "Every form <input> should have a matching element for accessibility. Which one?", options: ["<label>", "<caption>", "<title>", "<placeholder>"], correct: 0 },
+        { question: "A <label> is correctly linked to its <input> when:", options: ["The label's 'for' attribute matches the input's 'id'", "They are next to each other in the code", "The label has the same class as the input", "The input has a placeholder"], correct: 0 },
+        { question: "Which tags group related form fields together and announce a section name to screen readers?", options: ["<fieldset> and <legend>", "<group> and <title>", "<section> and <header>", "<form> and <label>"], correct: 0 },
+        { question: "A 'skip navigation' link exists to help which type of user?", options: ["A keyboard-only user who wants to bypass the nav menu", "A user with a slow internet connection", "A user viewing the site on a large monitor", "A search engine crawler"], correct: 0 },
+        { question: "Before moving from HTML to CSS, a professional developer should:", options: ["Run the HTML through the W3C Validator to catch errors", "Delete all comments from the code", "Convert the file to XHTML", "Compress all images"], correct: 0 },
+        { question: "Which path type should student projects use to avoid broken links when opened directly in a browser?", options: ["Same-folder relative path", "Root-relative path (leading /)", "Absolute URL", "Up-a-folder path only"], correct: 0 }
     ];
     window.onload = () => initQuiz(pool);
   </script>
