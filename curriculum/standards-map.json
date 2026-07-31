@@ -1,0 +1,394 @@
+{
+ "chapters": {
+  "1": {
+   "title": "The Developer\u2019s World (Join the Developer\u2019s Guild)",
+   "page": "year1/join-the-developers-guild.html",
+   "owns": {
+    "1.1.1": "Discuss the requirements of CTSO participation/involvement as described in Carl D. Perkins Law",
+    "1.1.2": "Research nationally recognized CTSOs",
+    "1.1.3": "Investigate the impact of federal and state government regarding the progression and operation of CTSOs (e.g., Federal Statutes and Regulations, Nevada Administrative Code [NAC], Nevada Revised Statutes [NRS])",
+    "1.2.1": "Discuss the purpose of parliamentary procedure",
+    "1.2.2": "Demonstrate the proper use of parliamentary procedure",
+    "1.2.3": "Differentiate between an office and a committee",
+    "1.2.6": "Describe the importance of a constitution and bylaws to the operation of a CTSO chapter",
+    "1.3.1": "Explore opportunities in community service-related work-based learning (WBL)",
+    "1.3.3": "Engage with business and industry partners for community service",
+    "1.4.2": "Describe the appropriate professional/workplace attire and its importance",
+    "1.4.4": "Participate in authentic contextualized instructional activities",
+    "1.5.1": "Make a connection between program standards to career pathway(s)",
+    "1.5.2": "Explain the importance of participation and completion of a program of study",
+    "1.5.3": "Promote community awareness of local student organizations associated with CTE programs",
+    "2.1.1": "Describe the role of the World Wide Web Consortium (W3C) in defining web standards",
+    "2.1.2": "Research the history of the World Wide Web",
+    "2.1.3": "Compare and contrast the Internet and the World Wide Web",
+    "2.3.1": "Define common terminology and their acronyms",
+    "2.3.2": "Differentiate between front-end and back-end development",
+    "2.3.3": "Explain the various roles and careers related to web design",
+    "2.5.1": "Define e-commerce as it relates to web development",
+    "2.5.3": "Evaluate payment-processing options",
+    "2.5.4": "Discuss security concerns as they relate to e-commerce",
+    "4.2.1": "Create a maintainable directory structure for a website",
+    "4.2.2": "Apply appropriate file naming protocols",
+    "6.1.3": "Explain the relationship between client and server"
+   },
+   "revisits": {
+    "1.2.5": "Participate in local, regional, state, or national conferences, events, or competitions",
+    "1.3.2": "Participate in a service learning (program related) and/or community service project or activity",
+    "1.4.1": "Demonstrate college and career readiness (e.g., applications, resumes, interview skills, presentation skills)",
+    "2.5.2": "Demonstrate how to integrate a shopping cart into a web page",
+    "3.2.4": "Differentiate between secure and unsecure web protocols",
+    "6.2.5": "Explain domain name servers (DNS)"
+   },
+   "wrs": {
+    "1.1.1": "Demonstrate a positive work ethic by coming to work every day on time, a willingness to take direction, and motivation to accomplish the task at hand Demonstration may include: \u2022 Maintaining punctual and consistent attendance (e.g., accounting for hours worked, arriving on time for work or appointments). \u2022 Taking direction willingly (e.g., using active listening techniques, approaching the assigned task with motivation). \u2022 Exhibiting motivation to accomplish the task at hand (e.g., remaining on task, working independently, completing the task efficiently, being a self-directed learner). Instructional strategies may include: \u2022 Define positive work ethic. \u2022 Calculate daily/weekly time sheets. \u2022 Identify employee traits desired by employers. \u2022 Role-play an employer or employee that exemplifies good work ethic.",
+    "1.1.4": "Demonstrate positive self-representation skills by dressing appropriately and using language and manners suitable for the workplace Demonstration may include: \u2022 Dressing appropriately (i.e., adhering to professional rather than personal standards, following dress code). \u2022 Maintaining personal hygiene. \u2022 Using language and manners suitable for the workplace (i.e., adhering to respectful, polite, and professional practices). Instructional strategies may include: \u2022 Research the values of dressing appropriately for a variety of settings including school and business. \u2022 Compare and contrast workplace dress versus personal dress. \u2022 Analyze different body languages to understand the messages they send. \u2022 Practice professional business etiquette and communications.",
+    "1.1.6": "Demonstrate conflict-resolution skills by negotiating diplomatic solutions to interpersonal and workplace issues Demonstration may include: \u2022 Demonstration includes negotiating diplomatic solutions to interpersonal conflicts in the workplace (e.g., personality issues, cultural difference issues, disagreements over how to handle work projects, performance issues). Instructional strategies may include: \u2022 Identify different types of conflicts. \u2022 Identify various viewpoints of an issue in order to encourage sensitivity and to resolve conflicts. \u2022 Introduce a problem-solving procedure and role-play various conflict scenarios.",
+    "1.2.4": "Demonstrate healthy behaviors and safety skills by following safety guidelines and managing personal health Demonstration may include: \u2022 Managing personal health (e.g., setting short-, medium-, and long-term physical-fitness goals; eating non- or minimally-processed foods). \u2022 Following safety guidelines (e.g., adhering to Occupational Safety and Health Administration [OSHA] standards and instructor and manufacturer guidelines). Instructional strategies may include: \u2022 Explain importance/impact of personal health as it relates to employment and work. \u2022 Create goals to promote healthy behaviors. \u2022 Design a chart that illustrates safety guidelines. \u2022 Pass a safety test.",
+    "1.2.5": "Demonstrate understanding of workplace organizations, systems, and climates by identifying \u201cbig picture\u201d issues and fulfilling the mission of the workplace Demonstration may include: \u2022 Identifying \u201cbig picture\u201d issues and goals (e.g., the organization\u2019s structure, culture, policies, and procedures, as well as its role and status within the industry, economy, and community) \u2022 Acknowledging the economic, political, and social relationships that impact multiple levels of an organization (e.g., local, national, international). \u2022 Explaining one\u2019s role in fulfilling the mission of the organization. Instructional strategies may include: \u2022 Investigate corporate visions and indentify their importance. \u2022 Illustrate the hierarchy of a company. \u2022 Define vision and mission statements. \u2022 Develop a business concept and its vision and mission statements."
+   }
+  },
+  "2": {
+   "title": "The \u201cRules\u201d (How Not to Get Sued)",
+   "page": "year1/the-rules-how-not-to-get-sued.html",
+   "owns": {
+    "3.1.1": "Research laws that govern intellectual property in diverse forms",
+    "3.1.2": "Evaluate Creative Commons licensing and other free-content license types",
+    "3.1.3": "Cite the boundaries of third-party work",
+    "3.1.4": "Explain terms related to copyright, trademarks, patents, and other intellectual property",
+    "3.2.1": "Explain invasion of privacy in the use of technology",
+    "3.2.2": "Model acceptable security practices",
+    "3.2.3": "Analyze the implications of a personal digital footprint",
+    "3.2.4": "Differentiate between secure and unsecure web protocols",
+    "3.2.5": "Explain the implications of General Data Protection Regulations (GDPR)",
+    "3.2.6": "Explain the implications of Nevada Consumer Privacy Act",
+    "3.2.7": "Compare and contrast global privacy policies and cultural impacts",
+    "3.2.8": "Describe how a security certificate protects a website",
+    "3.3.1": "Model legal and ethical use of information",
+    "3.3.2": "Describe the purpose of a non-disclosure agreement (NDA)",
+    "3.3.3": "Analyze content for bias",
+    "4.6.1": "Describe regional, national, and international legal requirements and standards for accessibility on the web",
+    "4.6.2": "Identify types of disabilities that should be considered when designing websites",
+    "4.6.5": "Research Americans with Disabilities Act (ADA) compliance regulations and policies"
+   },
+   "revisits": {
+    "4.6.3": "Optimize websites to accommodate users with special needs"
+   },
+   "wrs": {
+    "1.1.2": "Demonstrate integrity by abiding by workplace policies and laws and demonstrating honesty and reliability Demonstration may include: \u2022 Identifying and abiding by laws and workplace policies (e.g., using personal and sick leave only when necessary, understanding harassment and discrimination policies). \u2022 Respecting the property of the employer and coworkers. \u2022 Identifying how one\u2019s actions and behavior can have far-reaching effects (e.g., personal behavior affects others nearby; business decisions can have global implications or impact the environment). \u2022 Exhibiting honesty and reliability. Instructional strategies may include: \u2022 Define integrity. \u2022 Review samples of human resource policies. \u2022 Investigate common employer-personnel issues. \u2022 Differentiate between honesty and reliability.",
+    "1.1.5": "Demonstrate diversity awareness by working well with all customers and coworkers Demonstration may include: \u2022 Working in a respectful and friendly manner with all customers and coworkers (i.e., treating all with the same degree of professional respect), regardless of national origin, race, appearance, religion, gender, disability, or age. \u2022 Respecting cultural differences encountered in the workplace. Instructional strategies may include: \u2022 Define diversity. \u2022 Summarize the Civil Rights Act of 1964 and the Americans with Disabilities Act of 1990. \u2022 Explain the importance of cultural awareness in the global market. \u2022 Identify cultural differences that affect communication (e.g., hand gestures, body language, and customs).",
+    "1.3.3": "Demonstrate proper Internet use and security by using the Internet appropriately for work Demonstration may include: \u2022 Using the Internet efficiently and ethically for work. \u2022 Identifying the risks of posting personal and work information on the Internet (e.g., on social networking sites, job search sites). \u2022 Taking measures to avoid Internet security risks (e.g., viruses, malware). Instructional strategies may include: \u2022 Review Internet use policies. \u2022 Define and describe risks associated with improper Internet use. \u2022 Compare and contrast the risks and benefits of social media sites. \u2022 Research laws and regulations associated with Internet content (i.e., copyright laws)."
+   }
+  },
+  "3": {
+   "title": "The Blueprint (Research & Architecture)",
+   "page": "year1/the-blueprint.html",
+   "owns": {
+    "2.4.1": "Describe the role of social media in web development",
+    "2.4.2": "Explain the correlation between social media platforms and web links",
+    "2.4.3": "Describe the relationship of advertising, marketing, social media, and websites",
+    "2.4.4": "Discuss current trends in social media",
+    "2.4.5": "Create and implement a strategy that uses social networks to drive traffic to a website",
+    "4.1.1": "Describe the web design and development cycle",
+    "4.1.2": "Demonstrate the web design and development cycle (e.g., analyze, design, develop, implement, evaluate)",
+    "4.3.2": "Develop an appropriate navigation system (site map)",
+    "4.3.3": "Develop wireframes for initial responsive design concepts",
+    "4.4.1": "Discuss and differentiate voice, tone, and style as it applies to web writing",
+    "4.4.2": "Determine the primary and secondary purposes of web content",
+    "4.4.3": "Identify target audiences and reading levels for specific websites",
+    "4.4.4": "Identify and create a list of keywords and descriptions (meta tags) to include in web content for search engine optimization (SEO)",
+    "4.4.5": "Apply grammar and spelling conventions to content",
+    "4.4.8": "List and describe best practices in content creation that foster indexing and ranking of websites"
+   },
+   "revisits": {
+    "4.6.4": "Explain website usability procedures"
+   },
+   "wrs": {
+    "1.1.3": "Demonstrate teamwork skills by contributing to the success of the team, assisting others, and requesting help when needed Demonstration may include: \u2022 Contributing to the success of the team (e.g., brainstorming solutions, volunteering, collaborating, compromising, valuing individual contributions, performing in accordance with the assigned role). \u2022 Assisting others (e.g., supporting team members and leaders, taking initiative). \u2022 Requesting help when needed (e.g., asking questions after consulting manuals on policies and procedures, knowing when to seek help from coworkers and supervisors). Instructional strategies may include: \u2022 Define teamwork. \u2022 Interpret the critical skills exhibited by effective team members. \u2022 Compare and contrast the various roles of team members. \u2022 Participate in team projects to practice communication skills.",
+    "1.2.1": "Demonstrate effective speaking and listening skills by communicating effectively with customers and employees and following directions Demonstration may include: \u2022 Communicating effectively with customers and coworkers (e.g., understanding the role of nonverbal communication, avoiding the use of slang, being pleasant and helpful, and utilizing an appropriate medium for conveying messages with dignity and respect). \u2022 Exhibiting public and group speaking skills. \u2022 Comprehending details and following directions. \u2022 Repeating directions or requests to ensure understanding (i.e., practicing active listening). Instructional strategies may include: \u2022 Define effective communication. \u2022 Participate in group discussions and oral presentations. \u2022 Compare and contrast the speaker\u2019s verbal and nonverbal messages. \u2022 Practice active listening.",
+    "1.2.2": "Demonstrate effective reading and writing skills by reading and interpreting workplace documents and writing clearly Demonstration may include: \u2022 Reading and correctly interpreting workplace documents (e.g., instructional manuals, work orders, invoices, memorandums). \u2022 Writing clear, correct language, appropriate to audience. Instructional strategies may include: \u2022 Utilize instructional manuals to solve a problem. \u2022 Interpret and complete work orders, invoices, and other workplace documents. \u2022 Create technical reports."
+   }
+  },
+  "4": {
+   "title": "The Artist (Intro to UI/UX)",
+   "page": "year1/the-why-intro-to-uiux.html",
+   "owns": {
+    "2.2.1": "Explain and apply color theory",
+    "2.2.2": "Explain and apply the principles of design",
+    "2.2.3": "Explain and apply the elements of design",
+    "2.2.4": "Explain and apply effective typography",
+    "2.2.5": "Evaluate the use of white space",
+    "4.3.1": "Identify commonly used layout techniques for web design",
+    "4.4.7": "Create a branding message that will present a professional image",
+    "4.6.4": "Explain website usability procedures"
+   },
+   "revisits": {
+    "4.3.4": "Develop responsive design for various devices",
+    "4.6.3": "Optimize websites to accommodate users with special needs"
+   },
+   "wrs": {
+    "1.1.7": "Demonstrate creativity and resourcefulness by contributing new ideas and working with initiative Demonstration may include: \u2022 Contributing new and innovative ideas (e.g., for improving products and procedures). \u2022 Displaying initiative readily, independently, and responsibly. \u2022 Dealing skillfully and promptly with new situations and obstacles. \u2022 Developing operational policies and procedures that use resources in a sustainable manner. Instructional strategies may include: \u2022 Define creativity and creative-thinking. \u2022 Research great inventors. \u2022 Analyze a problem, brainstorm solutions, and identify a solution. \u2022 Create a futuristic product."
+   }
+  },
+  "5": {
+   "title": "The \u201cBones\u201d (Intro to HTML)",
+   "page": "year1/the-bones-intro-to-html.html",
+   "owns": {
+    "4.2.3": "Describe the usage of correct file paths for relative and absolute links",
+    "4.6.3": "Optimize websites to accommodate users with special needs",
+    "5.1.1": "Explain the purpose of Hypertext Markup Language (HTML) in website development",
+    "5.1.2": "Differentiate among the different versions of HTML",
+    "5.1.3": "Identify HTML tags for authoring a web page document",
+    "5.1.4": "Code a basic web page utilizing proper HTML document structure in a text editor",
+    "5.1.5": "Utilize verification tools to verify code"
+   },
+   "revisits": {
+    "4.2.1": "Create a maintainable directory structure for a website",
+    "4.2.2": "Apply appropriate file naming protocols"
+   },
+   "wrs": {
+    "1.3.2": "Demonstrate proficiency with information technology by using computers, file management techniques and software/programs effectively Demonstration may include: \u2022 Working with hardware, file-management techniques, and IT software/programs effectively on various operating systems. \u2022 Working with equipment and software specific to occupation. \u2022 Seeking additional technology to improve work processes and products. Instructional strategies may include: \u2022 Identify the appropriate use of various software tools. \u2022 Utilize presentation software to communicate ideas to a group. \u2022 Utilize word processing software to produce workplace documents. \u2022 Utilize spreadsheet software to create meaningful workplace records."
+   }
+  },
+  "6": {
+   "title": "The \u201cClothes\u201d (Intro to CSS)",
+   "page": "year1/the-clothes-intro-to-css.html",
+   "owns": {
+    "4.3.5": "Identify the uses of Cascading Style Sheets (CSS)",
+    "5.2.1": "Describe the role of CSS in relation to web design",
+    "5.2.2": "Identify the structure of CSS style rules",
+    "5.2.3": "Describe CSS selector types",
+    "5.2.4": "Differentiate between internal, external, and inline style sheets",
+    "5.2.5": "Use CSS to style webpage content (e.g., typography, web fonts)",
+    "5.2.7": "Utilize online validation tools for CSS"
+   },
+   "revisits": {
+    "4.6.3": "Optimize websites to accommodate users with special needs"
+   },
+   "wrs": {
+    "1.2.9": "Demonstrate mathematics skills by using mathematical reasoning to accomplish tasks Demonstration may include: \u2022 Using mathematical reasoning and processes to accomplish job-specific tasks (e.g., using geometry and algebra to predict required supplies for a construction job, using computer mathematics to create a programming algorithm). \u2022 Making calculations related to personal finance (e.g., wage rates, paycheck deductions, taxes). Instructional strategies may include: \u2022 Estimate manufacturing, repair, or food costs. \u2022 Prepare a small business budget. \u2022 Calculate wage rates, paycheck deductions, and taxes."
+   }
+  },
+  "7": {
+   "title": "The \u201cStyle\u201d (Advanced CSS Layout)",
+   "page": "year1/the-style-advanced-css-layout.html",
+   "owns": {
+    "4.3.4": "Develop responsive design for various devices",
+    "5.2.6": "Use CSS to lay out webpage content (e.g., flexbox, grid, positioning: static, relative, absolute, fixed)",
+    "5.2.8": "Describe the function of a CSS preprocessor"
+   },
+   "revisits": {
+    "4.6.3": "Optimize websites to accommodate users with special needs"
+   },
+   "wrs": {
+    "1.2.3": "Demonstrate critical-thinking and problem-solving skills by analyzing and resolving problems that arise in completing assigned tasks Demonstration may include: \u2022 Recognizing, analyzing, and solving problems that arise in completing assigned tasks. \u2022 Identifying resources that may help solve a specific problem. \u2022 Using a logical approach to make decisions and solve problems. Instructional strategies may include: \u2022 Define critical-thinking and problem-solving skills. \u2022 Analyze a problem and predict a solution. \u2022 Utilize a problem-solving procedure to solve a problem."
+   }
+  },
+  "8": {
+   "title": "Sights & Sounds (Media)",
+   "page": "year1/sights-sounds-making-it-pop-html-media.html",
+   "owns": {
+    "1.3.2": "Participate in a service learning (program related) and/or community service project or activity",
+    "4.4.6": "Evaluate existing content for web use (e.g., images, print documents, text, video)",
+    "4.5.1": "Describe common media file formats",
+    "4.5.2": "Identify appropriate software for media creation",
+    "4.5.3": "Create and edit media files (e.g., sound, video, graphics, interactive media, multimedia)",
+    "4.5.4": "Optimize media files for uploading using compression tools",
+    "4.5.5": "Embed media files in a web design",
+    "4.5.6": "Calculate and convert images to desired sizes and resolution"
+   },
+   "revisits": {
+    "1.4.5": "Demonstrate technical skills in various student organization activities/events",
+    "4.3.4": "Develop responsive design for various devices",
+    "4.6.3": "Optimize websites to accommodate users with special needs",
+    "5.2.6": "Use CSS to lay out webpage content (e.g., flexbox, grid, positioning: static, relative, absolute, fixed)"
+   },
+   "wrs": {
+    "1.3.1": "Demonstrate proficiency with job-specific technologies by selecting and safely using technological resources to accomplish work responsibilities in a productive manner Demonstration may include: \u2022 Demonstration includes selecting and safely using technological resources (e.g., equipment, machines, tools, electronics) to accomplish work efficiently and productively, while considering environmental impacts of such technologies. Instructional strategies may include: \u2022 Identify the appropriate tools to accomplish a task. \u2022 Describe safety procedures. \u2022 Identify local and federal regulations that affect safety and equipment.",
+    "1.3.4": "Demonstrate proficiency with telecommunications by selecting and using appropriate devices, services, and applications Demonstration may include: \u2022 Demonstration includes selecting and using telecommunications devices (e.g., portable digital assistants, smart devices, cellular phones), services (e.g., digital subscriber line, cellular network, cable, Internet), and Web-based applications (e.g., Webmail, social networking, online auctions, wikis) appropriate to work assignments. Instructional strategies may include: \u2022 Identify the appropriate usage of various devices in the workplace. \u2022 Create a timeline of the evolution of telecommunications. \u2022 Explain workplace uses of Web-based applications. \u2022 Describe the effectiveness and impact of telecommunications resources."
+   }
+  },
+  "9": {
+   "title": "The \u201cBrains\u201d (Intro to JavaScript)",
+   "page": "year2/the-brains-intro-to-javascript.html",
+   "owns": {
+    "5.3.1": "Explain the use of current web scripting technologies",
+    "5.3.2": "Implement scripting (e.g., rollovers, form scripts)",
+    "5.3.3": "Compare and contrast client (browser) scripting and server scripting (e.g., PHP, JavaScript)",
+    "5.3.5": "Compare and contrast static versus dynamic websites"
+   },
+   "revisits": {},
+   "wrs": {}
+  },
+  "10": {
+   "title": "The Game Developer (Advanced JS & Game Logic)",
+   "page": "year2/the-game-dev-advanced-js-game-logic.html",
+   "owns": {
+    "1.2.4": "Discuss the importance of participation in local, regional, state, and national conferences, events, and competitions",
+    "1.2.5": "Participate in local, regional, state, or national conferences, events, or competitions",
+    "1.4.5": "Demonstrate technical skills in various student organization activities/events",
+    "5.3.4": "Enhance interactivity of websites using current scripting trends",
+    "5.3.6": "Utilize online validation tools for web scripting"
+   },
+   "revisits": {
+    "7.1.3": "Develop an app using a modern programming language and/or platform"
+   },
+   "wrs": {
+    "1.2.8": "Demonstrate time, task, and resource management skills by organizing and implementing a productive plan of work Demonstration may include: \u2022 Organizing and implementing a productive plan of work (e.g., setting and meeting short-, medium-, and long-term professional goals). \u2022 Working efficiently to make the best use of time. \u2022 Managing personnel to capitalize on their strengths while respecting their professional desires. \u2022 Maintaining equipment to ensure longevity and efficiency. \u2022 Using resources in a sustainable manner. Instructional strategies may include: \u2022 Develop a plan of work to reach identified goals. \u2022 Develop and utilize a time-management plan. \u2022 Describe the importance of using natural resources effectively."
+   }
+  },
+  "11": {
+   "title": "The \u201cCloud\u201d (Collaboration & Hosting)",
+   "page": "year2/the-cloud-collaboration-hosting.html",
+   "owns": {
+    "4.2.4": "Recognize the relationship between local and remote site structures",
+    "4.2.5": "Develop a data backup procedures plan",
+    "5.6.1": "Define cloud computing",
+    "5.6.2": "Compare various cloud computing platforms (e.g., Microsoft Azure, Amazon AWS, Google Cloud)",
+    "5.6.3": "Explain the role of version control when developing with a team",
+    "6.1.1": "Identify the various server operating systems used to host web pages",
+    "6.1.2": "Describe how servers work in a hosting environment",
+    "6.1.4": "Explain common web server maintenance routines",
+    "6.1.5": "Describe the technical requirements involved in choosing a web host"
+   },
+   "revisits": {
+    "4.2.1": "Create a maintainable directory structure for a website",
+    "4.2.3": "Describe the usage of correct file paths for relative and absolute links",
+    "6.1.3": "Explain the relationship between client and server"
+   },
+   "wrs": {
+    "1.2.6": "Demonstrate lifelong-learning skills by continually acquiring new industry-related information and improving professional skills Demonstration may include: \u2022 Continually acquiring new industry-related knowledge. \u2022 Improving professional skills to stay current in the field and to promote personal advancement. \u2022 Seeking education and experiences that enhance personal growth. Instructional strategies may include: \u2022 Describe the relationship of lifelong learning to financial success. \u2022 Develop an educational/career plan. \u2022 Create a portfolio."
+   }
+  },
+  "12": {
+   "title": "The \u201cManager\u201d (CMS Platforms)",
+   "page": "year2/the-manager-cms-platforms.html",
+   "owns": {
+    "2.5.2": "Demonstrate how to integrate a shopping cart into a web page",
+    "5.5.1": "Identify content management systems (CMS) (e.g., WordPress, Joomla)",
+    "5.5.2": "Evaluate current trends in CMS (e.g., blogging, online magazine, corporate websites) and learning management system (LMS [e.g., Canvas])",
+    "5.5.3": "Explore WYSIWYG software (e.g., Dreamweaver) for web development"
+   },
+   "revisits": {},
+   "wrs": {
+    "1.2.10": "Demonstrate customer service skills by identifying and addressing the needs of all customers and providing helpful, courteous, and knowledgeable service Demonstration may include: \u2022 Addressing the needs of all customers (e.g., proactively engaging customers until they are satisfied). \u2022 Providing helpful, courteous, and knowledgeable service (e.g., displaying a positive attitude, treating all customers with the same degree of professional respect, sharing information and knowledge honestly and forthrightly). Instructional strategies may include: \u2022 Define good customer service. \u2022 Identify the importance of internal and external customer service. \u2022 Explain the importance of achieving and maintaining customer satisfaction. \u2022 Role-play good customer service."
+   }
+  },
+  "13": {
+   "title": "The \u201cNetwork\u201d (Intro to APIs)",
+   "page": "year2/the-network-intro-to-apis.html",
+   "owns": {
+    "7.1.1": "Analyze current programming languages and/or platforms used in web app development",
+    "7.1.2": "Explain the purpose of Application Programming Interface (API) in app development",
+    "7.1.3": "Develop an app using a modern programming language and/or platform"
+   },
+   "revisits": {
+    "6.1.3": "Explain the relationship between client and server"
+   },
+   "wrs": {}
+  },
+  "14": {
+   "title": "The \u201cBrain\u201d (Databases)",
+   "page": "year2/the-brain-databases.html",
+   "owns": {
+    "5.4.1": "Identify and describe relational databases",
+    "5.4.2": "Analyze various databases used in web development",
+    "5.4.3": "Describe the purpose of a database as it relates to web development",
+    "5.4.4": "Incorporate a database into a website where possible (e.g., local storage, external database)"
+   },
+   "revisits": {},
+   "wrs": {}
+  },
+  "15": {
+   "title": "The Game Never Ends (Emerging Tech)",
+   "page": "year2/the-game-never-ends.html",
+   "owns": {
+    "7.2.1": "Define Artificial Intelligence",
+    "7.2.2": "Explain the role of AI in web development",
+    "7.2.3": "Describe how AI changes the user experience",
+    "7.2.4": "Explain the significance of data in the development of AI",
+    "7.3.1": "Research Internet of Things (IoT) as it relates to web development",
+    "7.3.2": "Explain the impact of digital assistants on web development",
+    "7.4.1": "Explore use of VR and AR in web design",
+    "7.4.2": "Research emerging applications of VR and AR in non-entertainment venues"
+   },
+   "revisits": {
+    "7.1.2": "Explain the purpose of Application Programming Interface (API) in app development"
+   },
+   "wrs": {}
+  },
+  "16": {
+   "title": "The Final Boss (Going Live)",
+   "page": "year2/the-final-boss-going-live.html",
+   "owns": {
+    "1.4.1": "Demonstrate college and career readiness (e.g., applications, resumes, interview skills, presentation skills)",
+    "1.4.3": "Investigate industry-standard credentials/certifications available within this Career Cluster\u2122",
+    "6.2.1": "Identify the purpose of Secure File Transfer Protocol (SFTP)",
+    "6.2.2": "Demonstrate the use of SFTP",
+    "6.2.3": "Preview and test web pages for compatibility using various browsers and output devices",
+    "6.2.4": "Describe the process of locating and registering a domain name",
+    "6.2.5": "Explain domain name servers (DNS)",
+    "6.3.1": "Evaluate content with client for relevancy",
+    "6.3.2": "Evaluate content for viability",
+    "6.3.3": "Monitor validity of hyperlinks",
+    "6.3.4": "Maintain and update all website documentation (e.g., prototype, site map, navigation)",
+    "6.3.5": "Analyze web analytics for purposes of improving traffic, user experience, and meeting targeted goals"
+   },
+   "revisits": {
+    "1.3.2": "Participate in a service learning (program related) and/or community service project or activity",
+    "2.4.5": "Create and implement a strategy that uses social networks to drive traffic to a website",
+    "3.2.3": "Analyze the implications of a personal digital footprint",
+    "3.2.4": "Differentiate between secure and unsecure web protocols",
+    "3.2.8": "Describe how a security certificate protects a website",
+    "4.4.4": "Identify and create a list of keywords and descriptions (meta tags) to include in web content for search engine optimization (SEO)",
+    "4.4.8": "List and describe best practices in content creation that foster indexing and ranking of websites",
+    "5.1.5": "Utilize verification tools to verify code",
+    "5.2.7": "Utilize online validation tools for CSS",
+    "5.3.6": "Utilize online validation tools for web scripting"
+   },
+   "wrs": {
+    "1.2.7": "Demonstrate job acquisition and advancement skills by preparing to apply for a job and seeking promotion Demonstration may include: \u2022 Preparing to apply for a job (e.g., complete personal aptitude and interest inventories, performing a job search, developing a r\u00e9sum\u00e9, preparing for an interview). \u2022 Identifying steps for seeking promotion (e.g., taking advantage of professional development opportunities, offering to accept additional assignments, learning new skills, understanding the benefits of mentor relationships). Instructional strategies may include: \u2022 Utilize different media sources to perform job searches. \u2022 Practice job interview skills. \u2022 Develop a r\u00e9sum\u00e9. \u2022 Complete a job application."
+   }
+  }
+ },
+ "nv_performance_standards": {
+  "CS1": "INTEGRATE CAREER AND TECHNICAL STUDENT ORGANIZATIONS (CTSOs)",
+  "1.1": "Explore the History and Organization of CTSOs",
+  "1.2": "Develop Leadership Skills",
+  "1.3": "Participate in Community Service",
+  "1.4": "Develop Professional and Career Skills",
+  "1.5": "Understand the Relevance of Career and Technical Education (CTE)",
+  "CS2": "FOUNDATIONS OF WEB DESIGN AND DEVELOPMENT",
+  "2.1": "Understand the History of Web Design and Development",
+  "2.2": "Explain Layout and Design Theory",
+  "2.3": "Demonstrate Knowledge of Industry Terminology",
+  "2.4": "Describe the Relationship Between Social Media and Web",
+  "2.5": "Describe E-Commerce",
+  "CS3": "ETHICAL AND SECURE USE OF INFORMATION",
+  "3.1": "Describe Copyright Laws in Relation to Web Development",
+  "3.2": "Explain Security Issues in Relation to Web Development",
+  "3.3": "Apply Personal and Professional Ethics",
+  "CS4": "PLAN AND DESIGN A WEBSITE",
+  "4.1": "Web Design and Development Cycle",
+  "4.2": "Develop a File Management System",
+  "4.3": "Demonstrate Proper Layout Techniques",
+  "4.4": "Create Web Content",
+  "4.5": "Create and Edit Media for the Web",
+  "4.6": "Demonstrate Knowledge of Challenges Associated with",
+  "CS5": "WEBSITE DEVELOPMENT",
+  "5.1": "Develop a Website Using Hypertext Markup Language (HTML)",
+  "5.2": "Describe Concepts and Use of Cascading Style Sheets",
+  "5.3": "Apply Foundations of Web Scripting",
+  "5.4": "Develop Databases",
+  "5.5": "Utilize Content Management Systems in Web Development",
+  "5.6": "Utilize Online Collaboration Resources",
+  "CS6": "PUBLISHING A WEBSITE",
+  "6.1": "Understand Fundamentals of Web Hosting",
+  "6.2": "Demonstrate Publishing to the Web",
+  "6.3": "Maintain Web Content",
+  "CS7": "ADVANCED AND EMERGING TECHNOLOGIES IN WEB DEVELOPMENT",
+  "7.1": "Develop a Web App",
+  "7.2": "Explain Artificial Intelligence (AI)",
+  "7.3": "Research Non-Standard Web Connected Devices",
+  "7.4": "Explore Virtual (VR) and Augmented (AR) Reality"
+ }
+}
