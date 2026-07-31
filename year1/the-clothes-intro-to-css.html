@@ -47,7 +47,7 @@
     <!-- SECTION 1: OVERVIEW & PERSONA -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">Our Site is Ugly. Let's Fix It.</h2>
+        <h2 class="section-title mt-0" id="role-of-css">Our Site is Ugly. Let's Fix It.</h2>
         <p>Welcome back, web wizard! &#129497;&#8205;&#9794;&#65039; In the last chapter, you built a website's skeleton with HTML. Now, it's time to give it a personality. HTML is the foundation, but CSS (Cascading Style Sheets) is what makes the web beautiful. As your <strong>Carson High Web Design & Marketing Agency</strong> begins taking on local clients, raw HTML structure is no longer enough.</p>
         <p>CSS is the paint, the interior design, and the clothing of your website that will bring your clients' brands to life and win you contracts across Carson City. CSS is made of modules, like different design departments (color, layout, fonts) that can be updated on their own. In this chapter, your agency is taking on a new client project, "The Curiosity Corner," and turning it into our design playground.</p>
         
@@ -55,7 +55,7 @@
           <a href="/images/the-clothes-intro-to-css/figure-01.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-01.png" alt="CSS Concept Visualization" class="img-fluid rounded shadow-sm border w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.1:</strong> CSS is Interior Design</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.1:</strong> CSS is Interior Design</figcaption>
         </figure>
 
         <h2 class="section-title mt-5">Meet the Target Audience: "Science Student Sam"</h2>
@@ -87,7 +87,7 @@
             </div>
           </div>
           <div class="card-footer bg-white border-top text-center py-2">
-            <span class="small text-muted" style="font-size: 0.75rem;"><strong>Figure 8.2:</strong> User Persona</span>
+            <span class="small text-muted" style="font-size: 0.75rem;"><strong>Figure 6.2:</strong> User Persona</span>
           </div>
         </div>
       </div>
@@ -147,8 +147,34 @@
       <div class="col-lg-8 pe-lg-5">
         <h2 class="section-title mt-0">Browser Developer Tools: Your Secret Superpower</h2>
         <p>Every browser has "Developer Tools" (just right-click on a page and hit "Inspect"). These tools are your agency's new best friend. You can see exactly which CSS is affecting an element, try out new styles live without even changing your files, and figure out why things aren't looking the way you want them to before presenting to a client.</p>
-        
-        <h2 class="section-title mt-5">How to Add CSS: The Style Hierarchy</h2>
+
+        <h2 class="section-title mt-5" id="uses-of-css">What Do We Actually Use CSS For?</h2>
+        <p><strong>Why it matters:</strong> Imagine a Carson City client asks you to change their agency's brand color from blue to green — but every single page has the color hard-coded inside the HTML with <code>style="color: blue;"</code> on every heading and button. You'd have to open every file and hunt down every instance. CSS exists to solve exactly this problem: it separates <em>content</em> (HTML) from <em>presentation</em> (how it looks), so one small edit in one file can update an entire site.</p>
+        <p><strong>What it is:</strong> CSS isn't just "make text a color." It has real, practical jobs on every professional site:</p>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>Color &amp; Backgrounds:</strong> Painting text, buttons, and sections to match a brand's palette.</li>
+            <li class="mb-2"><strong>Typography:</strong> Choosing fonts, sizes, and spacing so text is readable and on-brand.</li>
+            <li class="mb-2"><strong>Layout &amp; Spacing:</strong> Positioning elements on the page and giving them breathing room (you'll go deep on this with the Box Model later in this chapter, and full page layout in Chapter 7).</li>
+            <li class="mb-2"><strong>Responsive Design:</strong> Making the same page look good on a phone, tablet, and desktop monitor.</li>
+            <li class="mb-2"><strong>Consistency at Scale:</strong> Styling hundreds of pages from a single shared stylesheet, so your agency's whole site (or a client's) always looks unified.</li>
+            <li class="mb-0"><strong>Interactivity Cues:</strong> Signaling to a user what's clickable with hover/focus states — no JavaScript required.</li>
+        </ul>
+        <p><strong>How it works in practice:</strong> A local coffee shop's site might use one <code>style.css</code> file to control the header color, the menu's font, the spacing between sections, and how the "Order Now" button changes when you hover over it — all from one place.</p>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> New designers often think of CSS as "just colors and fonts" and reach for inline <code>style=""</code> attributes to get something working fast. That's the trap: inline styles have to be repeated (and re-edited) on every single tag, which is exactly the maintenance nightmare CSS was invented to prevent. A professional almost always reaches for an external stylesheet first.
+        </div>
+        <div class="card border-secondary shadow-sm mb-5">
+          <div class="card-header bg-light fw-bold">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">A client asks you to change their brand's accent color across a 40-page site. Why is this a quick fix if you built the site correctly with CSS?</p>
+            <details>
+              <summary class="fw-bold text-primary" style="cursor: pointer;">Show Answer</summary>
+              <p class="mb-0 mt-2">Because the color rule lives in one external <code>.css</code> file linked to all 40 pages. Changing it in that one file updates every page at once — you never have to touch the HTML or repeat the edit 40 times.</p>
+            </details>
+          </div>
+        </div>
+
+        <h2 class="section-title mt-5" id="style-hierarchy">How to Add CSS: The Style Hierarchy</h2>
         <p>A browser follows a "style rule"—single instruction for how something should look. But where do these rules come from? It's like a fashion hierarchy, where the most important voice gets the final say.</p>
         <p>The priority order of power is: <code>Inline (Boss) &gt; Embedded &gt; External &gt; Browser (Default)</code>.</p>
         
@@ -206,6 +232,39 @@ h2 {
 
         <h5 class="fw-bold mt-4 text-primary">Style Inheritance</h5>
         <p>Some styles on a parent tag (a tag that holds other tags) get passed down—or "inherited"—by all its "kid" tags. For instance, setting a font on the <code>&lt;body&gt;</code> element means all paragraphs and headings inside it will inherit that font automatically.</p>
+
+        <h2 class="section-title mt-5" id="anatomy-of-a-rule">Anatomy of a CSS Rule</h2>
+        <p><strong>Why it matters:</strong> Before you can write CSS, you need the exact vocabulary for its parts. When you ask another developer (or an AI assistant, or a forum) for help, "my selector isn't targeting the right declaration" means something very specific — and it's the difference between describing a bug precisely and just saying "it's broken."</p>
+        <p><strong>What it is:</strong> Every CSS style rule has two parts: a <code>selector</code> (what to style) and a <code>declaration block</code> (how to style it), wrapped in curly braces <code>{ }</code>. Inside the declaration block, each individual instruction is a <code>declaration</code>, made of a <code>property</code> and a <code>value</code>, separated by a colon and ending in a semicolon.</p>
+        <pre class="p-3 border rounded shadow-sm mb-3 no-copy"><code>selector {
+    property: value;
+    property: value;
+}
+
+/* A real example */
+h1 {
+    color: #005A9C;   /* property: color, value: #005A9C */
+    font-size: 2rem;  /* property: font-size, value: 2rem */
+}</code></pre>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>Selector:</strong> <code>h1</code> — points at the element(s) to style.</li>
+            <li class="mb-2"><strong>Declaration Block:</strong> everything between <code>{</code> and <code>}</code>.</li>
+            <li class="mb-2"><strong>Declaration:</strong> one full <code>property: value;</code> pair.</li>
+            <li class="mb-0"><strong>Property &amp; Value:</strong> <code>color</code> is the property (what aspect you're changing); <code>#005A9C</code> is the value (the setting you're changing it to).</li>
+        </ul>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> Forgetting the semicolon after a declaration doesn't break the line you forgot it on — it breaks the <em>next</em> declaration, because the browser reads both as one run-together instruction. A missing closing <code>}</code> is worse: it can silently swallow every rule below it in the file until the next stray <code>}</code> the browser finds. Always count your braces.
+        </div>
+        <div class="card border-secondary shadow-sm mb-0">
+          <div class="card-header bg-light fw-bold">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">In the rule <code>p { color: teal; margin: 0; }</code>, identify the selector, and list both declarations.</p>
+            <details>
+              <summary class="fw-bold text-primary" style="cursor: pointer;">Show Answer</summary>
+              <p class="mb-0 mt-2">Selector: <code>p</code>. Declarations: <code>color: teal;</code> and <code>margin: 0;</code> — each is one property/value pair.</p>
+            </details>
+          </div>
+        </div>
       </div>
       
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
@@ -213,7 +272,7 @@ h2 {
           <a href="/images/the-clothes-intro-to-css/figure-03.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-03.png" alt="Browser Developer Tools Interface" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.3:</strong> Browser Dev Tools</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.3:</strong> Browser Dev Tools</figcaption>
         </figure>
 
         <div class="card roadmap-card border-warning shadow-sm mb-4 mt-5 text-start">
@@ -227,7 +286,7 @@ h2 {
           <a href="/images/the-clothes-intro-to-css/figure-04.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-04.png" alt="CSS Priority Pyramid Diagram" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.4:</strong> CSS Priority Hierarchy</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.4:</strong> CSS Priority Hierarchy</figcaption>
         </figure>
       </div>
     </div>
@@ -269,13 +328,13 @@ h2 {
           <a href="/images/the-clothes-intro-to-css/figure-05.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-05.png" alt="Folder structure and link code" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.5:</strong> Linking CSS Code</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.5:</strong> Linking CSS Code</figcaption>
         </figure>
         <figure class="mb-0 text-center">
           <a href="/images/the-clothes-intro-to-css/figure-06.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-06.png" alt="Browser view showing linked sheet" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.6:</strong> Initial Browser View</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.6:</strong> Initial Browser View</figcaption>
         </figure>
       </div>
     </div>
@@ -320,13 +379,13 @@ h2 {
           <a href="/images/the-clothes-intro-to-css/figure-07.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-07.png" alt="CSS charset setup code" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.7:</strong> CSS Setup Code</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.7:</strong> CSS Setup Code</figcaption>
         </figure>
         <figure class="mb-0 text-center">
           <a href="/images/the-clothes-intro-to-css/figure-08.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-08.png" alt="Browser view with setup" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.8:</strong> Browser View (Setup)</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.8:</strong> Browser View (Setup)</figcaption>
         </figure>
       </div>
     </div>
@@ -360,13 +419,13 @@ h2 {
           <a href="/images/the-clothes-intro-to-css/figure-09.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-09.png" alt="CSS Body and H1 rules code" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.9:</strong> CSS Rules Code</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.9:</strong> CSS Rules Code</figcaption>
         </figure>
         <figure class="mb-0 text-center">
           <a href="/images/the-clothes-intro-to-css/figure-10.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-10.png" alt="Browser view with colors applied" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.10:</strong> Colored Browser View</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.10:</strong> Colored Browser View</figcaption>
         </figure>
       </div>
     </div>
@@ -433,7 +492,7 @@ h2 {
           <a href="/images/the-clothes-intro-to-css/figure-11.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-11.png" alt="Color Wheel and Formats Diagram" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.11:</strong> CSS Color Models</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.11:</strong> CSS Color Models</figcaption>
         </figure>
       </div>
     </div>
@@ -707,13 +766,13 @@ h1 {
           <a href="/images/the-clothes-intro-to-css/figure-12.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-12.png" alt="CSS color rules for body and H1" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.12:</strong> CSS Color Code</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.12:</strong> CSS Color Code</figcaption>
         </figure>
         <figure class="mb-0 text-center">
           <a href="/images/the-clothes-intro-to-css/figure-13.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-13.png" alt="Browser view showing color application" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.13:</strong> Colored Browser View</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.13:</strong> Colored Browser View</figcaption>
         </figure>
       </div>
     </div>
@@ -721,7 +780,7 @@ h1 {
     <!-- SECTION 4: SELECTORS -->
     <div class="row mb-5 align-items-start border-bottom pb-4">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">The 3 "Selectors" You Need to Know (And More!)</h2>
+        <h2 class="section-title mt-0" id="selectors">The 3 "Selectors" You Need to Know (And More!)</h2>
         <p>Selectors are how you <code>aim</code> your styles. Think of them as the address on an envelope; they tell the browser exactly which element(s) should receive the styling instructions inside the curly braces. Without the correct selector, your CSS rules are like letters lost in the mail—they exist, but they never reach their destination.</p>
         <p>Mastering selectors is the key to writing clean, efficient CSS. Instead of adding a class to every single paragraph on your client's landing page, you can use a combination of selectors to target "only the paragraphs inside the footer" or "only the first link in the navigation." This keeps your HTML cleaner and makes your CSS much more powerful.</p>
         <p>Understanding selectors also unlocks the true potential of the "Cascading" part of Cascading Style Sheets. By leveraging specific selectors, you can create a base set of styles that apply broadly and then override them only where necessary with more targeted rules. This layered approach prevents you from writing repetitive code and makes updating your website's design much faster and less prone to errors.</p>
@@ -736,7 +795,7 @@ h1 {
 
         <!-- SPECIFICITY SCORING TABLE -->
         <div class="card border-warning shadow-sm my-4">
-          <div class="card-header bg-warning text-dark fw-bold"><span class="badge bg-dark text-warning me-1">NV 5.2.2</span> Specificity Scoring: The Math Behind the Fight</div>
+          <div class="card-header bg-warning text-dark fw-bold">Specificity Scoring: The Math Behind the Fight</div>
           <div class="card-body small bg-light">
             <p class="mb-3">When two rules conflict, the browser calculates a <strong>specificity score</strong> for each selector. The selector with the <strong>highest score wins</strong>, regardless of which rule was written last in the file.</p>
             <table class="table table-bordered table-sm small bg-white mb-3">
@@ -832,7 +891,7 @@ h1 {
 
         <!-- SPECIFICITY BATTLE: INTERACTIVE DEMO -->
         <div class="card border-danger shadow-sm my-4">
-          <div class="card-header bg-danger text-white fw-bold"><span class="badge bg-white text-danger me-1">NV 5.2.2</span> Specificity Battle: Who Wins?</div>
+          <div class="card-header bg-danger text-white fw-bold">Specificity Battle: Who Wins?</div>
           <div class="card-body bg-light small">
             <p class="mb-3">Two developers each wrote a rule targeting the same <code>&lt;p&gt;</code> tag that has <code>class="intro"</code>. Which color will the text actually be? Check your reasoning before looking at the winner!</p>
             <div class="row g-3">
@@ -898,7 +957,7 @@ h1 {
           <a href="/images/the-clothes-intro-to-css/figure-14.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-14.png" alt="Diagram showing specificity hierarchy of ID vs Class vs Element" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.14:</strong> Specificity Hierarchy</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.14:</strong> Specificity Hierarchy</figcaption>
         </figure>
       </div>
     </div>
@@ -963,13 +1022,13 @@ h1 {
           <a href="/images/the-clothes-intro-to-css/figure-15.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-15.png" alt="HTML and CSS code for testing specificity" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.15:</strong> Specificity Practice Code</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.15:</strong> Specificity Practice Code</figcaption>
         </figure>
         <figure class="mb-0 text-center">
           <a href="/images/the-clothes-intro-to-css/figure-16.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-16.png" alt="Browser view showing color overrides" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.16:</strong> Browser View (Overrides)</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.16:</strong> Browser View (Overrides)</figcaption>
         </figure>
       </div>
     </div>
@@ -977,7 +1036,7 @@ h1 {
     <!-- SECTION 5: FONTS AND TYPOGRAPHY -->
     <div class="row mb-5 pb-4 align-items-start border-bottom">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">Finding Your Voice: Fun with Fonts</h2>
+        <h2 class="section-title mt-0" id="typography">Finding Your Voice: Fun with Fonts</h2>
         <p>Typography is a fancy word for "making your text look good." But it is also the art and technique of arranging type to make written language legible, readable, and appealing when displayed. On the web, where 95% of the information is written language, typography is arguably the most important element of your design.</p>
         <p>Good typography establishes a visual hierarchy, guiding the reader's eye through the content in a logical order. Selecting fonts that match your local client's "vibe" is crucial. A Carson City law firm needs a serious, traditional font, while a kids' toy store needs something fun and bouncy. Understanding these nuances allows you to control the mood and tone of your site before a user even reads a single word.</p>
         
@@ -1032,7 +1091,7 @@ h1 {
         </table>
 
         <!-- GOOGLE FONTS INTEGRATION -->
-        <h5 class="fw-bold mt-5 text-primary"><span class="badge bg-primary me-1">NV 5.2.1</span> Integrating Google Fonts: Step by Step</h5>
+        <h5 class="fw-bold mt-5 text-primary">Integrating Google Fonts: Step by Step</h5>
         <p>Google Fonts is a free library of hundreds of web fonts. Here is the professional three-step workflow to use them in any project:</p>
         <div class="bg-light p-4 rounded border shadow-sm mb-5">
           <ol class="small mb-0 ps-3">
@@ -1136,13 +1195,13 @@ body {
           <a href="/images/the-clothes-intro-to-css/figure-17.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-17.png" alt="Diagram showing font stacks" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.17:</strong> CSS Font Stacks</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.17:</strong> CSS Font Stacks</figcaption>
         </figure>
         <figure class="mb-4 mt-5 pt-5 text-center">
           <a href="/images/the-clothes-intro-to-css/figure-18.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-18.png" alt="Comparison of px vs rem units" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.18:</strong> Units (px vs rem)</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.18:</strong> Units (px vs rem)</figcaption>
         </figure>
         
         <div class="card roadmap-card border-warning shadow-sm mb-4 mt-5 text-start">
@@ -1208,13 +1267,13 @@ body {
           <a href="/images/the-clothes-intro-to-css/figure-19.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-19.png" alt="CSS Typography Code" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.19:</strong> Typography CSS</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.19:</strong> Typography CSS</figcaption>
         </figure>
         <figure class="mb-0 text-center">
           <a href="/images/the-clothes-intro-to-css/figure-20.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-20.png" alt="Browser view showing typography changes" class="img-fluid rounded border shadow-sm w-100">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.20:</strong> Browser View (Typography)</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.20:</strong> Browser View (Typography)</figcaption>
         </figure>
       </div>
     </div>
@@ -1253,7 +1312,7 @@ padding: 20px 40px;</code></pre>
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
         <figure class="mb-4 text-center">
           <img src="/images/the-style-advanced-css-layout/figure-01.png" alt="Box Model Diagram" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Box+Model'">
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.21:</strong> The CSS Box Model</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.21:</strong> The CSS Box Model</figcaption>
         </figure>
       </div>
     </div>
@@ -1480,7 +1539,7 @@ padding: 20px 40px;</code></pre>
           <a href="/images/the-clothes-intro-to-css/figure-21.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-21.png" alt="Diagram explaining pseudo-classes" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Pseudo'">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.22:</strong> Pseudo-Class Anatomy</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.22:</strong> Pseudo-Class Anatomy</figcaption>
         </figure>
       </div>
     </div>
@@ -1531,13 +1590,13 @@ footer p::before {
           <a href="/images/the-clothes-intro-to-css/figure-22.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-22.png" alt="CSS code for hover and before" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Hover+Code'">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.23:</strong> Hover and Before CSS</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.23:</strong> Hover and Before CSS</figcaption>
         </figure>
         <figure class="mb-0 text-center">
           <a href="/images/the-clothes-intro-to-css/figure-23.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-23.png" alt="Browser view showing hover state" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=Hover+Browser'">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.24:</strong> Browser View (Hover)</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.24:</strong> Browser View (Hover)</figcaption>
         </figure>
       </div>
     </div>
@@ -1548,15 +1607,28 @@ footer p::before {
         <h2 class="section-title mt-0">Build Smart, Not Hard: Progressive Enhancement</h2>
         <p>This is a pro-level move. It means you start by building a simple, solid website that works for everyone, even on old, slow browsers. Then, you layer on the fancy bells and whistles (like animations and complex layouts) for users with modern browsers. This way, your site is always usable, and no one gets left out.</p>
         
-        <h2 class="section-title mt-5">Checking Your Work: CSS Validation</h2>
+        <h2 class="section-title mt-5" id="css-validation">Checking Your Work: CSS Validation</h2>
         <p>Just like with HTML, browsers are very "forgiving" of bad CSS. A <code>CSS Validator</code> is like a super-strict teacher that checks your code for syntax errors and typos. The most popular tool is the <code>W3C CSS Validator</code> (search for it online). You can check your code:</p>
         <ul class="small mb-0 ps-4">
             <li class="mb-2"><strong>By URI:</strong> Paste the web address of your live site.</li>
             <li class="mb-2"><strong>By File Upload:</strong> Upload your <code>style.css</code> file.</li>
             <li class="mb-0"><strong>By Direct Input:</strong> Copy and paste your CSS code.</li>
         </ul>
-        <div class="alert alert-info border-0 border-start border-4 border-info mt-4 mb-0 shadow-sm small">
+        <div class="alert alert-info border-0 border-start border-4 border-info mt-4 mb-4 shadow-sm small">
           This is a crucial step for writing professional, bug-free code.
+        </div>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> A browser will silently ignore a CSS rule it can't parse (like a typo'd property name or a missing semicolon) instead of throwing an error you can see. That means your page can look "fine" while several rules are quietly being skipped. Running the validator catches these silent failures before a client ever notices something's missing.
+        </div>
+        <div class="card border-secondary shadow-sm mb-0">
+          <div class="card-header bg-light fw-bold">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">Why won't a browser just show you an error message when your CSS has a typo, the way some programming languages do?</p>
+            <details>
+              <summary class="fw-bold text-primary" style="cursor: pointer;">Show Answer</summary>
+              <p class="mb-0 mt-2">Browsers are designed to be forgiving so the rest of the page still renders — an unrecognized or broken rule is simply skipped rather than crashing the whole stylesheet. That's convenient for users but dangerous for developers, which is exactly why a validator (that isn't forgiving) is a professional habit.</p>
+            </details>
+          </div>
         </div>
       </div>
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
@@ -1571,7 +1643,7 @@ footer p::before {
           <a href="/images/the-clothes-intro-to-css/figure-24.png" target="_blank" rel="noopener">
             <img src="/images/the-clothes-intro-to-css/figure-24.png" alt="W3C CSS Validation Service" class="img-fluid rounded border shadow-sm w-100" onerror="this.src='https://placehold.co/600x400?text=W3C+Validation'">
           </a>
-          <figcaption class="p-2 small text-muted text-center"><strong>Figure 8.25:</strong> CSS Validation</figcaption>
+          <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.25:</strong> CSS Validation</figcaption>
         </figure>
       </div>
     </div>

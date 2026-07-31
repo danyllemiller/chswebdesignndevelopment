@@ -1,0 +1,60 @@
+{
+  "chapter": 6,
+  "title": "The “Clothes” (Intro to CSS)",
+  "page": "year1/the-clothes-intro-to-css.html",
+  "assessment_note": "Assessment for this chapter lives in external worksheets/tests, not an on-page question bank. assessed_by is descriptive only.",
+  "indicators": {
+    "4.3.5": {
+      "taught_in": "What Do We Actually Use CSS For?",
+      "anchor": "#uses-of-css",
+      "practiced_in": "Quick Check on why a single stylesheet update affects an entire site",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.2.1": {
+      "taught_in": "Our Site is Ugly. Let's Fix It. (Chapter Overview)",
+      "anchor": "#role-of-css",
+      "practiced_in": "Lab 1: The External Sheet",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.2.2": {
+      "taught_in": "Anatomy of a CSS Rule",
+      "anchor": "#anatomy-of-a-rule",
+      "practiced_in": "Walkthrough: CSS File Setup, Walkthrough: Basic Styling",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.2.3": {
+      "taught_in": "The 3 \"Selectors\" You Need to Know (And More!)",
+      "anchor": "#selectors",
+      "practiced_in": "Lab 2: Structural Targeting, Lab 3: Specificity Audit",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.2.4": {
+      "taught_in": "How to Add CSS: The Style Hierarchy",
+      "anchor": "#style-hierarchy",
+      "practiced_in": "Lab 1: The External Sheet",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.2.5": {
+      "taught_in": "Finding Your Voice: Fun with Fonts",
+      "anchor": "#typography",
+      "practiced_in": "Lab 5: Brand Typography, Lab 6: Spacing & Breathing",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.2.7": {
+      "taught_in": "Checking Your Work: CSS Validation",
+      "anchor": "#css-validation",
+      "practiced_in": "Milestone: Project 3 Base CSS Integration (pass W3C CSS Validation with zero errors)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    }
+  },
+  "revisits": {
+    "4.6.3": "Not formally re-taught this chapter; the :focus pseudo-class (keyboard accessibility) and color-contrast discussion touch on it, but it is formally owned by Chapter 5."
+  },
+  "wrs": {
+    "1.2.9": {
+      "taught_in": "Style Specificity: Who Wins in a Fight? / Specificity Scoring: The Math Behind the Fight",
+      "anchor": "#selectors",
+      "student_action": "Lab 3: Specificity Audit requires students to calculate specificity scores numerically to predict which CSS rule wins, applying mathematical reasoning to a job-specific task"
+    }
+  }
+}

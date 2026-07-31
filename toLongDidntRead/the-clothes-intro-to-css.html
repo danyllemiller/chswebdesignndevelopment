@@ -47,14 +47,33 @@
     </h4>
     <ul>
      <li>
-      CSS makes HTML look good. Write styles in an
+      CSS solves one big problem: it separates content from presentation, so
       <strong>
-       external
+       one external
        <code>
         .css
        </code>
        file
       </strong>
+      can update the look of an entire site instead of editing every tag by hand.
+     </li>
+     <li>
+      Every rule has two parts: a
+      <strong>
+       selector
+      </strong>
+      (what to style) and a
+      <strong>
+       declaration block
+      </strong>
+      — one or more
+      <code>
+       property: value;
+      </code>
+      pairs inside
+      <code>
+       { }
+      </code>
       .
      </li>
      <li>
@@ -77,6 +96,17 @@
       .
      </li>
      <li>
+      Colors can be written as Named (
+      <code>
+       tomato
+      </code>
+      ), Hex (
+      <code>
+       #FF6347
+      </code>
+      ), RGB, or HSL — add an Alpha value (RGBA/HSLA) for transparency.
+     </li>
+     <li>
       Everything is a box. Learn the
       <strong>
        Box Model
@@ -92,48 +122,28 @@
      </li>
      <li>
       <strong>
-       Flexbox
+       Pseudo-classes
       </strong>
       (
       <code>
-       display: flex
+       :hover
       </code>
-      ) is for 1D layout (rows
-      <em>
-       or
-      </em>
-      columns). It's awesome for centering.
-     </li>
-     <li>
+      ) style special states;
       <strong>
-       Grid
+       pseudo-elements
       </strong>
       (
       <code>
-       display: grid
+       ::before
       </code>
-      ) is for 2D layout (rows
-      <em>
-       and
-      </em>
-      columns). It's for whole-page designs.
-     </li>
-     <li>
-      <code>
-       position: fixed
-      </code>
-      sticks an element to the screen.
-      <code>
-       position: absolute
-      </code>
-      takes it out of the flow.
+      ) style parts of an element or inject new content.
      </li>
      <li>
       Use the
       <strong>
        W3C CSS Validator
       </strong>
-      to find bugs in your code.
+      to find bugs your browser silently hides from you.
      </li>
     </ul>
    </article>
