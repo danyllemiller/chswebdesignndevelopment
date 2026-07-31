@@ -119,7 +119,7 @@
     <!-- SECTION 2: THE WAITER ANALOGY -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">What is an API? The "Waiter" Analogy</h2>
+        <h2 class="section-title mt-0" id="purpose-of-api">What is an API? The "Waiter" Analogy</h2>
         <p>Imagine yourself (the <strong>Client</strong>) sitting at a restaurant. You can't just walk into the kitchen and grab the food yourself—it's restricted for safety and security. You need a middleman to handle the communication. That is the API. If your agency is building a real-estate site, the API is the waiter that fetches live property listings from a central database.</p>
         
         <ul class="small mb-4 bg-light p-4 rounded border shadow-sm text-start">
@@ -298,7 +298,7 @@
             <li class="mb-0"><strong>Deserialization:</strong> What is 'Deserialization' (or <code>JSON.parse()</code>)? <strong>Taking a raw string of JSON text received from a network and converting it back into a usable JavaScript Object.</strong> You unpack the box to use the data.</li>
         </ul>
 
-        <h5 class="fw-bold mt-5 text-primary">Working with JSON: <code>parse()</code> &amp; <code>stringify()</code> <span class="badge bg-primary ms-1" style="font-size:0.65rem;">NV 7.1.2</span></h5>
+        <h5 class="fw-bold mt-5 text-primary">Working with JSON: <code>parse()</code> &amp; <code>stringify()</code></h5>
         <p>These two built-in JavaScript methods are the workhorses of API data exchange. You will use them constantly in professional agency code.</p>
         <div class="row g-3 mb-4 text-start">
           <div class="col-md-6">
@@ -365,7 +365,7 @@ console.log(str);
     <!-- SECTION 4: FETCH & ASYNC -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">The Network Connection: Asynchronous Fetch</h2>
+        <h2 class="section-title mt-0" id="develop-with-fetch">The Network Connection: Asynchronous Fetch</h2>
         <p>A data request from an API is not instant. The signal has to travel across the world, wait for the server to think, and travel back. If JavaScript were <strong>Synchronous</strong> (running line-by-line rigidly), the browser would <strong>freeze</strong> and become unresponsive while waiting for the reply.</p>
         
         <p>Why is the <code>fetch()</code> command in JavaScript considered 'Asynchronous'? <strong>Because it runs in the background, allowing the rest of the website to load while waiting for the server's response.</strong></p>
@@ -382,7 +382,7 @@ console.log(str);
             <li class="mb-0"><strong><code>.json()</code>:</strong> Why do we need to call <code>await response.json()</code> after a successful fetch? <strong>Because the data comes across the internet as a raw stream of text, and this command translates it back into a usable JavaScript Object.</strong> If you forget the <code>await</code> keyword before <code>response.json()</code>, what will your data variable contain? <strong>A pending Promise instead of the actual data.</strong></li>
         </ul>
 
-        <h5 class="fw-bold mt-5 text-primary">Two Styles: <code>.then()</code> vs <code>async/await</code> <span class="badge bg-primary ms-1" style="font-size:0.65rem;">NV 7.2.1</span></h5>
+        <h5 class="fw-bold mt-5 text-primary">Two Styles: <code>.then()</code> vs <code>async/await</code></h5>
         <p>Both patterns achieve the exact same goal — handling a Promise from <code>fetch()</code>. Modern code prefers <code>async/await</code> because it reads like synchronous code, but you will encounter <code>.then()</code> chains in older projects and tutorials.</p>
         <div class="row g-3 mb-3 text-start">
           <div class="col-md-6">
@@ -597,7 +597,7 @@ console.log(str);
             <strong>SECURITY ALERT:</strong> Why should you NEVER expose a private API key (like a client's Stripe payment key) in your front-end JavaScript? <strong>Anyone can view your JS code in DevTools, steal the key, and rack up massive charges on your client's account, putting the agency at risk of legal liability.</strong> How do developers typically hide private API keys? <strong>By routing requests through their own secure Backend Server or using Serverless Functions, keeping the key off the client's browser.</strong> Securing API keys demonstrates the WRS skill of <strong>Probity</strong>.
         </div>
 
-        <h5 class="fw-bold mt-5 text-danger">Rate Limiting: Respecting the API's Rules <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">WRS 1.1.4</span></h5>
+        <h5 class="fw-bold mt-5 text-danger">Rate Limiting: Respecting the API's Rules</h5>
         <p>Every API provider limits how many requests you can make per minute or per day to prevent abuse and protect their servers.</p>
         <ul class="small mb-4 bg-light p-3 rounded border shadow-sm text-start">
           <li class="mb-2"><strong>What it means:</strong> A free weather API might allow 60 requests per minute or 1,000 per day. Exceeding this returns a <strong>429 Too Many Requests</strong> error and your API key may be temporarily blocked.</li>
@@ -613,14 +613,14 @@ console.log(str);
         </ul>
 
         <div class="alert alert-warning border-warning border-start border-4 shadow-sm small mt-4 mb-4 text-start">
-          <strong>API Key Security — The <code>.env</code> Concept: <span class="badge bg-danger ms-1">WRS 1.1.2</span></strong><br>
+          <strong>API Key Security — The <code>.env</code> Concept:</strong><br>
           Never hard-code API keys directly into your JavaScript files. Anyone who views your page source in DevTools can steal them. Professional developers store secret keys in <strong>environment variables</strong> — a <code>.env</code> file on the server that is never shipped to the browser.
           <pre class="mt-2 mb-1 p-2 bg-dark text-success rounded" style="font-size:0.8rem;"># .env file (lives on the server — NEVER in your repo)
 API_KEY=abc123yoursecretkey</pre>
           <p class="mb-0">Add <code>.env</code> to your <code>.gitignore</code> file so it is <strong>never committed to GitHub</strong>. For front-end-only projects, route API calls through a serverless function or backend proxy that injects the key server-side and keeps it invisible to the browser.</p>
         </div>
 
-        <h5 class="fw-bold mt-5 text-primary">Reading API Documentation <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">WRS 1.2.3</span></h5>
+        <h5 class="fw-bold mt-5 text-primary">Reading API Documentation</h5>
         <p>Every professional API ships with documentation. Knowing how to read it efficiently is the skill that separates a junior developer from a mid-level one. When you open any API's docs, look for these six things:</p>
         <table class="table table-bordered small bg-white shadow-sm mt-3 mb-4 text-start">
           <thead class="bg-primary text-white">
@@ -736,6 +736,42 @@ API_KEY=abc123yoursecretkey</pre>
               <h6 class="fw-bold">Webhooks</h6>
               <p class="small text-muted mb-0">Instead of constantly asking a server "Is there an update?", a Webhook lets the server "push" a message to your app instantly the moment an event happens (like a payment succeeding).</p>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 8B: THE MODERN LANDSCAPE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0" id="modern-web-platforms">Beyond Vanilla JS: The Modern Web App Landscape</h2>
+        <p><strong>Why it matters:</strong> Everything you just built — <code>fetch()</code>, <code>async/await</code>, manually updating the DOM with template literals — is "vanilla" JavaScript: no extra tools, just the language itself. That's exactly how the web works under the hood. But once an agency app grows past a few pages, most professional teams reach for a <strong>framework</strong> or a specific <strong>platform</strong> instead of hand-writing every DOM update.</p>
+        <p><strong>What it is:</strong> The current landscape breaks down into a few major categories:</p>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>Front-End JS Frameworks:</strong> <strong>React</strong> (built by Meta, the most widely used — organizes UI into reusable "components"), <strong>Vue</strong> (known for a gentler learning curve), and <strong>Angular</strong> (built by Google, a full-featured framework common in large enterprise apps). All three still call <code>fetch()</code> and parse JSON behind the scenes — the exact skills from this chapter.</li>
+            <li class="mb-2"><strong>Back-End / Server Platforms:</strong> <strong>Node.js</strong> (lets you write server code in JavaScript — the same language as your front-end), <strong>Python</strong> (Django/Flask), and <strong>PHP</strong> (what powers WordPress, from Chapter 12). These are the "kitchen" side of the Waiter Analogy — the platforms that build the APIs you've been consuming.</li>
+            <li class="mb-0"><strong>Mobile App Platforms:</strong> <strong>Native</strong> development (Swift for iOS, Kotlin for Android) builds the fastest, most polished apps but requires writing the app twice. <strong>Cross-Platform</strong> tools like <strong>React Native</strong> and <strong>Flutter</strong> let a team write one codebase that runs on both iOS and Android.</li>
+        </ul>
+        <p>If Astro Anna eventually wanted a dedicated phone app instead of just a website, an agency developer who already knows JavaScript and <code>fetch()</code> could pick up <strong>React Native</strong> quickly — the core skills (API calls, JSON, async data) transfer directly.</p>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> Assuming vanilla JS skills are "outdated" the moment you learn a framework exists. The opposite is true: React, Vue, and Angular are all just organized ways of doing the same <code>fetch</code>/DOM/JSON work you just learned by hand. Developers who understand the fundamentals first learn frameworks faster than those who skip straight to one.
+        </div>
+        <div class="card border-secondary shadow-sm mb-0">
+          <div class="card-header bg-light fw-bold">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">Why would knowing vanilla JavaScript <code>fetch()</code> and JSON make it easier to learn a framework like React later, instead of that knowledge being wasted?</p>
+            <details>
+              <summary class="fw-bold text-primary" style="cursor: pointer;">Show Answer</summary>
+              <p class="mb-0 mt-2">Frameworks like React still use fetch(), async/await, and JSON parsing under the hood — they just organize the resulting UI code differently (into components). Understanding the core mechanics first means you're only learning new organization, not new networking concepts.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="card roadmap-card border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info border-bottom">E.O.P. Exam Tip:</div>
+          <div class="card-body small">
+              <p class="mb-0">Know the pairing: <strong>React/Vue/Angular</strong> = front-end frameworks. <strong>Node.js/Python/PHP</strong> = back-end platforms. <strong>React Native/Flutter</strong> = cross-platform mobile.</p>
           </div>
         </div>
       </div>
