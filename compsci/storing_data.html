@@ -7,8 +7,6 @@
   <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  
-  <!-- External Curriculum Styles -->
   <link href="/css/compsci.css" rel="stylesheet" />
 </head>
 <body class="compsci-body">
@@ -16,199 +14,117 @@
   <div class="chapter-header">
     <span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 3: Data & Analysis</span>
 <h1 class="display-4 fw-bold">Chapter 6: Storing Data</h1>
-    <p class="lead text-muted">From flat files to massive databases: How we organize, protect, and permanently store digital information.</p>
+    <p class="lead text-muted">The same 500 records, organized two different ways, answer completely different questions.</p>
   </div>
 
-  <!-- STICKY TABLE OF CONTENTS -->
   <div class="sticky-toc">
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
-<a href="#section-6-1">6.1 Organizing Data Elements</a>
-      <a href="#section-8-2">8.2 Where Data Lives</a>
-      <a href="#section-8-3">8.3 Accessibility & Integrity</a>
+      <a href="#section-6-1">6.1 How Data Gets Organised</a>
+      <a href="#section-6-2">6.2 Where Data Lives</a>
   </div>
 
-  <!-- Section 8.1 -->
-  <h3 id="section-8-1" class="fw-bold mt-4 border-bottom pb-2">8.1 Organizing Data Elements <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.DA.S.2</span></h3>
-  <p class="fs-5">In Chapter 7, we learned how a computer translates a single letter or color into binary code. But what happens when you have millions of letters, numbers, and colors? Data is useless if it is a disorganized mess. We must architect systems to connect and organize data elements logically.</p>
-  
-  <h4 class="fw-bold mt-4 text-primary">8.1.1 Data Relationships</h4>
-  <p>Information rarely exists in isolation. <strong>Data Elements</strong> must be linked together to create meaning. For example, the number "3.8" means nothing on its own. The name "Alice" means nothing on its own. But when you link "Alice Johnson," "Student ID: 8011569," and "GPA: 3.8" into a single <strong>Record</strong>, you have created a valuable, relational piece of data.</p>
+  <!-- Section 6.1 -->
+  <h3 id="section-6-1" class="fw-bold mt-4 border-bottom pb-2">6.1 How Data Gets Organised</h3>
+  <p class="fs-5">A pile of names, dates, and numbers dumped into one long list is technically "stored." It's just not answerable. Structure is what turns raw data into something you can actually query.</p>
 
-  <h4 class="fw-bold mt-5 text-info">8.1.2 Flat Files vs. Databases</h4>
-  <p>How do we store these records? There are two main approaches, and choosing the right one depends on how much data you have.</p>
-  
+  <h4 class="fw-bold mt-4 text-primary">6.1.1 Four Ways to Structure Data</h4>
   <div class="row g-4 my-3">
       <div class="col-md-6">
-          <div class="card h-100 shadow-sm border-warning">
+          <div class="card h-100 shadow-sm border-secondary">
               <div class="card-body">
-                  <h5 class="fw-bold text-warning text-dark"><i class="fas fa-file-alt me-2"></i> Flat Files</h5>
-                  <p>A Flat File is a simple, two-dimensional list. Think of a single spreadsheet tab or a basic text document with comma-separated values (CSV). They are fast to create and easy to share, but they become impossibly slow and messy if you have millions of rows.</p>
+                  <h5 class="fw-bold"><i class="fas fa-align-left me-2"></i> Flat File</h5>
+                  <p class="mb-0 small">Everything in one long, unstructured list. Fast to write, painful to search.</p>
               </div>
           </div>
       </div>
       <div class="col-md-6">
           <div class="card h-100 shadow-sm border-primary">
               <div class="card-body">
-                  <h5 class="fw-bold text-primary"><i class="fas fa-database me-2"></i> Relational Databases</h5>
-                  <p>A Database is a complex 3D web of data. Instead of one massive list, data is broken into separate "Tables" (e.g., a "Students" table, a "Classes" table, and a "Teachers" table). The database software links these tables together dynamically, allowing you to instantly search millions of records without duplication.</p>
+                  <h5 class="fw-bold text-primary"><i class="fas fa-table me-2"></i> Table (Fields & Records)</h5>
+                  <p class="mb-0 small">Each row is one record, each column a consistent field. This is what a spreadsheet does for you automatically.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-success">
+              <div class="card-body">
+                  <h5 class="fw-bold text-success"><i class="fas fa-sitemap me-2"></i> Hierarchical</h5>
+                  <p class="mb-0 small">Nested parent-child relationships — like folders inside folders.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body">
+                  <h5 class="fw-bold text-warning"><i class="fas fa-key me-2"></i> Key-Value</h5>
+                  <p class="mb-0 small">A simple lookup: one unique key points to one value, built for speed.</p>
               </div>
           </div>
       </div>
   </div>
 
-  <h4 class="fw-bold mt-5 text-info">8.1.3 The Primary Key</h4>
-  <p>If a high school has three students named "John Smith," how does the database know which John Smith gets the A+ in Web Design? It uses a <strong>Primary Key</strong>.</p>
-  <p>A Primary Key is a specific data element that is 100% unique to a single record in a database. A person's name makes a terrible primary key because names repeat. This is exactly why you are assigned a <strong>Student ID Number</strong>, why citizens have <strong>Social Security Numbers</strong>, and why cars have <strong>VIN numbers</strong>. These unique identifiers ensure data never gets mixed up.</p>
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-search me-2"></i> Worked Example: Restructuring a Messy List</h5>
+      <p class="mb-0">A flat list of "Jordan, 10th grade, A-, Chemistry" repeated 500 times can't answer "who's failing Chemistry?" without reading every single line. Turn it into a table with real fields — Student, Grade Level, Class, Score — and that same question becomes one sort and one glance.</p>
+  </div>
+
+  <p><strong>The trap:</strong> students often think adding structure is pure upside. It isn't free — restructuring costs real effort up front. What it buys you is every query afterward becoming faster and actually possible. That's the tradeoff you're always making.</p>
+
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-table fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity: The Organisation Audit</h4>
+              <p class="mb-0">Restructure a messy data set into a proper table, then write three questions the original list couldn't answer that your new version can.</p>
+              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Organisation Audit</strong> in your Digital Notebook on the right.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 6.2 -->
+  <h3 id="section-6-2" class="fw-bold border-bottom pb-2">6.2 Where Data Lives</h3>
+  <p class="fs-5">The same file stored on your laptop, on a network drive, and in the cloud survives completely different disasters. Location isn't just a convenience setting — it determines who can reach your data, how fast, and what happens when something fails.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">6.2.1 Comparing Storage Locations</h4>
+  <table class="table table-bordered table-sm shadow-sm mt-3">
+    <thead class="table-dark">
+      <tr><th>Location</th><th>Speed</th><th>Cost</th><th>Durability</th><th>Who Holds the Keys</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Local</strong></td><td>Fastest</td><td>Free (already own it)</td><td>Low — one device, one point of failure</td><td>You</td></tr>
+      <tr><td><strong>Network</strong></td><td>Fast on-site</td><td>Moderate</td><td>Moderate</td><td>Your organization</td></tr>
+      <tr><td><strong>Cloud</strong></td><td>Depends on connection</td><td>Ongoing subscription</td><td>High — replicated across data centers</td><td>A third party</td></tr>
+      <tr><td><strong>Archival</strong></td><td>Slow to retrieve</td><td>Cheapest per gigabyte</td><td>Very high</td><td>Whoever manages the archive</td></tr>
+    </tbody>
+  </table>
 
   <div class="image-placeholder shadow-sm">
-    <i class="fas fa-key fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">The Relational Web & Primary Keys</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A clean infographic showing two tables. Table 1 (Students) has a glowing golden key next to a "Student ID" column. A glowing line connects that ID column to Table 2 (Grades), demonstrating how databases link information securely.</p>
+    <i class="fas fa-cloud fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">Same File, Three Locations</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A clean infographic showing one document icon branching into three paths — a laptop labeled "Local," a server rack labeled "Network," and a cloud icon labeled "Cloud" — with small icons of a fire, a thief, and a Wi-Fi outage next to each, showing what each survives.</p>
   </div>
 
-  <!-- Activity 8.1.4 -->
-  <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-sitemap fa-3x me-4 text-info"></i>
-          <div>
-              <h4 class="fw-bold mb-1">Activity 8.1.4: Designing a Classroom Inventory</h4>
-              <p class="mb-0">Step into the shoes of a Data Architect! Your teacher wants to create a digital database to track a classroom lending library of 500 books. You must decide which data elements to collect (Title, Author, ISBN, Due Date) and invent a bulletproof "Primary Key" system to track them.</p>
-              <p class="mb-0 fw-bold mt-1 text-dark">👉 Open the "Classroom Inventory" template in your Digital Notebook to design your table!</p>
-          </div>
-      </div>
-  </div>
+  <p><strong>The trap:</strong> students often assume the most convenient storage option is automatically the safest. It's usually the opposite. Privacy and control tend to move inversely to convenience — cloud storage is effortless precisely because you've handed control of the keys to someone else. That's a decision, not an accident, and it's worth making on purpose.</p>
 
-  <hr class="my-5 opacity-25">
-
-  <!-- Section 8.2 -->
-  <h3 id="section-8-2" class="fw-bold border-bottom pb-2">8.2 Where Data Lives <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.DA.S.2</span></h3>
-  <p class="fs-5">Once data is organized, it needs a physical home. You must evaluate the tradeoffs between speed, cost, and risk when choosing where to save your files.</p>
-
-  <h4 class="fw-bold mt-4 text-primary">8.2.1 Local vs. Network vs. Cloud</h4>
-  
-  <!-- Interactive Tabs for Storage Locations -->
-  <ul class="nav nav-tabs mt-4" id="locationTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-          <button class="nav-link active fw-bold text-danger" id="local-tab" data-bs-toggle="tab" data-bs-target="#local-pane" type="button" role="tab">
-              <i class="fas fa-laptop me-2"></i> Local Storage
-          </button>
-      </li>
-      <li class="nav-item" role="presentation">
-          <button class="nav-link fw-bold text-warning text-dark" id="network-tab" data-bs-toggle="tab" data-bs-target="#network-pane" type="button" role="tab">
-              <i class="fas fa-server me-2"></i> Network Storage
-          </button>
-      </li>
-      <li class="nav-item" role="presentation">
-          <button class="nav-link fw-bold text-success" id="cloud-tab" data-bs-toggle="tab" data-bs-target="#cloud-pane" type="button" role="tab">
-              <i class="fas fa-cloud me-2"></i> Cloud Storage
-          </button>
-      </li>
-  </ul>
-  
-  <div class="tab-content border border-top-0 bg-white p-4 shadow-sm mb-4" id="locationTabsContent">
-      <div class="tab-pane fade show active" id="local-pane">
-          <h5 class="fw-bold text-danger">Local Storage (Your Device)</h5>
-          <p>Saving a file directly to your laptop's hard drive.</p>
-          <p><strong>Pros:</strong> It is incredibly fast, free, and works without an internet connection.<br><strong>Cons:</strong> It is highly risky. If your laptop is dropped or stolen, your data is gone forever.</p>
-      </div>
-      <div class="tab-pane fade" id="network-pane">
-          <h5 class="fw-bold text-warning text-dark">Network Storage (The Server Room)</h5>
-          <p>Saving a file to a central server inside your building (like a school's "Shared Drive").</p>
-          <p><strong>Pros:</strong> Easily shared with coworkers and backed up by IT professionals.<br><strong>Cons:</strong> You usually cannot access these files once you leave the physical building.</p>
-      </div>
-      <div class="tab-pane fade" id="cloud-pane">
-          <h5 class="fw-bold text-success">Cloud Storage (Data Centers)</h5>
-          <p>Saving a file to a massive data center owned by companies like Google, Microsoft, or Amazon.</p>
-          <p><strong>Pros:</strong> Accessible from any device in the world and virtually immune to physical destruction.<br><strong>Cons:</strong> Requires a constant internet connection, introduces privacy concerns, and incurs subscription costs.</p>
-      </div>
-  </div>
-
-  <h4 class="fw-bold mt-5 text-info">8.2.2 Storage Media Tradeoffs</h4>
-  <p>Beyond the location, you must also choose the physical hardware (the media) used to hold the data. Every piece of hardware forces a tradeoff between Speed, Cost, Portability, and Longevity.</p>
-
-  <div class="row g-3 my-4">
-      <div class="col-md-6">
-          <div class="p-3 border rounded shadow-sm bg-light">
-              <h6 class="fw-bold text-primary mb-2"><i class="fas fa-hdd me-2"></i> SSD vs. HDD</h6>
-              <p class="small mb-0"><strong>SSDs (Solid State Drives)</strong> are blazing fast and durable, but expensive per gigabyte. <strong>HDDs (Hard Disk Drives)</strong> are slow and easily broken if dropped, but they are incredibly cheap for storing massive amounts of archival data.</p>
-          </div>
-      </div>
-      <div class="col-md-6">
-          <div class="p-3 border rounded shadow-sm bg-light">
-              <h6 class="fw-bold text-success mb-2"><i class="fas fa-compact-disc me-2"></i> Optical vs. Flash</h6>
-              <p class="small mb-0"><strong>Flash Drives (USB Sticks)</strong> are ultra-portable and convenient, but can easily be lost or corrupted. <strong>Optical Media (CDs/DVDs/Blu-Ray)</strong> cannot be accidentally erased and are perfect for locking data away in a physical vault for decades.</p>
-          </div>
-      </div>
-  </div>
-
-  <!-- Activity 8.2.3 -->
-  <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-balance-scale-right fa-3x me-4 text-info"></i>
-          <div>
-              <h4 class="fw-bold mb-1">Activity 8.2.3: The Storage Architect Challenge</h4>
-              <p class="mb-0">You are consulting for three clients: A professional photographer, a small local bakery, and a global social media app. You must choose the best storage location (Local/Network/Cloud) and media for each, justifying your choice based on their specific budget and speed needs.</p>
-              <p class="mb-0 fw-bold mt-1 text-dark">👉 Complete the Storage Challenge in your Digital Notebook!</p>
-          </div>
-      </div>
-  </div>
-
-  <hr class="my-5 opacity-25">
-
-  <!-- Section 8.3 -->
-  <h3 id="section-8-3" class="fw-bold border-bottom pb-2">8.3 Accessibility, Privacy, and Integrity <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.DA.S.2</span></h3>
-  <p class="fs-5">Data is powerful, but it is also fragile and highly personal. As Data Architects, we have an ethical responsibility to ensure our data remains accurate, private, and accessible to everyone.</p>
-
-  <h4 class="fw-bold mt-4 text-primary">8.3.1 Data Integrity</h4>
-  <p><strong>Data Integrity</strong> means ensuring that data hasn't been corrupted, accidentally deleted, or maliciously changed by a hacker.</p>
-  <p>To guarantee integrity, computer scientists use <strong>Checksums</strong>. A checksum is a mathematical calculation run on a file. It creates a unique "digital fingerprint" (like <code>a8f5c2...</code>). When you download the file, your computer runs the math again. If the fingerprint matches exactly, you know the file has 100% integrity. If even one single pixel was altered by a hacker, the fingerprint completely changes.</p>
-
-  <!-- Step-by-Step Guide for Read-Only -->
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
-      <h5 class="fw-bold text-warning"><i class="fas fa-shield-alt me-2"></i> Step-by-Step: Protecting Integrity with "Read-Only"</h5>
-      <p class="small mb-3 text-light">The easiest way to prevent accidental data corruption is to lock the file so it cannot be edited. This is called setting "Read-Only" permissions.</p>
-      
-      <h6 class="fw-bold text-info mt-3"><i class="fab fa-windows me-2"></i> On Windows:</h6>
-      <ol class="mb-3 text-light small">
-          <li class="mb-1">Right-click the file you want to protect and select <strong>Properties</strong>.</li>
-          <li class="mb-1">At the very bottom of the "General" tab, look for the <strong>Attributes</strong> section.</li>
-          <li class="mb-1">Check the box next to <strong>Read-only</strong> and click Apply. Anyone who tries to save changes to this file will now be blocked!</li>
-      </ol>
-
-      <h6 class="fw-bold text-light mt-3"><i class="fab fa-apple me-2"></i> On macOS:</h6>
-      <ol class="mb-0 text-light small">
-          <li class="mb-1">Right-click (or Control-click) the file and select <strong>Get Info</strong>.</li>
-          <li class="mb-1">Expand the <strong>Sharing & Permissions</strong> section at the bottom.</li>
-          <li class="mb-1">Click the lock icon to authenticate, then change your privilege from "Read & Write" to <strong>Read only</strong>.</li>
-      </ol>
+      <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">Which storage option trades privacy for convenience, and why? <em class="text-white-50">(Answer: cloud storage — a third party holds both your data and the encryption keys, in exchange for access from anywhere.)</em></p>
   </div>
 
-  <h4 class="fw-bold mt-5 text-info">8.3.2 Privacy and Ethics in Storage</h4>
-  <p>When you store a photo on your local laptop, you own it entirely. But what happens when you upload it to the Cloud? You are saving it on a server owned by another company. The tradeoff for the convenience of Cloud Storage is a loss of absolute privacy. You must trust that the provider's <em>Terms of Service</em> prevent their employees from viewing, selling, or using your data to train Artificial Intelligence models.</p>
-
-  <h4 class="fw-bold mt-5 text-info">8.3.3 Accessibility for All</h4>
-  <p>Data must be organized in a way that respects users with disabilities. If you build a massive data table on a website using images instead of actual text, a visually impaired user utilizing a <strong>Screen Reader</strong> will only hear "Image, Image, Image." Proper data architecture requires using Semantic HTML and clear, text-based headers so assistive technologies can read the data relationships aloud.</p>
-
-  <div class="image-placeholder shadow-sm">
-    <i class="fas fa-universal-access fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">Data Accessibility</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> An illustration of a visually impaired user interacting with a laptop. A glowing, floating overlay shows a well-organized data table being scanned by a digital "Screen Reader" that is translating the text into an audio waveform.</p>
-  </div>
-
-  <!-- Final Chapter Call to Action -->
   <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
       <div class="d-flex align-items-center">
-          <i class="fas fa-infinity fa-3x me-4 text-primary"></i>
+          <i class="fas fa-balance-scale-right fa-3x me-4 text-primary"></i>
           <div>
-              <h3 class="fw-bold mb-1">Activity 8.3.4: The "Forever" Nature of Digital Data</h3>
-              <p class="mb-0 fs-5">Once a photo or database is uploaded to the cloud, it is instantly replicated across multiple backup servers for redundancy. Is it ever truly possible to "delete" something from the internet?</p>
-              <p class="mb-0 fw-bold mt-2 text-danger">👉 Open the "Discussion Reflection" template in your Digital Notebook to outline your argument for the class debate.</p>
+              <h3 class="fw-bold mb-1">Activity: The Storage Tradeoff Matrix</h3>
+              <p class="mb-0 fs-5">Build a matrix scoring four storage locations on speed, cost, durability, and privacy, then recommend a location for two different data sets and explain why the right answer differs between them.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Storage Tradeoff Matrix</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>
 
-  <!-- Required scripts for interactive tabs/accordions inside the iframe -->
   <script src="/js/bootstrap.bundle.js"></script>
 <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 </body>
-</html> 
+</html>
