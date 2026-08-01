@@ -105,67 +105,57 @@ function waitForAuth(timeout = 12000) {
 // Default course map (fallback if JSON fails to load)
 const DEFAULT_COURSE_MAP = [
     {
-        unitNum: 0, name: "Unit 0: Office Productivity",
-        chapters: [
-            { ch: 0, title: "Ch 0: Intro to Office Software", file: "intro_to_office_software.html" }
-        ]
-    },
-    {
-        unitNum: 1, name: "Unit 1: Digital Skills & Safety",
+        unitNum: 1, name: "Unit 1: Digital Citizenship",
         chapters: [
             { ch: 1, title: "Ch 1: Essential Computer Skills", file: "essential_computer_skills.html" },
-            { ch: 2, title: "Ch 2: Ethics, Privacy & Law", file: "ethics_privacy_law.html" },
-            { ch: 3, title: "Ch 3: Cybersecurity Threats", file: "cybersecurity_threats.html" }
+            { ch: 2, title: "Ch 2: Ethics, Privacy & Law", file: "ethics_privacy_law.html" }
         ]
     },
     {
-        unitNum: 2, name: "Unit 2: Computing Fundamentals",
+        unitNum: 2, name: "Unit 2: Computing Systems",
         chapters: [
-            { ch: 4, title: "Ch 4: How Computers Work", file: "how_computers_work.html" },
-            { ch: 5, title: "Ch 5: Language of Computers", file: "language_of_computers.html" }
+            { ch: 3, title: "Ch 3: How Computers Work", file: "how_computers_work.html" },
+            { ch: 4, title: "Ch 4: Intro to Office Software", file: "intro_to_office_software.html" }
         ]
     },
     {
-        unitNum: 3, name: "Unit 3: Data & Visualization",
+        unitNum: 3, name: "Unit 3: Data & Analysis",
         chapters: [
+            { ch: 5, title: "Ch 5: The Language of Computers", file: "language_of_computers.html" },
             { ch: 6, title: "Ch 6: Storing Data", file: "storing_data.html" },
             { ch: 7, title: "Ch 7: Mastering Spreadsheets", file: "mastering_spreadsheets.html" },
             { ch: 8, title: "Ch 8: Computational Modeling", file: "computational_modeling.html" }
         ]
     },
     {
-        unitNum: 4, name: "Unit 4: Logic & Algorithms",
+        unitNum: 4, name: "Unit 4: Beg. Algorithm & Programming",
         chapters: [
             { ch: 9, title: "Ch 9: Problem Solving & Algorithms", file: "problem_solving_algorithms.html" },
-            { ch: 10, title: "Ch 10: Control Structures & Events", file: "control_structures_events.html" },
-            { ch: 11, title: "Ch 11: Modularity & Procedures", file: "modularity_procedures.html" }
+            { ch: 10, title: "Ch 10: Control Structures & Events", file: "control_structures_events.html" }
         ]
     },
     {
-        unitNum: 5, name: "Unit 5: Society & Ethics",
+        unitNum: 5, name: "Unit 5: Impacts of Computing",
         chapters: [
-            { ch: 12, title: "Ch 12: Culture, Equity & Bias", file: "culture_equity_bias.html" },
-            { ch: 13, title: "Ch 13: Ethics & Societal Impact", file: "ethics_societal_impact.html" }
+            { ch: 11, title: "Ch 11: Culture, Equity & Bias", file: "culture_equity_bias.html" },
+            { ch: 12, title: "Ch 12: Ethics & Societal Impact", file: "ethics_societal_impact.html" },
+            { ch: 13, title: "Ch 13: AI & Cross-Disciplinary Tech", file: "ai_cross_disciplinary.html" }
         ]
     },
     {
-        unitNum: 6, name: "Unit 6: Software Engineering",
+        unitNum: 6, name: "Unit 6: Intermediate A&P",
         chapters: [
             { ch: 14, title: "Ch 14: Advanced Data Structures", file: "advanced_data_structures.html" },
-            { ch: 15, title: "Ch 15: Software Development Lifecycle", file: "software_development_lifecycle.html" }
+            { ch: 15, title: "Ch 15: Modularity & Procedures", file: "modularity_procedures.html" },
+            { ch: 16, title: "Ch 16: Software Development Lifecycle", file: "software_development_lifecycle.html" }
         ]
     },
     {
-        unitNum: 7, name: "Unit 7: Networks & Security",
+        unitNum: 7, name: "Unit 7: Networks and the Internet",
         chapters: [
-            { ch: 16, title: "Ch 16: How the Internet Works", file: "how_the_internet_works.html" },
-            { ch: 17, title: "Ch 17: Defending Systems", file: "defending_systems.html" }
-        ]
-    },
-    {
-        unitNum: 8, name: "Unit 8: AI & Innovation",
-        chapters: [
-            { ch: 18, title: "Ch 18: AI & Cross Disciplinary", file: "ai_cross_disciplinary.html" }
+            { ch: 17, title: "Ch 17: How the Internet Works", file: "how_the_internet_works.html" },
+            { ch: 18, title: "Ch 18: Cybersecurity Threats", file: "cybersecurity_threats.html" },
+            { ch: 19, title: "Ch 19: Defending Systems", file: "defending_systems.html" }
         ]
     }
 ];

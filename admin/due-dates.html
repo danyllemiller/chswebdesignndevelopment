@@ -239,42 +239,38 @@
 // ─── Course maps ──────────────────────────────────────────────────────────────
 
 const CS_MAP = [
-  { unitNum: 0, unitTitle: 'Unit 0 (Extra Credit): Office Productivity', extraCredit: true, chapters: [
-    { ch: 0, title: 'Ch 0: Intro to Office Software' }
-  ]},
-  { unitNum: 1, unitTitle: 'Unit 1: Digital Skills & Network Safety', chapters: [
+  { unitNum: 1, unitTitle: 'Unit 1: Digital Citizenship', chapters: [
     { ch: 1, title: 'Ch 1: Essential Computer Skills' },
-    { ch: 2, title: 'Ch 2: Ethics, Privacy & Law' },
-    { ch: 3, title: 'Ch 3: Cybersecurity Threats' }
+    { ch: 2, title: 'Ch 2: Ethics, Privacy & Law' }
   ]},
-  { unitNum: 2, unitTitle: 'Unit 2: How Computers Work', chapters: [
-    { ch: 4, title: 'Ch 4: How Computers Work' },
-    { ch: 5, title: 'Ch 5: The Language of Computers' }
+  { unitNum: 2, unitTitle: 'Unit 2: Computing Systems', chapters: [
+    { ch: 3, title: 'Ch 3: How Computers Work' },
+    { ch: 4, title: 'Ch 4: Intro to Office Software' }
   ]},
-  { unitNum: 3, unitTitle: 'Unit 3: Data & Spreadsheets', chapters: [
+  { unitNum: 3, unitTitle: 'Unit 3: Data & Analysis', chapters: [
+    { ch: 5,  title: 'Ch 5: The Language of Computers' },
     { ch: 6,  title: 'Ch 6: Storing Data' },
     { ch: 7,  title: 'Ch 7: Mastering Spreadsheets' },
     { ch: 8,  title: 'Ch 8: Computational Modeling' }
   ]},
-  { unitNum: 4, unitTitle: 'Unit 4: Algorithms & Programming', chapters: [
+  { unitNum: 4, unitTitle: 'Unit 4: Beg. Algorithm & Programming', chapters: [
     { ch: 9,  title: 'Ch 9: Problem Solving & Algorithms' },
-    { ch: 10, title: 'Ch 10: Control Structures & Events' },
-    { ch: 11, title: 'Ch 11: Modularity & Procedures' }
+    { ch: 10, title: 'Ch 10: Control Structures & Events' }
   ]},
-  { unitNum: 5, unitTitle: 'Unit 5: Society, Culture & Ethics', chapters: [
-    { ch: 12, title: 'Ch 12: Culture, Equity & Bias' },
-    { ch: 13, title: 'Ch 13: Ethics & Societal Impact' }
+  { unitNum: 5, unitTitle: 'Unit 5: Impacts of Computing', chapters: [
+    { ch: 11, title: 'Ch 11: Culture, Equity & Bias' },
+    { ch: 12, title: 'Ch 12: Ethics & Societal Impact' },
+    { ch: 13, title: 'Ch 13: AI & Cross-Disciplinary Tech' }
   ]},
-  { unitNum: 6, unitTitle: 'Unit 6: Data Structures & SDLC', chapters: [
+  { unitNum: 6, unitTitle: 'Unit 6: Intermediate A&P', chapters: [
     { ch: 14, title: 'Ch 14: Advanced Data Structures' },
-    { ch: 15, title: 'Ch 15: Software Development Lifecycle' }
+    { ch: 15, title: 'Ch 15: Modularity & Procedures' },
+    { ch: 16, title: 'Ch 16: Software Development Lifecycle' }
   ]},
-  { unitNum: 7, unitTitle: 'Unit 7: Internet & Security', chapters: [
-    { ch: 16, title: 'Ch 16: How the Internet Works' },
-    { ch: 17, title: 'Ch 17: Defending Systems' }
-  ]},
-  { unitNum: 8, unitTitle: 'Unit 8 (Extra Credit): AI & Future Tech', extraCredit: true, chapters: [
-    { ch: 18, title: 'Ch 18: AI & Cross-Disciplinary Tech' }
+  { unitNum: 7, unitTitle: 'Unit 7: Networks and the Internet', chapters: [
+    { ch: 17, title: 'Ch 17: How the Internet Works' },
+    { ch: 18, title: 'Ch 18: Cybersecurity Threats' },
+    { ch: 19, title: 'Ch 19: Defending Systems' }
   ]}
 ];
 
@@ -440,7 +436,6 @@ const TITLE_MAP = (() => {
     m[`Unit${n}-Exam`] = `Unit ${n} Summative Exam`;
     for (const ch of unit.chapters) m[`Unit${n}-Ch${ch.ch}`] = ch.title;
   }
-  m['Unit9-Exam'] = 'CS Final Exam';
   for (const ch of WD_MAP) {
     const n = ch.ch;
     m[`WD-Ch${n}-Pre`]  = `Ch ${n} Pre-Assessment`;
@@ -575,10 +570,9 @@ function renderCS() {
 
   for (const unit of CS_MAP) {
     const n = unit.unitNum;
-    const isBorderClass = unit.extraCredit ? '' : '';
     html += `<div class="card section-card mb-3">
       <div class="card-header d-flex align-items-center justify-content-between">
-        <span><i class="fas fa-layer-group me-2"></i>${unit.unitTitle}${unit.extraCredit ? ' <span class="badge bg-secondary ms-2">Extra Credit</span>' : ''}</span>
+        <span><i class="fas fa-layer-group me-2"></i>${unit.unitTitle}</span>
       </div>
       <div class="card-body p-0">`;
 
@@ -595,16 +589,6 @@ function renderCS() {
 
     html += `</div></div>`;
   }
-
-  // CS Final
-  html += `<div class="card section-card mb-3" style="border-left-color:#198754">
-    <div class="card-header" style="background:#d1e7dd;color:#0f5132">
-      <i class="fas fa-graduation-cap me-2"></i>CS Final Exam
-    </div>
-    <div class="card-body p-0">
-      ${assignmentRow('Unit9-Exam', 'CS Final Exam', 'final', 100, COURSE_ID_CS)}
-    </div>
-  </div>`;
 
   return html;
 }
@@ -1063,7 +1047,6 @@ function collectCSIds() {
     for (const ch of unit.chapters) ids.push(`Unit${n}-Ch${ch.ch}`);
     ids.push(`Unit${n}-Exam`);
   }
-  ids.push('Unit9-Exam');
   return ids;
 }
 
