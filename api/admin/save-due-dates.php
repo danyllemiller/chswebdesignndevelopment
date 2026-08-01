@@ -25,79 +25,102 @@ if (count($assignments) === 0) {
 
 $db = getDB();
 
-// ── 1. Upsert each assignment into exams table ────────────────────────────────
-$saved = 0;
-$stmt  = $db->prepare(
-    'INSERT INTO exams (exam_id, title, total_points, due_date, course_id, period_due_dates)
-     VALUES (?, ?, ?, ?, ?, ?)
-     ON DUPLICATE KEY UPDATE
-       title            = VALUES(title),
-       total_points     = VALUES(total_points),
-       due_date         = VALUES(due_date),
-       course_id        = VALUES(course_id),
-       period_due_dates = VALUES(period_due_dates)'
-);
-
-foreach ($assignments as $a) {
-    $examId     = trim($a['exam_id']      ?? '');
-    if (!$examId) continue;
-    $title      = trim($a['title']        ?? $examId);
-    $pts        = (int)($a['total_points'] ?? 100);
-    $dueDate    = !empty($a['due_date'])  ? $a['due_date']  : null;
-    $courseId   = trim($a['course_id']    ?? 'cs');
-    $pdd        = !empty($a['period_due_dates']) ? json_encode($a['period_due_dates']) : null;
-
-    $stmt->bind_param('ssisss', $examId, $title, $pts, $dueDate, $courseId, $pdd);
-    $stmt->execute();
-    $saved++;
-}
-$stmt->close();
-
-// ── 2. Sync to calendar_events (source = 'due_date') ─────────────────────────
-$calSynced = 0;
-if ($doCalSync) {
-    // Ensure source column exists
-    $db->query("ALTER TABLE calendar_events ADD COLUMN IF NOT EXISTS source VARCHAR(20) NOT NULL DEFAULT 'manual'");
-
-    // Wipe old due-date events and rebuild from scratch
-    $db->query("DELETE FROM calendar_events WHERE source = 'due_date'");
-
-    $ins = $db->prepare(
-        "INSERT INTO calendar_events (event_date, title, type, description, all_day, source)
-         VALUES (?, ?, 'none', ?, 1, 'due_date')"
+try {
+    // ── 1. Upsert each assignment into exams table ────────────────────────────
+    $saved = 0;
+    $stmt  = $db->prepare(
+        'INSERT INTO exams (exam_id, title, total_points, due_date, course_id, period_due_dates)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+           title            = VALUES(title),
+           total_points     = VALUES(total_points),
+           due_date         = VALUES(due_date),
+           course_id        = VALUES(course_id),
+           period_due_dates = VALUES(period_due_dates)'
     );
 
     foreach ($assignments as $a) {
-        $course = strtoupper(trim($a['course_id'] ?? 'CS'));
-        $title  = trim($a['title'] ?? ($a['exam_id'] ?? ''));
-        $desc   = $course . ' – ' . $title;
+        $examId     = trim($a['exam_id']      ?? '');
+        if (!$examId) continue;
+        $title      = trim($a['title']        ?? $examId);
+        $pts        = (int)($a['total_points'] ?? 100);
+        $dueDate    = !empty($a['due_date'])  ? $a['due_date']  : null;
+        $courseId   = trim($a['course_id']    ?? 'cs');
+        $pdd        = !empty($a['period_due_dates']) ? json_encode($a['period_due_dates']) : null;
 
-        // Default due date
-        if (!empty($a['due_date'])) {
-            $calTitle = $title . ' Due';
-            $ins->bind_param('sss', $a['due_date'], $calTitle, $desc);
-            $ins->execute();
-            $calSynced++;
-        }
+        $stmt->bind_param('ssisss', $examId, $title, $pts, $dueDate, $courseId, $pdd);
+        $stmt->execute();
+        $saved++;
+    }
+    $stmt->close();
 
-        // Period-specific due dates
-        if (!empty($a['period_due_dates']) && is_array($a['period_due_dates'])) {
-            foreach ($a['period_due_dates'] as $period => $pDate) {
-                if (empty($pDate)) continue;
-                $pTitle = $title . ' Due – Period ' . $period;
-                $pDesc  = $course . ' – ' . $title . ' [Period ' . $period . ']';
-                $ins->bind_param('sss', $pDate, $pTitle, $pDesc);
+    // ── 2. Sync to calendar_events (source = 'due_date') ─────────────────────
+    $calSynced = 0;
+    if ($doCalSync) {
+        // Ensure the table exists at all (events.php normally creates it, but
+        // this endpoint must not assume that page has ever been loaded).
+        $db->query("CREATE TABLE IF NOT EXISTS `calendar_events` (
+          `id`          INT AUTO_INCREMENT PRIMARY KEY,
+          `event_date`  DATE         NOT NULL,
+          `title`       VARCHAR(255) NOT NULL,
+          `type`        VARCHAR(20)  NOT NULL DEFAULT 'none',
+          `description` TEXT,
+          `all_day`     TINYINT(1)   NOT NULL DEFAULT 1,
+          `start_time`  TIME                  DEFAULT NULL,
+          `end_time`    TIME                  DEFAULT NULL,
+          `source`      VARCHAR(20)  NOT NULL DEFAULT 'manual',
+          `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          KEY `idx_date` (`event_date`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        // Ensure source column exists (older deployments of the table won't have it)
+        $db->query("ALTER TABLE calendar_events ADD COLUMN IF NOT EXISTS source VARCHAR(20) NOT NULL DEFAULT 'manual'");
+
+        // Wipe old due-date events and rebuild from scratch
+        $db->query("DELETE FROM calendar_events WHERE source = 'due_date'");
+
+        $ins = $db->prepare(
+            "INSERT INTO calendar_events (event_date, title, type, description, all_day, source)
+             VALUES (?, ?, 'none', ?, 1, 'due_date')"
+        );
+
+        foreach ($assignments as $a) {
+            $course = strtoupper(trim($a['course_id'] ?? 'CS'));
+            $title  = trim($a['title'] ?? ($a['exam_id'] ?? ''));
+            $desc   = $course . ' – ' . $title;
+
+            // Default due date
+            if (!empty($a['due_date'])) {
+                $calTitle = $title . ' Due';
+                $ins->bind_param('sss', $a['due_date'], $calTitle, $desc);
                 $ins->execute();
                 $calSynced++;
             }
-        }
-    }
-    $ins->close();
-}
 
-$db->close();
-echo json_encode([
-    'success'          => true,
-    'exams_saved'      => $saved,
-    'calendar_synced'  => $calSynced
-]);
+            // Period-specific due dates
+            if (!empty($a['period_due_dates']) && is_array($a['period_due_dates'])) {
+                foreach ($a['period_due_dates'] as $period => $pDate) {
+                    if (empty($pDate)) continue;
+                    $pTitle = $title . ' Due – Period ' . $period;
+                    $pDesc  = $course . ' – ' . $title . ' [Period ' . $period . ']';
+                    $ins->bind_param('sss', $pDate, $pTitle, $pDesc);
+                    $ins->execute();
+                    $calSynced++;
+                }
+            }
+        }
+        $ins->close();
+    }
+
+    $db->close();
+    echo json_encode([
+        'success'          => true,
+        'exams_saved'      => $saved,
+        'calendar_synced'  => $calSynced
+    ]);
+} catch (\Throwable $e) {
+    // Never let this endpoint die with an empty body — always return JSON
+    // so the front-end's res.json() has something to parse.
+    http_response_code(500);
+    echo json_encode(['error' => 'Save failed: ' . $e->getMessage()]);
+}
