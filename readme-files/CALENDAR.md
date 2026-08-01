@@ -258,10 +258,19 @@ The Due Date Manager (`admin/due-dates.html`) populates the calendar with assign
 | Source | `due_date` |
 | Type | `none` (observance-only — italic text, no background color) |
 | Title format | `"{Assignment Title} Due"` or `"{Title} Due – Period {A1}"` |
+| course_bucket | `'WD1'` / `'WD2'` / `'CS'`, derived from the assignment's real course_id; `NULL` if unmapped |
 | Lifecycle | Fully deleted and rebuilt each time the teacher clicks Save in the Due Date Manager |
 | Not affected by | CSV re-import, manual Add Event modal |
 
 Because `source='due_date'` is not 'csv' or 'manual', CSV imports never delete due-date events and the manual event modal never modifies them.
+
+### Student Course Filtering (course_bucket)
+
+The student-facing calendar only shows due dates for the course a student is actually enrolled in — mixing WD1, WD2, and CS due dates together would be noise and confusion for a single-course student.
+
+- **Tagging (write side):** `api/admin/save-due-dates.php` maps each assignment's real `course_id` (e.g. `05254G1S`) to a coarse bucket (`WD1`) via `courseIdToBucket()`, and stores it on the generated `calendar_events` row. Unmapped course_ids get `course_bucket = NULL`.
+- **Filtering (read side):** `GET /api/events.php?bucket=WD1` returns rows where `course_bucket IS NULL OR course_bucket = 'WD1'` — i.e. every general school-wide event (A day, B day, OFF, manual, CSV — all `NULL`) plus that student's own due dates. No `?bucket` param (teacher/admin) returns everything.
+- **Requesting (client side):** `js/calendar.js`'s `getStudentCalendarBucket()` reads the same `localStorage.getItem('user')` object `auth-guard.js` uses, and derives the bucket from `section_id`'s prefix (`WD1-*` → `WD1`, `WD2-*` → `WD2`, `CS-*`/`COMP*` → `CS`). Teachers/admins and any section it can't classify get `null`, which means "no filter" — the calendar always fails open rather than risk hiding a real assignment from a student.
 
 ### mergeEventIntoSpecialDates(ev)
 

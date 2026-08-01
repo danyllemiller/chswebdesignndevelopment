@@ -19,17 +19,43 @@ $db->query("CREATE TABLE IF NOT EXISTS `calendar_events` (
   KEY `idx_date` (`event_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+// Ensure columns added after initial table creation exist (self-healing —
+// this file's own CREATE TABLE above predates both columns).
+$db->query("ALTER TABLE calendar_events ADD COLUMN IF NOT EXISTS source VARCHAR(20) NOT NULL DEFAULT 'manual'");
+$db->query("ALTER TABLE calendar_events ADD COLUMN IF NOT EXISTS course_bucket VARCHAR(10) DEFAULT NULL");
+
 $method = $_SERVER['REQUEST_METHOD'];
 
-// ── GET: return all events ────────────────────────────────────────────────────
+// ── GET: return events, optionally filtered to one student's course ──────────
+// ?bucket=WD1|WD2|CS restricts due-date events to that course. Events with no
+// course_bucket (school-wide CSV/manual dates, and any due-date event whose
+// course_id didn't map to a known bucket) are always included -- filtering is
+// additive, never hides general calendar info. Omit ?bucket entirely (teacher/
+// admin view) to get everything, unfiltered, exactly as before.
 if ($method === 'GET') {
-    $result = $db->query(
-        'SELECT id, DATE_FORMAT(event_date,"%Y-%m-%d") AS event_date,
-                title, type, description, all_day,
-                TIME_FORMAT(start_time,"%H:%i") AS start_time,
-                TIME_FORMAT(end_time,"%H:%i")   AS end_time
-         FROM calendar_events ORDER BY event_date ASC'
-    );
+    $bucket = trim($_GET['bucket'] ?? '');
+    if ($bucket !== '') {
+        $stmt = $db->prepare(
+            'SELECT id, DATE_FORMAT(event_date,"%Y-%m-%d") AS event_date,
+                    title, type, description, all_day,
+                    TIME_FORMAT(start_time,"%H:%i") AS start_time,
+                    TIME_FORMAT(end_time,"%H:%i")   AS end_time
+             FROM calendar_events
+             WHERE course_bucket IS NULL OR course_bucket = ?
+             ORDER BY event_date ASC'
+        );
+        $stmt->bind_param('s', $bucket);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    } else {
+        $result = $db->query(
+            'SELECT id, DATE_FORMAT(event_date,"%Y-%m-%d") AS event_date,
+                    title, type, description, all_day,
+                    TIME_FORMAT(start_time,"%H:%i") AS start_time,
+                    TIME_FORMAT(end_time,"%H:%i")   AS end_time
+             FROM calendar_events ORDER BY event_date ASC'
+        );
+    }
     $events = [];
     while ($row = $result->fetch_assoc()) $events[] = $row;
     $db->close();

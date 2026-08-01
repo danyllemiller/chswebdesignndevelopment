@@ -25,6 +25,20 @@ if (count($assignments) === 0) {
 
 $db = getDB();
 
+// Maps the real course_id values used by the Due Date Manager to a coarse
+// "bucket" tag stored on calendar_events, so the student calendar can filter
+// by enrolled course without needing to know the real SIS course codes.
+// Anything not in this map (custom/legacy course_id) yields null, which the
+// calendar treats as "visible to everyone" -- fail-open, never fail-closed.
+function courseIdToBucket(string $courseId): ?string {
+    switch ($courseId) {
+        case '05254G1S': return 'WD1';
+        case '05254G2S': return 'WD2';
+        case '10003GS':  return 'CS';
+        default:         return null;
+    }
+}
+
 try {
     // ── 1. Upsert each assignment into exams table ────────────────────────────
     $saved = 0;
@@ -69,30 +83,34 @@ try {
           `start_time`  TIME                  DEFAULT NULL,
           `end_time`    TIME                  DEFAULT NULL,
           `source`      VARCHAR(20)  NOT NULL DEFAULT 'manual',
+          `course_bucket` VARCHAR(10) DEFAULT NULL,
           `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
           KEY `idx_date` (`event_date`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-        // Ensure source column exists (older deployments of the table won't have it)
+        // Ensure columns exist (older deployments of the table won't have them)
         $db->query("ALTER TABLE calendar_events ADD COLUMN IF NOT EXISTS source VARCHAR(20) NOT NULL DEFAULT 'manual'");
+        $db->query("ALTER TABLE calendar_events ADD COLUMN IF NOT EXISTS course_bucket VARCHAR(10) DEFAULT NULL");
 
         // Wipe old due-date events and rebuild from scratch
         $db->query("DELETE FROM calendar_events WHERE source = 'due_date'");
 
         $ins = $db->prepare(
-            "INSERT INTO calendar_events (event_date, title, type, description, all_day, source)
-             VALUES (?, ?, 'none', ?, 1, 'due_date')"
+            "INSERT INTO calendar_events (event_date, title, type, description, all_day, source, course_bucket)
+             VALUES (?, ?, 'none', ?, 1, 'due_date', ?)"
         );
 
         foreach ($assignments as $a) {
-            $course = strtoupper(trim($a['course_id'] ?? 'CS'));
-            $title  = trim($a['title'] ?? ($a['exam_id'] ?? ''));
-            $desc   = $course . ' – ' . $title;
+            $courseId = trim($a['course_id'] ?? '');
+            $bucket   = courseIdToBucket($courseId);
+            $course   = strtoupper($courseId ?: 'CS');
+            $title    = trim($a['title'] ?? ($a['exam_id'] ?? ''));
+            $desc     = $course . ' – ' . $title;
 
             // Default due date
             if (!empty($a['due_date'])) {
                 $calTitle = $title . ' Due';
-                $ins->bind_param('sss', $a['due_date'], $calTitle, $desc);
+                $ins->bind_param('ssss', $a['due_date'], $calTitle, $desc, $bucket);
                 $ins->execute();
                 $calSynced++;
             }
@@ -103,7 +121,7 @@ try {
                     if (empty($pDate)) continue;
                     $pTitle = $title . ' Due – Period ' . $period;
                     $pDesc  = $course . ' – ' . $title . ' [Period ' . $period . ']';
-                    $ins->bind_param('sss', $pDate, $pTitle, $pDesc);
+                    $ins->bind_param('ssss', $pDate, $pTitle, $pDesc, $bucket);
                     $ins->execute();
                     $calSynced++;
                 }

@@ -64,6 +64,35 @@ function saveViewState() {
     } catch {}
 }
 
+// Derives which course's due dates this logged-in user should see on the
+// calendar, from the same localStorage 'user' object auth-guard.js reads.
+// Returns null for teachers/admins (see everything) and for any student
+// whose section_id doesn't clearly match a known course prefix (fail open --
+// show everything rather than risk hiding a real assignment).
+function getStudentCalendarBucket() {
+    try {
+        const stored = localStorage.getItem('user');
+        if (!stored || stored === 'undefined') return null;
+        const user = JSON.parse(stored);
+
+        const isTeacher = user.role === 'admin'
+            || user.section_id === 'Teacher'
+            || (user.username && user.username.includes('damiller'));
+        if (isTeacher) return null;
+
+        const section = String(
+            user.section_id || user.section || user.period || user.studentClass || user.class || ''
+        ).trim().toUpperCase();
+
+        if (section.startsWith('WD1')) return 'WD1';
+        if (section.startsWith('WD2')) return 'WD2';
+        if (section.startsWith('CS') || section.startsWith('COMP')) return 'CS';
+        return null;
+    } catch {
+        return null;
+    }
+}
+
 async function initCalendar() {
     const now = new Date();
     currentYear  = now.getFullYear();
@@ -134,7 +163,9 @@ async function initCalendar() {
 
     // Load all calendar dates from DB (CSV-imported school calendar + manually-added events)
     try {
-        const res = await fetch('/api/events.php');
+        const bucket = getStudentCalendarBucket();
+        const url = bucket ? `/api/events.php?bucket=${encodeURIComponent(bucket)}` : '/api/events.php';
+        const res = await fetch(url);
         if (res.ok) {
             const data = await res.json();
             rawEvents = new Map();
