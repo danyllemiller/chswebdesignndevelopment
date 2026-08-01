@@ -1,0 +1,60 @@
+{
+  "chapter": 15,
+  "title": "The Game Never Ends (Emerging Tech)",
+  "page": "year2/the-game-never-ends.html",
+  "assessment_note": "Assessment for this chapter lives in external worksheets/tests, not an on-page question bank. assessed_by is descriptive only.",
+  "indicators": {
+    "7.2.1": {
+      "taught_in": "The AI Revolution: Copilot, Not Autopilot (AI vs. Machine Learning definitions)",
+      "anchor": "#define-ai",
+      "practiced_in": "Lab 1: Prompt Engineering Lab",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "7.2.2": {
+      "taught_in": "Generative AI in Web Development (Chatbots, Pattern Recognition, Code Generation)",
+      "anchor": "#ai-role-web-dev",
+      "practiced_in": "Lab 1: Prompt Engineering Lab",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "7.2.3": {
+      "taught_in": "How AI Reshapes the User Experience (Recommendation Engines, Adaptive Interfaces, AI Support Widgets)",
+      "anchor": "#ai-changes-ux",
+      "practiced_in": "Quick Check on AI-driven personalization",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "7.2.4": {
+      "taught_in": "The Dark Side: AI Ethics & Bias (Algorithmic Bias caused by biased/incomplete training data)",
+      "anchor": "#significance-of-data-ai",
+      "practiced_in": "Lab 2: Ethics Case Study",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "7.3.1": {
+      "taught_in": "The Internet of Things (IoT) & Edge Computing",
+      "anchor": "#iot-research",
+      "practiced_in": "Lab 4: IoT Security Audit",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "7.3.2": {
+      "taught_in": "Digital Assistants & Voice Search: The Impact on Web Development (Structured Data, Conversational Content, Featured Snippets)",
+      "anchor": "#digital-assistants-impact",
+      "practiced_in": "Quick Check on structured data and voice search",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "7.4.1": {
+      "taught_in": "Virtual Reality (VR) vs. Augmented Reality (AR)",
+      "anchor": "#ar-vr-web-design",
+      "practiced_in": "Lab 3: AR Integration Plan",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "7.4.2": {
+      "taught_in": "AR vs. VR vs. MR — The Full Spectrum (retail Virtual Try-On, IKEA Place furniture placement)",
+      "anchor": "#ar-vr-non-entertainment-uses",
+      "practiced_in": "Lab 3: AR Integration Plan",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    }
+  },
+  "revisits": {
+    "7.1.2": "Actively reinforced in the 'Bringing It All Together: Modern Web Architecture' comprehensive review (The Network & APIs column) as part of final-exam prep; formally owned by Chapter 13."
+  },
+  "wrs": {}
+}
