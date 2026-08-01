@@ -3,12 +3,12 @@
 <head>
   <!-- File: compsci/ethics_privacy_law.html -->
   <meta charset="utf-8"/>
-<title>Chapter 2: Ethics, Privacy, and the Law</title>
+<title>Chapter 2: Ethics, Privacy & Law</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
   <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  
+
   <!-- External Curriculum Styles -->
   <link href="/css/compsci.css" rel="stylesheet" />
 </head>
@@ -16,185 +16,197 @@
 
   <div class="chapter-header">
 <span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 1: Digital Citizenship</span>
-    <h1 class="display-4 fw-bold">Chapter 2: Ethics, Privacy, and the Law</h1>
-    <p class="lead text-muted">Navigating intellectual property, software licenses, and the hidden data economy.</p>
+    <h1 class="display-4 fw-bold">Chapter 2: Ethics, Privacy & Law</h1>
+    <p class="lead text-muted">What your data is worth, who's collecting it, and the difference between using someone's work and stealing it.</p>
   </div>
 
   <!-- STICKY TABLE OF CONTENTS -->
   <div class="sticky-toc">
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
-<a href="#section-2-1">2.1 Intellectual Property & Innovation</a>
-      <a href="#section-2-2">2.2 Software Licenses & Libraries</a>
-      <a href="#section-2-3">2.3 Privacy & Automated Data</a>
+      <a href="#section-2-1">2.1 Personal Data & Privacy</a>
+      <a href="#section-2-2">2.2 Intellectual Property & Attribution</a>
+      <a href="#section-2-3">2.3 The Data You Never Chose to Give</a>
   </div>
 
-  <p class="fs-5 mb-5">Just because you <em>can</em> build something with code doesn't mean you <em>should</em>. As Data Architects, we have immense power to collect information, write algorithms, and create digital artifacts. With that power comes the legal and ethical responsibility to respect the rights of other creators, protect user privacy, and understand how our software impacts society.</p>
+  <!-- Section 2.1 -->
+  <h3 id="section-2-1" class="fw-bold mt-4 border-bottom pb-2">2.1 Personal Data & Privacy</h3>
+  <p class="fs-5">Every privacy policy uses the same handful of words — encryption, cookies, HTTPS — and most people click "Accept" without knowing what any of them actually do. That's the whole business model. You can't defend data you don't understand.</p>
 
-  <!-- Section 16.1 -->
-<h3 id="section-2-1" class="fw-bold mt-4 border-bottom pb-2">2.1 Intellectual Property & Innovation <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.IC.SLE.1</span></h3>
-  <p class="fs-5">If you build a physical chair, it is obvious that you own it. But if you write a brilliant block of code or design a beautiful logo, how do you "own" those invisible digital bytes? You use <strong>Intellectual Property (IP)</strong> law.</p>
-  
-<h4 class="fw-bold mt-4 text-primary">2.1.1 Defining Intellectual Property</h4>
-  <p>There are three main categories of IP protection in the digital space:</p>
-  
+  <h4 class="fw-bold mt-4 text-primary">2.1.1 The Protective Vocabulary</h4>
   <div class="row g-4 my-3">
-      <div class="col-md-4">
-          <div class="card h-100 shadow-sm border-primary">
-              <div class="card-body text-center">
-                  <h5 class="fw-bold text-primary"><i class="fas fa-copyright me-2"></i> Copyright</h5>
-                  <p class="small text-muted mb-0">Protects original "creative works" like photographs, music, videos, and yes—the actual lines of code you write. It applies automatically the moment you create the work.</p>
-              </div>
-          </div>
-      </div>
-      <div class="col-md-4">
-          <div class="card h-100 shadow-sm border-warning">
-              <div class="card-body text-center">
-                  <h5 class="fw-bold text-warning text-dark"><i class="fas fa-lightbulb me-2"></i> Patent</h5>
-                  <p class="small text-muted mb-0">Protects "inventions" and "processes." You can patent a unique algorithm or a new piece of hardware (like a new type of touchscreen). Patents are very expensive to get.</p>
-              </div>
-          </div>
-      </div>
-      <div class="col-md-4">
+      <div class="col-md-6">
           <div class="card h-100 shadow-sm border-success">
-              <div class="card-body text-center">
-                  <h5 class="fw-bold text-success"><i class="fas fa-trademark me-2"></i> Trademark</h5>
-                  <p class="small text-muted mb-0">Protects brand identity. A logo, a company name (like "Google" or "Apple"), or a slogan. It prevents consumers from being confused by copycat companies.</p>
+              <div class="card-body">
+                  <h5 class="fw-bold text-success"><i class="fas fa-lock me-2"></i> Encryption</h5>
+                  <p class="mb-0">Scrambling data with a key so that anyone who intercepts it sees nonsense instead of your actual information. Only someone with the right key can unscramble it.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-primary">
+              <div class="card-body">
+                  <h5 class="fw-bold text-primary"><i class="fas fa-globe me-2"></i> HTTPS</h5>
+                  <p class="mb-0">The "S" means the connection between you and the site is encrypted. A padlock icon in the address bar is your signal that the trip your data takes is private.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body">
+                  <h5 class="fw-bold text-warning"><i class="fas fa-cookie-bite me-2"></i> Cookies</h5>
+                  <p class="mb-0">Small files a website leaves in your browser to remember you — your login, your cart, or which ads it thinks you'll click.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-danger">
+              <div class="card-body">
+                  <h5 class="fw-bold text-danger"><i class="fas fa-fingerprint me-2"></i> Password Strength</h5>
+                  <p class="mb-0">Length matters more than symbols. <code>correcthorsebatterystaple</code> takes longer to crack than <code>P@ss1!</code> because it's simply longer.</p>
               </div>
           </div>
       </div>
   </div>
 
-  <h4 class="fw-bold mt-5 text-info">2.1.2 The Innovation Balance <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.IC.SLE.1</span></h4>
-  <p>The entire goal of IP law is to find the perfect <strong>Innovation Balance</strong>. </p>
-  <ul>
-      <li><strong>Beneficial Effects:</strong> IP protects creators' income. If anyone could instantly steal and sell your video game the day you released it, you would never spend the 3 years required to make it. Copyright gives you a financial incentive to invent.</li>
-      <li><strong>Harmful Effects:</strong> If IP laws are <em>too</em> strict, they slow down human progress. "Patent Trolls" buy up vague patents (like "a system for buying things online") and sue any small startup that tries to build an online store. Overly strict copyright prevents artists from remixing, sharing, and building upon the culture around them.</li>
-  </ul>
+  <h4 class="fw-bold mt-5 text-info">2.1.2 What Gets Collected, and How</h4>
+  <p>Cookies are the visible part. Behind them are <strong>trackers</strong> embedded in ads and share buttons across thousands of sites, and <strong>device fingerprinting</strong> — identifying your specific device by its unique combination of screen size, fonts, and browser settings, without needing a cookie at all.</p>
 
-  <div class="image-placeholder shadow-sm my-4">
-    <i class="fas fa-balance-scale fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">The Innovation Scales</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> An artistic golden scale. On one side, a glowing lightbulb and a stack of money (Representing the incentive to invent). On the other side, a tangled web of padlocks, chains, and legal documents (Representing the stifling effect of strict IP laws). The scale is perfectly balanced.</p>
-  </div>
-
-<h4 class="fw-bold mt-5 text-info">2.1.3 Digital Piracy & Fair Use</h4>
-  <p>Copying a movie and uploading it for free is Digital Piracy. However, there are legal exceptions. <strong>Fair Use</strong> allows you to use copyrighted material without permission <em>if</em> you are using it for specific, transformative purposes:</p>
-  <ul>
-      <li><strong>Education:</strong> A teacher showing a movie clip in class to analyze the cinematography.</li>
-      <li><strong>Parody & Commentary:</strong> A YouTuber using a 10-second clip of a song to make a joke or review the music.</li>
-      <li><strong>Transformative Works:</strong> Changing the original work so heavily (like a Meme) that it creates an entirely new piece of art with a new meaning.</li>
-  </ul>
-
-<!-- Activity 2.1.4 -->
-  <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-search-dollar fa-3x me-4 text-info"></i>
-          <div>
-              <h4 class="fw-bold mb-1">Activity 2.1.4: The "Copyright Search"</h4>
-              <p class="mb-0">You cannot just "Google" an image and use it in your app. You must use a search engine to find an image that specifically has a reusable license. Once you find it, you must write a one-sentence "Attribution" giving proper credit to the original creator.</p>
-              <p class="mb-0 fw-bold mt-1 text-dark">👉 Open your Digital Notebook and complete the Copyright Search activity.</p>
-          </div>
-      </div>
-  </div>
-
-  <hr class="my-5 opacity-25">
-
-  <!-- Section 16.2 -->
-<h3 id="section-2-2" class="fw-bold border-bottom pb-2">2.2 Software Licenses & Libraries <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.AP.PD.2</span></h3>
-  <p class="fs-5">In Chapter 14, we learned that programmers use "Libraries" (pre-written modules of code) to build things faster. But you cannot just download someone else's code and use it without checking the license first!</p>
-
-  <h4 class="fw-bold mt-4 text-primary">2.2.1 Proprietary vs. Open Source</h4>
-  <p>Software generally falls into one of two distribution models:</p>
-  <div class="row g-3 my-3">
-      <div class="col-md-6">
-          <div class="p-3 border rounded shadow-sm bg-light h-100">
-              <h6 class="fw-bold text-danger mb-2"><i class="fas fa-lock me-2"></i> Proprietary (Closed Source)</h6>
-              <p class="small mb-0">Software you pay for (like Adobe Photoshop or Microsoft Office). The company keeps the actual source code hidden in a vault. You buy a <em>license to use the app</em>, but you are legally forbidden from seeing how it was built or changing the code.</p>
-          </div>
-      </div>
-      <div class="col-md-6">
-          <div class="p-3 border rounded shadow-sm bg-light h-100">
-              <h6 class="fw-bold text-success mb-2"><i class="fas fa-door-open me-2"></i> Open Source</h6>
-              <p class="small mb-0">Software where the creator publishes the raw source code online for everyone to see (like Linux, Python, or Blender). Anyone can download it, use it for free, fix bugs, and add new features. It relies on community collaboration.</p>
-          </div>
-      </div>
-  </div>
-
-<h4 class="fw-bold mt-5 text-info">2.2.2 Evaluating Licenses <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.AP.PD.2</span></h4>
-  <p>Even Open Source code has rules. When you download a Library to use in your project, you must read the <strong>Terms of Service</strong> or the attached License. Some licenses say "You can use this for free, but if you put it in an app, you aren't allowed to sell the app for money."</p>
-
-  <!-- Step-by-Step Guide for Finding Free Images -->
-  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
-      <h5 class="fw-bold text-warning"><i class="fas fa-images me-2"></i> Step-by-Step: Finding Creative Commons Images</h5>
-      <p class="small mb-3 text-light"><strong>Creative Commons (CC)</strong> is a famous licensing system that allows creators to easily share their work for free, as long as you give them credit. Here is how to find CC images safely using Google:</p>
-      
-      <ol class="mb-0 text-light small">
-          <li class="mb-2"><strong>Search:</strong> Go to Google Images and search for your topic (e.g., "Mountains").</li>
-          <li class="mb-2"><strong>Open Tools:</strong> Click the <strong>Tools</strong> button just underneath the search bar.</li>
-          <li class="mb-2"><strong>Filter by Rights:</strong> Click the new <strong>Usage Rights</strong> dropdown menu that appears.</li>
-          <li class="mb-2"><strong>Select CC:</strong> Change the filter from "All" to <strong>Creative Commons licenses</strong>.</li>
-          <li><strong>Verify:</strong> Click on an image. In the preview panel, it will usually say "Image may be subject to copyright" OR it will provide a link to "License details." Always check the details to ensure you attribute the creator properly!</li>
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-route me-2"></i> Worked Example: One Click, Traced</h5>
+      <p class="mb-1">You click "Accept" on a cookie banner. Here's what actually happens next:</p>
+      <ol class="mb-0">
+          <li>The site drops a cookie in your browser tied to a unique ID.</li>
+          <li>Every ad and tracking pixel embedded on that page reads that ID too.</li>
+          <li>Those trackers follow the same ID across other sites that use the same ad network.</li>
+          <li>A profile builds: what you looked at, how long, what you clicked next — sold to advertisers who never asked you directly.</li>
       </ol>
   </div>
 
-<h4 class="fw-bold mt-5 text-info">2.2.3 The Impact of Libraries</h4>
-  <p>Pre-written code speeds up development massively. The entire modern web is built on Open Source libraries! However, using them requires ethical responsibility. If a developer uses a GPL (General Public License) library, they are legally required to make their <em>entire app</em> open source as well. Evaluating licenses ensures you don't accidentally get your company sued.</p>
+  <p><strong>The trap:</strong> students often think the data they typed is the only data collected. In practice, <strong>inferred data</strong> — conclusions drawn from your behavior rather than anything you typed — is often more revealing. Nobody told a site your income bracket, but your browsing pattern can guess it close enough to sell.</p>
 
-<!-- Activity 2.2.4 -->
-  <div class="alert alert-warning mt-4 shadow-sm border-warning">
+  <h4 class="fw-bold mt-5 text-info">2.1.3 The Limits of Data Management</h4>
+  <p>Be honest with yourself about what privacy settings can and can't undo:</p>
+  <ul>
+      <li><strong>Deletion is often partial.</strong> "Delete my account" frequently means "hide it," not "erase it from every backup."</li>
+      <li><strong>Breaches are permanent.</strong> Once your password or email appears in a leaked database, it's out there forever — changing your password doesn't un-leak the old one.</li>
+      <li><strong>No setting removes data already sold.</strong> Turning off ad tracking today doesn't recall the profile a broker already built and sold last year.</li>
+  </ul>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
+      <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">A site collects your browsing history and uses it to guess your age range without you ever entering your birthday. Is that data volunteered, observed, or inferred? <em class="text-white-50">(Answer: inferred — nobody typed it in, it was concluded from behavior.)</em></p>
+  </div>
+
+  <div class="alert alert-info mt-4 shadow-sm border-info">
       <div class="d-flex align-items-center">
-          <i class="fas fa-file-contract fa-3x me-4 text-warning text-dark"></i>
+          <i class="fas fa-route fa-3x me-4 text-info"></i>
           <div>
-              <h4 class="fw-bold mb-1 text-dark">Activity 2.2.4: The License Match-Up</h4>
-              <p class="mb-0 text-dark">You will be given three different software licenses (MIT, GPL, and Creative Commons Non-Commercial). You must match them to the correct real-world scenario: "I want to sell my app," "I want to share my art for free," or "I want everyone to improve my code."</p>
-              <p class="mb-0 fw-bold mt-1 text-danger">👉 Complete the Match-Up in your Digital Notebook.</p>
+              <h4 class="fw-bold mb-1">Activity: The Data Trail</h4>
+              <p class="mb-0">Read one real privacy policy and list exactly what it collects, why, and who receives it. Then inspect a live site's cookies and count how many third parties are reading you.</p>
+              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Data Trail</strong> in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
 
   <hr class="my-5 opacity-25">
 
-  <!-- Section 16.3 -->
-<h3 id="section-2-3" class="fw-bold border-bottom pb-2">2.3 Privacy & Automated Data <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standards 9-12.IC.SLE.2, 9-12.IC.SLE.3</span></h3>
-  <p class="fs-5">In the past, you only gave data to a company if you actively filled out a form and clicked "Submit." Today, your devices collect millions of data points about you while sitting silently in your pocket.</p>
+  <!-- Section 2.2 -->
+  <h3 id="section-2-2" class="fw-bold border-bottom pb-2">2.2 Intellectual Property & Attribution</h3>
+  <p class="fs-5">You found the perfect image for a project. Can you use it? The honest answer is: it depends on a license you probably haven't read yet.</p>
 
-  <h4 class="fw-bold mt-4 text-primary">2.3.1 The Hidden Collection <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.IC.SLE.2</span></h4>
-  <p>Automated data collection happens constantly without your explicit consent:</p>
-  <ul>
-      <li><strong>Cookies:</strong> Tiny text files websites leave in your browser. They are used to keep you logged in, but "Tracking Cookies" follow you from site to site, building a profile of everything you look at across the internet.</li>
-      <li><strong>GPS & Location Services:</strong> Your phone constantly pings cell towers and Wi-Fi networks, creating a minute-by-minute map of everywhere you have been.</li>
-      <li><strong>Background Refresh:</strong> Apps silently send usage statistics, screen time, and error reports back to company servers even when you aren't using them.</li>
-  </ul>
+  <h4 class="fw-bold mt-4 text-primary">2.2.1 Copyright, Permission & Fair Use</h4>
+  <p>The moment someone creates an original work — a photo, a song, a paragraph — <strong>copyright</strong> protects it automatically. No registration required. That means the default answer to "can I use this?" is no, unless one of three things is true: you have <strong>permission</strong>, the work is licensed for reuse, or your use qualifies as <strong>fair use</strong>.</p>
 
-  <div class="image-placeholder shadow-sm my-4">
-    <i class="fas fa-user-secret fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">The Data Vacuum</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A glowing smartphone sitting on a table. Invisible, glowing digital streams of data (location pins, shopping carts, text bubbles) are being silently sucked out of the phone and up into a massive, dark server cloud looming above.</p>
+  <div class="concept-box shadow-sm border-warning bg-light">
+      <h5 class="fw-bold text-dark"><i class="fas fa-exclamation-triangle me-2"></i> The Trap: "Fair Use" Is Not a Permission Slip</h5>
+      <p class="mb-0">Students often think fair use is something you can decide for yourself in advance, like a coupon. It isn't. Fair use is a legal <em>defense</em> you raise <strong>after</strong> you've already been sued for using something — weighed after the fact on factors like purpose, amount used, and market impact. It's a possible argument in court, not a green light beforehand.</p>
   </div>
 
-<h4 class="fw-bold mt-5 text-info">2.3.2 Social & Economic Implications <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-12.IC.SLE.3</span></h4>
-  <p>Why do companies offer you amazing apps for free? Because of the golden rule of the internet: <strong>"If the product is free, YOU are the product."</strong></p>
-  <p>Companies act as "Data Brokers." They collect your automated data, package it into a highly detailed profile of your habits, fears, and desires, and sell it to advertisers. This has massive real-world implications. If an algorithm determines from your web searches that you have an unhealthy diet, could a health insurance company buy that data and raise your rates? If an algorithm sees what political articles you read, could an employer use that to deny you a job?</p>
+  <h4 class="fw-bold mt-5 text-info">2.2.2 Correct Attribution</h4>
+  <p>When a work's license does allow reuse, you still owe the creator credit. A correct attribution has four parts:</p>
 
-<h4 class="fw-bold mt-5 text-info">2.3.3 Privacy Laws (GDPR & COPPA)</h4>
-  <p>To fight back against automated data collection, governments have created powerful privacy laws:</p>
+  <div class="row g-3 my-4 text-center">
+      <div class="col-6 col-md-3">
+          <div class="card h-100 shadow-sm"><div class="card-body"><h6 class="fw-bold text-primary">Title</h6><p class="small mb-0">What the work is called</p></div></div>
+      </div>
+      <div class="col-6 col-md-3">
+          <div class="card h-100 shadow-sm"><div class="card-body"><h6 class="fw-bold text-primary">Author</h6><p class="small mb-0">Who made it</p></div></div>
+      </div>
+      <div class="col-6 col-md-3">
+          <div class="card h-100 shadow-sm"><div class="card-body"><h6 class="fw-bold text-primary">Source</h6><p class="small mb-0">Where you found it</p></div></div>
+      </div>
+      <div class="col-6 col-md-3">
+          <div class="card h-100 shadow-sm"><div class="card-body"><h6 class="fw-bold text-primary">License</h6><p class="small mb-0">What you're allowed to do</p></div></div>
+      </div>
+  </div>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
+      <h5 class="fw-bold text-info"><i class="fas fa-pen me-2"></i> Worked Example: Right vs. Wrong Attribution</h5>
+      <p class="mb-1 text-danger"><strong>Wrong:</strong> "Photo from the internet"</p>
+      <p class="mb-1 text-danger"><strong>Wrong:</strong> "Credit: unknown"</p>
+      <p class="mb-0 text-success"><strong>Right:</strong> "'Desert Sunset' by J. Alvarez, via Unsplash, CC0 license"</p>
+  </div>
+
+  <p>You'll also see Creative Commons codes on licensed work — each one adds an obligation. <code>BY</code> means you must credit the creator. <code>SA</code> ("share-alike") means anything you build from it must carry the same license forward. <code>NC</code> means non-commercial use only. Read the code before you reuse the work, not after.</p>
+
+  <p class="mt-3">There's a real argument on both sides of IP law worth knowing honestly: it funds creators and protects the investment behind their work — but it can also lock up culture and block people from building on ideas that came before them. Both things are true at once.</p>
+
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-copyright fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity: The Attribution Lab</h4>
+              <p class="mb-0">Source three assets you're actually licensed to use and write a correct four-part attribution for each. Then find and fix two badly written attributions.</p>
+              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Attribution Lab</strong> in your Digital Notebook on the right.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 2.3 -->
+  <h3 id="section-2-3" class="fw-bold border-bottom pb-2">2.3 The Data You Never Chose to Give</h3>
+  <p class="fs-5">Privacy conversations usually focus on what you post. The bigger risk is what's generated <em>about</em> you automatically — data you never typed, never saw a form for, and never got asked about.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">2.3.1 Volunteered, Observed & Inferred</h4>
+  <p>Not all data is the same kind of exposed:</p>
   <ul>
-      <li><strong>GDPR (Europe):</strong> The strictest privacy law in the world. It requires websites to ask for explicit permission before using tracking cookies, and it gives citizens the <em>"Right to be Forgotten"</em> (the right to force a company to delete all your data).</li>
-      <li><strong>COPPA (United States):</strong> The Children's Online Privacy Protection Act. It makes it highly illegal to collect data on anyone under the age of 13 without verifiable parental consent. This is why you must be 13 to create a social media account!</li>
+      <li><strong>Volunteered:</strong> you typed it — your name in a signup form.</li>
+      <li><strong>Observed:</strong> collected directly from your action — your location while an app is open.</li>
+      <li><strong>Inferred:</strong> concluded from patterns — a guess about your interests, habits, or even mood based on what you clicked and when.</li>
   </ul>
+  <p>Inference is where the real exposure sits, because it's invisible. You can review what you typed. You can't review a conclusion a system drew about you behind the scenes.</p>
 
-<!-- Activity 2.3.4 -->
+  <div class="image-placeholder shadow-sm">
+    <i class="fas fa-brain fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">Three Kinds of Data, One Profile</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A clean infographic with three labeled funnels — "Volunteered," "Observed," and "Inferred" — all feeding into one central profile icon labeled "You."</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">2.3.2 Weighing the Tradeoff</h4>
+  <p>Automated data collection isn't automatically bad — it's a tradeoff, and the same tradeoff resolves differently depending on which value you weight most:</p>
+
+  <div class="concept-box shadow-sm border-secondary bg-light">
+      <h5 class="fw-bold text-dark"><i class="fas fa-map-marker-alt me-2"></i> Worked Example: Location Tracking</h5>
+      <p class="mb-1"><strong>Argued for safety:</strong> if something happens to you, your location history could help someone find you fast.</p>
+      <p class="mb-1"><strong>Argued for law:</strong> that same history can be subpoenaed and used against you in ways you never agreed to.</p>
+      <p class="mb-0"><strong>Argued for ethics:</strong> should a company be allowed to sell where you sleep and work, even if it's technically legal?</p>
+  </div>
+
+  <p><strong>The trap:</strong> students often think there's one correct answer to a privacy tradeoff. There usually isn't — there's a decision about which value you're willing to give up ground on, made honestly instead of by default.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">Name one system that generates data about you without you ever deliberately entering anything. <em class="text-white-50">(Example answer: a fitness app inferring your sleep schedule from when your phone stops moving.)</em></p>
+  </div>
+
   <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
       <div class="d-flex align-items-center">
-          <i class="fas fa-eye-slash fa-3x me-4 text-primary"></i>
+          <i class="fas fa-scale-balanced fa-3x me-4 text-primary"></i>
           <div>
-              <h3 class="fw-bold mb-1">Activity 2.3.4: The Privacy Paradox</h3>
-              <p class="mb-2 fs-5">Almost every person surveyed says that "Digital Privacy is incredibly important to me." Yet, those exact same people eagerly click "Accept" on 50-page Terms of Service agreements so they can use a free social media app that tracks their location 24/7.</p>
-              <ul class="mb-0 fw-bold text-dark small">
-                  <li class="mb-1">Do users actually care about privacy, or is the convenience of "free" apps just too powerful?</li>
-                  <li class="mb-1">Should companies be forced to make their Terms of Service simple enough for a 10-year-old to understand?</li>
-              </ul>
-              <p class="mb-0 fw-bold mt-2 text-danger">👉 Open the "Discussion Reflection" template in your Digital Notebook to outline your argument for the class debate.</p>
+              <h3 class="fw-bold mb-1">Activity: The Privacy Position</h3>
+              <p class="mb-0 fs-5">Pick one real privacy tradeoff and argue it from the safety, legal, and ethical angles — then state your own position and the strongest objection to it.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Privacy Position</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>

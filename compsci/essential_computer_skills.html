@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Chapter 1: Essential Computer Skills & Troubleshooting</title>
+  <title>Chapter 1: Essential Computer Skills</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
   <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  
+
   <!-- External Curriculum Styles -->
   <link href="/css/compsci.css" rel="stylesheet" />
 </head>
@@ -16,76 +16,80 @@
   <div class="chapter-header">
 <span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 1: Digital Citizenship</span>
     <h1 class="display-4 fw-bold">Chapter 1: Essential Computer Skills</h1>
-    <p class="lead text-muted">Mastering the OS, organizing data, and solving digital problems like a pro.</p>
+    <p class="lead text-muted">Who you are online, how you act online, and how to spot the people trying to take advantage of both.</p>
   </div>
 
   <!-- STICKY TABLE OF CONTENTS -->
   <div class="sticky-toc">
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
-      <a href="#section-2-1">1.1 Navigating the OS & Files</a>
-      <a href="#section-2-2">1.2 Systematic Troubleshooting</a>
-      <a href="#section-2-3">1.3 Maintenance & Updates</a>
+      <a href="#section-1-1">1.1 Your Digital Identity</a>
+      <a href="#section-1-2">1.2 Safe, Legal & Ethical Habits</a>
+      <a href="#section-1-3">1.3 Recognizing Online Dangers</a>
   </div>
 
   <!-- Section 1.1 -->
-  <h3 id="section-2-1" class="fw-bold mt-4 border-bottom pb-2">1.1 Navigating the OS & File Management</h3>
-  <p class="fs-5">In Chapter 1, we learned that the Operating System (OS) is the software that manages the hardware. But how do <em>we</em> manage the OS? To be a digital creator, you need to navigate your computer with speed and precision, organizing your data so it is never lost.</p>
-  
-  <h4 class="fw-bold mt-4 text-primary">1.1.1 The Graphical User Interface (GUI) & The Desktop</h4>
-  <p>In the early days of computing, users interacted with machines using a <strong>Command Line Interface (CLI)</strong>—typing lines of text on a black screen. Today, we use a <strong>Graphical User Interface (GUI)</strong>. A GUI (pronounced "gooey") allows you to interact with the OS using visual elements like windows, icons, and menus.</p>
-  <p>Your <strong>Desktop</strong> is the primary workspace of the GUI. While it's tempting to save every file directly to the desktop, treating it like a digital junk drawer slows down your computer and makes finding files impossible. Customizing and organizing your workspace is the first step to digital productivity.</p>
+  <h3 id="section-1-1" class="fw-bold mt-4 border-bottom pb-2">1.1 Your Digital Identity</h3>
+  <p class="fs-5">Tonight, somewhere, an employer, a college admissions officer, or a coach is going to search your name. What comes up is not random — it's the sum of every account you've made, every post you've left up, and every photo someone else tagged you in. That sum has a name: your <strong>digital identity</strong>.</p>
 
-  <div class="image-placeholder shadow-sm">
-    <i class="fas fa-desktop fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">The Command Line vs. The GUI</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A split-screen image. On the left, a retro black computer monitor with glowing green text code. On the right, a modern, colorful desktop screen with folders, a mouse cursor, and application windows.</p>
-  </div>
-
-  <h4 class="fw-bold mt-5 text-info">1.1.2 File Systems & Hierarchies</h4>
-  <p>Data isn't just thrown randomly onto your hard drive. The OS uses a <strong>File System</strong> to keep track of where everything is physically stored. The best way to visualize a file system is like an upside-down tree.</p>
-
-  <div class="concept-box shadow-sm border-primary bg-light">
-      <h5 class="fw-bold text-primary"><i class="fas fa-sitemap me-2"></i> The Folder Hierarchy</h5>
-      <ul>
-          <li><strong>The Root Directory:</strong> The very top of the tree. In Windows, this is usually your <code>C:\</code> drive. On a Mac, it is simply <code>Macintosh HD</code>. Everything on the computer branches out from here.</li>
-          <li><strong>Folders (Directories):</strong> Digital containers used to group related files.</li>
-          <li><strong>Subfolders:</strong> Folders placed inside other folders to create a highly specific <strong>File Path</strong>.</li>
-      </ul>
-      <p class="mb-0 font-monospace text-muted mt-2 bg-white p-2 rounded border">Example File Path: C:\Users\Student\Documents\WebDesign\Project1\logo.png</p>
-  </div>
-
-  <h4 class="fw-bold mt-5 text-info">1.1.3 File Extensions & Associations</h4>
-  <p>Have you ever noticed the three or four letters at the end of a file's name? That is the <strong>File Extension</strong>. Extensions are crucial because they tell the Operating System <em>which</em> program it should use to open the file.</p>
+  <h4 class="fw-bold mt-4 text-primary">1.1.1 The Footprint You Leave</h4>
+  <p>Your digital footprint has two halves, and most people only think about one of them.</p>
 
   <div class="row g-4 my-3">
       <div class="col-md-6">
-          <div class="card h-100 shadow-sm border-warning">
+          <div class="card h-100 shadow-sm border-primary">
               <div class="card-body">
-                  <h5 class="fw-bold text-warning"><i class="fas fa-tools me-2"></i> Raw Working Files</h5>
-                  <p>These are files that are still being edited. They contain layers, history, and raw data. You usually need the specific app that created them to open them.</p>
-                  <p class="font-monospace small bg-light p-2 rounded">.psd (Photoshop)<br>.ai (Illustrator)<br>.docx (Word Document)</p>
+                  <h5 class="fw-bold text-primary"><i class="fas fa-pen-nib me-2"></i> Active Footprint</h5>
+                  <p class="mb-0">Everything you deliberately publish: posts, comments, usernames, profile photos, the videos you make. You chose to put this here.</p>
               </div>
           </div>
       </div>
       <div class="col-md-6">
-          <div class="card h-100 shadow-sm border-success">
+          <div class="card h-100 shadow-sm border-info">
               <div class="card-body">
-                  <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Exported Final Products</h5>
-                  <p>These files are "flattened" and ready to be shared with the world. They are universally recognized and can be opened in almost any web browser or basic viewer.</p>
-                  <p class="font-monospace small bg-light p-2 rounded">.jpg / .png (Images)<br>.pdf (Documents)<br>.html (Webpages)</p>
+                  <h5 class="fw-bold text-info"><i class="fas fa-eye me-2"></i> Passive Footprint</h5>
+                  <p class="mb-0">Everything collected or posted about you without a deliberate choice on your part: photos friends tag you in, search history, location data, an old account you forgot existed.</p>
               </div>
           </div>
       </div>
   </div>
 
-  <!-- Review Call to Action -->
+  <p>Reputation isn't built by one post — it's built by accumulation. A single awkward comment from three years ago won't sink you. A pattern of them will. That's why "I'll delete it later" is a weaker plan than "I'll think about it before I post it."</p>
+
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-users me-2"></i> Worked Example: One Post, Three Audiences</h5>
+      <p>Say you post: <em>"This assignment is so dumb, waste of my life."</em> Read it as three different people:</p>
+      <ul class="mb-0">
+          <li><strong>A friend</strong> reads it as venting. No big deal.</li>
+          <li><strong>A teacher</strong> reads it as disrespect for their class, even if that's not what you meant.</li>
+          <li><strong>A hiring manager</strong>, scrolling your public profile before an interview, reads it as a preview of how you'll talk about their company.</li>
+      </ul>
+      <p class="mb-0 mt-2">Same seven words. Three completely different verdicts. That gap is the entire reason digital identity matters.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">1.1.2 Choosing a Professional Identity</h4>
+  <p>Every account you create is an identity decision, starting with the username. A username like <code>xXcrazygamer420Xx</code> is fine for a private gaming account. It is not fine on something that will appear next to your real submitted work for the rest of the year — and possibly on a resume link someday.</p>
+
+  <div class="image-placeholder shadow-sm">
+    <i class="fas fa-id-badge fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">Gamertag vs. Professional Handle</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A clean split-image graphic. Left side shows a flashy, neon gamertag with a skull emoji. Right side shows a plain, lowercase professional username like "jsmith26" next to a simple resume icon.</p>
+  </div>
+
+  <p><strong>The trap:</strong> students often think a professional identity has to be boring or fake. It doesn't. It just has to be something you'd be fine explaining to an employer. "amiller24" isn't a lie — it's just the version of your name a stranger can trust.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-primary border-5">
+      <h5 class="fw-bold text-info"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">A friend tags you in an unflattering photo you never posted yourself. Is that part of your active footprint or your passive footprint? <em class="text-white-50">(Answer: passive — you didn't choose to publish it, but it's still part of what a stranger can find.)</em></p>
+  </div>
+
+  <!-- Activity CTA -->
   <div class="alert alert-info mt-4 shadow-sm border-info">
       <div class="d-flex align-items-center">
-          <i class="fas fa-folder-tree fa-3x me-4 text-info"></i>
+          <i class="fas fa-search fa-3x me-4 text-info"></i>
           <div>
-              <h4 class="fw-bold mb-1">Activity: Structuring a Project Workspace</h4>
-              <p class="mb-0">You have been given a chaotic list of 20 unorganized files. Your mission is to design a logical folder hierarchy (using Folders and Subfolders) to organize them for a digital arts project.</p>
-              <p class="mb-0 fw-bold mt-1">👉 Load the <strong>Chapter 2 Activity</strong> in your Digital Notebook on the right.</p>
+              <h4 class="fw-bold mb-1">Activity: The Footprint Audit</h4>
+              <p class="mb-0">Search your own name the way a stranger would. List everything you find, separate what you created from what was created about you, and fix anything that needs fixing.</p>
+              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Footprint Audit</strong> in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
@@ -93,163 +97,158 @@
   <hr class="my-5 opacity-25">
 
   <!-- Section 1.2 -->
-  <h3 id="section-2-2" class="fw-bold border-bottom pb-2">1.2 Systematic Troubleshooting <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">Standard 9-11.CS.T.1</span></h3>
-  <p class="fs-5">Technology breaks. Apps freeze, internet connections drop, and files refuse to save. The difference between an amateur and a professional is how they react to failure.</p>
+  <h3 id="section-1-2" class="fw-bold border-bottom pb-2">1.2 Safe, Legal & Ethical Habits Online</h3>
+  <p class="fs-5">Knowing what you <em>can</em> do online and knowing what you <em>should</em> do online are two different skills. This section is about the second one — and about speaking up when someone else gets it wrong.</p>
 
-  <h4 class="fw-bold mt-4 text-primary">1.1.1 The Troubleshooting Mindset</h4>
-  <p>When an error occurs, the most common human reaction is panic, followed by rapidly clicking the mouse. This makes the problem worse. The Troubleshooting Mindset requires you to treat computer errors like a scientist:</p>
-  <ol>
-      <li><strong>Stop and Read:</strong> Error messages contain specific clues. Do not immediately click "OK" or "Close." Read the text!</li>
-      <li><strong>Reproduce the Error:</strong> Can you make the error happen again? If it happens every time you click a specific button, you've found the trigger.</li>
-      <li><strong>Don't Panic:</strong> Computers operate on logic. If it is broken, there is a logical reason why.</li>
-  </ol>
+  <h4 class="fw-bold mt-4 text-primary">1.2.1 Four Words That Sound the Same But Aren't</h4>
+  <p>People use "safe," "legal," "ethical," and "positive" interchangeably. They shouldn't — each one protects something different.</p>
 
-  <h4 class="fw-bold mt-5 text-info">1.1.2 The "Divide and Conquer" Strategy</h4>
-  <p>Computers are complex systems made of many overlapping layers. <strong>Isolating the variable</strong> is the key to solving complex problems. By eliminating what <em>isn't</em> broken, we zoom in on what is.</p>
-
-  <!-- Interactive Tabs for Troubleshooting -->
-  <ul class="nav nav-tabs mt-4" id="troubleTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-          <button class="nav-link active fw-bold text-danger" id="hardware-tab" data-bs-toggle="tab" data-bs-target="#hardware-pane" type="button" role="tab">
-              <i class="fas fa-mouse me-2"></i> Is it Hardware?
-          </button>
-      </li>
-      <li class="nav-item" role="presentation">
-          <button class="nav-link fw-bold text-primary" id="software-tab" data-bs-toggle="tab" data-bs-target="#software-pane" type="button" role="tab">
-              <i class="fas fa-window-restore me-2"></i> Is it Software?
-          </button>
-      </li>
-      <li class="nav-item" role="presentation">
-          <button class="nav-link fw-bold text-success" id="network-tab" data-bs-toggle="tab" data-bs-target="#network-pane" type="button" role="tab">
-              <i class="fas fa-wifi me-2"></i> Is it the Network?
-          </button>
-      </li>
-  </ul>
-  
-  <div class="tab-content border border-top-0 bg-white p-4 shadow-sm mb-4" id="troubleTabsContent">
-      <div class="tab-pane fade show active" id="hardware-pane">
-          <h5 class="fw-bold text-danger">The Physical Layer</h5>
-          <p><strong>Example:</strong> Your mouse won't move.</p>
-          <p><strong>Divide & Conquer:</strong> Check the physical connections first. Is the USB plugged in? Does the mouse have batteries? Does a different mouse work in the same USB port? If a second mouse works, the first mouse is physically broken.</p>
+  <div class="row g-3 my-4 text-center">
+      <div class="col-md-3">
+          <div class="card h-100 shadow-sm border-success">
+              <div class="card-body">
+                  <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                  <h6 class="fw-bold">Safe</h6>
+                  <p class="small mb-0">Protects <strong>you</strong> — your accounts, your data, your reputation.</p>
+              </div>
+          </div>
       </div>
-      <div class="tab-pane fade" id="software-pane">
-          <h5 class="fw-bold text-primary">The Application Layer</h5>
-          <p><strong>Example:</strong> Adobe Photoshop is completely frozen.</p>
-          <p><strong>Divide & Conquer:</strong> Is the whole computer frozen, or just the app? Press the Windows key (or Cmd+Space on Mac). If the start menu opens, the hardware is fine, but the app has crashed. You can use the Task Manager (or Force Quit) to close the specific app without restarting the whole machine.</p>
+      <div class="col-md-3">
+          <div class="card h-100 shadow-sm border-primary">
+              <div class="card-body">
+                  <i class="fas fa-gavel fa-2x text-primary mb-2"></i>
+                  <h6 class="fw-bold">Legal</h6>
+                  <p class="small mb-0">Protects you from <strong>consequences</strong> — fines, suspension, a record.</p>
+              </div>
+          </div>
       </div>
-      <div class="tab-pane fade" id="network-pane">
-          <h5 class="fw-bold text-success">The Communication Layer</h5>
-          <p><strong>Example:</strong> A webpage won't load.</p>
-          <p><strong>Divide & Conquer:</strong> Can you load a different website (like Google)? If yes, your internet is fine, but the specific website is down. If you can't load <em>any</em> website, check your Wi-Fi icon. Are other people in the room connected? If they are, it's an issue with your specific computer's network settings.</p>
+      <div class="col-md-3">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body">
+                  <i class="fas fa-hand-holding-heart fa-2x text-warning mb-2"></i>
+                  <h6 class="fw-bold">Ethical</h6>
+                  <p class="small mb-0">Protects <strong>other people</strong>, even when nobody's watching.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-3">
+          <div class="card h-100 shadow-sm border-info">
+              <div class="card-body">
+                  <i class="fas fa-hammer fa-2x text-info mb-2"></i>
+                  <h6 class="fw-bold">Positive</h6>
+                  <p class="small mb-0">Actually <strong>builds</strong> something instead of just avoiding harm.</p>
+              </div>
+          </div>
       </div>
   </div>
 
-  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
-      <h5 class="fw-bold text-warning"><i class="fas fa-list-ol me-2"></i> Step-by-Step: How to "Force Quit" a Frozen App</h5>
-      <p class="small mb-3 text-light">If an application completely freezes and won't let you close it normally, use the OS's built-in manager to forcefully terminate it without having to restart your whole computer.</p>
-      
-      <h6 class="fw-bold text-info mt-3"><i class="fab fa-windows me-2"></i> On Windows (Task Manager):</h6>
-      <ol class="mb-3 text-light small">
-          <li class="mb-1">Press <code>Ctrl + Shift + Esc</code> on your keyboard. (Alternatively, press <code>Ctrl + Alt + Delete</code> and click "Task Manager").</li>
-          <li class="mb-1">In the Task Manager window, locate the frozen app in the "Processes" list (it will often say "Not Responding").</li>
-          <li class="mb-1">Click on the app to select it, then click the <strong>End Task</strong> button in the bottom right corner.</li>
-      </ol>
+  <p>Something can be legal and still unethical. Screenshotting a friend's private message and sharing it isn't usually illegal — but it's a betrayal, and everyone in the room knows it. Being a good digital citizen means clearing all four bars, not just the one with a punishment attached.</p>
 
-      <h6 class="fw-bold text-light mt-3"><i class="fab fa-apple me-2"></i> On macOS (Force Quit):</h6>
-      <ol class="mb-0 text-light small">
-          <li class="mb-1">Press <code>Cmd + Option + Esc</code> on your keyboard all at the same time.</li>
-          <li class="mb-1">A "Force Quit Applications" window will pop up. Select the frozen app from the list.</li>
-          <li class="mb-1">Click the <strong>Force Quit</strong> button in the bottom right corner.</li>
-      </ol>
-  </div>
+  <h4 class="fw-bold mt-5 text-info">1.2.2 The Bystander Problem</h4>
+  <p>Most online harm doesn't continue because attackers are unstoppable. It continues because witnesses say nothing. Advocating for good behavior — not just practicing it yourself — is the harder half of digital citizenship, and it's a skill you can actually train.</p>
 
-  <h4 class="fw-bold mt-5 text-info">1.1.3 Researching the Solution</h4>
-  <p>Even the best IT professionals in the world do not memorize every solution. They are simply experts at using search engines to find answers. The art of the "Tech Query" involves being incredibly specific.</p>
-  
   <div class="concept-box shadow-sm border-warning bg-light">
-      <h5 class="fw-bold text-dark"><i class="fab fa-google text-primary me-2"></i> How to Google an Error</h5>
-      <p><strong>Bad Search:</strong> "My screen went blue."<br>
-      <em>Why it's bad:</em> Too vague. It will return millions of unrelated results.</p>
-      <p class="mb-0"><strong>Good Search:</strong> "Windows 11 BSOD Error Code 0x000000EF when opening Premiere Pro"<br>
-      <em>Why it works:</em> It includes the OS version, the exact error code, and the specific application that triggered the crash. This will lead you directly to documentation or forums with the exact fix.</p>
+      <h5 class="fw-bold text-dark"><i class="fas fa-comment-dots me-2"></i> Two Scripts for the Same Situation</h5>
+      <p><strong>Scenario:</strong> A group chat starts piling on one person over a mistake they made.</p>
+      <p class="mb-1"><strong>Escalates:</strong> <em>"Yeah honestly they kind of deserve it lol"</em> — even a joking pile-on adds fuel.</p>
+      <p class="mb-0"><strong>De-escalates:</strong> <em>"Okay I think that's enough, let's move on"</em> — short, doesn't lecture anyone, and it works because someone finally said it.</p>
   </div>
+
+  <p><strong>The trap:</strong> students often think intervening means a big dramatic confrontation. It almost never does. The de-escalating line above is eleven words. Most of the time that's all it takes — nobody else wanted to be the one to say it.</p>
 
   <div class="image-placeholder shadow-sm">
-    <i class="fas fa-project-diagram fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">The Troubleshooting Flowchart</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A clean, modern flowchart graphic demonstrating a 'Yes/No' decision tree for fixing a computer that won't turn on (e.g. "Is it plugged in?" -> Yes -> "Is the power strip on?").</p>
+    <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">The Bystander Effect, Visualized</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A simple flat-illustration graphic showing a group chat with many gray "silent" message bubbles piling on one small message bubble, and a single colored bubble breaking the pattern to say "that's enough."</p>
+  </div>
+
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-balance-scale fa-3x me-4 text-info"></i>
+          <div>
+              <h4 class="fw-bold mb-1">Activity: The Conduct Case Studies</h4>
+              <p class="mb-0">Sort twelve real behaviors onto a legal/illegal and ethical/unethical grid, then defend the three placements your group argued about the most.</p>
+              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Conduct Case Studies</strong> in your Digital Notebook on the right.</p>
+          </div>
+      </div>
   </div>
 
   <hr class="my-5 opacity-25">
 
   <!-- Section 1.3 -->
-  <h3 id="section-2-3" class="fw-bold border-bottom pb-2">1.3 Maintenance and Updates</h3>
-  <p class="fs-5">A computer is like a car; if you don't change the oil and maintain the engine, it will eventually break down. Digital maintenance ensures your machine runs fast and your data stays safe.</p>
+  <h3 id="section-1-3" class="fw-bold border-bottom pb-2">1.3 Recognizing Online Dangers</h3>
+  <p class="fs-5">Cybersecurity has a reputation problem: people picture a hacker in a hoodie breaking encryption. In reality, almost nobody breaks encryption. They just ask you nicely for your password — and dress the question up so it doesn't look like a question.</p>
 
-  <h4 class="fw-bold mt-4 text-primary">1.3.1 Software Updates & Patches</h4>
-  <p>Why does your computer constantly annoy you with "Update Available" pop-ups? Developers release updates for three main reasons:</p>
-  <ul>
-      <li><strong>Patching Security Holes:</strong> The most important reason. Hackers constantly find vulnerabilities in software. Updates patch these holes to keep your data safe.</li>
-      <li><strong>Fixing Bugs:</strong> Repairing glitches that cause the software to crash.</li>
-      <li><strong>Adding Features:</strong> Improving the software with new tools and better performance.</li>
+  <h4 class="fw-bold mt-4 text-primary">1.3.1 The Human Attacks</h4>
+  <p>These attacks don't target your computer. They target you.</p>
+
+  <!-- Interactive Tabs for Attack Types -->
+  <ul class="nav nav-tabs mt-4" id="threatTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+          <button class="nav-link active fw-bold text-danger" id="phishing-tab" data-bs-toggle="tab" data-bs-target="#phishing-pane" type="button" role="tab">
+              <i class="fas fa-envelope-open-text me-2"></i> Phishing
+          </button>
+      </li>
+      <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-primary" id="imperson-tab" data-bs-toggle="tab" data-bs-target="#imperson-pane" type="button" role="tab">
+              <i class="fas fa-user-secret me-2"></i> Impersonation
+          </button>
+      </li>
+      <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-warning" id="stuffing-tab" data-bs-toggle="tab" data-bs-target="#stuffing-pane" type="button" role="tab">
+              <i class="fas fa-key me-2"></i> Credential Stuffing
+          </button>
+      </li>
   </ul>
-  <p>Ignoring updates is the number one way computers become infected with malware.</p>
 
-  <h4 class="fw-bold mt-5 text-info">1.3.2 Backups and The Rule of 3-2-1</h4>
-  <p>Hard drives fail. Laptops get stolen. Coffee gets spilled. If your data only exists in one place, it doesn't really exist at all. The golden standard of data protection is the <strong>Rule of 3-2-1</strong>.</p>
-
-  <div class="row g-3 my-4 text-center">
-      <div class="col-md-4">
-          <div class="card h-100 shadow-sm border-primary bg-primary text-white">
-              <div class="card-body">
-                  <h1 class="display-3 fw-bold mb-0">3</h1>
-                  <h5 class="fw-bold">Copies of your Data</h5>
-                  <p class="small mb-0 opacity-75">The original working file, plus two backups.</p>
-              </div>
-          </div>
+  <div class="tab-content border border-top-0 bg-white p-4 shadow-sm mb-4" id="threatTabsContent">
+      <div class="tab-pane fade show active" id="phishing-pane">
+          <h5 class="fw-bold text-danger">The Fake Message</h5>
+          <p>An email or text pretending to be someone official — your school, a bank, a game you play — asking you to click a link and log in.</p>
+          <p class="mb-0"><strong>The tells:</strong> a sender domain that's almost right but not quite (<code>micros0ft-support.com</code>), manufactured urgency ("your account will be deleted in 24 hours!"), and a link whose visible text doesn't match where it actually goes.</p>
       </div>
-      <div class="col-md-4">
-          <div class="card h-100 shadow-sm border-warning bg-warning text-dark">
-              <div class="card-body">
-                  <h1 class="display-3 fw-bold mb-0">2</h1>
-                  <h5 class="fw-bold">Different Media Types</h5>
-                  <p class="small mb-0 opacity-75">E.g., Your laptop's SSD, and an external USB Hard Drive.</p>
-              </div>
-          </div>
+      <div class="tab-pane fade" id="imperson-pane">
+          <h5 class="fw-bold text-primary">Someone Pretending to Be Someone Else</h5>
+          <p>An account copying a real person's name and photo — a teacher, a friend, a celebrity — to trick you into trusting a message you'd normally ignore.</p>
+          <p class="mb-0"><strong>The tells:</strong> a brand-new account, a slightly misspelled username, and a request that a real version of that person would never actually make over DM (like asking for money or a password).</p>
       </div>
-      <div class="col-md-4">
-          <div class="card h-100 shadow-sm border-success bg-success text-white">
-              <div class="card-body">
-                  <h1 class="display-3 fw-bold mb-0">1</h1>
-                  <h5 class="fw-bold">Offsite Backup</h5>
-                  <p class="small mb-0 opacity-75">Cloud storage (Google Drive, OneDrive) so it survives a physical fire/flood.</p>
-              </div>
-          </div>
+      <div class="tab-pane fade" id="stuffing-pane">
+          <h5 class="fw-bold text-warning">Reusing a Leaked Password</h5>
+          <p>Attackers don't guess your password — they buy a list of real ones leaked from some other site's breach, then try that exact email-and-password combo everywhere else.</p>
+          <p class="mb-0"><strong>Why it works:</strong> most people reuse the same password across many sites. One breach anywhere becomes a master key everywhere, unless every password is unique.</p>
       </div>
   </div>
 
-  <div class="image-placeholder shadow-sm border-primary">
-    <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
-    <h5 class="fw-bold text-dark">Local vs Cloud Storage</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> An infographic showing a laptop backing up a folder. One arrow points to an external physical hard drive (Local), and another arrow points up to a glowing server rack in the sky (Cloud).</p>
+  <h4 class="fw-bold mt-5 text-info">1.3.2 Prevention and Detection</h4>
+  <p>You can't out-guess every attack, but you can make yourself an expensive target instead of an easy one.</p>
+
+  <div class="concept-box shadow-sm border-success bg-light">
+      <h5 class="fw-bold text-success"><i class="fas fa-lock me-2"></i> The Habits That Actually Work</h5>
+      <ul class="mb-0">
+          <li><strong>A unique password per site</strong>, kept in a password manager instead of your memory.</li>
+          <li><strong>Multi-factor authentication</strong> — a second code from your phone, so a stolen password alone isn't enough.</li>
+          <li><strong>Verifying out of band</strong> — if a "school" text asks you to log in urgently, don't click the link. Open the school's site yourself, the way you normally would.</li>
+      </ul>
   </div>
 
-  <h4 class="fw-bold mt-5 text-info">1.3.3 Digital Housekeeping</h4>
-  <p>Over time, computers accumulate "digital dust." Managing your storage space keeps the OS running efficiently.</p>
-  <ul>
-      <li><strong>Clearing the Cache:</strong> Web browsers download images and code so sites load faster next time. This is the Cache. Over months, this can take up gigabytes of space and cause errors. Clearing it forces a fresh download.</li>
-      <li><strong>Uninstalling Unused Programs:</strong> Safely removing old software prevents background processes from eating up your RAM and CPU cycles.</li>
-      <li><strong>Emptying the Trash:</strong> Deleting a file just moves it to the Recycle Bin. It still takes up hard drive space until you empty the bin!</li>
-  </ul>
+  <p><strong>The trap:</strong> students often think that if they didn't get "hacked" in some dramatic movie sense, they weren't affected by a breach. In reality, most breaches are silent — a company's database leaks, your old password from three years ago is now on a public list, and you never notice until someone tries it on your current accounts.</p>
 
-  <!-- Final Chapter Call to Action -->
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-danger border-5">
+      <h5 class="fw-bold text-danger"><i class="fas fa-first-aid me-2"></i> If You Think You Already Clicked Something</h5>
+      <ol class="mb-0 text-light">
+          <li class="mb-1">Change the password for that account immediately, from a different, trusted device.</li>
+          <li class="mb-1">Turn on multi-factor authentication if it isn't already on.</li>
+          <li class="mb-0">Check anywhere else you used that same password — and change those too.</li>
+      </ol>
+  </div>
+
   <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
       <div class="d-flex align-items-center">
-          <i class="fas fa-tasks fa-3x me-4 text-primary"></i>
+          <i class="fas fa-user-shield fa-3x me-4 text-primary"></i>
           <div>
-              <h3 class="fw-bold mb-1">Chapter 2 Review Activity</h3>
-              <p class="mb-0 fs-5">Can you apply the "Divide and Conquer" strategy to real problems?</p>
-              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Click the green "Worksheet" button to load your Chapter 2 Assignment into your Digital Notebook!</p>
+              <h3 class="fw-bold mb-1">Activity: The Threat Recognition Lab</h3>
+              <p class="mb-0 fs-5">Dissect four real phishing and impersonation attempts and mark every tell you can find on each one.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Threat Recognition Lab</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>
