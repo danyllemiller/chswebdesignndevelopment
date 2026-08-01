@@ -1185,6 +1185,7 @@
 
     // ── State ─────────────────────────────────────────────────────────────
     let user, assignments = [], goals = [], gradeLog = [], prompts = [], calEvents = {};
+    let classDueDates = []; // real WD/CS chapter due dates, filtered to the student's enrolled course
     let calYear, calMonth, calDay, currentView = 'month';
     let calSelectedYMD = ''; // full YYYY-MM-DD of the day the user last explicitly selected
     let schoolSpecialDates = {}, bellSchedule = [];  // from school calendar (schoolSpecialDates: {date → {type,label}})
@@ -1427,6 +1428,22 @@
       });
     }
 
+    // Which WD1/WD2/CS course's due dates this logged-in user should see,
+    // derived from the same localStorage 'user' object js/calendar.js reads
+    // (section_id prefix WD1-*/WD2-*/CS-*). Returns null for teachers/admins
+    // and any section that doesn't clearly match a known prefix -- fail open
+    // (show everything) rather than risk hiding a real assignment.
+    function getPlannerCourseBucket() {
+      if (!user) return null;
+      const isTeacher = user.isTeacher || user.role === 'teacher' || user.role === 'admin' || user.section_id === 'Teacher';
+      if (isTeacher) return null;
+      const section = String(user.section_id || user.studentClass || user.section || '').trim().toUpperCase();
+      if (section.startsWith('WD1')) return 'WD1';
+      if (section.startsWith('WD2')) return 'WD2';
+      if (section.startsWith('CS') || section.startsWith('COMP')) return 'CS';
+      return null;
+    }
+
     async function loadSchoolCalendar() {
       try {
         // Load special dates from the same CSV calendar.html uses (no admin auth needed)
@@ -1434,12 +1451,20 @@
         if (csvRes.ok) parseSpecialDatesCsv(await csvRes.text());
       } catch (_) {}
       try {
-        // Load DB events (manually added school events)
-        const evRes = await fetch('/api/events.php');
+        // Load DB events (manually added school events + real class due dates,
+        // filtered to this student's enrolled course where we can tell).
+        const bucket = getPlannerCourseBucket();
+        const evUrl = bucket ? `/api/events.php?bucket=${encodeURIComponent(bucket)}` : '/api/events.php';
+        const evRes = await fetch(evUrl);
         if (evRes.ok) {
           const data = await evRes.json().catch(() => null);
+          classDueDates = [];
           if (data?.events) {
             data.events.forEach(ev => {
+              if (ev.source === 'due_date') {
+                classDueDates.push({ date: ev.event_date, label: ev.title });
+                return; // itemized in the Assignments Due list, not the day-type chip
+              }
               const existing = schoolSpecialDates[ev.event_date];
               if (!existing) schoolSpecialDates[ev.event_date] = { type: ev.type || 'EVENT', label: ev.description || ev.type || 'Event' };
             });
@@ -1495,6 +1520,11 @@
           const k = a.due_date.split('T')[0];
           (calEvents[k] = calEvents[k] || []).push({ type: 'assign', label: a.title, passed: a.passed, submitted: a.submitted });
         }
+      });
+      // Real WD/CS chapter due dates from the Due Date Manager, already
+      // filtered server-side to this student's enrolled course.
+      classDueDates.forEach(d => {
+        (calEvents[d.date] = calEvents[d.date] || []).push({ type: 'assign', label: d.label });
       });
       todos.forEach(t => {
         if (t.date) {

@@ -37,7 +37,7 @@ if ($method === 'GET') {
     if ($bucket !== '') {
         $stmt = $db->prepare(
             'SELECT id, DATE_FORMAT(event_date,"%Y-%m-%d") AS event_date,
-                    title, type, description, all_day,
+                    title, type, description, all_day, source,
                     TIME_FORMAT(start_time,"%H:%i") AS start_time,
                     TIME_FORMAT(end_time,"%H:%i")   AS end_time
              FROM calendar_events
@@ -50,7 +50,7 @@ if ($method === 'GET') {
     } else {
         $result = $db->query(
             'SELECT id, DATE_FORMAT(event_date,"%Y-%m-%d") AS event_date,
-                    title, type, description, all_day,
+                    title, type, description, all_day, source,
                     TIME_FORMAT(start_time,"%H:%i") AS start_time,
                     TIME_FORMAT(end_time,"%H:%i")   AS end_time
              FROM calendar_events ORDER BY event_date ASC'
