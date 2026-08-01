@@ -6,6 +6,55 @@
 const errorDiv = document.getElementById("auth-error");
 
 /**
+ * Client-side mirror of server/helpers.js validatePassword(). Convenience
+ * only -- the server enforces this independently on register and
+ * change-password, so this never needs to be trusted on its own.
+ * Returns null if pw satisfies the rule, otherwise a specific message
+ * naming the first unmet requirement.
+ */
+function validatePasswordClient(pw) {
+    const s = String(pw || "");
+    if (s.length < 8) return "Password must be at least 8 characters.";
+    if (/\s/.test(s)) return "Password cannot contain spaces.";
+    if (!/^[\x21-\x7E]+$/.test(s)) return "Password can only contain standard keyboard letters, numbers, and symbols.";
+    if (!/[A-Z]/.test(s)) return "Password needs at least one uppercase letter.";
+    if (!/[a-z]/.test(s)) return "Password needs at least one lowercase letter.";
+    if (!/[0-9]/.test(s)) return "Password needs at least one number.";
+    if (!/[^A-Za-z0-9]/.test(s)) return "Password needs at least one special character.";
+    return null;
+}
+
+/**
+ * Updates a live password checklist, ticking each requirement green as it
+ * becomes true. `prefix` selects which checklist (register uses "pw-check",
+ * reset uses "reset-pw-check") since both forms coexist in the DOM at once.
+ * No-op if the checklist items aren't on the page.
+ */
+function updatePasswordChecklist(pw, prefix = "pw-check") {
+    const s = String(pw || "");
+    const checks = {
+        [`${prefix}-length`]:  s.length >= 8,
+        [`${prefix}-upper`]:   /[A-Z]/.test(s),
+        [`${prefix}-lower`]:   /[a-z]/.test(s),
+        [`${prefix}-number`]:  /[0-9]/.test(s),
+        [`${prefix}-special`]: /[^A-Za-z0-9]/.test(s)
+    };
+    Object.entries(checks).forEach(([id, met]) => {
+        const li = document.getElementById(id);
+        if (!li) return;
+        const icon = li.querySelector("i");
+        li.classList.toggle("text-success", met);
+        li.classList.toggle("text-muted", !met);
+        if (icon) {
+            icon.classList.toggle("fas", met);
+            icon.classList.toggle("fa-check-circle", met);
+            icon.classList.toggle("far", !met);
+            icon.classList.toggle("fa-circle", !met);
+        }
+    });
+}
+
+/**
  * Returns the student to their original destination or the dashboard.
  * Updated to check for lastPage first (remember last page feature).
  * Priority: lastPage > explicit redirect > default course page
@@ -127,10 +176,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (Number(data.must_change_password || data.user?.must_change_password || 0) === 1) {
                     let newPassword, confirmPassword;
                     do {
-                        newPassword = prompt("Your account requires a new password.\n\nEnter a new password (minimum 6 characters):");
+                        newPassword = prompt("Your account requires a new password.\n\nPassword must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a special character:");
                         if (!newPassword) throw new Error('Password change is required before continuing.');
-                        if (String(newPassword).length < 6) {
-                            alert('Password must be at least 6 characters. Please try again.');
+                        const passwordError = validatePasswordClient(newPassword);
+                        if (passwordError) {
+                            alert(passwordError + ' Please try again.');
                             newPassword = null;
                             continue;
                         }
@@ -205,14 +255,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // REGISTRATION LOGIC
     if (regForm) {
+        const regPasswordInput = document.getElementById("reg-password");
+        if (regPasswordInput) {
+            regPasswordInput.addEventListener("input", () => updatePasswordChecklist(regPasswordInput.value));
+        }
+
         regForm.addEventListener("submit", async (e) => {
             e.preventDefault();
+            errorDiv.classList.add("d-none");
+
+            const username = document.getElementById("reg-username").value.trim().toLowerCase();
+            const password = document.getElementById("reg-password").value;
+
+            if (!/^[a-z0-9]+$/.test(username)) {
+                errorDiv.textContent = "Username may only contain lowercase letters and numbers.";
+                errorDiv.classList.remove("d-none");
+                return;
+            }
+
+            const passwordError = validatePasswordClient(password);
+            if (passwordError) {
+                errorDiv.textContent = passwordError;
+                errorDiv.classList.remove("d-none");
+                return;
+            }
+
             const payload = {
                 first_name: document.getElementById("reg-fname").value.trim(),
                 last_name: document.getElementById("reg-lname").value.trim(),
                 student_id: document.getElementById("reg-sid").value.trim(),
-                username: document.getElementById("reg-username").value.trim().toLowerCase(),
-                password: document.getElementById("reg-password").value
+                username: username,
+                password: password
             };
             try {
                 const response = await fetch('/api/register', {
@@ -235,19 +308,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // SELF-SERVICE PASSWORD RESET
     if (resetForm) {
+        const resetPasswordInput = document.getElementById("reset-new-password");
+        if (resetPasswordInput) {
+            resetPasswordInput.addEventListener("input", () =>
+                updatePasswordChecklist(resetPasswordInput.value, "reset-pw-check")
+            );
+        }
+
         resetForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             const resetError = document.getElementById("reset-error");
             const resetSuccess = document.getElementById("reset-success");
-            
+
             resetError.classList.add("d-none");
             resetSuccess.classList.add("d-none");
+
+            const newPassword = document.getElementById("reset-new-password").value;
+            const passwordError = validatePasswordClient(newPassword);
+            if (passwordError) {
+                resetError.textContent = passwordError;
+                resetError.classList.remove("d-none");
+                return;
+            }
 
             const payload = {
                 first_name: document.getElementById("reset-fname").value.trim(),
                 last_name: document.getElementById("reset-lname").value.trim(),
                 student_id: document.getElementById("reset-sid").value.trim(),
-                username: document.getElementById("reset-username").value.trim().toLowerCase()
+                username: document.getElementById("reset-username").value.trim().toLowerCase(),
+                new_password: newPassword
             };
 
             try {

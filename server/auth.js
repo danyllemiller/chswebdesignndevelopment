@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const { getDbConnection } = require('./db');
+const { validatePassword } = require('./helpers');
 
 // LOGIN
 router.post('/login', async (req, res) => {
@@ -64,6 +65,15 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ error: 'First name, last name, student ID, username, and password are required.' });
     }
 
+    if (!/^[a-z0-9]+$/.test(String(username))) {
+        return res.status(400).json({ error: 'Username may only contain lowercase letters and numbers.' });
+    }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+        return res.status(400).json({ error: passwordError });
+    }
+
     try {
         const connection = await getDbConnection();
         const [students] = await connection.execute('SELECT * FROM students WHERE student_id = ?', [student_id]);
@@ -90,8 +100,9 @@ router.post('/change-password', async (req, res) => {
         return res.status(400).json({ error: 'Current password and new password are required.' });
     }
 
-    if (String(new_password).length < 6) {
-        return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+    const passwordError = validatePassword(new_password);
+    if (passwordError) {
+        return res.status(400).json({ error: passwordError });
     }
 
     try {
@@ -135,10 +146,19 @@ router.post('/change-password', async (req, res) => {
 });
 
 router.post('/reset-password', async (req, res) => {
-    const { first_name, last_name, student_id, username } = req.body;
+    const { first_name, last_name, student_id, username, new_password } = req.body;
 
     if (!first_name || !last_name || !student_id || !username) {
         return res.status(400).json({ error: 'First name, last name, student ID, and username are required.' });
+    }
+
+    if (!new_password) {
+        return res.status(400).json({ error: 'A new password is required.' });
+    }
+
+    const passwordError = validatePassword(new_password);
+    if (passwordError) {
+        return res.status(400).json({ error: passwordError });
     }
 
     try {
@@ -156,22 +176,20 @@ router.post('/reset-password', async (req, res) => {
             return res.status(404).json({ error: 'No matching student record found. Verify enrollment details.' });
         }
 
-        const defaultResetPassword = String(student_id).trim();
-        if (!defaultResetPassword) {
-            await connection.end();
-            return res.status(400).json({ error: 'Invalid student ID for reset.' });
-        }
-
-        const resetHash = await bcrypt.hash(defaultResetPassword, 10);
+        // Student chose their own compliant password directly -- no forced
+        // change-on-next-login needed (that flow is for the teacher/admin
+        // default-password reset path in /admin/reset-password-default,
+        // which is unrelated to this self-service route).
+        const resetHash = await bcrypt.hash(new_password, 10);
         await connection.execute(
-            'UPDATE students SET password = ?, password_hash = ?, must_change_password = 1, password_updated_at = NOW() WHERE student_id = ?',
+            'UPDATE students SET password = ?, password_hash = ?, must_change_password = 0, password_updated_at = NOW() WHERE student_id = ?',
             [resetHash, resetHash, student_id]
         );
         await connection.end();
 
         return res.json({
             success: true,
-            message: 'Password reset successful. Your temporary password is your Student ID. You must change it immediately after login.'
+            message: 'Password reset successful. You can now log in with your new password.'
         });
     } catch (err) {
         console.error(err);
