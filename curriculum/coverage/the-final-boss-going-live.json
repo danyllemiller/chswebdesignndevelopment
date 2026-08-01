@@ -1,0 +1,95 @@
+{
+  "chapter": 16,
+  "title": "The Final Boss (Going Live)",
+  "page": "year2/the-final-boss-going-live.html",
+  "assessment_note": "Assessment for this chapter lives in external worksheets/tests, not an on-page question bank. assessed_by is descriptive only.",
+  "indicators": {
+    "1.4.1": {
+      "taught_in": "Landing the Job: Applications, Interviews & Presentations (job applications, STAR-method interview answers, portfolio presentation skills)",
+      "anchor": "#interview-and-application-skills",
+      "practiced_in": "Portfolio Case Studies (STAR Method), Milestone: Live Portfolio Launch",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "1.4.3": {
+      "taught_in": "Boosting Your Resume: Industry Credentials & Certifications (Google Career Certificates, CompTIA ITF+, Adobe Certified Professional, freeCodeCamp, SkillsUSA)",
+      "anchor": "#industry-credentials",
+      "practiced_in": "Let's Discuss / resume-building tie-in to the Portfolio Milestone",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "6.2.1": {
+      "taught_in": "FTP vs. SFTP: The Security Difference",
+      "anchor": "#sftp-purpose",
+      "practiced_in": "Lab 1: Manual FTP Upload",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "6.2.2": {
+      "taught_in": "FTP vs. SFTP: The Security Difference (SFTP protocol selection in FileZilla)",
+      "anchor": "#sftp-purpose",
+      "practiced_in": "Lab 1: Manual FTP Upload (SFTP login to school sandbox server)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "6.2.3": {
+      "taught_in": "5. Cross-Browser Testing Checklist (Chrome, Firefox, Safari, Edge, BrowserStack, DevTools Device Emulation)",
+      "anchor": "#cross-browser-testing",
+      "practiced_in": "Lab 3: The QA Audit",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "6.2.4": {
+      "taught_in": "Owning Your Identity: Domains & DNS (Registrars, domain purchase/renewal)",
+      "anchor": "#domain-registration",
+      "practiced_in": "Guild Checkpoint discussion questions",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "6.2.5": {
+      "taught_in": "The DNS Phonebook (A Records, CNAME Records, DNS Propagation)",
+      "anchor": "#dns-explained",
+      "practiced_in": "Lab 2: Automated Cloud Launch",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "6.3.1": {
+      "taught_in": "Post-Launch: The Job Isn't Over When You Hit Deploy — Evaluating Content for Relevancy",
+      "anchor": "#evaluate-content-relevancy",
+      "practiced_in": "Post-launch Quick Check",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "6.3.2": {
+      "taught_in": "Post-Launch: The Job Isn't Over When You Hit Deploy — Evaluating Content for Viability",
+      "anchor": "#evaluate-content-viability",
+      "practiced_in": "Post-launch Quick Check",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "6.3.3": {
+      "taught_in": "2. The \"Link Rot\" Test (W3C Link Checker, Screaming Frog SEO Spider)",
+      "anchor": "#monitor-hyperlink-validity",
+      "practiced_in": "Lab 3: The QA Audit",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "6.3.4": {
+      "taught_in": "Post-Launch: The Job Isn't Over When You Hit Deploy — Maintaining Site Documentation",
+      "anchor": "#maintain-site-documentation",
+      "practiced_in": "Post-launch Quick Check",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "6.3.5": {
+      "taught_in": "Post-Launch: The Job Isn't Over When You Hit Deploy — Analyzing Web Analytics",
+      "anchor": "#analyze-web-analytics",
+      "practiced_in": "Post-launch Quick Check",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    }
+  },
+  "revisits": {
+    "1.3.2": "Not formally re-taught this chapter; formally owned by Chapter 8 (Sights & Sounds).",
+    "2.4.5": "Lightly touched via the Post-Launch Pro Tip on sharing case studies via social media with Open Graph tags to drive traffic, but not formally taught here; formally owned by Chapter 3 (The Blueprint).",
+    "3.2.3": "Not formally re-taught this chapter; formally owned by Chapter 2 (The Rules).",
+    "3.2.4": "Actively reinforced via FTP vs. SFTP and the HTTP vs. HTTPS sections; formally owned by Chapter 2 (The Rules).",
+    "3.2.8": "Actively reinforced via the Security: HTTP vs HTTPS section (SSL/TLS certificates); formally owned by Chapter 2 (The Rules).",
+    "4.4.4": "Lightly touched via the Google Lighthouse SEO category (meta tags, crawlable links), but not formally taught here; formally owned by Chapter 3 (The Blueprint).",
+    "4.4.8": "Lightly touched via the Google Lighthouse SEO category, but not formally taught here; formally owned by Chapter 3 (The Blueprint).",
+    "5.1.5": "Not formally re-taught this chapter; formally owned by Chapter 5 (The Bones).",
+    "5.2.7": "Not formally re-taught this chapter; formally owned by Chapter 6 (The Clothes).",
+    "5.3.6": "Not formally re-taught this chapter; formally owned by Chapter 10 (The Game Developer)."
+  },
+  "wrs": {
+    "1.2.7": "Taught via Landing the Job: Applications, Interviews & Presentations and the Industry Credentials & Certifications sections (job applications, interview prep, professional development via certifications)."
+  }
+}

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Practice Quiz: Chapter 18 - The "Launch"</title>
+  <title>Practice Quiz: Chapter 16 - The "Launch"</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
   <link rel="shortcut icon" href="/images/favicon/favicon.ico">
@@ -28,17 +28,17 @@
     <div class="row">
       <div class="col-lg-9">
         <hgroup class="mb-5 border-bottom pb-3">
-          <h1 class="display-5 fw-bold text-primary">Chapter 18 Skill Practice</h1>
+          <h1 class="display-5 fw-bold text-primary">Chapter 16 Skill Practice</h1>
           <p class="lead text-muted">Ready to go live? Randomized 10 from 35+ questions.</p>
         </hgroup>
         <div id="quiz-questions" class="text-start mb-5">
             <div class="text-center p-5"><div class="spinner-border text-primary"></div><p class="mt-2">Simulating Deployment...</p></div>
         </div>
         <div class="row text-center g-3 mt-5 no-print border-top pt-4">
-            <div class="col-6 col-md-3"><a href="/year2/the-launch-deployment-portfolio.html" class="btn btn-outline-primary w-100 small rounded-pill">Back to Lesson</a></div>
-            <div class="col-6 col-md-3"><a href="/techTalkA-Zguide/the-launch-deployment-portfolio.html" class="btn btn-outline-primary w-100 small rounded-pill">Tech Talk A-Z</a></div>
-            <div class="col-6 col-md-3"><a href="/toLongDidntRead/the-launch-deployment-portfolio.html" class="btn btn-outline-primary w-100 small rounded-pill">TL;DR Version</a></div>
-            <div class="col-6 col-md-3"><a href="/infographics/the-launch-deployment-portfolio.html" class="btn btn-outline-primary w-100 small rounded-pill">Infographics</a></div>
+            <div class="col-6 col-md-3"><a href="/year2/the-final-boss-going-live.html" class="btn btn-outline-primary w-100 small rounded-pill">Back to Lesson</a></div>
+            <div class="col-6 col-md-3"><a href="/techTalkA-ZGuide/the-final-boss-going-live.html" class="btn btn-outline-primary w-100 small rounded-pill">Tech Talk A-Z</a></div>
+            <div class="col-6 col-md-3"><a href="/toLongDidntRead/the-final-boss-going-live.html" class="btn btn-outline-primary w-100 small rounded-pill">TL;DR Version</a></div>
+            <div class="col-6 col-md-3"><a href="/infographics/the-final-boss-going-live.html" class="btn btn-outline-primary w-100 small rounded-pill">Infographics</a></div>
         </div>
       </div>
     </div>
@@ -80,7 +80,10 @@
         { question: "Which protocol is the legacy 'Moving Truck'?", options: ["FTP", "HTTP", "DNS", "TCP"], correct: 0 },
         { question: "Alt text is checked during which QA step?", options: ["Accessibility Audit", "Resize Test", "Speed Test", "Console Check"], correct: 0 },
         { question: "Netlify's global network of servers is a ______.", options: ["CDN", "VCS", "SaaS", "IDE"], correct: 0 },
-        { question: "The main branch in Git is usually called ______.", options: ["main or master", "root", "final", "test"], correct: 0 }
+        { question: "The main branch in Git is usually called ______.", options: ["main or master", "root", "final", "test"], correct: 0 },
+        { question: "Why is SFTP safer than plain FTP?", options: ["It encrypts the entire connection, including credentials", "It transfers files faster", "It doesn't require a login", "It only works on Netlify"], correct: 0 },
+        { question: "Which tool tracks real visitor traffic and behavior on a live site after launch?", options: ["Google Analytics", "FileZilla", "Google Lighthouse", "GitHub"], correct: 0 },
+        { question: "What is an industry-standard credential a student could add to a resume?", options: ["A CompTIA or Google Career Certificate", "A copy of their diploma", "A screenshot of their code", "A GitHub username"], correct: 0 }
     ];
     window.onload = () => initQuiz(pool);
   </script>

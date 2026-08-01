@@ -126,7 +126,7 @@
           <strong>The Danger:</strong> Why is the 'Old School' FTP method considered dangerous for modern team development? <strong>It is manual, error-prone, and can instantly overwrite live files with no 'undo' button.</strong>
         </div>
 
-        <h5 class="fw-bold mt-5 text-danger">FTP vs. SFTP: The Security Difference <span class="badge bg-primary ms-1" style="font-size:0.65rem;">NV 6.2.1</span></h5>
+        <h5 class="fw-bold mt-5 text-danger" id="sftp-purpose">FTP vs. SFTP: The Security Difference</h5>
         <p>Not all file transfer protocols are equal. What is the critical security difference between FTP and SFTP?</p>
         <div class="row g-3 mb-4 text-start">
           <div class="col-md-6">
@@ -357,7 +357,7 @@
         <p>Which file is automatically recognized as the default homepage by almost all web servers? <strong><code>index.html</code></strong>. If you name your homepage <code>main.html</code>, your live site will just show an ugly directory folder list.</p>
         <p>Furthermore, what happens if you deploy an HTML file but forget to deploy the <code>images</code> folder that goes with it? <strong>The images will show as broken links (404 errors) on the live site.</strong> What is a '404 Error'? <strong>Not Found (The requested page or file does not exist on the server).</strong></p>
 
-        <h5 class="fw-bold mt-5 text-danger">Server-Side Error Troubleshooting <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">WRS 1.2.3</span></h5>
+        <h5 class="fw-bold mt-5 text-danger">Server-Side Error Troubleshooting</h5>
         <p>When your deployed site throws an error, the HTTP status code in the browser's Network tab tells you exactly where to look. Three common server errors you will encounter on launch day:</p>
         <table class="table table-bordered small bg-white shadow-sm mt-3 mb-4 text-start">
           <thead class="bg-dark text-white">
@@ -398,12 +398,12 @@
     <!-- SECTION 4: DOMAINS, DNS & SSL -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">Owning Your Identity: Domains &amp; DNS</h2>
+        <h2 class="section-title mt-0" id="domain-registration">Owning Your Identity: Domains &amp; DNS</h2>
         <p>Right now, your site lives on a free subdomain like <code>hannah-dev.netlify.app</code>. What is a 'Subdomain'? <strong>A prefix added to a domain name to separate content (like 'blog.mysite.com' vs 'mysite.com').</strong> However, a custom domain projects professionalism.</p>
         
         <p>How does a Custom Domain (like <code>johndoe.com</code>) improve a portfolio? <strong>It projects professionalism, authority, and brand ownership.</strong> When you purchase a domain name from a Registrar (like GoDaddy), how long do you typically 'own' it before having to renew? <strong>One Year.</strong></p>
         
-        <h5 class="fw-bold mt-4 text-primary">The DNS Phonebook</h5>
+        <h5 class="fw-bold mt-4 text-primary" id="dns-explained">The DNS Phonebook</h5>
         <p>What is the Domain Name System (DNS)? <strong>The internet's master phonebook that translates human-friendly names into computer-friendly IP addresses.</strong> To connect your custom domain to your host, you must edit your DNS records:</p>
         <ul class="small mb-4 bg-light p-3 rounded border shadow-sm text-start">
             <li class="mb-2">What is a DNS 'A Record' used for? <strong>Pointing a domain name to a specific numeric IP address.</strong></li>
@@ -437,7 +437,7 @@
               <p class="mt-1 mb-0">Why should you perform the 'Resize Test' before launching? <strong>To ensure the layout doesn't break and remains fully responsive on mobile-sized screens.</strong> If your QA test reveals that your website requires horizontal scrolling on a phone, what CSS feature do you need to fix? <strong>The Media Queries and responsive widths.</strong></p>
             </li>
             <li class="mb-3">
-              <strong class="text-primary fs-6">2. The "Link Rot" Test</strong>
+              <strong class="text-primary fs-6" id="monitor-hyperlink-validity">2. The "Link Rot" Test</strong>
               <p class="mt-1 mb-0">What is 'Link Rot'? <strong>When hyperlinks point to pages or resources that have been deleted or moved (resulting in 404 errors).</strong> When an external link opens in the same tab and navigates the user away from your portfolio, it breaks best practices. What attribute fixes this? <strong><code>target="_blank"</code></strong>. Tools to automate link checking: <strong>W3C Link Checker</strong> (free, browser-based at validator.w3.org/checklink), <strong>Screaming Frog SEO Spider</strong> (desktop app, crawls the whole site), or browser extensions like "Check My Links." Run these before every major deployment.</p>
             </li>
             <li class="mb-3">
@@ -450,7 +450,7 @@
             </li>
         </ul>
 
-        <h5 class="fw-bold mt-5 text-primary">5. Cross-Browser Testing Checklist <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">NV 6.2.1</span></h5>
+        <h5 class="fw-bold mt-5 text-primary" id="cross-browser-testing">5. Cross-Browser Testing Checklist</h5>
         <p>Your site may work perfectly in Chrome but break in Safari or Firefox due to CSS compatibility differences. Test in at least these four browsers before launch:</p>
         <div class="row g-3 mb-4 text-start">
           <div class="col-md-6">
@@ -516,7 +516,7 @@
     <!-- SECTION 5b: PRE-LAUNCH SECURITY CHECKLIST -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">Pre-Launch Security Checklist <span class="badge bg-danger ms-1" style="font-size:0.7rem;">WRS 1.1.1</span> <span class="badge bg-danger ms-1" style="font-size:0.7rem;">WRS 1.1.2</span></h2>
+        <h2 class="section-title mt-0">Pre-Launch Security Checklist</h2>
         <p>Before clicking the deploy button, run through this checklist. A professional agency never ships a site without completing every item.</p>
         <div class="card border-danger shadow-sm">
           <div class="card-header bg-danger text-white fw-bold">Pre-Launch Security &amp; Quality Checklist</div>
@@ -566,6 +566,49 @@
       </div>
     </div>
 
+    <!-- SECTION 5c: POST-LAUNCH MAINTENANCE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0" id="post-launch-maintenance">Post-Launch: The Job Isn't Over When You Hit Deploy</h2>
+        <p><strong>Why it matters:</strong> Hannah's client won't disappear the moment the site goes live — a professional developer keeps auditing, updating, and reporting on a site for as long as the client relationship lasts. Skipping this step is why so many "finished" client sites go stale within a year.</p>
+        <p><strong>What it is:</strong> A live site is a living product, not a one-time delivery. Four ongoing responsibilities every professional developer owns after launch:</p>
+
+        <h6 class="fw-bold mt-4 text-primary" id="evaluate-content-relevancy">1. Evaluating Content for Relevancy</h6>
+        <p class="small mb-3">Sit down with the client periodically and review the site's content together: Is the "About Us" bio still accurate? Are old promotions, events, or team members still listed? Content that was true at launch can become outdated or embarrassing within months. Relevancy review means checking with the client — not guessing on your own — whether content still reflects their business today.</p>
+
+        <h6 class="fw-bold mt-4 text-primary" id="evaluate-content-viability">2. Evaluating Content for Viability</h6>
+        <p class="small mb-3">Viability asks a different question than relevancy: is this content actually working? A blog post nobody reads, a service page that never converts a visitor into a client, or a photo gallery that just slows the page down are all technically "relevant" but not viable. Use traffic data (see Analytics below) to decide what content pulls its weight and what should be trimmed or rewritten.</p>
+
+        <h6 class="fw-bold mt-4 text-primary" id="maintain-site-documentation">3. Maintaining Site Documentation</h6>
+        <p class="small mb-3">Every professional project keeps living documentation: the original prototype/wireframes, an up-to-date site map, and a navigation structure diagram. As you add pages or restructure the nav after launch, update these documents too — six months later, neither you nor a teammate should have to reverse-engineer the live site just to understand how it's organized.</p>
+
+        <h6 class="fw-bold mt-4 text-primary" id="analyze-web-analytics">4. Analyzing Web Analytics</h6>
+        <p class="small mb-3">Tools like Google Analytics track real visitor behavior on a live site: how many people visited, which pages they viewed, how long they stayed, and where they dropped off. Analyzing this data lets you improve traffic (are visitors finding the site at all?), user experience (are they leaving from a specific broken page?), and whether the site is meeting the client's targeted goals (form submissions, purchases, contact clicks).</p>
+
+        <div class="alert alert-warning border-warning border-start border-4 shadow-sm small mt-3 mb-3 text-start">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> Students assume "Deploy" is the last step in the project. In a real client relationship, deploy is the halfway point — a site with zero post-launch maintenance quietly rots: content goes stale, links break, and nobody notices traffic dropping because no one is checking the analytics.
+        </div>
+        <div class="card border-secondary shadow-sm mb-0">
+          <div class="card-header bg-light fw-bold small">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">Google Analytics shows that 80% of visitors leave a client's site within 5 seconds on the "Pricing" page. Which post-launch responsibility does this data point feed into, and what should you check first?</p>
+            <details>
+              <summary class="text-primary fw-bold" style="cursor:pointer;">Show Answer</summary>
+              <p class="mt-2 mb-0">This is <strong>analyzing web analytics</strong> revealing a likely UX or content problem — check the Pricing page itself for confusing content, broken layout, or slow load time, then decide whether that content is still relevant/viable.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="card roadmap-card border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info border-bottom">Pro Tip:</div>
+          <div class="card-body small">
+            <p class="mb-0">Sharing a fresh case study or new project on social media is one of the simplest ways to drive traffic back to a portfolio or client site — pair it with the Open Graph tags mentioned in the Milestone so the shared link looks professional in the feed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- SECTION 6: THE PORTFOLIO & CAREERS -->
     <div class="row mb-5 pb-4 align-items-start border-bottom">
       <div class="col-lg-8 pe-lg-5">
@@ -587,6 +630,29 @@
               <strong>4. The Resume:</strong> Why is it recommended to include a downloadable PDF resume on your portfolio? <strong>So recruiters can print it or upload it directly into their Applicant Tracking Systems (ATS).</strong>
             </li>
         </ul>
+
+        <h5 class="fw-bold mt-4 text-primary" id="industry-credentials">Boosting Your Resume: Industry Credentials &amp; Certifications</h5>
+        <p><strong>Why it matters:</strong> A hiring manager scanning 100 resumes for a summer internship can't verify your skills firsthand — a recognized credential is a fast, trusted signal that someone else has already tested and confirmed what you claim to know.</p>
+        <p><strong>What it is:</strong> Industry-standard credentials available in the Web Design &amp; Development career cluster include: <strong>Google Career Certificates</strong> (UX Design, IT Support), <strong>CompTIA IT Fundamentals (ITF+)</strong>, <strong>Adobe Certified Professional</strong> exams, <strong>freeCodeCamp</strong> certifications (Responsive Web Design, JavaScript Algorithms), and Nevada's own <strong>SkillsUSA</strong> competitive certifications.</p>
+        <p class="small mb-0"><strong>How:</strong> List credentials in a dedicated "Certifications" section on your resume and portfolio, alongside the date earned. Even a certification in progress ("In Progress: freeCodeCamp Responsive Web Design") signals initiative to an employer.</p>
+
+        <h5 class="fw-bold mt-4 text-primary" id="interview-and-application-skills">Landing the Job: Applications, Interviews &amp; Presentations</h5>
+        <p><strong>Why it matters:</strong> A flawless portfolio still needs a human to walk an employer through it — the application, interview, and pitch are the skills that actually get you hired.</p>
+        <p><strong>What it is:</strong> Three job-readiness skills every candidate needs: a <strong>job application</strong> (a tailored resume and cover letter matched to the specific posting, not a generic copy-paste), <strong>interview skills</strong> (confidently answering behavioral questions), and <strong>presentation skills</strong> (walking a stranger through your work clearly and confidently).</p>
+        <p class="small mb-3"><strong>How:</strong> Reuse the same <strong>STAR Method</strong> (Situation, Task, Action, Result) you used to write your portfolio Case Studies to answer spoken interview questions like "Tell me about a time you solved a difficult bug." If you already wrote the Case Study, you already have the STAR answer memorized.</p>
+        <div class="alert alert-warning border-warning border-start border-4 shadow-sm small mt-3 mb-3 text-start">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> Students prepare a portfolio but never rehearse actually talking through it out loud. In a real interview, silently having good projects isn't enough — if you freeze up or ramble when asked "walk me through this project," the interviewer never finds out how good your work really is.
+        </div>
+        <div class="card border-secondary shadow-sm mb-0">
+          <div class="card-header bg-light fw-bold small">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">An interviewer asks Hannah, "Tell me about a bug you fixed." Which portfolio-writing method should she reuse to structure her spoken answer, and why does having case studies already written make this easier?</p>
+            <details>
+              <summary class="text-primary fw-bold" style="cursor:pointer;">Show Answer</summary>
+              <p class="mt-2 mb-0">The <strong>STAR Method</strong> — since her portfolio Case Studies are already written in Situation/Task/Action/Result format, she can speak the same structure out loud instead of improvising an answer from scratch.</p>
+            </details>
+          </div>
+        </div>
 
         <h5 class="fw-bold mt-4 text-primary">The Mindset: Defeating Imposter Syndrome</h5>
         <p>It is entirely normal to feel like you don't know enough to apply for a job. What is 'Imposter Syndrome'? <strong>A psychological feeling that you aren't a 'real' professional or aren't good enough, despite your accomplishments.</strong> What is the best way to handle 'Imposter Syndrome'? <strong>Accept that all developers feel it, keep learning, and proudly share the work you have completed.</strong></p>
