@@ -523,9 +523,9 @@ function pval(examId, period) {
   return existingExams[examId]?.period_due_dates?.[period] || '';
 }
 
-function dateInput(examId, type, pts) {
+function dateInput(examId, type, pts, courseId) {
   const v = val(examId);
-  return `<input type="date" class="form-control form-control-sm asgn-date" data-exam="${examId}" data-type="${type}" data-pts="${pts || ''}" value="${v}" style="min-width:155px">`;
+  return `<input type="date" class="form-control form-control-sm asgn-date" data-exam="${examId}" data-type="${type}" data-pts="${pts || ''}" data-course="${courseId || ''}" value="${v}" style="min-width:155px">`;
 }
 
 function periodToggleBtn(examId) {
@@ -547,7 +547,7 @@ function periodRows(examId, type) {
   return `<div class="period-rows" id="prows-${examId}">${rows}</div>`;
 }
 
-function assignmentRow(examId, label, type, pts) {
+function assignmentRow(examId, label, type, pts, courseId) {
   const badgeMap = { exam:'badge-exam', pre:'badge-pre', chapter:'badge-chapter', final:'badge-final', lab:'badge-lab', milestone:'badge-milestone' };
   const labelMap = { exam:'Exam', pre:'Pre-Test', chapter:'Notes', final:'Final', lab:'Lab', milestone:'Milestone' };
   return `
@@ -556,11 +556,19 @@ function assignmentRow(examId, label, type, pts) {
         ${label}
         <span class="type-badge ${badgeMap[type] || 'badge-chapter'} ms-1">${labelMap[type] || type}</span>
       </div>
-      ${dateInput(examId, type, pts)}
+      ${dateInput(examId, type, pts, courseId)}
       ${periodToggleBtn(examId)}
     </div>
     ${periodRows(examId, type)}`;
 }
+
+// Real course_id values (must exist as rows in the `courses` table — the
+// exams.course_id FK enforces this). WD is split at the Ch9/Ch10 boundary to
+// match the real Web Design I / Web Design II course records; CS has no such
+// split. These are NOT the flat 'wd'/'cs' bucket the old code used to send.
+const COURSE_ID_WD1 = '05254G1S'; // Web Design I  (Chapters 1-9)
+const COURSE_ID_WD2 = '05254G2S'; // Web Design II (Chapters 10-16)
+const COURSE_ID_CS  = '10003GS';  // Comp Sci & Intg Tech (all chapters)
 
 function renderCS() {
   let html = '';
@@ -575,15 +583,15 @@ function renderCS() {
       <div class="card-body p-0">`;
 
     // Pre-assessment
-    html += assignmentRow(`Unit${n}-Pre`, `Unit ${n} Pre-Assessment`, 'pre', 15);
+    html += assignmentRow(`Unit${n}-Pre`, `Unit ${n} Pre-Assessment`, 'pre', 15, COURSE_ID_CS);
 
     // Chapter notes
     for (const ch of unit.chapters) {
-      html += assignmentRow(`Unit${n}-Ch${ch.ch}`, ch.title, 'chapter', 10);
+      html += assignmentRow(`Unit${n}-Ch${ch.ch}`, ch.title, 'chapter', 10, COURSE_ID_CS);
     }
 
     // Summative exam
-    html += assignmentRow(`Unit${n}-Exam`, `Unit ${n} Summative Exam`, 'exam', 100);
+    html += assignmentRow(`Unit${n}-Exam`, `Unit ${n} Summative Exam`, 'exam', 100, COURSE_ID_CS);
 
     html += `</div></div>`;
   }
@@ -594,7 +602,7 @@ function renderCS() {
       <i class="fas fa-graduation-cap me-2"></i>CS Final Exam
     </div>
     <div class="card-body p-0">
-      ${assignmentRow('Unit9-Exam', 'CS Final Exam', 'final', 100)}
+      ${assignmentRow('Unit9-Exam', 'CS Final Exam', 'final', 100, COURSE_ID_CS)}
     </div>
   </div>`;
 
@@ -606,34 +614,36 @@ function renderWD() {
 
   for (const ch of WD_MAP) {
     const n = ch.ch;
+    // Ch 1-9 = Level 1 (Web Design I); Ch 10-16 = Level 2 (Web Design II)
+    const courseId = n <= 9 ? COURSE_ID_WD1 : COURSE_ID_WD2;
     html += `<div class="card section-card wd mb-3">
       <div class="card-header">
         <i class="fas fa-globe me-2"></i>Chapter ${n}: ${ch.title}
       </div>
       <div class="card-body p-0">`;
 
-    html += assignmentRow(`WD-Ch${n}-Pre`, `Ch ${n} Pre-Assessment`, 'pre', 15);
+    html += assignmentRow(`WD-Ch${n}-Pre`, `Ch ${n} Pre-Assessment`, 'pre', 15, courseId);
 
     for (const lab of ch.labs) {
-      html += assignmentRow(lab.id, lab.title, 'lab', lab.pts);
+      html += assignmentRow(lab.id, lab.title, 'lab', lab.pts, courseId);
     }
 
     for (const ms of ch.milestones) {
-      html += assignmentRow(ms.id, ms.title, 'milestone', ms.pts);
+      html += assignmentRow(ms.id, ms.title, 'milestone', ms.pts, courseId);
     }
 
-    html += assignmentRow(`WD-Ch${n}-Exam`, `Ch ${n}: ${ch.title} — Exam`, 'exam', 100);
+    html += assignmentRow(`WD-Ch${n}-Exam`, `Ch ${n}: ${ch.title} — Exam`, 'exam', 100, courseId);
 
     html += `</div></div>`;
   }
 
-  // WD Final / Capstone
+  // WD Final / Capstone — lands in the Level 2 (Web Design II) year
   html += `<div class="card section-card wd mb-3" style="border-left-color:#6f42c1">
     <div class="card-header" style="background:#ede0ff;color:#4a2c91">
       <i class="fas fa-trophy me-2"></i>WD Capstone / Final Project
     </div>
     <div class="card-body p-0">
-      ${assignmentRow('WD-Final', 'WD Final Capstone Project', 'final', 100)}
+      ${assignmentRow('WD-Final', 'WD Final Capstone Project', 'final', 100, COURSE_ID_WD2)}
     </div>
   </div>`;
 
@@ -680,10 +690,11 @@ function collectAssignments() {
 
   // Main due dates
   list.querySelectorAll('.asgn-date').forEach(inp => {
-    const id   = inp.dataset.exam;
-    const type = inp.dataset.type;
-    const pts  = inp.dataset.pts ? parseInt(inp.dataset.pts) : null;
-    if (!byExam[id]) byExam[id] = { exam_id: id, type, due_date: '', period_due_dates: {}, pts };
+    const id       = inp.dataset.exam;
+    const type     = inp.dataset.type;
+    const pts      = inp.dataset.pts ? parseInt(inp.dataset.pts) : null;
+    const courseId = inp.dataset.course || currentCourse;
+    if (!byExam[id]) byExam[id] = { exam_id: id, type, due_date: '', period_due_dates: {}, pts, courseId };
     byExam[id].due_date = inp.value;
   });
 
@@ -704,7 +715,7 @@ function collectAssignments() {
       exam_id: a.exam_id,
       title: TITLE_MAP[a.exam_id] || existing?.title || humanTitle(a.exam_id),
       total_points: existing?.total_points || pts,
-      course_id: currentCourse,
+      course_id: a.courseId || currentCourse,
       due_date: a.due_date || null,
       period_due_dates: Object.keys(a.period_due_dates).length ? a.period_due_dates : null
     };
@@ -765,11 +776,12 @@ function exportCSV() {
 
   list.querySelectorAll('.asgn-date').forEach(inp => {
     if (!inp.value) return;
-    const id   = inp.dataset.exam;
-    const type = inp.dataset.type;
+    const id       = inp.dataset.exam;
+    const type     = inp.dataset.type;
+    const courseId = inp.dataset.course || currentCourse;
     const ex   = existingExams[id];
     const title = ex?.title || humanTitle(id);
-    rows.push([id, title, currentCourse, inp.value, type]);
+    rows.push([id, title, courseId, inp.value, type]);
   });
 
   if (rows.length === 1) { alert('No dates set to export.'); return; }
