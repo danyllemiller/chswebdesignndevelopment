@@ -1,10 +1,14 @@
 /**
  * CHS Web Design - Master Teacher Gradebook Controller (MariaDB Edition)
- * This script powers the administrative gradebook interface, handling real-time MariaDB data synchronization 
- * for student rosters, assignments, and grades. It features a dynamically weighted grading engine based on course type, 
- * period-specific due dates with smart auto-fill from student submissions, automatic calendar-aware exemptions for 
+ * This script powers the administrative gradebook interface, handling real-time MariaDB data synchronization
+ * for student rosters, assignments, and grades. It features a dynamically weighted grading engine based on course type,
+ * period-specific due dates with smart auto-fill from student submissions, automatic calendar-aware exemptions for
  * timeclock entries, and inline editing for rapid grade entry, all while maintaining strict privacy and sorting controls.
  */
+
+// Weighted grading config is shared with the student dashboard via js/modules/grade-weights.js —
+// edit there, not here, so teacher and student views never diverge.
+import { COURSE_WEIGHTS, getAssignmentCategory } from '../modules/grade-weights.js';
 
 // Dynamically load Chart.js for the Analytics Graph
 if (!document.getElementById('chartjs-lib')) {
@@ -12,30 +16,6 @@ if (!document.getElementById('chartjs-lib')) {
     script.id = 'chartjs-lib';
     script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
     document.head.appendChild(script);
-}
-
-// ========================================================
-// ⚖️ WEIGHTED GRADING CONFIGURATION
-// Easily modify these decimals if syllabus weights change!
-// ========================================================
-const COURSE_WEIGHTS = {
-    WD1: { assignment: 0.50, project_quiz: 0.20, final: 0.20, career: 0.10 },
-    WD2: { assignment: 0.35, project_quiz: 0.35, final: 0.20, career: 0.10 },
-    AS:  { assignment: 0.35, project_quiz: 0.35, final: 0.20, career: 0.10 }, // Map Advanced Studies matching WD2
-    CS:  { assignment: 0.60, project_quiz: 0.20, final: 0.20, career: 0.00 } 
-};
-
-function getAssignmentCategory(name, courseKey) {
-    const lowerName = name.toLowerCase();
-    
-    if (lowerName.startsWith('tc-') || lowerName.includes('timeclock')) {
-        if (courseKey === 'CS') return 'assignment';
-        return 'career';
-    }
-    
-    if (lowerName.includes('final')) return 'final';
-    if (lowerName.includes('project') || lowerName.includes('quiz') || lowerName.includes('exam') || lowerName.includes('summative') || lowerName.includes('assessment') || lowerName.includes('milestone')) return 'project_quiz';
-    return 'assignment';
 }
 
 let allStudents = [];

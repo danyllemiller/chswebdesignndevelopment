@@ -2,6 +2,7 @@
 import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
 import { escapeHtml, parsePts } from '../modules/utils.js';
+import { COURSE_WEIGHTS, getAssignmentCategory } from '../modules/grade-weights.js';
 
 // --- INJECT TURN-IN MODAL ON LOAD ---
 function injectTurnInModal() {
@@ -136,14 +137,17 @@ async function loadGrades() {
         if (welcomeEl) welcomeEl.innerText = `Welcome, ${user.first_name}!`;
 
         const studentPeriod = (data.section_id || user.section_id || "").trim().toUpperCase();
-        let courseKey = "WD1";
-        if (studentPeriod.includes("WD2")) courseKey = "WD2";
-        if (studentPeriod.includes("CS")) courseKey = "CS";
+        let courseKey = studentPeriod.startsWith("WD1") ? "WD1"
+            : studentPeriod.startsWith("WD2") ? "WD2"
+            : studentPeriod.startsWith("AS") ? "AS"
+            : studentPeriod.includes("CS") ? "CS"
+            : "WD1";
 
         const subtitleEl = document.getElementById('userSubtitle');
         if (subtitleEl) {
             if (courseKey === "WD1") subtitleEl.innerText = `Viewing Web Design Gradebook (Period ${studentPeriod})`;
             if (courseKey === "WD2") subtitleEl.innerText = `Viewing Advanced Web Design Gradebook (Period ${studentPeriod})`;
+            if (courseKey === "AS") subtitleEl.innerText = `Viewing Advanced Studies Gradebook (Period ${studentPeriod})`;
             if (courseKey === "CS") subtitleEl.innerText = `Viewing Computer Science Gradebook (Period ${studentPeriod})`;
         }
 
@@ -192,8 +196,8 @@ const keys = Array.from(allKeys)
             .filter(key => isAssignmentVisible(key, studentPeriod, registryData))
             .sort();
             
-calculateGradeStats(keys, myGrades);
-        calculateBadges(keys, myGrades);
+calculateGradeStats(keys, myGrades, registryData, courseKey);
+        calculateBadges(keys, myGrades, registryData);
         renderGradeTable(keys, myGrades, user.student_id, registryData, studentPeriod);
         renderProficiencyScales(keys, myGrades, user.student_id, courseKey, saData.assessments);
         
@@ -209,26 +213,45 @@ calculateGradeStats(keys, myGrades);
     }
 }
 
-function calculateGradeStats(keys, myGrades) {
+function calculateGradeStats(keys, myGrades, registryData, courseKey) {
     let totalEarned = 0;
     let totalPossible = 0;
     let completed = 0;
-    
+    const catEarned = { assignment: 0, project_quiz: 0, final: 0, career: 0 };
+    const catPossible = { assignment: 0, project_quiz: 0, final: 0, career: 0 };
+
     keys.forEach(key => {
         if (myGrades[key] !== undefined && myGrades[key] !== null) {
-            const max = parsePts(key); 
+            // Use the real registered max points (same source gradebook.js uses), falling
+            // back to the parsePts() guess only for legacy items missing from the registry.
+            const max = registryData?.[key]?.maxPoints || parsePts(key);
             const score = typeof myGrades[key] === 'object' ? myGrades[key].score : myGrades[key];
-            
+
             if (score !== "Submitted" && score !== "") {
+                const num = Number(score);
                 totalPossible += max;
-                totalEarned += Number(score);
+                totalEarned += num;
                 completed++;
+
+                const cat = getAssignmentCategory(key, courseKey);
+                catEarned[cat] += num;
+                catPossible[cat] += max;
             }
         }
     });
-    
-    const percent = totalPossible > 0 ? Math.round((totalEarned / totalPossible) * 100) : 0;
-    
+
+    // Mirrors js/admin/gradebook.js's weighted calculation exactly, so a student's
+    // displayed grade always matches what the teacher's gradebook computes.
+    const weights = COURSE_WEIGHTS[courseKey] || COURSE_WEIGHTS.WD1;
+    let weighted = 0, weightSum = 0;
+    Object.keys(catPossible).forEach(cat => {
+        if (catPossible[cat] > 0 && weights[cat] > 0) {
+            weighted += (catEarned[cat] / catPossible[cat]) * weights[cat];
+            weightSum += weights[cat];
+        }
+    });
+    const percent = weightSum > 0 ? Math.round((weighted / weightSum) * 100) : (totalPossible > 0 ? Math.round((totalEarned / totalPossible) * 100) : 0);
+
     let letterGrade = 'F';
     let gradeColor = 'text-danger';
     if (percent >= 90) { letterGrade = 'A'; gradeColor = 'text-success'; }
@@ -270,7 +293,7 @@ function calculateGradeStats(keys, myGrades) {
     }
 }
 
-function calculateBadges(keys, myGrades) {
+function calculateBadges(keys, myGrades, registryData) {
     const badgesContainer = document.getElementById('badgesContainer');
     const badgesCard = document.getElementById('badgesCard');
     
@@ -314,8 +337,8 @@ function calculateBadges(keys, myGrades) {
         const grade = myGrades[key];
         if (grade) {
             const score = typeof grade === 'object' ? grade.score : grade;
-            const max = parsePts(key); 
-            
+            const max = registryData?.[key]?.maxPoints || parsePts(key);
+
             if (score !== "Submitted" && score !== "") {
                 totalSubmitted++;
                 totalPoints += Number(score);
@@ -412,9 +435,9 @@ function renderGradeTable(keys, myGrades, studentId, registryData, studentPeriod
     bodyHtml += `<td class="empty-cell bg-light border-bottom"></td></tr>`;
 
     bodyHtml += `<tr><td class="label-cell sticky-col font-monospace fw-bold text-dark bg-light">Possible Points</td>`;
-    keys.forEach(key => { 
-        const max = parsePts(key); 
-        bodyHtml += `<td class="text-center align-middle fw-bold text-muted bg-light border-bottom">${max}</td>`; 
+    keys.forEach(key => {
+        const max = registryData?.[key]?.maxPoints || parsePts(key);
+        bodyHtml += `<td class="text-center align-middle fw-bold text-muted bg-light border-bottom">${max}</td>`;
     });
     bodyHtml += `<td class="empty-cell bg-light border-bottom"></td></tr>`;
 
@@ -422,7 +445,7 @@ function renderGradeTable(keys, myGrades, studentId, registryData, studentPeriod
     keys.forEach(key => {
         const grade = myGrades[key];
         const isHighStakes = key.toLowerCase().includes('exam') || key.toLowerCase().includes('project') || key.toLowerCase().includes('milestone') || key.toLowerCase().includes('summative');
-        const max = parsePts(key); 
+        const max = registryData?.[key]?.maxPoints || parsePts(key);
         
         if (!grade || grade.score === "") {
             bodyHtml += `<td class="text-center align-middle">
