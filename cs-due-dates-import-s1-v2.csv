@@ -1,0 +1,49 @@
+exam_id,title,course_id,due_date,type
+cs_ch1_footprint_audit,The Footprint Audit,10003GS,2026-08-20,lab
+cs_ch1_conduct_case_studies,The Conduct Case Studies,10003GS,2026-08-20,lab
+cs_ch1_threat_recognition,The Threat Recognition Lab,10003GS,2026-08-20,lab
+cs_ch2_data_trail,The Data Trail,10003GS,2026-08-20,lab
+cs_ch2_attribution_lab,The Attribution Lab,10003GS,2026-08-20,lab
+cs_ch2_privacy_position,The Privacy Position,10003GS,2026-08-20,lab
+Unit1-Exam,Unit 1 CFA,10003GS,2026-08-27,exam
+cs_ch3_abstraction_teardown,The Abstraction Teardown,10003GS,2026-09-03,lab
+cs_ch3_layer_interaction_map,The Layer Interaction Map,10003GS,2026-09-03,lab
+cs_ch3_file_system_audit,The File System Audit,10003GS,2026-09-03,lab
+cs_ch3_troubleshooting_guide,The Troubleshooting Guide,10003GS,2026-09-08,lab
+cs_ch4_audience_rebuild,The Audience Rebuild,10003GS,2026-09-08,lab
+cs_ch4_distributed_build,The Distributed Build,10003GS,2026-09-08,lab
+Unit2-Exam,Unit 2 CFA,10003GS,2026-09-10,exam
+cs_ch5_binary_translator,The Binary Translator,10003GS,2026-09-17,lab
+cs_ch5_encoding_lab,The Encoding Lab,10003GS,2026-09-17,lab
+cs_ch6_organisation_audit,The Organisation Audit,10003GS,2026-09-22,lab
+cs_ch6_storage_tradeoff_matrix,The Storage Tradeoff Matrix,10003GS,2026-09-22,lab
+cs_ch7_function_toolkit,The Function Toolkit,10003GS,2026-09-24,lab
+cs_ch7_chart_rebuild,The Chart Rebuild,10003GS,2026-09-24,lab
+cs_ch7_dashboard_build,The Dashboard Build,10003GS,2026-09-24,lab
+cs_ch8_model_build,The Model Build,10003GS,2026-09-28,lab
+Unit3-Exam,Unit 3 CFA,10003GS,2026-09-29,exam
+cs_ch9_decomposition_tree,The Decomposition Tree,10003GS,2026-10-06,lab
+cs_ch9_pseudocode_spec,The Pseudocode Spec,10003GS,2026-10-06,lab
+cs_ch9_first_prototype,The First Prototype,10003GS,2026-10-06,lab
+cs_ch10_decision_logic,The Decision Logic,10003GS,2026-10-06,lab
+cs_ch10_iteration_build,The Iteration Build,10003GS,2026-10-06,lab
+cs_ch10_event_driven_artifact,The Event-Driven Artifact,10003GS,2026-10-06,lab
+Unit4-Exam,Unit 4 CFA,10003GS,2026-10-15,exam
+cs_ch11_bias_test,The Bias Test,10003GS,2026-10-22,lab
+cs_ch12_cross_discipline_brief,The Cross-Discipline Brief,10003GS,2026-10-22,lab
+cs_ch12_privacy_audit,The Privacy Audit,10003GS,2026-10-22,lab
+Unit5-Exam,Unit 5 CFA,10003GS,2026-11-03,exam
+cs_ch14_array_refactor,The Array Refactor,10003GS,2026-11-12,lab
+cs_ch14_structure_comparison,The Structure Comparison,10003GS,2026-11-12,lab
+cs_ch15_procedure_library,The Procedure Library,10003GS,2026-11-12,lab
+cs_ch15_integrated_tool,The Integrated Tool,10003GS,2026-11-16,lab
+cs_ch16_feedback_cycle,The Feedback Cycle,10003GS,2026-11-16,lab
+cs_ch16_license_audit,The License Audit,10003GS,2026-11-17,lab
+cs_ch16_accessibility_pass,The Accessibility Pass,10003GS,2026-11-17,lab
+Unit6-Exam,Unit 6 CFA,10003GS,2026-11-19,exam
+cs_ch17_network_map,The Network Map,10003GS,2026-12-03,lab
+cs_ch18_threat_log,The Threat Log,10003GS,2026-12-07,lab
+cs_ch19_tradeoff_matrix,The Tradeoff Matrix,10003GS,2026-12-08,lab
+cs_ch19_security_brief,The Security Brief,10003GS,2026-12-08,lab
+cs_ch19_network_audit,Project: The Network Audit,10003GS,2026-12-08,milestone
+Unit7-Exam,Unit 7 CFA,10003GS,2026-12-10,exam

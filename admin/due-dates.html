@@ -240,37 +240,97 @@
 
 const CS_MAP = [
   { unitNum: 1, unitTitle: 'Unit 1: Digital Citizenship', chapters: [
-    { ch: 1, title: 'Ch 1: Essential Computer Skills' },
-    { ch: 2, title: 'Ch 2: Ethics, Privacy & Law' }
+    { ch: 1, title: 'Ch 1: Essential Computer Skills', labs: [
+      { id: 'cs_ch1_footprint_audit',       title: 'The Footprint Audit',        pts: 25 },
+      { id: 'cs_ch1_conduct_case_studies',  title: 'The Conduct Case Studies',   pts: 25 },
+      { id: 'cs_ch1_threat_recognition',    title: 'The Threat Recognition Lab', pts: 25 }
+    ]},
+    { ch: 2, title: 'Ch 2: Ethics, Privacy & Law', labs: [
+      { id: 'cs_ch2_data_trail',         title: 'The Data Trail',        pts: 25 },
+      { id: 'cs_ch2_attribution_lab',    title: 'The Attribution Lab',   pts: 25 },
+      { id: 'cs_ch2_privacy_position',   title: 'The Privacy Position',  pts: 25 }
+    ]}
   ]},
   { unitNum: 2, unitTitle: 'Unit 2: Computing Systems', chapters: [
-    { ch: 3, title: 'Ch 3: How Computers Work' },
-    { ch: 4, title: 'Ch 4: Intro to Office Software' }
+    { ch: 3, title: 'Ch 3: How Computers Work', labs: [
+      { id: 'cs_ch3_abstraction_teardown',  title: 'The Abstraction Teardown',   pts: 25 },
+      { id: 'cs_ch3_layer_interaction_map', title: 'The Layer Interaction Map',  pts: 25 },
+      { id: 'cs_ch3_file_system_audit',     title: 'The File System Audit',      pts: 25 },
+      { id: 'cs_ch3_troubleshooting_guide', title: 'The Troubleshooting Guide',  pts: 25 }
+    ]},
+    { ch: 4, title: 'Ch 4: Intro to Office Software', labs: [
+      { id: 'cs_ch4_audience_rebuild',   title: 'The Audience Rebuild',   pts: 25 },
+      { id: 'cs_ch4_distributed_build',  title: 'The Distributed Build',  pts: 25 }
+    ]}
   ]},
   { unitNum: 3, unitTitle: 'Unit 3: Data & Analysis', chapters: [
-    { ch: 5,  title: 'Ch 5: The Language of Computers' },
-    { ch: 6,  title: 'Ch 6: Storing Data' },
-    { ch: 7,  title: 'Ch 7: Mastering Spreadsheets' },
-    { ch: 8,  title: 'Ch 8: Computational Modeling' }
+    { ch: 5, title: 'Ch 5: The Language of Computers', labs: [
+      { id: 'cs_ch5_binary_translator', title: 'The Binary Translator', pts: 25 },
+      { id: 'cs_ch5_encoding_lab',      title: 'The Encoding Lab',      pts: 25 }
+    ]},
+    { ch: 6, title: 'Ch 6: Storing Data', labs: [
+      { id: 'cs_ch6_organisation_audit',      title: 'The Organisation Audit',      pts: 25 },
+      { id: 'cs_ch6_storage_tradeoff_matrix', title: 'The Storage Tradeoff Matrix', pts: 25 }
+    ]},
+    { ch: 7, title: 'Ch 7: Mastering Spreadsheets', labs: [
+      { id: 'cs_ch7_function_toolkit', title: 'The Function Toolkit', pts: 25 },
+      { id: 'cs_ch7_chart_rebuild',    title: 'The Chart Rebuild',    pts: 25 },
+      { id: 'cs_ch7_dashboard_build',  title: 'The Dashboard Build',  pts: 25 }
+    ]},
+    { ch: 8, title: 'Ch 8: Computational Modeling', labs: [
+      { id: 'cs_ch8_model_build', title: 'The Model Build', pts: 25 }
+    ]}
   ]},
   { unitNum: 4, unitTitle: 'Unit 4: Beg. Algorithm & Programming', chapters: [
-    { ch: 9,  title: 'Ch 9: Problem Solving & Algorithms' },
-    { ch: 10, title: 'Ch 10: Control Structures & Events' }
+    { ch: 9, title: 'Ch 9: Problem Solving & Algorithms', labs: [
+      { id: 'cs_ch9_decomposition_tree', title: 'The Decomposition Tree', pts: 25 },
+      { id: 'cs_ch9_pseudocode_spec',    title: 'The Pseudocode Spec',    pts: 25 },
+      { id: 'cs_ch9_first_prototype',    title: 'The First Prototype',    pts: 25 }
+    ]},
+    { ch: 10, title: 'Ch 10: Control Structures & Events', labs: [
+      { id: 'cs_ch10_decision_logic',       title: 'The Decision Logic',        pts: 25 },
+      { id: 'cs_ch10_iteration_build',      title: 'The Iteration Build',       pts: 25 },
+      { id: 'cs_ch10_event_driven_artifact', title: 'The Event-Driven Artifact', pts: 25 }
+    ]}
   ]},
   { unitNum: 5, unitTitle: 'Unit 5: Impacts of Computing', chapters: [
-    { ch: 11, title: 'Ch 11: Culture, Equity & Bias' },
-    { ch: 12, title: 'Ch 12: Ethics & Societal Impact' },
-    { ch: 13, title: 'Ch 13: AI & Cross-Disciplinary Tech' }
+    { ch: 11, title: 'Ch 11: Culture, Equity & Bias', labs: [
+      { id: 'cs_ch11_bias_test', title: 'The Bias Test', pts: 25 }
+    ]},
+    { ch: 12, title: 'Ch 12: Ethics & Societal Impact', labs: [
+      { id: 'cs_ch12_cross_discipline_brief', title: 'The Cross-Discipline Brief', pts: 25 },
+      { id: 'cs_ch12_privacy_audit',          title: 'The Privacy Audit',         pts: 25 }
+    ]},
+    { ch: 13, title: 'Ch 13: AI & Cross-Disciplinary Tech', labs: [] }
   ]},
   { unitNum: 6, unitTitle: 'Unit 6: Intermediate A&P', chapters: [
-    { ch: 14, title: 'Ch 14: Advanced Data Structures' },
-    { ch: 15, title: 'Ch 15: Modularity & Procedures' },
-    { ch: 16, title: 'Ch 16: Software Development Lifecycle' }
+    { ch: 14, title: 'Ch 14: Advanced Data Structures', labs: [
+      { id: 'cs_ch14_array_refactor',       title: 'The Array Refactor',       pts: 25 },
+      { id: 'cs_ch14_structure_comparison', title: 'The Structure Comparison', pts: 25 }
+    ]},
+    { ch: 15, title: 'Ch 15: Modularity & Procedures', labs: [
+      { id: 'cs_ch15_procedure_library', title: 'The Procedure Library', pts: 25 },
+      { id: 'cs_ch15_integrated_tool',   title: 'The Integrated Tool',   pts: 25 }
+    ]},
+    { ch: 16, title: 'Ch 16: Software Development Lifecycle', labs: [
+      { id: 'cs_ch16_feedback_cycle',     title: 'The Feedback Cycle',     pts: 25 },
+      { id: 'cs_ch16_license_audit',      title: 'The License Audit',      pts: 25 },
+      { id: 'cs_ch16_accessibility_pass', title: 'The Accessibility Pass', pts: 25 }
+    ]}
   ]},
   { unitNum: 7, unitTitle: 'Unit 7: Networks and the Internet', chapters: [
-    { ch: 17, title: 'Ch 17: How the Internet Works' },
-    { ch: 18, title: 'Ch 18: Cybersecurity Threats' },
-    { ch: 19, title: 'Ch 19: Defending Systems' }
+    { ch: 17, title: 'Ch 17: How the Internet Works', labs: [
+      { id: 'cs_ch17_network_map', title: 'The Network Map', pts: 25 }
+    ]},
+    { ch: 18, title: 'Ch 18: Cybersecurity Threats', labs: [
+      { id: 'cs_ch18_threat_log', title: 'The Threat Log', pts: 25 }
+    ]},
+    { ch: 19, title: 'Ch 19: Defending Systems', labs: [
+      { id: 'cs_ch19_tradeoff_matrix', title: 'The Tradeoff Matrix', pts: 25 },
+      { id: 'cs_ch19_security_brief',  title: 'The Security Brief',  pts: 25 }
+    ], milestones: [
+      { id: 'cs_ch19_network_audit', title: 'Project: The Network Audit', pts: 100 }
+    ]}
   ]}
 ];
 
@@ -432,9 +492,14 @@ const TITLE_MAP = (() => {
   const m = {};
   for (const unit of CS_MAP) {
     const n = unit.unitNum;
-    m[`Unit${n}-Pre`]  = `Unit ${n} Pre-Assessment`;
-    m[`Unit${n}-Exam`] = `Unit ${n} Summative Exam`;
-    for (const ch of unit.chapters) m[`Unit${n}-Ch${ch.ch}`] = ch.title;
+    // Exam id stays "-Exam" (not "-CFA") so it still matches the "exam"
+    // substring the weighted-grading category matcher in gradebook.js and
+    // dashboard.js relies on — only the display title says CFA.
+    m[`Unit${n}-Exam`] = `Unit ${n} Common Formative Assessment (CFA)`;
+    for (const ch of unit.chapters) {
+      for (const lab of (ch.labs || []))       m[lab.id] = lab.title;
+      for (const ms  of (ch.milestones || [])) m[ms.id]  = ms.title;
+    }
   }
   for (const ch of WD_MAP) {
     const n = ch.ch;
@@ -576,16 +641,18 @@ function renderCS() {
       </div>
       <div class="card-body p-0">`;
 
-    // Pre-assessment
-    html += assignmentRow(`Unit${n}-Pre`, `Unit ${n} Pre-Assessment`, 'pre', 15, COURSE_ID_CS);
-
-    // Chapter notes
+    // Per-chapter labs and milestones
     for (const ch of unit.chapters) {
-      html += assignmentRow(`Unit${n}-Ch${ch.ch}`, ch.title, 'chapter', 10, COURSE_ID_CS);
+      for (const lab of (ch.labs || [])) {
+        html += assignmentRow(lab.id, lab.title, 'lab', lab.pts, COURSE_ID_CS);
+      }
+      for (const ms of (ch.milestones || [])) {
+        html += assignmentRow(ms.id, ms.title, 'milestone', ms.pts, COURSE_ID_CS);
+      }
     }
 
-    // Summative exam
-    html += assignmentRow(`Unit${n}-Exam`, `Unit ${n} Summative Exam`, 'exam', 100, COURSE_ID_CS);
+    // Unit CFA (Common Formative Assessment)
+    html += assignmentRow(`Unit${n}-Exam`, `Unit ${n} CFA`, 'exam', 100, COURSE_ID_CS);
 
     html += `</div></div>`;
   }
@@ -1043,8 +1110,10 @@ function collectCSIds() {
   const ids = [];
   for (const unit of CS_MAP) {
     const n = unit.unitNum;
-    ids.push(`Unit${n}-Pre`);
-    for (const ch of unit.chapters) ids.push(`Unit${n}-Ch${ch.ch}`);
+    for (const ch of unit.chapters) {
+      for (const lab of (ch.labs || []))       ids.push(lab.id);
+      for (const ms  of (ch.milestones || [])) ids.push(ms.id);
+    }
     ids.push(`Unit${n}-Exam`);
   }
   return ids;
