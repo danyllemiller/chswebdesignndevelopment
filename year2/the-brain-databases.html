@@ -48,7 +48,7 @@
     <!-- SECTION 1: OVERVIEW & PERSONA -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">The Amnesia Problem: Why Your Client Needs a Brain</h2>
+        <h2 class="section-title mt-0" id="purpose-of-database">The Amnesia Problem: Why Your Client Needs a Brain</h2>
         <p>Welcome back, Agency Full-Stack Developer! In previous chapters, you learned how to make your client's site interactive with JavaScript. Your sites can react to clicks, validate forms, and run mini-games, which is awesome! But there's still a massive piece of magic missing. <strong>What happens when the customer closes the page or hits refresh?</strong></p>
         
         <p>All their changes, all their shopping cart items, and all their user data vanish into thin air.</p>
@@ -118,7 +118,7 @@
     <!-- SECTION 2: DATABASES & RELATIONS -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">Describing the Database</h2>
+        <h2 class="section-title mt-0" id="identify-relational-db">Describing the Database</h2>
         <p>A database is the critical link between a user's action on the front-end (Client-Side) and the site's permanent storage (Server-Side). For an agency, it solves two massive problems for our clients:</p>
         <ol class="small mb-4 bg-light p-4 border rounded shadow-sm text-start">
           <li class="mb-2"><strong>Memory:</strong> It permanently stores user-generated content and account data on a remote server that stays online 24/7.</li>
@@ -137,7 +137,7 @@
             <li class="mb-0"><strong>Foreign Key:</strong> What is a Foreign Key? <strong>A column in one table that points back to the Primary Key of another table, creating a link between them.</strong> Think of a class roster sheet. Instead of writing out a student's full name on every sheet, the school just writes their Student ID (the Foreign Key). This is part of <strong>Data Normalization</strong>: Organizing data to reduce redundancy and improve data integrity (e.g., using Foreign Keys instead of typing a name 100 times to save the client server space!).</li>
         </ul>
 
-        <h5 class="fw-bold mt-4 text-primary">Data Normalization: Eliminating Redundancy <span class="badge bg-primary ms-1" style="font-size:0.65rem;">WRS 1.2.3</span></h5>
+        <h5 class="fw-bold mt-4 text-primary">Data Normalization: Eliminating Redundancy</h5>
         <p>What is <strong>Data Normalization</strong>? <strong>The process of organizing a database to reduce redundancy — avoiding storing the same data in multiple places — so that updates only need to happen in one location.</strong></p>
         <div class="row g-3 mb-4 text-start">
           <div class="col-md-6">
@@ -366,7 +366,7 @@
     <!-- SECTION 3: DATABASE TYPES & LOCAL STORAGE LAB -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">Analyzing Database Types</h2>
+        <h2 class="section-title mt-0" id="analyze-db-types">Analyzing Database Types</h2>
         <p>Professional agency developers choose the right tool for the job. Here is how the modern web stores data:</p>
         
         <ul class="small mb-5 text-start">
@@ -489,6 +489,51 @@ if (savedScore !== null) {
       </div>
     </div>
 
+    <!-- SECTION 3B: BRIDGING TO A REAL DATABASE -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0" id="incorporate-external-db">Bridging the Gap: Connecting to a Real External Database</h2>
+        <p><strong>Why it matters:</strong> Local Storage solved the "amnesia" problem, but it created a new one: Cody's high score only lives inside <em>his</em> browser. His friend on a different computer can't see it, and if Cody clears his cache, it's gone forever. For a real competitive leaderboard, ByteBox needs a database that lives on a shared server everyone's browser can reach.</p>
+        <p><strong>What it is:</strong> Writing raw SQL in a sandbox is great for learning the language, but how does a front-end developer actually <em>incorporate</em> a live external database into a real website without building and hosting an entire custom backend server? The professional shortcut is a <strong>Backend-as-a-Service (BaaS)</strong> platform — <strong>Firebase</strong> (Google) or <strong>Supabase</strong> (open-source, built on Postgres SQL) are the two most common. A BaaS hosts a real, shared database in the cloud and exposes it through a simple API — meaning you connect to it using the exact <code>fetch()</code> and <code>async/await</code> skills from Chapter 13.</p>
+        <pre class="p-3 border rounded shadow-sm mb-4 no-copy"><code>// Saving Cody's score to a REAL shared database (Firebase example)
+async function saveScoreToCloud(username, score) {
+    await fetch("https://bytebox-scores.firebaseio.com/scores.json", {
+        method: "POST",
+        body: JSON.stringify({ username: username, score: score })
+    });
+}
+
+// Reading the whole leaderboard back — visible to EVERY player
+async function loadLeaderboard() {
+    const response = await fetch("https://bytebox-scores.firebaseio.com/scores.json");
+    const data = await response.json();
+    return data; // Every player's scores, not just this browser's
+}</code></pre>
+        <p>Notice this is the exact same <code>fetch()</code>/<code>await</code>/<code>JSON.parse()</code> pattern from Chapter 13 — a BaaS just puts a real, shared database behind that familiar API.</p>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
+          <strong>Trap — Where Everyone Gets Ambushed:</strong> Assuming you always need to build a full custom backend server (Node.js, PHP) to use a real database. For many small-to-medium client projects, a BaaS eliminates that entire layer — a front-end-focused agency developer can ship a genuine shared-database feature without ever writing server code.
+        </div>
+        <div class="card border-secondary shadow-sm mb-0">
+          <div class="card-header bg-light fw-bold">Quick Check</div>
+          <div class="card-body small">
+            <p class="mb-2">Why can't Local Storage alone power a real ByteBox leaderboard that all players can see?</p>
+            <details>
+              <summary class="fw-bold text-primary" style="cursor: pointer;">Show Answer</summary>
+              <p class="mb-0 mt-2">Local Storage lives entirely inside one specific browser on one specific device. It never leaves that browser, so no other player's browser can read it. A real leaderboard needs data stored on a shared server (SQL, NoSQL, or a BaaS like Firebase) that every player's browser can fetch() from.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="card roadmap-card border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info border-bottom">E.O.P. Exam Tip:</div>
+          <div class="card-body small">
+              <p class="mb-0">Know the spectrum: <strong>Local Storage</strong> (one browser only) &rarr; <strong>BaaS</strong> like Firebase/Supabase (shared cloud DB, no custom backend needed) &rarr; <strong>Full custom backend</strong> (Node.js/PHP + your own SQL server, maximum control).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- SECTION 4: CRUD & SQL LANGUAGE -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
@@ -528,7 +573,7 @@ if (savedScore !== null) {
         </table>
 
         <div class="alert alert-info border-info border-start border-4 shadow-sm small mt-4 mb-4 text-start">
-          <strong>CRUD Lifecycle — SQL Commands + HTTP Methods: <span class="badge bg-primary ms-1">NV 5.4.1</span></strong>
+          <strong>CRUD Lifecycle — SQL Commands + HTTP Methods:</strong>
           <p class="mt-2 mb-2">CRUD actions are universal. The same four operations appear in both your database (SQL) and your API layer (HTTP methods). When you understand this mapping, you can read any full-stack codebase instantly:</p>
           <table class="table table-bordered table-sm small bg-white mb-0">
             <thead class="bg-primary text-white text-center">
@@ -611,7 +656,7 @@ WHERE id = 101;
             </div>
           </div>
           <div class="alert alert-danger small py-2 px-3 mt-3 mb-0 border-danger border-start border-3">
-            <strong>The Golden Rule:</strong> Before running any <code>UPDATE</code> or <code>DELETE</code>, first run a <code>SELECT</code> with the same <code>WHERE</code> clause to preview exactly which rows will be affected. <span class="badge bg-primary ms-1">NV 5.4.1</span>
+            <strong>The Golden Rule:</strong> Before running any <code>UPDATE</code> or <code>DELETE</code>, first run a <code>SELECT</code> with the same <code>WHERE</code> clause to preview exactly which rows will be affected.
           </div>
         </div>
 
@@ -856,7 +901,7 @@ WHERE id = 101;
     <!-- SECTION 6: GDPR/CCPA -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0">Legal Obligations: GDPR &amp; CCPA <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">WRS 1.1.2</span> <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">WRS 1.1.4</span></h2>
+        <h2 class="section-title mt-0">Legal Obligations: GDPR &amp; CCPA</h2>
         <p>When our agency builds a database that stores user data, we are not just engineers — we are data custodians with legal obligations. Two major privacy laws govern how user data must be handled:</p>
 
         <div class="row g-3 mb-4 text-start">

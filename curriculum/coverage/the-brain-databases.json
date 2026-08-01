@@ -1,0 +1,34 @@
+{
+  "chapter": 14,
+  "title": "The “Brain” (Databases)",
+  "page": "year2/the-brain-databases.html",
+  "assessment_note": "Assessment for this chapter lives in external worksheets/tests, not an on-page question bank. assessed_by is descriptive only.",
+  "indicators": {
+    "5.4.1": {
+      "taught_in": "Describing the Database (Schema, Relational Databases, Primary/Foreign Keys, Normalization)",
+      "anchor": "#identify-relational-db",
+      "practiced_in": "Lab 2: The Schema Architect Lab, Interactive Relational Database diagram (Figure 14.1)",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.4.2": {
+      "taught_in": "Analyzing Database Types (SQL, NoSQL, Cloud, Local Storage)",
+      "anchor": "#analyze-db-types",
+      "practiced_in": "Lab 1: The CRUD App Audit",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.4.3": {
+      "taught_in": "The Amnesia Problem: Why Your Client Needs a Brain",
+      "anchor": "#purpose-of-database",
+      "practiced_in": "Let's Discuss prompt on why a database beats a text file",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    },
+    "5.4.4": {
+      "taught_in": "Walkthrough: The \"Sticky Note\" Database (Local Storage) / Bridging the Gap: Connecting to a Real External Database",
+      "anchor": "#incorporate-external-db",
+      "practiced_in": "Local Storage save/load walkthroughs, Lab 3: The Data Detective Lab, Lab 4: Secure Data Entry Lab, Milestone: Client Database Schema",
+      "assessed_by": "External chapter worksheet/test (not tracked on-page)"
+    }
+  },
+  "revisits": {},
+  "wrs": {}
+}
