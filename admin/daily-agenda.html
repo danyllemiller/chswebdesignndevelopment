@@ -191,10 +191,22 @@
     flex: 1 1 auto; display: flex; flex-direction: column; gap: .4rem;
   }
   .schedule-list li {
-    display: flex; justify-content: space-between; align-items: center; gap: .4rem;
-    padding: .5rem .6rem; border-radius: .35rem;
+    border-radius: .35rem;
     flex: 1 1 0;
+    overflow: hidden;
   }
+  .sched-inner {
+    display: flex; justify-content: space-between; align-items: center; gap: .4rem;
+    width: 100%; height: 100%;
+    padding: .5rem .6rem;
+    text-decoration: none;
+    color: inherit;
+    text-shadow: none;
+  }
+  a.sched-inner { cursor: pointer; }
+  a.sched-inner:hover { filter: brightness(.9); }
+  a.sched-inner:hover .sched-period { text-decoration: underline; }
+  .sched-current { outline: 2px solid rgba(0,0,0,.45); outline-offset: -2px; }
   .sched-period { font-weight: 700; font-size: 1rem; }
   .sched-time { font-variant-numeric: tabular-nums; white-space: nowrap; }
   .schedule-empty {
@@ -358,6 +370,7 @@ const COURSES = {
 const params  = new URLSearchParams(location.search);
 const course  = params.get('course');
 const courseCfg = COURSES[course];
+let track = 'main'; // reassigned below once courseCfg is known; shared so renderBellSchedule() can read it
 
 // ── Bell schedule (shared with /calendar.html: special-dates.csv + DB events decide
 // the day type; /api/bell-schedule.php holds the period times for each type) ──────
@@ -374,6 +387,19 @@ const PERIOD_COLORS = {
 };
 const PERIOD_COLOR_DEFAULT = '#e5e7eb'; // gray fallback (summer S1-S4, unknown periods)
 const PERIOD_TEXT_COLOR = '#1a1a2e';
+
+// Which course each period actually teaches, from current live roster enrollment
+// (students.course_id -> courses.course_name), not bell_schedule.course_name
+// (mostly unpopulated). CS Track A meets on A-day periods, Track B on B-day periods.
+const PERIOD_COURSE_LINKS = {
+  'A1': { course: 'wd1' },
+  'B2': { course: 'wd2' },
+  'A3': { course: 'cs_s1', track: 'A' },
+  'A5': { course: 'cs_s1', track: 'A' },
+  'B4': { course: 'cs_s1', track: 'B' },
+  'B6': { course: 'cs_s1', track: 'B' },
+  'B8': { course: 'cs_s1', track: 'B' },
+};
 
 function parseSpecialDatesCSV(text) {
   const lines = text.split(/\r?\n/);
@@ -450,15 +476,30 @@ function renderBellSchedule(dateStr) {
   periods.forEach(p => {
     const li = document.createElement('li');
     li.style.background = PERIOD_COLORS[p.period_label] || PERIOD_COLOR_DEFAULT;
-    li.style.color = PERIOD_TEXT_COLOR;
-    li.style.textShadow = 'none';
+
+    const link = PERIOD_COURSE_LINKS[p.period_label];
+    const isCurrentPage = link && link.course === course && (link.track || 'main') === track;
+    const inner = document.createElement(link && !isCurrentPage ? 'a' : 'div');
+    inner.className = 'sched-inner';
+    inner.style.color = PERIOD_TEXT_COLOR;
+    if (link && !isCurrentPage) {
+      const url = new URLSearchParams({ course: link.course });
+      if (link.track) url.set('track', link.track);
+      inner.href = `/admin/daily-agenda.html?${url.toString()}`;
+      inner.title = `Go to ${COURSES[link.course].label}${link.track ? ' (Track ' + link.track + ')' : ''}`;
+    } else if (isCurrentPage) {
+      inner.title = 'You are here';
+      inner.classList.add('sched-current');
+    }
+
     const period = document.createElement('span');
     period.className = 'sched-period';
     period.textContent = p.period_label;
     const time = document.createElement('span');
     time.className = 'sched-time';
     time.textContent = `${fmtTime(p.start_time)}–${fmtTime(p.end_time)}`;
-    li.append(period, time);
+    inner.append(period, time);
+    li.appendChild(inner);
     ul.appendChild(li);
   });
   box.appendChild(ul);
@@ -469,7 +510,7 @@ if (!courseCfg) {
 } else {
   document.getElementById('agendaRoot').classList.remove('d-none');
   document.documentElement.setAttribute('data-course', course);
-  let track = courseCfg.hasTracks ? (params.get('track') === 'B' ? 'B' : 'A') : 'main';
+  track = courseCfg.hasTracks ? (params.get('track') === 'B' ? 'B' : 'A') : 'main';
   document.documentElement.setAttribute('data-track', track);
 
   let content = {};   // block_num -> content object
