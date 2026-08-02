@@ -93,14 +93,10 @@
     color: var(--label-color);
     font-weight: 700;
     font-size: .85rem;
-    margin-bottom: .35rem;
+    margin: 0 0 .35rem;
+    flex: 0 0 auto;
   }
   .section-label .cmt { color: var(--text-muted); font-weight: 400; }
-  /* Box outlines are baked into the background art for WD1/WD2 — content
-     sits directly in the drawn zones with no extra label. CS keeps its
-     comment-style label (see the --code-comment JS toggle below). */
-  [data-course="wd1"] .section-label,
-  [data-course="wd2"] .section-label { display: none; }
 
   .agenda-canvas {
     position: relative;
@@ -123,6 +119,8 @@
     font-size: .78rem;
     line-height: 1.35;
     text-shadow: 0 1px 4px rgba(0,0,0,.7);
+    display: flex;
+    flex-direction: column;
   }
   .zone-objective { left: 2%;    top: 16%;   width: 19.5%; height: 30%; }
   .zone-standards { left: 2%;    top: 51%;   width: 19.5%; height: 44%; }
@@ -130,6 +128,8 @@
   .zone-tasks     { left: 24%;   top: 37.5%; width: 52%;   height: 57.5%; }
   .zone-schedule  { left: 78.5%; top: 16%;   width: 19.5%; height: 52%; }
   .zone-timer     { left: 78.5%; top: 71%;   width: 19.5%; height: 24.5%; }
+
+  .zone-schedule #scheduleBox { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
 
   .do-now-prompt { color: var(--donow-text); font-weight: 600; }
   .do-now-reply { color: var(--text-muted); font-style: italic; font-size: .78rem; }
@@ -148,15 +148,23 @@
     margin-bottom: .4rem;
     padding-bottom: .3rem;
     border-bottom: 1px dashed var(--box-border);
+    flex: 0 0 auto;
   }
-  .schedule-list { list-style: none; padding-left: 0; margin: 0; font-size: .75rem; }
+  .schedule-list {
+    list-style: none; padding-left: 0; margin: 0; font-size: .85rem;
+    flex: 1 1 auto; display: flex; flex-direction: column; gap: .4rem;
+  }
   .schedule-list li {
     display: flex; justify-content: space-between; align-items: center; gap: .4rem;
-    padding: .3rem .4rem; margin-bottom: .25rem; border-radius: .3rem;
+    padding: .5rem .6rem; border-radius: .35rem;
+    flex: 1 1 0;
   }
-  .sched-period { font-weight: 700; }
+  .sched-period { font-weight: 700; font-size: 1rem; }
   .sched-time { font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .schedule-empty { padding: 1rem 0; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
+  .schedule-empty {
+    flex: 1 1 auto; display: flex; align-items: center; justify-content: center;
+    text-align: center; text-shadow: 0 1px 4px rgba(0,0,0,.7);
+  }
 
   .timer-display {
     font-variant-numeric: tabular-nums;
@@ -238,35 +246,35 @@
 
   <div class="agenda-canvas">
     <div class="zone zone-objective">
-      <div class="section-label" data-cmt="Objective">Objective</div>
+      <h2 class="section-label" data-cmt="Objective">Objective</h2>
       <ul id="objectiveList" class="mb-0 ps-3"></ul>
     </div>
 
     <div class="zone zone-standards">
-      <div class="section-label" data-cmt="Standards">Standards</div>
+      <h2 class="section-label" data-cmt="Standards">Standards</h2>
       <div id="standardsBox"></div>
     </div>
 
     <div class="zone zone-donow">
-      <div class="section-label" data-cmt="Do Now">Do Now</div>
+      <h2 class="section-label" data-cmt="Do Now">Do Now</h2>
       <div id="doNowPrompt" class="do-now-prompt mb-1"></div>
       <div class="do-now-reply">Reply in one or two sentences.</div>
     </div>
 
     <div class="zone zone-tasks">
-      <div class="section-label" data-cmt="Tasks">Tasks</div>
+      <h2 class="section-label" data-cmt="Tasks">Tasks</h2>
       <div id="tasksTitle" class="tasks-title"></div>
       <ul id="taskList" class="task-list"></ul>
       <div id="exitTicket" class="exit-ticket"></div>
     </div>
 
     <div class="zone zone-schedule">
-      <div class="section-label" data-cmt="Schedule">Schedule</div>
+      <h2 class="section-label" data-cmt="Schedule">Schedule</h2>
       <div id="scheduleBox"></div>
     </div>
 
     <div class="zone zone-timer">
-      <div class="section-label" data-cmt="Timer">Timer</div>
+      <h2 class="section-label" data-cmt="Timer">Timer</h2>
       <div id="timerDisplay" class="timer-display">05:00</div>
       <div class="timer-controls mb-2">
         <button id="timerStartPause" class="btn btn-sm btn-success">Start</button>
