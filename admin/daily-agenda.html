@@ -388,7 +388,12 @@ if (!courseCfg) {
     }
 
     const doNow = document.getElementById('doNowPrompt');
-    doNow.textContent = c ? `${c.doNowType || 'Predict'}: ${c.doNowPrompt || ''}` : '';
+    if (c) {
+      const dt = (c.doNowType === '' ) ? '' : (c.doNowType || 'Predict');
+      doNow.textContent = dt ? `${dt}: ${c.doNowPrompt || ''}` : (c.doNowPrompt || '');
+    } else {
+      doNow.textContent = '';
+    }
     doNow.setAttribute('contenteditable', editing);
 
     const tt = document.getElementById('tasksTitle');
