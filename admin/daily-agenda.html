@@ -76,13 +76,19 @@
   }
   .date-block h2 { color: var(--text-muted); font-weight: 600; font-size: 1rem; margin: 0; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
   .min-day-note { color: var(--tasks-title); font-size: .75rem; font-style: italic; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
+  .title-block { flex: 1; text-align: center; }
   .agenda-title {
-    text-align: center;
     color: var(--h1-color);
     font-weight: 800;
     font-size: 2rem;
-    flex: 1;
     text-shadow: 0 1px 6px rgba(0,0,0,.8);
+  }
+  .course-subtitle {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: .95rem;
+    margin-top: .1rem;
+    text-shadow: 0 1px 4px rgba(0,0,0,.7);
   }
   .clock-block { text-align: right; min-width: 140px; }
   .clock-face {
@@ -286,7 +292,10 @@
         <h2 id="dateLabel" class="tag-label" data-tag="h2">—</h2>
         <div id="minDayNote" class="min-day-note d-none">45-minute minimum day</div>
       </div>
-      <h1 class="agenda-title tag-label" data-tag="h1">Today's Agenda</h1>
+      <div class="title-block">
+        <h1 class="agenda-title tag-label" data-tag="h1">Today's Agenda</h1>
+        <div id="courseSubtitle" class="course-subtitle"></div>
+      </div>
       <div class="clock-block">
         <h2 id="clockFace" class="clock-face tag-label" data-tag="h2">--:--:--</h2>
         <div id="clockDate" class="clock-date"></div>
@@ -578,11 +587,17 @@ if (!courseCfg) {
     });
   }
 
+  function courseSubtitleText() {
+    if (course === 'cs_s1') return `Computer Science ${track} Day`;
+    return courseCfg.label;
+  }
+
   function render() {
     const c = content[currentBlock];
     const dateStr = (schedule[track] || {})[currentBlock];
     document.getElementById('dateLabel').textContent = dateStr ? fmtDateLabel(dateStr) : `Block ${currentBlock}`;
     document.getElementById('minDayNote').classList.toggle('d-none', !(c && c.minimumDay));
+    document.getElementById('courseSubtitle').textContent = courseSubtitleText();
 
     document.getElementById('jumpSelect').value = currentBlock;
     renderBellSchedule(dateStr);
