@@ -117,6 +117,22 @@
     min-height: 150px;
   }
 
+  .schedule-day-type {
+    font-weight: 700;
+    text-align: center;
+    color: var(--tasks-title);
+    font-size: .95rem;
+    margin-bottom: .5rem;
+    padding-bottom: .35rem;
+    border-bottom: 1px dashed var(--box-border);
+  }
+  .schedule-list { list-style: none; padding-left: 0; margin: 0; font-size: .85rem; }
+  .schedule-list li { display: flex; justify-content: space-between; gap: .5rem; padding: .3rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .schedule-list li:last-child { border-bottom: none; }
+  .sched-period { color: var(--text-main); font-weight: 600; }
+  .sched-time { color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .schedule-empty { padding: 1rem 0; }
+
   .timer-display {
     font-variant-numeric: tabular-nums;
     font-size: 2.75rem;
@@ -222,9 +238,7 @@
 
     <div class="col-lg-3">
       <div class="section-label" data-cmt="Schedule">Schedule</div>
-      <div class="schedule-box d-flex align-items-center justify-content-center p-2">
-        <div id="blockBadge" class="display-6 fw-bold text-muted">01</div>
-      </div>
+      <div id="scheduleBox" class="schedule-box p-2"></div>
       <div class="section-label mt-3" data-cmt="Timer">Timer</div>
       <div class="timer-box p-2">
         <div id="timerDisplay" class="timer-display">05:00</div>
@@ -275,6 +289,100 @@ const COURSES = {
 const params  = new URLSearchParams(location.search);
 const course  = params.get('course');
 const courseCfg = COURSES[course];
+
+// ── Bell schedule (shared with /calendar.html: special-dates.csv + DB events decide
+// the day type; /api/bell-schedule.php holds the period times for each type) ──────
+let dayTypes = new Map();   // 'YYYY-MM-DD' -> { type, description }
+let bellSchedule = [];      // rows from bell_schedule table
+
+const DAY_TYPE_LABELS = { A: 'A Day', B: 'B Day', A_MIN: 'A Min Day', B_MIN: 'B Min Day', C: 'All Periods', summer: 'Summer School' };
+const EVENT_TYPE_PRI = { A: 6, B: 5, C: 4, A_MIN: 3, B_MIN: 2, S: 2, OFF: 1, none: 0 };
+
+function parseSpecialDatesCSV(text) {
+  const lines = text.split(/\r?\n/);
+  const firstLine = lines.find(l => l.trim());
+  const delim = firstLine && firstLine.includes('\t') ? '\t' : ',';
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i].trim();
+    if (!raw) continue;
+    if (i === 0 && /^date/i.test(raw.split(delim)[0].trim())) continue;
+    const cols = raw.split(delim);
+    const date = cols[0]?.trim();
+    const type = cols[1]?.trim();
+    const description = delim === '\t' ? (cols[2]?.trim() || '') : cols.slice(2).join(',').trim();
+    if (date && /^\d{4}-\d{2}-\d{2}$/.test(date) && type) dayTypes.set(date, { type, description });
+  }
+}
+
+function mergeEventIntoDayTypes(ev) {
+  const existing = dayTypes.get(ev.event_date);
+  if (existing) {
+    if ((EVENT_TYPE_PRI[ev.type] ?? 0) > (EVENT_TYPE_PRI[existing.type] ?? 0)) existing.type = ev.type;
+  } else {
+    dayTypes.set(ev.event_date, { type: ev.type, description: ev.description || '' });
+  }
+}
+
+function getBellScheduleKey(dateStr) {
+  const info = dayTypes.get(dateStr);
+  if (info?.type === 'OFF') return null;
+  const jsDay = new Date(dateStr + 'T00:00:00').getDay();
+  if (jsDay === 0 || jsDay === 6) return null;
+  const calType = info?.type;
+  if (!calType || calType === 'none') return null;
+  return calType === 'S' ? 'summer' : calType;
+}
+
+function fmtTime(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  let h12 = h % 12; if (h12 === 0) h12 = 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+function renderBellSchedule(dateStr) {
+  const box = document.getElementById('scheduleBox');
+  box.innerHTML = '';
+  const empty = (label) => {
+    const d = document.createElement('div');
+    d.className = 'schedule-empty text-muted small text-center';
+    d.textContent = label;
+    box.appendChild(d);
+  };
+  if (!dateStr) return empty('No date set');
+
+  const info = dayTypes.get(dateStr);
+  const key = getBellScheduleKey(dateStr);
+  if (!key) {
+    const jsDay = new Date(dateStr + 'T00:00:00').getDay();
+    const isWeekend = jsDay === 0 || jsDay === 6;
+    return empty(info?.type === 'OFF' ? 'No School' : (isWeekend ? 'Weekend' : 'No bell schedule'));
+  }
+
+  const periods = bellSchedule.filter(r => r.schedule_type === key).sort((a, b) => a.start_time.localeCompare(b.start_time));
+
+  const typeDiv = document.createElement('div');
+  typeDiv.className = 'schedule-day-type';
+  typeDiv.textContent = DAY_TYPE_LABELS[key] || key;
+  box.appendChild(typeDiv);
+
+  if (!periods.length) return empty('No bell schedule configured');
+
+  const ul = document.createElement('ul');
+  ul.className = 'schedule-list';
+  periods.forEach(p => {
+    const li = document.createElement('li');
+    const period = document.createElement('span');
+    period.className = 'sched-period';
+    period.textContent = p.period_label;
+    const time = document.createElement('span');
+    time.className = 'sched-time';
+    time.textContent = `${fmtTime(p.start_time)}–${fmtTime(p.end_time)}`;
+    li.append(period, time);
+    ul.appendChild(li);
+  });
+  box.appendChild(ul);
+}
 
 if (!courseCfg) {
   document.getElementById('picker').classList.remove('d-none');
@@ -355,8 +463,8 @@ if (!courseCfg) {
     document.getElementById('dateLabel').textContent = dateStr ? fmtDateLabel(dateStr) : `Block ${currentBlock}`;
     document.getElementById('minDayNote').classList.toggle('d-none', !(c && c.minimumDay));
 
-    document.getElementById('blockBadge').textContent = String(currentBlock).padStart(2, '0');
     document.getElementById('jumpSelect').value = currentBlock;
+    renderBellSchedule(dateStr);
 
     const objList = document.getElementById('objectiveList');
     objList.innerHTML = '';
@@ -613,9 +721,17 @@ if (!courseCfg) {
   }
 
   // ── Load data ───────────────────────────────────────────────────────────
-  fetch(`/api/agenda/get.php?course=${encodeURIComponent(course)}`)
-    .then(r => r.json())
-    .then(data => {
+  const calendarLoad = Promise.all([
+    fetch('/special-dates.csv').then(r => r.ok ? r.text() : '').then(parseSpecialDatesCSV).catch(() => {}),
+    fetch('/api/events.php').then(r => r.ok ? r.json() : { events: [] }).then(d => (d.events || []).forEach(mergeEventIntoDayTypes)).catch(() => {}),
+    fetch('/api/bell-schedule.php').then(r => r.ok ? r.json() : { schedule: [] }).then(d => { bellSchedule = d.schedule || []; }).catch(() => {}),
+  ]);
+
+  Promise.all([
+    fetch(`/api/agenda/get.php?course=${encodeURIComponent(course)}`).then(r => r.json()),
+    calendarLoad
+  ])
+    .then(([data]) => {
       content = data.content || {};
       schedule = data.schedule || {};
       renderTrackToggle();
