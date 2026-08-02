@@ -6,6 +6,7 @@
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
   <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap">
   <script type="module" src="/js/auth-guard.js"></script>
 <style>
   :root {
@@ -21,30 +22,34 @@
     --text-muted: #94a3b8;
     --star-color: #ffffff;
     --code-comment: false;
+    --bg-image: url('/images/agenda-backgrounds/web-1.png');
   }
   [data-course="wd2"] {
     --bg: #0a1a16;
     --box-border: rgba(94,234,212,0.35);
     --label-color: #5eead4;
+    --bg-image: url('/images/agenda-backgrounds/web-2.png');
   }
   [data-course="cs_s1"][data-track="A"] {
     --bg: #150c26;
     --box-border: rgba(167,139,250,0.35);
     --label-color: #6ee7b7;
     --code-comment: true;
+    --bg-image: url('/images/agenda-backgrounds/comp-sci-a.png');
   }
   [data-course="cs_s1"][data-track="B"] {
     --bg: #2a1608;
     --box-border: rgba(217,164,65,0.35);
     --label-color: #6ee7b7;
     --code-comment: true;
+    --bg-image: url('/images/agenda-backgrounds/comp-sci-b.png');
   }
 
   * { box-sizing: border-box; }
   html, body {
     background: var(--bg);
     color: var(--text-main);
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, 'Courier New', monospace;
     min-height: 100vh;
   }
   body {
@@ -87,61 +92,82 @@
   .section-label {
     color: var(--label-color);
     font-weight: 700;
-    font-size: 1.05rem;
-    margin-bottom: .4rem;
+    font-size: .85rem;
+    margin-bottom: .35rem;
   }
   .section-label .cmt { color: var(--text-muted); font-weight: 400; }
+  /* Box outlines are baked into the background art for WD1/WD2 — content
+     sits directly in the drawn zones with no extra label. CS keeps its
+     comment-style label (see the --code-comment JS toggle below). */
+  [data-course="wd1"] .section-label,
+  [data-course="wd2"] .section-label { display: none; }
 
-  .agenda-box {
-    border: 1.5px solid var(--box-border);
-    border-radius: .6rem;
-    background: var(--box-bg);
-    padding: 1rem;
-    min-height: 140px;
+  .agenda-canvas {
+    position: relative;
+    width: 100%;
+    max-width: 1920px;
+    margin: 0 auto 1rem;
+    aspect-ratio: 1920 / 1080;
+    background-image: var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: .5rem;
+    overflow: hidden;
   }
-  .agenda-box.tall { min-height: 320px; }
+
+  .zone {
+    position: absolute;
+    overflow-y: auto;
+    padding: .6rem .9rem;
+    font-size: .78rem;
+    line-height: 1.35;
+    text-shadow: 0 1px 4px rgba(0,0,0,.7);
+  }
+  .zone-objective { left: 2%;    top: 16%;   width: 19.5%; height: 30%; }
+  .zone-standards { left: 2%;    top: 51%;   width: 19.5%; height: 44%; }
+  .zone-donow     { left: 24%;   top: 16%;   width: 52%;   height: 16.5%; }
+  .zone-tasks     { left: 24%;   top: 37.5%; width: 52%;   height: 57.5%; }
+  .zone-schedule  { left: 78.5%; top: 16%;   width: 19.5%; height: 52%; }
+  .zone-timer     { left: 78.5%; top: 71%;   width: 19.5%; height: 24.5%; }
 
   .do-now-prompt { color: var(--donow-text); font-weight: 600; }
-  .do-now-reply { color: var(--text-muted); font-style: italic; font-size: .85rem; }
+  .do-now-reply { color: var(--text-muted); font-style: italic; font-size: .78rem; }
 
-  .tasks-title { color: var(--tasks-title); font-weight: 700; margin-bottom: .5rem; }
-  .task-list { list-style: none; padding-left: 0; margin-bottom: .75rem; }
-  .task-list li { padding-left: 1.4rem; position: relative; margin-bottom: .4rem; }
+  .tasks-title { color: var(--tasks-title); font-weight: 700; margin-bottom: .4rem; }
+  .task-list { list-style: none; padding-left: 0; margin-bottom: .6rem; }
+  .task-list li { padding-left: 1.3rem; position: relative; margin-bottom: .3rem; }
   .task-list li::before { content: "\2605"; position: absolute; left: 0; color: var(--star-color); }
-  .exit-ticket { color: var(--text-muted); font-style: italic; font-size: .85rem; border-top: 1px dashed var(--box-border); padding-top: .5rem; }
-
-  .schedule-box, .timer-box {
-    border: 1.5px solid var(--box-border);
-    border-radius: .6rem;
-    background: var(--box-bg);
-    min-height: 150px;
-  }
+  .exit-ticket { color: var(--text-muted); font-style: italic; font-size: .75rem; border-top: 1px dashed var(--box-border); padding-top: .4rem; }
 
   .schedule-day-type {
     font-weight: 700;
     text-align: center;
     color: var(--tasks-title);
-    font-size: .95rem;
-    margin-bottom: .5rem;
-    padding-bottom: .35rem;
+    font-size: .82rem;
+    margin-bottom: .4rem;
+    padding-bottom: .3rem;
     border-bottom: 1px dashed var(--box-border);
   }
-  .schedule-list { list-style: none; padding-left: 0; margin: 0; font-size: .85rem; }
-  .schedule-list li { display: flex; justify-content: space-between; gap: .5rem; padding: .3rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .schedule-list li:last-child { border-bottom: none; }
-  .sched-period { color: var(--text-main); font-weight: 600; }
-  .sched-time { color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .schedule-empty { padding: 1rem 0; }
+  .schedule-list { list-style: none; padding-left: 0; margin: 0; font-size: .75rem; }
+  .schedule-list li {
+    display: flex; justify-content: space-between; align-items: center; gap: .4rem;
+    padding: .3rem .4rem; margin-bottom: .25rem; border-radius: .3rem;
+  }
+  .sched-period { font-weight: 700; }
+  .sched-time { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .schedule-empty { padding: 1rem 0; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
 
   .timer-display {
     font-variant-numeric: tabular-nums;
-    font-size: 2.75rem;
+    font-size: 1.9rem;
     font-weight: 800;
     text-align: center;
     color: var(--text-main);
   }
-  .timer-controls { display: flex; gap: .4rem; justify-content: center; flex-wrap: wrap; }
-  .timer-presets button { padding: .15rem .5rem; font-size: .75rem; }
+  .timer-controls { display: flex; gap: .3rem; justify-content: center; flex-wrap: wrap; }
+  .timer-controls .btn { padding: .1rem .4rem; font-size: .7rem; }
+  .timer-presets button { padding: .1rem .4rem; font-size: .68rem; }
 
   .footer-bar {
     display: flex;
@@ -210,54 +236,53 @@
     </div>
   </div>
 
-  <div class="row g-3">
-    <div class="col-lg-3">
+  <div class="agenda-canvas">
+    <div class="zone zone-objective">
       <div class="section-label" data-cmt="Objective">Objective</div>
-      <div class="agenda-box">
-        <ul id="objectiveList" class="mb-0 ps-3"></ul>
-      </div>
-      <div class="section-label mt-3" data-cmt="Standards">Standards</div>
-      <div class="agenda-box">
-        <div id="standardsBox"></div>
-      </div>
+      <ul id="objectiveList" class="mb-0 ps-3"></ul>
     </div>
 
-    <div class="col-lg-6">
+    <div class="zone zone-standards">
+      <div class="section-label" data-cmt="Standards">Standards</div>
+      <div id="standardsBox"></div>
+    </div>
+
+    <div class="zone zone-donow">
       <div class="section-label" data-cmt="Do Now">Do Now</div>
-      <div class="agenda-box mb-3">
-        <div id="doNowPrompt" class="do-now-prompt mb-1"></div>
-        <div class="do-now-reply">Reply in one or two sentences.</div>
-      </div>
-      <div class="section-label" data-cmt="Tasks">Tasks</div>
-      <div class="agenda-box tall">
-        <div id="tasksTitle" class="tasks-title"></div>
-        <ul id="taskList" class="task-list"></ul>
-        <div id="exitTicket" class="exit-ticket"></div>
-      </div>
+      <div id="doNowPrompt" class="do-now-prompt mb-1"></div>
+      <div class="do-now-reply">Reply in one or two sentences.</div>
     </div>
 
-    <div class="col-lg-3">
+    <div class="zone zone-tasks">
+      <div class="section-label" data-cmt="Tasks">Tasks</div>
+      <div id="tasksTitle" class="tasks-title"></div>
+      <ul id="taskList" class="task-list"></ul>
+      <div id="exitTicket" class="exit-ticket"></div>
+    </div>
+
+    <div class="zone zone-schedule">
       <div class="section-label" data-cmt="Schedule">Schedule</div>
-      <div id="scheduleBox" class="schedule-box p-2"></div>
-      <div class="section-label mt-3" data-cmt="Timer">Timer</div>
-      <div class="timer-box p-2">
-        <div id="timerDisplay" class="timer-display">05:00</div>
-        <div class="timer-controls mb-2">
-          <button id="timerStartPause" class="btn btn-sm btn-success">Start</button>
-          <button id="timerReset" class="btn btn-sm btn-outline-secondary">Reset</button>
-          <button id="timerModeToggle" class="btn btn-sm btn-outline-info">Stopwatch</button>
-        </div>
-        <div class="timer-presets d-flex gap-1 justify-content-center flex-wrap mb-2">
-          <button class="btn btn-outline-light" data-mins="1">1m</button>
-          <button class="btn btn-outline-light" data-mins="5">5m</button>
-          <button class="btn btn-outline-light" data-mins="10">10m</button>
-          <button class="btn btn-outline-light" data-mins="15">15m</button>
-          <button class="btn btn-outline-light" data-mins="20">20m</button>
-        </div>
-        <div class="d-flex justify-content-center gap-1">
-          <input id="timerCustomMins" type="number" min="0" max="180" placeholder="min" class="form-control form-control-sm" style="width:70px">
-          <button id="timerSetCustom" class="btn btn-sm btn-outline-warning">Set</button>
-        </div>
+      <div id="scheduleBox"></div>
+    </div>
+
+    <div class="zone zone-timer">
+      <div class="section-label" data-cmt="Timer">Timer</div>
+      <div id="timerDisplay" class="timer-display">05:00</div>
+      <div class="timer-controls mb-2">
+        <button id="timerStartPause" class="btn btn-sm btn-success">Start</button>
+        <button id="timerReset" class="btn btn-sm btn-outline-secondary">Reset</button>
+        <button id="timerModeToggle" class="btn btn-sm btn-outline-info">Stopwatch</button>
+      </div>
+      <div class="timer-presets d-flex gap-1 justify-content-center flex-wrap mb-2">
+        <button class="btn btn-outline-light" data-mins="1">1m</button>
+        <button class="btn btn-outline-light" data-mins="5">5m</button>
+        <button class="btn btn-outline-light" data-mins="10">10m</button>
+        <button class="btn btn-outline-light" data-mins="15">15m</button>
+        <button class="btn btn-outline-light" data-mins="20">20m</button>
+      </div>
+      <div class="d-flex justify-content-center gap-1">
+        <input id="timerCustomMins" type="number" min="0" max="180" placeholder="min" class="form-control form-control-sm" style="width:60px">
+        <button id="timerSetCustom" class="btn btn-sm btn-outline-warning">Set</button>
       </div>
     </div>
   </div>
@@ -297,6 +322,14 @@ let bellSchedule = [];      // rows from bell_schedule table
 
 const DAY_TYPE_LABELS = { A: 'A Day', B: 'B Day', A_MIN: 'A Min Day', B_MIN: 'B Min Day', C: 'All Periods', summer: 'Summer School' };
 const EVENT_TYPE_PRI = { A: 6, B: 5, C: 4, A_MIN: 3, B_MIN: 2, S: 2, OFF: 1, none: 0 };
+
+// Period color coding, matching the physical planner's Swatches panel.
+const PERIOD_COLORS = {
+  'A1': '#f2d2d4', 'B2': '#cccdeb', 'A3': '#9cb9da', 'B4': '#f9f9dc',
+  'A5': '#f6e9d4', 'B6': '#ecf4ea', 'B8': '#eadafa', 'A-Int': '#dff3f9'
+};
+const PERIOD_COLOR_DEFAULT = '#e5e7eb'; // gray fallback (summer S1-S4, unknown periods)
+const PERIOD_TEXT_COLOR = '#1a1a2e';
 
 function parseSpecialDatesCSV(text) {
   const lines = text.split(/\r?\n/);
@@ -372,6 +405,9 @@ function renderBellSchedule(dateStr) {
   ul.className = 'schedule-list';
   periods.forEach(p => {
     const li = document.createElement('li');
+    li.style.background = PERIOD_COLORS[p.period_label] || PERIOD_COLOR_DEFAULT;
+    li.style.color = PERIOD_TEXT_COLOR;
+    li.style.textShadow = 'none';
     const period = document.createElement('span');
     period.className = 'sched-period';
     period.textContent = p.period_label;
