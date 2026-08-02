@@ -61,33 +61,51 @@
   }
 
   .top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 11%;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: .5rem;
+    padding: 0 2%;
+    z-index: 2;
   }
-  .date-block h4 { color: var(--text-muted); font-weight: 600; margin: 0; }
-  .min-day-note { color: var(--tasks-title); font-size: .8rem; font-style: italic; }
+  .date-block h2 { color: var(--text-muted); font-weight: 600; font-size: 1rem; margin: 0; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
+  .min-day-note { color: var(--tasks-title); font-size: .75rem; font-style: italic; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
   .agenda-title {
     text-align: center;
     color: var(--h1-color);
     font-weight: 800;
-    font-size: 2.75rem;
+    font-size: 2rem;
     flex: 1;
+    text-shadow: 0 1px 6px rgba(0,0,0,.8);
   }
   .clock-block { text-align: right; min-width: 140px; }
   .clock-face {
     font-variant-numeric: tabular-nums;
-    font-size: 1.6rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: var(--text-main);
     border: 1.5px solid var(--box-border);
     border-radius: .5rem;
-    padding: .35rem .75rem;
-    background: var(--box-bg);
+    padding: .3rem .6rem;
+    background: rgba(0,0,0,.25);
+    display: inline-block;
+    margin: 0;
   }
-  .clock-date { color: var(--text-muted); font-size: .75rem; margin-top: .25rem; }
+  .clock-date { color: var(--text-muted); font-size: .7rem; margin-top: .2rem; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
+
+  /* Visible tag brackets for the top-bar headings (date / title / clock),
+     kept separate from .section-label so the CS comment-style JS (which
+     only targets .section-label) doesn't fight with the live clock/date
+     text getting rewritten every second. */
+  .tag-label::before { content: "<" attr(data-tag) ">"; color: var(--text-muted); font-weight: 400; margin-right: .3em; font-size: .55em; vertical-align: middle; }
+  .tag-label::after  { content: "</" attr(data-tag) ">"; color: var(--text-muted); font-weight: 400; margin-left: .3em; font-size: .55em; vertical-align: middle; }
+  [data-course="cs_s1"] .tag-label::before,
+  [data-course="cs_s1"] .tag-label::after { content: none; }
 
   .section-label {
     position: absolute;
@@ -249,19 +267,19 @@
 
 <div id="agendaRoot" class="d-none">
 
-  <div class="top-bar">
-    <div class="date-block">
-      <h4 id="dateLabel">—</h4>
-      <div id="minDayNote" class="min-day-note d-none">45-minute minimum day</div>
-    </div>
-    <h1 class="agenda-title">Today's Agenda</h1>
-    <div class="clock-block">
-      <div id="clockFace" class="clock-face">--:--:--</div>
-      <div id="clockDate" class="clock-date"></div>
-    </div>
-  </div>
-
   <div class="agenda-canvas">
+    <div class="top-bar">
+      <div class="date-block">
+        <h2 id="dateLabel" class="tag-label" data-tag="h2">—</h2>
+        <div id="minDayNote" class="min-day-note d-none">45-minute minimum day</div>
+      </div>
+      <h1 class="agenda-title tag-label" data-tag="h1">Today's Agenda</h1>
+      <div class="clock-block">
+        <h2 id="clockFace" class="clock-face tag-label" data-tag="h2">--:--:--</h2>
+        <div id="clockDate" class="clock-date"></div>
+      </div>
+    </div>
+
     <h2 class="section-label label-objective" data-tag="h2" data-cmt="Objective">Objective</h2>
     <div class="zone zone-objective">
       <ul id="objectiveList" class="mb-0 ps-3"></ul>
