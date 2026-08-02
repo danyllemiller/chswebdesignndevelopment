@@ -90,13 +90,30 @@
   .clock-date { color: var(--text-muted); font-size: .75rem; margin-top: .25rem; }
 
   .section-label {
+    position: absolute;
     color: var(--label-color);
     font-weight: 700;
-    font-size: .85rem;
-    margin: 0 0 .35rem;
-    flex: 0 0 auto;
+    font-size: .8rem;
+    margin: 0;
+    white-space: nowrap;
+    text-shadow: 0 1px 4px rgba(0,0,0,.7);
   }
   .section-label .cmt { color: var(--text-muted); font-weight: 400; }
+
+  /* Visible tag-bracket text around each label, code-editor style. CS pages
+     use a comment-style label instead (JS toggle below), so the brackets
+     are suppressed there to avoid double-decorating the label. */
+  .section-label::before { content: "<" attr(data-tag) ">"; color: var(--text-muted); font-weight: 400; margin-right: .3em; }
+  .section-label::after  { content: "</" attr(data-tag) ">"; color: var(--text-muted); font-weight: 400; margin-left: .3em; }
+  [data-course="cs_s1"] .section-label::before,
+  [data-course="cs_s1"] .section-label::after { content: none; }
+
+  .label-objective { left: 2%;    top: calc(16% - 1.3rem);   width: 19.5%; }
+  .label-standards { left: 2%;    top: calc(51% - 1.3rem);   width: 19.5%; }
+  .label-donow     { left: 24%;   top: calc(16% - 1.3rem);   width: 52%; }
+  .label-tasks     { left: 24%;   top: calc(37.5% - 1.3rem); width: 52%; }
+  .label-schedule  { left: 78.5%; top: calc(16% - 1.3rem);   width: 19.5%; }
+  .label-timer     { left: 78.5%; top: calc(71% - 1.3rem);   width: 19.5%; }
 
   .agenda-canvas {
     position: relative;
@@ -245,36 +262,36 @@
   </div>
 
   <div class="agenda-canvas">
+    <h2 class="section-label label-objective" data-tag="h2" data-cmt="Objective">Objective</h2>
     <div class="zone zone-objective">
-      <h2 class="section-label" data-cmt="Objective">Objective</h2>
       <ul id="objectiveList" class="mb-0 ps-3"></ul>
     </div>
 
+    <h3 class="section-label label-standards" data-tag="h3" data-cmt="Standards">Standards</h3>
     <div class="zone zone-standards">
-      <h2 class="section-label" data-cmt="Standards">Standards</h2>
       <div id="standardsBox"></div>
     </div>
 
+    <h4 class="section-label label-donow" data-tag="h4" data-cmt="Do Now">Do Now</h4>
     <div class="zone zone-donow">
-      <h2 class="section-label" data-cmt="Do Now">Do Now</h2>
       <div id="doNowPrompt" class="do-now-prompt mb-1"></div>
       <div class="do-now-reply">Reply in one or two sentences.</div>
     </div>
 
+    <h5 class="section-label label-tasks" data-tag="h5" data-cmt="Tasks">Tasks</h5>
     <div class="zone zone-tasks">
-      <h2 class="section-label" data-cmt="Tasks">Tasks</h2>
       <div id="tasksTitle" class="tasks-title"></div>
       <ul id="taskList" class="task-list"></ul>
       <div id="exitTicket" class="exit-ticket"></div>
     </div>
 
+    <h2 class="section-label label-schedule" data-tag="h2" data-cmt="Schedule">Schedule</h2>
     <div class="zone zone-schedule">
-      <h2 class="section-label" data-cmt="Schedule">Schedule</h2>
       <div id="scheduleBox"></div>
     </div>
 
+    <h3 class="section-label label-timer" data-tag="h3" data-cmt="Timer">Timer</h3>
     <div class="zone zone-timer">
-      <h2 class="section-label" data-cmt="Timer">Timer</h2>
       <div id="timerDisplay" class="timer-display">05:00</div>
       <div class="timer-controls mb-2">
         <button id="timerStartPause" class="btn btn-sm btn-success">Start</button>
