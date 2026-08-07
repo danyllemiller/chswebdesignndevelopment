@@ -989,21 +989,27 @@ if (!courseCfg) {
 
   function startAlarm() {
     if (!soundAudioCtx || alarmActive) return;
-    alarmActive = true;
-    alarmOsc = soundAudioCtx.createOscillator();
-    alarmGain = soundAudioCtx.createGain();
-    alarmOsc.type = 'square';
-    alarmGain.gain.value = 0.15;
-    alarmOsc.connect(alarmGain);
-    alarmGain.connect(soundAudioCtx.destination);
-    alarmOsc.frequency.value = 600;
-    alarmOsc.start();
-    let high = false;
-    alarmSweepTimer = setInterval(() => {
-      high = !high;
-      if (alarmOsc) alarmOsc.frequency.setValueAtTime(high ? 1100 : 600, soundAudioCtx.currentTime);
-    }, 220);
-    document.getElementById('soundPanel').classList.add('alarm-active');
+    try {
+      if (soundAudioCtx.state === 'suspended') soundAudioCtx.resume();
+      alarmOsc = soundAudioCtx.createOscillator();
+      alarmGain = soundAudioCtx.createGain();
+      alarmOsc.type = 'square';
+      alarmGain.gain.value = 0.5;
+      alarmOsc.connect(alarmGain);
+      alarmGain.connect(soundAudioCtx.destination);
+      alarmOsc.frequency.value = 600;
+      alarmOsc.start();
+      let high = false;
+      alarmSweepTimer = setInterval(() => {
+        high = !high;
+        if (alarmOsc) alarmOsc.frequency.setValueAtTime(high ? 1100 : 600, soundAudioCtx.currentTime);
+      }, 220);
+      document.getElementById('soundPanel').classList.add('alarm-active');
+      alarmActive = true;
+    } catch (e) {
+      console.error('Sound alarm failed to start:', e);
+      alarmActive = false;
+    }
   }
 
   function stopAlarm() {
@@ -1053,6 +1059,7 @@ if (!courseCfg) {
       return;
     }
     soundAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (soundAudioCtx.state === 'suspended') soundAudioCtx.resume();
     const source = soundAudioCtx.createMediaStreamSource(soundStream);
     soundAnalyser = soundAudioCtx.createAnalyser();
     soundAnalyser.fftSize = 512;
@@ -1061,6 +1068,7 @@ if (!courseCfg) {
     const data = new Uint8Array(soundAnalyser.fftSize);
     const fill = document.getElementById('soundMeterFill');
     const label = document.getElementById('soundMeterLabel');
+    let alarmSmoothPct = 0;
 
     function tick() {
       soundAnalyser.getByteTimeDomainData(data);
@@ -1074,9 +1082,12 @@ if (!courseCfg) {
       fill.style.height = pct + '%';
       label.textContent = pct < 25 ? 'Quiet' : pct < 60 ? 'OK' : 'Too Loud';
 
-      if (alarmEnabled && pct > alarmLevel) {
+      // Smoothed + hysteresis so a level right at the threshold doesn't
+      // rapidly start/stop the alarm dozens of times a second.
+      alarmSmoothPct = alarmSmoothPct * 0.7 + pct * 0.3;
+      if (alarmEnabled && alarmSmoothPct > alarmLevel) {
         if (!alarmActive) startAlarm();
-      } else if (alarmActive) {
+      } else if (alarmActive && alarmSmoothPct < Math.max(0, alarmLevel - 8)) {
         stopAlarm();
       }
 
