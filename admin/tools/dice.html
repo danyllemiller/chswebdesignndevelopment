@@ -23,24 +23,33 @@
 
   <style>
     body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
-    .tools-card { max-width: 720px; margin: 2.5rem auto; }
+    .tools-card { max-width: 760px; margin: 2.5rem auto; }
+    .die-row {
+      display: flex; align-items: center; gap: .5rem;
+      background: #f8f9fb; border: 1px solid #e2e5ec; border-radius: 10px;
+      padding: .5rem .6rem; margin-bottom: .5rem;
+    }
+    .die-row .die-index { font-weight: 700; color: #000099; min-width: 1.6rem; }
+    .die-row select { max-width: 140px; }
+    .die-row .remove-die { margin-left: auto; color: #adb5bd; cursor: pointer; }
+    .die-row .remove-die:hover { color: #dc3545; }
     .die-face {
-      width: 110px; height: 110px;
+      width: 100px; height: 100px;
       border-radius: 16px;
       background: #fff;
       border: 3px solid #000099;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.6rem; font-weight: 800; color: #000099;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 2.2rem; font-weight: 800; color: #000099;
       box-shadow: 0 4px 10px rgba(0,0,153,.15);
-      transition: transform .15s ease;
     }
+    .die-face .die-sides-label { font-size: .65rem; font-weight: 700; color: #6c757d; margin-top: -.2rem; }
     .die-face.rolling { animation: spin .5s ease; }
     @keyframes spin {
       0%   { transform: rotate(0deg) scale(1); }
       50%  { transform: rotate(200deg) scale(1.08); }
       100% { transform: rotate(360deg) scale(1); }
     }
-    .dice-tray { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; min-height: 130px; }
+    .dice-tray { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; min-height: 120px; }
     .total-badge { font-size: 1.4rem; font-weight: 700; color: #000099; }
     .history-item { font-size: .85rem; color: #6c757d; }
   </style>
@@ -53,26 +62,13 @@
   <div class="card shadow-sm border-0">
     <div class="card-body p-4">
       <h2 class="gochi text-primary mb-1"><i class="fas fa-dice me-2"></i>Dice</h2>
-      <p class="text-muted mb-4">Roll dice for randomization, warm-ups, or games.</p>
+      <p class="text-muted mb-4">Set up each die's own number of sides, then roll them all at once.</p>
 
-      <div class="d-flex flex-wrap gap-3 align-items-end mb-4">
-        <div>
-          <label class="form-label fw-bold small mb-1">Die type</label>
-          <select id="dieType" class="form-select">
-            <option value="4">d4</option>
-            <option value="6" selected>d6</option>
-            <option value="8">d8</option>
-            <option value="10">d10</option>
-            <option value="12">d12</option>
-            <option value="20">d20</option>
-          </select>
-        </div>
-        <div>
-          <label class="form-label fw-bold small mb-1">Number of dice</label>
-          <input id="dieCount" type="number" min="1" max="10" value="2" class="form-control" style="width:90px">
-        </div>
-        <button id="rollBtn" class="btn btn-primary btn-lg"><i class="fas fa-dice me-2"></i>Roll</button>
-        <button id="clearBtn" class="btn btn-outline-secondary">Clear</button>
+      <div id="dieRows" class="mb-2"></div>
+      <div class="d-flex gap-2 mb-4">
+        <button id="addDieBtn" class="btn btn-outline-primary btn-sm"><i class="fas fa-plus me-1"></i>Add Die</button>
+        <button id="rollBtn" class="btn btn-primary btn-lg ms-auto"><i class="fas fa-dice me-2"></i>Roll</button>
+        <button id="clearBtn" class="btn btn-outline-secondary">Clear Results</button>
       </div>
 
       <div id="diceTray" class="dice-tray mb-3"></div>
@@ -90,32 +86,83 @@
 
 <script src="/js/bootstrap.bundle.js"></script>
 <script>
+  const SIDE_OPTIONS = [4, 6, 8, 10, 12, 20];
+  const MAX_DICE = 10;
+  const dieRowsWrap = document.getElementById('dieRows');
   const tray = document.getElementById('diceTray');
   const totalBadge = document.getElementById('totalBadge');
   const historyList = document.getElementById('historyList');
   const history = [];
 
+  let dice = [{ sides: 6 }, { sides: 6 }];
+
+  function renderDieRows() {
+    dieRowsWrap.innerHTML = '';
+    dice.forEach((d, i) => {
+      const row = document.createElement('div');
+      row.className = 'die-row';
+
+      const idx = document.createElement('span');
+      idx.className = 'die-index';
+      idx.textContent = `#${i + 1}`;
+
+      const select = document.createElement('select');
+      select.className = 'form-select form-select-sm';
+      SIDE_OPTIONS.forEach(sides => {
+        const opt = document.createElement('option');
+        opt.value = sides;
+        opt.textContent = `d${sides}`;
+        if (sides === d.sides) opt.selected = true;
+        select.appendChild(opt);
+      });
+      select.addEventListener('change', () => { d.sides = parseInt(select.value, 10); });
+
+      const removeIcon = document.createElement('i');
+      removeIcon.className = 'fas fa-xmark remove-die';
+      removeIcon.title = 'Remove this die';
+      removeIcon.addEventListener('click', () => {
+        if (dice.length <= 1) return;
+        dice.splice(i, 1);
+        renderDieRows();
+      });
+
+      row.append(idx, select, removeIcon);
+      dieRowsWrap.appendChild(row);
+    });
+  }
+
+  document.getElementById('addDieBtn').addEventListener('click', () => {
+    if (dice.length >= MAX_DICE) return;
+    dice.push({ sides: 6 });
+    renderDieRows();
+  });
+
   function roll() {
-    const sides = parseInt(document.getElementById('dieType').value, 10);
-    const count = Math.min(10, Math.max(1, parseInt(document.getElementById('dieCount').value, 10) || 1));
     tray.innerHTML = '';
     const results = [];
-    for (let i = 0; i < count; i++) {
-      const value = 1 + Math.floor(Math.random() * sides);
-      results.push(value);
+    dice.forEach(d => {
+      const value = 1 + Math.floor(Math.random() * d.sides);
+      results.push({ sides: d.sides, value });
       const die = document.createElement('div');
       die.className = 'die-face rolling';
-      die.textContent = value;
+      const valueSpan = document.createElement('span');
+      valueSpan.textContent = value;
+      const sidesLabel = document.createElement('span');
+      sidesLabel.className = 'die-sides-label';
+      sidesLabel.textContent = `d${d.sides}`;
+      die.append(valueSpan, sidesLabel);
       tray.appendChild(die);
-    }
-    if (count > 1) {
-      const sum = results.reduce((a, b) => a + b, 0);
+    });
+
+    if (results.length > 1) {
+      const sum = results.reduce((a, b) => a + b.value, 0);
       totalBadge.textContent = `Total: ${sum}`;
       totalBadge.classList.remove('d-none');
     } else {
       totalBadge.classList.add('d-none');
     }
-    history.unshift({ sides, results, time: new Date().toLocaleTimeString() });
+
+    history.unshift({ results, time: new Date().toLocaleTimeString() });
     history.splice(8);
     renderHistory();
   }
@@ -125,7 +172,7 @@
     history.forEach(h => {
       const li = document.createElement('li');
       li.className = 'history-item';
-      li.textContent = `${h.time} — d${h.sides} × ${h.results.length}: ${h.results.join(', ')}`;
+      li.textContent = `${h.time} — ${h.results.map(r => `d${r.sides}: ${r.value}`).join(', ')}`;
       historyList.appendChild(li);
     });
   }
@@ -137,6 +184,8 @@
     history.length = 0;
     renderHistory();
   });
+
+  renderDieRows();
 </script>
 </body>
 </html>
