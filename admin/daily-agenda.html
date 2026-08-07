@@ -246,6 +246,7 @@
   }
   .panel-btn-group .btn { padding: .1rem .35rem; font-size: .7rem; }
   .sound-meter-track {
+    position: relative;
     height: 90px; border-radius: .5rem; overflow: hidden;
     background: rgba(255,255,255,.08);
     border: 1.5px solid var(--box-border);
@@ -256,9 +257,24 @@
     background: linear-gradient(0deg, #22c55e, #eab308 60%, #ef4444 90%);
     transition: height .08s linear;
   }
+  .sound-alarm-marker {
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: #fff; bottom: 70%; z-index: 2;
+    box-shadow: 0 0 3px rgba(0,0,0,.6);
+  }
   .sound-meter-label {
     text-align: center; font-weight: 700; font-size: .8rem;
     margin-top: .4rem; color: var(--text-main);
+  }
+  .sound-alarm-controls { margin-top: .5rem; }
+  .sound-alarm-label { font-size: .68rem; color: var(--text-muted); }
+  .form-range { height: 1rem; }
+  #soundPanel.alarm-active .sound-meter-track {
+    animation: alarmFlash .5s steps(1) infinite;
+  }
+  #soundPanel.alarm-active .sound-meter-label { color: #ef4444; }
+  @keyframes alarmFlash {
+    50% { box-shadow: 0 0 0 3px #ef4444; }
   }
 
   /* Timer/Sound Meter blown up to fill the whole browser window */
@@ -285,6 +301,9 @@
   #fillWindowOverlay .sound-meter-track { height: 60vh; width: 180px; }
   #fillWindowOverlay .sound-meter-label { font-size: 3rem; margin-top: 1.5rem; }
   #fillWindowOverlay #soundMicToggle { font-size: 1.3rem; padding: .6rem 1.6rem; margin-top: 1rem; width: auto !important; }
+  #fillWindowOverlay .sound-alarm-controls { width: 260px; margin-top: 1.5rem; }
+  #fillWindowOverlay .sound-alarm-label { font-size: 1rem; }
+  #fillWindowOverlay .form-range { height: 1.5rem; }
 
   .footer-bar {
     display: flex;
@@ -414,9 +433,20 @@
 
       <div id="soundPanel" class="d-none">
         <div class="sound-meter-track">
+          <div id="soundAlarmMarker" class="sound-alarm-marker"></div>
           <div id="soundMeterFill" class="sound-meter-fill"></div>
         </div>
         <div id="soundMeterLabel" class="sound-meter-label">Mic off</div>
+
+        <div class="sound-alarm-controls">
+          <label class="sound-alarm-label" for="soundAlarmLevel">Alarm above <span id="soundAlarmLevelVal">70</span>%</label>
+          <input type="range" id="soundAlarmLevel" min="10" max="100" value="70" class="form-range">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="soundAlarmEnabled" checked>
+            <label class="form-check-label sound-alarm-label" for="soundAlarmEnabled">Alarm sound</label>
+          </div>
+        </div>
+
         <button id="soundMicToggle" class="btn btn-sm btn-outline-success w-100 mt-2"><i class="fas fa-microphone me-1"></i>Start Listening</button>
       </div>
     </div>
@@ -954,8 +984,39 @@ if (!courseCfg) {
 
   // ── Sound level meter (shares the Timer box via a toggle) ──────────────
   let soundAudioCtx = null, soundAnalyser = null, soundStream = null, soundRAF = null;
+  let alarmLevel = 70, alarmEnabled = true, alarmActive = false;
+  let alarmOsc = null, alarmGain = null, alarmSweepTimer = null;
+
+  function startAlarm() {
+    if (!soundAudioCtx || alarmActive) return;
+    alarmActive = true;
+    alarmOsc = soundAudioCtx.createOscillator();
+    alarmGain = soundAudioCtx.createGain();
+    alarmOsc.type = 'square';
+    alarmGain.gain.value = 0.15;
+    alarmOsc.connect(alarmGain);
+    alarmGain.connect(soundAudioCtx.destination);
+    alarmOsc.frequency.value = 600;
+    alarmOsc.start();
+    let high = false;
+    alarmSweepTimer = setInterval(() => {
+      high = !high;
+      if (alarmOsc) alarmOsc.frequency.setValueAtTime(high ? 1100 : 600, soundAudioCtx.currentTime);
+    }, 220);
+    document.getElementById('soundPanel').classList.add('alarm-active');
+  }
+
+  function stopAlarm() {
+    alarmActive = false;
+    if (alarmSweepTimer) clearInterval(alarmSweepTimer);
+    alarmSweepTimer = null;
+    if (alarmOsc) { try { alarmOsc.stop(); } catch (e) {} alarmOsc.disconnect(); alarmOsc = null; }
+    if (alarmGain) { alarmGain.disconnect(); alarmGain = null; }
+    document.getElementById('soundPanel').classList.remove('alarm-active');
+  }
 
   function stopSoundMeter() {
+    stopAlarm();
     if (soundRAF) cancelAnimationFrame(soundRAF);
     soundRAF = null;
     if (soundStream) soundStream.getTracks().forEach(t => t.stop());
@@ -969,6 +1030,20 @@ if (!courseCfg) {
     document.getElementById('soundMicToggle').classList.remove('btn-outline-danger');
     document.getElementById('soundMicToggle').classList.add('btn-outline-success');
   }
+
+  function updateAlarmMarker() {
+    document.getElementById('soundAlarmMarker').style.bottom = alarmLevel + '%';
+    document.getElementById('soundAlarmLevelVal').textContent = alarmLevel;
+  }
+  document.getElementById('soundAlarmLevel').addEventListener('input', (e) => {
+    alarmLevel = parseInt(e.target.value, 10);
+    updateAlarmMarker();
+  });
+  document.getElementById('soundAlarmEnabled').addEventListener('change', (e) => {
+    alarmEnabled = e.target.checked;
+    if (!alarmEnabled) stopAlarm();
+  });
+  updateAlarmMarker();
 
   async function startSoundMeter() {
     try {
@@ -998,6 +1073,13 @@ if (!courseCfg) {
       const pct = Math.min(100, Math.max(4, Math.round(rms * 260)));
       fill.style.height = pct + '%';
       label.textContent = pct < 25 ? 'Quiet' : pct < 60 ? 'OK' : 'Too Loud';
+
+      if (alarmEnabled && pct > alarmLevel) {
+        if (!alarmActive) startAlarm();
+      } else if (alarmActive) {
+        stopAlarm();
+      }
+
       soundRAF = requestAnimationFrame(tick);
     }
     tick();
