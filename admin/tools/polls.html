@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Polls</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 800px; margin: 2.5rem auto; }
+    .poll-option {
+      background: #fff; border: 2px solid #dee2e6; border-radius: 12px;
+      padding: 1rem 1.25rem; margin-bottom: .75rem; cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .poll-option:hover { border-color: #000099; background: #f0f2ff; }
+    .poll-option-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .poll-option-label { font-weight: 700; font-size: 1.05rem; }
+    .poll-option-count { font-size: 1.5rem; font-weight: 800; color: #000099; min-width: 2.5rem; text-align: center; }
+    .poll-bar-track { height: 10px; background: #e9ecef; border-radius: 6px; margin-top: .5rem; overflow: hidden; }
+    .poll-bar-fill { height: 100%; background: #000099; transition: width .25s ease; }
+    .setup-row { display: flex; gap: .5rem; margin-bottom: .5rem; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <h2 class="gochi text-primary mb-1"><i class="fas fa-square-poll-vertical me-2"></i>Polls</h2>
+      <p class="text-muted mb-4">Show a question, tap an option each time a student raises their hand for it.</p>
+
+      <div id="setupView">
+        <label class="form-label fw-bold small">Question</label>
+        <input id="questionInput" type="text" class="form-control mb-3" placeholder="e.g. Which topic should we review first?">
+        <label class="form-label fw-bold small">Options (2-6)</label>
+        <div id="optionRows"></div>
+        <div class="d-flex gap-2 mb-3">
+          <button id="addOptionBtn" class="btn btn-outline-secondary btn-sm"><i class="fas fa-plus me-1"></i>Add Option</button>
+        </div>
+        <button id="startPollBtn" class="btn btn-primary btn-lg w-100"><i class="fas fa-play me-2"></i>Start Poll</button>
+      </div>
+
+      <div id="pollView" class="d-none">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <h4 id="pollQuestion" class="mb-0"></h4>
+          <button id="newPollBtn" class="btn btn-outline-secondary btn-sm"><i class="fas fa-rotate-left me-1"></i>New Poll</button>
+        </div>
+        <div id="pollOptions"></div>
+        <p class="text-muted small mt-2">Total votes: <span id="totalVotes">0</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script>
+  const optionRows = document.getElementById('optionRows');
+  const COLORS = ['#000099', '#198754', '#dc3545', '#fd7e14', '#6f42c1', '#0dcaf0'];
+
+  function addOptionRow(value = '') {
+    if (optionRows.children.length >= 6) return;
+    const row = document.createElement('div');
+    row.className = 'setup-row';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'form-control option-input';
+    input.placeholder = `Option ${optionRows.children.length + 1}`;
+    input.value = value;
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn btn-outline-danger';
+    removeBtn.innerHTML = '<i class="fas fa-xmark"></i>';
+    removeBtn.addEventListener('click', () => {
+      if (optionRows.children.length <= 2) return;
+      row.remove();
+    });
+    row.append(input, removeBtn);
+    optionRows.appendChild(row);
+  }
+  addOptionRow(); addOptionRow();
+
+  document.getElementById('addOptionBtn').addEventListener('click', () => addOptionRow());
+
+  let poll = null;
+
+  document.getElementById('startPollBtn').addEventListener('click', () => {
+    const question = document.getElementById('questionInput').value.trim() || 'Poll';
+    const options = Array.from(optionRows.querySelectorAll('.option-input'))
+      .map(i => i.value.trim())
+      .filter(Boolean);
+    if (options.length < 2) { alert('Add at least 2 options.'); return; }
+
+    poll = { question, options: options.map(label => ({ label, votes: 0 })) };
+    document.getElementById('pollQuestion').textContent = poll.question;
+    document.getElementById('setupView').classList.add('d-none');
+    document.getElementById('pollView').classList.remove('d-none');
+    renderPoll();
+  });
+
+  function renderPoll() {
+    const wrap = document.getElementById('pollOptions');
+    wrap.innerHTML = '';
+    const total = poll.options.reduce((s, o) => s + o.votes, 0);
+    document.getElementById('totalVotes').textContent = total;
+
+    poll.options.forEach((opt, i) => {
+      const div = document.createElement('div');
+      div.className = 'poll-option';
+      const pct = total > 0 ? Math.round((opt.votes / total) * 100) : 0;
+      const row = document.createElement('div');
+      row.className = 'poll-option-row';
+      const labelSpan = document.createElement('span');
+      labelSpan.className = 'poll-option-label';
+      labelSpan.textContent = opt.label;
+      const countSpan = document.createElement('span');
+      countSpan.className = 'poll-option-count';
+      countSpan.textContent = opt.votes;
+      row.append(labelSpan, countSpan);
+
+      const track = document.createElement('div');
+      track.className = 'poll-bar-track';
+      const fill = document.createElement('div');
+      fill.className = 'poll-bar-fill';
+      fill.style.width = pct + '%';
+      fill.style.background = COLORS[i % COLORS.length];
+      track.appendChild(fill);
+
+      div.append(row, track);
+      div.addEventListener('click', () => { opt.votes++; renderPoll(); });
+      wrap.appendChild(div);
+    });
+  }
+
+  document.getElementById('newPollBtn').addEventListener('click', () => {
+    poll = null;
+    document.getElementById('pollView').classList.add('d-none');
+    document.getElementById('setupView').classList.remove('d-none');
+  });
+</script>
+</body>
+</html>

@@ -240,6 +240,26 @@
   .timer-controls .btn { padding: .1rem .4rem; font-size: .7rem; }
   .timer-presets button { padding: .1rem .4rem; font-size: .68rem; }
 
+  .panel-mode-toggle {
+    position: absolute; top: .3rem; right: .3rem; z-index: 3;
+    padding: .1rem .35rem; font-size: .7rem;
+  }
+  .sound-meter-track {
+    height: 90px; border-radius: .5rem; overflow: hidden;
+    background: rgba(255,255,255,.08);
+    border: 1.5px solid var(--box-border);
+    display: flex; align-items: flex-end;
+  }
+  .sound-meter-fill {
+    width: 100%; height: 4%;
+    background: linear-gradient(0deg, #22c55e, #eab308 60%, #ef4444 90%);
+    transition: height .08s linear;
+  }
+  .sound-meter-label {
+    text-align: center; font-weight: 700; font-size: .8rem;
+    margin-top: .4rem; color: var(--text-main);
+  }
+
   .footer-bar {
     display: flex;
     justify-content: space-between;
@@ -341,22 +361,34 @@
 
     <h3 class="section-label label-timer" data-tag="h3" data-cmt="Timer">Timer</h3>
     <div class="zone zone-timer">
-      <div id="timerDisplay" class="timer-display">05:00</div>
-      <div class="timer-controls mb-2">
-        <button id="timerStartPause" class="btn btn-sm btn-success">Start</button>
-        <button id="timerReset" class="btn btn-sm btn-outline-secondary">Reset</button>
-        <button id="timerModeToggle" class="btn btn-sm btn-outline-info">Stopwatch</button>
+      <button id="panelModeToggle" class="btn btn-sm btn-outline-light panel-mode-toggle" title="Switch between Timer and Sound Meter"><i class="fas fa-volume-high"></i></button>
+
+      <div id="timerPanel">
+        <div id="timerDisplay" class="timer-display">05:00</div>
+        <div class="timer-controls mb-2">
+          <button id="timerStartPause" class="btn btn-sm btn-success">Start</button>
+          <button id="timerReset" class="btn btn-sm btn-outline-secondary">Reset</button>
+          <button id="timerModeToggle" class="btn btn-sm btn-outline-info">Stopwatch</button>
+        </div>
+        <div class="timer-presets d-flex gap-1 justify-content-center flex-wrap mb-2">
+          <button class="btn btn-outline-light" data-mins="1">1m</button>
+          <button class="btn btn-outline-light" data-mins="5">5m</button>
+          <button class="btn btn-outline-light" data-mins="10">10m</button>
+          <button class="btn btn-outline-light" data-mins="15">15m</button>
+          <button class="btn btn-outline-light" data-mins="20">20m</button>
+        </div>
+        <div class="d-flex justify-content-center gap-1">
+          <input id="timerCustomMins" type="number" min="0" max="180" placeholder="min" class="form-control form-control-sm" style="width:60px">
+          <button id="timerSetCustom" class="btn btn-sm btn-outline-warning">Set</button>
+        </div>
       </div>
-      <div class="timer-presets d-flex gap-1 justify-content-center flex-wrap mb-2">
-        <button class="btn btn-outline-light" data-mins="1">1m</button>
-        <button class="btn btn-outline-light" data-mins="5">5m</button>
-        <button class="btn btn-outline-light" data-mins="10">10m</button>
-        <button class="btn btn-outline-light" data-mins="15">15m</button>
-        <button class="btn btn-outline-light" data-mins="20">20m</button>
-      </div>
-      <div class="d-flex justify-content-center gap-1">
-        <input id="timerCustomMins" type="number" min="0" max="180" placeholder="min" class="form-control form-control-sm" style="width:60px">
-        <button id="timerSetCustom" class="btn btn-sm btn-outline-warning">Set</button>
+
+      <div id="soundPanel" class="d-none">
+        <div class="sound-meter-track">
+          <div id="soundMeterFill" class="sound-meter-fill"></div>
+        </div>
+        <div id="soundMeterLabel" class="sound-meter-label">Mic off</div>
+        <button id="soundMicToggle" class="btn btn-sm btn-outline-success w-100 mt-2"><i class="fas fa-microphone me-1"></i>Start Listening</button>
       </div>
     </div>
   </div>
@@ -372,6 +404,12 @@
     <button id="nextBtn" class="btn btn-outline-light btn-sm">Next <i class="fas fa-chevron-right"></i></button>
     <button id="todayBtn" class="btn btn-outline-info btn-sm">Today</button>
     <span id="trackToggle" class="track-toggle btn-group d-none" role="group"></span>
+    <div class="dropdown">
+      <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-toolbox me-1"></i>Tools
+      </button>
+      <ul id="toolsMenu" class="dropdown-menu dropdown-menu-end"></ul>
+    </div>
     <a href="/index.html" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-sm nav-logo-link" title="Open the main website in a new tab">
       <img src="/images/weblogo.png" alt="CHS Web Design &amp; Dev" class="nav-logo">
     </a>
@@ -381,6 +419,7 @@
   </div>
 </div>
 
+<script src="/js/bootstrap.bundle.js"></script>
 <script>
 const COURSES = {
   wd1:   { totalBlocks: 99, hasTracks: false, label: 'Web Design Level 1' },
@@ -533,6 +572,30 @@ if (!courseCfg) {
   document.documentElement.setAttribute('data-course', course);
   track = courseCfg.hasTracks ? (params.get('track') === 'B' ? 'B' : 'A') : 'main';
   document.documentElement.setAttribute('data-track', track);
+
+  // ── Classroom tools menu ──────────────────────────────────────────────
+  (function populateToolsMenu() {
+    const hint = new URLSearchParams({ course }).toString() + (courseCfg.hasTracks ? `&track=${track}` : '');
+    const TOOLS = [
+      { label: 'Group Maker', icon: 'fa-people-group', href: `/admin/tools/group-maker.html?${hint}` },
+      { label: 'Random Name Picker', icon: 'fa-shuffle', href: `/admin/tools/random-name-picker.html?${hint}` },
+      { label: 'Scoreboard', icon: 'fa-trophy', href: '/admin/tools/scoreboard.html' },
+      { label: 'Dice', icon: 'fa-dice', href: '/admin/tools/dice.html' },
+      { label: 'Polls', icon: 'fa-square-poll-vertical', href: '/admin/tools/polls.html' },
+    ];
+    const menu = document.getElementById('toolsMenu');
+    TOOLS.forEach(t => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.className = 'dropdown-item';
+      a.href = t.href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.innerHTML = `<i class="fas ${t.icon} me-2"></i>${t.label}`;
+      li.appendChild(a);
+      menu.appendChild(li);
+    });
+  })();
 
   let content = {};   // block_num -> content object
   let schedule = {};  // track -> block_num -> date string
@@ -855,6 +918,82 @@ if (!courseCfg) {
     updateTimerDisplay();
   });
   updateTimerDisplay();
+
+  // ── Sound level meter (shares the Timer box via a toggle) ──────────────
+  let soundAudioCtx = null, soundAnalyser = null, soundStream = null, soundRAF = null;
+
+  function stopSoundMeter() {
+    if (soundRAF) cancelAnimationFrame(soundRAF);
+    soundRAF = null;
+    if (soundStream) soundStream.getTracks().forEach(t => t.stop());
+    soundStream = null;
+    if (soundAudioCtx) soundAudioCtx.close().catch(() => {});
+    soundAudioCtx = null;
+    soundAnalyser = null;
+    document.getElementById('soundMeterFill').style.height = '4%';
+    document.getElementById('soundMeterLabel').textContent = 'Mic off';
+    document.getElementById('soundMicToggle').innerHTML = '<i class="fas fa-microphone me-1"></i>Start Listening';
+    document.getElementById('soundMicToggle').classList.remove('btn-outline-danger');
+    document.getElementById('soundMicToggle').classList.add('btn-outline-success');
+  }
+
+  async function startSoundMeter() {
+    try {
+      soundStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      document.getElementById('soundMeterLabel').textContent = 'Mic access denied';
+      return;
+    }
+    soundAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = soundAudioCtx.createMediaStreamSource(soundStream);
+    soundAnalyser = soundAudioCtx.createAnalyser();
+    soundAnalyser.fftSize = 512;
+    source.connect(soundAnalyser);
+
+    const data = new Uint8Array(soundAnalyser.fftSize);
+    const fill = document.getElementById('soundMeterFill');
+    const label = document.getElementById('soundMeterLabel');
+
+    function tick() {
+      soundAnalyser.getByteTimeDomainData(data);
+      let sumSquares = 0;
+      for (let i = 0; i < data.length; i++) {
+        const v = (data[i] - 128) / 128;
+        sumSquares += v * v;
+      }
+      const rms = Math.sqrt(sumSquares / data.length);
+      const pct = Math.min(100, Math.max(4, Math.round(rms * 260)));
+      fill.style.height = pct + '%';
+      label.textContent = pct < 25 ? 'Quiet' : pct < 60 ? 'OK' : 'Too Loud';
+      soundRAF = requestAnimationFrame(tick);
+    }
+    tick();
+
+    document.getElementById('soundMicToggle').innerHTML = '<i class="fas fa-microphone-slash me-1"></i>Stop Listening';
+    document.getElementById('soundMicToggle').classList.remove('btn-outline-success');
+    document.getElementById('soundMicToggle').classList.add('btn-outline-danger');
+  }
+
+  document.getElementById('soundMicToggle').addEventListener('click', () => {
+    if (soundStream) stopSoundMeter(); else startSoundMeter();
+  });
+
+  document.getElementById('panelModeToggle').addEventListener('click', () => {
+    const timerPanel = document.getElementById('timerPanel');
+    const soundPanel = document.getElementById('soundPanel');
+    const btn = document.getElementById('panelModeToggle');
+    const showingSound = !soundPanel.classList.contains('d-none');
+    if (showingSound) {
+      stopSoundMeter();
+      soundPanel.classList.add('d-none');
+      timerPanel.classList.remove('d-none');
+      btn.innerHTML = '<i class="fas fa-volume-high"></i>';
+    } else {
+      timerPanel.classList.add('d-none');
+      soundPanel.classList.remove('d-none');
+      btn.innerHTML = '<i class="fas fa-clock"></i>';
+    }
+  });
 
   // ── Comment-style section labels for CS pages ──────────────────────────
   if (getComputedStyle(document.documentElement).getPropertyValue('--code-comment').trim() === 'true') {

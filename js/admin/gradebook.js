@@ -20,11 +20,31 @@ if (!document.getElementById('chartjs-lib')) {
 
 let allStudents = [];
 let allGrades = {};
-let allAssignments = {}; 
-let calendarConfig = null; 
-let privacyMode = false; 
-let showSummaryColumns = true; 
-let currentSortMode = 'lastName'; 
+let allAssignments = {};
+let calendarConfig = null;
+let privacyMode = false;
+let showSummaryColumns = true;
+let currentSortMode = 'lastName';
+let allStickers = {}; // student_id -> [{ id, sticker_name, awarded_at }]
+let stickerModalStudentId = null;
+
+const STICKER_DIR = '/images/Big-Motivational-Reward-Stickers-Bundle/';
+const STICKERS = [
+    'A+', 'APEELING WORK', 'APTLY DONE', 'AWESOME WORK', 'BEE YOUR BEST', 'BEEUTIFUL WORK',
+    'BRILLIANT WORK', 'CHERRY GOOD', 'CHERRY SWEET WORK', 'DONUT GIVE UP', 'DREAM BIG',
+    'EXCELLENT', 'FANTASTIC WORK', 'FINTASTIC WORK', 'GOOD JOB', 'GRAPE JOB',
+    'GREAT JOB BRAVOCADO', 'GREAT WORK LETTUCE CELEBRATE', 'HOLIDAY CHEERS', 'HOLLY JOLLY GREAT WORK',
+    'I AM SNOW PROUD OF YOU', 'KEEP IT UP', 'KEEP LEARNING', 'KEEP SHINING', 'KEEP UP THE GOOD WORK',
+    'LOOKING ROCK', 'NICE WORK SPOTTED', 'NICE WORK', 'ONE IN A MELON', 'ORANGE YOU A SMARTIE',
+    'OTTERLY AMAZING', 'PURRFECT JOB', 'SHINE BRIGHT', 'SHOOT FOR THE STARS', 'SIMPLY GOOD', 'STAR',
+    'SUPER COOL WORK', 'SUPER COOL', 'SUPER', 'THIS WORK IS SODALIGHTFUL', 'THUMBS UP',
+    'TOADALLY TERRIFIC', 'TOTALLY BANANAS', 'TRY AGAIN', 'WAY TO GO', 'WELL DONE (2)', 'WELL DONE (3)',
+    'WELL DONE', 'WHALE DONE', 'YOU ARE A GIFT', 'YOU ARE A SHINING STAR', 'YOU ARE A STAR',
+    'YOU ARE LLAMAZING', 'YOU ARE OUT OF THIS WORLD', 'YOU ARE PURRFECT', 'YOU DID IT (2)', 'YOU DID IT',
+    'YOU ROCK', 'YOU SNAILED IT', "YOU'RE LIKE A HUG IN A MUG", "YOU'RE ONE SMART COOKIE",
+    "YOU'RE THE BERRY BEST", "YOU'VE GOT MAGIC IN YOU", 'YOUR WORK SHINES'
+];
+function stickerImgUrl(name) { return STICKER_DIR + encodeURIComponent(name + '.png'); }
 window.earliestSubmissions = {}; 
 
 const cleanKey = (str) => {
@@ -425,14 +445,129 @@ function injectModals() {
         </div>
       </div>
     </div>
+
+    <div class="modal fade" id="stickerModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow border-warning">
+          <div class="modal-header bg-warning py-2">
+            <h6 class="modal-title fw-bold"><i class="fas fa-star me-2"></i>Award a Sticker — <span id="stickerModalStudentName"></span></h6>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body bg-light">
+            <div id="stickerGrid" class="d-flex flex-wrap gap-2 mb-3" style="max-height:340px; overflow-y:auto;"></div>
+            <hr>
+            <p class="small fw-bold text-muted mb-1">Already awarded</p>
+            <div id="stickerAwardedList" class="d-flex flex-wrap gap-2"></div>
+          </div>
+          <div class="modal-footer py-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
     `;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-    
+
     document.getElementById('btnSaveAddCol').addEventListener('click', saveAddCol);
     document.getElementById('btnSaveColEdit').addEventListener('click', saveColEdit);
     document.getElementById('btnConfirmDeleteCol').addEventListener('click', confirmDeleteCol);
 
-    injectControls(); 
+    injectControls();
+}
+
+function openStickerModal(studentId) {
+    stickerModalStudentId = studentId;
+    const student = allStudents.find(s => s.studentId === studentId);
+    document.getElementById('stickerModalStudentName').textContent = student ? `${student.firstName} ${student.lastName}` : studentId;
+
+    const grid = document.getElementById('stickerGrid');
+    grid.innerHTML = '';
+    STICKERS.forEach(name => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-light border p-1';
+        btn.title = name;
+        btn.style.width = '64px';
+        btn.style.height = '64px';
+        const img = document.createElement('img');
+        img.src = stickerImgUrl(name);
+        img.alt = name;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
+        btn.appendChild(img);
+        btn.addEventListener('click', () => awardSticker(studentId, name));
+        grid.appendChild(btn);
+    });
+
+    renderAwardedStickers(studentId);
+    getModal('stickerModal').show();
+}
+
+function renderAwardedStickers(studentId) {
+    const wrap = document.getElementById('stickerAwardedList');
+    wrap.innerHTML = '';
+    const awarded = allStickers[studentId] || [];
+    if (awarded.length === 0) {
+        const p = document.createElement('p');
+        p.className = 'text-muted small mb-0';
+        p.textContent = 'None yet.';
+        wrap.appendChild(p);
+        return;
+    }
+    awarded.forEach(a => {
+        const chip = document.createElement('span');
+        chip.className = 'badge bg-white text-dark border d-flex align-items-center gap-1 p-2';
+        const img = document.createElement('img');
+        img.src = stickerImgUrl(a.sticker_name);
+        img.alt = a.sticker_name;
+        img.style.width = '24px';
+        img.style.height = '24px';
+        img.style.objectFit = 'contain';
+        const label = document.createElement('span');
+        label.textContent = a.sticker_name;
+        const removeIcon = document.createElement('i');
+        removeIcon.className = 'fas fa-xmark ms-1';
+        removeIcon.style.cursor = 'pointer';
+        removeIcon.addEventListener('click', () => removeSticker(a.id, studentId));
+        chip.append(img, label, removeIcon);
+        wrap.appendChild(chip);
+    });
+}
+
+async function awardSticker(studentId, stickerName) {
+    try {
+        const res = await fetch('/api/admin/award-sticker', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: studentId, sticker_name: stickerName })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to award sticker');
+        if (!allStickers[studentId]) allStickers[studentId] = [];
+        allStickers[studentId].unshift({ id: data.id, student_id: studentId, sticker_name: stickerName, awarded_at: new Date().toISOString() });
+        renderAwardedStickers(studentId);
+        applyFiltersAndRender();
+    } catch (e) {
+        alert('Failed to award sticker: ' + e.message);
+    }
+}
+
+async function removeSticker(id, studentId) {
+    try {
+        const res = await fetch('/api/admin/remove-sticker', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to remove sticker');
+        allStickers[studentId] = (allStickers[studentId] || []).filter(a => a.id !== id);
+        renderAwardedStickers(studentId);
+        applyFiltersAndRender();
+    } catch (e) {
+        alert('Failed to remove sticker: ' + e.message);
+    }
 }
 
 const getModal = (id) => bootstrap.Modal.getInstance(document.getElementById(id)) || new bootstrap.Modal(document.getElementById(id));
@@ -612,6 +747,18 @@ async function loadData() {
             });
         }
 
+        try {
+            const stickerRes = await fetch('/api/admin/stickers');
+            if (stickerRes.ok) {
+                const stickerData = await stickerRes.json();
+                allStickers = {};
+                (stickerData.stickers || []).forEach(row => {
+                    if (!allStickers[row.student_id]) allStickers[row.student_id] = [];
+                    allStickers[row.student_id].push(row);
+                });
+            }
+        } catch (e) { console.error('Failed to load stickers', e); }
+
         applyFiltersAndRender();
     } catch (e) {
         console.error(e);
@@ -773,7 +920,8 @@ function renderGradebook(students, grades, currentPeriod) {
     headHtml += `<div class="d-flex justify-content-between align-items-center mb-1">Student Info<button id="btnTogglePrivacy" class="btn btn-sm ${privacyMode?'btn-warning':'btn-outline-light'} py-0 px-2"><i class="fas ${privacyIcon}"></i></button></div></th>`;
     
     if (showSummaryColumns) headHtml += '<th class="header-summary">Points</th><th class="header-summary">Possible</th><th class="header-summary">Weighted %</th><th class="header-summary border-right-heavy">Grade</th>';
-    
+    headHtml += '<th class="header-summary border-right-heavy">Stickers</th>';
+
     sortedKeys.forEach((key, i) => {
         const info = assignmentMap.get(key);
         let tooltip = `${key}${info.dueDate ? ' | Due: ' + info.dueDate : ''}${info.instructions ? ' | ' + info.instructions : ''}`;
@@ -785,7 +933,8 @@ function renderGradebook(students, grades, currentPeriod) {
 
     let html = '<tr class="calc-row"><td class="sticky-col p-2 bg-light text-dark fw-bold border-bottom" style="font-size: 0.8rem;"><i class="fas fa-calendar-day text-warning me-1"></i> Due Date</td>';
     if(showSummaryColumns) html += `<td colspan="4" class="bg-light border-bottom text-center text-muted border-right-heavy">-</td>`;
-    sortedKeys.forEach(key => { 
+    html += `<td class="bg-light border-bottom border-right-heavy">-</td>`;
+    sortedKeys.forEach(key => {
         const info = assignmentMap.get(key);
         let dateText = '-';
         if (info.dueDate) {
@@ -812,11 +961,13 @@ function renderGradebook(students, grades, currentPeriod) {
 
     html += '<tr class="calc-row"><td class="sticky-col p-2 bg-light text-dark fw-bold border-bottom">Possible Points</td>';
     if(showSummaryColumns) html += `<td colspan="4" class="bg-light border-bottom text-center text-muted border-right-heavy">-</td>`;
+    html += `<td class="bg-light border-bottom border-right-heavy">-</td>`;
     averages.forEach(a => html += `<td class="calc-val bg-light text-dark fw-bold border-bottom text-center">${a.max}</td>`);
     html += '</tr>';
 
     html += '<tr class="calc-row"><td class="sticky-col p-2 bg-secondary text-white fw-bold">Class Average</td>';
     if(showSummaryColumns) html += `<td colspan="4" class="bg-secondary border-bottom text-center text-white-50 border-right-heavy">-</td>`;
+    html += `<td class="bg-secondary border-right-heavy">-</td>`;
     averages.forEach(a => html += `<td class="calc-val bg-secondary text-white fw-bold text-center">${a.avg}</td>`);
     html += '</tr>';
 
@@ -861,6 +1012,10 @@ const cellClass = rowIndex % 2 === 0 ? 'gradebook-cell-even' : 'gradebook-cell-o
         html += `<tr class="${rowClass}"><td class="sticky-col student-info-cell p-2 ${cellClass}"><div><span class="fw-bold">${privacyMode?`Student ${rowIndex+1}`:`${s.lastName.toUpperCase()}, ${s.firstName}`}</span><div class="id-cell">${privacyMode?'HIDDEN':s.displaySchoolId} | ${s.period}</div></div></td>`;
 // Summary cells match row background
         if (showSummaryColumns) html += `<td class="text-center ${cellClass}">${earned}</td><td class="text-center ${cellClass}">${possible}</td><td class="text-center ${cellClass} text-primary fw-bold">${pct}%</td><td class="text-center border-right-heavy fw-bold ${cellClass}">${letter}</td>`;
+
+        const stickerCount = (allStickers[s.studentId] || []).length;
+        html += `<td class="text-center border-right-heavy ${cellClass}"><button type="button" class="btn btn-sm btn-outline-warning award-sticker-btn" data-student-id="${s.studentId}" title="Award a sticker">
+            <i class="fas fa-star"></i>${stickerCount > 0 ? ` ${stickerCount}` : ''}</button></td>`;
 
         sortedKeys.forEach((key, colIndex) => {
             const fuzzyKey = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(key));
@@ -965,6 +1120,11 @@ document.addEventListener('click', (e) => {
         document.getElementById('deleteColName').innerText = key;
         document.getElementById('deleteColTarget').value = key;
         getModal('deleteColModal').show();
+        return;
+    }
+
+    if (target.closest('.award-sticker-btn')) {
+        openStickerModal(target.closest('.award-sticker-btn').dataset.studentId);
         return;
     }
 

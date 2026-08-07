@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Scoreboard</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 960px; margin: 2.5rem auto; }
+    .team-card {
+      background: #fff; border-radius: 14px; border: 3px solid var(--team-color, #000099);
+      padding: 1.25rem; text-align: center; position: relative;
+    }
+    .team-name {
+      border: none; background: transparent; text-align: center; font-weight: 800;
+      font-size: 1.1rem; color: var(--team-color, #000099); width: 100%;
+    }
+    .team-name:focus { outline: 2px dashed var(--team-color, #000099); }
+    .team-score { font-size: 3.5rem; font-weight: 800; color: var(--team-color, #000099); margin: .5rem 0; }
+    .team-controls { display: flex; gap: .5rem; justify-content: center; }
+    .team-remove { position: absolute; top: 6px; right: 8px; color: #adb5bd; cursor: pointer; }
+    .team-remove:hover { color: #dc3545; }
+    .teams-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
+        <h2 class="gochi text-primary mb-0"><i class="fas fa-trophy me-2"></i>Scoreboard</h2>
+        <div class="d-flex gap-2">
+          <button id="addTeamBtn" class="btn btn-outline-primary btn-sm"><i class="fas fa-plus me-1"></i>Add Team</button>
+          <button id="resetBtn" class="btn btn-outline-danger btn-sm"><i class="fas fa-rotate-left me-1"></i>Reset Scores</button>
+        </div>
+      </div>
+      <p class="text-muted mb-4">Stays put if you keep this tab open — closing or navigating away clears it.</p>
+
+      <div id="teamsGrid" class="teams-grid"></div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script>
+  const COLORS = ['#000099', '#198754', '#dc3545', '#fd7e14', '#6f42c1', '#0dcaf0'];
+  const STORAGE_KEY = 'classroomScoreboard';
+
+  function loadState() {
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return { teams: [{ name: 'Team 1', score: 0 }, { name: 'Team 2', score: 0 }] };
+  }
+
+  let state = loadState();
+
+  function saveState() {
+    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function render() {
+    const grid = document.getElementById('teamsGrid');
+    grid.innerHTML = '';
+    state.teams.forEach((team, i) => {
+      const card = document.createElement('div');
+      card.className = 'team-card';
+      card.style.setProperty('--team-color', COLORS[i % COLORS.length]);
+
+      const removeBtn = document.createElement('i');
+      removeBtn.className = 'fas fa-xmark team-remove';
+      removeBtn.title = 'Remove team';
+      removeBtn.addEventListener('click', () => {
+        if (state.teams.length <= 1) return;
+        state.teams.splice(i, 1);
+        saveState(); render();
+      });
+
+      const nameInput = document.createElement('input');
+      nameInput.className = 'team-name';
+      nameInput.value = team.name;
+      nameInput.addEventListener('input', () => { team.name = nameInput.value; saveState(); });
+
+      const scoreDiv = document.createElement('div');
+      scoreDiv.className = 'team-score';
+      scoreDiv.textContent = team.score;
+
+      const controls = document.createElement('div');
+      controls.className = 'team-controls';
+      const minus = document.createElement('button');
+      minus.className = 'btn btn-outline-secondary btn-lg';
+      minus.textContent = '−';
+      minus.addEventListener('click', () => { team.score--; saveState(); render(); });
+      const plus = document.createElement('button');
+      plus.className = 'btn btn-primary btn-lg';
+      plus.textContent = '+';
+      plus.style.background = COLORS[i % COLORS.length];
+      plus.style.borderColor = COLORS[i % COLORS.length];
+      plus.addEventListener('click', () => { team.score++; saveState(); render(); });
+      controls.append(minus, plus);
+
+      card.append(removeBtn, nameInput, scoreDiv, controls);
+      grid.appendChild(card);
+    });
+  }
+
+  document.getElementById('addTeamBtn').addEventListener('click', () => {
+    if (state.teams.length >= 6) return;
+    state.teams.push({ name: `Team ${state.teams.length + 1}`, score: 0 });
+    saveState(); render();
+  });
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    state.teams.forEach(t => t.score = 0);
+    saveState(); render();
+  });
+
+  render();
+</script>
+</body>
+</html>

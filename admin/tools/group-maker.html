@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Group Maker</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 1100px; margin: 2.5rem auto; }
+    .name-chip {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: #eef0ff; border-radius: 999px; padding: .3rem .7rem; margin: .2rem;
+      font-size: .85rem;
+    }
+    .name-chip i { cursor: pointer; color: #6c757d; }
+    .name-chip i:hover { color: #dc3545; }
+    .groups-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .group-card { background: #fff; border: 2px solid #000099; border-radius: 12px; padding: 1rem; }
+    .group-card h6 { color: #000099; font-weight: 800; }
+    .group-card ul { padding-left: 1.1rem; margin-bottom: 0; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <h2 class="gochi text-primary mb-1"><i class="fas fa-people-group me-2"></i>Group Maker</h2>
+      <p class="text-muted mb-4">Loads the class roster automatically — edit the name list below before making groups if you need to.</p>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-5">
+          <label class="form-label fw-bold small mb-1">Class Period</label>
+          <select id="periodSelect" class="form-select">
+            <option value="">Loading roster…</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold small mb-1">Split by</label>
+          <select id="splitMode" class="form-select">
+            <option value="count">Number of groups</option>
+            <option value="size">Students per group</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold small mb-1" id="splitValueLabel">Groups</label>
+          <input id="splitValue" type="number" min="2" max="20" value="4" class="form-control">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button id="makeGroupsBtn" class="btn btn-primary w-100"><i class="fas fa-shuffle me-1"></i>Make Groups</button>
+        </div>
+      </div>
+
+      <label class="form-label fw-bold small mb-1">Names in this class (edit freely — won't touch the real roster)</label>
+      <div id="nameChips" class="border rounded p-2 mb-2" style="min-height:60px;"></div>
+      <div class="d-flex gap-2 mb-4">
+        <input id="addNameInput" type="text" class="form-control" placeholder="Add a name and press Enter">
+        <button id="resetRosterBtn" class="btn btn-outline-secondary">Reset to Roster</button>
+      </div>
+
+      <div id="groupsGrid" class="groups-grid"></div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const courseHint = params.get('course');
+  const trackHint = params.get('track');
+  const TRACK_PERIODS = { A: ['A3', 'A5'], B: ['B4', 'B6', 'B8'] };
+  const COURSE_PERIOD = { wd1: 'A1', wd2: 'B2' };
+
+  let periods = []; // [{ key, label, names: [] }]
+  let currentNames = [];
+
+  function periodKey(period, courseName) { return `${period}|${courseName}`; }
+
+  fetch('/api/admin/roster')
+    .then(r => r.json())
+    .then(rows => {
+      const grouped = new Map();
+      rows.forEach(s => {
+        if (s.archived) return;
+        const period = s.display_period || s.section_id;
+        const courseName = s.display_course_name || '';
+        if (!period || period === 'Teacher' || s.role === 'teacher') return;
+        const key = periodKey(period, courseName);
+        if (!grouped.has(key)) grouped.set(key, { period, courseName, names: [] });
+        const name = `${s.first_name || ''} ${s.last_name || ''}`.trim() || s.student_id;
+        grouped.get(key).names.push(name);
+      });
+      periods = Array.from(grouped.entries()).map(([key, v]) => ({
+        key, label: `${v.period} — ${v.courseName}`, names: v.names.sort()
+      })).sort((a, b) => a.label.localeCompare(b.label));
+
+      const sel = document.getElementById('periodSelect');
+      sel.innerHTML = '';
+      periods.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.key;
+        opt.textContent = `${p.label} (${p.names.length})`;
+        sel.appendChild(opt);
+      });
+
+      let defaultKey = null;
+      if (courseHint && COURSE_PERIOD[courseHint]) {
+        const match = periods.find(p => p.period === COURSE_PERIOD[courseHint]);
+        if (match) defaultKey = match.key;
+      } else if (courseHint === 'cs_s1' && trackHint && TRACK_PERIODS[trackHint]) {
+        const match = periods.find(p => TRACK_PERIODS[trackHint].includes(p.period));
+        if (match) defaultKey = match.key;
+      }
+      if (defaultKey) sel.value = defaultKey;
+      loadPeriod(sel.value);
+    })
+    .catch(() => {
+      document.getElementById('periodSelect').innerHTML = '<option value="">Failed to load roster</option>';
+    });
+
+  function loadPeriod(key) {
+    const p = periods.find(x => x.key === key);
+    currentNames = p ? [...p.names] : [];
+    renderChips();
+  }
+
+  function renderChips() {
+    const wrap = document.getElementById('nameChips');
+    wrap.innerHTML = '';
+    currentNames.forEach((name, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'name-chip';
+      chip.appendChild(document.createTextNode(name + ' '));
+      const removeIcon = document.createElement('i');
+      removeIcon.className = 'fas fa-xmark';
+      removeIcon.addEventListener('click', () => {
+        currentNames.splice(i, 1);
+        renderChips();
+      });
+      chip.appendChild(removeIcon);
+      wrap.appendChild(chip);
+    });
+  }
+
+  document.getElementById('periodSelect').addEventListener('change', (e) => loadPeriod(e.target.value));
+  document.getElementById('resetRosterBtn').addEventListener('click', () => loadPeriod(document.getElementById('periodSelect').value));
+  document.getElementById('addNameInput').addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const val = e.target.value.trim();
+    if (val) { currentNames.push(val); renderChips(); e.target.value = ''; }
+  });
+  document.getElementById('splitMode').addEventListener('change', (e) => {
+    document.getElementById('splitValueLabel').textContent = e.target.value === 'count' ? 'Groups' : 'Per group';
+  });
+
+  document.getElementById('makeGroupsBtn').addEventListener('click', () => {
+    const names = [...currentNames];
+    if (names.length < 2) { alert('Need at least 2 names to make groups.'); return; }
+    for (let i = names.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [names[i], names[j]] = [names[j], names[i]];
+    }
+    const mode = document.getElementById('splitMode').value;
+    const val = Math.max(1, parseInt(document.getElementById('splitValue').value, 10) || 1);
+    const groupCount = mode === 'count' ? Math.min(val, names.length) : Math.max(1, Math.ceil(names.length / val));
+
+    const groups = Array.from({ length: groupCount }, () => []);
+    names.forEach((name, i) => groups[i % groupCount].push(name));
+
+    const grid = document.getElementById('groupsGrid');
+    grid.innerHTML = '';
+    groups.forEach((g, i) => {
+      const card = document.createElement('div');
+      card.className = 'group-card';
+      const h6 = document.createElement('h6');
+      h6.textContent = `Group ${i + 1}`;
+      const ul = document.createElement('ul');
+      g.forEach(n => {
+        const li = document.createElement('li');
+        li.textContent = n;
+        ul.appendChild(li);
+      });
+      card.append(h6, ul);
+      grid.appendChild(card);
+    });
+  });
+</script>
+</body>
+</html>
