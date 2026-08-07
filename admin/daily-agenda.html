@@ -240,10 +240,11 @@
   .timer-controls .btn { padding: .1rem .4rem; font-size: .7rem; }
   .timer-presets button { padding: .1rem .4rem; font-size: .68rem; }
 
-  .panel-mode-toggle {
+  .panel-btn-group {
     position: absolute; top: .3rem; right: .3rem; z-index: 3;
-    padding: .1rem .35rem; font-size: .7rem;
+    display: flex; gap: .25rem;
   }
+  .panel-btn-group .btn { padding: .1rem .35rem; font-size: .7rem; }
   .sound-meter-track {
     height: 90px; border-radius: .5rem; overflow: hidden;
     background: rgba(255,255,255,.08);
@@ -259,6 +260,31 @@
     text-align: center; font-weight: 700; font-size: .8rem;
     margin-top: .4rem; color: var(--text-main);
   }
+
+  /* Timer/Sound Meter blown up to fill the whole browser window */
+  #fillWindowOverlay {
+    position: fixed; inset: 0; z-index: 99999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #fillWindowOverlay.d-none { display: none; }
+  .shrink-window-btn {
+    position: absolute; top: 1.25rem; right: 1.25rem; z-index: 3;
+    font-size: 1.1rem; padding: .5rem .8rem;
+  }
+  #fillWindowOverlay .panel-btn-group { top: 1.25rem; left: 1.25rem; right: auto; }
+  #fillWindowOverlay .panel-btn-group .btn { font-size: 1.1rem; padding: .5rem .8rem; }
+  #fillWindowOverlay #fillWindowBtn { display: none; }
+  #fillWindowOverlay #timerPanel,
+  #fillWindowOverlay #soundPanel { display: flex; flex-direction: column; align-items: center; }
+  #fillWindowOverlay .timer-display { font-size: 16rem; line-height: 1; margin-bottom: 2rem; }
+  #fillWindowOverlay .timer-controls .btn { font-size: 1.4rem; padding: .6rem 1.4rem; }
+  #fillWindowOverlay .timer-presets button { font-size: 1.2rem; padding: .5rem 1rem; }
+  #fillWindowOverlay #timerCustomMins { font-size: 1.2rem; width: 110px !important; height: auto; }
+  #fillWindowOverlay #timerSetCustom { font-size: 1.2rem; padding: .5rem 1rem; }
+  #fillWindowOverlay .sound-meter-track { height: 60vh; width: 180px; }
+  #fillWindowOverlay .sound-meter-label { font-size: 3rem; margin-top: 1.5rem; }
+  #fillWindowOverlay #soundMicToggle { font-size: 1.3rem; padding: .6rem 1.6rem; margin-top: 1rem; width: auto !important; }
 
   .footer-bar {
     display: flex;
@@ -361,7 +387,10 @@
 
     <h3 class="section-label label-timer" data-tag="h3" data-cmt="Timer">Timer</h3>
     <div class="zone zone-timer">
-      <button id="panelModeToggle" class="btn btn-sm btn-outline-light panel-mode-toggle" title="Switch between Timer and Sound Meter"><i class="fas fa-volume-high"></i></button>
+      <div class="panel-btn-group">
+        <button id="panelModeToggle" class="btn btn-sm btn-outline-light" title="Switch between Timer and Sound Meter"><i class="fas fa-volume-high"></i></button>
+        <button id="fillWindowBtn" class="btn btn-sm btn-outline-light" title="Fill the window"><i class="fas fa-expand"></i></button>
+      </div>
 
       <div id="timerPanel">
         <div id="timerDisplay" class="timer-display">05:00</div>
@@ -391,6 +420,10 @@
         <button id="soundMicToggle" class="btn btn-sm btn-outline-success w-100 mt-2"><i class="fas fa-microphone me-1"></i>Start Listening</button>
       </div>
     </div>
+  </div>
+
+  <div id="fillWindowOverlay" class="d-none no-print">
+    <button id="shrinkWindowBtn" class="btn btn-outline-light shrink-window-btn" title="Exit full window"><i class="fas fa-compress"></i></button>
   </div>
 
   <div class="footer-bar">
@@ -993,6 +1026,29 @@ if (!courseCfg) {
       soundPanel.classList.remove('d-none');
       btn.innerHTML = '<i class="fas fa-clock"></i>';
     }
+  });
+
+  // ── Fill window (blow up the Timer/Sound Meter box to the full browser window) ──
+  const zoneTimerEl = document.getElementById('panelModeToggle').closest('.zone-timer');
+  const fillOverlay = document.getElementById('fillWindowOverlay');
+  const btnGroup = document.querySelector('.panel-btn-group');
+
+  function enterFillWindow() {
+    fillOverlay.insertBefore(btnGroup, fillOverlay.firstChild);
+    fillOverlay.appendChild(document.getElementById('timerPanel'));
+    fillOverlay.appendChild(document.getElementById('soundPanel'));
+    fillOverlay.classList.remove('d-none');
+  }
+  function exitFillWindow() {
+    zoneTimerEl.appendChild(btnGroup);
+    zoneTimerEl.appendChild(document.getElementById('timerPanel'));
+    zoneTimerEl.appendChild(document.getElementById('soundPanel'));
+    fillOverlay.classList.add('d-none');
+  }
+  document.getElementById('fillWindowBtn').addEventListener('click', enterFillWindow);
+  document.getElementById('shrinkWindowBtn').addEventListener('click', exitFillWindow);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !fillOverlay.classList.contains('d-none')) exitFillWindow();
   });
 
   // ── Comment-style section labels for CS pages ──────────────────────────
