@@ -26,16 +26,17 @@
     .tools-card { max-width: 800px; margin: 2.5rem auto; }
     .poll-option {
       background: #fff; border: 2px solid #dee2e6; border-radius: 12px;
-      padding: 1rem 1.25rem; margin-bottom: .75rem; cursor: pointer;
-      transition: border-color .15s, background .15s;
+      padding: 1rem 1.25rem; margin-bottom: .75rem;
     }
-    .poll-option:hover { border-color: #000099; background: #f0f2ff; }
+    .poll-option.clickable { cursor: pointer; transition: border-color .15s, background .15s; }
+    .poll-option.clickable:hover { border-color: #000099; background: #f0f2ff; }
     .poll-option-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
     .poll-option-label { font-weight: 700; font-size: 1.05rem; }
     .poll-option-count { font-size: 1.5rem; font-weight: 800; color: #000099; min-width: 2.5rem; text-align: center; }
     .poll-bar-track { height: 10px; background: #e9ecef; border-radius: 6px; margin-top: .5rem; overflow: hidden; }
     .poll-bar-fill { height: 100%; background: #000099; transition: width .25s ease; }
     .setup-row { display: flex; gap: .5rem; margin-bottom: .5rem; }
+    .broadcast-badge { font-size: .75rem; }
   </style>
 </head>
 <body>
@@ -46,7 +47,7 @@
   <div class="card shadow-sm border-0">
     <div class="card-body p-4">
       <h2 class="gochi text-primary mb-1"><i class="fas fa-square-poll-vertical me-2"></i>Polls</h2>
-      <p class="text-muted mb-4">Show a question, tap an option each time a student raises their hand for it.</p>
+      <p class="text-muted mb-4">Either tap votes yourself as students raise their hands, or push the question straight to every student's screen in a period.</p>
 
       <div id="setupView">
         <label class="form-label fw-bold small">Question</label>
@@ -56,13 +57,31 @@
         <div class="d-flex gap-2 mb-3">
           <button id="addOptionBtn" class="btn btn-outline-secondary btn-sm"><i class="fas fa-plus me-1"></i>Add Option</button>
         </div>
+
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" id="broadcastToggle" checked>
+          <label class="form-check-label fw-bold" for="broadcastToggle">Push to students' screens</label>
+        </div>
+        <div id="periodRow" class="mb-3">
+          <label class="form-label fw-bold small mb-1">Class Period</label>
+          <select id="periodSelect" class="form-select">
+            <option value="">Loading periods…</option>
+          </select>
+        </div>
+
         <button id="startPollBtn" class="btn btn-primary btn-lg w-100"><i class="fas fa-play me-2"></i>Start Poll</button>
       </div>
 
       <div id="pollView" class="d-none">
         <div class="d-flex justify-content-between align-items-start mb-3">
-          <h4 id="pollQuestion" class="mb-0"></h4>
-          <button id="newPollBtn" class="btn btn-outline-secondary btn-sm"><i class="fas fa-rotate-left me-1"></i>New Poll</button>
+          <div>
+            <h4 id="pollQuestion" class="mb-1"></h4>
+            <span id="broadcastBadge" class="badge bg-success broadcast-badge d-none"><i class="fas fa-tower-broadcast me-1"></i>Live on student screens</span>
+          </div>
+          <div class="d-flex gap-2">
+            <button id="endPollBtn" class="btn btn-outline-danger btn-sm d-none"><i class="fas fa-stop me-1"></i>End Poll</button>
+            <button id="newPollBtn" class="btn btn-outline-secondary btn-sm"><i class="fas fa-rotate-left me-1"></i>New Poll</button>
+          </div>
         </div>
         <div id="pollOptions"></div>
         <p class="text-muted small mt-2">Total votes: <span id="totalVotes">0</span></p>
@@ -98,26 +117,77 @@
     optionRows.appendChild(row);
   }
   addOptionRow(); addOptionRow();
-
   document.getElementById('addOptionBtn').addEventListener('click', () => addOptionRow());
 
-  let poll = null;
+  // ── Class period list (for broadcast mode) ──────────────────────────────
+  fetch('/api/admin/sections')
+    .then(r => r.json())
+    .then(rows => {
+      const sel = document.getElementById('periodSelect');
+      sel.innerHTML = '';
+      rows.filter(s => s.section_id && s.section_id !== 'Teacher').forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.section_id;
+        opt.textContent = `${s.section_id} — ${s.course_name || ''}`;
+        sel.appendChild(opt);
+      });
+    })
+    .catch(() => {
+      document.getElementById('periodSelect').innerHTML = '<option value="">Failed to load periods</option>';
+    });
 
-  document.getElementById('startPollBtn').addEventListener('click', () => {
+  document.getElementById('broadcastToggle').addEventListener('change', (e) => {
+    document.getElementById('periodRow').classList.toggle('d-none', !e.target.checked);
+  });
+
+  // ── Poll state ───────────────────────────────────────────────────────────
+  let poll = null;          // local-only mode: { question, options: [{label, votes}] }
+  let broadcastPollId = null;
+  let resultsInterval = null;
+
+  document.getElementById('startPollBtn').addEventListener('click', async () => {
     const question = document.getElementById('questionInput').value.trim() || 'Poll';
     const options = Array.from(optionRows.querySelectorAll('.option-input'))
       .map(i => i.value.trim())
       .filter(Boolean);
     if (options.length < 2) { alert('Add at least 2 options.'); return; }
 
-    poll = { question, options: options.map(label => ({ label, votes: 0 })) };
-    document.getElementById('pollQuestion').textContent = poll.question;
-    document.getElementById('setupView').classList.add('d-none');
-    document.getElementById('pollView').classList.remove('d-none');
-    renderPoll();
+    const broadcast = document.getElementById('broadcastToggle').checked;
+    if (broadcast) {
+      const sectionId = document.getElementById('periodSelect').value;
+      if (!sectionId) { alert('Pick a class period to push this poll to.'); return; }
+      try {
+        const res = await fetch('/api/admin/polls/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, options, section_id: sectionId })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to start poll');
+        broadcastPollId = data.id;
+        poll = null;
+        document.getElementById('pollQuestion').textContent = question;
+        document.getElementById('broadcastBadge').classList.remove('d-none');
+        document.getElementById('endPollBtn').classList.remove('d-none');
+        document.getElementById('setupView').classList.add('d-none');
+        document.getElementById('pollView').classList.remove('d-none');
+        startResultsPolling();
+      } catch (e) {
+        alert('Failed to start poll: ' + e.message);
+      }
+    } else {
+      broadcastPollId = null;
+      poll = { question, options: options.map(label => ({ label, votes: 0 })) };
+      document.getElementById('pollQuestion').textContent = poll.question;
+      document.getElementById('broadcastBadge').classList.add('d-none');
+      document.getElementById('endPollBtn').classList.add('d-none');
+      document.getElementById('setupView').classList.add('d-none');
+      document.getElementById('pollView').classList.remove('d-none');
+      renderLocalPoll();
+    }
   });
 
-  function renderPoll() {
+  function renderLocalPoll() {
     const wrap = document.getElementById('pollOptions');
     wrap.innerHTML = '';
     const total = poll.options.reduce((s, o) => s + o.votes, 0);
@@ -125,7 +195,7 @@
 
     poll.options.forEach((opt, i) => {
       const div = document.createElement('div');
-      div.className = 'poll-option';
+      div.className = 'poll-option clickable';
       const pct = total > 0 ? Math.round((opt.votes / total) * 100) : 0;
       const row = document.createElement('div');
       row.className = 'poll-option-row';
@@ -146,12 +216,84 @@
       track.appendChild(fill);
 
       div.append(row, track);
-      div.addEventListener('click', () => { opt.votes++; renderPoll(); });
+      div.addEventListener('click', () => { opt.votes++; renderLocalPoll(); });
       wrap.appendChild(div);
     });
   }
 
-  document.getElementById('newPollBtn').addEventListener('click', () => {
+  function renderBroadcastResults(question, options, counts, total) {
+    document.getElementById('pollQuestion').textContent = question;
+    document.getElementById('totalVotes').textContent = total;
+    const wrap = document.getElementById('pollOptions');
+    wrap.innerHTML = '';
+    options.forEach((label, i) => {
+      const votes = counts[i] || 0;
+      const pct = total > 0 ? Math.round((votes / total) * 100) : 0;
+      const div = document.createElement('div');
+      div.className = 'poll-option';
+      const row = document.createElement('div');
+      row.className = 'poll-option-row';
+      const labelSpan = document.createElement('span');
+      labelSpan.className = 'poll-option-label';
+      labelSpan.textContent = label;
+      const countSpan = document.createElement('span');
+      countSpan.className = 'poll-option-count';
+      countSpan.textContent = votes;
+      row.append(labelSpan, countSpan);
+
+      const track = document.createElement('div');
+      track.className = 'poll-bar-track';
+      const fill = document.createElement('div');
+      fill.className = 'poll-bar-fill';
+      fill.style.width = pct + '%';
+      fill.style.background = COLORS[i % COLORS.length];
+      track.appendChild(fill);
+
+      div.append(row, track);
+      wrap.appendChild(div);
+    });
+  }
+
+  function startResultsPolling() {
+    if (resultsInterval) clearInterval(resultsInterval);
+    const fetchResults = async () => {
+      if (!broadcastPollId) return;
+      try {
+        const res = await fetch(`/api/admin/polls/results?id=${broadcastPollId}`);
+        const data = await res.json();
+        if (data.poll) renderBroadcastResults(data.poll.question, data.poll.options, data.counts, data.total);
+      } catch (e) {}
+    };
+    fetchResults();
+    resultsInterval = setInterval(fetchResults, 3000);
+  }
+
+  document.getElementById('endPollBtn').addEventListener('click', async () => {
+    if (!broadcastPollId) return;
+    try {
+      await fetch('/api/admin/polls/close', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: broadcastPollId })
+      });
+    } catch (e) {}
+    document.getElementById('broadcastBadge').classList.add('d-none');
+    document.getElementById('endPollBtn').classList.add('d-none');
+    if (resultsInterval) clearInterval(resultsInterval);
+  });
+
+  document.getElementById('newPollBtn').addEventListener('click', async () => {
+    if (broadcastPollId) {
+      try {
+        await fetch('/api/admin/polls/close', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: broadcastPollId })
+        });
+      } catch (e) {}
+    }
+    if (resultsInterval) clearInterval(resultsInterval);
+    broadcastPollId = null;
     poll = null;
     document.getElementById('pollView').classList.add('d-none');
     document.getElementById('setupView').classList.remove('d-none');

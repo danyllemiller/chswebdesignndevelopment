@@ -17,5 +17,6 @@ router.use('/', require('./routes/gallery'));
 router.use('/', require('./routes/rank'));
 router.use('/', require('./routes/paystubs'));
 router.use('/', require('./routes/stickers'));
+router.use('/', require('./routes/polls'));
 
 module.exports = router;
