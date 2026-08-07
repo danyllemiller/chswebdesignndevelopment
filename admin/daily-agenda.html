@@ -445,6 +445,11 @@
             <input class="form-check-input" type="checkbox" id="soundAlarmEnabled" checked>
             <label class="form-check-label sound-alarm-label" for="soundAlarmEnabled">Alarm sound</label>
           </div>
+          <select id="soundAlarmChoice" class="form-select form-select-sm mt-1">
+            <option value="scratch">Scratch Alarm</option>
+            <option value="clock">Alarm Clock</option>
+            <option value="both" selected>Both</option>
+          </select>
         </div>
 
         <button id="soundMicToggle" class="btn btn-sm btn-outline-success w-100 mt-2"><i class="fas fa-microphone me-1"></i>Start Listening</button>
@@ -985,25 +990,41 @@ if (!courseCfg) {
   // ── Sound level meter (shares the Timer box via a toggle) ──────────────
   let soundAudioCtx = null, soundAnalyser = null, soundStream = null, soundRAF = null;
   let alarmLevel = 70, alarmEnabled = true, alarmActive = false;
-  let alarmOsc = null, alarmGain = null, alarmSweepTimer = null;
+
+  const ALARM_SOUNDS = {
+    scratch: new Audio('/sounds/8footdino_on_scratch-alarm-301729.mp3'),
+    clock: new Audio('/sounds/soundshelfstudio-ui-alarm-clock-516360.mp3')
+  };
+  Object.values(ALARM_SOUNDS).forEach(a => { a.loop = true; a.volume = 1; });
+  let alarmAudioPrimed = false;
+
+  // Autoplay policies block .play() unless it traces back to a user gesture.
+  // The alarm actually starts later from inside a requestAnimationFrame loop,
+  // so "unlock" each Audio element right now, inside the Start Listening
+  // click itself, with a silent play+pause.
+  function primeAlarmAudio() {
+    if (alarmAudioPrimed) return;
+    alarmAudioPrimed = true;
+    Object.values(ALARM_SOUNDS).forEach(a => {
+      const prevVol = a.volume;
+      a.volume = 0;
+      a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = prevVol; }).catch(() => { a.volume = prevVol; });
+    });
+  }
+
+  function activeAlarmSounds() {
+    const choice = document.getElementById('soundAlarmChoice').value;
+    if (choice === 'both') return [ALARM_SOUNDS.scratch, ALARM_SOUNDS.clock];
+    return [ALARM_SOUNDS[choice]].filter(Boolean);
+  }
 
   function startAlarm() {
-    if (!soundAudioCtx || alarmActive) return;
+    if (alarmActive) return;
     try {
-      if (soundAudioCtx.state === 'suspended') soundAudioCtx.resume();
-      alarmOsc = soundAudioCtx.createOscillator();
-      alarmGain = soundAudioCtx.createGain();
-      alarmOsc.type = 'square';
-      alarmGain.gain.value = 0.5;
-      alarmOsc.connect(alarmGain);
-      alarmGain.connect(soundAudioCtx.destination);
-      alarmOsc.frequency.value = 600;
-      alarmOsc.start();
-      let high = false;
-      alarmSweepTimer = setInterval(() => {
-        high = !high;
-        if (alarmOsc) alarmOsc.frequency.setValueAtTime(high ? 1100 : 600, soundAudioCtx.currentTime);
-      }, 220);
+      activeAlarmSounds().forEach(a => {
+        a.currentTime = 0;
+        a.play().catch(e => console.error('Alarm audio failed to play:', e));
+      });
       document.getElementById('soundPanel').classList.add('alarm-active');
       alarmActive = true;
     } catch (e) {
@@ -1014,10 +1035,7 @@ if (!courseCfg) {
 
   function stopAlarm() {
     alarmActive = false;
-    if (alarmSweepTimer) clearInterval(alarmSweepTimer);
-    alarmSweepTimer = null;
-    if (alarmOsc) { try { alarmOsc.stop(); } catch (e) {} alarmOsc.disconnect(); alarmOsc = null; }
-    if (alarmGain) { alarmGain.disconnect(); alarmGain = null; }
+    Object.values(ALARM_SOUNDS).forEach(a => { a.pause(); a.currentTime = 0; });
     document.getElementById('soundPanel').classList.remove('alarm-active');
   }
 
@@ -1101,6 +1119,7 @@ if (!courseCfg) {
   }
 
   document.getElementById('soundMicToggle').addEventListener('click', () => {
+    primeAlarmAudio();
     if (soundStream) stopSoundMeter(); else startSoundMeter();
   });
 
