@@ -991,12 +991,15 @@ if (!courseCfg) {
   let soundAudioCtx = null, soundAnalyser = null, soundStream = null, soundRAF = null;
   let alarmLevel = 70, alarmEnabled = true, alarmActive = false;
 
+  const ALARM_BURST_MS = 3000;
   const ALARM_SOUNDS = {
     scratch: new Audio('/sounds/8footdino_on_scratch-alarm-301729.mp3'),
     clock: new Audio('/sounds/soundshelfstudio-ui-alarm-clock-516360.mp3')
   };
+  // Looped so a clip shorter than the 3s burst just repeats to fill it.
   Object.values(ALARM_SOUNDS).forEach(a => { a.loop = true; a.volume = 1; });
   let alarmAudioPrimed = false;
+  let alarmTimer = null;
 
   // Autoplay policies block .play() unless it traces back to a user gesture.
   // The alarm actually starts later from inside a requestAnimationFrame loop,
@@ -1027,6 +1030,7 @@ if (!courseCfg) {
       });
       document.getElementById('soundPanel').classList.add('alarm-active');
       alarmActive = true;
+      alarmTimer = setTimeout(stopAlarm, ALARM_BURST_MS);
     } catch (e) {
       console.error('Sound alarm failed to start:', e);
       alarmActive = false;
@@ -1035,6 +1039,7 @@ if (!courseCfg) {
 
   function stopAlarm() {
     alarmActive = false;
+    if (alarmTimer) { clearTimeout(alarmTimer); alarmTimer = null; }
     Object.values(ALARM_SOUNDS).forEach(a => { a.pause(); a.currentTime = 0; });
     document.getElementById('soundPanel').classList.remove('alarm-active');
   }
@@ -1100,13 +1105,13 @@ if (!courseCfg) {
       fill.style.height = pct + '%';
       label.textContent = pct < 25 ? 'Quiet' : pct < 60 ? 'OK' : 'Too Loud';
 
-      // Smoothed + hysteresis so a level right at the threshold doesn't
-      // rapidly start/stop the alarm dozens of times a second.
+      // Smoothed so a level right at the threshold doesn't rapidly
+      // retrigger the alarm dozens of times a second. Each trigger commits
+      // to a fixed 3s burst (see ALARM_BURST_MS) regardless of what the
+      // level does mid-burst; once it ends, a still-loud room retriggers.
       alarmSmoothPct = alarmSmoothPct * 0.7 + pct * 0.3;
-      if (alarmEnabled && alarmSmoothPct > alarmLevel) {
-        if (!alarmActive) startAlarm();
-      } else if (alarmActive && alarmSmoothPct < Math.max(0, alarmLevel - 8)) {
-        stopAlarm();
+      if (alarmEnabled && !alarmActive && alarmSmoothPct > alarmLevel) {
+        startAlarm();
       }
 
       soundRAF = requestAnimationFrame(tick);
