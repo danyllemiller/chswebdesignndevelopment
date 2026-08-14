@@ -7,12 +7,12 @@ const DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 // Each type maps to a background color, text color, and short label.
 // 'none' = observance only — just show the name, no colored background.
 const TYPE_CONFIG = {
-    A:     { bg: '#e4e6f8', text: '#1a1a6e', border: '#b0b5e8', label: 'A Day' },
-    B:     { bg: '#d9eed8', text: '#1a3a1a', border: '#a4cfa2', label: 'B Day' },
-    A_MIN: { bg: '#cdd0f0', text: '#1a1a6e', border: '#9099d8', label: 'A Min Day' },
-    B_MIN: { bg: '#c3e3c2', text: '#1a3a1a', border: '#88be86', label: 'B Min Day' },
-    OFF:   { bg: '#fef9d0', text: '#5c4800', border: '#e6d000', label: 'No School' },
-    C:     { bg: '#f5e6dc', text: '#7a2a0a', border: '#e0b89a', label: 'All Periods' },
+    A:     { bg: '#c9f0ea', text: '#0a4a44', border: '#7fd4c7', label: 'A Day' },       // teal
+    A_MIN: { bg: '#fbd9e6', text: '#7a1f42', border: '#f2a8c4', label: 'A Min Day' },   // pink
+    B:     { bg: '#e5d9f7', text: '#3d1a6e', border: '#c4a8ed', label: 'B Day' },       // purple
+    B_MIN: { bg: '#ece2fa', text: '#3d1a6e', border: '#d3bdf2', label: 'B Min Day' },   // lighter purple
+    C:     { bg: '#e2e2e2', text: '#333333', border: '#b8b8b8', label: 'All Periods' }, // gray
+    OFF:   { bg: '#fef9d0', text: '#5c4800', border: '#e6d000', label: 'No School' },   // yellow
     S:     { bg: '#ffe8cc', text: '#7a3800', border: '#ff9944', label: 'Summer School' },
     none:  { bg: null,      text: null,      border: null,      label: ''          },
 };
@@ -187,6 +187,24 @@ async function initCalendar() {
             }
         };
         reader.readAsText(file);
+    });
+
+    document.getElementById('btn-dedupe-calendar')?.addEventListener('click', async () => {
+        if (!confirm('Remove duplicate calendar events? This only deletes exact duplicates (same date, title, type, and description) — events that just happen to share a date are left alone.')) return;
+        showDedupeStatus('Checking for duplicates…', 'success');
+        try {
+            const res = await fetch('/api/dedupe-calendar.php', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                await loadCalendarData();
+                renderCurrentView();
+                showDedupeStatus(data.deleted > 0 ? `✓ Removed ${data.deleted} duplicate event(s).` : '✓ No duplicates found.', 'success');
+            } else {
+                showDedupeStatus(`Failed: ${data.error}`, 'danger');
+            }
+        } catch {
+            showDedupeStatus('Could not reach the server.', 'danger');
+        }
     });
 
     await loadCalendarData();
@@ -427,6 +445,11 @@ function isoDate(y, m, d) {
 
 function showCsvStatus(msg, type) {
     const el = document.getElementById('csv-status');
+    if (el) { el.className = `mt-2 small text-${type} fw-bold`; el.textContent = msg; }
+}
+
+function showDedupeStatus(msg, type) {
+    const el = document.getElementById('dedupe-status');
     if (el) { el.className = `mt-2 small text-${type} fw-bold`; el.textContent = msg; }
 }
 

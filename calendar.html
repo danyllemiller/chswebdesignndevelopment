@@ -115,6 +115,15 @@
               </div>
 
               <div class="calendar-form-card mb-3">
+                <h3 class="h5 text-primary mb-2"><i class="fas fa-broom me-2"></i>Clear Duplicate Events</h3>
+                <p class="small text-muted mb-2">If the same date/title/type ended up saved more than once (e.g. from re-importing a sheet), this removes the extra copies and keeps one of each. Events that are genuinely different (different titles/assignments on the same day) are left alone.</p>
+                <button id="btn-dedupe-calendar" class="btn btn-outline-danger btn-sm w-100">
+                  <i class="fas fa-broom me-1"></i>Remove Duplicate Events
+                </button>
+                <div id="dedupe-status" class="mt-2 small"></div>
+              </div>
+
+              <div class="calendar-form-card mb-3">
                 <h3 class="h5 text-primary mb-2"><i class="fas fa-bell me-2"></i>Bell Schedule</h3>
                 <p class="small text-muted mb-2">Set period times and link sections to courses.</p>
                 <button id="btn-bell-schedule" class="btn btn-primary btn-sm w-100">
