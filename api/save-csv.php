@@ -39,15 +39,9 @@ $db = getDB();
 // Ensure source column exists (no-op if already added)
 $db->query("ALTER TABLE calendar_events ADD COLUMN IF NOT EXISTS source VARCHAR(20) NOT NULL DEFAULT 'manual'");
 
-// Replace all previously-imported CSV rows
-$db->query("DELETE FROM calendar_events WHERE source = 'csv'");
-
-$ins = $db->prepare(
-    "INSERT INTO calendar_events (event_date, title, type, description, all_day, source)
-     VALUES (?, ?, ?, ?, 1, 'csv')"
-);
-
-$count = 0;
+// Parse every valid row first, so we know exactly which dates this import
+// touches before deleting anything.
+$rows = [];
 foreach ($lines as $i => $line) {
     $trimmed = trim($line);
     if (!$trimmed) continue;
@@ -73,7 +67,28 @@ foreach ($lines as $i => $line) {
     // Title: use description if present, otherwise the type label
     $title = $desc ?: ($typeLabels[$type] ?? 'Event');
 
-    $ins->bind_param('ssss', $date, $title, $type, $desc);
+    $rows[] = ['date' => $date, 'title' => $title, 'type' => $type, 'desc' => $desc];
+}
+
+// Only clear out previously-imported CSV rows on the dates this file actually
+// covers — everything imported in earlier uploads, on other dates, is left alone.
+if ($rows) {
+    $dates = array_values(array_unique(array_column($rows, 'date')));
+    $placeholders = implode(',', array_fill(0, count($dates), '?'));
+    $del = $db->prepare("DELETE FROM calendar_events WHERE source = 'csv' AND event_date IN ($placeholders)");
+    $del->bind_param(str_repeat('s', count($dates)), ...$dates);
+    $del->execute();
+    $del->close();
+}
+
+$ins = $db->prepare(
+    "INSERT INTO calendar_events (event_date, title, type, description, all_day, source)
+     VALUES (?, ?, ?, ?, 1, 'csv')"
+);
+
+$count = 0;
+foreach ($rows as $row) {
+    $ins->bind_param('ssss', $row['date'], $row['title'], $row['type'], $row['desc']);
     $ins->execute();
     $count++;
 }

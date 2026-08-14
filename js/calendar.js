@@ -93,6 +93,38 @@ function getStudentCalendarBucket() {
     }
 }
 
+// Loads the static base calendar (special-dates.csv) then layers every DB
+// event on top of it (CSV imports + manually-added events). Re-running this
+// after a CSV import reflects the merged result instead of just that file's
+// rows, since the server-side import now only touches the dates in that file.
+async function loadCalendarData() {
+    try {
+        const csvRes = await fetch('/special-dates.csv');
+        if (csvRes.ok) parseCSV(await csvRes.text());
+    } catch {}
+
+    try {
+        const res = await fetch('/api/school-config.php');
+        if (res.ok) schoolConfig = await res.json();
+    } catch {}
+
+    try {
+        const bucket = getStudentCalendarBucket();
+        const url = bucket ? `/api/events.php?bucket=${encodeURIComponent(bucket)}` : '/api/events.php';
+        const res = await fetch(url);
+        if (res.ok) {
+            const data = await res.json();
+            rawEvents = new Map();
+            (data.events || []).forEach(ev => {
+                const arr = rawEvents.get(ev.event_date) || [];
+                arr.push(ev);
+                rawEvents.set(ev.event_date, arr);
+                mergeEventIntoSpecialDates(ev);
+            });
+        }
+    } catch {}
+}
+
 async function initCalendar() {
     const now = new Date();
     currentYear  = now.getFullYear();
@@ -130,10 +162,8 @@ async function initCalendar() {
         if (!file) { showCsvStatus('Select a CSV file first.', 'danger'); return; }
         const reader = new FileReader();
         reader.onload = async e => {
-            const text  = e.target.result;
-            const count = parseCSV(text);
-            renderCurrentView();
-            showCsvStatus(`✓ Imported ${count} dates — saving to server…`, 'success');
+            const text = e.target.result;
+            showCsvStatus('Saving to server…', 'success');
             try {
                 const res = await fetch('/api/save-csv.php', {
                     method: 'POST',
@@ -141,42 +171,25 @@ async function initCalendar() {
                     body: text,
                 });
                 const data = await res.json();
-                showCsvStatus(data.success ? `✓ ${data.count} dates saved to calendar.` : `✓ ${count} dates parsed (server save failed: ${data.error})`, data.success ? 'success' : 'warning');
+                if (data.success) {
+                    // Reload everything (static file + all DB events, merged) rather
+                    // than replacing the in-memory calendar with just this file's rows —
+                    // the server only touched the dates in this import, so the on-screen
+                    // calendar should reflect that too, not look like it got wiped.
+                    await loadCalendarData();
+                    renderCurrentView();
+                    showCsvStatus(`✓ ${data.count} dates from this file saved — added to your existing calendar.`, 'success');
+                } else {
+                    showCsvStatus(`Server save failed: ${data.error}`, 'danger');
+                }
             } catch {
-                showCsvStatus(`✓ ${count} dates imported (could not save to server — will reset on refresh).`, 'warning');
+                showCsvStatus('Could not reach the server — nothing was saved.', 'danger');
             }
         };
         reader.readAsText(file);
     });
 
-    // Load school calendar from the static CSV file (primary data source)
-    try {
-        const csvRes = await fetch('/special-dates.csv');
-        if (csvRes.ok) parseCSV(await csvRes.text());
-    } catch {}
-
-    // Load school year boundary config
-    try {
-        const res = await fetch('/api/school-config.php');
-        if (res.ok) schoolConfig = await res.json();
-    } catch {}
-
-    // Load all calendar dates from DB (CSV-imported school calendar + manually-added events)
-    try {
-        const bucket = getStudentCalendarBucket();
-        const url = bucket ? `/api/events.php?bucket=${encodeURIComponent(bucket)}` : '/api/events.php';
-        const res = await fetch(url);
-        if (res.ok) {
-            const data = await res.json();
-            rawEvents = new Map();
-            (data.events || []).forEach(ev => {
-                const arr = rawEvents.get(ev.event_date) || [];
-                arr.push(ev);
-                rawEvents.set(ev.event_date, arr);
-                mergeEventIntoSpecialDates(ev);
-            });
-        }
-    } catch {}
+    await loadCalendarData();
 
     renderCurrentView();
     initAppointments();
