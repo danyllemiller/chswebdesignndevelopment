@@ -18,6 +18,16 @@ if (!document.getElementById('chartjs-lib')) {
     document.head.appendChild(script);
 }
 
+// Current bell-schedule period codes don't carry a course prefix the way the
+// old "WD1-A1"-style section_ids did, so period-group filtering (below) needs
+// an explicit map instead of splitting on a hyphen. Source: live roster
+// enrollment (students.course_id -> courses.course_name), same mapping used
+// for the Daily Agenda schedule links.
+const PERIOD_COURSE_MAP = { 'A1': 'WD1', 'B2': 'WD2', 'A3': 'CS', 'A5': 'CS', 'B4': 'CS', 'B6': 'CS', 'B8': 'CS' };
+function periodGroupPrefix(period) {
+    return PERIOD_COURSE_MAP[period] || String(period).split('-')[0];
+}
+
 let allStudents = [];
 let allGrades = {};
 let allAssignments = {};
@@ -579,11 +589,12 @@ const getModal = (id) => bootstrap.Modal.getInstance(document.getElementById(id)
 function getFilteredStudents(periodVal, studentVal) {
     let filtered = allStudents;
     if (periodVal !== 'All') {
-        if (periodVal === 'All-WD1') filtered = filtered.filter(s => s.period.startsWith('WD1'));
-        else if (periodVal === 'All-WD2') filtered = filtered.filter(s => s.period.startsWith('WD2'));
-        else if (periodVal === 'All-CS') filtered = filtered.filter(s => s.period.startsWith('CS'));
-        else if (periodVal === 'All-AS') filtered = filtered.filter(s => s.period.startsWith('AS'));
-        else filtered = filtered.filter(s => s.period === periodVal);
+        if (periodVal.startsWith('All-')) {
+            const groupPrefix = periodVal.slice(4);
+            filtered = filtered.filter(s => periodGroupPrefix(s.period) === groupPrefix);
+        } else {
+            filtered = filtered.filter(s => s.period === periodVal);
+        }
     }
     if (studentVal && studentVal !== 'All') filtered = filtered.filter(s => s.studentId === studentVal);
     return filtered;
@@ -621,7 +632,7 @@ function updatePeriodDropdown() {
 
     const groupedPeriods = {};
     periods.forEach(p => {
-        const prefix = p.split('-')[0];
+        const prefix = periodGroupPrefix(p);
         if (!groupedPeriods[prefix]) groupedPeriods[prefix] = [];
         groupedPeriods[prefix].push(p);
     });
