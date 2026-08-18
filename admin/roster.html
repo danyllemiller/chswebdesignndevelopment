@@ -117,7 +117,7 @@
 
           <!-- SINGLE STUDENT TAB -->
           <div class="tab-pane fade" id="pills-single">
-            <div class="row g-2 mb-3">
+            <div class="row g-2 mb-2">
                 <div class="col-md-3"><input type="text" id="single-fname" class="form-control" placeholder="First Name"></div>
                 <div class="col-md-3"><input type="text" id="single-lname" class="form-control" placeholder="Last Name"></div>
                 <div class="col-md-3"><input type="text" id="single-sid" class="form-control" placeholder="Student ID"></div>
@@ -125,6 +125,12 @@
                     <select id="single-period" class="form-select">
                       <option value="">Role/Period...</option>
                     </select>
+                </div>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-12">
+                    <label class="form-label small fw-semibold mb-1">Additional Periods <span class="text-muted fw-normal">(optional — e.g. an Intervention student who's also in a real CS/WD1 period. Ctrl/Cmd-click to select more than one.)</span></label>
+                    <select id="single-additional-periods" class="form-select" multiple size="4"></select>
                 </div>
             </div>
             <button id="addSingleBtn" class="btn btn-primary w-100 fw-bold">Add to Roster</button>
@@ -233,6 +239,12 @@
               <div class="col-md-4"><label class="form-label small">Student ID</label><input id="edit-student-id" class="form-control" readonly /></div>
               <div class="col-md-4"><label class="form-label small">Username</label><input id="edit-username" class="form-control" /></div>
               <div class="col-md-4"><label class="form-label small">Role / Period</label><select id="editPeriod" class="form-select"></select></div>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col-12">
+                <label class="form-label small">Additional Periods <span class="text-muted">(e.g. also in Intervention. Ctrl/Cmd-click to select more than one.)</span></label>
+                <select id="editAdditionalPeriods" class="form-select" multiple size="4"></select>
+              </div>
             </div>
             <div class="row g-2 mb-2">
               <div class="col-md-6"><label class="form-label small">Set Password (optional)</label><input id="edit-password" type="password" class="form-control" placeholder="Leave blank to keep existing" /></div>

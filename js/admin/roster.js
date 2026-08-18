@@ -141,6 +141,8 @@ function populateSectionSelectors(sections) {
     const bulkPeriodMove = document.getElementById('bulkPeriodMove');
     const singlePeriod = document.getElementById('single-period');
     const editPeriod = document.getElementById('editPeriod');
+    const singleAdditional = document.getElementById('single-additional-periods');
+    const editAdditional = document.getElementById('editAdditionalPeriods');
 
     if (sectionFilter) {
         sectionFilter.innerHTML = `<option value="All">All Periods</option>` + buildSectionOptions(sections, null, false);
@@ -153,6 +155,13 @@ function populateSectionSelectors(sections) {
     }
     if (editPeriod) {
         editPeriod.innerHTML = buildSectionOptions(sections, 'Role/Period...');
+    }
+    // Multi-selects for additional (non-primary) periods — no placeholder option needed
+    if (singleAdditional) {
+        singleAdditional.innerHTML = buildSectionOptions(sections, '', false);
+    }
+    if (editAdditional) {
+        editAdditional.innerHTML = buildSectionOptions(sections, '', false);
     }
     // populate courseFilter with unique courses
     const courseFilter = document.getElementById('courseFilter');
@@ -362,10 +371,14 @@ async function fetchRoster() {
 
             const isChecked = selectedStudents.has(s.student_id) ? 'checked' : '';
 
+            const additionalBadges = (s.additional_sections || []).map(a =>
+                `<span class="badge bg-info text-dark ms-1" title="${escapeHtml(a.course_name || '')}">+${escapeHtml(a.section_id)}</span>`
+            ).join('');
+
             row.innerHTML = `
                 <td class="text-center"><input type="checkbox" class="student-checkbox" data-student-id="${escapeHtml(s.student_id || '')}" ${isChecked} onchange="toggleStudentCheckbox('${escapeHtml(s.student_id || '')}')"></td>
                 <td class="small text-muted">${escapeHtml(courseId)}</td>
-                <td>${escapeHtml(period)}</td>
+                <td>${escapeHtml(period)}${additionalBadges}</td>
                 <td>${escapeHtml(courseName)}</td>
                 <td>${escapeHtml(s.last_name || '')}</td>
                 <td>${escapeHtml(s.first_name || '')}</td>
@@ -392,10 +405,11 @@ async function fetchRoster() {
 
 // --- ADD SINGLE STUDENT ---
 document.getElementById('addSingleBtn').addEventListener('click', async () => {
+    const studentId = document.getElementById('single-sid').value.trim();
     const payload = [{
         first_name: document.getElementById('single-fname').value.trim(),
         last_name: document.getElementById('single-lname').value.trim(),
-        student_id: document.getElementById('single-sid').value.trim(),
+        student_id: studentId,
         section_id: document.getElementById('single-period').value.trim()
     }];
 
@@ -406,6 +420,15 @@ document.getElementById('addSingleBtn').addEventListener('click', async () => {
             body: JSON.stringify(payload)
         });
         if (res.ok) {
+            const additionalSel = document.getElementById('single-additional-periods');
+            const additionalIds = additionalSel ? Array.from(additionalSel.selectedOptions).map(o => o.value) : [];
+            if (studentId && additionalIds.length > 0) {
+                await fetch('/api/admin/set-student-sections', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ student_id: studentId, section_ids: additionalIds })
+                });
+            }
             showStatus('Student added!', 'success');
             fetchRoster();
         }
@@ -496,6 +519,19 @@ window.manageStudent = async (id, name) => {
             const opt = Array.from(editPeriodEl.options).find(o => o.value === target);
             if (opt) editPeriodEl.value = target;
         }
+
+        const editAdditionalEl = document.getElementById('editAdditionalPeriods');
+        if (editAdditionalEl) {
+            Array.from(editAdditionalEl.options).forEach(o => { o.selected = false; });
+            try {
+                const secRes = await fetch(`/api/admin/student-sections?student_id=${encodeURIComponent(id)}`);
+                if (secRes.ok) {
+                    const extra = await secRes.json();
+                    const extraIds = new Set(extra.map(r => r.section_id));
+                    Array.from(editAdditionalEl.options).forEach(o => { o.selected = extraIds.has(o.value); });
+                }
+            } catch (e) { console.error('Failed to load additional sections', e); }
+        }
     } catch (err) {
         console.error(err);
         showStatus('Failed to load student details.', 'danger');
@@ -568,6 +604,13 @@ document.getElementById('saveStudentBtn').addEventListener('click', async () => 
             method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
         });
         if (res.ok) {
+            const editAdditionalEl = document.getElementById('editAdditionalPeriods');
+            const additionalIds = editAdditionalEl ? Array.from(editAdditionalEl.selectedOptions).map(o => o.value) : [];
+            await fetch('/api/admin/set-student-sections', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ student_id: payload.student_id, section_ids: additionalIds })
+            });
             showStatus('Student saved!', 'success');
             bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
             fetchRoster();
