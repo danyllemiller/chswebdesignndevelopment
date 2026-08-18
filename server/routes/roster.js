@@ -43,9 +43,91 @@ router.get('/admin/roster', async (req, res) => {
                    ORDER BY s.last_name ASC, s.first_name ASC`;
         }
         const [students] = await connection.execute(sql, params);
+
+        // Attach each student's additional (non-primary) sections, e.g. an
+        // Intervention student who is also physically enrolled in a real
+        // CS/WD1 period. Grading stays tied to the primary section_id above
+        // — this is purely for roster/attendance-style lookups.
+        const [extra] = await connection.execute(`
+            SELECT sas.student_id, sas.section_id, COALESCE(c.course_name, '') AS course_name
+            FROM student_additional_sections sas
+            LEFT JOIN class_sections cs ON sas.section_id = cs.section_id
+            LEFT JOIN courses c ON cs.course_id = c.course_id
+        `);
+        const extraByStudent = {};
+        extra.forEach(r => {
+            if (!extraByStudent[r.student_id]) extraByStudent[r.student_id] = [];
+            extraByStudent[r.student_id].push({ section_id: r.section_id, course_name: r.course_name });
+        });
+        students.forEach(s => { s.additional_sections = extraByStudent[s.student_id] || []; });
+
         await connection.end();
         res.json(students);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch roster.' }); }
+});
+
+// GET /admin/student-sections?student_id=X — additional (non-primary) sections for one student
+router.get('/admin/student-sections', async (req, res) => {
+    const studentId = req.query.student_id;
+    if (!studentId) return res.status(400).json({ error: 'student_id is required' });
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS student_additional_sections (
+              student_id VARCHAR(50) NOT NULL,
+              section_id VARCHAR(50) NOT NULL,
+              added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (student_id, section_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        `);
+        const [rows] = await connection.execute(
+            `SELECT sas.section_id, COALESCE(c.course_name, '') AS course_name
+             FROM student_additional_sections sas
+             LEFT JOIN class_sections cs ON sas.section_id = cs.section_id
+             LEFT JOIN courses c ON cs.course_id = c.course_id
+             WHERE sas.student_id = ?`,
+            [studentId]
+        );
+        await connection.end();
+        res.json(rows);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch student sections' }); }
+});
+
+// POST /admin/set-student-sections — { student_id, section_ids: [...] }
+// Replaces the full set of additional sections for a student in one call,
+// matching how a multi-select list naturally reports its selection.
+router.post('/admin/set-student-sections', async (req, res) => {
+    const { student_id, section_ids } = req.body || {};
+    if (!student_id || !Array.isArray(section_ids)) {
+        return res.status(400).json({ error: 'student_id and section_ids array are required' });
+    }
+    let connection;
+    try {
+        connection = await getDbConnection();
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS student_additional_sections (
+              student_id VARCHAR(50) NOT NULL,
+              section_id VARCHAR(50) NOT NULL,
+              added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (student_id, section_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        `);
+        await connection.execute('DELETE FROM student_additional_sections WHERE student_id = ?', [student_id]);
+        for (const sid of section_ids) {
+            const clean = String(sid).trim();
+            if (!clean) continue;
+            await connection.execute(
+                'INSERT IGNORE INTO student_additional_sections (student_id, section_id) VALUES (?, ?)',
+                [student_id, clean]
+            );
+        }
+        await connection.end();
+        res.json({ success: true, count: section_ids.length });
+    } catch (err) {
+        if (connection) try { await connection.end(); } catch (_) {}
+        console.error(err);
+        res.status(500).json({ error: 'Failed to save student sections' });
+    }
 });
 
 router.get('/admin/sections', async (req, res) => {
