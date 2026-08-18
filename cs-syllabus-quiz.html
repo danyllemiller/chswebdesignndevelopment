@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Syllabus Quiz | CHS Computer Science</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet"/>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=6"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    .quiz-q { border-left: 4px solid var(--primary-color); }
+    .quiz-q.correct { border-left-color: #198754; background: #f0fff4; }
+    .quiz-q.incorrect { border-left-color: #dc3545; background: #fff5f5; }
+    .quiz-explain { display: none; font-size: .85rem; }
+    .quiz-q.answered .quiz-explain { display: block; }
+    .form-check-label { cursor: pointer; }
+    #quizResult { display: none; }
+  </style>
+</head>
+<body class="bg-white">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container my-5" style="max-width: 800px;">
+    <div class="text-center mb-5">
+      <h1 class="gochi text-primary display-4 mb-2">Syllabus Quiz</h1>
+      <p class="text-muted fw-bold">Computer Science Foundations | Instructor: Ms. Miller</p>
+      <p class="text-muted small">10 questions on the grading policy, attendance rules, and academic integrity. Answer every question, then check your score.</p>
+    </div>
+
+    <form id="quizForm">
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="c">
+        <div class="card-body">
+          <p class="fw-bold">1. In CS, what percentage of your grade comes from Assignments?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1a" value="a"><label class="form-check-label" for="q1a">20%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1b" value="b"><label class="form-check-label" for="q1b">50%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1c" value="c"><label class="form-check-label" for="q1c">60%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1d" value="d"><label class="form-check-label" for="q1d">80%</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Assignments are 60% of your grade, Tests/Quizzes 20%, and the Final Exam 20%.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="b">
+        <div class="card-body">
+          <p class="fw-bold">2. How much of your grade comes from Tests/Quizzes?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2a" value="a"><label class="form-check-label" for="q2a">10%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2b" value="b"><label class="form-check-label" for="q2b">20%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2c" value="c"><label class="form-check-label" for="q2c">30%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2d" value="d"><label class="form-check-label" for="q2d">60%</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Tests/Quizzes are 20% of your grade — the same weight as the Final Exam.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="a">
+        <div class="card-body">
+          <p class="fw-bold">3. How much of your grade comes from the Final Exam?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3a" value="a"><label class="form-check-label" for="q3a">20%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3b" value="b"><label class="form-check-label" for="q3b">40%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3c" value="c"><label class="form-check-label" for="q3c">60%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3d" value="d"><label class="form-check-label" for="q3d">100%</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Assignments (60%) + Tests/Quizzes (20%) + Final Exam (20%) = 100%.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="c">
+        <div class="card-body">
+          <p class="fw-bold">4. This class lets you "test out" early. What score on the final exam excuses you from all remaining assignments for the semester?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4a" value="a"><label class="form-check-label" for="q4a">60% or better</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4b" value="b"><label class="form-check-label" for="q4b">70% or better</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4c" value="c"><label class="form-check-label" for="q4c">80% or better</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4d" value="d"><label class="form-check-label" for="q4d">100%</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>80% or better on an early attempt at the final exam excuses you from all remaining assignments that semester.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="b">
+        <div class="card-body">
+          <p class="fw-bold">5. If you score 75-79% on an early test-out attempt, what happens?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5a" value="a"><label class="form-check-label" for="q5a">You're excused from all remaining work, same as 80%+</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5b" value="b"><label class="form-check-label" for="q5b">You may retake the exam one time to improve your score</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5c" value="c"><label class="form-check-label" for="q5c">You automatically fail the course</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5d" value="d"><label class="form-check-label" for="q5d">Nothing — that score doesn't count either way</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>75-79% earns you one retake attempt to try to improve your score.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="d">
+        <div class="card-body">
+          <p class="fw-bold">6. If you score below 75% on the early test-out attempt (or fail the retake), what's required?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6a" value="a"><label class="form-check-label" for="q6a">Nothing — you can try again anytime</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6b" value="b"><label class="form-check-label" for="q6b">You automatically fail the class</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6c" value="c"><label class="form-check-label" for="q6c">You lose Chromebook privileges</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6d" value="d"><label class="form-check-label" for="q6d">You complete all remaining assignments and retake the final on the regular scheduled day</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Below 75% (or a failed retake) means completing the rest of the semester's assignments normally, then retaking the final on its regular scheduled day.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="a">
+        <div class="card-body">
+          <p class="fw-bold">7. How soon after the bell must you clock in, or you're considered late?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7a" value="a"><label class="form-check-label" for="q7a">Within the first 5 minutes of class</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7b" value="b"><label class="form-check-label" for="q7b">Within the first 15 minutes of class</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7c" value="c"><label class="form-check-label" for="q7c">Any time before the class ends</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7d" value="d"><label class="form-check-label" for="q7d">Clocking in isn't required in CS</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Even though the coursework is self-paced, clock-ins are required every day within the first 5 minutes of class.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="b">
+        <div class="card-body">
+          <p class="fw-bold">8. You arrive late to class. What do you need to do to make sure it's marked as a tardy and not an absence?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8a" value="a"><label class="form-check-label" for="q8a">Nothing — the teacher will notice you're there</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8b" value="b"><label class="form-check-label" for="q8b">Take a Tardy Form from the tray, fill it out, and turn it in before you leave</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8c" value="c"><label class="form-check-label" for="q8c">Email the teacher after class</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8d" value="d"><label class="form-check-label" for="q8d">Have a parent call the office</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Every student is marked absent by default. If the Tardy Form isn't turned in, the absence stands — the form is what protects your record.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="c">
+        <div class="card-body">
+          <p class="fw-bold">9. At which tardy does your teacher first contact home about it?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9a" value="a"><label class="form-check-label" for="q9a">The 1st</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9b" value="b"><label class="form-check-label" for="q9b">The 2nd</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9c" value="c"><label class="form-check-label" for="q9c">The 3rd</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9d" value="d"><label class="form-check-label" for="q9d">The 5th</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>1st = private check-in, 2nd = written reflection, 3rd = home contact + support plan. Tardies reset each grading period.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="d">
+        <div class="card-body">
+          <p class="fw-bold">10. What happens if you copy someone else's code and turn it in as your own?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10a" value="a"><label class="form-check-label" for="q10a">Only the person who copied gets a zero</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10b" value="b"><label class="form-check-label" for="q10b">You lose half credit</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10c" value="c"><label class="form-check-label" for="q10c">Nothing, as long as you cite where it came from afterward</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10d" value="d"><label class="form-check-label" for="q10d">Both the person who copied and the person who gave it get a zero</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Both the giver and the taker receive a zero — copying code without attribution counts as plagiarism either way.</p>
+        </div>
+      </div>
+
+      <div class="text-center mt-4 mb-5">
+        <button type="submit" class="btn btn-primary btn-lg px-5 fw-bold">Check My Answers</button>
+      </div>
+
+      <div id="quizResult" class="card shadow-sm border-primary mb-5">
+        <div class="card-body text-center p-4">
+          <h3 class="fw-bold mb-2" id="quizScoreText"></h3>
+          <p class="text-muted mb-0" id="quizScoreNote"></p>
+        </div>
+      </div>
+
+    </form>
+  </section>
+
+  <div id="footer-placeholder" class="no-print"></div>
+  <a href="#" class="back-to-top text-decoration-none no-print" title="Back to Top">🚀</a>
+
+  <script>
+    document.getElementById('quizForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const questions = document.querySelectorAll('.quiz-q');
+      let correctCount = 0;
+      let unanswered = 0;
+
+      questions.forEach(q => {
+        const name = q.querySelector('input[type="radio"]').name;
+        const selected = q.querySelector(`input[name="${name}"]:checked`);
+        const answer = q.dataset.answer;
+
+        q.classList.add('answered');
+        q.classList.remove('correct', 'incorrect');
+
+        if (!selected) {
+          unanswered++;
+          return;
+        }
+        if (selected.value === answer) {
+          correctCount++;
+          q.classList.add('correct');
+        } else {
+          q.classList.add('incorrect');
+        }
+      });
+
+      const resultCard = document.getElementById('quizResult');
+      const scoreText = document.getElementById('quizScoreText');
+      const scoreNote = document.getElementById('quizScoreNote');
+      const pct = Math.round((correctCount / questions.length) * 100);
+
+      scoreText.textContent = `${correctCount} / ${questions.length} correct (${pct}%)`;
+      scoreNote.textContent = unanswered > 0
+        ? `You left ${unanswered} question(s) blank — those are marked as missed above.`
+        : (pct === 100 ? "Perfect score — you're ready to go." : 'Review the highlighted questions above, then try again.');
+      resultCard.style.display = 'block';
+      resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  </script>
+</body>
+</html>
