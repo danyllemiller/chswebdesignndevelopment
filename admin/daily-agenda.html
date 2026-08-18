@@ -398,7 +398,7 @@
     <div class="zone zone-tasks">
       <div id="tasksTitle" class="tasks-title"></div>
       <ul id="taskList" class="task-list"></ul>
-      <div id="exitTicket" class="exit-ticket"></div>
+      <div class="exit-ticket"><span class="exit-ticket-label">In one or two sentences,</span> <span id="exitTicket"></span></div>
     </div>
 
     <h2 class="section-label label-schedule" data-tag="h2" data-cmt="Schedule">Schedule</h2>
@@ -799,7 +799,7 @@ if (!courseCfg) {
     });
 
     const et = document.getElementById('exitTicket');
-    et.textContent = c && c.exitTicket ? `In one or two sentences, ${c.exitTicket}` : '';
+    et.textContent = c && c.exitTicket ? c.exitTicket : '';
     et.setAttribute('contenteditable', editing);
 
     document.getElementById('chapterLabel').textContent = c ? c.chapterLabel || '' : '';
@@ -865,8 +865,7 @@ if (!courseCfg) {
     }
     c.tasksTitle = document.getElementById('tasksTitle').textContent.trim();
     c.tasksList = Array.from(document.querySelectorAll('#taskList li')).map(li => li.textContent.trim());
-    const etRaw = document.getElementById('exitTicket').textContent;
-    c.exitTicket = etRaw.replace(/^In one or two sentences,\s*/, '').trim();
+    c.exitTicket = document.getElementById('exitTicket').textContent.trim();
 
     content[currentBlock] = c;
 

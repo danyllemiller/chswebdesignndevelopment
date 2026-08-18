@@ -905,7 +905,10 @@ function renderGradebook(students, grades, currentPeriod) {
             const ck = cleanKey(key);
             if (!seenCleanKeys.has(ck)) {
                 seenCleanKeys.add(ck);
-                assignmentMap.set(key, { ...parseAssignmentInfo(key), dueDate: resolveDueDate(key, currentPeriod), instructions: allAssignments[key].instructions || '' });
+                const storedMax = allAssignments[key].maxPoints;
+                const info = { ...parseAssignmentInfo(key), dueDate: resolveDueDate(key, currentPeriod), instructions: allAssignments[key].instructions || '' };
+                if (storedMax !== undefined && storedMax !== null) info.maxPoints = storedMax;
+                assignmentMap.set(key, info);
             }
         }
     });
@@ -917,7 +920,10 @@ function renderGradebook(students, grades, currentPeriod) {
                 const ck = cleanKey(key);
                 if (!seenCleanKeys.has(ck)) {
                     seenCleanKeys.add(ck);
-                    assignmentMap.set(key, { ...parseAssignmentInfo(key), dueDate: resolveDueDate(key, currentPeriod), instructions: '' });
+                    const storedMax = allAssignments[key]?.maxPoints ?? sGrades[key]?.max;
+                    const info = { ...parseAssignmentInfo(key), dueDate: resolveDueDate(key, currentPeriod), instructions: '' };
+                    if (storedMax !== undefined && storedMax !== null) info.maxPoints = storedMax;
+                    assignmentMap.set(key, info);
                 }
             }
         });
@@ -980,10 +986,31 @@ function renderGradebook(students, grades, currentPeriod) {
     averages.forEach(a => html += `<td class="calc-val bg-secondary text-white fw-bold text-center">${a.avg}</td>`);
     html += '</tr>';
 
-sortStudentsArray(students).forEach((s, rowIndex) => {
+    // Viewing a grouped course (e.g. "All Comp Sci") clusters students by
+    // period with a header row between each, regardless of the Sort dropdown —
+    // otherwise "All CS" just interleaves every period's students together.
+    const isGroupedView = currentPeriod.startsWith('All-');
+    let orderedStudents = sortStudentsArray(students);
+    if (isGroupedView) {
+        orderedStudents = [...students].sort((a, b) => {
+            const periodCmp = (a.period || '').localeCompare(b.period || '');
+            if (periodCmp !== 0) return periodCmp;
+            return currentSortMode === 'firstName'
+                ? (a.firstName || '').localeCompare(b.firstName || '')
+                : (a.lastName || '').localeCompare(b.lastName || '');
+        });
+    }
+    let lastGroupPeriod = null;
+
+    orderedStudents.forEach((s, rowIndex) => {
+        if (isGroupedView && s.period !== lastGroupPeriod) {
+            lastGroupPeriod = s.period;
+            html += `<tr class="table-primary"><td colspan="100%" class="fw-bold py-2 px-3"><i class="fas fa-users me-2"></i>Period ${escapeHtml(s.period || 'Unassigned')}</td></tr>`;
+        }
+
         const sGrades = grades[s.studentId] || {};
         const courseKey = periodToCourseKey(s.period) || 'CS';
-        
+
         // Alternating row background for better readability
         const rowBgClass = rowIndex % 2 === 0 ? 'bg-white' : 'bg-light';
         

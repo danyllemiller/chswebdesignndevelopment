@@ -79,8 +79,8 @@ const HOSTGATOR_MANAGE_URL = "https://digitalartsclasses.com/manage_files.php";
 // Set these to true to REQUIRE completion, false to BYPASS (skip)
 // Default: false = bypass/optional for all students
 const GLOBAL_BYPASS_CONFIG = {
-    requirePreScale: false,        // false = Pre-Scale NOT required for exam unlock
-    requireDiagnostic: false,     // false = Diagnostic NOT required for exam unlock
+    requirePreScale: true,         // true = Pre-Scale REQUIRED before the Unit Test unlocks
+    requireDiagnostic: true,      // true = Diagnostic Pre-Assessment REQUIRED before the Unit Test unlocks
     requireWorksheets: false,     // false = Worksheets NOT required (enable_worksheet=false)
     bypassAll: false              // If true, bypasses all gating requirements
 };
@@ -979,10 +979,20 @@ else if (activeTab.type === 'EXAM') {
                 if (dom.examOverlay) dom.examOverlay.classList.remove('d-none');
 
                 const bypassWorksheets = !GLOBAL_BYPASS_CONFIG.requireWorksheets || GLOBAL_BYPASS_CONFIG.bypassAll;
-                const examUnlocked = bypassWorksheets || hasAllChapWork;
+                const bypassPreScale   = !GLOBAL_BYPASS_CONFIG.requirePreScale   || GLOBAL_BYPASS_CONFIG.bypassAll;
+                const bypassDiagnostic = !GLOBAL_BYPASS_CONFIG.requireDiagnostic || GLOBAL_BYPASS_CONFIG.bypassAll;
+
+                const worksUnlocked = bypassWorksheets  || hasAllChapWork;
+                const scaleUnlocked = bypassPreScale    || hasPreScale;
+                const diagUnlocked  = bypassDiagnostic  || hasPreTest;
+                const examUnlocked  = worksUnlocked && scaleUnlocked && diagUnlocked;
 
                 if (!examUnlocked && dom.examOverlay) {
-                    dom.examOverlay.innerHTML = `<i class="fas fa-ban text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i><h3 class="fw-bold">Exam Locked</h3><p class="text-muted px-4 mb-4">You must submit work (Journal, Code, or File Upload) for <strong>every chapter</strong> in this unit before the exam unlocks.</p>`;
+                    const missing = [];
+                    if (!scaleUnlocked) missing.push('the <strong>Pre-Scale</strong>');
+                    if (!diagUnlocked) missing.push('the <strong>Diagnostic Pre-Assessment</strong>');
+                    if (!worksUnlocked) missing.push('work for <strong>every chapter</strong> (Journal, Code, or File Upload)');
+                    dom.examOverlay.innerHTML = `<i class="fas fa-ban text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i><h3 class="fw-bold">Exam Locked</h3><p class="text-muted px-4 mb-4">You must complete ${missing.join(', ')} before the exam unlocks.</p>`;
                 } else if (dom.examOverlay) {
                     dom.examOverlay.innerHTML = `
                         <i class="fas fa-file-signature text-primary fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
@@ -1928,25 +1938,26 @@ if (chapBtn) {
                     const bypassPreScale   = !GLOBAL_BYPASS_CONFIG.requirePreScale   || GLOBAL_BYPASS_CONFIG.bypassAll;
 
                     const _hasPreScale = selfAssessmentsLoaded && selfAssessments[`unit${activeUnit.unitNum}`] !== undefined && selfAssessments[`unit${activeUnit.unitNum}`] > 0;
+                    const _hasPreTest = Object.keys(grades).some(k => k.match(new RegExp(`Unit\\s*-?\\s*${activeUnit.unitNum}`, 'i')) && k.match(/(Diagnostic|Pre-Assessment|Pre)/i));
                     const allChaptersDone = activeUnit.chapters.every(c => {
                         const hasNote  = Object.keys(notes).some(key => key.includes(`Ch ${c.ch}`) || key.includes(`Ch${c.ch}`));
                         const hasGrade = Object.keys(grades).some(k => k.match(new RegExp(`(Ch|Chapter)\\s*0*${c.ch}[-\\s:]`, 'i')));
                         return hasNote || hasGrade;
                     });
 
-                    const examUnlocked  = bypassPreScale   || _hasPreScale;
-                    const diagUnlocked  = bypassDiagnostic || examUnlocked;
+                    const scaleUnlocked = bypassPreScale   || _hasPreScale;
+                    const diagUnlocked  = bypassDiagnostic || _hasPreTest;
                     const worksUnlocked = bypassWorksheets  || allChaptersDone;
 
-                    if (examUnlocked && diagUnlocked && worksUnlocked) {
+                    if (scaleUnlocked && diagUnlocked && worksUnlocked) {
                         window.open(`/exams/cs-unit-${activeUnit.unitNum}-exam.html`, '_blank');
                         return;
                     } else {
                         const missing = [];
-                        if (!examUnlocked)  missing.push('Pre-Scale');
-                        if (!diagUnlocked)  missing.push('Diagnostic');
+                        if (!scaleUnlocked) missing.push('Pre-Scale');
+                        if (!diagUnlocked)  missing.push('Diagnostic Pre-Assessment');
                         if (!worksUnlocked) missing.push('All Chapter Notes');
-                        alert(`Exam Locked! Complete the following to unlock:\n• ${missing.join('\n• ')}`);
+                        alert(`Exam Locked! You must complete the following before you can take the Unit Test:\n• ${missing.join('\n• ')}`);
                         return;
                     }
                 }
