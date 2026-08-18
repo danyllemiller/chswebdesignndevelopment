@@ -78,35 +78,45 @@ console.log("1. Loader.js is active and running!");
 // SUMMER COUNTDOWN LOGIC (STACKED VERSION)
 // ==========================================
 function initSummerCountdown() {
-    const summerDate = new Date('2026-06-04T11:40:00').getTime(); 
-    
+    // Rolling sequence of break countdowns, each targeting end-of-school-day on
+    // the last attendance day before that break (times sourced from the live
+    // bell schedule: 14:07 for a regular day, 12:50 for the Jun 3 minimum day).
+    // Once a target passes, the countdown automatically advances to the next one.
+    const breakTargets = [
+        { label: 'Thanksgiving Break', date: '2026-11-20T14:07:00' },
+        { label: 'Winter Break',       date: '2026-12-17T14:07:00' },
+        { label: 'Spring Break',       date: '2027-03-26T14:07:00' },
+        { label: 'Summer Break',       date: '2027-06-03T12:50:00' }
+    ];
+
     const updateTimer = () => {
         const countdownEl = document.getElementById('summer-countdown');
-        if (!countdownEl) return; 
+        if (!countdownEl) return;
 
         const now = new Date().getTime();
-        const distance = summerDate - now;
-        
-        if (distance < 0) {
+        const target = breakTargets.find(t => new Date(t.date).getTime() - now > 0);
+
+        if (!target) {
             countdownEl.innerHTML = "Enjoy your Summer! 🏖️";
             return;
         }
-        
+
+        const distance = new Date(target.date).getTime() - now;
         const days = Math.floor(distance / (1000 * 60 * 60 * 24));
         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        
+
         // Stacked HTML format for better spacing
         countdownEl.innerHTML = `
-            <div style="font-size: 0.75rem; line-height: 1; margin-bottom: 2px; opacity: 0.9;">Summer Break In:</div>
+            <div style="font-size: 0.75rem; line-height: 1; margin-bottom: 2px; opacity: 0.9;">${target.label} In:</div>
             <div style="font-size: 0.9rem; line-height: 1; letter-spacing: 0.5px;">${days}d ${hours}h ${minutes}m</div>
         `;
     };
-    
-    updateTimer(); 
-    
+
+    updateTimer();
+
     if(window.dacSummerTimer) clearInterval(window.dacSummerTimer);
-    window.dacSummerTimer = setInterval(updateTimer, 1000); 
+    window.dacSummerTimer = setInterval(updateTimer, 1000);
 }
 
 // ==========================================

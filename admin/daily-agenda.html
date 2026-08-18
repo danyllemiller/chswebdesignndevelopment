@@ -712,24 +712,42 @@ if (!courseCfg) {
 
   function renderTrackToggle() {
     const wrap = document.getElementById('trackToggle');
-    if (!courseCfg.hasTracks) return;
     wrap.classList.remove('d-none');
-    wrap.innerHTML = `
-      <button class="btn btn-sm ${track==='A' ? 'btn-info' : 'btn-outline-info'}" data-track-btn="A">A</button>
-      <button class="btn btn-sm ${track==='B' ? 'btn-info' : 'btn-outline-info'}" data-track-btn="B">B</button>`;
-    wrap.querySelectorAll('[data-track-btn]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        track = btn.getAttribute('data-track-btn');
-        document.documentElement.setAttribute('data-track', track);
-        const url = new URL(location);
-        url.searchParams.set('track', track);
-        history.replaceState(null, '', url);
-        renderTrackToggle();
-        populateJumpSelect();
-        currentBlock = findBlockForToday();
-        render();
+
+    if (courseCfg.hasTracks) {
+      // Comp Sci meets every day (both A and B) — the A/B button switches which
+      // track's pacing/content is shown, staying on this page.
+      wrap.innerHTML = `
+        <button class="btn btn-sm ${track==='A' ? 'btn-info' : 'btn-outline-info'}" data-track-btn="A">A</button>
+        <button class="btn btn-sm ${track==='B' ? 'btn-info' : 'btn-outline-info'}" data-track-btn="B">B</button>`;
+      wrap.querySelectorAll('[data-track-btn]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          track = btn.getAttribute('data-track-btn');
+          document.documentElement.setAttribute('data-track', track);
+          const url = new URL(location);
+          url.searchParams.set('track', track);
+          history.replaceState(null, '', url);
+          renderTrackToggle();
+          populateJumpSelect();
+          currentBlock = findBlockForToday();
+          render();
+        });
       });
-    });
+    } else {
+      // WD1/WD2 only meet on one letter day each (A1 = Web Design 1,
+      // B2 = Web Design 2 & AS) — the A/B button jumps to whichever
+      // course's agenda meets on that day.
+      wrap.innerHTML = `
+        <button class="btn btn-sm ${course==='wd1' ? 'btn-info' : 'btn-outline-info'}" data-day-btn="A" title="Period A1 — Web Design 1">A</button>
+        <button class="btn btn-sm ${course==='wd2' ? 'btn-info' : 'btn-outline-info'}" data-day-btn="B" title="Period B2 — Web Design 2 & AS">B</button>`;
+      wrap.querySelectorAll('[data-day-btn]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-day-btn') === 'A' ? 'wd1' : 'wd2';
+          if (target === course) return;
+          location.href = `?course=${target}`;
+        });
+      });
+    }
   }
 
   function courseSubtitleText() {

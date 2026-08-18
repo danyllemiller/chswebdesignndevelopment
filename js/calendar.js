@@ -144,6 +144,7 @@ async function initCalendar() {
 
     document.getElementById('prev-month')?.addEventListener('click', () => navigateCalendar(-1));
     document.getElementById('next-month')?.addEventListener('click', () => navigateCalendar(1));
+    document.getElementById('today-btn')?.addEventListener('click', goToToday);
 
     document.querySelectorAll('[name="calendar-view"]').forEach(radio => {
         radio.addEventListener('change', () => {
@@ -487,6 +488,21 @@ function navigateCalendar(dir) {
     }
     saveViewState();
     renderCurrentView();
+}
+
+// Jumps to today's date in whichever view (Month/Week/Day/Events) is currently active.
+function goToToday() {
+    const t = new Date();
+    selectedDate = isoDate(t.getFullYear(), t.getMonth() + 1, t.getDate());
+    currentYear  = t.getFullYear();
+    currentMonth = t.getMonth();
+    saveViewState();
+    renderCurrentView();
+
+    if (currentView === 'view-events') {
+        document.querySelector(`.event-list-row[data-date="${selectedDate}"]`)
+            ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 }
 
 // ─── Time Grid Helpers ────────────────────────────────────────────────────────
