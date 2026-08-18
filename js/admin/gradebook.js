@@ -8,7 +8,7 @@
 
 // Weighted grading config is shared with the student dashboard via js/modules/grade-weights.js —
 // edit there, not here, so teacher and student views never diverge.
-import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js';
+import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=2';
 
 // Dynamically load Chart.js for the Analytics Graph
 if (!document.getElementById('chartjs-lib')) {
