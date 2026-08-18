@@ -136,14 +136,16 @@
   .label-objective { left: 2.19%;  top: calc(15.93% - 1.3rem); width: 19.43%; }
   .label-standards { left: 2.19%;  top: calc(52.69% - 1.3rem); width: 19.43%; }
   .label-donow     { left: 23.8%;  top: calc(15.93% - 1.3rem); width: 52.14%; }
-  .label-tasks     { left: 23.8%;  top: calc(38.33% - 1.3rem); width: 52.14%; }
+  .label-tasks     { left: 23.8%;  top: calc(36% - 1.3rem);    width: 52.14%; }
   .label-schedule  { left: 78.39%; top: calc(15.93% - 1.3rem); width: 19.43%; }
-  .label-timer     { left: 78.39%; top: calc(73.8% - 1.3rem);  width: 19.43%; }
+  .label-timer     { left: 78.39%; top: calc(48% - 1.3rem);    width: 19.43%; }
 
   .agenda-canvas {
     position: relative;
-    width: 100%;
-    max-width: 1920px;
+    /* Capped to a height budget (not just width) so the canvas can never
+       push the nav-bar below the viewport, regardless of window shape —
+       this is the actual fix for needing to scroll to reach Prev/Next. */
+    width: min(100%, 1920px, 126vh);
     margin: 0 auto 1rem;
     aspect-ratio: 1920 / 1080;
     background-image: var(--bg-image);
@@ -165,15 +167,17 @@
     flex-direction: column;
     min-height: 0; /* let flex children actually shrink/scroll instead of overflowing the box */
   }
-  /* Coordinates below are measured pixel-for-pixel against the drawn box
-     outlines baked into the background art (all 4 images share the same
-     1920x1080 layout), not eyeballed — keep them in sync if the art changes. */
+  /* No longer pixel-matched to the background art's drawn outlines —
+     resized/repositioned per feedback: bigger text in Do Now/Tasks,
+     shorter Schedule/Standards/Tasks, taller Timer moved up. */
   .zone-objective { left: 2.19%;  top: 15.93%; width: 19.43%; height: 30.83%; }
-  .zone-standards { left: 2.19%;  top: 52.69%; width: 19.43%; height: 42.87%; }
-  .zone-donow     { left: 23.8%;  top: 15.93%; width: 52.14%; height: 16.39%; }
-  .zone-tasks     { left: 23.8%;  top: 38.33%; width: 52.14%; height: 57.22%; }
-  .zone-schedule  { left: 78.39%; top: 15.93%; width: 19.43%; height: 52.13%; }
-  .zone-timer     { left: 78.39%; top: 73.8%;  width: 19.43%; height: 21.76%; }
+  .zone-standards { left: 2.19%;  top: 52.69%; width: 19.43%; height: 28%; }
+  .zone-donow     { left: 23.8%;  top: 15.93%; width: 52.14%; height: 18%; }
+  .zone-tasks     { left: 23.8%;  top: 36%;    width: 52.14%; height: 44%; }
+  .zone-schedule  { left: 78.39%; top: 15.93%; width: 19.43%; height: 30%; }
+  .zone-timer     { left: 78.39%; top: 48%;    width: 19.43%; height: 46%; }
+
+  .zone-donow, .zone-tasks { font-size: 1.05rem; }
 
   .zone-schedule #scheduleBox { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
 
