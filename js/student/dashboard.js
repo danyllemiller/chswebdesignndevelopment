@@ -2,7 +2,7 @@
 import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
 import { escapeHtml, parsePts } from '../modules/utils.js';
-import { COURSE_WEIGHTS, getAssignmentCategory } from '../modules/grade-weights.js';
+import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js';
 
 // --- INJECT TURN-IN MODAL ON LOAD ---
 function injectTurnInModal() {
@@ -86,6 +86,8 @@ function abbreviateAssignmentName(name) {
 function isAssignmentVisible(name, period, registryData) {
     if (!period || period === 'Teacher') return true;
 
+    const studentCourse = periodToCourseKey(period);
+
     // Supports registry keyed by exam_id while preserving title-key fallback.
     const registryEntry = registryData[name]
         || Object.values(registryData).find((entry) => entry && entry.title && entry.title.trim() === String(name).trim());
@@ -100,22 +102,22 @@ function isAssignmentVisible(name, period, registryData) {
         };
         const targetRaw = registryEntry.targetCourse;
         const target = courseMap[targetRaw] || targetRaw;
-        if (target !== 'All' && !period.includes(target)) return false;
+        if (target !== 'All' && target !== studentCourse) return false;
     }
 
     const lowerName = String(name).toLowerCase();
     const match = lowerName.match(/(?:chapter|ch|unit|milestone)\s*(\d+)/i);
     const num = match ? parseInt(match[1], 10) : null;
 
-    if (period.includes('WD1')) {
-        if (num !== null) return lowerName.includes('unit') || lowerName.includes('milestone') ? num >= 1 && num <= 4 : num >= 1 && num <= 8; 
-        return true; 
+    if (studentCourse === 'WD1') {
+        if (num !== null) return lowerName.includes('unit') || lowerName.includes('milestone') ? num >= 1 && num <= 4 : num >= 1 && num <= 8;
+        return true;
     }
-    if (period.includes('WD2')) {
+    if (studentCourse === 'WD2' || studentCourse === 'AS') {
         if (num !== null) return lowerName.includes('unit') || lowerName.includes('milestone') ? num >= 5 && num <= 8 : num >= 9 && num <= 16;
         return true;
     }
-    if (period.includes('CS')) {
+    if (studentCourse === 'CS') {
         if (num !== null) return num >= 1 && num <= 19;
         return true;
     }
@@ -137,11 +139,7 @@ async function loadGrades() {
         if (welcomeEl) welcomeEl.innerText = `Welcome, ${user.first_name}!`;
 
         const studentPeriod = (data.section_id || user.section_id || "").trim().toUpperCase();
-        let courseKey = studentPeriod.startsWith("WD1") ? "WD1"
-            : studentPeriod.startsWith("WD2") ? "WD2"
-            : studentPeriod.startsWith("AS") ? "AS"
-            : studentPeriod.includes("CS") ? "CS"
-            : "WD1";
+        let courseKey = periodToCourseKey(studentPeriod) || "WD1";
 
         const subtitleEl = document.getElementById('userSubtitle');
         if (subtitleEl) {

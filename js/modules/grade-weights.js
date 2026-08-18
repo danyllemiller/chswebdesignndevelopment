@@ -10,6 +10,27 @@ export const COURSE_WEIGHTS = {
     CS:  { assignment: 0.60, project_quiz: 0.20, final: 0.20, career: 0.00 }
 };
 
+// Current bell-schedule period codes (A1, A3, A5, B2, B4, B6, B8...) don't
+// carry a course prefix the way the old "WD1-A1"-style section_ids did, so
+// any startsWith()/includes() check against a bare period silently fails.
+// This is the single source of truth for period -> course, sourced from
+// live roster enrollment (students.course_id -> courses.course_name) —
+// used by both the teacher gradebook and the student dashboard so they can
+// never disagree about which weight scheme applies to a given student.
+export const PERIOD_COURSE_MAP = { A1: 'WD1', B2: 'WD2', A3: 'CS', A5: 'CS', B4: 'CS', B6: 'CS', B8: 'CS' };
+
+export function periodToCourseKey(period) {
+    const p = String(period || '').trim().toUpperCase();
+    if (PERIOD_COURSE_MAP[p]) return PERIOD_COURSE_MAP[p];
+    // Fall back to legacy hyphenated codes (e.g. "WD1-A1") or a bare "CS"/"AS" value
+    const prefix = p.split('-')[0];
+    if (COURSE_WEIGHTS[prefix]) return prefix;
+    if (p.includes('CS')) return 'CS';
+    if (p.includes('WD2')) return 'WD2';
+    if (p.includes('WD1')) return 'WD1';
+    return null;
+}
+
 export function getAssignmentCategory(name, courseKey) {
     const lowerName = name.toLowerCase();
 

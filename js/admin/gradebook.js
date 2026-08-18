@@ -8,7 +8,7 @@
 
 // Weighted grading config is shared with the student dashboard via js/modules/grade-weights.js —
 // edit there, not here, so teacher and student views never diverge.
-import { COURSE_WEIGHTS, getAssignmentCategory } from '../modules/grade-weights.js';
+import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js';
 
 // Dynamically load Chart.js for the Analytics Graph
 if (!document.getElementById('chartjs-lib')) {
@@ -18,14 +18,11 @@ if (!document.getElementById('chartjs-lib')) {
     document.head.appendChild(script);
 }
 
-// Current bell-schedule period codes don't carry a course prefix the way the
-// old "WD1-A1"-style section_ids did, so period-group filtering (below) needs
-// an explicit map instead of splitting on a hyphen. Source: live roster
-// enrollment (students.course_id -> courses.course_name), same mapping used
-// for the Daily Agenda schedule links.
-const PERIOD_COURSE_MAP = { 'A1': 'WD1', 'B2': 'WD2', 'A3': 'CS', 'A5': 'CS', 'B4': 'CS', 'B6': 'CS', 'B8': 'CS' };
+// Period-group filtering (the "All WD1"/"All CS" dropdown options) needs to
+// resolve a bare period code (A1, A3, B2...) to its course the same way
+// periodToCourseKey() does for grade weighting, so the two can't disagree.
 function periodGroupPrefix(period) {
-    return PERIOD_COURSE_MAP[period] || String(period).split('-')[0];
+    return periodToCourseKey(period) || String(period).split('-')[0];
 }
 
 let allStudents = [];
@@ -841,8 +838,9 @@ function isAssignmentVisible(name, period) {
         const prefix = period.split('-')[1];
         return resolvedTarget === prefix;
     }
-    
-    return period.includes(resolvedTarget);
+
+    // period is a specific period code (e.g. "A5", "B2", or a legacy "WD1-A1")
+    return periodGroupPrefix(period) === resolvedTarget;
 }
 
 function abbreviateAssignmentName(name) {
@@ -984,7 +982,7 @@ function renderGradebook(students, grades, currentPeriod) {
 
 sortStudentsArray(students).forEach((s, rowIndex) => {
         const sGrades = grades[s.studentId] || {};
-        const courseKey = s.period.startsWith('WD1') ? 'WD1' : s.period.startsWith('WD2') ? 'WD2' : s.period.startsWith('AS') ? 'AS' : 'CS';
+        const courseKey = periodToCourseKey(s.period) || 'CS';
         
         // Alternating row background for better readability
         const rowBgClass = rowIndex % 2 === 0 ? 'bg-white' : 'bg-light';
