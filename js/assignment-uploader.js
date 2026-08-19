@@ -1,6 +1,6 @@
 /**
  * CHS Web Design - Universal Assignment Uploader
- * MIGRATED: Firebase removed. Uses MariaDB API + auth-guard.js for authentication.
+ * Uses MariaDB API + auth-guard.js for authentication.
  */
 
 let currentStudent = null; // { student_id, first_name, last_name, username, section_id }

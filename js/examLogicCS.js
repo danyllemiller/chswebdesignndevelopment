@@ -1,7 +1,7 @@
 // exam-engine.js
 /**
  * COMPUTER SCIENCE SUMMATIVE EXAM ENGINE (PROCTOR EDITION)
- * MIGRATED: Firebase removed. Uses MariaDB API + auth-guard.js.
+ * Uses MariaDB API + auth-guard.js.
  * - Dynamic 5-Question Per Chapter pooling logic (15 or 20 total questions).
  * - Interactive CS Notebook iframe integration.
  * - Grade keep-highest logic preserved.

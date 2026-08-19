@@ -1,6 +1,6 @@
 /**
  * CHS Web Design - Admin Rubric Manager
- * MIGRATED: Firebase removed. Uses MariaDB API + auth-guard.js.
+ * Uses MariaDB API + auth-guard.js.
  * Handles the creation of Rubrics, Self-Assessments, and Auto-Grader Rules.
  */
 

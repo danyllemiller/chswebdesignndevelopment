@@ -165,16 +165,6 @@ window.launchGame = async function(gameId) {
 // 4. DATA FETCH & INITIALIZATION (MariaDB / local pool)
 // ======================================================
 
-// No-op shims so game engines that reference Firebase globals don't crash.
-// Multiplayer is solo-only; these stubs silently do nothing.
-window.doc        = () => ({});
-window.getDoc     = async () => ({ exists: () => false, data: () => ({}) });
-window.setDoc     = async () => {};
-window.updateDoc  = async () => {};
-window.onSnapshot = () => () => {};   // returns a no-op unsubscribe fn
-window.collection = () => ({});
-window.getDocs    = async () => ({ docs: [] });
-
 async function loadGameDataFromPool() {
     try {
         // Determine chapter filter from URL path or page title

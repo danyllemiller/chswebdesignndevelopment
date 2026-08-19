@@ -1,7 +1,7 @@
 // js/admin/payroll.js
 /**
  * Master Payroll & Timeclock Dashboard
- * MIGRATED: Firebase removed. Uses MariaDB API + auth-guard.js for authentication.
+ * Uses MariaDB API + auth-guard.js for authentication.
  */
 
 // ============================================================================
@@ -257,7 +257,7 @@ function getExpectedDuration(dateStr, periodStr) {
 }
 
 // ============================================================================
-// TIMESHEET ADAPTER: MariaDB row → Firebase-compatible shape
+// TIMESHEET ADAPTER: MariaDB row → legacy timesheet object shape
 // ============================================================================
 function adaptTimesheetRow(row, periodStr) {
     // date: MariaDB DATE serialized as ISO string or Date object

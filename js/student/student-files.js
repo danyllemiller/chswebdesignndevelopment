@@ -1,6 +1,6 @@
 /**
  * CHS Web Design - Student File Manager (Workspace Edition)
- * MIGRATED: Firebase removed. Uses MariaDB API + auth-guard.js for authentication.
+ * Uses MariaDB API + auth-guard.js for authentication.
  * Handles: Virtual File System, Folder Navigation, Move/Delete/Download.
  * INCLUDES: Peer-to-peer file sharing, Code Editor, and Fetch API fix.
  */

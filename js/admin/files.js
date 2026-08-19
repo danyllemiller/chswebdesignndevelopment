@@ -2,7 +2,7 @@
  * CHS Web Design - Admin Student Files Controller
  * -----------------------------------------------
  * Allows the teacher to select a student from the roster and view their HostGator files.
- * MIGRATED: Firebase removed. Uses MariaDB API + auth-guard.js for authentication.
+ * Uses MariaDB API + auth-guard.js for authentication.
  */
 
 (function() {

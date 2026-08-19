@@ -1,6 +1,6 @@
  /**
  * REUSABLE PRE-TEST ENGINE (DIAGNOSTIC EDITION)
- * MIGRATED: Firebase removed. Uses MariaDB API + auth-guard.js.
+ * Uses MariaDB API + auth-guard.js.
  */
 
 // --- Dependencies Injection ---

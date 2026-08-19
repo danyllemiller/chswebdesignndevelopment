@@ -3,7 +3,7 @@
  * ---------------------------------------------------------------------
  * Dedicated controller for the student-notes.html page.
  * Handles the rich text editor and note sidebar.
- * Uses MariaDB API endpoints only (no Firebase).
+ * Uses MariaDB API endpoints only.
  */
 
 (function() {
