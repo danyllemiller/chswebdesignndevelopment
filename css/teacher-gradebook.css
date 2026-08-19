@@ -7,17 +7,25 @@
 /* =========================================
    GRADEBOOK CONTAINER & SCROLLING (THE FIX)
    ========================================= */
-/* CRITICAL: Forces horizontal scrolling and natural vertical expansion */
-.gradebook-container,
-.table-responsive { 
-    max-height: none !important; 
-    overflow-x: auto !important; 
-    overflow-y: visible !important;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 0.375rem; 
-    border: 0.0625rem solid var(--sheet-border); 
+.gradebook-container {
+    border-radius: 0.375rem;
+    border: 0.0625rem solid var(--sheet-border);
     margin-bottom: 1rem;
     background: #fff;
+}
+
+/* Bounded, independently-scrolling pane so the sticky header/rows have an
+   actual scrollport to stick within. Previously this had overflow-x:auto
+   with overflow-y:visible and no max-height — per spec, overflow-y:visible
+   computes to auto once overflow-x isn't visible, so the browser already
+   treated this as a scroll container, just one that (with max-height:none)
+   never had bounded space to scroll internally, so position:sticky never
+   visibly stuck to anything. */
+.table-responsive {
+    max-height: 80vh;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* CRITICAL: Forces table to expand to its true width, enabling horizontal scroll */
