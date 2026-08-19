@@ -357,6 +357,137 @@ router.post('/admin/upload-roster', async (req, res) => {
     }
 });
 
+// Given the full roster CSV that's about to be uploaded, finds any
+// currently-active student NOT present in it — i.e. dropped/transferred
+// since the last upload — and suggests archive (kept, hidden from the
+// active roster) vs delete (removed entirely, including grades) based on
+// how long they were actually active: under ~1 quarter of activity (or
+// none at all) suggests delete since there's nothing meaningful to lose,
+// a full quarter+ suggests archive to preserve their record. This is a
+// suggestion only — nothing is changed until /admin/roster-apply-decisions
+// is called with the teacher's reviewed choices.
+router.post('/admin/roster-diff', async (req, res) => {
+    let students = req.body;
+    if (!students) return res.status(400).json({ error: 'Roster payload is required.' });
+    if (!Array.isArray(students)) students = [students];
+    const uploadedIds = new Set(
+        students.map((s) => String(s.student_id || s.studentId || '').trim()).filter(Boolean)
+    );
+    if (uploadedIds.size === 0) return res.status(400).json({ error: 'No student IDs found in payload.' });
+
+    try {
+        const connection = await getDbConnection();
+        const year = getCurrentSchoolYear();
+        const [activeRows] = await connection.execute(
+            `SELECT s.student_id, s.first_name, s.last_name, s.section_id, COALESCE(c.course_name, '') AS course_name
+             FROM students s
+             LEFT JOIN class_sections cs ON s.section_id = cs.section_id
+             LEFT JOIN courses c ON cs.course_id = c.course_id
+             WHERE (s.archived IS NULL OR s.archived = 0)
+               AND s.school_year = ?
+               AND (s.role IS NULL OR LOWER(s.role) <> 'teacher')
+               AND s.section_id <> 'Teacher'`,
+            [year]
+        );
+        const missing = activeRows.filter((r) => !uploadedIds.has(String(r.student_id).trim()));
+
+        if (missing.length === 0) {
+            await connection.end();
+            return res.json({ missing: [] });
+        }
+
+        const ids = missing.map((m) => m.student_id);
+        const placeholders = ids.map(() => '?').join(',');
+        const [respRows] = await connection.execute(
+            `SELECT student_id, MIN(timestamp) AS earliest FROM responses WHERE student_id IN (${placeholders}) GROUP BY student_id`,
+            ids
+        );
+        const [clockRows] = await connection.execute(
+            `SELECT student_id, MIN(timestamp) AS earliest FROM clockins WHERE student_id IN (${placeholders}) GROUP BY student_id`,
+            ids
+        );
+        await connection.end();
+
+        const earliestByStudent = {};
+        [...respRows, ...clockRows].forEach((r) => {
+            if (!r.earliest) return;
+            const t = new Date(r.earliest).getTime();
+            if (!earliestByStudent[r.student_id] || t < earliestByStudent[r.student_id]) {
+                earliestByStudent[r.student_id] = t;
+            }
+        });
+
+        const QUARTER_DAYS = 45; // ~1 quarter of a school year, in calendar days
+        const results = missing.map((m) => {
+            const earliestMs = earliestByStudent[m.student_id];
+            const daysActive = earliestMs ? Math.round((Date.now() - earliestMs) / 86400000) : null;
+            const suggestedAction = (daysActive !== null && daysActive >= QUARTER_DAYS) ? 'archive' : 'delete';
+            return { ...m, daysActive, suggestedAction };
+        });
+
+        res.json({ missing: results });
+    } catch (err) {
+        console.error(err && err.stack ? err.stack : err);
+        res.status(500).json({ error: 'Failed to compute roster diff.' });
+    }
+});
+
+// Applies the teacher's reviewed archive/delete decisions for students who
+// were missing from the latest roster CSV. "archive" flips students.archived
+// so they're hidden but every record is preserved. "delete" removes the
+// student and every row referencing them across the app (grades, notes,
+// clock-ins, planner data, etc.) — most of those tables have no cascading
+// foreign key to students, so each is cleaned up explicitly to avoid
+// leaving orphaned rows behind.
+const STUDENT_ID_TABLES = [
+    'appointments', 'class_poll_votes', 'clockins', 'cs_notebook', 'exam_progress',
+    'gallery_items', 'grades', 'intervention_enrollments', 'intervention_goals',
+    'intervention_journal', 'intervention_submissions', 'intervention_tests',
+    'notebook_entries', 'planner_habits', 'planner_habit_log', 'planner_preferences',
+    'planner_todos', 'responses', 'self_assessments', 'student_additional_sections',
+    'student_grade_log', 'student_paystubs', 'student_responses', 'student_stickers',
+    'timeclock_log', 'timesheets', 'turnins'
+];
+
+router.post('/admin/roster-apply-decisions', async (req, res) => {
+    const { decisions } = req.body || {};
+    if (!Array.isArray(decisions) || decisions.length === 0) {
+        return res.status(400).json({ error: 'decisions array is required.' });
+    }
+
+    let connection;
+    try {
+        connection = await getDbConnection();
+        await connection.beginTransaction();
+
+        let archived = 0, deleted = 0;
+        for (const d of decisions) {
+            const studentId = String(d.student_id || '').trim();
+            if (!studentId) continue;
+
+            if (d.action === 'archive') {
+                await connection.execute('UPDATE students SET archived = 1 WHERE student_id = ?', [studentId]);
+                archived++;
+            } else if (d.action === 'delete') {
+                for (const table of STUDENT_ID_TABLES) {
+                    await connection.execute(`DELETE FROM ${table} WHERE student_id = ?`, [studentId]);
+                }
+                await connection.execute('DELETE FROM students WHERE student_id = ?', [studentId]);
+                deleted++;
+            }
+            // action === 'skip' (or anything else): leave the student untouched.
+        }
+
+        await connection.commit();
+        await connection.end();
+        res.json({ success: true, archived, deleted });
+    } catch (err) {
+        console.error(err && err.stack ? err.stack : err);
+        try { if (connection) { await connection.rollback(); await connection.end(); } } catch (_) {}
+        res.status(500).json({ error: 'Failed to apply roster decisions.' });
+    }
+});
+
 router.post('/admin/reset-student', async (req, res) => {
     const { student_id } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id is required.' });
