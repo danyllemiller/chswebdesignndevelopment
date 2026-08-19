@@ -918,19 +918,6 @@ if (!courseCfg) {
   let stopwatchMode = false;
   let stopwatchElapsed = 0;
 
-  function beep() {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.frequency.value = 880;
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.4);
-    } catch (e) { /* audio not available */ }
-  }
-
   function fmtTimer(totalSecs) {
     const m = Math.floor(totalSecs / 60);
     const s = totalSecs % 60;
@@ -950,7 +937,7 @@ if (!courseCfg) {
         timerRemaining = 0;
         updateTimerDisplay();
         pauseTimer();
-        beep();
+        startAlarm();
         return;
       }
     }
@@ -958,6 +945,7 @@ if (!courseCfg) {
   }
 
   function startTimer() {
+    primeAlarmAudio(); // unlock the alarm sound now, on this click, in case the sound meter was never opened
     timerRunning = true;
     document.getElementById('timerStartPause').textContent = 'Pause';
     timerInterval = setInterval(timerTick, 1000);
