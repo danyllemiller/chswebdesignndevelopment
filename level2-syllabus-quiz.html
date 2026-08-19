@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Syllabus Quiz | CHS Web Design II &amp; AS</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet"/>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=7"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    .quiz-q { border-left: 4px solid var(--primary-color); }
+    .quiz-q.correct { border-left-color: #198754; background: #f0fff4; }
+    .quiz-q.incorrect { border-left-color: #dc3545; background: #fff5f5; }
+    .quiz-explain { display: none; font-size: .85rem; }
+    .quiz-q.answered .quiz-explain { display: block; }
+    .form-check-label { cursor: pointer; }
+    #quizResult { display: none; }
+  </style>
+</head>
+<body class="bg-white">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container my-5" style="max-width: 800px;">
+    <div class="text-center mb-5">
+      <h1 class="gochi text-primary display-4 mb-2">Syllabus Quiz</h1>
+      <p class="text-muted fw-bold">Web Design II, III &amp; AS | Instructor: Ms. Miller</p>
+      <p class="text-muted small">10 questions on the grading policy, Career Readiness, and academic integrity. Answer every question, then check your score.</p>
+    </div>
+
+    <form id="quizForm">
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="b">
+        <div class="card-body">
+          <p class="fw-bold">1. In Web Design II, III &amp; AS, what percentage of your grade comes from Assignments?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1a" value="a"><label class="form-check-label" for="q1a">20%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1b" value="b"><label class="form-check-label" for="q1b">35%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1c" value="c"><label class="form-check-label" for="q1c">50%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1d" value="d"><label class="form-check-label" for="q1d">60%</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Assignments are 35% of your grade — the same weight as Projects/Quizzes.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="c">
+        <div class="card-body">
+          <p class="fw-bold">2. How much of your grade comes from Projects/Quizzes?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2a" value="a"><label class="form-check-label" for="q2a">10%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2b" value="b"><label class="form-check-label" for="q2b">20%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2c" value="c"><label class="form-check-label" for="q2c">35%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2d" value="d"><label class="form-check-label" for="q2d">50%</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Projects/Quizzes are 35% of your grade, matching Assignments.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="a">
+        <div class="card-body">
+          <p class="fw-bold">3. How much of your grade comes from the Final Exam, and how much from Career Readiness?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3a" value="a"><label class="form-check-label" for="q3a">Final Exam 20%, Career Readiness 10%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3b" value="b"><label class="form-check-label" for="q3b">Final Exam 10%, Career Readiness 20%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3c" value="c"><label class="form-check-label" for="q3c">Final Exam 35%, Career Readiness 35%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3d" value="d"><label class="form-check-label" for="q3d">Final Exam 0%, Career Readiness 0%</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Assignments (35%) + Projects/Quizzes (35%) + Final Exam (20%) + Career Readiness (10%) = 100%.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="c">
+        <div class="card-body">
+          <p class="fw-bold">4. How do you earn the $5 bonus on your bi-weekly simulated paycheck?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4a" value="a"><label class="form-check-label" for="q4a">Finishing every assignment early</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4b" value="b"><label class="form-check-label" for="q4b">Having a perfect Guild Score</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4c" value="c"><label class="form-check-label" for="q4c">Clocking in on time using the Employee Portal</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4d" value="d"><label class="form-check-label" for="q4d">Winning a client pitch</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>On-time clock-ins through the Employee Portal earn a $5 bonus on your bi-weekly simulated paycheck. Tardiness is tracked just like a real job.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="d">
+        <div class="card-body">
+          <p class="fw-bold">5. Your Guild Score is a separate class ranking. What three signals build it, and at what weights?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5a" value="a"><label class="form-check-label" for="q5a">Grades 100%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5b" value="b"><label class="form-check-label" for="q5b">Grades 25%, Habits 25%, Attendance 50%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5c" value="c"><label class="form-check-label" for="q5c">Attendance 100%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5d" value="d"><label class="form-check-label" for="q5d">Grades 50%, Habits (Planner) 25%, Attendance (Clock-In) 25%</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Guild Score = Grades 50% + Habits (My Planner) 25% + Attendance (Clock-In) 25%.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="b">
+        <div class="card-body">
+          <p class="fw-bold">6. How is your My Planner habit-tracker data calculated for the Guild Score?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6a" value="a"><label class="form-check-label" for="q6a">Only today's entry counts</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6b" value="b"><label class="form-check-label" for="q6b">It's averaged over the last 28 days</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6c" value="c"><label class="form-check-label" for="q6c">It's averaged over the whole school year</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6d" value="d"><label class="form-check-label" for="q6d">It doesn't affect your Guild Score</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Habit data from My Planner is averaged over the last 28 days and makes up 25% of your Guild Score.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="c">
+        <div class="card-body">
+          <p class="fw-bold">7. You want to redo a project to improve your grade. What's the rule?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7a" value="a"><label class="form-check-label" for="q7a">Redos aren't allowed</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7b" value="b"><label class="form-check-label" for="q7b">You can redo it any time before the end of the school year</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7c" value="c"><label class="form-check-label" for="q7c">You can redo it until you're satisfied, within the current or immediately following unit</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7d" value="d"><label class="form-check-label" for="q7d">Only the teacher can request a redo, not the student</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Redos are welcome — redo any project until you're satisfied, within the current or immediately following unit.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="a">
+        <div class="card-body">
+          <p class="fw-bold">8. You know you'll need extra time on an assignment. What's the correct move?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8a" value="a"><label class="form-check-label" for="q8a">Email at least 24 hours in advance to request an extension</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8b" value="b"><label class="form-check-label" for="q8b">Just turn it in whenever — extensions aren't needed</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8c" value="c"><label class="form-check-label" for="q8c">Wait until the due date to ask</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8d" value="d"><label class="form-check-label" for="q8d">Ask a classmate to turn it in for you late</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Life happens — request extensions at least 24 hours in advance by email. Don't wait until the day of. Work turned in late without an extension is capped at 60% (D-).</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="d">
+        <div class="card-body">
+          <p class="fw-bold">9. What's true about using AI tools like ChatGPT, Claude, or Copilot on your work?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9a" value="a"><label class="form-check-label" for="q9a">AI use is banned entirely</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9b" value="b"><label class="form-check-label" for="q9b">You can submit AI output as your own without saying so</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9c" value="c"><label class="form-check-label" for="q9c">AI use always results in a zero</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9d" value="d"><label class="form-check-label" for="q9d">AI is allowed for learning and assistance, but you must cite it and be able to explain every line</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Using AI tools is allowed for learning and assistance. Submitting AI output as your own original work without understanding or attribution is not — if you use it, cite it and be able to explain every line.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="c">
+        <div class="card-body">
+          <p class="fw-bold">10. At which tardy does your teacher first contact home about it?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10a" value="a"><label class="form-check-label" for="q10a">The 1st</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10b" value="b"><label class="form-check-label" for="q10b">The 2nd</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10c" value="c"><label class="form-check-label" for="q10c">The 3rd</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10d" value="d"><label class="form-check-label" for="q10d">The 5th</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Every student is marked absent by default until a Tardy Form is turned in. The first call home comes at the third tardy.</p>
+        </div>
+      </div>
+
+      <div class="text-center mt-4 mb-5">
+        <button type="submit" class="btn btn-primary btn-lg px-5 fw-bold">Check My Answers</button>
+      </div>
+
+      <div id="quizResult" class="card shadow-sm border-primary mb-5">
+        <div class="card-body text-center p-4">
+          <h3 class="fw-bold mb-2" id="quizScoreText"></h3>
+          <p class="text-muted mb-0" id="quizScoreNote"></p>
+        </div>
+      </div>
+
+    </form>
+  </section>
+
+  <div id="footer-placeholder" class="no-print"></div>
+  <a href="#" class="back-to-top text-decoration-none no-print" title="Back to Top">🚀</a>
+
+  <script>
+    document.getElementById('quizForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const questions = document.querySelectorAll('.quiz-q');
+      let correctCount = 0;
+      let unanswered = 0;
+
+      questions.forEach(q => {
+        const name = q.querySelector('input[type="radio"]').name;
+        const selected = q.querySelector(`input[name="${name}"]:checked`);
+        const answer = q.dataset.answer;
+
+        q.classList.add('answered');
+        q.classList.remove('correct', 'incorrect');
+
+        if (!selected) {
+          unanswered++;
+          return;
+        }
+        if (selected.value === answer) {
+          correctCount++;
+          q.classList.add('correct');
+        } else {
+          q.classList.add('incorrect');
+        }
+      });
+
+      const resultCard = document.getElementById('quizResult');
+      const scoreText = document.getElementById('quizScoreText');
+      const scoreNote = document.getElementById('quizScoreNote');
+      const pct = Math.round((correctCount / questions.length) * 100);
+
+      scoreText.textContent = `${correctCount} / ${questions.length} correct (${pct}%)`;
+      scoreNote.textContent = unanswered > 0
+        ? `You left ${unanswered} question(s) blank — those are marked as missed above.`
+        : (pct === 100 ? "Perfect score — you're ready to go." : 'Review the highlighted questions above, then try again.');
+      resultCard.style.display = 'block';
+      resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  </script>
+</body>
+</html>
