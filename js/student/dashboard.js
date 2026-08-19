@@ -2,7 +2,7 @@
 import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
 import { escapeHtml, parsePts } from '../modules/utils.js';
-import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=2';
+import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=3';
 
 // --- INJECT TURN-IN MODAL ON LOAD ---
 function injectTurnInModal() {
@@ -125,74 +125,107 @@ function isAssignmentVisible(name, period, registryData) {
 }
 
 // --- UPDATED LOAD GRADES (MARIADB INTEGRATION) ---
-// A student enrolled in more than one real graded course (e.g. primary CS,
-// additional WD1) needs their own course switcher — the teacher gradebook
-// already handles this with a filter dropdown; this mirrors that pattern
-// instead of trying to render every course's grades on screen at once.
-async function renderCourseSwitcher(user, activeSectionId) {
-    const el = document.getElementById('courseSwitcher');
-    if (!el) return;
+const COURSE_LABELS = { WD1: 'Web Design 1', WD2: 'Web Design 2', AS: 'Advanced Studies', CS: 'Computer Science', INTV: 'Intervention' };
 
-    const primaryPeriod = (user.section_id || '').trim().toUpperCase();
-    const courses = new Map(); // courseKey -> representative section_id
-    const primaryCourseKey = periodToCourseKey(primaryPeriod);
-    if (primaryCourseKey) courses.set(primaryCourseKey, primaryPeriod);
-
-    try {
-        const extra = await apiFetch(`/api/admin/student-sections?student_id=${user.student_id}`);
-        (Array.isArray(extra) ? extra : []).forEach((sec) => {
-            const key = periodToCourseKey(String(sec.section_id || '').trim().toUpperCase());
-            // Only real graded courses get a tab — things like Intervention
-            // have no weight scheme of their own and aren't a "gradebook".
-            if (key && COURSE_WEIGHTS[key] && !courses.has(key)) {
-                courses.set(key, String(sec.section_id).trim().toUpperCase());
-            }
-        });
-    } catch (e) { console.error('Could not load additional sections:', e); }
-
-    if (courses.size <= 1) { el.classList.add('d-none'); el.innerHTML = ''; return; }
-
-    const courseNames = { WD1: 'Web Design 1', WD2: 'Web Design 2', AS: 'Advanced Studies', CS: 'Computer Science' };
-    el.innerHTML = Array.from(courses.entries()).map(([key, sectionId]) => {
-        const isActive = sectionId === (activeSectionId || primaryPeriod);
-        return `<button type="button" class="btn btn-sm ${isActive ? 'btn-primary' : 'btn-outline-primary'}" data-section-id="${sectionId}">${courseNames[key] || key}</button>`;
-    }).join('');
-    el.classList.remove('d-none');
-    el.querySelectorAll('button').forEach((btn) => {
-        btn.addEventListener('click', () => loadGrades(btn.dataset.sectionId));
-    });
+// Curriculum-chapter features (proficiency scales, growth chart) only make
+// sense for courses that actually have a fixed chapter/unit sequence.
+// Intervention assignments are ad-hoc, so it gets stats + a grade table only.
+function hasCurriculumChapters(courseKey) {
+    return courseKey !== 'INTV';
 }
 
-async function loadGrades(sectionOverride) {
-    const user = getLoggedInUser();
-    if (!user || !user.student_id) return;
+// Builds the full markup for one course's panel — stats cards, badges,
+// grade table, and (if applicable) proficiency scales + growth chart — all
+// with IDs suffixed by courseKey so multiple panels can coexist on the page.
+function coursePanelTemplate(courseKey, sectionId) {
+    const suffix = `-${courseKey}`;
+    const chapterBlock = hasCurriculumChapters(courseKey) ? `
+        <div id="proficiencyContainer${suffix}" class="mb-4"></div>
+        <div class="card shadow-sm mb-4 border-0 d-none" id="chartCard${suffix}">
+            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                <h6 class="fw-bold text-primary mb-0"><i class="fas fa-chart-line me-2"></i>My Proficiency Growth</h6>
+            </div>
+            <div class="card-body">
+                <div style="max-height: 350px;"><canvas id="selfAssessChart${suffix}"></canvas></div>
+            </div>
+        </div>` : '';
+
+    return `
+    <div class="course-panel mb-5" id="coursePanel${suffix}">
+        <div class="d-flex align-items-center mb-1">
+            <h3 class="text-primary fw-bold mb-0">${COURSE_LABELS[courseKey] || courseKey}</h3>
+            <div id="overallBadge${suffix}" class="d-none ms-2"></div>
+        </div>
+        <p class="text-muted small mb-3">Period ${escapeHtml(sectionId)}</p>
+
+        <div class="row g-3 mb-4" id="statsContainer${suffix}" style="display:none;">
+            <div class="col-md-4">
+                <div class="summary-card shadow-sm bg-white p-3 rounded border-start border-4 border-primary">
+                    <small class="text-uppercase fw-bold text-muted" style="font-size: 0.75rem;">Overall Grade</small>
+                    <div class="d-flex align-items-end">
+                        <h2 id="overallPercent${suffix}" class="mb-0 text-primary fw-bold">--%</h2>
+                        <h4 id="overallLetter${suffix}" class="mb-0 ms-2 fw-bold text-muted"></h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="summary-card shadow-sm bg-white p-3 rounded border-start border-4" style="border-left-color: #34a853 !important;">
+                    <small class="text-uppercase fw-bold text-muted" style="font-size: 0.75rem;">Assignments Completed</small>
+                    <h2 id="completedCount${suffix}" class="mb-0 fw-bold text-dark">0 / 0</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="summary-card shadow-sm bg-white p-3 rounded border-start border-4" style="border-left-color: #fbbc05 !important;">
+                    <small class="text-uppercase fw-bold text-muted" style="font-size: 0.75rem;">Points Earned</small>
+                    <h2 id="pointsEarned${suffix}" class="mb-0 fw-bold text-dark">0 pts</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4 border-0 d-none" id="badgesCard${suffix}">
+            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                <h6 class="fw-bold text-primary mb-0"><i class="fas fa-award me-2"></i>My Achievements</h6>
+            </div>
+            <div class="card-body">
+                <div id="badgesContainer${suffix}" class="d-flex flex-wrap gap-3"></div>
+            </div>
+        </div>
+
+        <div class="gradebook-container shadow-sm mb-4">
+            <div class="table-responsive table-responsive-gb">
+                <table class="table table-spreadsheet mb-0">
+                    <thead id="gradeHead${suffix}"></thead>
+                    <tbody id="gradeBody${suffix}">
+                        <tr><td class="p-5 text-center"><div class="spinner-border text-primary"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        ${chapterBlock}
+    </div>
+    <hr class="my-5">`;
+}
+
+// Loads and renders one course's full panel — its own stats, badges, grade
+// table, and (if applicable) proficiency scales + growth chart, all scoped
+// by courseKey so this can run independently for every enrolled course.
+async function renderCoursePanel(user, courseKey, sectionId) {
+    const root = document.getElementById('courseGradesRoot');
+    if (!root) return;
+    // loadGrades() clears #courseGradesRoot before calling this for each
+    // course, so panels are always appended fresh, never patched in place.
+    root.insertAdjacentHTML('beforeend', coursePanelTemplate(courseKey, sectionId));
 
     try {
-        const gradebookUrl = `/api/student/course-gradebook?student_id=${user.student_id}`
-            + (sectionOverride ? `&section_id=${encodeURIComponent(sectionOverride)}` : '');
         const [data, saData] = await Promise.all([
-            apiFetch(gradebookUrl),
+            apiFetch(`/api/student/course-gradebook?student_id=${user.student_id}&section_id=${encodeURIComponent(sectionId)}`),
             apiFetch(`/api/student/self-assessments?student_id=${user.student_id}`)
         ]);
 
-        const welcomeEl = document.getElementById('welcomeMessage');
-        if (welcomeEl) welcomeEl.innerText = `Welcome, ${user.first_name}!`;
+        const studentPeriod = (data.section_id || sectionId || "").trim().toUpperCase();
 
-        const studentPeriod = (data.section_id || user.section_id || "").trim().toUpperCase();
-        let courseKey = periodToCourseKey(studentPeriod) || "WD1";
-
-        renderCourseSwitcher(user, studentPeriod);
-
-        const subtitleEl = document.getElementById('userSubtitle');
-        if (subtitleEl) {
-            if (courseKey === "WD1") subtitleEl.innerText = `Viewing Web Design Gradebook (Period ${studentPeriod})`;
-            if (courseKey === "WD2") subtitleEl.innerText = `Viewing Advanced Web Design Gradebook (Period ${studentPeriod})`;
-            if (courseKey === "AS") subtitleEl.innerText = `Viewing Advanced Studies Gradebook (Period ${studentPeriod})`;
-            if (courseKey === "CS") subtitleEl.innerText = `Viewing Computer Science Gradebook (Period ${studentPeriod})`;
-        }
-
-        // Key everything by exam_id only — avoids duplicate columns when title !== exam_id
         const registryData = {};
+        const myGrades = {};
         if (Array.isArray(data.assignments)) {
             data.assignments.forEach((assignment) => {
                 const examIdKey = String(assignment.exam_id || '').trim();
@@ -209,14 +242,6 @@ async function loadGrades(sectionOverride) {
                             : assignment.period_due_dates)
                         : {}
                 };
-            });
-        }
-
-        const myGrades = {};
-        if (Array.isArray(data.assignments)) {
-            data.assignments.forEach((assignment) => {
-                const examIdKey = String(assignment.exam_id || '').trim();
-                if (!examIdKey) return;
                 myGrades[examIdKey] = {
                     score: assignment.score,
                     timestamp: assignment.timestamp,
@@ -231,26 +256,58 @@ async function loadGrades(sectionOverride) {
                 .concat(Object.keys(registryData))
                 .filter(k => k !== 'lastSubmitDate' && k !== 'uid' && !k.endsWith('-Score'))
         );
-            
-const keys = Array.from(allKeys)
+        const keys = Array.from(allKeys)
             .filter(key => isAssignmentVisible(key, studentPeriod, registryData))
             .sort();
-            
-calculateGradeStats(keys, myGrades, registryData, courseKey);
-        calculateBadges(keys, myGrades, registryData);
-        renderGradeTable(keys, myGrades, user.student_id, registryData, studentPeriod);
-        renderProficiencyScales(keys, myGrades, user.student_id, courseKey, saData.assessments);
-        
-        // Render self-assessment chart with BOTH perceived (self-assessment) AND actual (exam) levels
-        if (saData.assessments) {
-            renderSelfAssessmentChart(saData.assessments, courseKey, myGrades);
+
+        calculateGradeStats(keys, myGrades, registryData, courseKey);
+        calculateBadges(keys, myGrades, registryData, courseKey);
+        renderGradeTable(keys, myGrades, user.student_id, registryData, studentPeriod, courseKey);
+
+        if (hasCurriculumChapters(courseKey)) {
+            renderProficiencyScales(keys, myGrades, user.student_id, courseKey, saData.assessments);
+            if (saData.assessments) renderSelfAssessmentChart(saData.assessments, courseKey, myGrades);
         }
-            
     } catch (e) {
-        console.error("Error loading grades:", e);
-        const gb = document.getElementById('gradeTableContainer') || document.getElementById('statsContainer')?.parentElement;
-        if (gb) gb.insertAdjacentHTML('afterbegin', `<div class="alert alert-danger mt-3"><strong>Could not load your gradebook.</strong> Please refresh the page or contact your teacher if this persists.</div>`);
+        console.error(`Error loading grades for ${courseKey}:`, e);
+        const body = document.getElementById(`gradeBody-${courseKey}`);
+        if (body) body.innerHTML = `<tr><td class="p-4 text-center text-danger">Could not load this class's gradebook. Please refresh or contact your teacher.</td></tr>`;
     }
+}
+
+async function loadGrades() {
+    const user = getLoggedInUser();
+    if (!user || !user.student_id) return;
+
+    const welcomeEl = document.getElementById('welcomeMessage');
+    if (welcomeEl) welcomeEl.innerText = `Welcome, ${user.first_name}!`;
+    const subtitleEl = document.getElementById('userSubtitle');
+    if (subtitleEl) subtitleEl.innerText = 'Your grades across every class you\'re enrolled in:';
+
+    const primaryPeriod = (user.section_id || '').trim().toUpperCase();
+    const courses = new Map(); // courseKey -> representative section_id
+    const primaryCourseKey = periodToCourseKey(primaryPeriod);
+    if (primaryCourseKey && COURSE_WEIGHTS[primaryCourseKey]) courses.set(primaryCourseKey, primaryPeriod);
+
+    try {
+        const extra = await apiFetch(`/api/admin/student-sections?student_id=${user.student_id}`);
+        (Array.isArray(extra) ? extra : []).forEach((sec) => {
+            const key = periodToCourseKey(String(sec.section_id || '').trim().toUpperCase());
+            if (key && COURSE_WEIGHTS[key] && !courses.has(key)) {
+                courses.set(key, String(sec.section_id).trim().toUpperCase());
+            }
+        });
+    } catch (e) { console.error('Could not load additional sections:', e); }
+
+    const root = document.getElementById('courseGradesRoot');
+    if (courses.size === 0) {
+        if (root) root.innerHTML = `<div class="alert alert-warning">We couldn't determine your class enrollment. Please contact your teacher.</div>`;
+        return;
+    }
+    if (root) root.innerHTML = '';
+
+    // Each course's panel loads independently so one failing doesn't block the rest.
+    await Promise.all(Array.from(courses.entries()).map(([courseKey, sectionId]) => renderCoursePanel(user, courseKey, sectionId)));
 }
 
 function calculateGradeStats(keys, myGrades, registryData, courseKey) {
@@ -299,14 +356,14 @@ function calculateGradeStats(keys, myGrades, registryData, courseKey) {
     else if (percent >= 70) { letterGrade = 'C'; gradeColor = 'text-secondary'; }
     else if (percent >= 60) { letterGrade = 'D'; gradeColor = 'text-warning'; }
 
-    const statsContainer = document.getElementById('statsContainer');
+    const statsContainer = document.getElementById(`statsContainer-${courseKey}`);
     if (statsContainer) statsContainer.style.display = 'flex';
 
-    const overallEl = document.getElementById('overallPercent');
-    const letterEl = document.getElementById('overallLetter');
-    const countEl = document.getElementById('completedCount');
-    const pointsEl = document.getElementById('pointsEarned');
-    const overallBadge = document.getElementById('overallBadge');
+    const overallEl = document.getElementById(`overallPercent-${courseKey}`);
+    const letterEl = document.getElementById(`overallLetter-${courseKey}`);
+    const countEl = document.getElementById(`completedCount-${courseKey}`);
+    const pointsEl = document.getElementById(`pointsEarned-${courseKey}`);
+    const overallBadge = document.getElementById(`overallBadge-${courseKey}`);
 
     if (overallEl) overallEl.innerText = percent + '%';
     if (letterEl) {
@@ -333,9 +390,9 @@ function calculateGradeStats(keys, myGrades, registryData, courseKey) {
     }
 }
 
-function calculateBadges(keys, myGrades, registryData) {
-    const badgesContainer = document.getElementById('badgesContainer');
-    const badgesCard = document.getElementById('badgesCard');
+function calculateBadges(keys, myGrades, registryData, courseKey) {
+    const badgesContainer = document.getElementById(`badgesContainer-${courseKey}`);
+    const badgesCard = document.getElementById(`badgesCard-${courseKey}`);
     
     if (!badgesContainer) return;
     if (badgesCard) badgesCard.classList.remove('d-none');
@@ -421,9 +478,9 @@ function calculateBadges(keys, myGrades, registryData) {
     }
 }
 
-function renderGradeTable(keys, myGrades, studentId, registryData, studentPeriod) {
-    const thead = document.getElementById('gradeHead');
-    const tbody = document.getElementById('gradeBody');
+function renderGradeTable(keys, myGrades, studentId, registryData, studentPeriod, courseKey) {
+    const thead = document.getElementById(`gradeHead-${courseKey}`);
+    const tbody = document.getElementById(`gradeBody-${courseKey}`);
     if (!thead || !tbody) return;
 
     let headHtml = `<tr><th class="label-cell sticky-col font-monospace px-3 py-3 assignment-header">Assignment</th>`;
@@ -537,7 +594,7 @@ function getRankName(lvl) {
 }
 
 async function renderProficiencyScales(keys, myGrades, userId, courseKey, assessmentsArray) {
-    const container = document.getElementById('proficiencyContainer');
+    const container = document.getElementById(`proficiencyContainer-${courseKey}`);
     if (!container) return;
     
     const selfAssessments = {};
@@ -637,7 +694,7 @@ window.saveSelfAssessment = async function(chapterId, level) {
 
 // --- SELF-ASSESSMENT CHART RENDERING ---
 async function renderSelfAssessmentChart(assessmentsArray, courseKey, myGrades) {
-    const chartCard = document.getElementById('chartCard');
+    const chartCard = document.getElementById(`chartCard-${courseKey}`);
     if (!chartCard) {
         console.log('[Chart] No chartCard element found');
         return;
@@ -691,12 +748,14 @@ for (let i = 1; i <= totalItems; i++) {
         actualLevelsData.push(examLevel);
     }
     
-    // Destroy existing chart if any
-    if (window.selfAssessChartInstance) {
-        window.selfAssessChartInstance.destroy();
+    // Destroy this course's existing chart instance, if any — each course
+    // panel has its own canvas/instance so they don't clobber each other.
+    window.selfAssessChartInstances = window.selfAssessChartInstances || {};
+    if (window.selfAssessChartInstances[courseKey]) {
+        window.selfAssessChartInstances[courseKey].destroy();
     }
-    
-    const ctx = document.getElementById('selfAssessChart');
+
+    const ctx = document.getElementById(`selfAssessChart-${courseKey}`);
     if (!ctx) {
         console.log('[Chart] No canvas element found');
         return;
@@ -713,7 +772,7 @@ for (let i = 1; i <= totalItems; i++) {
     const perceivedColor = '#20c997';  // Teal for perceived
     const actualColor = '#fd7e14';   // Orange for actual
     
-    window.selfAssessChartInstance = new Chart(ctx, {
+    window.selfAssessChartInstances[courseKey] = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,

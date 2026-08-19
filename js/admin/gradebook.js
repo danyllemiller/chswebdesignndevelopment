@@ -8,7 +8,7 @@
 
 // Weighted grading config is shared with the student dashboard via js/modules/grade-weights.js —
 // edit there, not here, so teacher and student views never diverge.
-import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=2';
+import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=3';
 
 // Dynamically load Chart.js for the Analytics Graph
 if (!document.getElementById('chartjs-lib')) {
@@ -665,7 +665,8 @@ function updatePeriodDropdown() {
         'WD1': 'Web Design 1',
         'WD2': 'Web Design 2',
         'CS': 'Computer Science',
-        'AS': 'Advanced Studies'
+        'AS': 'Advanced Studies',
+        'INTV': 'Intervention'
     };
 
     Object.keys(groupedPeriods).sort().forEach(prefix => {

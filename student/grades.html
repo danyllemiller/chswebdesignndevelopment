@@ -27,70 +27,15 @@
   <div class="container my-5">
     <div id="student-payroll-container"></div>
     <div id="studentHeader" class="mb-4">
-        <div class="d-flex align-items-center">
-            <h2 class="gochi text-primary mb-0">My Progress Report</h2>
-            <div id="overallBadge" class="d-none"></div>
-        </div>
+        <h2 class="gochi text-primary mb-0">My Progress Report</h2>
         <p class="text-muted" id="userSubtitle">Connecting to Gradebook...</p>
-        <div id="courseSwitcher" class="btn-group d-none mb-2" role="group"></div>
     </div>
 
-    <div class="row g-3 mb-4" id="statsContainer" style="display:none;">
-        <div class="col-md-4">
-            <div class="summary-card shadow-sm bg-white p-3 rounded border-start border-4 border-primary">
-                <small class="text-uppercase fw-bold text-muted" style="font-size: 0.75rem;">Overall Grade</small>
-                <div class="d-flex align-items-end">
-                    <h2 id="overallPercent" class="mb-0 text-primary fw-bold">--%</h2>
-                    <h4 id="overallLetter" class="mb-0 ms-2 fw-bold text-muted"></h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="summary-card shadow-sm bg-white p-3 rounded border-start border-4" style="border-left-color: #34a853 !important;">
-                <small class="text-uppercase fw-bold text-muted" style="font-size: 0.75rem;">Assignments Completed</small>
-                <h2 id="completedCount" class="mb-0 fw-bold text-dark">0 / 0</h2>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="summary-card shadow-sm bg-white p-3 rounded border-start border-4" style="border-left-color: #fbbc05 !important;">
-                <small class="text-uppercase fw-bold text-muted" style="font-size: 0.75rem;">Points Earned</small>
-                <h2 id="pointsEarned" class="mb-0 fw-bold text-dark">0 pts</h2>
-            </div>
-        </div>
-    </div>
-    
-    <div class="card shadow-sm mb-4 border-0 d-none" id="badgesCard">
-        <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-            <h6 class="fw-bold text-primary mb-0"><i class="fas fa-award me-2"></i>My Achievements</h6>
-        </div>
-        <div class="card-body">
-            <div id="badgesContainer" class="d-flex flex-wrap gap-3"></div>
-        </div>
-    </div>
-
-    <div class="gradebook-container shadow-sm mb-5">
-        <div class="table-responsive table-responsive-gb">
-          <table class="table table-spreadsheet mb-0">
-            <thead id="gradeHead"></thead>
-            <tbody id="gradeBody">
-                <tr><td class="p-5 text-center"><div class="spinner-border text-primary"></div><br><small class="text-muted mt-2 d-block">Fetching your scores from MariaDB...</small></td></tr>
-            </tbody>
-          </table>
-        </div>
-    </div>
-
-<div id="proficiencyContainer" class="mt-5 mb-5"></div>
-    
-    <!-- Self-Assessment Progress Chart -->
-    <div class="card shadow-sm mb-5 border-0" id="chartCard">
-        <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-            <h6 class="fw-bold text-primary mb-0"><i class="fas fa-chart-line me-2"></i>My Proficiency Growth</h6>
-        </div>
-        <div class="card-body">
-            <div id="chartContainer" style="max-height: 350px;">
-                <canvas id="selfAssessChart"></canvas>
-            </div>
-        </div>
+    <!-- One full panel (stats, badges, grade table, proficiency scales, growth
+         chart) is rendered per class the student is actually enrolled in —
+         see renderCoursePanel() in dashboard.js. -->
+    <div id="courseGradesRoot">
+        <div class="text-center p-5"><div class="spinner-border text-primary"></div><br><small class="text-muted mt-2 d-block">Fetching your scores from MariaDB...</small></div>
     </div>
   </div>
 
@@ -101,7 +46,7 @@
   <script type="module" src="/js/auth-guard.js"></script>
   <script src="/js/loader.js?v=7"></script>
   
-  <script type="module" src="/js/student/dashboard.js?v=13"></script>
+  <script type="module" src="/js/student/dashboard.js?v=14"></script>
   <script type="module" src="/js/student/student-payroll.js"></script>
   <script type="module" src="/js/student/timeclock.js?v=2"></script>
   <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>

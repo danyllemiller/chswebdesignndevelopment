@@ -4,10 +4,11 @@
 // so the two views can never compute a different percentage for the same data.
 
 export const COURSE_WEIGHTS = {
-    WD1: { assignment: 0.50, project_quiz: 0.20, final: 0.20, career: 0.10 },
-    WD2: { assignment: 0.35, project_quiz: 0.35, final: 0.20, career: 0.10 },
-    AS:  { assignment: 0.35, project_quiz: 0.35, final: 0.20, career: 0.10 }, // Map Advanced Studies matching WD2
-    CS:  { assignment: 0.60, project_quiz: 0.20, final: 0.20, career: 0.00 }
+    WD1:  { assignment: 0.50, project_quiz: 0.20, final: 0.20, career: 0.10 },
+    WD2:  { assignment: 0.35, project_quiz: 0.35, final: 0.20, career: 0.10 },
+    AS:   { assignment: 0.35, project_quiz: 0.35, final: 0.20, career: 0.10 }, // Map Advanced Studies matching WD2
+    CS:   { assignment: 0.60, project_quiz: 0.20, final: 0.20, career: 0.00 },
+    INTV: { assignment: 1.00, project_quiz: 0.00, final: 0.00, career: 0.00 } // Flat pool, no categories
 };
 
 // Current bell-schedule period codes (A1, A3, A5, B2, B4, B6, B8...) don't
@@ -17,7 +18,7 @@ export const COURSE_WEIGHTS = {
 // live roster enrollment (students.course_id -> courses.course_name) —
 // used by both the teacher gradebook and the student dashboard so they can
 // never disagree about which weight scheme applies to a given student.
-export const PERIOD_COURSE_MAP = { A1: 'WD1', B2: 'WD2', A3: 'CS', A5: 'CS', B4: 'CS', B6: 'CS', B8: 'CS' };
+export const PERIOD_COURSE_MAP = { A1: 'WD1', B2: 'WD2', A3: 'CS', A5: 'CS', B4: 'CS', B6: 'CS', B8: 'CS', INTV: 'INTV' };
 
 export function periodToCourseKey(period) {
     const p = String(period || '').trim().toUpperCase();
@@ -32,6 +33,11 @@ export function periodToCourseKey(period) {
 }
 
 export function getAssignmentCategory(name, courseKey) {
+    // Intervention is a flat pool — every assignment counts the same, no
+    // final/project-quiz/career split (COURSE_WEIGHTS.INTV weights those at 0,
+    // so miscategorizing something here would silently drop it from the total).
+    if (courseKey === 'INTV') return 'assignment';
+
     const lowerName = name.toLowerCase();
 
     if (lowerName.startsWith('tc-') || lowerName.includes('timeclock')) {
