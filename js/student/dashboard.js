@@ -125,13 +125,53 @@ function isAssignmentVisible(name, period, registryData) {
 }
 
 // --- UPDATED LOAD GRADES (MARIADB INTEGRATION) ---
-async function loadGrades() {
-    const user = getLoggedInUser();
-    if (!user || !user.student_id) return; 
-    
+// A student enrolled in more than one real graded course (e.g. primary CS,
+// additional WD1) needs their own course switcher — the teacher gradebook
+// already handles this with a filter dropdown; this mirrors that pattern
+// instead of trying to render every course's grades on screen at once.
+async function renderCourseSwitcher(user, activeSectionId) {
+    const el = document.getElementById('courseSwitcher');
+    if (!el) return;
+
+    const primaryPeriod = (user.section_id || '').trim().toUpperCase();
+    const courses = new Map(); // courseKey -> representative section_id
+    const primaryCourseKey = periodToCourseKey(primaryPeriod);
+    if (primaryCourseKey) courses.set(primaryCourseKey, primaryPeriod);
+
     try {
+        const extra = await apiFetch(`/api/admin/student-sections?student_id=${user.student_id}`);
+        (Array.isArray(extra) ? extra : []).forEach((sec) => {
+            const key = periodToCourseKey(String(sec.section_id || '').trim().toUpperCase());
+            // Only real graded courses get a tab — things like Intervention
+            // have no weight scheme of their own and aren't a "gradebook".
+            if (key && COURSE_WEIGHTS[key] && !courses.has(key)) {
+                courses.set(key, String(sec.section_id).trim().toUpperCase());
+            }
+        });
+    } catch (e) { console.error('Could not load additional sections:', e); }
+
+    if (courses.size <= 1) { el.classList.add('d-none'); el.innerHTML = ''; return; }
+
+    const courseNames = { WD1: 'Web Design 1', WD2: 'Web Design 2', AS: 'Advanced Studies', CS: 'Computer Science' };
+    el.innerHTML = Array.from(courses.entries()).map(([key, sectionId]) => {
+        const isActive = sectionId === (activeSectionId || primaryPeriod);
+        return `<button type="button" class="btn btn-sm ${isActive ? 'btn-primary' : 'btn-outline-primary'}" data-section-id="${sectionId}">${courseNames[key] || key}</button>`;
+    }).join('');
+    el.classList.remove('d-none');
+    el.querySelectorAll('button').forEach((btn) => {
+        btn.addEventListener('click', () => loadGrades(btn.dataset.sectionId));
+    });
+}
+
+async function loadGrades(sectionOverride) {
+    const user = getLoggedInUser();
+    if (!user || !user.student_id) return;
+
+    try {
+        const gradebookUrl = `/api/student/course-gradebook?student_id=${user.student_id}`
+            + (sectionOverride ? `&section_id=${encodeURIComponent(sectionOverride)}` : '');
         const [data, saData] = await Promise.all([
-            apiFetch(`/api/student/course-gradebook?student_id=${user.student_id}`),
+            apiFetch(gradebookUrl),
             apiFetch(`/api/student/self-assessments?student_id=${user.student_id}`)
         ]);
 
@@ -140,6 +180,8 @@ async function loadGrades() {
 
         const studentPeriod = (data.section_id || user.section_id || "").trim().toUpperCase();
         let courseKey = periodToCourseKey(studentPeriod) || "WD1";
+
+        renderCourseSwitcher(user, studentPeriod);
 
         const subtitleEl = document.getElementById('userSubtitle');
         if (subtitleEl) {

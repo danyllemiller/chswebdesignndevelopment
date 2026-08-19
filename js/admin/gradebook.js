@@ -583,16 +583,39 @@ const getModal = (id) => bootstrap.Modal.getInstance(document.getElementById(id)
 // 2. DATA LOADING & RENDERING
 // ========================================================
 
+// Resolves which single course a view is scoped to, if any — 'All-CS' or a
+// specific CS period both resolve to 'CS'. Returns null for the unfiltered
+// 'All' view, where there's no single course to weight everyone against.
+function getViewCourseKey(periodVal) {
+    if (!periodVal || periodVal === 'All') return null;
+    if (periodVal.startsWith('All-')) return periodVal.slice(4);
+    return periodToCourseKey(periodVal);
+}
+
+// A student matches a course/period filter either through their primary
+// period or through an additional (non-primary) section — e.g. a CS-primary
+// student who's also enrolled in Intervention or a second real class should
+// still show up, correctly weighted, when that other course's gradebook is
+// filtered. matchedPeriod records which period actually qualified them so
+// period-specific due dates/exemptions use the right one for this view.
 function getFilteredStudents(periodVal, studentVal) {
-    let filtered = allStudents;
+    let filtered = allStudents.map(s => ({ ...s, matchedPeriod: s.period }));
+
     if (periodVal !== 'All') {
-        if (periodVal.startsWith('All-')) {
-            const groupPrefix = periodVal.slice(4);
-            filtered = filtered.filter(s => periodGroupPrefix(s.period) === groupPrefix);
-        } else {
-            filtered = filtered.filter(s => s.period === periodVal);
-        }
+        const groupPrefix = periodVal.startsWith('All-') ? periodVal.slice(4) : null;
+
+        filtered = filtered.filter(s => {
+            if (groupPrefix ? periodGroupPrefix(s.period) === groupPrefix : s.period === periodVal) {
+                return true;
+            }
+            const extraMatch = (s.additional_sections || []).find(a =>
+                groupPrefix ? periodGroupPrefix(a.section_id) === groupPrefix : a.section_id === periodVal
+            );
+            if (extraMatch) { s.matchedPeriod = extraMatch.section_id; return true; }
+            return false;
+        });
     }
+
     if (studentVal && studentVal !== 'All') filtered = filtered.filter(s => s.studentId === studentVal);
     return filtered;
 }
@@ -615,7 +638,11 @@ function updatePeriodDropdown() {
     
     const currentVal = select.value;
     
-    const periods = [...new Set(allStudents.map(s => s.period))]
+    // Include periods a student only has as an additional (non-primary)
+    // section too — e.g. Intervention, if nobody has it as their primary
+    // class — so it's still selectable as its own filter.
+    const allPeriods = allStudents.flatMap(s => [s.period, ...(s.additional_sections || []).map(a => a.section_id)]);
+    const periods = [...new Set(allPeriods)]
         .filter(p => p && p !== 'Teacher' && p !== 'Unassigned')
         .sort();
 
@@ -998,7 +1025,7 @@ function renderGradebook(students, grades, currentPeriod) {
     let orderedStudents = sortStudentsArray(students);
     if (isGroupedView) {
         orderedStudents = [...students].sort((a, b) => {
-            const periodCmp = (a.period || '').localeCompare(b.period || '');
+            const periodCmp = (a.matchedPeriod || a.period || '').localeCompare(b.matchedPeriod || b.period || '');
             if (periodCmp !== 0) return periodCmp;
             return currentSortMode === 'firstName'
                 ? (a.firstName || '').localeCompare(b.firstName || '')
@@ -1006,15 +1033,27 @@ function renderGradebook(students, grades, currentPeriod) {
         });
     }
     let lastGroupPeriod = null;
+    // When a specific course's gradebook is filtered (e.g. "All Comp Sci" or
+    // a single CS period), every student in the list — whether it's their
+    // primary class or an additional one — gets weighted using THAT course's
+    // scheme and only counts assignments belonging to it (sortedKeys is
+    // already scoped to the active view via isAssignmentVisible). Only the
+    // unfiltered "All" view falls back to each student's own primary course.
+    const viewCourseKey = getViewCourseKey(currentPeriod);
 
     orderedStudents.forEach((s, rowIndex) => {
-        if (isGroupedView && s.period !== lastGroupPeriod) {
-            lastGroupPeriod = s.period;
-            html += `<tr class="table-primary"><td colspan="100%" class="fw-bold py-2 px-3"><i class="fas fa-users me-2"></i>Period ${escapeHtml(s.period || 'Unassigned')}</td></tr>`;
+        const displayPeriod = s.matchedPeriod || s.period;
+        if (isGroupedView && displayPeriod !== lastGroupPeriod) {
+            lastGroupPeriod = displayPeriod;
+            html += `<tr class="table-primary"><td colspan="100%" class="fw-bold py-2 px-3"><i class="fas fa-users me-2"></i>Period ${escapeHtml(displayPeriod || 'Unassigned')}</td></tr>`;
         }
 
         const sGrades = grades[s.studentId] || {};
-        const courseKey = periodToCourseKey(s.period) || 'CS';
+        // Only honor the view's course as an override if it's a real graded
+        // course (has its own weight scheme) — a view like "All Intervention"
+        // mixes students from different real courses, so each still needs
+        // their own primary course's weights, not a shared one.
+        const courseKey = (viewCourseKey && COURSE_WEIGHTS[viewCourseKey]) ? viewCourseKey : (periodToCourseKey(s.period) || 'CS');
 
         // Alternating row background for better readability
         const rowBgClass = rowIndex % 2 === 0 ? 'bg-white' : 'bg-light';
@@ -1029,7 +1068,7 @@ function renderGradebook(students, grades, currentPeriod) {
             // Period-specific exemption check: If assignment has period due dates, and student's period has no due date, and student is ungraded
             const reg = allAssignments[key];
             const hasPeriodDueDates = reg?.periodDueDates && Object.values(reg.periodDueDates).some(d => d);
-            const studentPeriodDueDate = reg?.periodDueDates?.[s.period];
+            const studentPeriodDueDate = reg?.periodDueDates?.[displayPeriod];
             const isPeriodExempt = hasPeriodDueDates && !studentPeriodDueDate && (score === "" || score === undefined);
 
             if (score !== undefined && score !== null && score !== "" && score !== "EX" && !isPeriodExempt) {
@@ -1050,7 +1089,7 @@ function renderGradebook(students, grades, currentPeriod) {
 // Alternating row background - grey/white pattern for readability
         const rowClass = rowIndex % 2 === 0 ? 'gradebook-row-even' : 'gradebook-row-odd';
 const cellClass = rowIndex % 2 === 0 ? 'gradebook-cell-even' : 'gradebook-cell-odd';
-        html += `<tr class="${rowClass}"><td class="sticky-col student-info-cell p-2 ${cellClass}"><div><span class="fw-bold">${privacyMode?`Student ${rowIndex+1}`:`${s.lastName.toUpperCase()}, ${s.firstName}`}</span><div class="id-cell">${privacyMode?'HIDDEN':s.displaySchoolId} | ${s.period}</div></div></td>`;
+        html += `<tr class="${rowClass}"><td class="sticky-col student-info-cell p-2 ${cellClass}"><div><span class="fw-bold">${privacyMode?`Student ${rowIndex+1}`:`${s.lastName.toUpperCase()}, ${s.firstName}`}</span><div class="id-cell">${privacyMode?'HIDDEN':s.displaySchoolId} | ${displayPeriod}</div></div></td>`;
 // Summary cells match row background
         if (showSummaryColumns) html += `<td class="text-center ${cellClass}">${earned}</td><td class="text-center ${cellClass}">${possible}</td><td class="text-center ${cellClass} text-primary fw-bold">${pct}%</td><td class="text-center border-right-heavy fw-bold ${cellClass}">${letter}</td>`;
 
@@ -1067,7 +1106,7 @@ let score = "", display = '', bg = "";
             // Period-specific exemption check
             const reg = allAssignments[key];
             const hasPeriodDueDates = reg?.periodDueDates && Object.values(reg.periodDueDates).some(d => d);
-            const studentPeriodDueDate = reg?.periodDueDates?.[s.period];
+            const studentPeriodDueDate = reg?.periodDueDates?.[displayPeriod];
             const isPeriodExempt = hasPeriodDueDates && !studentPeriodDueDate;
 
             if (g) {
@@ -1082,7 +1121,7 @@ let score = "", display = '', bg = "";
                     display = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
                 } else {
                     let isTC = key.match(/TC-(?:In|Out)\s+(\d{1,2}\/\d{1,2})/i);
-                    if (isTC && !isStudentScheduledOn(s.period, isTC[1])) display = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
+                    if (isTC && !isStudentScheduledOn(displayPeriod, isTC[1])) display = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
                 }
             }
 

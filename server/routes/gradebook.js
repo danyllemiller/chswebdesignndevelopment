@@ -4,7 +4,7 @@ const { getDbConnection } = require('../db');
 const { resolveCourseId } = require('../helpers');
 
 router.get('/student/course-gradebook', async (req, res) => {
-    const { student_id } = req.query;
+    const { student_id, section_id: sectionOverride } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
         const connection = await getDbConnection();
@@ -16,7 +16,10 @@ router.get('/student/course-gradebook', async (req, res) => {
             await connection.end();
             return res.status(404).json({ error: 'Student not found' });
         }
-        const sectionId = students[0].section_id || '';
+        // Lets a student pull their grades scoped to an additional (non-primary)
+        // section they're also enrolled in — e.g. a CS-primary student who's
+        // also in WD1 viewing their WD1-weighted grades specifically.
+        const sectionId = (sectionOverride && String(sectionOverride).trim()) || students[0].section_id || '';
         const courseCode = await resolveCourseId(connection, sectionId);
         if (!courseCode) {
             await connection.end();
@@ -147,6 +150,25 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
             `SELECT student_id, first_name, last_name, username, section_id
              FROM students ORDER BY last_name ASC, first_name ASC`
         );
+
+        // Attach each student's additional (non-primary) sections — e.g. a
+        // student whose primary period is CS but who's also enrolled in
+        // Intervention or a second real class — so the gradebook can show
+        // and correctly weight them under each course they're actually in,
+        // not just their primary one.
+        const [extra] = await connection.execute(`
+            SELECT sas.student_id, sas.section_id, COALESCE(c.course_name, '') AS course_name
+            FROM student_additional_sections sas
+            LEFT JOIN class_sections cs ON sas.section_id = cs.section_id
+            LEFT JOIN courses c ON cs.course_id = c.course_id
+        `);
+        const extraByStudent = {};
+        extra.forEach(r => {
+            if (!extraByStudent[r.student_id]) extraByStudent[r.student_id] = [];
+            extraByStudent[r.student_id].push({ section_id: r.section_id, course_name: r.course_name });
+        });
+        students.forEach(s => { s.additional_sections = extraByStudent[s.student_id] || []; });
+
         const [exams] = await connection.execute(
             `SELECT exam_id, TRIM(title) AS title, total_points, course_id FROM exams`
         );
