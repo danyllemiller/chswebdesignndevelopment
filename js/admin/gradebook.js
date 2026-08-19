@@ -1085,9 +1085,32 @@ let score = "", display = '', bg = "";
         html += '</tr>';
     });
     tbody.innerHTML = html;
-    
+    stickCalcRows(thead);
+
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });
+}
+
+// Pins the Due Date / Possible Points / Class Average rows directly beneath
+// the sticky assignment-name header, so scrolling only moves student rows.
+// Offsets are measured from the actual rendered heights (rather than
+// hardcoded) since the header's row height varies with content.
+function stickCalcRows(thead) {
+    requestAnimationFrame(() => {
+        const calcRows = document.querySelectorAll('#gradebookBody tr.calc-row');
+        if (!thead || !calcRows.length) return;
+        let top = thead.offsetHeight;
+        calcRows.forEach((row, i) => {
+            const isLast = i === calcRows.length - 1;
+            row.querySelectorAll('td').forEach(td => {
+                td.style.position = 'sticky';
+                td.style.top = top + 'px';
+                if (!td.classList.contains('sticky-col')) td.style.zIndex = 9;
+                if (isLast) td.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.15)';
+            });
+            top += row.offsetHeight;
+        });
+    });
 }
 
 // ========================================================
