@@ -105,30 +105,6 @@ function handleNavigationFlow(isCS = false) {
     window.location.replace(redirectTo);
 }
 
-/**
- * Posts clock-in data to the server.
- */
-async function recordClockIn(type, answer = "N/A") {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (!user) return;
-
-    try {
-        await fetch('/api/clockin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ 
-                student_id: user.student_id, 
-                section_id: user.section_id,
-                type: type, 
-                answer: answer 
-            })
-        });
-    } catch (err) {
-        console.error("Clock-in storage failed:", err);
-    }
-}
-
 // --- FORM INITIALIZATION ---
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -170,7 +146,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
 
                 localStorage.setItem('user', JSON.stringify(normalizedUser));
-                localStorage.setItem('shift', JSON.stringify(data.shift));
 
                 // If account is flagged, force immediate password change before any redirect.
                 if (Number(data.must_change_password || data.user?.must_change_password || 0) === 1) {
@@ -219,18 +194,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
                 
-                if (data.shift && data.shift.isRegular) {
-                    // REGULAR SHIFT: Transition to Clock-In Question
-                    document.getElementById('tab-login').parentElement.classList.add('d-none');
-                    document.getElementById('tab-register').parentElement.classList.add('d-none');
-                    const clockInTab = document.getElementById('tab-clockin');
-                    clockInTab.parentElement.classList.remove('d-none');
-                    clockInTab.click();
-                } else {
-                    // OVERTIME: Silent Record and Redirect
-                    await recordClockIn('Overtime');
-                    handleNavigationFlow();
-                }
+                // Clock-in/out is handled by the timeclock widget (js/student/timeclock.js)
+                // once the student lands on their dashboard, which knows their actual
+                // period and today's bell schedule. Login itself just navigates on.
+                handleNavigationFlow();
 
             } catch (err) {
                 errorDiv.textContent = "Authentication Error: " + err.message;
@@ -239,17 +206,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // CLOCK-IN SUBMISSION
+    // CLOCK-IN SUBMISSION (legacy tab, superseded by the timeclock widget)
     if (clockinForm) {
         clockinForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const answer = document.getElementById('clockin-answer').value;
-            try {
-                await recordClockIn('Regular', answer);
-                handleNavigationFlow();
-            } catch (err) {
-                handleNavigationFlow();
-            }
+            handleNavigationFlow();
         });
     }
 

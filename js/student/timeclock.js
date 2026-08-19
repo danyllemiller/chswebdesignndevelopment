@@ -4,6 +4,7 @@ import { apiFetch } from '../modules/api-client.js';
 
 let studentData = null;
 let currentQuestion = null;
+let bellWindow = null; // { startMs, endMs } for the student's period today, or null if no class today
 
 // ==============================================================================
 // 1. HELPERS & CONFIGURATION
@@ -11,6 +12,120 @@ let currentQuestion = null;
 
 function getLocalTodayStr() {
     return new Date().toISOString().split('T')[0];
+}
+
+// ==============================================================================
+// AUTO-POPUP: clock-in as soon as the student's period starts, clock-out
+// reminder 5 minutes before it ends. Mirrors the day-type resolution already
+// used by calendar.js / admin/daily-agenda.html (special-dates.csv + DB
+// events, higher-priority event wins on a given date) so this never disagrees
+// with what the calendar shows for today.
+// ==============================================================================
+
+function parseSpecialDatesCSV(text) {
+    const dayTypes = new Map();
+    const lines = text.split(/\r?\n/);
+    const firstLine = lines.find(l => l.trim());
+    const delim = firstLine && firstLine.includes('\t') ? '\t' : ',';
+    for (let i = 0; i < lines.length; i++) {
+        const raw = lines[i].trim();
+        if (!raw) continue;
+        if (i === 0 && /^date/i.test(raw.split(delim)[0].trim())) continue;
+        const cols = raw.split(delim);
+        const date = cols[0]?.trim();
+        const type = cols[1]?.trim();
+        const description = delim === '\t' ? (cols[2]?.trim() || '') : cols.slice(2).join(',').trim();
+        if (date && /^\d{4}-\d{2}-\d{2}$/.test(date) && type) dayTypes.set(date, { type, description });
+    }
+    return dayTypes;
+}
+
+const EVENT_TYPE_PRI = { A: 6, B: 5, C: 4, A_MIN: 3, B_MIN: 2, S: 2, OFF: 1, none: 0 };
+
+function mergeEventIntoDayTypes(dayTypes, ev) {
+    const existing = dayTypes.get(ev.event_date);
+    if (existing) {
+        if ((EVENT_TYPE_PRI[ev.type] ?? 0) > (EVENT_TYPE_PRI[existing.type] ?? 0)) existing.type = ev.type;
+    } else {
+        dayTypes.set(ev.event_date, { type: ev.type, description: ev.description || '' });
+    }
+}
+
+// The calendar event type IS the bell_schedule.schedule_type key (S -> 'summer').
+function getBellScheduleKey(dayTypes, dateStr) {
+    const info = dayTypes.get(dateStr);
+    if (!info || info.type === 'OFF' || info.type === 'none') return null;
+    const jsDay = new Date(dateStr + 'T00:00:00').getDay();
+    if (jsDay === 0 || jsDay === 6) return null;
+    return info.type === 'S' ? 'summer' : info.type;
+}
+
+// Resolves today's start/end time (as ms-since-epoch) for the logged-in
+// student's own period, or null if their period doesn't meet today at all.
+async function resolveTodaysBellWindow() {
+    const period = String(studentData.section_id || '').trim().toUpperCase();
+    if (!period) return null;
+
+    try {
+        const [csvText, eventsData, bellData] = await Promise.all([
+            fetch('/special-dates.csv').then(r => r.ok ? r.text() : '').catch(() => ''),
+            fetch('/api/events.php').then(r => r.ok ? r.json() : { events: [] }).catch(() => ({ events: [] })),
+            fetch('/api/bell-schedule.php').then(r => r.ok ? r.json() : { schedule: [] }).catch(() => ({ schedule: [] })),
+        ]);
+
+        const dayTypes = parseSpecialDatesCSV(csvText);
+        (eventsData.events || []).forEach(ev => mergeEventIntoDayTypes(dayTypes, ev));
+
+        const todayStr = getLocalTodayStr();
+        const scheduleKey = getBellScheduleKey(dayTypes, todayStr);
+        if (!scheduleKey) return null; // no school today (weekend/off/unscheduled)
+
+        const row = (bellData.schedule || []).find(r => r.schedule_type === scheduleKey && r.period_label === period);
+        if (!row) return null; // this student's period doesn't meet on today's day type
+
+        const [startH, startM] = row.start_time.split(':').map(Number);
+        const [endH, endM] = row.end_time.split(':').map(Number);
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startH, startM, 0);
+        const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endH, endM, 0);
+        return { startMs: start.getTime(), endMs: end.getTime() };
+    } catch (e) {
+        console.error('[timeclock] Could not resolve today\'s bell window:', e);
+        return null;
+    }
+}
+
+function openTimeclockModal() {
+    const modalEl = document.getElementById('timeclock-modal');
+    if (!modalEl) return;
+    const existing = bootstrap.Modal.getInstance(modalEl);
+    if (existing && modalEl.classList.contains('show')) return; // already open
+    (existing || new bootstrap.Modal(modalEl)).show();
+}
+
+// Runs on load and on a 60s interval. Auto-opens the timeclock modal exactly
+// once per mode per day — once dismissed, the floating widget button is still
+// there for the student to finish it manually, but we don't keep yanking it
+// back open every minute.
+function checkAutoPopup() {
+    if (!bellWindow || !window.timeclock) return;
+    const now = Date.now();
+    const mode = window.timeclock.currentMode;
+    const todayStr = getLocalTodayStr();
+
+    if (mode === 'in' && now >= bellWindow.startMs && now <= bellWindow.endMs) {
+        const flag = `tc_auto_shown_in_${todayStr}`;
+        if (!sessionStorage.getItem(flag)) {
+            sessionStorage.setItem(flag, '1');
+            openTimeclockModal();
+        }
+    } else if (mode === 'out' && now >= (bellWindow.endMs - 5 * 60 * 1000) && now <= bellWindow.endMs) {
+        const flag = `tc_auto_shown_out_${todayStr}`;
+        if (!sessionStorage.getItem(flag)) {
+            sessionStorage.setItem(flag, '1');
+            openTimeclockModal();
+        }
+    }
 }
 
 // 2-day rotation engine
@@ -36,9 +151,18 @@ async function initTimeclock() {
     // Get student data from our shared session module
     studentData = getLoggedInUser();
     if (!studentData) return;
-    
+
     injectTimeclockUI();
-    checkStatus();
+    await checkStatus();
+
+    bellWindow = await resolveTodaysBellWindow();
+    checkAutoPopup();
+    setInterval(async () => {
+        const modalEl = document.getElementById('timeclock-modal');
+        if (modalEl && modalEl.classList.contains('show')) return; // don't disrupt an in-progress submission
+        await checkStatus();
+        checkAutoPopup();
+    }, 60 * 1000);
 }
 
 async function checkStatus() {
