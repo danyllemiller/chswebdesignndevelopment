@@ -70,8 +70,8 @@ function getLastPosition() {
     }
 }
 
-const HOSTGATOR_UPLOAD_URL = "https://digitalartsclasses.com/upload.php";
-const HOSTGATOR_MANAGE_URL = "https://digitalartsclasses.com/manage_files.php";
+const HOSTGATOR_UPLOAD_URL = "/upload.php";
+const HOSTGATOR_MANAGE_URL = "/manage_files.php";
 
 // ========================================================
 // GLOBAL CONFIGURATION - APPLIES TO ALL STUDENTS

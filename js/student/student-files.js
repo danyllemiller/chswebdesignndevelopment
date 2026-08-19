@@ -5,8 +5,8 @@
  * INCLUDES: Peer-to-peer file sharing, Code Editor, and Fetch API fix.
  */
 
-const HOSTGATOR_UPLOAD_URL = "https://digitalartsclasses.com/upload.php";
-const HOSTGATOR_MANAGE_URL = "https://digitalartsclasses.com/manage_files.php";
+const HOSTGATOR_UPLOAD_URL = "/upload.php";
+const HOSTGATOR_MANAGE_URL = "/manage_files.php";
 
 let myOwnStudentId = null;
 let myOwnStudentData = null; // { student_id, first_name, last_name, section_id, username }
@@ -261,7 +261,7 @@ function renderFileTable() {
     }
 
     Array.from(subfolders).sort().forEach(folder => {
-        const folderUrl = `https://digitalartsclasses.com/uploads/${currentStudentId}/${currentFolderPath}${folder}/`;
+        const folderUrl = `/uploads/${currentStudentId}/${currentFolderPath}${folder}/`;
         html += `
             <tr class="align-middle folder-row">
                 <td><input type="checkbox" class="file-checkbox" data-type="folder" data-folder="${currentFolderPath}${folder}/" style="cursor: pointer;"></td>
@@ -429,7 +429,7 @@ async function handleBulkShare() {
         const isFolder = itemType === 'folder';
         const itemPath = isFolder ? checkbox.dataset.folder : checkbox.dataset.path;
         const itemName = itemPath.split('/').filter(p => p).pop();
-        const itemUrl = `https://digitalartsclasses.com/uploads/${currentStudentId}/${itemPath}`;
+        const itemUrl = `/uploads/${currentStudentId}/${itemPath}`;
 
         if (isFolder) {
             // Share the folder itself
@@ -440,7 +440,7 @@ async function handleBulkShare() {
                 // Share all files inside the folder
                 const itemsInFolder = allFilesData.filter(f => f.path.startsWith(itemPath));
                 for (let file of itemsInFolder) {
-                    const fileUrl = `https://digitalartsclasses.com/uploads/${currentStudentId}/${file.path}`;
+                    const fileUrl = `/uploads/${currentStudentId}/${file.path}`;
                     const fileName = file.path.split('/').pop();
                     await shareItem(targetStudentId.trim(), senderName, fileName, fileUrl, false);
                 }

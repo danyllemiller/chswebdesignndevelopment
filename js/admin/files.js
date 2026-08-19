@@ -21,7 +21,7 @@
 })();
 
 // HostGator Endpoints
-const HOSTGATOR_MANAGE_URL = "https://digitalartsclasses.com/manage_files.php";
+const HOSTGATOR_MANAGE_URL = "/manage_files.php";
 
 // Global State
 let fullRoster = [];
