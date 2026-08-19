@@ -901,6 +901,10 @@ function renderGradebook(students, grades, currentPeriod) {
     const seenCleanKeys = new Set();
 
     Object.keys(allAssignments).forEach(key => {
+        // "-Score" entries hold the raw accuracy behind a flat completion
+        // credit (e.g. diagnostic performance behind "Unit3-Pre"'s 15/15).
+        // They're shown as a tooltip on the real column, not their own column.
+        if (key.endsWith('-Score')) return;
         if(key !== 'lastSubmitDate' && isAssignmentVisible(key, currentPeriod)) {
             const ck = cleanKey(key);
             if (!seenCleanKeys.has(ck)) {
@@ -916,6 +920,7 @@ function renderGradebook(students, grades, currentPeriod) {
     students.forEach(s => {
         const sGrades = grades[s.studentId] || {};
         Object.keys(sGrades).forEach(key => {
+            if (key.endsWith('-Score')) return;
             if(key !== 'lastSubmitDate' && isAssignmentVisible(key, currentPeriod)) {
                 const ck = cleanKey(key);
                 if (!seenCleanKeys.has(ck)) {
@@ -1080,7 +1085,24 @@ let score = "", display = '', bg = "";
                     if (isTC && !isStudentScheduledOn(s.period, isTC[1])) display = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
                 }
             }
-            html += `<td class="grade-cell text-center border-end" style="${bg}" data-student-id="${s.studentId}" data-assignment="${key}" data-current-score="${score}" data-current-max="${info.maxPoints}" data-row-index="${rowIndex}" data-col-index="${colIndex}">${display}</td>`;
+
+            // If this cell has a companion raw-accuracy entry ("{key}-Score",
+            // e.g. a diagnostic's real performance behind its flat completion
+            // credit), surface it as a tooltip and a small on-cell marker.
+            let rawScoreAttrs = '';
+            const rawKey = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(key + '-Score'));
+            if (rawKey) {
+                const raw = sGrades[rawKey];
+                const rawScore = typeof raw === 'object' ? raw.score : raw;
+                const rawMax = (raw && typeof raw === 'object' && raw.max) ? raw.max : '';
+                if (rawScore !== '' && rawScore !== undefined && rawScore !== null) {
+                    const rawPct = rawMax ? Math.round((Number(rawScore) / Number(rawMax)) * 100) : '';
+                    rawScoreAttrs = ` data-bs-toggle="tooltip" title="Actual score: ${rawScore}${rawMax ? '/' + rawMax : ''}${rawPct !== '' ? ' (' + rawPct + '%)' : ''}"`;
+                    display += `<sup class="text-muted ms-1" style="font-size:0.6em;">${rawScore}${rawMax ? '/' + rawMax : ''}</sup>`;
+                }
+            }
+
+            html += `<td class="grade-cell text-center border-end" style="${bg}"${rawScoreAttrs} data-student-id="${s.studentId}" data-assignment="${key}" data-current-score="${score}" data-current-max="${info.maxPoints}" data-row-index="${rowIndex}" data-col-index="${colIndex}">${display}</td>`;
         });
         html += '</tr>';
     });

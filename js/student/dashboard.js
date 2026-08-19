@@ -187,7 +187,7 @@ async function loadGrades() {
         const allKeys = new Set(
             Object.keys(myGrades)
                 .concat(Object.keys(registryData))
-                .filter(k => k !== 'lastSubmitDate' && k !== 'uid')
+                .filter(k => k !== 'lastSubmitDate' && k !== 'uid' && !k.endsWith('-Score'))
         );
             
 const keys = Array.from(allKeys)

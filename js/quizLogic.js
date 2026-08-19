@@ -624,6 +624,25 @@ async function processResults() {
             } else {
                 console.error("[QuizLogic] Gradebook sync failed:", res.status);
             }
+
+            // Also record the student's actual diagnostic accuracy (not the
+            // flat 15pt completion credit above) under a separate exam_id,
+            // for reporting — the completion credit doesn't reflect how the
+            // student actually performed on the diagnostic itself.
+            try {
+                await fetch('/api/submit-exam', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_id: user.student_id,
+                        exam_id: preAssmtExamId + '-Score',
+                        score: finalScore,
+                        total_points: finalTotal
+                    })
+                });
+            } catch (e) {
+                console.error("[QuizLogic] Could not record diagnostic accuracy score:", e.message);
+            }
         }
     } catch(e) { console.error("[QuizLogic] Could not sync pre-assessment to gradebook:", e.message); }
 }

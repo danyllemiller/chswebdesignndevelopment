@@ -172,7 +172,7 @@
   <a href="#" class="back-to-top text-decoration-none no-print" title="Back to Top">🚀</a>
 
   <script>
-    document.getElementById('quizForm').addEventListener('submit', (e) => {
+    document.getElementById('quizForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const questions = document.querySelectorAll('.quiz-q');
       let correctCount = 0;
@@ -209,6 +209,26 @@
         : (pct === 100 ? "Perfect score — you're ready to go." : 'Review the highlighted questions above, then try again.');
       resultCard.style.display = 'block';
       resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Full credit for completion, recorded in the gradebook. The actual
+      // accuracy score is recorded separately (not part of the grade) so
+      // it doesn't penalize students for reading the syllabus for the
+      // first time, while still being visible for reporting.
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.student_id) {
+          await fetch('/api/submit-exam', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: user.student_id, exam_id: 'CS Syllabus Quiz', score: 20, total_points: 20 })
+          });
+          await fetch('/api/submit-exam', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: user.student_id, exam_id: 'CS Syllabus Quiz-Score', score: correctCount, total_points: questions.length })
+          });
+        }
+      } catch (err) { console.error('[SyllabusQuiz] Gradebook sync failed:', err); }
     });
   </script>
 </body>
