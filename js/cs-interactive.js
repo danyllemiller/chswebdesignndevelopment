@@ -85,6 +85,20 @@ const GLOBAL_BYPASS_CONFIG = {
     bypassAll: false              // If true, bypasses all gating requirements
 };
 
+// Per the official test-out policy: testing out of a unit (80%+ on that
+// unit's test) excuses a student from that unit's ASSIGNMENTS, not from the
+// test itself — "everyone sits every unit test, every time." The CS Final
+// Exam unlocks for early attempt once a student has SAT (taken, any score)
+// all seven required unit tests — no unit's score, pass/fail, or test-out
+// status is what's checked here, only whether the test was taken.
+function hasSatUnitTest(n, grades) {
+    return Object.keys(grades).some(k =>
+        k.match(new RegExp(`Unit\\s*-?\\s*${n}\\b`, 'i')) &&
+        k.match(/Summative|Exam|Final/i) &&
+        !k.match(/Pre/i)
+    );
+}
+
 function waitForAuth(timeout = 12000) {
     return new Promise((resolve) => {
         if (window.dacAuthData) { 
@@ -1024,31 +1038,30 @@ if (!hasExam) {
                 if (dom.paneTitle) dom.paneTitle.innerText = 'CS Course Final Exam';
                 if (dom.examOverlay) dom.examOverlay.classList.remove('d-none');
 
-                // Units 1–7 are required; Units 0 and 8 are extra credit
+                // Units 1–7 are required; Units 0 and 8 are extra credit.
+                // A unit counts as done once its test has been taken (any
+                // score) — testing out of a unit excuses its assignments,
+                // not the test itself, and everyone sits every unit test.
                 const requiredUnits = [1, 2, 3, 4, 5, 6, 7];
                 const unitStatus = requiredUnits.map(n => ({
                     n,
-                    done: gradesLoaded && Object.keys(grades).some(k =>
-                        k.match(new RegExp(`Unit\\s*-?\\s*${n}\\b`, 'i')) &&
-                        k.match(/Summative|Exam|Final/i) &&
-                        !k.match(/Pre/i)
-                    )
+                    done: gradesLoaded && hasSatUnitTest(n, grades)
                 }));
                 const allUnitsDone = unitStatus.every(s => s.done);
 
                 if (!allUnitsDone && dom.examOverlay) {
                     const missing = unitStatus.filter(s => !s.done)
-                        .map(s => `<li>Unit ${s.n} Exam</li>`).join('');
+                        .map(s => `<li>Unit ${s.n} Test</li>`).join('');
                     dom.examOverlay.innerHTML = `<i class="fas fa-lock text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
                         <h3 class="fw-bold">Final Exam Locked</h3>
-                        <p class="text-muted px-4 mb-2">Complete the following unit exams to unlock the CS Final Exam:</p>
+                        <p class="text-muted px-4 mb-2">You must sit every unit test before the CS Final Exam unlocks — testing out of a unit excuses its assignments, not the test itself:</p>
                         <ul class="text-start text-danger fw-bold d-inline-block mb-0">${missing}</ul>
                         <p class="text-muted small mt-3">Units 0 and 8 are extra credit and not required.</p>`;
                 } else if (dom.examOverlay) {
                     dom.examOverlay.innerHTML = `
                         <i class="fas fa-graduation-cap text-warning fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
                         <h3 class="fw-bold">CS Course Final Exam</h3>
-                        <p class="text-muted px-4 mb-4">You've completed all required unit exams. The final exam will open in a new tab.</p>
+                        <p class="text-muted px-4 mb-4">You've taken all seven unit tests. The final exam will open in a new tab.</p>
                         <button id="btn-launch-final" class="btn btn-success btn-lg fw-bold px-5 shadow-sm mt-2">
                             <i class="fas fa-graduation-cap me-2"></i> Launch CS Final Exam
                         </button>`;
@@ -1901,13 +1914,7 @@ const escapeHtmlSimple = function(str) {
                 if (unitVal === 'FINAL_EXAM') {
                     // If grades are loaded, check lock immediately — no extra click needed
                     const requiredUnits = [1, 2, 3, 4, 5, 6, 7];
-                    const allDone = gradesLoaded && requiredUnits.every(n =>
-                        Object.keys(grades).some(k =>
-                            k.match(new RegExp(`Unit\\s*-?\\s*${n}\\b`, 'i')) &&
-                            k.match(/Summative|Exam|Final/i) &&
-                            !k.match(/Pre/i)
-                        )
-                    );
+                    const allDone = gradesLoaded && requiredUnits.every(n => hasSatUnitTest(n, grades));
                     if (allDone) {
                         window.open('/exams/cs-final-exam.html', '_blank');
                     } else {
