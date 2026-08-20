@@ -792,11 +792,11 @@
               </select>
             </div>
             <div class="col-4 d-none" id="glPeriodWrap">
-              <label class="form-label fw-bold small">Period</label>
+              <label class="form-label fw-bold small">Period <span class="text-danger">*</span></label>
               <input type="text" class="form-control" id="glPeriod" placeholder="e.g. A1">
             </div>
             <div class="col-8 d-none" id="glClassWrap">
-              <label class="form-label fw-bold small">Class Name <span class="text-danger">*</span></label>
+              <label class="form-label fw-bold small">Class Name (optional)</label>
               <input type="text" class="form-control" id="glClass" placeholder="e.g. AP English">
             </div>
             <div class="col-12">
@@ -2134,14 +2134,19 @@
       // Period/class always comes from hidden inputs set by openGradeLogForPeriod
       const cls = document.getElementById('glClass').value.trim();
       const periodLabel = document.getElementById('glPeriod').value.trim();
-      if (!cls) { alert('Please select a period / class.'); return; }
+      if (!periodLabel) { alert('Please select a period / class.'); return; }
       if (score === '') { alert('Please enter a score.'); return; }
-      await apiFetch('/api/intervention/grade-log', { method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ student_id: user.student_id, period_label: periodLabel,
-          class_name: cls, assignment: document.getElementById('glAssignment').value,
-          category: document.getElementById('glCategory').value || null,
-          score: parseFloat(score), max_score: parseFloat(document.getElementById('glMax').value) || 100,
-          grade_date: document.getElementById('glDate').value }) });
+      try {
+        await apiFetch('/api/intervention/grade-log', { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ student_id: user.student_id, period_label: periodLabel,
+            class_name: cls, assignment: document.getElementById('glAssignment').value,
+            category: document.getElementById('glCategory').value || null,
+            score: parseFloat(score), max_score: parseFloat(document.getElementById('glMax').value) || 100,
+            grade_date: document.getElementById('glDate').value }) });
+      } catch (err) {
+        alert('Could not save that grade. Please try again.');
+        return;
+      }
       bootstrap.Modal.getInstance(document.getElementById('gradeLogModal'))?.hide();
       const data = await apiFetch(`/api/intervention/grade-log?student_id=${user.student_id}`);
       gradeLog = data.grades || [];

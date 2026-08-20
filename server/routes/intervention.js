@@ -426,14 +426,17 @@ router.get('/intervention/grade-log', async (req, res) => {
 // Grade log — add or update an entry
 router.post('/intervention/grade-log', async (req, res) => {
     const { student_id, period_label, class_name, assignment, category, score, max_score, grade_date } = req.body;
-    if (!student_id || !class_name) return res.status(400).json({ error: 'student_id and class_name required' });
+    if (!student_id || !period_label) return res.status(400).json({ error: 'student_id and period_label required' });
+    // Class name is optional metadata on top of the period -- fall back to the
+    // period code itself so the row always has a readable label either way.
+    const resolvedClassName = (class_name && String(class_name).trim()) || period_label;
     try {
         const connection = await getDbConnection();
         await ensureTables(connection);
         const [result] = await connection.execute(
             `INSERT INTO student_grade_log (student_id, period_label, class_name, assignment, category, score, max_score, grade_date)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [student_id, period_label || null, class_name, assignment || null, category || null,
+            [student_id, period_label, resolvedClassName, assignment || null, category || null,
              score != null ? parseFloat(score) : null, max_score != null ? parseFloat(max_score) : 100,
              grade_date || new Date().toISOString().split('T')[0]]
         );
