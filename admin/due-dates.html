@@ -926,18 +926,21 @@ function getPeriodScheduleType(sectionId) {
   return m ? m[1].toUpperCase() : 'A';
 }
 
+// The only real periods -- everything else in the roster's raw section list
+// (CS-A5, WD1-A1, T1, T2, Teacher, etc.) is legacy/duplicate data. No A/B/C
+// badge on the numbered periods since a period isn't fixed to one day type --
+// it also meets on C-days (all-period days), so labeling it "A-day" or
+// "B-day" was misleading. INTV keeps its badge since it only ever meets A-day.
+const SMART_PERIOD_WHITELIST = ['A1', 'A3', 'A5', 'B2', 'B4', 'B6', 'B8', 'INTV'];
+
 function renderPeriodChecks(containerId, course) {
   const c = document.getElementById(containerId);
   if (!c) return;
-  c.innerHTML = periods.map(p => {
-    const schedType = getPeriodScheduleType(p);
-    const dayLabel  = schedType === 'B' || schedType === 'B_MIN' ? 'B-day'
-                    : schedType === 'C' ? 'C-day'
-                    : 'A-day';
-    const badgeColor = schedType.startsWith('B') ? '#198754' : schedType === 'C' ? '#e67e00' : '#0d6efd';
+  c.innerHTML = SMART_PERIOD_WHITELIST.map(p => {
+    const badge = p === 'INTV' ? ' <span style="font-size:0.7rem;color:#0d6efd;font-weight:600">A-day</span>' : '';
     return `<div class="form-check form-check-inline mb-0">
        <input class="form-check-input" type="checkbox" id="sc-${course}-${p}" value="${p}">
-       <label class="form-check-label" for="sc-${course}-${p}">${p} <span style="font-size:0.7rem;color:${badgeColor};font-weight:600">${dayLabel}</span></label>
+       <label class="form-check-label" for="sc-${course}-${p}">${p}${badge}</label>
      </div>`;
   }).join('');
 }
