@@ -143,6 +143,13 @@
           <label class="form-label fw-semibold small mb-1">Which class periods are Computer Science?</label>
           <div id="cs-period-checks" class="d-flex flex-wrap gap-2 p-2 rounded" style="background:#f8f9fa;min-height:38px"></div>
         </div>
+        <div class="p-2 rounded mb-2" style="background:#fff8e1;border:1px solid #ffe082">
+          <div class="fw-bold mb-1" style="font-size:0.85rem"><i class="fas fa-flag-checkered me-1"></i>Fill In Gaps From CFA Dates</div>
+          <div class="small text-muted mb-2">Already entered a Unit CFA date below (in the assignment list)? This fills in that unit's labs/milestones by spreading them across the meeting days between the previous unit's CFA and this one — leaving a review day before the test. Units with no CFA date set are left alone.</div>
+          <button class="btn btn-sm px-3 fw-bold" style="background:#e6a100;color:white" onclick="autoScheduleFromCFAs()">
+            <i class="fas fa-flag-checkered me-2"></i>Fill Gaps From CFAs
+          </button>
+        </div>
       </div>
 
       <!-- WD section -->
@@ -826,7 +833,6 @@ function exportCSV() {
   const rows = [['exam_id','title','course_id','due_date','type']];
 
   list.querySelectorAll('.asgn-date').forEach(inp => {
-    if (!inp.value) return;
     const id       = inp.dataset.exam;
     const type     = inp.dataset.type;
     const courseId = inp.dataset.course || currentCourse;
@@ -835,7 +841,7 @@ function exportCSV() {
     rows.push([id, title, courseId, inp.value, type]);
   });
 
-  if (rows.length === 1) { alert('No dates set to export.'); return; }
+  if (rows.length === 1) { alert('No assignments found to export.'); return; }
 
   const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
@@ -1099,6 +1105,118 @@ function scheduleBlock(examIds, selPeriods, start, end, calMap) {
   });
 
   return examIds.length;
+}
+
+function dayAfter(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+function dayBefore(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+// Fills each CS unit's labs/milestones into the gap between the previous unit's
+// CFA date and this unit's CFA date, leaving CFA_BUFFER_DAYS of meeting days
+// free right before the test as a review/reteach window. A unit with no CFA
+// date entered yet is left completely alone -- it's not touched or skipped-over
+// silently, it's reported in the diagnostics so it's obvious what didn't run.
+const CFA_BUFFER_DAYS = 1;
+
+async function autoScheduleFromCFAs() {
+  const status = document.getElementById('smart-status');
+  status.innerHTML = '<span class="text-muted">Fetching calendar…</span>';
+  captureToState();
+  const cfg = saveSmartConfig();
+
+  if (!cfg.csPeriods.length) { status.innerHTML = '<span class="text-warning">Check at least one CS period.</span>'; return; }
+
+  let calData;
+  try {
+    calData = await (await fetch('/api/events.php')).json();
+  } catch (e) {
+    status.innerHTML = `<span class="text-danger">Could not load calendar: ${e.message}</span>`;
+    return;
+  }
+
+  const PRI = { A: 6, B: 5, C: 4, A_MIN: 3, B_MIN: 2, S: 2, OFF: 1, none: 0 };
+  const calMap = {};
+  for (const ev of (calData.events || [])) {
+    const d = ev.event_date;
+    if (!d) continue;
+    const p = PRI[ev.type] || 0;
+    if (!calMap[d] || p > (PRI[calMap[d]] || 0)) calMap[d] = ev.type;
+  }
+  const calDates = Object.keys(calMap).sort();
+  if (!calDates.length) {
+    status.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>No school calendar found. Import a school calendar CSV first, then retry.</span>';
+    return;
+  }
+  const calMin = calDates[0];
+
+  // Same A/B grouping scheduleBlock() uses, so the buffer we trim off lines up
+  // with whichever day-type actually drives the spread for these periods.
+  const byPrefix = {};
+  for (const p of cfg.csPeriods) {
+    const schedType = getPeriodScheduleType(p);
+    const prefix = (schedType === 'B' || schedType === 'B_MIN') ? 'B' : 'A';
+    (byPrefix[prefix] = byPrefix[prefix] || []).push(p);
+  }
+  const primaryPrefix = byPrefix['A'] ? 'A' : Object.keys(byPrefix)[0];
+
+  let anchorStart = cfg.csSemStart || calMin;
+  let assigned = 0;
+  const debugLines = [];
+
+  for (const unit of CS_MAP) {
+    const n = unit.unitNum;
+    const cfaId = `Unit${n}-Exam`;
+    const cfaDate = existingExams[cfaId]?.due_date;
+
+    if (!cfaDate) {
+      debugLines.push(`<b>Unit ${n}:</b> no CFA date set — left alone`);
+      continue;
+    }
+
+    const ids = [];
+    for (const ch of unit.chapters) {
+      for (const lab of (ch.labs || []))       ids.push(lab.id);
+      for (const ms  of (ch.milestones || [])) ids.push(ms.id);
+    }
+
+    if (!ids.length) {
+      debugLines.push(`<b>Unit ${n}:</b> no labs/milestones to place (CFA ${cfaDate})`);
+      anchorStart = dayAfter(cfaDate);
+      continue;
+    }
+
+    const dayBeforeCFA = dayBefore(cfaDate);
+    const rawDays = getMeetingDays(calMap, primaryPrefix, anchorStart, dayBeforeCFA);
+    let bufferedEnd = dayBeforeCFA;
+    if (rawDays.length > CFA_BUFFER_DAYS) {
+      bufferedEnd = rawDays[rawDays.length - 1 - CFA_BUFFER_DAYS];
+    } else if (rawDays.length > 0) {
+      bufferedEnd = rawDays[rawDays.length - 1]; // not enough room for a full buffer -- use what's there
+    }
+
+    const placed = scheduleBlock(ids, cfg.csPeriods, anchorStart, bufferedEnd, calMap);
+    assigned += placed;
+    debugLines.push(`<b>Unit ${n}:</b> ${ids.length} item(s) spread ${anchorStart} → ${bufferedEnd} (CFA ${cfaDate})` +
+      (placed ? '' : ' — <span class="text-danger">no meeting days in that window</span>'));
+
+    anchorStart = dayAfter(cfaDate);
+  }
+
+  render();
+
+  const diag = `<div class="mt-2 p-2 rounded small" style="background:#f8f9fa;border:1px solid #dee2e6;font-family:monospace;line-height:1.9">${debugLines.join('<br>')}</div>`;
+  if (!assigned) {
+    status.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>Nothing scheduled — check the details below:</span>' + diag;
+  } else {
+    status.innerHTML = `<span class="text-success"><i class="fas fa-check me-1"></i>${assigned} assignment(s) filled in from CFA anchors. Review dates below, then click Save.</span>` + diag;
+  }
 }
 
 function getMeetingDays(calMap, prefix, startDate, endDate) {
