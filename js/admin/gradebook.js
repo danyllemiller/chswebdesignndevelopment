@@ -32,6 +32,8 @@ let calendarConfig = null;
 let privacyMode = false;
 let showSummaryColumns = true;
 let currentSortMode = 'lastName';
+let assignmentSortMode = 'dueDate'; // 'dueDate' | 'weight' | 'alpha'
+let assignmentSortDir = 'asc';
 let allStickers = {}; // student_id -> [{ id, sticker_name, awarded_at }]
 let stickerModalStudentId = null;
 
@@ -102,6 +104,14 @@ const toggleHtml = `
             <option value="periodLast">Sort: Period, Last Name</option>
             <option value="periodFirst">Sort: Period, First Name</option>
         </select>
+        <select id="sortAssignmentFilter" class="form-select form-select-sm border-info text-info fw-bold shadow-sm" style="width: auto;" title="Sort Assignment Columns By">
+            <option value="dueDate">Assignments: Due Date</option>
+            <option value="weight">Assignments: Weight (Category)</option>
+            <option value="alpha">Assignments: Alphabetical</option>
+        </select>
+        <button type="button" id="btnAssignmentSortDir" class="btn btn-sm btn-outline-info fw-bold shadow-sm" title="Reverse assignment sort direction">
+            <i class="fas fa-arrow-down-a-z me-1"></i> Forward
+        </button>
         <button type="button" id="btnSyncSheets" class="btn btn-sm btn-warning fw-bold shadow-sm" title="Pull Master Grades from Google Sheet">
             <i class="fas fa-cloud-download-alt me-1"></i> Sync Sheets
         </button>
@@ -129,6 +139,25 @@ const toggleHtml = `
             currentSortMode = e.target.value;
             const periodVal = document.getElementById('periodFilter') ? document.getElementById('periodFilter').value : 'All';
             updateStudentDropdown(getFilteredStudents(periodVal, 'All'));
+            applyFiltersAndRender();
+        });
+    }
+
+    const sortAssignmentFilter = document.getElementById('sortAssignmentFilter');
+    if (sortAssignmentFilter) {
+        sortAssignmentFilter.addEventListener('change', (e) => {
+            assignmentSortMode = e.target.value;
+            applyFiltersAndRender();
+        });
+    }
+
+    const btnAssignmentSortDir = document.getElementById('btnAssignmentSortDir');
+    if (btnAssignmentSortDir) {
+        btnAssignmentSortDir.addEventListener('click', () => {
+            assignmentSortDir = assignmentSortDir === 'asc' ? 'desc' : 'asc';
+            btnAssignmentSortDir.innerHTML = assignmentSortDir === 'asc'
+                ? '<i class="fas fa-arrow-down-a-z me-1"></i> Forward'
+                : '<i class="fas fa-arrow-up-a-z me-1"></i> Backward';
             applyFiltersAndRender();
         });
     }
@@ -962,7 +991,25 @@ function renderGradebook(students, grades, currentPeriod) {
         });
     });
 
-    const sortedKeys = Array.from(assignmentMap.keys()).sort((a, b) => (assignmentMap.get(a).dueDate || '9999').localeCompare(assignmentMap.get(b).dueDate || '9999') || a.localeCompare(b));
+    // Assignment column sort/filter — Due Date, Weight (category, e.g. Final
+    // outweighs a regular Assignment), or Alphabetical, each forward/backward.
+    // "Weight" uses the active view's course when filtered; falls back to CS
+    // for an unfiltered/mixed view, since it's just an ordering aid there.
+    const sortCourseKey = getViewCourseKey(currentPeriod) || 'CS';
+    const sortWeights = COURSE_WEIGHTS[sortCourseKey] || COURSE_WEIGHTS.CS;
+    const sortedKeys = Array.from(assignmentMap.keys()).sort((a, b) => {
+        let cmp;
+        if (assignmentSortMode === 'weight') {
+            const wA = sortWeights[getAssignmentCategory(a, sortCourseKey)] || 0;
+            const wB = sortWeights[getAssignmentCategory(b, sortCourseKey)] || 0;
+            cmp = wB - wA || a.localeCompare(b);
+        } else if (assignmentSortMode === 'alpha') {
+            cmp = a.localeCompare(b);
+        } else {
+            cmp = (assignmentMap.get(a).dueDate || '9999').localeCompare(assignmentMap.get(b).dueDate || '9999') || a.localeCompare(b);
+        }
+        return assignmentSortDir === 'desc' ? -cmp : cmp;
+    });
     let headHtml = '<tr><th class="sticky-corner px-2 pb-2">';
     const privacyIcon = privacyMode ? "fa-user-secret" : "fa-eye";
     headHtml += `<div class="d-flex justify-content-between align-items-center mb-1">Student Info<button id="btnTogglePrivacy" class="btn btn-sm ${privacyMode?'btn-warning':'btn-outline-light'} py-0 px-2"><i class="fas ${privacyIcon}"></i></button></div></th>`;
