@@ -565,7 +565,13 @@ router.post('/admin/save-student', async (req, res) => {
         }
         await connection.end();
         res.json({ success: true, affectedRows: result.affectedRows });
-    } catch (err) { console.error(err && err.stack ? err.stack : err); res.status(500).json({ error: 'Failed to save student' }); }
+    } catch (err) {
+        console.error(err && err.stack ? err.stack : err);
+        if (err && err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'That username is already taken by another student.' });
+        }
+        res.status(500).json({ error: 'Failed to save student' });
+    }
 });
 
 router.delete('/admin/delete-student', async (req, res) => {

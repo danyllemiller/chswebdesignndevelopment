@@ -78,13 +78,25 @@ router.post('/register', async (req, res) => {
         const connection = await getDbConnection();
         const [students] = await connection.execute('SELECT * FROM students WHERE student_id = ?', [student_id]);
         if (students.length === 0) { await connection.end(); return res.status(400).json({ error: 'ID not on roster.' }); }
-        
+
+        const [taken] = await connection.execute('SELECT student_id FROM students WHERE username = ? AND student_id != ?', [username, student_id]);
+        if (taken.length > 0) {
+            await connection.end();
+            return res.status(400).json({ error: 'That username is already taken. Please choose another.' });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         await connection.execute('UPDATE students SET username = ?, password = ?, first_name = ?, last_name = ? WHERE student_id = ?',
             [username, hashedPassword, first_name, last_name, student_id]);
         await connection.end();
         res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: 'Database error.' }); }
+    } catch (err) {
+        console.error('[register] Database error:', err);
+        if (err && err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'That username is already taken. Please choose another.' });
+        }
+        res.status(500).json({ error: 'Database error.' });
+    }
 });
 
 // LOGOUT
