@@ -973,27 +973,65 @@ function updateSmartPanelCourse(course) {
   if (wd) wd.classList.toggle('d-none', course !== 'wd');
 }
 
-async function autoSchedule() {
-  const status = document.getElementById('smart-status');
-  status.innerHTML = '<span class="text-muted">Fetching calendar…</span>';
-  const cfg = saveSmartConfig();
+// Same date → day-type priority scheme the main Calendar page uses.
+const PRI = { A:6, B:5, C:4, A_MIN:3, B_MIN:2, S:2, OFF:1, none:0 };
 
-  let calData;
-  try {
-    calData = await (await fetch('/api/events.php')).json();
-  } catch(e) {
-    status.innerHTML = `<span class="text-danger">Could not load calendar: ${e.message}</span>`;
-    return;
+function parseSpecialDatesCSV(text) {
+  const out = {};
+  const lines = text.split(/\r?\n/);
+  const firstLine = lines.find(l => l.trim());
+  const delim = firstLine && firstLine.includes('\t') ? '\t' : ',';
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i].trim();
+    if (!raw) continue;
+    if (i === 0 && /^date/i.test(raw.split(delim)[0].trim())) continue; // header row
+    const cols = raw.split(delim);
+    const date = cols[0]?.trim();
+    const type = cols[1]?.trim();
+    if (date && /^\d{4}-\d{2}-\d{2}$/.test(date) && type) out[date] = type;
   }
+  return out;
+}
 
-  // Build date → highest-priority day type map
-  const PRI = { A:6, B:5, C:4, A_MIN:3, B_MIN:2, S:2, OFF:1, none:0 };
+// Builds the same date → day-type map the Calendar page shows: the static
+// special-dates.csv as a base, with calendar_events (DB) layered on top only
+// where the DB entry outranks the CSV's type. The Smart Auto-Schedule tools
+// used to read /api/events.php alone, which skips that base CSV entirely --
+// if a school year's rotation was never synced into the DB (or got reset to
+// 'none' by an old import bug), every auto-schedule tool reported "no meeting
+// days" even though the real Calendar page showed the correct A/B/C days,
+// because that page merges both sources and this one didn't.
+async function buildCalMap() {
   const calMap = {};
+  try {
+    const csvRes = await fetch('/special-dates.csv');
+    if (csvRes.ok) {
+      const csvTypes = parseSpecialDatesCSV(await csvRes.text());
+      for (const [d, type] of Object.entries(csvTypes)) calMap[d] = type;
+    }
+  } catch (_) { /* fall back to DB-only below */ }
+
+  const calData = await (await fetch('/api/events.php')).json();
   for (const ev of (calData.events || [])) {
     const d = ev.event_date;
     if (!d) continue;
     const p = PRI[ev.type] || 0;
     if (!calMap[d] || p > (PRI[calMap[d]] || 0)) calMap[d] = ev.type;
+  }
+  return calMap;
+}
+
+async function autoSchedule() {
+  const status = document.getElementById('smart-status');
+  status.innerHTML = '<span class="text-muted">Fetching calendar…</span>';
+  const cfg = saveSmartConfig();
+
+  let calMap;
+  try {
+    calMap = await buildCalMap();
+  } catch (e) {
+    status.innerHTML = `<span class="text-danger">Could not load calendar: ${e.message}</span>`;
+    return;
   }
 
   const totalEvents = Object.keys(calMap).length;
@@ -1133,28 +1171,28 @@ async function autoScheduleFromCFAs() {
 
   if (!cfg.csPeriods.length) { status.innerHTML = '<span class="text-warning">Check at least one CS period.</span>'; return; }
 
-  let calData;
+  let calMap;
   try {
-    calData = await (await fetch('/api/events.php')).json();
+    calMap = await buildCalMap();
   } catch (e) {
     status.innerHTML = `<span class="text-danger">Could not load calendar: ${e.message}</span>`;
     return;
-  }
-
-  const PRI = { A: 6, B: 5, C: 4, A_MIN: 3, B_MIN: 2, S: 2, OFF: 1, none: 0 };
-  const calMap = {};
-  for (const ev of (calData.events || [])) {
-    const d = ev.event_date;
-    if (!d) continue;
-    const p = PRI[ev.type] || 0;
-    if (!calMap[d] || p > (PRI[calMap[d]] || 0)) calMap[d] = ev.type;
   }
   const calDates = Object.keys(calMap).sort();
   if (!calDates.length) {
     status.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>No school calendar found. Import a school calendar CSV first, then retry.</span>';
     return;
   }
-  const calMin = calDates[0];
+  const calMin = calDates[0], calMax = calDates[calDates.length - 1];
+
+  // Same stale-year guard as the whole-semester tool -- a Semester Start typed
+  // with the wrong year (2027 instead of 2026, etc.) silently produces an
+  // anchor that starts after every CFA date, which reads as "no meeting days"
+  // for every single unit with no obvious cause.
+  if (cfg.csSemStart && (cfg.csSemStart < calMin || cfg.csSemStart > calMax)) {
+    status.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Your Semester Start (${cfg.csSemStart}) is outside the loaded calendar (${calMin} → ${calMax}). Check the year — this is almost always an old date left over from before.</span>`;
+    return;
+  }
 
   // Same A/B grouping scheduleBlock() uses, so the buffer we trim off lines up
   // with whichever day-type actually drives the spread for these periods.
