@@ -1228,13 +1228,25 @@ function stickCalcRows(thead) {
 window.showAnalytics = function(dbKey, displayLabel) {
     let scores = [];
     let periodData = {};
+    let realMax = null;
     const filtered = getFilteredStudents(document.getElementById('periodFilter').value, 'All');
-    
+
+    // Pre-assessments/diagnostics award flat completion credit for taking them
+    // (e.g. always 15/15) and store the real diagnostic accuracy separately
+    // under a "-Score" companion key. Analytics needs to answer "how much did
+    // students already know before this unit," not "who clicked through the
+    // quiz" -- so prefer the real "-Score" entry when one exists, and pull the
+    // mastery threshold's max from that entry too (the diagnostic's own point
+    // total, not the flat completion credit's).
     filtered.forEach(s => {
-        const fuzzyKey = Object.keys(allGrades[s.studentId]||{}).find(k=>cleanKey(k)===cleanKey(dbKey));
-        const entry = fuzzyKey ? allGrades[s.studentId][fuzzyKey] : null;
-        const score = entry ? (typeof entry === 'object' ? entry.score : entry) : "";
-        if (score !== "" && score !== "EX" && !isNaN(Number(score))) {
+        const sGrades = allGrades[s.studentId] || {};
+        const fuzzyScoreKey = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(dbKey + '-Score'));
+        const fuzzyKey = fuzzyScoreKey || Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(dbKey));
+        const entry = fuzzyKey ? sGrades[fuzzyKey] : null;
+        if (!entry) return;
+        const score = typeof entry === 'object' ? entry.score : entry;
+        if (fuzzyScoreKey && typeof entry === 'object' && entry.max) realMax = entry.max;
+        if (score !== "" && score !== undefined && score !== "EX" && !isNaN(Number(score))) {
             scores.push(Number(score));
             if (!periodData[s.period]) periodData[s.period] = [];
             periodData[s.period].push(Number(score));
@@ -1242,7 +1254,7 @@ window.showAnalytics = function(dbKey, displayLabel) {
     });
 
     if (scores.length === 0) return alert("No scores to analyze.");
-    const max = parseAssignmentInfo(dbKey).maxPoints;
+    const max = realMax || parseAssignmentInfo(dbKey).maxPoints;
     scores.sort((a,b)=>a-b);
     const mean = (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1);
     const mid = Math.floor(scores.length / 2);
