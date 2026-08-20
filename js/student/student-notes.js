@@ -27,6 +27,8 @@ let allNotes = [];
 let activeNoteId = null;
 let autoSaveTimer = null;
 
+const LAST_CHAPTER_KEY = 'notebookLastChapter';
+
 const dom = {
     list: document.getElementById('note-list'),
     form: document.getElementById('note-form'),
@@ -150,7 +152,7 @@ async function initializeNotebook() {
                 console.warn('Notebook helpers unavailable; delaying setup until toolbar functions are initialized.');
                 setTimeout(initNotebookUI, 50);
             }
-        await fetchNotes();
+        await fetchNotes(true);
     } catch (e) {
         console.error("Notebook Init Error:", e);
         showEmptyState();
@@ -167,19 +169,24 @@ function initNotebookUI() {
     const tabsContainer = document.getElementById('chapterTabsContainer');
     const units = getUnitLabels();
 
+    // Restore whatever chapter the student was last viewing -- without this, every
+    // refresh silently reset the tab back to Chapter 1, so notes saved under any
+    // other chapter looked like they'd vanished (they were just on a hidden tab).
+    const savedChapter = localStorage.getItem(LAST_CHAPTER_KEY);
+    const restoredChapter = units.includes(savedChapter) ? savedChapter : units[0];
+
     if (tabsContainer) {
         tabsContainer.innerHTML = units.map((ch) =>
-            `<button class="chapter-tab-btn ${ch === currentChapterTab ? 'active' : ''}" data-chapter="${ch.replace(/"/g, '"')}">${ch}</button>`
+            `<button class="chapter-tab-btn ${ch === restoredChapter ? 'active' : ''}" data-chapter="${ch.replace(/"/g, '"')}">${ch}</button>`
         ).join('');
     }
 
-    const firstChapter = units[0];
-    currentChapterTab = firstChapter;
-    const firstBtn = document.querySelector('.chapter-tab-btn[data-chapter]');
-    if (firstBtn) {
+    currentChapterTab = restoredChapter;
+    const activeBtn = document.querySelector(`.chapter-tab-btn[data-chapter="${restoredChapter.replace(/"/g, '\\"')}"]`) || document.querySelector('.chapter-tab-btn[data-chapter]');
+    if (activeBtn) {
         document.querySelectorAll('.chapter-tab-btn').forEach(b => b.classList.remove('active'));
-        firstBtn.classList.add('active');
-        currentChapterTab = firstBtn.dataset.chapter || firstChapter;
+        activeBtn.classList.add('active');
+        currentChapterTab = activeBtn.dataset.chapter || restoredChapter;
     }
 
     const listTitle = document.getElementById('list-chapter-title');
@@ -267,7 +274,7 @@ function renderNoteList() {
     }
 }
 
-async function fetchNotes() {
+async function fetchNotes(autoOpenMostRecent = false) {
     const userId = getActiveUserId();
     if (!userId) {
         console.warn("fetchNotes skipped: student id not available yet.");
@@ -297,7 +304,14 @@ async function fetchNotes() {
             activeNoteId = null;
             showEmptyState();
         } else if (activeNoteId === null) {
-            showEmptyState();
+            // On a fresh page load, reopen the most recently edited note in the
+            // restored chapter instead of showing "no note selected" -- that blank
+            // state is exactly what made saved notes look like they'd disappeared.
+            if (autoOpenMostRecent && allNotes.length > 0) {
+                openNote(allNotes[0]);
+            } else {
+                showEmptyState();
+            }
         }
     } catch (err) {
         console.warn("Notebook read unavailable, showing empty state.", err);
@@ -498,11 +512,25 @@ function setupTemplatesAndHTML() {
     }
 };
 
+function openNote(note) {
+    activeNoteId = note.id;
+    if (dom.title) dom.title.value = note.title;
+    if (dom.content) dom.content.value = note.content;
+
+    const category = document.getElementById('note-category');
+    if (category && note.category) category.value = note.category;
+
+    hideEmptyState();
+    updatePreview();
+    renderNoteList();
+}
+
 document.body.addEventListener('click', async (e) => {
     if (e.target.classList.contains('chapter-tab-btn')) {
         document.querySelectorAll('.chapter-tab-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         currentChapterTab = e.target.dataset.chapter || e.target.textContent.trim();
+        localStorage.setItem(LAST_CHAPTER_KEY, currentChapterTab);
         const listTitle = document.getElementById('list-chapter-title');
         if (listTitle) listTitle.innerText = `${currentChapterTab}`;
         activeNoteId = null;
@@ -541,15 +569,6 @@ document.body.addEventListener('click', async (e) => {
     if (item) {
         const note = allNotes.find(x => x.id === item.dataset.id);
         if (!note) return;
-        activeNoteId = note.id;
-        if (dom.title) dom.title.value = note.title;
-        if (dom.content) dom.content.value = note.content;
-
-        const category = document.getElementById('note-category');
-        if (category && note.category) category.value = note.category;
-
-        hideEmptyState();
-        updatePreview();
-        renderNoteList();
+        openNote(note);
     }
 });
