@@ -1,0 +1,190 @@
+<!-- level1-crash-review.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Level 1 Crash Review | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/web-app-manifest-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/web-app-manifest-512x512.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+
+  <!-- Security Guard: Kicks out anyone not logged in -->
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=8"></script>
+</head>
+<body class="bg-white">
+
+  <!--Navigation-->
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+
+    <nav class="mb-4 d-flex justify-content-between small fw-bold">
+        <a href="/level2andUp.html" class="text-decoration-none text-primary">&laquo; Back to Web Design 2 Overview</a>
+        <a href="/year2/the-brains-intro-to-javascript.html" class="text-decoration-none text-primary">Next: 9: The "Brains" &raquo;</a>
+    </nav>
+
+    <!-- CLEAN MODERN HEADER -->
+    <h1 class="text-center text-primary fw-bold mt-5 mb-2">Level 1 Crash Review</h1>
+    <p class="text-center text-secondary fst-italic fs-5 mb-5">A fast recap of Chapters 1-8 before we build "The Brains" (JavaScript)</p>
+
+    <!-- ROADMAP -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Welcome Back, Junior Developers</h2>
+        <p>Before we hand you JavaScript — the language that makes your sites <em>do</em> things — we need to make sure everything you built in Year 1 is still solid. Nobody wires up interactivity on a shaky foundation. This page is a fast, no-fluff recap of every Chapter 1-8 concept you'll lean on constantly this year. Skim it, refresh your memory, then take the pre-test below.</p>
+        <p class="small text-muted">Need more than a refresher on any one topic? Every heading below links back to that chapter's full lesson.</p>
+      </div>
+      <div class="col-lg-4">
+        <div class="list-group shadow-sm">
+          <a href="#recap-1" class="list-group-item list-group-item-action text-dark">1. The Developer's World</a>
+          <a href="#recap-2" class="list-group-item list-group-item-action text-dark">2. The "Rules" (Legal &amp; Ethics)</a>
+          <a href="#recap-3" class="list-group-item list-group-item-action text-dark">3. The Blueprint (Planning)</a>
+          <a href="#recap-4" class="list-group-item list-group-item-action text-dark">4. UI/UX Design</a>
+          <a href="#recap-5" class="list-group-item list-group-item-action text-dark">5. The "Bones" (HTML)</a>
+          <a href="#recap-6" class="list-group-item list-group-item-action text-dark">6. The "Clothes" (CSS)</a>
+          <a href="#recap-7" class="list-group-item list-group-item-action text-dark">7. Advanced Layout</a>
+          <a href="#recap-8" class="list-group-item list-group-item-action text-dark">8. Sights &amp; Sounds</a>
+          <a href="/pre-assessments/level1-crash-review.html" class="list-group-item list-group-item-action fw-bold text-white bg-primary">🚀 Take the Pre-Test</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1: DEVELOPER'S WORLD -->
+    <div id="recap-1" class="row mb-5 pb-4 border-bottom">
+      <div class="col-12">
+        <h2 class="section-title mt-0"><a href="/year1/join-the-developers-guild.html" class="text-decoration-none">1. The Developer's World</a></h2>
+        <ul class="mb-0">
+          <li>You're not just a student — you're part of a professional <strong>Agency</strong>, and the industry expects <strong>Continuous Learning</strong> because tech changes fast.</li>
+          <li>The <strong>Internet</strong> is the physical network of connected computers; the <strong>Web</strong> is one service that runs on top of it (email and gaming are others).</li>
+          <li><strong>DNS</strong> translates human-readable domain names into IP addresses. <strong>Hosting</strong> is where a site's files actually live.</li>
+          <li>The <strong>Web Development Life Cycle (WDLC)</strong> — plan, design, build, test, launch, maintain — keeps client projects from blowing their budget or deadline.</li>
+          <li>Professional file-naming rules matter: lowercase, no spaces, hyphens instead — <code>about-us.html</code>, not <code>About Us.html</code>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2: THE RULES -->
+    <div id="recap-2" class="row mb-5 pb-4 border-bottom">
+      <div class="col-12">
+        <h2 class="section-title mt-0"><a href="/year1/the-rules-how-not-to-get-sued.html" class="text-decoration-none">2. The "Rules" (Legal &amp; Ethics)</a></h2>
+        <ul class="mb-0">
+          <li><strong>Copyright</strong> protects original creative work automatically; you can't just grab an image off Google and use it commercially.</li>
+          <li><strong>Creative Commons</strong> licenses spell out exactly how a creator allows their work to be reused.</li>
+          <li><strong>Accessibility</strong> (alt text, color contrast, keyboard navigation) isn't optional — the Domino's lawsuit confirmed websites are legally public accommodations.</li>
+          <li>An <strong>NDA</strong> protects a client's trade secrets; you'll sign versions of these in the real industry.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 3: THE BLUEPRINT -->
+    <div id="recap-3" class="row mb-5 pb-4 border-bottom">
+      <div class="col-12">
+        <h2 class="section-title mt-0"><a href="/year1/the-blueprint.html" class="text-decoration-none">3. The Blueprint (Planning)</a></h2>
+        <ul class="mb-0">
+          <li>A <strong>Sitemap</strong> is the tree diagram of every page on a site and how they connect.</li>
+          <li>A <strong>Wireframe</strong> is a low-fidelity, grayscale sketch of a page's layout — content and structure only, no colors or fonts yet.</li>
+          <li>Planning before coding saves massive rework time later — this is true for JavaScript apps too, where you'll now plan <em>logic</em>, not just layout.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 4: UI/UX -->
+    <div id="recap-4" class="row mb-5 pb-4 border-bottom">
+      <div class="col-12">
+        <h2 class="section-title mt-0"><a href="/year1/the-why-intro-to-uiux.html" class="text-decoration-none">4. UI/UX Design</a></h2>
+        <ul class="mb-0">
+          <li><strong>UX (User Experience)</strong> is how a product feels to use; <strong>UI (User Interface)</strong> is the actual visual controls the user touches.</li>
+          <li>Design for a specific <strong>persona</strong> — a fictional target user — instead of designing for "everyone."</li>
+          <li><strong>Color theory</strong> and typography choices aren't decoration — they guide the user's eye and set the tone.</li>
+          <li>Avoid <strong>Dark Patterns</strong> — UI tricks designed to manipulate users into actions they didn't intend.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 5: HTML -->
+    <div id="recap-5" class="row mb-5 pb-4 border-bottom">
+      <div class="col-12">
+        <h2 class="section-title mt-0"><a href="/year1/the-bones-intro-to-html.html" class="text-decoration-none">5. The "Bones" (HTML)</a></h2>
+        <ul class="mb-0">
+          <li>HTML is <strong>structure</strong>, not styling — every page needs <code>&lt;!DOCTYPE html&gt;</code>, <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, and <code>&lt;body&gt;</code>.</li>
+          <li>Elements have an opening and closing tag: <code>&lt;p&gt;text&lt;/p&gt;</code>. Void elements like <code>&lt;img&gt;</code> and <code>&lt;br&gt;</code> don't need a closing tag.</li>
+          <li>An <strong>attribute</strong> adds info to a tag: <code>&lt;img src="cat.jpg" alt="A cat"&gt;</code>.</li>
+          <li>Every element JavaScript will target this year — buttons, inputs, divs — starts as plain HTML. You can't manipulate an element that isn't there.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 6: CSS -->
+    <div id="recap-6" class="row mb-5 pb-4 border-bottom">
+      <div class="col-12">
+        <h2 class="section-title mt-0"><a href="/year1/the-clothes-intro-to-css.html" class="text-decoration-none">6. The "Clothes" (CSS)</a></h2>
+        <ul class="mb-0">
+          <li><strong>Selectors</strong> target which elements get styled: element (<code>p</code>), class (<code>.card</code>), or ID (<code>#header</code>).</li>
+          <li>The <strong>Box Model</strong> — content, padding, border, margin — controls every element's spacing.</li>
+          <li><strong>Classes</strong> can be reused on many elements; <strong>IDs</strong> should be unique to one element per page — the same rule JavaScript relies on when you use <code>document.getElementById()</code>.</li>
+          <li><strong>Specificity</strong> determines which conflicting CSS rule wins.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 7: ADVANCED LAYOUT -->
+    <div id="recap-7" class="row mb-5 pb-4 border-bottom">
+      <div class="col-12">
+        <h2 class="section-title mt-0"><a href="/year1/the-style-advanced-css-layout.html" class="text-decoration-none">7. Advanced Layout</a></h2>
+        <ul class="mb-0">
+          <li><strong>Flexbox</strong> lays elements out along a single row or column and handles alignment/spacing automatically.</li>
+          <li><strong>CSS Grid</strong> lays elements out in a full two-dimensional row-and-column grid.</li>
+          <li><strong>Responsive Design</strong> (media queries) adapts a layout to different screen sizes — mobile, tablet, desktop.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 8: SIGHTS & SOUNDS -->
+    <div id="recap-8" class="row mb-5 pb-4 border-bottom">
+      <div class="col-12">
+        <h2 class="section-title mt-0"><a href="/year1/sights-sounds-making-it-pop-html-media.html" class="text-decoration-none">8. Sights &amp; Sounds</a></h2>
+        <ul class="mb-0">
+          <li><strong>Image formats</strong> matter: JPG for photos, PNG for transparency, SVG for scalable icons/logos.</li>
+          <li>Always <strong>optimize/compress</strong> media — huge unoptimized files are one of the most common reasons real sites load slowly.</li>
+          <li>The <code>&lt;video&gt;</code> and <code>&lt;audio&gt;</code> tags embed native media players without needing external plugins.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- FINAL CTA -->
+    <div class="row mb-5">
+      <div class="col-12 text-center">
+        <div class="card shadow-sm border-primary p-4">
+          <h3 class="fw-bold text-primary mb-2">Ready?</h3>
+          <p class="text-muted mb-3">Take the pre-test now so we know exactly where the class stands before we start Chapter 9.</p>
+          <a href="/pre-assessments/level1-crash-review.html" class="btn btn-primary btn-lg fw-bold px-5 mx-auto" style="max-width: 320px;">🚀 Take the Pre-Test</a>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <div id="footer-nav"></div>
+  <div id="footer-placeholder"></div>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

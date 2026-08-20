@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Pre-Assessment: Level 1 Crash Review</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/web-app-manifest-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/web-app-manifest-512x512.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=8"></script>
+  <!-- Our Diagnostic Testing Logic -->
+  <script type="module">
+    import { initPreTest } from "/js/preTestLogic.js?v=1";
+    window.initPreTest = initPreTest;
+  </script>
+<script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5">
+                <div class="spinner-border text-info" role="status"></div>
+                <p class="mt-2 fw-bold">Initializing Level 1 Crash Review Diagnostic...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Level 1 Crash Review Diagnostic Pool — spans Chapters 1-8
+    const crashReviewPool = [
+        // Ch 1: The Developer's World
+        { question: "What translates a human-readable domain name (like example.com) into an IP address?", options: ["Hosting", "DNS", "A CMS", "A Sitemap"] },
+        { question: "What is the term for constantly updating your skills because technology changes so quickly?", options: ["Continuous Learning", "Freelancing", "Debugging", "Prototyping"] },
+        { question: "Which is a correct, professional filename?", options: ["About Us.html", "about-us.html", "AboutUs!.html", "about us.HTML"] },
+        // Ch 2: The Rules
+        { question: "What legally protects an original creative work the moment it's created?", options: ["A patent", "Copyright", "A trademark", "An NDA"] },
+        { question: "What kind of license spells out exactly how a creator allows their work to be reused?", options: ["Creative Commons", "GPL only", "Public Domain only", "Copyleft"] },
+        { question: "Why does a website legally need to be accessible to users with disabilities?", options: ["It's optional but nice", "Courts have ruled websites are public accommodations", "Only government sites require it", "It only matters for print"] },
+        // Ch 3: The Blueprint
+        { question: "What do you call the tree diagram showing every page on a site and how they connect?", options: ["A wireframe", "A sitemap", "A style guide", "A mockup"] },
+        { question: "What is a wireframe?", options: ["The final, fully-styled design", "A low-fidelity, grayscale layout sketch", "The site's database schema", "A hosting contract"] },
+        // Ch 4: UI/UX Design
+        { question: "UX (User Experience) refers to:", options: ["The visual buttons and controls", "How a product feels to use overall", "The site's color palette only", "The server's response time only"] },
+        { question: "What is a 'persona' in UX design?", options: ["The developer's job title", "A fictional target user you design for", "A CSS animation", "A type of wireframe"] },
+        { question: "What are 'Dark Patterns'?", options: ["A color scheme", "UI tricks designed to manipulate users", "A JavaScript error type", "An accessibility feature"] },
+        // Ch 5: The Bones (HTML)
+        { question: "Which tag must wrap all the visible content of a webpage?", options: ["<head>", "<body>", "<html>", "<meta>"] },
+        { question: "Which of these is a 'void' element that never needs a closing tag?", options: ["<p>", "<div>", "<img>", "<section>"] },
+        { question: "In <img src=\"cat.jpg\" alt=\"A cat\">, what is 'alt' called?", options: ["A tag", "An attribute", "A selector", "A class"] },
+        // Ch 6: The Clothes (CSS)
+        { question: "Which CSS selector targets an element by its unique ID?", options: [".header", "#header", "*header", "header{}"] },
+        { question: "What are the four layers of the CSS Box Model, from inside out?", options: ["Margin, Border, Padding, Content", "Content, Padding, Border, Margin", "Padding, Content, Margin, Border", "Border, Content, Padding, Margin"] },
+        { question: "Which rule determines which CSS style wins when two rules conflict?", options: ["Alphabetical order", "Specificity", "File size", "Browser default"] },
+        // Ch 7: Advanced Layout
+        { question: "Which CSS layout system arranges items along a single row or column?", options: ["CSS Grid", "Flexbox", "Float", "Position: absolute"] },
+        { question: "What does a media query enable?", options: ["Playing audio files", "Responsive design across screen sizes", "Database queries", "Font loading"] },
+        { question: "Which layout system is best for a full two-dimensional row-and-column layout?", options: ["Flexbox", "CSS Grid", "Inline-block", "Text-align"] },
+        // Ch 8: Sights & Sounds
+        { question: "Which image format is best for a scalable logo or icon?", options: ["JPG", "SVG", "BMP", "TIFF"] },
+        { question: "Why should you compress/optimize images before publishing a site?", options: ["It's required by copyright law", "Unoptimized files slow down page load", "It changes the file's color profile", "It's only needed for print"] },
+        { question: "Which HTML tag embeds a native video player without a plugin?", options: ["<media>", "<video>", "<embed-video>", "<film>"] },
+        { question: "Which image format supports transparency?", options: ["JPG", "PNG", "BMP", "TIFF"] }
+    ];
+
+    const config = {
+        questions: crashReviewPool,
+        questionCount: 15, // Diagnostic length
+        chapterTitle: "Level 1 Crash Review",
+        gradebookExamId: "WD-CrashReview-Pre",
+        webhookUrl: "https://script.google.com/macros/s/AKfycbzgJFP8F23d1C8UtIT1jG-eosRq1YBaA2dfqCIQnPMuZeAfGd1gVPYrObO8UQgkIb3atQ/exec"
+    };
+
+    window.onload = () => initPreTest(config);
+  </script>
+
+<div id="footer-placeholder"></div>
+
+  <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>
