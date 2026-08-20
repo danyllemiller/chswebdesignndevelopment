@@ -747,6 +747,8 @@ window.addEventListener('DOMContentLoaded', () => {
         updateStudentDropdown(getFilteredStudents(e.target.value, 'All'));
         applyFiltersAndRender();
     });
+
+    document.getElementById('studentFilter')?.addEventListener('change', applyFiltersAndRender);
 });
 
 async function loadData() {
