@@ -997,8 +997,19 @@ async function autoSchedule() {
   }
 
   const calDates = Object.keys(calMap).sort();
+  const calMin = calDates[0], calMax = calDates[calDates.length - 1];
   let assigned = 0;
-  const debugLines = [`<b>Calendar loaded:</b> ${totalEvents} days (${calDates[0]} → ${calDates[calDates.length-1]})`];
+  const debugLines = [`<b>Calendar loaded:</b> ${totalEvents} days (${calMin} → ${calMax})`];
+
+  // Catches the exact confusion of "the calendar has these days scheduled,
+  // why does this say 0 meeting days" — the entered range (often a stale
+  // value from a previous school year left in this browser's storage)
+  // simply doesn't overlap any loaded calendar day at all.
+  const rangeOverlapsCalendar = (start, end) => start && end && start <= calMax && end >= calMin;
+  if (currentCourse === 'cs' && cfg.csSemStart && cfg.csSemEnd && !rangeOverlapsCalendar(cfg.csSemStart, cfg.csSemEnd)) {
+    status.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Your Semester Start/Final Exam Date (${cfg.csSemStart} → ${cfg.csSemEnd}) don't overlap the loaded calendar at all (it only covers ${calMin} → ${calMax}). Check the year — this is almost always an old date left over from before.</span>`;
+    return;
+  }
 
   if (currentCourse === 'cs') {
     if (!cfg.csSemStart || !cfg.csSemEnd) { status.innerHTML = '<span class="text-warning">Enter a semester start date and final exam date.</span>'; return; }
