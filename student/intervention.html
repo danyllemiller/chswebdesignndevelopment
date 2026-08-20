@@ -946,26 +946,38 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <p class="text-muted small mb-3">Enter your class names and pick a color for each period — colors show in Day View.</p>
+          <p class="text-muted small mb-3">Rename each period, enter your class name, and pick a color — all of it shows in the grade tracker and Day View.</p>
           <div class="row g-4">
             <div class="col-md-6">
               <h6 class="fw-bold mb-3"><span class="cal-block-badge cal-block-a me-2">A</span>A-Day Schedule</h6>
-              <div class="mb-2"><label class="form-label small fw-bold">Period 1</label>
+              <div class="mb-3"><div class="d-flex align-items-center gap-2 mb-1">
+                  <input type="text" class="form-control form-control-sm fw-bold" id="nickA1" placeholder="Period 1" style="max-width:160px;">
+                  <span class="text-muted small">(A1)</span>
+                </div>
                 <div class="d-flex gap-2 align-items-center">
                   <input type="text" class="form-control form-control-sm" id="schA1" placeholder="e.g. AP English">
                   <input type="color" class="period-color-input" id="colorA1" value="#4a90d9" title="Period color">
                 </div></div>
-              <div class="mb-2"><label class="form-label small fw-bold">Period 3</label>
+              <div class="mb-3"><div class="d-flex align-items-center gap-2 mb-1">
+                  <input type="text" class="form-control form-control-sm fw-bold" id="nickA3" placeholder="Period 3" style="max-width:160px;">
+                  <span class="text-muted small">(A3)</span>
+                </div>
                 <div class="d-flex gap-2 align-items-center">
                   <input type="text" class="form-control form-control-sm" id="schA3" placeholder="e.g. Chemistry">
                   <input type="color" class="period-color-input" id="colorA3" value="#6d916c" title="Period color">
                 </div></div>
-              <div class="mb-2"><label class="form-label small fw-bold">Period 5 / Intervention</label>
+              <div class="mb-3"><div class="d-flex align-items-center gap-2 mb-1">
+                  <input type="text" class="form-control form-control-sm fw-bold" id="nickA5" placeholder="Period 5 / Intervention" style="max-width:160px;">
+                  <span class="text-muted small">(A5)</span>
+                </div>
                 <div class="d-flex gap-2 align-items-center">
                   <input type="text" class="form-control form-control-sm" id="schA5" placeholder="e.g. Intervention / Math">
                   <input type="color" class="period-color-input" id="colorA5" value="#e67e22" title="Period color">
                 </div></div>
-              <div class="mb-2"><label class="form-label small fw-bold">Period 7</label>
+              <div class="mb-3"><div class="d-flex align-items-center gap-2 mb-1">
+                  <input type="text" class="form-control form-control-sm fw-bold" id="nickA7" placeholder="Period 7" style="max-width:160px;">
+                  <span class="text-muted small">(A7)</span>
+                </div>
                 <div class="d-flex gap-2 align-items-center">
                   <input type="text" class="form-control form-control-sm" id="schA7" placeholder="e.g. PE / Elective">
                   <input type="color" class="period-color-input" id="colorA7" value="#9b59b6" title="Period color">
@@ -973,22 +985,34 @@
             </div>
             <div class="col-md-6">
               <h6 class="fw-bold mb-3"><span class="cal-block-badge cal-block-b me-2">B</span>B-Day Schedule</h6>
-              <div class="mb-2"><label class="form-label small fw-bold">Period 2</label>
+              <div class="mb-3"><div class="d-flex align-items-center gap-2 mb-1">
+                  <input type="text" class="form-control form-control-sm fw-bold" id="nickB2" placeholder="Period 2" style="max-width:160px;">
+                  <span class="text-muted small">(B2)</span>
+                </div>
                 <div class="d-flex gap-2 align-items-center">
                   <input type="text" class="form-control form-control-sm" id="schB2" placeholder="e.g. US History">
                   <input type="color" class="period-color-input" id="colorB2" value="#e74c3c" title="Period color">
                 </div></div>
-              <div class="mb-2"><label class="form-label small fw-bold">Period 4</label>
+              <div class="mb-3"><div class="d-flex align-items-center gap-2 mb-1">
+                  <input type="text" class="form-control form-control-sm fw-bold" id="nickB4" placeholder="Period 4" style="max-width:160px;">
+                  <span class="text-muted small">(B4)</span>
+                </div>
                 <div class="d-flex gap-2 align-items-center">
                   <input type="text" class="form-control form-control-sm" id="schB4" placeholder="e.g. Spanish">
                   <input type="color" class="period-color-input" id="colorB4" value="#1abc9c" title="Period color">
                 </div></div>
-              <div class="mb-2"><label class="form-label small fw-bold">Period 6</label>
+              <div class="mb-3"><div class="d-flex align-items-center gap-2 mb-1">
+                  <input type="text" class="form-control form-control-sm fw-bold" id="nickB6" placeholder="Period 6" style="max-width:160px;">
+                  <span class="text-muted small">(B6)</span>
+                </div>
                 <div class="d-flex gap-2 align-items-center">
                   <input type="text" class="form-control form-control-sm" id="schB6" placeholder="e.g. Web Design">
                   <input type="color" class="period-color-input" id="colorB6" value="#f39c12" title="Period color">
                 </div></div>
-              <div class="mb-2"><label class="form-label small fw-bold">Period 8</label>
+              <div class="mb-3"><div class="d-flex align-items-center gap-2 mb-1">
+                  <input type="text" class="form-control form-control-sm fw-bold" id="nickB8" placeholder="Period 8" style="max-width:160px;">
+                  <span class="text-muted small">(B8)</span>
+                </div>
                 <div class="d-flex gap-2 align-items-center">
                   <input type="text" class="form-control form-control-sm" id="schB8" placeholder="e.g. Art / Elective">
                   <input type="color" class="period-color-input" id="colorB8" value="#2980b9" title="Period color">
@@ -1204,6 +1228,7 @@
     let mySchedule = {};   // {A1:'English', A3:'Math', A5:'Intervention', A7:'PE', B2:'History', ...}
     let periodColors = {}; // {A1:'#4a90d9', A3:'#6d916c', ...} — student-chosen per-period colors
     let gradeCategories = {}; // {A1:[{id,name,weight},...], ...} — weighted grade categories per period
+    let periodLabels = {}; // {A1:'1st Period', A3:'Chem Block', ...} — student's own name for the period code
     let viewingStudentId = null; // non-null when teacher is viewing a student
     let isReadOnly = false;      // true when teacher is viewing a student's planner
     const targetSid = () => viewingStudentId || user?.student_id;
@@ -1237,6 +1262,7 @@
           decorPrefs      = data.prefs.decor            || {};
           countdowns      = data.prefs.countdowns       || [];
           gradeCategories = data.prefs.gradeCategories  || {};
+          periodLabels    = data.prefs.periodLabels     || {};
           if (!isReadOnly) {
             localStorage.setItem(`intv_sched_${sid}`,       JSON.stringify(mySchedule));
             localStorage.setItem(`intv_period_colors_${sid}`, JSON.stringify(periodColors));
@@ -1244,6 +1270,7 @@
             localStorage.setItem(`intv_decor_${sid}`,       JSON.stringify(decorPrefs));
             localStorage.setItem(`intv_cd_${sid}`,          JSON.stringify(countdowns));
             localStorage.setItem(`intv_grade_cats_${sid}`,  JSON.stringify(gradeCategories));
+            localStorage.setItem(`intv_period_labels_${sid}`, JSON.stringify(periodLabels));
           }
           return;
         }
@@ -1256,6 +1283,7 @@
         decorPrefs      = JSON.parse(localStorage.getItem(`intv_decor_${sid}`) || '{}');
         countdowns      = JSON.parse(localStorage.getItem(`intv_cd_${sid}`) || '[]');
         gradeCategories = JSON.parse(localStorage.getItem(`intv_grade_cats_${sid}`) || '{}');
+        periodLabels    = JSON.parse(localStorage.getItem(`intv_period_labels_${sid}`) || '{}');
       }
     }
 
@@ -1271,7 +1299,8 @@
           stickers:        dayStickers,
           decor:           decorPrefs,
           countdowns,
-          gradeCategories
+          gradeCategories,
+          periodLabels
         })
       }).catch(() => {}); // background — don't block UI
     }
@@ -2013,6 +2042,7 @@
 
       grid.innerHTML = ALL_PERIODS.map(p => {
         const cls     = mySchedule[p] || '';
+        const nick    = periodLabels[p] || '';
         const col     = (periodColors[p] || DEFAULT_PERIOD_COLORS[p] || '#6c757d');
         const entries = gradeLog.filter(g => g.period_label === p);
 
@@ -2061,7 +2091,8 @@
             <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background:${col};color:#fff;">
               <div class="overflow-hidden flex-grow-1 me-1">
                 <div class="d-flex align-items-baseline gap-2">
-                  <span class="fw-bold" style="font-size:.85rem;">${p}</span>
+                  <span class="fw-bold" style="font-size:.85rem;">${nick || p}</span>
+                  ${nick ? `<span style="font-size:.62rem;opacity:.7;">(${p})</span>` : ''}
                   ${letter != null ? `<span style="font-size:1.05rem;font-weight:900;line-height:1;">${letter}</span><span style="font-size:.72rem;opacity:.9;">${overallPct}%</span>` : ''}
                   ${cats.length ? `<span style="font-size:.62rem;opacity:.75;">(weighted)</span>` : ''}
                 </div>
@@ -2154,7 +2185,8 @@
 
     window.openGradeLogForPeriod = (period) => {
       if (isReadOnly) return;
-      const cls = mySchedule[period] || '';
+      const cls  = mySchedule[period] || '';
+      const nick = periodLabels[period] || period;
       // Set hidden inputs — save handler reads these
       document.getElementById('glPeriod').value = period;
       document.getElementById('glClass').value  = cls;
@@ -2164,7 +2196,7 @@
       document.getElementById('glClassWrap').classList.add('d-none');
       const labelRow = document.getElementById('glPeriodLabelRow');
       labelRow.classList.remove('d-none');
-      document.getElementById('glPeriodLabel').textContent = cls ? `${period} · ${cls}` : period;
+      document.getElementById('glPeriodLabel').textContent = cls ? `${nick} · ${cls}` : nick;
       window.populateCategorySelect(period);
       document.getElementById('glDate').value = todayStr;
       bootstrap.Modal.getOrCreateInstance(document.getElementById('gradeLogModal')).show();
@@ -3120,6 +3152,8 @@
         if (el) el.value = mySchedule[k] || '';
         const cp = document.getElementById(`color${k}`);
         if (cp) cp.value = periodColors[k] || DEFAULT_PERIOD_COLORS[k] || '#888888';
+        const nk = document.getElementById(`nick${k}`);
+        if (nk) nk.value = periodLabels[k] || '';
       });
     }
 
@@ -3132,13 +3166,17 @@
         if (el) mySchedule[k] = el.value.trim();
         const cp = document.getElementById(`color${k}`);
         if (cp) periodColors[k] = cp.value;
+        const nk = document.getElementById(`nick${k}`);
+        if (nk) periodLabels[k] = nk.value.trim();
       });
       localStorage.setItem(`intv_sched_${user.student_id}`, JSON.stringify(mySchedule));
       localStorage.setItem(`intv_period_colors_${user.student_id}`, JSON.stringify(periodColors));
+      localStorage.setItem(`intv_period_labels_${user.student_id}`, JSON.stringify(periodLabels));
       syncPrefsToServer();
       bootstrap.Modal.getInstance(document.getElementById('scheduleModal'))?.hide();
       if (currentView === 'day') renderCalendar();
       populateScheduleSelects();
+      renderGradesTab();
     });
 
     // ── Grade Category Modal ──────────────────────────────────────────────────
@@ -3223,7 +3261,7 @@
         if (!sel) return;
         sel.innerHTML = '';
         sel.add(new Option('— Pick from your schedule —', ''));
-        filled.forEach(k => sel.add(new Option(`${k} · ${mySchedule[k]}`, makeVal(k))));
+        filled.forEach(k => sel.add(new Option(`${periodLabels[k] || k} · ${mySchedule[k]}`, makeVal(k))));
         sel.add(new Option('Other / Type below…', '__other__'));
         sel.value = '';
       }

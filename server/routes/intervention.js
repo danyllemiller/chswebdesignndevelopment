@@ -912,6 +912,10 @@ async function ensurePlannerTables(connection) {
     await connection.execute(`
         ALTER TABLE planner_preferences ADD COLUMN IF NOT EXISTS grade_categories_json LONGTEXT DEFAULT NULL
     `).catch(() => {});
+    // Add period_labels_json column to planner_preferences if it doesn't exist yet
+    await connection.execute(`
+        ALTER TABLE planner_preferences ADD COLUMN IF NOT EXISTS period_labels_json LONGTEXT DEFAULT NULL
+    `).catch(() => {});
 }
 
 // ── Preferences (schedule, colors, stickers, decor, countdowns) ───────────
@@ -934,27 +938,29 @@ router.get('/intervention/planner-prefs', async (req, res) => {
             stickers:         r.stickers_json         ? JSON.parse(r.stickers_json)         : {},
             decor:            r.decor_json            ? JSON.parse(r.decor_json)            : {},
             countdowns:       r.countdowns_json       ? JSON.parse(r.countdowns_json)       : [],
-            gradeCategories:  r.grade_categories_json ? JSON.parse(r.grade_categories_json) : {}
+            gradeCategories:  r.grade_categories_json ? JSON.parse(r.grade_categories_json) : {},
+            periodLabels:     r.period_labels_json    ? JSON.parse(r.period_labels_json)    : {}
         }});
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch prefs' }); }
 });
 
 router.put('/intervention/planner-prefs', async (req, res) => {
-    const { student_id, schedule, colors, stickers, decor, countdowns, gradeCategories } = req.body;
+    const { student_id, schedule, colors, stickers, decor, countdowns, gradeCategories, periodLabels } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
         const connection = await getDbConnection();
         await ensurePlannerTables(connection);
         await connection.execute(
-            `INSERT INTO planner_preferences (student_id, schedule_json, colors_json, stickers_json, decor_json, countdowns_json, grade_categories_json)
-             VALUES (?, ?, ?, ?, ?, ?, ?)
+            `INSERT INTO planner_preferences (student_id, schedule_json, colors_json, stickers_json, decor_json, countdowns_json, grade_categories_json, period_labels_json)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
              ON DUPLICATE KEY UPDATE
                schedule_json          = COALESCE(VALUES(schedule_json),          schedule_json),
                colors_json            = COALESCE(VALUES(colors_json),            colors_json),
                stickers_json          = COALESCE(VALUES(stickers_json),          stickers_json),
                decor_json             = COALESCE(VALUES(decor_json),             decor_json),
                countdowns_json        = COALESCE(VALUES(countdowns_json),        countdowns_json),
-               grade_categories_json  = COALESCE(VALUES(grade_categories_json),  grade_categories_json)`,
+               grade_categories_json  = COALESCE(VALUES(grade_categories_json),  grade_categories_json),
+               period_labels_json     = COALESCE(VALUES(period_labels_json),     period_labels_json)`,
             [
                 student_id,
                 schedule         !== undefined ? JSON.stringify(schedule)         : null,
@@ -962,7 +968,8 @@ router.put('/intervention/planner-prefs', async (req, res) => {
                 stickers         !== undefined ? JSON.stringify(stickers)         : null,
                 decor            !== undefined ? JSON.stringify(decor)            : null,
                 countdowns       !== undefined ? JSON.stringify(countdowns)       : null,
-                gradeCategories  !== undefined ? JSON.stringify(gradeCategories)  : null
+                gradeCategories  !== undefined ? JSON.stringify(gradeCategories)  : null,
+                periodLabels     !== undefined ? JSON.stringify(periodLabels)     : null
             ]
         );
         await connection.end();
@@ -1142,11 +1149,12 @@ router.get('/teacher/planner/:student_id/prefs', async (req, res) => {
         if (!rows.length) return res.json({ prefs: null });
         const r = rows[0];
         res.json({ prefs: {
-            schedule:   r.schedule_json   ? JSON.parse(r.schedule_json)   : {},
-            colors:     r.colors_json     ? JSON.parse(r.colors_json)     : {},
-            stickers:   r.stickers_json   ? JSON.parse(r.stickers_json)   : {},
-            decor:      r.decor_json      ? JSON.parse(r.decor_json)      : {},
-            countdowns: r.countdowns_json ? JSON.parse(r.countdowns_json) : []
+            schedule:     r.schedule_json      ? JSON.parse(r.schedule_json)      : {},
+            colors:       r.colors_json        ? JSON.parse(r.colors_json)        : {},
+            stickers:     r.stickers_json      ? JSON.parse(r.stickers_json)      : {},
+            decor:        r.decor_json         ? JSON.parse(r.decor_json)         : {},
+            countdowns:   r.countdowns_json    ? JSON.parse(r.countdowns_json)    : [],
+            periodLabels: r.period_labels_json ? JSON.parse(r.period_labels_json) : {}
         }});
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch prefs' }); }
 });
