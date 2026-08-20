@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Word Cloud</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=8"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 900px; margin: 2.5rem auto; }
+    .broadcast-badge { font-size: .75rem; }
+    #cloudWrap {
+      min-height: 320px; display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: center; gap: .5rem 1.1rem; padding: 2rem 1rem;
+      background: #fff; border: 2px dashed #dee2e6; border-radius: 14px;
+    }
+    .cloud-word {
+      font-weight: 800; line-height: 1; white-space: nowrap;
+      transition: font-size .35s ease, color .35s ease;
+    }
+    .cloud-empty { color: #adb5bd; font-weight: 600; font-size: 1.1rem; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <h2 class="gochi text-primary mb-1"><i class="fas fa-cloud me-2"></i>Word Cloud</h2>
+      <p class="text-muted mb-4">Give students a prompt. Every word they submit shows up live below — the more students that submit the same word, the bigger it grows.</p>
+
+      <div id="setupView">
+        <label class="form-label fw-bold small">Prompt</label>
+        <input id="promptInput" type="text" class="form-control mb-3" placeholder="e.g. Describe today's lesson in one word">
+
+        <div class="row g-3 mb-3">
+          <div class="col-sm-6">
+            <label class="form-label fw-bold small mb-1">Class Period</label>
+            <select id="periodSelect" class="form-select">
+              <option value="">Loading periods…</option>
+            </select>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-bold small mb-1">Words per student</label>
+            <select id="maxWordsSelect" class="form-select">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="startCloudBtn" class="btn btn-primary btn-lg w-100"><i class="fas fa-play me-2"></i>Start Word Cloud</button>
+      </div>
+
+      <div id="cloudView" class="d-none">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h4 id="cloudPrompt" class="mb-1"></h4>
+            <span class="badge bg-success broadcast-badge"><i class="fas fa-tower-broadcast me-1"></i>Live on student screens</span>
+          </div>
+          <div class="d-flex gap-2">
+            <button id="clearWordsBtn" class="btn btn-outline-secondary btn-sm"><i class="fas fa-eraser me-1"></i>Clear Words</button>
+            <button id="endCloudBtn" class="btn btn-outline-danger btn-sm"><i class="fas fa-stop me-1"></i>End</button>
+            <button id="newCloudBtn" class="btn btn-outline-secondary btn-sm"><i class="fas fa-rotate-left me-1"></i>New Cloud</button>
+          </div>
+        </div>
+
+        <div id="cloudWrap"><span class="cloud-empty">Waiting for words to come in…</span></div>
+
+        <p class="text-muted small mt-2 mb-0">
+          <span id="totalStudents">0</span> student(s) responded &middot; <span id="totalEntries">0</span> word(s) total
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script>
+  const COLORS = ['#000099', '#198754', '#dc3545', '#fd7e14', '#6f42c1', '#0dcaf0', '#d63384'];
+  const MIN_FONT = 16, MAX_FONT = 68;
+
+  // ── Class period list ────────────────────────────────────────────────────
+  fetch('/api/admin/sections')
+    .then(r => r.json())
+    .then(rows => {
+      const sel = document.getElementById('periodSelect');
+      sel.innerHTML = '';
+      rows.filter(s => s.section_id && s.section_id !== 'Teacher').forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.section_id;
+        opt.textContent = `${s.section_id} — ${s.course_name || ''}`;
+        sel.appendChild(opt);
+      });
+    })
+    .catch(() => {
+      document.getElementById('periodSelect').innerHTML = '<option value="">Failed to load periods</option>';
+    });
+
+  // ── State ────────────────────────────────────────────────────────────────
+  let cloudId = null;
+  let resultsInterval = null;
+
+  document.getElementById('startCloudBtn').addEventListener('click', async () => {
+    const prompt = document.getElementById('promptInput').value.trim();
+    const sectionId = document.getElementById('periodSelect').value;
+    const maxWords = document.getElementById('maxWordsSelect').value;
+    if (!prompt) { alert('Enter a prompt first.'); return; }
+    if (!sectionId) { alert('Pick a class period to push this to.'); return; }
+
+    try {
+      const res = await fetch('/api/admin/wordcloud/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, section_id: sectionId, max_words: maxWords })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed to start word cloud');
+      cloudId = data.id;
+      document.getElementById('cloudPrompt').textContent = prompt;
+      document.getElementById('setupView').classList.add('d-none');
+      document.getElementById('cloudView').classList.remove('d-none');
+      startResultsPolling();
+    } catch (e) {
+      alert('Failed to start word cloud: ' + e.message);
+    }
+  });
+
+  // Word sizing: linear scale between the least- and most-submitted word in
+  // the current results, so the cloud always uses the full size range no
+  // matter how many total submissions there are. Order is shuffled each
+  // render (not sorted by count) so big words don't all clump together --
+  // that's what actually makes it read as a "cloud" instead of a list.
+  function renderCloud(words) {
+    const wrap = document.getElementById('cloudWrap');
+    wrap.innerHTML = '';
+    if (!words.length) {
+      wrap.innerHTML = '<span class="cloud-empty">Waiting for words to come in…</span>';
+      return;
+    }
+    const counts = words.map(w => w.count);
+    const min = Math.min(...counts), max = Math.max(...counts);
+    const shuffled = [...words].sort(() => Math.random() - 0.5);
+
+    shuffled.forEach((w, i) => {
+      const ratio = max === min ? 1 : (w.count - min) / (max - min);
+      const size = MIN_FONT + ratio * (MAX_FONT - MIN_FONT);
+      const span = document.createElement('span');
+      span.className = 'cloud-word';
+      span.style.fontSize = size.toFixed(0) + 'px';
+      span.style.color = COLORS[i % COLORS.length];
+      span.title = `${w.count} submission${w.count === 1 ? '' : 's'}`;
+      span.textContent = w.word;
+      wrap.appendChild(span);
+    });
+  }
+
+  async function fetchResults() {
+    if (!cloudId) return;
+    try {
+      const res = await fetch(`/api/admin/wordcloud/results?id=${cloudId}`);
+      const data = await res.json();
+      if (!data.wordcloud) return;
+      renderCloud(data.words || []);
+      document.getElementById('totalStudents').textContent = data.totalStudents;
+      document.getElementById('totalEntries').textContent = data.totalEntries;
+    } catch (e) {}
+  }
+
+  function startResultsPolling() {
+    if (resultsInterval) clearInterval(resultsInterval);
+    fetchResults();
+    resultsInterval = setInterval(fetchResults, 3000);
+  }
+
+  document.getElementById('clearWordsBtn').addEventListener('click', async () => {
+    if (!cloudId) return;
+    if (!confirm('Clear all submitted words? Students keep their remaining submissions and can type new ones.')) return;
+    try {
+      await fetch('/api/admin/wordcloud/clear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: cloudId })
+      });
+      fetchResults();
+    } catch (e) {}
+  });
+
+  document.getElementById('endCloudBtn').addEventListener('click', async () => {
+    if (!cloudId) return;
+    try {
+      await fetch('/api/admin/wordcloud/close', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: cloudId })
+      });
+    } catch (e) {}
+    if (resultsInterval) clearInterval(resultsInterval);
+  });
+
+  document.getElementById('newCloudBtn').addEventListener('click', async () => {
+    if (cloudId) {
+      try {
+        await fetch('/api/admin/wordcloud/close', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: cloudId })
+        });
+      } catch (e) {}
+    }
+    if (resultsInterval) clearInterval(resultsInterval);
+    cloudId = null;
+    document.getElementById('promptInput').value = '';
+    document.getElementById('cloudView').classList.add('d-none');
+    document.getElementById('setupView').classList.remove('d-none');
+  });
+</script>
+</body>
+</html>

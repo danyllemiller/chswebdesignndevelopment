@@ -18,6 +18,17 @@
 })();
 
 // ==========================================
+// LIVE WORD CLOUDS (sitewide, self-guards to students only)
+// ==========================================
+(function injectWordCloudListener() {
+  if (document.getElementById('wordcloud-listener-script')) return;
+  const script = document.createElement('script');
+  script.id = 'wordcloud-listener-script';
+  script.src = '/js/wordcloud-listener.js?v=1';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
 // AUTO-INJECT COMMON HEAD RESOURCES
 // ==========================================
 (function initGlobalHeadResources() {

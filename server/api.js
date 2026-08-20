@@ -18,5 +18,6 @@ router.use('/', require('./routes/rank'));
 router.use('/', require('./routes/paystubs'));
 router.use('/', require('./routes/stickers'));
 router.use('/', require('./routes/polls'));
+router.use('/', require('./routes/wordcloud'));
 
 module.exports = router;
