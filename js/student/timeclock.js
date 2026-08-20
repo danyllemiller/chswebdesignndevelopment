@@ -1,6 +1,7 @@
 // /js/student/timeclock.js
 import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
+import { periodToCourseKey } from '../modules/grade-weights.js?v=3';
 
 let studentData = null;
 let currentQuestion = null;
@@ -187,25 +188,41 @@ async function checkStatus() {
         }
 
         if (mode === 'in') {
-            // DETECT TRACK: CS vs WD
-            const isCS = studentData.section_id.startsWith('CS');
+            // DETECT TRACK: CS vs WD — bare period codes (A3, B4...) don't carry
+            // a "CS"/"WD" prefix, so this has to go through the shared course map.
+            const isCS = periodToCourseKey(studentData.section_id) === 'CS';
             const category = isCS ? 'CS_IN' : 'WD_IN';
             const dayGroup = getTwoDayIndex();
 
             // Fetch Question from DB via apiFetch
             currentQuestion = await apiFetch(`/api/timeclock/question?type=${category}&group=${dayGroup}`);
-            
+
             label.innerText = currentQuestion.question_text;
             const options = JSON.parse(currentQuestion.options);
-            
-            optsContainer.innerHTML = options.map((opt, i) => `
+
+            let html = options.map((opt, i) => `
                 <div class="form-check mb-2">
                     <input class="form-check-input" type="radio" name="tc-radio" value="${opt}" id="opt${i}" required>
                     <label class="form-check-label" for="opt${i}">${opt}</label>
                 </div>
             `).join('');
+
+            const rq = currentQuestion.reviewQuestion;
+            if (rq) {
+                html += `
+                    <hr class="my-3">
+                    <h6 class="fw-bold text-dark mb-1">Quick Unit ${rq.unit} Review${rq.isFallback ? '' : ''}</h6>
+                    <p class="small mb-2">${rq.question}</p>
+                    ${rq.options.map((opt, i) => `
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="tc-review-radio" value="${(opt || '').replace(/"/g, '&quot;')}" id="rq-opt${i}" required>
+                            <label class="form-check-label" for="rq-opt${i}">${opt}</label>
+                        </div>
+                    `).join('')}`;
+            }
+            optsContainer.innerHTML = html;
             btn.innerText = "Submit & Clock In";
-        } 
+        }
         else if (mode === 'out') {
             label.innerText = "Daily Reflection";
             optsContainer.innerHTML = `<textarea id="tc-out-answer" class="form-control" rows="3" required></textarea>`;
@@ -225,6 +242,14 @@ async function handleTimeclockSubmit(e) {
         const checked = document.querySelector('input[name="tc-radio"]:checked');
         if (!checked) return;
         answer = checked.value;
+
+        const rq = currentQuestion?.reviewQuestion;
+        if (rq) {
+            const reviewChecked = document.querySelector('input[name="tc-review-radio"]:checked');
+            if (!reviewChecked) return;
+            const isCorrect = reviewChecked.value === rq.answer;
+            answer += ` | Unit ${rq.unit} Review: ${isCorrect ? 'Correct' : `Incorrect (chose "${reviewChecked.value}", correct was "${rq.answer}")`}`;
+        }
     } else {
         answer = document.getElementById('tc-out-answer').value;
     }

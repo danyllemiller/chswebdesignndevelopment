@@ -32,6 +32,38 @@ router.get('/timeclock/status', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch status' }); }
 });
 
+// Current unit = the lowest-numbered Unit N Exam whose due date hasn't
+// passed yet, i.e. the unit students are actively working toward. Falls
+// back to Unit 1 (flagged) if no CS unit exam has a due date set at all.
+async function getCurrentCSUnit(connection) {
+    const today = new Date().toISOString().split('T')[0];
+    const [rows] = await connection.execute(
+        `SELECT exam_id, due_date FROM exams
+         WHERE course_id LIKE '10003%' AND exam_id REGEXP '^Unit[0-9]+-Exam$' AND due_date IS NOT NULL
+         ORDER BY due_date ASC`
+    );
+    const parsed = rows
+        .map(r => ({ unit: parseInt(r.exam_id.match(/^Unit(\d+)-Exam$/i)[1], 10), dueDate: r.due_date }))
+        .filter(r => !isNaN(r.unit))
+        .sort((a, b) => a.unit - b.unit);
+
+    const upcoming = parsed.find(r => new Date(r.dueDate).toISOString().split('T')[0] >= today);
+    if (upcoming) return { unit: upcoming.unit, isFallback: false };
+    if (parsed.length > 0) return { unit: parsed[parsed.length - 1].unit, isFallback: false }; // all past — stick with the last one
+    return { unit: 1, isFallback: true }; // no due dates set anywhere yet
+}
+
+async function getRandomCSQuestion(connection, unit) {
+    const [rows] = await connection.execute(
+        `SELECT question_text AS question, option_a, option_b, option_c, option_d, correct_answer AS answer
+         FROM questions WHERE chapter_number = ? ORDER BY RAND() LIMIT 1`,
+        [unit]
+    );
+    if (rows.length === 0) return null;
+    const r = rows[0];
+    return { question: r.question, options: [r.option_a, r.option_b, r.option_c, r.option_d], answer: r.answer };
+}
+
 router.get('/timeclock/question', async (req, res) => {
     const { type } = req.query;
     const today = new Date().toISOString().split('T')[0];
@@ -43,15 +75,24 @@ router.get('/timeclock/question', async (req, res) => {
             'SELECT wd_question, cs_question FROM teacher_daily_questions WHERE date = ?',
             [today]
         );
-        await connection.end();
         const dailyQ = rows[0];
         const baseText = isCS ? (dailyQ?.cs_question || '') : (dailyQ?.wd_question || '');
         const questionText = baseText
             ? `${baseText}\n\nAlso — how are you arriving today?`
             : 'How are you arriving today?';
-        res.json({ question_text: questionText, options: defaultOptions });
+
+        let reviewQuestion = null;
+        if (isCS) {
+            const { unit, isFallback } = await getCurrentCSUnit(connection);
+            const q = await getRandomCSQuestion(connection, unit);
+            if (q) reviewQuestion = { ...q, unit, isFallback };
+        }
+
+        await connection.end();
+        res.json({ question_text: questionText, options: defaultOptions, reviewQuestion });
     } catch (err) {
-        res.json({ question_text: 'How are you arriving today?', options: defaultOptions });
+        console.error(err);
+        res.json({ question_text: 'How are you arriving today?', options: defaultOptions, reviewQuestion: null });
     }
 });
 
