@@ -226,14 +226,24 @@ function filterNavigation(authData) {
     if (loginMenu) loginMenu.style.setProperty('display', 'none', 'important');
 
     if (authData.isTeacher) {
-        // --- TEACHER: SHOW ADMIN, ATOMICALLY HIDE STUDENT MENUS ---
+        // --- TEACHER: SHOW ADMIN, PLUS ALL STUDENT TOOL MENUS SO THE TEACHER CAN
+        // DEMONSTRATE THEM LIVE WITHOUT LOGGING IN AS A STUDENT ---
         if (adminMenu) {
             adminMenu.classList.remove('d-none');
             adminMenu.style.setProperty('display', 'block', 'important');
         }
-        if (studentMenuWD) studentMenuWD.style.setProperty('display', 'none', 'important');
-        if (studentMenuCS) studentMenuCS.style.setProperty('display', 'none', 'important');
-        if (studentMenuINTV) studentMenuINTV.style.setProperty('display', 'none', 'important');
+        if (studentMenuWD) {
+            studentMenuWD.classList.remove('d-none');
+            studentMenuWD.style.setProperty('display', 'block', 'important');
+        }
+        if (studentMenuCS) {
+            studentMenuCS.classList.remove('d-none');
+            studentMenuCS.style.setProperty('display', 'block', 'important');
+        }
+        if (studentMenuINTV) {
+            studentMenuINTV.classList.remove('d-none');
+            studentMenuINTV.style.setProperty('display', 'block', 'important');
+        }
         if (webDesignNav) webDesignNav.style.display = '';
         if (compSciNav) compSciNav.style.display = '';
     } else {
@@ -250,74 +260,49 @@ const studentClass = String(
             authData.user?.studentClass ||
             ''
         ).trim().toUpperCase();
-        
+
         // FIX: Check explicit course setting FIRST - this is set at login and is most reliable
         // The auth-guard sets authData.course to 'CS' or 'WD' based on student's section_id
         const explicitCourse = authData.course ? String(authData.course).toUpperCase() : null;
-        
+
         // Fall back to inferring from section_id if no explicit course set
         const courseFromClass = studentClass.startsWith('CS') || studentClass.startsWith('COMP') || studentClass.includes('COMP') ? 'CS' :
                     (studentClass.startsWith('WD') || studentClass.startsWith('AS') || studentClass.includes('WEB')) ? 'WD' :
                     null;
-        
-        // Use explicit course first, then fall back to class-based inference
-        const isCS = explicitCourse === 'CS' || authData.isCSStudent === true || courseFromClass === 'CS' || /^(CS|COMP)/.test(studentClass) || studentClass.includes('CS') || studentClass.includes('COMP');
-        const isWD = explicitCourse === 'WD' || courseFromClass === 'WD' || /^(WD|AS)/.test(studentClass) || studentClass.includes('WD') || studentClass.includes('WEB');
-        const isINTV = !isCS && !isWD && (studentClass === 'INTV' || studentClass === 'INTERVENTION' || studentClass.startsWith('INTV'));
 
-        console.log('[filterNavigation STUDENT] studentClass=', studentClass, 'explicitCourse=', explicitCourse, 'courseFromClass=', courseFromClass, 'isCS=', isCS, 'isWD=', isWD, 'isINTV=', isINTV, 'authData.isCSStudent=', authData.isCSStudent);
+        // auth-guard now resolves a student's FULL set of enrolled courses (primary
+        // section + any additional sections) into authData.enrolledCourses. Prefer
+        // that -- it's what lets a student in both CS and WD see both menus -- and
+        // only fall back to the old single-course inference if it's missing.
+        const enrolledCourses = Array.isArray(authData.enrolledCourses) && authData.enrolledCourses.length
+            ? authData.enrolledCourses
+            : null;
 
-        if (isINTV) {
-            if (webDesignNav) webDesignNav.style.setProperty('display', 'none', 'important');
-            if (compSciNav) compSciNav.style.setProperty('display', 'none', 'important');
-            if (studentMenuWD) studentMenuWD.style.setProperty('display', 'none', 'important');
-            if (studentMenuCS) studentMenuCS.style.setProperty('display', 'none', 'important');
-            if (studentMenuINTV) {
-                studentMenuINTV.classList.remove('d-none');
-                studentMenuINTV.style.setProperty('display', 'block', 'important');
-            }
-        } else if (isCS && !isWD) {
-            console.log('[filterNavigation] APPLYING CS-ONLY RULES');
-            if (webDesignNav) {
-                webDesignNav.style.setProperty('display', 'none', 'important');
-                console.log('[filterNavigation] Hidden webDesignNav:', webDesignNav.style.display);
-            }
-            if (studentMenuWD) {
-                studentMenuWD.style.setProperty('display', 'none', 'important');
-                console.log('[filterNavigation] Hidden studentMenuWD:', studentMenuWD.style.display);
-            }
-            if (studentMenuCS) {
-                studentMenuCS.classList.remove('d-none');
-                studentMenuCS.style.setProperty('display', 'block', 'important');
-                console.log('[filterNavigation] Showed studentMenuCS:', studentMenuCS.style.display);
-            }
-            if (compSciNav) {
-                compSciNav.style.setProperty('display', 'block', 'important');
-                console.log('[filterNavigation] Ensured compSciNav visible:', compSciNav.style.display);
-            }
-        } else if (isWD && !isCS) {
-            if (compSciNav) compSciNav.style.setProperty('display', 'none', 'important');
-            if (studentMenuCS) studentMenuCS.style.setProperty('display', 'none', 'important');
-            if (studentMenuWD) {
-                studentMenuWD.classList.remove('d-none');
-                studentMenuWD.style.setProperty('display', 'block', 'important');
-            }
-            if (webDesignNav) webDesignNav.style.display = '';
-        } else if (authData.isCSStudent) {
-            // If we still know this is a CS student, hide WD nav and show CS nav.
-            if (webDesignNav) webDesignNav.style.setProperty('display', 'none', 'important');
-            if (studentMenuWD) studentMenuWD.style.setProperty('display', 'none', 'important');
-            if (studentMenuCS) {
-                studentMenuCS.classList.remove('d-none');
-                studentMenuCS.style.setProperty('display', 'block', 'important');
-            }
-            if (compSciNav) compSciNav.style.setProperty('display', '');
-        } else {
-            // If track is unknown, keep both top-level course nav items available,
-            // but hide the student-specific dropdowns until course is detected.
-            if (studentMenuWD) studentMenuWD.style.setProperty('display', 'none', 'important');
-            if (studentMenuCS) studentMenuCS.style.setProperty('display', 'none', 'important');
-            if (studentMenuINTV) studentMenuINTV.style.setProperty('display', 'none', 'important');
+        const isCS = enrolledCourses ? enrolledCourses.includes('CS') :
+            (explicitCourse === 'CS' || authData.isCSStudent === true || courseFromClass === 'CS' || /^(CS|COMP)/.test(studentClass) || studentClass.includes('CS') || studentClass.includes('COMP'));
+        const isWD = enrolledCourses ? enrolledCourses.includes('WD') :
+            (explicitCourse === 'WD' || authData.isWDStudent === true || courseFromClass === 'WD' || /^(WD|AS)/.test(studentClass) || studentClass.includes('WD') || studentClass.includes('WEB'));
+        const isINTV = enrolledCourses ? enrolledCourses.includes('INTV') :
+            (!isCS && !isWD && (studentClass === 'INTV' || studentClass === 'INTERVENTION' || studentClass.startsWith('INTV')));
+
+        console.log('[filterNavigation STUDENT] studentClass=', studentClass, 'enrolledCourses=', enrolledCourses, 'isCS=', isCS, 'isWD=', isWD, 'isINTV=', isINTV);
+
+        // Each course's nav is shown/hidden independently -- a student enrolled in
+        // more than one course (e.g. CS + Web Design) sees every menu that applies.
+        if (webDesignNav) webDesignNav.style.setProperty('display', isWD ? '' : 'none', isWD ? '' : 'important');
+        if (compSciNav) compSciNav.style.setProperty('display', isCS ? 'block' : 'none', isCS ? '' : 'important');
+
+        if (studentMenuWD) {
+            if (isWD) { studentMenuWD.classList.remove('d-none'); studentMenuWD.style.setProperty('display', 'block', 'important'); }
+            else studentMenuWD.style.setProperty('display', 'none', 'important');
+        }
+        if (studentMenuCS) {
+            if (isCS) { studentMenuCS.classList.remove('d-none'); studentMenuCS.style.setProperty('display', 'block', 'important'); }
+            else studentMenuCS.style.setProperty('display', 'none', 'important');
+        }
+        if (studentMenuINTV) {
+            if (isINTV) { studentMenuINTV.classList.remove('d-none'); studentMenuINTV.style.setProperty('display', 'block', 'important'); }
+            else studentMenuINTV.style.setProperty('display', 'none', 'important');
         }
     }
 
@@ -346,41 +331,27 @@ const studentClass = String(
         const courseFromClass = studentClass.startsWith('CS') || studentClass.startsWith('COMP') || studentClass.includes('COMP') ? 'CS' :
                     (studentClass.startsWith('WD') || studentClass.startsWith('AS') || studentClass.includes('WEB')) ? 'WD' :
                     null;
-        const isCS = authData.course === 'CS' || authData.isCSStudent === true || courseFromClass === 'CS' || /^(CS|COMP)/.test(studentClass) || studentClass.includes('CS') || studentClass.includes('COMP');
-        const isWD = authData.course === 'WD' || courseFromClass === 'WD' || /^(WD|AS)/.test(studentClass) || studentClass.includes('WD') || studentClass.includes('WEB');
-        const isINTV = !isCS && !isWD && (studentClass === 'INTV' || studentClass === 'INTERVENTION' || studentClass.startsWith('INTV'));
+        const enrolledCourses = Array.isArray(authData.enrolledCourses) && authData.enrolledCourses.length
+            ? authData.enrolledCourses
+            : null;
+        const isCS = enrolledCourses ? enrolledCourses.includes('CS') :
+            (authData.course === 'CS' || authData.isCSStudent === true || courseFromClass === 'CS' || /^(CS|COMP)/.test(studentClass) || studentClass.includes('CS') || studentClass.includes('COMP'));
+        const isWD = enrolledCourses ? enrolledCourses.includes('WD') :
+            (authData.course === 'WD' || authData.isWDStudent === true || courseFromClass === 'WD' || /^(WD|AS)/.test(studentClass) || studentClass.includes('WD') || studentClass.includes('WEB'));
+        const isINTV = enrolledCourses ? enrolledCourses.includes('INTV') :
+            (!isCS && !isWD && (studentClass === 'INTV' || studentClass === 'INTERVENTION' || studentClass.startsWith('INTV')));
 
         if (authData.isTeacher) return;
 
-        if (isINTV) {
-            if (studentMenuWD) studentMenuWD.style.setProperty('display', 'none', 'important');
-            if (studentMenuCS) studentMenuCS.style.setProperty('display', 'none', 'important');
-            if (studentMenuINTV) {
-                studentMenuINTV.classList.remove('d-none');
-                studentMenuINTV.style.setProperty('display', 'block', 'important');
-            }
-        } else if (isCS && !isWD) {
-            console.log('[filterNavigation DEFENSIVE CHECK] Re-enforcing CS-only nav');
-            if (webDesignNav && webDesignNav.style.display !== 'none') {
-                webDesignNav.style.setProperty('display', 'none', 'important');
-                console.log('[filterNavigation] webDesignNav was re-hidden');
-            }
-            if (studentMenuWD && studentMenuWD.style.display !== 'none') {
-                studentMenuWD.style.setProperty('display', 'none', 'important');
-                console.log('[filterNavigation] studentMenuWD was re-hidden');
-            }
-            if (studentMenuINTV) studentMenuINTV.style.setProperty('display', 'none', 'important');
-        } else if (isWD && !isCS) {
-            console.log('[filterNavigation DEFENSIVE CHECK] Re-enforcing WD-only nav');
-            if (compSciNav && compSciNav.style.display === 'none') {
-                compSciNav.style.setProperty('display', '', 'important');
-                console.log('[filterNavigation] compSciNav was re-shown');
-            }
-            if (studentMenuCS && studentMenuCS.style.display !== 'none') {
-                studentMenuCS.style.setProperty('display', 'none', 'important');
-                console.log('[filterNavigation] studentMenuCS was re-hidden');
-            }
-            if (studentMenuINTV) studentMenuINTV.style.setProperty('display', 'none', 'important');
-        }
+        // Re-apply the same independent per-course visibility as the initial pass,
+        // in case something else on the page mutated these elements in the meantime.
+        if (webDesignNav) webDesignNav.style.setProperty('display', isWD ? '' : 'none', isWD ? '' : 'important');
+        if (compSciNav) compSciNav.style.setProperty('display', isCS ? 'block' : 'none', isCS ? '' : 'important');
+        if (studentMenuWD) studentMenuWD.style.setProperty('display', isWD ? 'block' : 'none', 'important');
+        if (studentMenuCS) studentMenuCS.style.setProperty('display', isCS ? 'block' : 'none', 'important');
+        if (studentMenuINTV) studentMenuINTV.style.setProperty('display', isINTV ? 'block' : 'none', 'important');
+        if (isWD && studentMenuWD) studentMenuWD.classList.remove('d-none');
+        if (isCS && studentMenuCS) studentMenuCS.classList.remove('d-none');
+        if (isINTV && studentMenuINTV) studentMenuINTV.classList.remove('d-none');
     }, 50);
 }

@@ -67,10 +67,12 @@ if (window.location.pathname.toLowerCase().includes('exams')) {
 function getCourseGroup(sectionId = '', courseName = '') {
     // Prefer course_name from DB — works with any section ID format
     const n = String(courseName).toUpperCase();
+    if (n.includes('INTERVENTION')) return 'INTV';
     if (n.includes('COMP') || n.includes('COMPUTER')) return 'CS';
     if (n.includes('WEB') || n.includes('DESIGN')) return 'WD';
     // Fall back to section_id prefix for legacy students
     const s = String(sectionId).toUpperCase();
+    if (s.startsWith('INTV') || s.includes('INTERVENTION')) return 'INTV';
     if (s.startsWith('CS') || s.startsWith('COMP') || s.includes('COMP')) return 'CS';
     if (s.startsWith('WD1') || s.startsWith('WD2') || s.startsWith('AS')) return 'WD';
     if (s.startsWith('WD') || s.includes('WEB')) return 'WD';
@@ -111,7 +113,7 @@ function getPageCourse(currentPath = '') {
     return 'SHARED';
 }
 
-function executeAuthCheck() {
+async function executeAuthCheck() {
     const currentPath = window.location.pathname.toLowerCase();
 
     let user = null;
@@ -165,8 +167,37 @@ function executeAuthCheck() {
     const normalizedSection = userSection;
     const isTeacher = user.role === 'admin' || user.section_id === 'Teacher' || (user.username && user.username.includes('damiller'));
     const studentCourse = getCourseGroup(normalizedSection, user.course_name || '');
-    const isCSStudent = studentCourse === 'CS' || user.course === 'CS' || user.isCSStudent === true || /^(CS|COMP)/.test(normalizedSection);
-    console.log('[auth-guard] user.section_id=', user.section_id, 'userSection=', normalizedSection, ' -> studentCourse=', studentCourse, 'isCSStudent=', isCSStudent, 'path=', currentPath);
+    const primaryIsCS = studentCourse === 'CS' || user.course === 'CS' || user.isCSStudent === true || /^(CS|COMP)/.test(normalizedSection);
+    const primaryIsWD = studentCourse === 'WD' || (!primaryIsCS && /^(WD|AS)/.test(normalizedSection));
+    const primaryIsINTV = studentCourse === 'INTV' || normalizedSection === 'INTV' || normalizedSection.startsWith('INTV');
+
+    // A student can be enrolled in more than one course (primary section plus
+    // any rows in student_additional_sections) -- collect every course group
+    // they actually belong to instead of forcing a single CS-vs-WD boolean.
+    const enrolledCourses = new Set();
+    if (primaryIsCS) enrolledCourses.add('CS');
+    if (primaryIsWD) enrolledCourses.add('WD');
+    if (primaryIsINTV) enrolledCourses.add('INTV');
+
+    if (!isTeacher && user.student_id) {
+        try {
+            const resp = await fetch(`/api/admin/student-sections?student_id=${encodeURIComponent(user.student_id)}`);
+            if (resp.ok) {
+                const additional = await resp.json();
+                (Array.isArray(additional) ? additional : []).forEach(sec => {
+                    const g = getCourseGroup(sec.section_id, sec.course_name || '');
+                    if (g) enrolledCourses.add(g);
+                });
+            }
+        } catch (e) {
+            console.error('[auth-guard] Failed to load additional sections:', e);
+        }
+    }
+
+    const isCSStudent = enrolledCourses.has('CS');
+    const isWDStudent = enrolledCourses.has('WD');
+    const isINTVStudent = enrolledCourses.has('INTV');
+    console.log('[auth-guard] user.section_id=', user.section_id, 'userSection=', normalizedSection, ' -> studentCourse=', studentCourse, 'enrolledCourses=', Array.from(enrolledCourses), 'path=', currentPath);
 
     if (isTeacher) {
         window.dacAuthData = {
@@ -219,25 +250,24 @@ function executeAuthCheck() {
     const isCSHomePage = csHomePages.some(p => currentPath.includes(p));
     const isWDHomePage = wdHomePages.some(p => currentPath.includes(p));
     
-    // If student is CS and trying to access CS home page, allow it
+    // A student's "home" for a course is always reachable if they're enrolled in it.
     if (isCSStudent && isCSHomePage) {
         console.log('[auth-guard] CS student accessing CS home page - allowing access');
-    } 
-    // If student is WD and trying to access WD home page, allow it
-    else if (!isCSStudent && isWDHomePage) {
+    } else if (isWDStudent && isWDHomePage) {
         console.log('[auth-guard] WD student accessing WD home page - allowing access');
     }
-    // Otherwise apply course restrictions
+    // Otherwise only block a page if the student isn't enrolled in that page's course at all --
+    // this is what lets a student in BOTH CS and WD reach both sets of tools.
     else if (!isShared && !isPublic) {
-        if (isCSStudent) {
-            if (pageCourse === 'WD') {
-                console.log('[auth-guard] CS student attempted WD page; redirecting to /cs-interactive.html');
-                window.location.replace('/cs-interactive.html');
-                return;
-            }
-        } else if (pageCourse === 'CS') {
-            console.log('[auth-guard] Non-CS student attempted CS page; redirecting to /student/notes.html');
-            window.location.replace('/student/notes.html');
+        const fallbackHome = isCSStudent ? '/cs-interactive.html' : (isWDStudent ? '/student/notes.html' : '/student/planner.html');
+        if (pageCourse === 'WD' && !isWDStudent) {
+            console.log('[auth-guard] Student not enrolled in WD attempted WD page; redirecting to', fallbackHome);
+            window.location.replace(fallbackHome);
+            return;
+        }
+        if (pageCourse === 'CS' && !isCSStudent) {
+            console.log('[auth-guard] Student not enrolled in CS attempted CS page; redirecting to', fallbackHome);
+            window.location.replace(fallbackHome);
             return;
         }
     }
@@ -249,6 +279,9 @@ function executeAuthCheck() {
         isAuthenticated: true,
         isTeacher: false,
         isCSStudent,
+        isWDStudent,
+        isINTVStudent,
+        enrolledCourses: Array.from(enrolledCourses),
         course: studentCourse || 'Student',
         studentClass: normalizedSection,
         section_id: normalizedSection,
