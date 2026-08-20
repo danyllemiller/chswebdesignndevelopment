@@ -3,6 +3,18 @@ const router = express.Router();
 const { getDbConnection } = require('../db');
 const { resolveCourseId } = require('../helpers');
 
+// mysql2 returns DATE columns as JS Date objects (local-timezone fields set to
+// match the stored date exactly), not strings. Reading those fields directly
+// avoids the UTC-conversion day-shift .toISOString() can introduce.
+function formatDbDate(d) {
+    if (!d) return '';
+    if (typeof d === 'string') return d.split('T')[0].split(' ')[0];
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
 router.get('/student/course-gradebook', async (req, res) => {
     const { student_id, section_id: sectionOverride } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
@@ -170,16 +182,24 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
         students.forEach(s => { s.additional_sections = extraByStudent[s.student_id] || []; });
 
         const [exams] = await connection.execute(
-            `SELECT exam_id, TRIM(title) AS title, total_points, course_id FROM exams`
+            `SELECT exam_id, TRIM(title) AS title, total_points, course_id, due_date, instructions, period_due_dates FROM exams`
         );
         const [grades] = await connection.execute(
             `SELECT student_id, exam_id, score, total_points, timestamp FROM responses`
         );
         const registry = {};
         exams.forEach(e => {
+            let periodDueDates = {};
+            if (e.period_due_dates) {
+                try {
+                    periodDueDates = typeof e.period_due_dates === 'string'
+                        ? JSON.parse(e.period_due_dates) : e.period_due_dates;
+                } catch (_) { periodDueDates = {}; }
+            }
             registry[e.exam_id] = {
                 title: e.title, maxPoints: e.total_points,
-                dueDate: '', instructions: '', targetCourse: e.course_id || 'All'
+                dueDate: formatDbDate(e.due_date), instructions: e.instructions || '',
+                targetCourse: e.course_id || 'All', periodDueDates
             };
         });
         await connection.end();
