@@ -1226,53 +1226,58 @@ function stickCalcRows(thead) {
 // ANALYTICS & MODAL HANDLERS
 // ========================================================
 window.showAnalytics = function(dbKey, displayLabel) {
-    let scores = [];
+    let percents = [];
     let periodData = {};
-    let realMax = null;
     const filtered = getFilteredStudents(document.getElementById('periodFilter').value, 'All');
 
     // Pre-assessments/diagnostics award flat completion credit for taking them
     // (e.g. always 15/15) and store the real diagnostic accuracy separately
     // under a "-Score" companion key. Analytics needs to answer "how much did
     // students already know before this unit," not "who clicked through the
-    // quiz" -- so prefer the real "-Score" entry when one exists, and pull the
-    // mastery threshold's max from that entry too (the diagnostic's own point
-    // total, not the flat completion credit's).
+    // quiz" -- so prefer the real "-Score" entry when one exists.
+    //
+    // Every student's own (score, max) pair comes straight off their actual
+    // grade record and its matching exams.total_points -- never a guessed or
+    // hardcoded point total. Because a quiz's question count can change over
+    // time (older submissions may be out of a different total than newer
+    // ones), raw scores from different totals aren't comparable, so each
+    // student is normalized to a percentage before averaging -- that's what
+    // stays correct "for all tests everywhere" regardless of how many
+    // questions a given test currently has.
     filtered.forEach(s => {
         const sGrades = allGrades[s.studentId] || {};
         const fuzzyScoreKey = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(dbKey + '-Score'));
         const fuzzyKey = fuzzyScoreKey || Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(dbKey));
         const entry = fuzzyKey ? sGrades[fuzzyKey] : null;
-        if (!entry) return;
-        const score = typeof entry === 'object' ? entry.score : entry;
-        if (fuzzyScoreKey && typeof entry === 'object' && entry.max) realMax = entry.max;
-        if (score !== "" && score !== undefined && score !== "EX" && !isNaN(Number(score))) {
-            scores.push(Number(score));
-            if (!periodData[s.period]) periodData[s.period] = [];
-            periodData[s.period].push(Number(score));
-        }
+        if (!entry || typeof entry !== 'object') return;
+        const score = entry.score;
+        const entryMax = Number(entry.max) || Number(allAssignments[fuzzyKey]?.maxPoints) || 0;
+        if (score === "" || score === undefined || score === "EX" || isNaN(Number(score)) || !entryMax) return;
+        const pct = (Number(score) / entryMax) * 100;
+        percents.push(pct);
+        if (!periodData[s.period]) periodData[s.period] = [];
+        periodData[s.period].push(pct);
     });
 
-    if (scores.length === 0) return alert("No scores to analyze.");
-    const max = realMax || parseAssignmentInfo(dbKey).maxPoints;
-    scores.sort((a,b)=>a-b);
-    const mean = (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1);
-    const mid = Math.floor(scores.length / 2);
-    const median = scores.length % 2 !== 0 ? scores[mid] : ((scores[mid-1]+scores[mid])/2);
-    const pass = Math.round((scores.filter(s=>(s/max)>=0.8).length / scores.length)*100);
+    if (percents.length === 0) return alert("No scores to analyze.");
+    percents.sort((a,b)=>a-b);
+    const mean = (percents.reduce((a,b)=>a+b,0)/percents.length).toFixed(1);
+    const mid = Math.floor(percents.length / 2);
+    const median = (percents.length % 2 !== 0 ? percents[mid] : ((percents[mid-1]+percents[mid])/2)).toFixed(1);
+    const pass = Math.round((percents.filter(p=>p>=80).length / percents.length)*100);
 
     document.getElementById('analyticsModalTitle').innerText = displayLabel;
-    document.getElementById('statMean').innerText = mean;
-    document.getElementById('statMedian').innerText = median;
+    document.getElementById('statMean').innerText = mean + '%';
+    document.getElementById('statMedian').innerText = median + '%';
     document.getElementById('statPass').innerText = pass + "%";
-    document.getElementById('masteryDescription').innerText = `Out of ${scores.length} attempts, ${pass}% reached Mastery (80%+).`;
-    
+    document.getElementById('masteryDescription').innerText = `Out of ${percents.length} attempts, ${pass}% reached Mastery (80%+).`;
+
     const ctx = document.getElementById('periodAnalyticsChart');
     if (window.analyticsChartInstance) window.analyticsChartInstance.destroy();
     window.analyticsChartInstance = new Chart(ctx, {
         type: 'bar',
-        data: { labels: Object.keys(periodData).sort(), datasets: [{ label: 'Mean Score', data: Object.keys(periodData).sort().map(p=>(periodData[p].reduce((a,b)=>a+b,0)/periodData[p].length).toFixed(1)), backgroundColor: 'rgba(54, 162, 235, 0.7)', borderRadius: 5 }] },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: max } } }
+        data: { labels: Object.keys(periodData).sort(), datasets: [{ label: 'Mean %', data: Object.keys(periodData).sort().map(p=>(periodData[p].reduce((a,b)=>a+b,0)/periodData[p].length).toFixed(1)), backgroundColor: 'rgba(54, 162, 235, 0.7)', borderRadius: 5 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
     });
     getModal('analyticsModal').show();
 };
