@@ -24,7 +24,7 @@
   <script src="/js/loader.js?v=8"></script>
   <!-- Our Diagnostic Testing Logic -->
   <script type="module">
-    import { initPreTest } from "/js/preTestLogic.js?v=1";
+    import { initPreTest } from "/js/preTestLogic.js?v=2";
     window.initPreTest = initPreTest;
   </script>
 <script type="module" src="/js/auth-guard.js"></script>
@@ -48,40 +48,43 @@
   </section>
 
   <script>
-    // Level 1 Crash Review Diagnostic Pool — spans Chapters 1-8
+    // Level 1 Crash Review Diagnostic Pool — spans Chapters 1-8.
+    // Every question carries an explicit `answer` field rather than relying on
+    // "the first option is correct" -- that positional convention is what let
+    // a mis-ordered options array grade silently wrong in the first place.
     const crashReviewPool = [
         // Ch 1: The Developer's World
-        { question: "What translates a human-readable domain name (like example.com) into an IP address?", options: ["Hosting", "DNS", "A CMS", "A Sitemap"] },
-        { question: "What is the term for constantly updating your skills because technology changes so quickly?", options: ["Continuous Learning", "Freelancing", "Debugging", "Prototyping"] },
-        { question: "Which is a correct, professional filename?", options: ["About Us.html", "about-us.html", "AboutUs!.html", "about us.HTML"] },
+        { question: "What translates a human-readable domain name (like example.com) into an IP address?", options: ["Hosting", "DNS", "A CMS", "A Sitemap"], answer: "DNS" },
+        { question: "What is the term for constantly updating your skills because technology changes so quickly?", options: ["Continuous Learning", "Freelancing", "Debugging", "Prototyping"], answer: "Continuous Learning" },
+        { question: "Which is a correct, professional filename?", options: ["About Us.html", "about-us.html", "AboutUs!.html", "about us.HTML"], answer: "about-us.html" },
         // Ch 2: The Rules
-        { question: "What legally protects an original creative work the moment it's created?", options: ["A patent", "Copyright", "A trademark", "An NDA"] },
-        { question: "What kind of license spells out exactly how a creator allows their work to be reused?", options: ["Creative Commons", "GPL only", "Public Domain only", "Copyleft"] },
-        { question: "Why does a website legally need to be accessible to users with disabilities?", options: ["It's optional but nice", "Courts have ruled websites are public accommodations", "Only government sites require it", "It only matters for print"] },
+        { question: "What legally protects an original creative work the moment it's created?", options: ["A patent", "Copyright", "A trademark", "An NDA"], answer: "Copyright" },
+        { question: "What kind of license spells out exactly how a creator allows their work to be reused?", options: ["Creative Commons", "GPL only", "Public Domain only", "Copyleft"], answer: "Creative Commons" },
+        { question: "Why does a website legally need to be accessible to users with disabilities?", options: ["It's optional but nice", "Courts have ruled websites are public accommodations", "Only government sites require it", "It only matters for print"], answer: "Courts have ruled websites are public accommodations" },
         // Ch 3: The Blueprint
-        { question: "What do you call the tree diagram showing every page on a site and how they connect?", options: ["A wireframe", "A sitemap", "A style guide", "A mockup"] },
-        { question: "What is a wireframe?", options: ["The final, fully-styled design", "A low-fidelity, grayscale layout sketch", "The site's database schema", "A hosting contract"] },
+        { question: "What do you call the tree diagram showing every page on a site and how they connect?", options: ["A wireframe", "A sitemap", "A style guide", "A mockup"], answer: "A sitemap" },
+        { question: "What is a wireframe?", options: ["The final, fully-styled design", "A low-fidelity, grayscale layout sketch", "The site's database schema", "A hosting contract"], answer: "A low-fidelity, grayscale layout sketch" },
         // Ch 4: UI/UX Design
-        { question: "UX (User Experience) refers to:", options: ["The visual buttons and controls", "How a product feels to use overall", "The site's color palette only", "The server's response time only"] },
-        { question: "What is a 'persona' in UX design?", options: ["The developer's job title", "A fictional target user you design for", "A CSS animation", "A type of wireframe"] },
-        { question: "What are 'Dark Patterns'?", options: ["A color scheme", "UI tricks designed to manipulate users", "A JavaScript error type", "An accessibility feature"] },
+        { question: "UX (User Experience) refers to:", options: ["The visual buttons and controls", "How a product feels to use overall", "The site's color palette only", "The server's response time only"], answer: "How a product feels to use overall" },
+        { question: "What is a 'persona' in UX design?", options: ["The developer's job title", "A fictional target user you design for", "A CSS animation", "A type of wireframe"], answer: "A fictional target user you design for" },
+        { question: "What are 'Dark Patterns'?", options: ["A color scheme", "UI tricks designed to manipulate users", "A JavaScript error type", "An accessibility feature"], answer: "UI tricks designed to manipulate users" },
         // Ch 5: The Bones (HTML)
-        { question: "Which tag must wrap all the visible content of a webpage?", options: ["<head>", "<body>", "<html>", "<meta>"] },
-        { question: "Which of these is a 'void' element that never needs a closing tag?", options: ["<p>", "<div>", "<img>", "<section>"] },
-        { question: "In <img src=\"cat.jpg\" alt=\"A cat\">, what is 'alt' called?", options: ["A tag", "An attribute", "A selector", "A class"] },
+        { question: "Which tag must wrap all the visible content of a webpage?", options: ["<head>", "<body>", "<html>", "<meta>"], answer: "<body>" },
+        { question: "Which of these is a 'void' element that never needs a closing tag?", options: ["<p>", "<div>", "<img>", "<section>"], answer: "<img>" },
+        { question: "In <img src=\"cat.jpg\" alt=\"A cat\">, what is 'alt' called?", options: ["A tag", "An attribute", "A selector", "A class"], answer: "An attribute" },
         // Ch 6: The Clothes (CSS)
-        { question: "Which CSS selector targets an element by its unique ID?", options: [".header", "#header", "*header", "header{}"] },
-        { question: "What are the four layers of the CSS Box Model, from inside out?", options: ["Margin, Border, Padding, Content", "Content, Padding, Border, Margin", "Padding, Content, Margin, Border", "Border, Content, Padding, Margin"] },
-        { question: "Which rule determines which CSS style wins when two rules conflict?", options: ["Alphabetical order", "Specificity", "File size", "Browser default"] },
+        { question: "Which CSS selector targets an element by its unique ID?", options: [".header", "#header", "*header", "header{}"], answer: "#header" },
+        { question: "What are the four layers of the CSS Box Model, from inside out?", options: ["Margin, Border, Padding, Content", "Content, Padding, Border, Margin", "Padding, Content, Margin, Border", "Border, Content, Padding, Margin"], answer: "Content, Padding, Border, Margin" },
+        { question: "Which rule determines which CSS style wins when two rules conflict?", options: ["Alphabetical order", "Specificity", "File size", "Browser default"], answer: "Specificity" },
         // Ch 7: Advanced Layout
-        { question: "Which CSS layout system arranges items along a single row or column?", options: ["CSS Grid", "Flexbox", "Float", "Position: absolute"] },
-        { question: "What does a media query enable?", options: ["Playing audio files", "Responsive design across screen sizes", "Database queries", "Font loading"] },
-        { question: "Which layout system is best for a full two-dimensional row-and-column layout?", options: ["Flexbox", "CSS Grid", "Inline-block", "Text-align"] },
+        { question: "Which CSS layout system arranges items along a single row or column?", options: ["CSS Grid", "Flexbox", "Float", "Position: absolute"], answer: "Flexbox" },
+        { question: "What does a media query enable?", options: ["Playing audio files", "Responsive design across screen sizes", "Database queries", "Font loading"], answer: "Responsive design across screen sizes" },
+        { question: "Which layout system is best for a full two-dimensional row-and-column layout?", options: ["Flexbox", "CSS Grid", "Inline-block", "Text-align"], answer: "CSS Grid" },
         // Ch 8: Sights & Sounds
-        { question: "Which image format is best for a scalable logo or icon?", options: ["JPG", "SVG", "BMP", "TIFF"] },
-        { question: "Why should you compress/optimize images before publishing a site?", options: ["It's required by copyright law", "Unoptimized files slow down page load", "It changes the file's color profile", "It's only needed for print"] },
-        { question: "Which HTML tag embeds a native video player without a plugin?", options: ["<media>", "<video>", "<embed-video>", "<film>"] },
-        { question: "Which image format supports transparency?", options: ["JPG", "PNG", "BMP", "TIFF"] }
+        { question: "Which image format is best for a scalable logo or icon?", options: ["JPG", "SVG", "BMP", "TIFF"], answer: "SVG" },
+        { question: "Why should you compress/optimize images before publishing a site?", options: ["It's required by copyright law", "Unoptimized files slow down page load", "It changes the file's color profile", "It's only needed for print"], answer: "Unoptimized files slow down page load" },
+        { question: "Which HTML tag embeds a native video player without a plugin?", options: ["<media>", "<video>", "<embed-video>", "<film>"], answer: "<video>" },
+        { question: "Which image format supports transparency?", options: ["JPG", "PNG", "BMP", "TIFF"], answer: "PNG" }
     ];
 
     const config = {
