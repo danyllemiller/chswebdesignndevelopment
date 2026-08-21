@@ -51,10 +51,38 @@ router.get('/student/course-gradebook', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch student course gradebook.' }); }
 });
 
+// Units 1-7 are the real sequential CS curriculum (CS_MAP in
+// admin/due-dates.html); Unit 0 is a standalone intro with no prerequisite
+// and Unit 8 is an orphaned, unlinked page, so neither is gated here.
+async function checkUnitPrerequisite(connection, studentId, examId) {
+    const m = /^Unit(\d+)-Exam$/i.exec(examId || '');
+    if (!m) return { ok: true };
+    const unitNum = parseInt(m[1], 10);
+    if (unitNum < 2 || unitNum > 7) return { ok: true };
+
+    const prevExamId = `Unit${unitNum - 1}-Exam`;
+    const [rows] = await connection.execute(
+        'SELECT score, total_points FROM responses WHERE student_id = ? AND exam_id = ?',
+        [studentId, prevExamId]
+    );
+    if (rows.length === 0) return { ok: false, prevExamId };
+    const pct = Number(rows[0].total_points) > 0 ? (Number(rows[0].score) / Number(rows[0].total_points)) * 100 : 0;
+    return { ok: pct >= 60, prevExamId, pct };
+}
+
 router.post('/submit-exam', async (req, res) => {
     const { student_id, exam_id, score, total_points, title, course_id } = req.body;
     try {
         const connection = await getDbConnection();
+
+        const prereq = await checkUnitPrerequisite(connection, student_id, exam_id);
+        if (!prereq.ok) {
+            await connection.end();
+            return res.status(403).json({
+                error: `${exam_id} is locked — a score of at least 60% on ${prereq.prevExamId} is required first.`
+            });
+        }
+
         const examTitle = title || exam_id.replace(/-/g, ' ').replace(/cs unit \d+/i, (m) => m.toUpperCase());
         const examCourse = course_id || '10003GS';
         await connection.execute(

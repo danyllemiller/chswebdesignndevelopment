@@ -492,10 +492,46 @@ function setupTabLockdown() {
     });
 }
 
+// Units 1-7 are the real sequential curriculum (see CS_MAP in
+// admin/due-dates.html); Unit 0 is a standalone intro assessment with no
+// prerequisite, and Unit 8 is an orphaned page not linked anywhere on the
+// site, so neither gets gated.
+async function checkUnitPrerequisite(unit) {
+    const unitNum = parseInt(unit, 10);
+    if (isNaN(unitNum) || unitNum < 2 || unitNum > 7) return { ok: true };
+
+    const prevExamId = `Unit${unitNum - 1}-Exam`;
+    try {
+        const res = await fetch(`/api/student/grades?student_id=${encodeURIComponent(studentId)}`);
+        if (!res.ok) return { ok: true }; // fail open on an API hiccup
+        const data = await res.json();
+        const prev = (data.responses || []).find(r => r.exam_id === prevExamId);
+        if (!prev) return { ok: false, prevExamId, pct: 0 };
+        const pct = Number(prev.total_points) > 0 ? (Number(prev.score) / Number(prev.total_points)) * 100 : 0;
+        return { ok: pct >= 60, prevExamId, pct };
+    } catch (e) {
+        console.error('[examLogicCS] Prerequisite check failed:', e);
+        return { ok: true }; // fail open -- server-side check is the real gate
+    }
+}
+
+function renderPrerequisiteBlock(prevExamId, pct) {
+    const container = document.getElementById('exam-container');
+    if (!container) return;
+    const prevLabel = prevExamId.replace(/-/g, ' ').replace('Exam', 'Exam');
+    container.innerHTML = `
+        <div class="alert alert-warning text-center shadow p-5">
+            <h4 class="fw-bold"><i class="fas fa-lock me-2"></i>This Unit Is Locked</h4>
+            <p class="mb-1">You need a score of at least <strong>60%</strong> on <strong>${escapeHtml(prevLabel)}</strong> to unlock this exam.</p>
+            <p class="text-muted small mb-4">Your current score on ${escapeHtml(prevLabel)}: ${pct.toFixed(0)}%</p>
+            <a href="/cs-interactive.html" class="btn btn-warning fw-bold">&laquo; Back to Class</a>
+        </div>`;
+}
+
 async function initExam(config) {
     // Extract unit number from config if provided (default to "a")
     currentUnit = config.unit || config.chapter || "a";
-    
+
     let pool = Array.isArray(config) ? config : (config.questions || []);
     
     // Handle backward compatibility - convert old chapter config to unit
@@ -589,6 +625,17 @@ async function initExam(config) {
 
     if (!username || !studentId) {
         window.location.replace(`/login.html?redirect=${encodeURIComponent(window.location.pathname)}`);
+        return;
+    }
+
+    // Sequential unlock: Unit N (2-7) requires 60%+ on Unit N-1's exam. Real
+    // enforcement lives server-side in /api/submit-exam -- this is just the
+    // friendly heads-up so a student isn't left guessing why their score
+    // never saved. Fails open on a network hiccup rather than hard-locking
+    // someone who's actually eligible.
+    const prereq = await checkUnitPrerequisite(currentUnit);
+    if (!prereq.ok) {
+        renderPrerequisiteBlock(prereq.prevExamId, prereq.pct);
         return;
     }
 
