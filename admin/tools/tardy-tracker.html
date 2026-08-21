@@ -126,7 +126,7 @@
     lookupPreview.innerHTML = '';
     if (!id) return;
     try {
-      const res = await fetch(`/api/admin/student?student_id=${encodeURIComponent(id)}`);
+      const res = await fetch(`/api/tardy/lookup?student_id=${encodeURIComponent(id)}`);
       if (!res.ok) {
         lookupPreview.innerHTML = `<span class="text-danger"><i class="fas fa-triangle-exclamation me-1"></i>No student found with that ID.</span>`;
         return;

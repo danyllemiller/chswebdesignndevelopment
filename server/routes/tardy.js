@@ -6,6 +6,24 @@ const { getDbConnection } = require('../db');
 // timestamped entry per tardy so a teacher can hand out passes and see both
 // a running log and a per-student count, without touching grading/attendance.
 
+// Dedicated lookup, deliberately not reusing /api/admin/student -- that
+// endpoint LEFT JOINs a payroll_roster table that doesn't exist in this
+// database, so it 500s on every call regardless of tardy tracking.
+router.get('/tardy/lookup', async (req, res) => {
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id is required' });
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.execute(
+            'SELECT student_id, first_name, last_name, section_id FROM students WHERE student_id = ? LIMIT 1',
+            [student_id]
+        );
+        await connection.end();
+        if (rows.length === 0) return res.status(404).json({ error: 'No student found with that ID.' });
+        res.json(rows[0]);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to look up student.' }); }
+});
+
 router.post('/tardy/log', async (req, res) => {
     const { student_id, period, reason } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
