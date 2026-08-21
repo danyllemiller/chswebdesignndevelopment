@@ -34,12 +34,19 @@ router.get('/admin/roster', async (req, res) => {
                    ORDER BY s.last_name ASC, s.first_name ASC`;
             params = [year];
         } else {
+            // A student must clear ALL THREE checks to appear in the default
+            // view: their own archived flag, and (if matched) their section's
+            // archived flag via either join path. This used to be OR'd
+            // together, which meant an active class_sections match alone kept
+            // a student visible even after explicitly archiving them via
+            // /admin/archive-students (students.archived = 1) -- the
+            // per-student archive button silently had no effect for anyone
+            // still enrolled in a non-archived section, which is nearly
+            // everyone it's ever used on.
             sql = `${baseSelect}
-                   WHERE (
-                       csc.archived = 0
-                       OR csl.archived = 0
-                       OR (csc.section_id IS NULL AND csl.section_id IS NULL AND (s.archived IS NULL OR s.archived = 0))
-                   )
+                   WHERE (s.archived IS NULL OR s.archived = 0)
+                     AND (csc.archived IS NULL OR csc.archived = 0)
+                     AND (csl.archived IS NULL OR csl.archived = 0)
                    ORDER BY s.last_name ASC, s.first_name ASC`;
         }
         const [students] = await connection.execute(sql, params);
