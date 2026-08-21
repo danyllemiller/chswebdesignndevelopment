@@ -54,11 +54,15 @@
           <label class="form-label small fw-bold">Date</label>
           <input type="date" id="dateInput" class="form-control">
         </div>
-        <div class="col-md-3">
-          <label class="form-label small fw-bold">Reason <span class="text-muted fw-normal">(optional)</span></label>
-          <input type="text" id="reasonInput" class="form-control" placeholder="e.g. overslept, bus was late">
+        <div class="col-md-2">
+          <label class="form-label small fw-bold">Time Arrived</label>
+          <input type="time" id="timeInput" class="form-control">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
+          <label class="form-label small fw-bold">Reason <span class="text-muted fw-normal">(optional)</span></label>
+          <input type="text" id="reasonInput" class="form-control" placeholder="e.g. overslept">
+        </div>
+        <div class="col-md-2">
           <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="fas fa-plus me-1"></i>Log Tardy</button>
         </div>
       </form>
@@ -67,37 +71,17 @@
     </div>
   </div>
 
-  <div class="row g-4">
-    <div class="col-lg-7">
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-white fw-bold"><i class="fas fa-list me-2 text-primary"></i>Recent Tardies</div>
-        <div class="card-body p-0" style="max-height: 480px; overflow-y: auto;">
-          <table class="table table-hover tardy-table mb-0">
-            <thead class="table-light sticky-top">
-              <tr><th>Student</th><th>Period</th><th>Reason</th><th>When</th><th></th></tr>
-            </thead>
-            <tbody id="logBody">
-              <tr><td colspan="5" class="text-center text-muted p-4">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-5">
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-white fw-bold"><i class="fas fa-chart-bar me-2 text-primary"></i>Tardy Counts</div>
-        <div class="card-body p-0" style="max-height: 480px; overflow-y: auto;">
-          <table class="table table-hover mb-0">
-            <thead class="table-light sticky-top">
-              <tr><th>Student</th><th class="text-center">Count</th><th>Last Tardy</th></tr>
-            </thead>
-            <tbody id="summaryBody">
-              <tr><td colspan="3" class="text-center text-muted p-4">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-white fw-bold"><i class="fas fa-list me-2 text-primary"></i>Tardy Log</div>
+    <div class="card-body p-0" style="max-height: 640px; overflow-y: auto;">
+      <table class="table table-hover tardy-table mb-0">
+        <thead class="table-light sticky-top">
+          <tr><th>Period</th><th>Reason</th><th>Date</th><th>Time Arrived</th><th>Min. Late</th><th></th></tr>
+        </thead>
+        <tbody id="logBody">
+          <tr><td colspan="6" class="text-center text-muted p-4">Loading...</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -125,17 +109,22 @@
   const studentIdInput = document.getElementById('studentIdInput');
   const periodInput = document.getElementById('periodInput');
   const dateInput = document.getElementById('dateInput');
+  const timeInput = document.getElementById('timeInput');
   const reasonInput = document.getElementById('reasonInput');
   const lookupPreview = document.getElementById('lookupPreview');
   const formError = document.getElementById('formError');
   const logBody = document.getElementById('logBody');
-  const summaryBody = document.getElementById('summaryBody');
 
   function todayStr() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
+  function nowTimeStr() {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  }
   dateInput.value = todayStr();
+  timeInput.value = nowTimeStr();
 
   let lookupTimer = null;
 
@@ -146,6 +135,85 @@
   function formatWhen(ts) {
     const d = new Date(ts.replace(' ', 'T'));
     return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
+  function formatTime(d) {
+    return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  // ── Bell-schedule resolution, mirroring js/student/timeclock.js's merge
+  // logic (special-dates.csv as the base day-type layer, calendar_events
+  // overriding it when its type outranks the CSV's) so "minutes late" is
+  // computed against the exact same source of truth as the rest of the site,
+  // for whatever specific date a tardy actually happened on -- not just today.
+  const EVENT_TYPE_PRI = { A: 6, B: 5, C: 4, A_MIN: 3, B_MIN: 2, S: 2, OFF: 1, none: 0 };
+  let dayTypes = new Map();
+  let bellSchedule = [];
+
+  function parseSpecialDatesCSV(text) {
+    const map = new Map();
+    const lines = text.split(/\r?\n/);
+    const firstLine = lines.find(l => l.trim());
+    const delim = firstLine && firstLine.includes('\t') ? '\t' : ',';
+    for (let i = 0; i < lines.length; i++) {
+      const raw = lines[i].trim();
+      if (!raw) continue;
+      if (i === 0 && /^date/i.test(raw.split(delim)[0].trim())) continue;
+      const cols = raw.split(delim);
+      const date = cols[0]?.trim();
+      const type = cols[1]?.trim();
+      if (date && /^\d{4}-\d{2}-\d{2}$/.test(date) && type) map.set(date, { type });
+    }
+    return map;
+  }
+
+  function mergeEventIntoDayTypes(ev) {
+    const existing = dayTypes.get(ev.event_date);
+    if (existing) {
+      if ((EVENT_TYPE_PRI[ev.type] ?? 0) > (EVENT_TYPE_PRI[existing.type] ?? 0)) existing.type = ev.type;
+    } else {
+      dayTypes.set(ev.event_date, { type: ev.type });
+    }
+  }
+
+  function getBellScheduleKey(dateStr) {
+    const info = dayTypes.get(dateStr);
+    if (!info || info.type === 'OFF' || info.type === 'none') return null;
+    const jsDay = new Date(dateStr + 'T00:00:00').getDay();
+    if (jsDay === 0 || jsDay === 6) return null;
+    return info.type === 'S' ? 'summer' : info.type;
+  }
+
+  async function loadScheduleData() {
+    try {
+      const [csvText, eventsData, bellData] = await Promise.all([
+        fetch('/special-dates.csv').then(r => r.ok ? r.text() : '').catch(() => ''),
+        fetch('/api/events.php').then(r => r.ok ? r.json() : { events: [] }).catch(() => ({ events: [] })),
+        fetch('/api/bell-schedule.php').then(r => r.ok ? r.json() : { schedule: [] }).catch(() => ({ schedule: [] })),
+      ]);
+      dayTypes = parseSpecialDatesCSV(csvText);
+      (eventsData.events || []).forEach(mergeEventIntoDayTypes);
+      bellSchedule = bellData.schedule || [];
+    } catch (e) { console.warn('Could not load bell schedule data:', e); }
+  }
+
+  // Minutes late = arrival time-of-day minus that period's official start
+  // time on that specific date, per the bell schedule. Returns null if no
+  // schedule match is found (e.g. period doesn't meet that day) rather than
+  // guessing.
+  function computeMinutesLate(createdAt, period) {
+    const d = new Date(createdAt.replace(' ', 'T'));
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const scheduleKey = getBellScheduleKey(dateStr);
+    if (!scheduleKey) return null;
+    const p = String(period || '').trim().toUpperCase();
+    const row = bellSchedule.find(r => r.schedule_type === scheduleKey && r.period_label === p)
+        || bellSchedule.find(r => r.schedule_type === scheduleKey && p.includes(r.period_label));
+    if (!row) return null;
+    const [sh, sm] = row.start_time.split(':').map(Number);
+    const startMinutes = sh * 60 + sm;
+    const arrivalMinutes = d.getHours() * 60 + d.getMinutes();
+    return arrivalMinutes - startMinutes;
   }
 
   function ordinal(n) {
@@ -200,55 +268,67 @@
     lookupTimer = setTimeout(lookupStudent, 400);
   });
 
+  function minutesLateCell(entry) {
+    const mins = computeMinutesLate(entry.created_at, entry.period);
+    if (mins === null) return '<span class="text-muted">—</span>';
+    if (mins <= 0) return '<span class="text-muted">on time</span>';
+    const badgeClass = mins >= 15 ? 'count-high' : mins >= 5 ? 'count-mid' : 'bg-secondary';
+    return `<span class="badge ${badgeClass}">${mins} min</span>`;
+  }
+
   async function loadLog() {
     try {
+      await loadScheduleData();
       const res = await fetch('/api/tardy/log');
       const data = await res.json();
       const entries = data.entries || [];
       if (entries.length === 0) {
-        logBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted p-4">No tardies logged yet.</td></tr>`;
+        logBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted p-4">No tardies logged yet.</td></tr>`;
         return;
       }
-      logBody.innerHTML = entries.map(e => `
-        <tr>
-          <td>${e.first_name ? `${escapeHtml(e.first_name)} ${escapeHtml(e.last_name)}` : escapeHtml(e.student_id)}<div class="text-muted small">${escapeHtml(e.student_id)}</div></td>
-          <td>${escapeHtml(e.period || '—')}</td>
-          <td>${escapeHtml(e.reason || '—')}</td>
-          <td class="small text-muted">${formatWhen(e.created_at)}</td>
-          <td><button class="btn btn-sm btn-outline-danger" data-delete="${e.id}" title="Remove entry"><i class="fas fa-xmark"></i></button></td>
-        </tr>
-      `).join('');
-    } catch (e) {
-      logBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger p-4">Failed to load log.</td></tr>`;
-    }
-  }
 
-  async function loadSummary() {
-    try {
-      const res = await fetch('/api/tardy/summary');
-      const data = await res.json();
-      const rows = data.summary || [];
-      if (rows.length === 0) {
-        summaryBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted p-4">No tardies logged yet.</td></tr>`;
-        return;
-      }
-      summaryBody.innerHTML = rows.map(r => {
-        const badgeClass = r.tardy_count >= 5 ? 'count-high' : r.tardy_count >= 3 ? 'count-mid' : 'bg-secondary';
-        return `
-          <tr>
-            <td>${r.first_name ? `${escapeHtml(r.first_name)} ${escapeHtml(r.last_name)}` : escapeHtml(r.student_id)}<div class="text-muted small">${escapeHtml(r.student_id)}</div></td>
-            <td class="text-center"><span class="badge ${badgeClass} count-badge">${r.tardy_count}</span></td>
-            <td class="small text-muted">${formatWhen(r.last_tardy)}</td>
-          </tr>
-        `;
+      // Group by student, students ordered by total tardy count (highest
+      // first) so the students who need attention surface at the top; each
+      // student's own entries stay newest-first underneath their header row.
+      const byStudent = new Map();
+      entries.forEach(e => {
+        if (!byStudent.has(e.student_id)) byStudent.set(e.student_id, []);
+        byStudent.get(e.student_id).push(e);
+      });
+      const groups = Array.from(byStudent.values()).sort((a, b) => b.length - a.length);
+
+      logBody.innerHTML = groups.map(group => {
+        const first = group[0];
+        const name = first.first_name ? `${escapeHtml(first.first_name)} ${escapeHtml(first.last_name)}` : escapeHtml(first.student_id);
+        const countBadgeClass = group.length >= 5 ? 'count-high' : group.length >= 3 ? 'count-mid' : 'bg-secondary';
+        const headerRow = `
+          <tr class="table-light">
+            <td colspan="6">
+              <strong>${name}</strong> <span class="text-muted small">(${escapeHtml(first.student_id)})</span>
+              <span class="badge ${countBadgeClass} count-badge ms-2">${group.length} ${group.length === 1 ? 'tardy' : 'tardies'}</span>
+            </td>
+          </tr>`;
+        const rows = group.map(e => {
+          const d = new Date(e.created_at.replace(' ', 'T'));
+          return `
+            <tr>
+              <td>${escapeHtml(e.period || '—')}</td>
+              <td>${escapeHtml(e.reason || '—')}</td>
+              <td class="small text-muted">${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</td>
+              <td class="small text-muted">${formatTime(d)}</td>
+              <td>${minutesLateCell(e)}</td>
+              <td><button class="btn btn-sm btn-outline-danger" data-delete="${e.id}" title="Remove entry"><i class="fas fa-xmark"></i></button></td>
+            </tr>`;
+        }).join('');
+        return headerRow + rows;
       }).join('');
     } catch (e) {
-      summaryBody.innerHTML = `<tr><td colspan="3" class="text-center text-danger p-4">Failed to load summary.</td></tr>`;
+      logBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger p-4">Failed to load log.</td></tr>`;
     }
   }
 
   async function refreshAll() {
-    await Promise.all([loadLog(), loadSummary()]);
+    await loadLog();
   }
 
   document.getElementById('tardyForm').addEventListener('submit', async (e) => {
@@ -258,7 +338,8 @@
       student_id: studentIdInput.value.trim(),
       period: periodInput.value.trim(),
       reason: reasonInput.value.trim(),
-      date: dateInput.value
+      date: dateInput.value,
+      time: timeInput.value
     };
     try {
       const res = await fetch('/api/tardy/log', {
@@ -272,6 +353,7 @@
       studentIdInput.value = '';
       periodInput.value = '';
       reasonInput.value = '';
+      timeInput.value = nowTimeStr();
       lookupPreview.innerHTML = '';
       lastLookupId = null;
       studentIdInput.focus();
