@@ -102,6 +102,45 @@
   </div>
 </div>
 
+<!-- EDIT TARDY ENTRY -->
+<div class="modal fade" id="editTardyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow border-primary">
+      <div class="modal-header bg-primary text-white py-2">
+        <h6 class="modal-title fw-bold"><i class="fas fa-pen me-2"></i>Edit Tardy — <span id="editTardyName"></span></h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body bg-light">
+        <form id="editTardyForm">
+          <input type="hidden" id="editTardyId">
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="form-label small fw-bold">Period</label>
+              <input type="text" id="editPeriodInput" class="form-control form-control-sm">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">Reason</label>
+              <input type="text" id="editReasonInput" class="form-control form-control-sm">
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small fw-bold">Date</label>
+              <input type="date" id="editDateInput" class="form-control form-control-sm">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">Time Arrived</label>
+              <input type="time" id="editTimeInput" class="form-control form-control-sm">
+            </div>
+          </div>
+          <div id="editTardyError" class="alert alert-danger small d-none"></div>
+          <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="footer-placeholder"></div>
 
 <script src="/js/bootstrap.bundle.js"></script>
@@ -276,12 +315,16 @@
     return `<span class="badge ${badgeClass}">${mins} min</span>`;
   }
 
+  const entriesById = new Map();
+
   async function loadLog() {
     try {
       await loadScheduleData();
       const res = await fetch('/api/tardy/log');
       const data = await res.json();
       const entries = data.entries || [];
+      entriesById.clear();
+      entries.forEach(e => entriesById.set(String(e.id), e));
       if (entries.length === 0) {
         logBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted p-4">No tardies logged yet.</td></tr>`;
         return;
@@ -317,7 +360,10 @@
               <td class="small text-muted">${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</td>
               <td class="small text-muted">${formatTime(d)}</td>
               <td>${minutesLateCell(e)}</td>
-              <td><button class="btn btn-sm btn-outline-danger" data-delete="${e.id}" title="Remove entry"><i class="fas fa-xmark"></i></button></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-1" data-edit="${e.id}" title="Edit entry"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-outline-danger" data-delete="${e.id}" title="Remove entry"><i class="fas fa-xmark"></i></button>
+              </td>
             </tr>`;
         }).join('');
         return headerRow + rows;
@@ -365,13 +411,57 @@
   });
 
   logBody.addEventListener('click', async (e) => {
-    const btn = e.target.closest('[data-delete]');
-    if (!btn) return;
-    if (!confirm('Remove this tardy entry?')) return;
+    const deleteBtn = e.target.closest('[data-delete]');
+    if (deleteBtn) {
+      if (!confirm('Remove this tardy entry?')) return;
+      try {
+        await fetch(`/api/tardy/log/${deleteBtn.dataset.delete}`, { method: 'DELETE' });
+        await refreshAll();
+      } catch (err) { console.error(err); }
+      return;
+    }
+
+    const editBtn = e.target.closest('[data-edit]');
+    if (editBtn) {
+      const entry = entriesById.get(String(editBtn.dataset.edit));
+      if (!entry) return;
+      const d = new Date(entry.created_at.replace(' ', 'T'));
+      document.getElementById('editTardyName').textContent = entry.first_name ? `${entry.first_name} ${entry.last_name}` : entry.student_id;
+      document.getElementById('editTardyId').value = entry.id;
+      document.getElementById('editPeriodInput').value = entry.period || '';
+      document.getElementById('editReasonInput').value = entry.reason || '';
+      document.getElementById('editDateInput').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      document.getElementById('editTimeInput').value = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      document.getElementById('editTardyError').classList.add('d-none');
+      new bootstrap.Modal(document.getElementById('editTardyModal')).show();
+    }
+  });
+
+  document.getElementById('editTardyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const editError = document.getElementById('editTardyError');
+    editError.classList.add('d-none');
+    const id = document.getElementById('editTardyId').value;
+    const payload = {
+      period: document.getElementById('editPeriodInput').value.trim(),
+      reason: document.getElementById('editReasonInput').value.trim(),
+      date: document.getElementById('editDateInput').value,
+      time: document.getElementById('editTimeInput').value
+    };
     try {
-      await fetch(`/api/tardy/log/${btn.dataset.delete}`, { method: 'DELETE' });
+      const res = await fetch(`/api/tardy/log/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update entry.');
+      bootstrap.Modal.getInstance(document.getElementById('editTardyModal'))?.hide();
       await refreshAll();
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      editError.textContent = err.message;
+      editError.classList.remove('d-none');
+    }
   });
 
   refreshAll();

@@ -104,6 +104,24 @@ router.get('/tardy/summary', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch tardy summary.' }); }
 });
 
+router.put('/tardy/log/:id', async (req, res) => {
+    const { id } = req.params;
+    const { period, reason, date, time } = req.body;
+    const validDate = /^\d{4}-\d{2}-\d{2}$/.test(date || '') ? date : null;
+    const validTime = /^\d{2}:\d{2}$/.test(time || '') ? time : null;
+    if (!validDate || !validTime) return res.status(400).json({ error: 'A valid date and time are required.' });
+    try {
+        const connection = await getDbConnection();
+        const [result] = await connection.execute(
+            'UPDATE tardy_passes SET period = ?, reason = ?, created_at = ? WHERE id = ?',
+            [period || '', reason || '', `${validDate} ${validTime}:00`, id]
+        );
+        await connection.release();
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Entry not found.' });
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update entry.' }); }
+});
+
 router.delete('/tardy/log/:id', async (req, res) => {
     const { id } = req.params;
     try {
