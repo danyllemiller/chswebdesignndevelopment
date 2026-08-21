@@ -163,7 +163,17 @@ function shuffleArray(array) {
 
 async function initPreTest(config) {
     let pool = shuffleArray([...config.questions]);
-    examQuestions = pool.slice(0, 10).map(q => ({ ...q, options: shuffleArray([...q.options]) }));
+    // For question pools with no explicit `answer` field, the convention is
+    // "options[0] is correct" -- but that has to be captured BEFORE the
+    // options themselves get shuffled for display, or grading ends up
+    // comparing against whatever landed first after a random shuffle instead
+    // of the real correct answer. Setting q.answer here makes every later
+    // correctness check (which already prefers q.answer) use the true
+    // original answer regardless of display order.
+    examQuestions = pool.slice(0, 10).map(q => {
+        const answer = q.answer || q.options[0];
+        return { ...q, answer, options: shuffleArray([...q.options]) };
+    });
     webhookUrl = config.webhookUrl;
     chapterTitle = config.chapterTitle;
 

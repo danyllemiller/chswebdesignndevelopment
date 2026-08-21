@@ -22,7 +22,7 @@ function loadQuizEngine() {
         }
 
         const s = document.createElement('script');
-        s.src = '/js/quizLogic.js?v=9';
+        s.src = '/js/quizLogic.js?v=10';
         s.onload = () => {
             // quizLogic.js sets window.initPreTest = its own initPreTest when it loads.
             // Capture it before anything can overwrite window.initPreTest again.
