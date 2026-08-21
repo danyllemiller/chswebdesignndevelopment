@@ -207,7 +207,7 @@ router.get('/intervention/status', async (req, res) => {
             'SELECT id, section_id, school_year FROM intervention_enrollments WHERE student_id = ? LIMIT 1',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ enrolled: rows.length > 0, enrollment: rows[0] || null });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to check enrollment' }); }
 });
@@ -222,7 +222,7 @@ router.get('/intervention/prompt', async (req, res) => {
         const [overrides] = await connection.execute(
             'SELECT prompt FROM intervention_prompt_overrides WHERE day_number = ? LIMIT 1', [dayNum]
         );
-        await connection.end();
+        await connection.release();
         const override = overrides.length ? overrides[0].prompt : null;
         res.json({ day_number: dayNum, prompt: promptForDay(dayNum, override), is_override: !!override });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch prompt' }); }
@@ -234,7 +234,7 @@ router.get('/intervention/prompts-all', async (req, res) => {
         const connection = await getDbConnection();
         await ensureTables(connection);
         const [overrides] = await connection.execute('SELECT day_number, prompt FROM intervention_prompt_overrides');
-        await connection.end();
+        await connection.release();
         const overrideMap = {};
         overrides.forEach(r => { overrideMap[r.day_number] = r.prompt; });
         const prompts = BUILT_IN_PROMPTS.map((p, i) => ({
@@ -260,7 +260,7 @@ router.get('/intervention/assignments', async (req, res) => {
             'SELECT assignment_id, submitted_at, passed FROM intervention_submissions WHERE student_id = ?',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         const subMap = {};
         submissions.forEach(s => { subMap[s.assignment_id] = s; });
         const result = assignments.map(a => ({
@@ -286,7 +286,7 @@ router.post('/intervention/submit', async (req, res) => {
              ON DUPLICATE KEY UPDATE response_text = VALUES(response_text), submitted_at = NOW(), passed = 1`,
             [student_id, assignment_id, response_text || '']
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, passed: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to submit assignment' }); }
 });
@@ -310,7 +310,7 @@ router.get('/intervention/journal', async (req, res) => {
                 [student_id]
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ entries: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch journal' }); }
 });
@@ -328,7 +328,7 @@ router.post('/intervention/journal', async (req, res) => {
              ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
             [student_id, date, prompt || null, content || '']
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save journal entry' }); }
 });
@@ -352,7 +352,7 @@ router.get('/intervention/goals', async (req, res) => {
                 [student_id]
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ goals: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch goals' }); }
 });
@@ -369,7 +369,7 @@ router.post('/intervention/goals', async (req, res) => {
             'INSERT INTO intervention_goals (student_id, cadence, title, notes, target_date) VALUES (?, ?, ?, ?, ?)',
             [student_id, cadence, title, notes || null, target_date || null]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, id: result.insertId });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to create goal' }); }
 });
@@ -386,7 +386,7 @@ router.put('/intervention/goals/:id', async (req, res) => {
             'UPDATE intervention_goals SET achieved_at = ? WHERE id = ? AND student_id = ?',
             [achieved ? new Date() : null, id, student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update goal' }); }
 });
@@ -402,7 +402,7 @@ router.delete('/intervention/goals/:id', async (req, res) => {
         await connection.execute(
             'DELETE FROM intervention_goals WHERE id = ? AND student_id = ?', [id, student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete goal' }); }
 });
@@ -418,7 +418,7 @@ router.get('/intervention/grade-log', async (req, res) => {
             'SELECT * FROM student_grade_log WHERE student_id = ? ORDER BY grade_date DESC, class_name ASC',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ grades: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch grade log' }); }
 });
@@ -440,7 +440,7 @@ router.post('/intervention/grade-log', async (req, res) => {
              score != null ? parseFloat(score) : null, max_score != null ? parseFloat(max_score) : 100,
              grade_date || new Date().toISOString().split('T')[0]]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, id: result.insertId });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save grade entry' }); }
 });
@@ -456,7 +456,7 @@ router.delete('/intervention/grade-log/:id', async (req, res) => {
         await connection.execute(
             'DELETE FROM student_grade_log WHERE id = ? AND student_id = ?', [id, student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete grade entry' }); }
 });
@@ -489,7 +489,7 @@ router.get('/intervention/tests', async (req, res) => {
             'SELECT * FROM intervention_tests WHERE student_id = ? AND test_date >= ? ORDER BY test_date ASC',
             [student_id, cutoff]
         );
-        await connection.end();
+        await connection.release();
         res.json({ tests: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch tests' }); }
 });
@@ -505,7 +505,7 @@ router.post('/intervention/tests', async (req, res) => {
             'INSERT INTO intervention_tests (student_id, class_name, test_type, title, test_date, notes) VALUES (?, ?, ?, ?, ?, ?)',
             [student_id, class_name, test_type || 'test', title || null, test_date, notes || null]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, id: result.insertId });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to add test' }); }
 });
@@ -539,7 +539,7 @@ router.put('/intervention/tests/:id', async (req, res) => {
                 [studied != null ? (studied ? 1 : 0) : null, notes ?? null, id, student_id]
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update test' }); }
 });
@@ -553,7 +553,7 @@ router.delete('/intervention/tests/:id', async (req, res) => {
         const connection = await getDbConnection();
         await connection.execute(TESTS_DDL);
         await connection.execute('DELETE FROM intervention_tests WHERE id = ? AND student_id = ?', [id, student_id]);
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete test' }); }
 });
@@ -591,7 +591,7 @@ router.get('/admin/intervention/roster', async (req, res) => {
                      s.section_id, ie.section_id, ie.school_year, ie.enrolled_at
             ORDER BY last_name ASC, first_name ASC
         `);
-        await connection.end();
+        await connection.release();
         res.json({ students: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch intervention roster' }); }
 });
@@ -630,7 +630,7 @@ router.post('/admin/intervention/enroll', async (req, res) => {
              ON DUPLICATE KEY UPDATE school_year = VALUES(school_year)`,
             [student_id, section_id || 'INTV', school_year || null]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, created_student: existing.length === 0 });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to enroll student' }); }
 });
@@ -645,7 +645,7 @@ router.delete('/admin/intervention/enroll', async (req, res) => {
         await connection.execute(
             'DELETE FROM intervention_enrollments WHERE student_id = ?', [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to unenroll student' }); }
 });
@@ -658,7 +658,7 @@ router.get('/admin/intervention/assignments', async (req, res) => {
         const [rows] = await connection.execute(
             'SELECT * FROM intervention_assignments ORDER BY day_number ASC'
         );
-        await connection.end();
+        await connection.release();
         res.json({ assignments: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch assignments' }); }
 });
@@ -675,14 +675,14 @@ router.post('/admin/intervention/assignments', async (req, res) => {
                 'UPDATE intervention_assignments SET day_number=?, title=?, instructions=?, due_date=? WHERE id=?',
                 [day_number || null, title, instructions || null, due_date || null, id]
             );
-            await connection.end();
+            await connection.release();
             return res.json({ success: true, id });
         }
         const [result] = await connection.execute(
             'INSERT INTO intervention_assignments (day_number, title, instructions, due_date) VALUES (?, ?, ?, ?)',
             [day_number || null, title, instructions || null, due_date || null]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, id: result.insertId });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save assignment' }); }
 });
@@ -699,7 +699,7 @@ router.put('/admin/intervention/assignments/:id', async (req, res) => {
             'UPDATE intervention_assignments SET day_number=?, title=?, instructions=?, due_date=? WHERE id=?',
             [day_number || null, title, instructions || null, due_date || null, id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, id: Number(id) });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update assignment' }); }
 });
@@ -721,7 +721,7 @@ router.post('/admin/intervention/assignments/import', async (req, res) => {
             );
             count++;
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true, imported: count });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to import assignments' }); }
 });
@@ -733,7 +733,7 @@ router.delete('/admin/intervention/assignments/:id', async (req, res) => {
         const connection = await getDbConnection();
         await ensureTables(connection);
         await connection.execute('DELETE FROM intervention_assignments WHERE id = ?', [id]);
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete assignment' }); }
 });
@@ -770,7 +770,7 @@ router.get('/admin/intervention/submissions', async (req, res) => {
                  ORDER BY ia.day_number ASC, s.last_name ASC`
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ submissions: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch submissions' }); }
 });
@@ -785,7 +785,7 @@ router.get('/admin/intervention/journal/:student_id', async (req, res) => {
             'SELECT * FROM intervention_journal WHERE student_id = ? ORDER BY entry_date DESC',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ entries: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch journal' }); }
 });
@@ -800,7 +800,7 @@ router.get('/admin/intervention/goals/:student_id', async (req, res) => {
             'SELECT * FROM intervention_goals WHERE student_id = ? ORDER BY cadence ASC, created_at DESC',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ goals: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch goals' }); }
 });
@@ -813,7 +813,7 @@ router.get('/admin/intervention/prompts', async (req, res) => {
         const [overrides] = await connection.execute(
             'SELECT day_number, prompt FROM intervention_prompt_overrides'
         );
-        await connection.end();
+        await connection.release();
         const overrideMap = {};
         overrides.forEach(r => { overrideMap[r.day_number] = r.prompt; });
         const prompts = BUILT_IN_PROMPTS.map((p, i) => ({
@@ -846,7 +846,7 @@ router.post('/admin/intervention/prompts/:day_number', async (req, res) => {
                 'DELETE FROM intervention_prompt_overrides WHERE day_number = ?', [dayNum]
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true, reverted_to_built_in: !prompt });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update prompt' }); }
 });
@@ -932,7 +932,7 @@ router.get('/intervention/planner-prefs', async (req, res) => {
         const [rows] = await connection.execute(
             'SELECT * FROM planner_preferences WHERE student_id = ? LIMIT 1', [student_id]
         );
-        await connection.end();
+        await connection.release();
         if (!rows.length) return res.json({ prefs: null });
         const r = rows[0];
         res.json({ prefs: {
@@ -975,7 +975,7 @@ router.put('/intervention/planner-prefs', async (req, res) => {
                 periodLabels     !== undefined ? JSON.stringify(periodLabels)     : null
             ]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save prefs' }); }
 });
@@ -998,7 +998,7 @@ router.get('/intervention/todos', async (req, res) => {
             'SELECT todo_id AS id, text_val AS text, due_date AS date, priority, item_type AS itemType, done FROM planner_todos WHERE student_id = ? ORDER BY due_date ASC, created_at ASC',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ todos: rows.map(r => ({ ...r, date: fmtDate(r.date), done: !!r.done, itemType: r.itemType || 'todo' })) });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch todos' }); }
 });
@@ -1033,7 +1033,7 @@ router.put('/intervention/todos', async (req, res) => {
                 [student_id, t.id, t.text, dueDate, t.priority || 'normal', t.itemType || 'todo', t.done ? 1 : 0]
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save todos' }); }
 });
@@ -1054,7 +1054,7 @@ router.get('/intervention/habits', async (req, res) => {
             'SELECT habit_id, log_date FROM planner_habit_log WHERE student_id = ? AND log_date >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         // Build log map: {habitId: {ymd: true}}
         const logMap = {};
         logs.forEach(l => {
@@ -1090,7 +1090,7 @@ router.put('/intervention/habits', async (req, res) => {
                 [student_id, h.id, h.text, h.color || null, i]
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save habits' }); }
 });
@@ -1113,7 +1113,7 @@ router.post('/intervention/habits/log', async (req, res) => {
                 [student_id, habit_id, log_date]
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to log habit' }); }
 });
@@ -1135,7 +1135,7 @@ router.get('/teacher/planner/students', async (req, res) => {
             LEFT JOIN students s ON ie.student_id = s.student_id
             ORDER BY last_name ASC, first_name ASC
         `);
-        await connection.end();
+        await connection.release();
         res.json({ students: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch students' }); }
 });
@@ -1148,7 +1148,7 @@ router.get('/teacher/planner/:student_id/prefs', async (req, res) => {
         const [rows] = await connection.execute(
             'SELECT * FROM planner_preferences WHERE student_id = ? LIMIT 1', [student_id]
         );
-        await connection.end();
+        await connection.release();
         if (!rows.length) return res.json({ prefs: null });
         const r = rows[0];
         res.json({ prefs: {
@@ -1171,7 +1171,7 @@ router.get('/teacher/planner/:student_id/todos', async (req, res) => {
             'SELECT todo_id AS id, text_val AS text, due_date AS date, priority, item_type AS itemType, done FROM planner_todos WHERE student_id = ? ORDER BY due_date ASC, created_at ASC',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ todos: rows.map(r => ({ ...r, date: fmtDate(r.date), done: !!r.done, itemType: r.itemType || 'todo' })) });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch todos' }); }
 });
@@ -1189,7 +1189,7 @@ router.get('/teacher/planner/:student_id/habits', async (req, res) => {
             'SELECT habit_id, log_date FROM planner_habit_log WHERE student_id = ? AND log_date >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         const logMap = {};
         logs.forEach(l => {
             const ymd = l.log_date instanceof Date ? l.log_date.toISOString().split('T')[0] : String(l.log_date).split('T')[0];
@@ -1209,7 +1209,7 @@ router.get('/teacher/planner/:student_id/tests', async (req, res) => {
             'SELECT * FROM intervention_tests WHERE student_id = ? ORDER BY test_date ASC',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ tests: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch tests' }); }
 });

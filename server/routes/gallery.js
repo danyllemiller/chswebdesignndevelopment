@@ -39,7 +39,7 @@ async function ensureGalleryTable() {
     } catch (e) {
         console.error('[gallery] Migration error:', e.message);
     } finally {
-        if (connection) await connection.end();
+        if (connection) await connection.release();
     }
 }
 
@@ -112,7 +112,7 @@ router.get('/gallery/feed', async (req, res) => {
         }
 
         const [rows] = await connection.execute(query, params);
-        await connection.end();
+        await connection.release();
         res.json({ items: rows, viewer: { isTeacher: viewer.isTeacher, isWD: viewer.isWD } });
     } catch (err) {
         console.error(err);
@@ -130,7 +130,7 @@ router.get('/gallery/my', async (req, res) => {
             'SELECT * FROM gallery_items WHERE student_id = ? ORDER BY submitted_at DESC',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ items: rows });
     } catch (err) {
         console.error(err);
@@ -155,7 +155,7 @@ router.post('/gallery/submit', async (req, res) => {
              sanitizedUrl, sanitizedThumb,
              (tech_tags || '').substring(0, 255), section_id || null, school_year || null, vis]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, id: result.insertId });
     } catch (err) {
         console.error(err);
@@ -175,7 +175,7 @@ router.put('/gallery/my/:id/visibility', async (req, res) => {
             'UPDATE gallery_items SET visibility = ? WHERE id = ? AND student_id = ?',
             [visibility, id, student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) {
         console.error(err);
@@ -208,7 +208,7 @@ router.put('/admin/gallery/:id', async (req, res) => {
         if (!setParts.length) return res.status(400).json({ error: 'Nothing to update' });
         vals.push(id);
         await connection.execute(`UPDATE gallery_items SET ${setParts.join(', ')} WHERE id = ?`, vals);
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) {
         console.error(err);
@@ -226,7 +226,7 @@ router.delete('/gallery/:id', async (req, res) => {
         const params = [id];
         if (student_id) { query += ' AND student_id = ?'; params.push(student_id); }
         await connection.execute(query, params);
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) {
         console.error(err);
@@ -244,7 +244,7 @@ router.get('/admin/gallery', async (req, res) => {
             JOIN students s ON g.student_id = s.student_id
             ORDER BY g.is_approved ASC, g.submitted_at DESC
         `);
-        await connection.end();
+        await connection.release();
         res.json({ items: rows });
     } catch (err) {
         console.error(err);

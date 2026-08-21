@@ -11,7 +11,7 @@ router.post('/clockin', async (req, res) => {
             'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',
             [student_id, section_id, type, answer]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Clock in failed.' }); }
 });
@@ -25,7 +25,7 @@ router.get('/timeclock/status', async (req, res) => {
             'SELECT * FROM clockins WHERE student_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC LIMIT 1',
             [student_id, today]
         );
-        await connection.end();
+        await connection.release();
         if (rows.length === 0) return res.json({ mode: 'in' });
         const type = rows[0].type;
         res.json({ mode: type === 'out' ? 'done' : 'out', ...rows[0] });
@@ -121,11 +121,11 @@ router.get('/timeclock/question', async (req, res) => {
             title = WD_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
             q = await getRandomQuestion(connection, 'wd_questions', chapter);
         } else {
-            await connection.end();
+            await connection.release();
             return res.status(400).json({ error: 'Unrecognized type' });
         }
 
-        await connection.end();
+        await connection.release();
 
         if (!q) {
             return res.json({
@@ -165,7 +165,7 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
         const dailyQ = rows[0];
         const custom = kind === 'CS' ? dailyQ?.cs_question : dailyQ?.wd_question;
         if (custom && custom.trim()) {
-            await connection.end();
+            await connection.release();
             return res.json({ prompt_text: custom.trim(), isCustom: true });
         }
 
@@ -177,10 +177,10 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
             ({ chapter } = await getCurrentWDChapter(connection, kind));
             title = WD_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
         } else {
-            await connection.end();
+            await connection.release();
             return res.status(400).json({ error: 'Unrecognized type' });
         }
-        await connection.end();
+        await connection.release();
 
         res.json({
             prompt_text: `In 2-3 sentences, reflect on what you learned today in Chapter ${chapter}: ${title}. What's one thing that made sense, and one thing you're still working through?`,
@@ -223,7 +223,7 @@ router.post('/timeclock/save', async (req, res) => {
                 [answer || '', student_id, today]
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Timeclock save failed.' }); }
 });
@@ -245,7 +245,7 @@ router.get('/admin/daily-questions', async (req, res) => {
             'SELECT wd_question, cs_question FROM teacher_daily_questions WHERE date = ?',
             [date]
         );
-        await connection.end();
+        await connection.release();
         res.json(rows.length > 0
             ? { wdQuestion: rows[0].wd_question || '', csQuestion: rows[0].cs_question || '' }
             : { wdQuestion: '', csQuestion: '' }
@@ -271,7 +271,7 @@ router.post('/admin/daily-questions', async (req, res) => {
              ON DUPLICATE KEY UPDATE wd_question = VALUES(wd_question), cs_question = VALUES(cs_question)`,
             [date, wdQuestion || '', csQuestion || '']
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save daily questions' }); }
 });
@@ -296,7 +296,7 @@ router.post('/admin/inject-timesheets', async (req, res) => {
             );
             count++;
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true, count });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to inject timesheets' }); }
 });

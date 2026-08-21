@@ -61,7 +61,7 @@ router.get('/admin/roster', async (req, res) => {
         });
         students.forEach(s => { s.additional_sections = extraByStudent[s.student_id] || []; });
 
-        await connection.end();
+        await connection.release();
         res.json(students);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch roster.' }); }
 });
@@ -88,7 +88,7 @@ router.get('/admin/student-sections', async (req, res) => {
              WHERE sas.student_id = ?`,
             [studentId]
         );
-        await connection.end();
+        await connection.release();
         res.json(rows);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch student sections' }); }
 });
@@ -121,10 +121,10 @@ router.post('/admin/set-student-sections', async (req, res) => {
                 [student_id, clean]
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true, count: section_ids.length });
     } catch (err) {
-        if (connection) try { await connection.end(); } catch (_) {}
+        if (connection) try { await connection.release(); } catch (_) {}
         console.error(err);
         res.status(500).json({ error: 'Failed to save student sections' });
     }
@@ -143,7 +143,7 @@ router.get('/admin/sections', async (req, res) => {
         else { sql += ' WHERE cs.archived = 0'; }
         sql += ' ORDER BY cs.section_id ASC, c.course_name ASC';
         const [sections] = await connection.execute(sql, params);
-        await connection.end();
+        await connection.release();
         res.json(sections);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch class section catalog.' }); }
 });
@@ -158,7 +158,7 @@ router.get('/admin/school-years', async (req, res) => {
                 SELECT school_year FROM students WHERE school_year IS NOT NULL
              ) combined ORDER BY school_year DESC`
         );
-        await connection.end();
+        await connection.release();
         res.json(rows.map(r => r.school_year).filter(Boolean));
     } catch (err) { res.status(500).json({ error: 'Failed to fetch school years' }); }
 });
@@ -174,7 +174,7 @@ router.post('/admin/archive-year', async (req, res) => {
         const [u] = await connection.execute(
             'UPDATE students SET archived = 1 WHERE school_year = ? AND section_id NOT IN (SELECT section_id FROM class_sections WHERE permanent = 1)', [school_year]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, school_year, sections: s.affectedRows, students: u.affectedRows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to archive year' }); }
 });
@@ -189,7 +189,7 @@ router.post('/admin/archive-students', async (req, res) => {
         const [result] = await connection.execute(
             `UPDATE students SET archived = 1 WHERE student_id IN (${placeholders})`, student_ids
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, archivedCount: result.affectedRows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to archive students' }); }
 });
@@ -213,10 +213,10 @@ router.post('/admin/sections', async (req, res) => {
             'INSERT IGNORE INTO class_sections (section_id, course_id, school_year, archived) VALUES (?, ?, ?, 0)',
             [sid, cid, year]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, section_id: sid, school_year: year });
     } catch (err) {
-        if (connection) try { await connection.end(); } catch(_) {}
+        if (connection) try { await connection.release(); } catch(_) {}
         console.error(err);
         res.status(500).json({ error: err.message });
     }
@@ -234,7 +234,7 @@ router.put('/admin/sections/:section_id', async (req, res) => {
             'SELECT permanent FROM class_sections WHERE section_id = ? AND course_id = ?', [sid, cid]
         );
         if (pRows.length > 0 && pRows[0].permanent === 1 && school_year !== undefined) {
-            await connection.end();
+            await connection.release();
             return res.status(403).json({ error: 'School year cannot be changed for permanent sections.' });
         }
         if (school_year !== undefined) {
@@ -249,10 +249,10 @@ router.put('/admin/sections/:section_id', async (req, res) => {
                 [String(course_name).trim(), cid]
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) {
-        if (connection) try { await connection.end(); } catch(_) {}
+        if (connection) try { await connection.release(); } catch(_) {}
         console.error(err);
         res.status(500).json({ error: err.message });
     }
@@ -270,22 +270,22 @@ router.delete('/admin/sections/:section_id', async (req, res) => {
             cid ? [sid, cid] : [sid]
         );
         if (permRows.some(r => r.permanent === 1)) {
-            await connection.end();
+            await connection.release();
             return res.status(403).json({ error: `"${sid}" is a permanent section and cannot be deleted.` });
         }
         const [rows] = await connection.execute(
             'SELECT COUNT(*) AS cnt FROM students WHERE section_id = ?', [sid]
         );
         if (rows[0].cnt > 0) {
-            await connection.end();
+            await connection.release();
             return res.status(409).json({ error: `Cannot delete — ${rows[0].cnt} student(s) still enrolled in period ${sid}.` });
         }
         const sql = cid ? 'DELETE FROM class_sections WHERE section_id = ? AND course_id = ?' : 'DELETE FROM class_sections WHERE section_id = ?';
         await connection.execute(sql, cid ? [sid, cid] : [sid]);
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) {
-        if (connection) try { await connection.end(); } catch(_) {}
+        if (connection) try { await connection.release(); } catch(_) {}
         res.status(500).json({ error: err.message });
     }
 });
@@ -331,7 +331,7 @@ router.post('/admin/upload-roster', async (req, res) => {
             }
         }
         if (invalid.length > 0) {
-            await connection.end();
+            await connection.release();
             return res.status(400).json({ error: 'Unknown course/section IDs in payload', invalid: Array.from(new Set(invalid)) });
         }
 
@@ -348,11 +348,11 @@ router.post('/admin/upload-roster', async (req, res) => {
             await connection.execute(stmt, [s.student_id, s.first_name, s.last_name, s.section_id, s.course_id, role, year]);
         }
         await connection.commit();
-        await connection.end();
+        await connection.release();
         res.json({ success: true, count: cleaned.length });
     } catch (err) {
         console.error(err && err.stack ? err.stack : err);
-        try { if (connection) { await connection.rollback(); await connection.end(); } } catch (_) {}
+        try { if (connection) { await connection.rollback(); await connection.release(); } } catch (_) {}
         res.status(500).json({ error: 'Failed to upload roster.' });
     }
 });
@@ -392,7 +392,7 @@ router.post('/admin/roster-diff', async (req, res) => {
         const missing = activeRows.filter((r) => !uploadedIds.has(String(r.student_id).trim()));
 
         if (missing.length === 0) {
-            await connection.end();
+            await connection.release();
             return res.json({ missing: [] });
         }
 
@@ -406,7 +406,7 @@ router.post('/admin/roster-diff', async (req, res) => {
             `SELECT student_id, MIN(timestamp) AS earliest FROM clockins WHERE student_id IN (${placeholders}) GROUP BY student_id`,
             ids
         );
-        await connection.end();
+        await connection.release();
 
         const earliestByStudent = {};
         [...respRows, ...clockRows].forEach((r) => {
@@ -479,11 +479,11 @@ router.post('/admin/roster-apply-decisions', async (req, res) => {
         }
 
         await connection.commit();
-        await connection.end();
+        await connection.release();
         res.json({ success: true, archived, deleted });
     } catch (err) {
         console.error(err && err.stack ? err.stack : err);
-        try { if (connection) { await connection.rollback(); await connection.end(); } } catch (_) {}
+        try { if (connection) { await connection.rollback(); await connection.release(); } } catch (_) {}
         res.status(500).json({ error: 'Failed to apply roster decisions.' });
     }
 });
@@ -497,7 +497,7 @@ router.post('/admin/reset-student', async (req, res) => {
             'UPDATE students SET username = NULL, password = NULL, password_hash = NULL WHERE student_id = ?',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         if (result.affectedRows === 0) return res.status(404).json({ error: 'Student not found.' });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to reset student.' }); }
@@ -514,7 +514,7 @@ router.get('/admin/student', async (req, res) => {
              FROM students s LEFT JOIN payroll_roster pr ON s.student_id = pr.student_id
              WHERE s.student_id = ? LIMIT 1`, [student_id]
         );
-        await connection.end();
+        await connection.release();
         if (rows.length === 0) return res.status(404).json({ error: 'Student not found' });
         res.json(rows[0]);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch student' }); }
@@ -528,13 +528,13 @@ router.post('/admin/save-student', async (req, res) => {
         if (section_id && String(section_id).trim().length > 0) {
             const [sections] = await connection.execute('SELECT section_id FROM class_sections WHERE section_id = ?', [section_id]);
             if (sections.length === 0) {
-                await connection.end();
+                await connection.release();
                 return res.status(400).json({ error: 'Invalid section_id' });
             }
         }
         const [existing] = await connection.execute('SELECT student_id FROM students WHERE student_id = ?', [student_id]);
         if (existing.length === 0) {
-            await connection.end();
+            await connection.release();
             return res.status(404).json({ error: 'Student not found' });
         }
         const updates = [], params = [];
@@ -549,7 +549,7 @@ router.post('/admin/save-student', async (req, res) => {
             params.push(hash, hash);
         }
         if (updates.length === 0) {
-            await connection.end();
+            await connection.release();
             return res.status(400).json({ error: 'No update fields provided' });
         }
         params.push(student_id);
@@ -563,7 +563,7 @@ router.post('/admin/save-student', async (req, res) => {
                 [student_id, payroll_title, rate]
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true, affectedRows: result.affectedRows });
     } catch (err) {
         console.error(err && err.stack ? err.stack : err);
@@ -580,7 +580,7 @@ router.delete('/admin/delete-student', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [result] = await connection.execute('DELETE FROM students WHERE student_id = ?', [student_id]);
-        await connection.end();
+        await connection.release();
         if (result.affectedRows === 0) return res.status(404).json({ error: 'Student not found.' });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete student.' }); }
@@ -596,7 +596,7 @@ router.post('/admin/delete-multiple-students', async (req, res) => {
         const [result] = await connection.execute(
             `DELETE FROM students WHERE student_id IN (${placeholders})`, student_ids
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, deletedCount: result.affectedRows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete students.' }); }
 });

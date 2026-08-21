@@ -41,7 +41,7 @@ router.get('/student/self-assessments', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute('SELECT * FROM self_assessments WHERE student_id = ?', [student_id]);
-        await connection.end();
+        await connection.release();
         res.json({ assessments: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch assessments' }); }
 });
@@ -54,7 +54,7 @@ router.post('/student/save-self-assessment', async (req, res) => {
             'INSERT INTO self_assessments (student_id, chapter_id, level) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE level = VALUES(level)',
             [student_id, chapter_id, level]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save assessment' }); }
 });
@@ -68,7 +68,7 @@ router.post('/student/submit-turnin', async (req, res) => {
             'INSERT INTO turnins (student_id, assignment_name, note, timestamp) VALUES (?, ?, ?, NOW())',
             [student_id, assignment_name, note]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save turn-in' }); }
 });
@@ -83,7 +83,7 @@ router.get('/student/profile', async (req, res) => {
             'SELECT student_id, first_name, last_name, section_id, username, role FROM students WHERE username = ?',
             [username.toLowerCase()]
         );
-        await connection.end();
+        await connection.release();
         if (rows.length === 0) return res.status(404).json({ error: 'Student not found' });
         res.json(rows[0]);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch student profile' }); }
@@ -102,7 +102,7 @@ router.post('/student/help-request', async (req, res) => {
             'UPDATE students SET help_requested = ? WHERE student_id = ?',
             [requested ? 1 : 0, student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update help request' }); }
 });
@@ -162,7 +162,7 @@ router.get('/cs-exam-questions', async (req, res) => {
             }));
         }
 
-        await connection.end();
+        await connection.release();
         res.json({ unit: unitNum, count: questions.length, questions });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch exam questions' }); }
 });
@@ -177,7 +177,7 @@ router.get('/student/cs-notebook', async (req, res) => {
             'SELECT id, chapter, title, category, content, is_submitted, timestamp FROM turnins WHERE student_id = ? ORDER BY timestamp DESC',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ notes: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load notebook entries' }); }
 });
@@ -194,7 +194,7 @@ router.post('/student/cs-notebook', async (req, res) => {
                content = VALUES(content), is_submitted = VALUES(is_submitted), timestamp = NOW()`,
             [student_id, chapter, title || '', category || 'Reflection', content || '', is_submitted ? 1 : 0]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save notebook entry' }); }
 });
@@ -210,7 +210,7 @@ router.get('/student/exam-progress', async (req, res) => {
             'SELECT progress_json FROM exam_progress WHERE student_id = ? AND exam_id = ?',
             [student_id, exam_id]
         );
-        await connection.end();
+        await connection.release();
         if (rows.length === 0) return res.json({ found: false });
         res.json({ found: true, ...JSON.parse(rows[0].progress_json || '{}') });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load progress' }); }
@@ -227,7 +227,7 @@ router.post('/student/exam-progress', async (req, res) => {
              ON DUPLICATE KEY UPDATE progress_json = VALUES(progress_json)`,
             [student_id, exam_id, JSON.stringify(progressData)]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save progress' }); }
 });
@@ -241,7 +241,7 @@ router.delete('/student/exam-progress', async (req, res) => {
             'DELETE FROM exam_progress WHERE student_id = ? AND exam_id = ?',
             [student_id, exam_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete progress' }); }
 });
@@ -252,7 +252,7 @@ router.get('/admin/rubrics', async (req, res) => {
         const connection = await getDbConnection();
         await connection.execute(RUBRICS_DDL);
         const [rows] = await connection.execute('SELECT * FROM rubrics ORDER BY title ASC');
-        await connection.end();
+        await connection.release();
         const rubrics = rows.map(r => ({
             id: r.id, title: r.title, course: r.course,
             enableSelfGrade: !!r.enable_self_grade, enablePeerGrade: !!r.enable_peer_grade,
@@ -278,7 +278,7 @@ router.post('/admin/rubrics/save', async (req, res) => {
             [id, title, course || '', enableSelfGrade ? 1 : 0, enablePeerGrade ? 1 : 0,
              JSON.stringify(criteria || []), totalPoints || 0, lastUpdated || Date.now()]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save rubric' }); }
 });
@@ -289,7 +289,7 @@ router.delete('/admin/rubrics/:id', async (req, res) => {
     try {
         const connection = await getDbConnection();
         await connection.execute('DELETE FROM rubrics WHERE id = ?', [id]);
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete rubric' }); }
 });
@@ -308,7 +308,7 @@ router.get('/review-questions', async (req, res) => {
             else                                   { sql += ' WHERE chapter = ?'; params.push(chapter); }
         }
         const [rows] = await connection.execute(sql, params);
-        await connection.end();
+        await connection.release();
         const questions = rows.map(r => ({ ...r, d: typeof r.d === 'string' ? JSON.parse(r.d) : (r.d || []) }));
         res.json({ questions });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch review questions' }); }
@@ -332,7 +332,7 @@ router.post('/admin/review-questions/seed', async (req, res) => {
         await connection.execute(
             `INSERT INTO review_questions (chapter, grade, cat, val, q, a, d) VALUES ${placeholders}`, values
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, count: questions.length });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to seed review questions' }); }
 });
@@ -342,7 +342,7 @@ router.delete('/admin/review-questions', async (req, res) => {
         const connection = await getDbConnection();
         await connection.execute(REVIEW_QUESTIONS_DDL);
         await connection.execute('TRUNCATE TABLE review_questions');
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to clear review questions' }); }
 });

@@ -45,7 +45,7 @@ async function ensurePaystubTables() {
     } catch (e) {
         console.error('[paystubs] Migration error:', e.message);
     } finally {
-        if (connection) await connection.end();
+        if (connection) await connection.release();
     }
 }
 
@@ -64,7 +64,7 @@ router.get('/paystubs/my', async (req, res) => {
             WHERE sp.student_id = ?
             ORDER BY pr.period_end DESC
         `, [student_id]);
-        await connection.end();
+        await connection.release();
         res.json({ paystubs: rows });
     } catch (err) {
         console.error(err);
@@ -96,7 +96,7 @@ router.get('/paystubs/ytd', async (req, res) => {
             JOIN payroll_runs pr ON sp.payroll_run_id = pr.id
             WHERE sp.student_id = ? AND YEAR(pr.period_end) = ?
         `, [student_id, targetYear]);
-        await connection.end();
+        await connection.release();
         res.json({ ytd: rows[0] || null, year: targetYear });
     } catch (err) {
         console.error(err);
@@ -117,7 +117,7 @@ router.get('/admin/payroll/runs', async (req, res) => {
             GROUP BY pr.id
             ORDER BY pr.period_end DESC
         `);
-        await connection.end();
+        await connection.release();
         res.json({ runs });
     } catch (err) {
         console.error(err);
@@ -137,7 +137,7 @@ router.get('/admin/payroll/run-detail/:id', async (req, res) => {
             WHERE sp.payroll_run_id = ?
             ORDER BY s.last_name, s.first_name
         `, [runId]);
-        await connection.end();
+        await connection.release();
         res.json({ stubs: rows });
     } catch (err) {
         console.error(err);
@@ -247,7 +247,7 @@ router.post('/admin/payroll/run', async (req, res) => {
             generated++;
         }
 
-        await connection.end();
+        await connection.release();
         res.json({ success: true, payroll_run_id: runId, paystubs_generated: generated });
     } catch (err) {
         console.error(err);

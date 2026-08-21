@@ -25,7 +25,7 @@ router.get('/student/course-gradebook', async (req, res) => {
             [student_id]
         );
         if (students.length === 0) {
-            await connection.end();
+            await connection.release();
             return res.status(404).json({ error: 'Student not found' });
         }
         // Lets a student pull their grades scoped to an additional (non-primary)
@@ -34,7 +34,7 @@ router.get('/student/course-gradebook', async (req, res) => {
         const sectionId = (sectionOverride && String(sectionOverride).trim()) || students[0].section_id || '';
         const courseCode = await resolveCourseId(connection, sectionId);
         if (!courseCode) {
-            await connection.end();
+            await connection.release();
             return res.status(400).json({ error: 'Unable to resolve course for student section' });
         }
         const [rows] = await connection.execute(
@@ -46,7 +46,7 @@ router.get('/student/course-gradebook', async (req, res) => {
              ORDER BY e.title ASC, e.exam_id ASC`,
             [student_id, courseCode]
         );
-        await connection.end();
+        await connection.release();
         res.json({ student_id, section_id: sectionId, course_id: courseCode, assignments: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch student course gradebook.' }); }
 });
@@ -77,7 +77,7 @@ router.post('/submit-exam', async (req, res) => {
 
         const prereq = await checkUnitPrerequisite(connection, student_id, exam_id);
         if (!prereq.ok) {
-            await connection.end();
+            await connection.release();
             return res.status(403).json({
                 error: `${exam_id} is locked — a score of at least 60% on ${prereq.prevExamId} is required first.`
             });
@@ -108,7 +108,7 @@ router.post('/submit-exam', async (req, res) => {
                 [student_id, exam_id, score, total_points || 100]
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true, keptHigher: !shouldUpdate });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save exam' }); }
 });
@@ -124,7 +124,7 @@ router.get('/student/grades', async (req, res) => {
              WHERE r.student_id = ?`,
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ responses: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch grades.' }); }
 });
@@ -134,7 +134,7 @@ router.post('/admin/clear-all-assignments', async (req, res) => {
         const connection = await getDbConnection();
         await connection.execute('DELETE FROM responses');
         await connection.execute('DELETE FROM exams');
-        await connection.end();
+        await connection.release();
         res.json({ success: true, message: 'All assignments and grades cleared.' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to clear assignments.' }); }
 });
@@ -147,7 +147,7 @@ router.post('/admin/save-assignment', async (req, res) => {
             'INSERT INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE title=VALUES(title), total_points=VALUES(total_points), course_id=VALUES(course_id)',
             [exam_id, title, total_points, course_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save assignment' }); }
 });
@@ -165,7 +165,7 @@ router.post('/admin/edit-assignment', async (req, res) => {
             await connection.execute('UPDATE exams SET title = ?, total_points = ?, course_id = ? WHERE exam_id = ?',
                 [title, total_points, course_id, exam_id]);
         }
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to edit assignment' }); }
 });
@@ -178,7 +178,7 @@ router.post('/admin/delete-assignment', async (req, res) => {
         const examKey = String(exam_id).trim();
         await connection.execute('DELETE FROM exams WHERE exam_id = ?', [examKey]);
         await connection.execute('DELETE FROM responses WHERE exam_id = ?', [examKey]);
-        await connection.end();
+        await connection.release();
         res.json({ success: true, exam_id: examKey });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete assignment' }); }
 });
@@ -230,7 +230,7 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
                 targetCourse: e.course_id || 'All', periodDueDates
             };
         });
-        await connection.end();
+        await connection.release();
         res.json({ students, assignments: registry, grades });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch gradebook' }); }
 });
@@ -250,7 +250,7 @@ router.post('/admin/save-grade', async (req, res) => {
              ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
             [student_id, exam_id, score !== undefined ? String(score) : '', Number(total_points) || 100]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save grade' }); }
 });
@@ -286,10 +286,10 @@ router.post('/admin/batch-update-grades', async (req, res) => {
             }
         }
         await connection.commit();
-        await connection.end();
+        await connection.release();
         res.json({ result: 'success', saved });
     } catch (err) {
-        if (connection) { try { await connection.rollback(); await connection.end(); } catch (_) {} }
+        if (connection) { try { await connection.rollback(); await connection.release(); } catch (_) {} }
         console.error(err);
         res.status(500).json({ error: 'Failed to batch update grades' });
     }

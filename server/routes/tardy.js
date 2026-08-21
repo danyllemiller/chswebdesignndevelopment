@@ -18,7 +18,7 @@ router.get('/tardy/lookup', async (req, res) => {
             'SELECT student_id, first_name, last_name, section_id FROM students WHERE student_id = ? LIMIT 1',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         if (rows.length === 0) return res.status(404).json({ error: 'No student found with that ID.' });
         res.json(rows[0]);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to look up student.' }); }
@@ -37,7 +37,7 @@ router.post('/tardy/log', async (req, res) => {
             [student_id]
         );
         if (students.length === 0) {
-            await connection.end();
+            await connection.release();
             return res.status(404).json({ error: 'No student found with that ID.' });
         }
         const [result] = await connection.execute(
@@ -48,7 +48,7 @@ router.post('/tardy/log', async (req, res) => {
                 ? [student_id, period || students[0].section_id || '', reason || '', useDate]
                 : [student_id, period || students[0].section_id || '', reason || '']
         );
-        await connection.end();
+        await connection.release();
         res.json({
             success: true,
             entry: {
@@ -79,7 +79,7 @@ router.get('/tardy/log', async (req, res) => {
              ORDER BY t.created_at DESC`,
             params
         );
-        await connection.end();
+        await connection.release();
         res.json({ entries: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch tardy log.' }); }
 });
@@ -95,7 +95,7 @@ router.get('/tardy/summary', async (req, res) => {
              GROUP BY t.student_id, s.first_name, s.last_name, s.section_id
              ORDER BY tardy_count DESC, last_tardy DESC`
         );
-        await connection.end();
+        await connection.release();
         res.json({ summary: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch tardy summary.' }); }
 });
@@ -105,7 +105,7 @@ router.delete('/tardy/log/:id', async (req, res) => {
     try {
         const connection = await getDbConnection();
         await connection.execute('DELETE FROM tardy_passes WHERE id = ?', [id]);
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete entry.' }); }
 });

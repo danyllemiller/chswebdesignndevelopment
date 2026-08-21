@@ -13,7 +13,7 @@ router.get('/payroll/roster', async (req, res) => {
              WHERE s.username = ?`,
             [username]
         );
-        await connection.end();
+        await connection.release();
         res.json(rows.length > 0 ? rows[0] : {});
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch payroll roster' }); }
 });
@@ -26,7 +26,7 @@ router.get('/payroll/timesheets', async (req, res) => {
             'SELECT * FROM timesheets WHERE student_id = ?',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ timesheets: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch timesheets' }); }
 });
@@ -44,7 +44,7 @@ router.get('/admin/payroll/roster', async (req, res) => {
               AND (s.section_id IS NULL OR s.section_id != 'Teacher')
             ORDER BY s.last_name ASC, s.first_name ASC
         `);
-        await connection.end();
+        await connection.release();
         res.json({ roster: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch payroll roster' }); }
 });
@@ -58,7 +58,7 @@ router.get('/admin/payroll/timesheets-daily', async (req, res) => {
             'SELECT * FROM timesheets WHERE date = ? ORDER BY student_id',
             [date]
         );
-        await connection.end();
+        await connection.release();
         res.json({ timesheets: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch daily timesheets' }); }
 });
@@ -72,7 +72,7 @@ router.get('/admin/payroll/timesheets-period', async (req, res) => {
             'SELECT * FROM timesheets WHERE date >= ? AND date <= ? ORDER BY student_id, date ASC',
             [from, to]
         );
-        await connection.end();
+        await connection.release();
         res.json({ timesheets: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch period timesheets' }); }
 });
@@ -85,7 +85,7 @@ router.post('/admin/update-student-role', async (req, res) => {
             'UPDATE students SET role_id = ? WHERE student_id = ?',
             [role_id, student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update student role' }); }
 });

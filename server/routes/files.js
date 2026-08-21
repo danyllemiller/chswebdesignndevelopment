@@ -38,7 +38,7 @@ router.get('/student/shared-files', async (req, res) => {
             'SELECT * FROM shared_files WHERE recipient_student_id = ? ORDER BY created_at DESC',
             [student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ files: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch shared files' }); }
 });
@@ -54,14 +54,14 @@ router.post('/student/share-file', async (req, res) => {
             'SELECT student_id FROM students WHERE student_id = ?', [recipient_student_id]
         );
         if (checkRows.length === 0) {
-            await connection.end();
+            await connection.release();
             return res.status(404).json({ error: 'Recipient student ID not found on roster' });
         }
         await connection.execute(
             'INSERT INTO shared_files (recipient_student_id, sender_name, file_name, url, is_folder) VALUES (?, ?, ?, ?, ?)',
             [recipient_student_id, sender_name || 'Unknown', file_name, url, is_folder ? 1 : 0]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to share file' }); }
 });
@@ -76,7 +76,7 @@ router.delete('/student/shared-file/:id', async (req, res) => {
             'DELETE FROM shared_files WHERE id = ? AND recipient_student_id = ?',
             [Number(id), student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete shared file' }); }
 });

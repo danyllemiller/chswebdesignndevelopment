@@ -12,14 +12,14 @@ router.get('/student/assignments-visible', async (req, res) => {
             'SELECT student_id, section_id FROM students WHERE student_id = ? LIMIT 1',
             [student_id]
         );
-        if (students.length === 0) { await connection.end(); return res.status(404).json({ error: 'Student not found' }); }
+        if (students.length === 0) { await connection.release(); return res.status(404).json({ error: 'Student not found' }); }
         const courseCode = await resolveCourseId(connection, students[0].section_id);
-        if (!courseCode) { await connection.end(); return res.status(400).json({ error: 'Unable to resolve course for student section' }); }
+        if (!courseCode) { await connection.release(); return res.status(400).json({ error: 'Unable to resolve course for student section' }); }
         const [assignments] = await connection.execute(
             'SELECT exam_id, title, total_points, course_id FROM exams WHERE course_id = ? ORDER BY title ASC, exam_id ASC',
             [courseCode]
         );
-        await connection.end();
+        await connection.release();
         res.json({ student_id, course_id: courseCode, assignments });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch visible assignments' }); }
 });
@@ -52,7 +52,7 @@ router.post('/admin/project-spec', async (req, res) => {
                 Number(is_active ?? 1)
             ]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save project spec' }); }
 });
@@ -70,7 +70,7 @@ router.get('/projects/specs', async (req, res) => {
              ORDER BY chapter_id ASC`,
             [course_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ specs: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch project specs' }); }
 });
@@ -93,7 +93,7 @@ router.post('/student/project-submission', async (req, res) => {
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [student_id, chapter_project_id, exam_id, original_filename, stored_path, file_hash || null, mode, nextVersion, overwrite_of_submission_id || null]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, version_no: nextVersion });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save project submission metadata' }); }
 });
@@ -155,7 +155,7 @@ router.post('/student/project-evaluation', async (req, res) => {
              ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
             [student_id, exam_id, aggregate, 100]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true, aggregate: { self_score: selfScore, peer_score: peerScore, auto_score: autoScore, aggregate_score: aggregate, status } });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save evaluation/aggregate' }); }
 });
@@ -176,7 +176,7 @@ router.get('/student/project-aggregate', async (req, res) => {
              ORDER BY created_at DESC`,
             [chapter_project_id, exam_id, student_id]
         );
-        await connection.end();
+        await connection.release();
         res.json({ aggregate: aggregateRows[0] || null, evaluations: evalRows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch project aggregate' }); }
 });

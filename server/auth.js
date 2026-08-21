@@ -17,14 +17,14 @@ router.post('/login', async (req, res) => {
         const connection = await getDbConnection();
         const [results] = await connection.execute('SELECT * FROM students WHERE username = ?', [username]);
 
-        if (results.length === 0) { await connection.end(); return res.status(401).json({ error: 'Invalid login' }); }
+        if (results.length === 0) { await connection.release(); return res.status(401).json({ error: 'Invalid login' }); }
 
         const user = results[0];
         const dbPassword = user.password || user.password_hash;
-        if (!dbPassword) { await connection.end(); return res.status(401).json({ error: 'No password set' }); }
+        if (!dbPassword) { await connection.release(); return res.status(401).json({ error: 'No password set' }); }
 
         const match = await bcrypt.compare(password, dbPassword);
-        if (!match) { await connection.end(); return res.status(401).json({ error: 'Invalid login' }); }
+        if (!match) { await connection.release(); return res.status(401).json({ error: 'Invalid login' }); }
 
         // Look up course info via section → class_sections → courses
         const sectionId = String(user.section_id || user.sectionId || user.section || '').trim();
@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
             );
             courseInfo = courseRows[0] || {};
         }
-        await connection.end();
+        await connection.release();
 
         req.session.regenerate((err) => {
             if (err) return res.status(500).json({ error: 'Session error' });
@@ -77,18 +77,18 @@ router.post('/register', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [students] = await connection.execute('SELECT * FROM students WHERE student_id = ?', [student_id]);
-        if (students.length === 0) { await connection.end(); return res.status(400).json({ error: 'ID not on roster.' }); }
+        if (students.length === 0) { await connection.release(); return res.status(400).json({ error: 'ID not on roster.' }); }
 
         const [taken] = await connection.execute('SELECT student_id FROM students WHERE username = ? AND student_id != ?', [username, student_id]);
         if (taken.length > 0) {
-            await connection.end();
+            await connection.release();
             return res.status(400).json({ error: 'That username is already taken. Please choose another.' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         await connection.execute('UPDATE students SET username = ?, password = ?, first_name = ?, last_name = ? WHERE student_id = ?',
             [username, hashedPassword, first_name, last_name, student_id]);
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) {
         console.error('[register] Database error:', err);
@@ -122,20 +122,20 @@ router.post('/change-password', async (req, res) => {
         const [rows] = await connection.execute('SELECT student_id, password, password_hash FROM students WHERE student_id = ?', [sessionUser.student_id]);
 
         if (rows.length === 0) {
-            await connection.end();
+            await connection.release();
             return res.status(404).json({ error: 'Student account not found.' });
         }
 
         const student = rows[0];
         const existingHash = student.password || student.password_hash;
         if (!existingHash) {
-            await connection.end();
+            await connection.release();
             return res.status(400).json({ error: 'No current password is set for this account.' });
         }
 
         const isMatch = await bcrypt.compare(current_password, existingHash);
         if (!isMatch) {
-            await connection.end();
+            await connection.release();
             return res.status(401).json({ error: 'Current password is incorrect.' });
         }
 
@@ -144,7 +144,7 @@ router.post('/change-password', async (req, res) => {
             'UPDATE students SET password = ?, must_change_password = 0, password_updated_at = NOW() WHERE student_id = ?',
             [nextHash, sessionUser.student_id]
         );
-        await connection.end();
+        await connection.release();
 
         if (req.session?.user) {
             req.session.user.must_change_password = 0;
@@ -176,7 +176,7 @@ router.post('/lookup-username', async (req, res) => {
              LIMIT 1`,
             [student_id, first_name, last_name]
         );
-        await connection.end();
+        await connection.release();
 
         if (rows.length === 0) {
             return res.status(404).json({ error: 'No matching student record found. Verify your enrollment details.' });
@@ -219,7 +219,7 @@ router.post('/reset-password', async (req, res) => {
         );
 
         if (rows.length === 0) {
-            await connection.end();
+            await connection.release();
             return res.status(404).json({ error: 'No matching student record found. Verify enrollment details.' });
         }
 
@@ -232,7 +232,7 @@ router.post('/reset-password', async (req, res) => {
             'UPDATE students SET password = ?, password_hash = ?, must_change_password = 0, password_updated_at = NOW() WHERE student_id = ?',
             [resetHash, resetHash, student_id]
         );
-        await connection.end();
+        await connection.release();
 
         return res.json({
             success: true,
@@ -265,7 +265,7 @@ router.post('/admin/reset-password-default', async (req, res) => {
         const [rows] = await connection.execute('SELECT student_id FROM students WHERE student_id = ?', [student_id]);
 
         if (rows.length === 0) {
-            await connection.end();
+            await connection.release();
             return res.status(404).json({ error: 'Student not found.' });
         }
 
@@ -274,7 +274,7 @@ router.post('/admin/reset-password-default', async (req, res) => {
             'UPDATE students SET password = ?, password_hash = ?, must_change_password = 1, password_updated_at = NOW() WHERE student_id = ?',
             [resetHash, resetHash, student_id]
         );
-        await connection.end();
+        await connection.release();
 
         return res.json({ success: true, message: 'Password reset to default. Student must change password at next login.' });
     } catch (err) {

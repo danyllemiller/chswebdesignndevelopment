@@ -58,7 +58,7 @@ router.post('/admin/polls/create', async (req, res) => {
       'INSERT INTO class_polls (section_id, question, options_json, active) VALUES (?, ?, ?, 1)',
       [section_id, String(question).trim(), JSON.stringify(options.map(o => String(o).trim()))]
     );
-    await connection.end();
+    await connection.release();
     res.json({ success: true, id: result.insertId });
   } catch (err) {
     console.error(err);
@@ -74,7 +74,7 @@ router.post('/admin/polls/close', async (req, res) => {
     const connection = await getDbConnection();
     await ensureTables(connection);
     await connection.execute('UPDATE class_polls SET active = 0, closed_at = NOW() WHERE id = ?', [id]);
-    await connection.end();
+    await connection.release();
     res.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -90,13 +90,13 @@ router.get('/admin/polls/results', async (req, res) => {
     const connection = await getDbConnection();
     await ensureTables(connection);
     const [pollRows] = await connection.execute('SELECT * FROM class_polls WHERE id = ? LIMIT 1', [id]);
-    if (pollRows.length === 0) { await connection.end(); return res.status(404).json({ error: 'Poll not found' }); }
+    if (pollRows.length === 0) { await connection.release(); return res.status(404).json({ error: 'Poll not found' }); }
     const poll = pollRowToJson(pollRows[0]);
     const [voteRows] = await connection.execute(
       'SELECT option_index, COUNT(*) AS cnt FROM class_poll_votes WHERE poll_id = ? GROUP BY option_index',
       [id]
     );
-    await connection.end();
+    await connection.release();
     const counts = poll.options.map((_, i) => {
       const found = voteRows.find(r => r.option_index === i);
       return found ? found.cnt : 0;
@@ -119,7 +119,7 @@ router.get('/student/polls/active', async (req, res) => {
       'SELECT * FROM class_polls WHERE section_id = ? AND active = 1 ORDER BY created_at DESC LIMIT 1',
       [section_id]
     );
-    if (rows.length === 0) { await connection.end(); return res.json({ poll: null }); }
+    if (rows.length === 0) { await connection.release(); return res.json({ poll: null }); }
     const poll = pollRowToJson(rows[0]);
     let alreadyVoted = false, votedOption = null;
     if (student_id) {
@@ -129,7 +129,7 @@ router.get('/student/polls/active', async (req, res) => {
       );
       if (voteRows.length > 0) { alreadyVoted = true; votedOption = voteRows[0].option_index; }
     }
-    await connection.end();
+    await connection.release();
     res.json({ poll, alreadyVoted, votedOption });
   } catch (err) {
     console.error(err);
@@ -148,7 +148,7 @@ router.post('/student/polls/vote', async (req, res) => {
     await ensureTables(connection);
     const [pollRows] = await connection.execute('SELECT active FROM class_polls WHERE id = ? LIMIT 1', [poll_id]);
     if (pollRows.length === 0 || !pollRows[0].active) {
-      await connection.end();
+      await connection.release();
       return res.status(409).json({ error: 'This poll is no longer active' });
     }
     try {
@@ -158,12 +158,12 @@ router.post('/student/polls/vote', async (req, res) => {
       );
     } catch (dupErr) {
       if (dupErr.code === 'ER_DUP_ENTRY') {
-        await connection.end();
+        await connection.release();
         return res.status(409).json({ error: 'You already voted on this poll' });
       }
       throw dupErr;
     }
-    await connection.end();
+    await connection.release();
     res.json({ success: true });
   } catch (err) {
     console.error(err);

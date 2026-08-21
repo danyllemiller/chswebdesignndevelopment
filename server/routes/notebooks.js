@@ -12,7 +12,7 @@ router.get('/admin/notebooks/roster', async (req, res) => {
                AND (section_id IS NULL OR section_id <> 'Teacher')
              ORDER BY section_id ASC, last_name ASC, first_name ASC`
         );
-        await connection.end();
+        await connection.release();
         const roster = rows.map((r) => ({
             student_id: r.student_id,
             firstName: r.first_name || '',
@@ -37,7 +37,7 @@ router.get('/admin/notebooks/entries', async (req, res) => {
             : 'SELECT id, student_id, chapter_id, title, category, content, created_at, updated_at FROM notebook_entries WHERE student_id = ? ORDER BY updated_at DESC, id DESC';
         const params = hasFilter ? [student_id, chapterNum] : [student_id];
         const [rows] = await connection.execute(sql, params);
-        await connection.end();
+        await connection.release();
         const entries = rows.map((row) => ({
             id: String(row.id), student_id: row.student_id,
             chapter: `Chapter ${row.chapter_id}`, chapter_id: row.chapter_id,
@@ -61,7 +61,7 @@ router.get('/student/notebook', async (req, res) => {
             : 'SELECT id, student_id, chapter_id, title, category, content, created_at, updated_at FROM notebook_entries WHERE student_id = ? ORDER BY updated_at DESC, id DESC';
         const params = hasFilter ? [student_id, chapterNum] : [student_id];
         const [rows] = await connection.execute(sql, params);
-        await connection.end();
+        await connection.release();
         const entries = rows.map((row) => ({
             id: String(row.id), student_id: row.student_id,
             chapter: `Chapter ${row.chapter_id}`, chapter_id: row.chapter_id,
@@ -84,14 +84,14 @@ router.post('/student/notebook/save', async (req, res) => {
                 'UPDATE notebook_entries SET chapter_id = ?, title = ?, category = ?, content = ?, updated_at = NOW() WHERE id = ? AND student_id = ?',
                 [Number(chapter_id), title, category || 'Notes', content || '', Number(id), student_id]
             );
-            await connection.end();
+            await connection.release();
             return res.json({ success: true, id: String(id) });
         }
         const [result] = await connection.execute(
             'INSERT INTO notebook_entries (student_id, chapter_id, title, category, content, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())',
             [student_id, Number(chapter_id), title, category || 'Notes', content || '']
         );
-        await connection.end();
+        await connection.release();
         return res.json({ success: true, id: String(result.insertId) });
     } catch (err) { console.error(err); return res.status(500).json({ error: 'Failed to save notebook entry' }); }
 });
@@ -105,7 +105,7 @@ router.post('/student/notebook/delete', async (req, res) => {
             'DELETE FROM notebook_entries WHERE id = ? AND student_id = ?',
             [Number(id), student_id]
         );
-        await connection.end();
+        await connection.release();
         return res.json({ success: true });
     } catch (err) { console.error(err); return res.status(500).json({ error: 'Failed to delete notebook entry' }); }
 });

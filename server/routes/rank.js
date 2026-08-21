@@ -54,7 +54,7 @@ router.get('/rank/leaderboard', async (req, res) => {
         if (section_id) { studentSql += ' AND section_id = ?'; params.push(section_id); }
         studentSql += ' ORDER BY last_name, first_name';
         const [students] = await connection.execute(studentSql, params);
-        await connection.end();
+        await connection.release();
 
         const gradeMap  = {};
         gradeRows.forEach(r  => { gradeMap[r.student_id]  = { score: Number(r.grade_score),  count: Number(r.entry_count) }; });
@@ -125,7 +125,7 @@ router.get('/rank/sections', async (req, res) => {
               AND section_id IS NOT NULL AND section_id != 'Teacher'
             ORDER BY section_id
         `);
-        await connection.end();
+        await connection.release();
         res.json({ sections: rows.map(r => r.section_id) });
     } catch (err) {
         console.error(err);

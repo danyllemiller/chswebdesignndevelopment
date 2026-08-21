@@ -82,7 +82,7 @@ router.get('/admin/calendar-settings', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute('SELECT config_json FROM calendar_settings WHERE id = 1');
-        await connection.end();
+        await connection.release();
         if (rows.length > 0) return res.json(rows[0].config_json);
         res.status(404).json({ error: 'Configuration not found' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch calendar settings' }); }
@@ -96,7 +96,7 @@ router.post('/admin/calendar-settings', async (req, res) => {
             'INSERT INTO calendar_settings (id, config_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE config_json = VALUES(config_json)',
             [JSON.stringify(config)]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save calendar settings' }); }
 });
@@ -127,7 +127,7 @@ router.get('/bell-schedule', async (req, res) => {
                  ORDER BY schedule_type ASC, sort_order ASC, start_time ASC`
             );
         }
-        await connection.end();
+        await connection.release();
         res.json({ schedule: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch bell schedule' }); }
 });
@@ -148,7 +148,7 @@ router.get('/admin/checklist', async (req, res) => {
         );
         const stateMap = {};
         rows.forEach(r => { stateMap[r.item_key] = !!r.completed; });
-        await connection.end();
+        await connection.release();
         res.json({
             cadence, period_key: pKey,
             items: items.map(item => ({ key: item.key, text: item.text, completed: stateMap[item.key] || false }))
@@ -169,7 +169,7 @@ router.post('/admin/checklist/toggle', async (req, res) => {
              ON DUPLICATE KEY UPDATE completed = VALUES(completed), updated_at = CURRENT_TIMESTAMP`,
             [teacher_id, cadence, item_key, period_key, completed ? 1 : 0]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to toggle checklist item' }); }
 });
@@ -185,7 +185,7 @@ router.post('/admin/checklist/reset', async (req, res) => {
             'UPDATE teacher_checklist_state SET completed = 0 WHERE teacher_id = ? AND cadence = ? AND period_key = ?',
             [teacher_id, cadence, period_key]
         );
-        await connection.end();
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to reset checklist' }); }
 });
