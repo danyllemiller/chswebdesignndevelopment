@@ -29,6 +29,22 @@
 })();
 
 // ==========================================
+// TIMECLOCK (sitewide, self-guards to students only)
+// Was previously only <script>-included on 4 pages, so the auto-popup
+// silently never fired for a student whose current page wasn't one of
+// those 4 -- which in practice is most of class time, since students are
+// on chapter/lesson pages, not grades/notes/files/calendar.
+// ==========================================
+(function injectTimeclock() {
+  if (document.getElementById('timeclock-script')) return;
+  const script = document.createElement('script');
+  script.id = 'timeclock-script';
+  script.type = 'module';
+  script.src = '/js/student/timeclock.js?v=5';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
 // AUTO-INJECT COMMON HEAD RESOURCES
 // ==========================================
 (function initGlobalHeadResources() {

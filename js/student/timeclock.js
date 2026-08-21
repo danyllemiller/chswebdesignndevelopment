@@ -161,6 +161,12 @@ async function initTimeclock() {
     studentData = getLoggedInUser();
     if (!studentData) return;
 
+    // Teachers browse student pages too (loader.js shows them every student
+    // nav menu so they can demo tools live) -- don't pop the timeclock for them.
+    const isTeacher = studentData.role === 'admin' || studentData.section_id === 'Teacher'
+        || String(studentData.username || '').includes('damiller');
+    if (isTeacher) return;
+
     injectTimeclockUI();
     await checkStatus();
 
