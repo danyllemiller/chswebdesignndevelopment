@@ -48,7 +48,9 @@
         </div>
         <div class="col-md-2">
           <label class="form-label small fw-bold">Period</label>
-          <input type="text" id="periodInput" class="form-control" placeholder="Auto-fills from roster">
+          <div id="periodFieldWrapper">
+            <input type="text" id="periodInput" class="form-control" placeholder="Auto-fills from roster">
+          </div>
         </div>
         <div class="col-md-2">
           <label class="form-label small fw-bold">Date</label>
@@ -146,7 +148,12 @@
 <script src="/js/bootstrap.bundle.js"></script>
 <script type="module">
   const studentIdInput = document.getElementById('studentIdInput');
-  const periodInput = document.getElementById('periodInput');
+  const periodFieldWrapper = document.getElementById('periodFieldWrapper');
+  // periodInput's underlying element gets swapped between a plain text
+  // input and a <select> (when a student has more than one period with
+  // this teacher), so it's looked up fresh each time rather than cached --
+  // a cached reference would go stale the moment the element is replaced.
+  function periodInput() { return document.getElementById('periodInput'); }
   const dateInput = document.getElementById('dateInput');
   const timeInput = document.getElementById('timeInput');
   const reasonInput = document.getElementById('reasonInput');
@@ -263,6 +270,24 @@
 
   let lastLookupId = null;
 
+  // Renders the period field as a plain text input (0-1 periods known --
+  // nothing to choose between) or a required <select> (2+ periods -- a
+  // student in more than one of the teacher's classes, e.g. dual-enrolled
+  // via student_additional_sections) so the teacher picks which period the
+  // tardy actually happened in instead of always defaulting to the primary.
+  function renderPeriodField(periods) {
+    const list = (periods || []).filter(Boolean);
+    if (list.length > 1) {
+      periodFieldWrapper.innerHTML = `
+        <select id="periodInput" class="form-control" required>
+          <option value="" disabled selected>Select period…</option>
+          ${list.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}
+        </select>`;
+    } else {
+      periodFieldWrapper.innerHTML = `<input type="text" id="periodInput" class="form-control" placeholder="Auto-fills from roster" value="${escapeHtml(list[0] || '')}">`;
+    }
+  }
+
   async function lookupStudent() {
     const id = studentIdInput.value.trim();
     lookupPreview.innerHTML = '';
@@ -275,7 +300,7 @@
       }
       const data = await res.json();
       lookupPreview.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i>${escapeHtml(data.first_name)} ${escapeHtml(data.last_name)} — ${escapeHtml(data.section_id || 'no period on file')}</span>`;
-      if (!periodInput.value) periodInput.value = data.section_id || '';
+      renderPeriodField(data.periods);
 
       // Pop a warning if this student already has prior tardies on record --
       // only once per distinct ID typed, so it doesn't reopen on every
@@ -310,7 +335,11 @@
   function minutesLateCell(entry) {
     const mins = computeMinutesLate(entry.created_at, entry.period);
     if (mins === null) return '<span class="text-muted">—</span>';
-    if (mins <= 0) return '<span class="text-muted">on time</span>';
+    // Arriving exactly at the bell still means the bell already rang -- the
+    // student wrote down the start time itself, not a moment before it.
+    // Only a genuinely earlier arrival counts as "on time."
+    if (mins < 0) return '<span class="text-muted">on time</span>';
+    if (mins === 0) return `<span class="badge bg-secondary">&lt;1 min</span>`;
     const badgeClass = mins >= 15 ? 'count-high' : mins >= 5 ? 'count-mid' : 'bg-secondary';
     return `<span class="badge ${badgeClass}">${mins} min</span>`;
   }
@@ -382,7 +411,7 @@
     formError.classList.add('d-none');
     const payload = {
       student_id: studentIdInput.value.trim(),
-      period: periodInput.value.trim(),
+      period: periodInput().value.trim(),
       reason: reasonInput.value.trim(),
       date: dateInput.value,
       time: timeInput.value
@@ -397,7 +426,7 @@
       if (!res.ok) throw new Error(data.error || 'Failed to log tardy.');
 
       studentIdInput.value = '';
-      periodInput.value = '';
+      renderPeriodField([]);
       reasonInput.value = '';
       timeInput.value = nowTimeStr();
       lookupPreview.innerHTML = '';

@@ -18,9 +18,21 @@ router.get('/tardy/lookup', async (req, res) => {
             'SELECT student_id, first_name, last_name, section_id FROM students WHERE student_id = ? LIMIT 1',
             [student_id]
         );
+        if (rows.length === 0) {
+            await connection.release();
+            return res.status(404).json({ error: 'No student found with that ID.' });
+        }
+        // A student in more than one of the teacher's periods (dual-enrolled
+        // via student_additional_sections) needs to pick which one the
+        // tardy actually happened in, rather than always defaulting to
+        // their primary section.
+        const [extra] = await connection.execute(
+            'SELECT section_id FROM student_additional_sections WHERE student_id = ?',
+            [student_id]
+        );
         await connection.release();
-        if (rows.length === 0) return res.status(404).json({ error: 'No student found with that ID.' });
-        res.json(rows[0]);
+        const periods = [rows[0].section_id, ...extra.map(r => r.section_id)].filter(Boolean);
+        res.json({ ...rows[0], periods: [...new Set(periods)] });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to look up student.' }); }
 });
 
