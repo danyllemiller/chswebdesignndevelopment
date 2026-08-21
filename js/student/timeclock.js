@@ -81,7 +81,15 @@ async function resolveTodaysBellWindow() {
         const scheduleKey = getBellScheduleKey(dayTypes, todayStr);
         if (!scheduleKey) return null; // no school today (weekend/off/unscheduled)
 
-        const row = (bellData.schedule || []).find(r => r.schedule_type === scheduleKey && r.period_label === period);
+        // Most students have a bare period code ("A1", "B4"), but a legacy
+        // subset (mostly WD1/WD2) still carry a compound section_id like
+        // "WD1-B4" -- an exact match against bell_schedule.period_label (which
+        // only ever has bare codes) silently finds nothing for them. Fall back
+        // to a substring match on the same period code, same convention
+        // periodToCourseKey() already uses for course resolution.
+        const schedule = bellData.schedule || [];
+        const row = schedule.find(r => r.schedule_type === scheduleKey && r.period_label === period)
+            || schedule.find(r => r.schedule_type === scheduleKey && period.includes(r.period_label));
         if (!row) return null; // this student's period doesn't meet on today's day type
 
         const [startH, startM] = row.start_time.split(':').map(Number);
