@@ -12,3 +12,6 @@ images/sights-sounds-making-it-pop-html-media/figure-16.gif
 
 # macOS AppleDouble resource-fork junk files
 ._*
+
+# Secrets — never commit
+.env
