@@ -112,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const regForm = document.getElementById("register-form");
     const clockinForm = document.getElementById("clockin-form");
     const resetForm = document.getElementById("reset-password-form");
+    const lookupUsernameForm = document.getElementById("lookup-username-form");
 
     // LOGIN LOGIC
     if (loginForm) {
@@ -263,6 +264,41 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (err) {
                 errorDiv.textContent = "Registration Error: " + err.message;
                 errorDiv.classList.remove("d-none");
+            }
+        });
+    }
+
+    // SELF-SERVICE USERNAME LOOKUP
+    if (lookupUsernameForm) {
+        lookupUsernameForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const lookupError = document.getElementById("lookup-username-error");
+            const lookupSuccess = document.getElementById("lookup-username-success");
+
+            lookupError.classList.add("d-none");
+            lookupSuccess.classList.add("d-none");
+
+            const payload = {
+                first_name: document.getElementById("lookup-fname").value.trim(),
+                last_name: document.getElementById("lookup-lname").value.trim(),
+                student_id: document.getElementById("lookup-sid").value.trim()
+            };
+
+            try {
+                const response = await fetch('/api/lookup-username', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Lookup failed');
+
+                lookupSuccess.textContent = `Your username is: ${data.username}`;
+                lookupSuccess.classList.remove("d-none");
+            } catch (err) {
+                lookupError.textContent = err.message;
+                lookupError.classList.remove("d-none");
             }
         });
     }

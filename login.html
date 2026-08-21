@@ -21,7 +21,7 @@
   
   <!-- The Brain (Logic) -->
   <script src="/js/loader.js?v=10"></script>
-  <script type="module" src="/js/login-logic.js?v=2"></script>
+  <script type="module" src="/js/login-logic.js?v=3"></script>
   <!-- Security/Nav Formatter -->
   <script type="module" src="/js/auth-guard.js"></script>
 </head>
@@ -65,7 +65,8 @@
                 <label class="form-label small fw-bold">Password</label>
                 <input type="password" id="login-password" class="form-control" required>
               </div>
-              <div class="mb-3 text-end">
+              <div class="mb-3 d-flex justify-content-between">
+                <a href="#" class="small text-decoration-none text-muted" data-bs-toggle="modal" data-bs-target="#lookupUsernameModal">Forgot Username?</a>
                 <a href="#" class="small text-decoration-none text-muted" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">Forgot Password?</a>
               </div>
               <button type="submit" class="btn btn-primary w-100 fw-bold">Log In</button>
@@ -123,6 +124,44 @@
               <button type="submit" class="btn btn-danger w-100 fw-bold">Clock In & Continue</button>
             </form>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SELF-SERVICE USERNAME LOOKUP MODAL -->
+  <div class="modal fade" id="lookupUsernameModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow border-info">
+        <div class="modal-header bg-info text-dark py-2">
+          <h6 class="modal-title fw-bold"><i class="fas fa-user-circle me-2"></i>Look Up Your Username</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body bg-light">
+          <form id="lookup-username-form">
+            <div id="lookup-username-error" class="alert alert-danger d-none small"></div>
+            <div id="lookup-username-success" class="alert alert-success d-none small"></div>
+
+            <p class="small text-muted mb-3">Enter your official roster enrollment details below and we'll show you your username:</p>
+
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">First Name</label>
+                <input type="text" id="lookup-fname" class="form-control form-control-sm border-info fw-bold" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">Last Name</label>
+                <input type="text" id="lookup-lname" class="form-control form-control-sm border-info fw-bold" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Student ID</label>
+              <input type="text" id="lookup-sid" class="form-control form-control-sm border-info fw-bold" placeholder="e.g. 7001234" required>
+            </div>
+
+            <button type="submit" class="btn btn-info btn-sm w-100 fw-bold text-dark shadow-sm">Find My Username</button>
+          </form>
         </div>
       </div>
     </div>

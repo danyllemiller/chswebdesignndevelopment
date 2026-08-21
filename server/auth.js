@@ -157,6 +157,41 @@ router.post('/change-password', async (req, res) => {
     }
 });
 
+// Self-service username lookup -- same identity-verification fields as
+// reset-password (first name, last name, student ID), minus username since
+// that's what's being looked up. Returns only the matched username, never
+// any other student data.
+router.post('/lookup-username', async (req, res) => {
+    const { first_name, last_name, student_id } = req.body;
+
+    if (!first_name || !last_name || !student_id) {
+        return res.status(400).json({ error: 'First name, last name, and student ID are required.' });
+    }
+
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.execute(
+            `SELECT username FROM students
+             WHERE student_id = ? AND LOWER(first_name) = LOWER(?) AND LOWER(last_name) = LOWER(?)
+             LIMIT 1`,
+            [student_id, first_name, last_name]
+        );
+        await connection.end();
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'No matching student record found. Verify your enrollment details.' });
+        }
+        if (!rows[0].username) {
+            return res.status(404).json({ error: 'No account found yet for this student — use the Register tab to create one.' });
+        }
+
+        return res.json({ success: true, username: rows[0].username });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Failed to look up username.' });
+    }
+});
+
 router.post('/reset-password', async (req, res) => {
     const { first_name, last_name, student_id, username, new_password } = req.body;
 
