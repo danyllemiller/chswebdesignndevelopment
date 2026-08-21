@@ -116,20 +116,28 @@ function openTimeclockModal() {
 // once per mode per day — once dismissed, the floating widget button is still
 // there for the student to finish it manually, but we don't keep yanking it
 // back open every minute.
+//
+// Flags are scoped by student_id, not just date: sessionStorage is shared by
+// every login that happens in the same browser tab, and school computers get
+// reused across periods without the tab ever closing. A date-only flag meant
+// whichever student's popup fired first that day silently suppressed it for
+// every student after them on the same machine — hitting later periods
+// (B6, B8...) far more than earlier ones simply by being later in the day.
 function checkAutoPopup() {
-    if (!bellWindow || !window.timeclock) return;
+    if (!bellWindow || !window.timeclock || !studentData) return;
     const now = Date.now();
     const mode = window.timeclock.currentMode;
     const todayStr = getLocalTodayStr();
+    const who = studentData.student_id;
 
     if (mode === 'in' && now >= bellWindow.startMs && now <= bellWindow.endMs) {
-        const flag = `tc_auto_shown_in_${todayStr}`;
+        const flag = `tc_auto_shown_in_${who}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
             openTimeclockModal();
         }
     } else if (mode === 'out' && now >= (bellWindow.endMs - 5 * 60 * 1000) && now <= bellWindow.endMs) {
-        const flag = `tc_auto_shown_out_${todayStr}`;
+        const flag = `tc_auto_shown_out_${who}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
             openTimeclockModal();
