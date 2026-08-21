@@ -25,8 +25,11 @@ router.get('/tardy/lookup', async (req, res) => {
 });
 
 router.post('/tardy/log', async (req, res) => {
-    const { student_id, period, reason } = req.body;
+    const { student_id, period, reason, date } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
+    // Backdating support (forgot to log it same-day): a valid YYYY-MM-DD date
+    // combines with the current time-of-day; anything else falls back to NOW().
+    const useDate = /^\d{4}-\d{2}-\d{2}$/.test(date || '') ? date : null;
     try {
         const connection = await getDbConnection();
         const [students] = await connection.execute(
@@ -38,8 +41,12 @@ router.post('/tardy/log', async (req, res) => {
             return res.status(404).json({ error: 'No student found with that ID.' });
         }
         const [result] = await connection.execute(
-            'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
-            [student_id, period || students[0].section_id || '', reason || '']
+            useDate
+                ? 'INSERT INTO tardy_passes (student_id, period, reason, created_at) VALUES (?, ?, ?, CONCAT(?, " ", CURTIME()))'
+                : 'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
+            useDate
+                ? [student_id, period || students[0].section_id || '', reason || '', useDate]
+                : [student_id, period || students[0].section_id || '', reason || '']
         );
         await connection.end();
         res.json({

@@ -1178,6 +1178,23 @@ async function processSubmission() {
     let titleColor = isRetake ? "text-warning" : "text-success";
     let retakeMsg = isRetake ? `<div class="alert alert-warning fw-bold mt-3"><i class="fas fa-exclamation-triangle"></i> Score is below 80%. You need to retake this test for exams and projects.</div>` : "";
 
+    // "Back to Class" routing, units 1-7 only (the real sequential curriculum --
+    // see CS_MAP in admin/due-dates.html). 80%+ advances to the next unit's
+    // default tab (or the Final Exam tab, past unit 7); under 80% restarts the
+    // same unit from its first chapter, matching the retake requirement above.
+    const UNIT_FIRST_CHAPTER = { 1: 1, 2: 3, 3: 5, 4: 9, 5: 11, 6: 14, 7: 17 };
+    const backNavUnit = parseInt(currentUnit, 10);
+    let backToClassUrl = '/cs-interactive.html';
+    if (!isNaN(backNavUnit) && backNavUnit >= 1 && backNavUnit <= 7) {
+        if (!isRetake) {
+            backToClassUrl = backNavUnit < 7
+                ? `/cs-interactive.html?goto=unit&unit=${backNavUnit + 1}`
+                : `/cs-interactive.html?goto=final`;
+        } else {
+            backToClassUrl = `/cs-interactive.html?goto=chapter&unit=${backNavUnit}&ch=${UNIT_FIRST_CHAPTER[backNavUnit]}`;
+        }
+    }
+
     container.innerHTML = `
         <div class="card shadow border-success mx-auto text-center" style="max-width: 750px;">
             <div class="card-body p-4 p-md-5">
@@ -1201,6 +1218,7 @@ async function processSubmission() {
                 </div>
                 <div class="mt-4 no-print d-flex justify-content-center gap-2">
                     <button onclick="downloadPDFReport(event)" class="btn btn-primary text-white px-4 shadow-sm">📥 Download PDF Report</button>
+                    <a href="${backToClassUrl}" class="btn btn-primary px-4 shadow-sm">&laquo; Back to Class</a>
                     <button onclick="window.location.reload()" class="btn btn-outline-secondary px-4">Return to Portal</button>
                 </div>
             </div>

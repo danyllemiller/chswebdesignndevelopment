@@ -42,19 +42,23 @@
       <p class="text-muted mb-4">Standalone tardy-pass log — not attendance. Enter a student ID to log a tardy.</p>
 
       <form id="tardyForm" class="row g-2 align-items-end">
-        <div class="col-md-3">
+        <div class="col-md-2">
           <label class="form-label small fw-bold">Student ID</label>
           <input type="text" id="studentIdInput" class="form-control" placeholder="e.g. 8001234" required autofocus autocomplete="off">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <label class="form-label small fw-bold">Period</label>
           <input type="text" id="periodInput" class="form-control" placeholder="Auto-fills from roster">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2">
+          <label class="form-label small fw-bold">Date</label>
+          <input type="date" id="dateInput" class="form-control">
+        </div>
+        <div class="col-md-3">
           <label class="form-label small fw-bold">Reason <span class="text-muted fw-normal">(optional)</span></label>
           <input type="text" id="reasonInput" class="form-control" placeholder="e.g. overslept, bus was late">
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
           <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="fas fa-plus me-1"></i>Log Tardy</button>
         </div>
       </form>
@@ -104,11 +108,18 @@
 <script type="module">
   const studentIdInput = document.getElementById('studentIdInput');
   const periodInput = document.getElementById('periodInput');
+  const dateInput = document.getElementById('dateInput');
   const reasonInput = document.getElementById('reasonInput');
   const lookupPreview = document.getElementById('lookupPreview');
   const formError = document.getElementById('formError');
   const logBody = document.getElementById('logBody');
   const summaryBody = document.getElementById('summaryBody');
+
+  function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  dateInput.value = todayStr();
 
   let lookupTimer = null;
 
@@ -201,7 +212,8 @@
     const payload = {
       student_id: studentIdInput.value.trim(),
       period: periodInput.value.trim(),
-      reason: reasonInput.value.trim()
+      reason: reasonInput.value.trim(),
+      date: dateInput.value
     };
     try {
       const res = await fetch('/api/tardy/log', {

@@ -2073,9 +2073,42 @@ window.addEventListener('message', async (event) => {
             }
         }, true);
 
+// Deep-link support for the exam report's "Back to Class" button:
+        // ?goto=unit&unit=N lands on unit N's default tab (used after a passing
+        // score, advancing to the next unit), ?goto=chapter&unit=N&ch=M lands on
+        // a specific chapter (used after a failing score, to restart that unit's
+        // content), and ?goto=final lands on the CS Final Exam tab (used after
+        // passing the last unit). Takes priority over both the saved-position
+        // restore above and the normal auto-advance-by-progress logic, since the
+        // exam report is telling us exactly where the student should land.
+        const gotoParam = urlParams.get('goto');
+        let skipAutoAdvance = false;
+        if (gotoParam === 'final') {
+            activeTab = { type: 'FINAL_EXAM' };
+            skipAutoAdvance = true;
+        } else if (gotoParam === 'unit') {
+            const gotoUnit = parseInt(urlParams.get('unit') || '', 10);
+            const found = csCourseMap.find(u => u.unitNum === gotoUnit);
+            if (found) {
+                activeUnit = found;
+                activeTab = { type: 'PRE_SCALE' };
+                skipAutoAdvance = true;
+            }
+        } else if (gotoParam === 'chapter') {
+            const gotoUnit = parseInt(urlParams.get('unit') || '', 10);
+            const gotoCh = parseInt(urlParams.get('ch') || '', 10);
+            const found = csCourseMap.find(u => u.unitNum === gotoUnit);
+            if (found) {
+                activeUnit = found;
+                const chapterData = found.chapters.find(c => c.ch === gotoCh);
+                activeTab = chapterData ? { type: 'CHAPTER', data: chapterData } : { type: 'PRE_SCALE' };
+                skipAutoAdvance = true;
+            }
+        }
+
 // Initialize with default states, which renders the initial UI before DB replies
         renderTabs();
-        checkProgressAndGate(true);
+        checkProgressAndGate(!skipAutoAdvance);
         
         // ==========================================
         // RENDER SELF-ASSESSMENT PROGRESS CHART
