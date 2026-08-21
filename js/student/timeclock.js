@@ -137,19 +137,11 @@ function checkAutoPopup() {
     }
 }
 
-// 2-day rotation engine
-function getTwoDayIndex() {
-    const now = new Date();
-    let startYear = now.getFullYear();
-    if (now.getMonth() < 7) startYear--; 
-    let current = new Date(startYear, 7, 1);
-    let days = 0;
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    while (current <= today) {
-        if (current.getDay() !== 0 && current.getDay() !== 6) days++;
-        current.setDate(current.getDate() + 1);
-    }
-    return Math.floor((days - 1) / 2);
+// Resolves 'CS', 'WD1', or 'WD2' for the logged-in student — bare period
+// codes (A3, B4...) don't carry a course prefix, so this has to go through
+// the shared course map rather than a simple startsWith() check.
+function getCourseKey() {
+    return periodToCourseKey(studentData.section_id) || 'CS';
 }
 
 // ==============================================================================
@@ -202,45 +194,33 @@ async function checkStatus() {
         }
 
         if (mode === 'in') {
-            // DETECT TRACK: CS vs WD — bare period codes (A3, B4...) don't carry
-            // a "CS"/"WD" prefix, so this has to go through the shared course map.
-            const isCS = periodToCourseKey(studentData.section_id) === 'CS';
-            const category = isCS ? 'CS_IN' : 'WD_IN';
-            const dayGroup = getTwoDayIndex();
+            const category = `${getCourseKey()}_IN`;
 
-            // Fetch Question from DB via apiFetch
-            currentQuestion = await apiFetch(`/api/timeclock/question?type=${category}&group=${dayGroup}`);
+            // Clock-in is always a real question pulled from that course's
+            // actual chapter test bank -- never a manually-typed question.
+            currentQuestion = await apiFetch(`/api/timeclock/question?type=${category}`);
 
-            label.innerText = currentQuestion.question_text;
-            const options = JSON.parse(currentQuestion.options);
+            label.innerHTML = `<span class="d-block small text-muted fw-normal mb-1">${currentQuestion.chapterLabel || ''}</span>${currentQuestion.question_text}`;
 
-            let html = options.map((opt, i) => `
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="tc-radio" value="${opt}" id="opt${i}" required>
-                    <label class="form-check-label" for="opt${i}">${opt}</label>
-                </div>
-            `).join('');
-
-            const rq = currentQuestion.reviewQuestion;
-            if (rq) {
-                html += `
-                    <hr class="my-3">
-                    <h6 class="fw-bold text-dark mb-1">Quick Unit ${rq.unit} Review${rq.isFallback ? '' : ''}</h6>
-                    <p class="small mb-2">${rq.question}</p>
-                    ${rq.options.map((opt, i) => `
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="tc-review-radio" value="${(opt || '').replace(/"/g, '&quot;')}" id="rq-opt${i}" required>
-                            <label class="form-check-label" for="rq-opt${i}">${opt}</label>
-                        </div>
-                    `).join('')}`;
+            if (currentQuestion.unavailable) {
+                optsContainer.innerHTML = `<input type="hidden" id="tc-in-fallback" value="N/A - no question bank available">`;
+            } else {
+                optsContainer.innerHTML = (currentQuestion.options || []).map((opt, i) => `
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="tc-radio" value="${(opt || '').replace(/"/g, '&quot;')}" id="opt${i}" required>
+                        <label class="form-check-label" for="opt${i}">${opt}</label>
+                    </div>
+                `).join('');
             }
-            optsContainer.innerHTML = html;
             btn.innerText = "Submit & Clock In";
         }
         else if (mode === 'out') {
-            label.innerText = "Daily Reflection";
+            const category = getCourseKey();
+            const promptData = await apiFetch(`/api/timeclock/reflection-prompt?type=${category}`);
+            label.innerText = promptData.prompt_text;
             optsContainer.innerHTML = `<textarea id="tc-out-answer" class="form-control" rows="3" required></textarea>`;
             btn.innerText = "Submit & Clock Out";
+            btn.disabled = false;
         }
     } catch (e) {
         console.error("Timeclock check status error:", e);
@@ -253,16 +233,18 @@ async function handleTimeclockSubmit(e) {
     let answer = "";
     
     if (mode === 'in') {
-        const checked = document.querySelector('input[name="tc-radio"]:checked');
-        if (!checked) return;
-        answer = checked.value;
+        const fallback = document.getElementById('tc-in-fallback');
+        if (fallback) {
+            answer = fallback.value;
+        } else {
+            const checked = document.querySelector('input[name="tc-radio"]:checked');
+            if (!checked) return;
+            answer = checked.value;
 
-        const rq = currentQuestion?.reviewQuestion;
-        if (rq) {
-            const reviewChecked = document.querySelector('input[name="tc-review-radio"]:checked');
-            if (!reviewChecked) return;
-            const isCorrect = reviewChecked.value === rq.answer;
-            answer += ` | Unit ${rq.unit} Review: ${isCorrect ? 'Correct' : `Incorrect (chose "${reviewChecked.value}", correct was "${rq.answer}")`}`;
+            if (currentQuestion?.correct_answer) {
+                const isCorrect = checked.value === currentQuestion.correct_answer;
+                answer += ` | ${currentQuestion.chapterLabel || 'Review'}: ${isCorrect ? 'Correct' : `Incorrect (chose "${checked.value}", correct was "${currentQuestion.correct_answer}")`}`;
+            }
         }
     } else {
         answer = document.getElementById('tc-out-answer').value;
