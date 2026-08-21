@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Tardy Tracker</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=11"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 1000px; margin: 2.5rem auto; }
+    #lookupPreview { min-height: 1.5rem; }
+    .count-badge { font-variant-numeric: tabular-nums; }
+    .count-high { background: #dc3545 !important; }
+    .count-mid { background: #fd7e14 !important; }
+    table.tardy-table td, table.tardy-table th { vertical-align: middle; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+      <h2 class="gochi text-primary mb-1"><i class="fas fa-stopwatch me-2"></i>Tardy Tracker</h2>
+      <p class="text-muted mb-4">Standalone tardy-pass log — not attendance. Enter a student ID to log a tardy.</p>
+
+      <form id="tardyForm" class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label small fw-bold">Student ID</label>
+          <input type="text" id="studentIdInput" class="form-control" placeholder="e.g. 8001234" required autofocus autocomplete="off">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small fw-bold">Period</label>
+          <input type="text" id="periodInput" class="form-control" placeholder="Auto-fills from roster">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small fw-bold">Reason <span class="text-muted fw-normal">(optional)</span></label>
+          <input type="text" id="reasonInput" class="form-control" placeholder="e.g. overslept, bus was late">
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="fas fa-plus me-1"></i>Log Tardy</button>
+        </div>
+      </form>
+      <div id="lookupPreview" class="small mt-2"></div>
+      <div id="formError" class="alert alert-danger small mt-2 d-none"></div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white fw-bold"><i class="fas fa-list me-2 text-primary"></i>Recent Tardies</div>
+        <div class="card-body p-0" style="max-height: 480px; overflow-y: auto;">
+          <table class="table table-hover tardy-table mb-0">
+            <thead class="table-light sticky-top">
+              <tr><th>Student</th><th>Period</th><th>Reason</th><th>When</th><th></th></tr>
+            </thead>
+            <tbody id="logBody">
+              <tr><td colspan="5" class="text-center text-muted p-4">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white fw-bold"><i class="fas fa-chart-bar me-2 text-primary"></i>Tardy Counts</div>
+        <div class="card-body p-0" style="max-height: 480px; overflow-y: auto;">
+          <table class="table table-hover mb-0">
+            <thead class="table-light sticky-top">
+              <tr><th>Student</th><th class="text-center">Count</th><th>Last Tardy</th></tr>
+            </thead>
+            <tbody id="summaryBody">
+              <tr><td colspan="3" class="text-center text-muted p-4">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script type="module">
+  const studentIdInput = document.getElementById('studentIdInput');
+  const periodInput = document.getElementById('periodInput');
+  const reasonInput = document.getElementById('reasonInput');
+  const lookupPreview = document.getElementById('lookupPreview');
+  const formError = document.getElementById('formError');
+  const logBody = document.getElementById('logBody');
+  const summaryBody = document.getElementById('summaryBody');
+
+  let lookupTimer = null;
+
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function formatWhen(ts) {
+    const d = new Date(ts.replace(' ', 'T'));
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
+  async function lookupStudent() {
+    const id = studentIdInput.value.trim();
+    lookupPreview.innerHTML = '';
+    if (!id) return;
+    try {
+      const res = await fetch(`/api/admin/student?student_id=${encodeURIComponent(id)}`);
+      if (!res.ok) {
+        lookupPreview.innerHTML = `<span class="text-danger"><i class="fas fa-triangle-exclamation me-1"></i>No student found with that ID.</span>`;
+        return;
+      }
+      const data = await res.json();
+      lookupPreview.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i>${escapeHtml(data.first_name)} ${escapeHtml(data.last_name)} — ${escapeHtml(data.section_id || 'no period on file')}</span>`;
+      if (!periodInput.value) periodInput.value = data.section_id || '';
+    } catch (e) {
+      lookupPreview.innerHTML = '';
+    }
+  }
+
+  studentIdInput.addEventListener('input', () => {
+    clearTimeout(lookupTimer);
+    lookupTimer = setTimeout(lookupStudent, 400);
+  });
+
+  async function loadLog() {
+    try {
+      const res = await fetch('/api/tardy/log');
+      const data = await res.json();
+      const entries = data.entries || [];
+      if (entries.length === 0) {
+        logBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted p-4">No tardies logged yet.</td></tr>`;
+        return;
+      }
+      logBody.innerHTML = entries.map(e => `
+        <tr>
+          <td>${e.first_name ? `${escapeHtml(e.first_name)} ${escapeHtml(e.last_name)}` : escapeHtml(e.student_id)}<div class="text-muted small">${escapeHtml(e.student_id)}</div></td>
+          <td>${escapeHtml(e.period || '—')}</td>
+          <td>${escapeHtml(e.reason || '—')}</td>
+          <td class="small text-muted">${formatWhen(e.created_at)}</td>
+          <td><button class="btn btn-sm btn-outline-danger" data-delete="${e.id}" title="Remove entry"><i class="fas fa-xmark"></i></button></td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      logBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger p-4">Failed to load log.</td></tr>`;
+    }
+  }
+
+  async function loadSummary() {
+    try {
+      const res = await fetch('/api/tardy/summary');
+      const data = await res.json();
+      const rows = data.summary || [];
+      if (rows.length === 0) {
+        summaryBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted p-4">No tardies logged yet.</td></tr>`;
+        return;
+      }
+      summaryBody.innerHTML = rows.map(r => {
+        const badgeClass = r.tardy_count >= 5 ? 'count-high' : r.tardy_count >= 3 ? 'count-mid' : 'bg-secondary';
+        return `
+          <tr>
+            <td>${r.first_name ? `${escapeHtml(r.first_name)} ${escapeHtml(r.last_name)}` : escapeHtml(r.student_id)}<div class="text-muted small">${escapeHtml(r.student_id)}</div></td>
+            <td class="text-center"><span class="badge ${badgeClass} count-badge">${r.tardy_count}</span></td>
+            <td class="small text-muted">${formatWhen(r.last_tardy)}</td>
+          </tr>
+        `;
+      }).join('');
+    } catch (e) {
+      summaryBody.innerHTML = `<tr><td colspan="3" class="text-center text-danger p-4">Failed to load summary.</td></tr>`;
+    }
+  }
+
+  async function refreshAll() {
+    await Promise.all([loadLog(), loadSummary()]);
+  }
+
+  document.getElementById('tardyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    formError.classList.add('d-none');
+    const payload = {
+      student_id: studentIdInput.value.trim(),
+      period: periodInput.value.trim(),
+      reason: reasonInput.value.trim()
+    };
+    try {
+      const res = await fetch('/api/tardy/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to log tardy.');
+
+      studentIdInput.value = '';
+      periodInput.value = '';
+      reasonInput.value = '';
+      lookupPreview.innerHTML = '';
+      studentIdInput.focus();
+      await refreshAll();
+    } catch (err) {
+      formError.textContent = err.message;
+      formError.classList.remove('d-none');
+    }
+  });
+
+  logBody.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-delete]');
+    if (!btn) return;
+    if (!confirm('Remove this tardy entry?')) return;
+    try {
+      await fetch(`/api/tardy/log/${btn.dataset.delete}`, { method: 'DELETE' });
+      await refreshAll();
+    } catch (err) { console.error(err); }
+  });
+
+  refreshAll();
+</script>
+</body>
+</html>
