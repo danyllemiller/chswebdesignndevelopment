@@ -4,59 +4,6 @@ hideStyle.id = 'auth-shield';
 hideStyle.innerHTML = 'body { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }';
 document.head.appendChild(hideStyle);
 
-// ==========================================
-// LAST PAGE TRACKING
-// ==========================================
-const LAST_PAGE_KEY = 'lastPage';
-const LAST_PAGE_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-
-/**
- * Save the current page to localStorage with timestamp.
- * Used to return user to last page after login/logout/timeout.
- */
-function saveLastPage() {
-    const currentPath = window.location.pathname;
-    // Don't save public pages or login/logout pages
-    const publicPages = ['/login.html', '/logout.html', '/index.html', '/contact.html', '/sitemap.html'];
-    if (publicPages.includes(currentPath) || currentPath === '/') return;
-    
-    const pageData = {
-        path: currentPath,
-        timestamp: Date.now(),
-        title: document.title || ''
-    };
-    localStorage.setItem(LAST_PAGE_KEY, JSON.stringify(pageData));
-    console.log('[lastPage] Saved:', pageData.path);
-}
-
-/**
- * Get the last saved page if it's fresh (less than 24 hours old).
- * Returns null if no valid last page exists.
- */
-function getLastPage() {
-    try {
-        const stored = localStorage.getItem('lastPage');
-        console.log('[lastPage] Raw:', stored);
-        if (!stored) return null;
-        
-        const pageData = JSON.parse(stored);
-        const age = Date.now() - pageData.timestamp;
-        console.log('[lastPage] Age:', age, 'ms');
-        
-        if (age > LAST_PAGE_MAX_AGE) {
-            // Page too old, clear it
-            localStorage.removeItem(LAST_PAGE_KEY);
-            console.log('[lastPage] Expired, cleared');
-            return null;
-        }
-        
-        return pageData.path;
-    } catch (e) {
-        console.log('[lastPage] Error:', e);
-        return null;
-    }
-}
-
 // --- ATOMIC BYPASS FOR EXAMS ---
 if (window.location.pathname.toLowerCase().includes('exams')) {
     const shield = document.getElementById('auth-shield');
@@ -150,8 +97,6 @@ async function executeAuthCheck() {
     if (!user) {
         console.log('[auth-guard] No user found in localStorage. isPublic=', isPublic, 'currentPath=', currentPath);
         if (!isPublic) {
-            // Save last page before redirect to login (for timeout scenarios)
-            saveLastPage();
             console.log('[auth-guard] Page not public, redirecting to login');
             window.location.replace(`/login.html?redirect=${encodeURIComponent(currentPath)}`);
         } else {
@@ -271,9 +216,6 @@ async function executeAuthCheck() {
             return;
         }
     }
-
-    // Save last page after successful auth (so we track where user is)
-    saveLastPage();
 
     window.dacAuthData = {
         isAuthenticated: true,

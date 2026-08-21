@@ -55,53 +55,26 @@ function updatePasswordChecklist(pw, prefix = "pw-check") {
 }
 
 /**
- * Returns the student to their original destination or the dashboard.
- * Updated to check for lastPage first (remember last page feature).
- * Priority: lastPage > explicit redirect > default course page
+ * Every fresh login lands on the gradebook page first, so the timeclock's
+ * auto-popup reliably fires at the start of each period. The one exception
+ * is a session that timed out mid-page (auth-guard redirects to login with
+ * an explicit ?redirect= back to where they were) -- that's a real
+ * "return me to my work" case, not a routine new-period login.
+ *
+ * This used to also check a `lastPage` value saved on every page load,
+ * which took priority over everything else -- meaning whatever page a
+ * student was last browsing (almost always cs-interactive.html for CS
+ * students) silently became their landing page on the next day's login,
+ * skipping the gradebook and its clock-in prompt entirely. Removed.
  */
-function handleNavigationFlow(isCS = false) {
+function handleNavigationFlow() {
     const urlParams = new URLSearchParams(window.location.search);
-    
-    // Get redirect param from auth-guard (set when session times out)
     const authRedirect = urlParams.get('redirect');
-    console.log('[login] authRedirect param:', authRedirect);
-    
-    // Check if there's a valid lastPage saved (from previous session)
-    let lastPage = null;
-    try {
-        const stored = localStorage.getItem('lastPage');
-        console.log('[login] lastPage raw:', stored);
-        if (stored) {
-            const pageData = JSON.parse(stored);
-            const age = Date.now() - pageData.timestamp;
-            const MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
-            console.log('[login] lastPage age:', age, 'ms');
-            if (age < MAX_AGE && pageData.path) {
-                lastPage = pageData.path;
-            }
-        }
-    } catch (e) {
-        console.log('[login] lastPage error:', e);
-        // Ignore errors, lastPage will be null
-    }
-    
-    // Priority: lastPage takes precedence over authRedirect (timeout redirect)
-    // We want user to return to where they were, not forced to timeout redirect
-    let redirectTo;
-    if (lastPage && !lastPage.includes('login') && !lastPage.includes('logout')) {
-        // Use saved lastPage if available
-        redirectTo = lastPage;
-        console.log('[login] Using lastPage:', lastPage);
-    } else if (authRedirect && !authRedirect.includes('login')) {
-        // Fall back to timeout redirect if no lastPage
-        redirectTo = authRedirect;
-        console.log('[login] Using authRedirect:', redirectTo);
-    } else {
-        // Default course page as final fallback
-        redirectTo = isCS ? "/cs-interactive.html" : "/student/grades.html";
-        console.log('[login] Using default:', redirectTo);
-    }
-    
+
+    const redirectTo = (authRedirect && !authRedirect.includes('login'))
+        ? authRedirect
+        : "/student/grades.html";
+
     window.location.replace(redirectTo);
 }
 
