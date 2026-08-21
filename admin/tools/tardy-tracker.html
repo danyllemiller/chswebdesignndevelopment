@@ -102,6 +102,22 @@
   </div>
 </div>
 
+<!-- REPEAT-TARDY WARNING -->
+<div class="modal fade" id="repeatTardyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow border-warning">
+      <div class="modal-header bg-warning text-dark py-2">
+        <h6 class="modal-title fw-bold"><i class="fas fa-triangle-exclamation me-2"></i>Repeat Tardy</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body bg-light">
+        <p class="mb-2">This is <strong id="repeatTardyName"></strong>'s <strong id="repeatTardyOrdinal"></strong> tardy pass.</p>
+        <div id="repeatTardyList" class="small"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="footer-placeholder"></div>
 
 <script src="/js/bootstrap.bundle.js"></script>
@@ -132,6 +148,14 @@
     return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   }
 
+  function ordinal(n) {
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
+  let lastLookupId = null;
+
   async function lookupStudent() {
     const id = studentIdInput.value.trim();
     lookupPreview.innerHTML = '';
@@ -145,6 +169,27 @@
       const data = await res.json();
       lookupPreview.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i>${escapeHtml(data.first_name)} ${escapeHtml(data.last_name)} — ${escapeHtml(data.section_id || 'no period on file')}</span>`;
       if (!periodInput.value) periodInput.value = data.section_id || '';
+
+      // Pop a warning if this student already has prior tardies on record --
+      // only once per distinct ID typed, so it doesn't reopen on every
+      // keystroke while they finish typing the same number.
+      if (id !== lastLookupId) {
+        lastLookupId = id;
+        const logRes = await fetch(`/api/tardy/log?student_id=${encodeURIComponent(id)}`);
+        const logData = await logRes.json();
+        const priorEntries = logData.entries || [];
+        if (priorEntries.length > 1) {
+          document.getElementById('repeatTardyName').textContent = `${data.first_name} ${data.last_name}`;
+          document.getElementById('repeatTardyOrdinal').textContent = ordinal(priorEntries.length + 1);
+          document.getElementById('repeatTardyList').innerHTML = priorEntries.map(e =>
+            `<div class="d-flex justify-content-between border-bottom py-1">
+               <span>${escapeHtml(e.period || '—')}${e.reason ? ' — ' + escapeHtml(e.reason) : ''}</span>
+               <span class="text-muted">${formatWhen(e.created_at)}</span>
+             </div>`
+          ).join('');
+          new bootstrap.Modal(document.getElementById('repeatTardyModal')).show();
+        }
+      }
     } catch (e) {
       lookupPreview.innerHTML = '';
     }
@@ -228,6 +273,7 @@
       periodInput.value = '';
       reasonInput.value = '';
       lookupPreview.innerHTML = '';
+      lastLookupId = null;
       studentIdInput.focus();
       await refreshAll();
     } catch (err) {
