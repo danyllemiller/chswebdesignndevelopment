@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
@@ -100,27 +100,6 @@ async function getValidAccessToken(connection) {
     return data.access_token;
 }
 
-// App-only token for catalog search -- doesn't need the teacher's own
-// authorization, so this is independent of whether /spotify/connect has run.
-let clientCredsCache = { token: null, expiresAt: 0 };
-async function getClientCredentialsToken() {
-    if (clientCredsCache.token && clientCredsCache.expiresAt > Date.now() + 60000) {
-        return clientCredsCache.token;
-    }
-    const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': 'Basic ' + Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64')
-        },
-        body: new URLSearchParams({ grant_type: 'client_credentials' })
-    });
-    const data = await tokenRes.json();
-    if (!tokenRes.ok) throw new Error(data.error_description || 'Failed to get Spotify search token');
-    clientCredsCache = { token: data.access_token, expiresAt: Date.now() + data.expires_in * 1000 };
-    return data.access_token;
-}
-
 router.get('/spotify/status', async (req, res) => {
     try {
         const connection = await getDbConnection();
@@ -169,7 +148,18 @@ router.get('/spotify/search', async (req, res) => {
     const { q } = req.query;
     if (!q || !q.trim()) return res.json({ tracks: [] });
     try {
-        const token = await getClientCredentialsToken();
+        const connection = await getDbConnection();
+        let token;
+        try {
+            // Spotify requires the app owner's account to have an active
+            // Premium subscription for search calls made with an app-only
+            // (client-credentials) token -- a policy change, not something
+            // fixable in code. Routing through the teacher's own authorized
+            // connection avoids that restriction entirely.
+            token = await getValidAccessToken(connection);
+        } finally {
+            await connection.release();
+        }
         const searchRes = await fetch(`https://api.spotify.com/v1/search?${new URLSearchParams({ q, type: 'track', limit: 10 })}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
