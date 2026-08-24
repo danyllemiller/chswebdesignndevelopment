@@ -164,6 +164,18 @@ function openTimeclockModal() {
 // student attends two genuinely separate class periods today, each with
 // its own clock-in/out event, so each period's popup needs to be able to
 // fire independently instead of one suppressing the other.
+//
+// Both windows are open-ended on the far side (no "now <= endMs" upper
+// bound) rather than snapping shut exactly at the period boundary. The
+// 60s interval only fires reliably while the tab is in the foreground --
+// browsers throttle timers in background tabs, which is exactly the kind
+// of thing a student with several tabs open runs into constantly. A
+// narrow window meant that if their tab wasn't focused at the precise
+// moment, the check ran late, the window had already closed, and the
+// popup silently never fired for the rest of the day. Better to prompt
+// late (still accurate -- the recorded clock time reflects when they
+// actually responded) than not at all. The once-per-day flag still
+// prevents it from repeating once shown.
 function checkAutoPopup() {
     if (!bellWindow || !window.timeclock || !studentData) return;
     const now = Date.now();
@@ -172,13 +184,13 @@ function checkAutoPopup() {
     const who = studentData.student_id;
     const wherePeriod = currentPeriod || 'na';
 
-    if (mode === 'in' && now >= bellWindow.startMs && now <= bellWindow.endMs) {
+    if (mode === 'in' && now >= bellWindow.startMs) {
         const flag = `tc_auto_shown_in_${who}_${wherePeriod}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
             openTimeclockModal();
         }
-    } else if (mode === 'out' && now >= (bellWindow.endMs - 5 * 60 * 1000) && now <= bellWindow.endMs) {
+    } else if (mode === 'out' && now >= (bellWindow.endMs - 5 * 60 * 1000)) {
         const flag = `tc_auto_shown_out_${who}_${wherePeriod}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
@@ -219,13 +231,25 @@ async function initTimeclock() {
     bellWindow = await resolveTodaysBellWindow();
     await checkStatus();
     checkAutoPopup();
-    setInterval(async () => {
+
+    const recheck = async () => {
         const modalEl = document.getElementById('timeclock-modal');
         if (modalEl && modalEl.classList.contains('show')) return; // don't disrupt an in-progress submission
         bellWindow = await resolveTodaysBellWindow(); // re-resolve each tick: which period is "current" changes across the day
         await checkStatus();
         checkAutoPopup();
-    }, 60 * 1000);
+    };
+
+    setInterval(recheck, 60 * 1000);
+
+    // Browsers throttle setInterval in background tabs, so a student who
+    // switches back to this tab could otherwise wait a while for the next
+    // (possibly delayed) tick before getting a check that's actually due
+    // right now. Re-check immediately the moment the tab becomes visible
+    // again instead of waiting on the interval to catch up.
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') recheck();
+    });
 }
 
 async function checkStatus() {
