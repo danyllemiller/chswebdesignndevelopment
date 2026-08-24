@@ -330,10 +330,15 @@
   .nav-bar select { max-width: 380px; }
 
   .add-bullet-btn { margin-top: .35rem; }
-  .bullet-remove-btn {
-    background: none; border: none; color: #dc3545; font-weight: 700;
-    line-height: 1; padding: 0 0 0 .5rem; cursor: pointer; font-size: .85em;
+  .bullet-controls { white-space: nowrap; }
+  .bullet-move-btn, .bullet-remove-btn {
+    background: none; border: none; font-weight: 700;
+    line-height: 1; padding: 0 0 0 .4rem; cursor: pointer; font-size: .85em;
   }
+  .bullet-move-btn { color: #6c757d; }
+  .bullet-move-btn:hover { color: #adb5bd; }
+  .bullet-move-btn:disabled { opacity: .3; cursor: default; }
+  .bullet-remove-btn { color: #dc3545; }
   .bullet-remove-btn:hover { color: #ff6b7a; }
 
   [contenteditable="true"] {
@@ -778,13 +783,40 @@ if (!courseCfg) {
     span.setAttribute('contenteditable', editing);
     li.appendChild(span);
     if (editing) {
+      const controls = document.createElement('span');
+      controls.className = 'bullet-controls';
+
+      const upBtn = document.createElement('button');
+      upBtn.type = 'button';
+      upBtn.className = 'bullet-move-btn';
+      upBtn.innerHTML = '&uarr;';
+      upBtn.title = 'Move up';
+      upBtn.addEventListener('click', () => {
+        const prev = li.previousElementSibling;
+        if (prev) li.parentElement.insertBefore(li, prev);
+      });
+
+      const downBtn = document.createElement('button');
+      downBtn.type = 'button';
+      downBtn.className = 'bullet-move-btn';
+      downBtn.innerHTML = '&darr;';
+      downBtn.title = 'Move down';
+      downBtn.addEventListener('click', () => {
+        const next = li.nextElementSibling;
+        if (next) li.parentElement.insertBefore(next, li);
+      });
+
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
       removeBtn.className = 'bullet-remove-btn';
       removeBtn.innerHTML = '&times;';
       removeBtn.title = 'Remove this line';
       removeBtn.addEventListener('click', () => li.remove());
-      li.appendChild(removeBtn);
+
+      controls.appendChild(upBtn);
+      controls.appendChild(downBtn);
+      controls.appendChild(removeBtn);
+      li.appendChild(controls);
     }
     return li;
   }
