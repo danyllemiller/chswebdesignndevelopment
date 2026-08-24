@@ -335,6 +335,33 @@ function updatePreview() {
     dom.preview.srcdoc = src;
 }
 
+let titleTooltipInstance = null;
+function showTitleTooltip(message) {
+    if (!dom.title) return;
+    if (typeof bootstrap === 'undefined') {
+        alert(message);
+        return;
+    }
+    if (titleTooltipInstance) {
+        titleTooltipInstance.dispose();
+        titleTooltipInstance = null;
+    }
+    titleTooltipInstance = new bootstrap.Tooltip(dom.title, { title: message, trigger: 'manual', placement: 'top' });
+    titleTooltipInstance.show();
+    dom.title.classList.add('is-invalid');
+    dom.title.focus();
+    setTimeout(() => {
+        if (titleTooltipInstance) titleTooltipInstance.hide();
+        dom.title?.classList.remove('is-invalid');
+    }, 3000);
+}
+if (dom.title) {
+    dom.title.addEventListener('input', () => {
+        dom.title.classList.remove('is-invalid');
+        if (titleTooltipInstance) titleTooltipInstance.hide();
+    });
+}
+
 async function saveNoteData() {
     const userId = getActiveUserId();
     if (!userId) {
@@ -344,14 +371,13 @@ async function saveNoteData() {
 
     const titleVal = (dom.title?.value || "").trim();
     if (!titleVal) {
-        alert("Please enter a title before saving.");
+        showTitleTooltip("Please enter a title before saving.");
         return false;
     }
 
     const isPlaceholderTitle = titleVal === "New Entry Title" || titleVal.startsWith("Note: ");
     if (!activeNoteId && isPlaceholderTitle) {
-        alert("Please enter a real note title before saving.");
-        if (dom.title) dom.title.focus();
+        showTitleTooltip("Give this note an original title before saving.");
         return false;
     }
 

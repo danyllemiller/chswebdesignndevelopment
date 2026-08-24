@@ -450,25 +450,46 @@ function getDefaultWorksheetTemplate() {
         if (currentMode === 'worksheet') {
             // Load worksheet template
             if (contentIn) contentIn.value = getWorksheetTemplate();
-            if (titleInput) titleInput.value = 'Chapter Worksheet';
+            if (titleInput) titleInput.value = '';
             if (catInput) catInput.value = 'Worksheet';
         } else {
             // Load regular notes template
             if (contentIn) contentIn.value = '<h2>Notes</h2><p>Start writing your notes here...</p>';
-            if (titleInput) titleInput.value = 'My Notes';
+            if (titleInput) titleInput.value = '';
             if (catInput) catInput.value = 'Notes';
         }
         updatePreview();
     };
-    
+
+    let titleTooltipInstance = null;
+    function showTitleTooltip(message) {
+        const titleInput = document.getElementById('note-title');
+        if (!titleInput) return;
+        if (typeof bootstrap === 'undefined') return;
+        if (titleTooltipInstance) {
+            titleTooltipInstance.dispose();
+            titleTooltipInstance = null;
+        }
+        titleTooltipInstance = new bootstrap.Tooltip(titleInput, { title: message, trigger: 'manual', placement: 'top' });
+        titleTooltipInstance.show();
+        titleInput.classList.add('is-invalid');
+        setTimeout(() => {
+            if (titleTooltipInstance) titleTooltipInstance.hide();
+            titleInput.classList.remove('is-invalid');
+        }, 3000);
+    }
+
     async function saveNotes(isSubmit = false) {
         if (!currentStudentData) return;
-        
+
         const titleInput = document.getElementById('note-title');
         const contentIn = document.getElementById('note-content');
         const catInput = document.getElementById('note-category');
-        
-        if (!titleInput || !titleInput.value.trim()) return;
+
+        if (!titleInput || !titleInput.value.trim()) {
+            showTitleTooltip('Give your note an original title before saving.');
+            return;
+        }
         
         const btn = document.getElementById('saveStatus');
         if (btn) {
