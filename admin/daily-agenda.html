@@ -329,6 +329,13 @@
   }
   .nav-bar select { max-width: 380px; }
 
+  .add-bullet-btn { margin-top: .35rem; }
+  .bullet-remove-btn {
+    background: none; border: none; color: #dc3545; font-weight: 700;
+    line-height: 1; padding: 0 0 0 .5rem; cursor: pointer; font-size: .85em;
+  }
+  .bullet-remove-btn:hover { color: #ff6b7a; }
+
   [contenteditable="true"] {
     outline: 2px dashed #fbbf24;
     outline-offset: 2px;
@@ -381,11 +388,13 @@
     <h2 class="section-label label-objective" data-tag="h2" data-cmt="Objective">Objective</h2>
     <div class="zone zone-objective">
       <ul id="objectiveList" class="mb-0 ps-3"></ul>
+      <button id="addObjectiveBtn" class="btn btn-sm btn-outline-warning add-bullet-btn d-none" type="button">+ Add line</button>
     </div>
 
     <h3 class="section-label label-standards" data-tag="h3" data-cmt="Standards">Standards</h3>
     <div class="zone zone-standards">
       <div id="standardsBox"></div>
+      <button id="addStandardBtn" class="btn btn-sm btn-outline-warning add-bullet-btn d-none" type="button">+ Add line</button>
     </div>
 
     <h4 class="section-label label-donow" data-tag="h4" data-cmt="Do Now">Do Now</h4>
@@ -398,6 +407,7 @@
     <div class="zone zone-tasks">
       <div id="tasksTitle" class="tasks-title"></div>
       <ul id="taskList" class="task-list"></ul>
+      <button id="addTaskBtn" class="btn btn-sm btn-outline-warning add-bullet-btn d-none" type="button">+ Add line</button>
       <div class="exit-ticket"><span class="exit-ticket-label">In one or two sentences,</span> <span id="exitTicket"></span></div>
     </div>
 
@@ -756,6 +766,39 @@ if (!courseCfg) {
     return courseCfg.label;
   }
 
+  // Builds a bullet <li> with its text as an editable span plus, while
+  // editing, a small × button so lines added by mistake can be removed --
+  // otherwise the only way to get rid of an unwanted line is to blank out
+  // its text, which still saves as an empty bullet.
+  function makeBulletLi(text) {
+    const li = document.createElement('li');
+    const span = document.createElement('span');
+    span.className = 'bullet-text';
+    span.textContent = text;
+    span.setAttribute('contenteditable', editing);
+    li.appendChild(span);
+    if (editing) {
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'bullet-remove-btn';
+      removeBtn.innerHTML = '&times;';
+      removeBtn.title = 'Remove this line';
+      removeBtn.addEventListener('click', () => li.remove());
+      li.appendChild(removeBtn);
+    }
+    return li;
+  }
+
+  function addBulletTo(listEl) {
+    const li = makeBulletLi('');
+    listEl.appendChild(li);
+    const span = li.querySelector('.bullet-text');
+    span.focus();
+  }
+  document.getElementById('addObjectiveBtn').addEventListener('click', () => addBulletTo(document.getElementById('objectiveList')));
+  document.getElementById('addStandardBtn').addEventListener('click', () => addBulletTo(document.querySelector('#standardsBox ul')));
+  document.getElementById('addTaskBtn').addEventListener('click', () => addBulletTo(document.getElementById('taskList')));
+
   function render() {
     const c = content[currentBlock];
     const dateStr = (schedule[track] || {})[currentBlock];
@@ -769,30 +812,28 @@ if (!courseCfg) {
     const objList = document.getElementById('objectiveList');
     objList.innerHTML = '';
     (c && c.objective || []).forEach(line => {
-      const li = document.createElement('li');
-      li.textContent = line;
-      li.setAttribute('contenteditable', editing);
-      objList.appendChild(li);
+      objList.appendChild(makeBulletLi(line));
     });
+    document.getElementById('addObjectiveBtn').classList.toggle('d-none', !editing);
 
     const stdBox = document.getElementById('standardsBox');
     stdBox.innerHTML = '';
+    const addStdBtn = document.getElementById('addStandardBtn');
     if (c && c.standardsNote) {
       const p = document.createElement('p');
       p.className = 'standards-note fst-italic small mb-0';
       p.textContent = c.standardsNote;
       p.setAttribute('contenteditable', editing);
       stdBox.appendChild(p);
+      addStdBtn.classList.add('d-none'); // freeform note, not a bullet list -- nothing to add a line to
     } else {
       const ul = document.createElement('ul');
       ul.className = 'mb-0 ps-3 small';
       (c && c.standards || []).forEach(line => {
-        const li = document.createElement('li');
-        li.textContent = line;
-        li.setAttribute('contenteditable', editing);
-        ul.appendChild(li);
+        ul.appendChild(makeBulletLi(line));
       });
       stdBox.appendChild(ul);
+      addStdBtn.classList.toggle('d-none', !editing);
     }
 
     const doNow = document.getElementById('doNowPrompt');
@@ -811,11 +852,9 @@ if (!courseCfg) {
     const tl = document.getElementById('taskList');
     tl.innerHTML = '';
     (c && c.tasksList || []).forEach(line => {
-      const li = document.createElement('li');
-      li.textContent = line;
-      li.setAttribute('contenteditable', editing);
-      tl.appendChild(li);
+      tl.appendChild(makeBulletLi(line));
     });
+    document.getElementById('addTaskBtn').classList.toggle('d-none', !editing);
 
     const et = document.getElementById('exitTicket');
     et.textContent = c && c.exitTicket ? c.exitTicket : '';
@@ -867,13 +906,13 @@ if (!courseCfg) {
   });
   document.getElementById('saveBtn').addEventListener('click', async () => {
     const c = content[currentBlock] || {};
-    c.objective = Array.from(document.querySelectorAll('#objectiveList li')).map(li => li.textContent.trim());
+    c.objective = Array.from(document.querySelectorAll('#objectiveList li .bullet-text')).map(el => el.textContent.trim()).filter(Boolean);
     const stdNoteEl = document.querySelector('#standardsBox p');
     if (stdNoteEl) {
       c.standardsNote = stdNoteEl.textContent.trim();
       c.standards = [];
     } else {
-      c.standards = Array.from(document.querySelectorAll('#standardsBox li')).map(li => li.textContent.trim());
+      c.standards = Array.from(document.querySelectorAll('#standardsBox li .bullet-text')).map(el => el.textContent.trim()).filter(Boolean);
       c.standardsNote = '';
     }
     const doNowRaw = document.getElementById('doNowPrompt').textContent;
@@ -883,7 +922,7 @@ if (!courseCfg) {
       c.doNowPrompt = doNowRaw.slice(colonIdx + 1).trim();
     }
     c.tasksTitle = document.getElementById('tasksTitle').textContent.trim();
-    c.tasksList = Array.from(document.querySelectorAll('#taskList li')).map(li => li.textContent.trim());
+    c.tasksList = Array.from(document.querySelectorAll('#taskList li .bullet-text')).map(el => el.textContent.trim()).filter(Boolean);
     c.exitTicket = document.getElementById('exitTicket').textContent.trim();
 
     content[currentBlock] = c;
