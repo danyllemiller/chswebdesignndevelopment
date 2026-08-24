@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { getCurrentSchoolYear } = require('../helpers');
 
 // Standalone tardy-pass tracker -- deliberately not attendance. Logs a
 // timestamped entry per tardy so a teacher can hand out passes and see both
@@ -81,17 +82,23 @@ router.post('/tardy/log', async (req, res) => {
 
 router.get('/tardy/log', async (req, res) => {
     const { student_id } = req.query;
+    const currentYear = getCurrentSchoolYear();
     try {
         const connection = await getDbConnection();
         const params = [];
         let where = '';
         if (student_id) { where = 'WHERE t.student_id = ?'; params.push(student_id); }
+        // Excludes archived/prior-year students -- that's also how
+        // test/dummy accounts (teststudent, testcsstudent, etc.) are flagged
+        // in this DB, so this keeps them out of the log and the per-student
+        // lookup alike.
+        params.push(currentYear);
         const [rows] = await connection.execute(
             `SELECT t.id, t.student_id, t.period, t.reason, t.created_at,
                     s.first_name, s.last_name
              FROM tardy_passes t
              LEFT JOIN students s ON s.student_id = t.student_id
-             ${where}
+             ${where ? where + ' AND' : 'WHERE'} (s.archived IS NULL OR s.archived = 0) AND s.school_year = ?
              ORDER BY t.created_at DESC`,
             params
         );
@@ -101,6 +108,7 @@ router.get('/tardy/log', async (req, res) => {
 });
 
 router.get('/tardy/summary', async (req, res) => {
+    const currentYear = getCurrentSchoolYear();
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(
@@ -108,8 +116,10 @@ router.get('/tardy/summary', async (req, res) => {
                     COUNT(*) AS tardy_count, MAX(t.created_at) AS last_tardy
              FROM tardy_passes t
              LEFT JOIN students s ON s.student_id = t.student_id
+             WHERE (s.archived IS NULL OR s.archived = 0) AND s.school_year = ?
              GROUP BY t.student_id, s.first_name, s.last_name, s.section_id
-             ORDER BY tardy_count DESC, last_tardy DESC`
+             ORDER BY tardy_count DESC, last_tardy DESC`,
+            [currentYear]
         );
         await connection.release();
         res.json({ summary: rows });

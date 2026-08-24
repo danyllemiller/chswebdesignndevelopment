@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { getCurrentSchoolYear } = require('../helpers');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -32,13 +33,21 @@ function dateOnly(d) {
 // by hand across the gradebook, the uploads folder, and the tardy tracker.
 router.get('/admin/daily-activity', async (req, res) => {
     const targetDate = req.query.date || dateOnly(new Date(Date.now() - 24 * 60 * 60 * 1000));
+    const currentYear = getCurrentSchoolYear();
+    // Both checks matter: archived catches students explicitly pulled out
+    // mid-year, school_year catches anyone from a prior year whose archived
+    // flag hasn't been (or wasn't) set. Also excludes test/dummy accounts
+    // (teststudent, testcsstudent, etc.), which are already archived in
+    // this DB.
+    const activeStudentFilter = '(s.archived IS NULL OR s.archived = 0) AND s.school_year = ?';
 
     try {
         const connection = await getDbConnection();
 
         const [roster] = await connection.execute(
             `SELECT student_id, first_name, last_name, section_id FROM students
-             WHERE (archived IS NULL OR archived = 0)`
+             WHERE (archived IS NULL OR archived = 0) AND school_year = ?`,
+            [currentYear]
         );
         const rosterMap = new Map(roster.map(r => [r.student_id, r]));
 
@@ -47,10 +56,9 @@ router.get('/admin/daily-activity', async (req, res) => {
                     s.first_name, s.last_name, s.section_id
              FROM turnins t
              JOIN students s ON s.student_id = t.student_id
-             WHERE t.is_submitted = 1 AND DATE(t.timestamp) = ?
-               AND (s.archived IS NULL OR s.archived = 0)
+             WHERE t.is_submitted = 1 AND DATE(t.timestamp) = ? AND ${activeStudentFilter}
              ORDER BY s.section_id, t.timestamp DESC`,
-            [targetDate]
+            [targetDate, currentYear]
         );
 
         const [examActivity] = await connection.execute(
@@ -58,10 +66,9 @@ router.get('/admin/daily-activity', async (req, res) => {
                     s.first_name, s.last_name, s.section_id
              FROM responses r
              JOIN students s ON s.student_id = r.student_id
-             WHERE DATE(r.timestamp) = ?
-               AND (s.archived IS NULL OR s.archived = 0)
+             WHERE DATE(r.timestamp) = ? AND ${activeStudentFilter}
              ORDER BY r.exam_id, s.last_name, s.first_name`,
-            [targetDate]
+            [targetDate, currentYear]
         );
 
         // Tardy follow-ups aren't scoped to the selected date -- it's a
@@ -72,7 +79,8 @@ router.get('/admin/daily-activity', async (req, res) => {
             `SELECT tp.student_id, s.first_name, s.last_name
              FROM tardy_passes tp
              JOIN students s ON s.student_id = tp.student_id
-             WHERE (s.archived IS NULL OR s.archived = 0)`
+             WHERE ${activeStudentFilter}`,
+            [currentYear]
         );
         await connection.release();
 
