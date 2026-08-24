@@ -40,7 +40,7 @@
   const script = document.createElement('script');
   script.id = 'timeclock-script';
   script.type = 'module';
-  script.src = '/js/student/timeclock.js?v=7';
+  script.src = '/js/student/timeclock.js?v=8';
   document.body ? document.body.appendChild(script) : document.head.appendChild(script);
 })();
 

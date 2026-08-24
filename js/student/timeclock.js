@@ -5,7 +5,8 @@ import { periodToCourseKey } from '../modules/grade-weights.js?v=3';
 
 let studentData = null;
 let currentQuestion = null;
-let bellWindow = null; // { startMs, endMs } for the student's period today, or null if no class today
+let bellWindow = null; // { startMs, endMs } for whichever of the student's periods is currently active today, or null
+let currentPeriod = null; // which of the student's (possibly multiple) periods bellWindow/getCourseKey resolved to
 
 // ==============================================================================
 // 1. HELPERS & CONFIGURATION
@@ -61,11 +62,36 @@ function getBellScheduleKey(dayTypes, dateStr) {
     return info.type === 'S' ? 'summer' : info.type;
 }
 
-// Resolves today's start/end time (as ms-since-epoch) for the logged-in
-// student's own period, or null if their period doesn't meet today at all.
+// A student can be enrolled in more than one of the teacher's periods (e.g.
+// dual-enrolled in a WD period and a CS period, or Intervention plus a real
+// class) via student_additional_sections. Returns every period code they
+// should be checked against, primary first.
+async function getAllStudentPeriods() {
+    const primary = String(studentData.section_id || '').trim().toUpperCase();
+    const periods = primary ? [primary] : [];
+    try {
+        const res = await fetch(`/api/admin/student-sections?student_id=${encodeURIComponent(studentData.student_id)}`);
+        if (res.ok) {
+            const extra = await res.json();
+            (extra || []).forEach(s => {
+                const p = String(s.section_id || '').trim().toUpperCase();
+                if (p && !periods.includes(p)) periods.push(p);
+            });
+        }
+    } catch (e) { /* fall back to just the primary period */ }
+    return periods;
+}
+
+// Resolves today's start/end time (as ms-since-epoch) for whichever of the
+// student's periods is actually happening right now -- not just their
+// primary section, since a dual-enrolled student's other class may be the
+// one currently in session. Also records which period that was in
+// currentPeriod, so the clock-in question matches the RIGHT course. Falls
+// back to the earliest period that meets today if none is active right
+// this moment (keeps things stable for the manual widget/status check).
 async function resolveTodaysBellWindow() {
-    const period = String(studentData.section_id || '').trim().toUpperCase();
-    if (!period) return null;
+    const periods = await getAllStudentPeriods();
+    if (periods.length === 0) return null;
 
     try {
         const [csvText, eventsData, bellData] = await Promise.all([
@@ -88,16 +114,27 @@ async function resolveTodaysBellWindow() {
         // to a substring match on the same period code, same convention
         // periodToCourseKey() already uses for course resolution.
         const schedule = bellData.schedule || [];
-        const row = schedule.find(r => r.schedule_type === scheduleKey && r.period_label === period)
-            || schedule.find(r => r.schedule_type === scheduleKey && period.includes(r.period_label));
-        if (!row) return null; // this student's period doesn't meet on today's day type
-
-        const [startH, startM] = row.start_time.split(':').map(Number);
-        const [endH, endM] = row.end_time.split(':').map(Number);
         const now = new Date();
-        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startH, startM, 0);
-        const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endH, endM, 0);
-        return { startMs: start.getTime(), endMs: end.getTime() };
+        const nowMs = now.getTime();
+
+        const windows = periods.map(period => {
+            const row = schedule.find(r => r.schedule_type === scheduleKey && r.period_label === period)
+                || schedule.find(r => r.schedule_type === scheduleKey && period.includes(r.period_label));
+            if (!row) return null;
+            const [startH, startM] = row.start_time.split(':').map(Number);
+            const [endH, endM] = row.end_time.split(':').map(Number);
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startH, startM, 0);
+            const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endH, endM, 0);
+            return { period, startMs: start.getTime(), endMs: end.getTime() };
+        }).filter(Boolean);
+
+        if (windows.length === 0) return null; // none of this student's periods meet on today's day type
+
+        const active = windows.find(w => nowMs >= w.startMs && nowMs <= w.endMs);
+        const chosen = active || windows.sort((a, b) => a.startMs - b.startMs)[0];
+
+        currentPeriod = chosen.period;
+        return { startMs: chosen.startMs, endMs: chosen.endMs };
     } catch (e) {
         console.error('[timeclock] Could not resolve today\'s bell window:', e);
         return null;
@@ -123,21 +160,26 @@ function openTimeclockModal() {
 // whichever student's popup fired first that day silently suppressed it for
 // every student after them on the same machine — hitting later periods
 // (B6, B8...) far more than earlier ones simply by being later in the day.
+// Flags are scoped by period too, not just student+date: a dual-enrolled
+// student attends two genuinely separate class periods today, each with
+// its own clock-in/out event, so each period's popup needs to be able to
+// fire independently instead of one suppressing the other.
 function checkAutoPopup() {
     if (!bellWindow || !window.timeclock || !studentData) return;
     const now = Date.now();
     const mode = window.timeclock.currentMode;
     const todayStr = getLocalTodayStr();
     const who = studentData.student_id;
+    const wherePeriod = currentPeriod || 'na';
 
     if (mode === 'in' && now >= bellWindow.startMs && now <= bellWindow.endMs) {
-        const flag = `tc_auto_shown_in_${who}_${todayStr}`;
+        const flag = `tc_auto_shown_in_${who}_${wherePeriod}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
             openTimeclockModal();
         }
     } else if (mode === 'out' && now >= (bellWindow.endMs - 5 * 60 * 1000) && now <= bellWindow.endMs) {
-        const flag = `tc_auto_shown_out_${who}_${todayStr}`;
+        const flag = `tc_auto_shown_out_${who}_${wherePeriod}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
             openTimeclockModal();
@@ -145,11 +187,12 @@ function checkAutoPopup() {
     }
 }
 
-// Resolves 'CS', 'WD1', or 'WD2' for the logged-in student — bare period
-// codes (A3, B4...) don't carry a course prefix, so this has to go through
-// the shared course map rather than a simple startsWith() check.
+// Resolves 'CS', 'WD1', or 'WD2' for whichever of the student's periods is
+// currently active (set by resolveTodaysBellWindow) -- not just their
+// primary section, so a dual-enrolled student sees the question for the
+// class actually happening right now, not always their primary one.
 function getCourseKey() {
-    return periodToCourseKey(studentData.section_id) || 'CS';
+    return periodToCourseKey(currentPeriod || studentData.section_id) || 'CS';
 }
 
 // ==============================================================================
@@ -168,13 +211,18 @@ async function initTimeclock() {
     if (isTeacher) return;
 
     injectTimeclockUI();
-    await checkStatus();
 
+    // Resolve which period is currently active BEFORE the first status
+    // check, so a dual-enrolled student's clock-in question is scoped to
+    // the right course from the very first render, not just after the
+    // first 60s refresh tick.
     bellWindow = await resolveTodaysBellWindow();
+    await checkStatus();
     checkAutoPopup();
     setInterval(async () => {
         const modalEl = document.getElementById('timeclock-modal');
         if (modalEl && modalEl.classList.contains('show')) return; // don't disrupt an in-progress submission
+        bellWindow = await resolveTodaysBellWindow(); // re-resolve each tick: which period is "current" changes across the day
         await checkStatus();
         checkAutoPopup();
     }, 60 * 1000);
@@ -185,7 +233,8 @@ async function checkStatus() {
 
     try {
         // Using our shared apiFetch module
-        const statusData = await apiFetch(`/api/timeclock/status?student_id=${studentData.student_id}`);
+        const periodParam = currentPeriod ? `&period=${encodeURIComponent(currentPeriod)}` : '';
+        const statusData = await apiFetch(`/api/timeclock/status?student_id=${studentData.student_id}${periodParam}`);
 
         const label = document.getElementById('tc-question-label');
         const optsContainer = document.getElementById('tc-options-container');
@@ -263,7 +312,7 @@ async function handleTimeclockSubmit(e) {
             method: 'POST',
             body: JSON.stringify({
                 student_id: studentData.student_id,
-                section_id: studentData.section_id,
+                section_id: currentPeriod || studentData.section_id,
                 mode: mode,
                 answer: answer
             })
@@ -305,4 +354,20 @@ function injectTimeclockUI() {
 
 // Preserve the global namespace for other scripts
 window.timeclock = { currentMode: "idle" };
-document.addEventListener("DOMContentLoaded", initTimeclock);
+
+// This file is injected dynamically by loader.js (document.createElement +
+// appendChild), not declared in the page's own markup -- a dynamically
+// inserted script doesn't block DOMContentLoaded, so by the time this file
+// finishes downloading and running, that event may have ALREADY fired
+// (timing depends on the page's own size/complexity and network speed,
+// which is exactly why this looked "random": it worked on slower/heavier
+// pages that hadn't finished parsing yet, and silently never ran at all on
+// faster/simpler ones). A DOMContentLoaded listener registered after the
+// event already happened never fires, so BOTH the auto-popup and the
+// manual widget button silently never appeared for those students. Same
+// readyState check loader.js itself already uses for this exact reason.
+if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", initTimeclock);
+} else {
+    initTimeclock();
+}

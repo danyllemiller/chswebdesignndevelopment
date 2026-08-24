@@ -16,15 +16,21 @@ router.post('/clockin', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Clock in failed.' }); }
 });
 
+// Scoped by period when provided: a dual-enrolled student who already
+// clocked in for their morning period shouldn't be told they need to
+// "clock out" the moment their afternoon period's page loads -- that's a
+// separate class with its own separate clock-in. Falls back to the old
+// student+date-only behavior if no period is given (backward compatible).
 router.get('/timeclock/status', async (req, res) => {
-    const { student_id } = req.query;
+    const { student_id, period } = req.query;
     try {
         const connection = await getDbConnection();
         const today = new Date().toISOString().split('T')[0];
-        const [rows] = await connection.execute(
-            'SELECT * FROM clockins WHERE student_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC LIMIT 1',
-            [student_id, today]
-        );
+        const sql = period
+            ? 'SELECT * FROM clockins WHERE student_id = ? AND section_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC LIMIT 1'
+            : 'SELECT * FROM clockins WHERE student_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC LIMIT 1';
+        const params = period ? [student_id, period, today] : [student_id, today];
+        const [rows] = await connection.execute(sql, params);
         await connection.release();
         if (rows.length === 0) return res.json({ mode: 'in' });
         const type = rows[0].type;
@@ -199,28 +205,49 @@ router.post('/timeclock/save', async (req, res) => {
     const { student_id, section_id, mode, answer } = req.body;
     if (!student_id || !mode) return res.status(400).json({ error: 'student_id and mode are required' });
     const today = new Date().toISOString().split('T')[0];
+    const period = section_id || '';
     try {
         const connection = await getDbConnection();
         if (mode === 'in') {
             await connection.execute(
                 'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',
-                [student_id, section_id || '', 'in', answer || '']
+                [student_id, period, 'in', answer || '']
             );
-            await connection.execute(
-                `INSERT INTO timesheets (student_id, date, clock_in, in_answer)
-                 VALUES (?, ?, CURTIME(), ?)
-                 ON DUPLICATE KEY UPDATE clock_in = CURTIME(), in_answer = VALUES(in_answer)`,
-                [student_id, today, answer || '']
+            // timesheets has no unique constraint to make "ON DUPLICATE KEY
+            // UPDATE" actually trigger (it never has -- every prior clock-in
+            // silently INSERTed a brand-new row instead of updating, which is
+            // why some students have dozens of rows for a single day).
+            // Explicit check-then-write instead, scoped by period so a
+            // dual-enrolled student's two classes each get their own row for
+            // the same day rather than colliding or overwriting each other.
+            const [existing] = await connection.execute(
+                'SELECT id FROM timesheets WHERE student_id = ? AND date = ? AND section_id = ? LIMIT 1',
+                [student_id, today, period]
             );
+            if (existing.length > 0) {
+                await connection.execute(
+                    'UPDATE timesheets SET clock_in = CURTIME(), in_answer = ? WHERE id = ?',
+                    [answer || '', existing[0].id]
+                );
+            } else {
+                await connection.execute(
+                    'INSERT INTO timesheets (student_id, date, section_id, clock_in, in_answer) VALUES (?, ?, ?, CURTIME(), ?)',
+                    [student_id, today, period, answer || '']
+                );
+            }
         } else if (mode === 'out') {
             await connection.execute(
                 'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',
-                [student_id, section_id || '', 'out', answer || '']
+                [student_id, period, 'out', answer || '']
             );
+            // Scoped by section_id and limited to one row so clocking out of
+            // one period can never stamp the same clock-out time onto a
+            // different period's still-open record for the same day.
             await connection.execute(
                 `UPDATE timesheets SET clock_out = CURTIME(), out_answer = ?
-                 WHERE student_id = ? AND date = ? AND clock_out IS NULL`,
-                [answer || '', student_id, today]
+                 WHERE student_id = ? AND date = ? AND section_id = ? AND clock_out IS NULL
+                 ORDER BY id DESC LIMIT 1`,
+                [answer || '', student_id, today, period]
             );
         }
         await connection.release();
