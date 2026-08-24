@@ -155,16 +155,30 @@
     `).join('');
   }
 
+  // Grouped by assignment (exam_id) rather than period -- this section is
+  // about seeing everyone who touched the same assignment together, sorted
+  // by last name within each group, not about which class they're in.
+  function groupByAssignment(items) {
+    const groups = new Map();
+    items.forEach(item => {
+      const key = item.exam_id || 'Unknown assignment';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(item);
+    });
+    groups.forEach(group => group.sort((a, b) => (a.last_name || '').localeCompare(b.last_name || '')));
+    return groups;
+  }
+
   function renderExamActivity(items) {
     document.getElementById('examCount').textContent = items.length;
     const list = document.getElementById('examList');
     if (items.length === 0) { list.innerHTML = '<p class="text-muted small mb-0">No new or improved exam scores that day.</p>'; return; }
-    const groups = groupByPeriod(items);
-    list.innerHTML = Array.from(groups.entries()).map(([period, group]) => `
-      <div class="period-group-label">${escapeHtml(period)}</div>
+    const groups = groupByAssignment(items);
+    list.innerHTML = Array.from(groups.entries()).map(([examId, group]) => `
+      <div class="period-group-label">${escapeHtml(examId)}</div>
       ${group.map(item => `
         <div class="activity-row d-flex justify-content-between align-items-start">
-          <div><strong>${name(item)}</strong> — ${escapeHtml(item.exam_id)}</div>
+          <div><strong>${name(item)}</strong> <span class="text-muted small">${escapeHtml(item.section_id || '')}</span></div>
           <span class="fw-bold">${item.score}/${item.total_points}</span>
         </div>`).join('')}
     `).join('');

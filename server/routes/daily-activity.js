@@ -60,7 +60,7 @@ router.get('/admin/daily-activity', async (req, res) => {
              JOIN students s ON s.student_id = r.student_id
              WHERE DATE(r.timestamp) = ?
                AND (s.archived IS NULL OR s.archived = 0)
-             ORDER BY s.section_id, r.timestamp DESC`,
+             ORDER BY r.exam_id, s.last_name, s.first_name`,
             [targetDate]
         );
 
