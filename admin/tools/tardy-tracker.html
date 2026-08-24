@@ -147,6 +147,8 @@
 
 <script src="/js/bootstrap.bundle.js"></script>
 <script type="module">
+  import { getTardyStep } from '/js/modules/tardy-ladder.js?v=1';
+
   const studentIdInput = document.getElementById('studentIdInput');
   const periodFieldWrapper = document.getElementById('periodFieldWrapper');
   // periodInput's underlying element gets swapped between a plain text
@@ -299,17 +301,31 @@
         return;
       }
       const data = await res.json();
-      lookupPreview.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i>${escapeHtml(data.first_name)} ${escapeHtml(data.last_name)} — ${escapeHtml(data.section_id || 'no period on file')}</span>`;
       renderPeriodField(data.periods);
+
+      // Always look up their prior count so it shows right in this preview --
+      // the teacher shouldn't have to go find their name in the log below
+      // just to know how many tardies are already on record.
+      const logRes = await fetch(`/api/tardy/log?student_id=${encodeURIComponent(id)}`);
+      const logData = await logRes.json();
+      const priorEntries = logData.entries || [];
+      const priorCount = priorEntries.length;
+      const countText = priorCount === 0 ? 'no prior tardies' : `${priorCount} prior ${priorCount === 1 ? 'tardy' : 'tardies'} on file`;
+
+      // "More than one tardy" needs following up on, per the tardy ladder --
+      // the first tardy is just a check-in with no further consequence.
+      const step = priorCount > 1 ? getTardyStep(priorCount) : null;
+      const flagHtml = step
+        ? ` <span class="badge bg-warning text-dark ms-1"><i class="fas fa-flag me-1"></i>Follow up — ${escapeHtml(step.label)}: ${escapeHtml(step.consequence)}</span>`
+        : '';
+
+      lookupPreview.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i>${escapeHtml(data.first_name)} ${escapeHtml(data.last_name)} — ${escapeHtml(data.section_id || 'no period on file')} · ${countText}</span>${flagHtml}`;
 
       // Pop a warning if this student already has prior tardies on record --
       // only once per distinct ID typed, so it doesn't reopen on every
       // keystroke while they finish typing the same number.
       if (id !== lastLookupId) {
         lastLookupId = id;
-        const logRes = await fetch(`/api/tardy/log?student_id=${encodeURIComponent(id)}`);
-        const logData = await logRes.json();
-        const priorEntries = logData.entries || [];
         if (priorEntries.length > 1) {
           document.getElementById('repeatTardyName').textContent = `${data.first_name} ${data.last_name}`;
           document.getElementById('repeatTardyOrdinal').textContent = ordinal(priorEntries.length + 1);
@@ -373,11 +389,16 @@
         const first = group[0];
         const name = first.first_name ? `${escapeHtml(first.first_name)} ${escapeHtml(first.last_name)}` : escapeHtml(first.student_id);
         const countBadgeClass = group.length >= 5 ? 'count-high' : group.length >= 3 ? 'count-mid' : 'bg-secondary';
+        const step = group.length > 1 ? getTardyStep(group.length) : null;
+        const flagBadge = step
+          ? `<span class="badge bg-warning text-dark ms-2" title="${escapeHtml(step.consequence)}"><i class="fas fa-flag me-1"></i>Needs follow-up — ${escapeHtml(step.label)}</span>`
+          : '';
         const headerRow = `
           <tr class="table-light">
             <td colspan="6">
               <strong>${name}</strong> <span class="text-muted small">(${escapeHtml(first.student_id)})</span>
               <span class="badge ${countBadgeClass} count-badge ms-2">${group.length} ${group.length === 1 ? 'tardy' : 'tardies'}</span>
+              ${flagBadge}
             </td>
           </tr>`;
         const rows = group.map(e => {
