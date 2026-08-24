@@ -22,7 +22,11 @@ router.get('/spotify/connect', (req, res) => {
         client_id: CLIENT_ID,
         response_type: 'code',
         redirect_uri: REDIRECT_URI,
-        scope
+        scope,
+        // Without this, Spotify silently skips the approval screen (and re-issues
+        // whatever scope was already on file) for an account that's connected
+        // before -- which defeats the point of reconnecting to pick up new scopes.
+        show_dialog: 'true'
     });
     res.redirect(`https://accounts.spotify.com/authorize?${params.toString()}`);
 });
@@ -170,7 +174,8 @@ router.get('/spotify/search', async (req, res) => {
             name: t.name,
             artist: (t.artists || []).map(a => a.name).join(', '),
             album_art: t.album?.images?.[2]?.url || t.album?.images?.[0]?.url || null,
-            uri: t.uri
+            uri: t.uri,
+            explicit: !!t.explicit
         }));
         res.json({ tracks });
     } catch (err) { console.error(err); res.status(500).json({ error: err.message }); }
@@ -181,9 +186,25 @@ router.post('/song-requests', async (req, res) => {
     if (!student_id || !track_id || !track_name) return res.status(400).json({ error: 'student_id, track_id, and track_name are required' });
     try {
         const connection = await getDbConnection();
+
+        // Re-check the explicit flag against Spotify directly rather than trusting
+        // whatever the client sent -- this is what the teacher relies on to screen
+        // requests, so it shouldn't be something a request body could misreport.
+        let explicit = 0;
+        try {
+            const accessToken = await getValidAccessToken(connection);
+            const trackRes = await fetch(`https://api.spotify.com/v1/tracks/${encodeURIComponent(track_id)}?fields=explicit`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            if (trackRes.ok) {
+                const trackData = await trackRes.json();
+                explicit = trackData.explicit ? 1 : 0;
+            }
+        } catch (e) { console.error('[spotify] explicit lookup failed:', e); }
+
         const [result] = await connection.execute(
-            'INSERT INTO song_requests (student_id, track_id, track_name, artist_name, album_art_url) VALUES (?, ?, ?, ?, ?)',
-            [student_id, track_id, track_name, artist_name || '', album_art_url || null]
+            'INSERT INTO song_requests (student_id, track_id, track_name, artist_name, album_art_url, explicit) VALUES (?, ?, ?, ?, ?, ?)',
+            [student_id, track_id, track_name, artist_name || '', album_art_url || null, explicit]
         );
         await connection.release();
         res.json({ success: true, id: result.insertId });

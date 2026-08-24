@@ -163,7 +163,7 @@
       body.innerHTML = requests.map(r => `
         <tr>
           <td>${r.album_art_url ? `<img src="${escapeHtml(r.album_art_url)}" class="album-art">` : `<div class="album-art-placeholder"><i class="fas fa-music"></i></div>`}</td>
-          <td><div class="fw-bold">${escapeHtml(r.track_name)}</div><div class="small text-muted">${escapeHtml(r.artist_name)}</div></td>
+          <td><div class="fw-bold">${escapeHtml(r.track_name)} ${r.explicit ? '<span class="badge bg-danger">Explicit</span>' : ''}</div><div class="small text-muted">${escapeHtml(r.artist_name)}</div></td>
           <td>${r.first_name ? `${escapeHtml(r.first_name)} ${escapeHtml(r.last_name)}` : escapeHtml(r.student_id)}</td>
           <td class="small text-muted">${formatWhen(r.requested_at)}</td>
           <td class="text-end">
