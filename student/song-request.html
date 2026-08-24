@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Student View | Song Requests</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <link href="/css/student-pages.css" rel="stylesheet" />
+
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    .track-row { display: flex; align-items: center; gap: .75rem; padding: .5rem; border-radius: 8px; }
+    .track-row:hover { background: #f8f9fa; }
+    .album-art { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+    .album-art-placeholder {
+      width: 48px; height: 48px; border-radius: 6px; background: #e9ecef;
+      display: flex; align-items: center; justify-content: center; color: #adb5bd; flex-shrink: 0;
+    }
+    .status-badge-pending { background: #6c757d; }
+    .status-badge-approved { background: #198754; }
+    .status-badge-rejected { background: #dc3545; }
+  </style>
+</head>
+<body class="bg-white">
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div class="container my-5" style="max-width: 700px;">
+    <h2 class="gochi text-primary mb-1"><i class="fab fa-spotify me-2"></i>Request a Song</h2>
+    <p class="text-muted mb-4">Search for a song and request it — your teacher approves each request before it's added to the class playlist.</p>
+
+    <form id="searchForm" class="mb-3">
+      <div class="input-group">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search for a song or artist..." autocomplete="off">
+        <button type="submit" class="btn btn-primary fw-bold"><i class="fas fa-search"></i></button>
+      </div>
+    </form>
+
+    <div id="searchResults" class="mb-4"></div>
+
+    <hr class="my-4">
+
+    <h5 class="fw-bold text-primary mb-3"><i class="fas fa-list me-2"></i>My Requests</h5>
+    <div id="myRequests"><p class="text-muted small">Loading...</p></div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script type="module">
+    import { getLoggedInUser } from '/js/modules/user-session.js';
+
+    const student = getLoggedInUser();
+
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function formatWhen(ts) {
+      const d = new Date(ts.replace(' ', 'T'));
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    async function searchSongs(q) {
+      const results = document.getElementById('searchResults');
+      if (!q.trim()) { results.innerHTML = ''; return; }
+      results.innerHTML = `<p class="text-muted small">Searching...</p>`;
+      try {
+        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        const tracks = data.tracks || [];
+        if (tracks.length === 0) {
+          results.innerHTML = `<p class="text-muted small">No results.</p>`;
+          return;
+        }
+        results.innerHTML = tracks.map(t => `
+          <div class="track-row">
+            ${t.album_art ? `<img src="${escapeHtml(t.album_art)}" class="album-art">` : `<div class="album-art-placeholder"><i class="fas fa-music"></i></div>`}
+            <div class="flex-grow-1">
+              <div class="fw-bold small">${escapeHtml(t.name)}</div>
+              <div class="text-muted small">${escapeHtml(t.artist)}</div>
+            </div>
+            <button class="btn btn-sm btn-outline-primary fw-bold" data-request='${JSON.stringify(t).replace(/'/g, "&#39;")}'>Request</button>
+          </div>
+        `).join('');
+      } catch (e) {
+        results.innerHTML = `<p class="text-danger small">Search failed. Try again.</p>`;
+      }
+    }
+
+    document.getElementById('searchForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      searchSongs(document.getElementById('searchInput').value);
+    });
+
+    document.getElementById('searchResults').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-request]');
+      if (!btn) return;
+      const track = JSON.parse(btn.dataset.request);
+      btn.disabled = true;
+      btn.textContent = 'Requesting...';
+      try {
+        const res = await fetch('/api/song-requests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            student_id: student.student_id,
+            track_id: track.id,
+            track_name: track.name,
+            artist_name: track.artist,
+            album_art_url: track.album_art
+          })
+        });
+        if (!res.ok) throw new Error();
+        btn.textContent = 'Requested ✓';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-secondary');
+        await loadMyRequests();
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = 'Request';
+        alert('Failed to submit request. Try again.');
+      }
+    });
+
+    async function loadMyRequests() {
+      const container = document.getElementById('myRequests');
+      try {
+        const res = await fetch(`/api/song-requests?student_id=${encodeURIComponent(student.student_id)}`);
+        const data = await res.json();
+        const requests = data.requests || [];
+        if (requests.length === 0) {
+          container.innerHTML = `<p class="text-muted small">You haven't requested any songs yet.</p>`;
+          return;
+        }
+        container.innerHTML = requests.map(r => `
+          <div class="track-row">
+            ${r.album_art_url ? `<img src="${escapeHtml(r.album_art_url)}" class="album-art">` : `<div class="album-art-placeholder"><i class="fas fa-music"></i></div>`}
+            <div class="flex-grow-1">
+              <div class="fw-bold small">${escapeHtml(r.track_name)}</div>
+              <div class="text-muted small">${escapeHtml(r.artist_name)} · ${formatWhen(r.requested_at)}</div>
+            </div>
+            <span class="badge status-badge-${r.status}">${r.status === 'pending' ? 'Pending approval' : r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span>
+          </div>
+        `).join('');
+      } catch (e) {
+        container.innerHTML = `<p class="text-danger small">Failed to load your requests.</p>`;
+      }
+    }
+
+    loadMyRequests();
+  </script>
+</body>
+</html>

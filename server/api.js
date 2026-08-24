@@ -20,5 +20,6 @@ router.use('/', require('./routes/stickers'));
 router.use('/', require('./routes/polls'));
 router.use('/', require('./routes/wordcloud'));
 router.use('/', require('./routes/tardy'));
+router.use('/', require('./routes/spotify'));
 
 module.exports = router;

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Song Requests</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=11"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 900px; margin: 2.5rem auto; }
+    .album-art { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; }
+    .album-art-placeholder {
+      width: 48px; height: 48px; border-radius: 6px; background: #e9ecef;
+      display: flex; align-items: center; justify-content: center; color: #adb5bd;
+    }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+      <h2 class="gochi text-primary mb-1"><i class="fab fa-spotify me-2"></i>Song Requests</h2>
+      <p class="text-muted mb-4">Students request songs; nothing reaches your playlist until you approve it here.</p>
+
+      <div id="connectionBanner"></div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+      <span><i class="fas fa-inbox me-2 text-primary"></i>Pending Requests</span>
+      <span id="pendingCount" class="badge bg-secondary"></span>
+    </div>
+    <div class="card-body p-0" style="max-height: 560px; overflow-y: auto;">
+      <table class="table table-hover mb-0">
+        <thead class="table-light sticky-top">
+          <tr><th></th><th>Song</th><th>Requested By</th><th>When</th><th class="text-end">Action</th></tr>
+        </thead>
+        <tbody id="requestsBody">
+          <tr><td colspan="5" class="text-center text-muted p-4">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script type="module">
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function formatWhen(ts) {
+    const d = new Date(ts.replace(' ', 'T'));
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
+  async function loadStatus() {
+    const banner = document.getElementById('connectionBanner');
+    try {
+      const res = await fetch('/api/spotify/status');
+      const data = await res.json();
+
+      if (!data.connected) {
+        banner.innerHTML = `
+          <div class="alert alert-warning d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-triangle-exclamation me-2"></i>Not connected to Spotify yet.</span>
+            <a href="/api/spotify/connect" class="btn btn-sm btn-dark fw-bold"><i class="fab fa-spotify me-1"></i>Connect Spotify</a>
+          </div>`;
+        return;
+      }
+
+      if (!data.playlist_id) {
+        banner.innerHTML = `
+          <div class="alert alert-info">
+            <div class="fw-bold mb-2"><i class="fas fa-check-circle me-2 text-success"></i>Spotify connected. Now set your playlist:</div>
+            <form id="playlistForm" class="d-flex gap-2">
+              <input type="text" id="playlistInput" class="form-control form-control-sm" placeholder="Paste a Spotify playlist link">
+              <button type="submit" class="btn btn-sm btn-primary fw-bold">Save</button>
+            </form>
+            <div id="playlistError" class="text-danger small mt-1 d-none"></div>
+          </div>`;
+        document.getElementById('playlistForm').addEventListener('submit', savePlaylist);
+        return;
+      }
+
+      banner.innerHTML = `
+        <div class="alert alert-success d-flex justify-content-between align-items-center">
+          <span><i class="fas fa-check-circle me-2"></i>Connected — adding approved songs to <strong>${escapeHtml(data.playlist_name)}</strong></span>
+          <button class="btn btn-sm btn-outline-secondary" id="changePlaylistBtn">Change Playlist</button>
+        </div>`;
+      document.getElementById('changePlaylistBtn').addEventListener('click', () => {
+        banner.innerHTML = `
+          <div class="alert alert-info">
+            <div class="fw-bold mb-2">Set a different playlist:</div>
+            <form id="playlistForm" class="d-flex gap-2">
+              <input type="text" id="playlistInput" class="form-control form-control-sm" placeholder="Paste a Spotify playlist link" value="${escapeHtml(data.playlist_id)}">
+              <button type="submit" class="btn btn-sm btn-primary fw-bold">Save</button>
+            </form>
+            <div id="playlistError" class="text-danger small mt-1 d-none"></div>
+          </div>`;
+        document.getElementById('playlistForm').addEventListener('submit', savePlaylist);
+      });
+    } catch (e) {
+      banner.innerHTML = `<div class="alert alert-danger">Failed to check Spotify connection status.</div>`;
+    }
+  }
+
+  async function savePlaylist(e) {
+    e.preventDefault();
+    const input = document.getElementById('playlistInput');
+    const errorEl = document.getElementById('playlistError');
+    errorEl.classList.add('d-none');
+    try {
+      const res = await fetch('/api/spotify/set-playlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playlist: input.value.trim() })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to save playlist.');
+      await loadStatus();
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.classList.remove('d-none');
+    }
+  }
+
+  async function loadRequests() {
+    const body = document.getElementById('requestsBody');
+    try {
+      const res = await fetch('/api/song-requests?status=pending');
+      const data = await res.json();
+      const requests = data.requests || [];
+      document.getElementById('pendingCount').textContent = requests.length;
+
+      if (requests.length === 0) {
+        body.innerHTML = `<tr><td colspan="5" class="text-center text-muted p-4">No pending requests.</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = requests.map(r => `
+        <tr>
+          <td>${r.album_art_url ? `<img src="${escapeHtml(r.album_art_url)}" class="album-art">` : `<div class="album-art-placeholder"><i class="fas fa-music"></i></div>`}</td>
+          <td><div class="fw-bold">${escapeHtml(r.track_name)}</div><div class="small text-muted">${escapeHtml(r.artist_name)}</div></td>
+          <td>${r.first_name ? `${escapeHtml(r.first_name)} ${escapeHtml(r.last_name)}` : escapeHtml(r.student_id)}</td>
+          <td class="small text-muted">${formatWhen(r.requested_at)}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-success me-1" data-approve="${r.id}" title="Approve"><i class="fas fa-check"></i></button>
+            <button class="btn btn-sm btn-outline-danger" data-reject="${r.id}" title="Reject"><i class="fas fa-xmark"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      body.innerHTML = `<tr><td colspan="5" class="text-center text-danger p-4">Failed to load requests.</td></tr>`;
+    }
+  }
+
+  document.getElementById('requestsBody').addEventListener('click', async (e) => {
+    const approveBtn = e.target.closest('[data-approve]');
+    const rejectBtn = e.target.closest('[data-reject]');
+    if (approveBtn) {
+      approveBtn.disabled = true;
+      try {
+        const res = await fetch(`/api/song-requests/${approveBtn.dataset.approve}/approve`, { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Approve failed.');
+        await loadRequests();
+      } catch (err) {
+        alert(err.message);
+        approveBtn.disabled = false;
+      }
+    } else if (rejectBtn) {
+      if (!confirm('Reject this request?')) return;
+      try {
+        await fetch(`/api/song-requests/${rejectBtn.dataset.reject}/reject`, { method: 'POST' });
+        await loadRequests();
+      } catch (err) { console.error(err); }
+    }
+  });
+
+  loadStatus();
+  loadRequests();
+</script>
+</body>
+</html>
