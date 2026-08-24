@@ -51,6 +51,7 @@ router.get('/spotify/callback', async (req, res) => {
         });
         const tokenData = await tokenRes.json();
         if (!tokenRes.ok) throw new Error(tokenData.error_description || 'Token exchange failed');
+        console.log('[spotify] connected -- granted scope:', tokenData.scope);
 
         const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
         const connection = await getDbConnection();
