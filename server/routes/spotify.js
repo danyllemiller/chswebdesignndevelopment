@@ -232,6 +232,16 @@ router.get('/song-requests', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch requests' }); }
 });
 
+// Spotify's Web API blocks every playlist-write call (add track, even
+// creating a brand-new playlist) for apps in Development Mode -- verified
+// this isn't a scope/config problem on our end (fresh token, correct scope,
+// account on the User Management allowlist, Web API enabled, ownership all
+// confirmed). Extended Quota Mode, which lifts that, has required a
+// registered business entity (not an individual) since May 2025, so there's
+// no path to fix this in code. Approving now just marks the request
+// approved and hands back a Spotify link -- the teacher adds it to the
+// playlist herself with one tap in the Spotify app, which isn't subject to
+// this restriction since it's not going through the Web API at all.
 router.post('/song-requests/:id/approve', async (req, res) => {
     const { id } = req.params;
     try {
@@ -240,22 +250,9 @@ router.post('/song-requests/:id/approve', async (req, res) => {
         if (rows.length === 0) { await connection.release(); return res.status(404).json({ error: 'Request not found' }); }
         const request = rows[0];
 
-        const [authRows] = await connection.execute('SELECT playlist_id FROM spotify_auth WHERE id = 1');
-        const playlistId = authRows[0]?.playlist_id;
-        if (!playlistId) { await connection.release(); return res.status(400).json({ error: 'No playlist has been set yet.' }); }
-
-        const accessToken = await getValidAccessToken(connection);
-        const addRes = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ uris: [`spotify:track:${request.track_id}`] })
-        });
-        const addData = await addRes.json();
-        if (!addRes.ok) throw new Error(addData.error?.message || 'Failed to add track to playlist');
-
         await connection.execute('UPDATE song_requests SET status = "approved", decided_at = NOW() WHERE id = ?', [id]);
         await connection.release();
-        res.json({ success: true });
+        res.json({ success: true, track_id: request.track_id, spotify_url: `https://open.spotify.com/track/${request.track_id}` });
     } catch (err) { console.error(err); res.status(500).json({ error: err.message }); }
 });
 
