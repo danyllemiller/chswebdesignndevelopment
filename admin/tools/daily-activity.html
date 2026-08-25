@@ -71,6 +71,14 @@
   </div>
 
   <div class="card shadow-sm border-0 mb-4 section-card">
+    <div class="card-header bg-white"><i class="fas fa-triangle-exclamation me-2 text-danger"></i>Incomplete Pretests / Exams <span id="incompleteCount" class="badge bg-secondary ms-1"></span></div>
+    <div class="card-body" id="incompleteBody">
+      <p class="text-muted small mb-2">A standing list, not tied to the date above — a student started this but no score was ever recorded. Cross-checked against the gradebook automatically; anything marked "unverified" couldn't be matched with certainty and is worth a manual look.</p>
+      <div id="incompleteList"></div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4 section-card">
     <div class="card-header bg-white"><i class="fas fa-flag me-2 text-danger"></i>Tardy Follow-Ups Needed <span id="tardyCount" class="badge bg-secondary ms-1"></span></div>
     <div class="card-body" id="tardyBody">
       <p class="text-muted small mb-2">A standing list, not tied to the date above — everyone currently on record with more than one tardy.</p>
@@ -103,6 +111,11 @@
   function formatTime(ts) {
     const d = new Date(String(ts).replace(' ', 'T'));
     return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  function formatDateTime(ts) {
+    const d = new Date(String(ts).replace(' ', 'T'));
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   }
 
   function name(item) {
@@ -184,6 +197,24 @@
     `).join('');
   }
 
+  function renderIncomplete(items) {
+    document.getElementById('incompleteCount').textContent = items.length;
+    const list = document.getElementById('incompleteList');
+    if (items.length === 0) { list.innerHTML = '<p class="text-muted small mb-0">Nothing currently incomplete.</p>'; return; }
+    const groups = groupByPeriod(items);
+    list.innerHTML = Array.from(groups.entries()).map(([period, group]) => `
+      <div class="period-group-label">${escapeHtml(period)}</div>
+      ${group.map(item => `
+        <div class="activity-row d-flex justify-content-between align-items-start">
+          <div>
+            <strong>${name(item)}</strong> — ${escapeHtml(item.expected_exam_id || item.exam_id)}
+            ${item.unverified ? '<span class="badge bg-secondary ms-1">unverified</span>' : ''}
+          </div>
+          <span class="text-muted small">last touched ${formatDateTime(item.updated_at)}</span>
+        </div>`).join('')}
+    `).join('');
+  }
+
   function renderTardyFollowups(items) {
     document.getElementById('tardyCount').textContent = items.length;
     const list = document.getElementById('tardyList');
@@ -207,6 +238,7 @@
       renderSubmissions(data.submissions || []);
       renderUploads(data.uploads || []);
       renderExamActivity(data.examActivity || []);
+      renderIncomplete(data.incompleteAssessments || []);
       renderTardyFollowups(data.tardyFollowups || []);
     } catch (e) {
       console.error(e);

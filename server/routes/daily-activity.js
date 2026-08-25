@@ -27,6 +27,34 @@ function dateOnly(d) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+// A student can have a saved in-progress pretest/exam (js/quizLogic.js,
+// js/examLogicCS.js) that never actually finished -- the row sticks around
+// under exam_progress until they resume and submit. Most of those turn out
+// to already have a real score on file (the row is just leftover clutter
+// from a completed earlier attempt); this only flags the ones that don't,
+// by reconstructing the gradebook exam_id the same way the client-side
+// engines build it and checking whether that key exists in responses.
+// Best-effort: exam_id naming has drifted over time (e.g. the WD "Crash
+// Review" pretest doesn't follow the Unit/Chapter-number pattern at all),
+// so anything this can't confidently parse is still surfaced, just flagged
+// as unverified rather than silently dropped.
+const WD_SECTIONS = new Set(['A1', 'B2']);
+
+function expectedGradebookExamId(examId, sectionId) {
+    const isWD = WD_SECTIONS.has(sectionId);
+    const unitMatch = examId.match(/Unit_?(\d+)/i);
+    const chapterMatch = examId.match(/Chapter_?(\d+)/i);
+    const num = unitMatch ? unitMatch[1] : (chapterMatch ? chapterMatch[1] : null);
+
+    if (examId.startsWith('PreTest_') && num) {
+        return isWD ? `Ch${num} Pre-Assessment [15 pts]` : `Unit${num}-Pre`;
+    }
+    if (examId.startsWith('Summative_') && num) {
+        return `Unit${num}-Exam`;
+    }
+    return null; // unparseable -- flagged as unverified, not assumed missing
+}
+
 // A single morning digest: what was submitted/uploaded/retaken yesterday
 // (or whatever date is asked for), plus a standing list of who still needs
 // a tardy follow-up conversation -- so none of this has to be hunted down
@@ -82,7 +110,37 @@ router.get('/admin/daily-activity', async (req, res) => {
              WHERE ${activeStudentFilter}`,
             [currentYear]
         );
+
+        // Incomplete pretests/exams -- also a standing list, not date-scoped,
+        // since "started but never finished" doesn't have a natural single day.
+        const [progressRows] = await connection.execute(
+            `SELECT ep.student_id, ep.exam_id, ep.updated_at, s.first_name, s.last_name, s.section_id
+             FROM exam_progress ep
+             JOIN students s ON s.student_id = ep.student_id
+             WHERE ${activeStudentFilter}`,
+            [currentYear]
+        );
+        const [allResponses] = await connection.execute(
+            `SELECT r.student_id, r.exam_id FROM responses r
+             JOIN students s ON s.student_id = r.student_id
+             WHERE ${activeStudentFilter}`,
+            [currentYear]
+        );
         await connection.release();
+
+        const scoredByStudent = new Map();
+        allResponses.forEach(r => {
+            if (!scoredByStudent.has(r.student_id)) scoredByStudent.set(r.student_id, new Set());
+            scoredByStudent.get(r.student_id).add(r.exam_id);
+        });
+        const incompleteAssessments = progressRows
+            .map(p => {
+                const expected = expectedGradebookExamId(p.exam_id, p.section_id);
+                const alreadyScored = expected && scoredByStudent.get(p.student_id)?.has(expected);
+                return { ...p, expected_exam_id: expected, unverified: expected === null, alreadyScored };
+            })
+            .filter(p => !p.alreadyScored)
+            .sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
 
         const tardyByStudent = new Map();
         tardyRows.forEach(r => {
@@ -129,7 +187,7 @@ router.get('/admin/daily-activity', async (req, res) => {
             console.error('[daily-activity] upload scan failed:', e);
         }
 
-        res.json({ date: targetDate, submissions, uploads, examActivity, tardyFollowups });
+        res.json({ date: targetDate, submissions, uploads, examActivity, tardyFollowups, incompleteAssessments });
     } catch (err) {
         console.error('[daily-activity] failed:', err);
         res.status(500).json({ error: 'Failed to build daily activity report.' });
