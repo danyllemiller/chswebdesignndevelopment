@@ -238,10 +238,11 @@ router.get('/song-requests', async (req, res) => {
 // account on the User Management allowlist, Web API enabled, ownership all
 // confirmed). Extended Quota Mode, which lifts that, has required a
 // registered business entity (not an individual) since May 2025, so there's
-// no path to fix this in code. Approving now just marks the request
-// approved and hands back a Spotify link -- the teacher adds it to the
-// playlist herself with one tap in the Spotify app, which isn't subject to
-// this restriction since it's not going through the Web API at all.
+// no path to fix this in code. On top of that, Spotify itself is blocked by
+// the district network, so a spotify.com link wouldn't even load at school.
+// Approving now just marks the request approved and hands back an Apple
+// Music search link for the same track -- one click to find it and add it
+// to the playlist manually there instead.
 router.post('/song-requests/:id/approve', async (req, res) => {
     const { id } = req.params;
     try {
@@ -252,7 +253,9 @@ router.post('/song-requests/:id/approve', async (req, res) => {
 
         await connection.execute('UPDATE song_requests SET status = "approved", decided_at = NOW() WHERE id = ?', [id]);
         await connection.release();
-        res.json({ success: true, track_id: request.track_id, spotify_url: `https://open.spotify.com/track/${request.track_id}` });
+        const searchTerm = `${request.track_name} ${request.artist_name}`.trim();
+        const appleMusicUrl = `https://music.apple.com/us/search?term=${encodeURIComponent(searchTerm)}`;
+        res.json({ success: true, track_id: request.track_id, apple_music_url: appleMusicUrl });
     } catch (err) { console.error(err); res.status(500).json({ error: err.message }); }
 });
 
