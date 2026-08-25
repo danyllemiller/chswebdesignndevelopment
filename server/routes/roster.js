@@ -515,10 +515,14 @@ router.get('/admin/student', async (req, res) => {
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
         const connection = await getDbConnection();
+        // pay_roles (keyed by students.role_id) is the real, live payroll table --
+        // also used by payroll.js for actual paycheck calculations. This used to
+        // join a "payroll_roster" table that was never actually created, which
+        // made this endpoint 500 on every call.
         const [rows] = await connection.execute(
             `SELECT s.student_id, s.first_name, s.last_name, s.username, s.section_id, s.role,
                     COALESCE(pr.title, 'Intern') AS payroll_title, COALESCE(pr.hourly_rate, 15.00) AS hourly_rate
-             FROM students s LEFT JOIN payroll_roster pr ON s.student_id = pr.student_id
+             FROM students s LEFT JOIN pay_roles pr ON s.role_id = pr.id
              WHERE s.student_id = ? LIMIT 1`, [student_id]
         );
         await connection.release();
@@ -561,14 +565,23 @@ router.post('/admin/save-student', async (req, res) => {
         }
         params.push(student_id);
         const [result] = await connection.execute(`UPDATE students SET ${updates.join(', ')} WHERE student_id = ?`, params);
+
+        // pay_roles is the real payroll table (keyed by students.role_id) --
+        // this used to insert into a "payroll_roster" table that was never
+        // actually created, which threw AFTER the update above had already
+        // committed, so the save looked like it failed (500, no roster
+        // refresh) even though the real change had already gone through.
         if (payroll_title && AGENCY_PAY_SCALES[payroll_title] !== undefined) {
             const rate = AGENCY_PAY_SCALES[payroll_title];
             await connection.execute(
-                `INSERT INTO payroll_roster (student_id, title, hourly_rate)
-                 VALUES (?, ?, ?)
-                 ON DUPLICATE KEY UPDATE title = VALUES(title), hourly_rate = VALUES(hourly_rate)`,
-                [student_id, payroll_title, rate]
+                `INSERT INTO pay_roles (title, hourly_rate) VALUES (?, ?)
+                 ON DUPLICATE KEY UPDATE hourly_rate = VALUES(hourly_rate)`,
+                [payroll_title, rate]
             );
+            const [roleRows] = await connection.execute('SELECT id FROM pay_roles WHERE title = ?', [payroll_title]);
+            if (roleRows.length > 0) {
+                await connection.execute('UPDATE students SET role_id = ? WHERE student_id = ?', [roleRows[0].id, student_id]);
+            }
         }
         await connection.release();
         res.json({ success: true, affectedRows: result.affectedRows });
