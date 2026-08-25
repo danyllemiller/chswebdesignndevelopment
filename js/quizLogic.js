@@ -480,41 +480,13 @@ async function processResults() {
     finalTotal = examQuestions.length;
     finalPercentage = Math.round((finalScore / finalTotal) * 100);
 
-    // If webhookUrl exists, try to send to webhook (Google Sheets). Otherwise use MariaDB only
-    if (webhookUrl) {
-        const payload = {
-            email: studentId,
-            studentId: studentId,
-            firstName: fName,
-            lastName: lName,
-            studentClass: sClass,
-            chapter: chapterTitle,
-            testType: "Pre-Test",
-            total: examQuestions.length,
-            answers: examQuestions.map((q, i) => ({
-                question: q.question.trim(),
-                selected: userAnswers[i] !== undefined ? q.options[userAnswers[i]].trim() : "Unanswered"
-            }))
-        };
-
-        try {
-            const response = await fetch(webhookUrl, { method: "POST", body: JSON.stringify(payload) });
-            if (response.ok) {
-                const serverData = await response.json();
-                // Override if webhook returns valid data
-                if (serverData && serverData.score !== undefined) {
-                    finalScore = serverData.score;
-                    finalTotal = serverData.total;
-                    finalPercentage = serverData.percentage;
-                    serverFeedback = serverData.feedback || [];
-                }
-            }
-} catch (e) {
-        console.warn("Webhook fetch failed, using local score:", e.message);
-    }
-} else {
-    console.log("[QuizLogic] No webhookUrl - using local grading for CS");
-}
+    // Legacy Google Sheets webhook removed -- MariaDB (below) is the real
+    // gradebook now, and the webhook fetch had no timeout, so a slow/dead
+    // script.google.com endpoint could stall a student's submission
+    // indefinitely with no error shown, leaving their diagnostic answered
+    // in full but never actually saved. Grading is local-only from here on,
+    // matching how CS pre-assessments already worked.
+    console.log("[QuizLogic] Using local grading (webhook removed).");
 
 // Delete saved progress from MariaDB
     try {
