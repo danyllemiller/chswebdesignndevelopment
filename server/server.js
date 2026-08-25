@@ -8,6 +8,17 @@ const apiRoutes = require('./api');
 const app = express();
 const PORT = 3000;
 
+// Tells browsers to only ever contact this domain over HTTPS, for a year,
+// including subdomains -- closes the gap where a visitor's very first
+// request could still go out over plain HTTP before any redirect happens.
+// Safe to set unconditionally: Cloudflare's own edge redirect (confirmed
+// separately) means an http:// request from a browser never actually
+// reaches this server in the first place.
+app.use((req, res, next) => {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    next();
+});
+
 // THIS LOGS EVERY REQUEST
 app.use((req, res, next) => {
     console.log(`[${new Date().toLocaleTimeString()}] Request received for: ${req.url}`);
