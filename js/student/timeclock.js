@@ -364,11 +364,12 @@ function injectTimeclockUI() {
     <div id="tc-widget" class="position-fixed bottom-0 end-0 m-4 z-3">
         <button class="btn btn-dark shadow-lg rounded-pill px-4 py-3" id="tc-widget-btn">Timeclock</button>
     </div>
-    <div class="modal fade" id="timeclock-modal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal fade" id="timeclock-modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow-lg border-0">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Employee Timecard</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body bg-light p-4">
                     <div id="tc-status-badge" class="badge bg-secondary mb-3 w-100 py-2">STATUS: IDLE</div>
@@ -376,6 +377,7 @@ function injectTimeclockUI() {
                         <h6 id="tc-question-label" class="fw-bold text-dark mb-3"></h6>
                         <div id="tc-options-container" class="mb-4"></div>
                         <button type="submit" id="tc-submit-btn" class="btn btn-primary w-100 fw-bold py-3">Submit</button>
+                        <button type="button" class="btn btn-link w-100 mt-2 text-muted" data-bs-dismiss="modal">Not right now</button>
                     </form>
                     <div id="tc-success-msg" class="alert alert-success mt-3 d-none text-center fw-bold">Success!</div>
                 </div>
@@ -384,8 +386,12 @@ function injectTimeclockUI() {
     </div>`;
     document.body.insertAdjacentHTML('beforeend', uiHtml);
     document.getElementById('tc-form').addEventListener('submit', handleTimeclockSubmit);
-    document.getElementById('tc-widget-btn').addEventListener('click', () => {
-        new bootstrap.Modal(document.getElementById('timeclock-modal')).show();
+    document.getElementById('tc-widget-btn').addEventListener('click', async () => {
+        // Refresh status right before showing -- otherwise a click soon after
+        // page load (before the initial status check finishes) opens a modal
+        // with stale or still-empty content that looks broken.
+        await checkStatus();
+        openTimeclockModal();
     });
 }
 
