@@ -1,6 +1,7 @@
 const statusDiv = document.getElementById('statusMessage');
 let availableSections = [];
 const selectedStudents = new Set();
+let lastDisplayedRoster = []; // whatever's currently visible after filters — what CSV export downloads
 
 async function populateYearDropdowns() {
     try {
@@ -344,6 +345,7 @@ async function fetchRoster() {
         const searchVal = (document.getElementById('rosterSearch')?.value || '').trim().toLowerCase();
 
         tbody.innerHTML = '';
+        lastDisplayedRoster = [];
         let passwordResetPendingCount = 0;
 
         data.forEach(s => {
@@ -365,6 +367,9 @@ async function fetchRoster() {
                 const hay = `${s.first_name || ''} ${s.last_name || ''} ${s.username || ''} ${s.student_id || ''} ${courseId}`.toLowerCase();
                 if (!hay.includes(searchVal)) return;
             }
+
+            lastDisplayedRoster.push({ courseId, period, courseName, lastName: s.last_name || '', firstName: s.first_name || '', username: s.username || '', studentId: s.student_id || '' });
+
             const row = document.createElement('tr');
             const resetPending = Number(s.must_change_password || 0) === 1;
             if (resetPending) passwordResetPendingCount += 1;
@@ -762,4 +767,22 @@ document.getElementById('roleFilter')?.addEventListener('change', fetchRoster);
 document.getElementById('yearFilter')?.addEventListener('change', fetchRoster);
 document.getElementById('rosterSearch')?.addEventListener('input', fetchRoster);
 document.getElementById('sectionYearFilter')?.addEventListener('change', fetchSections);
+
+// --- EXPORT ROSTER TO CSV ---
+// Exports exactly what's currently visible in the table (respects every
+// active filter — period, course, role, search, and year).
+document.getElementById('exportRosterCsvBtn')?.addEventListener('click', () => {
+    if (lastDisplayedRoster.length === 0) return showStatus('No students to export.', 'warning');
+
+    const header = ['Course ID', 'Period', 'Course Name', 'Last Name', 'First Name', 'Username', 'Student ID'];
+    const rows = lastDisplayedRoster.map(s => [s.courseId, s.period, s.courseName, s.lastName, s.firstName, s.username, s.studentId]);
+    const csv = [header, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `roster-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+});
 

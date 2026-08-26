@@ -321,6 +321,23 @@ function calculateGradeStats(keys, myGrades, registryData, courseKey) {
 
     keys.forEach(key => {
         if (myGrades[key] !== undefined && myGrades[key] !== null) {
+            // CS-only mastery exemption: once a student scores 80%+ on a unit's
+            // exam, that unit's Pre-Test and Pre-Scale are exempt — they exist
+            // to measure where a student started, which no longer matters once
+            // the exam itself proves they've mastered the material.
+            if (courseKey === 'CS') {
+                const unitMatch = key.match(/^Unit(\d+)(?:-Pre|\s+Pre-Scale)$/);
+                if (unitMatch) {
+                    const examEntry = myGrades[`Unit${unitMatch[1]}-Exam`];
+                    const examScore = examEntry ? (typeof examEntry === 'object' ? examEntry.score : examEntry) : null;
+                    const examMax = registryData?.[`Unit${unitMatch[1]}-Exam`]?.maxPoints;
+                    if (examScore !== null && examScore !== undefined && examScore !== '' && examMax
+                        && (Number(examScore) / examMax) >= 0.80) {
+                        return;
+                    }
+                }
+            }
+
             // Use the real registered max points (same source gradebook.js uses), falling
             // back to the parsePts() guess only for legacy items missing from the registry.
             const max = registryData?.[key]?.maxPoints || parsePts(key);

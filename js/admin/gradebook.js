@@ -74,8 +74,8 @@ function sortStudentsArray(studentsArray) {
         const bLast = b.lastName || '';
         const aFirst = a.firstName || '';
         const bFirst = b.firstName || '';
-        const aPeriod = a.period || '';
-        const bPeriod = b.period || '';
+        const aPeriod = a.matchedPeriod || a.period || '';
+        const bPeriod = b.matchedPeriod || b.period || '';
 
         if (currentSortMode === 'lastName') {
             return aLast.localeCompare(bLast);
@@ -1072,15 +1072,22 @@ function renderGradebook(students, grades, currentPeriod) {
     // period with a header row between each, regardless of the Sort dropdown —
     // otherwise "All CS" just interleaves every period's students together.
     const isGroupedView = currentPeriod.startsWith('All-');
-    let orderedStudents = sortStudentsArray(students);
+    // Grouped views always need students clustered by period (the group
+    // header rows assume contiguous same-period blocks), but should still
+    // respect whichever last/first-name choice is selected as the tiebreaker
+    // within each period, instead of hardcoding it.
+    let orderedStudents;
     if (isGroupedView) {
+        const byFirst = currentSortMode === 'firstName' || currentSortMode === 'periodFirst';
         orderedStudents = [...students].sort((a, b) => {
             const periodCmp = (a.matchedPeriod || a.period || '').localeCompare(b.matchedPeriod || b.period || '');
             if (periodCmp !== 0) return periodCmp;
-            return currentSortMode === 'firstName'
+            return byFirst
                 ? (a.firstName || '').localeCompare(b.firstName || '')
                 : (a.lastName || '').localeCompare(b.lastName || '');
         });
+    } else {
+        orderedStudents = sortStudentsArray(students);
     }
     let lastGroupPeriod = null;
     // When a specific course's gradebook is filtered (e.g. "All Comp Sci" or
@@ -1112,10 +1119,27 @@ function renderGradebook(students, grades, currentPeriod) {
         let earned = 0, possible = 0, catEarned = {assignment:0, project_quiz:0, final:0, career:0}, catPossible = {assignment:0, project_quiz:0, final:0, career:0};
 
         sortedKeys.forEach(key => {
+            // CS-only mastery exemption: 80%+ on a unit's exam exempts that
+            // unit's Pre-Test and Pre-Scale. Mirrors js/student/dashboard.js.
+            if (courseKey === 'CS') {
+                const unitMatch = key.match(/^Unit(\d+)(?:-Pre|\s+Pre-Scale)$/);
+                if (unitMatch) {
+                    const examKey = `Unit${unitMatch[1]}-Exam`;
+                    const examFuzzy = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(examKey));
+                    const examEntry = examFuzzy ? sGrades[examFuzzy] : null;
+                    const examScore = examEntry ? (typeof examEntry === 'object' ? examEntry.score : examEntry) : null;
+                    const examMax = (examEntry && typeof examEntry === 'object' && examEntry.max) ? Number(examEntry.max) : allAssignments[examKey]?.maxPoints;
+                    if (examScore !== null && examScore !== undefined && examScore !== '' && examMax
+                        && (Number(examScore) / examMax) >= 0.80) {
+                        return;
+                    }
+                }
+            }
+
             const fuzzyKey = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(key));
             const g = fuzzyKey ? sGrades[fuzzyKey] : null;
             const score = g ? (typeof g === 'object' ? g.score : g) : "";
-            
+
             // Period-specific exemption check: If assignment has period due dates, and student's period has no due date, and student is ungraded
             const reg = allAssignments[key];
             const hasPeriodDueDates = reg?.periodDueDates && Object.values(reg.periodDueDates).some(d => d);

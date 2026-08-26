@@ -147,6 +147,18 @@ let finalScore = 0;
 let finalTotal = 0;
 let finalPercentage = 0;
 let gradebookExamId = "";
+let reportOnScreen = false;
+let reportSaved = false;
+
+// Warn before leaving the report screen if the student hasn't downloaded
+// their PDF copy yet — since retakes are blocked, this is their only chance
+// to keep a copy once they navigate away.
+window.addEventListener('beforeunload', (e) => {
+    if (reportOnScreen && !reportSaved) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
 
 function escapeHtml(str) {
     if (typeof str !== 'string') return str;
@@ -225,7 +237,42 @@ async function initPreTest(config) {
     }
 
     examProgressId = `PreTest_${studentId}_${chapterTitle.replace(/\s+/g, '_')}`;
+
+    // One attempt per diagnostic. A teacher can grant a retake (e.g. a
+    // student didn't save their printout) by clearing that student's score
+    // for this exam_id in the admin gradebook — an empty score here reopens it.
+    if (gradebookExamId) {
+        try {
+            const gradesRes = await fetch(`/api/student/grades?student_id=${encodeURIComponent(studentId)}`);
+            if (gradesRes.ok) {
+                const { responses = [] } = await gradesRes.json();
+                const existing = responses.find(r => r.exam_id === gradebookExamId);
+                if (existing && existing.score !== null && existing.score !== undefined && existing.score !== '') {
+                    renderAlreadyCompletedScreen(existing.score, existing.total_points);
+                    return;
+                }
+            }
+        } catch (e) { console.warn("Could not check for a prior attempt:", e); }
+    }
+
     renderAuthScreen();
+}
+
+function renderAlreadyCompletedScreen(score, total) {
+    const container = document.getElementById('exam-container');
+    if (!container) return;
+    container.innerHTML = `
+        <div class="card shadow border-primary mx-auto" style="max-width: 550px;">
+            <div class="card-header bg-primary text-center py-3"><h4 class="mb-0 fw-bold text-white">Diagnostic Assessment</h4></div>
+            <div class="card-body p-4 text-center">
+                <h5 class="text-primary mb-3">${escapeHtml(chapterTitle)}</h5>
+                <div class="alert alert-info text-start">
+                    <strong>Already completed.</strong> You scored ${escapeHtml(String(score))}${total ? ' / ' + escapeHtml(String(total)) : ''} on this diagnostic. Each diagnostic can only be taken once.
+                    <p class="small text-muted mt-2 mb-0">If you need to retake it — for example, you didn't get to save your report — ask your teacher.</p>
+                </div>
+                <button onclick="returnToWorkspace()" class="btn btn-outline-primary px-4">Return to Workspace</button>
+            </div>
+        </div>`;
 }
 
 function renderAuthScreen() {
@@ -447,6 +494,7 @@ examQuestions.forEach((q, i) => {
         });
 
         doc.save(`Diagnostic_${lName}_${fName}_${chapterTitle.replace(/\s+/g, '_')}.pdf`);
+        reportSaved = true;
     } catch (err) {
         console.error("PDF Error:", err);
         showDacAlert("Download Error", "We couldn't generate the PDF automatically. Please take a photo of this screen for your records.");
@@ -535,12 +583,15 @@ async function processResults() {
                         ${reviewHtml}
                     </div>
                 </div>
-<div class="mt-4 no-print d-flex justify-content-center gap-2">
+                <p class="small text-danger fw-bold mt-3 mb-0 no-print">⚠️ Save your report before leaving this page — this diagnostic can only be taken once.</p>
+<div class="mt-3 no-print d-flex justify-content-center gap-2">
                     <button onclick="downloadPDFReport(event)" class="btn btn-primary text-white px-4 shadow-sm">📥 Download PDF Report</button>
-                    <button onclick="returnToWorkspace()" class="btn btn-outline-secondary px-4">Return to Workspace</button>
+                    <button onclick="confirmReturnToWorkspace()" class="btn btn-outline-secondary px-4">Return to Workspace</button>
                 </div>
             </div>
         </div>`;
+
+    reportOnScreen = true;
 
     // Use opener for new-window context (CS), fall back to parent for iframe context (WD)
     (window.opener || window.parent || window).postMessage({ type: 'diagnostic_complete', score: finalScore }, '*');
@@ -631,6 +682,7 @@ async function processResults() {
 
 // Return to Workspace function - properly redirects back to cs-interactive
 function returnToWorkspace() {
+    reportOnScreen = false; // leaving deliberately — don't trigger the unsaved-report warning
     // Notify parent that diagnostic is complete (use opener for new-window, parent for iframe)
     (window.opener || window.parent || window).postMessage({ type: 'diagnostic_complete', score: finalScore }, '*');
     // Clear lastPage to prevent redirect loop back to quiz
@@ -639,6 +691,21 @@ function returnToWorkspace() {
     } catch(e) {}
     // Redirect back to cs-interactive workspace
     window.top.location.href = '/cs-interactive.html';
+}
+
+// Only on the report screen: confirm the student meant to leave without
+// downloading their one-time-only report before actually navigating away.
+function confirmReturnToWorkspace() {
+    if (!reportSaved) {
+        showDacConfirm(
+            "Leave without saving?",
+            "You haven't downloaded your report yet, and this diagnostic can only be taken once. Are you sure you want to leave?",
+            returnToWorkspace
+        );
+        document.getElementById('dac-modal-confirm').innerText = "Leave Anyway";
+    } else {
+        returnToWorkspace();
+    }
 }
 
 // Expose to global scope for onclick handlers in dynamically rendered HTML
@@ -651,4 +718,5 @@ window.confirmSubmit = confirmSubmit;
 window.processResults = processResults;
 window.checkResume = checkResume;
 window.downloadPDFReport = downloadPDFReport;
+window.confirmReturnToWorkspace = confirmReturnToWorkspace;
 window.returnToWorkspace = returnToWorkspace;

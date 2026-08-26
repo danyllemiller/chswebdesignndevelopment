@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { resolveCourseId } = require('../helpers');
+const { resolveCourseId, getCurrentSchoolYear } = require('../helpers');
 
 // mysql2 returns DATE columns as JS Date objects (local-timezone fields set to
 // match the stored date exactly), not strings. Reading those fields directly
@@ -190,7 +190,10 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
         const connection = await getDbConnection();
         const [students] = await connection.execute(
             `SELECT student_id, first_name, last_name, username, section_id
-             FROM students ORDER BY last_name ASC, first_name ASC`
+             FROM students
+             WHERE (archived IS NULL OR archived = 0) AND school_year = ?
+             ORDER BY last_name ASC, first_name ASC`,
+            [getCurrentSchoolYear()]
         );
 
         // Attach each student's additional (non-primary) sections — e.g. a
