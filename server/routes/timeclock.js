@@ -182,9 +182,14 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
         // given student was actually in that day.
         let todaysChapterLabel = null;
         if (student_id) {
+            // Excludes the exam scratchpad -- it's for jotting notes during a
+            // test, not chapter content, so "reflect on what you learned in
+            // Unit Exam Scratchpad" isn't a meaningful prompt even though
+            // it's technically their most recent save.
             const [turninRows] = await connection.execute(
                 `SELECT chapter FROM turnins
                  WHERE student_id = ? AND DATE(timestamp) = ? AND chapter IS NOT NULL AND chapter != ''
+                   AND chapter NOT LIKE '%Exam Scratchpad%'
                  ORDER BY timestamp DESC LIMIT 1`,
                 [student_id, today]
             );
