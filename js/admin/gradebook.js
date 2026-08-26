@@ -56,6 +56,11 @@ const STICKERS = [
 function stickerImgUrl(name) { return STICKER_DIR + encodeURIComponent(name + '.png'); }
 window.earliestSubmissions = {}; 
 
+function escapeHtml(str) {
+    if (typeof str !== 'string') return str;
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
 const cleanKey = (str) => {
     if (!str) return "";
     return str.toString()
@@ -501,14 +506,167 @@ function injectModals() {
         </div>
       </div>
     </div>
+
+    <div class="modal fade" id="changePeriodModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow border-primary">
+          <div class="modal-header bg-primary text-white py-2">
+            <h6 class="modal-title fw-bold"><i class="fas fa-right-left me-2"></i>Change Period — <span id="changePeriodStudentName"></span></h6>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body bg-light">
+            <label class="form-label small fw-bold text-muted">New Period</label>
+            <select id="changePeriodSelect" class="form-select fw-bold border-primary"></select>
+            <input type="hidden" id="changePeriodStudentId">
+          </div>
+          <div class="modal-footer py-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" id="btnSaveChangePeriod" class="btn btn-primary btn-sm fw-bold px-4">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="dropStudentModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow border-danger">
+          <div class="modal-header bg-danger text-white py-2">
+            <h6 class="modal-title fw-bold"><i class="fas fa-user-minus me-2"></i>Mark as Dropped</h6>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body bg-light text-center">
+            <p class="mb-2 fw-bold text-dark">Mark <span id="dropStudentName" class="text-danger"></span> as dropped?</p>
+            <p class="small text-muted mb-0">They'll be archived and removed from active rosters and gradebook views, but their grade history is kept. You can restore them later from the roster's year filter.</p>
+            <input type="hidden" id="dropStudentId">
+          </div>
+          <div class="modal-footer py-2 justify-content-center">
+            <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" id="btnConfirmDropStudent" class="btn btn-danger btn-sm fw-bold px-4">Mark as Dropped</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="studentContextMenu" class="shadow border rounded bg-white py-1" style="display:none; position:fixed; z-index:3000; min-width:190px;">
+        <button type="button" class="dropdown-item ctx-change-period"><i class="fas fa-right-left me-2 text-primary"></i>Change Period</button>
+        <button type="button" class="dropdown-item ctx-drop-student text-danger"><i class="fas fa-user-minus me-2"></i>Mark as Dropped</button>
+    </div>
     `;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 
     document.getElementById('btnSaveAddCol').addEventListener('click', saveAddCol);
     document.getElementById('btnSaveColEdit').addEventListener('click', saveColEdit);
     document.getElementById('btnConfirmDeleteCol').addEventListener('click', confirmDeleteCol);
+    document.getElementById('btnSaveChangePeriod').addEventListener('click', saveChangePeriod);
+    document.getElementById('btnConfirmDropStudent').addEventListener('click', confirmDropStudent);
 
     injectControls();
+    injectStudentContextMenu();
+}
+
+// ========================================================
+// STUDENT RIGHT-CLICK CONTEXT MENU (Change Period / Mark as Dropped)
+// ========================================================
+function injectStudentContextMenu() {
+    const menu = document.getElementById('studentContextMenu');
+
+    document.addEventListener('contextmenu', (e) => {
+        const cell = e.target.closest('.student-info-cell');
+        if (!cell) return;
+        e.preventDefault();
+        menu.dataset.studentId = cell.dataset.studentId;
+        menu.dataset.studentName = cell.dataset.studentName;
+        menu.dataset.currentPeriod = cell.dataset.currentPeriod;
+
+        // Keep the menu fully on-screen regardless of where along the row it was triggered.
+        const menuWidth = 190, menuHeight = 90;
+        const x = Math.min(e.clientX, window.innerWidth - menuWidth - 8);
+        const y = Math.min(e.clientY, window.innerHeight - menuHeight - 8);
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+        menu.style.display = 'block';
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!menu.contains(e.target)) menu.style.display = 'none';
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') menu.style.display = 'none';
+    });
+
+    menu.querySelector('.ctx-change-period').addEventListener('click', () => {
+        menu.style.display = 'none';
+        openChangePeriodModal(menu.dataset.studentId, menu.dataset.studentName, menu.dataset.currentPeriod);
+    });
+    menu.querySelector('.ctx-drop-student').addEventListener('click', () => {
+        menu.style.display = 'none';
+        openDropStudentModal(menu.dataset.studentId, menu.dataset.studentName);
+    });
+}
+
+function openChangePeriodModal(studentId, studentName, currentPeriod) {
+    document.getElementById('changePeriodStudentName').textContent = studentName;
+    document.getElementById('changePeriodStudentId').value = studentId;
+
+    // Real, currently-in-use periods only — same source as the period filter dropdown.
+    const allPeriods = allStudents.flatMap(s => [s.period, ...(s.additional_sections || []).map(a => a.section_id)]);
+    const periods = [...new Set(allPeriods)].filter(p => p && p !== 'Teacher' && p !== 'Unassigned').sort();
+
+    const select = document.getElementById('changePeriodSelect');
+    select.innerHTML = periods.map(p => `<option value="${escapeHtml(p)}" ${p === currentPeriod ? 'selected' : ''}>${escapeHtml(p)}</option>`).join('');
+    getModal('changePeriodModal').show();
+}
+
+async function saveChangePeriod() {
+    const studentId = document.getElementById('changePeriodStudentId').value;
+    const newPeriod = document.getElementById('changePeriodSelect').value;
+    const btn = document.getElementById('btnSaveChangePeriod');
+    btn.disabled = true;
+    try {
+        const res = await fetch('/api/admin/save-student', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: studentId, section_id: newPeriod })
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || 'Failed to change period');
+        }
+        getModal('changePeriodModal').hide();
+        await loadData();
+        applyFiltersAndRender();
+    } catch (e) {
+        alert('Could not change period: ' + e.message);
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function openDropStudentModal(studentId, studentName) {
+    document.getElementById('dropStudentName').textContent = studentName;
+    document.getElementById('dropStudentId').value = studentId;
+    getModal('dropStudentModal').show();
+}
+
+async function confirmDropStudent() {
+    const studentId = document.getElementById('dropStudentId').value;
+    const btn = document.getElementById('btnConfirmDropStudent');
+    btn.disabled = true;
+    try {
+        const res = await fetch('/api/admin/archive-students', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_ids: [studentId] })
+        });
+        if (!res.ok) throw new Error('Failed to archive student');
+        getModal('dropStudentModal').hide();
+        await loadData();
+        applyFiltersAndRender();
+    } catch (e) {
+        alert('Could not mark student as dropped: ' + e.message);
+    } finally {
+        btn.disabled = false;
+    }
 }
 
 function openStickerModal(studentId) {
@@ -1173,7 +1331,7 @@ function renderGradebook(students, grades, currentPeriod) {
 // Alternating row background - grey/white pattern for readability
         const rowClass = rowIndex % 2 === 0 ? 'gradebook-row-even' : 'gradebook-row-odd';
 const cellClass = rowIndex % 2 === 0 ? 'gradebook-cell-even' : 'gradebook-cell-odd';
-        html += `<tr class="${rowClass}"><td class="sticky-col student-info-cell p-2 ${cellClass}"><div><span class="fw-bold">${privacyMode?`Student ${rowIndex+1}`:`${s.lastName.toUpperCase()}, ${s.firstName}`}</span><div class="id-cell">${privacyMode?'HIDDEN':s.displaySchoolId} | ${displayPeriod}</div></div></td>`;
+        html += `<tr class="${rowClass}"><td class="sticky-col student-info-cell p-2 ${cellClass}" data-student-id="${s.studentId}" data-student-name="${escapeHtml(`${s.firstName} ${s.lastName}`)}" data-current-period="${escapeHtml(displayPeriod || '')}" title="Right-click for options"><div><span class="fw-bold">${privacyMode?`Student ${rowIndex+1}`:`${s.lastName.toUpperCase()}, ${s.firstName}`}</span><div class="id-cell">${privacyMode?'HIDDEN':s.displaySchoolId} | ${displayPeriod}</div></div></td>`;
 // Summary cells match row background
         if (showSummaryColumns) html += `<td class="text-center ${cellClass}">${earned}</td><td class="text-center ${cellClass}">${possible}</td><td class="text-center ${cellClass} text-primary fw-bold">${pct}%</td><td class="text-center border-right-heavy fw-bold ${cellClass}">${letter}</td>`;
 
