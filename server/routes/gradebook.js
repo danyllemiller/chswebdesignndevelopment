@@ -313,4 +313,206 @@ router.post('/admin/batch-update-grades', async (req, res) => {
     }
 });
 
+// ========================================================
+// PRE-TEST / EXAM ATTEMPT ANALYTICS
+// ========================================================
+// Mirrors the weighting/exemption rules in js/modules/grade-weights.js and
+// js/student/dashboard.js's calculateGradeStats() so "overall grade" here
+// matches what students/teachers see everywhere else in the gradebook.
+const ANALYTICS_COURSE_WEIGHTS = {
+    CS:  { assignment: 0.60, project_quiz: 0.20, final: 0.20, career: 0.00 },
+    WD1: { assignment: 0.50, project_quiz: 0.20, final: 0.20, career: 0.10 },
+    WD2: { assignment: 0.35, project_quiz: 0.35, final: 0.20, career: 0.10 }
+};
+
+function analyticsAssignmentCategory(name) {
+    const n = name.toLowerCase();
+    if (n.includes('final')) return 'final';
+    if (n.includes('project') || n.includes('quiz') || n.includes('exam') || n.includes('summative') || n.includes('assessment') || n.includes('milestone')) return 'project_quiz';
+    return 'assignment';
+}
+
+const ATTEMPT_ANALYTICS_CONFIG = {
+    CS: {
+        courseId: '10003GS',
+        chapters: [1, 2, 3, 4, 5, 6, 7],
+        label: (n) => `Unit ${n}`,
+        preExamId: (n) => `Unit${n}-Pre-Score`,
+        examExamId: (n) => `Unit${n}-Exam`,
+        periods: ['A3', 'A5', 'B4', 'B6', 'B8']
+    },
+    WD1: {
+        courseId: '05254G1S',
+        chapters: [1, 2, 3, 4, 5, 6, 7, 8],
+        label: (n) => `Chapter ${n}`,
+        preExamId: (n) => `Ch${n} Pre-Assessment [15 pts]-Score`,
+        examExamId: (n) => `Ch${n}-Exam`,
+        periods: ['A1']
+    },
+    WD2: {
+        courseId: '05254G2S',
+        chapters: [9, 10, 11, 12, 13, 14, 15, 16],
+        label: (n) => `Chapter ${n}`,
+        preExamId: (n) => `Ch${n} Pre-Assessment [15 pts]-Score`,
+        examExamId: (n) => `Ch${n}-Exam`,
+        periods: ['B2']
+    }
+};
+
+function summarizeAttempts(rows) {
+    const pcts = rows.filter(r => Number(r.total_points) > 0).map(r => (Number(r.score) / Number(r.total_points)) * 100);
+    if (pcts.length === 0) return { count: 0, avgPercent: null, masteryPercent: null };
+    const avg = pcts.reduce((a, b) => a + b, 0) / pcts.length;
+    const masteryCount = pcts.filter(p => p >= 80).length;
+    return {
+        count: pcts.length,
+        avgPercent: Math.round(avg * 10) / 10,
+        masteryPercent: Math.round((masteryCount / pcts.length) * 1000) / 10
+    };
+}
+
+router.get('/admin/attempt-analytics', async (req, res) => {
+    const courseKey = String(req.query.course || '').toUpperCase();
+    const config = ATTEMPT_ANALYTICS_CONFIG[courseKey];
+    if (!config) return res.status(400).json({ error: 'course must be CS, WD1, or WD2' });
+
+    try {
+        const connection = await getDbConnection();
+
+        // --- Per-chapter pretest + exam attempt breakdown ---
+        const units = [];
+        for (const n of config.chapters) {
+            const preExamId = config.preExamId(n);
+            const examExamId = config.examExamId(n);
+
+            const [preRows] = await connection.execute(
+                'SELECT score, total_points FROM exam_attempts WHERE exam_id = ? AND attempt_number = 1',
+                [preExamId]
+            );
+            const pretest = summarizeAttempts(preRows);
+
+            const [examRows] = await connection.execute(
+                'SELECT attempt_number, score, total_points FROM exam_attempts WHERE exam_id = ?',
+                [examExamId]
+            );
+            const byAttempt = { '1': [], '2': [], '3+': [] };
+            examRows.forEach(r => {
+                const key = r.attempt_number === 1 ? '1' : r.attempt_number === 2 ? '2' : '3+';
+                byAttempt[key].push(r);
+            });
+
+            units.push({
+                unit: n,
+                label: config.label(n),
+                pretest: { count: pretest.count, avgPercent: pretest.avgPercent },
+                examAttempts: {
+                    '1': summarizeAttempts(byAttempt['1']),
+                    '2': summarizeAttempts(byAttempt['2']),
+                    '3+': summarizeAttempts(byAttempt['3+'])
+                }
+            });
+        }
+
+        // --- Overall weighted grade, current-year active students only ---
+        const [students] = await connection.execute(
+            `SELECT student_id, section_id FROM students
+             WHERE (archived IS NULL OR archived = 0) AND school_year = ? AND section_id IN (${config.periods.map(() => '?').join(',')})`,
+            [getCurrentSchoolYear(), ...config.periods]
+        );
+
+        const [examRegistry] = await connection.execute(
+            'SELECT exam_id, TRIM(title) AS title, total_points, due_date FROM exams WHERE course_id = ?',
+            [config.courseId]
+        );
+        const registryByExamId = {};
+        examRegistry.forEach(e => { registryByExamId[e.exam_id] = e; });
+
+        const [allResponses] = await connection.execute(
+            `SELECT r.student_id, r.exam_id, r.score, r.total_points
+             FROM responses r
+             JOIN exams e ON r.exam_id = e.exam_id
+             WHERE e.course_id = ?`,
+            [config.courseId]
+        );
+        const responsesByStudent = {};
+        allResponses.forEach(r => {
+            if (!responsesByStudent[r.student_id]) responsesByStudent[r.student_id] = {};
+            responsesByStudent[r.student_id][r.exam_id] = r;
+        });
+
+        const weights = ANALYTICS_COURSE_WEIGHTS[courseKey];
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const periodTotals = {};
+        config.periods.forEach(p => { periodTotals[p] = []; });
+        const courseTotals = [];
+
+        students.forEach(s => {
+            const myGrades = responsesByStudent[s.student_id] || {};
+            const catEarned = { assignment: 0, project_quiz: 0, final: 0, career: 0 };
+            const catPossible = { assignment: 0, project_quiz: 0, final: 0, career: 0 };
+
+            Object.keys(registryByExamId).forEach(examId => {
+                if (examId.endsWith('-Score')) return;
+                const reg = registryByExamId[examId];
+                const g = myGrades[examId];
+                const score = g ? g.score : undefined;
+                if (score === 'EX') return;
+
+                // CS-only mastery exemption: 80%+ on a unit's exam exempts that unit's Pre-Test.
+                if (courseKey === 'CS') {
+                    const unitMatch = examId.match(/^Unit(\d+)-Pre$/);
+                    if (unitMatch) {
+                        const examEntry = myGrades[`Unit${unitMatch[1]}-Exam`];
+                        if (examEntry && examEntry.score !== null && examEntry.score !== undefined && examEntry.score !== ''
+                            && Number(examEntry.total_points) > 0 && (Number(examEntry.score) / Number(examEntry.total_points)) >= 0.80) {
+                            return;
+                        }
+                    }
+                }
+
+                const hasScore = score !== undefined && score !== null && score !== '';
+                if (!hasScore) {
+                    const dueDate = reg.due_date ? formatDbDate(reg.due_date) : '';
+                    const isPastDue = !!dueDate && new Date(dueDate + 'T00:00:00') < today;
+                    if (!isPastDue) return;
+                }
+
+                const max = Number(reg.total_points) || 0;
+                const num = hasScore ? Number(score) : 0;
+                const cat = analyticsAssignmentCategory(examId);
+                catEarned[cat] += num;
+                catPossible[cat] += max;
+            });
+
+            let weighted = 0, weightSum = 0;
+            Object.keys(catPossible).forEach(cat => {
+                if (catPossible[cat] > 0 && weights[cat] > 0) {
+                    weighted += (catEarned[cat] / catPossible[cat]) * weights[cat];
+                    weightSum += weights[cat];
+                }
+            });
+            const pct = weightSum > 0 ? (weighted / weightSum) * 100 : null;
+            if (pct === null) return;
+
+            courseTotals.push(pct);
+            if (periodTotals[s.section_id]) periodTotals[s.section_id].push(pct);
+        });
+
+        const avgOf = (arr) => arr.length > 0 ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : null;
+
+        const overallByPeriod = {};
+        config.periods.forEach(p => {
+            overallByPeriod[p] = { studentCount: periodTotals[p].length, avgPercent: avgOf(periodTotals[p]) };
+        });
+
+        await connection.release();
+        res.json({
+            course: courseKey,
+            units,
+            overallCourse: { studentCount: courseTotals.length, avgPercent: avgOf(courseTotals) },
+            overallByPeriod
+        });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to compute attempt analytics' }); }
+});
+
 module.exports = router;
