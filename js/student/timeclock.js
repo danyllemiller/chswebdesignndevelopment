@@ -310,7 +310,7 @@ async function checkStatus() {
         }
         else if (mode === 'out') {
             const category = getCourseKey();
-            const promptData = await apiFetch(`/api/timeclock/reflection-prompt?type=${category}`);
+            const promptData = await apiFetch(`/api/timeclock/reflection-prompt?type=${category}&student_id=${encodeURIComponent(studentData.student_id)}`);
             label.innerText = promptData.prompt_text;
             optsContainer.innerHTML = `<textarea id="tc-out-answer" class="form-control" rows="3" required></textarea>`;
             btn.innerText = "Submit & Clock Out";

@@ -158,7 +158,7 @@ router.get('/timeclock/question', async (req, res) => {
 // actually working on right now, resolved the same way as the clock-in
 // question so the two never disagree about "today's" content.
 router.get('/timeclock/reflection-prompt', async (req, res) => {
-    const { type } = req.query; // CS, WD1, WD2
+    const { type, student_id } = req.query; // CS, WD1, WD2
     const kind = String(type || '');
     const today = new Date().toISOString().split('T')[0];
     try {
@@ -175,6 +175,33 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
             return res.json({ prompt_text: custom.trim(), isCustom: true });
         }
 
+        // Prefer what this specific student actually worked on today (their
+        // most recent notebook/worksheet save) over the class-wide due-date
+        // schedule -- students progress through chapters at their own pace,
+        // so the due-date-driven "current chapter" often isn't the one a
+        // given student was actually in that day.
+        let todaysChapterLabel = null;
+        if (student_id) {
+            const [turninRows] = await connection.execute(
+                `SELECT chapter FROM turnins
+                 WHERE student_id = ? AND DATE(timestamp) = ? AND chapter IS NOT NULL AND chapter != ''
+                 ORDER BY timestamp DESC LIMIT 1`,
+                [student_id, today]
+            );
+            if (turninRows.length > 0) todaysChapterLabel = turninRows[0].chapter;
+        }
+
+        if (todaysChapterLabel) {
+            await connection.release();
+            return res.json({
+                prompt_text: `In 2-3 sentences, reflect on what you learned today in ${todaysChapterLabel}. What's one thing that made sense, and one thing you're still working through?`,
+                isCustom: false
+            });
+        }
+
+        // Fallback: no recorded activity for this student today (e.g. they
+        // clocked in but didn't save any notes) -- use the class-wide
+        // due-date schedule as a reasonable default.
         let chapter, title;
         if (kind === 'CS') {
             ({ chapter } = await getCurrentCSChapter(connection));
