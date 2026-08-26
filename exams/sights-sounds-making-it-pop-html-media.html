@@ -42,25 +42,12 @@
   </section>
 
   <script>
-    // ONLY CHANGE THESE TWO VARIABLES PER CHAPTER
-    const EXAM_ID = "wd-ch8-exam"; 
-    const CHAPTER_TITLE = "Chapter 8: Sights & Sounds (Media)";
-
-    window.onload = async () => {
-        try {
-            const response = await fetch(`/api/questions?exam_id=${EXAM_ID}`);
-            const data = await response.json();
-            
-            // initExam is the global function inside your updated examLogic.js
-            initExam({
-                questions: data,
-                chapterTitle: CHAPTER_TITLE,
-                webhookUrl: "https://script.google.com/macros/s/AKfycbyoX6MTNxThGNVQtIn4e_OgJoYUGUdPPKY9lbXf63h3H9fwGOxUeToxptyORS7LgWVNeg/exec"
-            });
-        } catch (err) {
-            console.error("Exam load failure:", err);
-            document.getElementById('exam-container').innerHTML = '<div class="alert alert-danger">Error loading exam data.</div>';
-        }
+    window.onload = () => {
+        initAdaptiveExam({
+            chapter: 8,
+            chapterTitle: "Chapter 8: Sights & Sounds (Media)",
+            webhookUrl: "/api/submit-exam"
+        });
     };
   </script>
   
@@ -76,6 +63,6 @@
     })();
   </script>
 <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
-<script src="/js/examLogic.js"></script>
+<script src="/js/examLogicWD.js?v=1"></script>
 </body>
 </html>

@@ -167,6 +167,32 @@ router.get('/cs-exam-questions', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch exam questions' }); }
 });
 
+// --- WD EXAM QUESTIONS ---
+router.get('/wd-exam-questions', async (req, res) => {
+    const { chapter } = req.query;
+    const chapterNum = parseInt(chapter, 10);
+    if (isNaN(chapterNum) || chapterNum < 1 || chapterNum > 16) {
+        return res.status(400).json({ error: 'Valid chapter number (1-16) required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.execute(
+            `SELECT question_id AS id, question_text AS question,
+                    option_a, option_b, option_c, option_d,
+                    correct_answer AS answer, chapter_number AS chapter
+             FROM wd_questions WHERE chapter_number = ? ORDER BY RAND()`,
+            [chapterNum]
+        );
+        const questions = rows.map(row => ({
+            question: row.question,
+            options: [row.option_a, row.option_b, row.option_c, row.option_d],
+            answer: row.answer, chapter: row.chapter
+        }));
+        await connection.release();
+        res.json({ chapter: chapterNum, count: questions.length, questions });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch WD exam questions' }); }
+});
+
 // --- CS NOTEBOOK (turnins table) ---
 router.get('/student/cs-notebook', async (req, res) => {
     const { student_id } = req.query;

@@ -91,6 +91,19 @@ router.post('/submit-exam', async (req, res) => {
             'INSERT INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = COALESCE(VALUES(title), title), total_points = COALESCE(VALUES(total_points), total_points)',
             [exam_id, examTitle, total_points || 100, examCourse]
         );
+        // Log every submission as its own attempt, in addition to the
+        // keep-highest "current best" logic below — responses only ever
+        // keeps one row per (student, exam_id), so this is the only place
+        // attempt-by-attempt history (1st vs 2nd vs 3rd attempt) survives.
+        const [attemptCountRows] = await connection.execute(
+            'SELECT COUNT(*) AS n FROM exam_attempts WHERE student_id = ? AND exam_id = ?',
+            [student_id, exam_id]
+        );
+        await connection.execute(
+            'INSERT INTO exam_attempts (student_id, exam_id, attempt_number, score, total_points, timestamp) VALUES (?, ?, ?, ?, ?, NOW())',
+            [student_id, exam_id, attemptCountRows[0].n + 1, score, total_points || 100]
+        );
+
         const [existingRows] = await connection.execute(
             'SELECT score FROM responses WHERE student_id = ? AND exam_id = ?',
             [student_id, exam_id]
