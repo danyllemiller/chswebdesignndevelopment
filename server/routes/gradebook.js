@@ -316,22 +316,6 @@ router.post('/admin/batch-update-grades', async (req, res) => {
 // ========================================================
 // PRE-TEST / EXAM ATTEMPT ANALYTICS
 // ========================================================
-// Mirrors the weighting/exemption rules in js/modules/grade-weights.js and
-// js/student/dashboard.js's calculateGradeStats() so "overall grade" here
-// matches what students/teachers see everywhere else in the gradebook.
-const ANALYTICS_COURSE_WEIGHTS = {
-    CS:  { assignment: 0.60, project_quiz: 0.20, final: 0.20, career: 0.00 },
-    WD1: { assignment: 0.50, project_quiz: 0.20, final: 0.20, career: 0.10 },
-    WD2: { assignment: 0.35, project_quiz: 0.35, final: 0.20, career: 0.10 }
-};
-
-function analyticsAssignmentCategory(name) {
-    const n = name.toLowerCase();
-    if (n.includes('final')) return 'final';
-    if (n.includes('project') || n.includes('quiz') || n.includes('exam') || n.includes('summative') || n.includes('assessment') || n.includes('milestone')) return 'project_quiz';
-    return 'assignment';
-}
-
 const ATTEMPT_ANALYTICS_CONFIG = {
     CS: {
         courseId: '10003GS',
@@ -379,139 +363,83 @@ router.get('/admin/attempt-analytics', async (req, res) => {
     try {
         const connection = await getDbConnection();
 
-        // --- Per-chapter pretest + exam attempt breakdown ---
-        const units = [];
-        for (const n of config.chapters) {
-            const preExamId = config.preExamId(n);
-            const examExamId = config.examExamId(n);
-
-            const [preRows] = await connection.execute(
-                'SELECT score, total_points FROM exam_attempts WHERE exam_id = ? AND attempt_number = 1',
-                [preExamId]
-            );
-            const pretest = summarizeAttempts(preRows);
-
-            const [examRows] = await connection.execute(
-                'SELECT attempt_number, score, total_points FROM exam_attempts WHERE exam_id = ?',
-                [examExamId]
-            );
-            const byAttempt = { '1': [], '2': [], '3+': [] };
-            examRows.forEach(r => {
-                const key = r.attempt_number === 1 ? '1' : r.attempt_number === 2 ? '2' : '3+';
-                byAttempt[key].push(r);
-            });
-
-            units.push({
-                unit: n,
-                label: config.label(n),
-                pretest: { count: pretest.count, avgPercent: pretest.avgPercent },
-                examAttempts: {
-                    '1': summarizeAttempts(byAttempt['1']),
-                    '2': summarizeAttempts(byAttempt['2']),
-                    '3+': summarizeAttempts(byAttempt['3+'])
-                }
-            });
-        }
-
-        // --- Overall weighted grade, current-year active students only ---
+        // Active, current-year students in this course, with their period --
+        // every row below is scoped to only these students, "All Periods"
+        // included, so stray/other-course/other-year data never leaks in.
         const [students] = await connection.execute(
             `SELECT student_id, section_id FROM students
              WHERE (archived IS NULL OR archived = 0) AND school_year = ? AND section_id IN (${config.periods.map(() => '?').join(',')})`,
             [getCurrentSchoolYear(), ...config.periods]
         );
+        const periodByStudent = {};
+        students.forEach(s => { periodByStudent[s.student_id] = s.section_id; });
+        const showAllRow = config.periods.length > 1;
 
-        const [examRegistry] = await connection.execute(
-            'SELECT exam_id, TRIM(title) AS title, total_points, due_date FROM exams WHERE course_id = ?',
-            [config.courseId]
-        );
-        const registryByExamId = {};
-        examRegistry.forEach(e => { registryByExamId[e.exam_id] = e; });
+        const units = [];
+        for (const n of config.chapters) {
+            const preExamId = config.preExamId(n);
+            const examExamId = config.examExamId(n);
 
-        const [allResponses] = await connection.execute(
-            `SELECT r.student_id, r.exam_id, r.score, r.total_points
-             FROM responses r
-             JOIN exams e ON r.exam_id = e.exam_id
-             WHERE e.course_id = ?`,
-            [config.courseId]
-        );
-        const responsesByStudent = {};
-        allResponses.forEach(r => {
-            if (!responsesByStudent[r.student_id]) responsesByStudent[r.student_id] = {};
-            responsesByStudent[r.student_id][r.exam_id] = r;
-        });
+            const [preAttemptRows] = await connection.execute(
+                'SELECT student_id, attempt_number, score, total_points FROM exam_attempts WHERE exam_id = ?',
+                [preExamId]
+            );
+            const [preResponseRows] = await connection.execute(
+                'SELECT student_id, score, total_points FROM responses WHERE exam_id = ?',
+                [preExamId]
+            );
+            const [examAttemptRows] = await connection.execute(
+                'SELECT student_id, attempt_number, score, total_points FROM exam_attempts WHERE exam_id = ?',
+                [examExamId]
+            );
+            const [examResponseRows] = await connection.execute(
+                'SELECT student_id, score, total_points FROM responses WHERE exam_id = ?',
+                [examExamId]
+            );
 
-        const weights = ANALYTICS_COURSE_WEIGHTS[courseKey];
-        const today = new Date(); today.setHours(0, 0, 0, 0);
-        const periodTotals = {};
-        config.periods.forEach(p => { periodTotals[p] = []; });
-        const courseTotals = [];
+            // Pretest attempt 1: use the logged attempt when one exists;
+            // otherwise backfill from the student's current gradebook score
+            // (everything taken before attempt logging went live has no
+            // logged attempt at all, so this is the only data available).
+            const preAttempt1 = {};
+            preAttemptRows.filter(r => r.attempt_number === 1).forEach(r => { preAttempt1[r.student_id] = r; });
+            preResponseRows.forEach(r => { if (!preAttempt1[r.student_id]) preAttempt1[r.student_id] = r; });
 
-        students.forEach(s => {
-            const myGrades = responsesByStudent[s.student_id] || {};
-            const catEarned = { assignment: 0, project_quiz: 0, final: 0, career: 0 };
-            const catPossible = { assignment: 0, project_quiz: 0, final: 0, career: 0 };
-
-            Object.keys(registryByExamId).forEach(examId => {
-                if (examId.endsWith('-Score')) return;
-                const reg = registryByExamId[examId];
-                const g = myGrades[examId];
-                const score = g ? g.score : undefined;
-                if (score === 'EX') return;
-
-                // CS-only mastery exemption: 80%+ on a unit's exam exempts that unit's Pre-Test.
-                if (courseKey === 'CS') {
-                    const unitMatch = examId.match(/^Unit(\d+)-Pre$/);
-                    if (unitMatch) {
-                        const examEntry = myGrades[`Unit${unitMatch[1]}-Exam`];
-                        if (examEntry && examEntry.score !== null && examEntry.score !== undefined && examEntry.score !== ''
-                            && Number(examEntry.total_points) > 0 && (Number(examEntry.score) / Number(examEntry.total_points)) >= 0.80) {
-                            return;
-                        }
-                    }
-                }
-
-                const hasScore = score !== undefined && score !== null && score !== '';
-                if (!hasScore) {
-                    const dueDate = reg.due_date ? formatDbDate(reg.due_date) : '';
-                    const isPastDue = !!dueDate && new Date(dueDate + 'T00:00:00') < today;
-                    if (!isPastDue) return;
-                }
-
-                const max = Number(reg.total_points) || 0;
-                const num = hasScore ? Number(score) : 0;
-                const cat = analyticsAssignmentCategory(examId);
-                catEarned[cat] += num;
-                catPossible[cat] += max;
+            // Exam attempts 1/2/3+: same backfill idea, but only into the
+            // 1st-attempt bucket, and only when the student has NO logged
+            // attempt at all -- otherwise a real 2nd/3rd attempt could get
+            // double-counted as a fresh "1st attempt" too.
+            const examBuckets = { '1': {}, '2': {}, '3+': {} };
+            examAttemptRows.forEach(r => {
+                const key = r.attempt_number === 1 ? '1' : r.attempt_number === 2 ? '2' : '3+';
+                examBuckets[key][r.student_id] = r;
+            });
+            examResponseRows.forEach(r => {
+                const hasLoggedAttempt = examBuckets['1'][r.student_id] || examBuckets['2'][r.student_id] || examBuckets['3+'][r.student_id];
+                if (!hasLoggedAttempt) examBuckets['1'][r.student_id] = r;
             });
 
-            let weighted = 0, weightSum = 0;
-            Object.keys(catPossible).forEach(cat => {
-                if (catPossible[cat] > 0 && weights[cat] > 0) {
-                    weighted += (catEarned[cat] / catPossible[cat]) * weights[cat];
-                    weightSum += weights[cat];
-                }
+            const periodsToShow = showAllRow ? [...config.periods, 'All'] : [...config.periods];
+            const periodRows = periodsToShow.map(period => {
+                const inScope = (studentId) => periodByStudent[studentId] !== undefined && (period === 'All' || periodByStudent[studentId] === period);
+
+                const preRowsForPeriod = Object.entries(preAttempt1).filter(([sid]) => inScope(sid)).map(([, r]) => r);
+                const pretest = summarizeAttempts(preRowsForPeriod);
+
+                const examAttemptsForPeriod = {};
+                ['1', '2', '3+'].forEach(key => {
+                    const rowsForPeriod = Object.entries(examBuckets[key]).filter(([sid]) => inScope(sid)).map(([, r]) => r);
+                    examAttemptsForPeriod[key] = summarizeAttempts(rowsForPeriod);
+                });
+
+                return { period, pretest: { count: pretest.count, avgPercent: pretest.avgPercent }, examAttempts: examAttemptsForPeriod };
             });
-            const pct = weightSum > 0 ? (weighted / weightSum) * 100 : null;
-            if (pct === null) return;
 
-            courseTotals.push(pct);
-            if (periodTotals[s.section_id]) periodTotals[s.section_id].push(pct);
-        });
-
-        const avgOf = (arr) => arr.length > 0 ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : null;
-
-        const overallByPeriod = {};
-        config.periods.forEach(p => {
-            overallByPeriod[p] = { studentCount: periodTotals[p].length, avgPercent: avgOf(periodTotals[p]) };
-        });
+            units.push({ unit: n, label: config.label(n), periods: periodRows });
+        }
 
         await connection.release();
-        res.json({
-            course: courseKey,
-            units,
-            overallCourse: { studentCount: courseTotals.length, avgPercent: avgOf(courseTotals) },
-            overallByPeriod
-        });
+        res.json({ course: courseKey, units });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to compute attempt analytics' }); }
 });
 
