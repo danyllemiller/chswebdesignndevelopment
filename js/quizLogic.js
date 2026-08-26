@@ -596,8 +596,9 @@ async function processResults() {
     // Use opener for new-window context (CS), fall back to parent for iframe context (WD)
     (window.opener || window.parent || window).postMessage({ type: 'diagnostic_complete', score: finalScore }, '*');
 
-// B. SYNC PRE-ASSESSMENT TO GRADEBOOK - 15 POINTS FIXED
-    // Web Design diagnostic AND CS Pre-Assessment both get fixed 15 points when completed
+// B. SYNC PRE-ASSESSMENT TO GRADEBOOK - full completion credit, scaled to
+    // the actual number of questions on the pretest (always 10 today, but
+    // this stays correct if that ever changes) rather than a hardcoded 15.
     try {
         const user = JSON.parse(localStorage.getItem('user'));
         if (user && user.student_id) {
@@ -638,16 +639,17 @@ async function processResults() {
                 throw new Error("Chapter could not be determined for gradebook sync.");
             }
 
-            console.log("[QuizLogic] Syncing Pre-Assessment to gradebook:", preAssmtExamId, "15 points");
-            
+            const pretestPoints = examQuestions.length || 10;
+            console.log("[QuizLogic] Syncing Pre-Assessment to gradebook:", preAssmtExamId, pretestPoints, "points");
+
             const res = await fetch('/api/submit-exam', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     student_id: user.student_id,
                     exam_id: preAssmtExamId,
-                    score: 15,  // FIXED: Pre-assessment = 15 points fixed for completion
-                    total_points: 15
+                    score: pretestPoints,  // full completion credit, scaled to the real question count
+                    total_points: pretestPoints
                 })
             });
             
