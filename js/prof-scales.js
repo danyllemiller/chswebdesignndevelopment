@@ -11,7 +11,12 @@ let gatewayMode = 'pre'; // 'pre' or 'post'
 // Automatically grab the Chapter/Unit name and ID from the document title
 const unitTitle = document.title || 'Unknown Unit';
 const chapterMatch = unitTitle.match(/(?:Chapter|Unit)\s*(\d+)/i);
-const chapterNum = chapterMatch ? parseInt(chapterMatch[1]) : 1; 
+const chapterNum = chapterMatch ? parseInt(chapterMatch[1]) : 1;
+// CS pages title as "Unit N", WD pages title as "Chapter N" — the gradebook
+// exam_id must use the matching prefix or it creates a duplicate entry
+// alongside the one cs-interactive.js/dashboard.js already write.
+const isCSPage = !!(chapterMatch && /^unit/i.test(chapterMatch[0]));
+const examIdPrefix = isCSPage ? 'Unit' : 'Ch';
 
 function setupPostMode() {
     gatewayMode = 'post';
@@ -263,10 +268,10 @@ window.submitToGateway = async function() {
     // A. SAVE TO MARIADB (if logged in)
     if (user && user.student_id) {
         // Pre-scale always gives full 10 points when completed
-        // STANDARDIZED FORMAT: matches cs-interactive.js (no space between Unit and number)
+        // STANDARDIZED FORMAT: matches cs-interactive.js / dashboard.js
         const preScaleExamId = gatewayMode === 'pre'
-            ? 'Unit' + chapterNum + ' Pre-Scale'
-            : 'Unit' + chapterNum + ' Post-Scale';
+            ? examIdPrefix + chapterNum + ' Pre-Scale'
+            : examIdPrefix + chapterNum + ' Post-Scale';
         
         console.log("SYNCING TO GRADEBOOK:", user.student_id, preScaleExamId, "10 points");
         

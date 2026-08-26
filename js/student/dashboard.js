@@ -317,23 +317,34 @@ function calculateGradeStats(keys, myGrades, registryData, courseKey) {
     const catEarned = { assignment: 0, project_quiz: 0, final: 0, career: 0 };
     const catPossible = { assignment: 0, project_quiz: 0, final: 0, career: 0 };
 
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+
     keys.forEach(key => {
         if (myGrades[key] !== undefined && myGrades[key] !== null) {
             // Use the real registered max points (same source gradebook.js uses), falling
             // back to the parsePts() guess only for legacy items missing from the registry.
             const max = registryData?.[key]?.maxPoints || parsePts(key);
             const score = typeof myGrades[key] === 'object' ? myGrades[key].score : myGrades[key];
+            if (score === "Submitted") return; // turned in, awaiting a numeric grade — not a zero
 
-            if (score !== "Submitted" && score !== "") {
-                const num = Number(score);
-                totalPossible += max;
-                totalEarned += num;
-                completed++;
-
-                const cat = getAssignmentCategory(key, courseKey);
-                catEarned[cat] += num;
-                catPossible[cat] += max;
+            const hasScore = score !== undefined && score !== null && score !== "";
+            if (!hasScore) {
+                // Ungraded — only count it as a missed zero once its due date has
+                // actually passed. Not-yet-due (or undated) work is excluded
+                // entirely rather than dragging the average down early.
+                const dueDate = registryData?.[key]?.dueDate;
+                const isPastDue = !!dueDate && new Date(dueDate + 'T00:00:00') < today;
+                if (!isPastDue) return;
             }
+
+            const num = hasScore ? Number(score) : 0;
+            totalPossible += max;
+            totalEarned += num;
+            if (hasScore) completed++;
+
+            const cat = getAssignmentCategory(key, courseKey);
+            catEarned[cat] += num;
+            catPossible[cat] += max;
         }
     });
 
@@ -653,14 +664,14 @@ window.saveSelfAssessment = async function(chapterId, level) {
         const isCS = chapterLower.startsWith('unit');
         const courseKey = isCS ? 'CS' : 'WD1';
         
-        // FIX: Use CORRECT format for exam_id
-        // CS uses "Unit1-PreScale" format
-        // WD uses "ch1 Pre-Scale" format (with space, matching current grading format)
+        // Exam ID format must match what prof-scales.js / cs-interactive.js write
+        // ("Unit1 Pre-Scale", WITH a space) — a mismatched format here creates a
+        // second, duplicate gradebook entry for the same self-assessment.
         let scaleExamId;
         if (isCS) {
             // Extract number: "unit1" -> "Unit1", "unit2" -> "Unit2", etc.
             const num = chapterLower.replace('unit', '');
-            scaleExamId = `Unit${num}-PreScale`;
+            scaleExamId = `Unit${num} Pre-Scale`;
         } else {
             // WD format: "ch1" -> "ch1 Pre-Scale", matching existing gradebook format
             const num = chapterLower.replace('ch', '');

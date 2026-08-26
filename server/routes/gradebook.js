@@ -39,6 +39,7 @@ router.get('/student/course-gradebook', async (req, res) => {
         }
         const [rows] = await connection.execute(
             `SELECT e.exam_id, TRIM(e.title) AS title, e.total_points, e.course_id,
+                    e.due_date, e.instructions, e.period_due_dates,
                     r.score, r.timestamp
              FROM exams e
              LEFT JOIN responses r ON e.exam_id = r.exam_id AND r.student_id = ?
@@ -46,6 +47,7 @@ router.get('/student/course-gradebook', async (req, res) => {
              ORDER BY e.title ASC, e.exam_id ASC`,
             [student_id, courseCode]
         );
+        rows.forEach(r => { r.due_date = formatDbDate(r.due_date); });
         await connection.release();
         res.json({ student_id, section_id: sectionId, course_id: courseCode, assignments: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch student course gradebook.' }); }

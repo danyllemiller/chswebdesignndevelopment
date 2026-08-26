@@ -1090,6 +1090,7 @@ function renderGradebook(students, grades, currentPeriod) {
     // already scoped to the active view via isAssignmentVisible). Only the
     // unfiltered "All" view falls back to each student's own primary course.
     const viewCourseKey = getViewCourseKey(currentPeriod);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
 
     orderedStudents.forEach((s, rowIndex) => {
         const displayPeriod = s.matchedPeriod || s.period;
@@ -1120,14 +1121,23 @@ function renderGradebook(students, grades, currentPeriod) {
             const hasPeriodDueDates = reg?.periodDueDates && Object.values(reg.periodDueDates).some(d => d);
             const studentPeriodDueDate = reg?.periodDueDates?.[displayPeriod];
             const isPeriodExempt = hasPeriodDueDates && !studentPeriodDueDate && (score === "" || score === undefined);
+            if (isPeriodExempt) return;
 
-            if (score !== undefined && score !== null && score !== "" && score !== "EX" && !isPeriodExempt) {
-                const num = Number(score);
-                const max = (g && typeof g === 'object' && g.max) ? Number(g.max) : assignmentMap.get(key).maxPoints;
-                earned += num; possible += max;
-                const cat = getAssignmentCategory(key, courseKey);
-                catEarned[cat] += num; catPossible[cat] += max;
+            const hasScore = score !== undefined && score !== null && score !== "" && score !== "EX";
+            if (!hasScore) {
+                // Ungraded — only count it as a missed zero once its due date
+                // has actually passed, so students aren't dinged for work
+                // that isn't due yet. Matches js/student/dashboard.js.
+                const effectiveDueDate = studentPeriodDueDate || reg?.dueDate;
+                const isPastDue = !!effectiveDueDate && new Date(effectiveDueDate + 'T00:00:00') < today;
+                if (!isPastDue) return;
             }
+
+            const num = hasScore ? Number(score) : 0;
+            const max = (g && typeof g === 'object' && g.max) ? Number(g.max) : assignmentMap.get(key).maxPoints;
+            earned += num; possible += max;
+            const cat = getAssignmentCategory(key, courseKey);
+            catEarned[cat] += num; catPossible[cat] += max;
         });
 
         const weights = COURSE_WEIGHTS[courseKey];
