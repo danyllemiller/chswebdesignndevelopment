@@ -228,7 +228,20 @@ async function initTimeclock() {
     // check, so a dual-enrolled student's clock-in question is scoped to
     // the right course from the very first render, not just after the
     // first 60s refresh tick.
+    //
+    // A whole class logging in within the same few seconds (start of
+    // period) is exactly when a fetch inside resolveTodaysBellWindow() is
+    // most likely to hiccup from network congestion -- each individual
+    // fetch already falls back gracefully on its own, but if enough of
+    // them fail at once the window resolves to null with no popup and no
+    // visible error, recovering only on the next 60s tick. Retry a few
+    // times, a few seconds apart, right at load so this recovers in
+    // seconds instead of possibly up to a minute.
     bellWindow = await resolveTodaysBellWindow();
+    for (let attempt = 0; !bellWindow && attempt < 4; attempt++) {
+        await new Promise(r => setTimeout(r, 4000));
+        bellWindow = await resolveTodaysBellWindow();
+    }
     await checkStatus();
     checkAutoPopup();
 
