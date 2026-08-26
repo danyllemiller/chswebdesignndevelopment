@@ -36,6 +36,12 @@
 // on chapter/lesson pages, not grades/notes/files/calendar.
 // ==========================================
 (function injectTimeclock() {
+  // Skip entirely inside an iframe (e.g. cs-notebook.html embedded in the
+  // interactive workspace) -- loader.js runs there too, so without this
+  // check the widget/modal gets injected a second time inside the frame,
+  // showing two timeclock buttons on the same page. The outer top-level
+  // page's own copy is the only one that should ever render.
+  if (window.self !== window.top) return;
   if (document.getElementById('timeclock-script')) return;
   const script = document.createElement('script');
   script.id = 'timeclock-script';
