@@ -593,30 +593,15 @@ function triggerAutoSave() {
                         return;
                     }
 
-                    // Sort by timestamp descending (newest first)
+                    // Sort by timestamp descending (newest first). Every saved
+                    // entry is shown -- this used to collapse down to one card
+                    // per unique title, which silently hid every other note
+                    // whenever students reused the same title (e.g. many kids
+                    // titling every entry "My Computer Science Notes"), making
+                    // it look like only their most recent note was ever saved.
                     allNotes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                    
-                    // Filter to only keep ONE note per unique title (the most recent one)
-                    const uniqueNotesMap = new Map();
-                    allNotes.forEach(n => {
-                        const titleKey = (n.title || '').trim().toLowerCase();
-                        // Only add if we haven't seen this title yet (first one is most recent due to sort)
-                        if (titleKey && !uniqueNotesMap.has(titleKey)) {
-                            uniqueNotesMap.set(titleKey, n);
-                        }
-                    });
-                    const uniqueNotes = Array.from(uniqueNotesMap.values());
-                    
-                    if (uniqueNotes.length === 0) {
-                        listContainer.innerHTML = `
-                            <div class="text-center p-4">
-                                <i class="fas fa-clipboard text-muted fs-1 mb-3"></i>
-                                <p class="text-muted">No saved notes found. Start a new entry!</p>
-                            </div>`;
-                        return;
-                    }
 
-                    const notesHtml = uniqueNotes.map(n => {
+                    const notesHtml = allNotes.map(n => {
                         const date = n.timestamp ? new Date(n.timestamp).toLocaleDateString() : 'Unknown date';
                         const preview = n.content ? n.content.substring(0, 80).replace(/<[^>]*>/g, '') + '...' : 'No content';
                         return `
