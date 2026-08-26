@@ -498,6 +498,7 @@ function getDefaultWorksheetTemplate() {
         }
         
         const payload = {
+            id: activeNoteId || null,
             student_id: currentStudentData.student_id,
             chapter: 'Unit Exam Scratchpad',
             title: titleInput.value.trim(),
@@ -506,16 +507,22 @@ function getDefaultWorksheetTemplate() {
             is_submitted: isSubmit ? 1 : 0,
             timestamp: Date.now()
         };
-        
+
         try {
             const res = await fetch('/api/student/cs-notebook', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            
+
             if (!res.ok) throw new Error('Save failed');
-            
+
+            // Track the row this session is now updating -- without this,
+            // every subsequent autosave has no id to send and creates yet
+            // another new row instead of updating this one.
+            const result = await res.json();
+            if (result?.id) activeNoteId = result.id;
+
             if (btn) {
                 btn.innerHTML = '<i class="fas fa-check me-1"></i> Saved';
                 btn.className = 'badge bg-success';
@@ -582,7 +589,10 @@ function triggerAutoSave() {
                     const res = await fetch(`/api/student/cs-notebook?student_id=${encodeURIComponent(currentStudentData.student_id)}`);
                     if (!res.ok) throw new Error('Failed to fetch');
                     const data = await res.json();
-                    const allNotes = data.notes || [];
+                    // Only entries the student actually gave a real title --
+                    // untitled autosave artifacts (blank title, saved before
+                    // they typed one) just clutter this list otherwise.
+                    const allNotes = (data.notes || []).filter(n => (n.title || '').trim().length > 0);
 
                     if (allNotes.length === 0) {
                         listContainer.innerHTML = `
@@ -627,7 +637,13 @@ function triggerAutoSave() {
                             const noteId = card.dataset.id;
                             const noteTitle = card.dataset.title;
                             const noteContent = card.dataset.content;
-                            
+
+                            // Continue editing this exact row -- without this,
+                            // the next autosave has no id to send and creates
+                            // a brand-new duplicate instead of updating the
+                            // note the student just opened.
+                            activeNoteId = noteId;
+
                             // Load into the current note form
                             document.getElementById('note-title').value = noteTitle;
                             document.getElementById('note-content').value = noteContent;

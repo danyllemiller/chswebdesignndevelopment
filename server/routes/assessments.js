@@ -183,19 +183,35 @@ router.get('/student/cs-notebook', async (req, res) => {
 });
 
 router.post('/student/cs-notebook', async (req, res) => {
-    const { student_id, chapter, title, category, content, is_submitted } = req.body;
+    const { id, student_id, chapter, title, category, content, is_submitted } = req.body;
     if (!student_id || !chapter) return res.status(400).json({ error: 'student_id and chapter required' });
     try {
         const connection = await getDbConnection();
-        await connection.execute(
+
+        // turnins has no unique constraint tying a chapter to one row per
+        // student, so the old INSERT ... ON DUPLICATE KEY never actually
+        // triggered -- every autosave (every 1.5s while editing) created a
+        // brand-new row instead of updating the one already in progress,
+        // which is why some students had 50+ "notes" that were really just
+        // repeated autosaves of the same session. Update by id once a row
+        // exists, same pattern as /student/notebook/save.
+        if (id) {
+            await connection.execute(
+                `UPDATE turnins SET chapter = ?, title = ?, category = ?, content = ?, is_submitted = ?, timestamp = NOW()
+                 WHERE id = ? AND student_id = ?`,
+                [chapter, title || '', category || 'Reflection', content || '', is_submitted ? 1 : 0, id, student_id]
+            );
+            await connection.release();
+            return res.json({ success: true, id: Number(id) });
+        }
+
+        const [result] = await connection.execute(
             `INSERT INTO turnins (student_id, chapter, title, category, content, is_submitted, timestamp)
-             VALUES (?, ?, ?, ?, ?, ?, NOW())
-             ON DUPLICATE KEY UPDATE title = VALUES(title), category = VALUES(category),
-               content = VALUES(content), is_submitted = VALUES(is_submitted), timestamp = NOW()`,
+             VALUES (?, ?, ?, ?, ?, ?, NOW())`,
             [student_id, chapter, title || '', category || 'Reflection', content || '', is_submitted ? 1 : 0]
         );
         await connection.release();
-        res.json({ success: true });
+        res.json({ success: true, id: result.insertId });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save notebook entry' }); }
 });
 
