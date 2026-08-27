@@ -639,6 +639,17 @@ async function processResults() {
                 throw new Error("Chapter could not be determined for gradebook sync.");
             }
 
+            // /api/submit-exam defaults a brand-new exam_id to the CS course
+            // when no course_id is given -- without this, every WD pretest's
+            // first-ever submission got silently mistagged as CS, hiding it
+            // from the WD admin gradebook (chapters 1-8 = WD1, 9-16 = WD2).
+            let pretestCourseId = '10003GS';
+            if (preAssmtExamId.startsWith('Ch')) {
+                const chMatch = preAssmtExamId.match(/^Ch(\d+)/);
+                const chNum = chMatch ? parseInt(chMatch[1], 10) : null;
+                pretestCourseId = (chNum !== null && chNum >= 9) ? '05254G2S' : '05254G1S';
+            }
+
             const pretestPoints = examQuestions.length || 10;
             console.log("[QuizLogic] Syncing Pre-Assessment to gradebook:", preAssmtExamId, pretestPoints, "points");
 
@@ -649,7 +660,8 @@ async function processResults() {
                     student_id: user.student_id,
                     exam_id: preAssmtExamId,
                     score: pretestPoints,  // full completion credit, scaled to the real question count
-                    total_points: pretestPoints
+                    total_points: pretestPoints,
+                    course_id: pretestCourseId
                 })
             });
             
@@ -672,7 +684,8 @@ async function processResults() {
                         student_id: user.student_id,
                         exam_id: preAssmtExamId + '-Score',
                         score: finalScore,
-                        total_points: finalTotal
+                        total_points: finalTotal,
+                        course_id: pretestCourseId
                     })
                 });
             } catch (e) {
