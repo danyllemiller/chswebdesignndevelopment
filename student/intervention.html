@@ -1249,7 +1249,13 @@
     calMonth = today.getMonth();   // 0-indexed
     calDay   = today.getDate();
 
-    const toYMD = d => d.toISOString().split('T')[0];
+    // Local calendar date, never UTC -- d.toISOString() shifts to UTC, which
+    // for any Pacific evening between ~5pm and midnight is already
+    // "tomorrow." That mismatch is what broke journal saving: todayStr (used
+    // to load/save today's entry) disagreed with calDay/calMonth/calYear
+    // (the actual local day the calendar highlights), so a save could land
+    // under a different date than the one currently showing.
+    const toYMD = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const todayStr = toYMD(today);
     calSelectedYMD = todayStr;
 
