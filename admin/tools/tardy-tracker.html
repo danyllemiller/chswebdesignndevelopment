@@ -74,7 +74,17 @@
   </div>
 
   <div class="card shadow-sm border-0">
-    <div class="card-header bg-white fw-bold"><i class="fas fa-list me-2 text-primary"></i>Tardy Log</div>
+    <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <span class="fw-bold"><i class="fas fa-list me-2 text-primary"></i>Tardy Log</span>
+      <div class="d-flex align-items-center gap-2">
+        <label for="sortModeSelect" class="small text-muted fw-bold mb-0">Sort by</label>
+        <select id="sortModeSelect" class="form-select form-select-sm" style="width: auto;">
+          <option value="count" selected>Most Tardies</option>
+          <option value="period">Class / Period</option>
+          <option value="lastname">Last Name</option>
+        </select>
+      </div>
+    </div>
     <div class="card-body p-0" style="max-height: 640px; overflow-y: auto;">
       <table class="table table-hover tardy-table mb-0">
         <thead class="table-light sticky-top">
@@ -361,31 +371,46 @@
   }
 
   const entriesById = new Map();
+  let lastEntries = [];
+  let sortMode = 'count';
 
-  async function loadLog() {
-    try {
-      await loadScheduleData();
-      const res = await fetch('/api/tardy/log');
-      const data = await res.json();
-      const entries = data.entries || [];
-      entriesById.clear();
-      entries.forEach(e => entriesById.set(String(e.id), e));
-      if (entries.length === 0) {
-        logBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted p-4">No tardies logged yet.</td></tr>`;
-        return;
-      }
+  document.getElementById('sortModeSelect').addEventListener('change', (e) => {
+    sortMode = e.target.value;
+    renderLog(lastEntries);
+  });
 
-      // Group by student, students ordered by total tardy count (highest
-      // first) so the students who need attention surface at the top; each
-      // student's own entries stay newest-first underneath their header row.
-      const byStudent = new Map();
-      entries.forEach(e => {
-        if (!byStudent.has(e.student_id)) byStudent.set(e.student_id, []);
-        byStudent.get(e.student_id).push(e);
-      });
-      const groups = Array.from(byStudent.values()).sort((a, b) => b.length - a.length);
+  function renderLog(entries) {
+    entriesById.clear();
+    entries.forEach(e => entriesById.set(String(e.id), e));
+    if (entries.length === 0) {
+      logBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted p-4">No tardies logged yet.</td></tr>`;
+      return;
+    }
 
-      logBody.innerHTML = groups.map(group => {
+    // Group by student; each student's own entries stay newest-first
+    // underneath their header row regardless of how the groups themselves
+    // are ordered below.
+    const byStudent = new Map();
+    entries.forEach(e => {
+      if (!byStudent.has(e.student_id)) byStudent.set(e.student_id, []);
+      byStudent.get(e.student_id).push(e);
+    });
+    const groups = Array.from(byStudent.values());
+
+    if (sortMode === 'period') {
+      // group[0] is each student's most recent tardy -- the most
+      // representative period if they've ever been marked under more than one.
+      groups.sort((a, b) =>
+        (a[0].period || '').localeCompare(b[0].period || '') ||
+        (a[0].last_name || '').localeCompare(b[0].last_name || ''));
+    } else if (sortMode === 'lastname') {
+      groups.sort((a, b) => (a[0].last_name || '').localeCompare(b[0].last_name || ''));
+    } else {
+      // Most Tardies -- students who need attention surface at the top.
+      groups.sort((a, b) => b.length - a.length);
+    }
+
+    logBody.innerHTML = groups.map(group => {
         const first = group[0];
         const name = first.first_name ? `${escapeHtml(first.first_name)} ${escapeHtml(first.last_name)}` : escapeHtml(first.student_id);
         const countBadgeClass = group.length >= 5 ? 'count-high' : group.length >= 3 ? 'count-mid' : 'bg-secondary';
@@ -418,6 +443,15 @@
         }).join('');
         return headerRow + rows;
       }).join('');
+  }
+
+  async function loadLog() {
+    try {
+      await loadScheduleData();
+      const res = await fetch('/api/tardy/log');
+      const data = await res.json();
+      lastEntries = data.entries || [];
+      renderLog(lastEntries);
     } catch (e) {
       logBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger p-4">Failed to load log.</td></tr>`;
     }
