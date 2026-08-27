@@ -1,3 +1,17 @@
+// Same palette as admin/daily-agenda.html's bell schedule swatches, so a
+// period reads as the same color everywhere on the site.
+const PERIOD_COLORS = {
+    'A1': '#f2d2d4', 'B2': '#cccdeb', 'A3': '#9cb9da', 'B4': '#f9f9dc',
+    'A5': '#f6e9d4', 'B6': '#ecf4ea', 'B8': '#eadafa', 'INTV': '#dff3f9'
+};
+
+function periodSwatch(period) {
+    if (period === 'All') return '';
+    const color = PERIOD_COLORS[period];
+    if (!color) return '';
+    return `<span class="period-swatch" style="background:${color};"></span>`;
+}
+
 function fmtPercent(val) {
     return (val === null || val === undefined) ? '<span class="no-data">—</span>' : `${val}%`;
 }
@@ -23,7 +37,7 @@ function renderUnits(units) {
             const periodLabel = p.period === 'All' ? 'All Periods' : `Period ${p.period}`;
             html += `
                 <tr class="${rowClass}">
-                    <td>${periodLabel}</td>
+                    <td>${periodSwatch(p.period)}${periodLabel}</td>
                     <td>${fmtPercent(p.pretest.avgPercent)} ${p.pretest.count ? `<span class="text-muted small">(n=${p.pretest.count})</span>` : ''}</td>
                     <td class="attempt-col-group">${fmtPercent(e1.avgPercent)} ${e1.count ? `<span class="text-muted small">(n=${e1.count})</span>` : ''}</td>
                     <td>${fmtMastery(e1.masteryPercent)}</td>
