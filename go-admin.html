@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Link Shortener Admin</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .wrap { max-width: 720px; margin: 2.5rem auto; padding: 0 1rem; }
+    .gochi { font-family: 'Gochi Hand', cursive; }
+    .link-row { background: #fff; border: 1px solid #e2e5f0; border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: .75rem; }
+    .link-slug { font-weight: 800; color: #000099; font-size: 1.05rem; }
+    .link-dest { color: #6c757d; font-size: .85rem; word-break: break-all; }
+    .link-note { font-size: .8rem; color: #495057; font-style: italic; margin-top: .25rem; }
+    .copy-btn { cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div id="loginView" class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <h2 class="gochi text-primary mb-3"><i class="fas fa-link me-2"></i>Link Shortener</h2>
+      <label class="form-label fw-bold small">Password</label>
+      <input id="passwordInput" type="password" class="form-control mb-3" placeholder="Enter password" autocomplete="current-password">
+      <button id="loginBtn" class="btn btn-primary w-100 fw-bold">Log In</button>
+      <div id="loginStatus" class="text-danger small mt-2"></div>
+    </div>
+  </div>
+
+  <div id="mainView" class="d-none">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="gochi text-primary mb-0"><i class="fas fa-link me-2"></i>Link Shortener</h2>
+      <button id="logoutBtn" class="btn btn-outline-secondary btn-sm">Log Out</button>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body p-4">
+        <h6 class="fw-bold text-muted text-uppercase small mb-3">New Link</h6>
+        <label class="form-label fw-bold small">Destination URL</label>
+        <input id="destInput" type="text" class="form-control mb-3" placeholder="https://example.com/some/long/path">
+        <label class="form-label fw-bold small">Slug</label>
+        <div class="input-group mb-3">
+          <span class="input-group-text">/go/</span>
+          <input id="slugInput" type="text" class="form-control" placeholder="quiz3">
+        </div>
+        <label class="form-label fw-bold small">Note (optional, just for you)</label>
+        <input id="noteInput" type="text" class="form-control mb-3" placeholder="e.g. Ch 9 review Kahoot">
+        <button id="createBtn" class="btn btn-success fw-bold w-100"><i class="fas fa-plus me-1"></i>Create Link</button>
+        <div id="createStatus" class="small mt-2"></div>
+      </div>
+    </div>
+
+    <h6 class="fw-bold text-muted text-uppercase small mb-2">Your Links</h6>
+    <div id="linksList"><p class="text-muted small">Loading…</p></div>
+  </div>
+
+</div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script>
+  const loginView = document.getElementById('loginView');
+  const mainView = document.getElementById('mainView');
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  async function checkAuth() {
+    const res = await fetch('/go/admin/api/check');
+    const data = await res.json();
+    if (data.authenticated) {
+      loginView.classList.add('d-none');
+      mainView.classList.remove('d-none');
+      loadLinks();
+    } else {
+      loginView.classList.remove('d-none');
+      mainView.classList.add('d-none');
+    }
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', async () => {
+    const password = document.getElementById('passwordInput').value;
+    const status = document.getElementById('loginStatus');
+    status.textContent = '';
+    try {
+      const res = await fetch('/go/admin/api/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) { status.textContent = data.error || 'Login failed.'; return; }
+      document.getElementById('passwordInput').value = '';
+      checkAuth();
+    } catch (e) { status.textContent = 'Network error.'; }
+  });
+  document.getElementById('passwordInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('loginBtn').click();
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await fetch('/go/admin/api/logout', { method: 'POST' });
+    checkAuth();
+  });
+
+  async function loadLinks() {
+    const listEl = document.getElementById('linksList');
+    try {
+      const res = await fetch('/go/admin/api/links');
+      if (res.status === 401) { checkAuth(); return; }
+      const data = await res.json();
+      const links = data.links || [];
+      if (!links.length) { listEl.innerHTML = '<p class="text-muted small">No links yet — create your first one above.</p>'; return; }
+      listEl.innerHTML = links.map(l => {
+        const shortUrl = `${window.location.origin}/go/${l.slug}`;
+        return `
+        <div class="link-row d-flex justify-content-between align-items-start gap-3">
+          <div class="flex-grow-1" style="min-width:0;">
+            <div class="link-slug">/go/${escapeHtml(l.slug)}</div>
+            <div class="link-dest">${escapeHtml(l.destination_url)}</div>
+            ${l.note ? `<div class="link-note">${escapeHtml(l.note)}</div>` : ''}
+          </div>
+          <button class="btn btn-outline-primary btn-sm copy-btn flex-shrink-0" data-url="${escapeHtml(shortUrl)}">
+            <i class="fas fa-copy me-1"></i>Copy
+          </button>
+        </div>`;
+      }).join('');
+      listEl.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(btn.dataset.url).then(() => {
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+            setTimeout(() => { btn.innerHTML = original; }, 1500);
+          });
+        });
+      });
+    } catch (e) {
+      listEl.innerHTML = '<p class="text-danger small">Failed to load links.</p>';
+    }
+  }
+
+  document.getElementById('createBtn').addEventListener('click', async () => {
+    const destination_url = document.getElementById('destInput').value.trim();
+    const slug = document.getElementById('slugInput').value.trim();
+    const note = document.getElementById('noteInput').value.trim();
+    const status = document.getElementById('createStatus');
+    status.textContent = '';
+    if (!destination_url || !slug) { status.className = 'small mt-2 text-danger'; status.textContent = 'Destination URL and slug are both required.'; return; }
+    try {
+      const res = await fetch('/go/admin/api/new', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ destination_url, slug, note })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) { status.className = 'small mt-2 text-danger'; status.textContent = data.error || 'Failed to create link.'; return; }
+      status.className = 'small mt-2 text-success';
+      status.textContent = `Created /go/${data.slug}`;
+      document.getElementById('destInput').value = '';
+      document.getElementById('slugInput').value = '';
+      document.getElementById('noteInput').value = '';
+      loadLinks();
+    } catch (e) { status.className = 'small mt-2 text-danger'; status.textContent = 'Network error.'; }
+  });
+
+  checkAuth();
+</script>
+</body>
+</html>

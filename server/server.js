@@ -1,9 +1,11 @@
 // /server/server.js
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const authRoutes = require('./auth');
 const apiRoutes = require('./api');
+const shortlinkRoutes = require('./routes/shortlinks');
 
 const app = express();
 const PORT = 3000;
@@ -18,6 +20,10 @@ app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     next();
 });
+
+// Behind nginx -- needed so req.ip (used for shortlink login rate limiting)
+// reflects the real client instead of the proxy's own address.
+app.set('trust proxy', true);
 
 // THIS LOGS EVERY REQUEST
 app.use((req, res, next) => {
@@ -37,6 +43,7 @@ app.use(session({
 // Route Mapping - API routes must come before static routes
 app.use('/api', authRoutes);
 app.use('/api', apiRoutes);
+app.use('/go', shortlinkRoutes);
 
 // Explicitly map your folders
 app.use('/js', express.static(path.join(__dirname, '../js')));
