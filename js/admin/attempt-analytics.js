@@ -5,11 +5,9 @@ const PERIOD_COLORS = {
     'A5': '#f6e9d4', 'B6': '#ecf4ea', 'B8': '#eadafa', 'INTV': '#dff3f9'
 };
 
-function periodSwatch(period) {
-    if (period === 'All') return '';
+function periodRowStyle(period) {
     const color = PERIOD_COLORS[period];
-    if (!color) return '';
-    return `<span class="period-swatch" style="background:${color};"></span>`;
+    return color ? ` style="background:${color};"` : '';
 }
 
 function fmtPercent(val) {
@@ -74,8 +72,8 @@ function renderUnits(units) {
             const rowClass = p.period === 'All' ? 'all-periods-row' : '';
             const periodLabel = p.period === 'All' ? 'All Periods' : `Period ${p.period}`;
             html += `
-                <tr class="${rowClass}">
-                    <td>${periodSwatch(p.period)}${periodLabel}</td>
+                <tr class="${rowClass}"${periodRowStyle(p.period)}>
+                    <td>${periodLabel}</td>
                     <td>${fmtPercent(p.pretest.avgPercent)} ${p.pretest.count ? `<span class="text-muted small">(n=${p.pretest.count})</span>` : ''}</td>
                     <td class="attempt-col-group">${fmtPercent(e1.avgPercent)} ${e1.count ? `<span class="text-muted small">(n=${e1.count})</span>` : ''}</td>
                     <td>${fmtMastery(e1.masteryPercent)}</td>
