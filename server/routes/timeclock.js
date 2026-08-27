@@ -2,6 +2,18 @@ const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
 
+// new Date().toISOString().split('T')[0] gives the UTC calendar date, which
+// for any Pacific evening between ~5pm and midnight is already "tomorrow" --
+// causing every "today" lookup in this file to miss same-day rows that
+// MySQL's NOW()/CURTIME() (server-local time) actually stored under the
+// real local date. Use the server's own local date fields instead.
+function getLocalDateStr(d = new Date()) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
 // Legacy clock-in endpoint (kept for backward compatibility)
 router.post('/clockin', async (req, res) => {
     const { student_id, section_id, type, answer } = req.body;
@@ -25,7 +37,7 @@ router.get('/timeclock/status', async (req, res) => {
     const { student_id, period } = req.query;
     try {
         const connection = await getDbConnection();
-        const today = new Date().toISOString().split('T')[0];
+        const today = getLocalDateStr();
         const sql = period
             ? 'SELECT * FROM clockins WHERE student_id = ? AND section_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC LIMIT 1'
             : 'SELECT * FROM clockins WHERE student_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC LIMIT 1';
@@ -70,7 +82,7 @@ const WD_CHAPTER_TITLES = {
 };
 
 async function getCurrentChapter(connection, courseId, examIdRegex, chapterRegex) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateStr();
     const [rows] = await connection.execute(
         `SELECT exam_id, due_date FROM exams WHERE course_id = ? AND exam_id REGEXP ? AND due_date IS NOT NULL ORDER BY due_date ASC`,
         [courseId, examIdRegex]
@@ -83,7 +95,7 @@ async function getCurrentChapter(connection, courseId, examIdRegex, chapterRegex
         .filter(Boolean)
         .sort((a, b) => a.chapter - b.chapter);
 
-    const upcoming = parsed.find(r => new Date(r.dueDate).toISOString().split('T')[0] >= today);
+    const upcoming = parsed.find(r => getLocalDateStr(new Date(r.dueDate)) >= today);
     if (upcoming) return { chapter: upcoming.chapter, isFallback: false };
     if (parsed.length > 0) return { chapter: parsed[parsed.length - 1].chapter, isFallback: false }; // all past — stick with the last one
     return { chapter: 1, isFallback: true }; // no due dates set anywhere yet
@@ -160,7 +172,7 @@ router.get('/timeclock/question', async (req, res) => {
 router.get('/timeclock/reflection-prompt', async (req, res) => {
     const { type, student_id } = req.query; // CS, WD1, WD2
     const kind = String(type || '');
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateStr();
     try {
         const connection = await getDbConnection();
 
@@ -236,7 +248,7 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
 router.post('/timeclock/save', async (req, res) => {
     const { student_id, section_id, mode, answer } = req.body;
     if (!student_id || !mode) return res.status(400).json({ error: 'student_id and mode are required' });
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateStr();
     const period = section_id || '';
     try {
         const connection = await getDbConnection();

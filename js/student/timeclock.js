@@ -12,8 +12,18 @@ let currentPeriod = null; // which of the student's (possibly multiple) periods 
 // 1. HELPERS & CONFIGURATION
 // ==============================================================================
 
+// Named "local" but was actually computing the UTC calendar date, which for
+// any Pacific evening between ~5pm and midnight is already "tomorrow" -- this
+// mismatched what the server actually stored clockin rows under (its own
+// local date), so students who clocked in during that window would never be
+// recognized as already clocked in, and kept getting the clock-IN prompt
+// again instead of ever reaching clock-out.
 function getLocalTodayStr() {
-    return new Date().toISOString().split('T')[0];
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
 }
 
 // ==============================================================================
