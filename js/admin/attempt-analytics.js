@@ -83,17 +83,23 @@ function renderUnits(units) {
     const tbody = document.getElementById('analyticsBody');
     destroyUnitCharts();
     if (!units || units.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No data yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">No data yet.</td></tr>';
         return;
     }
 
     let html = '';
     units.forEach(u => {
-        html += `<tr class="unit-header-row"><td colspan="8">${u.label}</td></tr>`;
-        u.periods.forEach(p => {
+        html += `<tr class="unit-header-row"><td colspan="9">${u.label}</td></tr>`;
+        u.periods.forEach((p, i) => {
             const e1 = p.examAttempts['1'], e2 = p.examAttempts['2'], e3 = p.examAttempts['3+'];
             const rowClass = p.period === 'All' ? 'all-periods-row' : '';
             const periodLabel = p.period === 'All' ? 'All Periods' : `Period ${p.period}`;
+            // The chart is one-per-unit, not one-per-period, so it only
+            // needs a cell on the unit's first row -- rowspan carries it
+            // down the rest of that unit's period rows as a single column.
+            const chartCell = i === 0
+                ? `<td rowspan="${u.periods.length}" class="unit-chart-cell attempt-col-group"><canvas id="chart-unit-${u.unit}"></canvas></td>`
+                : '';
             html += `
                 <tr class="${rowClass}"${periodRowStyle(p.period)}>
                     <td>${periodLabel}</td>
@@ -104,9 +110,9 @@ function renderUnits(units) {
                     <td>${fmtMastery(e2.masteryPercent)}</td>
                     <td class="attempt-col-group">${fmtPercent(e3.avgPercent)} ${e3.count ? `<span class="text-muted small">(n=${e3.count})</span>` : ''}</td>
                     <td>${fmtMastery(e3.masteryPercent)}</td>
+                    ${chartCell}
                 </tr>`;
         });
-        html += `<tr class="unit-chart-row"><td colspan="8"><canvas id="chart-unit-${u.unit}"></canvas></td></tr>`;
     });
     tbody.innerHTML = html;
 
