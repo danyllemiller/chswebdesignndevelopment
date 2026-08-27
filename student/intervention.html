@@ -194,6 +194,9 @@
 
     /* Journal */
     .journal-prompt-box { background: var(--p-accent-light); border-left: 4px solid var(--p-accent); border-radius: 6px; padding: 14px 16px; font-size: .95rem; font-family: var(--p-font-body); }
+    .editable-prompt { cursor: text; border-radius: 4px; padding: 2px 4px; margin: -2px -4px; outline: none; }
+    .editable-prompt:hover { background: rgba(255,255,255,.6); }
+    .editable-prompt:focus { background: #fff; box-shadow: 0 0 0 2px var(--p-accent); }
     .journal-entry-card { border-left: 3px solid #dee2e6; padding-left: 12px; margin-bottom: 12px; }
     .journal-entry-card:hover { border-left-color: var(--p-accent); }
 
@@ -583,7 +586,9 @@
             </div>
             <div class="card-body">
               <div class="journal-prompt-box mb-3" id="journalPromptBox">
-                <small class="text-muted d-block mb-1 fw-bold text-uppercase" style="font-size:.65rem;">Today's Prompt</small>
+                <small class="text-muted d-block mb-1 fw-bold text-uppercase" style="font-size:.65rem;">Today's Prompt
+                  <i class="fas fa-pen-to-square ms-1 d-none" id="journalPromptEditHint" title="You can edit this prompt"></i>
+                </small>
                 <span id="journalPromptText">Loading…</span>
               </div>
               <textarea id="journalTextarea" class="form-control" rows="7" placeholder="Write your reflection here…"></textarea>
@@ -1525,15 +1530,28 @@
         ? `/api/admin/intervention/journal/${sid}`
         : `/api/intervention/journal?student_id=${sid}&date=${todayStr}`;
 
+      let savedPrompt = null;
       if (!isReadOnly) {
         const data = await apiFetch(journalUrl);
         const entry = (data.entries || [])[0];
-        if (entry) document.getElementById('journalTextarea').value = entry.content || '';
+        if (entry) {
+          document.getElementById('journalTextarea').value = entry.content || '';
+          savedPrompt = entry.prompt || null;
+        }
       }
 
-      // Today's prompt
-      const todayPrompt = prompts[0]?.prompt || '';
-      document.getElementById('journalPromptText').textContent = todayPrompt || 'Reflect on your learning today.';
+      // Today's prompt: an admin-set override always wins and is locked.
+      // Otherwise, prefer whatever the student already customized it to on a
+      // prior save today, falling back to the generic day prompt.
+      const isOverride = !!prompts[0]?.is_override;
+      const todayPrompt = isOverride ? (prompts[0]?.prompt || '') : (savedPrompt || prompts[0]?.prompt || '');
+      const promptEl = document.getElementById('journalPromptText');
+      promptEl.textContent = todayPrompt || 'Reflect on your learning today.';
+      promptEl.contentEditable = isReadOnly ? 'false' : String(!isOverride);
+      promptEl.classList.toggle('editable-prompt', !isReadOnly && !isOverride);
+      promptEl.title = !isReadOnly && !isOverride ? 'Click to write your own prompt' : '';
+      const editHint = document.getElementById('journalPromptEditHint');
+      if (editHint) editHint.classList.toggle('d-none', isReadOnly || isOverride);
 
       // History
       const histUrl = isReadOnly
@@ -1869,6 +1887,16 @@
       const entry = (data.entries || [])[0];
       document.getElementById('journalTextarea').value = entry?.content || '';
       document.getElementById('btnSaveJournal').dataset.date = ymd;
+
+      // Past entries show their own saved prompt, locked -- editing here
+      // would silently overwrite what the student actually reflected on
+      // that day, and re-saving would stamp today's prompt onto it.
+      const promptEl = document.getElementById('journalPromptText');
+      promptEl.textContent = entry?.prompt || 'Reflect on your learning that day.';
+      promptEl.contentEditable = 'false';
+      promptEl.classList.remove('editable-prompt');
+      const editHint = document.getElementById('journalPromptEditHint');
+      if (editHint) editHint.classList.add('d-none');
     }
 
     window.loadJournalDate = loadJournalForDate;
@@ -2237,7 +2265,19 @@
     }
 
     document.querySelectorAll('.intv-nav .nav-link').forEach(a => {
-      a.addEventListener('click', e => { e.preventDefault(); showTab(a.dataset.tab); });
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        showTab(a.dataset.tab);
+        // Re-anchor to today -- otherwise a student who viewed a past entry
+        // from history, then navigated away and back, would still have
+        // btnSaveJournal's date stuck on that past day (loadJournalForDate
+        // never gets reset anywhere else), silently saving today's writing
+        // under an old date.
+        if (a.dataset.tab === 'journal' && !isReadOnly) {
+          document.getElementById('btnSaveJournal').dataset.date = todayStr;
+          loadJournal();
+        }
+      });
     });
 
     // ── Calendar controls ─────────────────────────────────────────────────
