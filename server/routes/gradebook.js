@@ -405,19 +405,50 @@ router.get('/admin/attempt-analytics', async (req, res) => {
             preAttemptRows.filter(r => r.attempt_number === 1).forEach(r => { preAttempt1[r.student_id] = r; });
             preResponseRows.forEach(r => { if (!preAttempt1[r.student_id]) preAttempt1[r.student_id] = r; });
 
-            // Exam attempts 1/2/3+: same backfill idea, but only into the
-            // 1st-attempt bucket, and only when the student has NO logged
-            // attempt at all -- otherwise a real 2nd/3rd attempt could get
-            // double-counted as a fresh "1st attempt" too.
-            const examBuckets = { '1': {}, '2': {}, '3+': {} };
+            // Cumulative, not siloed: only students who scored low enough to
+            // need a retake show up in a raw "2nd attempt" bucket, so
+            // comparing that group's average against everyone's 1st-attempt
+            // average makes retaking look like it hurts, when it's really
+            // just measuring a different (weaker) subgroup. Instead, track
+            // each student's BEST score so far through attempt 1, through
+            // attempt 2, and through attempt 3+ -- the same population every
+            // time, carried forward when they didn't retake, so the number
+            // can only hold steady or improve as more attempts are allowed.
+            const attemptsByStudent = {};
             examAttemptRows.forEach(r => {
-                const key = r.attempt_number === 1 ? '1' : r.attempt_number === 2 ? '2' : '3+';
-                examBuckets[key][r.student_id] = r;
+                if (!attemptsByStudent[r.student_id]) attemptsByStudent[r.student_id] = [];
+                attemptsByStudent[r.student_id].push(r);
             });
             examResponseRows.forEach(r => {
-                const hasLoggedAttempt = examBuckets['1'][r.student_id] || examBuckets['2'][r.student_id] || examBuckets['3+'][r.student_id];
-                if (!hasLoggedAttempt) examBuckets['1'][r.student_id] = r;
+                if (!attemptsByStudent[r.student_id]) attemptsByStudent[r.student_id] = [{ attempt_number: 1, score: r.score, total_points: r.total_points }];
             });
+
+            const cumulativeByStudent = {};
+            Object.entries(attemptsByStudent).forEach(([sid, attempts]) => {
+                let through1 = null, through2 = null, through3 = null;
+                attempts.forEach(a => {
+                    if (!(Number(a.total_points) > 0)) return;
+                    const p = (Number(a.score) / Number(a.total_points)) * 100;
+                    if (a.attempt_number <= 1) through1 = through1 === null ? p : Math.max(through1, p);
+                    if (a.attempt_number <= 2) through2 = through2 === null ? p : Math.max(through2, p);
+                    through3 = through3 === null ? p : Math.max(through3, p);
+                });
+                if (through2 === null) through2 = through1;
+                if (through3 === null) through3 = through2;
+                cumulativeByStudent[sid] = { through1, through2, through3 };
+            });
+
+            function summarizeCumulative(vals) {
+                const pcts = vals.filter(v => v !== null);
+                if (pcts.length === 0) return { count: 0, avgPercent: null, masteryPercent: null };
+                const avg = pcts.reduce((a, b) => a + b, 0) / pcts.length;
+                const masteryCount = pcts.filter(p => p >= 80).length;
+                return {
+                    count: pcts.length,
+                    avgPercent: Math.round(avg * 10) / 10,
+                    masteryPercent: Math.round((masteryCount / pcts.length) * 1000) / 10
+                };
+            }
 
             const periodsToShow = showAllRow ? [...config.periods, 'All'] : [...config.periods];
             const periodRows = periodsToShow.map(period => {
@@ -426,11 +457,12 @@ router.get('/admin/attempt-analytics', async (req, res) => {
                 const preRowsForPeriod = Object.entries(preAttempt1).filter(([sid]) => inScope(sid)).map(([, r]) => r);
                 const pretest = summarizeAttempts(preRowsForPeriod);
 
-                const examAttemptsForPeriod = {};
-                ['1', '2', '3+'].forEach(key => {
-                    const rowsForPeriod = Object.entries(examBuckets[key]).filter(([sid]) => inScope(sid)).map(([, r]) => r);
-                    examAttemptsForPeriod[key] = summarizeAttempts(rowsForPeriod);
-                });
+                const relevantCumulative = Object.entries(cumulativeByStudent).filter(([sid]) => inScope(sid)).map(([, v]) => v);
+                const examAttemptsForPeriod = {
+                    '1': summarizeCumulative(relevantCumulative.map(v => v.through1)),
+                    '2': summarizeCumulative(relevantCumulative.map(v => v.through2)),
+                    '3+': summarizeCumulative(relevantCumulative.map(v => v.through3))
+                };
 
                 return { period, pretest: { count: pretest.count, avgPercent: pretest.avgPercent }, examAttempts: examAttemptsForPeriod };
             });
