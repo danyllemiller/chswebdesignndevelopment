@@ -30,27 +30,50 @@ function renderUnitChart(unit) {
     const canvas = document.getElementById(`chart-unit-${unit.unit}`);
     if (!canvas || typeof Chart === 'undefined') return;
 
-    // "All Periods" is already the summary row right above it in the table --
-    // the chart is for comparing periods against each other, so it's left out here.
+    // One bar per category (the cumulative "All Periods" number) -- the
+    // per-period breakdown lives in the hover tooltip instead of as
+    // separate bars, since that's what the row above the chart already is.
     const periods = unit.periods.filter(p => p.period !== 'All');
-    if (periods.length === 0) return;
+    const allRow = unit.periods.find(p => p.period === 'All');
+    if (!allRow || periods.length === 0) return;
+
+    const categories = [
+        { label: 'Pre-Test', color: 'rgba(108,117,125,0.75)', value: allRow.pretest.avgPercent, key: 'pretest' },
+        { label: 'Exam — After 1 Attempt', color: 'rgba(13,110,253,0.75)', value: allRow.examAttempts['1'].avgPercent, key: '1' },
+        { label: 'Exam — After 2 Attempts', color: 'rgba(25,135,84,0.75)', value: allRow.examAttempts['2'].avgPercent, key: '2' },
+        { label: 'Exam — After 3+ Attempts', color: 'rgba(255,193,7,0.85)', value: allRow.examAttempts['3+'].avgPercent, key: '3+' }
+    ];
 
     const chart = new Chart(canvas, {
         type: 'bar',
         data: {
-            labels: periods.map(p => p.period),
-            datasets: [
-                { label: 'Pre-Test', data: periods.map(p => p.pretest.avgPercent), backgroundColor: 'rgba(108,117,125,0.75)', borderRadius: 3 },
-                { label: 'Exam — After 1 Attempt', data: periods.map(p => p.examAttempts['1'].avgPercent), backgroundColor: 'rgba(13,110,253,0.75)', borderRadius: 3 },
-                { label: 'Exam — After 2 Attempts', data: periods.map(p => p.examAttempts['2'].avgPercent), backgroundColor: 'rgba(25,135,84,0.75)', borderRadius: 3 },
-                { label: 'Exam — After 3+ Attempts', data: periods.map(p => p.examAttempts['3+'].avgPercent), backgroundColor: 'rgba(255,193,7,0.85)', borderRadius: 3 }
-            ]
+            labels: categories.map(c => c.label),
+            datasets: [{
+                data: categories.map(c => c.value),
+                backgroundColor: categories.map(c => c.color),
+                borderRadius: 3
+            }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } },
-            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } }
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: (items) => categories[items[0].dataIndex].label,
+                        label: (item) => `All Periods: ${item.parsed.y ?? '—'}%`,
+                        afterBody: (items) => {
+                            const key = categories[items[0].dataIndex].key;
+                            return periods.map(p => {
+                                const val = key === 'pretest' ? p.pretest.avgPercent : p.examAttempts[key].avgPercent;
+                                return `Period ${p.period}: ${val !== null && val !== undefined ? val + '%' : '—'}`;
+                            });
+                        }
+                    }
+                }
+            }
         }
     });
     unitCharts.push(chart);

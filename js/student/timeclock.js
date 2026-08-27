@@ -141,7 +141,25 @@ async function resolveTodaysBellWindow() {
         if (windows.length === 0) return null; // none of this student's periods meet on today's day type
 
         const active = windows.find(w => nowMs >= w.startMs && nowMs <= w.endMs);
-        const chosen = active || windows.sort((a, b) => a.startMs - b.startMs)[0];
+        let chosen = active || windows.sort((a, b) => a.startMs - b.startMs)[0];
+
+        // A dual-enrolled student who never clocked out of an earlier period
+        // today otherwise gets silently abandoned the moment their next
+        // period becomes "active" -- everything below is scoped to whichever
+        // period this function picks, so an unfinished earlier clock-out
+        // would never be checked again. Finish that first: if any already-
+        // ended period today still shows mode 'out' (clocked in, never out),
+        // resolve to that period instead until it's actually completed.
+        const pastEnded = windows.filter(w => nowMs > w.endMs).sort((a, b) => b.endMs - a.endMs);
+        for (const w of pastEnded) {
+            try {
+                const res = await fetch(`/api/timeclock/status?student_id=${encodeURIComponent(studentData.student_id)}&period=${encodeURIComponent(w.period)}`);
+                if (!res.ok) continue;
+                const data = await res.json();
+                const mode = data.mode || (data.type === 'out' ? 'done' : data.type === 'in' ? 'out' : 'in');
+                if (mode === 'out') { chosen = w; break; }
+            } catch (e) { /* ignore this period, keep the normal fallback */ }
+        }
 
         currentPeriod = chosen.period;
         return { startMs: chosen.startMs, endMs: chosen.endMs };
