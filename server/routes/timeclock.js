@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
 const { getDbConnection } = require('../db');
 
 // new Date().toISOString().split('T')[0] gives the UTC calendar date, which
@@ -12,6 +14,149 @@ function getLocalDateStr(d = new Date()) {
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
+}
+
+// ==============================================================================
+// DAY-TYPE / BELL-SCHEDULE RESOLUTION (server-side)
+// Mirrors the identical merge logic already used client-side in
+// js/student/timeclock.js, admin/tools/tardy-tracker.html, and
+// student/intervention.html (special-dates.csv as the base layer,
+// calendar_events overriding it when its type outranks the CSV's) so
+// grading decisions here never disagree with what those pages show.
+// ==============================================================================
+
+const EVENT_TYPE_PRI = { A: 6, B: 5, C: 4, A_MIN: 3, B_MIN: 2, S: 2, OFF: 1, none: 0 };
+
+function parseSpecialDatesCSV(text) {
+    const map = new Map();
+    const lines = text.split(/\r?\n/);
+    const firstLine = lines.find(l => l.trim());
+    const delim = firstLine && firstLine.includes('\t') ? '\t' : ',';
+    for (let i = 0; i < lines.length; i++) {
+        const raw = lines[i].trim();
+        if (!raw) continue;
+        if (i === 0 && /^date/i.test(raw.split(delim)[0].trim())) continue;
+        const cols = raw.split(delim);
+        const date = cols[0]?.trim();
+        const type = cols[1]?.trim();
+        if (date && /^\d{4}-\d{2}-\d{2}$/.test(date) && type) map.set(date, { type });
+    }
+    return map;
+}
+
+// Briefly cached (60s) -- this runs on every clock-in/clock-out check, and
+// the underlying data (a static CSV + a rarely-changing events table)
+// doesn't need to be re-read on every single request.
+let dayTypesCache = null;
+let dayTypesCacheAt = 0;
+
+async function getDayTypes(connection) {
+    if (dayTypesCache && Date.now() - dayTypesCacheAt < 60000) return dayTypesCache;
+    let csvText = '';
+    try { csvText = fs.readFileSync(path.join(__dirname, '../../special-dates.csv'), 'utf8'); } catch (e) { /* fall through with an empty CSV layer */ }
+    const dayTypes = parseSpecialDatesCSV(csvText);
+    const [events] = await connection.execute('SELECT event_date, type FROM calendar_events');
+    events.forEach(ev => {
+        const dateStr = getLocalDateStr(new Date(ev.event_date));
+        const existing = dayTypes.get(dateStr);
+        if (existing) {
+            if ((EVENT_TYPE_PRI[ev.type] ?? 0) > (EVENT_TYPE_PRI[existing.type] ?? 0)) existing.type = ev.type;
+        } else {
+            dayTypes.set(dateStr, { type: ev.type });
+        }
+    });
+    dayTypesCache = dayTypes;
+    dayTypesCacheAt = Date.now();
+    return dayTypes;
+}
+
+function getBellScheduleKeyForDate(dayTypes, dateStr) {
+    const info = dayTypes.get(dateStr);
+    if (!info || info.type === 'OFF' || info.type === 'none') return null;
+    const jsDay = new Date(dateStr + 'T00:00:00').getDay();
+    if (jsDay === 0 || jsDay === 6) return null;
+    return info.type === 'S' ? 'summer' : info.type;
+}
+
+function isSchoolDay(dayTypes, dateStr) {
+    return getBellScheduleKeyForDate(dayTypes, dateStr) !== null;
+}
+
+function mondayOf(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const day = d.getDay();
+    d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
+    return d;
+}
+
+// Which "pair group" a date belongs to for question-rotation purposes:
+// within each Monday-based week, count real school days in order -- the
+// 1st is solo, the 2nd+3rd pair up, the 4th+5th pair up, and so on. Built
+// on the ACTUAL school-day sequence (skipping weekends/holidays/off days
+// via the real calendar), not fixed weekday names, so a Monday holiday
+// correctly shifts the whole week's pairing instead of breaking it.
+function pairGroupKey(dayTypes, dateStr) {
+    const monday = mondayOf(dateStr);
+    const mondayStr = getLocalDateStr(monday);
+    let idx = 0;
+    const cursor = new Date(monday);
+    for (let i = 0; i < 14; i++) {
+        const cStr = getLocalDateStr(cursor);
+        if (isSchoolDay(dayTypes, cStr)) idx++;
+        if (cStr === dateStr) {
+            const group = idx > 0 ? Math.floor(idx / 2) + 1 : 0;
+            return `${mondayStr}-g${group}`;
+        }
+        cursor.setDate(cursor.getDate() + 1);
+    }
+    return dateStr; // defensive fallback -- shouldn't normally be reached
+}
+
+async function getBellStartTime(connection, dayTypes, dateStr, period) {
+    const scheduleKey = getBellScheduleKeyForDate(dayTypes, dateStr);
+    if (!scheduleKey) return null;
+    const p = String(period || '').trim().toUpperCase();
+    const [rows] = await connection.execute(
+        'SELECT start_time FROM bell_schedule WHERE schedule_type = ? AND period_label = ?',
+        [scheduleKey, p]
+    );
+    let row = rows[0];
+    if (!row) {
+        const [allRows] = await connection.execute('SELECT period_label, start_time FROM bell_schedule WHERE schedule_type = ?', [scheduleKey]);
+        row = allRows.find(r => p.includes(r.period_label));
+    }
+    return row ? row.start_time : null;
+}
+
+// On time = clocked in anywhere from the window opening (5 min before the
+// bell) through 5 minutes after it. Arriving later than that is late;
+// arriving early is always fine since the clock-in window itself doesn't
+// open any earlier than 5 minutes before the bell.
+function isOnTime(startTimeStr, now = new Date()) {
+    if (!startTimeStr) return null; // no schedule resolved -- can't judge, don't penalize
+    const [sh, sm] = String(startTimeStr).split(':').map(Number);
+    const startMinutes = sh * 60 + sm;
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    return (nowMinutes - startMinutes) <= 5;
+}
+
+// Deterministic hash so every student in the same course sees the exact
+// same question for the whole pair-group window, without needing to
+// coordinate or store which question was "already picked" anywhere.
+function hashString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+    return Math.abs(hash);
+}
+
+const PERIOD_COURSE_MAP = { A1: 'WD1', B2: 'WD2', A3: 'CS', A5: 'CS', B4: 'CS', B6: 'CS', B8: 'CS' };
+const TC_COURSE_ID_MAP = { CS: '10003GS', WD1: '05254G1S', WD2: '05254G2S' };
+
+function periodToCourseKeyServer(period) {
+    const p = String(period || '').trim().toUpperCase();
+    if (PERIOD_COURSE_MAP[p]) return PERIOD_COURSE_MAP[p];
+    const prefix = p.match(/^[A-Z]+/)?.[0];
+    return (prefix && PERIOD_COURSE_MAP[prefix]) || null;
 }
 
 // Legacy clock-in endpoint (kept for backward compatibility)
@@ -109,14 +254,19 @@ function getCurrentWDChapter(connection, wdKey) {
     return getCurrentChapter(connection, WD_COURSE_IDS[wdKey], '^ch[0-9]+_', /^ch(\d+)_/);
 }
 
-async function getRandomQuestion(connection, table, chapter) {
+// Deterministic, not random -- every student in the same course must see
+// the identical question for the whole pair-group window (see
+// pairGroupKey above), so the pool is fetched in a stable order and
+// indexed via a hash of (groupKey, table, chapter) instead of RAND().
+async function getDeterministicQuestion(connection, table, chapter, groupKey) {
     const [rows] = await connection.execute(
         `SELECT question_text AS question, option_a, option_b, option_c, option_d, correct_answer AS answer
-         FROM ${table} WHERE chapter_number = ? ORDER BY RAND() LIMIT 1`,
+         FROM ${table} WHERE chapter_number = ? ORDER BY question_id ASC`,
         [chapter]
     );
     if (rows.length === 0) return null;
-    const r = rows[0];
+    const idx = hashString(`${groupKey}|${table}|${chapter}`) % rows.length;
+    const r = rows[idx];
     return { question: r.question, options: [r.option_a, r.option_b, r.option_c, r.option_d], answer: r.answer };
 }
 
@@ -128,16 +278,18 @@ router.get('/timeclock/question', async (req, res) => {
     const kind = String(type || '').replace(/_IN$/, ''); // CS, WD1, WD2
     try {
         const connection = await getDbConnection();
+        const dayTypes = await getDayTypes(connection);
+        const groupKey = pairGroupKey(dayTypes, getLocalDateStr());
 
         let chapter, isFallback, title, q;
         if (kind === 'CS') {
             ({ chapter, isFallback } = await getCurrentCSChapter(connection));
             title = CS_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
-            q = await getRandomQuestion(connection, 'questions', chapter);
+            q = await getDeterministicQuestion(connection, 'questions', chapter, groupKey);
         } else if (kind === 'WD1' || kind === 'WD2') {
             ({ chapter, isFallback } = await getCurrentWDChapter(connection, kind));
             title = WD_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
-            q = await getRandomQuestion(connection, 'wd_questions', chapter);
+            q = await getDeterministicQuestion(connection, 'wd_questions', chapter, `${kind}|${groupKey}`);
         } else {
             await connection.release();
             return res.status(400).json({ error: 'Unrecognized type' });
@@ -246,16 +398,17 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
 });
 
 router.post('/timeclock/save', async (req, res) => {
-    const { student_id, section_id, mode, answer } = req.body;
+    const { student_id, section_id, mode, answer, is_correct } = req.body;
     if (!student_id || !mode) return res.status(400).json({ error: 'student_id and mode are required' });
     const today = getLocalDateStr();
     const period = section_id || '';
     try {
         const connection = await getDbConnection();
         if (mode === 'in') {
+            const isCorrectVal = is_correct === undefined || is_correct === null ? null : (is_correct ? 1 : 0);
             await connection.execute(
-                'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',
-                [student_id, period, 'in', answer || '']
+                'INSERT INTO clockins (student_id, section_id, type, answer, is_correct, timestamp) VALUES (?, ?, ?, ?, ?, NOW())',
+                [student_id, period, 'in', answer || '', isCorrectVal]
             );
             // timesheets has no unique constraint to make "ON DUPLICATE KEY
             // UPDATE" actually trigger (it never has -- every prior clock-in
@@ -279,6 +432,38 @@ router.post('/timeclock/save', async (req, res) => {
                     [student_id, today, period, answer || '']
                 );
             }
+
+            // Grade the clock-in: 1 pt for doing it, 1 pt for being on time
+            // (within 5 min of the bell), 1 pt for a correct answer. Written
+            // straight into the real gradebook (exams/responses) so it shows
+            // up in the normal admin/student views like any other assignment
+            // -- one shared entry per course per day, matching how exams and
+            // pretests already work. Best-effort: a failure here shouldn't
+            // block the clock-in itself from succeeding.
+            try {
+                const courseKey = periodToCourseKeyServer(period);
+                const courseId = TC_COURSE_ID_MAP[courseKey];
+                if (courseId) {
+                    const dayTypes = await getDayTypes(connection);
+                    const startTime = await getBellStartTime(connection, dayTypes, today, period);
+                    const onTime = isOnTime(startTime);
+                    let points = 1; // attempted
+                    if (onTime) points += 1;
+                    if (isCorrectVal === 1) points += 1;
+
+                    const examId = `TC-${courseKey}-${today}`;
+                    await connection.execute(
+                        `INSERT INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?)
+                         ON DUPLICATE KEY UPDATE title = VALUES(title), total_points = VALUES(total_points), course_id = VALUES(course_id)`,
+                        [examId, `Timeclock Check-In — ${today}`, 3, courseId]
+                    );
+                    await connection.execute(
+                        `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW())
+                         ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
+                        [student_id, examId, points, 3]
+                    );
+                }
+            } catch (gradeErr) { console.error('[timeclock] Failed to grade clock-in:', gradeErr); }
         } else if (mode === 'out') {
             await connection.execute(
                 'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',

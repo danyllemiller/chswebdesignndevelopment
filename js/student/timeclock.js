@@ -194,7 +194,10 @@ function checkAutoPopup() {
     const who = studentData.student_id;
     const wherePeriod = currentPeriod || 'na';
 
-    if (mode === 'in' && now >= bellWindow.startMs) {
+    // Clock-in opens 5 min before the bell and closes at the end of class --
+    // it doesn't stay open indefinitely like clock-out does, since clocking
+    // in after class is over doesn't mean anything.
+    if (mode === 'in' && now >= (bellWindow.startMs - 5 * 60 * 1000) && now <= bellWindow.endMs) {
         const flag = `tc_auto_shown_in_${who}_${wherePeriod}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
@@ -297,6 +300,17 @@ async function checkStatus() {
             return;
         }
 
+        // Clock-in only stays available through the end of that period --
+        // once it's over, there's nothing meaningful to clock in for anymore.
+        if (mode === 'in' && bellWindow && Date.now() > bellWindow.endMs) {
+            document.getElementById('tc-form').style.display = 'none';
+            const successMsg = document.getElementById('tc-success-msg');
+            successMsg.classList.remove('d-none', 'alert-success');
+            successMsg.classList.add('alert-secondary');
+            successMsg.textContent = "Today's class has ended, so clock-in is closed. See you next class!";
+            return;
+        }
+
         if (mode === 'in') {
             const category = `${getCourseKey()}_IN`;
 
@@ -335,7 +349,8 @@ async function handleTimeclockSubmit(e) {
     e.preventDefault();
     const mode = window.timeclock.currentMode;
     let answer = "";
-    
+    let isCorrect = null; // null = no gradable question (e.g. question bank empty); true/false once a real question was answered
+
     if (mode === 'in') {
         const fallback = document.getElementById('tc-in-fallback');
         if (fallback) {
@@ -346,7 +361,7 @@ async function handleTimeclockSubmit(e) {
             answer = checked.value;
 
             if (currentQuestion?.correct_answer) {
-                const isCorrect = checked.value === currentQuestion.correct_answer;
+                isCorrect = checked.value === currentQuestion.correct_answer;
                 answer += ` | ${currentQuestion.chapterLabel || 'Review'}: ${isCorrect ? 'Correct' : `Incorrect (chose "${checked.value}", correct was "${currentQuestion.correct_answer}")`}`;
             }
         }
@@ -361,7 +376,8 @@ async function handleTimeclockSubmit(e) {
                 student_id: studentData.student_id,
                 section_id: currentPeriod || studentData.section_id,
                 mode: mode,
-                answer: answer
+                answer: answer,
+                is_correct: isCorrect
             })
         });
         location.reload();
