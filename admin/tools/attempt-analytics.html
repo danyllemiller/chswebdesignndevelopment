@@ -20,6 +20,7 @@
 
   <script src="/js/loader.js?v=19"></script>
   <script type="module" src="/js/auth-guard.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
@@ -33,6 +34,8 @@
     .unit-header-row td { background: #0d6efd; color: #fff; font-weight: 700; font-size: 1.05rem; }
     .all-periods-row td { background: #f1f3f9; font-weight: 700; }
     .period-swatch { display: inline-block; width: .85rem; height: .85rem; border-radius: 3px; margin-right: .5rem; vertical-align: middle; border: 1px solid rgba(0,0,0,.08); }
+    .unit-chart-row td { background: #fff; padding: 1rem 1.5rem; }
+    .unit-chart-row canvas { max-height: 220px; }
   </style>
 </head>
 <body>
@@ -86,6 +89,6 @@
 
 <div id="footer-placeholder"></div>
 
-<script type="module" src="/js/admin/attempt-analytics.js?v=4"></script>
+<script type="module" src="/js/admin/attempt-analytics.js?v=5"></script>
 </body>
 </html>
