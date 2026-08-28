@@ -907,7 +907,49 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('studentFilter')?.addEventListener('change', applyFiltersAndRender);
+
+    document.getElementById('markEnteredIcBtn')?.addEventListener('click', markEnteredIcForCurrentView);
 });
+
+// Scoped to the period filter only (not the individual-student filter) --
+// "All" periods clears every yellow cell in the gradebook, a specific
+// period only clears that period's.
+async function markEnteredIcForCurrentView() {
+    const periodVal = document.getElementById('periodFilter')?.value || 'All';
+    const students = getFilteredStudents(periodVal, 'All');
+    const pairs = [];
+    students.forEach(s => {
+        const sGrades = allGrades[s.studentId] || {};
+        Object.entries(sGrades).forEach(([examId, g]) => {
+            if (g && typeof g === 'object' && g.score !== '' && g.score !== undefined && g.score !== null && !g.enteredIC) {
+                pairs.push({ student_id: s.studentId, exam_id: examId });
+            }
+        });
+    });
+
+    if (pairs.length === 0) {
+        alert('No new grades to mark — nothing is currently yellow in this view.');
+        return;
+    }
+    if (!confirm(`Mark ${pairs.length} grade(s) as entered in IC${periodVal !== 'All' ? ` for ${periodVal}` : ''}?`)) return;
+
+    const btn = document.getElementById('markEnteredIcBtn');
+    btn.disabled = true;
+    try {
+        const res = await fetch('/api/admin/mark-grades-entered-ic', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pairs })
+        });
+        if (!res.ok) throw new Error();
+        pairs.forEach(p => { allGrades[p.student_id][p.exam_id].enteredIC = true; });
+        applyFiltersAndRender();
+    } catch (e) {
+        alert('Failed to mark grades as entered. Try again.');
+    } finally {
+        btn.disabled = false;
+    }
+}
 
 async function loadData() {
     try {
@@ -967,7 +1009,8 @@ async function loadData() {
                 allGrades[g.student_id][g.exam_id] = {
                     score: g.score,
                     max: g.total_points,
-                    timestamp: g.timestamp
+                    timestamp: g.timestamp,
+                    enteredIC: !!g.entered_in_ic
                 };
             });
         }
@@ -1357,6 +1400,11 @@ let score = "", display = '', bg = "";
                 else {
                     display = (Number(score) === info.maxPoints) ? '<span class="check-mark">✔</span>' : score;
                     if (Number(score)/info.maxPoints < 0.8) bg = "background-color: #FFF2CC;";
+                    // A new/updated score not yet copied into IC takes visual
+                    // priority over the low-score highlight above -- once
+                    // marked entered, the cell falls back to whatever bg (if
+                    // any) it would've had otherwise.
+                    if (score !== "" && typeof g === 'object' && !g.enteredIC) bg = "background-color: rgb(240, 239, 155);";
                 }
             } else {
                 if (isPeriodExempt) {

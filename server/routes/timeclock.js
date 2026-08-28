@@ -457,9 +457,13 @@ router.post('/timeclock/save', async (req, res) => {
                          ON DUPLICATE KEY UPDATE title = VALUES(title), total_points = VALUES(total_points), course_id = VALUES(course_id)`,
                         [examId, `Timeclock Check-In — ${today}`, 3, courseId]
                     );
+                    const [icCols] = await connection.execute(`SHOW COLUMNS FROM responses LIKE 'entered_in_ic'`);
+                    if (icCols.length === 0) {
+                        await connection.execute(`ALTER TABLE responses ADD COLUMN entered_in_ic TINYINT(1) DEFAULT 0`);
+                    }
                     await connection.execute(
-                        `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW())
-                         ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
+                        `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic) VALUES (?, ?, ?, ?, NOW(), 0)
+                         ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0`,
                         [student_id, examId, points, 3]
                     );
                 }

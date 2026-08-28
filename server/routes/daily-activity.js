@@ -89,20 +89,13 @@ router.get('/admin/daily-activity', async (req, res) => {
             [targetDate, currentYear]
         );
 
-        const [examActivity] = await connection.execute(
-            `SELECT r.student_id, r.exam_id, r.score, r.total_points, r.timestamp,
-                    s.first_name, s.last_name, s.section_id
-             FROM responses r
-             JOIN students s ON s.student_id = r.student_id
-             WHERE DATE(r.timestamp) = ? AND ${activeStudentFilter}
-             ORDER BY r.exam_id, s.last_name, s.first_name`,
-            [targetDate, currentYear]
-        );
-
         // Tardy follow-ups aren't scoped to the selected date -- it's a
-        // standing "who still needs a conversation" list (there's no way to
-        // mark one resolved yet), so it always reflects the full current
-        // tally regardless of which date is being viewed above it.
+        // standing "who still needs a conversation" list, resolved (letter
+        // sent, or flagged as minor and not worth a letter) per tardy-count
+        // milestone via tardy_followup_resolutions -- so it always reflects
+        // the full current tally regardless of which date is being viewed
+        // above it, minus whatever's already been handled at that count.
+        await ensureFollowupTables(connection);
         const [tardyRows] = await connection.execute(
             `SELECT tp.student_id, s.first_name, s.last_name
              FROM tardy_passes tp
@@ -110,6 +103,10 @@ router.get('/admin/daily-activity', async (req, res) => {
              WHERE ${activeStudentFilter}`,
             [currentYear]
         );
+        const [resolutionRows] = await connection.execute(
+            `SELECT student_id, resolved_through_count FROM tardy_followup_resolutions`
+        );
+        const resolvedThrough = new Map(resolutionRows.map(r => [r.student_id, r.resolved_through_count]));
 
         // Incomplete pretests/exams -- also a standing list, not date-scoped,
         // since "started but never finished" doesn't have a natural single day.
@@ -148,9 +145,60 @@ router.get('/admin/daily-activity', async (req, res) => {
             tardyByStudent.get(r.student_id).count++;
         });
         const tardyFollowups = Array.from(tardyByStudent.values())
-            .filter(s => s.count > 1)
+            .filter(s => s.count > 1 && s.count > (resolvedThrough.get(s.student_id) || 1))
             .map(s => ({ student_id: s.student_id, first_name: s.first_name, last_name: s.last_name, count: s.count, step: getTardyStep(s.count) }))
             .sort((a, b) => b.count - a.count);
+
+        // Retake clearances needed: CS unit-exam attempts where the most
+        // recent attempt was under 80% and the required next step (notes
+        // after the 1st fail, worksheets after the 2nd) hasn't been marked
+        // cleared yet. See checkRetakeClearance in routes/gradebook.js for
+        // the same logic applied server-side as the real enforcement gate.
+        const [attemptRows] = await connection.execute(
+            `SELECT ea.student_id, ea.exam_id, ea.score, ea.total_points,
+                    s.first_name, s.last_name, s.section_id
+             FROM exam_attempts ea
+             JOIN students s ON s.student_id = ea.student_id
+             WHERE ea.exam_id REGEXP '^Unit[0-9]+-Exam$' AND ${activeStudentFilter}
+             ORDER BY ea.student_id, ea.exam_id, ea.attempt_number ASC`,
+            [currentYear]
+        );
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS retake_clearances (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                student_id VARCHAR(50) NOT NULL,
+                exam_id VARCHAR(100) NOT NULL,
+                requirement ENUM('notes','worksheets') NOT NULL,
+                cleared_by VARCHAR(100),
+                cleared_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_clearance_lookup (student_id, exam_id, requirement)
+            )
+        `);
+        const [clearanceRows] = await connection.execute(
+            `SELECT student_id, exam_id, requirement FROM retake_clearances`
+        );
+        const clearanceSet = new Set(clearanceRows.map(c => `${c.student_id}|${c.exam_id}|${c.requirement}`));
+
+        const attemptsByKey = new Map();
+        attemptRows.forEach(r => {
+            const key = `${r.student_id}|${r.exam_id}`;
+            if (!attemptsByKey.has(key)) attemptsByKey.set(key, []);
+            attemptsByKey.get(key).push(r);
+        });
+        const retakeClearancesNeeded = [];
+        attemptsByKey.forEach((attempts) => {
+            const last = attempts[attempts.length - 1];
+            const pct = Number(last.total_points) > 0 ? (Number(last.score) / Number(last.total_points)) * 100 : 0;
+            if (pct >= 80) return;
+            const requirement = attempts.length === 1 ? 'notes' : (attempts.length === 2 ? 'worksheets' : null);
+            if (!requirement) return;
+            if (clearanceSet.has(`${last.student_id}|${last.exam_id}|${requirement}`)) return;
+            retakeClearancesNeeded.push({
+                student_id: last.student_id, first_name: last.first_name, last_name: last.last_name,
+                section_id: last.section_id, exam_id: last.exam_id, attempt_number: attempts.length,
+                pct: Math.round(pct), requirement
+            });
+        });
 
         // Uploaded files have zero database tracking at all (upload.php is
         // pure filesystem), so there's genuinely no way to know from this
@@ -187,11 +235,76 @@ router.get('/admin/daily-activity', async (req, res) => {
             console.error('[daily-activity] upload scan failed:', e);
         }
 
-        res.json({ date: targetDate, submissions, uploads, examActivity, tardyFollowups, incompleteAssessments });
+        res.json({ date: targetDate, submissions, uploads, tardyFollowups, incompleteAssessments, retakeClearancesNeeded });
     } catch (err) {
         console.error('[daily-activity] failed:', err);
         res.status(500).json({ error: 'Failed to build daily activity report.' });
     }
+});
+
+async function ensureFollowupTables(connection) {
+    await connection.execute(`
+        CREATE TABLE IF NOT EXISTS tardy_followup_resolutions (
+            student_id VARCHAR(50) PRIMARY KEY,
+            resolved_through_count INT NOT NULL,
+            resolution_type ENUM('letter','minor_flag') NOT NULL,
+            resolved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    await connection.execute(`
+        CREATE TABLE IF NOT EXISTS staff_contacts (
+            id INT PRIMARY KEY DEFAULT 1,
+            counselor_name VARCHAR(150),
+            counselor_email VARCHAR(150)
+        )
+    `);
+}
+
+// Marks a student's tardy follow-up as handled (letter sent, or judged not
+// worth one) up through their CURRENT count -- they drop off the list until
+// the count moves past this again.
+router.post('/admin/tardy-followup-resolve', async (req, res) => {
+    const { student_id, count, resolution_type } = req.body;
+    if (!student_id || !count || !['letter', 'minor_flag'].includes(resolution_type)) {
+        return res.status(400).json({ error: 'student_id, count, and a valid resolution_type are required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        await ensureFollowupTables(connection);
+        await connection.execute(
+            `INSERT INTO tardy_followup_resolutions (student_id, resolved_through_count, resolution_type)
+             VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE resolved_through_count = VALUES(resolved_through_count), resolution_type = VALUES(resolution_type), resolved_at = NOW()`,
+            [student_id, count, resolution_type]
+        );
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save resolution' }); }
+});
+
+router.get('/admin/staff-contacts', async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await ensureFollowupTables(connection);
+        const [rows] = await connection.execute('SELECT counselor_name, counselor_email FROM staff_contacts WHERE id = 1');
+        await connection.release();
+        res.json(rows[0] || { counselor_name: '', counselor_email: '' });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch staff contacts' }); }
+});
+
+router.post('/admin/staff-contacts', async (req, res) => {
+    const { counselor_name, counselor_email } = req.body;
+    try {
+        const connection = await getDbConnection();
+        await ensureFollowupTables(connection);
+        await connection.execute(
+            `INSERT INTO staff_contacts (id, counselor_name, counselor_email) VALUES (1, ?, ?)
+             ON DUPLICATE KEY UPDATE counselor_name = VALUES(counselor_name), counselor_email = VALUES(counselor_email)`,
+            [counselor_name || '', counselor_email || '']
+        );
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save staff contacts' }); }
 });
 
 module.exports = router;

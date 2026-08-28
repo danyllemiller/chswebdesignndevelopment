@@ -63,14 +63,6 @@
   </div>
 
   <div class="card shadow-sm border-0 mb-4 section-card">
-    <div class="card-header bg-white"><i class="fas fa-rotate-right me-2 text-warning"></i>Exam Activity <span id="examCount" class="badge bg-secondary ms-1"></span></div>
-    <div class="card-body" id="examBody">
-      <p class="text-muted small mb-2">A new or improved score on file for that date — this can't distinguish a genuine retake from a first-ever submission, just informational.</p>
-      <div id="examList"></div>
-    </div>
-  </div>
-
-  <div class="card shadow-sm border-0 mb-4 section-card">
     <div class="card-header bg-white"><i class="fas fa-triangle-exclamation me-2 text-danger"></i>Incomplete Pretests / Exams <span id="incompleteCount" class="badge bg-secondary ms-1"></span></div>
     <div class="card-body" id="incompleteBody">
       <p class="text-muted small mb-2">A standing list, not tied to the date above — a student started this but no score was ever recorded. Cross-checked against the gradebook automatically; anything marked "unverified" couldn't be matched with certainty and is worth a manual look.</p>
@@ -79,10 +71,21 @@
   </div>
 
   <div class="card shadow-sm border-0 mb-4 section-card">
-    <div class="card-header bg-white"><i class="fas fa-flag me-2 text-danger"></i>Tardy Follow-Ups Needed <span id="tardyCount" class="badge bg-secondary ms-1"></span></div>
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <span><i class="fas fa-flag me-2 text-danger"></i>Tardy Follow-Ups Needed <span id="tardyCount" class="badge bg-secondary ms-1"></span></span>
+      <button id="counselorSettingsBtn" class="btn btn-sm btn-outline-secondary" title="Set counselor contact info"><i class="fas fa-gear"></i></button>
+    </div>
     <div class="card-body" id="tardyBody">
-      <p class="text-muted small mb-2">A standing list, not tied to the date above — everyone currently on record with more than one tardy.</p>
+      <p class="text-muted small mb-2">A standing list, not tied to the date above — everyone currently on record with more than one tardy that hasn't been handled yet at their current count.</p>
       <div id="tardyList"></div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4 section-card">
+    <div class="card-header bg-white"><i class="fas fa-book me-2 text-primary"></i>Retake Clearances Needed <span id="retakeCount" class="badge bg-secondary ms-1"></span></div>
+    <div class="card-body" id="retakeBody">
+      <p class="text-muted small mb-2">Comp Sci only — a student under 80% on a unit test needs to show notes before retake #1, or finish all chapter activities/worksheets before retake #2. Clearing here is what unlocks the retake for them.</p>
+      <div id="retakeList"></div>
     </div>
   </div>
 </div>
@@ -168,35 +171,6 @@
     `).join('');
   }
 
-  // Grouped by assignment (exam_id) rather than period -- this section is
-  // about seeing everyone who touched the same assignment together, sorted
-  // by last name within each group, not about which class they're in.
-  function groupByAssignment(items) {
-    const groups = new Map();
-    items.forEach(item => {
-      const key = item.exam_id || 'Unknown assignment';
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key).push(item);
-    });
-    groups.forEach(group => group.sort((a, b) => (a.last_name || '').localeCompare(b.last_name || '')));
-    return groups;
-  }
-
-  function renderExamActivity(items) {
-    document.getElementById('examCount').textContent = items.length;
-    const list = document.getElementById('examList');
-    if (items.length === 0) { list.innerHTML = '<p class="text-muted small mb-0">No new or improved exam scores that day.</p>'; return; }
-    const groups = groupByAssignment(items);
-    list.innerHTML = Array.from(groups.entries()).map(([examId, group]) => `
-      <div class="period-group-label">${escapeHtml(examId)}</div>
-      ${group.map(item => `
-        <div class="activity-row d-flex justify-content-between align-items-start">
-          <div><strong>${name(item)}</strong> <span class="text-muted small">${escapeHtml(item.section_id || '')}</span></div>
-          <span class="fw-bold">${item.score}/${item.total_points}</span>
-        </div>`).join('')}
-    `).join('');
-  }
-
   function renderIncomplete(items) {
     document.getElementById('incompleteCount').textContent = items.length;
     const list = document.getElementById('incompleteList');
@@ -215,20 +189,113 @@
     `).join('');
   }
 
+  let counselorContact = { counselor_name: '', counselor_email: '' };
+
   function renderTardyFollowups(items) {
     document.getElementById('tardyCount').textContent = items.length;
     const list = document.getElementById('tardyList');
     if (items.length === 0) { list.innerHTML = '<p class="text-muted small mb-0">Nobody currently needs a tardy follow-up.</p>'; return; }
     list.innerHTML = items.map(item => `
-      <div class="activity-row d-flex justify-content-between align-items-start">
+      <div class="activity-row d-flex justify-content-between align-items-start flex-wrap gap-2">
         <div>
           <strong>${name(item)}</strong>
           <span class="badge bg-warning text-dark ms-1">${item.count} tardies — ${escapeHtml(item.step?.label || '')}</span>
           <div class="text-muted small">${escapeHtml(item.step?.consequence || '')}</div>
+          <div class="letter-area mt-2 d-none"></div>
         </div>
-        <a href="/admin/tools/tardy-tracker.html" class="btn btn-sm btn-outline-primary">Open Tracker</a>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-primary fw-bold gen-letter-btn" data-student-id="${item.student_id}" data-first-name="${escapeHtml(item.first_name || '')}" data-last-name="${escapeHtml(item.last_name || '')}" data-count="${item.count}">
+            <i class="fas fa-envelope me-1"></i>${item.count >= 4 ? 'Parent + Counselor Letter' : 'Parent Letter'}
+          </button>
+          <button class="btn btn-sm btn-outline-secondary minor-flag-btn" data-student-id="${item.student_id}" data-count="${item.count}" title="Handle without a letter">
+            <i class="fas fa-flag"></i> Minor
+          </button>
+        </div>
       </div>`).join('');
   }
+
+  function renderRetakeClearances(items) {
+    document.getElementById('retakeCount').textContent = items.length;
+    const list = document.getElementById('retakeList');
+    if (items.length === 0) { list.innerHTML = '<p class="text-muted small mb-0">Nobody currently needs a retake clearance.</p>'; return; }
+    list.innerHTML = items.map(item => `
+      <div class="activity-row d-flex justify-content-between align-items-start">
+        <div>
+          <strong>${name(item)}</strong> <span class="text-muted small">${escapeHtml(item.section_id || '')}</span>
+          <div class="text-muted small">${escapeHtml(item.exam_id)} — attempt ${item.attempt_number} scored ${item.pct}%, needs <strong>${item.requirement === 'notes' ? 'notes shown' : 'chapter activities/worksheets finished'}</strong> before retake</div>
+        </div>
+        <button class="btn btn-sm btn-success fw-bold clear-retake-btn" data-student-id="${item.student_id}" data-exam-id="${item.exam_id}" data-requirement="${item.requirement}">
+          <i class="fas fa-check me-1"></i>Mark Cleared
+        </button>
+      </div>`).join('');
+  }
+
+  document.getElementById('tardyList').addEventListener('click', async (e) => {
+    const genBtn = e.target.closest('.gen-letter-btn');
+    const flagBtn = e.target.closest('.minor-flag-btn');
+    if (genBtn) {
+      const { studentId, firstName, lastName, count } = genBtn.dataset;
+      const area = genBtn.closest('.activity-row').querySelector('.letter-area');
+      const { renderTardyLetterText } = await import('/js/modules/tardy-letter-template.js?v=1');
+      const { getTardyStep } = await import('/js/modules/tardy-ladder.js?v=1');
+      const step = getTardyStep(Number(count));
+      const text = renderTardyLetterText({ first_name: firstName, last_name: lastName }, Number(count), step,
+        counselorContact.counselor_email ? { name: counselorContact.counselor_name, email: counselorContact.counselor_email } : null);
+      area.classList.remove('d-none');
+      area.innerHTML = `
+        <textarea class="form-control small mb-1" rows="8" readonly style="font-family: monospace; font-size: .75rem;">${escapeHtml(text)}</textarea>
+        <button class="btn btn-sm btn-outline-primary copy-letter-btn">Copy</button>
+        <button class="btn btn-sm btn-outline-success mark-sent-btn" data-student-id="${studentId}" data-count="${count}">Mark Sent</button>`;
+      area.querySelector('.copy-letter-btn').addEventListener('click', async () => {
+        await navigator.clipboard.writeText(text);
+        area.querySelector('.copy-letter-btn').textContent = 'Copied!';
+      });
+      area.querySelector('.mark-sent-btn').addEventListener('click', () => resolveFollowup(studentId, Number(count), 'letter'));
+    } else if (flagBtn) {
+      const { studentId, count } = flagBtn.dataset;
+      if (!confirm('Flag this as minor behavior and clear it from the list without a letter?')) return;
+      resolveFollowup(studentId, Number(count), 'minor_flag');
+    }
+  });
+
+  async function resolveFollowup(studentId, count, resolutionType) {
+    try {
+      await fetch('/api/admin/tardy-followup-resolve', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: studentId, count, resolution_type: resolutionType })
+      });
+      loadReport();
+    } catch (e) { alert('Failed to save. Try again.'); }
+  }
+
+  document.getElementById('retakeList').addEventListener('click', async (e) => {
+    const btn = e.target.closest('.clear-retake-btn');
+    if (!btn) return;
+    const { studentId, examId, requirement } = btn.dataset;
+    if (!confirm(`Mark ${requirement} cleared for this student on ${examId}?`)) return;
+    btn.disabled = true;
+    try {
+      await fetch('/api/admin/retake-clearance', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: studentId, exam_id: examId, requirement })
+      });
+      loadReport();
+    } catch (e) { alert('Failed to save. Try again.'); btn.disabled = false; }
+  });
+
+  document.getElementById('counselorSettingsBtn').addEventListener('click', async () => {
+    const name = prompt('Counselor name:', counselorContact.counselor_name || '');
+    if (name === null) return;
+    const email = prompt('Counselor email:', counselorContact.counselor_email || '');
+    if (email === null) return;
+    try {
+      await fetch('/api/admin/staff-contacts', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ counselor_name: name, counselor_email: email })
+      });
+      counselorContact = { counselor_name: name, counselor_email: email };
+    } catch (e) { alert('Failed to save. Try again.'); }
+  });
 
   async function loadReport() {
     const date = dateInput.value;
@@ -237,13 +304,15 @@
       const data = await res.json();
       renderSubmissions(data.submissions || []);
       renderUploads(data.uploads || []);
-      renderExamActivity(data.examActivity || []);
       renderIncomplete(data.incompleteAssessments || []);
       renderTardyFollowups(data.tardyFollowups || []);
+      renderRetakeClearances(data.retakeClearancesNeeded || []);
     } catch (e) {
       console.error(e);
     }
   }
+
+  fetch('/api/admin/staff-contacts').then(r => r.json()).then(d => { counselorContact = d; }).catch(() => {});
 
   dateInput.value = yesterdayStr();
   dateInput.addEventListener('change', loadReport);

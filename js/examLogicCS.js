@@ -528,6 +528,37 @@ function renderPrerequisiteBlock(prevExamId, pct) {
         </div>`;
 }
 
+// After a failed attempt (<80%), a retake is blocked until the teacher
+// clears the required next step (notes after attempt 1, worksheets after
+// attempt 2) -- real enforcement is server-side in /api/submit-exam, this
+// is just the up-front locked screen so a student isn't retaking a test
+// that won't be accepted.
+async function checkRetakeGate(unit) {
+    const unitNum = parseInt(unit, 10);
+    if (isNaN(unitNum)) return { ok: true };
+    const examId = `Unit${unitNum}-Exam`;
+    try {
+        const res = await fetch(`/api/exam/retake-status?student_id=${encodeURIComponent(studentId)}&exam_id=${encodeURIComponent(examId)}`);
+        if (!res.ok) return { ok: true }; // fail open on an API hiccup
+        return await res.json();
+    } catch (e) {
+        console.error('[examLogicCS] Retake gate check failed:', e);
+        return { ok: true }; // fail open -- server-side check is the real gate
+    }
+}
+
+function renderRetakeBlock(requirement, message) {
+    const container = document.getElementById('exam-container');
+    if (!container) return;
+    const label = requirement === 'notes' ? 'Notes Check Needed' : 'Chapter Work Needed';
+    container.innerHTML = `
+        <div class="alert alert-warning text-center shadow p-5">
+            <h4 class="fw-bold"><i class="fas fa-lock me-2"></i>${label}</h4>
+            <p class="mb-4">${escapeHtml(message)}</p>
+            <a href="/cs-interactive.html" class="btn btn-warning fw-bold">&laquo; Back to Class</a>
+        </div>`;
+}
+
 async function initExam(config) {
     // Extract unit number from config if provided (default to "a")
     currentUnit = config.unit || config.chapter || "a";
@@ -636,6 +667,12 @@ async function initExam(config) {
     const prereq = await checkUnitPrerequisite(currentUnit);
     if (!prereq.ok) {
         renderPrerequisiteBlock(prereq.prevExamId, prereq.pct);
+        return;
+    }
+
+    const retakeGate = await checkRetakeGate(currentUnit);
+    if (!retakeGate.ok) {
+        renderRetakeBlock(retakeGate.requirement, retakeGate.message);
         return;
     }
 

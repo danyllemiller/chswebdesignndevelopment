@@ -22,7 +22,7 @@
    never had bounded space to scroll internally, so position:sticky never
    visibly stuck to anything. */
 .table-responsive {
-    max-height: 80vh;
+    max-height: 92vh;
     overflow-x: auto !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;

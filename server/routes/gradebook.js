@@ -15,6 +15,17 @@ function formatDbDate(d) {
     return `${y}-${m}-${day}`;
 }
 
+// Any INSERT...ON DUPLICATE KEY UPDATE into responses (admin edit, student
+// submission, timeclock, etc.) resets entered_in_ic = 0 -- a score that
+// changes needs re-entering in IC even if the old value was already
+// entered. New rows get 0 for free via the column default.
+async function ensureEnteredIcColumn(connection) {
+    const [cols] = await connection.execute(`SHOW COLUMNS FROM responses LIKE 'entered_in_ic'`);
+    if (cols.length === 0) {
+        await connection.execute(`ALTER TABLE responses ADD COLUMN entered_in_ic TINYINT(1) DEFAULT 0`);
+    }
+}
+
 router.get('/student/course-gradebook', async (req, res) => {
     const { student_id, section_id: sectionOverride } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
@@ -72,6 +83,59 @@ async function checkUnitPrerequisite(connection, studentId, examId) {
     return { ok: pct >= 60, prevExamId, pct };
 }
 
+// CS-only remediation gate (WD is direct instruction and tests differently,
+// so this deliberately only ever matches "Unit{n}-Exam"). After a first
+// failed attempt (<80%) the student must show notes before a retake; after
+// a second failed attempt they must finish every activity/worksheet in the
+// chapter first. Modeled purely off attempt COUNT + the most recent
+// attempt's score, not per-attempt bookkeeping -- a clearance row is never
+// deleted/consumed, it just stops being the one that matters once the
+// attempt count moves past it (e.g. a 'notes' clearance from after attempt
+// 1 is irrelevant once attempt 2 also fails and 'worksheets' is required).
+async function ensureRetakeClearanceTable(connection) {
+    await connection.execute(`
+        CREATE TABLE IF NOT EXISTS retake_clearances (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            student_id VARCHAR(50) NOT NULL,
+            exam_id VARCHAR(100) NOT NULL,
+            requirement ENUM('notes','worksheets') NOT NULL,
+            cleared_by VARCHAR(100),
+            cleared_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_clearance_lookup (student_id, exam_id, requirement)
+        )
+    `);
+}
+
+async function checkRetakeClearance(connection, studentId, examId) {
+    const m = /^Unit\d+-Exam$/i.exec(examId || '');
+    if (!m) return { ok: true };
+
+    const [attempts] = await connection.execute(
+        'SELECT score, total_points FROM exam_attempts WHERE student_id = ? AND exam_id = ? ORDER BY attempt_number ASC',
+        [studentId, examId]
+    );
+    if (attempts.length === 0) return { ok: true };
+
+    const last = attempts[attempts.length - 1];
+    const pct = Number(last.total_points) > 0 ? (Number(last.score) / Number(last.total_points)) * 100 : 0;
+    if (pct >= 80) return { ok: true };
+
+    const requirement = attempts.length === 1 ? 'notes' : (attempts.length === 2 ? 'worksheets' : null);
+    if (!requirement) return { ok: true }; // 3+ failed attempts -- outside this two-step policy
+
+    await ensureRetakeClearanceTable(connection);
+    const [cleared] = await connection.execute(
+        'SELECT id FROM retake_clearances WHERE student_id = ? AND exam_id = ? AND requirement = ? ORDER BY id DESC LIMIT 1',
+        [studentId, examId, requirement]
+    );
+    if (cleared.length > 0) return { ok: true };
+
+    const message = requirement === 'notes'
+        ? 'Before retaking this test, show your teacher your notes on this chapter.'
+        : 'Before retaking this test, finish every activity and worksheet in this chapter and check in with your teacher.';
+    return { ok: false, requirement, message };
+}
+
 // Matches unit-test/exam and pre-test exam_ids specifically (CS: "Unit3-Exam",
 // "Unit3-Pre", "Unit3-Pre-Score"; WD: "Ch5-Exam", "Ch5 Pre-Assessment [15
 // pts]", "...-Score") -- deliberately narrow so regular assignments,
@@ -94,6 +158,7 @@ router.post('/submit-exam', async (req, res) => {
 
     try {
         const connection = await getDbConnection();
+        await ensureEnteredIcColumn(connection);
 
         const prereq = await checkUnitPrerequisite(connection, student_id, exam_id);
         if (!prereq.ok) {
@@ -101,6 +166,12 @@ router.post('/submit-exam', async (req, res) => {
             return res.status(403).json({
                 error: `${exam_id} is locked — a score of at least 60% on ${prereq.prevExamId} is required first.`
             });
+        }
+
+        const retakeGate = await checkRetakeClearance(connection, student_id, exam_id);
+        if (!retakeGate.ok) {
+            await connection.release();
+            return res.status(403).json({ error: retakeGate.message, retakeBlocked: true, requirement: retakeGate.requirement });
         }
 
         const examTitle = title || exam_id.replace(/-/g, ' ').replace(/cs unit \d+/i, (m) => m.toUpperCase());
@@ -137,7 +208,7 @@ router.post('/submit-exam', async (req, res) => {
         }
         if (shouldUpdate) {
             await connection.execute(
-                'INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()',
+                'INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic) VALUES (?, ?, ?, ?, NOW(), 0) ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0',
                 [student_id, exam_id, score, total_points || 100]
             );
         }
@@ -219,6 +290,7 @@ router.post('/admin/delete-assignment', async (req, res) => {
 router.get('/admin/master-gradebook-data', async (req, res) => {
     try {
         const connection = await getDbConnection();
+        await ensureEnteredIcColumn(connection);
         const [students] = await connection.execute(
             `SELECT student_id, first_name, last_name, username, section_id
              FROM students
@@ -249,7 +321,7 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
             `SELECT exam_id, TRIM(title) AS title, total_points, course_id, due_date, instructions, period_due_dates FROM exams`
         );
         const [grades] = await connection.execute(
-            `SELECT student_id, exam_id, score, total_points, timestamp FROM responses`
+            `SELECT student_id, exam_id, score, total_points, timestamp, entered_in_ic FROM responses`
         );
         const registry = {};
         exams.forEach(e => {
@@ -276,14 +348,15 @@ router.post('/admin/save-grade', async (req, res) => {
     if (!student_id || !exam_id) return res.status(400).json({ error: 'student_id and exam_id are required' });
     try {
         const connection = await getDbConnection();
+        await ensureEnteredIcColumn(connection);
         await connection.execute(
             'INSERT IGNORE INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?)',
             [exam_id, exam_id, Number(total_points) || 100, 'All']
         );
         await connection.execute(
-            `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp)
-             VALUES (?, ?, ?, ?, NOW())
-             ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
+            `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic)
+             VALUES (?, ?, ?, ?, NOW(), 0)
+             ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0`,
             [student_id, exam_id, score !== undefined ? String(score) : '', Number(total_points) || 100]
         );
         await connection.release();
@@ -299,6 +372,7 @@ router.post('/admin/batch-update-grades', async (req, res) => {
     let connection;
     try {
         connection = await getDbConnection();
+        await ensureEnteredIcColumn(connection);
         await connection.beginTransaction();
         let saved = 0;
         for (const entry of batch) {
@@ -313,9 +387,9 @@ router.post('/admin/batch-update-grades', async (req, res) => {
                     [examId, examId, maxPts, 'All']
                 );
                 await connection.execute(
-                    `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp)
-                     VALUES (?, ?, ?, ?, NOW())
-                     ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
+                    `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic)
+                     VALUES (?, ?, ?, ?, NOW(), 0)
+                     ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0`,
                     [studentId, examId, score, maxPts]
                 );
                 saved++;
@@ -328,6 +402,68 @@ router.post('/admin/batch-update-grades', async (req, res) => {
         if (connection) { try { await connection.rollback(); await connection.release(); } catch (_) {} }
         console.error(err);
         res.status(500).json({ error: 'Failed to batch update grades' });
+    }
+});
+
+// The client sends the exact (student_id, exam_id) pairs it currently has
+// highlighted yellow in whatever view is on screen -- scoped to a single
+// period filter, or every yellow cell if the filter is "All" -- rather than
+// this endpoint trying to re-derive "current view" itself.
+// Called client-side (examLogicCS.js) before a unit exam even starts, so a
+// blocked student sees a locked screen instead of retaking the test and
+// only finding out at submit time that the score won't be accepted.
+router.get('/exam/retake-status', async (req, res) => {
+    const { student_id, exam_id } = req.query;
+    if (!student_id || !exam_id) return res.status(400).json({ error: 'student_id and exam_id are required' });
+    try {
+        const connection = await getDbConnection();
+        const status = await checkRetakeClearance(connection, student_id, exam_id);
+        await connection.release();
+        res.json(status);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to check retake status' }); }
+});
+
+router.post('/admin/retake-clearance', async (req, res) => {
+    const { student_id, exam_id, requirement, cleared_by } = req.body;
+    if (!student_id || !exam_id || !['notes', 'worksheets'].includes(requirement)) {
+        return res.status(400).json({ error: 'student_id, exam_id, and a valid requirement are required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        await ensureRetakeClearanceTable(connection);
+        await connection.execute(
+            'INSERT INTO retake_clearances (student_id, exam_id, requirement, cleared_by) VALUES (?, ?, ?, ?)',
+            [student_id, exam_id, requirement, cleared_by || null]
+        );
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save clearance' }); }
+});
+
+router.post('/admin/mark-grades-entered-ic', async (req, res) => {
+    const { pairs } = req.body;
+    if (!Array.isArray(pairs) || pairs.length === 0) {
+        return res.status(400).json({ error: 'pairs array is required' });
+    }
+    let connection;
+    try {
+        connection = await getDbConnection();
+        await ensureEnteredIcColumn(connection);
+        await connection.beginTransaction();
+        for (const { student_id, exam_id } of pairs) {
+            if (!student_id || !exam_id) continue;
+            await connection.execute(
+                'UPDATE responses SET entered_in_ic = 1 WHERE student_id = ? AND exam_id = ?',
+                [student_id, exam_id]
+            );
+        }
+        await connection.commit();
+        await connection.release();
+        res.json({ success: true, marked: pairs.length });
+    } catch (err) {
+        if (connection) { try { await connection.rollback(); await connection.release(); } catch (_) {} }
+        console.error(err);
+        res.status(500).json({ error: 'Failed to mark grades entered' });
     }
 });
 
