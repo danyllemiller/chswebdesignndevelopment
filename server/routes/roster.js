@@ -304,6 +304,14 @@ router.post('/admin/upload-roster', async (req, res) => {
     if (!students) return res.status(400).json({ error: 'Roster payload is required.' });
     if (!Array.isArray(students)) students = [students];
 
+    // Archiving "anyone missing from this payload" is only safe when the
+    // payload IS the full current roster (the CSV bulk-upload flow). The
+    // single "Add Student" form posts here too with just one student --
+    // without this flag it would read as "everyone else just dropped out."
+    // Opt-in and defaults to off on purpose so a future caller can't
+    // reintroduce the same mistake by omission.
+    const archiveMissing = req.query.archiveMissing === 'true';
+
     const cleaned = students
         .map((s) => ({
             student_id: String(s.student_id || s.studentId || '').trim(),
@@ -349,15 +357,19 @@ router.post('/admin/upload-roster', async (req, res) => {
 
         // Snapshot who's currently active BEFORE the upsert below touches
         // anything, so "missing from this file" is judged against the roster
-        // as it stood at the start of the upload, not a moving target.
-        const [activeRows] = await connection.execute(
-            `SELECT student_id FROM students
-             WHERE (archived IS NULL OR archived = 0) AND school_year = ?
-               AND (role IS NULL OR LOWER(role) <> 'teacher') AND section_id <> 'Teacher'`,
-            [year]
-        );
-        const uploadedIds = new Set(resolved.map((s) => s.student_id));
-        const missingIds = activeRows.map((r) => r.student_id).filter((id) => !uploadedIds.has(id));
+        // as it stood at the start of the upload, not a moving target. Only
+        // computed at all when archiveMissing is set -- see note above.
+        let missingIds = [];
+        if (archiveMissing) {
+            const [activeRows] = await connection.execute(
+                `SELECT student_id FROM students
+                 WHERE (archived IS NULL OR archived = 0) AND school_year = ?
+                   AND (role IS NULL OR LOWER(role) <> 'teacher') AND section_id <> 'Teacher'`,
+                [year]
+            );
+            const uploadedIds = new Set(resolved.map((s) => s.student_id));
+            missingIds = activeRows.map((r) => r.student_id).filter((id) => !uploadedIds.has(id));
+        }
 
         const [existingRows] = await connection.execute('SELECT student_id FROM students');
         const existingIds = new Set(existingRows.map((r) => r.student_id));

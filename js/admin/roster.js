@@ -493,7 +493,11 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
 });
 
 async function finishRosterUpload(students) {
-    const res = await fetch('/api/admin/upload-roster', {
+    // archiveMissing=true only here -- this is the one flow where the
+    // payload IS meant to be the full current roster. Never add this flag
+    // to the single Add Student call above; that payload is intentionally
+    // just one student and would read as everyone else having dropped out.
+    const res = await fetch('/api/admin/upload-roster?archiveMissing=true', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(students)
