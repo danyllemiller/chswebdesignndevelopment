@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
 const { resolveCourseId, getCurrentSchoolYear } = require('../helpers');
+const { computeStudentGrade } = require('../gradeCalc');
 
 const ON_TIME_BONUS = 5.00;
 // Backfill baseline for students.role_history -- safely before any shift
@@ -447,6 +448,32 @@ router.get('/admin/payroll/missing-assignments', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to compute missing assignments' });
+    }
+});
+
+// GET /admin/payroll/grade-summary?student_ids=1,2,3 — current overall
+// grade % + letter for each given student, computed the exact same way
+// their own dashboard computes it (see server/gradeCalc.js). Built for the
+// parent-newsletter feature, batched by explicit ids like the
+// missing-assignments endpoint above.
+router.get('/admin/payroll/grade-summary', async (req, res) => {
+    const studentIds = String(req.query.student_ids || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (studentIds.length === 0) return res.json({ grades: {} });
+    try {
+        const connection = await getDbConnection();
+        const [students] = await connection.execute(
+            `SELECT student_id, section_id FROM students WHERE student_id IN (${studentIds.map(() => '?').join(',')})`,
+            studentIds
+        );
+        const grades = {};
+        for (const s of students) {
+            grades[s.student_id] = await computeStudentGrade(connection, s.student_id, s.section_id);
+        }
+        await connection.release();
+        res.json({ grades });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to compute grade summaries' });
     }
 });
 

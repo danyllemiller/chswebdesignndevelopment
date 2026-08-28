@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Parent Newsletters | CHS Admin</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=19"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { background: #f4f6fb; }
+    .letter-card { max-width: 720px; margin: 0 auto 1.5rem; }
+    .letter-body {
+      font-family: 'Courier New', Courier, monospace;
+      white-space: pre-wrap;
+      font-size: .85rem;
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      max-height: 340px;
+      overflow-y: auto;
+    }
+    .grade-badge-A { background: #d1fae5; color: #065f46; }
+    .grade-badge-B { background: #dbeafe; color: #1e40af; }
+    .grade-badge-C { background: #fef3c7; color: #92400e; }
+    .grade-badge-D, .grade-badge-F { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid sticky-top px-0">
+  <div id="nav-placeholder"></div>
+</div>
+
+<section class="container my-5">
+  <div class="d-flex align-items-center mb-4">
+    <div>
+      <h1 class="gochi text-primary mb-0"><i class="fas fa-envelope-open-text me-2"></i>Parent Newsletters</h1>
+      <p class="text-muted mb-0" id="subtitleLine">Loading run…</p>
+    </div>
+    <div class="ms-auto d-flex gap-2">
+      <a href="/admin/run-payroll.html" class="btn btn-outline-secondary btn-sm fw-bold"><i class="fas fa-arrow-left me-1"></i>Back</a>
+      <button class="btn btn-primary btn-sm fw-bold" id="copyAllBtn"><i class="fas fa-copy me-1"></i>Copy All</button>
+    </div>
+  </div>
+  <p class="text-muted small mb-4">Plain text, ready to paste into a ParentSquare direct message per family. "Copy All" copies every letter separated by dividers, matching how your other ParentSquare posts are organized.</p>
+
+  <div id="lettersContainer">
+    <div class="text-center text-muted py-5">
+      <div class="spinner-border text-primary mb-3"></div>
+      <p>Building letters…</p>
+    </div>
+  </div>
+</section>
+
+<div id="footer-placeholder"></div>
+
+<script type="module">
+import { apiFetch } from '/js/modules/api-client.js';
+import { renderNewsletterText } from '/js/modules/newsletter-template.js';
+
+const runId = new URLSearchParams(location.search).get('run');
+let allLetters = [];
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+async function init() {
+  if (!runId) {
+    document.getElementById('lettersContainer').innerHTML = `<div class="alert alert-danger">No run specified. Go back and pick a run.</div>`;
+    return;
+  }
+  try {
+    const detail = await apiFetch(`/api/admin/payroll/run-detail/${encodeURIComponent(runId)}`);
+    const stubs = detail.stubs || [];
+    if (stubs.length === 0) {
+      document.getElementById('lettersContainer').innerHTML = `<div class="alert alert-warning">No students in this run.</div>`;
+      return;
+    }
+    document.getElementById('subtitleLine').textContent = `${stubs.length} letter${stubs.length !== 1 ? 's' : ''} for this pay period`;
+
+    const studentIds = [...new Set(stubs.map(s => s.student_id))].join(',');
+    const [gradeData, missingData] = await Promise.all([
+      apiFetch(`/api/admin/payroll/grade-summary?student_ids=${encodeURIComponent(studentIds)}`).catch(() => ({ grades: {} })),
+      apiFetch(`/api/admin/payroll/missing-assignments?student_ids=${encodeURIComponent(studentIds)}`).catch(() => ({ missing: {} }))
+    ]);
+
+    allLetters = stubs.map(s => {
+      const grade = gradeData.grades?.[s.student_id] || null;
+      const missing = missingData.missing?.[s.student_id] || [];
+      const text = renderNewsletterText(s, grade, missing);
+      return { student: s, text, grade };
+    });
+
+    document.getElementById('lettersContainer').innerHTML = allLetters.map((l, i) => `
+      <div class="card shadow-sm border-0 letter-card">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h5 class="fw-bold mb-0">${escHtml(l.student.first_name)} ${escHtml(l.student.last_name)}</h5>
+              <span class="text-muted small">Period ${escHtml(l.student.section_id || '—')}</span>
+              ${l.grade && l.grade.letterGrade ? `<span class="badge grade-badge-${l.grade.letterGrade} ms-2">${l.grade.percent}% (${l.grade.letterGrade})</span>` : ''}
+            </div>
+            <button class="btn btn-outline-primary btn-sm fw-bold copy-one-btn" data-idx="${i}"><i class="fas fa-copy me-1"></i>Copy</button>
+          </div>
+          <div class="letter-body">${escHtml(l.text)}</div>
+        </div>
+      </div>`).join('');
+
+    document.querySelectorAll('.copy-one-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = Number(btn.dataset.idx);
+        await navigator.clipboard.writeText(allLetters[idx].text);
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied';
+        setTimeout(() => { btn.innerHTML = original; }, 1500);
+      });
+    });
+  } catch (e) {
+    document.getElementById('lettersContainer').innerHTML = `<div class="alert alert-danger">Could not load this payroll run.</div>`;
+  }
+}
+
+document.getElementById('copyAllBtn').addEventListener('click', async () => {
+  if (allLetters.length === 0) return;
+  const combined = allLetters.map(l => l.text).join('\n\n---\n---\n\n');
+  await navigator.clipboard.writeText(combined);
+  const btn = document.getElementById('copyAllBtn');
+  const original = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied All';
+  setTimeout(() => { btn.innerHTML = original; }, 1500);
+});
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

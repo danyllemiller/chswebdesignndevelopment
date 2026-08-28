@@ -300,6 +300,7 @@ async function loadHistory() {
           <div class="badge bg-success me-2">${r.stub_count} paystubs</div>
           <div class="text-success fw-bold small me-2">${fmtMoney(r.total_gross)} gross</div>
           <a href="/admin/tools/print-paystubs.html?run=${r.id}" class="btn btn-sm btn-outline-primary fw-bold"><i class="fas fa-print me-1"></i>View &amp; Print</a>
+          <a href="/admin/tools/parent-newsletters.html?run=${r.id}" class="btn btn-sm btn-outline-secondary fw-bold"><i class="fas fa-envelope-open-text me-1"></i>Newsletters</a>
         </div>
       </div>`).join('');
     document.getElementById('historyContainer').innerHTML = html;
@@ -331,7 +332,8 @@ document.getElementById('btnRunPayroll').addEventListener('click', async () => {
         <li>Students can view their paystub at <strong>My Grades → My Paystubs</strong></li>
         <li>Run ID: <code>#${result.payroll_run_id}</code></li>
       </ul>
-      <a href="/admin/tools/print-paystubs.html?run=${result.payroll_run_id}" class="btn btn-primary fw-bold w-100"><i class="fas fa-print me-1"></i>View &amp; Print Paystubs</a>`;
+      <a href="/admin/tools/print-paystubs.html?run=${result.payroll_run_id}" class="btn btn-primary fw-bold w-100 mb-2"><i class="fas fa-print me-1"></i>View &amp; Print Paystubs</a>
+      <a href="/admin/tools/parent-newsletters.html?run=${result.payroll_run_id}" class="btn btn-outline-primary fw-bold w-100"><i class="fas fa-envelope-open-text me-1"></i>Parent Newsletters</a>`;
     bootstrap.Modal.getOrCreateInstance(document.getElementById('resultModal')).show();
     loadHistory();
   } catch (e) {
