@@ -307,6 +307,18 @@
   #fillWindowOverlay .sound-alarm-label { font-size: 1rem; }
   #fillWindowOverlay .form-range { height: 1.5rem; }
 
+  #pageStamp {
+    position: fixed;
+    bottom: 4px;
+    right: 6px;
+    font-size: 8px;
+    color: var(--text-muted);
+    opacity: .35;
+    letter-spacing: .05em;
+    user-select: none;
+    pointer-events: none;
+  }
+
   .footer-bar {
     display: flex;
     justify-content: space-between;
@@ -477,6 +489,8 @@
   <div id="fillWindowOverlay" class="d-none no-print">
     <button id="shrinkWindowBtn" class="btn btn-outline-light shrink-window-btn" title="Exit full window"><i class="fas fa-compress"></i></button>
   </div>
+
+  <div id="pageStamp" class="no-print"></div>
 
   <div class="footer-bar">
     <span id="chapterLabel"></span>
@@ -699,6 +713,23 @@ if (!courseCfg) {
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
 
+  // Deterministic per-day 6-digit code, same formula duplicated in
+  // examLogicCS.js/examLogicWD.js -- lets the retake-cooldown override
+  // screen verify a typed code purely client-side (no server round trip,
+  // no DB row, both servers agree automatically since it's just today's
+  // date run through the same hash). Rendered here with no label at all.
+  function dailyStampCode() {
+    const input = todayStr() + 'chs-guild-2026';
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
+    return String(hash % 1000000).padStart(6, '0');
+  }
+
+  function renderPageStamp() {
+    const el = document.getElementById('pageStamp');
+    if (el) el.textContent = dailyStampCode();
+  }
+
   function findBlockForToday() {
     const map = schedule[track] || {};
     const today = todayStr();
@@ -837,6 +868,7 @@ if (!courseCfg) {
     document.getElementById('dateLabel').textContent = dateStr ? fmtDateLabel(dateStr) : `Block ${currentBlock}`;
     document.getElementById('minDayNote').classList.toggle('d-none', !(c && c.minimumDay));
     document.getElementById('courseSubtitle').textContent = courseSubtitleText();
+    renderPageStamp();
 
     document.getElementById('jumpSelect').value = currentBlock;
     renderBellSchedule(dateStr);

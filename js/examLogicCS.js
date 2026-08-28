@@ -221,12 +221,25 @@ function canTakeExam() {
     return { allowed: true };
 }
 
+// Same formula as admin/daily-agenda.html's unlabeled corner stamp -- a
+// deterministic per-day 6-digit code, purely client-side (no server round
+// trip, no DB row, both servers naturally agree since it's just today's
+// date through the same hash). Typing it here clears the cooldown early.
+function dailyOverrideCode() {
+    const d = new Date();
+    const dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const input = dateStr + 'chs-guild-2026';
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
+    return String(hash % 1000000).padStart(6, '0');
+}
+
 function showCooldownMessage(remainingMs) {
     const container = document.getElementById('exam-container');
     if (!container) return;
-    
+
     const cooldownEndTime = lastSubmissionTime + COOLDOWN_MS;
-    
+
     container.innerHTML = `
         <div class="alert alert-warning text-center shadow">
             <h4 class="fw-bold text-warning"><i class="fas fa-clock"></i> Cooldown Period</h4>
@@ -235,28 +248,52 @@ function showCooldownMessage(remainingMs) {
                 <strong>--:--</strong>
             </div>
             <p class="small text-muted">This page will automatically refresh when the cooldown ends.</p>
+            <a href="#" id="override-toggle-link" class="small text-muted">Override</a>
+            <div id="override-box" class="d-none mt-2">
+                <div class="input-group input-group-sm mx-auto" style="max-width: 220px;">
+                    <input type="text" id="override-code-input" class="form-control text-center" maxlength="6" inputmode="numeric">
+                    <button class="btn btn-outline-secondary" id="override-submit-btn">Go</button>
+                </div>
+            </div>
         </div>`;
-    
+
+    document.getElementById('override-toggle-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('override-box')?.classList.remove('d-none');
+        document.getElementById('override-code-input')?.focus();
+    });
+    document.getElementById('override-submit-btn')?.addEventListener('click', () => {
+        const input = document.getElementById('override-code-input');
+        if (input && input.value.trim() === dailyOverrideCode()) {
+            lastSubmissionTime = 0;
+            saveAttemptData();
+            window.location.reload();
+        } else if (input) {
+            input.value = '';
+            input.placeholder = 'Try again';
+        }
+    });
+
     const updateCountdown = () => {
         const now = Date.now();
         const remaining = cooldownEndTime - now;
-        
+
         if (remaining <= 0) {
             window.location.reload();
             return;
         }
-        
+
         const mins = Math.floor(remaining / 60000);
         const secs = Math.floor((remaining % 60000) / 1000);
-        
+
         const countdownEl = document.getElementById('cooldown-countdown');
         if (countdownEl) {
             countdownEl.innerHTML = `<strong>${mins}:${secs.toString().padStart(2, '0')}</strong>`;
         }
-        
+
         requestAnimationFrame(updateCountdown);
     };
-    
+
     requestAnimationFrame(updateCountdown);
 }
 
