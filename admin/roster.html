@@ -220,37 +220,6 @@
     </div>
   </div>
 
-  <!-- Roster Diff Review Modal (students missing from a fresh CSV upload) -->
-  <div class="modal fade" id="rosterDiffModal" tabindex="-1" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-warning">
-          <h5 class="modal-title fw-bold"><i class="fas fa-user-clock me-2"></i>Students Not In This CSV</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <p class="small text-muted">
-            These students are currently active but weren't in the file you just uploaded. Pick an action for each —
-            <strong>Archive</strong> hides them but keeps every grade/note on record (fully reversible), <strong>Delete</strong>
-            removes them and their history permanently, <strong>Skip</strong> leaves them untouched for now.
-            Suggestions below are based on how long ago their earliest recorded activity was (~1 quarter or more suggests Archive; less, or none at all, suggests Delete) — review before confirming.
-          </p>
-          <div class="table-responsive">
-            <table class="table table-sm align-middle">
-              <thead>
-                <tr><th>Student</th><th>Class</th><th>Activity</th><th style="width:160px;">Action</th></tr>
-              </thead>
-              <tbody id="rosterDiffBody"></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel Upload</button>
-          <button type="button" id="rosterDiffConfirmBtn" class="btn btn-warning fw-bold">Confirm & Finish Upload</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Management Modal -->
   <div class="modal fade" id="editModal" tabindex="-1">
@@ -381,7 +350,7 @@
 
 <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/admin/roster.js?v=11"></script>
+  <script src="/js/admin/roster.js?v=12"></script>
   <script src="/js/admin/attendance-reminder.js"></script>
 </body>
 </html>

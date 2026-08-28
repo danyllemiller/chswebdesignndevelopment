@@ -482,32 +482,17 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
             return;
         }
 
-        // Before touching anything, check who's currently active but missing
-        // from this fresh file, so the teacher can review archive/delete
-        // choices for them rather than that being silently decided.
-        let missing = [];
-        try {
-            const diffRes = await fetch('/api/admin/roster-diff', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(students)
-            });
-            if (diffRes.ok) {
-                const diffData = await diffRes.json();
-                missing = diffData.missing || [];
-            }
-        } catch (err) { console.error('Roster diff failed:', err); }
-
-        if (missing.length > 0) {
-            openRosterDiffModal(students, missing);
-        } else {
-            await finishRosterUpload(students, []);
-        }
+        // upload-roster now handles the whole thing atomically in one call:
+        // matched students get their period/name corrected, brand-new IDs
+        // get a bare account created (same as the single-add form above),
+        // and anyone currently active but absent from this file is archived
+        // automatically -- no manual per-student review step anymore.
+        await finishRosterUpload(students);
     };
     reader.readAsText(file);
 });
 
-async function finishRosterUpload(students, decisions) {
+async function finishRosterUpload(students) {
     const res = await fetch('/api/admin/upload-roster', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -518,66 +503,9 @@ async function finishRosterUpload(students, decisions) {
         showStatus(j && j.error ? `Upload failed: ${j.error}` : 'Upload failed', 'danger');
         return;
     }
-
-    let decisionSummary = '';
-    if (decisions.length > 0) {
-        const decRes = await fetch('/api/admin/roster-apply-decisions', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ decisions })
-        });
-        if (decRes.ok) {
-            const d = await decRes.json();
-            decisionSummary = ` (${d.archived || 0} archived, ${d.deleted || 0} deleted)`;
-        } else {
-            decisionSummary = ' — but applying archive/delete decisions failed, check console.';
-            const j = await decRes.json().catch(() => ({}));
-            console.error('roster-apply-decisions failed:', j);
-        }
-    }
-
-    showStatus(`Roster uploaded successfully!${decisionSummary}`, 'success');
+    const d = await res.json();
+    showStatus(`Roster uploaded — ${d.created || 0} added, ${d.updated || 0} updated, ${d.archived || 0} archived (not on this file).`, 'success');
     fetchRoster();
-}
-
-function openRosterDiffModal(students, missing) {
-    const tbody = document.getElementById('rosterDiffBody');
-    tbody.innerHTML = missing.map((m, i) => {
-        const activity = m.daysActive === null
-            ? 'No recorded activity'
-            : `Active ~${m.daysActive} day${m.daysActive === 1 ? '' : 's'} ago`;
-        return `
-            <tr data-student-id="${m.student_id}">
-                <td>${(m.last_name || '')}, ${(m.first_name || '')}<div class="small text-muted">${m.student_id}</div></td>
-                <td>${m.course_name || m.section_id || '—'}</td>
-                <td class="small text-muted">${activity}</td>
-                <td>
-                    <select class="form-select form-select-sm roster-diff-action">
-                        <option value="archive" ${m.suggestedAction === 'archive' ? 'selected' : ''}>Archive</option>
-                        <option value="delete" ${m.suggestedAction === 'delete' ? 'selected' : ''}>Delete</option>
-                        <option value="skip">Skip (do nothing)</option>
-                    </select>
-                </td>
-            </tr>`;
-    }).join('');
-
-    const modalEl = document.getElementById('rosterDiffModal');
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
-
-    const confirmBtn = document.getElementById('rosterDiffConfirmBtn');
-    confirmBtn.onclick = async () => {
-        const decisions = Array.from(tbody.querySelectorAll('tr')).map(row => ({
-            student_id: row.dataset.studentId,
-            action: row.querySelector('.roster-diff-action').value
-        }));
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Uploading...';
-        modal.hide();
-        await finishRosterUpload(students, decisions);
-        confirmBtn.disabled = false;
-        confirmBtn.innerHTML = 'Confirm & Finish Upload';
-    };
 }
 
 // --- MODAL ACTIONS ---
