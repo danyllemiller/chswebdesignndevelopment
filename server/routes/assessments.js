@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { sanitizeNotebookHtml } = require('../sanitizeNotebookHtml');
 
 const EXAM_PROGRESS_DDL = `CREATE TABLE IF NOT EXISTS exam_progress (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -211,6 +212,7 @@ router.get('/student/cs-notebook', async (req, res) => {
 router.post('/student/cs-notebook', async (req, res) => {
     const { id, student_id, chapter, title, category, content, is_submitted } = req.body;
     if (!student_id || !chapter) return res.status(400).json({ error: 'student_id and chapter required' });
+    const cleanContent = sanitizeNotebookHtml(content);
     try {
         const connection = await getDbConnection();
 
@@ -225,7 +227,7 @@ router.post('/student/cs-notebook', async (req, res) => {
             await connection.execute(
                 `UPDATE turnins SET chapter = ?, title = ?, category = ?, content = ?, is_submitted = ?, timestamp = NOW()
                  WHERE id = ? AND student_id = ?`,
-                [chapter, title || '', category || 'Reflection', content || '', is_submitted ? 1 : 0, id, student_id]
+                [chapter, title || '', category || 'Reflection', cleanContent, is_submitted ? 1 : 0, id, student_id]
             );
             await connection.release();
             return res.json({ success: true, id: Number(id) });
@@ -234,7 +236,7 @@ router.post('/student/cs-notebook', async (req, res) => {
         const [result] = await connection.execute(
             `INSERT INTO turnins (student_id, chapter, title, category, content, is_submitted, timestamp)
              VALUES (?, ?, ?, ?, ?, ?, NOW())`,
-            [student_id, chapter, title || '', category || 'Reflection', content || '', is_submitted ? 1 : 0]
+            [student_id, chapter, title || '', category || 'Reflection', cleanContent, is_submitted ? 1 : 0]
         );
         await connection.release();
         res.json({ success: true, id: result.insertId });

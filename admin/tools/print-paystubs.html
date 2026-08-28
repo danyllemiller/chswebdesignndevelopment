@@ -98,12 +98,19 @@
          would for an on-screen document. */
       @page { margin: 0.25in; }
       .no-print { display: none !important; }
-      body { background: #fff; }
-      /* section.container's own my-5 (3rem) top margin only ever applies
-         once, at the very start of the printed flow -- it doesn't repeat
-         after each page-break-after, so page 1 alone sat 3rem lower than
-         every page after it. Zero it out for print so every page starts
-         from the same @page margin with nothing else added on top. */
+      /* The sitewide /css/dacPrint.css (loaded above) sets body { margin:
+         .5in; width: 90%; } for every printed page on the site. Same bug
+         as section.container below: a margin/width on <body> is a single
+         box applied once at the very start of the printed flow -- it does
+         NOT repeat on each new page the way an @page margin does. Page 1
+         got dacPrint.css's extra .5in on top of ours, every page after it
+         didn't, which is exactly why only the first check looked right.
+         Override both properties here so nothing but our own @page margin
+         is ever in play. */
+      body { background: #fff; margin: 0 !important; width: 100% !important; padding: 0 !important; }
+      /* section.container's own my-5 (3rem) top margin has the identical
+         problem -- zero it out too so every page starts from the same
+         @page margin with nothing else added on top. */
       section.container { margin: 0 !important; padding: 0 !important; max-width: none !important; }
       #stubsContainer { margin: 0 !important; }
       .paystub-doc { border-color: #000 !important; margin-bottom: 0; }
