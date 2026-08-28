@@ -60,6 +60,12 @@
             <button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="insertUnorderedList" title="Bullet List"><i class="fas fa-list-ul"></i></button>
             <button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="insertOrderedList" title="Numbered List"><i class="fas fa-list-ol"></i></button>
             <span class="border-end mx-1"></span>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn" data-action="insertTable" title="Insert Table"><i class="fas fa-table"></i></button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn" data-action="addRow" title="Add Row Below">+Row</button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn" data-action="addCol" title="Add Column">+Col</button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn text-danger" data-action="delRow" title="Delete Current Row">−Row</button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn text-danger" data-action="delCol" title="Delete Current Column">−Col</button>
+            <span class="border-end mx-1"></span>
             <button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-warning" data-command="hiliteColor" data-val="#fff200" title="Highlight"><i class="fas fa-highlighter"></i></button>
             <button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-danger" data-command="removeFormat" title="Clear"><i class="fas fa-eraser"></i></button>
             <div class="ms-auto">
@@ -224,6 +230,10 @@ async function init() {
                     h2, h3, h4 { color: #000099; border-bottom: 2px solid #cfe1f0; padding-bottom: 5px; }
                     .donow { background: #fffcf0; border-left: 5px solid #ffc107; padding: 15px; margin: 15px 0; }
                     .highlight { background: #fff200; padding: 2px 5px; }
+                    .notebook-table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+                    .notebook-table th, .notebook-table td { border: 1px solid #b9c2cc; padding: 8px 10px; text-align: left; }
+                    .notebook-table th { background: #cfe1f0; color: #1a1a1a; }
+                    .notebook-table tr:nth-child(even) td { background: #f7f9fb; }
                 </style>
                 <script>
                     function sync() { window.parent.postMessage({type:'updateHtml',content:document.body.innerHTML}, '*');}
@@ -702,7 +712,95 @@ function triggerAutoSave() {
             });
         });
     }
-    
+
+    // ========================================================
+    // TABLE TOOLBAR (insert / add row-col / delete row-col)
+    // ========================================================
+
+    function getFocusedTableNode() {
+        const previewFrame = document.getElementById('preview-frame');
+        const win = previewFrame?.contentWindow;
+        const sel = win?.getSelection?.();
+        if (!sel || sel.rangeCount === 0) return null;
+        let node = sel.getRangeAt(0).startContainer;
+        if (node.nodeType === 3) node = node.parentElement;
+        return node;
+    }
+    function getFocusedTable() {
+        const node = getFocusedTableNode();
+        return node ? node.closest('table') : null;
+    }
+    function getFocusedCell() {
+        const node = getFocusedTableNode();
+        return node ? node.closest('td, th') : null;
+    }
+
+    function syncAfterTableEdit() {
+        const previewFrame = document.getElementById('preview-frame');
+        if (!previewFrame?.contentWindow) return;
+        previewFrame.contentWindow.focus();
+        const contentIn = document.getElementById('note-content');
+        if (contentIn) {
+            contentIn.value = previewFrame.contentWindow.document.body.innerHTML;
+            triggerAutoSave();
+        }
+    }
+
+    function setupTableToolbar() {
+        document.querySelectorAll('.rt-table-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const previewFrame = document.getElementById('preview-frame');
+                if (!previewFrame?.contentWindow) return;
+                const doc = previewFrame.contentWindow.document;
+                const action = btn.dataset.action;
+
+                if (action === 'insertTable') {
+                    const tableHtml = `<table class="notebook-table"><tbody>
+                        <tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr>
+                        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    </tbody></table><p>&nbsp;</p>`;
+                    doc.execCommand('insertHTML', false, tableHtml);
+                    syncAfterTableEdit();
+                    return;
+                }
+
+                const table = getFocusedTable();
+                if (!table) {
+                    alert('Click inside a table first, then use this button to add or remove a row/column.');
+                    return;
+                }
+
+                if (action === 'addRow') {
+                    const templateRow = table.rows[table.rows.length - 1];
+                    const newRow = table.insertRow(-1);
+                    for (let i = 0; i < templateRow.cells.length; i++) {
+                        newRow.insertCell(-1).innerHTML = '&nbsp;';
+                    }
+                } else if (action === 'addCol') {
+                    Array.from(table.rows).forEach((row, i) => {
+                        const cell = doc.createElement(i === 0 ? 'th' : 'td');
+                        cell.innerHTML = i === 0 ? 'Header' : '&nbsp;';
+                        row.appendChild(cell);
+                    });
+                } else if (action === 'delRow') {
+                    if (table.rows.length <= 1) { table.remove(); syncAfterTableEdit(); return; }
+                    const cell = getFocusedCell();
+                    const row = cell ? cell.closest('tr') : table.rows[table.rows.length - 1];
+                    row.remove();
+                } else if (action === 'delCol') {
+                    if (table.rows[0].cells.length <= 1) { table.remove(); syncAfterTableEdit(); return; }
+                    const cell = getFocusedCell();
+                    const colIndex = cell ? cell.cellIndex : table.rows[0].cells.length - 1;
+                    Array.from(table.rows).forEach(row => { if (row.cells[colIndex]) row.deleteCell(colIndex); });
+                }
+
+                syncAfterTableEdit();
+            });
+        });
+    }
+
     // ========================================================
     // EVENT LISTENERS
     // ========================================================
@@ -726,6 +824,7 @@ function triggerAutoSave() {
 // Initialize
     init().then(() => {
         setupRichToolbar();
+        setupTableToolbar();
         setupLoadNotes();
         
         // Also listen for iframe content changes
