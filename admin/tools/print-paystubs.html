@@ -84,6 +84,14 @@
     .missing-block { max-width: 680px; margin: 1rem auto 0; border: 2px solid #dc3545; border-radius: 4px; padding: .6rem .9rem; background: #fff; }
 
     .stub-sheet:not(:last-child) { page-break-after: always; }
+    /* Small buffer from the very top of each page's printable area -- with
+       zero space here every check's top border sat exactly on the @page
+       margin boundary, which print engines can clip a sliver off of. Set
+       on .stub-sheet itself (not body/section.container) specifically
+       because it's the element that repeats fresh on every single page,
+       unlike a parent container's margin which only ever applies once at
+       the start of the whole printed flow. */
+    .stub-sheet { padding-top: 0.15in; }
 
     /* Check and earnings statement are fixed-height and must always land
        on the same page together -- only MISSING ASSIGNMENTS can grow
