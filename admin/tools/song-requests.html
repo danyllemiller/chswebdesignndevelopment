@@ -38,11 +38,9 @@
 <div class="container tools-card">
   <div class="card shadow-sm border-0 mb-4">
     <div class="card-body p-4">
-      <h2 class="gochi text-primary mb-1"><i class="fab fa-spotify me-2"></i>Song Requests</h2>
+      <h2 class="gochi text-primary mb-1"><i class="fas fa-music me-2"></i>Song Requests</h2>
       <p class="text-muted mb-2">Students request songs; nothing reaches your playlist until you approve it here.</p>
-      <p class="text-muted small mb-4"><i class="fas fa-circle-info me-1"></i>Spotify blocks adding tracks automatically for this app (and is blocked by the district network anyway), so approving a request opens an Apple Music search for that song instead &mdash; just add it to your playlist there.</p>
-
-      <div id="connectionBanner"></div>
+      <p class="text-muted small mb-0"><i class="fas fa-circle-info me-1"></i>Apple Music has no automated way to add tracks to a playlist for this app, so approving a request opens an Apple Music search for that song instead &mdash; just add it to your playlist there.</p>
     </div>
   </div>
 
@@ -75,77 +73,6 @@
   function formatWhen(ts) {
     const d = new Date(ts.replace(' ', 'T'));
     return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-  }
-
-  async function loadStatus() {
-    const banner = document.getElementById('connectionBanner');
-    try {
-      const res = await fetch('/api/spotify/status');
-      const data = await res.json();
-
-      if (!data.connected) {
-        banner.innerHTML = `
-          <div class="alert alert-warning d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-triangle-exclamation me-2"></i>Not connected to Spotify yet.</span>
-            <a href="/api/spotify/connect" class="btn btn-sm btn-dark fw-bold"><i class="fab fa-spotify me-1"></i>Connect Spotify</a>
-          </div>`;
-        return;
-      }
-
-      if (!data.playlist_id) {
-        banner.innerHTML = `
-          <div class="alert alert-info">
-            <div class="fw-bold mb-2"><i class="fas fa-check-circle me-2 text-success"></i>Spotify connected. Now set your playlist:</div>
-            <form id="playlistForm" class="d-flex gap-2">
-              <input type="text" id="playlistInput" class="form-control form-control-sm" placeholder="Paste a Spotify playlist link">
-              <button type="submit" class="btn btn-sm btn-primary fw-bold">Save</button>
-            </form>
-            <div id="playlistError" class="text-danger small mt-1 d-none"></div>
-          </div>`;
-        document.getElementById('playlistForm').addEventListener('submit', savePlaylist);
-        return;
-      }
-
-      banner.innerHTML = `
-        <div class="alert alert-success d-flex justify-content-between align-items-center">
-          <span><i class="fas fa-check-circle me-2"></i>Connected — adding approved songs to <strong>${escapeHtml(data.playlist_name)}</strong></span>
-          <button class="btn btn-sm btn-outline-secondary" id="changePlaylistBtn">Change Playlist</button>
-        </div>`;
-      document.getElementById('changePlaylistBtn').addEventListener('click', () => {
-        banner.innerHTML = `
-          <div class="alert alert-info">
-            <div class="fw-bold mb-2">Set a different playlist:</div>
-            <form id="playlistForm" class="d-flex gap-2">
-              <input type="text" id="playlistInput" class="form-control form-control-sm" placeholder="Paste a Spotify playlist link" value="${escapeHtml(data.playlist_id)}">
-              <button type="submit" class="btn btn-sm btn-primary fw-bold">Save</button>
-            </form>
-            <div id="playlistError" class="text-danger small mt-1 d-none"></div>
-          </div>`;
-        document.getElementById('playlistForm').addEventListener('submit', savePlaylist);
-      });
-    } catch (e) {
-      banner.innerHTML = `<div class="alert alert-danger">Failed to check Spotify connection status.</div>`;
-    }
-  }
-
-  async function savePlaylist(e) {
-    e.preventDefault();
-    const input = document.getElementById('playlistInput');
-    const errorEl = document.getElementById('playlistError');
-    errorEl.classList.add('d-none');
-    try {
-      const res = await fetch('/api/spotify/set-playlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playlist: input.value.trim() })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save playlist.');
-      await loadStatus();
-    } catch (err) {
-      errorEl.textContent = err.message;
-      errorEl.classList.remove('d-none');
-    }
   }
 
   async function loadRequests() {
@@ -206,7 +133,6 @@
     }
   });
 
-  loadStatus();
   loadRequests();
 </script>
 </body>
