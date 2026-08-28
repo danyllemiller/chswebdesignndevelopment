@@ -37,6 +37,25 @@ function timeToMinutes(t) {
     return h * 60 + (m || 0) + (s || 0) / 60;
 }
 
+// Semi-monthly pay date: whichever comes first, the 1st or the 15th, on or
+// after the day payroll is actually run -- not the period's own end date.
+// Running payroll on 8/28 for a period that ended 8/22 pays out 9/1, the
+// next payday after processing, matching how a real semi-monthly payroll
+// calendar works. Computed once per run (same for every student in it) and
+// frozen on payroll_runs so it doesn't drift if viewed/printed later.
+function getLocalDateStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function computeNextPayDate(fromDateStr) {
+    const [y, m, d] = fromDateStr.split('-').map(Number);
+    const target = d <= 1 ? 1 : (d <= 15 ? 15 : 1);
+    const targetMonth = (d <= 15) ? m : (m === 12 ? 1 : m + 1);
+    const targetYear = (d <= 15) ? y : (m === 12 ? y + 1 : y);
+    return `${targetYear}-${String(targetMonth).padStart(2, '0')}-${String(target).padStart(2, '0')}`;
+}
+
 // students.course_id is NULL for a lot of legacy-enrolled students (confirmed
 // live -- WD1-B4/WD1-B6/WD2-A3/CS-B8 etc. all rely on section_id resolution
 // instead), so filtering/grouping payroll by the raw column would silently
@@ -60,6 +79,7 @@ async function ensurePaystubTables() {
                 id           INT AUTO_INCREMENT PRIMARY KEY,
                 period_start DATE NOT NULL,
                 period_end   DATE NOT NULL,
+                pay_date     DATE NULL,
                 run_by       VARCHAR(100),
                 notes        TEXT,
                 is_finalized TINYINT(1) DEFAULT 1,
@@ -67,6 +87,10 @@ async function ensurePaystubTables() {
                 UNIQUE KEY unique_period (period_start, period_end)
             )
         `);
+        const [payDateCols] = await connection.execute(`SHOW COLUMNS FROM payroll_runs LIKE 'pay_date'`);
+        if (payDateCols.length === 0) {
+            await connection.execute(`ALTER TABLE payroll_runs ADD COLUMN pay_date DATE NULL`);
+        }
         await connection.execute(`
             CREATE TABLE IF NOT EXISTS student_paystubs (
                 id               INT AUTO_INCREMENT PRIMARY KEY,
@@ -309,7 +333,7 @@ router.get('/paystubs/my', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(`
-            SELECT sp.*, pr.period_start, pr.period_end, pr.is_finalized, pr.run_by, pr.run_at
+            SELECT sp.*, pr.period_start, pr.period_end, pr.pay_date, pr.is_finalized, pr.run_by, pr.run_at
             FROM student_paystubs sp
             JOIN payroll_runs pr ON sp.payroll_run_id = pr.id
             WHERE sp.student_id = ?
@@ -452,10 +476,15 @@ router.get('/admin/payroll/run-detail/:id', async (req, res) => {
     const runId = Number(req.params.id);
     try {
         const connection = await getDbConnection();
+        // Was missing the payroll_runs join entirely -- period_start/end/
+        // pay_date/run_by never actually came back, so every printed stub's
+        // "Pay Period" and "Pay Date" silently rendered blank.
         const [rows] = await connection.execute(`
-            SELECT sp.*, s.first_name, s.last_name, s.section_id
+            SELECT sp.*, s.first_name, s.last_name, s.section_id,
+                   pr.period_start, pr.period_end, pr.pay_date, pr.run_by, pr.run_at
             FROM student_paystubs sp
             JOIN students s ON sp.student_id = s.student_id
+            JOIN payroll_runs pr ON sp.payroll_run_id = pr.id
             WHERE sp.payroll_run_id = ?
             ORDER BY s.last_name, s.first_name
         `, [runId]);
@@ -492,13 +521,18 @@ router.post('/admin/payroll/run', async (req, res) => {
     try {
         const connection = await getDbConnection();
 
-        // Create or update payroll run record
+        // Create or update payroll run record. pay_date is recomputed on
+        // every run (including a re-run of the same period) since it's
+        // tied to when payroll actually gets processed, not the period
+        // itself -- a re-run today should show today's next payday, not
+        // the one from whenever it was first run.
+        const payDate = computeNextPayDate(getLocalDateStr());
         await connection.execute(
-            `INSERT INTO payroll_runs (period_start, period_end, run_by, notes, is_finalized)
-             VALUES (?, ?, ?, ?, 1)
-             ON DUPLICATE KEY UPDATE run_by = VALUES(run_by), notes = VALUES(notes),
+            `INSERT INTO payroll_runs (period_start, period_end, pay_date, run_by, notes, is_finalized)
+             VALUES (?, ?, ?, ?, ?, 1)
+             ON DUPLICATE KEY UPDATE pay_date = VALUES(pay_date), run_by = VALUES(run_by), notes = VALUES(notes),
                is_finalized = 1, run_at = CURRENT_TIMESTAMP`,
-            [period_start, period_end, (run_by || 'teacher').substring(0, 100), notes || null]
+            [period_start, period_end, payDate, (run_by || 'teacher').substring(0, 100), notes || null]
         );
         const [[runRow]] = await connection.execute(
             'SELECT id FROM payroll_runs WHERE period_start = ? AND period_end = ?',

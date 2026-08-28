@@ -43,6 +43,18 @@ function escHtml(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// Same semi-monthly rule as server/routes/paystubs.js computeNextPayDate --
+// whichever comes first, the 1st or the 15th, on or after the given date.
+// Used as a live fallback for "estimated" stubs, which don't have a real,
+// frozen pay_date yet since payroll hasn't actually been run for them.
+function computeNextPayDate(fromDateStr) {
+    const [y, m, d] = fromDateStr.split('-').map(Number);
+    const target = d <= 1 ? 1 : (d <= 15 ? 15 : 1);
+    const targetMonth = (d <= 15) ? m : (m === 12 ? 1 : m + 1);
+    const targetYear = (d <= 15) ? y : (m === 12 ? y + 1 : y);
+    return `${targetYear}-${String(targetMonth).padStart(2, '0')}-${String(target).padStart(2, '0')}`;
+}
+
 // stub: the paystub row (period_start/end, role_title, hourly_rate,
 // regular_hours, bonus_count, bonus_rate, gross_pay, fed_tax, ss_tax,
 // med_tax, total_deductions, net_pay, ytd_gross, run_by, and either
@@ -54,6 +66,12 @@ export function renderPaystubHtml(stub, missingAssignments) {
         || `${stub.first_name || ''} ${stub.last_name || ''}`.trim()
         || stub.student_id || '';
     const missing = missingAssignments || [];
+    // Finalized stubs carry a real, frozen pay_date (computed once when
+    // payroll was actually run); estimated stubs never had a run, so fall
+    // back to a live "next payday from today" using the same rule.
+    const now = new Date();
+    const todayLocal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const payDate = stub.pay_date || computeNextPayDate(todayLocal);
 
     // Finalized stubs carry a per-role earnings breakdown (a mid-period
     // promotion pays the old rate before the change and the new rate
@@ -108,7 +126,7 @@ export function renderPaystubHtml(stub, missingAssignments) {
         </div>
         <div class="text-end">
           <div class="check-number">No. ${checkNumber}</div>
-          <div class="check-date">${fmtDate(stub.period_end)}</div>
+          <div class="check-date">${fmtDate(payDate)}</div>
         </div>
       </div>
       <div class="check-payline">
@@ -141,7 +159,7 @@ export function renderPaystubHtml(stub, missingAssignments) {
           <div class="col-5 text-end">
             <div class="fw-bold fs-5 text-success">${isEstimated ? 'ESTIMATED STATEMENT' : 'EARNINGS STATEMENT'}</div>
             <div class="small fw-bold">Pay Period: ${fmtDate(stub.period_start)} – ${fmtDate(stub.period_end)}</div>
-            <div class="small fw-bold">Pay Date: ${fmtDate(stub.period_end)}</div>
+            <div class="small fw-bold">Pay Date: ${fmtDate(payDate)}</div>
           </div>
         </div>
       </div>
