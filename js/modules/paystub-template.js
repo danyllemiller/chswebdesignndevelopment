@@ -77,11 +77,9 @@ export function renderPaystubHtml(stub, missingAssignments) {
         || stub.student_id || '';
     const missing = missingAssignments || [];
     // Finalized stubs carry a real, frozen pay_date (computed once when
-    // payroll was actually run); estimated stubs never had a run, so fall
-    // back to a live "next payday from today" using the same rule.
-    const now = new Date();
-    const todayLocal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const payDate = stub.pay_date || computeNextPayDate(todayLocal);
+    // payroll was actually run, tied to period_end not run time); estimated
+    // stubs never had a run, so fall back to computing it live the same way.
+    const payDate = stub.pay_date || (stub.period_end ? computeNextPayDate(String(stub.period_end).split('T')[0]) : null);
 
     // Finalized stubs carry a per-role earnings breakdown (a mid-period
     // promotion pays the old rate before the change and the new rate

@@ -196,7 +196,7 @@
 <script type="module">
 import { getLoggedInUser } from '/js/modules/user-session.js';
 import { apiFetch } from '/js/modules/api-client.js';
-import { renderPaystubHtml } from '/js/modules/paystub-template.js';
+import { renderPaystubHtml } from '/js/modules/paystub-template.js?v=2';
 
 const user = getLoggedInUser();
 if (!user) { location.href = '/login.html'; }

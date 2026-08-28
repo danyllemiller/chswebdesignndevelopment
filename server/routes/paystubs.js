@@ -556,12 +556,12 @@ router.post('/admin/payroll/run', async (req, res) => {
     try {
         const connection = await getDbConnection();
 
-        // Create or update payroll run record. pay_date is recomputed on
-        // every run (including a re-run of the same period) since it's
-        // tied to when payroll actually gets processed, not the period
-        // itself -- a re-run today should show today's next payday, not
-        // the one from whenever it was first run.
-        const payDate = computeNextPayDate(getLocalDateStr());
+        // pay_date is tied to the PERIOD, not to whenever the run happens
+        // to be clicked -- the nearest 1st or 15th on/after period_end, so
+        // a period ending 8/29 always pays 9/1 no matter when it's run or
+        // re-run, and reprinting an old stub later never shows a
+        // different date than it did originally.
+        const payDate = computeNextPayDate(period_end);
         await connection.execute(
             `INSERT INTO payroll_runs (period_start, period_end, pay_date, run_by, notes, is_finalized)
              VALUES (?, ?, ?, ?, ?, 1)
