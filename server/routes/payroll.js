@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { resolveCourseId } = require('../helpers');
+const { resolveCourseId, getCurrentSchoolYear } = require('../helpers');
 
 router.get('/payroll/roster', async (req, res) => {
     const { username } = req.query;
@@ -35,6 +35,10 @@ router.get('/payroll/timesheets', async (req, res) => {
 router.get('/admin/payroll/roster', async (req, res) => {
     try {
         const connection = await getDbConnection();
+        // Current-year, not-archived only -- matches the scoping payroll
+        // runs use (server/routes/paystubs.js computePayrollForPeriod), so
+        // the course checklist this feeds on Run Payroll doesn't offer
+        // courses/sections that don't actually apply to anyone current.
         const [rows] = await connection.execute(`
             SELECT s.student_id, s.first_name, s.last_name, s.section_id, s.username,
                    COALESCE(pr.title, 'Web Developer') AS pay_role_title,
@@ -43,8 +47,10 @@ router.get('/admin/payroll/roster', async (req, res) => {
             LEFT JOIN pay_roles pr ON s.role_id = pr.id
             WHERE (s.role IS NULL OR LOWER(s.role) NOT IN ('admin', 'teacher'))
               AND (s.section_id IS NULL OR s.section_id != 'Teacher')
+              AND (s.archived IS NULL OR s.archived = 0)
+              AND s.school_year = ?
             ORDER BY s.last_name ASC, s.first_name ASC
-        `);
+        `, [getCurrentSchoolYear()]);
         // Same section_id -> course_id resolution payroll runs use (raw
         // students.course_id is NULL for a lot of legacy enrollments), so
         // the course checklist on the Run Payroll page groups students the

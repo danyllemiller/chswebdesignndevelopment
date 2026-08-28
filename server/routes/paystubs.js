@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { resolveCourseId } = require('../helpers');
+const { resolveCourseId, getCurrentSchoolYear } = require('../helpers');
 
 const ON_TIME_BONUS = 5.00;
 // Backfill baseline for students.role_history -- safely before any shift
@@ -187,6 +187,10 @@ function resolveRoleForDate(historyRows, dateStr) {
 // Developer partway through a pay period) correctly pays the old rate for
 // shifts before the change and the new rate after, in the same run.
 async function computePayrollForPeriod(connection, { period_start, period_end, course_ids }) {
+    // Same current-year + not-archived scoping as the tardy tracker
+    // (server/routes/tardy.js) -- this query had neither, so a payroll run
+    // pulled in every student ever enrolled, prior years and archived
+    // students included, not just the currently-rostered ones.
     const [allStudents] = await connection.execute(`
         SELECT s.student_id, s.first_name, s.last_name, s.section_id, s.course_id,
                COALESCE(r.title, 'Web Developer')                   AS role_title,
@@ -194,7 +198,9 @@ async function computePayrollForPeriod(connection, { period_start, period_end, c
         FROM students s
         LEFT JOIN pay_roles r ON s.role_id = r.id
         WHERE (s.role IS NULL OR LOWER(s.role) NOT IN ('admin','teacher'))
-          AND (s.section_id IS NULL OR s.section_id != 'Teacher')`);
+          AND (s.section_id IS NULL OR s.section_id != 'Teacher')
+          AND (s.archived IS NULL OR s.archived = 0)
+          AND s.school_year = ?`, [getCurrentSchoolYear()]);
     const resolved = await resolveEffectiveCourseIds(connection, allStudents);
     const students = (Array.isArray(course_ids) && course_ids.length > 0)
         ? resolved.filter(s => course_ids.includes(s.effective_course_id))
