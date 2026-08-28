@@ -1125,7 +1125,14 @@ async function processSubmission() {
                 })
             });
             if (!saveRes.ok) {
-                console.error("Grade save failed:", await saveRes.text());
+                const errText = await saveRes.text();
+                console.error("Grade save failed:", errText);
+                if (saveRes.status === 503) {
+                    try {
+                        const errBody = JSON.parse(errText);
+                        if (errBody.testingPaused) alert(errBody.error);
+                    } catch {}
+                }
             } else {
                 console.log("[examLogicCS] Grade saved:", finalAssignmentKey, finalScore, "/", finalTotal);
             }

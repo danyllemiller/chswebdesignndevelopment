@@ -72,8 +72,26 @@ async function checkUnitPrerequisite(connection, studentId, examId) {
     return { ok: pct >= 60, prevExamId, pct };
 }
 
+// Matches unit-test/exam and pre-test exam_ids specifically (CS: "Unit3-Exam",
+// "Unit3-Pre", "Unit3-Pre-Score"; WD: "Ch5-Exam", "Ch5 Pre-Assessment [15
+// pts]", "...-Score") -- deliberately narrow so regular assignments,
+// projects, timeclock grading, etc. (which never match this) keep working
+// even while this is on.
+const TEST_EXAM_ID_PATTERN = /-Exam$|-Pre$|-Pre-Score$|Pre-Assessment/i;
+
 router.post('/submit-exam', async (req, res) => {
     const { student_id, exam_id, score, total_points, title, course_id } = req.body;
+
+    // Env-var gated so this can be flipped on/off per-server (e.g. only on
+    // the droplet while it's standing in during a home-server outage)
+    // without a code change or redeploy -- see OUTAGE-RUNBOOK.md.
+    if (process.env.BLOCK_EXAM_SUBMISSIONS === 'true' && TEST_EXAM_ID_PATTERN.test(exam_id || '')) {
+        return res.status(503).json({
+            error: 'Unit tests and pre-tests are temporarily paused while the class database is being kept in sync. Please wait for your teacher to say it\'s okay to test, then try again.',
+            testingPaused: true
+        });
+    }
+
     try {
         const connection = await getDbConnection();
 

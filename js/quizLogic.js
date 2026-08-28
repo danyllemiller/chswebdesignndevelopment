@@ -670,6 +670,12 @@ async function processResults() {
                 console.log("[QuizLogic] Gradebook sync result:", result);
             } else {
                 console.error("[QuizLogic] Gradebook sync failed:", res.status);
+                if (res.status === 503) {
+                    try {
+                        const errBody = await res.json();
+                        if (errBody.testingPaused) alert(errBody.error);
+                    } catch {}
+                }
             }
 
             // Also record the student's actual diagnostic accuracy (not the

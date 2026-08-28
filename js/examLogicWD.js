@@ -737,11 +737,17 @@ async function processSubmission() {
             }
         }
         if (shouldSave) {
-            await fetch('/api/submit-exam', {
+            const saveRes = await fetch('/api/submit-exam', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ student_id: studentId, exam_id: finalAssignmentKey, score: finalScore, total_points: finalTotal })
             });
+            if (!saveRes.ok && saveRes.status === 503) {
+                try {
+                    const errBody = await saveRes.json();
+                    if (errBody.testingPaused) alert(errBody.error);
+                } catch {}
+            }
         }
     } catch(e) { console.warn("Could not save grade:", e); }
 
