@@ -582,6 +582,15 @@ function openRosterDiffModal(students, missing) {
 
 // --- MODAL ACTIONS ---
 let activeStudentId = null;
+let originalPayrollTitle = 'Intern';
+
+// Only show the effective-date picker once the admin actually changes the
+// position -- most saves don't touch payroll at all, and the row would
+// otherwise imply every save moves someone's pay-rate start date.
+document.getElementById('edit-payroll-title')?.addEventListener('change', (e) => {
+    const effDateRow = document.getElementById('payroll-effective-date-row');
+    if (effDateRow) effDateRow.style.display = (e.target.value !== originalPayrollTitle) ? '' : 'none';
+});
 window.manageStudent = async (id, name) => {
     activeStudentId = id;
     document.getElementById('modalStudentName').innerText = name;
@@ -597,6 +606,11 @@ window.manageStudent = async (id, name) => {
         document.getElementById('edit-role').value = s.role || 'student';
         const posEl = document.getElementById('edit-payroll-title');
         if (posEl) posEl.value = s.payroll_title || 'Intern';
+        originalPayrollTitle = s.payroll_title || 'Intern';
+        const effDateRow = document.getElementById('payroll-effective-date-row');
+        const effDateInput = document.getElementById('edit-payroll-effective-date');
+        if (effDateRow) effDateRow.style.display = 'none';
+        if (effDateInput) effDateInput.value = new Date().toISOString().split('T')[0];
         // ensure editPeriod options exist; if not, fall back to simple text
         const editPeriodEl = document.getElementById('editPeriod');
         if (editPeriodEl) {
@@ -681,7 +695,8 @@ document.getElementById('saveStudentBtn').addEventListener('click', async () => 
         username: document.getElementById('edit-username').value.trim() || null,
         section_id: document.getElementById('editPeriod') ? document.getElementById('editPeriod').value : null,
         role: document.getElementById('edit-role').value || 'student',
-        payroll_title: document.getElementById('edit-payroll-title')?.value || 'Intern'
+        payroll_title: document.getElementById('edit-payroll-title')?.value || 'Intern',
+        payroll_effective_date: document.getElementById('edit-payroll-effective-date')?.value || null
     };
     const pw = document.getElementById('edit-password').value;
     if (pw && pw.length > 0) payload.password = pw;

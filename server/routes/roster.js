@@ -20,12 +20,14 @@ router.get('/admin/roster', async (req, res) => {
             SELECT DISTINCT s.*,
                 COALESCE(csc.section_id, csl.section_id, s.section_id)   AS display_period,
                 COALESCE(crc.course_name, crl.course_name, '')            AS display_course_name,
-                COALESCE(csc.school_year, csl.school_year, s.school_year) AS effective_year
+                COALESCE(csc.school_year, csl.school_year, s.school_year) AS effective_year,
+                pr.title AS payroll_title
             FROM students s
             LEFT JOIN class_sections csc ON s.course_id = csc.course_id
             LEFT JOIN courses        crc ON s.course_id = crc.course_id
             LEFT JOIN class_sections csl ON s.section_id = csl.section_id AND s.course_id IS NULL
-            LEFT JOIN courses        crl ON csl.course_id = crl.course_id AND s.course_id IS NULL`;
+            LEFT JOIN courses        crl ON csl.course_id = crl.course_id AND s.course_id IS NULL
+            LEFT JOIN pay_roles      pr  ON s.role_id = pr.id`;
 
         let sql, params = [];
         if (year) {
@@ -532,7 +534,7 @@ router.get('/admin/student', async (req, res) => {
 });
 
 router.post('/admin/save-student', async (req, res) => {
-    const { student_id, first_name, last_name, username, section_id, role, password, payroll_title } = req.body || {};
+    const { student_id, first_name, last_name, username, section_id, role, password, payroll_title, payroll_effective_date } = req.body || {};
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
         const connection = await getDbConnection();
@@ -571,6 +573,12 @@ router.post('/admin/save-student', async (req, res) => {
         // actually created, which threw AFTER the update above had already
         // committed, so the save looked like it failed (500, no roster
         // refresh) even though the real change had already gone through.
+        //
+        // Only writes a new student_role_history row (payroll's real,
+        // date-aware source of truth) when the title is actually changing --
+        // the edit modal always submits payroll_title on every save, so
+        // without this check saving an unrelated field (name, section...)
+        // would spam a new no-op history row every time.
         if (payroll_title && AGENCY_PAY_SCALES[payroll_title] !== undefined) {
             const rate = AGENCY_PAY_SCALES[payroll_title];
             await connection.execute(
@@ -579,8 +587,20 @@ router.post('/admin/save-student', async (req, res) => {
                 [payroll_title, rate]
             );
             const [roleRows] = await connection.execute('SELECT id FROM pay_roles WHERE title = ?', [payroll_title]);
-            if (roleRows.length > 0) {
-                await connection.execute('UPDATE students SET role_id = ? WHERE student_id = ?', [roleRows[0].id, student_id]);
+            const [[currentRole]] = await connection.execute(
+                `SELECT r.id, r.title FROM students s LEFT JOIN pay_roles r ON s.role_id = r.id WHERE s.student_id = ?`,
+                [student_id]
+            );
+            if (roleRows.length > 0 && (!currentRole || currentRole.title !== payroll_title)) {
+                const newRoleId = roleRows[0].id;
+                const effectiveDate = (payroll_effective_date && /^\d{4}-\d{2}-\d{2}$/.test(payroll_effective_date))
+                    ? payroll_effective_date
+                    : new Date().toISOString().split('T')[0];
+                await connection.execute('UPDATE students SET role_id = ? WHERE student_id = ?', [newRoleId, student_id]);
+                await connection.execute(
+                    'INSERT INTO student_role_history (student_id, role_id, effective_date) VALUES (?, ?, ?)',
+                    [student_id, newRoleId, effectiveDate]
+                );
             }
         }
         await connection.release();

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { resolveCourseId } = require('../helpers');
 
 router.get('/payroll/roster', async (req, res) => {
     const { username } = req.query;
@@ -44,6 +45,26 @@ router.get('/admin/payroll/roster', async (req, res) => {
               AND (s.section_id IS NULL OR s.section_id != 'Teacher')
             ORDER BY s.last_name ASC, s.first_name ASC
         `);
+        // Same section_id -> course_id resolution payroll runs use (raw
+        // students.course_id is NULL for a lot of legacy enrollments), so
+        // the course checklist on the Run Payroll page groups students the
+        // same way a run actually will.
+        const courseIdBySection = new Map();
+        for (const r of rows) {
+            const key = r.section_id || '';
+            if (!courseIdBySection.has(key)) courseIdBySection.set(key, await resolveCourseId(connection, key));
+            r.course_id = courseIdBySection.get(key);
+        }
+        const courseIds = [...new Set(rows.map(r => r.course_id).filter(Boolean))];
+        let courseNames = {};
+        if (courseIds.length > 0) {
+            const [courseRows] = await connection.execute(
+                `SELECT course_id, course_name FROM courses WHERE course_id IN (${courseIds.map(() => '?').join(',')})`,
+                courseIds
+            );
+            courseNames = Object.fromEntries(courseRows.map(c => [c.course_id, c.course_name]));
+        }
+        rows.forEach(r => { r.course_name = courseNames[r.course_id] || r.course_id || 'Unassigned'; });
         await connection.release();
         res.json({ roster: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch payroll roster' }); }
