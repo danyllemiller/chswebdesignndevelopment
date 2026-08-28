@@ -59,6 +59,40 @@
     .paystub-doc table th { border-bottom: 1px solid #222; padding-bottom: .25rem; }
     .paystub-doc table td { padding: .2rem 0; }
 
+    /* Detachable "check" portion -- deliberately a different (serif, not
+       monospace) feel from the earnings statement above it, like a real
+       paycheck's check stub vs. the check itself. */
+    .fake-check {
+      font-family: Georgia, 'Times New Roman', serif;
+      max-width: 680px;
+      margin: 1.5rem auto 0;
+      border: 2px solid #1a3a1a;
+      border-radius: 4px;
+      padding: 1.1rem 1.4rem;
+      color: #1a1a1a;
+      background:
+        repeating-linear-gradient(135deg, rgba(26,58,26,.05) 0 2px, transparent 2px 14px),
+        #f7faf5;
+    }
+    .check-top { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #1a3a1a; padding-bottom: .5rem; margin-bottom: .7rem; }
+    .check-bank-name { font-weight: 700; font-size: 1rem; }
+    .check-fake-tag { font-size: .65rem; font-style: italic; font-weight: 400; color: #6b6b6b; }
+    .check-bank-addr { font-size: .7rem; color: #444; }
+    .check-number, .check-date { font-size: .8rem; font-weight: 700; }
+    .check-payline { display: flex; align-items: baseline; gap: .6rem; margin-bottom: .6rem; }
+    .check-label { font-size: .7rem; font-weight: 700; white-space: nowrap; }
+    .check-payee { flex: 1; border-bottom: 1px solid #1a1a1a; padding-bottom: 2px; font-size: 1rem; }
+    .check-amount-box { border: 1.5px solid #1a1a1a; border-radius: 3px; padding: .2rem .6rem; font-weight: 700; font-family: 'Courier New', monospace; }
+    .check-words { border-bottom: 1px solid #1a1a1a; padding-bottom: 2px; margin-bottom: .8rem; font-size: .9rem; }
+    .check-words span::after { content: ' ***************************'; color: #9aa89a; letter-spacing: 1px; }
+    .check-bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: .7rem; }
+    .check-memo { font-size: .7rem; color: #444; font-style: italic; }
+    .check-signature { text-align: center; }
+    .sig-line { width: 190px; border-bottom: 1px solid #1a1a1a; height: 1.6rem; font-family: 'Brush Script MT', cursive; }
+    .sig-label { font-size: .6rem; color: #444; }
+    .check-micr { text-align: center; font-family: 'Courier New', monospace; letter-spacing: .25em; font-size: .95rem; color: #333; margin-bottom: .5rem; }
+    .check-disclaimer { text-align: center; font-size: .6rem; font-weight: 700; color: #8a1f1f; letter-spacing: .03em; }
+
     /* W-2 style */
     .w2-doc {
       border: 2px solid #000099;
@@ -84,6 +118,7 @@
     @media print {
       .no-print { display: none !important; }
       .paystub-doc, .w2-doc { border-color: #000 !important; }
+      .fake-check { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
   </style>
 </head>

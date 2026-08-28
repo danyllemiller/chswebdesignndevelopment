@@ -8,6 +8,36 @@ function fmtDate(d) {
     return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 function fmtMoney(n) { return '$' + Number(n || 0).toFixed(2); }
+
+const ONES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+    'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+const TENS = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+function threeDigitsToWords(n) {
+    let str = '';
+    if (n >= 100) { str += ONES[Math.floor(n / 100)] + ' Hundred '; n %= 100; }
+    if (n >= 20) { str += TENS[Math.floor(n / 10)] + ' '; n %= 10; }
+    if (n > 0) str += ONES[n] + ' ';
+    return str.trim();
+}
+
+// Standard check-writing convention: dollars spelled out, cents as a
+// fraction ("and 45/100"), good up to the low millions -- far more than
+// any classroom paycheck will ever need.
+function amountToWords(amount) {
+    let dollars = Math.floor(Number(amount) || 0);
+    const cents = Math.round((Number(amount) - dollars) * 100);
+    if (dollars === 0) return `Zero and ${String(cents).padStart(2, '0')}/100`;
+    const groups = ['', ' Thousand', ' Million'];
+    let str = '', i = 0;
+    while (dollars > 0) {
+        const chunk = dollars % 1000;
+        if (chunk > 0) str = threeDigitsToWords(chunk) + groups[i] + ' ' + str;
+        dollars = Math.floor(dollars / 1000);
+        i++;
+    }
+    return `${str.trim()} and ${String(cents).padStart(2, '0')}/100`;
+}
 function escHtml(s) {
     if (!s) return '';
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -58,6 +88,47 @@ export function renderPaystubHtml(stub, missingAssignments) {
             </tbody>
           </table>
         </div>`;
+
+    // Deterministic per-stub check number and fake account digits (stable
+    // across re-renders of the same stub, not just random noise) --
+    // finalized stubs use their real DB id; estimated ones (no id yet)
+    // derive one from student_id + period so it's still stable per period.
+    const checkSeed = stub.id || `${stub.student_id || ''}${stub.period_end || ''}`;
+    let seedNum = 0;
+    for (const ch of String(checkSeed)) seedNum = (seedNum * 31 + ch.charCodeAt(0)) >>> 0;
+    const checkNumber = String(1000 + (seedNum % 9000));
+    const acctNumber = String(100000000 + (seedNum % 900000000));
+
+    const fakeCheck = `
+    <div class="fake-check">
+      <div class="check-top">
+        <div>
+          <div class="check-bank-name">First Classroom Bank &amp; Trust <span class="check-fake-tag">(not a real bank)</span></div>
+          <div class="check-bank-addr">CHS Web Design Studio · 1111 N Saliman Rd · Carson City, NV 89701</div>
+        </div>
+        <div class="text-end">
+          <div class="check-number">No. ${checkNumber}</div>
+          <div class="check-date">${fmtDate(stub.period_end)}</div>
+        </div>
+      </div>
+      <div class="check-payline">
+        <span class="check-label">PAY TO THE&nbsp;ORDER&nbsp;OF</span>
+        <span class="check-payee">${escHtml(employeeName)}</span>
+        <span class="check-amount-box">$ ${Number(stub.net_pay || 0).toFixed(2)}</span>
+      </div>
+      <div class="check-words">
+        <span>${amountToWords(stub.net_pay)} Dollars</span>
+      </div>
+      <div class="check-bottom">
+        <div class="check-memo">MEMO: Classroom pay simulation — not negotiable</div>
+        <div class="check-signature">
+          <div class="sig-line"></div>
+          <div class="sig-label">Authorized Signature — CHS Web Design Studio</div>
+        </div>
+      </div>
+      <div class="check-micr">⑈${acctNumber}⑈ ${checkNumber}⑈</div>
+      <div class="check-disclaimer">NOT A REAL CHECK · CLASSROOM SIMULATION ONLY · NO MONETARY VALUE · CANNOT BE DEPOSITED OR CASHED</div>
+    </div>`;
 
     return `
     <div class="paystub-doc">
@@ -129,5 +200,6 @@ export function renderPaystubHtml(stub, missingAssignments) {
           ${isEstimated ? 'ESTIMATED — ' : ''}SIMULATED EARNINGS STATEMENT FOR EDUCATIONAL PURPOSES ONLY. NO REAL CURRENCY IS EXCHANGED.
         </div>
       </div>
-    </div>`;
+    </div>
+    ${fakeCheck}`;
 }
