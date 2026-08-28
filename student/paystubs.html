@@ -92,6 +92,8 @@
     .sig-label { font-size: .6rem; color: #444; }
     .check-micr { text-align: center; font-family: 'Courier New', monospace; letter-spacing: .25em; font-size: .95rem; color: #333; margin-bottom: .5rem; }
     .check-disclaimer { text-align: center; font-size: .6rem; font-weight: 700; color: #8a1f1f; letter-spacing: .03em; }
+    .missing-block { max-width: 680px; margin: 1rem auto 0; border: 2px solid #dc3545; border-radius: 4px; padding: .6rem .9rem; background: #fff; }
+    .fake-check, .paystub-doc { page-break-inside: avoid; }
 
     /* W-2 style */
     .w2-doc {
@@ -116,6 +118,7 @@
     .status-estimated { background: #fef3c7; color: #92400e; }
 
     @media print {
+      @page { margin: 0.25in; }
       .no-print { display: none !important; }
       .paystub-doc, .w2-doc { border-color: #000 !important; }
       .fake-check { -webkit-print-color-adjust: exact; print-color-adjust: exact; }

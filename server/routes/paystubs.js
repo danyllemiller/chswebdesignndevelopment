@@ -216,6 +216,13 @@ async function computePayrollForPeriod(connection, { period_start, period_end, c
     // (server/routes/tardy.js) -- this query had neither, so a payroll run
     // pulled in every student ever enrolled, prior years and archived
     // students included, not just the currently-rostered ones.
+    // Also scoped to real, current bell-schedule periods (A1, A3, A5, B2,
+    // B4, B6, B8, INTV, ...) -- some students still carry stale legacy
+    // section_id labels ("WD1-A1", "WD1-B4", "T1", etc.) left over from a
+    // previous section-naming scheme. Those aren't real current periods,
+    // but they were still passing the archived/school_year check above,
+    // so a payroll run was sweeping in every one of them as extra
+    // students who don't actually belong on this pay period.
     const [allStudents] = await connection.execute(`
         SELECT s.student_id, s.first_name, s.last_name, s.section_id, s.course_id,
                COALESCE(r.title, 'Web Developer')                   AS role_title,
@@ -225,7 +232,8 @@ async function computePayrollForPeriod(connection, { period_start, period_end, c
         WHERE (s.role IS NULL OR LOWER(s.role) NOT IN ('admin','teacher'))
           AND (s.section_id IS NULL OR s.section_id != 'Teacher')
           AND (s.archived IS NULL OR s.archived = 0)
-          AND s.school_year = ?`, [getCurrentSchoolYear()]);
+          AND s.school_year = ?
+          AND s.section_id IN (SELECT DISTINCT period_label FROM bell_schedule)`, [getCurrentSchoolYear()]);
     const resolved = await resolveEffectiveCourseIds(connection, allStudents);
     const students = (Array.isArray(course_ids) && course_ids.length > 0)
         ? resolved.filter(s => course_ids.includes(s.effective_course_id))
@@ -576,6 +584,21 @@ router.post('/admin/payroll/run', async (req, res) => {
             period_start, period_end,
             course_ids: Array.isArray(course_ids) ? course_ids : []
         });
+
+        // Re-running a period only ever inserted/updated rows for students
+        // in the current result -- a student who no longer belongs (wrong
+        // course scoping, now-excluded legacy section, etc.) kept their
+        // stale stub from a prior run instead of being removed. Purge
+        // anyone not in this run's fresh computation before inserting it.
+        const keepIds = rows.map(s => s.student_id);
+        if (keepIds.length > 0) {
+            await connection.execute(
+                `DELETE FROM student_paystubs WHERE payroll_run_id = ? AND student_id NOT IN (${keepIds.map(() => '?').join(',')})`,
+                [runId, ...keepIds]
+            );
+        } else {
+            await connection.execute('DELETE FROM student_paystubs WHERE payroll_run_id = ?', [runId]);
+        }
 
         let generated = 0;
         for (const s of rows) {

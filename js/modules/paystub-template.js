@@ -3,9 +3,19 @@
 // (admin/tools/print-paystubs.html) so a printed check always looks
 // identical to what the student sees on their own page.
 
+// DATE columns (period_start/end, pay_date) come back from the server as
+// full ISO timestamps -- mysql2 returns them as Date objects, and
+// JSON-serializing a Date always calls .toISOString(), so this receives
+// "2026-09-01T07:00:00.000Z", not a plain "2026-09-01". Appending
+// 'T12:00:00' to that (the old behavior) produced a malformed
+// double-timestamp string and Date parsed it as Invalid Date on every
+// check. Only the date portion before 'T' is ever meaningful here.
 function fmtDate(d) {
     if (!d) return '—';
-    return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const dateOnly = d instanceof Date
+        ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+        : String(d).split('T')[0];
+    return new Date(dateOnly + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 function fmtMoney(n) { return '$' + Number(n || 0).toFixed(2); }
 
@@ -94,7 +104,7 @@ export function renderPaystubHtml(stub, missingAssignments) {
         </tr>`).join('');
 
     const missingBlock = missing.length === 0 ? '' : `
-        <div class="border border-danger border-2 p-2 mt-3">
+        <div class="missing-block">
           <div class="fw-bold text-danger small text-decoration-underline mb-1">MISSING ASSIGNMENTS (${missing.length})</div>
           <table class="table table-sm table-borderless small mb-0">
             <tbody>
@@ -148,7 +158,7 @@ export function renderPaystubHtml(stub, missingAssignments) {
       <div class="check-disclaimer">NOT A REAL CHECK · CLASSROOM SIMULATION ONLY · NO MONETARY VALUE · CANNOT BE DEPOSITED OR CASHED</div>
     </div>`;
 
-    return `
+    const stubDoc = `
     <div class="paystub-doc">
       <div class="stub-header">
         <div class="row align-items-start">
@@ -213,11 +223,17 @@ export function renderPaystubHtml(stub, missingAssignments) {
           <div class="col-6 small fw-bold text-muted">YTD GROSS: ${stub.ytd_gross !== '—' && stub.ytd_gross !== undefined ? fmtMoney(stub.ytd_gross) : '—'}</div>
           <div class="col-6 text-end"><strong>NET PAY:</strong> <span class="text-success fs-4 fw-bold">${fmtMoney(stub.net_pay)}</span></div>
         </div>
-        ${missingBlock}
         <div class="text-center mt-3 text-muted" style="font-size:.65rem;">
           ${isEstimated ? 'ESTIMATED — ' : ''}SIMULATED EARNINGS STATEMENT FOR EDUCATIONAL PURPOSES ONLY. NO REAL CURRENCY IS EXCHANGED.
         </div>
       </div>
-    </div>
-    ${fakeCheck}`;
+    </div>`;
+
+    // The check and stub are fixed-height and always kept together (see
+    // .fake-check/.paystub-doc page-break-inside:avoid in each consuming
+    // page's CSS) -- missing assignments is the one section that can grow
+    // without bound, so it's a separate sibling block, deliberately placed
+    // LAST and outside both bordered boxes, so a long list overflows onto
+    // its own next page instead of dragging the check down with it.
+    return `${fakeCheck}${stubDoc}${missingBlock}`;
 }

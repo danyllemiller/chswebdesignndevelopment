@@ -49,6 +49,7 @@ router.get('/admin/payroll/roster', async (req, res) => {
               AND (s.section_id IS NULL OR s.section_id != 'Teacher')
               AND (s.archived IS NULL OR s.archived = 0)
               AND s.school_year = ?
+              AND s.section_id IN (SELECT DISTINCT period_label FROM bell_schedule)
             ORDER BY s.last_name ASC, s.first_name ASC
         `, [getCurrentSchoolYear()]);
         // Same section_id -> course_id resolution payroll runs use (raw
