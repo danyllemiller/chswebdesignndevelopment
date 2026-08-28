@@ -27,8 +27,8 @@
       border-radius: 6px;
       background: #fff;
       color: #000;
-      max-width: 680px;
-      margin: 0 auto 2rem;
+      width: 100%;
+      margin: 0 0 2rem;
     }
     .paystub-doc .stub-header { border-bottom: 2px solid #222; padding: 1rem 1.5rem; }
     .paystub-doc .stub-body   { padding: 1.25rem 1.5rem; }
@@ -46,11 +46,11 @@
        that height instead of adding to it. */
     .fake-check {
       font-family: Georgia, 'Times New Roman', serif;
-      max-width: 680px;
-      height: 2.75in;
+      width: 100%;
       box-sizing: border-box;
+      height: 2.75in;
       overflow: hidden;
-      margin: 0 auto;
+      margin: 0 0 1.5rem;
       border: 2px solid #1a3a1a;
       border-radius: 4px;
       padding: 1.1rem 1.4rem;
@@ -81,17 +81,19 @@
     .check-micr { text-align: center; font-family: 'Courier New', monospace; letter-spacing: .25em; font-size: .95rem; color: #333; margin-bottom: .5rem; }
     .check-disclaimer { text-align: center; font-size: .6rem; font-weight: 700; color: #8a1f1f; letter-spacing: .03em; }
 
-    .missing-block { max-width: 680px; margin: 1rem auto 0; border: 2px solid #dc3545; border-radius: 4px; padding: .6rem .9rem; background: #fff; }
+    .missing-block { width: 100%; box-sizing: border-box; margin: 1rem 0 0; border: 2px solid #dc3545; border-radius: 4px; padding: .6rem .9rem; background: #fff; }
 
     .stub-sheet:not(:last-child) { page-break-after: always; }
-    /* Small buffer from the very top of each page's printable area -- with
-       zero space here every check's top border sat exactly on the @page
-       margin boundary, which print engines can clip a sliver off of. Set
-       on .stub-sheet itself (not body/section.container) specifically
-       because it's the element that repeats fresh on every single page,
-       unlike a parent container's margin which only ever applies once at
-       the start of the whole printed flow. */
-    .stub-sheet { padding-top: 0.25in; }
+    /* Uniform 0.25in buffer on every side, on top of the @page margin (also
+       0.25in) -- set on .stub-sheet itself (not body/section.container)
+       specifically because it's the element that repeats fresh on every
+       single page, unlike a parent container's margin which only ever
+       applies once at the start of the whole printed flow. Without this,
+       content sitting exactly on the @page boundary gets a sliver clipped
+       by the print engine. The check/stub/missing-block below are all set
+       to width:100% so they fill exactly this resulting box instead of
+       staying capped at a fixed pixel width narrower than the page. */
+    .stub-sheet { box-sizing: border-box; padding: 0.25in; }
 
     /* Check and earnings statement are fixed-height and must always land
        on the same page together -- only MISSING ASSIGNMENTS can grow

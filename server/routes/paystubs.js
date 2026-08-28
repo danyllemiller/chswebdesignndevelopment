@@ -521,7 +521,7 @@ router.get('/admin/payroll/run-detail/:id', async (req, res) => {
             JOIN students s ON sp.student_id = s.student_id
             JOIN payroll_runs pr ON sp.payroll_run_id = pr.id
             WHERE sp.payroll_run_id = ?
-            ORDER BY s.last_name, s.first_name
+            ORDER BY s.section_id, s.last_name, s.first_name
         `, [runId]);
         await connection.release();
         res.json({ stubs: rows });
