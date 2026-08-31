@@ -4,6 +4,21 @@ const fs = require('fs');
 const path = require('path');
 const { getDbConnection } = require('../db');
 
+// Client-side JS errors on the timeclock widget were failing completely
+// silently for some students with no way to see why -- multiple fixes
+// aimed at guessed causes (stale cache, Bootstrap modal races, load
+// ordering) each failed to resolve it for everyone, because guessing
+// blind at a client-only failure with no console access just repeats the
+// same cycle. This gives the client a place to report its own errors
+// (message, stack, and where in the flow it happened) straight into the
+// server logs, so the actual failure can be read directly instead of
+// guessed at again.
+router.post('/client-error-log', async (req, res) => {
+    const { message, stack, url, student_id, context, userAgent, timestamp } = req.body || {};
+    console.error('[CLIENT ERROR]', JSON.stringify({ message, stack, url, student_id, context, userAgent, timestamp }));
+    res.json({ ok: true });
+});
+
 // new Date().toISOString().split('T')[0] gives the UTC calendar date, which
 // for any Pacific evening between ~5pm and midnight is already "tomorrow" --
 // causing every "today" lookup in this file to miss same-day rows that

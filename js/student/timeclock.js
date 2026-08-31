@@ -3,6 +3,38 @@ import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
 import { periodToCourseKey } from '../modules/grade-weights.js?v=3';
 
+// Every previous fix here targeted a guessed cause and each one failed for
+// some students with zero visible symptom -- there was no way to see what
+// was actually throwing. This reports any error, caught or not, straight to
+// the server logs (POST /api/client-error-log) so the real failure can be
+// read directly. logTimeclockError() is used everywhere this file already
+// has a catch block; the two window listeners below catch anything that
+// happens outside all of them.
+function logTimeclockError(context, err) {
+    try {
+        fetch('/api/client-error-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: err && err.message ? err.message : String(err),
+                stack: err && err.stack ? err.stack : null,
+                url: window.location.href,
+                student_id: studentData ? studentData.student_id : null,
+                context,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            })
+        }).catch(() => {});
+    } catch (e) { /* logging must never itself break the widget */ }
+}
+
+window.addEventListener('error', (ev) => {
+    logTimeclockError('window.onerror', ev.error || { message: ev.message });
+});
+window.addEventListener('unhandledrejection', (ev) => {
+    logTimeclockError('window.onunhandledrejection', ev.reason);
+});
+
 let studentData = null;
 let currentQuestion = null;
 let bellWindow = null; // { startMs, endMs } for whichever of the student's periods is currently active today, or null
@@ -179,6 +211,7 @@ async function resolveTodaysBellWindow() {
         return { startMs: chosen.startMs, endMs: chosen.endMs };
     } catch (e) {
         console.error('[timeclock] Could not resolve today\'s bell window:', e);
+        logTimeclockError('resolveTodaysBellWindow', e);
         return null;
     }
 }
@@ -291,13 +324,13 @@ function checkAutoPopup() {
         const flag = `tc_auto_shown_in_${who}_${wherePeriod}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
-            openTimeclockModal().catch(e => console.error('Timeclock auto-popup error:', e));
+            openTimeclockModal().catch(e => { console.error('Timeclock auto-popup error:', e); logTimeclockError('checkAutoPopup:in', e); });
         }
     } else if (mode === 'out' && now >= (bellWindow.endMs - 5 * 60 * 1000)) {
         const flag = `tc_auto_shown_out_${who}_${wherePeriod}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
-            openTimeclockModal().catch(e => console.error('Timeclock auto-popup error:', e));
+            openTimeclockModal().catch(e => { console.error('Timeclock auto-popup error:', e); logTimeclockError('checkAutoPopup:out', e); });
         }
     }
 }
@@ -451,6 +484,7 @@ async function checkStatusInner() {
         }
     } catch (e) {
         console.error("Timeclock check status error:", e);
+        logTimeclockError('checkStatusInner', e);
         // Previously silent -- if this background check is what the
         // auto-popup ends up displaying (checkAutoPopup reads
         // window.timeclock.currentMode, which is already set by this point,
@@ -503,7 +537,7 @@ async function handleTimeclockSubmit(e) {
             })
         });
         location.reload();
-    } catch (e) { console.error("Timeclock submit error:", e); }
+    } catch (e) { console.error("Timeclock submit error:", e); logTimeclockError('handleTimeclockSubmit', e); }
 }
 
 function injectTimeclockUI() {
@@ -562,6 +596,7 @@ function injectTimeclockUI() {
 // always leaves the student looking at real content or a visible error
 // message -- never nothing.
 async function handleManualOpen() {
+    logTimeclockError('handleManualOpen:clicked', { message: 'button click received' });
     const modalEl = document.getElementById('timeclock-modal');
     const label = document.getElementById('tc-question-label');
     const optsContainer = document.getElementById('tc-options-container');
@@ -569,7 +604,12 @@ async function handleManualOpen() {
     const form = document.getElementById('tc-form');
     const successMsg = document.getElementById('tc-success-msg');
     const widgetBtn = document.getElementById('tc-widget-btn');
-    if (!modalEl || !label || !optsContainer || !btn || !form || !successMsg) return;
+    if (!modalEl || !label || !optsContainer || !btn || !form || !successMsg) {
+        logTimeclockError('handleManualOpen:missingDom', {
+            message: `required DOM element missing: modal=${!!modalEl} label=${!!label} opts=${!!optsContainer} btn=${!!btn} form=${!!form} success=${!!successMsg}`
+        });
+        return;
+    }
 
     form.style.display = '';
     successMsg.classList.add('d-none');
@@ -593,6 +633,7 @@ async function handleManualOpen() {
         // button itself, with plain DOM/CSS changes that need nothing but
         // the browser's own rendering.
         console.error('Timeclock modal failed to open:', e);
+        logTimeclockError('handleManualOpen:openModal', e);
         if (widgetBtn) {
             widgetBtn.innerText = 'Timeclock (tap to retry)';
             widgetBtn.classList.add('btn-danger');
@@ -637,6 +678,7 @@ async function handleManualOpen() {
         }
     } catch (e) {
         console.error('Timeclock manual open error:', e);
+        logTimeclockError('handleManualOpen:fetch', e);
         label.innerText = "Something went wrong loading the timeclock. Please try again, or tell your teacher if it keeps happening.";
         optsContainer.innerHTML = '';
         btn.innerText = 'Retry';

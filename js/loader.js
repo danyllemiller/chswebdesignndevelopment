@@ -46,7 +46,31 @@
   const script = document.createElement('script');
   script.id = 'timeclock-script';
   script.type = 'module';
-  script.src = '/js/student/timeclock.js?v=20';
+  script.src = '/js/student/timeclock.js?v=21';
+  // Repeated fixes aimed at guessed causes (stale cache, modal races, load
+  // ordering) each failed for some students with zero visible symptom --
+  // this catches the case none of those could see at all: the module
+  // script itself failing to load or parse (404, network failure, a syntax
+  // error), which means initTimeclock() never runs and the button is
+  // either missing or wired to nothing. Reported with plain XHR, not
+  // fetch/apiFetch, since if the module never loaded, nothing this file
+  // imports can be trusted to exist either.
+  script.onerror = function (ev) {
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/client-error-log', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify({
+        message: 'timeclock.js script failed to load',
+        stack: null,
+        url: window.location.href,
+        student_id: (function () { try { return JSON.parse(localStorage.getItem('user') || '{}').student_id || null; } catch (e) { return null; } })(),
+        context: 'loader.js script.onerror',
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+      }));
+    } catch (e) { /* nothing more we can do without the module */ }
+  };
   document.body ? document.body.appendChild(script) : document.head.appendChild(script);
 })();
 
