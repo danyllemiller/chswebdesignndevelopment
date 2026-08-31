@@ -316,61 +316,80 @@ router.get('/timeclock/question', async (req, res) => {
     }
 });
 
+// The six groups a clock-out question can be scoped to. WD2 vs WD_AS share
+// the same physical period (B2) but are different courses -- distinguished
+// by the student's own course_id, not section_id. CS is split into two
+// pacing clusters that don't share a period, except on Mondays when both
+// clusters intentionally collapse into one shared question.
+const QUESTION_GROUPS = [
+    { key: 'WD1', label: 'Web Design I (A1)' },
+    { key: 'WD2', label: 'Web Design II (B2)' },
+    { key: 'WD_AS', label: 'Web Design AS (B2, AS track)' },
+    { key: 'CS_A', label: 'Comp Sci — A3 & A5' },
+    { key: 'CS_B', label: 'Comp Sci — B4, B6 & B8' },
+    { key: 'CS_MON', label: 'Comp Sci — Mondays (all periods share one)' }
+];
+const WD_AS_COURSE_ID = '05254EF-201';
+
+async function ensureDailyQuestionsGroupTable(connection) {
+    await connection.execute(`
+        CREATE TABLE IF NOT EXISTS teacher_daily_questions_v2 (
+            date DATE NOT NULL,
+            group_key VARCHAR(20) NOT NULL,
+            question_text TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (date, group_key)
+        )
+    `);
+}
+
+async function resolveQuestionGroupKey(connection, studentId) {
+    const [[student]] = await connection.execute(
+        'SELECT section_id, course_id FROM students WHERE student_id = ?', [studentId]
+    );
+    if (!student) return null;
+    const sectionId = student.section_id;
+    if (sectionId === 'A1') return 'WD1';
+    if (sectionId === 'B2') return student.course_id === WD_AS_COURSE_ID ? 'WD_AS' : 'WD2';
+    if (['A3', 'A5', 'B4', 'B6', 'B8'].includes(sectionId)) {
+        if (new Date().getDay() === 1) return 'CS_MON'; // Monday: both CS clusters share one question
+        return (sectionId === 'A3' || sectionId === 'A5') ? 'CS_A' : 'CS_B';
+    }
+    return null;
+}
+
 // Clock-out prompt: a teacher's manually-set exit ticket for today takes
-// priority (admin/payroll.html's "Set Clock Out Prompts" modal); otherwise
-// auto-generate a reflection prompt tied to the chapter the student is
-// actually working on right now, resolved the same way as the clock-in
-// question so the two never disagree about "today's" content.
+// priority (admin/payroll.html's "Set Clock Out Prompts" modal), scoped to
+// the student's specific group so everyone in the same group sees the
+// identical question. Previously fell back to guessing from each
+// individual student's own most-recent notebook save when nothing was set
+// -- that meant two students in the same class could see completely
+// different (or, for a student with no recorded activity that day,
+// missing/broken) prompts. The fallback is now the same stable, class-wide
+// due-date chapter for everyone, never derived from individual activity.
 router.get('/timeclock/reflection-prompt', async (req, res) => {
     const { type, student_id } = req.query; // CS, WD1, WD2
     const kind = String(type || '');
     const today = getLocalDateStr();
     try {
         const connection = await getDbConnection();
+        await ensureDailyQuestionsGroupTable(connection);
 
-        const [rows] = await connection.execute(
-            'SELECT wd_question, cs_question FROM teacher_daily_questions WHERE date = ?',
-            [today]
-        );
-        const dailyQ = rows[0];
-        const custom = kind === 'CS' ? dailyQ?.cs_question : dailyQ?.wd_question;
-        if (custom && custom.trim()) {
-            await connection.release();
-            return res.json({ prompt_text: custom.trim(), isCustom: true });
-        }
-
-        // Prefer what this specific student actually worked on today (their
-        // most recent notebook/worksheet save) over the class-wide due-date
-        // schedule -- students progress through chapters at their own pace,
-        // so the due-date-driven "current chapter" often isn't the one a
-        // given student was actually in that day.
-        let todaysChapterLabel = null;
-        if (student_id) {
-            // Excludes the exam scratchpad -- it's for jotting notes during a
-            // test, not chapter content, so "reflect on what you learned in
-            // Unit Exam Scratchpad" isn't a meaningful prompt even though
-            // it's technically their most recent save.
-            const [turninRows] = await connection.execute(
-                `SELECT chapter FROM turnins
-                 WHERE student_id = ? AND DATE(timestamp) = ? AND chapter IS NOT NULL AND chapter != ''
-                   AND chapter NOT LIKE '%Exam Scratchpad%'
-                 ORDER BY timestamp DESC LIMIT 1`,
-                [student_id, today]
+        const groupKey = student_id ? await resolveQuestionGroupKey(connection, student_id) : null;
+        if (groupKey) {
+            const [rows] = await connection.execute(
+                'SELECT question_text FROM teacher_daily_questions_v2 WHERE date = ? AND group_key = ?',
+                [today, groupKey]
             );
-            if (turninRows.length > 0) todaysChapterLabel = turninRows[0].chapter;
+            const custom = rows[0]?.question_text;
+            if (custom && custom.trim()) {
+                await connection.release();
+                return res.json({ prompt_text: custom.trim(), isCustom: true, groupKey });
+            }
         }
 
-        if (todaysChapterLabel) {
-            await connection.release();
-            return res.json({
-                prompt_text: `In 2-3 sentences, reflect on what you learned today in ${todaysChapterLabel}. What's one thing that made sense, and one thing you're still working through?`,
-                isCustom: false
-            });
-        }
-
-        // Fallback: no recorded activity for this student today (e.g. they
-        // clocked in but didn't save any notes) -- use the class-wide
-        // due-date schedule as a reasonable default.
+        // Fallback: no custom question set for this group today -- use the
+        // class-wide due-date schedule as a reasonable, stable default.
         let chapter, title;
         if (kind === 'CS') {
             ({ chapter } = await getCurrentCSChapter(connection));
@@ -493,44 +512,31 @@ router.get('/admin/daily-questions', async (req, res) => {
     if (!date) return res.status(400).json({ error: 'date is required' });
     try {
         const connection = await getDbConnection();
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS teacher_daily_questions (
-                date DATE NOT NULL PRIMARY KEY,
-                wd_question TEXT,
-                cs_question TEXT,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            )
-        `);
+        await ensureDailyQuestionsGroupTable(connection);
         const [rows] = await connection.execute(
-            'SELECT wd_question, cs_question FROM teacher_daily_questions WHERE date = ?',
+            'SELECT group_key, question_text FROM teacher_daily_questions_v2 WHERE date = ?',
             [date]
         );
         await connection.release();
-        res.json(rows.length > 0
-            ? { wdQuestion: rows[0].wd_question || '', csQuestion: rows[0].cs_question || '' }
-            : { wdQuestion: '', csQuestion: '' }
-        );
+        const questions = {};
+        rows.forEach(r => { questions[r.group_key] = r.question_text || ''; });
+        res.json({ groups: QUESTION_GROUPS, questions });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch daily questions' }); }
 });
 
 router.post('/admin/daily-questions', async (req, res) => {
-    const { date, wdQuestion, csQuestion } = req.body;
+    const { date, questions } = req.body; // { WD1: "...", WD2: "...", WD_AS: "...", CS_A: "...", CS_B: "...", CS_MON: "..." }
     if (!date) return res.status(400).json({ error: 'date is required' });
     try {
         const connection = await getDbConnection();
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS teacher_daily_questions (
-                date DATE NOT NULL PRIMARY KEY,
-                wd_question TEXT,
-                cs_question TEXT,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            )
-        `);
-        await connection.execute(
-            `INSERT INTO teacher_daily_questions (date, wd_question, cs_question) VALUES (?, ?, ?)
-             ON DUPLICATE KEY UPDATE wd_question = VALUES(wd_question), cs_question = VALUES(cs_question)`,
-            [date, wdQuestion || '', csQuestion || '']
-        );
+        await ensureDailyQuestionsGroupTable(connection);
+        for (const g of QUESTION_GROUPS) {
+            await connection.execute(
+                `INSERT INTO teacher_daily_questions_v2 (date, group_key, question_text) VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE question_text = VALUES(question_text)`,
+                [date, g.key, (questions && questions[g.key]) || '']
+            );
+        }
         await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save daily questions' }); }

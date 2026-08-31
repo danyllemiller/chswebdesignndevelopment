@@ -123,14 +123,30 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light p-4">
-                    <p class="small text-muted mb-4">These questions will automatically appear when students clock out on the selected date. If left blank, it will default to the standard 3-2-1 Reflection.</p>
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-primary">Web Design Question</label>
-                        <textarea id="wdQuestionInput" class="form-control border-primary" rows="3" placeholder="Leave blank to use default 3-2-1 reflection..."></textarea>
+                    <p class="small text-muted mb-4">These questions will automatically appear when students clock out on the selected date. Each group gets its own question — leave any blank to fall back to an auto-generated reflection prompt for that group's current chapter.</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-primary">Web Design I (A1)</label>
+                        <textarea id="q-WD1" class="form-control border-primary" rows="2" placeholder="Leave blank to use default reflection..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-primary">Web Design II (B2)</label>
+                        <textarea id="q-WD2" class="form-control border-primary" rows="2" placeholder="Leave blank to use default reflection..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-primary">Web Design AS (B2, AS track)</label>
+                        <textarea id="q-WD_AS" class="form-control border-primary" rows="2" placeholder="Leave blank to use default reflection..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-primary">Comp Sci — A3 &amp; A5</label>
+                        <textarea id="q-CS_A" class="form-control border-primary" rows="2" placeholder="Leave blank to use default reflection..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-primary">Comp Sci — B4, B6 &amp; B8</label>
+                        <textarea id="q-CS_B" class="form-control border-primary" rows="2" placeholder="Leave blank to use default reflection..."></textarea>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label fw-bold text-primary">Computer Science Question</label>
-                        <textarea id="csQuestionInput" class="form-control border-primary" rows="3" placeholder="Leave blank to use default 3-2-1 reflection..."></textarea>
+                        <label class="form-label fw-bold text-primary">Comp Sci — Mondays (all periods share this one)</label>
+                        <textarea id="q-CS_MON" class="form-control border-primary" rows="2" placeholder="Leave blank to use default reflection..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -241,6 +257,6 @@
     </div>
 
     <!-- Script path pointed specifically to the admin folder inside js -->
-    <script type="module" src="/js/admin/payroll.js?v=2"></script>
+    <script type="module" src="/js/admin/payroll.js?v=3"></script>
 </body>
 </html>

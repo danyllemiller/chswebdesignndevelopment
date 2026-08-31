@@ -8,6 +8,20 @@ let currentQuestion = null;
 let bellWindow = null; // { startMs, endMs } for whichever of the student's periods is currently active today, or null
 let currentPeriod = null; // which of the student's (possibly multiple) periods bellWindow/getCourseKey resolved to
 
+// checkStatus() gets triggered from four independent places (initial load,
+// the 60s recheck interval, the visibilitychange handler, and the manual
+// widget-button click) with no coordination between them. Two of those
+// firing close together (e.g. the tab regains focus right as the interval
+// also ticks, or a student clicks the button while an auto-recheck is
+// still in flight) used to run two overlapping async checks that both
+// fetched a question and both raced to write the same label/options DOM
+// elements -- whichever response arrived second silently won, sometimes
+// leaving the modal on a stale or half-written state with no visible
+// error. This flag makes a second call while one's already running just
+// wait for the in-flight one instead of starting a competing fetch.
+let statusCheckPromise = null;
+let checkStatusCallId = 0;
+
 // ==============================================================================
 // 1. HELPERS & CONFIGURATION
 // ==============================================================================
@@ -303,13 +317,30 @@ async function initTimeclock() {
     });
 }
 
-async function checkStatus() {
+// Public entry point -- every caller (initial load, the 60s interval, the
+// visibility handler, the button click) goes through here. If a check is
+// already running, piggyback on that same promise instead of starting a
+// second overlapping one.
+function checkStatus() {
+    if (statusCheckPromise) return statusCheckPromise;
+    statusCheckPromise = checkStatusInner().finally(() => { statusCheckPromise = null; });
+    return statusCheckPromise;
+}
+
+async function checkStatusInner() {
     if (!studentData) return;
+
+    // Tags this specific call so its DOM writes can be thrown away if a
+    // newer call finishes first -- belt-and-suspenders alongside the
+    // single-flight guard above, in case a caller ever bypasses checkStatus()
+    // and calls this directly.
+    const callId = ++checkStatusCallId;
 
     try {
         // Using our shared apiFetch module
         const periodParam = currentPeriod ? `&period=${encodeURIComponent(currentPeriod)}` : '';
         const statusData = await apiFetch(`/api/timeclock/status?student_id=${studentData.student_id}${periodParam}`);
+        if (callId !== checkStatusCallId) return; // a newer check has since started; this response is stale
 
         const label = document.getElementById('tc-question-label');
         const optsContainer = document.getElementById('tc-options-container');
@@ -342,6 +373,7 @@ async function checkStatus() {
             // Clock-in is always a real question pulled from that course's
             // actual chapter test bank -- never a manually-typed question.
             currentQuestion = await apiFetch(`/api/timeclock/question?type=${category}`);
+            if (callId !== checkStatusCallId) return; // superseded while this fetch was in flight
 
             label.innerHTML = `<span class="d-block small text-muted fw-normal mb-1">${currentQuestion.chapterLabel || ''}</span>${currentQuestion.question_text}`;
 
@@ -360,6 +392,7 @@ async function checkStatus() {
         else if (mode === 'out') {
             const category = getCourseKey();
             const promptData = await apiFetch(`/api/timeclock/reflection-prompt?type=${category}&student_id=${encodeURIComponent(studentData.student_id)}`);
+            if (callId !== checkStatusCallId) return; // superseded while this fetch was in flight
             label.innerText = promptData.prompt_text;
             optsContainer.innerHTML = `<textarea id="tc-out-answer" class="form-control" rows="3" required></textarea>`;
             btn.innerText = "Submit & Clock Out";
