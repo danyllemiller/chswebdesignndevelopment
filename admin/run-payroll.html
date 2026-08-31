@@ -40,7 +40,7 @@
     <div class="d-flex align-items-center mb-4">
       <div>
         <h1 class="gochi text-primary mb-0"><i class="fas fa-money-check-alt me-2"></i>Run Payroll</h1>
-        <p class="text-muted mb-0">Generate official paystubs for a bi-weekly pay period. Students can then view them at My Grades → My Paystubs.</p>
+        <p class="text-muted mb-0">Generate official paystubs for a semi-monthly pay period (1st-15th, 16th-end of month). Students can then view them at My Grades → My Paystubs.</p>
       </div>
     </div>
 
@@ -161,7 +161,8 @@ function waitForAuth(timeout = 8000) {
 let isTeacher = false;
 
 const ON_TIME_BONUS = 5.00;
-const ANCHOR_DATE   = new Date('2026-08-02T00:00:00');
+const ANCHOR_YEAR  = 2026;
+const ANCHOR_MONTH  = 7; // August (0-indexed) -- start of the school year
 
 function pad(n) { return n < 10 ? '0' + n : String(n); }
 function fmtDate(d) {
@@ -174,16 +175,23 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// Generate all bi-weekly period ranges from anchor to today
+// Generate all semi-monthly period ranges (1st-15th, 16th-end of month)
+// from the school-year anchor to today. Each half is only included once
+// its OWN start date has actually arrived, so an in-progress period shows
+// up but a fully-future one doesn't.
 function getAllPeriods() {
   const today = new Date();
   const periods = [];
-  let cursor = new Date(ANCHOR_DATE);
-  while (cursor <= today) {
-    const end = new Date(cursor.getTime() + 13 * 86400000);
-    const fmt = dt => `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
-    periods.push({ start: fmt(cursor), end: fmt(end) });
-    cursor = new Date(cursor.getTime() + 14 * 86400000);
+  const fmt = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
+  let y = ANCHOR_YEAR, m = ANCHOR_MONTH;
+  while (new Date(y, m, 1) <= today) {
+    const lastDay = new Date(y, m + 1, 0).getDate();
+    periods.push({ start: fmt(y, m, 1), end: fmt(y, m, 15) });
+    if (new Date(y, m, 16) <= today) {
+      periods.push({ start: fmt(y, m, 16), end: fmt(y, m, lastDay) });
+    }
+    m++;
+    if (m > 11) { m = 0; y++; }
   }
   return periods.reverse(); // newest first
 }

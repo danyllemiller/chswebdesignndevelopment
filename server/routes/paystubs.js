@@ -38,12 +38,11 @@ function timeToMinutes(t) {
     return h * 60 + (m || 0) + (s || 0) / 60;
 }
 
-// Semi-monthly pay date: whichever comes first, the 1st or the 15th, on or
-// after the day payroll is actually run -- not the period's own end date.
-// Running payroll on 8/28 for a period that ended 8/22 pays out 9/1, the
-// next payday after processing, matching how a real semi-monthly payroll
-// calendar works. Computed once per run (same for every student in it) and
-// frozen on payroll_runs so it doesn't drift if viewed/printed later.
+// Pay date is always the calendar day right after the period ends -- a
+// period ending the 15th pays the 16th, one ending on the last day of the
+// month pays the 1st of the next. Computed once per run (same for every
+// student in it) and frozen on payroll_runs so it doesn't drift if
+// viewed/printed later.
 function getLocalDateStr() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -51,10 +50,8 @@ function getLocalDateStr() {
 
 function computeNextPayDate(fromDateStr) {
     const [y, m, d] = fromDateStr.split('-').map(Number);
-    const target = d <= 1 ? 1 : (d <= 15 ? 15 : 1);
-    const targetMonth = (d <= 15) ? m : (m === 12 ? 1 : m + 1);
-    const targetYear = (d <= 15) ? y : (m === 12 ? y + 1 : y);
-    return `${targetYear}-${String(targetMonth).padStart(2, '0')}-${String(target).padStart(2, '0')}`;
+    const next = new Date(y, m - 1, d + 1); // JS Date normalizes day-of-month overflow (e.g. Aug 31 + 1 -> Sep 1)
+    return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`;
 }
 
 // students.course_id is NULL for a lot of legacy-enrolled students (confirmed
