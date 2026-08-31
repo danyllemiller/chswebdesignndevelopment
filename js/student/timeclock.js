@@ -206,9 +206,32 @@ function cleanupStrayModalState() {
     document.body.style.removeProperty('padding-right');
 }
 
-function openTimeclockModal() {
+// bootstrap.bundle.js is loaded as a plain global from its own <script> tag,
+// not an ES module import -- unlike this file's actual imports (apiFetch,
+// getLoggedInUser, etc.), which the module system guarantees are resolved
+// before any of this file's own code runs, nothing guarantees `bootstrap`
+// itself is already defined by the moment a click fires, especially on a
+// fully cold load (confirmed live: a guest profile with zero cache produced
+// "button clicked, nothing happens at all," which is exactly what a bare
+// `bootstrap.Modal...` reference throws on if that global isn't ready yet).
+// Poll briefly instead of assuming it's there.
+function waitForBootstrap(timeoutMs = 5000) {
+    return new Promise((resolve, reject) => {
+        if (window.bootstrap && window.bootstrap.Modal) { resolve(); return; }
+        const start = Date.now();
+        const check = () => {
+            if (window.bootstrap && window.bootstrap.Modal) { resolve(); return; }
+            if (Date.now() - start > timeoutMs) { reject(new Error('bootstrap.bundle.js did not load in time')); return; }
+            setTimeout(check, 100);
+        };
+        check();
+    });
+}
+
+async function openTimeclockModal() {
     const modalEl = document.getElementById('timeclock-modal');
     if (!modalEl) return;
+    await waitForBootstrap();
     // Previously checked our own `.show()` CSS class as a manual "already
     // open" guard -- if that class and Bootstrap's actual internal state
     // ever fell out of sync (e.g. the auto-popup and a manual click both
@@ -268,13 +291,13 @@ function checkAutoPopup() {
         const flag = `tc_auto_shown_in_${who}_${wherePeriod}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
-            openTimeclockModal();
+            openTimeclockModal().catch(e => console.error('Timeclock auto-popup error:', e));
         }
     } else if (mode === 'out' && now >= (bellWindow.endMs - 5 * 60 * 1000)) {
         const flag = `tc_auto_shown_out_${who}_${wherePeriod}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
-            openTimeclockModal();
+            openTimeclockModal().catch(e => console.error('Timeclock auto-popup error:', e));
         }
     }
 }
@@ -545,6 +568,7 @@ async function handleManualOpen() {
     const btn = document.getElementById('tc-submit-btn');
     const form = document.getElementById('tc-form');
     const successMsg = document.getElementById('tc-success-msg');
+    const widgetBtn = document.getElementById('tc-widget-btn');
     if (!modalEl || !label || !optsContainer || !btn || !form || !successMsg) return;
 
     form.style.display = '';
@@ -553,7 +577,29 @@ async function handleManualOpen() {
     optsContainer.innerHTML = '';
     btn.disabled = true;
     btn.innerText = 'Loading...';
-    openTimeclockModal();
+    if (widgetBtn) {
+        widgetBtn.innerText = 'Timeclock';
+        widgetBtn.classList.remove('btn-danger');
+        widgetBtn.classList.add('btn-dark');
+    }
+
+    try {
+        await openTimeclockModal();
+    } catch (e) {
+        // The modal itself couldn't open -- almost certainly
+        // bootstrap.bundle.js hadn't finished loading yet. There's nowhere
+        // inside a still-hidden modal to show that, so fall back to the one
+        // element guaranteed visible without Bootstrap at all: the floating
+        // button itself, with plain DOM/CSS changes that need nothing but
+        // the browser's own rendering.
+        console.error('Timeclock modal failed to open:', e);
+        if (widgetBtn) {
+            widgetBtn.innerText = 'Timeclock (tap to retry)';
+            widgetBtn.classList.add('btn-danger');
+            widgetBtn.classList.remove('btn-dark');
+        }
+        return;
+    }
 
     try {
         const periodParam = currentPeriod ? `&period=${encodeURIComponent(currentPeriod)}` : '';
