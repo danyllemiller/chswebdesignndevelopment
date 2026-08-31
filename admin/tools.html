@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>More Tools | CHS Admin</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=19"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 900px; margin: 2.5rem auto; }
+    .tool-link {
+      display: flex; align-items: center; gap: .9rem;
+      padding: 1rem 1.1rem; border-radius: .5rem;
+      background: #fff; border: 1px solid #e6e8ee;
+      text-decoration: none; color: inherit;
+      transition: box-shadow .15s ease, transform .15s ease;
+    }
+    .tool-link:hover { box-shadow: 0 .25rem .75rem rgba(0,0,0,.08); transform: translateY(-1px); color: inherit; }
+    .tool-link i.tool-icon { font-size: 1.35rem; width: 1.6rem; text-align: center; flex-shrink: 0; }
+    .tool-link .tool-name { font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <h2 class="gochi text-primary mb-1"><i class="fas fa-toolbox me-2"></i>More Tools</h2>
+  <p class="text-muted mb-4">The rest of the admin toolkit — the everyday tools (Roster, Gradebook, Daily Agenda, Digital Notebooks, Calendar) stay in the main Admin menu.</p>
+
+  <div class="row g-3">
+    <div class="col-md-6"><a class="tool-link" href="/admin/payroll.html"><i class="fas fa-money-check-alt tool-icon text-primary"></i><span class="tool-name">Payroll &amp; Timeclock</span></a></div>
+    <div class="col-md-6"><a class="tool-link" href="/admin/run-payroll.html"><i class="fas fa-file-invoice-dollar tool-icon text-primary"></i><span class="tool-name">Run Payroll</span></a></div>
+    <div class="col-md-6"><a class="tool-link" href="/admin/tools/tardy-tracker.html"><i class="fas fa-stopwatch tool-icon text-primary"></i><span class="tool-name">Tardy Tracker</span></a></div>
+    <div class="col-md-6"><a class="tool-link" href="/admin/tools/daily-activity.html"><i class="fas fa-clipboard-list tool-icon text-primary"></i><span class="tool-name">Daily Activity</span></a></div>
+    <div class="col-md-6"><a class="tool-link" href="/admin/tools/off-days.html"><i class="fas fa-calendar-xmark tool-icon text-primary"></i><span class="tool-name">Off Days</span></a></div>
+    <div class="col-md-6"><a class="tool-link" href="/admin/tools/attempt-analytics.html"><i class="fas fa-chart-line tool-icon text-primary"></i><span class="tool-name">Attempt Analytics</span></a></div>
+    <div class="col-md-6"><a class="tool-link" href="/admin/tools/song-requests.html"><i class="fas fa-music tool-icon text-success"></i><span class="tool-name">Song Requests</span></a></div>
+    <div class="col-md-6"><a class="tool-link" href="/admin/files.html"><i class="fas fa-folder tool-icon text-warning"></i><span class="tool-name">Student Files</span></a></div>
+    <div class="col-md-6"><a class="tool-link" href="/admin/rubrics.html"><i class="fas fa-bullhorn tool-icon text-success"></i><span class="tool-name">Rubric Manager</span></a></div>
+    <div class="col-md-6"><a class="tool-link" href="/admin/due-dates.html"><i class="fas fa-calendar-check tool-icon text-info"></i><span class="tool-name">Due Date Manager</span></a></div>
+    <div class="col-md-6"><a class="tool-link" href="/admin/checklist.html"><i class="fas fa-clipboard-check tool-icon text-success"></i><span class="tool-name">Teacher Checklist</span></a></div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+</body>
+</html>
