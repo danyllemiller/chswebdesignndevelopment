@@ -186,7 +186,25 @@ router.post('/submit-exam', async (req, res) => {
         }
 
         const examTitle = title || exam_id.replace(/-/g, ' ').replace(/cs unit \d+/i, (m) => m.toUpperCase());
-        const examCourse = course_id || '10003GS';
+        // prof-scales.js (every chapter's Pre-Scale/Post-Scale, both CS and
+        // WD) never sends course_id at all -- this used to blindly default
+        // to Comp Sci whenever it was omitted, silently mistagging the
+        // first WD student's submission of any not-yet-seeded chapter as a
+        // CS assignment (confirmed live: Ch9 Pre-Scale, submitted only by
+        // B2/WD2 students, ended up tagged '10003GS' and showing up in the
+        // Comp Sci gradebook). Resolve the submitting student's own actual
+        // course from their section instead of guessing CS -- this is only
+        // a fallback for brand-new exam rows; an explicitly-passed
+        // course_id (e.g. from the Due Date Manager pre-seeding a row) is
+        // still honored above it, and ON DUPLICATE KEY UPDATE below never
+        // touches course_id once a row exists either way.
+        let examCourse = course_id;
+        if (!examCourse) {
+            const [[submittingStudent]] = await connection.execute(
+                'SELECT section_id FROM students WHERE student_id = ?', [student_id]
+            );
+            examCourse = (submittingStudent && await resolveCourseId(connection, submittingStudent.section_id)) || '10003GS';
+        }
         await connection.execute(
             'INSERT INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = COALESCE(VALUES(title), title), total_points = COALESCE(VALUES(total_points), total_points)',
             [exam_id, examTitle, total_points || 100, examCourse]
@@ -255,12 +273,16 @@ router.post('/admin/clear-all-assignments', async (req, res) => {
 });
 
 router.post('/admin/save-assignment', async (req, res) => {
-    const { exam_id, title, total_points, course_id } = req.body;
+    // due_date and instructions were accepted from the client and silently
+    // dropped -- neither was ever written to the exams table, so a due date
+    // set on a brand-new assignment column never actually saved in the
+    // first place, with no error surfaced anywhere.
+    const { exam_id, title, total_points, course_id, due_date, instructions } = req.body;
     try {
         const connection = await getDbConnection();
         await connection.execute(
-            'INSERT INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE title=VALUES(title), total_points=VALUES(total_points), course_id=VALUES(course_id)',
-            [exam_id, title, total_points, course_id]
+            'INSERT INTO exams (exam_id, title, total_points, course_id, due_date, instructions) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title=VALUES(title), total_points=VALUES(total_points), course_id=VALUES(course_id), due_date=VALUES(due_date), instructions=VALUES(instructions)',
+            [exam_id, title, total_points, course_id, due_date || null, instructions || null]
         );
         await connection.release();
         res.json({ success: true });
@@ -268,17 +290,22 @@ router.post('/admin/save-assignment', async (req, res) => {
 });
 
 router.post('/admin/edit-assignment', async (req, res) => {
-    const { old_exam_id, exam_id, title, total_points, course_id } = req.body;
+    // Same gap as save-assignment above -- due_date and instructions were
+    // sent by the client on every edit (including edits that only touched
+    // the due date) but never appeared in either UPDATE statement below, so
+    // the change silently never persisted no matter how many times it was
+    // re-entered through the gradebook's edit-column modal.
+    const { old_exam_id, exam_id, title, total_points, course_id, due_date, instructions } = req.body;
     if (!old_exam_id || !exam_id) return res.status(400).json({ error: 'old_exam_id and exam_id are required' });
     try {
         const connection = await getDbConnection();
         if (old_exam_id !== exam_id) {
             await connection.execute('UPDATE responses SET exam_id = ? WHERE exam_id = ?', [exam_id, old_exam_id]);
-            await connection.execute('UPDATE exams SET exam_id = ?, title = ?, total_points = ?, course_id = ? WHERE exam_id = ?',
-                [exam_id, title, total_points, course_id, old_exam_id]);
+            await connection.execute('UPDATE exams SET exam_id = ?, title = ?, total_points = ?, course_id = ?, due_date = ?, instructions = ? WHERE exam_id = ?',
+                [exam_id, title, total_points, course_id, due_date || null, instructions || null, old_exam_id]);
         } else {
-            await connection.execute('UPDATE exams SET title = ?, total_points = ?, course_id = ? WHERE exam_id = ?',
-                [title, total_points, course_id, exam_id]);
+            await connection.execute('UPDATE exams SET title = ?, total_points = ?, course_id = ?, due_date = ?, instructions = ? WHERE exam_id = ?',
+                [title, total_points, course_id, due_date || null, instructions || null, exam_id]);
         }
         await connection.release();
         res.json({ success: true });
