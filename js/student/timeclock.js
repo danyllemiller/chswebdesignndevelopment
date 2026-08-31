@@ -298,9 +298,13 @@ async function openTimeclockModal() {
 // its own clock-in/out event, so each period's popup needs to be able to
 // fire independently instead of one suppressing the other.
 //
-// Both windows are open-ended on the far side (no "now <= endMs" upper
-// bound) rather than snapping shut exactly at the period boundary. The
-// 60s interval only fires reliably while the tab is in the foreground --
+// The clock-out window is open-ended on the far side (no upper bound --
+// checked below) since recording a late clock-out is still meaningful.
+// Clock-in is deliberately NOT open-ended: it closes at bellWindow.endMs
+// (checked in checkAutoPopup below, and enforced again server-side in
+// checkStatusInner's "today's class has ended" message) because clocking
+// in for a period that's already over doesn't mean anything. The 60s
+// interval only fires reliably while the tab is in the foreground --
 // browsers throttle timers in background tabs, which is exactly the kind
 // of thing a student with several tabs open runs into constantly. A
 // narrow window meant that if their tab wasn't focused at the precise
