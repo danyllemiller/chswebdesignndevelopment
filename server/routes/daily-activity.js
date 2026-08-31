@@ -8,21 +8,6 @@ const path = require('path');
 const REPO_ROOT = path.join(__dirname, '..', '..');
 const UPLOADS_ROOT = path.join(REPO_ROOT, 'uploads');
 
-// Mirrors js/modules/tardy-ladder.js -- duplicated here rather than shared
-// via import because that module uses ES module syntax and this server runs
-// CommonJS. Keep both in sync if the policy on discipline.html changes.
-const TARDY_LADDER = [
-    { count: 1, label: 'First Tardy', consequence: 'Brief private check-in. No further consequence.' },
-    { count: 2, label: 'Second Tardy', consequence: 'Five-minute conference and a short written reflection identifying one specific change.' },
-    { count: 3, label: 'Third Tardy', consequence: 'Parent/guardian contacted by phone or email, and a short support plan is built together. Missed class time is made up during lunch or before/after school.' },
-    { count: 4, label: 'Fourth Tardy', consequence: "Scheduled restorative session, a revised plan, and the student's counselor is looped in. Parent/guardian is notified of the outcome." },
-    { count: 5, label: 'Fifth Tardy & Beyond', consequence: 'Administrative referral, with a meeting requested including parent/guardian, counselor, and an administrator.' }
-];
-function getTardyStep(count) {
-    if (!count || count < 1) return null;
-    return TARDY_LADDER.find(s => s.count === count) || TARDY_LADDER[TARDY_LADDER.length - 1];
-}
-
 function dateOnly(d) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
@@ -89,25 +74,6 @@ router.get('/admin/daily-activity', async (req, res) => {
             [targetDate, currentYear]
         );
 
-        // Tardy follow-ups aren't scoped to the selected date -- it's a
-        // standing "who still needs a conversation" list, resolved (letter
-        // sent, or flagged as minor and not worth a letter) per tardy-count
-        // milestone via tardy_followup_resolutions -- so it always reflects
-        // the full current tally regardless of which date is being viewed
-        // above it, minus whatever's already been handled at that count.
-        await ensureFollowupTables(connection);
-        const [tardyRows] = await connection.execute(
-            `SELECT tp.student_id, s.first_name, s.last_name
-             FROM tardy_passes tp
-             JOIN students s ON s.student_id = tp.student_id
-             WHERE ${activeStudentFilter}`,
-            [currentYear]
-        );
-        const [resolutionRows] = await connection.execute(
-            `SELECT student_id, resolved_through_count FROM tardy_followup_resolutions`
-        );
-        const resolvedThrough = new Map(resolutionRows.map(r => [r.student_id, r.resolved_through_count]));
-
         // Incomplete pretests/exams -- also a standing list, not date-scoped,
         // since "started but never finished" doesn't have a natural single day.
         const [progressRows] = await connection.execute(
@@ -138,16 +104,6 @@ router.get('/admin/daily-activity', async (req, res) => {
             })
             .filter(p => !p.alreadyScored)
             .sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
-
-        const tardyByStudent = new Map();
-        tardyRows.forEach(r => {
-            if (!tardyByStudent.has(r.student_id)) tardyByStudent.set(r.student_id, { ...r, count: 0 });
-            tardyByStudent.get(r.student_id).count++;
-        });
-        const tardyFollowups = Array.from(tardyByStudent.values())
-            .filter(s => s.count > 1 && s.count > (resolvedThrough.get(s.student_id) || 1))
-            .map(s => ({ student_id: s.student_id, first_name: s.first_name, last_name: s.last_name, count: s.count, step: getTardyStep(s.count) }))
-            .sort((a, b) => b.count - a.count);
 
         // Retake clearances needed: CS unit-exam attempts where the most
         // recent attempt was under 80% and the required next step (notes
@@ -235,76 +191,16 @@ router.get('/admin/daily-activity', async (req, res) => {
             console.error('[daily-activity] upload scan failed:', e);
         }
 
-        res.json({ date: targetDate, submissions, uploads, tardyFollowups, incompleteAssessments, retakeClearancesNeeded });
+        res.json({ date: targetDate, submissions, uploads, incompleteAssessments, retakeClearancesNeeded });
     } catch (err) {
         console.error('[daily-activity] failed:', err);
         res.status(500).json({ error: 'Failed to build daily activity report.' });
     }
 });
 
-async function ensureFollowupTables(connection) {
-    await connection.execute(`
-        CREATE TABLE IF NOT EXISTS tardy_followup_resolutions (
-            student_id VARCHAR(50) PRIMARY KEY,
-            resolved_through_count INT NOT NULL,
-            resolution_type ENUM('letter','minor_flag') NOT NULL,
-            resolved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-    await connection.execute(`
-        CREATE TABLE IF NOT EXISTS staff_contacts (
-            id INT PRIMARY KEY DEFAULT 1,
-            counselor_name VARCHAR(150),
-            counselor_email VARCHAR(150)
-        )
-    `);
-}
-
-// Marks a student's tardy follow-up as handled (letter sent, or judged not
-// worth one) up through their CURRENT count -- they drop off the list until
-// the count moves past this again.
-router.post('/admin/tardy-followup-resolve', async (req, res) => {
-    const { student_id, count, resolution_type } = req.body;
-    if (!student_id || !count || !['letter', 'minor_flag'].includes(resolution_type)) {
-        return res.status(400).json({ error: 'student_id, count, and a valid resolution_type are required' });
-    }
-    try {
-        const connection = await getDbConnection();
-        await ensureFollowupTables(connection);
-        await connection.execute(
-            `INSERT INTO tardy_followup_resolutions (student_id, resolved_through_count, resolution_type)
-             VALUES (?, ?, ?)
-             ON DUPLICATE KEY UPDATE resolved_through_count = VALUES(resolved_through_count), resolution_type = VALUES(resolution_type), resolved_at = NOW()`,
-            [student_id, count, resolution_type]
-        );
-        await connection.release();
-        res.json({ success: true });
-    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save resolution' }); }
-});
-
-router.get('/admin/staff-contacts', async (req, res) => {
-    try {
-        const connection = await getDbConnection();
-        await ensureFollowupTables(connection);
-        const [rows] = await connection.execute('SELECT counselor_name, counselor_email FROM staff_contacts WHERE id = 1');
-        await connection.release();
-        res.json(rows[0] || { counselor_name: '', counselor_email: '' });
-    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch staff contacts' }); }
-});
-
-router.post('/admin/staff-contacts', async (req, res) => {
-    const { counselor_name, counselor_email } = req.body;
-    try {
-        const connection = await getDbConnection();
-        await ensureFollowupTables(connection);
-        await connection.execute(
-            `INSERT INTO staff_contacts (id, counselor_name, counselor_email) VALUES (1, ?, ?)
-             ON DUPLICATE KEY UPDATE counselor_name = VALUES(counselor_name), counselor_email = VALUES(counselor_email)`,
-            [counselor_name || '', counselor_email || '']
-        );
-        await connection.release();
-        res.json({ success: true });
-    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save staff contacts' }); }
-});
+// Tardy follow-up resolution and staff-contacts endpoints moved to
+// server/routes/tardy.js -- all tardy-related admin work (logging,
+// consequence follow-ups, counselor contact info) now lives together there
+// instead of being split between this file and a separate tardy tracker.
 
 module.exports = router;

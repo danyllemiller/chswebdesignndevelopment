@@ -96,6 +96,17 @@
       </table>
     </div>
   </div>
+
+  <div class="card shadow-sm border-0 mt-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <span class="fw-bold"><i class="fas fa-flag me-2 text-danger"></i>Tardy Follow-Ups Needed <span id="tardyFollowupCount" class="badge bg-secondary ms-1"></span></span>
+      <button id="counselorSettingsBtn" class="btn btn-sm btn-outline-secondary" title="Set counselor contact info"><i class="fas fa-gear"></i></button>
+    </div>
+    <div class="card-body" id="tardyFollowupBody">
+      <p class="text-muted small mb-2">A standing list, not tied to the date above — everyone currently past their first tardy at a consequence step that hasn't been handled yet at their current count. Counts here are the decayed, quarter-scoped effective count: five consecutive periods with no tardy drops one off, and everyone starts fresh at 0 each new quarter.</p>
+      <div id="tardyFollowupList"></div>
+    </div>
+  </div>
 </div>
 
 <!-- REPEAT-TARDY WARNING -->
@@ -172,6 +183,8 @@
   const lookupPreview = document.getElementById('lookupPreview');
   const formError = document.getElementById('formError');
   const logBody = document.getElementById('logBody');
+
+  let counselorContact = { counselor_name: '', counselor_email: '' };
 
   function todayStr() {
     const d = new Date();
@@ -322,9 +335,12 @@
       const priorCount = priorEntries.length;
       const countText = priorCount === 0 ? 'no prior tardies' : `${priorCount} prior ${priorCount === 1 ? 'tardy' : 'tardies'} on file`;
 
-      // "More than one tardy" needs following up on, per the tardy ladder --
-      // the first tardy is just a check-in with no further consequence.
-      const step = priorCount > 1 ? getTardyStep(priorCount) : null;
+      // The consequence ladder runs on the EFFECTIVE count -- decayed (five
+      // consecutive clean periods drops one off) and scoped to the current
+      // quarter (tardies before this quarter's start don't count) -- not the
+      // raw all-time total shown in countText above.
+      const effectiveCount = logData.effective ? logData.effective.effectiveCount : 0;
+      const step = effectiveCount > 1 ? getTardyStep(effectiveCount) : null;
       const flagHtml = step
         ? ` <span class="badge bg-warning text-dark ms-1"><i class="fas fa-flag me-1"></i>Follow up — ${escapeHtml(step.label)}: ${escapeHtml(step.consequence)}</span>`
         : '';
@@ -373,6 +389,7 @@
   const entriesById = new Map();
   let lastEntries = [];
   let sortMode = 'count';
+  let effectiveByStudent = new Map();
 
   document.getElementById('sortModeSelect').addEventListener('change', (e) => {
     sortMode = e.target.value;
@@ -413,8 +430,14 @@
     logBody.innerHTML = groups.map(group => {
         const first = group[0];
         const name = first.first_name ? `${escapeHtml(first.first_name)} ${escapeHtml(first.last_name)}` : escapeHtml(first.student_id);
-        const countBadgeClass = group.length >= 5 ? 'count-high' : group.length >= 3 ? 'count-mid' : 'bg-secondary';
-        const step = group.length > 1 ? getTardyStep(group.length) : null;
+        // The badge shows the EFFECTIVE count (decayed, quarter-scoped) --
+        // what actually drives the consequence ladder -- alongside the raw
+        // number of entries logged all-time, since those two can diverge
+        // once decay or a quarter reset kicks in.
+        const summary = effectiveByStudent.get(first.student_id);
+        const effectiveCount = summary ? summary.effective_count : group.length;
+        const countBadgeClass = effectiveCount >= 5 ? 'count-high' : effectiveCount >= 3 ? 'count-mid' : 'bg-secondary';
+        const step = effectiveCount > 1 ? getTardyStep(effectiveCount) : null;
         const flagBadge = step
           ? `<span class="badge bg-warning text-dark ms-2" title="${escapeHtml(step.consequence)}"><i class="fas fa-flag me-1"></i>Needs follow-up — ${escapeHtml(step.label)}</span>`
           : '';
@@ -422,7 +445,8 @@
           <tr class="table-light">
             <td colspan="6">
               <strong>${name}</strong> <span class="text-muted small">(${escapeHtml(first.student_id)})</span>
-              <span class="badge ${countBadgeClass} count-badge ms-2">${group.length} ${group.length === 1 ? 'tardy' : 'tardies'}</span>
+              <span class="badge ${countBadgeClass} count-badge ms-2">${effectiveCount} effective ${effectiveCount === 1 ? 'tardy' : 'tardies'}</span>
+              <span class="text-muted small ms-1">(${group.length} logged this year)</span>
               ${flagBadge}
             </td>
           </tr>`;
@@ -448,8 +472,13 @@
   async function loadLog() {
     try {
       await loadScheduleData();
-      const res = await fetch('/api/tardy/log');
-      const data = await res.json();
+      const [logRes, summaryRes] = await Promise.all([
+        fetch('/api/tardy/log'),
+        fetch('/api/tardy/summary')
+      ]);
+      const data = await logRes.json();
+      const summaryData = await summaryRes.json();
+      effectiveByStudent = new Map((summaryData.summary || []).map(s => [s.student_id, s]));
       lastEntries = data.entries || [];
       renderLog(lastEntries);
     } catch (e) {
@@ -457,8 +486,110 @@
     }
   }
 
+  function name(item) {
+    return item.first_name ? `${escapeHtml(item.first_name)} ${escapeHtml(item.last_name)}` : escapeHtml(item.student_id);
+  }
+
+  function renderTardyFollowups(items) {
+    document.getElementById('tardyFollowupCount').textContent = items.length;
+    const list = document.getElementById('tardyFollowupList');
+    if (items.length === 0) { list.innerHTML = '<p class="text-muted small mb-0">Nobody currently needs a tardy follow-up.</p>'; return; }
+    list.innerHTML = items.map(item => `
+      <div class="activity-row d-flex justify-content-between align-items-start flex-wrap gap-2 border-bottom py-2">
+        <div>
+          <strong>${name(item)}</strong>
+          <span class="badge bg-warning text-dark ms-1">${item.count} effective ${item.count === 1 ? 'tardy' : 'tardies'} — ${escapeHtml(item.step?.label || '')}</span>
+          <div class="text-muted small">${escapeHtml(item.step?.consequence || '')}</div>
+          <div class="letter-area mt-2 d-none"></div>
+        </div>
+        <div class="d-flex flex-column align-items-end gap-1">
+          <div class="d-flex gap-1">
+            <button class="btn btn-sm btn-primary fw-bold gen-letter-btn" data-student-id="${item.student_id}" data-first-name="${escapeHtml(item.first_name || '')}" data-last-name="${escapeHtml(item.last_name || '')}" data-count="${item.count}">
+              <i class="fas fa-envelope me-1"></i>${item.count >= 4 ? 'Parent + Counselor Letter' : 'Parent Letter'}
+            </button>
+            <button class="btn btn-sm btn-outline-secondary minor-flag-btn" data-student-id="${item.student_id}" data-count="${item.count}" title="Handle without a letter">
+              <i class="fas fa-flag"></i> Minor
+            </button>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input consequence-done-checkbox" type="checkbox" data-student-id="${item.student_id}" data-count="${item.count}" id="consequence-${item.student_id}">
+            <label class="form-check-label small" for="consequence-${item.student_id}">I've done the consequence</label>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  async function loadFollowups() {
+    try {
+      const res = await fetch('/api/tardy/followups');
+      const data = await res.json();
+      renderTardyFollowups(data.followups || []);
+    } catch (e) { console.error(e); }
+  }
+
+  document.getElementById('tardyFollowupList').addEventListener('click', async (e) => {
+    const genBtn = e.target.closest('.gen-letter-btn');
+    const flagBtn = e.target.closest('.minor-flag-btn');
+    if (genBtn) {
+      const { studentId, firstName, lastName, count } = genBtn.dataset;
+      const area = genBtn.closest('.activity-row').querySelector('.letter-area');
+      const { renderTardyLetterText } = await import('/js/modules/tardy-letter-template.js?v=1');
+      const step = getTardyStep(Number(count));
+      const text = renderTardyLetterText({ first_name: firstName, last_name: lastName }, Number(count), step,
+        counselorContact.counselor_email ? { name: counselorContact.counselor_name, email: counselorContact.counselor_email } : null);
+      area.classList.remove('d-none');
+      area.innerHTML = `
+        <textarea class="form-control small mb-1" rows="8" readonly style="font-family: monospace; font-size: .75rem;">${escapeHtml(text)}</textarea>
+        <button class="btn btn-sm btn-outline-primary copy-letter-btn">Copy</button>
+        <button class="btn btn-sm btn-outline-success mark-sent-btn" data-student-id="${studentId}" data-count="${count}">Mark Sent</button>`;
+      area.querySelector('.copy-letter-btn').addEventListener('click', async () => {
+        await navigator.clipboard.writeText(text);
+        area.querySelector('.copy-letter-btn').textContent = 'Copied!';
+      });
+      area.querySelector('.mark-sent-btn').addEventListener('click', () => resolveFollowup(studentId, Number(count), 'letter'));
+    } else if (flagBtn) {
+      const { studentId, count } = flagBtn.dataset;
+      if (!confirm('Flag this as minor behavior and clear it from the list without a letter?')) return;
+      resolveFollowup(studentId, Number(count), 'minor_flag');
+    }
+  });
+
+  document.getElementById('tardyFollowupList').addEventListener('change', (e) => {
+    const checkbox = e.target.closest('.consequence-done-checkbox');
+    if (!checkbox || !checkbox.checked) return;
+    const { studentId, count } = checkbox.dataset;
+    resolveFollowup(studentId, Number(count), 'consequence_done');
+  });
+
+  async function resolveFollowup(studentId, count, resolutionType) {
+    try {
+      await fetch('/api/tardy/followup-resolve', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: studentId, count, resolution_type: resolutionType })
+      });
+      loadFollowups();
+    } catch (e) { alert('Failed to save. Try again.'); }
+  }
+
+  document.getElementById('counselorSettingsBtn').addEventListener('click', async () => {
+    const name = prompt('Counselor name:', counselorContact.counselor_name || '');
+    if (name === null) return;
+    const email = prompt('Counselor email:', counselorContact.counselor_email || '');
+    if (email === null) return;
+    try {
+      await fetch('/api/tardy/staff-contacts', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ counselor_name: name, counselor_email: email })
+      });
+      counselorContact = { counselor_name: name, counselor_email: email };
+    } catch (e) { alert('Failed to save. Try again.'); }
+  });
+
+  fetch('/api/tardy/staff-contacts').then(r => r.json()).then(d => { counselorContact = d; }).catch(() => {});
+
   async function refreshAll() {
     await loadLog();
+    await loadFollowups();
   }
 
   document.getElementById('tardyForm').addEventListener('submit', async (e) => {
