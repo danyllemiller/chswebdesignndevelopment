@@ -1088,11 +1088,17 @@ function parseAssignmentInfo(name) {
 function isAssignmentVisible(name, period) {
     if (!period || period === 'All' || period === 'Teacher') return true;
 
-    // Timeclock entries must ALWAYS render for all periods to prevent them from being hidden on filter switches
-    if (name.toUpperCase().startsWith('TC-') || name.toLowerCase().includes('timeclock')) {
-        return true;
-    }
-    
+    // Timeclock entries (TC-{courseKey}-{date}) are written to the exams
+    // table with a real course_id at creation time (server/routes/
+    // timeclock.js), same as every other assignment -- they used to be
+    // unconditionally visible in every period regardless of that course_id,
+    // which is exactly what leaked a dual-enrolled student's CS check-ins
+    // into a Web Design period filter (and vice versa). Falling through to
+    // the normal targetCourse check below filters them correctly, and the
+    // existing "no targetCourse yet -> visible" fallback further down still
+    // covers the case this was originally guarding against (a same-day
+    // check-in whose exams-table row hasn't been created yet).
+
     // Map backend relational course codes to frontend shorthand prefixes
     const courseMap = {
         '05254G1S': 'WD1',
