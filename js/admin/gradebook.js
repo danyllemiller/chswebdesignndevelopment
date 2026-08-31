@@ -1458,7 +1458,14 @@ let score = "", display = '', bg = "";
                         if (unit && !masteryExempt) {
                             const effectiveDueDate = studentPeriodDueDate || reg?.dueDate;
                             const isPastDue = !!effectiveDueDate && new Date(effectiveDueDate + 'T00:00:00') < today;
-                            if (isPastDue) display = '<span class="text-danger fw-bold" title="Missing">M</span>';
+                            if (isPastDue) {
+                                display = '<span class="text-danger fw-bold" title="Missing">M</span>';
+                                // Text color alone was too easy to miss scanning
+                                // a full row -- the cell background itself is
+                                // now red, same visual weight as the yellow
+                                // "not yet entered in IC" highlight above.
+                                bg = "background-color: rgb(240, 155, 155);";
+                            }
                         }
                     }
                 }
