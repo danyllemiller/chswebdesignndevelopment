@@ -1413,7 +1413,20 @@ let score = "", display = '', bg = "";
                 if (score === "EX") display = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
                 else {
                     display = (Number(score) === info.maxPoints) ? '<span class="check-mark">✔</span>' : score;
-                    if (Number(score)/info.maxPoints < 0.8) bg = "background-color: #FFF2CC;";
+                    const pct = Number(score) / info.maxPoints;
+                    // Exams get a three-tier performance highlight instead of
+                    // the flat "below 80%" yellow every other assignment
+                    // uses: red under 60%, orange 60-70%, yellow 70-80%,
+                    // nothing at 80%+ (also the mastery threshold that
+                    // exempts a unit's chapter classwork). Matches "Exam" in
+                    // either course's naming convention (Unit1-Exam,
+                    // Final-Exam, WD-Ch1-Exam, ...), not just CS.
+                    const isExam = /Exam/i.test(key);
+                    if (isExam) {
+                        if (pct < 0.60) bg = "background-color: rgb(240, 155, 155);";
+                        else if (pct < 0.70) bg = "background-color: rgb(245, 191, 137);";
+                        else if (pct < 0.80) bg = "background-color: #FFF2CC;";
+                    } else if (pct < 0.8) bg = "background-color: #FFF2CC;";
                     // A new/updated score not yet copied into IC takes visual
                     // priority over the low-score highlight above -- once
                     // marked entered, the cell falls back to whatever bg (if
