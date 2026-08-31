@@ -18,6 +18,20 @@ if (!document.getElementById('chartjs-lib')) {
     document.head.appendChild(script);
 }
 
+// Matches data/cs-course-map.json -- which chapters' classwork
+// (cs_chN_activity_name) belong to which unit's exam. Kept in sync with
+// the identical copies in server/gradeCalc.js and js/student/dashboard.js.
+const CS_UNIT_CHAPTERS = {
+    1: [1, 2], 2: [3, 4], 3: [5, 6, 7, 8], 4: [9, 10],
+    5: [11, 12, 13], 6: [14, 15, 16], 7: [17, 18, 19]
+};
+function unitForCsChapter(ch) {
+    for (const unit in CS_UNIT_CHAPTERS) {
+        if (CS_UNIT_CHAPTERS[unit].includes(ch)) return Number(unit);
+    }
+    return null;
+}
+
 // Period-group filtering (the "All WD1"/"All CS" dropdown options) needs to
 // resolve a bare period code (A1, A3, B2...) to its course the same way
 // periodToCourseKey() does for grade weighting, so the two can't disagree.
@@ -1412,6 +1426,27 @@ let score = "", display = '', bg = "";
                 } else {
                     let isTC = key.match(/TC-(?:In|Out)\s+(\d{1,2}\/\d{1,2})/i);
                     if (isTC && !isStudentScheduledOn(displayPeriod, isTC[1])) display = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
+                    else {
+                        // CS-only mastery exemption: once a student scores
+                        // 80%+ on a unit's exam, that unit's chapter classwork
+                        // is exempt -- shown with the same EX badge a teacher
+                        // would type manually, so it reads identically to any
+                        // other exemption and is obviously safe to skip when
+                        // copying grades into IC. Never applies to Pre-Test,
+                        // Pre-Scale, or timeclock entries (those aren't
+                        // cs_chN_* keys, so the regex below can't match them).
+                        const chMatch = key.match(/^cs_ch(\d+)_/);
+                        const unit = chMatch ? unitForCsChapter(Number(chMatch[1])) : null;
+                        if (unit) {
+                            const examEntry = sGrades[`Unit${unit}-Exam`];
+                            const examScore = examEntry ? (typeof examEntry === 'object' ? examEntry.score : examEntry) : null;
+                            const examMax = allAssignments[`Unit${unit}-Exam`]?.maxPoints;
+                            if (examScore !== null && examScore !== undefined && examScore !== '' && examMax
+                                && (Number(examScore) / examMax) >= 0.80) {
+                                display = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
+                            }
+                        }
+                    }
                 }
             }
 

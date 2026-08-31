@@ -18,6 +18,20 @@ const COURSE_WEIGHTS = {
 const COURSE_MAP = { '05254G1S': 'WD1', '05254G2S': 'WD2', '10003GS': 'CS', '05254ES': 'AS', '99999999': 'Teacher' };
 const COURSE_LABELS = { WD1: 'Web Design 1', WD2: 'Web Design 2', AS: 'Advanced Studies', CS: 'Computer Science', INTV: 'Intervention' };
 
+// Matches data/cs-course-map.json -- which chapters' classwork
+// (cs_chN_activity_name) belong to which unit's exam, for the mastery
+// exemption below.
+const CS_UNIT_CHAPTERS = {
+    1: [1, 2], 2: [3, 4], 3: [5, 6, 7, 8], 4: [9, 10],
+    5: [11, 12, 13], 6: [14, 15, 16], 7: [17, 18, 19]
+};
+function unitForCsChapter(ch) {
+    for (const unit in CS_UNIT_CHAPTERS) {
+        if (CS_UNIT_CHAPTERS[unit].includes(ch)) return Number(unit);
+    }
+    return null;
+}
+
 function getAssignmentCategory(name, courseKey) {
     if (courseKey === 'INTV') return 'assignment';
     const lowerName = name.toLowerCase();
@@ -113,10 +127,18 @@ async function computeStudentGrade(connection, studentId, sectionId) {
         const registryEntry = { title: r.title, targetCourse: courseCode };
         if (!isAssignmentVisible(key, courseKey, registryEntry)) return;
 
+        // Pre-Test, Pre-Scale, and timeclock entries are NEVER exempt --
+        // only chapter classwork (cs_chN_*) is, once that chapter's unit
+        // exam is scored 80% or better. Previously this exempted Unit#-Pre
+        // and Unit# Pre-Scale instead, which is the opposite of what's
+        // wanted: those diagnostic/reflection items should always count,
+        // and it's the classwork that becomes redundant once the exam
+        // itself proves mastery.
         if (courseKey === 'CS') {
-            const unitMatch = key.match(/^Unit(\d+)(?:-Pre|\s+Pre-Scale)$/);
-            if (unitMatch) {
-                const examEntry = byKey[`Unit${unitMatch[1]}-Exam`];
+            const chMatch = key.match(/^cs_ch(\d+)_/);
+            const unit = chMatch ? unitForCsChapter(Number(chMatch[1])) : null;
+            if (unit) {
+                const examEntry = byKey[`Unit${unit}-Exam`];
                 if (examEntry && examEntry.score !== null && examEntry.score !== undefined && examEntry.score !== '' && examEntry.total_points
                     && (Number(examEntry.score) / examEntry.total_points) >= 0.80) {
                     return;

@@ -4,6 +4,20 @@ import { apiFetch } from '../modules/api-client.js';
 import { escapeHtml, parsePts } from '../modules/utils.js';
 import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=3';
 
+// Matches data/cs-course-map.json -- which chapters' classwork
+// (cs_chN_activity_name) belong to which unit's exam, for the mastery
+// exemption below. Kept in sync with the identical copy in server/gradeCalc.js.
+const CS_UNIT_CHAPTERS = {
+    1: [1, 2], 2: [3, 4], 3: [5, 6, 7, 8], 4: [9, 10],
+    5: [11, 12, 13], 6: [14, 15, 16], 7: [17, 18, 19]
+};
+function unitForCsChapter(ch) {
+    for (const unit in CS_UNIT_CHAPTERS) {
+        if (CS_UNIT_CHAPTERS[unit].includes(ch)) return Number(unit);
+    }
+    return null;
+}
+
 // --- INJECT TURN-IN MODAL ON LOAD ---
 function injectTurnInModal() {
     if (document.getElementById('turnInModal')) return;
@@ -321,16 +335,20 @@ function calculateGradeStats(keys, myGrades, registryData, courseKey) {
 
     keys.forEach(key => {
         if (myGrades[key] !== undefined && myGrades[key] !== null) {
-            // CS-only mastery exemption: once a student scores 80%+ on a unit's
-            // exam, that unit's Pre-Test and Pre-Scale are exempt — they exist
-            // to measure where a student started, which no longer matters once
-            // the exam itself proves they've mastered the material.
+            // CS-only mastery exemption: once a student scores 80%+ on a
+            // unit's exam, that unit's chapter classwork (cs_chN_*) is
+            // exempt — it exists to build toward mastery, which no longer
+            // matters once the exam itself proves it. Pre-Test, Pre-Scale,
+            // and timeclock entries are NEVER exempt, regardless of exam
+            // score -- previously this exempted Unit#-Pre and Unit#
+            // Pre-Scale instead, the opposite of what's wanted.
             if (courseKey === 'CS') {
-                const unitMatch = key.match(/^Unit(\d+)(?:-Pre|\s+Pre-Scale)$/);
-                if (unitMatch) {
-                    const examEntry = myGrades[`Unit${unitMatch[1]}-Exam`];
+                const chMatch = key.match(/^cs_ch(\d+)_/);
+                const unit = chMatch ? unitForCsChapter(Number(chMatch[1])) : null;
+                if (unit) {
+                    const examEntry = myGrades[`Unit${unit}-Exam`];
                     const examScore = examEntry ? (typeof examEntry === 'object' ? examEntry.score : examEntry) : null;
-                    const examMax = registryData?.[`Unit${unitMatch[1]}-Exam`]?.maxPoints;
+                    const examMax = registryData?.[`Unit${unit}-Exam`]?.maxPoints;
                     if (examScore !== null && examScore !== undefined && examScore !== '' && examMax
                         && (Number(examScore) / examMax) >= 0.80) {
                         return;
