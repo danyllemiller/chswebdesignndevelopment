@@ -242,7 +242,7 @@ function resolveRoleForDate(historyRows, dateStr) {
 // student -- a mid-period role change (e.g. promoted from Intern to Web
 // Developer partway through a pay period) correctly pays the old rate for
 // shifts before the change and the new rate after, in the same run.
-async function computePayrollForPeriod(connection, { period_start, period_end, course_ids }) {
+async function computePayrollForPeriod(connection, { period_start, period_end, course_ids, ownRunId }) {
     // Same current-year + not-archived scoping as the tardy tracker
     // (server/routes/tardy.js) -- this query had neither, so a payroll run
     // pulled in every student ever enrolled, prior years and archived
@@ -279,9 +279,16 @@ async function computePayrollForPeriod(connection, { period_start, period_end, c
         });
     }
 
+    // A shift already claimed by THIS SAME period's own prior run still
+    // counts as "available" -- actually clicking Run releases those claims
+    // before recomputing (see /admin/payroll/run below), so a preview that
+    // didn't also account for them would show an already-run period as
+    // missing students/hours it will really have once run for real.
     const [timesheets] = await connection.execute(
-        'SELECT * FROM timesheets WHERE date >= ? AND date <= ? AND paid_run_id IS NULL',
-        [period_start, period_end]
+        ownRunId
+            ? 'SELECT * FROM timesheets WHERE date >= ? AND date <= ? AND (paid_run_id IS NULL OR paid_run_id = ?)'
+            : 'SELECT * FROM timesheets WHERE date >= ? AND date <= ? AND paid_run_id IS NULL',
+        ownRunId ? [period_start, period_end, ownRunId] : [period_start, period_end]
     );
     // When scoped to specific course(s), only count a shift if the shift's
     // OWN section resolves to one of those courses -- otherwise a
@@ -593,7 +600,13 @@ router.get('/admin/payroll/preview', async (req, res) => {
     if (!period_start || !period_end) return res.status(400).json({ error: 'period_start and period_end required' });
     try {
         const connection = await getDbConnection();
-        const rows = await computePayrollForPeriod(connection, { period_start, period_end, course_ids });
+        const [[existingRun]] = await connection.execute(
+            'SELECT id FROM payroll_runs WHERE period_start = ? AND period_end = ?',
+            [period_start, period_end]
+        );
+        const rows = await computePayrollForPeriod(connection, {
+            period_start, period_end, course_ids, ownRunId: existingRun ? existingRun.id : null
+        });
         await connection.release();
         res.json({ rows });
     } catch (err) {
