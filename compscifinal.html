@@ -33,8 +33,11 @@
   <div class="container mt-5 mb-5">
       
    <div class="text-center mb-5" id="quiz-header">
+    <div class="alert alert-warning fw-bold d-inline-block px-4 py-2 mb-3">
+     <i class="fas fa-triangle-exclamation me-2"></i>PRACTICE ONLY &mdash; NOT GRADED. This score is not saved anywhere and will not appear in your gradebook. For your real, graded Final Exam, go to the CS Interactive Workspace and open the Final Exam tab.
+    </div>
     <h1 class="fw-bold display-5">Computer Science Practice Exam</h1>
-    <p class="text-muted lead">Test your knowledge with these 100 questions.</p>
+    <p class="text-muted lead">Test your knowledge with these 100 questions. This is for practice only and is never recorded.</p>
    </div>
 
    <div id="quiz-container">
@@ -58,13 +61,14 @@
    </div>
 
    <div class="d-none text-center" id="result-container">
-    <h2 class="display-4 fw-bold text-dark">Quiz Complete!</h2>
-    <p class="text-muted lead mt-3">You have finished the exam.</p>
-    
+    <h2 class="display-4 fw-bold text-dark">Practice Quiz Complete!</h2>
+    <p class="text-muted lead mt-3">You have finished the practice exam.</p>
+
     <div class="my-5 p-4 bg-light rounded border">
-     <p class="h3">Your Score:</p>
+     <p class="h3">Your Practice Score:</p>
      <p class="display-1 fw-bold text-primary my-2" id="score">0 / 0</p>
      <p class="h5 text-secondary" id="score-text"></p>
+     <p class="alert alert-warning fw-bold mt-3 mb-0"><i class="fas fa-triangle-exclamation me-2"></i>This is not saved anywhere and will not appear in your gradebook.</p>
     </div>
 
     <button class="btn btn-site-primary btn-lg px-5 py-3 fw-bold mb-5" id="restart-btn">
