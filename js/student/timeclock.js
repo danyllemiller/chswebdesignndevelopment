@@ -428,6 +428,19 @@ async function checkStatusInner() {
         }
     } catch (e) {
         console.error("Timeclock check status error:", e);
+        // Previously silent -- if this background check is what the
+        // auto-popup ends up displaying (checkAutoPopup reads
+        // window.timeclock.currentMode, which is already set by this point,
+        // and can still open the modal even though the question/prompt
+        // fetch below it just failed), a blank or stale modal was exactly
+        // as confusing to a student as no popup at all. Leave a visible,
+        // actionable message instead -- the widget button now has its own
+        // fully independent retry path (handleManualOpen) that doesn't share
+        // whatever just failed here.
+        const label = document.getElementById('tc-question-label');
+        const optsContainer = document.getElementById('tc-options-container');
+        if (label) label.innerText = "Something went wrong loading the timeclock. Click the Timeclock button below to try again.";
+        if (optsContainer) optsContainer.innerHTML = '';
     }
 }
 
@@ -503,13 +516,87 @@ function injectTimeclockUI() {
     // stops stray backdrop/body-lock state from ever accumulating across a
     // class period's worth of auto-popups, rechecks, and clicks.
     document.getElementById('timeclock-modal').addEventListener('hidden.bs.modal', cleanupStrayModalState);
-    document.getElementById('tc-widget-btn').addEventListener('click', async () => {
-        // Refresh status right before showing -- otherwise a click soon after
-        // page load (before the initial status check finishes) opens a modal
-        // with stale or still-empty content that looks broken.
-        await checkStatus();
-        openTimeclockModal();
-    });
+    document.getElementById('tc-widget-btn').addEventListener('click', handleManualOpen);
+}
+
+// The manual button has to work unconditionally: a student called out of
+// class early needs to be able to clock out right then, not wait for the
+// "5 minutes before period end" auto-popup window; a student walking in
+// late still needs to be able to clock in even though they missed the
+// on-time window; and a click before or after the normal period entirely
+// (an aide covering a different block, a make-up session) still needs to
+// do something instead of nothing. Previously this routed through the same
+// checkStatus()/checkStatusInner() pipeline the auto-popup and 60s recheck
+// use -- sharing that path meant a click could silently no-op if another
+// call's staleness token (checkStatusCallId) or the mode==='in'-past-
+// bellWindow.endMs early return happened to apply, with zero visible
+// feedback. Confirmed live: half of B6 had the server correctly reporting
+// mode:'in' on every single status check, but the client never even
+// attempted the follow-up question fetch -- some exception was being
+// swallowed by the shared path's single catch-all with no visible sign of
+// failure. This handler is fully self-contained (no bellWindow gate, no
+// staleness token, no dependency on the interval/auto-popup state) and
+// always leaves the student looking at real content or a visible error
+// message -- never nothing.
+async function handleManualOpen() {
+    const modalEl = document.getElementById('timeclock-modal');
+    const label = document.getElementById('tc-question-label');
+    const optsContainer = document.getElementById('tc-options-container');
+    const btn = document.getElementById('tc-submit-btn');
+    const form = document.getElementById('tc-form');
+    const successMsg = document.getElementById('tc-success-msg');
+    if (!modalEl || !label || !optsContainer || !btn || !form || !successMsg) return;
+
+    form.style.display = '';
+    successMsg.classList.add('d-none');
+    label.innerText = 'Loading...';
+    optsContainer.innerHTML = '';
+    btn.disabled = true;
+    btn.innerText = 'Loading...';
+    openTimeclockModal();
+
+    try {
+        const periodParam = currentPeriod ? `&period=${encodeURIComponent(currentPeriod)}` : '';
+        const statusData = await apiFetch(`/api/timeclock/status?student_id=${studentData.student_id}${periodParam}`);
+        const mode = statusData.mode || (statusData.type === 'out' ? 'done' : statusData.type === 'in' ? 'out' : 'in');
+        window.timeclock.currentMode = mode;
+
+        if (mode === 'done') {
+            form.style.display = 'none';
+            successMsg.classList.remove('d-none');
+            return;
+        }
+
+        if (mode === 'in') {
+            const category = `${getCourseKey()}_IN`;
+            currentQuestion = await apiFetch(`/api/timeclock/question?type=${category}`);
+            label.innerHTML = `<span class="d-block small text-muted fw-normal mb-1">${currentQuestion.chapterLabel || ''}</span>${currentQuestion.question_text}`;
+            if (currentQuestion.unavailable) {
+                optsContainer.innerHTML = `<input type="hidden" id="tc-in-fallback" value="N/A - no question bank available">`;
+            } else {
+                optsContainer.innerHTML = (currentQuestion.options || []).map((opt, i) => `
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="tc-radio" value="${(opt || '').replace(/"/g, '&quot;')}" id="opt${i}" required>
+                        <label class="form-check-label" for="opt${i}">${opt}</label>
+                    </div>
+                `).join('');
+            }
+            btn.innerText = 'Submit & Clock In';
+        } else if (mode === 'out') {
+            const category = getCourseKey();
+            const promptData = await apiFetch(`/api/timeclock/reflection-prompt?type=${category}&student_id=${encodeURIComponent(studentData.student_id)}`);
+            label.innerText = promptData.prompt_text;
+            optsContainer.innerHTML = `<textarea id="tc-out-answer" class="form-control" rows="3" required></textarea>`;
+            btn.innerText = 'Submit & Clock Out';
+        }
+    } catch (e) {
+        console.error('Timeclock manual open error:', e);
+        label.innerText = "Something went wrong loading the timeclock. Please try again, or tell your teacher if it keeps happening.";
+        optsContainer.innerHTML = '';
+        btn.innerText = 'Retry';
+    } finally {
+        btn.disabled = false;
+    }
 }
 
 // Preserve the global namespace for other scripts
