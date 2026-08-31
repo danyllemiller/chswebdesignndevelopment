@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Off Days</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=19"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 700px; margin: 2.5rem auto; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+      <h2 class="gochi text-primary mb-1"><i class="fas fa-calendar-xmark me-2"></i>Off Days</h2>
+      <p class="text-muted mb-3">Holidays, breaks, and teacher workdays -- students aren't in class on these dates.
+        Testing is locked all day on anything listed here (and on every Saturday/Sunday automatically), plus outside
+        7am-4pm on real school days.</p>
+
+      <form id="addForm" class="d-flex gap-2 mb-2">
+        <input type="date" id="dateInput" class="form-control" required>
+        <input type="text" id="labelInput" class="form-control" placeholder="Label (e.g. Labor Day)">
+        <button type="submit" class="btn btn-primary fw-bold text-nowrap"><i class="fas fa-plus me-1"></i>Add</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-white fw-bold">Current List <span id="count" class="badge bg-secondary ms-1"></span></div>
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead class="table-light"><tr><th>Date</th><th>Label</th><th class="text-end">Remove</th></tr></thead>
+        <tbody id="listBody"><tr><td colspan="3" class="text-center text-muted p-4">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script type="module">
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function fmtDate(dateStr) {
+    const d = new Date(dateStr + 'T12:00:00');
+    return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  async function loadList() {
+    const body = document.getElementById('listBody');
+    try {
+      const res = await fetch('/api/admin/off-days');
+      const data = await res.json();
+      const offDays = data.offDays || [];
+      document.getElementById('count').textContent = offDays.length;
+      if (offDays.length === 0) {
+        body.innerHTML = '<tr><td colspan="3" class="text-center text-muted p-4">No off days added yet.</td></tr>';
+        return;
+      }
+      body.innerHTML = offDays.map(d => `
+        <tr>
+          <td>${fmtDate(d.off_date)}</td>
+          <td>${escapeHtml(d.label || '—')}</td>
+          <td class="text-end"><button class="btn btn-sm btn-outline-danger del-btn" data-date="${d.off_date}"><i class="fas fa-trash"></i></button></td>
+        </tr>`).join('');
+    } catch (e) {
+      body.innerHTML = '<tr><td colspan="3" class="text-center text-danger p-4">Failed to load.</td></tr>';
+    }
+  }
+
+  document.getElementById('addForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const off_date = document.getElementById('dateInput').value;
+    const label = document.getElementById('labelInput').value.trim();
+    try {
+      await fetch('/api/admin/off-days', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ off_date, label })
+      });
+      document.getElementById('dateInput').value = '';
+      document.getElementById('labelInput').value = '';
+      loadList();
+    } catch (e) { alert('Failed to add. Try again.'); }
+  });
+
+  document.getElementById('listBody').addEventListener('click', async (e) => {
+    const btn = e.target.closest('.del-btn');
+    if (!btn) return;
+    if (!confirm('Remove this off day?')) return;
+    try {
+      await fetch(`/api/admin/off-days/${btn.dataset.date}`, { method: 'DELETE' });
+      loadList();
+    } catch (e) { alert('Failed to remove. Try again.'); }
+  });
+
+  loadList();
+</script>
+</body>
+</html>

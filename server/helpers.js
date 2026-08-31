@@ -54,4 +54,35 @@ function validatePassword(pw) {
     return null;
 }
 
-module.exports = { getCurrentSchoolYear, resolveCourseId, clampScore, validatePassword };
+async function ensureOffDaysTable(connection) {
+    await connection.execute(`
+        CREATE TABLE IF NOT EXISTS school_off_days (
+            off_date DATE PRIMARY KEY,
+            label VARCHAR(100)
+        )
+    `);
+}
+
+// Tests (unit exams/pre-tests specifically -- see TEST_EXAM_ID_PATTERN in
+// gradebook.js) are only allowed 7am-4pm on an actual school day: not a
+// weekend, not a listed holiday/teacher-workday. Off days are whatever's in
+// school_off_days -- a small admin-maintained list (admin/tools/off-days.html),
+// since there's no real school calendar data source in the app to check
+// against instead.
+async function isTestingWindowOpen(connection) {
+    await ensureOffDaysTable(connection);
+    const now = new Date();
+    const dow = now.getDay(); // 0=Sun, 6=Sat
+    if (dow === 0 || dow === 6) return { ok: false, reason: 'weekend' };
+
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const [offRows] = await connection.execute('SELECT label FROM school_off_days WHERE off_date = ?', [dateStr]);
+    if (offRows.length > 0) return { ok: false, reason: 'holiday', label: offRows[0].label || 'No school today' };
+
+    const hour = now.getHours();
+    if (hour < 7 || hour >= 16) return { ok: false, reason: 'after_hours' };
+
+    return { ok: true };
+}
+
+module.exports = { getCurrentSchoolYear, resolveCourseId, clampScore, validatePassword, ensureOffDaysTable, isTestingWindowOpen };

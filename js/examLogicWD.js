@@ -398,7 +398,42 @@ async function initExam(config) {
     const safeTitle = (chapterTitle || "Assessment").replace(/\s+/g, '_');
     examProgressId = `Summative_${studentId}_${safeTitle}_${todayStr}`;
 
+    const windowGate = await checkTestingWindow();
+    if (!windowGate.ok) {
+        renderTestingWindowBlock(windowGate.reason, windowGate.label);
+        return;
+    }
+
     renderAuthScreen();
+}
+
+// Tests only open 7am-4pm on real school days -- real enforcement is
+// server-side in /api/submit-exam, this is just the up-front locked screen.
+async function checkTestingWindow() {
+    try {
+        const res = await fetch('/api/exam/testing-window-status');
+        if (!res.ok) return { ok: true }; // fail open on an API hiccup
+        return await res.json();
+    } catch (e) {
+        console.error('[examLogicWD] Testing window check failed:', e);
+        return { ok: true };
+    }
+}
+
+function renderTestingWindowBlock(reason, label) {
+    const container = document.getElementById('exam-container');
+    if (!container) return;
+    const message = reason === 'holiday'
+        ? `Testing is closed today (${label}). Please wait until the next school day.`
+        : reason === 'weekend'
+            ? 'Testing is only open 7am-4pm on school days -- not weekends.'
+            : 'Testing is only open 7am-4pm on school days. Please try again during school hours.';
+    container.innerHTML = `
+        <div class="alert alert-warning text-center shadow p-5">
+            <h4 class="fw-bold"><i class="fas fa-lock me-2"></i>Testing Closed</h4>
+            <p class="mb-4">${escapeHtml(message)}</p>
+            <a href="/student" class="btn btn-warning fw-bold">&laquo; Back to Portal</a>
+        </div>`;
 }
 
 function renderAuthScreen() {

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { resolveCourseId, getCurrentSchoolYear } = require('../helpers');
+const { resolveCourseId, getCurrentSchoolYear, isTestingWindowOpen } = require('../helpers');
 
 // mysql2 returns DATE columns as JS Date objects (local-timezone fields set to
 // match the stored date exactly), not strings. Reading those fields directly
@@ -159,6 +159,17 @@ router.post('/submit-exam', async (req, res) => {
     try {
         const connection = await getDbConnection();
         await ensureEnteredIcColumn(connection);
+
+        if (TEST_EXAM_ID_PATTERN.test(exam_id || '')) {
+            const windowStatus = await isTestingWindowOpen(connection);
+            if (!windowStatus.ok) {
+                await connection.release();
+                const message = windowStatus.reason === 'holiday'
+                    ? `Testing is closed today (${windowStatus.label}). Please wait until the next school day.`
+                    : 'Testing is only open 7am-4pm on school days. Please try again during school hours.';
+                return res.status(503).json({ error: message, testingPaused: true });
+            }
+        }
 
         const prereq = await checkUnitPrerequisite(connection, student_id, exam_id);
         if (!prereq.ok) {
@@ -421,6 +432,18 @@ router.get('/exam/retake-status', async (req, res) => {
         await connection.release();
         res.json(status);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to check retake status' }); }
+});
+
+// Called client-side (examLogicCS.js, examLogicWD.js) before a test starts,
+// so a student outside the testing window sees a locked screen up front
+// rather than finishing the whole test and only finding out at submit time.
+router.get('/exam/testing-window-status', async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        const status = await isTestingWindowOpen(connection);
+        await connection.release();
+        res.json(status);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to check testing window' }); }
 });
 
 router.post('/admin/retake-clearance', async (req, res) => {

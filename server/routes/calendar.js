@@ -1,6 +1,48 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { ensureOffDaysTable } = require('../helpers');
+
+// School off-days -- holidays, teacher workdays, anything students aren't
+// in class -- used to gate test-taking to real school hours (see
+// isTestingWindowOpen in helpers.js). No real school-calendar data source
+// exists in the app, so this is a small manually-maintained list.
+router.get('/admin/off-days', async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await ensureOffDaysTable(connection);
+        const [rows] = await connection.execute('SELECT off_date, label FROM school_off_days ORDER BY off_date');
+        await connection.release();
+        res.json({ offDays: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch off days' }); }
+});
+
+router.post('/admin/off-days', async (req, res) => {
+    const { off_date, label } = req.body;
+    if (!off_date || !/^\d{4}-\d{2}-\d{2}$/.test(off_date)) {
+        return res.status(400).json({ error: 'A valid off_date (YYYY-MM-DD) is required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        await ensureOffDaysTable(connection);
+        await connection.execute(
+            'INSERT INTO school_off_days (off_date, label) VALUES (?, ?) ON DUPLICATE KEY UPDATE label = VALUES(label)',
+            [off_date, label || null]
+        );
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save off day' }); }
+});
+
+router.delete('/admin/off-days/:date', async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await ensureOffDaysTable(connection);
+        await connection.execute('DELETE FROM school_off_days WHERE off_date = ?', [req.params.date]);
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete off day' }); }
+});
 
 const CHECKLIST_DDL = `CREATE TABLE IF NOT EXISTS teacher_checklist_state (
     id         INT AUTO_INCREMENT PRIMARY KEY,
