@@ -926,8 +926,8 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // Scoped to the period filter only (not the individual-student filter) --
-// "All" periods clears every yellow cell in the gradebook, a specific
-// period only clears that period's.
+// "All" periods clears every blue "needs entering in IC" cell in the
+// gradebook, a specific period only clears that period's.
 async function markEnteredIcForCurrentView() {
     const periodVal = document.getElementById('periodFilter')?.value || 'All';
     const students = getFilteredStudents(periodVal, 'All');
@@ -942,7 +942,7 @@ async function markEnteredIcForCurrentView() {
     });
 
     if (pairs.length === 0) {
-        alert('No new grades to mark — nothing is currently yellow in this view.');
+        alert('No new grades to mark — nothing currently needs entering into IC in this view.');
         return;
     }
     if (!confirm(`Mark ${pairs.length} grade(s) as entered in IC${periodVal !== 'All' ? ` for ${periodVal}` : ''}?`)) return;
@@ -1414,24 +1414,33 @@ let score = "", display = '', bg = "";
                 else {
                     display = (Number(score) === info.maxPoints) ? '<span class="check-mark">✔</span>' : score;
                     const pct = Number(score) / info.maxPoints;
-                    // Exams get a three-tier performance highlight instead of
-                    // the flat "below 80%" yellow every other assignment
-                    // uses: red under 60%, orange 60-70%, yellow 70-80%,
-                    // nothing at 80%+ (also the mastery threshold that
-                    // exempts a unit's chapter classwork). Matches "Exam" in
-                    // either course's naming convention (Unit1-Exam,
-                    // Final-Exam, WD-Ch1-Exam, ...), not just CS.
-                    const isExam = /Exam/i.test(key);
-                    if (isExam) {
+                    // Only exams get a score-based color: red under 60%,
+                    // orange 60-70%, yellow 70-80%, nothing at 80%+ (also the
+                    // mastery threshold that exempts a unit's chapter
+                    // classwork). Matches "Exam" in either course's naming
+                    // convention (Unit1-Exam, Final-Exam, WD-Ch1-Exam, ...).
+                    // Every other assignment type (Pre-Test, Pre-Scale,
+                    // classwork, worksheets...) gets no score-based
+                    // highlight at all -- there used to be a flat "below 80%"
+                    // yellow applied here regardless of assignment type,
+                    // which is exactly what made some Unit#-Pre cells turn
+                    // color for no reason anyone could explain from the
+                    // score alone.
+                    if (/Exam/i.test(key)) {
                         if (pct < 0.60) bg = "background-color: rgb(240, 155, 155);";
                         else if (pct < 0.70) bg = "background-color: rgb(245, 191, 137);";
                         else if (pct < 0.80) bg = "background-color: #FFF2CC;";
-                    } else if (pct < 0.8) bg = "background-color: #FFF2CC;";
+                    }
                     // A new/updated score not yet copied into IC takes visual
                     // priority over the low-score highlight above -- once
                     // marked entered, the cell falls back to whatever bg (if
-                    // any) it would've had otherwise.
-                    if (score !== "" && typeof g === 'object' && !g.enteredIC) bg = "background-color: rgb(240, 239, 155);";
+                    // any) it would've had otherwise. Blue on purpose: red,
+                    // orange, and yellow are all reserved for exam score
+                    // quality now, and this is an unrelated workflow signal
+                    // ("needs copying into IC"), not a score-quality one --
+                    // reusing yellow here is exactly what made it ambiguous
+                    // with the new 70-80% exam tier.
+                    if (score !== "" && typeof g === 'object' && !g.enteredIC) bg = "background-color: rgb(174, 214, 241);";
                 }
             } else {
                 if (isPeriodExempt) {
@@ -1475,8 +1484,7 @@ let score = "", display = '', bg = "";
                                 display = '<span class="text-danger fw-bold" title="Missing">M</span>';
                                 // Text color alone was too easy to miss scanning
                                 // a full row -- the cell background itself is
-                                // now red, same visual weight as the yellow
-                                // "not yet entered in IC" highlight above.
+                                // now red too.
                                 bg = "background-color: rgb(240, 155, 155);";
                             }
                         }
