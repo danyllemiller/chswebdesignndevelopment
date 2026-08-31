@@ -183,6 +183,29 @@ async function resolveTodaysBellWindow() {
     }
 }
 
+// Clears any leftover .modal-backdrop element and body scroll-lock classes
+// that Bootstrap can strand behind if a show() call ever lands while a
+// previous hide() fade transition hasn't fully finished yet. This modal is
+// re-triggered very often -- auto-popup on load, every 60s recheck, every
+// tab-refocus, every manual click -- so that race is not a rare edge case
+// here, it's routine. Once it happens, the modal is technically "shown" in
+// Bootstrap's internal state but paints behind/under the stale backdrop
+// with zero visible result and no console error -- from the student's side
+// that's just "clicking the timeclock button does nothing," and it was
+// confirmed to accumulate across a single class period for a large share
+// of a room (25 clocked in, only 15 auto-prompted to clock out) once enough
+// show/hide cycles had happened. Called proactively via the modal's own
+// 'hidden.bs.modal' event the instant a close transition genuinely
+// finishes, not just reactively before the next show -- that's what keeps
+// this from ever accumulating in the first place, instead of only papering
+// over it for the next call.
+function cleanupStrayModalState() {
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+}
+
 function openTimeclockModal() {
     const modalEl = document.getElementById('timeclock-modal');
     if (!modalEl) return;
@@ -196,24 +219,10 @@ function openTimeclockModal() {
     // already-shown modal using its own internal _isShown state, so let it
     // handle that instead of tracking it ourselves.
     //
-    // That still leaves one failure mode: this modal gets re-triggered very
-    // often (auto-popup on load, every 60s recheck, every tab-refocus, every
-    // manual click), and if a show() call ever lands while a previous hide()
-    // fade transition hasn't fully finished, Bootstrap can end up with a
-    // leftover .modal-backdrop element and/or the body's scroll-lock classes
-    // stuck in place while the modal itself is NOT actually visible -- and
-    // with no console error, since nothing threw. Once that happens, every
-    // later show() call still runs but paints behind/under the stale
-    // backdrop, which is exactly "clicking the timeclock button does
-    // nothing" from the student's side. If the modal isn't currently shown,
-    // clear any stray backdrop/body-lock state before asking Bootstrap to
-    // show it fresh.
-    if (!modalEl.classList.contains('show')) {
-        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-        document.body.classList.remove('modal-open');
-        document.body.style.removeProperty('overflow');
-        document.body.style.removeProperty('padding-right');
-    }
+    // Belt-and-suspenders alongside the 'hidden.bs.modal' listener below:
+    // if the modal isn't currently shown, clear any stray backdrop/body-lock
+    // state one more time right before asking Bootstrap to show it fresh.
+    if (!modalEl.classList.contains('show')) cleanupStrayModalState();
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
@@ -489,6 +498,11 @@ function injectTimeclockUI() {
     </div>`;
     document.body.insertAdjacentHTML('beforeend', uiHtml);
     document.getElementById('tc-form').addEventListener('submit', handleTimeclockSubmit);
+    // Bootstrap fires this the instant its own hide transition genuinely
+    // finishes -- cleaning up here, not just before the next show(), is what
+    // stops stray backdrop/body-lock state from ever accumulating across a
+    // class period's worth of auto-popups, rechecks, and clicks.
+    document.getElementById('timeclock-modal').addEventListener('hidden.bs.modal', cleanupStrayModalState);
     document.getElementById('tc-widget-btn').addEventListener('click', async () => {
         // Refresh status right before showing -- otherwise a click soon after
         // page load (before the initial status check finishes) opens a modal
