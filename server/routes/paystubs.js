@@ -71,6 +71,37 @@ async function resolveEffectiveCourseIds(connection, students) {
     return students.map(s => ({ ...s, effective_course_id: bySection.get(s.section_id || '') }));
 }
 
+// A student's PRIMARY section (students.section_id) is only one of possibly
+// several classes they're actually in -- student_additional_sections covers
+// e.g. an Intervention student who's also genuinely enrolled in a real CS/WD
+// period. Payroll used to only ever look at the primary section, so a
+// student whose main/primary class is Comp Sci but who's also in Web Design
+// as an additional section was silently skipped from every Web Design
+// payroll run. Returns student_id -> Set of every course_id they belong to
+// (primary + all additional), so membership tests can check the whole set.
+async function resolveAllCourseIdsByStudent(connection, students) {
+    const byStudent = new Map();
+    for (const s of students) {
+        byStudent.set(s.student_id, new Set([s.effective_course_id].filter(Boolean)));
+    }
+    if (students.length === 0) return byStudent;
+    const ids = students.map(s => s.student_id);
+    const [additional] = await connection.execute(
+        `SELECT student_id, section_id FROM student_additional_sections WHERE student_id IN (${ids.map(() => '?').join(',')})`,
+        ids
+    );
+    const bySection = new Map();
+    for (const row of additional) {
+        const key = row.section_id || '';
+        if (!bySection.has(key)) bySection.set(key, await resolveCourseId(connection, key));
+        const courseId = bySection.get(key);
+        if (!courseId) continue;
+        if (!byStudent.has(row.student_id)) byStudent.set(row.student_id, new Set());
+        byStudent.get(row.student_id).add(courseId);
+    }
+    return byStudent;
+}
+
 async function ensurePaystubTables() {
     let connection;
     try {
@@ -235,16 +266,39 @@ async function computePayrollForPeriod(connection, { period_start, period_end, c
           AND s.school_year = ?
           AND s.section_id IN (SELECT DISTINCT period_label FROM bell_schedule)`, [getCurrentSchoolYear()]);
     const resolved = await resolveEffectiveCourseIds(connection, allStudents);
-    const students = (Array.isArray(course_ids) && course_ids.length > 0)
-        ? resolved.filter(s => course_ids.includes(s.effective_course_id))
-        : resolved;
+    const hasFilter = Array.isArray(course_ids) && course_ids.length > 0;
+    let students = resolved;
+    if (hasFilter) {
+        // Membership checks the student's FULL set of courses (primary +
+        // any additional sections), not just their primary -- see
+        // resolveAllCourseIdsByStudent's comment for why this matters.
+        const courseSetByStudent = await resolveAllCourseIdsByStudent(connection, resolved);
+        students = resolved.filter(s => {
+            const studentCourses = courseSetByStudent.get(s.student_id) || new Set([s.effective_course_id]);
+            return course_ids.some(cid => studentCourses.has(cid));
+        });
+    }
 
     const [timesheets] = await connection.execute(
         'SELECT * FROM timesheets WHERE date >= ? AND date <= ? AND paid_run_id IS NULL',
         [period_start, period_end]
     );
+    // When scoped to specific course(s), only count a shift if the shift's
+    // OWN section resolves to one of those courses -- otherwise a
+    // dual-enrolled student's hours from their OTHER class would get paid
+    // out (and claimed via paid_run_id) under the wrong course's run.
+    let relevantTimesheets = timesheets;
+    if (hasFilter) {
+        const shiftCourseBySection = new Map();
+        relevantTimesheets = [];
+        for (const t of timesheets) {
+            const key = t.section_id || '';
+            if (!shiftCourseBySection.has(key)) shiftCourseBySection.set(key, await resolveCourseId(connection, key));
+            if (course_ids.includes(shiftCourseBySection.get(key))) relevantTimesheets.push(t);
+        }
+    }
     const tsMap = {};
-    timesheets.forEach(t => {
+    relevantTimesheets.forEach(t => {
         if (!tsMap[t.student_id]) tsMap[t.student_id] = [];
         tsMap[t.student_id].push(t);
     });
