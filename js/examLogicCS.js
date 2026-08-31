@@ -1209,8 +1209,13 @@ async function processSubmission() {
 // Build assignment key for gradebook (e.g. "Unit1-Exam")
     const unitNumMatch = chapterTitle ? chapterTitle.match(/(?:unit|chapter|ch)\s*(\d+)/i) : null;
     const unitNum = unitNumMatch ? unitNumMatch[1] : (currentUnit || 1);
-    // FIXED: Use format Unit1-Exam, Unit2-Exam, etc. for gradebook
-    const finalAssignmentKey = `Unit${unitNum}-Exam`;
+    // Unit 9 is cs-final-exam.html's reserved sentinel for the cumulative CS
+    // Final Exam (CS only has 7 real units) -- this used to fall through to
+    // the generic "Unit${unitNum}-Exam" format and save as "Unit9-Exam",
+    // which getAssignmentCategory() (checks for the literal substring
+    // "final") never recognized as the Final category, and which nobody
+    // looking at the gradebook would recognize as "the final exam" either.
+    const finalAssignmentKey = String(unitNum) === '9' ? 'Final-Exam' : `Unit${unitNum}-Exam`;
 
 // "Keep highest" grade logic — check existing grade and keep the higher one
     try {
