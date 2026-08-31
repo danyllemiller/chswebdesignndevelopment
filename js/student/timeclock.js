@@ -195,6 +195,25 @@ function openTimeclockModal() {
     // getOrCreateInstance().show() already no-ops safely on an
     // already-shown modal using its own internal _isShown state, so let it
     // handle that instead of tracking it ourselves.
+    //
+    // That still leaves one failure mode: this modal gets re-triggered very
+    // often (auto-popup on load, every 60s recheck, every tab-refocus, every
+    // manual click), and if a show() call ever lands while a previous hide()
+    // fade transition hasn't fully finished, Bootstrap can end up with a
+    // leftover .modal-backdrop element and/or the body's scroll-lock classes
+    // stuck in place while the modal itself is NOT actually visible -- and
+    // with no console error, since nothing threw. Once that happens, every
+    // later show() call still runs but paints behind/under the stale
+    // backdrop, which is exactly "clicking the timeclock button does
+    // nothing" from the student's side. If the modal isn't currently shown,
+    // clear any stray backdrop/body-lock state before asking Bootstrap to
+    // show it fresh.
+    if (!modalEl.classList.contains('show')) {
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+    }
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
