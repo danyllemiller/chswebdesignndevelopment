@@ -12,8 +12,6 @@
   <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
 <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <link href="/css/student-pages.css" rel="stylesheet" />
   
-  <!-- Monaco Editor Loader -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
   <script type="module" src="/js/auth-guard.js"></script>
   
   <style>
@@ -212,7 +210,25 @@
   <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
   <script src="/js/loader.js?v=19"></script>
-  
+
+  <!-- Monaco Editor Loader -- must load AFTER bootstrap.bundle.js/jquery.js,
+       never before. Bootstrap's UMD wrapper checks `typeof define ===
+       'function' && define.amd` and registers itself as an anonymous AMD
+       module instead of the global `window.bootstrap` the whole rest of the
+       site depends on if that check is already true when it runs. Monaco's
+       loader.min.js defines exactly that global AMD `define` function --
+       previously it sat in <head>, before bootstrap.bundle.js at the bottom
+       of <body>, so `window.bootstrap` never got created at all, silently
+       and permanently (not a timing race that resolves by waiting longer --
+       confirmed live via the client-error-log endpoint: "bootstrap.bundle.js
+       did not load in time" on this exact page, hitting whichever students'
+       browsers happened to fetch/execute the CDN script fast enough to win
+       the race against bootstrap). This is almost certainly the majority
+       cause behind every "clicking the timeclock button does nothing"
+       report so far, since this is the page CS students spend most of class
+       on. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+
   <script>
     /**
      * SAFE MONACO LOADER
