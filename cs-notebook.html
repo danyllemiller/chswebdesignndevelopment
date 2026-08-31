@@ -574,6 +574,10 @@ function triggerAutoSave() {
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                                        <div class="mb-3 position-relative">
+                                            <i class="fas fa-search position-absolute text-muted" style="left: 12px; top: 50%; transform: translateY(-50%);"></i>
+                                            <input type="text" id="notes-search-input" class="form-control ps-5" placeholder="Search your notes by title, chapter, or content...">
+                                        </div>
                                         <div id="notes-list-container" class="text-center p-4">
                                             <div class="spinner-border text-primary"></div>
                                             <p class="mt-2 text-muted">Loading your saved notes...</p>
@@ -595,33 +599,29 @@ function triggerAutoSave() {
 
 // Fetch all notes for this student
                 const listContainer = document.getElementById('notes-list-container');
-                try {
-                    const res = await fetch(`/api/student/cs-notebook?student_id=${encodeURIComponent(currentStudentData.student_id)}`);
-                    if (!res.ok) throw new Error('Failed to fetch');
-                    const data = await res.json();
-                    // Only entries the student actually gave a real title --
-                    // untitled autosave artifacts (blank title, saved before
-                    // they typed one) just clutter this list otherwise.
-                    const allNotes = (data.notes || []).filter(n => (n.title || '').trim().length > 0);
+                const searchInput = document.getElementById('notes-search-input');
+                searchInput.value = '';
 
-                    if (allNotes.length === 0) {
+                // Renders whichever subset of notes matches the current
+                // search text (or everything, when it's empty) -- pulled out
+                // of the fetch below so typing in the search box re-filters
+                // instantly from the already-fetched list instead of
+                // re-fetching on every keystroke. This is the same view used
+                // during an exam (cs-final-exam.html embeds this page in a
+                // locked-down iframe as the "Exam Scratchpad"), so a student
+                // needs to be able to find one specific saved note out of
+                // many without scrolling a long unfiltered list mid-test.
+                const renderNotesList = (notesToShow) => {
+                    if (notesToShow.length === 0) {
                         listContainer.innerHTML = `
                             <div class="text-center p-4">
                                 <i class="fas fa-clipboard text-muted fs-1 mb-3"></i>
-                                <p class="text-muted">No saved notes found. Start a new entry!</p>
+                                <p class="text-muted">${searchInput.value.trim() ? 'No notes match your search.' : 'No saved notes found. Start a new entry!'}</p>
                             </div>`;
                         return;
                     }
 
-                    // Sort by timestamp descending (newest first). Every saved
-                    // entry is shown -- this used to collapse down to one card
-                    // per unique title, which silently hid every other note
-                    // whenever students reused the same title (e.g. many kids
-                    // titling every entry "My Computer Science Notes"), making
-                    // it look like only their most recent note was ever saved.
-                    allNotes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-                    const notesHtml = allNotes.map(n => {
+                    const notesHtml = notesToShow.map(n => {
                         const date = n.timestamp ? new Date(n.timestamp).toLocaleDateString() : 'Unknown date';
                         const preview = n.content ? n.content.substring(0, 80).replace(/<[^>]*>/g, '') + '...' : 'No content';
                         return `
@@ -657,15 +657,45 @@ function triggerAutoSave() {
                             // Load into the current note form
                             document.getElementById('note-title').value = noteTitle;
                             document.getElementById('note-content').value = noteContent;
-                            
+
                             // Update the preview
                             updatePreview();
                             triggerAutoSave();
-                            
+
                             // Close modal
                             if (modal) modal.hide();
                         };
                     });
+                };
+
+                try {
+                    const res = await fetch(`/api/student/cs-notebook?student_id=${encodeURIComponent(currentStudentData.student_id)}`);
+                    if (!res.ok) throw new Error('Failed to fetch');
+                    const data = await res.json();
+                    // Only entries the student actually gave a real title --
+                    // untitled autosave artifacts (blank title, saved before
+                    // they typed one) just clutter this list otherwise.
+                    const allNotes = (data.notes || []).filter(n => (n.title || '').trim().length > 0);
+
+                    // Sort by timestamp descending (newest first). Every saved
+                    // entry is shown -- this used to collapse down to one card
+                    // per unique title, which silently hid every other note
+                    // whenever students reused the same title (e.g. many kids
+                    // titling every entry "My Computer Science Notes"), making
+                    // it look like only their most recent note was ever saved.
+                    allNotes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                    renderNotesList(allNotes);
+
+                    searchInput.oninput = () => {
+                        const term = searchInput.value.trim().toLowerCase();
+                        if (!term) { renderNotesList(allNotes); return; }
+                        const matches = allNotes.filter(n => {
+                            const haystack = `${n.title || ''} ${n.chapter || ''} ${n.category || ''} ${(n.content || '').replace(/<[^>]*>/g, ' ')}`.toLowerCase();
+                            return haystack.includes(term);
+                        });
+                        renderNotesList(matches);
+                    };
                 } catch (e) {
                     listContainer.innerHTML = `<div class="text-center p-4 text-danger">
                         <i class="fas fa-exclamation-triangle fs-1 mb-2"></i>
