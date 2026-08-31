@@ -172,9 +172,16 @@ async function resolveTodaysBellWindow() {
 function openTimeclockModal() {
     const modalEl = document.getElementById('timeclock-modal');
     if (!modalEl) return;
-    const existing = bootstrap.Modal.getInstance(modalEl);
-    if (existing && modalEl.classList.contains('show')) return; // already open
-    (existing || new bootstrap.Modal(modalEl)).show();
+    // Previously checked our own `.show()` CSS class as a manual "already
+    // open" guard -- if that class and Bootstrap's actual internal state
+    // ever fell out of sync (e.g. the auto-popup and a manual click both
+    // touching the same modal around the same moment), every click after
+    // that silently no-opped forever with no visible error, since the guard
+    // returned early without ever calling .show() again. Bootstrap's own
+    // getOrCreateInstance().show() already no-ops safely on an
+    // already-shown modal using its own internal _isShown state, so let it
+    // handle that instead of tracking it ourselves.
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
 // Runs on load and on a 60s interval. Auto-opens the timeclock modal exactly
