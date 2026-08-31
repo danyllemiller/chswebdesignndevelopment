@@ -429,15 +429,24 @@ async function fetchQuestionsForWeightedMix(targetUnit) {
 
 // Weighted question mixing logic with new distribution for units a-8
 function getWeightedQuestions(allQuestionsByUnit, targetUnit, totalQuestions = 25) {
+    // Target unit = 100 - 5*(number of prior units); every prior unit back
+    // to Unit 1 gets a flat 5% slice, never a unit that hasn't been taught
+    // yet. Unit 3 previously pulled 5% from Unit 4 (a FUTURE unit) instead
+    // of Unit 1 -- a real bug, not a data problem, that put untaught
+    // content on the test. Units 5-7 also silently dropped the most
+    // distant prior units instead of including all of them, which on top
+    // of not matching the intended formula meant the percentages never
+    // actually summed to 100 (the shortfall got silently absorbed into the
+    // target unit's own share instead).
     const weights = {
         a: { a: 100 },
         1: { 1: 100 },
         2: { 2: 95, 1: 5 },
-        3: { 3: 90, 2: 5, 4: 5 },
+        3: { 3: 90, 2: 5, 1: 5 },
         4: { 4: 85, 3: 5, 2: 5, 1: 5 },
-        5: { 5: 80, 4: 5, 3: 5, 2: 5 },
-        6: { 6: 75, 5: 5, 4: 5, 3: 5, 2: 5 },
-        7: { 7: 70, 6: 5, 5: 5, 4: 5, 3: 5 },
+        5: { 5: 80, 4: 5, 3: 5, 2: 5, 1: 5 },
+        6: { 6: 75, 5: 5, 4: 5, 3: 5, 2: 5, 1: 5 },
+        7: { 7: 70, 6: 5, 5: 5, 4: 5, 3: 5, 2: 5, 1: 5 },
         8: { 8: 65, 7: 5, 6: 5, 5: 5, 4: 5 }
     };
     
