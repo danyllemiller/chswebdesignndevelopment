@@ -1437,6 +1437,7 @@ let score = "", display = '', bg = "";
                         // cs_chN_* keys, so the regex below can't match them).
                         const chMatch = key.match(/^cs_ch(\d+)_/);
                         const unit = chMatch ? unitForCsChapter(Number(chMatch[1])) : null;
+                        let masteryExempt = false;
                         if (unit) {
                             const examEntry = sGrades[`Unit${unit}-Exam`];
                             const examScore = examEntry ? (typeof examEntry === 'object' ? examEntry.score : examEntry) : null;
@@ -1444,7 +1445,20 @@ let score = "", display = '', bg = "";
                             if (examScore !== null && examScore !== undefined && examScore !== '' && examMax
                                 && (Number(examScore) / examMax) >= 0.80) {
                                 display = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
+                                masteryExempt = true;
                             }
+                        }
+                        // Didn't reach 80% on the unit exam (or hasn't taken
+                        // it yet) -- if this chapter assignment's due date has
+                        // passed with nothing turned in, flag it the same way
+                        // the student's own dashboard already counts it: a
+                        // visible MISSING marker instead of a blank cell, so
+                        // it's not mistaken for "not due yet" or silently
+                        // overlooked at a glance.
+                        if (unit && !masteryExempt) {
+                            const effectiveDueDate = studentPeriodDueDate || reg?.dueDate;
+                            const isPastDue = !!effectiveDueDate && new Date(effectiveDueDate + 'T00:00:00') < today;
+                            if (isPastDue) display = '<span class="text-danger small fw-bold">MISSING</span>';
                         }
                     }
                 }
