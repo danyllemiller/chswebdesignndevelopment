@@ -40,6 +40,8 @@ I wanted to reach out because ${firstName} has reached ${step.label.toLowerCase(
 
 ${step.consequence}
 
+My classroom tardy policy is posted at chswebdesignndevelopment.com/discipline.html#tardies, and the school's official tardy policy is in the student handbook.
+
 ${counselorBody}Two things help most: talk with ${firstName} about the Tardy Form — it takes ninety seconds and it's the difference between a tardy and an absence on the record — and if something is making it hard to get to class on time, let me know. There's usually something we can build around.
 
 If you have any questions, please don't hesitate to reach out.
