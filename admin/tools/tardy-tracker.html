@@ -494,10 +494,27 @@
     document.getElementById('tardyFollowupCount').textContent = items.length;
     const list = document.getElementById('tardyFollowupList');
     if (items.length === 0) { list.innerHTML = '<p class="text-muted small mb-0">Nobody currently needs a tardy follow-up.</p>'; return; }
-    list.innerHTML = items.map(item => `
+
+    // Grouped by period (unlike the log table below, which stays sortable by
+    // hand) -- within each period, tardiest first, ties broken by last name.
+    const byPeriod = new Map();
+    items.forEach(item => {
+      const period = item.period || 'No period on file';
+      if (!byPeriod.has(period)) byPeriod.set(period, []);
+      byPeriod.get(period).push(item);
+    });
+    const periods = Array.from(byPeriod.keys()).sort();
+
+    list.innerHTML = periods.map(period => {
+      const group = byPeriod.get(period).sort((a, b) =>
+        b.count - a.count || (a.last_name || '').localeCompare(b.last_name || ''));
+      return `
+        <div class="mb-3">
+          <div class="fw-bold text-uppercase small text-muted border-bottom pb-1 mb-1">${escapeHtml(period)}</div>
+          ${group.map(item => `
       <div class="activity-row d-flex justify-content-between align-items-start flex-wrap gap-2 border-bottom py-2">
         <div>
-          <strong>${name(item)}</strong> <span class="text-muted small">${escapeHtml(item.period || '—')}</span>
+          <strong>${name(item)}</strong>
           <span class="badge bg-warning text-dark ms-1">${item.count} effective ${item.count === 1 ? 'tardy' : 'tardies'} — ${escapeHtml(item.step?.label || '')}</span>
           <div class="text-muted small">${escapeHtml(item.step?.consequence || '')}</div>
           <div class="letter-area mt-2 d-none"></div>
@@ -516,7 +533,9 @@
             <label class="form-check-label small" for="consequence-${item.student_id}">I've done the consequence</label>
           </div>
         </div>
-      </div>`).join('');
+      </div>`).join('')}
+        </div>`;
+    }).join('');
   }
 
   async function loadFollowups() {
