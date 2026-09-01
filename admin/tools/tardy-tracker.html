@@ -497,7 +497,7 @@
     list.innerHTML = items.map(item => `
       <div class="activity-row d-flex justify-content-between align-items-start flex-wrap gap-2 border-bottom py-2">
         <div>
-          <strong>${name(item)}</strong>
+          <strong>${name(item)}</strong> <span class="text-muted small">${escapeHtml(item.period || '—')}</span>
           <span class="badge bg-warning text-dark ms-1">${item.count} effective ${item.count === 1 ? 'tardy' : 'tardies'} — ${escapeHtml(item.step?.label || '')}</span>
           <div class="text-muted small">${escapeHtml(item.step?.consequence || '')}</div>
           <div class="letter-area mt-2 d-none"></div>

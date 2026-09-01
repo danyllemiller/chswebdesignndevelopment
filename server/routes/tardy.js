@@ -252,7 +252,7 @@ router.get('/tardy/followups', async (req, res) => {
             const { effectiveCount } = await computeEffectiveCount(connection, s.period, s.dates);
             if (effectiveCount > 1 && effectiveCount > (resolvedThrough.get(s.student_id) || 1)) {
                 followups.push({
-                    student_id: s.student_id, first_name: s.first_name, last_name: s.last_name,
+                    student_id: s.student_id, first_name: s.first_name, last_name: s.last_name, period: s.period,
                     count: effectiveCount, step: getTardyStep(effectiveCount)
                 });
             }
