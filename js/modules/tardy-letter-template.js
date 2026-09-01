@@ -32,13 +32,22 @@ export function renderTardyLetterText(student, count, step, counselor) {
         ? `${firstName} has now reached the fourth tardy in ${firstName === 'Your student' ? 'their' : `${firstName}'s`} class this grading period, so ${counselor?.name || 'the counselor'} is being looped in alongside this note home, per our tardy policy's next step.\n\n`
         : '';
 
+    // The ladder's own consequence wording ("contacted by phone or email...")
+    // reads oddly inside the very email that IS the contact, and presumes
+    // what the plan should be -- the letter asks the parent directly
+    // instead, without changing the underlying policy text shown anywhere
+    // else (the admin follow-up list, discipline.html).
+    const bodyLine = (count === 3 || count === 4)
+        ? `I'd like to hear from you — what do you think would help ${firstName} get to class on time? Let's build a plan together based on your input.`
+        : step.consequence;
+
     return `Subject: ${firstName}'s Attendance — Tardy Follow-Up${ccLine}
 
 Hello ${firstName}'s family,
 
 I wanted to reach out because ${firstName} has reached ${step.label.toLowerCase()} in class as of ${today}.
 
-${step.consequence}
+${bodyLine}
 
 My classroom tardy policy is posted at chswebdesignndevelopment.com/discipline.html#tardies, and the school's official tardy policy is in the student handbook.
 

@@ -7,8 +7,8 @@
 export const TARDY_LADDER = [
     { count: 1, label: 'First Tardy', consequence: 'Brief private check-in. No further consequence.' },
     { count: 2, label: 'Second Tardy', consequence: 'Five-minute conference and a short written reflection identifying one specific change.' },
-    { count: 3, label: 'Third Tardy', consequence: "I'll ask what you think could help your student get to class on time, and we'll build a plan together based on your input." },
-    { count: 4, label: 'Fourth Tardy', consequence: "A restorative session is scheduled, the counselor is looped in, and I'll ask what you think could help your student get to class on time." },
+    { count: 3, label: 'Third Tardy', consequence: 'Parent/guardian contacted by phone or email, and a short support plan is built together. Missed class time is made up during lunch or before/after school.' },
+    { count: 4, label: 'Fourth Tardy', consequence: "Scheduled restorative session, a revised plan, and the student's counselor is looped in. Parent/guardian is notified of the outcome." },
     { count: 5, label: 'Fifth Tardy & Beyond', consequence: 'Administrative referral, with a meeting requested including parent/guardian, counselor, and an administrator.' }
 ];
 
