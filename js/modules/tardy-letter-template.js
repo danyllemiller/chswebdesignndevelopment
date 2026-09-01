@@ -7,11 +7,18 @@ function fmtDate(d) {
     return new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
+// Student names come out of the roster however the school's SIS export
+// stored them, which is often ALL CAPS -- letters home should read like a
+// name, not a shout, so every name is title-cased before it goes in.
+function toTitleCase(str) {
+    return String(str || '').toLowerCase().replace(/(^|[\s\-'])([a-z])/g, (m, sep, c) => sep + c.toUpperCase());
+}
+
 // student: { first_name, last_name }
 // step: result of getTardyStep(count), from tardy-ladder.js
 // counselor: { name, email } | null
 export function renderTardyLetterText(student, count, step, counselor) {
-    const firstName = student.first_name || 'Your student';
+    const firstName = toTitleCase(student.first_name) || 'Your student';
     const today = fmtDate(new Date());
     const isFourthPlus = count >= 4;
 
