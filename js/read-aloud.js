@@ -1,37 +1,35 @@
 // js/read-aloud.js
-// Simple "Read Aloud" button for curriculum content pages, using the
+// Simple "Read Aloud" button for WD curriculum content pages, using the
 // browser's built-in Web Speech API -- no external libraries. Injected
 // sitewide by loader.js; self-guards to curriculum pages only (year1/year2
-// chapters, computerscience.html, and the /compsci/ CS chapter pages) via
-// the URL path, since the shared .container-ultrawide wrapper it reads
-// from on WD/computerscience.html pages is also used on ~150 other pages
-// (admin tools, student pages) this shouldn't appear on.
+// chapters, computerscience.html) via the URL path, since the shared
+// .container-ultrawide wrapper it reads from is also used on ~150 other
+// pages (admin tools, student pages) this shouldn't appear on.
 //
-// The 20 CS chapter pages under /compsci/ are loaded inside an iframe by
-// cs-interactive.js and don't include loader.js -- this file is added to
-// each of them directly (they don't use .container-ultrawide either, so
-// the container/anchor logic below falls back to their own
-// .chapter-header/.sticky-toc layout).
+// The CS side has its own equivalent -- a button built into
+// cs-interactive.html's left-pane header bar (js/cs-interactive.js), since
+// the 20 CS chapter pages under /compsci/ are loaded inside an iframe
+// there and a fixed header button reads better than one embedded in each
+// page's scrolling content.
 
 (function () {
   if (!('speechSynthesis' in window)) return; // unsupported browser -- silent no-op
 
-  const CURRICULUM_PATH_PATTERNS = ['/year1/', '/year2/', '/computerscience.html', '/compsci/'];
+  const CURRICULUM_PATH_PATTERNS = ['/year1/', '/year2/', '/computerscience.html'];
   const path = window.location.pathname.toLowerCase();
   if (!CURRICULUM_PATH_PATTERNS.some(p => path.includes(p))) return;
 
-  const container = document.querySelector('.container-ultrawide') || document.body;
+  const container = document.querySelector('.container-ultrawide');
   if (!container) return;
 
   let speaking = false;
   let btn = null;
 
   function getReadableText() {
-    // Skip the prev/next chapter nav bar, the CS chapter pages' own
-    // "in this chapter" jump-link bar, and anything marked no-print --
+    // Skip the prev/next chapter nav bar and anything marked no-print --
     // read just the actual lesson content.
     const clone = container.cloneNode(true);
-    clone.querySelectorAll('nav, .no-print, .sticky-toc, script, style, iframe').forEach(el => el.remove());
+    clone.querySelectorAll('nav, .no-print, script, style, iframe').forEach(el => el.remove());
     return (clone.innerText || clone.textContent || '').trim();
   }
 
@@ -60,23 +58,19 @@
   }
 
   function createButton() {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'text-center mb-4 no-print';
-
     btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'btn btn-outline-primary btn-sm fw-bold';
+    btn.className = 'btn btn-outline-primary btn-sm fw-bold ms-3 no-print align-middle';
     btn.setAttribute('aria-label', 'Read this page aloud');
     updateButton();
     btn.addEventListener('click', () => { speaking ? stopReading() : startReading(); });
 
-    wrapper.appendChild(btn);
-    // On CS chapter pages, sit below the "in this chapter" jump-link bar
-    // rather than between it and the title. Elsewhere, sit right below the
-    // page's <h1>.
-    const anchor = container.querySelector('.sticky-toc') || container.querySelector('h1');
-    if (anchor) anchor.insertAdjacentElement('afterend', wrapper);
-    else container.insertBefore(wrapper, container.firstChild);
+    // Sits inline at the end of the <h1> itself, rather than as its own
+    // centered block below the title -- a full-width row felt awkward and
+    // disconnected from the heading it belongs to.
+    const h1 = container.querySelector('h1');
+    if (h1) h1.appendChild(btn);
+    else container.insertBefore(btn, container.firstChild);
   }
 
   // Speech synthesis doesn't stop on its own when a student navigates away.

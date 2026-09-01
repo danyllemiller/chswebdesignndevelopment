@@ -213,10 +213,69 @@ const dom = {
     examOverlay: document.getElementById('exam-launch-overlay'),
     statusPill: document.getElementById('unit-status-pill'),
     paneTitle: document.getElementById('list-chapter-title'),
+    readAloudBtn: document.getElementById('read-aloud-toggle-btn'),
     viewJournal: document.getElementById('view-journal'),
     viewDropbox: document.getElementById('view-dropbox'),
     viewCode: document.getElementById('view-code')
 };
+
+// ============================================================================
+// READ ALOUD (left-pane header button) -- reads whatever chapter is
+// currently loaded in the curriculum iframe, via the Web Speech API. Lives
+// in the parent page's fixed header instead of inside each of the 20
+// /compsci/*.html chapter pages, so it's always in the same place
+// regardless of which chapter is open or how far the student has scrolled.
+// ============================================================================
+(function initReadAloud() {
+    if (!dom.readAloudBtn || !('speechSynthesis' in window)) {
+        if (dom.readAloudBtn) dom.readAloudBtn.classList.add('d-none');
+        return;
+    }
+
+    let speaking = false;
+
+    function updateBtn() {
+        dom.readAloudBtn.innerHTML = speaking ? '<i class="fas fa-stop"></i>' : '<i class="fas fa-volume-up"></i>';
+        dom.readAloudBtn.title = speaking ? 'Stop reading' : 'Read this chapter aloud';
+        dom.readAloudBtn.classList.toggle('btn-danger', speaking);
+        dom.readAloudBtn.classList.toggle('btn-light', !speaking);
+    }
+
+    function stopReading() {
+        window.speechSynthesis.cancel();
+        speaking = false;
+        updateBtn();
+    }
+
+    function getFrameText() {
+        try {
+            const frameDoc = dom.curriculumFrame && dom.curriculumFrame.contentDocument;
+            if (!frameDoc || !frameDoc.body) return '';
+            const clone = frameDoc.body.cloneNode(true);
+            clone.querySelectorAll('nav, .no-print, .sticky-toc, script, style, iframe').forEach(el => el.remove());
+            return (clone.innerText || clone.textContent || '').trim();
+        } catch (e) {
+            return ''; // cross-origin or not-yet-loaded -- nothing readable
+        }
+    }
+
+    function startReading() {
+        const text = getFrameText();
+        if (!text) return;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = () => { speaking = false; updateBtn(); };
+        utterance.onerror = () => { speaking = false; updateBtn(); };
+        speaking = true;
+        updateBtn();
+        window.speechSynthesis.speak(utterance);
+    }
+
+    dom.readAloudBtn.addEventListener('click', () => { speaking ? stopReading() : startReading(); });
+    // A new chapter loads a fresh document into the iframe -- keep reading
+    // the old one from under the student's feet, so stop instead.
+    if (dom.curriculumFrame) dom.curriculumFrame.addEventListener('load', stopReading);
+    window.addEventListener('pagehide', () => window.speechSynthesis.cancel());
+})();
 
 // ============================================================================
 // HELPER FUNCTIONS - Support both API-based and localStorage-based patterns
