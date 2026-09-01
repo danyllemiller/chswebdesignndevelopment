@@ -40,6 +40,17 @@
 })();
 
 // ==========================================
+// READ ALOUD (sitewide, self-guards to curriculum content pages by URL path)
+// ==========================================
+(function injectReadAloud() {
+  if (document.getElementById('read-aloud-script')) return;
+  const script = document.createElement('script');
+  script.id = 'read-aloud-script';
+  script.src = '/js/read-aloud.js?v=1';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
 // TIMECLOCK (sitewide, self-guards to students only)
 // Was previously only <script>-included on 4 pages, so the auto-popup
 // silently never fired for a student whose current page wasn't one of
