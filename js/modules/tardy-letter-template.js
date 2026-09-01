@@ -61,3 +61,18 @@ damiller@carson.k12.nv.us
 
 Ms. Miller`;
 }
+
+// Short heads-up sent directly to the student (via the private messaging
+// system) about their 5-minute conference -- the Second Tardy step's
+// consequence, and every tardy from there on. Deliberately NOT the full
+// paper reflection form with signature/date blanks -- those only make
+// sense on paper, not in a chat thread -- just a plain-text notice asking
+// them to come find her.
+// student: { first_name }
+export function renderStudentReflectionRequestText(student) {
+    const firstName = toTitleCase(student.first_name) || 'there';
+    return `Hi ${firstName} — since this is a tardy for you today, let's do our 5-minute conference. Come find me before/after class or during a passing period so we can talk through what happened and land on one small thing to change for next time.
+
+See you soon.
+- Ms. Miller`;
+}

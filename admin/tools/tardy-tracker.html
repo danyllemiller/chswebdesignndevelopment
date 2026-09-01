@@ -524,6 +524,9 @@
             <button class="btn btn-sm btn-primary fw-bold gen-letter-btn" data-student-id="${item.student_id}" data-first-name="${escapeHtml(item.first_name || '')}" data-last-name="${escapeHtml(item.last_name || '')}" data-count="${item.count}">
               <i class="fas fa-envelope me-1"></i>${item.count >= 4 ? 'Parent + Counselor Letter' : 'Parent Letter'}
             </button>
+            <button class="btn btn-sm btn-outline-primary fw-bold send-reflection-btn" data-student-id="${item.student_id}" data-first-name="${escapeHtml(item.first_name || '')}" title="Send a 5-minute conference heads-up via Messages">
+              <i class="fas fa-comment-dots me-1"></i>Message Student
+            </button>
             <button class="btn btn-sm btn-outline-secondary minor-flag-btn" data-student-id="${item.student_id}" data-count="${item.count}" title="Handle without a letter">
               <i class="fas fa-flag"></i> Minor
             </button>
@@ -549,7 +552,27 @@
   document.getElementById('tardyFollowupList').addEventListener('click', async (e) => {
     const genBtn = e.target.closest('.gen-letter-btn');
     const flagBtn = e.target.closest('.minor-flag-btn');
-    if (genBtn) {
+    const reflectionBtn = e.target.closest('.send-reflection-btn');
+    if (reflectionBtn) {
+      const { studentId, firstName } = reflectionBtn.dataset;
+      const originalHtml = reflectionBtn.innerHTML;
+      reflectionBtn.disabled = true;
+      reflectionBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sending...';
+      try {
+        const { renderStudentReflectionRequestText } = await import('/js/modules/tardy-letter-template.js?v=1');
+        const body = renderStudentReflectionRequestText({ first_name: firstName });
+        const res = await fetch('/api/admin/messages', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ student_id: studentId, body })
+        });
+        if (!res.ok) throw new Error('Failed to send.');
+        reflectionBtn.innerHTML = '<i class="fas fa-check me-1"></i>Sent!';
+        setTimeout(() => { reflectionBtn.innerHTML = originalHtml; reflectionBtn.disabled = false; }, 2500);
+      } catch (err) {
+        reflectionBtn.innerHTML = '<i class="fas fa-xmark me-1"></i>Failed';
+        setTimeout(() => { reflectionBtn.innerHTML = originalHtml; reflectionBtn.disabled = false; }, 2500);
+      }
+    } else if (genBtn) {
       const { studentId, firstName, lastName, count } = genBtn.dataset;
       const area = genBtn.closest('.activity-row').querySelector('.letter-area');
       const { renderTardyLetterText } = await import('/js/modules/tardy-letter-template.js?v=1');
