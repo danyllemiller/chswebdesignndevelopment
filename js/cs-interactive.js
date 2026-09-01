@@ -621,14 +621,29 @@ function initCSInteractive(student) {
                 console.log('WORKSHEET DEBUG: Using fallback chapter:', chapterNum);
             }
             
-            // Load the notebook iframe with the appropriate mode and chapter
+            // Load the notebook iframe with the appropriate mode and chapter.
+            // chapterLabel tells cs-notebook.html which real chapter/unit
+            // this note belongs to -- it used to hardcode every save as
+            // "Unit Exam Scratchpad" regardless of what chapter a student
+            // was actually viewing, which silently pooled every chapter's
+            // notes into one bucket and made chapters overwrite each other.
+            // Mirrors the labeling scheme the CS gradebook already expects
+            // (Unit N - Chapter Title / Unit N Exam Scratchpad / Unit N General).
             const notebookFrame = document.getElementById('notebook-frame');
             if (notebookFrame) {
+                let chapterLabel = activeUnit ? `Unit ${activeUnit.unitNum} General` : 'General';
+                if (activeTab.type === 'CHAPTER' && activeUnit) {
+                    chapterLabel = `Unit ${activeUnit.unitNum} - ${activeTab.data.title}`;
+                } else if (activeTab.type === 'EXAM' && activeUnit) {
+                    chapterLabel = `Unit ${activeUnit.unitNum} Exam Scratchpad`;
+                }
+
                 let notebookUrl = '/cs-notebook.html?mode=' + (mode === 'worksheet' ? 'worksheet' : 'notes');
                 notebookUrl += '&chapter=' + chapterNum;
+                notebookUrl += '&chapterLabel=' + encodeURIComponent(chapterLabel);
                 notebookUrl += '&t=' + Date.now(); // Cache buster
                 notebookFrame.src = notebookUrl;
-                console.log('Loading notebook with:', notebookUrl, 'for chapter:', chapterNum, 'activeTab:', activeTab.type);
+                console.log('Loading notebook with:', notebookUrl, 'for chapter:', chapterNum, 'chapterLabel:', chapterLabel, 'activeTab:', activeTab.type);
             }
             
             // Highlight the clicked button

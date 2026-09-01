@@ -133,15 +133,23 @@
     const urlParams = new URLSearchParams(window.location.search);
     currentMode = urlParams.get('mode') || 'notes';
     let paramChapter = urlParams.get('chapter') || 'Misc';
-    
+
+    // Which real chapter/unit these notes belong to, passed by
+    // cs-interactive.js -- used to tag saves and to only load back the
+    // note that actually belongs to this chapter, instead of whatever the
+    // student happened to save most recently anywhere in the app. Falls
+    // back to the old pooled label only if this page is ever opened
+    // directly without it (e.g. manual testing).
+    const chapterLabel = urlParams.get('chapterLabel') || 'Unit Exam Scratchpad';
+
     // Handle case where chapter is 0, "Misc", or empty - use Unit 0 intro to office software worksheet
     if (paramChapter === '0' || paramChapter === 'Misc' || !paramChapter || paramChapter === 'unit0') {
         currentChapter = '0'; // Chapter 0: Intro to Office Software
     } else {
         currentChapter = paramChapter;
     }
-    
-    console.log('Worksheet chapter:', currentChapter);
+
+    console.log('Worksheet chapter:', currentChapter, 'chapterLabel:', chapterLabel);
     
 async function init() {
         // Load worksheets library first
@@ -257,10 +265,14 @@ async function fetchNotes() {
             const res = await fetch('/api/student/cs-notebook?student_id=' + encodeURIComponent(currentStudentData.student_id));
             if (!res.ok) throw new Error('Failed to fetch');
             const data = await res.json();
-            // Load ALL notes - students need access to all their saved notes during exams
-            const allNotes = data.notes || [];
-            
-            // Get most recent or create new
+            // Only this chapter's/exam's own notes -- previously this loaded
+            // the single most-recently-saved note across the student's
+            // ENTIRE history regardless of chapter, so opening any chapter's
+            // notes could silently load (and then autosave-overwrite) a
+            // completely different chapter's content.
+            const allNotes = (data.notes || []).filter(n => n.chapter === chapterLabel);
+
+            // Get most recent for this chapter or create new
             if (allNotes.length > 0) {
                 allNotes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 const note = allNotes[0];
@@ -510,7 +522,7 @@ function getDefaultWorksheetTemplate() {
         const payload = {
             id: activeNoteId || null,
             student_id: currentStudentData.student_id,
-            chapter: 'Unit Exam Scratchpad',
+            chapter: chapterLabel,
             title: titleInput.value.trim(),
             category: catInput ? catInput.value : 'Notes',
             content: contentIn ? contentIn.value : '',
