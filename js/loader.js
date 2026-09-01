@@ -29,6 +29,17 @@
 })();
 
 // ==========================================
+// MESSAGES BADGE (sitewide, self-guards per role -- students and teacher alike)
+// ==========================================
+(function injectMessagesBadge() {
+  if (document.getElementById('messages-badge-script')) return;
+  const script = document.createElement('script');
+  script.id = 'messages-badge-script';
+  script.src = '/js/messages-badge.js?v=1';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
 // TIMECLOCK (sitewide, self-guards to students only)
 // Was previously only <script>-included on 4 pages, so the auto-popup
 // silently never fired for a student whose current page wasn't one of

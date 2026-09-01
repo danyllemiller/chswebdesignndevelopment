@@ -25,12 +25,13 @@
         
         <!-- LOGGED-IN: WD STUDENT TOOLS (Hidden by default) -->
         <li class="nav-item dropdown d-none" id="student-menu-wd">
-          <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);" id="navbarStudentWD" role="button"><i class="fas fa-user-graduate me-1 text-primary"></i> Student Tools</a>
+          <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);" id="navbarStudentWD" role="button"><i class="fas fa-user-graduate me-1 text-primary"></i> Student Tools<span class="badge rounded-pill bg-danger ms-1 d-none" id="msg-badge-wd">0</span></a>
           <ul aria-labelledby="navbarStudentWD" class="dropdown-menu dropdown-menu-end shadow border-primary">
             <li><a class="nav-link dropdown-item" href="/student/notes.html"><i class="fas fa-book me-2 text-info"></i> My Notebook</a></li>
             <li><a class="nav-link dropdown-item" href="/student/grades.html"><i class="fas fa-chart-line me-2 text-success"></i> My Grades</a></li>
             <li><a class="nav-link dropdown-item" href="/student/files.html"><i class="fas fa-folder-open me-2 text-warning"></i> My Files</a></li>
             <li><a class="nav-link dropdown-item" href="/student/planner.html"><i class="fas fa-seedling me-2 text-success"></i> My Planner</a></li>
+            <li><a class="nav-link dropdown-item" href="/student/messages.html"><i class="fas fa-envelope me-2 text-primary"></i> Messages</a></li>
             <li><a class="nav-link dropdown-item" href="/calendar.html"><i class="fas fa-calendar-alt me-2 text-secondary"></i> Calendar</a></li>
             <li><a class="nav-link dropdown-item" href="/student/song-request.html"><i class="fas fa-music me-2 text-success"></i> Request a Song</a></li>
             <li><hr class="dropdown-divider border-primary"></li>
@@ -40,12 +41,13 @@
 
         <!-- LOGGED-IN: CS STUDENT TOOLS (Hidden by default) -->
         <li class="nav-item dropdown d-none" id="student-menu-cs">
-          <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);" id="navbarStudentCS" role="button"><i class="fas fa-user-graduate me-1 text-success"></i> Student Tools</a>
+          <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);" id="navbarStudentCS" role="button"><i class="fas fa-user-graduate me-1 text-success"></i> Student Tools<span class="badge rounded-pill bg-danger ms-1 d-none" id="msg-badge-cs">0</span></a>
           <ul aria-labelledby="navbarStudentCS" class="dropdown-menu dropdown-menu-end shadow border-success">
             <li><a class="nav-link dropdown-item" href="/cs-interactive.html"><i class="fas fa-terminal me-2 text-info"></i> CS Workspace</a></li>
             <li><a class="nav-link dropdown-item" href="/student/grades.html"><i class="fas fa-chart-line me-2 text-success"></i> My Grades</a></li>
             <li><a class="nav-link dropdown-item" href="/student/files.html"><i class="fas fa-folder-open me-2 text-warning"></i> My Files</a></li>
             <li><a class="nav-link dropdown-item" href="/student/planner.html"><i class="fas fa-seedling me-2 text-success"></i> My Planner</a></li>
+            <li><a class="nav-link dropdown-item" href="/student/messages.html"><i class="fas fa-envelope me-2 text-primary"></i> Messages</a></li>
             <li><a class="nav-link dropdown-item" href="/calendar.html"><i class="fas fa-calendar-alt me-2 text-secondary"></i> Calendar</a></li>
             <li><a class="nav-link dropdown-item" href="/student/song-request.html"><i class="fas fa-music me-2 text-success"></i> Request a Song</a></li>
             <li><hr class="dropdown-divider border-success"></li>
@@ -55,9 +57,10 @@
 
         <!-- LOGGED-IN: INTERVENTION-ONLY STUDENT (Hidden by default) -->
         <li class="nav-item dropdown d-none" id="student-menu-intv">
-          <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);" id="navbarStudentINTV" role="button"><i class="fas fa-seedling me-1 text-success"></i> My Planner</a>
+          <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);" id="navbarStudentINTV" role="button"><i class="fas fa-seedling me-1 text-success"></i> My Planner<span class="badge rounded-pill bg-danger ms-1 d-none" id="msg-badge-intv">0</span></a>
           <ul aria-labelledby="navbarStudentINTV" class="dropdown-menu dropdown-menu-end shadow border-success">
             <li><a class="nav-link dropdown-item" href="/student/planner.html"><i class="fas fa-seedling me-2 text-success"></i> Growth Mindset Planner</a></li>
+            <li><a class="nav-link dropdown-item" href="/student/messages.html"><i class="fas fa-envelope me-2 text-primary"></i> Messages</a></li>
             <li><hr class="dropdown-divider border-success"></li>
             <li><a class="nav-link dropdown-item text-danger" href="/logout.html"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
           </ul>
@@ -65,11 +68,12 @@
 
         <!-- ADMIN MENU (Hidden by default) -->
         <li class="nav-item dropdown d-none" id="admin-menu-item">
-          <a aria-expanded="false" class="nav-link dropdown-toggle text-danger" data-bs-toggle="dropdown" href="javascript:void(0);" id="navbarAdmin" role="button"><i class="fas fa-shield-alt me-1"></i> Admin</a>
+          <a aria-expanded="false" class="nav-link dropdown-toggle text-danger" data-bs-toggle="dropdown" href="javascript:void(0);" id="navbarAdmin" role="button"><i class="fas fa-shield-alt me-1"></i> Admin<span class="badge rounded-pill bg-danger ms-1 d-none" id="msg-badge-admin">0</span></a>
           <ul aria-labelledby="navbarAdmin" class="dropdown-menu dropdown-menu-end shadow border-danger">
             <li><a class="nav-link dropdown-item" href="/admin/roster.html"><i class="fas fa-users me-2 text-primary"></i> Roster Management</a></li>
             <li><a class="nav-link dropdown-item" href="/admin/gradebook.html"><i class="fas fa-graduation-cap me-2 text-primary"></i> Master Gradebook</a></li>
             <li><a class="nav-link dropdown-item" href="/admin/notebooks.html"><i class="fas fa-book-open me-2 text-info"></i> Digital Notebooks</a></li>
+            <li><a class="nav-link dropdown-item" href="/admin/messages.html"><i class="fas fa-envelope me-2 text-primary"></i> Messages</a></li>
             <li><a class="nav-link dropdown-item" href="/calendar.html"><i class="fas fa-calendar-alt me-2 text-secondary"></i> Calendar</a></li>
             <li><a class="nav-link dropdown-item" href="/admin/daily-agenda.html"><i class="fas fa-chalkboard me-2 text-primary"></i> Daily Agenda</a></li>
             <li><a class="nav-link dropdown-item" href="/admin/tools.html"><i class="fas fa-toolbox me-2 text-danger"></i> More Tools</a></li>

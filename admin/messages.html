@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Teacher Admin | Messages</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet" />
+
+  <!-- Loader for Navigation & Auth Guard -->
+  <script src="/js/loader.js?v=19"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { background: #f4f6fb; }
+    .tools-card { max-width: 1100px; margin: 2rem auto; }
+    #threadList { max-height: 640px; overflow-y: auto; }
+    .thread-row { cursor: pointer; border-bottom: 1px solid #eee; padding: .65rem .9rem; }
+    .thread-row:hover { background: #f4f6fb; }
+    .thread-row.active { background: #e7edff; }
+    #messageThread { height: 440px; overflow-y: auto; background: #f4f6fb; border-radius: 10px; padding: 1rem; }
+    .msg-bubble { max-width: 75%; padding: .6rem 1rem; border-radius: 14px; margin-bottom: .75rem; word-wrap: break-word; white-space: pre-wrap; }
+    .msg-teacher { background: #000099; color: #fff; margin-left: auto; border-bottom-right-radius: 4px; }
+    .msg-student { background: #fff; border: 1px solid #dee2e6; margin-right: auto; border-bottom-left-radius: 4px; }
+    .msg-meta { font-size: .7rem; opacity: .7; margin-top: .25rem; }
+    #newThreadResults { max-height: 220px; overflow-y: auto; }
+  </style>
+</head>
+<body class="bg-white">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div class="container tools-card">
+    <h2 class="gochi text-primary mb-3"><i class="fas fa-envelope me-2"></i>Messages</h2>
+
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white">
+            <input type="text" id="newThreadSearch" class="form-control form-control-sm" placeholder="Search students to start a new message…" autocomplete="off">
+            <div id="newThreadResults" class="list-group list-group-flush mt-1 d-none"></div>
+          </div>
+          <div id="threadList">
+            <div class="text-center text-muted p-4" id="threadListLoading">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white fw-bold" id="threadHeader">Select a student to view their messages</div>
+          <div class="card-body">
+            <div id="messageThread">
+              <p class="text-muted small text-center mb-0 mt-5">No conversation selected.</p>
+            </div>
+            <form id="sendForm" class="d-flex gap-2 mt-3 d-none">
+              <input type="text" id="messageInput" class="form-control" placeholder="Type a message…" maxlength="5000" autocomplete="off" required>
+              <button type="submit" class="btn btn-primary fw-bold px-4"><i class="fas fa-paper-plane"></i></button>
+            </form>
+            <div id="sendError" class="alert alert-danger small mt-2 d-none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+
+  <script type="module">
+    const threadList = document.getElementById('threadList');
+    const threadHeader = document.getElementById('threadHeader');
+    const messageThread = document.getElementById('messageThread');
+    const sendForm = document.getElementById('sendForm');
+    const messageInput = document.getElementById('messageInput');
+    const sendError = document.getElementById('sendError');
+    const newThreadSearch = document.getElementById('newThreadSearch');
+    const newThreadResults = document.getElementById('newThreadResults');
+
+    let roster = [];
+    let currentStudentId = null;
+
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function formatRelative(ts) {
+      const d = new Date(ts.replace(' ', 'T'));
+      const diffMs = Date.now() - d.getTime();
+      const diffMin = Math.floor(diffMs / 60000);
+      if (diffMin < 1) return 'just now';
+      if (diffMin < 60) return `${diffMin}m ago`;
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return `${diffHr}h ago`;
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    function formatWhen(ts) {
+      const d = new Date(ts.replace(' ', 'T'));
+      return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    function studentName(s) {
+      return s.first_name ? `${escapeHtml(s.first_name)} ${escapeHtml(s.last_name)}` : escapeHtml(s.student_id);
+    }
+
+    async function loadRoster() {
+      try {
+        const res = await fetch('/api/admin/roster');
+        const data = await res.json();
+        roster = (Array.isArray(data) ? data : []).filter(s =>
+          String(s.role || '').toLowerCase() !== 'admin' && String(s.role || '').toLowerCase() !== 'teacher'
+        );
+      } catch (e) { roster = []; }
+    }
+
+    async function loadThreads() {
+      try {
+        const res = await fetch('/api/admin/messages/threads');
+        if (!res.ok) {
+          threadList.innerHTML = '<p class="text-danger small text-center p-4 mb-0">Please log in as admin to view messages.</p>';
+          return;
+        }
+        const data = await res.json();
+        renderThreadList(data.threads || []);
+      } catch (e) {
+        threadList.innerHTML = '<p class="text-danger small text-center p-4 mb-0">Failed to load message threads.</p>';
+      }
+    }
+
+    function renderThreadList(threads) {
+      if (threads.length === 0) {
+        threadList.innerHTML = '<p class="text-muted small text-center p-4 mb-0">No conversations yet. Search above to message a student.</p>';
+        return;
+      }
+      threadList.innerHTML = threads.map(t => `
+        <div class="thread-row d-flex justify-content-between align-items-center ${t.student_id === currentStudentId ? 'active' : ''}" data-student-id="${t.student_id}">
+          <div>
+            <div class="fw-bold">${studentName(t)}</div>
+            <div class="text-muted small">${escapeHtml(t.section_id || '')} · ${formatRelative(t.last_message_at)}</div>
+          </div>
+          ${t.unread_count > 0 ? `<span class="badge bg-danger rounded-pill">${t.unread_count}</span>` : ''}
+        </div>`).join('');
+    }
+
+    threadList.addEventListener('click', (e) => {
+      const row = e.target.closest('.thread-row');
+      if (!row) return;
+      openThread(row.dataset.studentId);
+    });
+
+    async function openThread(studentId) {
+      currentStudentId = studentId;
+      sendForm.classList.remove('d-none');
+      messageThread.innerHTML = '<div class="text-center text-muted p-4">Loading…</div>';
+      try {
+        const res = await fetch(`/api/admin/messages/thread?student_id=${encodeURIComponent(studentId)}`);
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          messageThread.innerHTML = `<p class="text-danger small text-center mb-0 mt-5">${escapeHtml(data.error || 'Failed to load thread.')}</p>`;
+          return;
+        }
+        const data = await res.json();
+        threadHeader.textContent = data.student.first_name ? `${data.student.first_name} ${data.student.last_name} — ${data.student.section_id || ''}` : studentId;
+        renderMessages(data.messages || []);
+        await loadThreads(); // refresh unread badges now that this thread's been read
+      } catch (e) {
+        messageThread.innerHTML = '<p class="text-danger small text-center mb-0 mt-5">Failed to load thread.</p>';
+      }
+    }
+
+    function renderMessages(messages) {
+      if (messages.length === 0) {
+        messageThread.innerHTML = '<p class="text-muted small text-center mb-0 mt-5">No messages yet — say hello!</p>';
+        return;
+      }
+      messageThread.innerHTML = messages.map(m => `
+        <div class="msg-bubble ${m.sender === 'teacher' ? 'msg-teacher' : 'msg-student'}">
+          <div>${escapeHtml(m.body)}</div>
+          <div class="msg-meta">${m.sender === 'teacher' ? 'You' : 'Student'} · ${formatWhen(m.created_at)}</div>
+        </div>`).join('');
+      messageThread.scrollTop = messageThread.scrollHeight;
+    }
+
+    sendForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      sendError.classList.add('d-none');
+      const body = messageInput.value.trim();
+      if (!body || !currentStudentId) return;
+      try {
+        const res = await fetch('/api/admin/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ student_id: currentStudentId, body })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to send message.');
+        messageInput.value = '';
+        await openThread(currentStudentId);
+      } catch (err) {
+        sendError.textContent = err.message;
+        sendError.classList.remove('d-none');
+      }
+    });
+
+    newThreadSearch.addEventListener('input', () => {
+      const q = newThreadSearch.value.trim().toLowerCase();
+      if (!q) { newThreadResults.classList.add('d-none'); newThreadResults.innerHTML = ''; return; }
+      const matches = roster.filter(s =>
+        `${s.first_name || ''} ${s.last_name || ''}`.toLowerCase().includes(q) || String(s.student_id).includes(q)
+      ).slice(0, 15);
+      if (matches.length === 0) {
+        newThreadResults.classList.remove('d-none');
+        newThreadResults.innerHTML = '<div class="list-group-item small text-muted">No matches.</div>';
+        return;
+      }
+      newThreadResults.classList.remove('d-none');
+      newThreadResults.innerHTML = matches.map(s => `
+        <button type="button" class="list-group-item list-group-item-action small" data-student-id="${s.student_id}">
+          ${studentName(s)} <span class="text-muted">(${escapeHtml(s.display_period || s.section_id || '')})</span>
+        </button>`).join('');
+    });
+
+    newThreadResults.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-student-id]');
+      if (!btn) return;
+      newThreadSearch.value = '';
+      newThreadResults.classList.add('d-none');
+      newThreadResults.innerHTML = '';
+      openThread(btn.dataset.studentId);
+    });
+
+    loadRoster();
+    loadThreads();
+  </script>
+</body>
+</html>
