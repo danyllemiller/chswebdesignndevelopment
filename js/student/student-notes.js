@@ -6,6 +6,38 @@
  * Uses MariaDB API endpoints only.
  */
 
+// A student reported notes she'd written no longer being there, with zero
+// trace of a save attempt (successful or failed) anywhere in the server
+// logs -- meaning whatever went wrong happened entirely client-side,
+// invisible to the server. Same diagnostic pattern already used in
+// js/student/timeclock.js: report any error, caught or not, straight to
+// the server logs so a real failure is actually visible next time instead
+// of requiring guesswork.
+function logNotesError(context, err) {
+    try {
+        fetch('/api/client-error-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: err && err.message ? err.message : String(err),
+                stack: err && err.stack ? err.stack : null,
+                url: window.location.href,
+                student_id: (typeof getActiveUserId === 'function' ? getActiveUserId() : null),
+                context,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            })
+        }).catch(() => {});
+    } catch (e) { /* logging must never itself break the notebook */ }
+}
+
+window.addEventListener('error', (ev) => {
+    logNotesError('window.onerror', ev.error || { message: ev.message });
+});
+window.addEventListener('unhandledrejection', (ev) => {
+    logNotesError('window.onunhandledrejection', ev.reason);
+});
+
 (function() {
     const patch = function(original) {
         return function(selector) {
@@ -115,6 +147,7 @@ if (dom.form) {
             }
         } catch (err) {
             console.error("Save failed:", err);
+            logNotesError('note-form submit', err);
             alert("Unable to save right now. Please try again.");
         }
     });
