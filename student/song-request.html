@@ -85,16 +85,25 @@
           results.innerHTML = `<p class="text-muted small">No results.</p>`;
           return;
         }
-        results.innerHTML = tracks.map(t => `
+        results.innerHTML = tracks.map(t => {
+          const alreadyOn = t.existing_status === 'approved';
+          const alreadyPending = t.existing_status === 'pending';
+          const actionHtml = alreadyOn
+            ? `<span class="badge status-badge-approved">Already on the playlist</span>`
+            : alreadyPending
+              ? `<span class="badge status-badge-pending">Already requested</span>`
+              : `<button class="btn btn-sm btn-outline-primary fw-bold" data-request='${JSON.stringify(t).replace(/'/g, "&#39;")}'>Request</button>`;
+          return `
           <div class="track-row">
             ${t.album_art ? `<img src="${escapeHtml(t.album_art)}" class="album-art">` : `<div class="album-art-placeholder"><i class="fas fa-music"></i></div>`}
             <div class="flex-grow-1">
               <div class="fw-bold small">${escapeHtml(t.name)} ${t.explicit ? '<span class="badge bg-danger">E</span>' : ''}</div>
               <div class="text-muted small">${escapeHtml(t.artist)}</div>
             </div>
-            <button class="btn btn-sm btn-outline-primary fw-bold" data-request='${JSON.stringify(t).replace(/'/g, "&#39;")}'>Request</button>
+            ${actionHtml}
           </div>
-        `).join('');
+        `;
+        }).join('');
       } catch (e) {
         results.innerHTML = `<p class="text-danger small">Search failed. Try again.</p>`;
       }

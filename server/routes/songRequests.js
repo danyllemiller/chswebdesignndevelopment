@@ -24,13 +24,39 @@ router.get('/song-search', async (req, res) => {
         })}`);
         const data = await searchRes.json();
         if (!searchRes.ok) throw new Error('Search failed');
+        const trackIds = (data.results || []).map(t => String(t.trackId));
+
+        // Apple Music has no free API for reading a public playlist's real
+        // track list (it loads client-side, not in the page's HTML) -- so
+        // rather than trying to check the actual playlist, this checks
+        // against song_requests instead, since every song that's ever made
+        // it onto the real playlist got there by being approved here.
+        // 'pending' counts too, so a student doesn't submit a duplicate of
+        // someone else's request that just hasn't been decided yet.
+        let statusByTrackId = {};
+        if (trackIds.length > 0) {
+            const connection = await getDbConnection();
+            const placeholders = trackIds.map(() => '?').join(',');
+            const [existing] = await connection.execute(
+                `SELECT track_id, status FROM song_requests WHERE track_id IN (${placeholders}) AND status IN ('pending','approved')`,
+                trackIds
+            );
+            await connection.release();
+            existing.forEach(r => {
+                // approved takes priority if a track somehow has both an
+                // approved row and a separate still-pending one
+                if (!statusByTrackId[r.track_id] || r.status === 'approved') statusByTrackId[r.track_id] = r.status;
+            });
+        }
+
         const tracks = (data.results || []).map(t => ({
             id: String(t.trackId),
             name: t.trackName,
             artist: t.artistName,
             // 100x100 is what the API returns by default; swap in a larger size for a sharper thumbnail.
             album_art: t.artworkUrl100 ? t.artworkUrl100.replace('100x100', '200x200') : null,
-            explicit: t.trackExplicitness === 'explicit'
+            explicit: t.trackExplicitness === 'explicit',
+            existing_status: statusByTrackId[String(t.trackId)] || null
         }));
         res.json({ tracks });
     } catch (err) { console.error(err); res.status(500).json({ error: err.message }); }
