@@ -75,6 +75,13 @@ function escapeHtml(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
+// Cached from the most recent renderGradebook() call so the "Copy Scores"
+// button (delegated click handler, outside that function's scope) can read
+// the exact same row order and grade data currently on screen, instead of
+// recomputing the sort/grouping logic a second time.
+let lastOrderedStudents = [];
+let lastGrades = {};
+
 const cleanKey = (str) => {
     if (!str) return "";
     return str.toString()
@@ -1243,9 +1250,17 @@ function renderGradebook(students, grades, currentPeriod) {
     sortedKeys.forEach((key, i) => {
         const info = assignmentMap.get(key);
         let tooltip = `${key}${info.dueDate ? ' | Due: ' + info.dueDate : ''}${info.instructions ? ' | ' + info.instructions : ''}`;
+        // Copy Scores: unit tests only (Unit1-Exam, Unit2-Exam, ...) -- for
+        // pulling just that one column's scores, in gradebook row order,
+        // into whatever format the district/admin wants them reported in,
+        // without copying the whole gradebook.
+        const isUnitExam = /^Unit\d+-Exam$/i.test(key);
+        const copyBtn = isUnitExam
+            ? `<i class="fas fa-copy text-white-50 x-small copy-scores-btn" data-assignment="${key}" title="Copy scores for this test, in gradebook order"></i>`
+            : '';
         headHtml += `<th class="header-main-blue" data-col-index="${i}"><div class="h-100 d-flex flex-column align-items-center justify-content-end pb-2">
             <span class="vertical-text analytics-trigger text-white fw-bold" title="${tooltip.replace(/"/g, "'")}" data-assignment="${key}">${abbreviateAssignmentName(key)}</span>
-            <div class="d-flex gap-1 justify-content-center w-100"><i class="fas fa-edit text-white-50 x-small edit-col-btn" data-assignment="${key}"></i><i class="fas fa-trash-alt text-white-50 x-small delete-col-btn" data-assignment="${key}"></i></div></div></th>`;
+            <div class="d-flex gap-1 justify-content-center w-100">${copyBtn}<i class="fas fa-edit text-white-50 x-small edit-col-btn" data-assignment="${key}"></i><i class="fas fa-trash-alt text-white-50 x-small delete-col-btn" data-assignment="${key}"></i></div></div></th>`;
     });
     thead.innerHTML = headHtml + '</tr>';
 
@@ -1521,6 +1536,9 @@ let score = "", display = '', bg = "";
     tbody.innerHTML = html;
     stickCalcRows(thead);
 
+    lastOrderedStudents = orderedStudents;
+    lastGrades = grades;
+
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });
 }
@@ -1612,6 +1630,29 @@ document.addEventListener('click', (e) => {
     if (target.closest('#btnTogglePrivacy')) { privacyMode = !privacyMode; applyFiltersAndRender(); return; }
     if (target.closest('.analytics-trigger')) { const t = target.closest('.analytics-trigger'); showAnalytics(t.dataset.assignment, t.innerText); return; }
     
+    if (target.closest('.copy-scores-btn')) {
+        const btn = target.closest('.copy-scores-btn');
+        const key = btn.dataset.assignment;
+        // Same lookup the Class Average row already uses (fuzzy-matched via
+        // cleanKey, since a score can be stored under a slightly different
+        // key spelling than the column header) -- keeps "what gets copied"
+        // consistent with "what the gradebook already shows as this
+        // student's score for this test."
+        const scores = lastOrderedStudents.map(s => {
+            const sGrades = lastGrades[s.studentId] || {};
+            const matchKey = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(key));
+            const g = matchKey ? sGrades[matchKey] : null;
+            const score = g ? (typeof g === 'object' ? g.score : g) : '';
+            return score === undefined || score === null ? '' : String(score);
+        });
+        navigator.clipboard.writeText(scores.join('\n')).then(() => {
+            const original = btn.className;
+            btn.className = 'fas fa-check text-success x-small';
+            setTimeout(() => { btn.className = original; }, 1500);
+        }).catch(() => alert('Could not copy to clipboard. Try again.'));
+        return;
+    }
+
     if (target.closest('.edit-col-btn')) {
         const key = target.closest('.edit-col-btn').dataset.assignment;
         document.getElementById('editColOldName').value = key;
