@@ -106,9 +106,9 @@ function renderUnits(units) {
                     <td>${fmtPercent(p.pretest.avgPercent)} ${p.pretest.count ? `<span class="text-muted small">(n=${p.pretest.count})</span>` : ''}</td>
                     <td class="attempt-col-group">${fmtPercent(e1.avgPercent)} ${e1.count ? `<span class="text-muted small">(n=${e1.count})</span>` : ''}</td>
                     <td>${fmtMastery(e1.masteryPercent)}</td>
-                    <td class="attempt-col-group">${fmtPercent(e2.avgPercent)} ${e2.count ? `<span class="text-muted small">(n=${e2.count})</span>` : ''}</td>
+                    <td class="attempt-col-group">${fmtPercent(e2.avgPercent)} ${e2.count ? `<span class="badge bg-warning text-dark">${e2.count} retook</span>` : ''}</td>
                     <td>${fmtMastery(e2.masteryPercent)}</td>
-                    <td class="attempt-col-group">${fmtPercent(e3.avgPercent)} ${e3.count ? `<span class="text-muted small">(n=${e3.count})</span>` : ''}</td>
+                    <td class="attempt-col-group">${fmtPercent(e3.avgPercent)} ${e3.count ? `<span class="badge bg-warning text-dark">${e3.count} retook</span>` : ''}</td>
                     <td>${fmtMastery(e3.masteryPercent)}</td>
                     ${chartCell}
                 </tr>`;

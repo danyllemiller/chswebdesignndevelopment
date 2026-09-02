@@ -666,9 +666,18 @@ router.get('/admin/attempt-analytics', async (req, res) => {
                     if (a.attempt_number <= 2) through2 = through2 === null ? p : Math.max(through2, p);
                     through3 = through3 === null ? p : Math.max(through3, p);
                 });
+                // Whether this student actually sat a 2nd/3rd attempt --
+                // distinct from through2/through3 above, which carry a
+                // non-retaker's best score forward so the cumulative
+                // average/mastery stay a whole-class number. This tracks
+                // real retake participation instead, so "how many students
+                // needed a retake" doesn't get diluted into the same
+                // whole-class count reported for every tier.
+                const took2 = attempts.some(a => a.attempt_number >= 2);
+                const took3 = attempts.some(a => a.attempt_number >= 3);
                 if (through2 === null) through2 = through1;
                 if (through3 === null) through3 = through2;
-                cumulativeByStudent[sid] = { through1, through2, through3 };
+                cumulativeByStudent[sid] = { through1, through2, through3, took2, took3 };
             });
 
             function summarizeCumulative(vals) {
@@ -691,10 +700,17 @@ router.get('/admin/attempt-analytics', async (req, res) => {
                 const pretest = summarizeAttempts(preRowsForPeriod);
 
                 const relevantCumulative = Object.entries(cumulativeByStudent).filter(([sid]) => inScope(sid)).map(([, v]) => v);
+                // avgPercent/masteryPercent stay fully cumulative (computed
+                // over the whole scoped population's best score so far) --
+                // only `count` is overridden on the retake tiers, to mean
+                // "how many students actually sat this attempt" instead of
+                // "how many are included in the cumulative average" (which
+                // is the same whole-class number on every tier and isn't
+                // what "how many need a retake" is asking).
                 const examAttemptsForPeriod = {
                     '1': summarizeCumulative(relevantCumulative.map(v => v.through1)),
-                    '2': summarizeCumulative(relevantCumulative.map(v => v.through2)),
-                    '3+': summarizeCumulative(relevantCumulative.map(v => v.through3))
+                    '2': { ...summarizeCumulative(relevantCumulative.map(v => v.through2)), count: relevantCumulative.filter(v => v.took2).length },
+                    '3+': { ...summarizeCumulative(relevantCumulative.map(v => v.through3)), count: relevantCumulative.filter(v => v.took3).length }
                 };
 
                 return { period, pretest: { count: pretest.count, avgPercent: pretest.avgPercent }, examAttempts: examAttemptsForPeriod };
