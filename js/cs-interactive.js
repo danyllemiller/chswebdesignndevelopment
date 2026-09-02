@@ -808,7 +808,7 @@ function initCSInteractive(student) {
                 return;
             }
             activitySelect.innerHTML = '<option value="">Select an activity…</option>' +
-                currentChapterActivities.map(a => `<option value="${a.exam_id}">${a.title} (${a.total_points} pts)</option>`).join('');
+                currentChapterActivities.map(a => `<option value="${a.exam_id}">Ch ${chapterNum}: ${a.title} (${a.total_points} pts)</option>`).join('');
             if (btnStartActivity) btnStartActivity.disabled = false;
         } catch (e) {
             activitySelect.innerHTML = '<option value="">Failed to load activities</option>';
