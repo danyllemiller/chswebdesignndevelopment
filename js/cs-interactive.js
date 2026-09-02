@@ -232,19 +232,27 @@ const dom = {
         return;
     }
 
+    // Reads sentence-by-sentence rather than as one long utterance, so
+    // stopping partway through has a real, stable position to remember --
+    // clicking the button again resumes from that sentence instead of
+    // starting over. Progress is saved to localStorage keyed by the
+    // iframe's current chapter URL, since each chapter has its own
+    // separate reading position and the parent page's own URL never
+    // changes as chapters switch.
     let speaking = false;
+    let chunks = [];
+    let chunkIndex = 0;
+    let progressKey = null;
 
-    function updateBtn() {
-        dom.readAloudBtn.innerHTML = speaking ? '<i class="fas fa-stop"></i>' : '<i class="fas fa-volume-up"></i>';
-        dom.readAloudBtn.title = speaking ? 'Stop reading' : 'Read this chapter aloud';
-        dom.readAloudBtn.classList.toggle('btn-danger', speaking);
-        dom.readAloudBtn.classList.toggle('btn-light', !speaking);
+    function getProgressKey() {
+        const src = dom.curriculumFrame && dom.curriculumFrame.src;
+        return src && src !== 'about:blank' ? 'readAloudProgress:' + src : null;
     }
 
-    function stopReading() {
-        window.speechSynthesis.cancel();
-        speaking = false;
-        updateBtn();
+    function splitIntoChunks(text) {
+        const matches = text.match(/[^.!?]+[.!?]+(?:\s+|$)/g);
+        if (matches && matches.length > 0) return matches.map(s => s.trim()).filter(Boolean);
+        return text.trim() ? [text.trim()] : [];
     }
 
     function getFrameText() {
@@ -259,22 +267,78 @@ const dom = {
         }
     }
 
-    function startReading() {
-        const text = getFrameText();
-        if (!text) return;
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.onend = () => { speaking = false; updateBtn(); };
-        utterance.onerror = () => { speaking = false; updateBtn(); };
-        speaking = true;
-        updateBtn();
+    function saveProgress() {
+        if (!progressKey) return;
+        if (chunkIndex > 0 && chunkIndex < chunks.length) localStorage.setItem(progressKey, String(chunkIndex));
+        else localStorage.removeItem(progressKey);
+    }
+
+    function updateBtn() {
+        const resumable = !speaking && chunkIndex > 0;
+        dom.readAloudBtn.innerHTML = speaking
+            ? '<i class="fas fa-stop"></i>'
+            : (resumable ? '<i class="fas fa-play"></i>' : '<i class="fas fa-volume-up"></i>');
+        dom.readAloudBtn.title = speaking
+            ? 'Stop reading'
+            : (resumable ? `Resume reading (sentence ${chunkIndex + 1} of ${chunks.length})` : 'Read this chapter aloud');
+        dom.readAloudBtn.classList.toggle('btn-danger', speaking);
+        dom.readAloudBtn.classList.toggle('btn-light', !speaking);
+    }
+
+    function speakNext() {
+        if (!speaking) return;
+        if (chunkIndex >= chunks.length) {
+            speaking = false;
+            chunkIndex = 0;
+            saveProgress();
+            updateBtn();
+            return;
+        }
+        const utterance = new SpeechSynthesisUtterance(chunks[chunkIndex]);
+        utterance.onend = () => {
+            if (!speaking) return; // stopped mid-sentence -- index already saved by stopReading()
+            chunkIndex++;
+            speakNext();
+        };
+        utterance.onerror = () => { speaking = false; saveProgress(); updateBtn(); };
         window.speechSynthesis.speak(utterance);
+        updateBtn();
+    }
+
+    function stopReading() {
+        speaking = false;
+        window.speechSynthesis.cancel();
+        saveProgress();
+        updateBtn();
+    }
+
+    function startReading() {
+        // Re-read fresh each click in case the chapter changed (or this is
+        // the first read of this chapter this page load).
+        progressKey = getProgressKey();
+        chunks = splitIntoChunks(getFrameText());
+        if (chunks.length === 0) return;
+        const saved = progressKey ? Number(localStorage.getItem(progressKey)) : 0;
+        if (Number.isInteger(saved) && saved > 0 && saved < chunks.length) chunkIndex = saved;
+        else if (chunkIndex >= chunks.length) chunkIndex = 0;
+        speaking = true;
+        speakNext();
     }
 
     dom.readAloudBtn.addEventListener('click', () => { speaking ? stopReading() : startReading(); });
-    // A new chapter loads a fresh document into the iframe -- keep reading
-    // the old one from under the student's feet, so stop instead.
-    if (dom.curriculumFrame) dom.curriculumFrame.addEventListener('load', stopReading);
-    window.addEventListener('pagehide', () => window.speechSynthesis.cancel());
+    // A new chapter loads a fresh document into the iframe -- stop reading
+    // the old one, and reset in-memory tracking so the next click reads
+    // (or resumes) the new chapter instead of stale state from the last one.
+    if (dom.curriculumFrame) dom.curriculumFrame.addEventListener('load', () => {
+        stopReading();
+        chunks = [];
+        chunkIndex = 0;
+        progressKey = getProgressKey();
+    });
+    window.addEventListener('pagehide', () => {
+        window.speechSynthesis.cancel();
+        if (speaking) saveProgress();
+    });
 })();
 
 // ============================================================================
