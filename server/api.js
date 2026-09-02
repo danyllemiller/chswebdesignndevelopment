@@ -23,5 +23,6 @@ router.use('/', require('./routes/tardy'));
 router.use('/', require('./routes/songRequests'));
 router.use('/', require('./routes/daily-activity'));
 router.use('/', require('./routes/messages'));
+router.use('/', require('./routes/newsletter'));
 
 module.exports = router;

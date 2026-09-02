@@ -185,4 +185,4 @@ async function computeStudentGrade(connection, studentId, sectionId) {
     return { percent, letterGrade, courseLabel: COURSE_LABELS[courseKey] || courseKey };
 }
 
-module.exports = { computeStudentGrade, periodToCourseKey, COURSE_LABELS };
+module.exports = { computeStudentGrade, periodToCourseKey, COURSE_LABELS, CS_UNIT_CHAPTERS, unitForCsChapter };

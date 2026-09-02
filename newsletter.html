@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Course Newsletter | CHS Web Design &amp; Development</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=20"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .newsletter-card { max-width: 760px; margin: 2rem auto 3rem; }
+    .course-tabs { max-width: 760px; margin: 1.5rem auto 0; }
+    .course-tabs .nav-link { font-weight: 700; }
+    .status-band {
+      background: linear-gradient(135deg, var(--primary-color, #000099), var(--primary-dark, #1f246b));
+      color: #fff; border-radius: .75rem; padding: 1.5rem;
+    }
+    .status-band .eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; opacity: .8; font-weight: 700; }
+    .status-band h3 { font-weight: 800; margin: .15rem 0 0; }
+    .item-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: .6rem 0; border-bottom: 1px solid #eef0f6; }
+    .item-row:last-child { border-bottom: none; }
+    .item-title { font-weight: 600; }
+    .item-date { white-space: nowrap; font-variant-numeric: tabular-nums; color: #6c757d; font-size: .9rem; }
+    .late-row .item-date { color: #c0392b; font-weight: 700; }
+    .section-heading { font-weight: 800; display: flex; align-items: center; gap: .5rem; }
+    .empty-note { color: #6c757d; font-style: italic; padding: .5rem 0; }
+    .notes-box { white-space: pre-wrap; }
+    .generated-note { font-size: .78rem; color: #9aa0ab; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<ul class="nav nav-pills course-tabs justify-content-center" id="courseTabs">
+  <li class="nav-item"><button class="nav-link" data-course="wd1">Web Design 1</button></li>
+  <li class="nav-item"><button class="nav-link" data-course="wd2">Web Design 2</button></li>
+  <li class="nav-item"><button class="nav-link" data-course="cs">Computer Science</button></li>
+</ul>
+
+<div class="container newsletter-card">
+  <div id="loadingState" class="text-center py-5">
+    <span class="spinner-border text-primary"></span>
+  </div>
+
+  <div id="content" class="d-none">
+    <div class="status-band shadow mb-4">
+      <div class="eyebrow" id="courseLabel">&nbsp;</div>
+      <h3 id="unitLine">&nbsp;</h3>
+      <div id="chapterLine" class="mt-1"></div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-3">
+      <div class="card-body">
+        <h5 class="section-heading text-primary mb-3"><i class="fas fa-calendar-check"></i> Due Next</h5>
+        <div id="dueNextList"></div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-3">
+      <div class="card-body">
+        <h5 class="section-heading text-danger mb-3"><i class="fas fa-triangle-exclamation"></i> Now Officially Late</h5>
+        <p class="text-muted small mb-3">If your student hasn't turned these in yet, they're past the due date.</p>
+        <div id="nowLateList"></div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-3" id="notesCard">
+      <div class="card-body">
+        <h5 class="section-heading text-success mb-3"><i class="fas fa-bullhorn"></i> From Ms. Miller</h5>
+        <div id="notesBox" class="notes-box"></div>
+      </div>
+    </div>
+
+    <p class="generated-note text-center mb-0" id="generatedNote"></p>
+  </div>
+
+  <div id="errorState" class="d-none alert alert-danger">Couldn't load the newsletter. Please try again shortly.</div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script>
+function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function renderItems(container, items, isLate) {
+    container.innerHTML = '';
+    if (!items.length) {
+        container.innerHTML = `<div class="empty-note">${isLate ? 'Nothing overdue right now.' : 'Nothing scheduled in the near future yet.'}</div>`;
+        return;
+    }
+    items.forEach(it => {
+        const row = document.createElement('div');
+        row.className = 'item-row' + (isLate ? ' late-row' : '');
+        row.innerHTML = `<span class="item-title">${it.title}${it.points ? ` <span class="text-muted small">(${it.points} pts)</span>` : ''}</span><span class="item-date">${fmtDate(it.dueDate)}</span>`;
+        container.appendChild(row);
+    });
+}
+
+async function loadNewsletter(course) {
+    document.getElementById('loadingState').classList.remove('d-none');
+    document.getElementById('content').classList.add('d-none');
+    document.getElementById('errorState').classList.add('d-none');
+
+    document.querySelectorAll('#courseTabs [data-course]').forEach(b => {
+        b.classList.toggle('active', b.dataset.course === course);
+    });
+
+    try {
+        const res = await fetch(`/api/newsletter?course=${course}`);
+        if (!res.ok) throw new Error('bad response');
+        const data = await res.json();
+
+        document.getElementById('courseLabel').textContent = data.courseName;
+        document.getElementById('unitLine').textContent = data.currentUnit
+            ? data.currentUnit.title
+            : `Chapter ${data.currentChapter.number}: ${data.currentChapter.title}`;
+        document.getElementById('chapterLine').textContent = data.currentUnit
+            ? `Currently on Chapter ${data.currentChapter.number}: ${data.currentChapter.title}`
+            : '';
+
+        renderItems(document.getElementById('dueNextList'), data.dueNext, false);
+        renderItems(document.getElementById('nowLateList'), data.nowLate, true);
+
+        const notesCard = document.getElementById('notesCard');
+        if (data.notes && data.notes.trim()) {
+            notesCard.classList.remove('d-none');
+            document.getElementById('notesBox').textContent = data.notes;
+        } else {
+            notesCard.classList.add('d-none');
+        }
+
+        document.getElementById('generatedNote').textContent = 'Updated ' + new Date(data.generatedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+
+        localStorage.setItem('newsletter_course', course);
+        history.replaceState(null, '', `?course=${course}`);
+
+        document.getElementById('loadingState').classList.add('d-none');
+        document.getElementById('content').classList.remove('d-none');
+    } catch (e) {
+        document.getElementById('loadingState').classList.add('d-none');
+        document.getElementById('errorState').classList.remove('d-none');
+    }
+}
+
+document.querySelectorAll('#courseTabs [data-course]').forEach(btn => {
+    btn.addEventListener('click', () => loadNewsletter(btn.dataset.course));
+});
+
+const params = new URLSearchParams(location.search);
+const initialCourse = params.get('course') || localStorage.getItem('newsletter_course') || 'wd1';
+loadNewsletter(['wd1','wd2','cs'].includes(initialCourse) ? initialCourse : 'wd1');
+</script>
+</body>
+</html>
