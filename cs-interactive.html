@@ -85,8 +85,17 @@
                         <button type="button" id="read-aloud-toggle-btn" class="btn btn-sm btn-light py-0 px-2" title="Read this chapter aloud" aria-label="Read this chapter aloud">
                             <i class="fas fa-volume-up"></i>
                         </button>
+                        <button type="button" id="read-aloud-settings-btn" class="btn btn-sm btn-light py-0 px-2" title="Reading speed & voice" aria-label="Reading speed and voice settings">
+                            <i class="fas fa-sliders-h"></i>
+                        </button>
                         <i class="fas fa-book-reader" id="left-pane-icon"></i>
                     </div>
+                </div>
+                <div id="read-aloud-settings-panel" class="card shadow p-2 d-none text-start" style="position:absolute; top:44px; right:8px; z-index:1000; min-width:220px; font-weight:normal;">
+                    <label class="form-label small fw-bold mb-1">Speed</label>
+                    <select id="read-aloud-rate-select" class="form-select form-select-sm mb-2"></select>
+                    <label class="form-label small fw-bold mb-1">Voice</label>
+                    <select id="read-aloud-voice-select" class="form-select form-select-sm"></select>
                 </div>
                 <div class="card-body p-0 bg-white h-75vh overflow-hidden-strict pos-relative">
                     

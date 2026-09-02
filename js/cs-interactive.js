@@ -214,6 +214,10 @@ const dom = {
     statusPill: document.getElementById('unit-status-pill'),
     paneTitle: document.getElementById('list-chapter-title'),
     readAloudBtn: document.getElementById('read-aloud-toggle-btn'),
+    readAloudSettingsBtn: document.getElementById('read-aloud-settings-btn'),
+    readAloudSettingsPanel: document.getElementById('read-aloud-settings-panel'),
+    readAloudRateSelect: document.getElementById('read-aloud-rate-select'),
+    readAloudVoiceSelect: document.getElementById('read-aloud-voice-select'),
     viewJournal: document.getElementById('view-journal'),
     viewDropbox: document.getElementById('view-dropbox'),
     viewCode: document.getElementById('view-code')
@@ -243,6 +247,68 @@ const dom = {
     let chunks = [];
     let chunkIndex = 0;
     let progressKey = null;
+
+    // Speed & voice are sitewide preferences (not per-chapter) -- shares
+    // the same localStorage keys as js/read-aloud.js on the WD side, so a
+    // student who sets a preferred speed/voice there gets it here too.
+    // Voice choice is limited to English voices: the API only changes
+    // accent/pronunciation, not translation, so a Spanish/Mandarin voice
+    // would just mispronounce the English text rather than help.
+    const RATE_KEY = 'readAloudRate';
+    const VOICE_KEY = 'readAloudVoiceName';
+    const RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+    let availableVoices = [];
+
+    function getSavedRate() {
+        const r = Number(localStorage.getItem(RATE_KEY));
+        return RATES.includes(r) ? r : 1;
+    }
+    function saveRate(r) { localStorage.setItem(RATE_KEY, String(r)); }
+    function getSavedVoiceName() { return localStorage.getItem(VOICE_KEY) || ''; }
+    function saveVoiceName(name) { if (name) localStorage.setItem(VOICE_KEY, name); else localStorage.removeItem(VOICE_KEY); }
+    function getSelectedVoice() {
+        const savedName = getSavedVoiceName();
+        return savedName ? (availableVoices.find(v => v.name === savedName) || null) : null;
+    }
+
+    function populateVoiceSelect() {
+        if (!dom.readAloudVoiceSelect) return;
+        availableVoices = window.speechSynthesis.getVoices();
+        const savedName = getSavedVoiceName();
+        dom.readAloudVoiceSelect.innerHTML = '<option value="">Default voice</option>';
+        availableVoices
+            .filter(v => v.lang.toLowerCase().startsWith('en'))
+            .forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.name;
+                opt.textContent = `${v.name} (${v.lang})`;
+                if (v.name === savedName) opt.selected = true;
+                dom.readAloudVoiceSelect.appendChild(opt);
+            });
+    }
+
+    if (dom.readAloudRateSelect) {
+        RATES.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r;
+            opt.textContent = r + 'x';
+            if (r === getSavedRate()) opt.selected = true;
+            dom.readAloudRateSelect.appendChild(opt);
+        });
+        dom.readAloudRateSelect.addEventListener('change', () => saveRate(Number(dom.readAloudRateSelect.value)));
+    }
+    if (dom.readAloudVoiceSelect) {
+        dom.readAloudVoiceSelect.addEventListener('change', () => saveVoiceName(dom.readAloudVoiceSelect.value));
+        populateVoiceSelect();
+        window.speechSynthesis.addEventListener('voiceschanged', populateVoiceSelect);
+    }
+    if (dom.readAloudSettingsBtn && dom.readAloudSettingsPanel) {
+        dom.readAloudSettingsBtn.addEventListener('click', () => dom.readAloudSettingsPanel.classList.toggle('d-none'));
+        document.addEventListener('click', (e) => {
+            if (dom.readAloudSettingsPanel.contains(e.target) || e.target === dom.readAloudSettingsBtn || dom.readAloudSettingsBtn.contains(e.target)) return;
+            dom.readAloudSettingsPanel.classList.add('d-none');
+        });
+    }
 
     function getProgressKey() {
         const src = dom.curriculumFrame && dom.curriculumFrame.src;
@@ -295,6 +361,9 @@ const dom = {
             return;
         }
         const utterance = new SpeechSynthesisUtterance(chunks[chunkIndex]);
+        utterance.rate = getSavedRate();
+        const voice = getSelectedVoice();
+        if (voice) utterance.voice = voice;
         utterance.onend = () => {
             if (!speaking) return; // stopped mid-sentence -- index already saved by stopReading()
             chunkIndex++;

@@ -11,6 +11,14 @@
 // clicking the button again resumes from that sentence instead of
 // starting over from the top. Progress is saved to localStorage per page,
 // so it survives a page reload or even coming back a different day.
+// Speed and voice are separate, sitewide preferences (not per-page) --
+// once a student picks a comfortable speed/voice it should stay picked
+// everywhere, not reset on every chapter.
+//
+// Voice choice is deliberately limited to English voices: the API can
+// only change accent/pronunciation, not translate the underlying text, so
+// picking a Spanish or Mandarin voice here would just mispronounce the
+// English text rather than actually help a non-English-speaking student.
 //
 // The CS side has its own equivalent -- a button built into
 // cs-interactive.html's left-pane header bar (js/cs-interactive.js), since
@@ -29,6 +37,23 @@
   if (!container) return;
 
   const PROGRESS_KEY = 'readAloudProgress:' + window.location.pathname;
+  const RATE_KEY = 'readAloudRate';
+  const VOICE_KEY = 'readAloudVoiceName';
+  const RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+
+  function getSavedRate() {
+    const r = Number(localStorage.getItem(RATE_KEY));
+    return RATES.includes(r) ? r : 1;
+  }
+  function saveRate(r) { localStorage.setItem(RATE_KEY, String(r)); }
+  function getSavedVoiceName() { return localStorage.getItem(VOICE_KEY) || ''; }
+  function saveVoiceName(name) { if (name) localStorage.setItem(VOICE_KEY, name); else localStorage.removeItem(VOICE_KEY); }
+
+  let availableVoices = [];
+  function getSelectedVoice() {
+    const savedName = getSavedVoiceName();
+    return savedName ? (availableVoices.find(v => v.name === savedName) || null) : null;
+  }
 
   function getReadableText() {
     // Skip the prev/next chapter nav bar and anything marked no-print --
@@ -57,6 +82,7 @@
   let btn = null;
   let progressLabel = null;
   let startOverBtn = null;
+  let voiceSelect = null;
 
   function saveProgress() {
     if (chunkIndex > 0 && chunkIndex < chunks.length) localStorage.setItem(PROGRESS_KEY, String(chunkIndex));
@@ -90,6 +116,9 @@
       return;
     }
     const utterance = new SpeechSynthesisUtterance(chunks[chunkIndex]);
+    utterance.rate = getSavedRate();
+    const voice = getSelectedVoice();
+    if (voice) utterance.voice = voice;
     utterance.onend = () => {
       if (!speaking) return; // stopped mid-sentence -- index already saved by stopReading()
       chunkIndex++;
@@ -120,11 +149,27 @@
     updateUi();
   }
 
+  function populateVoiceSelect() {
+    if (!voiceSelect) return;
+    availableVoices = window.speechSynthesis.getVoices();
+    const savedName = getSavedVoiceName();
+    voiceSelect.innerHTML = '<option value="">Default voice</option>';
+    availableVoices
+      .filter(v => v.lang.toLowerCase().startsWith('en'))
+      .forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = `${v.name} (${v.lang})`;
+        if (v.name === savedName) opt.selected = true;
+        voiceSelect.appendChild(opt);
+      });
+  }
+
   function createButton() {
     if (chunks.length === 0) return;
 
     const wrapper = document.createElement('span');
-    wrapper.className = 'no-print d-inline-flex align-items-center gap-2 ms-3';
+    wrapper.className = 'no-print d-inline-flex align-items-center gap-2 ms-3 position-relative';
 
     btn = document.createElement('button');
     btn.type = 'button';
@@ -141,9 +186,55 @@
     startOverBtn.textContent = 'Start over';
     startOverBtn.addEventListener('click', startOver);
 
+    // Speed & voice settings -- a small gear toggle rather than always-on
+    // controls, so the default view next to the title stays uncluttered.
+    const settingsBtn = document.createElement('button');
+    settingsBtn.type = 'button';
+    settingsBtn.className = 'btn btn-outline-secondary btn-sm';
+    settingsBtn.textContent = '⚙';
+    settingsBtn.title = 'Reading speed & voice';
+    settingsBtn.setAttribute('aria-label', 'Reading speed and voice settings');
+
+    const settingsPanel = document.createElement('div');
+    settingsPanel.className = 'card shadow-sm p-2 d-none text-start';
+    settingsPanel.style.cssText = 'position:absolute; top:100%; left:0; z-index:1000; min-width:220px; background:#fff; font-weight:normal;';
+
+    const rateLabel = document.createElement('label');
+    rateLabel.className = 'form-label small fw-bold mb-1';
+    rateLabel.textContent = 'Speed';
+    const rateSelect = document.createElement('select');
+    rateSelect.className = 'form-select form-select-sm mb-2';
+    RATES.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r;
+      opt.textContent = r + 'x';
+      if (r === getSavedRate()) opt.selected = true;
+      rateSelect.appendChild(opt);
+    });
+    rateSelect.addEventListener('change', () => saveRate(Number(rateSelect.value)));
+
+    const voiceLabel = document.createElement('label');
+    voiceLabel.className = 'form-label small fw-bold mb-1';
+    voiceLabel.textContent = 'Voice';
+    voiceSelect = document.createElement('select');
+    voiceSelect.className = 'form-select form-select-sm';
+    voiceSelect.addEventListener('change', () => saveVoiceName(voiceSelect.value));
+
+    settingsPanel.appendChild(rateLabel);
+    settingsPanel.appendChild(rateSelect);
+    settingsPanel.appendChild(voiceLabel);
+    settingsPanel.appendChild(voiceSelect);
+
+    settingsBtn.addEventListener('click', () => settingsPanel.classList.toggle('d-none'));
+    document.addEventListener('click', (e) => {
+      if (!wrapper.contains(e.target)) settingsPanel.classList.add('d-none');
+    });
+
     wrapper.appendChild(btn);
     wrapper.appendChild(progressLabel);
     wrapper.appendChild(startOverBtn);
+    wrapper.appendChild(settingsBtn);
+    wrapper.appendChild(settingsPanel);
 
     // Sits inline at the end of the <h1> itself, rather than as its own
     // centered block below the title -- a full-width row felt awkward and
@@ -153,6 +244,8 @@
     else container.insertBefore(wrapper, container.firstChild);
 
     updateUi();
+    populateVoiceSelect();
+    window.speechSynthesis.addEventListener('voiceschanged', populateVoiceSelect);
   }
 
   // Speech synthesis doesn't stop on its own when a student navigates
