@@ -42,7 +42,7 @@ body { font-family: var(--font-family-base); font-size: 1.5rem; color: var(--pri
     text-overflow: ellipsis !important;
 }
 
-/* Removed forced blue background to allow JS grey board logic */
+/* Removed forced blue background to allow JS gray board logic */
 .question-btn {
     width: 100%; height: 100%; border: 1px solid var(--secondary-color);
     font-weight: 900; font-size: 1.5rem !important; 

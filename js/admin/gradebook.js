@@ -1406,7 +1406,7 @@ function renderGradebook(students, grades, currentPeriod) {
         let pct = weightSum > 0 ? Math.round((weighted/weightSum)*100) : (possible > 0 ? Math.round((earned/possible)*100) : 0);
         let letter = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : pct >= 60 ? 'D' : 'F';
 
-// Alternating row background - grey/white pattern for readability
+// Alternating row background - gray/white pattern for readability
         const rowClass = rowIndex % 2 === 0 ? 'gradebook-row-even' : 'gradebook-row-odd';
 const cellClass = rowIndex % 2 === 0 ? 'gradebook-cell-even' : 'gradebook-cell-odd';
         html += `<tr class="${rowClass}"><td class="sticky-col student-info-cell p-2 ${cellClass}" data-student-id="${s.studentId}" data-student-name="${escapeHtml(`${s.firstName} ${s.lastName}`)}" data-current-period="${escapeHtml(displayPeriod || '')}" title="Right-click for options"><div><span class="fw-bold">${privacyMode?`Student ${rowIndex+1}`:`${s.lastName.toUpperCase()}, ${s.firstName}`}</span><div class="id-cell">${privacyMode?'HIDDEN':s.displaySchoolId} | ${displayPeriod}</div></div></td>`;
@@ -1660,7 +1660,15 @@ document.addEventListener('click', (e) => {
         document.getElementById('editColNewPts').value = parseAssignmentInfo(key).maxPoints;
         document.getElementById('editColDueDate').value = allAssignments[key]?.dueDate || "";
         document.getElementById('editColInstructions').value = allAssignments[key]?.instructions || "";
-        document.getElementById('editColCourse').value = allAssignments[key]?.targetCourse || "All";
+        // targetCourse holds the raw DB course_id (e.g. '10003GS'), but the
+        // <select>'s <option> values are the short codes ('CS'/'WD1'/...) --
+        // setting .value to an unmatched string leaves the <select> with
+        // nothing selected, so saving (even without touching this field)
+        // silently fell through to the dbCourseMap[''] fallback in
+        // saveColEdit() and reassigned the assignment to the wrong course.
+        const rawTarget = allAssignments[key]?.targetCourse;
+        const courseCodeMap = { '05254G1S': 'WD1', '05254G2S': 'WD2', '10003GS': 'CS', '05254ES': 'AS' };
+        document.getElementById('editColCourse').value = courseCodeMap[rawTarget] || rawTarget || 'All';
         renderPeriodDateInputs('editColPeriodDates', allAssignments[key]?.periodDueDates || {}, 'primary');
         getModal('editColModal').show();
         return;

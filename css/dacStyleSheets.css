@@ -20,17 +20,17 @@
   --primary-darkest: #3f478a;         /* Slate Blue Mid-Tone */
 
   /* Background & Light Colors */
-  --secondary-color: #c7c9db;         /* Pale Grey-White Highlight */
-  --secondary-light: #adb2cc;         /* Cool Neutral Grey */
-  --secondary-muted: #9499b8;        /* Pale Blue-Grey */
+  --secondary-color: #c7c9db;         /* Pale Gray-White Highlight */
+  --secondary-light: #adb2cc;         /* Cool Neutral Gray */
+  --secondary-muted: #9499b8;        /* Pale Blue-Gray */
 
 /* Accent Colors */
   --tertiary-color: #6d916c;          /* Muted Sage Green - Main Accent */
   --accent-lavender: #846c91;         /* Muted Dusty Lavender */
   --accent-slate: #846c91;            /* Alias for accent-lavender — used by bg-success card headers */
   --accent-teal: #6c8c91;             /* Muted Steel Teal */
-  --accent-blue-gray: #5c669e;        /* Muted Blue-Grey Transition */
-  --accent-periwinkle: #7a82ab;        /* Soft Periwinkle Grey */
+  --accent-blue-gray: #5c669e;        /* Muted Blue-Gray Transition */
+  --accent-periwinkle: #7a82ab;        /* Soft Periwinkle Gray */
   --accent-warm: #e07a5f;             /* Warm Coral/Orange for warnings */
   --accent-turquoise: #45b7aa;       /* Turquoise for info badges */
 
@@ -38,7 +38,7 @@
   --quaternary-color: var(--accent-lavender);    /* Lavender Accent */
   --code-color: var(--tertiary-color);           /* Teal */
   --file-name-color: var(--accent-lavender);     /* Lavender */
-  --site-secondary: var(--secondary-color);     /* Pale Grey-White */
+  --site-secondary: var(--secondary-color);     /* Pale Gray-White */
 
   /* Spreadsheet/Table Globals */
   --sheet-blue: var(--primary-color);
