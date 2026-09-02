@@ -46,7 +46,7 @@
   if (document.getElementById('read-aloud-script')) return;
   const script = document.createElement('script');
   script.id = 'read-aloud-script';
-  script.src = '/js/read-aloud.js?v=1';
+  script.src = '/js/read-aloud.js?v=2';
   document.body ? document.body.appendChild(script) : document.head.appendChild(script);
 })();
 
