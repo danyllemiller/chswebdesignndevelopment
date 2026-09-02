@@ -520,6 +520,35 @@
 
 <script src="/js/bootstrap.bundle.js"></script>
 <script>
+// A "why is everything gone" report on this page traced back to data that
+// was actually fully intact server-side -- meaning whatever failed,
+// failed silently in the browser with zero server-side trace. Same
+// diagnostic pattern already used in timeclock.js and student-notes.js:
+// report any error, caught or not, straight to the server logs.
+function logAgendaError(context, err) {
+    try {
+        fetch('/api/client-error-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: err && err.message ? err.message : String(err),
+                stack: err && err.stack ? err.stack : null,
+                url: window.location.href,
+                student_id: null,
+                context,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            })
+        }).catch(() => {});
+    } catch (e) { /* logging must never itself break the page */ }
+}
+window.addEventListener('error', (ev) => {
+    logAgendaError('window.onerror', ev.error || { message: ev.message });
+});
+window.addEventListener('unhandledrejection', (ev) => {
+    logAgendaError('window.onunhandledrejection', ev.reason);
+});
+
 const COURSES = {
   wd1:   { totalBlocks: 99, hasTracks: false, label: 'Web Design Level 1' },
   wd2:   { totalBlocks: 99, hasTracks: false, label: 'Web Design Level 2' },
