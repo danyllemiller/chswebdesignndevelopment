@@ -23,10 +23,16 @@ function isTeacherSession(sessionUser) {
 }
 
 async function ensureMessagesTable(connection) {
+    // student_id must match students.student_id's actual collation
+    // (utf8mb4_uca1400_ai_ci) explicitly -- letting it default silently
+    // picked the connection's default (utf8mb4_unicode_ci) instead, which
+    // broke every JOIN against students with "Illegal mix of collations"
+    // (caught server-side as a 500, surfacing to the admin inbox as
+    // "nothing here" with no obvious error).
     await connection.execute(`
         CREATE TABLE IF NOT EXISTS messages (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            student_id VARCHAR(50) NOT NULL,
+            student_id VARCHAR(50) COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
             sender ENUM('student','teacher') NOT NULL,
             body TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
