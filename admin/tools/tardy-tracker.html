@@ -559,7 +559,7 @@
       reflectionBtn.disabled = true;
       reflectionBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sending...';
       try {
-        const { renderStudentReflectionRequestText } = await import('/js/modules/tardy-letter-template.js?v=2');
+        const { renderStudentReflectionRequestText } = await import('/js/modules/tardy-letter-template.js?v=3');
         const body = renderStudentReflectionRequestText({ first_name: firstName });
         const res = await fetch('/api/admin/messages', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -575,7 +575,7 @@
     } else if (genBtn) {
       const { studentId, firstName, lastName, count } = genBtn.dataset;
       const area = genBtn.closest('.activity-row').querySelector('.letter-area');
-      const { renderTardyLetterText } = await import('/js/modules/tardy-letter-template.js?v=2');
+      const { renderTardyLetterText } = await import('/js/modules/tardy-letter-template.js?v=3');
       const step = getTardyStep(Number(count));
       const text = renderTardyLetterText({ first_name: firstName, last_name: lastName }, Number(count), step,
         counselorContact.counselor_email ? { name: counselorContact.counselor_name, email: counselorContact.counselor_email } : null);

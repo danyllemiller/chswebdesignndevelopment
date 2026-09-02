@@ -71,7 +71,7 @@ Ms. Miller`;
 // student: { first_name }
 export function renderStudentReflectionRequestText(student) {
     const firstName = toTitleCase(student.first_name) || 'there';
-    return `Hi ${firstName} — since this is a tardy for you today, let's do our 5-minute conference. Come find me before/after class or during a passing period so we can talk through what happened and land on one small thing to change for next time.
+    return `Hi ${firstName} — since you're at two tardies or more now, please fill out the reflection on the back of your tardy pass, and let's have our 5-minute conference. Come find me before/after class or during a passing period so we can talk through what happened and land on one small thing to change for next time.
 
 See you soon.
 - Ms. Miller`;
