@@ -236,11 +236,19 @@
     wrapper.appendChild(settingsBtn);
     wrapper.appendChild(settingsPanel);
 
-    // Sits inline at the end of the <h1> itself, rather than as its own
-    // centered block below the title -- a full-width row felt awkward and
-    // disconnected from the heading it belongs to.
+    // On WD1/WD2 chapter pages, every single one follows <h1>ChapterTitle</h1>
+    // immediately with a <p> subheading (e.g. "Foundations, Internet
+    // Structure & Professionalism | CHS Web Design Track") -- sits there
+    // instead of on the chapter title itself, since that's the more
+    // natural place for a "read this page" control. computerscience.html
+    // doesn't share that exact structure (a wrapping div, not a plain <p>
+    // right after the h1), so it keeps the old placement on the h1.
     const h1 = container.querySelector('h1');
-    if (h1) h1.appendChild(wrapper);
+    const isWDChapterPage = path.includes('/year1/') || path.includes('/year2/');
+    const subheading = isWDChapterPage && h1 && h1.nextElementSibling && h1.nextElementSibling.tagName === 'P'
+      ? h1.nextElementSibling : null;
+    const anchor = subheading || h1;
+    if (anchor) anchor.appendChild(wrapper);
     else container.insertBefore(wrapper, container.firstChild);
 
     updateUi();
