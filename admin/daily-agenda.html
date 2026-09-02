@@ -51,14 +51,45 @@
     background: var(--bg);
     color: var(--text-main);
     font-family: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, 'Courier New', monospace;
-    min-height: 100vh;
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* no scrolling in any direction -- the canvas scales to fit instead, see #agendaRoot/.agenda-canvas-wrap */
   }
   body {
     background-image:
       linear-gradient(var(--grid-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
     background-size: 32px 32px;
-    padding: 1.25rem;
+  }
+
+  /* #agendaRoot fills the viewport with a 5%-all-around margin. The toolbar
+     (.footer-bar / .nav-bar) stays its natural, unscaled size so the Tools
+     dropdown keeps positioning correctly (Bootstrap's Popper doesn't account
+     for an ancestor CSS transform); only .agenda-canvas-wrap's leftover space
+     is handed to the canvas, which is scaled to fit it -- see
+     fitAgendaToViewport() in the script below. */
+  #agendaRoot {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5vh 5vw;
+    display: flex;
+    flex-direction: column;
+    /* stretch (the flex default), not center -- .footer-bar/.nav-bar need
+       full width to keep their existing space-between/centered layouts.
+       No gap here: .footer-bar/.nav-bar already carry their own margins,
+       which used to collapse against the canvas's old bottom margin in
+       block flow -- flex items don't collapse margins, so adding a gap on
+       top would double up the spacing between them. */
+  }
+  .agenda-canvas-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
   }
 
   .top-bar {
@@ -142,10 +173,10 @@
 
   .agenda-canvas {
     position: relative;
-    width: 100%;
-    max-width: 1920px;
-    margin: 0 auto 1rem;
-    aspect-ratio: 1920 / 1080;
+    width: 1920px;
+    height: 1080px;
+    flex: 0 0 auto;
+    transform-origin: center center;
     background-image: var(--bg-image);
     background-size: cover;
     background-position: center;
@@ -386,6 +417,7 @@
 
 <div id="agendaRoot" class="d-none">
 
+  <div class="agenda-canvas-wrap">
   <div class="agenda-canvas">
     <div class="top-bar">
       <div class="date-block">
@@ -485,9 +517,6 @@
       </div>
     </div>
   </div>
-
-  <div id="fillWindowOverlay" class="d-none no-print">
-    <button id="shrinkWindowBtn" class="btn btn-outline-light shrink-window-btn" title="Exit full window"><i class="fas fa-compress"></i></button>
   </div>
 
   <div id="pageStamp" class="no-print"></div>
@@ -516,6 +545,14 @@
     <button id="saveBtn" class="btn btn-success btn-sm d-none">Save</button>
     <button id="cancelBtn" class="btn btn-outline-secondary btn-sm d-none">Cancel</button>
   </div>
+</div>
+
+<!-- Outside #agendaRoot/.agenda-canvas on purpose: CSS transform on an
+     ancestor creates a new containing block for position:fixed descendants,
+     which would trap this "fill the real browser window" overlay inside the
+     scaled-down agenda box instead of the actual window. -->
+<div id="fillWindowOverlay" class="d-none no-print">
+  <button id="shrinkWindowBtn" class="btn btn-outline-light shrink-window-btn" title="Exit full window"><i class="fas fa-compress"></i></button>
 </div>
 
 <script src="/js/bootstrap.bundle.js"></script>
@@ -548,6 +585,22 @@ window.addEventListener('error', (ev) => {
 window.addEventListener('unhandledrejection', (ev) => {
     logAgendaError('window.onunhandledrejection', ev.reason);
 });
+
+// Scales .agenda-canvas (a fixed 1920x1080 box, matching the background art
+// and every %-based zone/label position) down to fit whatever room is left
+// in .agenda-canvas-wrap after the toolbar/footer take their natural size --
+// keeping the page from ever scrolling, at any window size. Only the canvas
+// is transformed, not the toolbar around it: Bootstrap's Popper positioning
+// (the Tools dropdown) doesn't account for an ancestor CSS transform, so
+// scaling the whole page as one unit would misplace that menu.
+function fitAgendaToViewport() {
+    const wrap = document.querySelector('.agenda-canvas-wrap');
+    const canvas = document.querySelector('.agenda-canvas');
+    if (!wrap || !canvas) return;
+    const scale = Math.min(wrap.clientWidth / 1920, wrap.clientHeight / 1080, 1);
+    canvas.style.transform = `scale(${scale})`;
+}
+window.addEventListener('resize', fitAgendaToViewport);
 
 const COURSES = {
   wd1:   { totalBlocks: 99, hasTracks: false, label: 'Web Design Level 1' },
@@ -697,6 +750,7 @@ if (!courseCfg) {
   document.getElementById('picker').classList.remove('d-none');
 } else {
   document.getElementById('agendaRoot').classList.remove('d-none');
+  fitAgendaToViewport();
   document.documentElement.setAttribute('data-course', course);
   track = courseCfg.hasTracks ? (params.get('track') === 'B' ? 'B' : 'A') : 'main';
   document.documentElement.setAttribute('data-track', track);
@@ -1039,6 +1093,7 @@ if (!courseCfg) {
     const now = new Date();
     document.getElementById('clockFace').textContent = now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' });
     document.getElementById('clockDate').textContent = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    fitAgendaToViewport(); // cheap safety net -- catches toolbar height changes (min-day note, track toggle, etc.) a resize event wouldn't fire for
   }
   tickClock();
   setInterval(tickClock, 1000);
