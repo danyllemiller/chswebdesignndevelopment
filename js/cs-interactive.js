@@ -599,20 +599,138 @@ function initCSInteractive(student) {
     const viewJournal = document.getElementById('view-journal');
     const viewDropbox = document.getElementById('view-dropbox');
     const viewCode = document.getElementById('view-code');
+    const viewActivities = document.getElementById('view-activities');
+    const activitySelect = document.getElementById('activity-select');
+    const btnStartActivity = document.getElementById('btn-start-activity');
+    const activityEmptyMsg = document.getElementById('activity-empty-msg');
     const modeTitle = document.getElementById('workspace-mode-title');
     const modeBadge = document.getElementById('workspace-badge');
 
     // Track current workspace mode
     let currentWorkspaceMode = null;
+    let currentChapterActivities = [];
+
+    // Same chapter-number resolution the Notes/Worksheet flow already used
+    // inline -- pulled out into its own function so the new Activities mode
+    // (which also needs to know the current chapter) doesn't duplicate it.
+    function resolveChapterNum() {
+        let chapterNum = null;
+
+        // Priority 1: If we're on a CHAPTER tab, use that chapter number
+        if (activeTab.type === 'CHAPTER' && activeTab.data && activeTab.data.ch !== undefined) {
+            chapterNum = activeTab.data.ch;
+        }
+
+        // Priority 2: For PRE_SCALE, PRE_TEST, EXAM, POST_SCALE - use unit's FIRST chapter
+        if (chapterNum === null && (activeTab.type === 'PRE_SCALE' || activeTab.type === 'PRE_TEST' || activeTab.type === 'EXAM' || activeTab.type === 'POST_SCALE')) {
+            if (activeUnit && activeUnit.chapters && activeUnit.chapters.length > 0) {
+                chapterNum = activeUnit.chapters[0].ch;
+            }
+        }
+
+        // Priority 3: Try to parse from curriculum frame URL (handles URLs like /compsci/essential_computer_skills.html)
+        if (chapterNum === null && dom.curriculumFrame && dom.curriculumFrame.src && dom.curriculumFrame.src !== 'about:blank') {
+            const frameSrc = dom.curriculumFrame.src;
+            const chMatch = frameSrc.match(/(?:ch|chapter)[-_]?(\d+)/i);
+            if (chMatch) {
+                chapterNum = parseInt(chMatch[1], 10);
+            }
+            if (chapterNum === null) {
+                const fileNameMatch = frameSrc.match(/\/([^/]+)\.html/i);
+                if (fileNameMatch) {
+                    const fileName = fileNameMatch[1];
+                    for (const unit of csCourseMap) {
+                        const found = unit.chapters.find(c => c.file === fileName);
+                        if (found) { chapterNum = found.ch; break; }
+                    }
+                }
+            }
+        }
+
+        // Fallback: Use first chapter of current unit or default to 1
+        if (chapterNum === null || chapterNum === 0) {
+            if (activeUnit && activeUnit.chapters && activeUnit.chapters.length > 0) {
+                chapterNum = activeUnit.chapters[0].ch;
+            } else {
+                chapterNum = 1;
+            }
+        }
+        return chapterNum;
+    }
+
+    // Populates the Activities dropdown with the real cs_ch#_* assignments
+    // already seeded in the gradebook for the given chapter.
+    async function loadChapterActivities(chapterNum) {
+        if (!activitySelect) return;
+        activitySelect.innerHTML = '<option value="">Loading activities...</option>';
+        if (btnStartActivity) btnStartActivity.disabled = true;
+        if (activityEmptyMsg) activityEmptyMsg.classList.add('d-none');
+        try {
+            const res = await fetch(`/api/student/cs-chapter-activities?chapter=${chapterNum}&student_id=${encodeURIComponent(student.student_id)}`);
+            const data = await res.json();
+            currentChapterActivities = data.activities || [];
+            if (currentChapterActivities.length === 0) {
+                activitySelect.innerHTML = '<option value="">No activities available</option>';
+                if (activityEmptyMsg) activityEmptyMsg.classList.remove('d-none');
+                return;
+            }
+            activitySelect.innerHTML = '<option value="">Select an activity…</option>' +
+                currentChapterActivities.map(a => `<option value="${a.exam_id}">${a.title} (${a.total_points} pts)</option>`).join('');
+            if (btnStartActivity) btnStartActivity.disabled = false;
+        } catch (e) {
+            activitySelect.innerHTML = '<option value="">Failed to load activities</option>';
+        }
+    }
+
+    if (btnStartActivity) {
+        btnStartActivity.addEventListener('click', () => {
+            const selectedId = activitySelect ? activitySelect.value : '';
+            if (!selectedId) return;
+            const activity = currentChapterActivities.find(a => a.exam_id === selectedId);
+            if (!activity) return;
+
+            const chapterNum = resolveChapterNum();
+            let chapterLabel = activeUnit ? `Unit ${activeUnit.unitNum} General` : 'General';
+            if (activeTab.type === 'CHAPTER' && activeUnit) {
+                chapterLabel = `Unit ${activeUnit.unitNum} - ${activeTab.data.title}`;
+            }
+
+            const notebookFrame = document.getElementById('notebook-frame');
+            if (notebookFrame) {
+                let notebookUrl = '/cs-notebook.html?mode=activity';
+                notebookUrl += '&chapter=' + chapterNum;
+                notebookUrl += '&chapterLabel=' + encodeURIComponent(chapterLabel);
+                notebookUrl += '&activityId=' + encodeURIComponent(activity.exam_id);
+                notebookUrl += '&activityTitle=' + encodeURIComponent(activity.title);
+                notebookUrl += '&activityPoints=' + encodeURIComponent(activity.total_points);
+                notebookUrl += '&t=' + Date.now();
+                notebookFrame.src = notebookUrl;
+            }
+
+            // Switch straight to the note editor view without going through
+            // switchWorkspaceView('journal') -- that would rebuild the iframe
+            // URL from the generic chapter-notes logic and wipe out the
+            // activity params just set above.
+            if (viewActivities) viewActivities.classList.add('d-none');
+            if (viewJournal) viewJournal.classList.remove('d-none');
+            document.querySelectorAll('.mode-btn').forEach(btn => { btn.classList.remove('active'); btn.style.opacity = '0.7'; });
+            const journalBtn = document.querySelector('.mode-btn[data-mode="journal"]');
+            if (journalBtn) { journalBtn.classList.add('active'); journalBtn.style.opacity = '1'; }
+            if (modeTitle) modeTitle.innerHTML = `<i class="fas fa-list-check me-2"></i> ${activity.title}`;
+            if (modeBadge) { modeBadge.className = "badge bg-success text-white font-monospace shadow-sm"; modeBadge.innerText = "Activity Mode"; }
+            currentWorkspaceMode = 'journal';
+        });
+    }
 
 // Function to switch workspace views - ONLY ONE shows at a time
     function switchWorkspaceView(mode) {
         console.log('switchWorkspaceView mode:', mode);
-        
+
         // Hide ALL views first
         if (viewJournal) viewJournal.classList.add('d-none');
         if (viewDropbox) viewDropbox.classList.add('d-none');
         if (viewCode) viewCode.classList.add('d-none');
+        if (viewActivities) viewActivities.classList.add('d-none');
 
         // Update button states - keep the base colors but show active state
         document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -623,63 +741,10 @@ function initCSInteractive(student) {
 // Show ONLY the selected view
         if ((mode === 'journal' || mode === 'worksheet') && viewJournal) {
             viewJournal.classList.remove('d-none');
-            
+
             // Get current chapter number - prioritize activeTab data first
-            let chapterNum = null;
-            
-            console.log('WORKSHEET DEBUG: activeTab.type=', activeTab.type, 'activeTab.data=', activeTab.data, 'activeUnit.unitNum=', activeUnit ? activeUnit.unitNum : 'none');
-            
-            // Priority 1: If we're on a CHAPTER tab, use that chapter number
-            if (activeTab.type === 'CHAPTER' && activeTab.data && activeTab.data.ch !== undefined) {
-                chapterNum = activeTab.data.ch;
-                console.log('WORKSHEET DEBUG: Using chapter from activeTab:', chapterNum);
-            }
-            
-            // Priority 2: For PRE_SCALE, PRE_TEST, EXAM, POST_SCALE - use unit's FIRST chapter
-            if (chapterNum === null && (activeTab.type === 'PRE_SCALE' || activeTab.type === 'PRE_TEST' || activeTab.type === 'EXAM' || activeTab.type === 'POST_SCALE')) {
-                // Use the first chapter of the current unit for general worksheets
-                if (activeUnit && activeUnit.chapters && activeUnit.chapters.length > 0) {
-                    chapterNum = activeUnit.chapters[0].ch;
-                    console.log('WORKSHEET DEBUG: Using first chapter of unit:', chapterNum);
-                }
-            }
-            
-            // Priority 3: Try to parse from curriculum frame URL (handles URLs like /compsci/essential_computer_skills.html)
-            if (chapterNum === null && dom.curriculumFrame && dom.curriculumFrame.src && dom.curriculumFrame.src !== 'about:blank') {
-                const frameSrc = dom.curriculumFrame.src;
-                // Match patterns like "ch1", "ch_1", "chapter_1" in the filename
-                const chMatch = frameSrc.match(/(?:ch|chapter)[-_]?(\d+)/i);
-                if (chMatch) {
-                    chapterNum = parseInt(chMatch[1], 10);
-                    console.log('WORKSHEET DEBUG: Parsed chapter from frame URL:', chapterNum);
-                }
-                // Also try matching the file name itself (e.g., "essential_computer_skills" -> look for chapter info)
-                if (chapterNum === null) {
-                    const fileNameMatch = frameSrc.match(/\/([^/]+)\.html/i);
-                    if (fileNameMatch) {
-                        const fileName = fileNameMatch[1];
-                        for (const unit of csCourseMap) {
-                            const found = unit.chapters.find(c => c.file === fileName);
-                            if (found) {
-                                chapterNum = found.ch;
-                                console.log('WORKSHEET DEBUG: Found chapter from course map:', chapterNum, 'for file:', fileName);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Fallback: Use first chapter of current unit or default to 1
-            if (chapterNum === null || chapterNum === 0) {
-                if (activeUnit && activeUnit.chapters && activeUnit.chapters.length > 0) {
-                    chapterNum = activeUnit.chapters[0].ch;
-                } else {
-                    chapterNum = 1;
-                }
-                console.log('WORKSHEET DEBUG: Using fallback chapter:', chapterNum);
-            }
-            
+            let chapterNum = resolveChapterNum();
+
             // Load the notebook iframe with the appropriate mode and chapter.
             // chapterLabel tells cs-notebook.html which real chapter/unit
             // this note belongs to -- it used to hardcode every save as
@@ -746,6 +811,16 @@ function initCSInteractive(student) {
             }
             if (modeTitle) modeTitle.innerHTML = '<i class="fas fa-code me-2"></i> Code Editor';
             if (modeBadge) { modeBadge.className = "badge bg-dark text-white font-monospace shadow-sm"; modeBadge.innerText = "Code Mode"; }
+        } else if (mode === 'activities' && viewActivities) {
+            viewActivities.classList.remove('d-none');
+            const activeBtn = document.querySelector('.mode-btn[data-mode="activities"]');
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.style.opacity = '1';
+            }
+            if (modeTitle) modeTitle.innerHTML = '<i class="fas fa-list-check me-2"></i> Activities';
+            if (modeBadge) { modeBadge.className = "badge bg-success text-white font-monospace shadow-sm"; modeBadge.innerText = "Activities Mode"; }
+            loadChapterActivities(resolveChapterNum());
         }
 
         currentWorkspaceMode = mode;
@@ -769,7 +844,8 @@ function initCSInteractive(student) {
     if (viewJournal) viewJournal.classList.add('d-none');
     if (viewDropbox) viewDropbox.classList.add('d-none');
     if (viewCode) viewCode.classList.add('d-none');
-    
+    if (viewActivities) viewActivities.classList.add('d-none');
+
     // Show prompt message
     if (modeTitle) {
         modeTitle.innerHTML = '<i class="fas fa-hand-pointer me-2"></i> Select a Mode';

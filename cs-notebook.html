@@ -142,6 +142,13 @@
     // directly without it (e.g. manual testing).
     const chapterLabel = urlParams.get('chapterLabel') || 'Unit Exam Scratchpad';
 
+    // When opened from the Activities dropdown, this note is bound to one
+    // specific real gradebook assignment -- saving a final submit for it
+    // also auto-grades that assignment (see saveNotes() below).
+    const activityId = urlParams.get('activityId') || null;
+    const activityTitle = urlParams.get('activityTitle') || null;
+    const activityPoints = Number(urlParams.get('activityPoints')) || null;
+
     // Handle case where chapter is 0, "Misc", or empty - use Unit 0 intro to office software worksheet
     if (paramChapter === '0' || paramChapter === 'Misc' || !paramChapter || paramChapter === 'unit0') {
         currentChapter = '0'; // Chapter 0: Intro to Office Software
@@ -201,9 +208,13 @@ async function init() {
                 subtitle.textContent = `${currentStudentData.first_name} ${currentStudentData.last_name} | ID: ${currentStudentData.student_id}`;
             }
             
-            // For worksheet mode, load worksheet template; otherwise load existing notes or create new
+            // For worksheet mode, load worksheet template; for a specific
+            // activity, resume that exact activity's saved work if it
+            // exists; otherwise load existing notes or create new.
             if (currentMode === 'worksheet') {
                 window.prepareNewNote();
+            } else if (currentMode === 'activity') {
+                fetchActivityNote();
             } else {
                 fetchNotes();
             }
@@ -289,7 +300,38 @@ async function fetchNotes() {
             window.prepareNewNote();
         }
     }
-    
+
+    // Like fetchNotes(), but for a specific activity -- a chapter can have
+    // several activities sharing the same chapterLabel, so this also
+    // matches on title (the activity's real name) to resume the right one
+    // instead of loading whichever activity was edited most recently.
+    async function fetchActivityNote() {
+        if (!currentStudentData || !activityTitle) return window.prepareNewNote();
+
+        try {
+            const res = await fetch('/api/student/cs-notebook?student_id=' + encodeURIComponent(currentStudentData.student_id));
+            if (!res.ok) throw new Error('Failed to fetch');
+            const data = await res.json();
+            const matches = (data.notes || []).filter(n =>
+                n.chapter === chapterLabel && n.category === 'Activity' && n.title === activityTitle);
+
+            if (matches.length > 0) {
+                matches.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                const note = matches[0];
+                activeNoteId = note.id;
+                document.getElementById('note-title').value = note.title;
+                document.getElementById('note-content').value = note.content || '';
+                document.getElementById('note-category').value = 'Activity';
+                updatePreview();
+            } else {
+                window.prepareNewNote();
+            }
+        } catch(e) {
+            console.error('Fetch activity note error:', e);
+            window.prepareNewNote();
+        }
+    }
+
 // Get worksheet template content - loads from worksheets library if available
     let worksheetsLibrary = {};
     
@@ -474,6 +516,10 @@ function getDefaultWorksheetTemplate() {
             if (contentIn) contentIn.value = getWorksheetTemplate();
             if (titleInput) titleInput.value = '';
             if (catInput) catInput.value = 'Worksheet';
+        } else if (currentMode === 'activity') {
+            if (contentIn) contentIn.value = `<h2>${activityTitle || 'Activity'}</h2><p>Write your work for this activity here...</p>`;
+            if (titleInput) titleInput.value = activityTitle || '';
+            if (catInput) catInput.value = 'Activity';
         } else {
             // Load regular notes template
             if (contentIn) contentIn.value = '<h2>Notes</h2><p>Start writing your notes here...</p>';
@@ -545,8 +591,41 @@ function getDefaultWorksheetTemplate() {
             const result = await res.json();
             if (result?.id) activeNoteId = result.id;
 
+            // Auto-grade: only on a real final submit (never the 1.5s
+            // autosave debounce -- matches how every other sync call in
+            // this codebase only fires on explicit turn-in) and only when
+            // this note is bound to a real activity. Passes the real
+            // title/points fetched from the gradebook via the Activities
+            // dropdown, not a guessed value -- submit-exam's upsert would
+            // otherwise silently overwrite the real assignment's title/
+            // points with a generic fallback if they were omitted.
+            let graded = false;
+            if (isSubmit && activityId) {
+                try {
+                    const gradeRes = await fetch('/api/submit-exam', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            student_id: currentStudentData.student_id,
+                            exam_id: activityId,
+                            score: activityPoints,
+                            total_points: activityPoints,
+                            title: activityTitle
+                        })
+                    });
+                    graded = gradeRes.ok;
+                } catch (gradeErr) {
+                    console.error('Auto-grade sync error:', gradeErr);
+                    // The note itself already saved above -- don't show a
+                    // false "Error" on a save that actually succeeded just
+                    // because the gradebook sync failed.
+                }
+            }
+
             if (btn) {
-                btn.innerHTML = '<i class="fas fa-check me-1"></i> Saved';
+                btn.innerHTML = graded
+                    ? '<i class="fas fa-check-double me-1"></i> Saved & Graded'
+                    : '<i class="fas fa-check me-1"></i> Saved';
                 btn.className = 'badge bg-success';
             }
         } catch(e) {

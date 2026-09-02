@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
 const { sanitizeNotebookHtml } = require('../sanitizeNotebookHtml');
+const { resolveCourseId } = require('../helpers');
 
 const EXAM_PROGRESS_DDL = `CREATE TABLE IF NOT EXISTS exam_progress (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -241,6 +242,31 @@ router.post('/student/cs-notebook', async (req, res) => {
         await connection.release();
         res.json({ success: true, id: result.insertId });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save notebook entry' }); }
+});
+
+// The real, already-dated, already-graded cs_ch#_* assignments for one
+// chapter -- the single source of truth the Activities dropdown pulls
+// from, so what a student sees always matches what's actually seeded in
+// the gradebook via the Due Date Manager. No separate activity list to
+// keep in sync.
+router.get('/student/cs-chapter-activities', async (req, res) => {
+    const { chapter, student_id } = req.query;
+    if (!chapter || !student_id) return res.status(400).json({ error: 'chapter and student_id required' });
+    try {
+        const connection = await getDbConnection();
+        const [[student]] = await connection.execute(
+            'SELECT section_id FROM students WHERE student_id = ? LIMIT 1',
+            [student_id]
+        );
+        const courseId = (student && await resolveCourseId(connection, student.section_id)) || '10003GS';
+        const [rows] = await connection.execute(
+            `SELECT exam_id, title, total_points, due_date FROM exams
+             WHERE exam_id LIKE ? AND course_id = ? ORDER BY exam_id`,
+            [`cs_ch${chapter}_%`, courseId]
+        );
+        await connection.release();
+        res.json({ activities: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load chapter activities' }); }
 });
 
 // --- EXAM PROGRESS ---

@@ -130,6 +130,35 @@ async function checkRetakeClearance(connection, studentId, examId) {
     );
     if (cleared.length > 0) return { ok: true };
 
+    // Auto-verify from real saved work before falling back to the manual
+    // "Mark Cleared" gate -- a note, worksheet, or graded Activity from
+    // ANY chapter in this unit counts (chapter labels are always built as
+    // "Unit N - <chapter title>", so a single LIKE match already covers
+    // every chapter in the unit without needing CS_UNIT_CHAPTERS here).
+    // Per direction: a completed worksheet/activity also satisfies the
+    // "notes" requirement, not just "worksheets" -- so "notes" accepts
+    // any of the three categories, "worksheets" accepts the two real-work
+    // ones. A LENGTH floor screens out empty/near-empty draft saves
+    // (confirmed live: submitted worksheets run 1900-21000 chars,
+    // unsubmitted drafts run 0-113).
+    const unitMatch = /^Unit(\d+)-Exam$/i.exec(examId);
+    if (unitMatch) {
+        const categories = requirement === 'notes' ? ['Notes', 'Worksheet', 'Activity'] : ['Worksheet', 'Activity'];
+        const placeholders = categories.map(() => '?').join(',');
+        const [qualifying] = await connection.execute(
+            `SELECT id FROM turnins WHERE student_id = ? AND chapter LIKE ? AND category IN (${placeholders})
+             AND is_submitted = 1 AND LENGTH(content) > 100 LIMIT 1`,
+            [studentId, `Unit ${unitMatch[1]} - %`, ...categories]
+        );
+        if (qualifying.length > 0) {
+            await connection.execute(
+                'INSERT INTO retake_clearances (student_id, exam_id, requirement, cleared_by) VALUES (?, ?, ?, ?)',
+                [studentId, examId, requirement, 'auto-verified']
+            );
+            return { ok: true };
+        }
+    }
+
     const message = requirement === 'notes'
         ? 'Before retaking this test, show your teacher your notes on this chapter.'
         : 'Before retaking this test, finish every activity and worksheet in this chapter and check in with your teacher.';
