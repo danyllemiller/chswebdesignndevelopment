@@ -218,6 +218,7 @@ const dom = {
     readAloudSettingsPanel: document.getElementById('read-aloud-settings-panel'),
     readAloudRateSelect: document.getElementById('read-aloud-rate-select'),
     readAloudVoiceSelect: document.getElementById('read-aloud-voice-select'),
+    readAloudStartOverBtn: document.getElementById('read-aloud-start-over-btn'),
     viewJournal: document.getElementById('view-journal'),
     viewDropbox: document.getElementById('view-dropbox'),
     viewCode: document.getElementById('view-code')
@@ -307,6 +308,15 @@ const dom = {
         document.addEventListener('click', (e) => {
             if (dom.readAloudSettingsPanel.contains(e.target) || e.target === dom.readAloudSettingsBtn || dom.readAloudSettingsBtn.contains(e.target)) return;
             dom.readAloudSettingsPanel.classList.add('d-none');
+        });
+    }
+    if (dom.readAloudStartOverBtn) {
+        dom.readAloudStartOverBtn.addEventListener('click', () => {
+            stopReading();
+            chunkIndex = 0;
+            saveProgress();
+            updateBtn();
+            if (dom.readAloudSettingsPanel) dom.readAloudSettingsPanel.classList.add('d-none');
         });
     }
 

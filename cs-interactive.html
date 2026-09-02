@@ -95,7 +95,10 @@
                     <label class="form-label small fw-bold mb-1">Speed</label>
                     <select id="read-aloud-rate-select" class="form-select form-select-sm mb-2"></select>
                     <label class="form-label small fw-bold mb-1">Voice</label>
-                    <select id="read-aloud-voice-select" class="form-select form-select-sm"></select>
+                    <select id="read-aloud-voice-select" class="form-select form-select-sm mb-2"></select>
+                    <button type="button" id="read-aloud-start-over-btn" class="btn btn-outline-secondary btn-sm w-100">
+                        <i class="fas fa-rotate-left me-1"></i>Start Over
+                    </button>
                 </div>
                 <div class="card-body p-0 bg-white h-75vh overflow-hidden-strict pos-relative">
                     
@@ -287,7 +290,7 @@
   </script>
 
   <!-- Centralized Controller for CS Notebook Logic -->
-<script type="module" src="/js/cs-interactive.js?v=29"></script>
+<script type="module" src="/js/cs-interactive.js?v=30"></script>
 
   <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 </body>
