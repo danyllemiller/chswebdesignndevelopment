@@ -114,14 +114,17 @@ table.table-spreadsheet thead th.header-summary {
 }
 
 table.table-spreadsheet thead th.header-main-blue {
-    background-color: var(--primary-color); 
+    background-color: var(--primary-color);
     color: white;
-    height: auto !important; 
+    height: auto !important;
     min-height: 12rem !important;
-    min-width: 2.75rem !important; 
-    max-width: 2.75rem !important; 
+    /* Widened from 2.75rem to fit 3 icons (copy/edit/delete) on unit test
+       columns without wrapping or overflowing -- intentionally wider
+       rather than adding horizontal scroll. */
+    min-width: 3.5rem !important;
+    max-width: 3.5rem !important;
     padding: 0;
-    border-right: 0.0625rem solid rgba(255,255,255,0.2); 
+    border-right: 0.0625rem solid rgba(255,255,255,0.2);
     vertical-align: bottom;
 }
 
