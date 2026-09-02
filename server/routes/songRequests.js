@@ -24,7 +24,6 @@ router.get('/song-search', async (req, res) => {
         })}`);
         const data = await searchRes.json();
         if (!searchRes.ok) throw new Error('Search failed');
-        const trackIds = (data.results || []).map(t => String(t.trackId));
 
         // Apple Music has no free API for reading a public playlist's real
         // track list (it loads client-side, not in the page's HTML) -- so
@@ -33,31 +32,43 @@ router.get('/song-search', async (req, res) => {
         // it onto the real playlist got there by being approved here.
         // 'pending' counts too, so a student doesn't submit a duplicate of
         // someone else's request that just hasn't been decided yet.
+        //
+        // Matches on name+artist as well as track_id: this table has
+        // requests from an earlier Spotify-based version of this feature
+        // (Spotify's alphanumeric ids, not Apple's numeric ones), so
+        // id-only matching would silently miss most of the existing
+        // catalog -- confirmed live, 63 of 76 pending/approved rows still
+        // carry a Spotify id.
+        const norm = (s) => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
         let statusByTrackId = {};
-        if (trackIds.length > 0) {
-            const connection = await getDbConnection();
-            const placeholders = trackIds.map(() => '?').join(',');
-            const [existing] = await connection.execute(
-                `SELECT track_id, status FROM song_requests WHERE track_id IN (${placeholders}) AND status IN ('pending','approved')`,
-                trackIds
-            );
-            await connection.release();
-            existing.forEach(r => {
-                // approved takes priority if a track somehow has both an
-                // approved row and a separate still-pending one
-                if (!statusByTrackId[r.track_id] || r.status === 'approved') statusByTrackId[r.track_id] = r.status;
-            });
-        }
+        let statusByNameArtist = {};
+        const connection = await getDbConnection();
+        const [existing] = await connection.execute(
+            `SELECT track_id, track_name, artist_name, status FROM song_requests WHERE status IN ('pending','approved')`
+        );
+        await connection.release();
+        existing.forEach(r => {
+            // approved takes priority if a track somehow matches both an
+            // approved row and a separate still-pending one
+            const better = (prev) => !prev || r.status === 'approved';
+            if (better(statusByTrackId[r.track_id])) statusByTrackId[r.track_id] = r.status;
+            const key = `${norm(r.track_name)}|${norm(r.artist_name)}`;
+            if (better(statusByNameArtist[key])) statusByNameArtist[key] = r.status;
+        });
 
-        const tracks = (data.results || []).map(t => ({
-            id: String(t.trackId),
-            name: t.trackName,
-            artist: t.artistName,
-            // 100x100 is what the API returns by default; swap in a larger size for a sharper thumbnail.
-            album_art: t.artworkUrl100 ? t.artworkUrl100.replace('100x100', '200x200') : null,
-            explicit: t.trackExplicitness === 'explicit',
-            existing_status: statusByTrackId[String(t.trackId)] || null
-        }));
+        const tracks = (data.results || []).map(t => {
+            const key = `${norm(t.trackName)}|${norm(t.artistName)}`;
+            const existingStatus = statusByTrackId[String(t.trackId)] || statusByNameArtist[key] || null;
+            return {
+                id: String(t.trackId),
+                name: t.trackName,
+                artist: t.artistName,
+                // 100x100 is what the API returns by default; swap in a larger size for a sharper thumbnail.
+                album_art: t.artworkUrl100 ? t.artworkUrl100.replace('100x100', '200x200') : null,
+                explicit: t.trackExplicitness === 'explicit',
+                existing_status: existingStatus
+            };
+        });
         res.json({ tracks });
     } catch (err) { console.error(err); res.status(500).json({ error: err.message }); }
 });
