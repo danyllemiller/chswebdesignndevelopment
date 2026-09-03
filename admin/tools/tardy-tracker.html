@@ -605,12 +605,21 @@
 
   async function resolveFollowup(studentId, count, resolutionType) {
     try {
-      await fetch('/api/tardy/followup-resolve', {
+      const res = await fetch('/api/tardy/followup-resolve', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ student_id: studentId, count, resolution_type: resolutionType })
       });
+      // fetch() only rejects on a network failure, never on the server
+      // returning an error status -- without this check, a 400/403/500
+      // here silently never saved anything while the checkbox still looked
+      // checked and the list still refreshed as if it worked.
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
       loadFollowups();
-    } catch (e) { alert('Failed to save. Try again.'); }
+    } catch (e) {
+      console.error('followup-resolve failed:', e);
+      alert("That didn't actually save -- please try again. If it keeps failing, tell your admin.");
+      loadFollowups();
+    }
   }
 
   document.getElementById('counselorSettingsBtn').addEventListener('click', async () => {

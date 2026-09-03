@@ -162,12 +162,30 @@ router.get('/admin/messages/thread', async (req, res) => {
 });
 
 router.post('/admin/messages', async (req, res) => {
-    if (!isTeacherSession(req.session?.user)) return res.status(403).json({ error: 'Not authorized.' });
+    // These early-return paths used to fail with zero server-side trace --
+    // a rejected send here is otherwise indistinguishable in the logs from
+    // one that never reached the server at all, which made a real "the
+    // teacher sent it, the student never got it" report unsolvable after
+    // the fact. Logging every rejection reason (not just the 500 path
+    // below) means the next one leaves evidence.
+    if (!isTeacherSession(req.session?.user)) {
+        console.warn('[messages] rejected: not a teacher session', { user: req.session?.user, student_id: req.body?.student_id });
+        return res.status(403).json({ error: 'Not authorized.' });
+    }
     const { student_id } = req.body;
     const body = String(req.body?.body || '').trim();
-    if (!student_id) return res.status(400).json({ error: 'student_id is required' });
-    if (!body) return res.status(400).json({ error: 'Message cannot be empty.' });
-    if (body.length > 5000) return res.status(400).json({ error: 'Message is too long.' });
+    if (!student_id) {
+        console.warn('[messages] rejected: missing student_id', { body: req.body });
+        return res.status(400).json({ error: 'student_id is required' });
+    }
+    if (!body) {
+        console.warn('[messages] rejected: empty body', { student_id });
+        return res.status(400).json({ error: 'Message cannot be empty.' });
+    }
+    if (body.length > 5000) {
+        console.warn('[messages] rejected: body too long', { student_id, length: body.length });
+        return res.status(400).json({ error: 'Message is too long.' });
+    }
     try {
         const connection = await getDbConnection();
         await ensureMessagesTable(connection);
@@ -176,6 +194,7 @@ router.post('/admin/messages', async (req, res) => {
             [student_id]
         );
         if (students.length === 0) {
+            console.warn('[messages] rejected: no student found', { student_id });
             await connection.release();
             return res.status(404).json({ error: 'No student found with that ID.' });
         }

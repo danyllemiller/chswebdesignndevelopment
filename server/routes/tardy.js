@@ -272,6 +272,7 @@ router.get('/tardy/followups', async (req, res) => {
 router.post('/tardy/followup-resolve', async (req, res) => {
     const { student_id, count, resolution_type } = req.body;
     if (!student_id || !count || !['letter', 'minor_flag', 'consequence_done'].includes(resolution_type)) {
+        console.warn('[tardy/followup-resolve] rejected: invalid payload', req.body);
         return res.status(400).json({ error: 'student_id, count, and a valid resolution_type are required' });
     }
     try {
