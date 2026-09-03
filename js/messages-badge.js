@@ -14,8 +14,11 @@
   // simplest to just update all three badges with the same count and let
   // whichever menu block is actually visible show it, rather than
   // duplicating that enrollment logic here.
-  const STUDENT_BADGE_IDS = ['msg-badge-wd', 'msg-badge-cs', 'msg-badge-intv'];
-  const ADMIN_BADGE_IDS = ['msg-badge-admin'];
+  // Each course's dropdown TOGGLE gets a badge too (so something's-unread
+  // is visible without opening the menu), plus one right next to the
+  // actual "Messages" link itself inside that same dropdown.
+  const STUDENT_BADGE_IDS = ['msg-badge-wd', 'msg-badge-cs', 'msg-badge-intv', 'msg-badge-wd-item', 'msg-badge-cs-item', 'msg-badge-intv-item'];
+  const ADMIN_BADGE_IDS = ['msg-badge-admin', 'msg-badge-admin-item'];
 
   function setBadges(ids, count) {
     ids.forEach(id => {

@@ -35,7 +35,7 @@
   if (document.getElementById('messages-badge-script')) return;
   const script = document.createElement('script');
   script.id = 'messages-badge-script';
-  script.src = '/js/messages-badge.js?v=1';
+  script.src = '/js/messages-badge.js?v=2';
   document.body ? document.body.appendChild(script) : document.head.appendChild(script);
 })();
 
