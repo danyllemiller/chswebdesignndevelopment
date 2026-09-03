@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Timeclock Answers</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=20"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 90vw; margin: 2.5rem auto; }
+    .answer-row { border-bottom: 1px solid #eef0f6; padding: .85rem 0; }
+    .answer-row:last-child { border-bottom: none; }
+    .answer-block { background: #f8f9fb; border-radius: .4rem; padding: .5rem .75rem; margin-top: .3rem; }
+    .answer-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: #6c757d; }
+    .empty-note { color: #6c757d; font-style: italic; padding: 1rem 0; }
+    .msg-box { display: none; margin-top: .5rem; }
+    .msg-box.active { display: block; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+      <h2 class="gochi text-primary mb-1"><i class="fas fa-comments me-2"></i>Timeclock Answers</h2>
+      <p class="text-muted mb-4">Review what students actually wrote for their clock-in and clock-out reflections, by day and section.</p>
+
+      <form id="filterForm" class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label small fw-bold text-muted mb-1">Date</label>
+          <input type="date" id="dateInput" class="form-control border-secondary" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small fw-bold text-muted mb-1">Section (optional)</label>
+          <input type="text" id="sectionInput" class="form-control border-secondary" placeholder="e.g. A1">
+        </div>
+        <div class="col-md-3">
+          <button type="submit" class="btn btn-primary fw-bold w-100"><i class="fas fa-search me-1"></i>Load</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="loadingState" class="text-center py-4 d-none"><span class="spinner-border text-primary"></span></div>
+  <div id="resultsList"></div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script>
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function name(item) { return `${item.first_name || ''} ${item.last_name || ''}`.trim() || item.student_id; }
+
+function fmtTime(dt) {
+  if (!dt) return '';
+  const d = new Date(dt.replace(' ', 'T'));
+  if (isNaN(d)) return '';
+  return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+}
+
+async function loadAnswers() {
+  const date = document.getElementById('dateInput').value;
+  const section = document.getElementById('sectionInput').value.trim();
+  const list = document.getElementById('resultsList');
+  const loading = document.getElementById('loadingState');
+  list.innerHTML = '';
+  loading.classList.remove('d-none');
+
+  try {
+    const params = new URLSearchParams({ date });
+    if (section) params.set('section', section);
+    const res = await fetch(`/api/admin/timeclock-answers?${params}`);
+    if (!res.ok) throw new Error('Failed to load');
+    const data = await res.json();
+    renderResults(data.rows || []);
+  } catch (e) {
+    list.innerHTML = `<div class="alert alert-danger">Couldn't load answers. Try again.</div>`;
+  } finally {
+    loading.classList.add('d-none');
+  }
+}
+
+function renderResults(rows) {
+  const list = document.getElementById('resultsList');
+  if (!rows.length) {
+    list.innerHTML = `<div class="card shadow-sm border-0"><div class="card-body"><div class="empty-note">No clock-in/out activity found for that day.</div></div></div>`;
+    return;
+  }
+
+  const bySection = new Map();
+  rows.forEach(r => {
+    const key = r.section_id || 'No period on file';
+    if (!bySection.has(key)) bySection.set(key, []);
+    bySection.get(key).push(r);
+  });
+  const sections = Array.from(bySection.keys()).sort();
+
+  list.innerHTML = sections.map(section => `
+    <div class="card shadow-sm border-0 mb-3">
+      <div class="card-header bg-white fw-bold text-uppercase small text-muted">${escapeHtml(section)}</div>
+      <div class="card-body p-3">
+        ${bySection.get(section).map(item => `
+          <div class="answer-row">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+              <strong>${escapeHtml(name(item))}</strong>
+              <button class="btn btn-sm btn-outline-primary fw-bold msg-toggle-btn" data-student-id="${item.student_id}" title="Message this student">
+                <i class="fas fa-comment-dots me-1"></i>Message Student
+              </button>
+            </div>
+
+            ${item.in_answer ? `
+              <div class="answer-block">
+                <div class="answer-label">Clock-in ${item.clock_in ? '· ' + fmtTime(item.clock_in) : ''}</div>
+                <div>${escapeHtml(item.in_answer)}</div>
+              </div>` : ''}
+
+            ${item.out_answer ? `
+              <div class="answer-block">
+                <div class="answer-label">Clock-out ${item.clock_out ? '· ' + fmtTime(item.clock_out) : ''}</div>
+                <div>${escapeHtml(item.out_answer)}</div>
+              </div>` : ''}
+
+            ${!item.in_answer && !item.out_answer ? `<div class="text-muted small mt-1">No answers recorded.</div>` : ''}
+
+            <div class="msg-box" data-msg-for="${item.student_id}">
+              <textarea class="form-control form-control-sm" rows="2" placeholder="Write a message to ${escapeHtml(item.first_name || 'this student')}..."></textarea>
+              <button class="btn btn-sm btn-success fw-bold mt-1 msg-send-btn" data-student-id="${item.student_id}">
+                <i class="fas fa-paper-plane me-1"></i>Send
+              </button>
+              <span class="small text-muted ms-2 msg-status"></span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('filterForm').addEventListener('submit', (e) => { e.preventDefault(); loadAnswers(); });
+
+document.getElementById('resultsList').addEventListener('click', async (e) => {
+  const toggleBtn = e.target.closest('.msg-toggle-btn');
+  const sendBtn = e.target.closest('.msg-send-btn');
+
+  if (toggleBtn) {
+    const box = toggleBtn.closest('.answer-row').querySelector('.msg-box');
+    box.classList.toggle('active');
+    if (box.classList.contains('active')) box.querySelector('textarea').focus();
+    return;
+  }
+
+  if (sendBtn) {
+    const { studentId } = sendBtn.dataset;
+    const box = sendBtn.closest('.msg-box');
+    const textarea = box.querySelector('textarea');
+    const status = box.querySelector('.msg-status');
+    const body = textarea.value.trim();
+    if (!body) { textarea.focus(); return; }
+
+    sendBtn.disabled = true;
+    status.textContent = 'Sending...';
+    try {
+      const res = await fetch('/api/admin/messages', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: studentId, body })
+      });
+      if (!res.ok) throw new Error('Failed to send.');
+      status.textContent = 'Sent!';
+      textarea.value = '';
+      setTimeout(() => { box.classList.remove('active'); status.textContent = ''; }, 1500);
+    } catch (err) {
+      status.textContent = 'Failed to send. Try again.';
+    } finally {
+      sendBtn.disabled = false;
+    }
+  }
+});
+
+document.getElementById('dateInput').value = new Date().toLocaleDateString('en-CA');
+loadAnswers();
+</script>
+</body>
+</html>

@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { getDbConnection } = require('../db');
+const { getCurrentSchoolYear } = require('../helpers');
 
 // Client-side JS errors on the timeclock widget were failing completely
 // silently for some students with no way to see why -- multiple fixes
@@ -555,6 +556,33 @@ router.post('/admin/daily-questions', async (req, res) => {
         await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save daily questions' }); }
+});
+
+// GET /admin/timeclock-answers?date=YYYY-MM-DD[&section=A1]
+// Every student's clock-in/clock-out question and answer for one day, so
+// the teacher can review what was actually written -- until now this data
+// existed only in the timesheets table with no admin page to read it back.
+router.get('/admin/timeclock-answers', async (req, res) => {
+    const date = req.query.date || getLocalDateStr();
+    const section = (req.query.section || '').trim();
+    try {
+        const currentYear = getCurrentSchoolYear();
+        const connection = await getDbConnection();
+        const params = [date, currentYear];
+        let sectionClause = '';
+        if (section) { sectionClause = 'AND t.section_id = ?'; params.push(section); }
+        const [rows] = await connection.execute(
+            `SELECT t.id, t.student_id, t.section_id, t.clock_in, t.clock_out, t.in_answer, t.out_answer,
+                    s.first_name, s.last_name
+             FROM timesheets t
+             JOIN students s ON s.student_id = t.student_id
+             WHERE t.date = ? AND (s.archived IS NULL OR s.archived = 0) AND s.school_year = ? ${sectionClause}
+             ORDER BY t.section_id, s.last_name, s.first_name`,
+            params
+        );
+        await connection.release();
+        res.json({ date, rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load timeclock answers' }); }
 });
 
 router.post('/admin/inject-timesheets', async (req, res) => {
