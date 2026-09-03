@@ -128,6 +128,9 @@
     let currentMode = 'notes'; // 'notes' or 'worksheet'
     let currentChapter = 'Misc';
     let worksheetAnswers = {}; // Store correct answers for checking
+    let saveRetryTimer = null;
+    let saveRetryCount = 0;
+    let pendingSubmitFlag = false; // was the failing save a final submit or just autosave?
     
 // Check URL params for mode and chapter
     const urlParams = new URLSearchParams(window.location.search);
@@ -157,7 +160,73 @@
     }
 
     console.log('Worksheet chapter:', currentChapter, 'chapterLabel:', chapterLabel);
-    
+
+    // ========================================================
+    // LOCAL DRAFT SAFETY NET
+    // The home server drops for brief stretches under load (known Wi-Fi
+    // driver flakiness), which fails an in-flight autosave with nothing
+    // else recording what was typed. Mirroring every change to
+    // localStorage first -- before the network call even goes out -- means
+    // a failed save never loses the content: it's retried automatically,
+    // and if the tab gets closed first, reopening this same browser
+    // recovers the draft. Keyed by student, so it can't leak into another
+    // student's session on a shared classroom computer.
+    // ========================================================
+    function draftKey() {
+        const sid = currentStudentData ? currentStudentData.student_id : 'anon';
+        return `csNotebookDraft:${sid}:${chapterLabel}:${activityId || 'none'}`;
+    }
+
+    function saveDraftLocal() {
+        if (!currentStudentData) return;
+        const titleInput = document.getElementById('note-title');
+        const contentIn = document.getElementById('note-content');
+        const catInput = document.getElementById('note-category');
+        try {
+            localStorage.setItem(draftKey(), JSON.stringify({
+                title: titleInput ? titleInput.value : '',
+                content: contentIn ? contentIn.value : '',
+                category: catInput ? catInput.value : 'Notes',
+                ts: Date.now()
+            }));
+        } catch (e) { console.error('Local draft save failed:', e); }
+    }
+
+    function clearDraftLocal() {
+        try { localStorage.removeItem(draftKey()); } catch (e) { /* ignore */ }
+    }
+
+    function readDraftLocal() {
+        try {
+            const raw = localStorage.getItem(draftKey());
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
+    }
+
+    // Called after a server note (or blank template) has been loaded into
+    // the form. If a local draft exists and is newer than what the server
+    // gave us -- e.g. the last save before a tab close never made it out
+    // -- it wins, and gets pushed to the server right away.
+    function restoreLocalDraftIfNewer(serverTimestamp) {
+        const draft = readDraftLocal();
+        if (!draft) return false;
+        if (serverTimestamp && draft.ts <= serverTimestamp) { clearDraftLocal(); return false; }
+        document.getElementById('note-title').value = draft.title || '';
+        document.getElementById('note-content').value = draft.content || '';
+        document.getElementById('note-category').value = draft.category || 'Notes';
+        updatePreview();
+        triggerAutoSave();
+        return true;
+    }
+
+    window.addEventListener('beforeunload', (e) => {
+        if (readDraftLocal()) {
+            e.preventDefault();
+            e.returnValue = 'Your last change hasn\'t saved yet. Leave anyway?';
+            return e.returnValue;
+        }
+    });
+
 async function init() {
         // Load worksheets library first
         await loadWorksheetsLibrary();
@@ -213,6 +282,7 @@ async function init() {
             // exists; otherwise load existing notes or create new.
             if (currentMode === 'worksheet') {
                 window.prepareNewNote();
+                restoreLocalDraftIfNewer(null);
             } else if (currentMode === 'activity') {
                 fetchActivityNote();
             } else {
@@ -292,12 +362,15 @@ async function fetchNotes() {
                 document.getElementById('note-content').value = note.content || '';
                 document.getElementById('note-category').value = note.category || 'Notes';
                 updatePreview();
+                restoreLocalDraftIfNewer(note.timestamp);
             } else {
                 window.prepareNewNote();
+                restoreLocalDraftIfNewer(null);
             }
         } catch(e) {
             console.error('Fetch notes error:', e);
             window.prepareNewNote();
+            restoreLocalDraftIfNewer(null);
         }
     }
 
@@ -323,12 +396,15 @@ async function fetchNotes() {
                 document.getElementById('note-content').value = note.content || '';
                 document.getElementById('note-category').value = 'Activity';
                 updatePreview();
+                restoreLocalDraftIfNewer(note.timestamp);
             } else {
                 window.prepareNewNote();
+                restoreLocalDraftIfNewer(null);
             }
         } catch(e) {
             console.error('Fetch activity note error:', e);
             window.prepareNewNote();
+            restoreLocalDraftIfNewer(null);
         }
     }
 
@@ -558,13 +634,20 @@ function getDefaultWorksheetTemplate() {
             showTitleTooltip('Give your note an original title before saving.');
             return;
         }
-        
+
+        // Belt and suspenders: triggerAutoSave() already mirrors to
+        // localStorage before this runs, but the "Save & Turn In" button
+        // calls saveNotes() directly, bypassing that -- so the draft still
+        // needs to land here too, before the network call that might fail.
+        saveDraftLocal();
+        if (saveRetryTimer) { clearTimeout(saveRetryTimer); saveRetryTimer = null; }
+
         const btn = document.getElementById('saveStatus');
         if (btn) {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Saving...';
             btn.className = 'badge bg-warning';
         }
-        
+
         const payload = {
             id: activeNoteId || null,
             student_id: currentStudentData.student_id,
@@ -628,16 +711,32 @@ function getDefaultWorksheetTemplate() {
                     : '<i class="fas fa-check me-1"></i> Saved';
                 btn.className = 'badge bg-success';
             }
+            // Confirmed on the server now -- the local safety copy is no
+            // longer needed and would otherwise incorrectly "win" against
+            // a genuinely newer server note the next time this page loads.
+            clearDraftLocal();
+            saveRetryCount = 0;
         } catch(e) {
             console.error('Save error:', e);
+            // Don't drop the content: the draft written above stays in
+            // localStorage (so a closed tab still recovers it on reopen),
+            // and the save itself is retried automatically with backoff
+            // rather than leaving a small badge as the only signal that
+            // something didn't make it to the server.
             if (btn) {
-                btn.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Error';
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Not saved — retrying…';
                 btn.className = 'badge bg-danger';
             }
+            saveRetryCount++;
+            const delay = Math.min(3000 * saveRetryCount, 15000);
+            pendingSubmitFlag = isSubmit;
+            if (saveRetryTimer) clearTimeout(saveRetryTimer);
+            saveRetryTimer = setTimeout(() => saveNotes(pendingSubmitFlag), delay);
         }
     }
     
 function triggerAutoSave() {
+        saveDraftLocal();
         if (autoSaveTimer) clearTimeout(autoSaveTimer);
         autoSaveTimer = setTimeout(() => saveNotes(false), 1500);
     }
