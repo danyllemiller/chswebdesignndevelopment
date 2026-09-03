@@ -547,8 +547,9 @@ async function handleTimeclockSubmit(e) {
 function injectTimeclockUI() {
     if (document.getElementById('tc-widget')) return;
     const uiHtml = `
-    <div id="tc-widget" class="position-fixed bottom-0 end-0 m-4 z-3">
-        <button class="btn btn-dark shadow-lg rounded-pill px-4 py-3" id="tc-widget-btn">Timeclock</button>
+    <div id="tc-widget" class="position-fixed bottom-0 end-0 m-4 z-3 d-flex gap-2">
+        <button class="btn btn-success shadow-lg rounded-pill px-4 py-3" id="tc-clockin-btn">Clock In</button>
+        <button class="btn btn-dark shadow-lg rounded-pill px-4 py-3" id="tc-clockout-btn">Clock Out</button>
     </div>
     <div class="modal fade" id="timeclock-modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -577,7 +578,8 @@ function injectTimeclockUI() {
     // stops stray backdrop/body-lock state from ever accumulating across a
     // class period's worth of auto-popups, rechecks, and clicks.
     document.getElementById('timeclock-modal').addEventListener('hidden.bs.modal', cleanupStrayModalState);
-    document.getElementById('tc-widget-btn').addEventListener('click', handleManualOpen);
+    document.getElementById('tc-clockin-btn').addEventListener('click', () => handleManualOpen('in'));
+    document.getElementById('tc-clockout-btn').addEventListener('click', () => handleManualOpen('out'));
 }
 
 // The manual button has to work unconditionally: a student called out of
@@ -599,15 +601,24 @@ function injectTimeclockUI() {
 // staleness token, no dependency on the interval/auto-popup state) and
 // always leaves the student looking at real content or a visible error
 // message -- never nothing.
-async function handleManualOpen() {
-    logTimeclockError('handleManualOpen:clicked', { message: 'button click received' });
+// forcedMode is which button the student actually clicked ('in' or 'out'),
+// now that Clock In and Clock Out are two separate always-visible buttons
+// instead of one button whose meaning was inferred from server state. The
+// server's real status is still fetched and is still the source of truth
+// for what's actually allowed -- a student clicking "Clock In" a second
+// time, or "Clock Out" before ever clocking in, gets a clear explanation
+// instead of the wrong flow silently proceeding.
+async function handleManualOpen(forcedMode) {
+    logTimeclockError('handleManualOpen:clicked', { message: `button click received (${forcedMode})` });
     const modalEl = document.getElementById('timeclock-modal');
     const label = document.getElementById('tc-question-label');
     const optsContainer = document.getElementById('tc-options-container');
     const btn = document.getElementById('tc-submit-btn');
     const form = document.getElementById('tc-form');
     const successMsg = document.getElementById('tc-success-msg');
-    const widgetBtn = document.getElementById('tc-widget-btn');
+    const clockInBtn = document.getElementById('tc-clockin-btn');
+    const clockOutBtn = document.getElementById('tc-clockout-btn');
+    const clickedBtn = forcedMode === 'out' ? clockOutBtn : clockInBtn;
     if (!modalEl || !label || !optsContainer || !btn || !form || !successMsg) {
         logTimeclockError('handleManualOpen:missingDom', {
             message: `required DOM element missing: modal=${!!modalEl} label=${!!label} opts=${!!optsContainer} btn=${!!btn} form=${!!form} success=${!!successMsg}`
@@ -621,11 +632,12 @@ async function handleManualOpen() {
     optsContainer.innerHTML = '';
     btn.disabled = true;
     btn.innerText = 'Loading...';
-    if (widgetBtn) {
-        widgetBtn.innerText = 'Timeclock';
-        widgetBtn.classList.remove('btn-danger');
-        widgetBtn.classList.add('btn-dark');
-    }
+    [clockInBtn, clockOutBtn].forEach(b => {
+        if (!b) return;
+        b.innerText = b === clockInBtn ? 'Clock In' : 'Clock Out';
+        b.classList.remove('btn-danger');
+        b.classList.add(b === clockInBtn ? 'btn-success' : 'btn-dark');
+    });
 
     try {
         await openTimeclockModal();
@@ -638,10 +650,10 @@ async function handleManualOpen() {
         // the browser's own rendering.
         console.error('Timeclock modal failed to open:', e);
         logTimeclockError('handleManualOpen:openModal', e);
-        if (widgetBtn) {
-            widgetBtn.innerText = 'Timeclock (tap to retry)';
-            widgetBtn.classList.add('btn-danger');
-            widgetBtn.classList.remove('btn-dark');
+        if (clickedBtn) {
+            clickedBtn.innerText = (forcedMode === 'out' ? 'Clock Out' : 'Clock In') + ' (tap to retry)';
+            clickedBtn.classList.add('btn-danger');
+            clickedBtn.classList.remove('btn-success', 'btn-dark');
         }
         return;
     }
@@ -655,6 +667,18 @@ async function handleManualOpen() {
         if (mode === 'done') {
             form.style.display = 'none';
             successMsg.classList.remove('d-none');
+            return;
+        }
+
+        // The button clicked doesn't match what the server says is actually
+        // next -- tell the student plainly instead of either silently
+        // no-oping or letting a mismatched submission through.
+        if (mode !== forcedMode) {
+            form.style.display = 'none';
+            successMsg.classList.remove('d-none');
+            successMsg.textContent = forcedMode === 'in'
+                ? "You're already clocked in. Click Clock Out when you're ready to leave."
+                : "You haven't clocked in yet. Click Clock In first.";
             return;
         }
 
