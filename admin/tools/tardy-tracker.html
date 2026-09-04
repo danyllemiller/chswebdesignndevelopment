@@ -170,6 +170,31 @@
 <script type="module">
   import { getTardyStep } from '/js/modules/tardy-ladder.js?v=1';
 
+  // A "the teacher clicked it and it just failed" report is unsolvable
+  // after the fact if the failure never leaves a trace anywhere -- this
+  // page's buttons only ever showed a generic "Failed" with nothing
+  // logged, client or server side. Report whatever actually threw
+  // (network error, a bad dynamic import, anything) straight to the
+  // server logs so a repeat of this is actually diagnosable.
+  function logTardyPageError(context, err) {
+    try {
+      fetch('/api/client-error-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: err && err.message ? err.message : String(err),
+          stack: err && err.stack ? err.stack : null,
+          url: window.location.href,
+          context,
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString()
+        })
+      }).catch(() => {});
+    } catch (e) { /* logging must never itself break the page */ }
+  }
+  window.addEventListener('error', (ev) => logTardyPageError('window.onerror', ev.error || { message: ev.message }));
+  window.addEventListener('unhandledrejection', (ev) => logTardyPageError('window.onunhandledrejection', ev.reason));
+
   const studentIdInput = document.getElementById('studentIdInput');
   const periodFieldWrapper = document.getElementById('periodFieldWrapper');
   // periodInput's underlying element gets swapped between a plain text
@@ -565,12 +590,17 @@
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ student_id: studentId, body })
         });
-        if (!res.ok) throw new Error('Failed to send.');
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `Server returned ${res.status}`);
+        }
         reflectionBtn.innerHTML = '<i class="fas fa-check me-1"></i>Sent!';
         setTimeout(() => { reflectionBtn.innerHTML = originalHtml; reflectionBtn.disabled = false; }, 2500);
       } catch (err) {
+        logTardyPageError('sendReflection:' + studentId, err);
         reflectionBtn.innerHTML = '<i class="fas fa-xmark me-1"></i>Failed';
-        setTimeout(() => { reflectionBtn.innerHTML = originalHtml; reflectionBtn.disabled = false; }, 2500);
+        reflectionBtn.title = err.message || 'Failed to send.';
+        setTimeout(() => { reflectionBtn.innerHTML = originalHtml; reflectionBtn.disabled = false; reflectionBtn.title = 'Send a 5-minute conference heads-up via Messages'; }, 4000);
       }
     } else if (genBtn) {
       const { studentId, firstName, lastName, count } = genBtn.dataset;
