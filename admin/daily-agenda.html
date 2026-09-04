@@ -335,10 +335,12 @@
   .tw-body.tw-body-flush { padding: 0; }
   .tw-body iframe { width: 100%; height: 100%; border: 0; display: block; }
   .tw-resize {
-    position: absolute; right: 0; bottom: 0; width: 18px; height: 18px; cursor: nwse-resize;
-    background: linear-gradient(135deg, transparent 55%, rgba(255,255,255,.4) 55%);
-    z-index: 2;
+    position: absolute; right: 1px; bottom: 1px; width: 26px; height: 26px; cursor: nwse-resize;
+    z-index: 5; border-radius: .3rem 0 .5rem 0;
+    background-color: rgba(20,22,32,.55);
+    background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.6) 0 2px, transparent 2px 5px);
   }
+  .tw-resize:hover { background-color: rgba(110,168,254,.5); }
   .tool-widget.maximized .tw-resize { display: none; }
   .tool-widget.dragging iframe, .tool-widget.resizing iframe { pointer-events: none; }
   .tool-widget.maximized .tw-body { display: flex; flex-direction: column; align-items: center; justify-content: center; }
