@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="/css/fontawesome.min.css">
   
   <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet" />
-  <link href="/css/teacher-gradebook.css?v=106.0" rel="stylesheet" />
+  <link href="/css/teacher-gradebook.css?v=107.0" rel="stylesheet" />
   
   <!-- Loader for Navigation & Auth Guard -->
   <script src="/js/loader.js?v=20"></script>
@@ -27,6 +27,12 @@
   <!--Navigation-->
   <div class="container-fluid sticky-top px-0 no-print">
     <div id="nav-placeholder"></div>
+  </div>
+
+  <div id="pendingChangesBar" class="d-none no-print">
+    <span id="pendingChangesCount"></span>
+    <button id="savePendingBtn" type="button" class="btn btn-success btn-sm fw-bold"><i class="fas fa-check me-1"></i>Save Changes</button>
+    <button id="discardPendingBtn" type="button" class="btn btn-outline-light btn-sm fw-bold"><i class="fas fa-rotate-left me-1"></i>Discard</button>
   </div>
 
   <div class="container-fluid my-4 px-4">
@@ -68,7 +74,7 @@
   <script src="/js/jquery.js"></script>
   
   <!-- Cache buster updated to ensure new dynamic dropdown JS loads -->
-  <script type="module" src="/js/admin/gradebook.js?v=135"></script>
+  <script type="module" src="/js/admin/gradebook.js?v=136"></script>
   <script src="/js/admin/attendance-reminder.js"></script>
 </body>
 </html>

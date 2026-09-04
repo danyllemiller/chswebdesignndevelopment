@@ -1625,6 +1625,95 @@ window.showAnalytics = function(dbKey, displayLabel) {
     getModal('analyticsModal').show();
 };
 
+// =========================================
+// UNSAVED GRADE CHANGES
+// Every cell edit used to POST /api/admin/save-grade the instant you
+// tabbed/clicked away -- a typo landed in the real gradebook immediately,
+// with no way back (confirmed live: the responses table just gets
+// overwritten in place, nothing else keeps the old value). Edits now
+// stage locally here and only actually save when Save Changes is
+// clicked, so a mistake can be caught and discarded before it's real.
+// =========================================
+const pendingChanges = new Map(); // `${studentId}::${assignment}` -> { studentId, assignment, newScore, newMax, oldScore, oldMax, cellEl }
+
+function renderGradeCellValue(cell, val, max) {
+    if (val === "EX") cell.innerHTML = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
+    else if (val === "" || val === undefined || val === null) cell.innerHTML = '<span class="text-danger small fw-bold">MISSING</span>';
+    else cell.innerHTML = (val == max ? '<span class="check-mark">✔</span>' : val);
+}
+
+function updatePendingChangesBar() {
+    const bar = document.getElementById('pendingChangesBar');
+    const countEl = document.getElementById('pendingChangesCount');
+    if (!bar || !countEl) return;
+    if (pendingChanges.size === 0) {
+        bar.classList.add('d-none');
+    } else {
+        bar.classList.remove('d-none');
+        countEl.textContent = `${pendingChanges.size} unsaved change${pendingChanges.size === 1 ? '' : 's'}`;
+    }
+}
+
+async function commitPendingChanges() {
+    if (pendingChanges.size === 0) return;
+    const btn = document.getElementById('savePendingBtn');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+
+    const byStudent = new Map();
+    pendingChanges.forEach(ch => {
+        if (!byStudent.has(ch.studentId)) byStudent.set(ch.studentId, {});
+        byStudent.get(ch.studentId)[ch.assignment] = { score: ch.newScore, max: ch.newMax };
+    });
+    const batch = [...byStudent.entries()].map(([studentId, updates]) => ({ studentId, updates }));
+
+    try {
+        const res = await fetch('/api/admin/batch-update-grades', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ batch })
+        });
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        pendingChanges.forEach(ch => {
+            if (!allGrades[ch.studentId]) allGrades[ch.studentId] = {};
+            allGrades[ch.studentId][ch.assignment] = { score: ch.newScore, max: ch.newMax, timestamp: new Date().toISOString() };
+            ch.cellEl.classList.remove('pending-change');
+        });
+        pendingChanges.clear();
+        updatePendingChangesBar();
+        applyFiltersAndRender(); // now safe/worthwhile -- averages etc. should reflect the just-saved data
+    } catch (e) {
+        console.error('Batch save failed:', e);
+        alert("Couldn't save changes -- please try again. Your edits are still here, nothing was lost.");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    }
+}
+
+function discardPendingChanges() {
+    if (pendingChanges.size === 0) return;
+    if (!confirm(`Discard ${pendingChanges.size} unsaved change${pendingChanges.size === 1 ? '' : 's'}? This cannot be undone.`)) return;
+    pendingChanges.forEach(ch => {
+        ch.cellEl.classList.remove('pending-change');
+        ch.cellEl.dataset.currentScore = ch.oldScore;
+        renderGradeCellValue(ch.cellEl, ch.oldScore, ch.oldMax);
+    });
+    pendingChanges.clear();
+    updatePendingChangesBar();
+}
+
+document.getElementById('savePendingBtn')?.addEventListener('click', commitPendingChanges);
+document.getElementById('discardPendingBtn')?.addEventListener('click', discardPendingChanges);
+
+window.addEventListener('beforeunload', (e) => {
+    if (pendingChanges.size > 0) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved grade changes. Leave anyway?';
+        return e.returnValue;
+    }
+});
+
 document.addEventListener('click', (e) => {
     const target = e.target;
     if (target.closest('#btnTogglePrivacy')) { privacyMode = !privacyMode; applyFiltersAndRender(); return; }
@@ -1702,29 +1791,35 @@ document.addEventListener('click', (e) => {
         cell.innerHTML = ''; cell.appendChild(input); input.focus();
 
         let isSaving = false;
-        const save = async () => {
+        const save = () => {
             if (isSaving) return; isSaving = true;
             const val = input.value.trim().toUpperCase();
             let final = val === "EX" ? "EX" : (val === "" ? "" : Number(val));
             if (val !== "" && val !== "EX" && isNaN(final)) { cell.innerHTML = currentScore || '<span class="text-danger small fw-bold">MISSING</span>'; return; }
 
             if (String(final) !== String(currentScore)) {
-                cell.innerHTML = '<span class="spinner-border spinner-border-sm text-warning"></span>';
-                try {
-                    await fetch('/api/admin/save-grade', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ student_id: studentId, exam_id: assignment, score: final, total_points: Number(currentMax) })
+                // Stage the change locally instead of saving immediately --
+                // nothing reaches the real gradebook until Save Changes is
+                // clicked, so a typo here is a non-event, not a scare.
+                const key = `${studentId}::${assignment}`;
+                const existing = pendingChanges.get(key);
+                const trueOriginalScore = existing ? existing.oldScore : currentScore;
+                const trueOriginalMax = existing ? existing.oldMax : Number(currentMax);
+
+                if (String(final) === String(trueOriginalScore)) {
+                    // Edited back to the original value -- no longer a real change
+                    pendingChanges.delete(key);
+                    cell.classList.remove('pending-change');
+                } else {
+                    pendingChanges.set(key, {
+                        studentId, assignment, newScore: final, newMax: Number(currentMax),
+                        oldScore: trueOriginalScore, oldMax: trueOriginalMax, cellEl: cell
                     });
-                    
-                    if (!allGrades[studentId]) allGrades[studentId] = {};
-                    allGrades[studentId][assignment] = { score: final, max: Number(currentMax), timestamp: new Date().toISOString() };
-                    
-                    cell.dataset.currentScore = final;
-                    if (final === "EX") cell.innerHTML = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
-                    else if (final === "") cell.innerHTML = '<span class="text-danger small fw-bold">MISSING</span>';
-                    else cell.innerHTML = (final == currentMax ? '<span class="check-mark">✔</span>' : final);
-                } catch (error) { console.error(error); cell.innerHTML = currentScore || '<span class="text-danger small fw-bold">MISSING</span>'; }
+                    cell.classList.add('pending-change');
+                }
+                cell.dataset.currentScore = final;
+                renderGradeCellValue(cell, final, currentMax);
+                updatePendingChangesBar();
             } else cell.innerHTML = currentScore || '<span class="text-danger small fw-bold">MISSING</span>';
         };
 
@@ -1733,7 +1828,7 @@ document.addEventListener('click', (e) => {
             if (next) next.click();
         };
 
-        input.onblur = () => { save(); setTimeout(() => { if (!document.querySelector('.inline-edit-input')) applyFiltersAndRender(); }, 500); };
+        input.onblur = () => save();
         input.onkeydown = (e) => {
             if (e.key === 'Enter' || e.code === 'NumpadEnter' || e.keyCode === 13) { 
                 e.preventDefault(); save(); setTimeout(() => nav(1, 0), 40); 

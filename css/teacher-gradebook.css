@@ -187,3 +187,20 @@ table.table-spreadsheet tbody tr:nth-child(even) { background-color: #ffffff; }
 .edit-col-btn, .delete-col-btn { cursor: pointer; opacity: 0.6; transition: 0.2s; font-size: 0.7rem; padding: 0.125rem; }
 .edit-col-btn:hover { opacity: 1; color: #ffc107; transform: scale(1.2); }
 .delete-col-btn:hover { opacity: 1; color: #dc3545; transform: scale(1.2); }
+
+/* =========================================
+   UNSAVED GRADE CHANGES — edits stage locally
+   until Save Changes is clicked, so an accidental
+   edit can always be discarded before it's real.
+   ========================================= */
+#pendingChangesBar {
+    position: sticky; top: 0; z-index: 1050;
+    display: flex; align-items: center; gap: .75rem;
+    background: #fff3cd; border-bottom: 2px solid #ffc107;
+    padding: .6rem 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+#pendingChangesCount { font-weight: 700; color: #664d03; flex: 1; }
+.grade-cell.pending-change {
+    background-color: #fff3cd !important;
+    box-shadow: inset 0 0 0 2px #ffc107;
+}
