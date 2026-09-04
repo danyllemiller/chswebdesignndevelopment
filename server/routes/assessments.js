@@ -244,6 +244,26 @@ router.post('/student/cs-notebook', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save notebook entry' }); }
 });
 
+// Students can delete their own notes. Scoped by student_id (not just id)
+// so a student can never delete another student's row by guessing/editing
+// the id client-side. Deleting a submitted Activity note does NOT touch
+// the gradebook -- the grade already posted via submit-exam stays as-is,
+// the client warns about this before calling here.
+router.delete('/student/cs-notebook', async (req, res) => {
+    const { id, student_id } = req.body || {};
+    if (!id || !student_id) return res.status(400).json({ error: 'id and student_id required' });
+    try {
+        const connection = await getDbConnection();
+        const [result] = await connection.execute(
+            'DELETE FROM turnins WHERE id = ? AND student_id = ?',
+            [id, student_id]
+        );
+        await connection.release();
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Note not found' });
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete notebook entry' }); }
+});
+
 // The real, already-dated, already-graded cs_ch#_* assignments for one
 // chapter -- the single source of truth the Activities dropdown pulls
 // from, so what a student sees always matches what's actually seeded in

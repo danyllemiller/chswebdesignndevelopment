@@ -104,6 +104,9 @@
                 <button type="button" onclick="window.prepareNewNote()" class="btn btn-outline-secondary fw-bold">
                     <i class="fas fa-plus me-1"></i> New Entry
                 </button>
+                <button type="button" id="btn-delete-note" class="btn btn-outline-danger fw-bold ms-auto d-none">
+                    <i class="fas fa-trash me-1"></i> Delete
+                </button>
             </div>
         </form>
       </div>
@@ -358,6 +361,7 @@ async function fetchNotes() {
                 allNotes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 const note = allNotes[0];
                 activeNoteId = note.id;
+                updateDeleteButtonVisibility();
                 document.getElementById('note-title').value = note.title || 'Exam Notes';
                 document.getElementById('note-content').value = note.content || '';
                 document.getElementById('note-category').value = note.category || 'Notes';
@@ -392,6 +396,7 @@ async function fetchNotes() {
                 matches.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 const note = matches[0];
                 activeNoteId = note.id;
+                updateDeleteButtonVisibility();
                 document.getElementById('note-title').value = note.title;
                 document.getElementById('note-content').value = note.content || '';
                 document.getElementById('note-category').value = 'Activity';
@@ -579,8 +584,16 @@ function getDefaultWorksheetTemplate() {
         });
     };
     
+    // Delete only makes sense once there's an actual saved row to delete --
+    // a brand-new, never-saved entry has nothing on the server yet.
+    function updateDeleteButtonVisibility() {
+        const btn = document.getElementById('btn-delete-note');
+        if (btn) btn.classList.toggle('d-none', !activeNoteId);
+    }
+
     window.prepareNewNote = function() {
         activeNoteId = null;
+        updateDeleteButtonVisibility();
         const form = document.getElementById('note-form');
         if (form) form.reset();
         const contentIn = document.getElementById('note-content');
@@ -673,6 +686,7 @@ function getDefaultWorksheetTemplate() {
             // another new row instead of updating this one.
             const result = await res.json();
             if (result?.id) activeNoteId = result.id;
+            updateDeleteButtonVisibility();
 
             // Auto-grade: only on a real final submit (never the 1.5s
             // autosave debounce -- matches how every other sync call in
@@ -854,6 +868,7 @@ function triggerAutoSave() {
                             // a brand-new duplicate instead of updating the
                             // note the student just opened.
                             activeNoteId = noteId;
+                            updateDeleteButtonVisibility();
 
                             // Load into the current note form
                             document.getElementById('note-title').value = note.title || '';
@@ -1040,6 +1055,35 @@ function triggerAutoSave() {
         e.preventDefault();
         if (autoSaveTimer) clearTimeout(autoSaveTimer);
         await saveNotes(true);
+    });
+
+    document.getElementById('btn-delete-note').addEventListener('click', async () => {
+        if (!activeNoteId || !currentStudentData) return;
+        const category = document.getElementById('note-category')?.value;
+        const warning = category === 'Activity'
+            ? 'Delete this entry? This is a graded Activity -- deleting it does NOT undo the grade you already earned, it just removes your written work. This cannot be undone.'
+            : 'Delete this note? This cannot be undone.';
+        if (!window.confirm(warning)) return;
+
+        const btn = document.getElementById('btn-delete-note');
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/student/cs-notebook', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: activeNoteId, student_id: currentStudentData.student_id })
+            });
+            if (!res.ok) throw new Error('Delete failed');
+            if (autoSaveTimer) clearTimeout(autoSaveTimer);
+            if (saveRetryTimer) { clearTimeout(saveRetryTimer); saveRetryTimer = null; }
+            clearDraftLocal(); // otherwise the local safety-net draft would silently resurrect the just-deleted note next load
+            window.prepareNewNote();
+        } catch (e) {
+            console.error('Delete note error:', e);
+            alert("Couldn't delete that note. Please try again.");
+        } finally {
+            btn.disabled = false;
+        }
     });
     
     window.addEventListener('message', (ev) => {
