@@ -81,6 +81,7 @@ function escapeHtml(str) {
 // recomputing the sort/grouping logic a second time.
 let lastOrderedStudents = [];
 let lastGrades = {};
+let lastSortedKeys = [];
 
 const cleanKey = (str) => {
     if (!str) return "";
@@ -969,16 +970,23 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('markEnteredIcBtn')?.addEventListener('click', markEnteredIcForCurrentView);
 });
 
-// Scoped to the period filter only (not the individual-student filter) --
-// "All" periods clears every blue "needs entering in IC" cell in the
-// gradebook, a specific period only clears that period's.
+// Scoped to exactly what's rendered on screen right now -- period, student,
+// and category filters all included -- by reusing lastOrderedStudents/
+// lastSortedKeys from the most recent render rather than re-deriving the
+// filters here, so this can never drift out of sync with what the table
+// actually shows. Previously this only respected the period filter: the
+// student filter was hardcoded to "All" and the category filter (added
+// later) wasn't consulted at all, so "Verify in IC" cleared every column
+// for the whole period regardless of what was actually visible.
 async function markEnteredIcForCurrentView() {
     const periodVal = document.getElementById('periodFilter')?.value || 'All';
-    const students = getFilteredStudents(periodVal, 'All');
+    const categoryVal = document.getElementById('categoryFilter')?.value || 'All';
+    const visibleKeys = new Set(lastSortedKeys.map(k => cleanKey(k)));
     const pairs = [];
-    students.forEach(s => {
+    lastOrderedStudents.forEach(s => {
         const sGrades = allGrades[s.studentId] || {};
         Object.entries(sGrades).forEach(([examId, g]) => {
+            if (!visibleKeys.has(cleanKey(examId))) return;
             if (g && typeof g === 'object' && g.score !== '' && g.score !== undefined && g.score !== null && !g.enteredIC) {
                 pairs.push({ student_id: s.studentId, exam_id: examId });
             }
@@ -989,7 +997,10 @@ async function markEnteredIcForCurrentView() {
         alert('No new grades to mark — nothing currently needs entering into IC in this view.');
         return;
     }
-    if (!confirm(`Mark ${pairs.length} grade(s) as entered in IC${periodVal !== 'All' ? ` for ${periodVal}` : ''}?`)) return;
+    const scopeParts = [];
+    if (periodVal !== 'All') scopeParts.push(periodVal);
+    if (categoryVal !== 'All') scopeParts.push(CATEGORY_LABELS[categoryVal] || (categoryVal === '__clockins' ? 'Clock-Ins' : categoryVal === '__preassessment' ? 'Pre-Tests / Pre-Scale' : categoryVal));
+    if (!confirm(`Mark ${pairs.length} grade(s) as entered in IC${scopeParts.length ? ` for ${scopeParts.join(' — ')}` : ''}?`)) return;
 
     const btn = document.getElementById('markEnteredIcBtn');
     btn.disabled = true;
@@ -1603,6 +1614,7 @@ let score = "", display = '', bg = "";
 
     lastOrderedStudents = orderedStudents;
     lastGrades = grades;
+    lastSortedKeys = sortedKeys;
 
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });
