@@ -906,12 +906,21 @@ function updatePeriodDropdown() {
 // manually-tagged label that could drift out of sync with how grades actually add up.
 const CATEGORY_LABELS = { project_quiz: 'Tests/Quizzes', assignment: 'Assignments', final: 'Final Exam', career: 'Career Readiness' };
 
+// A clock-in is identified by its exam_id naming pattern (matching the exact
+// check grade-weights.js uses), not by weight bucket -- CS folds clock-ins
+// into its "assignment" weight while WD1/WD2 fold them into "career", so a
+// weight-category filter alone could never isolate "just the clock-ins" the
+// same way across every course. "__clockins" is handled as its own special
+// case in renderGradebook rather than mapped through getAssignmentCategory.
+const isClockIn = (key) => { const l = key.toLowerCase(); return l.startsWith('tc-') || l.includes('timeclock'); };
+
 function updateCategoryDropdown() {
     const select = document.getElementById('categoryFilter');
     if (!select) return;
     const currentVal = select.value;
     let html = '<option value="All">All Categories</option>';
     Object.keys(CATEGORY_LABELS).forEach(key => { html += `<option value="${key}">${CATEGORY_LABELS[key]}</option>`; });
+    html += '<option value="__clockins">Clock-Ins</option>';
     select.innerHTML = html;
     if ([...select.options].some(opt => opt.value === currentVal)) select.value = currentVal;
     else select.value = 'All';
@@ -1213,13 +1222,15 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
     // toward in the real final-grade calculation.
     const courseKeyForView = getViewCourseKey(currentPeriod) || 'CS';
     const categoryVal = categoryFilterVal || 'All';
+    const columnMatchesCategory = (key) => categoryVal === 'All'
+        || (categoryVal === '__clockins' ? isClockIn(key) : getAssignmentCategory(key, courseKeyForView) === categoryVal);
 
     Object.keys(allAssignments).forEach(key => {
         // "-Score" entries hold the raw accuracy behind a flat completion
         // credit (e.g. diagnostic performance behind "Unit3-Pre"'s 15/15).
         // They're shown as a tooltip on the real column, not their own column.
         if (key.endsWith('-Score')) return;
-        if (categoryVal !== 'All' && getAssignmentCategory(key, courseKeyForView) !== categoryVal) return;
+        if (!columnMatchesCategory(key)) return;
         if(key !== 'lastSubmitDate' && isAssignmentVisible(key, currentPeriod)) {
             const ck = cleanKey(key);
             if (!seenCleanKeys.has(ck)) {
@@ -1236,7 +1247,7 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
         const sGrades = grades[s.studentId] || {};
         Object.keys(sGrades).forEach(key => {
             if (key.endsWith('-Score')) return;
-            if (categoryVal !== 'All' && getAssignmentCategory(key, courseKeyForView) !== categoryVal) return;
+            if (!columnMatchesCategory(key)) return;
             if(key !== 'lastSubmitDate' && isAssignmentVisible(key, currentPeriod)) {
                 const ck = cleanKey(key);
                 if (!seenCleanKeys.has(ck)) {
