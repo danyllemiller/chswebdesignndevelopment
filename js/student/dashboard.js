@@ -280,7 +280,18 @@ async function renderCoursePanel(user, courseKey, sectionId) {
 
         if (hasCurriculumChapters(courseKey)) {
             renderProficiencyScales(keys, myGrades, user.student_id, courseKey, saData.assessments);
-            if (saData.assessments) renderSelfAssessmentChart(saData.assessments, courseKey, myGrades);
+            // Awaited and caught on its own -- this call was previously fire-and-forget,
+            // so a Chart.js failure (e.g. undefined Chart) became an unhandled promise
+            // rejection instead of hitting the catch below, and would otherwise wipe out
+            // the grade table above (already rendered fine) with a false "could not load"
+            // message for what's really just a decorative chart failing.
+            if (saData.assessments) {
+                try {
+                    await renderSelfAssessmentChart(saData.assessments, courseKey, myGrades);
+                } catch (chartErr) {
+                    console.error(`Self-assessment chart failed for ${courseKey}:`, chartErr);
+                }
+            }
         }
     } catch (e) {
         console.error(`Error loading grades for ${courseKey}:`, e);
