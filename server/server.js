@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const authRoutes = require('./auth');
 const apiRoutes = require('./api');
 const shortlinkRoutes = require('./routes/shortlinks');
@@ -34,10 +35,34 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
+// Previously had no `store` set, which silently defaults express-session
+// to its built-in MemoryStore -- an in-process object that's entirely
+// wiped on every restart. Express-session's own docs call MemoryStore
+// "not designed for a production environment" for exactly this reason:
+// every `pm2 restart` (any deploy touching a server/ file) instantly
+// logged out every currently-active session server-side, while each
+// browser's cookie and client-cached authData still claimed they were
+// logged in -- surfacing later as random 403s on session-gated routes
+// with no obvious connection to a deploy that happened minutes earlier.
+// Backing the store with the same MySQL database already in use makes
+// sessions survive restarts (and would also survive a droplet failover,
+// since both boxes point at the same reconciled database).
+const sessionStore = new MySQLStore({
+    host: 'localhost',
+    user: 'root',
+    password: 'chs_password',
+    database: 'chs_gradebook',
+    // Table is auto-created on first run if missing; explicit here so
+    // it's easy to find (`SELECT * FROM sessions`) rather than guessing
+    // the package's default name.
+    schema: { tableName: 'sessions' }
+});
+
 app.use(session({
     secret: 'secure-session-key-12345',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: sessionStore
 }));
 
 // Route Mapping - API routes must come before static routes
