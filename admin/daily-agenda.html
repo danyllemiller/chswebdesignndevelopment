@@ -419,6 +419,8 @@
     font-size: .85rem;
     font-style: italic;
   }
+  #chapterLabel { color: inherit; text-decoration: none; }
+  #chapterLabel:hover { text-decoration: underline; }
 
   .nav-bar {
     display: flex;
@@ -529,7 +531,7 @@
   <div id="pageStamp" class="no-print"></div>
 
   <div class="footer-bar">
-    <span id="chapterLabel"></span>
+    <a id="chapterLabel" href="#" target="_blank" rel="noopener"></a>
     <span id="milestoneNote" class="d-none fw-bold text-warning"></span>
   </div>
 
@@ -603,6 +605,51 @@ const params  = new URLSearchParams(location.search);
 const course  = params.get('course');
 const courseCfg = COURSES[course];
 let track = 'main'; // reassigned below once courseCfg is known; shared so renderBellSchedule() can read it
+
+// ── Chapter label → real chapter page, for the clickable footer link ────
+// WD1 (chapters 1-8) lives under /year1/, WD2 continues the same numbering
+// (chapters 9-16) under /year2/ -- one continuous chapter sequence split
+// across two folders by level. CS's chapter→file map already exists as
+// its own JSON (used elsewhere on the site), fetched lazily only when
+// this is a CS agenda, since WD pages never need it.
+const WD_CHAPTER_FILES = {
+  1: 'join-the-developers-guild.html', 2: 'the-rules-how-not-to-get-sued.html', 3: 'the-blueprint.html',
+  4: 'the-why-intro-to-uiux.html', 5: 'the-bones-intro-to-html.html', 6: 'the-clothes-intro-to-css.html',
+  7: 'the-style-advanced-css-layout.html', 8: 'sights-sounds-making-it-pop-html-media.html',
+  9: 'the-brains-intro-to-javascript.html', 10: 'the-game-dev-advanced-js-game-logic.html',
+  11: 'the-cloud-collaboration-hosting.html', 12: 'the-manager-cms-platforms.html',
+  13: 'the-network-intro-to-apis.html', 14: 'the-brain-databases.html',
+  15: 'the-game-never-ends.html', 16: 'the-final-boss-going-live.html'
+};
+let csChapterFiles = null; // { chNum: 'file.html', ... }, filled in lazily
+if (course === 'cs_s1') {
+  fetch('/data/cs-course-map.json').then(r => r.json()).then(data => {
+    csChapterFiles = {};
+    (data.courseMap || []).forEach(unit => (unit.chapters || []).forEach(ch => { csChapterFiles[ch.ch] = ch.file; }));
+    // The page's first render can happen before this fetch resolves --
+    // patch the link in directly rather than re-running the full render,
+    // since other page state this early isn't guaranteed to be ready yet.
+    const el = document.getElementById('chapterLabel');
+    const url = el && el.textContent ? chapterLabelToUrl(el.textContent) : null;
+    if (url) { el.href = url; el.style.pointerEvents = ''; }
+  }).catch(() => { csChapterFiles = {}; });
+}
+
+function chapterLabelToUrl(label) {
+  const m = /^Chapter\s+(\d+)/i.exec(label || '');
+  if (!m) return null;
+  const chNum = parseInt(m[1], 10);
+  if (course === 'wd1' || course === 'wd2') {
+    const file = WD_CHAPTER_FILES[chNum];
+    if (!file) return null;
+    return `/${chNum <= 8 ? 'year1' : 'year2'}/${file}`;
+  }
+  if (course === 'cs_s1') {
+    const file = csChapterFiles && csChapterFiles[chNum];
+    return file ? `/compsci/${file}` : null;
+  }
+  return null;
+}
 
 // ── Bell schedule (shared with /calendar.html: special-dates.csv + DB events decide
 // the day type; /api/bell-schedule.php holds the period times for each type) ──────
@@ -997,7 +1044,11 @@ if (!courseCfg) {
     et.textContent = c && c.exitTicket ? c.exitTicket : '';
     et.setAttribute('contenteditable', editing);
 
-    document.getElementById('chapterLabel').textContent = c ? c.chapterLabel || '' : '';
+    const chapterLabelEl = document.getElementById('chapterLabel');
+    chapterLabelEl.textContent = c ? c.chapterLabel || '' : '';
+    const chapterUrl = c && c.chapterLabel ? chapterLabelToUrl(c.chapterLabel) : null;
+    if (chapterUrl) { chapterLabelEl.href = chapterUrl; chapterLabelEl.style.pointerEvents = ''; }
+    else { chapterLabelEl.removeAttribute('href'); chapterLabelEl.style.pointerEvents = 'none'; }
 
     const ms = document.getElementById('milestoneNote');
     if (c && c.milestone) {
