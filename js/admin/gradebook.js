@@ -914,6 +914,14 @@ const CATEGORY_LABELS = { project_quiz: 'Tests/Quizzes', assignment: 'Assignment
 // case in renderGradebook rather than mapped through getAssignmentCategory.
 const isClockIn = (key) => { const l = key.toLowerCase(); return l.startsWith('tc-') || l.includes('timeclock'); };
 
+// Same cross-cutting problem as clock-ins, in the other direction: CS's
+// "Unit1-Pre"/"Unit1-Pre-Score"/"Unit1 Pre-Scale" carry no weight keyword so
+// getAssignmentCategory buckets them as plain "assignment", while WD's
+// "Ch1 Pre-Assessment [15 pts]" matches "assessment" and lands in
+// "project_quiz" instead -- so a weight-category filter alone would show
+// pre-tests under a different label per course, or miss CS's entirely.
+const isPreAssessment = (key) => /pre-scale|pre-assessment|^unit\d+-pre(-score)?$|^cs-unit-\d+$/i.test(key);
+
 function updateCategoryDropdown() {
     const select = document.getElementById('categoryFilter');
     if (!select) return;
@@ -921,6 +929,7 @@ function updateCategoryDropdown() {
     let html = '<option value="All">All Categories</option>';
     Object.keys(CATEGORY_LABELS).forEach(key => { html += `<option value="${key}">${CATEGORY_LABELS[key]}</option>`; });
     html += '<option value="__clockins">Clock-Ins</option>';
+    html += '<option value="__preassessment">Pre-Tests / Pre-Scale</option>';
     select.innerHTML = html;
     if ([...select.options].some(opt => opt.value === currentVal)) select.value = currentVal;
     else select.value = 'All';
@@ -1222,8 +1231,12 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
     // toward in the real final-grade calculation.
     const courseKeyForView = getViewCourseKey(currentPeriod) || 'CS';
     const categoryVal = categoryFilterVal || 'All';
-    const columnMatchesCategory = (key) => categoryVal === 'All'
-        || (categoryVal === '__clockins' ? isClockIn(key) : getAssignmentCategory(key, courseKeyForView) === categoryVal);
+    const columnMatchesCategory = (key) => {
+        if (categoryVal === 'All') return true;
+        if (categoryVal === '__clockins') return isClockIn(key);
+        if (categoryVal === '__preassessment') return isPreAssessment(key);
+        return getAssignmentCategory(key, courseKeyForView) === categoryVal;
+    };
 
     Object.keys(allAssignments).forEach(key => {
         // "-Score" entries hold the raw accuracy behind a flat completion
