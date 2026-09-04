@@ -1513,23 +1513,29 @@ let score = "", display = '', bg = "";
                 }
             }
 
-            // If this cell has a companion raw-accuracy entry ("{key}-Score",
+            // If this column has a companion raw-accuracy exam_id ("{key}-Score",
             // e.g. a diagnostic's real performance behind its flat completion
-            // credit), surface it as a tooltip and a small on-cell marker.
-            let rawScoreAttrs = '';
-            const rawKey = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(key + '-Score'));
+            // credit), surface it as a small clickable on-cell marker -- checked
+            // against allAssignments (every known exam_id) rather than just this
+            // student's own sGrades, so the marker still appears -- as an empty
+            // "+" -- when the real score was never recorded at all, giving a way
+            // to enter it that isn't otherwise on this page.
+            const rawKey = Object.keys(allAssignments).find(k => cleanKey(k) === cleanKey(key + '-Score'));
             if (rawKey) {
-                const raw = sGrades[rawKey];
-                const rawScore = typeof raw === 'object' ? raw.score : raw;
-                const rawMax = (raw && typeof raw === 'object' && raw.max) ? raw.max : '';
-                if (rawScore !== '' && rawScore !== undefined && rawScore !== null) {
-                    const rawPct = rawMax ? Math.round((Number(rawScore) / Number(rawMax)) * 100) : '';
-                    rawScoreAttrs = ` data-bs-toggle="tooltip" title="Actual score: ${rawScore}${rawMax ? '/' + rawMax : ''}${rawPct !== '' ? ' (' + rawPct + '%)' : ''}"`;
-                    display += `<sup class="text-muted ms-1" style="font-size:0.6em;">${rawScore}${rawMax ? '/' + rawMax : ''}</sup>`;
-                }
+                const rawSGradeKey = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(rawKey));
+                const raw = rawSGradeKey ? sGrades[rawSGradeKey] : null;
+                const rawScore = raw ? (typeof raw === 'object' ? raw.score : raw) : '';
+                const rawMax = (raw && typeof raw === 'object' && raw.max) ? raw.max : (allAssignments[rawKey]?.maxPoints || '');
+                const hasRaw = rawScore !== '' && rawScore !== undefined && rawScore !== null;
+                const rawPct = (hasRaw && rawMax) ? Math.round((Number(rawScore) / Number(rawMax)) * 100) : '';
+                const markerLabel = hasRaw ? `${rawScore}${rawMax ? '/' + rawMax : ''}` : '+';
+                const markerTitle = hasRaw
+                    ? `Actual score: ${rawScore}${rawMax ? '/' + rawMax : ''}${rawPct !== '' ? ' (' + rawPct + '%)' : ''} -- click to edit`
+                    : 'Click to record the actual score earned';
+                display += `<sup class="raw-score-marker text-muted ms-1" style="font-size:0.6em;cursor:pointer;text-decoration:underline dotted;${hasRaw ? '' : 'opacity:.5;'}" title="${markerTitle}" data-raw-key="${rawKey}" data-raw-score="${hasRaw ? rawScore : ''}" data-raw-max="${rawMax}" data-student-id="${s.studentId}">${markerLabel}</sup>`;
             }
 
-            html += `<td class="grade-cell text-center border-end" style="${bg}"${rawScoreAttrs} data-student-id="${s.studentId}" data-assignment="${key}" data-current-score="${score}" data-current-max="${info.maxPoints}" data-row-index="${rowIndex}" data-col-index="${colIndex}">${display}</td>`;
+            html += `<td class="grade-cell text-center border-end" style="${bg}" data-student-id="${s.studentId}" data-assignment="${key}" data-current-score="${score}" data-current-max="${info.maxPoints}" data-row-index="${rowIndex}" data-col-index="${colIndex}">${display}</td>`;
         });
         html += '</tr>';
     });
@@ -1696,8 +1702,14 @@ function discardPendingChanges() {
     if (!confirm(`Discard ${pendingChanges.size} unsaved change${pendingChanges.size === 1 ? '' : 's'}? This cannot be undone.`)) return;
     pendingChanges.forEach(ch => {
         ch.cellEl.classList.remove('pending-change');
-        ch.cellEl.dataset.currentScore = ch.oldScore;
-        renderGradeCellValue(ch.cellEl, ch.oldScore, ch.oldMax);
+        if (ch.type === 'raw') {
+            ch.cellEl.dataset.rawScore = ch.oldScore;
+            ch.cellEl.textContent = (ch.oldScore === "" || ch.oldScore === null || ch.oldScore === undefined) ? '+' : `${ch.oldScore}${ch.oldMax ? '/' + ch.oldMax : ''}`;
+            ch.cellEl.style.opacity = (ch.oldScore === "" || ch.oldScore === null || ch.oldScore === undefined) ? '.5' : '1';
+        } else {
+            ch.cellEl.dataset.currentScore = ch.oldScore;
+            renderGradeCellValue(ch.cellEl, ch.oldScore, ch.oldMax);
+        }
     });
     pendingChanges.clear();
     updatePendingChangesBar();
@@ -1773,6 +1785,39 @@ document.addEventListener('click', (e) => {
 
     if (target.closest('.award-sticker-btn')) {
         openStickerModal(target.closest('.award-sticker-btn').dataset.studentId);
+        return;
+    }
+
+    const rawMarker = target.closest('.raw-score-marker');
+    if (rawMarker) {
+        const studentId = rawMarker.dataset.studentId;
+        const rawKey = rawMarker.dataset.rawKey;
+        const currentRaw = rawMarker.dataset.rawScore;
+        const currentRawMax = rawMarker.dataset.rawMax;
+        const input = prompt(`Actual score earned${currentRawMax ? ' (out of ' + currentRawMax + ')' : ''} for ${rawKey}:`, currentRaw || '');
+        if (input === null) return;
+        const val = input.trim();
+        const final = val === "" ? "" : Number(val);
+        if (val !== "" && isNaN(final)) { alert('Enter a number.'); return; }
+
+        const pendingKey = `${studentId}::${rawKey}`;
+        const existing = pendingChanges.get(pendingKey);
+        const trueOriginalScore = existing ? existing.oldScore : (currentRaw || "");
+        const trueOriginalMax = existing ? existing.oldMax : (Number(currentRawMax) || 0);
+
+        if (String(final) === String(trueOriginalScore)) {
+            pendingChanges.delete(pendingKey);
+        } else {
+            pendingChanges.set(pendingKey, {
+                studentId, assignment: rawKey, newScore: final, newMax: Number(currentRawMax) || trueOriginalMax,
+                oldScore: trueOriginalScore, oldMax: trueOriginalMax, cellEl: rawMarker, type: 'raw'
+            });
+        }
+        rawMarker.dataset.rawScore = final;
+        rawMarker.textContent = final === "" ? '+' : `${final}${currentRawMax ? '/' + currentRawMax : ''}`;
+        rawMarker.style.opacity = final === "" ? '.5' : '1';
+        rawMarker.classList.toggle('pending-change', pendingChanges.has(pendingKey));
+        updatePendingChangesBar();
         return;
     }
 
