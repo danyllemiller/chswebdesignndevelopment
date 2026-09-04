@@ -1085,12 +1085,35 @@ table tbody tr td {
   border-color: var(--calendar-border) !important;
 }
 
-/* Sticky columns in gradebook */
-table.table-spreadsheet tbody td.sticky-col,
+/* Sticky columns in gradebook.
+   Regular student rows are sticky LEFT only, so as you scroll down they
+   pass underneath the calc-rows (Due Date / Possible Points / Class
+   Average), which are sticky BOTH left and top (pinned under the header).
+   Both used to share the same z-index:10 -- a tie the browser breaks by
+   DOM order, and since student rows come after the calc-rows in the
+   markup, a scrolling student's name cell won that tie and rendered on
+   TOP of the pinned rows instead of sliding underneath them, while every
+   other (non-sticky-col) column had no such tie and correctly stayed
+   under. Calc-rows now sit strictly above regular rows so they always win. */
+table.table-spreadsheet tbody td.sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 8;
+  border-right: 0.125rem solid var(--calendar-border) !important;
+  min-width: 11.25rem !important;
+  max-width: 11.25rem !important;
+  width: 11.25rem !important;
+  background-color: var(--secondary-color) !important;
+  color: var(--calendar-text-dark) !important;
+  padding: 0.15rem 0.25rem !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 table.table-spreadsheet tr.calc-row td.sticky-col {
   position: sticky;
   left: 0;
-  z-index: 10;
+  z-index: 11;
   border-right: 0.125rem solid var(--calendar-border) !important;
   min-width: 11.25rem !important;
   max-width: 11.25rem !important;
