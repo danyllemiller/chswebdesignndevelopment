@@ -149,6 +149,11 @@ async function computeStudentGrade(connection, studentId, sectionId) {
         const max = r.total_points || parsePts(key);
         const score = r.score;
         if (score === 'Submitted') return;
+        // Excused work is fully excluded, regardless of due date. Previously
+        // "EX" wasn't caught here at all, so it fell through to hasScore=true
+        // and Number("EX") produced NaN, silently corrupting the running total
+        // (and, downstream, the grade-based paystub calc in paystubs.js).
+        if (score === 'EX') return;
 
         const hasScore = score !== undefined && score !== null && score !== '';
         if (!hasScore) {

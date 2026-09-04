@@ -372,6 +372,11 @@ function calculateGradeStats(keys, myGrades, registryData, courseKey) {
             const max = registryData?.[key]?.maxPoints || parsePts(key);
             const score = typeof myGrades[key] === 'object' ? myGrades[key].score : myGrades[key];
             if (score === "Submitted") return; // turned in, awaiting a numeric grade — not a zero
+            // Excused work is fully excluded, regardless of due date. Previously
+            // "EX" wasn't caught here at all, so it fell through to hasScore=true
+            // and Number("EX") produced NaN, silently corrupting the running total
+            // for the rest of this student's course.
+            if (score === "EX") return;
 
             const hasScore = score !== undefined && score !== null && score !== "";
             if (!hasScore) {

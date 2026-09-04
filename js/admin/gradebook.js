@@ -1435,7 +1435,14 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
             const isPeriodExempt = hasPeriodDueDates && !studentPeriodDueDate && (score === "" || score === undefined);
             if (isPeriodExempt) return;
 
-            const hasScore = score !== undefined && score !== null && score !== "" && score !== "EX";
+            // Excused work is fully excluded from both earned and possible,
+            // regardless of due date -- previously this fell through to the
+            // past-due zero-counting branch below once the due date passed,
+            // silently counting an EX as a 0 against the denominator and
+            // tanking the percentage for anyone with excused work.
+            if (score === "EX") return;
+
+            const hasScore = score !== undefined && score !== null && score !== "";
             if (!hasScore) {
                 // Ungraded — only count it as a missed zero once its due date
                 // has actually passed, so students aren't dinged for work
