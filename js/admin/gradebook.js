@@ -900,14 +900,32 @@ function updatePeriodDropdown() {
     }
 }
 
+// Filter options are the same weighted categories COURSE_WEIGHTS/getAssignmentCategory
+// already use to compute the real final grade (grade-weights.js) -- so "Tests/Quizzes"
+// here means exactly the assignments counted in that weight bucket, not a separate
+// manually-tagged label that could drift out of sync with how grades actually add up.
+const CATEGORY_LABELS = { project_quiz: 'Tests/Quizzes', assignment: 'Assignments', final: 'Final Exam', career: 'Career Readiness' };
+
+function updateCategoryDropdown() {
+    const select = document.getElementById('categoryFilter');
+    if (!select) return;
+    const currentVal = select.value;
+    let html = '<option value="All">All Categories</option>';
+    Object.keys(CATEGORY_LABELS).forEach(key => { html += `<option value="${key}">${CATEGORY_LABELS[key]}</option>`; });
+    select.innerHTML = html;
+    if ([...select.options].some(opt => opt.value === currentVal)) select.value = currentVal;
+    else select.value = 'All';
+}
+
 function applyFiltersAndRender() {
     const periodVal = document.getElementById('periodFilter')?.value || 'All';
     const studentVal = document.getElementById('studentFilter')?.value || 'All';
+    const categoryVal = document.getElementById('categoryFilter')?.value || 'All';
     if (!periodVal || periodVal.includes('Select')) {
         document.getElementById('gradebookBody').innerHTML = '<tr><td colspan="100%" class="text-center p-5 text-muted"><h4>No Class Selected</h4></td></tr>';
         return;
     }
-    renderGradebook(getFilteredStudents(periodVal, studentVal), allGrades, periodVal);
+    renderGradebook(getFilteredStudents(periodVal, studentVal), allGrades, periodVal, categoryVal);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -928,6 +946,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('studentFilter')?.addEventListener('change', applyFiltersAndRender);
+    document.getElementById('categoryFilter')?.addEventListener('change', applyFiltersAndRender);
 
     document.getElementById('markEnteredIcBtn')?.addEventListener('click', markEnteredIcForCurrentView);
 });
@@ -1048,6 +1067,7 @@ async function loadData() {
             }
         } catch (e) { console.error('Failed to load stickers', e); }
 
+        updateCategoryDropdown();
         applyFiltersAndRender();
     } catch (e) {
         console.error(e);
@@ -1181,17 +1201,25 @@ function resolveDueDate(key, periodFilterVal) {
     return reg?.dueDate || window.earliestSubmissions[key]?.global || '';
 }
 
-function renderGradebook(students, grades, currentPeriod) {
+function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
     const thead = document.getElementById('gradebookHead');
     const tbody = document.getElementById('gradebookBody');
     const assignmentMap = new Map();
     const seenCleanKeys = new Set();
+
+    // Same course-key resolution used for weight-based sorting below, reused
+    // here so the category filter checks a column against the exact weight
+    // bucket ("Tests/Quizzes" == project_quiz, etc.) it actually counts
+    // toward in the real final-grade calculation.
+    const courseKeyForView = getViewCourseKey(currentPeriod) || 'CS';
+    const categoryVal = categoryFilterVal || 'All';
 
     Object.keys(allAssignments).forEach(key => {
         // "-Score" entries hold the raw accuracy behind a flat completion
         // credit (e.g. diagnostic performance behind "Unit3-Pre"'s 15/15).
         // They're shown as a tooltip on the real column, not their own column.
         if (key.endsWith('-Score')) return;
+        if (categoryVal !== 'All' && getAssignmentCategory(key, courseKeyForView) !== categoryVal) return;
         if(key !== 'lastSubmitDate' && isAssignmentVisible(key, currentPeriod)) {
             const ck = cleanKey(key);
             if (!seenCleanKeys.has(ck)) {
@@ -1208,6 +1236,7 @@ function renderGradebook(students, grades, currentPeriod) {
         const sGrades = grades[s.studentId] || {};
         Object.keys(sGrades).forEach(key => {
             if (key.endsWith('-Score')) return;
+            if (categoryVal !== 'All' && getAssignmentCategory(key, courseKeyForView) !== categoryVal) return;
             if(key !== 'lastSubmitDate' && isAssignmentVisible(key, currentPeriod)) {
                 const ck = cleanKey(key);
                 if (!seenCleanKeys.has(ck)) {
@@ -1225,13 +1254,12 @@ function renderGradebook(students, grades, currentPeriod) {
     // outweighs a regular Assignment), or Alphabetical, each forward/backward.
     // "Weight" uses the active view's course when filtered; falls back to CS
     // for an unfiltered/mixed view, since it's just an ordering aid there.
-    const sortCourseKey = getViewCourseKey(currentPeriod) || 'CS';
-    const sortWeights = COURSE_WEIGHTS[sortCourseKey] || COURSE_WEIGHTS.CS;
+    const sortWeights = COURSE_WEIGHTS[courseKeyForView] || COURSE_WEIGHTS.CS;
     const sortedKeys = Array.from(assignmentMap.keys()).sort((a, b) => {
         let cmp;
         if (assignmentSortMode === 'weight') {
-            const wA = sortWeights[getAssignmentCategory(a, sortCourseKey)] || 0;
-            const wB = sortWeights[getAssignmentCategory(b, sortCourseKey)] || 0;
+            const wA = sortWeights[getAssignmentCategory(a, courseKeyForView)] || 0;
+            const wB = sortWeights[getAssignmentCategory(b, courseKeyForView)] || 0;
             cmp = wB - wA || a.localeCompare(b);
         } else if (assignmentSortMode === 'alpha') {
             cmp = a.localeCompare(b);
@@ -1892,7 +1920,7 @@ async function saveAddCol() {
     const date = document.getElementById('addColDueDate').value;
     const inst = document.getElementById('addColInstructions').value;
     const course = document.getElementById('addColCourse').value;
-    
+
     if (!name) return alert("Name required");
     const finalName = `${name} [${pts} pts]`;
     
@@ -1915,8 +1943,9 @@ async function saveAddCol() {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ exam_id: finalName, title: name, total_points: pts, due_date: date || null, instructions: inst, course_id: dbCourseId })
         });
-        
+
         allAssignments[finalName] = { maxPoints: pts, dueDate: date, instructions: inst, targetCourse: dbCourseId, periodDueDates: periodDates };
+        updateCategoryDropdown();
         applyFiltersAndRender();
         getModal('addColModal').hide();
     } catch (err) { alert("Failed to save new column."); }
@@ -1929,7 +1958,7 @@ async function saveColEdit() {
     const date = document.getElementById('editColDueDate').value;
     const final = `${name} [${pts} pts]`;
     const course = document.getElementById('editColCourse').value;
-    
+
     const periodDates = {};
     document.querySelectorAll('#editColPeriodDates .period-due-date-input').forEach(i => periodDates[i.dataset.period] = i.value);
     
@@ -1949,10 +1978,11 @@ async function saveColEdit() {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ old_exam_id: old, exam_id: final, title: name, total_points: pts, due_date: date || null, instructions: document.getElementById('editColInstructions').value, course_id: dbCourseId })
         });
-        
+
         delete allAssignments[old];
         allAssignments[final] = { maxPoints: pts, dueDate: date, periodDueDates: periodDates, instructions: document.getElementById('editColInstructions').value, targetCourse: dbCourseId };
-        
+        updateCategoryDropdown();
+
         Object.keys(allGrades).forEach(sId => {
             if (allGrades[sId][old]) {
                 allGrades[sId][final] = allGrades[sId][old];
