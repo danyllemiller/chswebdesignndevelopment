@@ -166,7 +166,6 @@
   .label-donow     { left: 23.8%;  top: calc(15.93% - 1.3rem); width: 52.14%; }
   .label-tasks     { left: 23.8%;  top: calc(38.33% - 1.3rem); width: 52.14%; }
   .label-schedule  { left: 78.39%; top: calc(15.93% - 1.3rem); width: 19.43%; }
-  .label-timer     { left: 78.39%; top: calc(73.8% - 1.3rem);  width: 19.43%; }
 
   .agenda-canvas {
     position: relative;
@@ -206,7 +205,6 @@
   .zone-donow     { left: 23.8%;  top: 15.93%; width: 52.14%; height: 16.39%; }
   .zone-tasks     { left: 23.8%;  top: 38.33%; width: 52.14%; height: 57.22%; }
   .zone-schedule  { left: 78.39%; top: 15.93%; width: 19.43%; height: 52.13%; }
-  .zone-timer     { left: 78.39%; top: 73.8%;  width: 19.43%; height: 21.76%; }
 
   .zone-donow, .zone-tasks { font-size: 1.05rem; }
 
@@ -275,11 +273,6 @@
   .timer-controls .btn { padding: .1rem .4rem; font-size: .7rem; }
   .timer-presets button { padding: .1rem .4rem; font-size: .68rem; }
 
-  .panel-btn-group {
-    position: absolute; top: .3rem; right: .3rem; z-index: 3;
-    display: flex; gap: .25rem;
-  }
-  .panel-btn-group .btn { padding: .1rem .35rem; font-size: .7rem; }
   .sound-meter-track {
     position: relative;
     height: 90px; border-radius: .5rem; overflow: hidden;
@@ -304,41 +297,104 @@
   .sound-alarm-controls { margin-top: .5rem; }
   .sound-alarm-label { font-size: .68rem; color: var(--text-muted); }
   .form-range { height: 1rem; }
-  #soundPanel.alarm-active .sound-meter-track {
+  .tool-widget.alarm-active .sound-meter-track {
     animation: alarmFlash .5s steps(1) infinite;
   }
-  #soundPanel.alarm-active .sound-meter-label { color: #ef4444; }
+  .tool-widget.alarm-active .sound-meter-label { color: #ef4444; }
+  .tool-widget.alarm-active { animation: alarmFlash .5s steps(1) infinite; }
   @keyframes alarmFlash {
     50% { box-shadow: 0 0 0 3px #ef4444; }
   }
 
-  /* Timer/Sound Meter blown up to fill the whole browser window */
-  #fillWindowOverlay {
-    position: fixed; inset: 0; z-index: 99999;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
+  /* ── Floating classroom tool widgets (classroomscreen-style toolbar) ── */
+  #widgetsLayer { position: fixed; inset: 0; z-index: 500; pointer-events: none; }
+  .tool-widget {
+    position: absolute; pointer-events: auto;
+    background: rgba(15,17,25,.94); border: 1px solid rgba(255,255,255,.22);
+    border-radius: .6rem; box-shadow: 0 10px 30px rgba(0,0,0,.45);
+    min-width: 230px; min-height: 180px; display: flex; flex-direction: column;
+    color: #f1f1f5; overflow: hidden;
   }
-  #fillWindowOverlay.d-none { display: none; }
-  .shrink-window-btn {
-    position: absolute; top: 1.25rem; right: 1.25rem; z-index: 3;
-    font-size: 1.1rem; padding: .5rem .8rem;
+  .tool-widget.selected { box-shadow: 0 0 0 2px #6ea8fe, 0 10px 30px rgba(0,0,0,.45); }
+  .tool-widget.maximized {
+    position: fixed !important; inset: 3vh 3vw !important;
+    width: auto !important; height: auto !important; z-index: 99999 !important;
   }
-  #fillWindowOverlay .panel-btn-group { top: 1.25rem; left: 1.25rem; right: auto; }
-  #fillWindowOverlay .panel-btn-group .btn { font-size: 1.1rem; padding: .5rem .8rem; }
-  #fillWindowOverlay #fillWindowBtn { display: none; }
-  #fillWindowOverlay #timerPanel,
-  #fillWindowOverlay #soundPanel { display: flex; flex-direction: column; align-items: center; }
-  #fillWindowOverlay .timer-display { font-size: 16rem; line-height: 1; margin-bottom: 2rem; }
-  #fillWindowOverlay .timer-controls .btn { font-size: 1.4rem; padding: .6rem 1.4rem; }
-  #fillWindowOverlay .timer-presets button { font-size: 1.2rem; padding: .5rem 1rem; }
-  #fillWindowOverlay #timerCustomMins { font-size: 1.2rem; width: 110px !important; height: auto; }
-  #fillWindowOverlay #timerSetCustom { font-size: 1.2rem; padding: .5rem 1rem; }
-  #fillWindowOverlay .sound-meter-track { height: 60vh; width: 180px; }
-  #fillWindowOverlay .sound-meter-label { font-size: 3rem; margin-top: 1.5rem; }
-  #fillWindowOverlay #soundMicToggle { font-size: 1.3rem; padding: .6rem 1.6rem; margin-top: 1rem; width: auto !important; }
-  #fillWindowOverlay .sound-alarm-controls { width: 260px; margin-top: 1.5rem; }
-  #fillWindowOverlay .sound-alarm-label { font-size: 1rem; }
-  #fillWindowOverlay .form-range { height: 1.5rem; }
+  .tw-header {
+    display: flex; align-items: center; gap: .4rem; padding: .4rem .55rem;
+    background: rgba(255,255,255,.07); cursor: move; user-select: none;
+    font-size: .78rem; font-weight: 700; letter-spacing: .01em; flex: 0 0 auto;
+  }
+  .tw-header .tw-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tw-header button {
+    background: none; border: none; color: #fff; opacity: .7; padding: .15rem .4rem;
+    font-size: .8rem; line-height: 1; border-radius: .25rem;
+  }
+  .tw-header button:hover { opacity: 1; background: rgba(255,255,255,.12); }
+  .tw-body { flex: 1 1 auto; overflow: auto; position: relative; padding: .75rem; min-height: 0; }
+  .tw-body.tw-body-flush { padding: 0; }
+  .tw-body iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .tw-resize {
+    position: absolute; right: 0; bottom: 0; width: 18px; height: 18px; cursor: nwse-resize;
+    background: linear-gradient(135deg, transparent 55%, rgba(255,255,255,.4) 55%);
+    z-index: 2;
+  }
+  .tool-widget.maximized .tw-resize { display: none; }
+  .tool-widget.dragging iframe, .tool-widget.resizing iframe { pointer-events: none; }
+  .tool-widget.maximized .tw-body { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .tool-widget.maximized .timer-display { font-size: min(20vw, 16rem); line-height: 1; margin-bottom: 2rem; }
+  .tool-widget.maximized .timer-controls .btn { font-size: 1.4rem; padding: .6rem 1.4rem; }
+  .tool-widget.maximized .timer-presets button { font-size: 1.2rem; padding: .5rem 1rem; }
+  .tool-widget.maximized .tt-custom-mins { font-size: 1.2rem; width: 110px !important; height: auto; }
+  .tool-widget.maximized .tt-set-custom { font-size: 1.2rem; padding: .5rem 1rem; }
+  .tool-widget.maximized .sound-meter-track { height: 55vh; width: 180px; }
+  .tool-widget.maximized .sound-meter-label { font-size: 3rem; margin-top: 1.5rem; }
+  .tool-widget.maximized .ss-mic-toggle { font-size: 1.3rem; padding: .6rem 1.6rem; margin-top: 1rem; width: auto !important; }
+  .tool-widget.maximized .sound-alarm-controls { width: 260px; margin-top: 1.5rem; }
+  .tool-widget.maximized .sound-alarm-label { font-size: 1rem; }
+  .tool-widget.maximized .form-range { height: 1.5rem; }
+
+  /* Traffic light */
+  .traffic-light-widget { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .9rem; height: 100%; }
+  .tl-light {
+    width: 3.2rem; height: 3.2rem; border-radius: 50%; cursor: pointer;
+    background: rgba(255,255,255,.08); border: 2px solid rgba(255,255,255,.15);
+    transition: box-shadow .15s, background .15s;
+  }
+  .tl-light.tl-red.lit { background: #ef4444; box-shadow: 0 0 22px 6px rgba(239,68,68,.75); }
+  .tl-light.tl-yellow.lit { background: #eab308; box-shadow: 0 0 22px 6px rgba(234,179,8,.75); }
+  .tl-light.tl-green.lit { background: #22c55e; box-shadow: 0 0 22px 6px rgba(34,197,94,.75); }
+  .tool-widget.maximized .tl-light { width: 9rem; height: 9rem; }
+  .tool-widget.maximized .traffic-light-widget { gap: 2.5rem; }
+
+  /* Work symbols */
+  .work-symbols-widget { display: flex; flex-direction: column; height: 100%; gap: .75rem; }
+  .ws-picker { display: flex; gap: .3rem; flex-wrap: wrap; justify-content: center; flex: 0 0 auto; }
+  .ws-picker button {
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); color: #fff;
+    border-radius: .4rem; padding: .4rem .5rem; font-size: .95rem;
+  }
+  .ws-picker button.active, .ws-picker button:hover { background: rgba(110,168,254,.35); border-color: #6ea8fe; }
+  .ws-display { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem; text-align: center; }
+  .ws-display-icon { font-size: 3.5rem; }
+  .ws-display-label { font-size: 1.1rem; font-weight: 700; }
+  .tool-widget.maximized .ws-display-icon { font-size: 12rem; }
+  .tool-widget.maximized .ws-display-label { font-size: 2.5rem; }
+
+  /* Toolbar */
+  #toolBeltBar {
+    position: fixed; left: 50%; bottom: .7rem; transform: translateX(-50%);
+    z-index: 600; display: flex; gap: .2rem; background: rgba(15,17,25,.85);
+    padding: .35rem .4rem; border-radius: .7rem; box-shadow: 0 4px 18px rgba(0,0,0,.4);
+    backdrop-filter: blur(4px);
+  }
+  #toolBeltBar button {
+    display: flex; flex-direction: column; align-items: center; gap: .1rem;
+    background: none; border: none; color: #f1f1f5; font-size: .6rem; padding: .3rem .5rem;
+    border-radius: .4rem; opacity: .8;
+  }
+  #toolBeltBar button i { font-size: 1.05rem; }
+  #toolBeltBar button:hover, #toolBeltBar button.active { opacity: 1; background: rgba(255,255,255,.14); }
 
   #pageStamp {
     position: fixed;
@@ -467,57 +523,6 @@
       <div id="scheduleBox"></div>
     </div>
 
-    <h3 class="section-label label-timer" data-tag="h3" data-cmt="Timer">Timer</h3>
-    <div class="zone zone-timer">
-      <div class="panel-btn-group">
-        <button id="panelModeToggle" class="btn btn-sm btn-outline-light" title="Switch between Timer and Sound Meter"><i class="fas fa-volume-high"></i></button>
-        <button id="fillWindowBtn" class="btn btn-sm btn-outline-light" title="Fill the window"><i class="fas fa-expand"></i></button>
-      </div>
-
-      <div id="timerPanel">
-        <div id="timerDisplay" class="timer-display">05:00</div>
-        <div class="timer-controls mb-2">
-          <button id="timerStartPause" class="btn btn-sm btn-success">Start</button>
-          <button id="timerReset" class="btn btn-sm btn-outline-secondary">Reset</button>
-          <button id="timerModeToggle" class="btn btn-sm btn-outline-info">Stopwatch</button>
-        </div>
-        <div class="timer-presets d-flex gap-1 justify-content-center flex-wrap mb-2">
-          <button class="btn btn-outline-light" data-mins="1">1m</button>
-          <button class="btn btn-outline-light" data-mins="5">5m</button>
-          <button class="btn btn-outline-light" data-mins="10">10m</button>
-          <button class="btn btn-outline-light" data-mins="15">15m</button>
-          <button class="btn btn-outline-light" data-mins="20">20m</button>
-        </div>
-        <div class="d-flex justify-content-center gap-1">
-          <input id="timerCustomMins" type="number" min="0" max="180" placeholder="min" class="form-control form-control-sm" style="width:60px">
-          <button id="timerSetCustom" class="btn btn-sm btn-outline-warning">Set</button>
-        </div>
-      </div>
-
-      <div id="soundPanel" class="d-none">
-        <div class="sound-meter-track">
-          <div id="soundAlarmMarker" class="sound-alarm-marker"></div>
-          <div id="soundMeterFill" class="sound-meter-fill"></div>
-        </div>
-        <div id="soundMeterLabel" class="sound-meter-label">Mic off</div>
-
-        <div class="sound-alarm-controls">
-          <label class="sound-alarm-label" for="soundAlarmLevel">Alarm above <span id="soundAlarmLevelVal">70</span>%</label>
-          <input type="range" id="soundAlarmLevel" min="10" max="100" value="70" class="form-range">
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="soundAlarmEnabled" checked>
-            <label class="form-check-label sound-alarm-label" for="soundAlarmEnabled">Alarm sound</label>
-          </div>
-          <select id="soundAlarmChoice" class="form-select form-select-sm mt-1">
-            <option value="scratch">Scratch Alarm</option>
-            <option value="clock">Alarm Clock</option>
-            <option value="both" selected>Both</option>
-          </select>
-        </div>
-
-        <button id="soundMicToggle" class="btn btn-sm btn-outline-success w-100 mt-2"><i class="fas fa-microphone me-1"></i>Start Listening</button>
-      </div>
-    </div>
   </div>
   </div>
 
@@ -549,14 +554,13 @@
   </div>
 </div>
 
-<!-- Kept as a body-level sibling of #agendaRoot (not nested inside it): a
+<!-- Kept as body-level siblings of #agendaRoot (not nested inside it): a
      CSS transform on an ancestor would create a new containing block for
-     this position:fixed "fill the real browser window" overlay, trapping it
-     inside that ancestor instead of the actual window. Nothing here is
-     transformed today, but this stays a safe place for it regardless. -->
-<div id="fillWindowOverlay" class="d-none no-print">
-  <button id="shrinkWindowBtn" class="btn btn-outline-light shrink-window-btn" title="Exit full window"><i class="fas fa-compress"></i></button>
-</div>
+     these position:fixed elements, trapping them inside that ancestor
+     instead of the actual window. Nothing here is transformed today, but
+     this stays a safe place for it regardless. -->
+<div id="widgetsLayer" class="no-print"></div>
+<div id="toolBeltBar" class="no-print"></div>
 
 <script src="/js/bootstrap.bundle.js"></script>
 <script>
@@ -1083,270 +1087,434 @@ if (!courseCfg) {
   tickClock();
   setInterval(tickClock, 1000);
 
-  // ── Timer (countdown + stopwatch) ──────────────────────────────────────
-  let timerSeconds = 300;
-  let timerRemaining = 300;
-  let timerRunning = false;
-  let timerInterval = null;
-  let stopwatchMode = false;
-  let stopwatchElapsed = 0;
+  // ══════════════════════════════════════════════════════════════════════
+  // FLOATING CLASSROOM TOOL WIDGETS (classroomscreen-style toolbar)
+  // Timer and Sound Level used to share one fixed box in the layout with a
+  // toggle between them; both are now fully independent floating widgets,
+  // alongside brand-new Traffic Light and Work Symbols widgets and the six
+  // existing full-page tools (Randomizer, Dice, Group Maker, Scoreboard,
+  // Word Cloud, Polls) embedded live via iframe -- reusing every bit of
+  // their existing logic instead of rebuilding any of it. Click a toolbar
+  // icon to pop one out; drag by its header, resize from the corner,
+  // maximize, or close. Clicking a widget selects it (blue outline); with
+  // one selected, Delete/Backspace closes it too -- unless focus is inside
+  // a text field within the widget (typing a custom timer length shouldn't
+  // nuke the widget on backspace).
+  // ══════════════════════════════════════════════════════════════════════
+  const TOOLS = [
+    { id: 'timer',      icon: 'fa-hourglass-half',       label: 'Timer' },
+    { id: 'sound',      icon: 'fa-volume-high',          label: 'Sound Level' },
+    { id: 'traffic',    icon: 'fa-traffic-light',        label: 'Traffic Light' },
+    { id: 'work',       icon: 'fa-hand',                 label: 'Work Symbols' },
+    { id: 'randomizer', icon: 'fa-shuffle',              label: 'Randomizer',  src: '/admin/tools/random-name-picker.html' },
+    { id: 'dice',       icon: 'fa-dice',                 label: 'Dice',        src: '/admin/tools/dice.html' },
+    { id: 'groups',     icon: 'fa-people-group',         label: 'Group Maker', src: '/admin/tools/group-maker.html' },
+    { id: 'scoreboard', icon: 'fa-trophy',                label: 'Scoreboard',  src: '/admin/tools/scoreboard.html' },
+    { id: 'wordcloud',  icon: 'fa-cloud',                 label: 'Word Cloud',  src: '/admin/tools/word-cloud.html' },
+    { id: 'polls',      icon: 'fa-square-poll-vertical',  label: 'Polls',       src: '/admin/tools/polls.html' },
+  ];
 
-  function fmtTimer(totalSecs) {
-    const m = Math.floor(totalSecs / 60);
-    const s = totalSecs % 60;
-    return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-  }
+  const openWidgets = new Map(); // toolId -> { el, cleanup }
+  let widgetZCounter = 10;
+  let selectedWidget = null;
 
-  function updateTimerDisplay() {
-    document.getElementById('timerDisplay').textContent = stopwatchMode ? fmtTimer(stopwatchElapsed) : fmtTimer(timerRemaining);
-  }
-
-  function timerTick() {
-    if (stopwatchMode) {
-      stopwatchElapsed++;
-    } else {
-      timerRemaining--;
-      if (timerRemaining <= 0) {
-        timerRemaining = 0;
-        updateTimerDisplay();
-        pauseTimer();
-        startAlarm();
-        return;
-      }
-    }
-    updateTimerDisplay();
-  }
-
-  function startTimer() {
-    primeAlarmAudio(); // unlock the alarm sound now, on this click, in case the sound meter was never opened
-    timerRunning = true;
-    document.getElementById('timerStartPause').textContent = 'Pause';
-    timerInterval = setInterval(timerTick, 1000);
-  }
-  function pauseTimer() {
-    timerRunning = false;
-    document.getElementById('timerStartPause').textContent = 'Start';
-    clearInterval(timerInterval);
-  }
-  document.getElementById('timerStartPause').addEventListener('click', () => {
-    timerRunning ? pauseTimer() : startTimer();
-  });
-  document.getElementById('timerReset').addEventListener('click', () => {
-    pauseTimer();
-    timerRemaining = timerSeconds;
-    stopwatchElapsed = 0;
-    updateTimerDisplay();
-  });
-  document.getElementById('timerModeToggle').addEventListener('click', () => {
-    pauseTimer();
-    stopwatchMode = !stopwatchMode;
-    document.getElementById('timerModeToggle').textContent = stopwatchMode ? 'Countdown' : 'Stopwatch';
-    stopwatchElapsed = 0;
-    timerRemaining = timerSeconds;
-    updateTimerDisplay();
-  });
-  document.querySelectorAll('.timer-presets button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      pauseTimer();
-      stopwatchMode = false;
-      document.getElementById('timerModeToggle').textContent = 'Stopwatch';
-      timerSeconds = parseInt(btn.dataset.mins, 10) * 60;
-      timerRemaining = timerSeconds;
-      updateTimerDisplay();
-    });
-  });
-  document.getElementById('timerSetCustom').addEventListener('click', () => {
-    const mins = parseInt(document.getElementById('timerCustomMins').value, 10);
-    if (!mins || mins < 0) return;
-    pauseTimer();
-    stopwatchMode = false;
-    document.getElementById('timerModeToggle').textContent = 'Stopwatch';
-    timerSeconds = mins * 60;
-    timerRemaining = timerSeconds;
-    updateTimerDisplay();
-  });
-  updateTimerDisplay();
-
-  // ── Sound level meter (shares the Timer box via a toggle) ──────────────
-  let soundAudioCtx = null, soundAnalyser = null, soundStream = null, soundRAF = null;
-  let alarmLevel = 70, alarmEnabled = true, alarmActive = false;
-
-  const ALARM_BURST_MS = 3000;
-  const ALARM_SOUNDS = {
-    scratch: new Audio('/sounds/8footdino_on_scratch-alarm-301729.mp3'),
-    clock: new Audio('/sounds/soundshelfstudio-ui-alarm-clock-516360.mp3')
-  };
-  // Looped so a clip shorter than the 3s burst just repeats to fill it.
-  Object.values(ALARM_SOUNDS).forEach(a => { a.loop = true; a.volume = 1; });
-  let alarmAudioPrimed = false;
-  let alarmTimer = null;
-
-  // Autoplay policies block .play() unless it traces back to a user gesture.
-  // The alarm actually starts later from inside a requestAnimationFrame loop,
-  // so "unlock" each Audio element right now, inside the Start Listening
-  // click itself, with a silent play+pause.
-  function primeAlarmAudio() {
-    if (alarmAudioPrimed) return;
-    alarmAudioPrimed = true;
-    Object.values(ALARM_SOUNDS).forEach(a => {
-      const prevVol = a.volume;
-      a.volume = 0;
-      a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = prevVol; }).catch(() => { a.volume = prevVol; });
+  function renderToolbar() {
+    const bar = document.getElementById('toolBeltBar');
+    bar.innerHTML = TOOLS.map(t => `
+      <button type="button" data-tool="${t.id}" title="${t.label}">
+        <i class="fas ${t.icon}"></i><span>${t.label}</span>
+      </button>
+    `).join('');
+    bar.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-tool]');
+      if (!btn) return;
+      openToolWidget(btn.dataset.tool);
     });
   }
 
-  function activeAlarmSounds() {
-    const choice = document.getElementById('soundAlarmChoice').value;
-    if (choice === 'both') return [ALARM_SOUNDS.scratch, ALARM_SOUNDS.clock];
-    return [ALARM_SOUNDS[choice]].filter(Boolean);
+  function selectWidget(el) {
+    if (selectedWidget) selectedWidget.classList.remove('selected');
+    selectedWidget = el;
+    if (el) el.classList.add('selected');
   }
 
-  function startAlarm() {
-    if (alarmActive) return;
+  function bringToFront(el) {
+    widgetZCounter++;
+    el.style.zIndex = widgetZCounter;
+  }
+
+  function closeWidget(toolId) {
+    const w = openWidgets.get(toolId);
+    if (!w) return;
+    if (w.cleanup) { try { w.cleanup(); } catch (e) { logAgendaError('widgetCleanup:' + toolId, e); } }
+    w.el.remove();
+    openWidgets.delete(toolId);
+    document.querySelector(`#toolBeltBar button[data-tool="${toolId}"]`)?.classList.remove('active');
+    if (selectedWidget === w.el) selectedWidget = null;
+  }
+
+  function openToolWidget(toolId) {
+    const existing = openWidgets.get(toolId);
+    if (existing) { bringToFront(existing.el); selectWidget(existing.el); return; }
+
+    const tool = TOOLS.find(t => t.id === toolId);
+    if (!tool) return;
+
+    const layer = document.getElementById('widgetsLayer');
+    const el = document.createElement('div');
+    el.className = 'tool-widget';
+    const openCount = openWidgets.size;
+    el.style.left = (40 + (openCount * 30) % 400) + 'px';
+    el.style.top = (40 + (openCount * 30) % 250) + 'px';
+    el.style.width = (tool.src ? 420 : 300) + 'px';
+    el.style.height = (tool.src ? 480 : 340) + 'px';
+
+    el.innerHTML = `
+      <div class="tw-header">
+        <i class="fas ${tool.icon}"></i>
+        <span class="tw-title">${tool.label}</span>
+        <button type="button" class="tw-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button type="button" class="tw-close" title="Close"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="tw-body ${tool.src ? 'tw-body-flush' : ''}"></div>
+      <div class="tw-resize"></div>
+    `;
+    layer.appendChild(el);
+    bringToFront(el);
+
+    let cleanup = null;
+    const body = el.querySelector('.tw-body');
     try {
-      activeAlarmSounds().forEach(a => {
-        a.currentTime = 0;
-        a.play().catch(e => console.error('Alarm audio failed to play:', e));
-      });
-      document.getElementById('soundPanel').classList.add('alarm-active');
-      alarmActive = true;
-      alarmTimer = setTimeout(stopAlarm, ALARM_BURST_MS);
-    } catch (e) {
-      console.error('Sound alarm failed to start:', e);
-      alarmActive = false;
-    }
-  }
-
-  function stopAlarm() {
-    alarmActive = false;
-    if (alarmTimer) { clearTimeout(alarmTimer); alarmTimer = null; }
-    Object.values(ALARM_SOUNDS).forEach(a => { a.pause(); a.currentTime = 0; });
-    document.getElementById('soundPanel').classList.remove('alarm-active');
-  }
-
-  function stopSoundMeter() {
-    stopAlarm();
-    if (soundRAF) cancelAnimationFrame(soundRAF);
-    soundRAF = null;
-    if (soundStream) soundStream.getTracks().forEach(t => t.stop());
-    soundStream = null;
-    if (soundAudioCtx) soundAudioCtx.close().catch(() => {});
-    soundAudioCtx = null;
-    soundAnalyser = null;
-    document.getElementById('soundMeterFill').style.height = '4%';
-    document.getElementById('soundMeterLabel').textContent = 'Mic off';
-    document.getElementById('soundMicToggle').innerHTML = '<i class="fas fa-microphone me-1"></i>Start Listening';
-    document.getElementById('soundMicToggle').classList.remove('btn-outline-danger');
-    document.getElementById('soundMicToggle').classList.add('btn-outline-success');
-  }
-
-  function updateAlarmMarker() {
-    document.getElementById('soundAlarmMarker').style.bottom = alarmLevel + '%';
-    document.getElementById('soundAlarmLevelVal').textContent = alarmLevel;
-  }
-  document.getElementById('soundAlarmLevel').addEventListener('input', (e) => {
-    alarmLevel = parseInt(e.target.value, 10);
-    updateAlarmMarker();
-  });
-  document.getElementById('soundAlarmEnabled').addEventListener('change', (e) => {
-    alarmEnabled = e.target.checked;
-    if (!alarmEnabled) stopAlarm();
-  });
-  updateAlarmMarker();
-
-  async function startSoundMeter() {
-    try {
-      soundStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (e) {
-      document.getElementById('soundMeterLabel').textContent = 'Mic access denied';
-      return;
-    }
-    soundAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (soundAudioCtx.state === 'suspended') soundAudioCtx.resume();
-    const source = soundAudioCtx.createMediaStreamSource(soundStream);
-    soundAnalyser = soundAudioCtx.createAnalyser();
-    soundAnalyser.fftSize = 512;
-    source.connect(soundAnalyser);
-
-    const data = new Uint8Array(soundAnalyser.fftSize);
-    const fill = document.getElementById('soundMeterFill');
-    const label = document.getElementById('soundMeterLabel');
-    let alarmSmoothPct = 0;
-
-    function tick() {
-      soundAnalyser.getByteTimeDomainData(data);
-      let sumSquares = 0;
-      for (let i = 0; i < data.length; i++) {
-        const v = (data[i] - 128) / 128;
-        sumSquares += v * v;
+      if (tool.src) {
+        body.innerHTML = `<iframe src="${tool.src}"></iframe>`;
+      } else {
+        cleanup = NATIVE_TOOLS[toolId](body, el);
       }
-      const rms = Math.sqrt(sumSquares / data.length);
-      const pct = Math.min(100, Math.max(4, Math.round(rms * 260)));
-      fill.style.height = pct + '%';
-      label.textContent = pct < 25 ? 'Quiet' : pct < 60 ? 'OK' : 'Too Loud';
+    } catch (e) {
+      logAgendaError('openToolWidget:' + toolId, e);
+    }
 
-      // Smoothed so a level right at the threshold doesn't rapidly
-      // retrigger the alarm dozens of times a second. Each trigger commits
-      // to a fixed 3s burst (see ALARM_BURST_MS) regardless of what the
-      // level does mid-burst; once it ends, a still-loud room retriggers.
-      alarmSmoothPct = alarmSmoothPct * 0.7 + pct * 0.3;
-      if (alarmEnabled && !alarmActive && alarmSmoothPct > alarmLevel) {
-        startAlarm();
+    openWidgets.set(toolId, { el, cleanup });
+    document.querySelector(`#toolBeltBar button[data-tool="${toolId}"]`)?.classList.add('active');
+
+    el.addEventListener('mousedown', () => { bringToFront(el); selectWidget(el); });
+
+    const header = el.querySelector('.tw-header');
+    header.addEventListener('mousedown', (e) => {
+      if (e.target.closest('button')) return;
+      e.preventDefault();
+      const startX = e.clientX, startY = e.clientY;
+      const startLeft = el.offsetLeft, startTop = el.offsetTop;
+      el.classList.add('dragging');
+      function onMove(ev) {
+        el.style.left = (startLeft + ev.clientX - startX) + 'px';
+        el.style.top = (startTop + ev.clientY - startY) + 'px';
       }
+      function onUp() {
+        el.classList.remove('dragging');
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
 
-      soundRAF = requestAnimationFrame(tick);
-    }
-    tick();
+    const resizeHandle = el.querySelector('.tw-resize');
+    resizeHandle.addEventListener('mousedown', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const startX = e.clientX, startY = e.clientY;
+      const startW = el.offsetWidth, startH = el.offsetHeight;
+      el.classList.add('resizing');
+      function onMove(ev) {
+        el.style.width = Math.max(230, startW + ev.clientX - startX) + 'px';
+        el.style.height = Math.max(180, startH + ev.clientY - startY) + 'px';
+      }
+      function onUp() {
+        el.classList.remove('resizing');
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
 
-    document.getElementById('soundMicToggle').innerHTML = '<i class="fas fa-microphone-slash me-1"></i>Stop Listening';
-    document.getElementById('soundMicToggle').classList.remove('btn-outline-success');
-    document.getElementById('soundMicToggle').classList.add('btn-outline-danger');
+    el.querySelector('.tw-close').addEventListener('click', () => closeWidget(toolId));
+    el.querySelector('.tw-maximize').addEventListener('click', () => el.classList.toggle('maximized'));
+
+    selectWidget(el);
   }
 
-  document.getElementById('soundMicToggle').addEventListener('click', () => {
-    primeAlarmAudio();
-    if (soundStream) stopSoundMeter(); else startSoundMeter();
+  document.getElementById('widgetsLayer').addEventListener('mousedown', (e) => {
+    if (e.target.id === 'widgetsLayer') selectWidget(null);
   });
 
-  document.getElementById('panelModeToggle').addEventListener('click', () => {
-    const timerPanel = document.getElementById('timerPanel');
-    const soundPanel = document.getElementById('soundPanel');
-    const btn = document.getElementById('panelModeToggle');
-    const showingSound = !soundPanel.classList.contains('d-none');
-    if (showingSound) {
-      stopSoundMeter();
-      soundPanel.classList.add('d-none');
-      timerPanel.classList.remove('d-none');
-      btn.innerHTML = '<i class="fas fa-volume-high"></i>';
-    } else {
-      timerPanel.classList.add('d-none');
-      soundPanel.classList.remove('d-none');
-      btn.innerHTML = '<i class="fas fa-clock"></i>';
-    }
-  });
-
-  // ── Fill window (blow up the Timer/Sound Meter box to the full browser window) ──
-  const zoneTimerEl = document.getElementById('panelModeToggle').closest('.zone-timer');
-  const fillOverlay = document.getElementById('fillWindowOverlay');
-  const btnGroup = document.querySelector('.panel-btn-group');
-
-  function enterFillWindow() {
-    fillOverlay.insertBefore(btnGroup, fillOverlay.firstChild);
-    fillOverlay.appendChild(document.getElementById('timerPanel'));
-    fillOverlay.appendChild(document.getElementById('soundPanel'));
-    fillOverlay.classList.remove('d-none');
-  }
-  function exitFillWindow() {
-    zoneTimerEl.appendChild(btnGroup);
-    zoneTimerEl.appendChild(document.getElementById('timerPanel'));
-    zoneTimerEl.appendChild(document.getElementById('soundPanel'));
-    fillOverlay.classList.add('d-none');
-  }
-  document.getElementById('fillWindowBtn').addEventListener('click', enterFillWindow);
-  document.getElementById('shrinkWindowBtn').addEventListener('click', exitFillWindow);
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !fillOverlay.classList.contains('d-none')) exitFillWindow();
+    if ((e.key === 'Delete' || e.key === 'Backspace') && selectedWidget) {
+      const active = document.activeElement;
+      const typing = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT' || active.isContentEditable);
+      if (typing) return;
+      const entry = [...openWidgets.entries()].find(([, w]) => w.el === selectedWidget);
+      if (entry) closeWidget(entry[0]);
+    }
   });
+
+  // Shared alarm sounds for the Timer widget (module-level so the audio
+  // files load once, not on every open/close of the widget).
+  const TIMER_CHIME = new Audio('/sounds/soundshelfstudio-ui-alarm-clock-516360.mp3');
+
+  const NATIVE_TOOLS = {
+    timer(body, widgetEl) {
+      body.innerHTML = `
+        <div class="tt-display timer-display">05:00</div>
+        <div class="timer-controls mb-2">
+          <button type="button" class="tt-start btn btn-sm btn-success">Start</button>
+          <button type="button" class="tt-reset btn btn-sm btn-outline-secondary">Reset</button>
+          <button type="button" class="tt-mode btn btn-sm btn-outline-info">Stopwatch</button>
+        </div>
+        <div class="timer-presets d-flex gap-1 justify-content-center flex-wrap mb-2">
+          <button type="button" class="btn btn-outline-light" data-mins="1">1m</button>
+          <button type="button" class="btn btn-outline-light" data-mins="5">5m</button>
+          <button type="button" class="btn btn-outline-light" data-mins="10">10m</button>
+          <button type="button" class="btn btn-outline-light" data-mins="15">15m</button>
+          <button type="button" class="btn btn-outline-light" data-mins="20">20m</button>
+        </div>
+        <div class="d-flex justify-content-center gap-1">
+          <input class="tt-custom-mins form-control form-control-sm" type="number" min="0" max="180" placeholder="min" style="width:60px">
+          <button type="button" class="tt-set-custom btn btn-sm btn-outline-warning">Set</button>
+        </div>
+      `;
+      let seconds = 300, remaining = 300, running = false, interval = null, stopwatch = false, elapsed = 0;
+      const display = body.querySelector('.tt-display');
+      const startBtn = body.querySelector('.tt-start');
+      const modeBtn = body.querySelector('.tt-mode');
+
+      function fmt(t) { const m = Math.floor(t / 60), s = t % 60; return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'); }
+      function update() { display.textContent = stopwatch ? fmt(elapsed) : fmt(remaining); }
+      function timesUp() {
+        widgetEl.classList.add('alarm-active');
+        try { TIMER_CHIME.currentTime = 0; TIMER_CHIME.play().catch(() => {}); } catch (e) {}
+      }
+      function clearAlarm() { widgetEl.classList.remove('alarm-active'); }
+      function tick() {
+        if (stopwatch) { elapsed++; }
+        else {
+          remaining--;
+          if (remaining <= 0) { remaining = 0; update(); pause(); timesUp(); return; }
+        }
+        update();
+      }
+      function start() { clearAlarm(); running = true; startBtn.textContent = 'Pause'; interval = setInterval(tick, 1000); }
+      function pause() { running = false; startBtn.textContent = 'Start'; clearInterval(interval); }
+
+      startBtn.addEventListener('click', () => running ? pause() : start());
+      body.querySelector('.tt-reset').addEventListener('click', () => { pause(); clearAlarm(); remaining = seconds; elapsed = 0; update(); });
+      modeBtn.addEventListener('click', () => {
+        pause(); clearAlarm();
+        stopwatch = !stopwatch;
+        modeBtn.textContent = stopwatch ? 'Countdown' : 'Stopwatch';
+        elapsed = 0; remaining = seconds;
+        update();
+      });
+      body.querySelectorAll('.timer-presets button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          pause(); clearAlarm();
+          stopwatch = false;
+          modeBtn.textContent = 'Stopwatch';
+          seconds = parseInt(btn.dataset.mins, 10) * 60;
+          remaining = seconds;
+          update();
+        });
+      });
+      body.querySelector('.tt-set-custom').addEventListener('click', () => {
+        const mins = parseInt(body.querySelector('.tt-custom-mins').value, 10);
+        if (!mins || mins < 0) return;
+        pause(); clearAlarm();
+        stopwatch = false;
+        modeBtn.textContent = 'Stopwatch';
+        seconds = mins * 60;
+        remaining = seconds;
+        update();
+      });
+      update();
+
+      return () => { clearInterval(interval); };
+    },
+
+    sound(body, widgetEl) {
+      body.innerHTML = `
+        <div class="sound-meter-track">
+          <div class="ss-alarm-marker sound-alarm-marker"></div>
+          <div class="ss-meter-fill sound-meter-fill"></div>
+        </div>
+        <div class="ss-meter-label sound-meter-label">Mic off</div>
+        <div class="sound-alarm-controls">
+          <label class="sound-alarm-label">Alarm above <span class="ss-alarm-val">70</span>%</label>
+          <input type="range" class="ss-alarm-range form-range" min="10" max="100" value="70">
+          <div class="form-check form-switch">
+            <input class="ss-alarm-enabled form-check-input" type="checkbox" checked>
+            <label class="form-check-label sound-alarm-label">Alarm sound</label>
+          </div>
+          <select class="ss-alarm-choice form-select form-select-sm mt-1">
+            <option value="scratch">Scratch Alarm</option>
+            <option value="clock">Alarm Clock</option>
+            <option value="both" selected>Both</option>
+          </select>
+        </div>
+        <button type="button" class="ss-mic-toggle btn btn-sm btn-outline-success w-100 mt-2"><i class="fas fa-microphone me-1"></i>Start Listening</button>
+      `;
+      const ALARM_BURST_MS = 3000;
+      const ALARM_SOUNDS = {
+        scratch: new Audio('/sounds/8footdino_on_scratch-alarm-301729.mp3'),
+        clock: new Audio('/sounds/soundshelfstudio-ui-alarm-clock-516360.mp3')
+      };
+      Object.values(ALARM_SOUNDS).forEach(a => { a.loop = true; a.volume = 1; });
+
+      let audioCtx = null, analyser = null, stream = null, raf = null;
+      let alarmLevel = 70, alarmEnabled = true, alarmActive = false, alarmAudioPrimed = false, alarmTimer = null;
+
+      const fill = body.querySelector('.ss-meter-fill');
+      const label = body.querySelector('.ss-meter-label');
+      const marker = body.querySelector('.ss-alarm-marker');
+      const alarmValEl = body.querySelector('.ss-alarm-val');
+      const alarmRange = body.querySelector('.ss-alarm-range');
+      const alarmEnabledEl = body.querySelector('.ss-alarm-enabled');
+      const alarmChoiceEl = body.querySelector('.ss-alarm-choice');
+      const micBtn = body.querySelector('.ss-mic-toggle');
+
+      function primeAlarmAudio() {
+        if (alarmAudioPrimed) return;
+        alarmAudioPrimed = true;
+        Object.values(ALARM_SOUNDS).forEach(a => {
+          const prevVol = a.volume;
+          a.volume = 0;
+          a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = prevVol; }).catch(() => { a.volume = prevVol; });
+        });
+      }
+      function activeAlarmSounds() {
+        const choice = alarmChoiceEl.value;
+        if (choice === 'both') return [ALARM_SOUNDS.scratch, ALARM_SOUNDS.clock];
+        return [ALARM_SOUNDS[choice]].filter(Boolean);
+      }
+      function startAlarm() {
+        if (alarmActive) return;
+        try {
+          activeAlarmSounds().forEach(a => { a.currentTime = 0; a.play().catch(e => console.error('Alarm audio failed to play:', e)); });
+          widgetEl.classList.add('alarm-active');
+          alarmActive = true;
+          alarmTimer = setTimeout(stopAlarm, ALARM_BURST_MS);
+        } catch (e) {
+          console.error('Sound alarm failed to start:', e);
+          alarmActive = false;
+        }
+      }
+      function stopAlarm() {
+        alarmActive = false;
+        if (alarmTimer) { clearTimeout(alarmTimer); alarmTimer = null; }
+        Object.values(ALARM_SOUNDS).forEach(a => { a.pause(); a.currentTime = 0; });
+        widgetEl.classList.remove('alarm-active');
+      }
+      function stopSoundMeter() {
+        stopAlarm();
+        if (raf) cancelAnimationFrame(raf);
+        raf = null;
+        if (stream) stream.getTracks().forEach(t => t.stop());
+        stream = null;
+        if (audioCtx) audioCtx.close().catch(() => {});
+        audioCtx = null; analyser = null;
+        fill.style.height = '4%';
+        label.textContent = 'Mic off';
+        micBtn.innerHTML = '<i class="fas fa-microphone me-1"></i>Start Listening';
+        micBtn.classList.remove('btn-outline-danger');
+        micBtn.classList.add('btn-outline-success');
+      }
+      function updateAlarmMarker() { marker.style.bottom = alarmLevel + '%'; alarmValEl.textContent = alarmLevel; }
+      alarmRange.addEventListener('input', (e) => { alarmLevel = parseInt(e.target.value, 10); updateAlarmMarker(); });
+      alarmEnabledEl.addEventListener('change', (e) => { alarmEnabled = e.target.checked; if (!alarmEnabled) stopAlarm(); });
+      updateAlarmMarker();
+
+      async function startSoundMeter() {
+        try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+        catch (e) { label.textContent = 'Mic access denied'; return; }
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const source = audioCtx.createMediaStreamSource(stream);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 512;
+        source.connect(analyser);
+        const data = new Uint8Array(analyser.fftSize);
+        let alarmSmoothPct = 0;
+        function tick() {
+          analyser.getByteTimeDomainData(data);
+          let sumSquares = 0;
+          for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sumSquares += v * v; }
+          const rms = Math.sqrt(sumSquares / data.length);
+          const pct = Math.min(100, Math.max(4, Math.round(rms * 260)));
+          fill.style.height = pct + '%';
+          label.textContent = pct < 25 ? 'Quiet' : pct < 60 ? 'OK' : 'Too Loud';
+          alarmSmoothPct = alarmSmoothPct * 0.7 + pct * 0.3;
+          if (alarmEnabled && !alarmActive && alarmSmoothPct > alarmLevel) startAlarm();
+          raf = requestAnimationFrame(tick);
+        }
+        tick();
+        micBtn.innerHTML = '<i class="fas fa-microphone-slash me-1"></i>Stop Listening';
+        micBtn.classList.remove('btn-outline-success');
+        micBtn.classList.add('btn-outline-danger');
+      }
+      micBtn.addEventListener('click', () => { primeAlarmAudio(); if (stream) stopSoundMeter(); else startSoundMeter(); });
+
+      return () => { stopSoundMeter(); };
+    },
+
+    traffic(body) {
+      body.innerHTML = `
+        <div class="traffic-light-widget">
+          <div class="tl-light tl-red" data-color="red"></div>
+          <div class="tl-light tl-yellow" data-color="yellow"></div>
+          <div class="tl-light tl-green" data-color="green"></div>
+        </div>
+      `;
+      body.querySelectorAll('.tl-light').forEach(light => {
+        light.addEventListener('click', () => {
+          const alreadyLit = light.classList.contains('lit');
+          body.querySelectorAll('.tl-light').forEach(l => l.classList.remove('lit'));
+          if (!alreadyLit) light.classList.add('lit');
+        });
+      });
+      return null;
+    },
+
+    work(body) {
+      const symbols = [
+        { id: 'silent',  icon: 'fa-hand',           label: 'Silent Work' },
+        { id: 'partner', icon: 'fa-user-group',     label: 'Partner Talk' },
+        { id: 'group',   icon: 'fa-people-group',   label: 'Group Work' },
+        { id: 'ask3',    icon: 'fa-comments',       label: 'Ask 3 Then Me' },
+        { id: 'quiet',   icon: 'fa-volume-xmark',   label: 'Quiet Voices' },
+      ];
+      body.innerHTML = `
+        <div class="work-symbols-widget">
+          <div class="ws-picker">
+            ${symbols.map(s => `<button type="button" data-symbol="${s.id}" title="${s.label}"><i class="fas ${s.icon}"></i></button>`).join('')}
+          </div>
+          <div class="ws-display">
+            <i class="ws-display-icon fas ${symbols[0].icon}"></i>
+            <div class="ws-display-label">${symbols[0].label}</div>
+          </div>
+        </div>
+      `;
+      function select(sym) {
+        body.querySelectorAll('.ws-picker button').forEach(b => b.classList.toggle('active', b.dataset.symbol === sym.id));
+        body.querySelector('.ws-display-icon').className = `ws-display-icon fas ${sym.icon}`;
+        body.querySelector('.ws-display-label').textContent = sym.label;
+      }
+      body.querySelectorAll('.ws-picker button').forEach((btn, i) => btn.addEventListener('click', () => select(symbols[i])));
+      select(symbols[0]);
+      body.querySelector('.ws-picker button[data-symbol="silent"]')?.classList.add('active');
+      return null;
+    },
+  };
+
+  renderToolbar();
 
   // ── Comment-style section labels for CS pages ──────────────────────────
   if (getComputedStyle(document.documentElement).getPropertyValue('--code-comment').trim() === 'true') {
