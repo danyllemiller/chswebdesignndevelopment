@@ -17,6 +17,30 @@ const MAX_ATTEMPTS = 3;
 const COOLDOWN_MINUTES = 45;
 // ======================================================
 
+// A student's score is computed and shown entirely client-side, before
+// the save even happens -- so a save failure was previously invisible:
+// they'd see "Assessment Submitted!" while the real score silently never
+// reached the gradebook, with nothing logged anywhere (a bare
+// console.warn, client-only, never sent to the server). Reports the real
+// failure so a repeat of this is diagnosable instead of a mystery.
+function logExamSaveError(context, err, extra) {
+    try {
+        fetch('/api/client-error-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: err && err.message ? err.message : String(err),
+                stack: err && err.stack ? err.stack : null,
+                url: window.location.href,
+                context,
+                ...extra,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            })
+        }).catch(() => {});
+    } catch (e) { /* logging must never itself break the exam flow */ }
+}
+
 const libs = [
     { id: 'jspdf-lib', src: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js' },
     { id: 'pdf-lib', src: 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js' }
@@ -1217,26 +1241,45 @@ async function processSubmission() {
     // looking at the gradebook would recognize as "the final exam" either.
     const finalAssignmentKey = String(unitNum) === '9' ? 'Final-Exam' : `Unit${unitNum}-Exam`;
 
-// "Keep highest" grade logic — check existing grade and keep the higher one
-    try {
-        let shouldSave = true;
-        let existingScore = -1;
-        const gradesRes = await fetch(`/api/student/grades?student_id=${encodeURIComponent(studentId)}`);
-        if (gradesRes.ok) {
-            const gradesData = await gradesRes.json();
-            const existing = (gradesData.responses || []).find(r => r.exam_id === finalAssignmentKey);
-            if (existing) {
-                existingScore = Number(existing.score);
-                // Only skip saving if existing score is HIGHER than new score (keep highest)
-                if (existingScore > finalScore) {
-                    shouldSave = false;
-                    console.log("[examLogicCS] Keeping higher existing score:", existingScore, "vs new:", finalScore);
-                } else {
-                    console.log("[examLogicCS] New score is higher or equal, updating grade:", finalScore, "vs existing:", existingScore);
-                }
+// "Keep highest" grade logic — check existing grade and keep the higher one.
+// This check and the actual save used to share one try/catch, so a
+// network hiccup on the CHECK (e.g. the server briefly restarting, which
+// happens during deploys) threw before the save was ever attempted --
+// silently discarding a real score with nothing logged anywhere. Now
+// isolated: a failed check just skips the "keep highest" comparison
+// (defaults to saving) instead of aborting the save entirely.
+let shouldSave = true;
+try {
+    const gradesRes = await fetch(`/api/student/grades?student_id=${encodeURIComponent(studentId)}`);
+    if (gradesRes.ok) {
+        const gradesData = await gradesRes.json();
+        const existing = (gradesData.responses || []).find(r => r.exam_id === finalAssignmentKey);
+        if (existing) {
+            const existingScore = Number(existing.score);
+            // Only skip saving if existing score is HIGHER than new score (keep highest)
+            if (existingScore > finalScore) {
+                shouldSave = false;
+                console.log("[examLogicCS] Keeping higher existing score:", existingScore, "vs new:", finalScore);
+            } else {
+                console.log("[examLogicCS] New score is higher or equal, updating grade:", finalScore, "vs existing:", existingScore);
             }
         }
-        if (shouldSave) {
+    }
+} catch (e) {
+    console.warn("[examLogicCS] Could not check existing grade, saving anyway:", e);
+    logExamSaveError('checkExistingGrade:' + finalAssignmentKey, e, { student_id: studentId });
+}
+
+let gradeSaveSucceeded = !shouldSave; // "kept the existing higher score" counts as a successful outcome, not a failure to warn about
+if (shouldSave) {
+    // A save that fails here means real, already-computed exam work
+    // vanishes with no other record of it existing -- worth a few quick
+    // retries against exactly the kind of brief server hiccup (a deploy
+    // restart) that caused this to go unnoticed before.
+    const MAX_SAVE_ATTEMPTS = 3;
+    let lastErr = null;
+    for (let attempt = 1; attempt <= MAX_SAVE_ATTEMPTS && !gradeSaveSucceeded; attempt++) {
+        try {
             const saveRes = await fetch('/api/submit-exam', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1249,20 +1292,34 @@ async function processSubmission() {
             });
             if (!saveRes.ok) {
                 const errText = await saveRes.text();
-                console.error("Grade save failed:", errText);
+                lastErr = new Error(`Server returned ${saveRes.status}: ${errText}`);
+                console.error("Grade save failed (attempt " + attempt + "):", errText);
                 if (saveRes.status === 503) {
                     try {
                         const errBody = JSON.parse(errText);
-                        if (errBody.testingPaused) alert(errBody.error);
+                        if (errBody.testingPaused) { alert(errBody.error); break; } // testing deliberately paused -- retrying won't help
                     } catch {}
                 }
             } else {
                 console.log("[examLogicCS] Grade saved:", finalAssignmentKey, finalScore, "/", finalTotal);
+                gradeSaveSucceeded = true;
             }
-        } else {
-            console.log("[examLogicCS] Grade not saved (existing score higher):", finalAssignmentKey);
+        } catch (e) {
+            lastErr = e;
+            console.warn("[examLogicCS] Grade save attempt " + attempt + " failed:", e);
         }
-    } catch(e) { console.warn("Could not save grade:", e); }
+        if (!gradeSaveSucceeded && attempt < MAX_SAVE_ATTEMPTS) {
+            await new Promise(r => setTimeout(r, 1500 * attempt));
+        }
+    }
+    if (!gradeSaveSucceeded) {
+        logExamSaveError('submitExam:' + finalAssignmentKey, lastErr || new Error('Unknown save failure'), {
+            student_id: studentId, score: finalScore, total_points: finalTotal
+        });
+    }
+} else {
+    console.log("[examLogicCS] Grade not saved (existing score higher):", finalAssignmentKey);
+}
 
     let badgeHtml = '';
     if (finalPercentage >= 100) {
@@ -1308,6 +1365,17 @@ async function processSubmission() {
     let titleColor = isRetake ? "text-warning" : "text-success";
     let retakeMsg = isRetake ? `<div class="alert alert-warning fw-bold mt-3"><i class="fas fa-exclamation-triangle"></i> Score is below 80%. You need to retake this test for exams and projects.</div>` : "";
 
+    // The score above is always real (computed locally from the student's
+    // own answers) -- this only covers whether it actually reached the
+    // gradebook after retrying. Telling the truth here, instead of a blanket
+    // "Submitted!", is what makes this catchable instead of a silent loss.
+    let saveFailedMsg = '';
+    if (!gradeSaveSucceeded) {
+        titleText = 'Assessment Complete — NOT Yet Saved';
+        titleColor = 'text-danger';
+        saveFailedMsg = `<div class="alert alert-danger fw-bold mt-3"><i class="fas fa-triangle-exclamation"></i> Your score (${finalPercentage}%) did NOT save to the gradebook after several tries -- please screenshot this screen right now and show your teacher. Do not close this page yet.</div>`;
+    }
+
     // "Back to Class" routing, units 1-7 only (the real sequential curriculum --
     // see CS_MAP in admin/due-dates.html). 80%+ advances to the next unit's
     // default tab (or the Final Exam tab, past unit 7); under 80% restarts the
@@ -1338,6 +1406,7 @@ async function processSubmission() {
                         <h1 class="display-3 fw-bold text-primary mb-0">${finalPercentage}%</h1>
                         ${badgeHtml}
                     </div>
+                    ${saveFailedMsg}
                     ${retakeMsg}
                     <p class="fw-bold mt-2 mb-4 text-dark border-bottom pb-2">${finalScore} out of ${finalTotal} correct</p>
 
