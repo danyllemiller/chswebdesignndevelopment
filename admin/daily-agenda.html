@@ -383,20 +383,18 @@
   .tool-widget.maximized .ws-display-icon { font-size: 12rem; }
   .tool-widget.maximized .ws-display-label { font-size: 2.5rem; }
 
-  /* Toolbar */
-  #toolBeltBar {
-    position: fixed; left: 50%; bottom: .7rem; transform: translateX(-50%);
-    z-index: 600; display: flex; gap: .2rem; background: rgba(15,17,25,.85);
-    padding: .35rem .4rem; border-radius: .7rem; box-shadow: 0 4px 18px rgba(0,0,0,.4);
-    backdrop-filter: blur(4px);
-  }
+  /* Toolbar -- lives inline inside .nav-bar now (one bar, not a second
+     floating one on top of it); only the popped-out widgets themselves
+     (#widgetsLayer) still float above the page. */
+  .nav-bar-divider { width: 1px; align-self: stretch; background: rgba(255,255,255,.25); margin: 0 .15rem; }
+  #toolBeltBar { display: flex; gap: .15rem; flex-wrap: wrap; }
   #toolBeltBar button {
     display: flex; flex-direction: column; align-items: center; gap: .1rem;
-    background: none; border: none; color: #f1f1f5; font-size: .6rem; padding: .3rem .5rem;
+    background: none; border: 1px solid transparent; color: #f1f1f5; font-size: .58rem; padding: .25rem .4rem;
     border-radius: .4rem; opacity: .8;
   }
-  #toolBeltBar button i { font-size: 1.05rem; }
-  #toolBeltBar button:hover, #toolBeltBar button.active { opacity: 1; background: rgba(255,255,255,.14); }
+  #toolBeltBar button i { font-size: .95rem; }
+  #toolBeltBar button:hover, #toolBeltBar button.active { opacity: 1; background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.25); }
 
   #pageStamp {
     position: fixed;
@@ -543,12 +541,9 @@
     <button id="nextBtn" class="btn btn-outline-light btn-sm">Next <i class="fas fa-chevron-right"></i></button>
     <button id="todayBtn" class="btn btn-outline-info btn-sm">Today</button>
     <span id="trackToggle" class="track-toggle btn-group d-none" role="group"></span>
-    <div class="dropdown">
-      <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="fas fa-toolbox me-1"></i>Tools
-      </button>
-      <ul id="toolsMenu" class="dropdown-menu dropdown-menu-end"></ul>
-    </div>
+    <span class="nav-bar-divider"></span>
+    <div id="toolBeltBar"></div>
+    <span class="nav-bar-divider"></span>
     <a href="/index.html" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-sm nav-logo-link" title="Open the main website in a new tab">
       <img src="/images/weblogo.png" alt="CHS Web Design &amp; Dev" class="nav-logo">
     </a>
@@ -794,30 +789,11 @@ if (!courseCfg) {
   track = courseCfg.hasTracks ? (params.get('track') === 'B' ? 'B' : 'A') : 'main';
   document.documentElement.setAttribute('data-track', track);
 
-  // ── Classroom tools menu ──────────────────────────────────────────────
-  (function populateToolsMenu() {
-    const hint = new URLSearchParams({ course }).toString() + (courseCfg.hasTracks ? `&track=${track}` : '');
-    const TOOLS = [
-      { label: 'Group Maker', icon: 'fa-people-group', href: `/admin/tools/group-maker.html?${hint}` },
-      { label: 'Random Name Picker', icon: 'fa-shuffle', href: `/admin/tools/random-name-picker.html?${hint}` },
-      { label: 'Scoreboard', icon: 'fa-trophy', href: '/admin/tools/scoreboard.html' },
-      { label: 'Dice', icon: 'fa-dice', href: '/admin/tools/dice.html' },
-      { label: 'Polls', icon: 'fa-square-poll-vertical', href: '/admin/tools/polls.html' },
-      { label: 'Word Cloud', icon: 'fa-cloud', href: '/admin/tools/word-cloud.html' },
-    ];
-    const menu = document.getElementById('toolsMenu');
-    TOOLS.forEach(t => {
-      const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.className = 'dropdown-item';
-      a.href = t.href;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.innerHTML = `<i class="fas ${t.icon} me-2"></i>${t.label}`;
-      li.appendChild(a);
-      menu.appendChild(li);
-    });
-  })();
+  // Course/track context passed to the Randomizer and Group Maker widgets
+  // below so they pre-filter to this class's actual roster -- the old
+  // "Tools" dropdown (now retired in favor of the pop-out toolbar) did the
+  // same thing, this just carries it forward.
+  const toolsHint = new URLSearchParams({ course }).toString() + (courseCfg.hasTracks ? `&track=${track}` : '');
 
   let content = {};   // block_num -> content object
   let schedule = {};  // track -> block_num -> date string
@@ -1159,9 +1135,9 @@ if (!courseCfg) {
     { id: 'sound',      icon: 'fa-volume-high',          label: 'Sound Level' },
     { id: 'traffic',    icon: 'fa-traffic-light',        label: 'Traffic Light' },
     { id: 'work',       icon: 'fa-hand',                 label: 'Work Symbols' },
-    { id: 'randomizer', icon: 'fa-shuffle',              label: 'Randomizer',  src: '/admin/tools/random-name-picker.html' },
+    { id: 'randomizer', icon: 'fa-shuffle',              label: 'Randomizer',  src: `/admin/tools/random-name-picker.html?${toolsHint}` },
     { id: 'dice',       icon: 'fa-dice',                 label: 'Dice',        src: '/admin/tools/dice.html' },
-    { id: 'groups',     icon: 'fa-people-group',         label: 'Group Maker', src: '/admin/tools/group-maker.html' },
+    { id: 'groups',     icon: 'fa-people-group',         label: 'Group Maker', src: `/admin/tools/group-maker.html?${toolsHint}` },
     { id: 'scoreboard', icon: 'fa-trophy',                label: 'Scoreboard',  src: '/admin/tools/scoreboard.html' },
     { id: 'wordcloud',  icon: 'fa-cloud',                 label: 'Word Cloud',  src: '/admin/tools/word-cloud.html' },
     { id: 'polls',      icon: 'fa-square-poll-vertical',  label: 'Polls',       src: '/admin/tools/polls.html' },
