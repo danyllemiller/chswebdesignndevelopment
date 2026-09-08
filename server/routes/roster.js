@@ -3,6 +3,29 @@ const router = express.Router();
 const { getDbConnection } = require('../db');
 const bcrypt = require('bcrypt');
 const { getCurrentSchoolYear } = require('../helpers');
+const fs = require('fs');
+const path = require('path');
+
+// Every student needs a personal uploads/<student_id>/ folder for the
+// PHP-backed assignment dropbox (upload.php/manage_files.php) to write
+// into. Those scripts run as www-data, which previously had no way to
+// create a brand-new folder there itself (the uploads/ root wasn't
+// writable by it), so a student's very first upload attempt failed
+// outright until someone noticed. Creating it here -- the moment the
+// student record itself is created -- means it always exists before a
+// student could ever reach the upload form. chmod 777 rather than
+// matching PHP's own 755 because this folder is owned by the Node
+// process's user, not www-data, so www-data needs "other" write access
+// to actually save files into it later.
+function ensureUploadFolder(studentId) {
+    try {
+        const dir = path.join(__dirname, '..', '..', 'uploads', String(studentId));
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        fs.chmodSync(dir, 0o777);
+    } catch (err) {
+        console.error(`Could not create upload folder for ${studentId}:`, err.message);
+    }
+}
 
 const AGENCY_PAY_SCALES = {
     'Intern': 15.00, 'Junior Developer': 20.00, 'Web Developer': 35.00,
@@ -384,7 +407,7 @@ router.post('/admin/upload-roster', async (req, res) => {
         for (const s of resolved) {
             const role = s.section_id === 'Teacher' ? 'teacher' : 'student';
             await connection.execute(stmt, [s.student_id, s.first_name, s.last_name, s.section_id, s.course_id, role, year]);
-            if (existingIds.has(s.student_id)) updated++; else created++;
+            if (existingIds.has(s.student_id)) { updated++; } else { created++; ensureUploadFolder(s.student_id); }
         }
 
         // Anyone active before this upload but absent from the new file is
