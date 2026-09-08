@@ -327,13 +327,19 @@ async function init() {
                     .notebook-table th { background: #cfe1f0; color: #1a1a1a; }
                     .notebook-table tr:nth-child(even) td { background: #f7f9fb; }
                     /* Pasted screenshots: native contentEditable paste already
-                       inserts them as an <img>, so no custom paste handling is
-                       needed for that. This adds (1) native CSS resize (a drag
-                       handle in the image's corner) and (2) a floating
-                       Word/Docs-style wrap-text toggle, shown when an image is
-                       clicked. */
-                    img { max-width: 100%; resize: both; overflow: hidden; cursor: pointer; display: inline-block; vertical-align: top; }
-                    img.nb-img-selected { outline: 2px solid #3b82f6; outline-offset: 2px; }
+                       inserts them as a bare <img>, so no custom paste handling
+                       is needed for that. Resizing does NOT work reliably with
+                       CSS resize applied directly to an <img> -- it's a
+                       replaced element and drag-handle support on it is
+                       inconsistent across browsers (confirmed live: handle
+                       rendered, dragging did nothing). The reliable fix is to
+                       resize a plain wrapper element instead and stretch the
+                       image to fill it -- see nbWrapImg() below, which
+                       auto-wraps every bare <img> (freshly pasted, or already
+                       saved from before this fix) in a .nb-img-wrap span. */
+                    .nb-img-wrap { display: inline-block; resize: both; overflow: hidden; cursor: pointer; vertical-align: top; max-width: 100%; }
+                    .nb-img-wrap img { width: 100%; height: 100%; display: block; }
+                    .nb-img-wrap.nb-img-selected { outline: 2px solid #3b82f6; outline-offset: 2px; }
                     #nb-img-toolbar { position: absolute; display: none; gap: 2px; background: #1f2937; border-radius: 6px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,.25); z-index: 9999; font-family: sans-serif; }
                     #nb-img-toolbar button { background: none; border: none; color: #fff; font-size: 11px; padding: 4px 8px; cursor: pointer; border-radius: 4px; white-space: nowrap; }
                     #nb-img-toolbar button:hover, #nb-img-toolbar button.active { background: #3b82f6; }
@@ -345,12 +351,37 @@ async function init() {
                             e.preventDefault(); document.execCommand('undo'); sync();
                         }
                     });
-                    // Word/Docs-style wrap-text toggle -- click an image to select
-                    // it and show No Wrap / Wrap Left / Wrap Right. A ResizeObserver
-                    // calls sync() after a drag-resize, since the native resize
-                    // handle doesn't fire an input event on its own and the new
-                    // size would otherwise only be visual until the next reload.
-                    var nbToolbar, nbSelectedImg = null;
+                    // Auto-wrap every bare <img> in a resizable .nb-img-wrap span
+                    // (see comment above), then a Word/Docs-style wrap-text toggle
+                    // -- click a wrapped image to select it and show No Wrap /
+                    // Wrap Left / Wrap Right. A ResizeObserver calls sync() after
+                    // a drag-resize, since the native resize handle doesn't fire
+                    // an input event on its own and the new size would otherwise
+                    // only be visual until the next reload.
+                    var nbRO = window.ResizeObserver ? new ResizeObserver(function(){ sync(); }) : null;
+                    function nbWrapImg(img) {
+                        if (img.parentElement && img.parentElement.classList && img.parentElement.classList.contains('nb-img-wrap')) return;
+                        var rect = img.getBoundingClientRect();
+                        var w = img.style.width || (rect.width ? Math.round(rect.width) + 'px' : '300px');
+                        var h = img.style.height || (rect.height ? Math.round(rect.height) + 'px' : '225px');
+                        var wrap = document.createElement('span');
+                        wrap.className = 'nb-img-wrap';
+                        wrap.style.width = w; wrap.style.height = h;
+                        if (img.style.float === 'left' || img.style.float === 'right') {
+                            wrap.style.float = img.style.float;
+                            if (img.style.margin) wrap.style.margin = img.style.margin;
+                        }
+                        img.parentNode.insertBefore(wrap, img);
+                        wrap.appendChild(img);
+                        img.removeAttribute('style');
+                    }
+                    function nbProcessImages() {
+                        document.querySelectorAll('img').forEach(nbWrapImg);
+                        if (nbRO) document.querySelectorAll('.nb-img-wrap').forEach(function(w){ nbRO.observe(w); });
+                    }
+                    nbProcessImages();
+                    new MutationObserver(nbProcessImages).observe(document.body, { childList: true, subtree: true });
+                    var nbToolbar, nbSelectedWrap = null;
                     function nbEnsureToolbar() {
                         if (nbToolbar) return nbToolbar;
                         nbToolbar = document.createElement('div');
@@ -359,46 +390,40 @@ async function init() {
                         document.body.appendChild(nbToolbar);
                         nbToolbar.addEventListener('mousedown', function(e){ e.preventDefault(); });
                         nbToolbar.addEventListener('click', function(e) {
-                            var btn = e.target.closest('button'); if (!btn || !nbSelectedImg) return;
+                            var btn = e.target.closest('button'); if (!btn || !nbSelectedWrap) return;
                             var mode = btn.dataset.wrap;
-                            if (mode === 'left') { nbSelectedImg.style.float = 'left'; nbSelectedImg.style.margin = '4px 16px 8px 0'; }
-                            else if (mode === 'right') { nbSelectedImg.style.float = 'right'; nbSelectedImg.style.margin = '4px 0 8px 16px'; }
-                            else { nbSelectedImg.style.float = 'none'; nbSelectedImg.style.margin = '8px 0'; }
+                            if (mode === 'left') { nbSelectedWrap.style.float = 'left'; nbSelectedWrap.style.margin = '4px 16px 8px 0'; }
+                            else if (mode === 'right') { nbSelectedWrap.style.float = 'right'; nbSelectedWrap.style.margin = '4px 0 8px 16px'; }
+                            else { nbSelectedWrap.style.float = 'none'; nbSelectedWrap.style.margin = '8px 0'; }
                             nbHighlightToolbar(); sync();
                         });
                         return nbToolbar;
                     }
                     function nbHighlightToolbar() {
-                        if (!nbToolbar || !nbSelectedImg) return;
-                        var mode = nbSelectedImg.style.float === 'left' ? 'left' : (nbSelectedImg.style.float === 'right' ? 'right' : 'none');
+                        if (!nbToolbar || !nbSelectedWrap) return;
+                        var mode = nbSelectedWrap.style.float === 'left' ? 'left' : (nbSelectedWrap.style.float === 'right' ? 'right' : 'none');
                         Array.prototype.forEach.call(nbToolbar.querySelectorAll('button'), function(b){ b.classList.toggle('active', b.dataset.wrap === mode); });
                     }
-                    function nbPositionToolbar(img) {
+                    function nbPositionToolbar(wrap) {
                         var t = nbEnsureToolbar();
-                        var r = img.getBoundingClientRect();
+                        var r = wrap.getBoundingClientRect();
                         t.style.left = (r.left + window.scrollX) + 'px';
                         t.style.top = (r.top + window.scrollY - 34) + 'px';
                         t.style.display = 'flex';
                         nbHighlightToolbar();
                     }
                     document.addEventListener('click', function(e) {
-                        var img = e.target.closest('img');
-                        if (img) {
-                            if (nbSelectedImg) nbSelectedImg.classList.remove('nb-img-selected');
-                            nbSelectedImg = img; img.classList.add('nb-img-selected');
-                            nbPositionToolbar(img);
+                        var wrap = e.target.closest('.nb-img-wrap');
+                        if (wrap) {
+                            if (nbSelectedWrap) nbSelectedWrap.classList.remove('nb-img-selected');
+                            nbSelectedWrap = wrap; wrap.classList.add('nb-img-selected');
+                            nbPositionToolbar(wrap);
                         } else if (!e.target.closest('#nb-img-toolbar')) {
-                            if (nbSelectedImg) nbSelectedImg.classList.remove('nb-img-selected');
-                            nbSelectedImg = null;
+                            if (nbSelectedWrap) nbSelectedWrap.classList.remove('nb-img-selected');
+                            nbSelectedWrap = null;
                             if (nbToolbar) nbToolbar.style.display = 'none';
                         }
                     });
-                    if (window.ResizeObserver) {
-                        var nbRO = new ResizeObserver(function(){ sync(); });
-                        function nbObserveImgs() { document.querySelectorAll('img').forEach(function(img){ nbRO.observe(img); }); }
-                        nbObserveImgs();
-                        new MutationObserver(nbObserveImgs).observe(document.body, { childList: true, subtree: true });
-                    }
                 <\/script>
             </head>
             <body contenteditable="true" oninput="sync()">${htmlContent || '<p>Start typing your notes here...</p>'}</body>
