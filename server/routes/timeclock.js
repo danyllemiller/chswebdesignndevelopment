@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { getDbConnection } = require('../db');
 const { getCurrentSchoolYear } = require('../helpers');
+const { pickWprQuestion } = require('../wprQuestionBank');
 
 // Client-side JS errors on the timeclock widget were failing completely
 // silently for some students with no way to see why -- multiple fixes
@@ -359,6 +360,27 @@ async function ensureDailyQuestionsGroupTable(connection) {
     `);
 }
 
+// Mirrors intervention_journal's shape exactly (server/routes/intervention.js)
+// -- one entry per student per calendar day, storing both the prompt asked
+// and what they wrote, so a WD1/WD2 student can look back through their own
+// clock-out reflections over time. Kept separate from the rich-text
+// notebook (student/notes.html) on purpose -- this is the daily
+// question-and-answer record, not their class notes.
+async function ensureWdJournalTable(connection) {
+    await connection.execute(`
+        CREATE TABLE IF NOT EXISTS wd_journal (
+            id         INT AUTO_INCREMENT PRIMARY KEY,
+            student_id VARCHAR(50) NOT NULL,
+            entry_date DATE NOT NULL,
+            prompt     TEXT,
+            content    TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_wd_journal (student_id, entry_date)
+        )
+    `);
+}
+
 async function resolveQuestionGroupKey(connection, studentId) {
     const [[student]] = await connection.execute(
         'SELECT section_id, course_id FROM students WHERE student_id = ?', [studentId]
@@ -404,15 +426,25 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
             }
         }
 
-        // Fallback: no custom question set for this group today -- use the
-        // class-wide due-date schedule as a reasonable, stable default.
+        // Fallback: no custom question set for this group today. WD1/WD2 get
+        // a real Nevada Workplace Readiness Skills question (one per
+        // calendar day, cycling through the whole bank) instead of a
+        // generic "reflect on the chapter" filler -- CS keeps the original
+        // chapter-based fallback since the WPR bank wasn't asked for there.
+        if (kind === 'WD1' || kind === 'WD2') {
+            await connection.release();
+            const picked = pickWprQuestion(today);
+            return res.json({
+                prompt_text: `[WPR ${picked.std}] ${picked.q}`,
+                isCustom: false,
+                wprStandard: picked.std
+            });
+        }
+
         let chapter, title;
         if (kind === 'CS') {
             ({ chapter } = await getCurrentCSChapter(connection));
             title = CS_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
-        } else if (kind === 'WD1' || kind === 'WD2') {
-            ({ chapter } = await getCurrentWDChapter(connection, kind));
-            title = WD_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
         } else {
             await connection.release();
             return res.status(400).json({ error: 'Unrecognized type' });
@@ -433,7 +465,7 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
 });
 
 router.post('/timeclock/save', async (req, res) => {
-    const { student_id, section_id, mode, answer, is_correct } = req.body;
+    const { student_id, section_id, mode, answer, is_correct, prompt } = req.body;
     if (!student_id || !mode) return res.status(400).json({ error: 'student_id and mode are required' });
     const today = getLocalDateStr();
     const period = section_id || '';
@@ -517,10 +549,61 @@ router.post('/timeclock/save', async (req, res) => {
                  ORDER BY id DESC LIMIT 1`,
                 [answer || '', student_id, today, period]
             );
+
+            // WD1/WD2 daily journal -- records the reflection prompt actually
+            // shown alongside the answer, one row per student per day, so it
+            // can be browsed later (My Daily Journal) the same way
+            // Intervention's journal already works. Best-effort: never block
+            // the clock-out itself if this fails.
+            try {
+                const courseKey = periodToCourseKeyServer(period);
+                if (courseKey === 'WD1' || courseKey === 'WD2') {
+                    await ensureWdJournalTable(connection);
+                    await connection.execute(
+                        `INSERT INTO wd_journal (student_id, entry_date, prompt, content)
+                         VALUES (?, ?, ?, ?)
+                         ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
+                        [student_id, today, prompt || null, answer || '']
+                    );
+                }
+            } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry:', journalErr); }
         }
         await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Timeclock save failed.' }); }
+});
+
+// Student's own journal -- every clock-out reflection they've written,
+// newest first, so they can look back on it (see ensureWdJournalTable above).
+router.get('/student/wd-journal', async (req, res) => {
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id is required' });
+    try {
+        const connection = await getDbConnection();
+        await ensureWdJournalTable(connection);
+        const [rows] = await connection.execute(
+            'SELECT entry_date, prompt, content, updated_at FROM wd_journal WHERE student_id = ? ORDER BY entry_date DESC',
+            [student_id]
+        );
+        await connection.release();
+        res.json({ entries: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch journal' }); }
+});
+
+// Teacher view of one student's journal (admin/tools/daily-activity.html or
+// similar can link into this by student_id).
+router.get('/admin/wd-journal/:student_id', async (req, res) => {
+    const { student_id } = req.params;
+    try {
+        const connection = await getDbConnection();
+        await ensureWdJournalTable(connection);
+        const [rows] = await connection.execute(
+            'SELECT entry_date, prompt, content, updated_at FROM wd_journal WHERE student_id = ? ORDER BY entry_date DESC',
+            [student_id]
+        );
+        await connection.release();
+        res.json({ entries: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch journal' }); }
 });
 
 router.get('/admin/daily-questions', async (req, res) => {

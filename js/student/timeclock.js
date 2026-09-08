@@ -37,6 +37,7 @@ window.addEventListener('unhandledrejection', (ev) => {
 
 let studentData = null;
 let currentQuestion = null;
+let currentPromptText = null; // the clock-out reflection prompt actually shown, so it can be saved alongside the answer for the WD daily journal
 let bellWindow = null; // { startMs, endMs } for whichever of the student's periods is currently active today, or null
 let currentPeriod = null; // which of the student's (possibly multiple) periods bellWindow/getCourseKey resolved to
 
@@ -481,6 +482,7 @@ async function checkStatusInner() {
             const category = getCourseKey();
             const promptData = await apiFetch(`/api/timeclock/reflection-prompt?type=${category}&student_id=${encodeURIComponent(studentData.student_id)}`);
             if (callId !== checkStatusCallId) return; // superseded while this fetch was in flight
+            currentPromptText = promptData.prompt_text;
             label.innerText = promptData.prompt_text;
             optsContainer.innerHTML = `<textarea id="tc-out-answer" class="form-control" rows="3" required></textarea>`;
             btn.innerText = "Submit & Clock Out";
@@ -537,7 +539,8 @@ async function handleTimeclockSubmit(e) {
                 section_id: currentPeriod || studentData.section_id,
                 mode: mode,
                 answer: answer,
-                is_correct: isCorrect
+                is_correct: isCorrect,
+                prompt: mode === 'out' ? currentPromptText : null
             })
         });
         location.reload();
@@ -700,6 +703,7 @@ async function handleManualOpen(forcedMode) {
         } else if (mode === 'out') {
             const category = getCourseKey();
             const promptData = await apiFetch(`/api/timeclock/reflection-prompt?type=${category}&student_id=${encodeURIComponent(studentData.student_id)}`);
+            currentPromptText = promptData.prompt_text;
             label.innerText = promptData.prompt_text;
             optsContainer.innerHTML = `<textarea id="tc-out-answer" class="form-control" rows="3" required></textarea>`;
             btn.innerText = 'Submit & Clock Out';
