@@ -14,13 +14,15 @@ const ALLOWED_TAGS = [
     'b', 'strong', 'i', 'em', 'u', 's', 'strike',
     'ul', 'ol', 'li',
     'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
-    'blockquote', 'code', 'pre'
+    'blockquote', 'code', 'pre',
+    'img'
 ];
 
 const ALLOWED_ATTRIBUTES = {
     '*': ['style', 'class'],
     td: ['colspan', 'rowspan'],
-    th: ['colspan', 'rowspan']
+    th: ['colspan', 'rowspan'],
+    img: ['src', 'alt']
 };
 
 const ALLOWED_STYLES = {
@@ -30,15 +32,30 @@ const ALLOWED_STYLES = {
         'text-align': [/^left$|^right$|^center$|^justify$/],
         'font-weight': [/^bold$|^normal$|^[1-9]00$/],
         'font-style': [/^italic$|^normal$/],
-        'text-decoration': [/^underline$|^line-through$|^none$/]
+        'text-decoration': [/^underline$|^line-through$|^none$/],
+        // Pasted-screenshot resize (native CSS `resize`, which stores the
+        // dragged dimensions as inline width/height) and the Word/Docs-style
+        // wrap-text toggle (float + margin) both need these to round-trip.
+        width: [/^\d+(\.\d+)?(px|%)$/],
+        height: [/^\d+(\.\d+)?(px|%)$/],
+        'max-width': [/^\d+(\.\d+)?(px|%)$/],
+        float: [/^left$|^right$|^none$/],
+        margin: [/^(0|[\d.]+px)( (0|[\d.]+px)){0,3}$/]
     }
 };
+
+// img src is allowed to be a pasted screenshot's data: URI (what
+// contenteditable's native paste-image behavior produces) in addition to a
+// normal http(s) URL -- scoped to the img tag specifically so this doesn't
+// loosen link/script handling anywhere else.
+const ALLOWED_SCHEMES_BY_TAG = { img: ['http', 'https', 'data'] };
 
 function sanitizeNotebookHtml(rawHtml) {
     return sanitizeHtml(rawHtml || '', {
         allowedTags: ALLOWED_TAGS,
         allowedAttributes: ALLOWED_ATTRIBUTES,
-        allowedStyles: ALLOWED_STYLES
+        allowedStyles: ALLOWED_STYLES,
+        allowedSchemesByTag: ALLOWED_SCHEMES_BY_TAG
     });
 }
 

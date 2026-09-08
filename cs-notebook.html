@@ -326,6 +326,17 @@ async function init() {
                     .notebook-table th, .notebook-table td { border: 1px solid #b9c2cc; padding: 8px 10px; text-align: left; }
                     .notebook-table th { background: #cfe1f0; color: #1a1a1a; }
                     .notebook-table tr:nth-child(even) td { background: #f7f9fb; }
+                    /* Pasted screenshots: native contentEditable paste already
+                       inserts them as an <img>, so no custom paste handling is
+                       needed for that. This adds (1) native CSS resize (a drag
+                       handle in the image's corner) and (2) a floating
+                       Word/Docs-style wrap-text toggle, shown when an image is
+                       clicked. */
+                    img { max-width: 100%; resize: both; overflow: hidden; cursor: pointer; display: inline-block; vertical-align: top; }
+                    img.nb-img-selected { outline: 2px solid #3b82f6; outline-offset: 2px; }
+                    #nb-img-toolbar { position: absolute; display: none; gap: 2px; background: #1f2937; border-radius: 6px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,.25); z-index: 9999; font-family: sans-serif; }
+                    #nb-img-toolbar button { background: none; border: none; color: #fff; font-size: 11px; padding: 4px 8px; cursor: pointer; border-radius: 4px; white-space: nowrap; }
+                    #nb-img-toolbar button:hover, #nb-img-toolbar button.active { background: #3b82f6; }
                 </style>
                 <script>
                     function sync() { window.parent.postMessage({type:'updateHtml',content:document.body.innerHTML}, '*');}
@@ -334,6 +345,60 @@ async function init() {
                             e.preventDefault(); document.execCommand('undo'); sync();
                         }
                     });
+                    // Word/Docs-style wrap-text toggle -- click an image to select
+                    // it and show No Wrap / Wrap Left / Wrap Right. A ResizeObserver
+                    // calls sync() after a drag-resize, since the native resize
+                    // handle doesn't fire an input event on its own and the new
+                    // size would otherwise only be visual until the next reload.
+                    var nbToolbar, nbSelectedImg = null;
+                    function nbEnsureToolbar() {
+                        if (nbToolbar) return nbToolbar;
+                        nbToolbar = document.createElement('div');
+                        nbToolbar.id = 'nb-img-toolbar';
+                        nbToolbar.innerHTML = '<button data-wrap="none">No Wrap</button><button data-wrap="left">Wrap Left</button><button data-wrap="right">Wrap Right</button>';
+                        document.body.appendChild(nbToolbar);
+                        nbToolbar.addEventListener('mousedown', function(e){ e.preventDefault(); });
+                        nbToolbar.addEventListener('click', function(e) {
+                            var btn = e.target.closest('button'); if (!btn || !nbSelectedImg) return;
+                            var mode = btn.dataset.wrap;
+                            if (mode === 'left') { nbSelectedImg.style.float = 'left'; nbSelectedImg.style.margin = '4px 16px 8px 0'; }
+                            else if (mode === 'right') { nbSelectedImg.style.float = 'right'; nbSelectedImg.style.margin = '4px 0 8px 16px'; }
+                            else { nbSelectedImg.style.float = 'none'; nbSelectedImg.style.margin = '8px 0'; }
+                            nbHighlightToolbar(); sync();
+                        });
+                        return nbToolbar;
+                    }
+                    function nbHighlightToolbar() {
+                        if (!nbToolbar || !nbSelectedImg) return;
+                        var mode = nbSelectedImg.style.float === 'left' ? 'left' : (nbSelectedImg.style.float === 'right' ? 'right' : 'none');
+                        Array.prototype.forEach.call(nbToolbar.querySelectorAll('button'), function(b){ b.classList.toggle('active', b.dataset.wrap === mode); });
+                    }
+                    function nbPositionToolbar(img) {
+                        var t = nbEnsureToolbar();
+                        var r = img.getBoundingClientRect();
+                        t.style.left = (r.left + window.scrollX) + 'px';
+                        t.style.top = (r.top + window.scrollY - 34) + 'px';
+                        t.style.display = 'flex';
+                        nbHighlightToolbar();
+                    }
+                    document.addEventListener('click', function(e) {
+                        var img = e.target.closest('img');
+                        if (img) {
+                            if (nbSelectedImg) nbSelectedImg.classList.remove('nb-img-selected');
+                            nbSelectedImg = img; img.classList.add('nb-img-selected');
+                            nbPositionToolbar(img);
+                        } else if (!e.target.closest('#nb-img-toolbar')) {
+                            if (nbSelectedImg) nbSelectedImg.classList.remove('nb-img-selected');
+                            nbSelectedImg = null;
+                            if (nbToolbar) nbToolbar.style.display = 'none';
+                        }
+                    });
+                    if (window.ResizeObserver) {
+                        var nbRO = new ResizeObserver(function(){ sync(); });
+                        function nbObserveImgs() { document.querySelectorAll('img').forEach(function(img){ nbRO.observe(img); }); }
+                        nbObserveImgs();
+                        new MutationObserver(nbObserveImgs).observe(document.body, { childList: true, subtree: true });
+                    }
                 <\/script>
             </head>
             <body contenteditable="true" oninput="sync()">${htmlContent || '<p>Start typing your notes here...</p>'}</body>
