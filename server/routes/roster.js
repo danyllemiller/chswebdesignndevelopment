@@ -458,7 +458,7 @@ router.get('/admin/student', async (req, res) => {
         // join a "payroll_roster" table that was never actually created, which
         // made this endpoint 500 on every call.
         const [rows] = await connection.execute(
-            `SELECT s.student_id, s.first_name, s.last_name, s.username, s.section_id, s.role,
+            `SELECT s.student_id, s.first_name, s.last_name, s.username, s.section_id, s.role, s.archived,
                     COALESCE(pr.title, 'Intern') AS payroll_title, COALESCE(pr.hourly_rate, 15.00) AS hourly_rate
              FROM students s LEFT JOIN pay_roles pr ON s.role_id = pr.id
              WHERE s.student_id = ? LIMIT 1`, [student_id]
@@ -470,7 +470,7 @@ router.get('/admin/student', async (req, res) => {
 });
 
 router.post('/admin/save-student', async (req, res) => {
-    const { student_id, first_name, last_name, username, section_id, role, password, payroll_title, payroll_effective_date } = req.body || {};
+    const { student_id, first_name, last_name, username, section_id, role, password, payroll_title, payroll_effective_date, archived } = req.body || {};
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
         const connection = await getDbConnection();
@@ -492,6 +492,14 @@ router.post('/admin/save-student', async (req, res) => {
         if (username   !== undefined) { updates.push('username = ?');   params.push(username || null); }
         if (section_id !== undefined) { updates.push('section_id = ?'); params.push(section_id || null); }
         if (role       !== undefined) { updates.push('role = ?');       params.push(role); }
+        // The individual edit form previously had no way to un-archive a
+        // student at all -- only bulk actions (archive-students/archive-year)
+        // could set the flag, none could clear it, so a student assigned a
+        // new section while still archived would keep their new section_id
+        // (it really did save) but stay invisible everywhere that filters
+        // archived IS NULL OR archived = 0, making the edit look like it
+        // silently failed no matter how many times it was repeated.
+        if (archived !== undefined) { updates.push('archived = ?'); params.push(archived ? 1 : 0); }
         if (password !== undefined && password !== null && String(password).length > 0) {
             const hash = await bcrypt.hash(String(password), 10);
             updates.push('password = ?', 'password_hash = ?');

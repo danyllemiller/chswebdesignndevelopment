@@ -536,6 +536,8 @@ window.manageStudent = async (id, name) => {
         document.getElementById('edit-student-id').value = s.student_id || '';
         document.getElementById('edit-username').value = s.username || '';
         document.getElementById('edit-role').value = s.role || 'student';
+        const activeEl = document.getElementById('edit-active');
+        if (activeEl) activeEl.checked = !s.archived;
         const posEl = document.getElementById('edit-payroll-title');
         if (posEl) posEl.value = s.payroll_title || 'Intern';
         originalPayrollTitle = s.payroll_title || 'Intern';
@@ -627,6 +629,7 @@ document.getElementById('saveStudentBtn').addEventListener('click', async () => 
         username: document.getElementById('edit-username').value.trim() || null,
         section_id: document.getElementById('editPeriod') ? document.getElementById('editPeriod').value : null,
         role: document.getElementById('edit-role').value || 'student',
+        archived: document.getElementById('edit-active') ? !document.getElementById('edit-active').checked : false,
         payroll_title: document.getElementById('edit-payroll-title')?.value || 'Intern',
         payroll_effective_date: document.getElementById('edit-payroll-effective-date')?.value || null
     };
