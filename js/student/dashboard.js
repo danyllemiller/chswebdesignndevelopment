@@ -4,6 +4,20 @@ import { apiFetch } from '../modules/api-client.js';
 import { escapeHtml, parsePts } from '../modules/utils.js';
 import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=3';
 
+// Matches data/cs-course-map.json -- which chapters' classwork
+// (cs_chN_activity_name) belong to which unit's exam, for the mastery
+// exemption below. Kept in sync with the identical copy in server/gradeCalc.js.
+const CS_UNIT_CHAPTERS = {
+    1: [1, 2], 2: [3, 4], 3: [5, 6, 7, 8], 4: [9, 10],
+    5: [11, 12, 13], 6: [14, 15, 16], 7: [17, 18, 19]
+};
+function unitForCsChapter(ch) {
+    for (const unit in CS_UNIT_CHAPTERS) {
+        if (CS_UNIT_CHAPTERS[unit].includes(ch)) return Number(unit);
+    }
+    return null;
+}
+
 // --- INJECT TURN-IN MODAL ON LOAD ---
 function injectTurnInModal() {
     if (document.getElementById('turnInModal')) return;
@@ -266,7 +280,18 @@ async function renderCoursePanel(user, courseKey, sectionId) {
 
         if (hasCurriculumChapters(courseKey)) {
             renderProficiencyScales(keys, myGrades, user.student_id, courseKey, saData.assessments);
-            if (saData.assessments) renderSelfAssessmentChart(saData.assessments, courseKey, myGrades);
+            // Awaited and caught on its own -- this call was previously fire-and-forget,
+            // so a Chart.js failure (e.g. undefined Chart) became an unhandled promise
+            // rejection instead of hitting the catch below, and would otherwise wipe out
+            // the grade table above (already rendered fine) with a false "could not load"
+            // message for what's really just a decorative chart failing.
+            if (saData.assessments) {
+                try {
+                    await renderSelfAssessmentChart(saData.assessments, courseKey, myGrades);
+                } catch (chartErr) {
+                    console.error(`Self-assessment chart failed for ${courseKey}:`, chartErr);
+                }
+            }
         }
     } catch (e) {
         console.error(`Error loading grades for ${courseKey}:`, e);
@@ -321,16 +346,20 @@ function calculateGradeStats(keys, myGrades, registryData, courseKey) {
 
     keys.forEach(key => {
         if (myGrades[key] !== undefined && myGrades[key] !== null) {
-            // CS-only mastery exemption: once a student scores 80%+ on a unit's
-            // exam, that unit's Pre-Test and Pre-Scale are exempt — they exist
-            // to measure where a student started, which no longer matters once
-            // the exam itself proves they've mastered the material.
+            // CS-only mastery exemption: once a student scores 80%+ on a
+            // unit's exam, that unit's chapter classwork (cs_chN_*) is
+            // exempt — it exists to build toward mastery, which no longer
+            // matters once the exam itself proves it. Pre-Test, Pre-Scale,
+            // and timeclock entries are NEVER exempt, regardless of exam
+            // score -- previously this exempted Unit#-Pre and Unit#
+            // Pre-Scale instead, the opposite of what's wanted.
             if (courseKey === 'CS') {
-                const unitMatch = key.match(/^Unit(\d+)(?:-Pre|\s+Pre-Scale)$/);
-                if (unitMatch) {
-                    const examEntry = myGrades[`Unit${unitMatch[1]}-Exam`];
+                const chMatch = key.match(/^cs_ch(\d+)_/);
+                const unit = chMatch ? unitForCsChapter(Number(chMatch[1])) : null;
+                if (unit) {
+                    const examEntry = myGrades[`Unit${unit}-Exam`];
                     const examScore = examEntry ? (typeof examEntry === 'object' ? examEntry.score : examEntry) : null;
-                    const examMax = registryData?.[`Unit${unitMatch[1]}-Exam`]?.maxPoints;
+                    const examMax = registryData?.[`Unit${unit}-Exam`]?.maxPoints;
                     if (examScore !== null && examScore !== undefined && examScore !== '' && examMax
                         && (Number(examScore) / examMax) >= 0.80) {
                         return;
@@ -343,6 +372,11 @@ function calculateGradeStats(keys, myGrades, registryData, courseKey) {
             const max = registryData?.[key]?.maxPoints || parsePts(key);
             const score = typeof myGrades[key] === 'object' ? myGrades[key].score : myGrades[key];
             if (score === "Submitted") return; // turned in, awaiting a numeric grade — not a zero
+            // Excused work is fully excluded, regardless of due date. Previously
+            // "EX" wasn't caught here at all, so it fell through to hasScore=true
+            // and Number("EX") produced NaN, silently corrupting the running total
+            // for the rest of this student's course.
+            if (score === "EX") return;
 
             const hasScore = score !== undefined && score !== null && score !== "";
             if (!hasScore) {

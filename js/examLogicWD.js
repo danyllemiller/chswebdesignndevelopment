@@ -200,6 +200,19 @@ function canTakeExam() {
     return { allowed: true };
 }
 
+// Same formula as admin/daily-agenda.html's unlabeled corner stamp -- a
+// deterministic per-day 6-digit code, purely client-side (no server round
+// trip, no DB row, both servers naturally agree since it's just today's
+// date through the same hash). Typing it here clears the cooldown early.
+function dailyOverrideCode() {
+    const d = new Date();
+    const dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const input = dateStr + 'chs-guild-2026';
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
+    return String(hash % 1000000).padStart(6, '0');
+}
+
 function showCooldownMessage(remainingMs) {
     const container = document.getElementById('exam-container');
     if (!container) return;
@@ -210,7 +223,30 @@ function showCooldownMessage(remainingMs) {
             <p>You recently submitted this exam. You must wait before retaking it.</p>
             <div class="display-4 my-4 fw-bold text-primary" id="cooldown-countdown"><strong>--:--</strong></div>
             <p class="small text-muted">This page will automatically refresh when the cooldown ends.</p>
+            <a href="#" id="override-toggle-link" class="small text-muted">Override</a>
+            <div id="override-box" class="d-none mt-2">
+                <div class="input-group input-group-sm mx-auto" style="max-width: 220px;">
+                    <input type="text" id="override-code-input" class="form-control text-center" maxlength="6" inputmode="numeric">
+                    <button class="btn btn-outline-secondary" id="override-submit-btn">Go</button>
+                </div>
+            </div>
         </div>`;
+    document.getElementById('override-toggle-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('override-box')?.classList.remove('d-none');
+        document.getElementById('override-code-input')?.focus();
+    });
+    document.getElementById('override-submit-btn')?.addEventListener('click', () => {
+        const input = document.getElementById('override-code-input');
+        if (input && input.value.trim() === dailyOverrideCode()) {
+            lastSubmissionTime = 0;
+            saveAttemptData();
+            window.location.reload();
+        } else if (input) {
+            input.value = '';
+            input.placeholder = 'Try again';
+        }
+    });
     const updateCountdown = () => {
         const remaining = cooldownEndTime - Date.now();
         if (remaining <= 0) { window.location.reload(); return; }
@@ -362,7 +398,42 @@ async function initExam(config) {
     const safeTitle = (chapterTitle || "Assessment").replace(/\s+/g, '_');
     examProgressId = `Summative_${studentId}_${safeTitle}_${todayStr}`;
 
+    const windowGate = await checkTestingWindow();
+    if (!windowGate.ok) {
+        renderTestingWindowBlock(windowGate.reason, windowGate.label);
+        return;
+    }
+
     renderAuthScreen();
+}
+
+// Tests only open 7am-4pm on real school days -- real enforcement is
+// server-side in /api/submit-exam, this is just the up-front locked screen.
+async function checkTestingWindow() {
+    try {
+        const res = await fetch('/api/exam/testing-window-status');
+        if (!res.ok) return { ok: true }; // fail open on an API hiccup
+        return await res.json();
+    } catch (e) {
+        console.error('[examLogicWD] Testing window check failed:', e);
+        return { ok: true };
+    }
+}
+
+function renderTestingWindowBlock(reason, label) {
+    const container = document.getElementById('exam-container');
+    if (!container) return;
+    const message = reason === 'holiday'
+        ? `Testing is closed today (${label}). Please wait until the next school day.`
+        : reason === 'weekend'
+            ? 'Testing is only open 7am-4pm on school days -- not weekends.'
+            : 'Testing is only open 7am-4pm on school days. Please try again during school hours.';
+    container.innerHTML = `
+        <div class="alert alert-warning text-center shadow p-5">
+            <h4 class="fw-bold"><i class="fas fa-lock me-2"></i>Testing Closed</h4>
+            <p class="mb-4">${escapeHtml(message)}</p>
+            <a href="/student" class="btn btn-warning fw-bold">&laquo; Back to Portal</a>
+        </div>`;
 }
 
 function renderAuthScreen() {
@@ -737,11 +808,17 @@ async function processSubmission() {
             }
         }
         if (shouldSave) {
-            await fetch('/api/submit-exam', {
+            const saveRes = await fetch('/api/submit-exam', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ student_id: studentId, exam_id: finalAssignmentKey, score: finalScore, total_points: finalTotal })
             });
+            if (!saveRes.ok && saveRes.status === 503) {
+                try {
+                    const errBody = await saveRes.json();
+                    if (errBody.testingPaused) alert(errBody.error);
+                } catch {}
+            }
         }
     } catch(e) { console.warn("Could not save grade:", e); }
 

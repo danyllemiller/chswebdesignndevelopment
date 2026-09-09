@@ -18,6 +18,20 @@ if (!document.getElementById('chartjs-lib')) {
     document.head.appendChild(script);
 }
 
+// Matches data/cs-course-map.json -- which chapters' classwork
+// (cs_chN_activity_name) belong to which unit's exam. Kept in sync with
+// the identical copies in server/gradeCalc.js and js/student/dashboard.js.
+const CS_UNIT_CHAPTERS = {
+    1: [1, 2], 2: [3, 4], 3: [5, 6, 7, 8], 4: [9, 10],
+    5: [11, 12, 13], 6: [14, 15, 16], 7: [17, 18, 19]
+};
+function unitForCsChapter(ch) {
+    for (const unit in CS_UNIT_CHAPTERS) {
+        if (CS_UNIT_CHAPTERS[unit].includes(ch)) return Number(unit);
+    }
+    return null;
+}
+
 // Period-group filtering (the "All WD1"/"All CS" dropdown options) needs to
 // resolve a bare period code (A1, A3, B2...) to its course the same way
 // periodToCourseKey() does for grade weighting, so the two can't disagree.
@@ -60,6 +74,14 @@ function escapeHtml(str) {
     if (typeof str !== 'string') return str;
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
+
+// Cached from the most recent renderGradebook() call so the "Copy Scores"
+// button (delegated click handler, outside that function's scope) can read
+// the exact same row order and grade data currently on screen, instead of
+// recomputing the sort/grouping logic a second time.
+let lastOrderedStudents = [];
+let lastGrades = {};
+let lastSortedKeys = [];
 
 const cleanKey = (str) => {
     if (!str) return "";
@@ -879,14 +901,50 @@ function updatePeriodDropdown() {
     }
 }
 
+// Filter options are the same weighted categories COURSE_WEIGHTS/getAssignmentCategory
+// already use to compute the real final grade (grade-weights.js) -- so "Tests/Quizzes"
+// here means exactly the assignments counted in that weight bucket, not a separate
+// manually-tagged label that could drift out of sync with how grades actually add up.
+const CATEGORY_LABELS = { project_quiz: 'Tests/Quizzes', assignment: 'Assignments', final: 'Final Exam', career: 'Career Readiness' };
+
+// A clock-in is identified by its exam_id naming pattern (matching the exact
+// check grade-weights.js uses), not by weight bucket -- CS folds clock-ins
+// into its "assignment" weight while WD1/WD2 fold them into "career", so a
+// weight-category filter alone could never isolate "just the clock-ins" the
+// same way across every course. "__clockins" is handled as its own special
+// case in renderGradebook rather than mapped through getAssignmentCategory.
+const isClockIn = (key) => { const l = key.toLowerCase(); return l.startsWith('tc-') || l.includes('timeclock'); };
+
+// Same cross-cutting problem as clock-ins, in the other direction: CS's
+// "Unit1-Pre"/"Unit1-Pre-Score"/"Unit1 Pre-Scale" carry no weight keyword so
+// getAssignmentCategory buckets them as plain "assignment", while WD's
+// "Ch1 Pre-Assessment [15 pts]" matches "assessment" and lands in
+// "project_quiz" instead -- so a weight-category filter alone would show
+// pre-tests under a different label per course, or miss CS's entirely.
+const isPreAssessment = (key) => /pre-scale|pre-assessment|^unit\d+-pre(-score)?$|^cs-unit-\d+$/i.test(key);
+
+function updateCategoryDropdown() {
+    const select = document.getElementById('categoryFilter');
+    if (!select) return;
+    const currentVal = select.value;
+    let html = '<option value="All">All Categories</option>';
+    Object.keys(CATEGORY_LABELS).forEach(key => { html += `<option value="${key}">${CATEGORY_LABELS[key]}</option>`; });
+    html += '<option value="__clockins">Clock-Ins</option>';
+    html += '<option value="__preassessment">Pre-Tests / Pre-Scale</option>';
+    select.innerHTML = html;
+    if ([...select.options].some(opt => opt.value === currentVal)) select.value = currentVal;
+    else select.value = 'All';
+}
+
 function applyFiltersAndRender() {
     const periodVal = document.getElementById('periodFilter')?.value || 'All';
     const studentVal = document.getElementById('studentFilter')?.value || 'All';
+    const categoryVal = document.getElementById('categoryFilter')?.value || 'All';
     if (!periodVal || periodVal.includes('Select')) {
         document.getElementById('gradebookBody').innerHTML = '<tr><td colspan="100%" class="text-center p-5 text-muted"><h4>No Class Selected</h4></td></tr>';
         return;
     }
-    renderGradebook(getFilteredStudents(periodVal, studentVal), allGrades, periodVal);
+    renderGradebook(getFilteredStudents(periodVal, studentVal), allGrades, periodVal, categoryVal);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -907,7 +965,60 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('studentFilter')?.addEventListener('change', applyFiltersAndRender);
+    document.getElementById('categoryFilter')?.addEventListener('change', applyFiltersAndRender);
+
+    document.getElementById('markEnteredIcBtn')?.addEventListener('click', markEnteredIcForCurrentView);
 });
+
+// Scoped to exactly what's rendered on screen right now -- period, student,
+// and category filters all included -- by reusing lastOrderedStudents/
+// lastSortedKeys from the most recent render rather than re-deriving the
+// filters here, so this can never drift out of sync with what the table
+// actually shows. Previously this only respected the period filter: the
+// student filter was hardcoded to "All" and the category filter (added
+// later) wasn't consulted at all, so "Verify in IC" cleared every column
+// for the whole period regardless of what was actually visible.
+async function markEnteredIcForCurrentView() {
+    const periodVal = document.getElementById('periodFilter')?.value || 'All';
+    const categoryVal = document.getElementById('categoryFilter')?.value || 'All';
+    const visibleKeys = new Set(lastSortedKeys.map(k => cleanKey(k)));
+    const pairs = [];
+    lastOrderedStudents.forEach(s => {
+        const sGrades = allGrades[s.studentId] || {};
+        Object.entries(sGrades).forEach(([examId, g]) => {
+            if (!visibleKeys.has(cleanKey(examId))) return;
+            if (g && typeof g === 'object' && g.score !== '' && g.score !== undefined && g.score !== null && !g.enteredIC) {
+                pairs.push({ student_id: s.studentId, exam_id: examId });
+            }
+        });
+    });
+
+    if (pairs.length === 0) {
+        alert('No new grades to mark — nothing currently needs entering into IC in this view.');
+        return;
+    }
+    const scopeParts = [];
+    if (periodVal !== 'All') scopeParts.push(periodVal);
+    if (categoryVal !== 'All') scopeParts.push(CATEGORY_LABELS[categoryVal] || (categoryVal === '__clockins' ? 'Clock-Ins' : categoryVal === '__preassessment' ? 'Pre-Tests / Pre-Scale' : categoryVal));
+    if (!confirm(`Mark ${pairs.length} grade(s) as entered in IC${scopeParts.length ? ` for ${scopeParts.join(' — ')}` : ''}?`)) return;
+
+    const btn = document.getElementById('markEnteredIcBtn');
+    btn.disabled = true;
+    try {
+        const res = await fetch('/api/admin/mark-grades-entered-ic', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pairs })
+        });
+        if (!res.ok) throw new Error();
+        pairs.forEach(p => { allGrades[p.student_id][p.exam_id].enteredIC = true; });
+        applyFiltersAndRender();
+    } catch (e) {
+        alert('Failed to mark grades as entered. Try again.');
+    } finally {
+        btn.disabled = false;
+    }
+}
 
 async function loadData() {
     try {
@@ -967,7 +1078,8 @@ async function loadData() {
                 allGrades[g.student_id][g.exam_id] = {
                     score: g.score,
                     max: g.total_points,
-                    timestamp: g.timestamp
+                    timestamp: g.timestamp,
+                    enteredIC: !!g.entered_in_ic
                 };
             });
         }
@@ -984,6 +1096,7 @@ async function loadData() {
             }
         } catch (e) { console.error('Failed to load stickers', e); }
 
+        updateCategoryDropdown();
         applyFiltersAndRender();
     } catch (e) {
         console.error(e);
@@ -1031,11 +1144,17 @@ function parseAssignmentInfo(name) {
 function isAssignmentVisible(name, period) {
     if (!period || period === 'All' || period === 'Teacher') return true;
 
-    // Timeclock entries must ALWAYS render for all periods to prevent them from being hidden on filter switches
-    if (name.toUpperCase().startsWith('TC-') || name.toLowerCase().includes('timeclock')) {
-        return true;
-    }
-    
+    // Timeclock entries (TC-{courseKey}-{date}) are written to the exams
+    // table with a real course_id at creation time (server/routes/
+    // timeclock.js), same as every other assignment -- they used to be
+    // unconditionally visible in every period regardless of that course_id,
+    // which is exactly what leaked a dual-enrolled student's CS check-ins
+    // into a Web Design period filter (and vice versa). Falling through to
+    // the normal targetCourse check below filters them correctly, and the
+    // existing "no targetCourse yet -> visible" fallback further down still
+    // covers the case this was originally guarding against (a same-day
+    // check-in whose exams-table row hasn't been created yet).
+
     // Map backend relational course codes to frontend shorthand prefixes
     const courseMap = {
         '05254G1S': 'WD1',
@@ -1111,17 +1230,31 @@ function resolveDueDate(key, periodFilterVal) {
     return reg?.dueDate || window.earliestSubmissions[key]?.global || '';
 }
 
-function renderGradebook(students, grades, currentPeriod) {
+function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
     const thead = document.getElementById('gradebookHead');
     const tbody = document.getElementById('gradebookBody');
     const assignmentMap = new Map();
     const seenCleanKeys = new Set();
+
+    // Same course-key resolution used for weight-based sorting below, reused
+    // here so the category filter checks a column against the exact weight
+    // bucket ("Tests/Quizzes" == project_quiz, etc.) it actually counts
+    // toward in the real final-grade calculation.
+    const courseKeyForView = getViewCourseKey(currentPeriod) || 'CS';
+    const categoryVal = categoryFilterVal || 'All';
+    const columnMatchesCategory = (key) => {
+        if (categoryVal === 'All') return true;
+        if (categoryVal === '__clockins') return isClockIn(key);
+        if (categoryVal === '__preassessment') return isPreAssessment(key);
+        return getAssignmentCategory(key, courseKeyForView) === categoryVal;
+    };
 
     Object.keys(allAssignments).forEach(key => {
         // "-Score" entries hold the raw accuracy behind a flat completion
         // credit (e.g. diagnostic performance behind "Unit3-Pre"'s 15/15).
         // They're shown as a tooltip on the real column, not their own column.
         if (key.endsWith('-Score')) return;
+        if (!columnMatchesCategory(key)) return;
         if(key !== 'lastSubmitDate' && isAssignmentVisible(key, currentPeriod)) {
             const ck = cleanKey(key);
             if (!seenCleanKeys.has(ck)) {
@@ -1138,6 +1271,7 @@ function renderGradebook(students, grades, currentPeriod) {
         const sGrades = grades[s.studentId] || {};
         Object.keys(sGrades).forEach(key => {
             if (key.endsWith('-Score')) return;
+            if (!columnMatchesCategory(key)) return;
             if(key !== 'lastSubmitDate' && isAssignmentVisible(key, currentPeriod)) {
                 const ck = cleanKey(key);
                 if (!seenCleanKeys.has(ck)) {
@@ -1155,13 +1289,12 @@ function renderGradebook(students, grades, currentPeriod) {
     // outweighs a regular Assignment), or Alphabetical, each forward/backward.
     // "Weight" uses the active view's course when filtered; falls back to CS
     // for an unfiltered/mixed view, since it's just an ordering aid there.
-    const sortCourseKey = getViewCourseKey(currentPeriod) || 'CS';
-    const sortWeights = COURSE_WEIGHTS[sortCourseKey] || COURSE_WEIGHTS.CS;
+    const sortWeights = COURSE_WEIGHTS[courseKeyForView] || COURSE_WEIGHTS.CS;
     const sortedKeys = Array.from(assignmentMap.keys()).sort((a, b) => {
         let cmp;
         if (assignmentSortMode === 'weight') {
-            const wA = sortWeights[getAssignmentCategory(a, sortCourseKey)] || 0;
-            const wB = sortWeights[getAssignmentCategory(b, sortCourseKey)] || 0;
+            const wA = sortWeights[getAssignmentCategory(a, courseKeyForView)] || 0;
+            const wB = sortWeights[getAssignmentCategory(b, courseKeyForView)] || 0;
             cmp = wB - wA || a.localeCompare(b);
         } else if (assignmentSortMode === 'alpha') {
             cmp = a.localeCompare(b);
@@ -1180,9 +1313,17 @@ function renderGradebook(students, grades, currentPeriod) {
     sortedKeys.forEach((key, i) => {
         const info = assignmentMap.get(key);
         let tooltip = `${key}${info.dueDate ? ' | Due: ' + info.dueDate : ''}${info.instructions ? ' | ' + info.instructions : ''}`;
+        // Copy Scores: unit tests only (Unit1-Exam, Unit2-Exam, ...) -- for
+        // pulling just that one column's scores, in gradebook row order,
+        // into whatever format the district/admin wants them reported in,
+        // without copying the whole gradebook.
+        const isUnitExam = /^Unit\d+-Exam$/i.test(key);
+        const copyBtn = isUnitExam
+            ? `<i class="fas fa-copy text-white-50 x-small copy-scores-btn" data-assignment="${key}" title="Copy scores for this test, in gradebook order"></i>`
+            : '';
         headHtml += `<th class="header-main-blue" data-col-index="${i}"><div class="h-100 d-flex flex-column align-items-center justify-content-end pb-2">
             <span class="vertical-text analytics-trigger text-white fw-bold" title="${tooltip.replace(/"/g, "'")}" data-assignment="${key}">${abbreviateAssignmentName(key)}</span>
-            <div class="d-flex gap-1 justify-content-center w-100"><i class="fas fa-edit text-white-50 x-small edit-col-btn" data-assignment="${key}"></i><i class="fas fa-trash-alt text-white-50 x-small delete-col-btn" data-assignment="${key}"></i></div></div></th>`;
+            <div class="d-flex gap-1 justify-content-center w-100">${copyBtn}<i class="fas fa-edit text-white-50 x-small edit-col-btn" data-assignment="${key}"></i><i class="fas fa-trash-alt text-white-50 x-small delete-col-btn" data-assignment="${key}"></i></div></div></th>`;
     });
     thead.innerHTML = headHtml + '</tr>';
 
@@ -1305,7 +1446,14 @@ function renderGradebook(students, grades, currentPeriod) {
             const isPeriodExempt = hasPeriodDueDates && !studentPeriodDueDate && (score === "" || score === undefined);
             if (isPeriodExempt) return;
 
-            const hasScore = score !== undefined && score !== null && score !== "" && score !== "EX";
+            // Excused work is fully excluded from both earned and possible,
+            // regardless of due date -- previously this fell through to the
+            // past-due zero-counting branch below once the due date passed,
+            // silently counting an EX as a 0 against the denominator and
+            // tanking the percentage for anyone with excused work.
+            if (score === "EX") return;
+
+            const hasScore = score !== undefined && score !== null && score !== "";
             if (!hasScore) {
                 // Ungraded — only count it as a missed zero once its due date
                 // has actually passed, so students aren't dinged for work
@@ -1328,7 +1476,7 @@ function renderGradebook(students, grades, currentPeriod) {
         let pct = weightSum > 0 ? Math.round((weighted/weightSum)*100) : (possible > 0 ? Math.round((earned/possible)*100) : 0);
         let letter = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : pct >= 60 ? 'D' : 'F';
 
-// Alternating row background - grey/white pattern for readability
+// Alternating row background - gray/white pattern for readability
         const rowClass = rowIndex % 2 === 0 ? 'gradebook-row-even' : 'gradebook-row-odd';
 const cellClass = rowIndex % 2 === 0 ? 'gradebook-cell-even' : 'gradebook-cell-odd';
         html += `<tr class="${rowClass}"><td class="sticky-col student-info-cell p-2 ${cellClass}" data-student-id="${s.studentId}" data-student-name="${escapeHtml(`${s.firstName} ${s.lastName}`)}" data-current-period="${escapeHtml(displayPeriod || '')}" title="Right-click for options"><div><span class="fw-bold">${privacyMode?`Student ${rowIndex+1}`:`${s.lastName.toUpperCase()}, ${s.firstName}`}</span><div class="id-cell">${privacyMode?'HIDDEN':s.displaySchoolId} | ${displayPeriod}</div></div></td>`;
@@ -1356,7 +1504,34 @@ let score = "", display = '', bg = "";
                 if (score === "EX") display = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
                 else {
                     display = (Number(score) === info.maxPoints) ? '<span class="check-mark">✔</span>' : score;
-                    if (Number(score)/info.maxPoints < 0.8) bg = "background-color: #FFF2CC;";
+                    const pct = Number(score) / info.maxPoints;
+                    // Only exams get a score-based color: red under 60%,
+                    // orange 60-70%, yellow 70-80%, nothing at 80%+ (also the
+                    // mastery threshold that exempts a unit's chapter
+                    // classwork). Matches "Exam" in either course's naming
+                    // convention (Unit1-Exam, Final-Exam, WD-Ch1-Exam, ...).
+                    // Every other assignment type (Pre-Test, Pre-Scale,
+                    // classwork, worksheets...) gets no score-based
+                    // highlight at all -- there used to be a flat "below 80%"
+                    // yellow applied here regardless of assignment type,
+                    // which is exactly what made some Unit#-Pre cells turn
+                    // color for no reason anyone could explain from the
+                    // score alone.
+                    if (/Exam/i.test(key)) {
+                        if (pct < 0.60) bg = "background-color: rgb(240, 155, 155);";
+                        else if (pct < 0.70) bg = "background-color: rgb(245, 191, 137);";
+                        else if (pct < 0.80) bg = "background-color: #FFF2CC;";
+                    }
+                    // A new/updated score not yet copied into IC takes visual
+                    // priority over the low-score highlight above -- once
+                    // marked entered, the cell falls back to whatever bg (if
+                    // any) it would've had otherwise. Blue on purpose: red,
+                    // orange, and yellow are all reserved for exam score
+                    // quality now, and this is an unrelated workflow signal
+                    // ("needs copying into IC"), not a score-quality one --
+                    // reusing yellow here is exactly what made it ambiguous
+                    // with the new 70-80% exam tier.
+                    if (score !== "" && typeof g === 'object' && !g.enteredIC) bg = "background-color: rgb(174, 214, 241);";
                 }
             } else {
                 if (isPeriodExempt) {
@@ -1364,31 +1539,82 @@ let score = "", display = '', bg = "";
                 } else {
                     let isTC = key.match(/TC-(?:In|Out)\s+(\d{1,2}\/\d{1,2})/i);
                     if (isTC && !isStudentScheduledOn(displayPeriod, isTC[1])) display = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
+                    else {
+                        // CS-only mastery exemption: once a student scores
+                        // 80%+ on a unit's exam, that unit's chapter classwork
+                        // is exempt -- shown with the same EX badge a teacher
+                        // would type manually, so it reads identically to any
+                        // other exemption and is obviously safe to skip when
+                        // copying grades into IC. Never applies to Pre-Test,
+                        // Pre-Scale, or timeclock entries (those aren't
+                        // cs_chN_* keys, so the regex below can't match them).
+                        const chMatch = key.match(/^cs_ch(\d+)_/);
+                        const unit = chMatch ? unitForCsChapter(Number(chMatch[1])) : null;
+                        let masteryExempt = false;
+                        if (unit) {
+                            const examEntry = sGrades[`Unit${unit}-Exam`];
+                            const examScore = examEntry ? (typeof examEntry === 'object' ? examEntry.score : examEntry) : null;
+                            const examMax = allAssignments[`Unit${unit}-Exam`]?.maxPoints;
+                            if (examScore !== null && examScore !== undefined && examScore !== '' && examMax
+                                && (Number(examScore) / examMax) >= 0.80) {
+                                display = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
+                                masteryExempt = true;
+                            }
+                        }
+                        // Didn't reach 80% on the unit exam (or hasn't taken
+                        // it yet) -- if this chapter assignment's due date has
+                        // passed with nothing turned in, flag it the same way
+                        // the student's own dashboard already counts it: a
+                        // visible MISSING marker instead of a blank cell, so
+                        // it's not mistaken for "not due yet" or silently
+                        // overlooked at a glance.
+                        if (unit && !masteryExempt) {
+                            const effectiveDueDate = studentPeriodDueDate || reg?.dueDate;
+                            const isPastDue = !!effectiveDueDate && new Date(effectiveDueDate + 'T00:00:00') < today;
+                            if (isPastDue) {
+                                display = '<span class="text-danger fw-bold" title="Missing">M</span>';
+                                // Text color alone was too easy to miss scanning
+                                // a full row -- the cell background itself is
+                                // now red too.
+                                bg = "background-color: rgb(240, 155, 155);";
+                            }
+                        }
+                    }
                 }
             }
 
-            // If this cell has a companion raw-accuracy entry ("{key}-Score",
+            // If this column has a companion raw-accuracy exam_id ("{key}-Score",
             // e.g. a diagnostic's real performance behind its flat completion
-            // credit), surface it as a tooltip and a small on-cell marker.
-            let rawScoreAttrs = '';
-            const rawKey = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(key + '-Score'));
+            // credit), surface it as a small clickable on-cell marker -- checked
+            // against allAssignments (every known exam_id) rather than just this
+            // student's own sGrades, so the marker still appears -- as an empty
+            // "+" -- when the real score was never recorded at all, giving a way
+            // to enter it that isn't otherwise on this page.
+            const rawKey = Object.keys(allAssignments).find(k => cleanKey(k) === cleanKey(key + '-Score'));
             if (rawKey) {
-                const raw = sGrades[rawKey];
-                const rawScore = typeof raw === 'object' ? raw.score : raw;
-                const rawMax = (raw && typeof raw === 'object' && raw.max) ? raw.max : '';
-                if (rawScore !== '' && rawScore !== undefined && rawScore !== null) {
-                    const rawPct = rawMax ? Math.round((Number(rawScore) / Number(rawMax)) * 100) : '';
-                    rawScoreAttrs = ` data-bs-toggle="tooltip" title="Actual score: ${rawScore}${rawMax ? '/' + rawMax : ''}${rawPct !== '' ? ' (' + rawPct + '%)' : ''}"`;
-                    display += `<sup class="text-muted ms-1" style="font-size:0.6em;">${rawScore}${rawMax ? '/' + rawMax : ''}</sup>`;
-                }
+                const rawSGradeKey = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(rawKey));
+                const raw = rawSGradeKey ? sGrades[rawSGradeKey] : null;
+                const rawScore = raw ? (typeof raw === 'object' ? raw.score : raw) : '';
+                const rawMax = (raw && typeof raw === 'object' && raw.max) ? raw.max : (allAssignments[rawKey]?.maxPoints || '');
+                const hasRaw = rawScore !== '' && rawScore !== undefined && rawScore !== null;
+                const rawPct = (hasRaw && rawMax) ? Math.round((Number(rawScore) / Number(rawMax)) * 100) : '';
+                const markerLabel = hasRaw ? `${rawScore}${rawMax ? '/' + rawMax : ''}` : '+';
+                const markerTitle = hasRaw
+                    ? `Actual score: ${rawScore}${rawMax ? '/' + rawMax : ''}${rawPct !== '' ? ' (' + rawPct + '%)' : ''} -- click to edit`
+                    : 'Click to record the actual score earned';
+                display += `<sup class="raw-score-marker text-muted ms-1" style="font-size:0.6em;cursor:pointer;text-decoration:underline dotted;${hasRaw ? '' : 'opacity:.5;'}" title="${markerTitle}" data-raw-key="${rawKey}" data-raw-score="${hasRaw ? rawScore : ''}" data-raw-max="${rawMax}" data-student-id="${s.studentId}">${markerLabel}</sup>`;
             }
 
-            html += `<td class="grade-cell text-center border-end" style="${bg}"${rawScoreAttrs} data-student-id="${s.studentId}" data-assignment="${key}" data-current-score="${score}" data-current-max="${info.maxPoints}" data-row-index="${rowIndex}" data-col-index="${colIndex}">${display}</td>`;
+            html += `<td class="grade-cell text-center border-end" style="${bg}" data-student-id="${s.studentId}" data-assignment="${key}" data-current-score="${score}" data-current-max="${info.maxPoints}" data-row-index="${rowIndex}" data-col-index="${colIndex}">${display}</td>`;
         });
         html += '</tr>';
     });
     tbody.innerHTML = html;
     stickCalcRows(thead);
+
+    lastOrderedStudents = orderedStudents;
+    lastGrades = grades;
+    lastSortedKeys = sortedKeys;
 
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });
@@ -1476,11 +1702,129 @@ window.showAnalytics = function(dbKey, displayLabel) {
     getModal('analyticsModal').show();
 };
 
+// =========================================
+// UNSAVED GRADE CHANGES
+// Every cell edit used to POST /api/admin/save-grade the instant you
+// tabbed/clicked away -- a typo landed in the real gradebook immediately,
+// with no way back (confirmed live: the responses table just gets
+// overwritten in place, nothing else keeps the old value). Edits now
+// stage locally here and only actually save when Save Changes is
+// clicked, so a mistake can be caught and discarded before it's real.
+// =========================================
+const pendingChanges = new Map(); // `${studentId}::${assignment}` -> { studentId, assignment, newScore, newMax, oldScore, oldMax, cellEl }
+
+function renderGradeCellValue(cell, val, max) {
+    if (val === "EX") cell.innerHTML = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
+    else if (val === "" || val === undefined || val === null) cell.innerHTML = '<span class="text-danger small fw-bold">MISSING</span>';
+    else cell.innerHTML = (val == max ? '<span class="check-mark">✔</span>' : val);
+}
+
+function updatePendingChangesBar() {
+    const bar = document.getElementById('pendingChangesBar');
+    const countEl = document.getElementById('pendingChangesCount');
+    if (!bar || !countEl) return;
+    if (pendingChanges.size === 0) {
+        bar.classList.add('d-none');
+    } else {
+        bar.classList.remove('d-none');
+        countEl.textContent = `${pendingChanges.size} unsaved change${pendingChanges.size === 1 ? '' : 's'}`;
+    }
+}
+
+async function commitPendingChanges() {
+    if (pendingChanges.size === 0) return;
+    const btn = document.getElementById('savePendingBtn');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+
+    const byStudent = new Map();
+    pendingChanges.forEach(ch => {
+        if (!byStudent.has(ch.studentId)) byStudent.set(ch.studentId, {});
+        byStudent.get(ch.studentId)[ch.assignment] = { score: ch.newScore, max: ch.newMax };
+    });
+    const batch = [...byStudent.entries()].map(([studentId, updates]) => ({ studentId, updates }));
+
+    try {
+        const res = await fetch('/api/admin/batch-update-grades', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ batch })
+        });
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        pendingChanges.forEach(ch => {
+            if (!allGrades[ch.studentId]) allGrades[ch.studentId] = {};
+            allGrades[ch.studentId][ch.assignment] = { score: ch.newScore, max: ch.newMax, timestamp: new Date().toISOString() };
+            ch.cellEl.classList.remove('pending-change');
+        });
+        pendingChanges.clear();
+        updatePendingChangesBar();
+        applyFiltersAndRender(); // now safe/worthwhile -- averages etc. should reflect the just-saved data
+    } catch (e) {
+        console.error('Batch save failed:', e);
+        alert("Couldn't save changes -- please try again. Your edits are still here, nothing was lost.");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    }
+}
+
+function discardPendingChanges() {
+    if (pendingChanges.size === 0) return;
+    if (!confirm(`Discard ${pendingChanges.size} unsaved change${pendingChanges.size === 1 ? '' : 's'}? This cannot be undone.`)) return;
+    pendingChanges.forEach(ch => {
+        ch.cellEl.classList.remove('pending-change');
+        if (ch.type === 'raw') {
+            ch.cellEl.dataset.rawScore = ch.oldScore;
+            ch.cellEl.textContent = (ch.oldScore === "" || ch.oldScore === null || ch.oldScore === undefined) ? '+' : `${ch.oldScore}${ch.oldMax ? '/' + ch.oldMax : ''}`;
+            ch.cellEl.style.opacity = (ch.oldScore === "" || ch.oldScore === null || ch.oldScore === undefined) ? '.5' : '1';
+        } else {
+            ch.cellEl.dataset.currentScore = ch.oldScore;
+            renderGradeCellValue(ch.cellEl, ch.oldScore, ch.oldMax);
+        }
+    });
+    pendingChanges.clear();
+    updatePendingChangesBar();
+}
+
+document.getElementById('savePendingBtn')?.addEventListener('click', commitPendingChanges);
+document.getElementById('discardPendingBtn')?.addEventListener('click', discardPendingChanges);
+
+window.addEventListener('beforeunload', (e) => {
+    if (pendingChanges.size > 0) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved grade changes. Leave anyway?';
+        return e.returnValue;
+    }
+});
+
 document.addEventListener('click', (e) => {
     const target = e.target;
     if (target.closest('#btnTogglePrivacy')) { privacyMode = !privacyMode; applyFiltersAndRender(); return; }
     if (target.closest('.analytics-trigger')) { const t = target.closest('.analytics-trigger'); showAnalytics(t.dataset.assignment, t.innerText); return; }
     
+    if (target.closest('.copy-scores-btn')) {
+        const btn = target.closest('.copy-scores-btn');
+        const key = btn.dataset.assignment;
+        // Same lookup the Class Average row already uses (fuzzy-matched via
+        // cleanKey, since a score can be stored under a slightly different
+        // key spelling than the column header) -- keeps "what gets copied"
+        // consistent with "what the gradebook already shows as this
+        // student's score for this test."
+        const scores = lastOrderedStudents.map(s => {
+            const sGrades = lastGrades[s.studentId] || {};
+            const matchKey = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(key));
+            const g = matchKey ? sGrades[matchKey] : null;
+            const score = g ? (typeof g === 'object' ? g.score : g) : '';
+            return score === undefined || score === null ? '' : String(score);
+        });
+        navigator.clipboard.writeText(scores.join('\n')).then(() => {
+            const original = btn.className;
+            btn.className = 'fas fa-check text-success x-small';
+            setTimeout(() => { btn.className = original; }, 1500);
+        }).catch(() => alert('Could not copy to clipboard. Try again.'));
+        return;
+    }
+
     if (target.closest('.edit-col-btn')) {
         const key = target.closest('.edit-col-btn').dataset.assignment;
         document.getElementById('editColOldName').value = key;
@@ -1488,7 +1832,15 @@ document.addEventListener('click', (e) => {
         document.getElementById('editColNewPts').value = parseAssignmentInfo(key).maxPoints;
         document.getElementById('editColDueDate').value = allAssignments[key]?.dueDate || "";
         document.getElementById('editColInstructions').value = allAssignments[key]?.instructions || "";
-        document.getElementById('editColCourse').value = allAssignments[key]?.targetCourse || "All";
+        // targetCourse holds the raw DB course_id (e.g. '10003GS'), but the
+        // <select>'s <option> values are the short codes ('CS'/'WD1'/...) --
+        // setting .value to an unmatched string leaves the <select> with
+        // nothing selected, so saving (even without touching this field)
+        // silently fell through to the dbCourseMap[''] fallback in
+        // saveColEdit() and reassigned the assignment to the wrong course.
+        const rawTarget = allAssignments[key]?.targetCourse;
+        const courseCodeMap = { '05254G1S': 'WD1', '05254G2S': 'WD2', '10003GS': 'CS', '05254ES': 'AS' };
+        document.getElementById('editColCourse').value = courseCodeMap[rawTarget] || rawTarget || 'All';
         renderPeriodDateInputs('editColPeriodDates', allAssignments[key]?.periodDueDates || {}, 'primary');
         getModal('editColModal').show();
         return;
@@ -1507,6 +1859,39 @@ document.addEventListener('click', (e) => {
         return;
     }
 
+    const rawMarker = target.closest('.raw-score-marker');
+    if (rawMarker) {
+        const studentId = rawMarker.dataset.studentId;
+        const rawKey = rawMarker.dataset.rawKey;
+        const currentRaw = rawMarker.dataset.rawScore;
+        const currentRawMax = rawMarker.dataset.rawMax;
+        const input = prompt(`Actual score earned${currentRawMax ? ' (out of ' + currentRawMax + ')' : ''} for ${rawKey}:`, currentRaw || '');
+        if (input === null) return;
+        const val = input.trim();
+        const final = val === "" ? "" : Number(val);
+        if (val !== "" && isNaN(final)) { alert('Enter a number.'); return; }
+
+        const pendingKey = `${studentId}::${rawKey}`;
+        const existing = pendingChanges.get(pendingKey);
+        const trueOriginalScore = existing ? existing.oldScore : (currentRaw || "");
+        const trueOriginalMax = existing ? existing.oldMax : (Number(currentRawMax) || 0);
+
+        if (String(final) === String(trueOriginalScore)) {
+            pendingChanges.delete(pendingKey);
+        } else {
+            pendingChanges.set(pendingKey, {
+                studentId, assignment: rawKey, newScore: final, newMax: Number(currentRawMax) || trueOriginalMax,
+                oldScore: trueOriginalScore, oldMax: trueOriginalMax, cellEl: rawMarker, type: 'raw'
+            });
+        }
+        rawMarker.dataset.rawScore = final;
+        rawMarker.textContent = final === "" ? '+' : `${final}${currentRawMax ? '/' + currentRawMax : ''}`;
+        rawMarker.style.opacity = final === "" ? '.5' : '1';
+        rawMarker.classList.toggle('pending-change', pendingChanges.has(pendingKey));
+        updatePendingChangesBar();
+        return;
+    }
+
     const cell = target.closest('.grade-cell');
     if (cell && !target.classList.contains('inline-edit-input')) {
         if (cell.querySelector('input')) return;
@@ -1522,29 +1907,35 @@ document.addEventListener('click', (e) => {
         cell.innerHTML = ''; cell.appendChild(input); input.focus();
 
         let isSaving = false;
-        const save = async () => {
+        const save = () => {
             if (isSaving) return; isSaving = true;
             const val = input.value.trim().toUpperCase();
             let final = val === "EX" ? "EX" : (val === "" ? "" : Number(val));
             if (val !== "" && val !== "EX" && isNaN(final)) { cell.innerHTML = currentScore || '<span class="text-danger small fw-bold">MISSING</span>'; return; }
 
             if (String(final) !== String(currentScore)) {
-                cell.innerHTML = '<span class="spinner-border spinner-border-sm text-warning"></span>';
-                try {
-                    await fetch('/api/admin/save-grade', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ student_id: studentId, exam_id: assignment, score: final, total_points: Number(currentMax) })
+                // Stage the change locally instead of saving immediately --
+                // nothing reaches the real gradebook until Save Changes is
+                // clicked, so a typo here is a non-event, not a scare.
+                const key = `${studentId}::${assignment}`;
+                const existing = pendingChanges.get(key);
+                const trueOriginalScore = existing ? existing.oldScore : currentScore;
+                const trueOriginalMax = existing ? existing.oldMax : Number(currentMax);
+
+                if (String(final) === String(trueOriginalScore)) {
+                    // Edited back to the original value -- no longer a real change
+                    pendingChanges.delete(key);
+                    cell.classList.remove('pending-change');
+                } else {
+                    pendingChanges.set(key, {
+                        studentId, assignment, newScore: final, newMax: Number(currentMax),
+                        oldScore: trueOriginalScore, oldMax: trueOriginalMax, cellEl: cell
                     });
-                    
-                    if (!allGrades[studentId]) allGrades[studentId] = {};
-                    allGrades[studentId][assignment] = { score: final, max: Number(currentMax), timestamp: new Date().toISOString() };
-                    
-                    cell.dataset.currentScore = final;
-                    if (final === "EX") cell.innerHTML = '<span class="badge bg-secondary px-1 text-white shadow-sm">EX</span>';
-                    else if (final === "") cell.innerHTML = '<span class="text-danger small fw-bold">MISSING</span>';
-                    else cell.innerHTML = (final == currentMax ? '<span class="check-mark">✔</span>' : final);
-                } catch (error) { console.error(error); cell.innerHTML = currentScore || '<span class="text-danger small fw-bold">MISSING</span>'; }
+                    cell.classList.add('pending-change');
+                }
+                cell.dataset.currentScore = final;
+                renderGradeCellValue(cell, final, currentMax);
+                updatePendingChangesBar();
             } else cell.innerHTML = currentScore || '<span class="text-danger small fw-bold">MISSING</span>';
         };
 
@@ -1553,7 +1944,7 @@ document.addEventListener('click', (e) => {
             if (next) next.click();
         };
 
-        input.onblur = () => { save(); setTimeout(() => { if (!document.querySelector('.inline-edit-input')) applyFiltersAndRender(); }, 500); };
+        input.onblur = () => save();
         input.onkeydown = (e) => {
             if (e.key === 'Enter' || e.code === 'NumpadEnter' || e.keyCode === 13) { 
                 e.preventDefault(); save(); setTimeout(() => nav(1, 0), 40); 
@@ -1572,7 +1963,7 @@ async function saveAddCol() {
     const date = document.getElementById('addColDueDate').value;
     const inst = document.getElementById('addColInstructions').value;
     const course = document.getElementById('addColCourse').value;
-    
+
     if (!name) return alert("Name required");
     const finalName = `${name} [${pts} pts]`;
     
@@ -1595,8 +1986,9 @@ async function saveAddCol() {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ exam_id: finalName, title: name, total_points: pts, due_date: date || null, instructions: inst, course_id: dbCourseId })
         });
-        
+
         allAssignments[finalName] = { maxPoints: pts, dueDate: date, instructions: inst, targetCourse: dbCourseId, periodDueDates: periodDates };
+        updateCategoryDropdown();
         applyFiltersAndRender();
         getModal('addColModal').hide();
     } catch (err) { alert("Failed to save new column."); }
@@ -1609,7 +2001,7 @@ async function saveColEdit() {
     const date = document.getElementById('editColDueDate').value;
     const final = `${name} [${pts} pts]`;
     const course = document.getElementById('editColCourse').value;
-    
+
     const periodDates = {};
     document.querySelectorAll('#editColPeriodDates .period-due-date-input').forEach(i => periodDates[i.dataset.period] = i.value);
     
@@ -1629,10 +2021,11 @@ async function saveColEdit() {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ old_exam_id: old, exam_id: final, title: name, total_points: pts, due_date: date || null, instructions: document.getElementById('editColInstructions').value, course_id: dbCourseId })
         });
-        
+
         delete allAssignments[old];
         allAssignments[final] = { maxPoints: pts, dueDate: date, periodDueDates: periodDates, instructions: document.getElementById('editColInstructions').value, targetCourse: dbCourseId };
-        
+        updateCategoryDropdown();
+
         Object.keys(allGrades).forEach(sId => {
             if (allGrades[sId][old]) {
                 allGrades[sId][final] = allGrades[sId][old];

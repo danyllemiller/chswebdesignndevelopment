@@ -6,14 +6,15 @@ export async function getDailyQuestions(date) {
         return await apiFetch(`/api/admin/daily-questions?date=${date}`);
     } catch (e) {
         console.error("Error fetching daily questions:", e);
-        return { wd_question: '', cs_question: '' };
+        return { groups: [], questions: {} };
     }
 }
 
-export async function saveDailyQuestions(date, wd_question, cs_question) {
+// questions: { WD1, WD2, WD_AS, CS_A, CS_B, CS_MON }
+export async function saveDailyQuestions(date, questions) {
     return await apiFetch('/api/admin/daily-questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date, wdQuestion: wd_question, csQuestion: cs_question })
+        body: JSON.stringify({ date, questions })
     });
 }

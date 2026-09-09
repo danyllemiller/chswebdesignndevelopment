@@ -12,8 +12,6 @@
   <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
 <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <link href="/css/student-pages.css" rel="stylesheet" />
   
-  <!-- Monaco Editor Loader -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
   <script type="module" src="/js/auth-guard.js"></script>
   
   <style>
@@ -84,8 +82,23 @@
                     <span id="list-chapter-title">Course Material</span>
                     <div class="d-flex align-items-center gap-2">
                         <span id="unit-status-pill" class="status-pill bg-white text-primary fw-bold px-2 py-1 rounded small d-none">Diagnostic Required</span>
+                        <button type="button" id="read-aloud-toggle-btn" class="btn btn-sm btn-light py-0 px-2" title="Read this chapter aloud" aria-label="Read this chapter aloud">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <button type="button" id="read-aloud-settings-btn" class="btn btn-sm btn-light py-0 px-2" title="Reading speed & voice" aria-label="Reading speed and voice settings">
+                            <i class="fas fa-sliders-h"></i>
+                        </button>
                         <i class="fas fa-book-reader" id="left-pane-icon"></i>
                     </div>
+                </div>
+                <div id="read-aloud-settings-panel" class="card shadow p-2 d-none text-start" style="position:absolute; top:44px; right:8px; z-index:1000; min-width:220px; font-weight:normal;">
+                    <label class="form-label small fw-bold mb-1">Speed</label>
+                    <select id="read-aloud-rate-select" class="form-select form-select-sm mb-2"></select>
+                    <label class="form-label small fw-bold mb-1">Voice</label>
+                    <select id="read-aloud-voice-select" class="form-select form-select-sm mb-2"></select>
+                    <button type="button" id="read-aloud-start-over-btn" class="btn btn-outline-secondary btn-sm w-100">
+                        <i class="fas fa-rotate-left me-1"></i>Start Over
+                    </button>
                 </div>
                 <div class="card-body p-0 bg-white h-75vh overflow-hidden-strict pos-relative">
                     
@@ -113,6 +126,9 @@
                         <button type="button" class="btn btn-sm fw-bold mode-btn text-white" data-mode="worksheet" style="background-color: #846c91; border-color: #846c91;">
                             <i class="fas fa-file-invoice me-1"></i> Worksheet
                         </button>
+                        <button type="button" class="btn btn-sm fw-bold mode-btn text-white" data-mode="activities" style="background-color: #3d8c6c; border-color: #3d8c6c;">
+                            <i class="fas fa-list-check me-1"></i> Activities
+                        </button>
                         <button type="button" class="btn btn-sm fw-bold mode-btn text-white" data-mode="dropbox" style="background-color: #5c669e; border-color: #5c669e;">
                             <i class="fas fa-cloud-upload-alt me-1"></i> Upload
                         </button>
@@ -136,6 +152,21 @@
                     <div id="view-journal" class="workspace-view p-0 h-100 d-none">
                         <!-- Notebook iframe - loads cs-notebook.html -->
                         <iframe id="notebook-frame" class="w-100 h-100 border-0" src="about:blank"></iframe>
+                    </div>
+
+                    <!-- MODE: ACTIVITIES PICKER (real cs_ch#_* gradebook assignments for this chapter) -->
+                    <div id="view-activities" class="workspace-view p-4 h-100 d-none">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-list-check me-2 text-success"></i>This Chapter's Activities</h5>
+                        <p class="text-muted small">Pick the activity you're working on. Your work is saved to your notebook and automatically graded when you submit it.</p>
+                        <div class="mb-3">
+                            <select id="activity-select" class="form-select">
+                                <option value="">Loading activities...</option>
+                            </select>
+                        </div>
+                        <button type="button" id="btn-start-activity" class="btn btn-success fw-bold" disabled>
+                            <i class="fas fa-pencil-alt me-1"></i> Start This Activity
+                        </button>
+                        <div id="activity-empty-msg" class="alert alert-secondary mt-3 d-none">No activities have been assigned for this chapter yet.</div>
                     </div>
 
                     <!-- MODE 2: CODE EDITOR (Monaco) -->
@@ -211,8 +242,27 @@
 
   <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/loader.js?v=19"></script>
-  
+  <script src="/js/chart.min.js"></script>
+  <script src="/js/loader.js?v=20"></script>
+
+  <!-- Monaco Editor Loader -- must load AFTER bootstrap.bundle.js/jquery.js,
+       never before. Bootstrap's UMD wrapper checks `typeof define ===
+       'function' && define.amd` and registers itself as an anonymous AMD
+       module instead of the global `window.bootstrap` the whole rest of the
+       site depends on if that check is already true when it runs. Monaco's
+       loader.min.js defines exactly that global AMD `define` function --
+       previously it sat in <head>, before bootstrap.bundle.js at the bottom
+       of <body>, so `window.bootstrap` never got created at all, silently
+       and permanently (not a timing race that resolves by waiting longer --
+       confirmed live via the client-error-log endpoint: "bootstrap.bundle.js
+       did not load in time" on this exact page, hitting whichever students'
+       browsers happened to fetch/execute the CDN script fast enough to win
+       the race against bootstrap). This is almost certainly the majority
+       cause behind every "clicking the timeclock button does nothing"
+       report so far, since this is the page CS students spend most of class
+       on. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+
   <script>
     /**
      * SAFE MONACO LOADER
@@ -241,7 +291,7 @@
   </script>
 
   <!-- Centralized Controller for CS Notebook Logic -->
-<script type="module" src="/js/cs-interactive.js?v=28"></script>
+<script type="module" src="/js/cs-interactive.js?v=30"></script>
 
   <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 </body>

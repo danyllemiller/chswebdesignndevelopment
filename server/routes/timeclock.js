@@ -3,6 +3,23 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { getDbConnection } = require('../db');
+const { getCurrentSchoolYear } = require('../helpers');
+const { pickWprQuestion } = require('../wprQuestionBank');
+
+// Client-side JS errors on the timeclock widget were failing completely
+// silently for some students with no way to see why -- multiple fixes
+// aimed at guessed causes (stale cache, Bootstrap modal races, load
+// ordering) each failed to resolve it for everyone, because guessing
+// blind at a client-only failure with no console access just repeats the
+// same cycle. This gives the client a place to report its own errors
+// (message, stack, and where in the flow it happened) straight into the
+// server logs, so the actual failure can be read directly instead of
+// guessed at again.
+router.post('/client-error-log', async (req, res) => {
+    const { message, stack, url, student_id, context, userAgent, timestamp } = req.body || {};
+    console.error('[CLIENT ERROR]', JSON.stringify({ message, stack, url, student_id, context, userAgent, timestamp }));
+    res.json({ ok: true });
+});
 
 // new Date().toISOString().split('T')[0] gives the UTC calendar date, which
 // for any Pacific evening between ~5pm and midnight is already "tomorrow" --
@@ -316,68 +333,118 @@ router.get('/timeclock/question', async (req, res) => {
     }
 });
 
+// The six groups a clock-out question can be scoped to. WD2 vs WD_AS share
+// the same physical period (B2) but are different courses -- distinguished
+// by the student's own course_id, not section_id. CS is split into two
+// pacing clusters that don't share a period, except on Mondays when both
+// clusters intentionally collapse into one shared question.
+const QUESTION_GROUPS = [
+    { key: 'WD1', label: 'Web Design I (A1)' },
+    { key: 'WD2', label: 'Web Design II (B2)' },
+    { key: 'WD_AS', label: 'Web Design AS (B2, AS track)' },
+    { key: 'CS_A', label: 'Comp Sci — A3 & A5' },
+    { key: 'CS_B', label: 'Comp Sci — B4, B6 & B8' },
+    { key: 'CS_MON', label: 'Comp Sci — Mondays (all periods share one)' }
+];
+const WD_AS_COURSE_ID = '05254EF-201';
+
+async function ensureDailyQuestionsGroupTable(connection) {
+    await connection.execute(`
+        CREATE TABLE IF NOT EXISTS teacher_daily_questions_v2 (
+            date DATE NOT NULL,
+            group_key VARCHAR(20) NOT NULL,
+            question_text TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (date, group_key)
+        )
+    `);
+}
+
+// Mirrors intervention_journal's shape exactly (server/routes/intervention.js)
+// -- one entry per student per calendar day, storing both the prompt asked
+// and what they wrote, so a WD1/WD2 student can look back through their own
+// clock-out reflections over time. Kept separate from the rich-text
+// notebook (student/notes.html) on purpose -- this is the daily
+// question-and-answer record, not their class notes.
+async function ensureWdJournalTable(connection) {
+    await connection.execute(`
+        CREATE TABLE IF NOT EXISTS wd_journal (
+            id         INT AUTO_INCREMENT PRIMARY KEY,
+            student_id VARCHAR(50) NOT NULL,
+            entry_date DATE NOT NULL,
+            prompt     TEXT,
+            content    TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_wd_journal (student_id, entry_date)
+        )
+    `);
+}
+
+async function resolveQuestionGroupKey(connection, studentId) {
+    const [[student]] = await connection.execute(
+        'SELECT section_id, course_id FROM students WHERE student_id = ?', [studentId]
+    );
+    if (!student) return null;
+    const sectionId = student.section_id;
+    if (sectionId === 'A1') return 'WD1';
+    if (sectionId === 'B2') return student.course_id === WD_AS_COURSE_ID ? 'WD_AS' : 'WD2';
+    if (['A3', 'A5', 'B4', 'B6', 'B8'].includes(sectionId)) {
+        if (new Date().getDay() === 1) return 'CS_MON'; // Monday: both CS clusters share one question
+        return (sectionId === 'A3' || sectionId === 'A5') ? 'CS_A' : 'CS_B';
+    }
+    return null;
+}
+
 // Clock-out prompt: a teacher's manually-set exit ticket for today takes
-// priority (admin/payroll.html's "Set Clock Out Prompts" modal); otherwise
-// auto-generate a reflection prompt tied to the chapter the student is
-// actually working on right now, resolved the same way as the clock-in
-// question so the two never disagree about "today's" content.
+// priority (admin/payroll.html's "Set Clock Out Prompts" modal), scoped to
+// the student's specific group so everyone in the same group sees the
+// identical question. Previously fell back to guessing from each
+// individual student's own most-recent notebook save when nothing was set
+// -- that meant two students in the same class could see completely
+// different (or, for a student with no recorded activity that day,
+// missing/broken) prompts. The fallback is now the same stable, class-wide
+// due-date chapter for everyone, never derived from individual activity.
 router.get('/timeclock/reflection-prompt', async (req, res) => {
     const { type, student_id } = req.query; // CS, WD1, WD2
     const kind = String(type || '');
     const today = getLocalDateStr();
     try {
         const connection = await getDbConnection();
+        await ensureDailyQuestionsGroupTable(connection);
 
-        const [rows] = await connection.execute(
-            'SELECT wd_question, cs_question FROM teacher_daily_questions WHERE date = ?',
-            [today]
-        );
-        const dailyQ = rows[0];
-        const custom = kind === 'CS' ? dailyQ?.cs_question : dailyQ?.wd_question;
-        if (custom && custom.trim()) {
-            await connection.release();
-            return res.json({ prompt_text: custom.trim(), isCustom: true });
-        }
-
-        // Prefer what this specific student actually worked on today (their
-        // most recent notebook/worksheet save) over the class-wide due-date
-        // schedule -- students progress through chapters at their own pace,
-        // so the due-date-driven "current chapter" often isn't the one a
-        // given student was actually in that day.
-        let todaysChapterLabel = null;
-        if (student_id) {
-            // Excludes the exam scratchpad -- it's for jotting notes during a
-            // test, not chapter content, so "reflect on what you learned in
-            // Unit Exam Scratchpad" isn't a meaningful prompt even though
-            // it's technically their most recent save.
-            const [turninRows] = await connection.execute(
-                `SELECT chapter FROM turnins
-                 WHERE student_id = ? AND DATE(timestamp) = ? AND chapter IS NOT NULL AND chapter != ''
-                   AND chapter NOT LIKE '%Exam Scratchpad%'
-                 ORDER BY timestamp DESC LIMIT 1`,
-                [student_id, today]
+        const groupKey = student_id ? await resolveQuestionGroupKey(connection, student_id) : null;
+        if (groupKey) {
+            const [rows] = await connection.execute(
+                'SELECT question_text FROM teacher_daily_questions_v2 WHERE date = ? AND group_key = ?',
+                [today, groupKey]
             );
-            if (turninRows.length > 0) todaysChapterLabel = turninRows[0].chapter;
+            const custom = rows[0]?.question_text;
+            if (custom && custom.trim()) {
+                await connection.release();
+                return res.json({ prompt_text: custom.trim(), isCustom: true, groupKey });
+            }
         }
 
-        if (todaysChapterLabel) {
+        // Fallback: no custom question set for this group today. WD1/WD2 get
+        // a real Nevada Workplace Readiness Skills question (one per
+        // calendar day, cycling through the whole bank) instead of a
+        // generic "reflect on the chapter" filler -- CS keeps the original
+        // chapter-based fallback since the WPR bank wasn't asked for there.
+        if (kind === 'WD1' || kind === 'WD2') {
             await connection.release();
+            const picked = pickWprQuestion(today);
             return res.json({
-                prompt_text: `In 2-3 sentences, reflect on what you learned today in ${todaysChapterLabel}. What's one thing that made sense, and one thing you're still working through?`,
-                isCustom: false
+                prompt_text: `[WPR ${picked.std}] ${picked.q}`,
+                isCustom: false,
+                wprStandard: picked.std
             });
         }
 
-        // Fallback: no recorded activity for this student today (e.g. they
-        // clocked in but didn't save any notes) -- use the class-wide
-        // due-date schedule as a reasonable default.
         let chapter, title;
         if (kind === 'CS') {
             ({ chapter } = await getCurrentCSChapter(connection));
             title = CS_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
-        } else if (kind === 'WD1' || kind === 'WD2') {
-            ({ chapter } = await getCurrentWDChapter(connection, kind));
-            title = WD_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
         } else {
             await connection.release();
             return res.status(400).json({ error: 'Unrecognized type' });
@@ -398,7 +465,7 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
 });
 
 router.post('/timeclock/save', async (req, res) => {
-    const { student_id, section_id, mode, answer, is_correct } = req.body;
+    const { student_id, section_id, mode, answer, is_correct, prompt } = req.body;
     if (!student_id || !mode) return res.status(400).json({ error: 'student_id and mode are required' });
     const today = getLocalDateStr();
     const period = section_id || '';
@@ -457,9 +524,13 @@ router.post('/timeclock/save', async (req, res) => {
                          ON DUPLICATE KEY UPDATE title = VALUES(title), total_points = VALUES(total_points), course_id = VALUES(course_id)`,
                         [examId, `Timeclock Check-In — ${today}`, 3, courseId]
                     );
+                    const [icCols] = await connection.execute(`SHOW COLUMNS FROM responses LIKE 'entered_in_ic'`);
+                    if (icCols.length === 0) {
+                        await connection.execute(`ALTER TABLE responses ADD COLUMN entered_in_ic TINYINT(1) DEFAULT 0`);
+                    }
                     await connection.execute(
-                        `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW())
-                         ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
+                        `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic) VALUES (?, ?, ?, ?, NOW(), 0)
+                         ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0`,
                         [student_id, examId, points, 3]
                     );
                 }
@@ -478,10 +549,61 @@ router.post('/timeclock/save', async (req, res) => {
                  ORDER BY id DESC LIMIT 1`,
                 [answer || '', student_id, today, period]
             );
+
+            // WD1/WD2 daily journal -- records the reflection prompt actually
+            // shown alongside the answer, one row per student per day, so it
+            // can be browsed later (My Daily Journal) the same way
+            // Intervention's journal already works. Best-effort: never block
+            // the clock-out itself if this fails.
+            try {
+                const courseKey = periodToCourseKeyServer(period);
+                if (courseKey === 'WD1' || courseKey === 'WD2') {
+                    await ensureWdJournalTable(connection);
+                    await connection.execute(
+                        `INSERT INTO wd_journal (student_id, entry_date, prompt, content)
+                         VALUES (?, ?, ?, ?)
+                         ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
+                        [student_id, today, prompt || null, answer || '']
+                    );
+                }
+            } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry:', journalErr); }
         }
         await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Timeclock save failed.' }); }
+});
+
+// Student's own journal -- every clock-out reflection they've written,
+// newest first, so they can look back on it (see ensureWdJournalTable above).
+router.get('/student/wd-journal', async (req, res) => {
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id is required' });
+    try {
+        const connection = await getDbConnection();
+        await ensureWdJournalTable(connection);
+        const [rows] = await connection.execute(
+            'SELECT entry_date, prompt, content, updated_at FROM wd_journal WHERE student_id = ? ORDER BY entry_date DESC',
+            [student_id]
+        );
+        await connection.release();
+        res.json({ entries: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch journal' }); }
+});
+
+// Teacher view of one student's journal (admin/tools/daily-activity.html or
+// similar can link into this by student_id).
+router.get('/admin/wd-journal/:student_id', async (req, res) => {
+    const { student_id } = req.params;
+    try {
+        const connection = await getDbConnection();
+        await ensureWdJournalTable(connection);
+        const [rows] = await connection.execute(
+            'SELECT entry_date, prompt, content, updated_at FROM wd_journal WHERE student_id = ? ORDER BY entry_date DESC',
+            [student_id]
+        );
+        await connection.release();
+        res.json({ entries: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch journal' }); }
 });
 
 router.get('/admin/daily-questions', async (req, res) => {
@@ -489,47 +611,61 @@ router.get('/admin/daily-questions', async (req, res) => {
     if (!date) return res.status(400).json({ error: 'date is required' });
     try {
         const connection = await getDbConnection();
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS teacher_daily_questions (
-                date DATE NOT NULL PRIMARY KEY,
-                wd_question TEXT,
-                cs_question TEXT,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            )
-        `);
+        await ensureDailyQuestionsGroupTable(connection);
         const [rows] = await connection.execute(
-            'SELECT wd_question, cs_question FROM teacher_daily_questions WHERE date = ?',
+            'SELECT group_key, question_text FROM teacher_daily_questions_v2 WHERE date = ?',
             [date]
         );
         await connection.release();
-        res.json(rows.length > 0
-            ? { wdQuestion: rows[0].wd_question || '', csQuestion: rows[0].cs_question || '' }
-            : { wdQuestion: '', csQuestion: '' }
-        );
+        const questions = {};
+        rows.forEach(r => { questions[r.group_key] = r.question_text || ''; });
+        res.json({ groups: QUESTION_GROUPS, questions });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch daily questions' }); }
 });
 
 router.post('/admin/daily-questions', async (req, res) => {
-    const { date, wdQuestion, csQuestion } = req.body;
+    const { date, questions } = req.body; // { WD1: "...", WD2: "...", WD_AS: "...", CS_A: "...", CS_B: "...", CS_MON: "..." }
     if (!date) return res.status(400).json({ error: 'date is required' });
     try {
         const connection = await getDbConnection();
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS teacher_daily_questions (
-                date DATE NOT NULL PRIMARY KEY,
-                wd_question TEXT,
-                cs_question TEXT,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            )
-        `);
-        await connection.execute(
-            `INSERT INTO teacher_daily_questions (date, wd_question, cs_question) VALUES (?, ?, ?)
-             ON DUPLICATE KEY UPDATE wd_question = VALUES(wd_question), cs_question = VALUES(cs_question)`,
-            [date, wdQuestion || '', csQuestion || '']
-        );
+        await ensureDailyQuestionsGroupTable(connection);
+        for (const g of QUESTION_GROUPS) {
+            await connection.execute(
+                `INSERT INTO teacher_daily_questions_v2 (date, group_key, question_text) VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE question_text = VALUES(question_text)`,
+                [date, g.key, (questions && questions[g.key]) || '']
+            );
+        }
         await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save daily questions' }); }
+});
+
+// GET /admin/timeclock-answers?date=YYYY-MM-DD[&section=A1]
+// Every student's clock-in/clock-out question and answer for one day, so
+// the teacher can review what was actually written -- until now this data
+// existed only in the timesheets table with no admin page to read it back.
+router.get('/admin/timeclock-answers', async (req, res) => {
+    const date = req.query.date || getLocalDateStr();
+    const section = (req.query.section || '').trim();
+    try {
+        const currentYear = getCurrentSchoolYear();
+        const connection = await getDbConnection();
+        const params = [date, currentYear];
+        let sectionClause = '';
+        if (section) { sectionClause = 'AND t.section_id = ?'; params.push(section); }
+        const [rows] = await connection.execute(
+            `SELECT t.id, t.student_id, t.section_id, t.clock_in, t.clock_out, t.in_answer, t.out_answer,
+                    s.first_name, s.last_name
+             FROM timesheets t
+             JOIN students s ON s.student_id = t.student_id
+             WHERE t.date = ? AND (s.archived IS NULL OR s.archived = 0) AND s.school_year = ? ${sectionClause}
+             ORDER BY t.section_id, s.last_name, s.first_name`,
+            params
+        );
+        await connection.release();
+        res.json({ date, rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load timeclock answers' }); }
 });
 
 router.post('/admin/inject-timesheets', async (req, res) => {

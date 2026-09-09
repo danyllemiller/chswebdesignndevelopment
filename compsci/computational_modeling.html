@@ -21,6 +21,7 @@
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
       <a href="#section-8-1">8.1 Anatomy of a Model</a>
       <a href="#section-8-2">8.2 Sensitivity Testing</a>
+      <a href="#section-8-3">8.3 Validating Against Reality</a>
   </div>
 
   <!-- Section 8.1 -->
@@ -104,6 +105,44 @@
               <h3 class="fw-bold mb-1">Activity: The Model Build</h3>
               <p class="mb-0 fs-5">Build a model with at least three inputs and one calculated outcome, state every assumption explicitly, then run a sensitivity test and name one thing your model can't account for.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Model Build</strong> into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 8.3 -->
+  <h3 id="section-8-3" class="fw-bold border-bottom pb-2">8.3 Validating Against Reality</h3>
+  <p class="fs-5">Surviving a sensitivity test still doesn't prove a model is good — it only proves you know which input it's most sensitive to. The real test is older and simpler: does the model's prediction match what actually happens?</p>
+
+  <h4 class="fw-bold mt-4 text-primary">8.3.1 Fitting the Past vs. Predicting the Future</h4>
+  <p>Here's the trap hiding inside every model: it's always possible to tune a model until it matches historical data perfectly. That's not the same accomplishment as building a model that correctly predicts something it's never seen. A model that's been adjusted until it explains every wiggle in the past — instead of the general trend — has usually just memorized noise, not learned the real relationship.</p>
+
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-cloud-sun-rain me-2"></i> Worked Example: The Forecast That Only Works Backward</h5>
+      <p class="mb-0">A student builds a formula that reproduces last month's daily temperatures with almost no error — by adding a separate correction term for nearly every single day. It looks incredible on a chart of the past. Fed tomorrow's conditions, it's no better than a random guess, because it never learned what actually drives temperature — it just memorized last month's answer key.</p>
+  </div>
+
+  <div class="image-placeholder shadow-sm">
+    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">Two Charts, One Model</h5>
+    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A two-panel comparison graphic. Left panel labeled "Training Data" shows a model line and an actual-data line overlapping almost perfectly. Right panel labeled "New Data" shows the same model line now far apart from a new actual-data line, with the gap between them highlighted.</p>
+  </div>
+
+  <p><strong>The trap:</strong> students often assume the model that matches historical data most closely is automatically the best one. Often it's the opposite — a model chasing every past data point instead of the underlying pattern tends to be the one that fails hardest on anything new.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
+      <h5 class="fw-bold text-info"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">A model explains ten years of past data almost perfectly, then performs badly predicting year eleven. What's the most likely problem? <em class="text-white-50">(Answer: overfitting — the model was tuned to match the noise in the past data instead of the real underlying relationship.)</em></p>
+  </div>
+
+  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-center">
+          <i class="fas fa-magnifying-glass-chart fa-3x me-4 text-primary"></i>
+          <div>
+              <h3 class="fw-bold mb-1">Activity: The Reality Check</h3>
+              <p class="mb-0 fs-5">Take the model from The Model Build, run it against a real outcome it wasn't built around, and compare the prediction to what actually happened. Calculate how far off it was, then name one specific assumption or relationship you'd adjust to close that gap.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Reality Check</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>

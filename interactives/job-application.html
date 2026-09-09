@@ -384,6 +384,7 @@ input.invalid, textarea.invalid {
   .role-banner { flex-direction: column; align-items: flex-start; }
 }
 </style>
+<script type="module" src="/js/auth-guard.js"></script>
 </head>
 <body>
 
@@ -588,7 +589,8 @@ input.invalid, textarea.invalid {
   </div>
   <div class="btn-group">
     <button class="btn btn-outline" onclick="clearForm()">Clear Form</button>
-    <button class="btn btn-primary" onclick="printApp()">🖨 Print / Save as PDF</button>
+    <button class="btn btn-primary" onclick="printApp()">🖨 Print / Save as PDF (for your own records)</button>
+    <button class="btn btn-primary" id="submitAppBtn" style="background:var(--success);border-color:var(--success);" onclick="submitApplication()">✅ Submit Application</button>
   </div>
 </div>
 
@@ -856,6 +858,82 @@ function printApp() {
     return;
   }
   window.print();
+}
+
+/* ── submit (the real save) ─────────────────────────────────────
+   printApp() above only ever offered window.print() -- nothing was ever
+   sent to the server, so a student's actual answers existed nowhere
+   unless they separately saved a PDF AND remembered to upload it through
+   the unrelated assignment dropbox. This is the real save. */
+var UNIVERSAL_QUESTIONS = {
+  'q-why': 'Q1. Why are you applying for this specific position? How does this role align with your current skills and where you want to go in your career?',
+  'q-conflict': 'Q2. Describe a time you experienced a conflict with a teammate, classmate, or colleague. What happened, what actions did you take, and what was the outcome?',
+  'q-gap': 'Q3. What is one skill this role requires that you do not yet have? How do you plan to develop it this semester?',
+  'q-cover': 'Professional Statement (Cover Letter): In 3–5 sentences, summarize why you are the strongest candidate for this role and what you will contribute to the agency.'
+};
+
+async function submitApplication() {
+  if (!validate()) {
+    alert('Please fill in all required fields before submitting.\n\nRequired fields are marked in red.');
+    var first = document.querySelector('.invalid');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  var user = {};
+  try { user = JSON.parse(localStorage.getItem('user') || '{}'); } catch (e) {}
+  if (!user.student_id) {
+    alert('You must be logged in to submit your application. Please log in and try again.');
+    return;
+  }
+
+  var roleVal = document.getElementById('roleSelect').value;
+  var role = ROLES[roleVal];
+
+  var answers = {};
+  Object.keys(UNIVERSAL_QUESTIONS).forEach(function (id) {
+    answers[id] = { question: UNIVERSAL_QUESTIONS[id], answer: document.getElementById(id).value.trim() };
+  });
+  role.questions.forEach(function (item) {
+    answers[item.id] = { question: item.q, answer: document.getElementById(item.id).value.trim() };
+  });
+
+  var payload = {
+    student_id: user.student_id,
+    role: roleVal,
+    role_label: role.label,
+    fields: {
+      fullName: document.getElementById('fullName').value.trim(),
+      classPeriod: document.getElementById('classPeriod').value,
+      appDate: document.getElementById('appDate').value,
+      yearTrack: document.getElementById('yearTrack').value,
+      prevExperience: document.getElementById('prevExperience').value,
+      sigName: document.getElementById('sigName').value.trim(),
+      sigDate: document.getElementById('sigDate').value
+    },
+    answers: answers
+  };
+
+  var btn = document.getElementById('submitAppBtn');
+  var originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  try {
+    var res = await fetch('/api/submit-job-application', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+    document.getElementById('statusMsg').innerHTML = '<strong style="color:var(--success)">✅ Application submitted — your teacher can see it now.</strong>';
+    alert('Application submitted! Your teacher can see it now.\n\nYou can still use "Print / Save as PDF" to keep your own copy, but that\'s optional — your submission is already saved.');
+  } catch (err) {
+    console.error('Application submit failed:', err);
+    alert('Something went wrong submitting your application. Please try again, or take a screenshot and tell your teacher.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
 }
 
 /* ── clear ───────────────────────────────────────────────────── */

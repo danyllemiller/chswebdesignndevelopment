@@ -8,21 +8,6 @@ const path = require('path');
 const REPO_ROOT = path.join(__dirname, '..', '..');
 const UPLOADS_ROOT = path.join(REPO_ROOT, 'uploads');
 
-// Mirrors js/modules/tardy-ladder.js -- duplicated here rather than shared
-// via import because that module uses ES module syntax and this server runs
-// CommonJS. Keep both in sync if the policy on discipline.html changes.
-const TARDY_LADDER = [
-    { count: 1, label: 'First Tardy', consequence: 'Brief private check-in. No further consequence.' },
-    { count: 2, label: 'Second Tardy', consequence: 'Five-minute conference and a short written reflection identifying one specific change.' },
-    { count: 3, label: 'Third Tardy', consequence: 'Parent/guardian contacted by phone or email, and a short support plan is built together. Missed class time is made up during lunch or before/after school.' },
-    { count: 4, label: 'Fourth Tardy', consequence: "Scheduled restorative session, a revised plan, and the student's counselor is looped in. Parent/guardian is notified of the outcome." },
-    { count: 5, label: 'Fifth Tardy & Beyond', consequence: 'Administrative referral, with a meeting requested including parent/guardian, counselor, and an administrator.' }
-];
-function getTardyStep(count) {
-    if (!count || count < 1) return null;
-    return TARDY_LADDER.find(s => s.count === count) || TARDY_LADDER[TARDY_LADDER.length - 1];
-}
-
 function dateOnly(d) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
@@ -89,28 +74,6 @@ router.get('/admin/daily-activity', async (req, res) => {
             [targetDate, currentYear]
         );
 
-        const [examActivity] = await connection.execute(
-            `SELECT r.student_id, r.exam_id, r.score, r.total_points, r.timestamp,
-                    s.first_name, s.last_name, s.section_id
-             FROM responses r
-             JOIN students s ON s.student_id = r.student_id
-             WHERE DATE(r.timestamp) = ? AND ${activeStudentFilter}
-             ORDER BY r.exam_id, s.last_name, s.first_name`,
-            [targetDate, currentYear]
-        );
-
-        // Tardy follow-ups aren't scoped to the selected date -- it's a
-        // standing "who still needs a conversation" list (there's no way to
-        // mark one resolved yet), so it always reflects the full current
-        // tally regardless of which date is being viewed above it.
-        const [tardyRows] = await connection.execute(
-            `SELECT tp.student_id, s.first_name, s.last_name
-             FROM tardy_passes tp
-             JOIN students s ON s.student_id = tp.student_id
-             WHERE ${activeStudentFilter}`,
-            [currentYear]
-        );
-
         // Incomplete pretests/exams -- also a standing list, not date-scoped,
         // since "started but never finished" doesn't have a natural single day.
         const [progressRows] = await connection.execute(
@@ -142,15 +105,56 @@ router.get('/admin/daily-activity', async (req, res) => {
             .filter(p => !p.alreadyScored)
             .sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
 
-        const tardyByStudent = new Map();
-        tardyRows.forEach(r => {
-            if (!tardyByStudent.has(r.student_id)) tardyByStudent.set(r.student_id, { ...r, count: 0 });
-            tardyByStudent.get(r.student_id).count++;
+        // Retake clearances needed: CS unit-exam attempts where the most
+        // recent attempt was under 80% and the required next step (notes
+        // after the 1st fail, worksheets after the 2nd) hasn't been marked
+        // cleared yet. See checkRetakeClearance in routes/gradebook.js for
+        // the same logic applied server-side as the real enforcement gate.
+        const [attemptRows] = await connection.execute(
+            `SELECT ea.student_id, ea.exam_id, ea.score, ea.total_points,
+                    s.first_name, s.last_name, s.section_id
+             FROM exam_attempts ea
+             JOIN students s ON s.student_id = ea.student_id
+             WHERE ea.exam_id REGEXP '^Unit[0-9]+-Exam$' AND ${activeStudentFilter}
+             ORDER BY ea.student_id, ea.exam_id, ea.attempt_number ASC`,
+            [currentYear]
+        );
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS retake_clearances (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                student_id VARCHAR(50) NOT NULL,
+                exam_id VARCHAR(100) NOT NULL,
+                requirement ENUM('notes','worksheets') NOT NULL,
+                cleared_by VARCHAR(100),
+                cleared_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_clearance_lookup (student_id, exam_id, requirement)
+            )
+        `);
+        const [clearanceRows] = await connection.execute(
+            `SELECT student_id, exam_id, requirement FROM retake_clearances`
+        );
+        const clearanceSet = new Set(clearanceRows.map(c => `${c.student_id}|${c.exam_id}|${c.requirement}`));
+
+        const attemptsByKey = new Map();
+        attemptRows.forEach(r => {
+            const key = `${r.student_id}|${r.exam_id}`;
+            if (!attemptsByKey.has(key)) attemptsByKey.set(key, []);
+            attemptsByKey.get(key).push(r);
         });
-        const tardyFollowups = Array.from(tardyByStudent.values())
-            .filter(s => s.count > 1)
-            .map(s => ({ student_id: s.student_id, first_name: s.first_name, last_name: s.last_name, count: s.count, step: getTardyStep(s.count) }))
-            .sort((a, b) => b.count - a.count);
+        const retakeClearancesNeeded = [];
+        attemptsByKey.forEach((attempts) => {
+            const last = attempts[attempts.length - 1];
+            const pct = Number(last.total_points) > 0 ? (Number(last.score) / Number(last.total_points)) * 100 : 0;
+            if (pct >= 80) return;
+            const requirement = attempts.length === 1 ? 'notes' : (attempts.length === 2 ? 'worksheets' : null);
+            if (!requirement) return;
+            if (clearanceSet.has(`${last.student_id}|${last.exam_id}|${requirement}`)) return;
+            retakeClearancesNeeded.push({
+                student_id: last.student_id, first_name: last.first_name, last_name: last.last_name,
+                section_id: last.section_id, exam_id: last.exam_id, attempt_number: attempts.length,
+                pct: Math.round(pct), requirement
+            });
+        });
 
         // Uploaded files have zero database tracking at all (upload.php is
         // pure filesystem), so there's genuinely no way to know from this
@@ -187,11 +191,16 @@ router.get('/admin/daily-activity', async (req, res) => {
             console.error('[daily-activity] upload scan failed:', e);
         }
 
-        res.json({ date: targetDate, submissions, uploads, examActivity, tardyFollowups, incompleteAssessments });
+        res.json({ date: targetDate, submissions, uploads, incompleteAssessments, retakeClearancesNeeded });
     } catch (err) {
         console.error('[daily-activity] failed:', err);
         res.status(500).json({ error: 'Failed to build daily activity report.' });
     }
 });
+
+// Tardy follow-up resolution and staff-contacts endpoints moved to
+// server/routes/tardy.js -- all tardy-related admin work (logging,
+// consequence follow-ups, counselor contact info) now lives together there
+// instead of being split between this file and a separate tardy tracker.
 
 module.exports = router;

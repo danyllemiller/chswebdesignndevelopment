@@ -29,6 +29,28 @@
 })();
 
 // ==========================================
+// MESSAGES BADGE (sitewide, self-guards per role -- students and teacher alike)
+// ==========================================
+(function injectMessagesBadge() {
+  if (document.getElementById('messages-badge-script')) return;
+  const script = document.createElement('script');
+  script.id = 'messages-badge-script';
+  script.src = '/js/messages-badge.js?v=2';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
+// READ ALOUD (sitewide, self-guards to curriculum content pages by URL path)
+// ==========================================
+(function injectReadAloud() {
+  if (document.getElementById('read-aloud-script')) return;
+  const script = document.createElement('script');
+  script.id = 'read-aloud-script';
+  script.src = '/js/read-aloud.js?v=3';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
 // TIMECLOCK (sitewide, self-guards to students only)
 // Was previously only <script>-included on 4 pages, so the auto-popup
 // silently never fired for a student whose current page wasn't one of
@@ -46,7 +68,31 @@
   const script = document.createElement('script');
   script.id = 'timeclock-script';
   script.type = 'module';
-  script.src = '/js/student/timeclock.js?v=15';
+  script.src = '/js/student/timeclock.js?v=22';
+  // Repeated fixes aimed at guessed causes (stale cache, modal races, load
+  // ordering) each failed for some students with zero visible symptom --
+  // this catches the case none of those could see at all: the module
+  // script itself failing to load or parse (404, network failure, a syntax
+  // error), which means initTimeclock() never runs and the button is
+  // either missing or wired to nothing. Reported with plain XHR, not
+  // fetch/apiFetch, since if the module never loaded, nothing this file
+  // imports can be trusted to exist either.
+  script.onerror = function (ev) {
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/client-error-log', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify({
+        message: 'timeclock.js script failed to load',
+        stack: null,
+        url: window.location.href,
+        student_id: (function () { try { return JSON.parse(localStorage.getItem('user') || '{}').student_id || null; } catch (e) { return null; } })(),
+        context: 'loader.js script.onerror',
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+      }));
+    } catch (e) { /* nothing more we can do without the module */ }
+  };
   document.body ? document.body.appendChild(script) : document.head.appendChild(script);
 })();
 

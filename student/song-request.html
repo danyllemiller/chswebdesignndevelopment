@@ -15,7 +15,7 @@
   <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
   <link href="/css/student-pages.css" rel="stylesheet" />
 
-  <script src="/js/loader.js?v=19"></script>
+  <script src="/js/loader.js?v=20"></script>
   <script type="module" src="/js/auth-guard.js"></script>
 
   <style>
@@ -37,7 +37,7 @@
   </div>
 
   <div class="container my-5" style="max-width: 700px;">
-    <h2 class="gochi text-primary mb-1"><i class="fab fa-spotify me-2"></i>Request a Song</h2>
+    <h2 class="gochi text-primary mb-1"><i class="fas fa-music me-2"></i>Request a Song</h2>
     <p class="text-muted mb-2">Search for a song and request it — your teacher approves each request before it's added to the class playlist.</p>
     <p class="text-muted small mb-4"><i class="fas fa-circle-info me-1"></i>Songs marked <span class="badge bg-danger">E</span> (explicit) will not be added to the playlist, so don't bother requesting those.</p>
 
@@ -78,23 +78,32 @@
       if (!q.trim()) { results.innerHTML = ''; return; }
       results.innerHTML = `<p class="text-muted small">Searching...</p>`;
       try {
-        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}`);
+        const res = await fetch(`/api/song-search?q=${encodeURIComponent(q)}`);
         const data = await res.json();
         const tracks = data.tracks || [];
         if (tracks.length === 0) {
           results.innerHTML = `<p class="text-muted small">No results.</p>`;
           return;
         }
-        results.innerHTML = tracks.map(t => `
+        results.innerHTML = tracks.map(t => {
+          const alreadyOn = t.existing_status === 'approved';
+          const alreadyPending = t.existing_status === 'pending';
+          const actionHtml = alreadyOn
+            ? `<span class="badge status-badge-approved">Already on the playlist</span>`
+            : alreadyPending
+              ? `<span class="badge status-badge-pending">Already requested</span>`
+              : `<button class="btn btn-sm btn-outline-primary fw-bold" data-request='${JSON.stringify(t).replace(/'/g, "&#39;")}'>Request</button>`;
+          return `
           <div class="track-row">
             ${t.album_art ? `<img src="${escapeHtml(t.album_art)}" class="album-art">` : `<div class="album-art-placeholder"><i class="fas fa-music"></i></div>`}
             <div class="flex-grow-1">
               <div class="fw-bold small">${escapeHtml(t.name)} ${t.explicit ? '<span class="badge bg-danger">E</span>' : ''}</div>
               <div class="text-muted small">${escapeHtml(t.artist)}</div>
             </div>
-            <button class="btn btn-sm btn-outline-primary fw-bold" data-request='${JSON.stringify(t).replace(/'/g, "&#39;")}'>Request</button>
+            ${actionHtml}
           </div>
-        `).join('');
+        `;
+        }).join('');
       } catch (e) {
         results.innerHTML = `<p class="text-danger small">Search failed. Try again.</p>`;
       }

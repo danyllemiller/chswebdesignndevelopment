@@ -3,6 +3,29 @@ const router = express.Router();
 const { getDbConnection } = require('../db');
 const bcrypt = require('bcrypt');
 const { getCurrentSchoolYear } = require('../helpers');
+const fs = require('fs');
+const path = require('path');
+
+// Every student needs a personal uploads/<student_id>/ folder for the
+// PHP-backed assignment dropbox (upload.php/manage_files.php) to write
+// into. Those scripts run as www-data, which previously had no way to
+// create a brand-new folder there itself (the uploads/ root wasn't
+// writable by it), so a student's very first upload attempt failed
+// outright until someone noticed. Creating it here -- the moment the
+// student record itself is created -- means it always exists before a
+// student could ever reach the upload form. chmod 777 rather than
+// matching PHP's own 755 because this folder is owned by the Node
+// process's user, not www-data, so www-data needs "other" write access
+// to actually save files into it later.
+function ensureUploadFolder(studentId) {
+    try {
+        const dir = path.join(__dirname, '..', '..', 'uploads', String(studentId));
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        fs.chmodSync(dir, 0o777);
+    } catch (err) {
+        console.error(`Could not create upload folder for ${studentId}:`, err.message);
+    }
+}
 
 const AGENCY_PAY_SCALES = {
     'Intern': 15.00, 'Junior Developer': 20.00, 'Web Developer': 35.00,
@@ -20,12 +43,14 @@ router.get('/admin/roster', async (req, res) => {
             SELECT DISTINCT s.*,
                 COALESCE(csc.section_id, csl.section_id, s.section_id)   AS display_period,
                 COALESCE(crc.course_name, crl.course_name, '')            AS display_course_name,
-                COALESCE(csc.school_year, csl.school_year, s.school_year) AS effective_year
+                COALESCE(csc.school_year, csl.school_year, s.school_year) AS effective_year,
+                pr.title AS payroll_title
             FROM students s
             LEFT JOIN class_sections csc ON s.course_id = csc.course_id
             LEFT JOIN courses        crc ON s.course_id = crc.course_id
             LEFT JOIN class_sections csl ON s.section_id = csl.section_id AND s.course_id IS NULL
-            LEFT JOIN courses        crl ON csl.course_id = crl.course_id AND s.course_id IS NULL`;
+            LEFT JOIN courses        crl ON csl.course_id = crl.course_id AND s.course_id IS NULL
+            LEFT JOIN pay_roles      pr  ON s.role_id = pr.id`;
 
         let sql, params = [];
         if (year) {
@@ -302,6 +327,14 @@ router.post('/admin/upload-roster', async (req, res) => {
     if (!students) return res.status(400).json({ error: 'Roster payload is required.' });
     if (!Array.isArray(students)) students = [students];
 
+    // Archiving "anyone missing from this payload" is only safe when the
+    // payload IS the full current roster (the CSV bulk-upload flow). The
+    // single "Add Student" form posts here too with just one student --
+    // without this flag it would read as "everyone else just dropped out."
+    // Opt-in and defaults to off on purpose so a future caller can't
+    // reintroduce the same mistake by omission.
+    const archiveMissing = req.query.archiveMissing === 'true';
+
     const cleaned = students
         .map((s) => ({
             student_id: String(s.student_id || s.studentId || '').trim(),
@@ -344,154 +377,59 @@ router.post('/admin/upload-roster', async (req, res) => {
 
         await connection.beginTransaction();
         const year = getCurrentSchoolYear();
+
+        // Snapshot who's currently active BEFORE the upsert below touches
+        // anything, so "missing from this file" is judged against the roster
+        // as it stood at the start of the upload, not a moving target. Only
+        // computed at all when archiveMissing is set -- see note above.
+        let missingIds = [];
+        if (archiveMissing) {
+            const [activeRows] = await connection.execute(
+                `SELECT student_id FROM students
+                 WHERE (archived IS NULL OR archived = 0) AND school_year = ?
+                   AND (role IS NULL OR LOWER(role) <> 'teacher') AND section_id <> 'Teacher'`,
+                [year]
+            );
+            const uploadedIds = new Set(resolved.map((s) => s.student_id));
+            missingIds = activeRows.map((r) => r.student_id).filter((id) => !uploadedIds.has(id));
+        }
+
+        const [existingRows] = await connection.execute('SELECT student_id FROM students');
+        const existingIds = new Set(existingRows.map((r) => r.student_id));
+
         const stmt = `INSERT INTO students (student_id, first_name, last_name, section_id, course_id, role, school_year, archived)
                       VALUES (?, ?, ?, ?, ?, ?, ?, 0)
                       ON DUPLICATE KEY UPDATE
                         first_name = VALUES(first_name), last_name = VALUES(last_name),
                         section_id = VALUES(section_id), course_id = VALUES(course_id),
                         role = VALUES(role), school_year = VALUES(school_year), archived = 0`;
+        let created = 0, updated = 0;
         for (const s of resolved) {
             const role = s.section_id === 'Teacher' ? 'teacher' : 'student';
             await connection.execute(stmt, [s.student_id, s.first_name, s.last_name, s.section_id, s.course_id, role, year]);
+            if (existingIds.has(s.student_id)) { updated++; } else { created++; ensureUploadFolder(s.student_id); }
         }
+
+        // Anyone active before this upload but absent from the new file is
+        // no longer on the current roster -- archived (not deleted), which
+        // hides them and keeps every record intact.
+        let archived = 0;
+        if (missingIds.length > 0) {
+            const placeholders = missingIds.map(() => '?').join(',');
+            const [archiveResult] = await connection.execute(
+                `UPDATE students SET archived = 1 WHERE student_id IN (${placeholders})`,
+                missingIds
+            );
+            archived = archiveResult.affectedRows;
+        }
+
         await connection.commit();
         await connection.release();
-        res.json({ success: true, count: cleaned.length });
+        res.json({ success: true, count: cleaned.length, created, updated, archived });
     } catch (err) {
         console.error(err && err.stack ? err.stack : err);
         try { if (connection) { await connection.rollback(); await connection.release(); } } catch (_) {}
         res.status(500).json({ error: 'Failed to upload roster.' });
-    }
-});
-
-// Given the full roster CSV that's about to be uploaded, finds any
-// currently-active student NOT present in it — i.e. dropped/transferred
-// since the last upload — and suggests archive (kept, hidden from the
-// active roster) vs delete (removed entirely, including grades) based on
-// how long they were actually active: under ~1 quarter of activity (or
-// none at all) suggests delete since there's nothing meaningful to lose,
-// a full quarter+ suggests archive to preserve their record. This is a
-// suggestion only — nothing is changed until /admin/roster-apply-decisions
-// is called with the teacher's reviewed choices.
-router.post('/admin/roster-diff', async (req, res) => {
-    let students = req.body;
-    if (!students) return res.status(400).json({ error: 'Roster payload is required.' });
-    if (!Array.isArray(students)) students = [students];
-    const uploadedIds = new Set(
-        students.map((s) => String(s.student_id || s.studentId || '').trim()).filter(Boolean)
-    );
-    if (uploadedIds.size === 0) return res.status(400).json({ error: 'No student IDs found in payload.' });
-
-    try {
-        const connection = await getDbConnection();
-        const year = getCurrentSchoolYear();
-        const [activeRows] = await connection.execute(
-            `SELECT s.student_id, s.first_name, s.last_name, s.section_id, COALESCE(c.course_name, '') AS course_name
-             FROM students s
-             LEFT JOIN class_sections cs ON s.section_id = cs.section_id
-             LEFT JOIN courses c ON cs.course_id = c.course_id
-             WHERE (s.archived IS NULL OR s.archived = 0)
-               AND s.school_year = ?
-               AND (s.role IS NULL OR LOWER(s.role) <> 'teacher')
-               AND s.section_id <> 'Teacher'`,
-            [year]
-        );
-        const missing = activeRows.filter((r) => !uploadedIds.has(String(r.student_id).trim()));
-
-        if (missing.length === 0) {
-            await connection.release();
-            return res.json({ missing: [] });
-        }
-
-        const ids = missing.map((m) => m.student_id);
-        const placeholders = ids.map(() => '?').join(',');
-        const [respRows] = await connection.execute(
-            `SELECT student_id, MIN(timestamp) AS earliest FROM responses WHERE student_id IN (${placeholders}) GROUP BY student_id`,
-            ids
-        );
-        const [clockRows] = await connection.execute(
-            `SELECT student_id, MIN(timestamp) AS earliest FROM clockins WHERE student_id IN (${placeholders}) GROUP BY student_id`,
-            ids
-        );
-        await connection.release();
-
-        const earliestByStudent = {};
-        [...respRows, ...clockRows].forEach((r) => {
-            if (!r.earliest) return;
-            const t = new Date(r.earliest).getTime();
-            if (!earliestByStudent[r.student_id] || t < earliestByStudent[r.student_id]) {
-                earliestByStudent[r.student_id] = t;
-            }
-        });
-
-        const QUARTER_DAYS = 45; // ~1 quarter of a school year, in calendar days
-        const results = missing.map((m) => {
-            const earliestMs = earliestByStudent[m.student_id];
-            const daysActive = earliestMs ? Math.round((Date.now() - earliestMs) / 86400000) : null;
-            const suggestedAction = (daysActive !== null && daysActive >= QUARTER_DAYS) ? 'archive' : 'delete';
-            return { ...m, daysActive, suggestedAction };
-        });
-
-        res.json({ missing: results });
-    } catch (err) {
-        console.error(err && err.stack ? err.stack : err);
-        res.status(500).json({ error: 'Failed to compute roster diff.' });
-    }
-});
-
-// Applies the teacher's reviewed archive/delete decisions for students who
-// were missing from the latest roster CSV. "archive" flips students.archived
-// so they're hidden but every record is preserved. "delete" removes the
-// student and every row referencing them across the app (grades, notes,
-// clock-ins, planner data, etc.) — most of those tables have no cascading
-// foreign key to students, so each is cleaned up explicitly to avoid
-// leaving orphaned rows behind.
-const STUDENT_ID_TABLES = [
-    'appointments', 'class_poll_votes', 'clockins', 'cs_notebook', 'exam_progress',
-    'gallery_items', 'grades', 'intervention_enrollments', 'intervention_goals',
-    'intervention_journal', 'intervention_submissions', 'intervention_tests',
-    'notebook_entries', 'planner_habits', 'planner_habit_log', 'planner_preferences',
-    'planner_todos', 'responses', 'self_assessments', 'student_additional_sections',
-    'student_grade_log', 'student_paystubs', 'student_responses', 'student_stickers',
-    'timeclock_log', 'timesheets', 'turnins'
-];
-
-router.post('/admin/roster-apply-decisions', async (req, res) => {
-    const { decisions } = req.body || {};
-    if (!Array.isArray(decisions) || decisions.length === 0) {
-        return res.status(400).json({ error: 'decisions array is required.' });
-    }
-
-    let connection;
-    try {
-        connection = await getDbConnection();
-        await connection.beginTransaction();
-
-        let archived = 0, deleted = 0;
-        for (const d of decisions) {
-            const studentId = String(d.student_id || '').trim();
-            if (!studentId) continue;
-
-            if (d.action === 'archive') {
-                await connection.execute('UPDATE students SET archived = 1 WHERE student_id = ?', [studentId]);
-                archived++;
-            } else if (d.action === 'delete') {
-                for (const table of STUDENT_ID_TABLES) {
-                    await connection.execute(`DELETE FROM ${table} WHERE student_id = ?`, [studentId]);
-                }
-                await connection.execute('DELETE FROM students WHERE student_id = ?', [studentId]);
-                deleted++;
-            }
-            // action === 'skip' (or anything else): leave the student untouched.
-        }
-
-        await connection.commit();
-        await connection.release();
-        res.json({ success: true, archived, deleted });
-    } catch (err) {
-        console.error(err && err.stack ? err.stack : err);
-        try { if (connection) { await connection.rollback(); await connection.release(); } } catch (_) {}
-        res.status(500).json({ error: 'Failed to apply roster decisions.' });
     }
 });
 
@@ -520,7 +458,7 @@ router.get('/admin/student', async (req, res) => {
         // join a "payroll_roster" table that was never actually created, which
         // made this endpoint 500 on every call.
         const [rows] = await connection.execute(
-            `SELECT s.student_id, s.first_name, s.last_name, s.username, s.section_id, s.role,
+            `SELECT s.student_id, s.first_name, s.last_name, s.username, s.section_id, s.role, s.archived,
                     COALESCE(pr.title, 'Intern') AS payroll_title, COALESCE(pr.hourly_rate, 15.00) AS hourly_rate
              FROM students s LEFT JOIN pay_roles pr ON s.role_id = pr.id
              WHERE s.student_id = ? LIMIT 1`, [student_id]
@@ -532,7 +470,7 @@ router.get('/admin/student', async (req, res) => {
 });
 
 router.post('/admin/save-student', async (req, res) => {
-    const { student_id, first_name, last_name, username, section_id, role, password, payroll_title } = req.body || {};
+    const { student_id, first_name, last_name, username, section_id, role, password, payroll_title, payroll_effective_date, archived } = req.body || {};
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
         const connection = await getDbConnection();
@@ -554,6 +492,14 @@ router.post('/admin/save-student', async (req, res) => {
         if (username   !== undefined) { updates.push('username = ?');   params.push(username || null); }
         if (section_id !== undefined) { updates.push('section_id = ?'); params.push(section_id || null); }
         if (role       !== undefined) { updates.push('role = ?');       params.push(role); }
+        // The individual edit form previously had no way to un-archive a
+        // student at all -- only bulk actions (archive-students/archive-year)
+        // could set the flag, none could clear it, so a student assigned a
+        // new section while still archived would keep their new section_id
+        // (it really did save) but stay invisible everywhere that filters
+        // archived IS NULL OR archived = 0, making the edit look like it
+        // silently failed no matter how many times it was repeated.
+        if (archived !== undefined) { updates.push('archived = ?'); params.push(archived ? 1 : 0); }
         if (password !== undefined && password !== null && String(password).length > 0) {
             const hash = await bcrypt.hash(String(password), 10);
             updates.push('password = ?', 'password_hash = ?');
@@ -571,6 +517,12 @@ router.post('/admin/save-student', async (req, res) => {
         // actually created, which threw AFTER the update above had already
         // committed, so the save looked like it failed (500, no roster
         // refresh) even though the real change had already gone through.
+        //
+        // Only writes a new student_role_history row (payroll's real,
+        // date-aware source of truth) when the title is actually changing --
+        // the edit modal always submits payroll_title on every save, so
+        // without this check saving an unrelated field (name, section...)
+        // would spam a new no-op history row every time.
         if (payroll_title && AGENCY_PAY_SCALES[payroll_title] !== undefined) {
             const rate = AGENCY_PAY_SCALES[payroll_title];
             await connection.execute(
@@ -579,8 +531,20 @@ router.post('/admin/save-student', async (req, res) => {
                 [payroll_title, rate]
             );
             const [roleRows] = await connection.execute('SELECT id FROM pay_roles WHERE title = ?', [payroll_title]);
-            if (roleRows.length > 0) {
-                await connection.execute('UPDATE students SET role_id = ? WHERE student_id = ?', [roleRows[0].id, student_id]);
+            const [[currentRole]] = await connection.execute(
+                `SELECT r.id, r.title FROM students s LEFT JOIN pay_roles r ON s.role_id = r.id WHERE s.student_id = ?`,
+                [student_id]
+            );
+            if (roleRows.length > 0 && (!currentRole || currentRole.title !== payroll_title)) {
+                const newRoleId = roleRows[0].id;
+                const effectiveDate = (payroll_effective_date && /^\d{4}-\d{2}-\d{2}$/.test(payroll_effective_date))
+                    ? payroll_effective_date
+                    : new Date().toISOString().split('T')[0];
+                await connection.execute('UPDATE students SET role_id = ? WHERE student_id = ?', [newRoleId, student_id]);
+                await connection.execute(
+                    'INSERT INTO student_role_history (student_id, role_id, effective_date) VALUES (?, ?, ?)',
+                    [student_id, newRoleId, effectiveDate]
+                );
             }
         }
         await connection.release();

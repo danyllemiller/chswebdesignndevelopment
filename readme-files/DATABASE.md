@@ -38,7 +38,7 @@ Schema verified live on 2026-06-22 (29 tables).
 | [students](#students) | All users (students, teacher, admin) |
 | [teacher_daily_questions](#teacher_daily_questions) | Teacher-set daily question per date |
 | [timeclock_log](#timeclock_log) | Raw clock-in/out punch log |
-| [timesheets](#timesheets) | Summarised daily clock-in/out with score |
+| [timesheets](#timesheets) | Summarized daily clock-in/out with score |
 | [turnins](#turnins) | Student assignment turn-ins |
 
 ---
@@ -545,7 +545,7 @@ Raw punch log — one row per clock-in or clock-out event.
 
 ## timesheets
 
-Summarised daily attendance — one row per student per day pairing a clock-in with a clock-out.
+Summarized daily attendance — one row per student per day pairing a clock-in with a clock-out.
 
 | Column | Type | Nullable | Default | Notes |
 |--------|------|----------|---------|-------|

@@ -20,7 +20,9 @@ router.use('/', require('./routes/stickers'));
 router.use('/', require('./routes/polls'));
 router.use('/', require('./routes/wordcloud'));
 router.use('/', require('./routes/tardy'));
-router.use('/', require('./routes/spotify'));
+router.use('/', require('./routes/songRequests'));
 router.use('/', require('./routes/daily-activity'));
+router.use('/', require('./routes/messages'));
+router.use('/', require('./routes/newsletter'));
 
 module.exports = router;

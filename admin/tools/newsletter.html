@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Parent Newsletter</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=20"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 900px; margin: 2.5rem auto; }
+    .item-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: .5rem 0; border-bottom: 1px solid #eef0f6; }
+    .item-row:last-child { border-bottom: none; }
+    .item-date { white-space: nowrap; font-variant-numeric: tabular-nums; color: #6c757d; font-size: .88rem; }
+    .late-row .item-date { color: #c0392b; font-weight: 700; }
+    .empty-note { color: #6c757d; font-style: italic; padding: .4rem 0; }
+    .share-link-box { font-family: 'Courier New', monospace; font-size: .85rem; word-break: break-all; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+      <h2 class="gochi text-primary mb-1"><i class="fas fa-newspaper me-2"></i>Parent Newsletter</h2>
+      <p class="text-muted mb-0">A public, course-wide status page — current unit, what's due next, and what's now officially late. No student names or grades, so it's safe to share the link with every parent in a course.</p>
+    </div>
+  </div>
+
+  <ul class="nav nav-pills mb-3" id="courseTabs">
+    <li class="nav-item"><button class="nav-link active fw-bold" data-course="wd1">Web Design 1</button></li>
+    <li class="nav-item"><button class="nav-link fw-bold" data-course="wd2">Web Design 2</button></li>
+    <li class="nav-item"><button class="nav-link fw-bold" data-course="cs">Computer Science</button></li>
+  </ul>
+
+  <div class="card shadow-sm border-0 mb-3">
+    <div class="card-body p-4">
+      <label class="form-label fw-bold small text-muted">Share this link with parents</label>
+      <div class="input-group">
+        <input type="text" id="shareLink" class="form-control share-link-box" readonly>
+        <button class="btn btn-outline-primary fw-bold" id="btnCopyLink"><i class="fas fa-link me-1"></i>Copy Link</button>
+      </div>
+      <p class="text-muted small mb-0 mt-2">This link always shows today's live status — no need to resend it as things change.</p>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-3">
+    <div class="card-body p-4">
+      <h6 class="fw-bold text-muted mb-3">Preview</h6>
+      <div id="loadingState" class="text-center py-4"><span class="spinner-border spinner-border-sm text-primary"></span></div>
+      <div id="previewContent" class="d-none">
+        <p class="mb-3"><strong id="unitLine"></strong><br><span class="text-muted small" id="chapterLine"></span></p>
+
+        <h6 class="fw-bold text-primary">Due Next</h6>
+        <div id="dueNextList" class="mb-3"></div>
+
+        <h6 class="fw-bold text-danger">Now Officially Late</h6>
+        <div id="nowLateList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-3">
+    <div class="card-body p-4">
+      <h6 class="fw-bold text-muted mb-2">Notes for Parents (optional)</h6>
+      <p class="text-muted small">Anything else parents should know — a reminder, an upcoming event, a policy note. Shows on the public page and in the copied text below.</p>
+      <textarea id="notesInput" class="form-control" rows="3" placeholder="e.g. Retakes for Unit 3 close this Friday..."></textarea>
+      <button id="btnSaveNotes" class="btn btn-success fw-bold mt-2"><i class="fas fa-save me-1"></i>Save Notes</button>
+      <span id="saveStatus" class="text-muted small ms-2"></span>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <button id="btnCopyText" class="btn btn-primary fw-bold"><i class="fas fa-copy me-1"></i>Copy for ParentSquare</button>
+      <span class="text-muted small ms-2">Formats everything above as plain text you can paste into an announcement.</span>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script>
+let currentCourse = 'wd1';
+let currentData = null;
+
+function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function renderItems(container, items, isLate) {
+    container.innerHTML = '';
+    if (!items.length) {
+        container.innerHTML = `<div class="empty-note">${isLate ? 'Nothing overdue right now.' : 'Nothing scheduled in the near future yet.'}</div>`;
+        return;
+    }
+    items.forEach(it => {
+        const row = document.createElement('div');
+        row.className = 'item-row' + (isLate ? ' late-row' : '');
+        row.innerHTML = `<span>${it.title}${it.points ? ` <span class="text-muted small">(${it.points} pts)</span>` : ''}</span><span class="item-date">${fmtDate(it.dueDate)}</span>`;
+        container.appendChild(row);
+    });
+}
+
+async function loadCourse(course) {
+    currentCourse = course;
+    document.querySelectorAll('#courseTabs [data-course]').forEach(b => b.classList.toggle('active', b.dataset.course === course));
+    document.getElementById('shareLink').value = `${location.origin}/newsletter.html?course=${course}`;
+
+    document.getElementById('loadingState').classList.remove('d-none');
+    document.getElementById('previewContent').classList.add('d-none');
+
+    try {
+        const res = await fetch(`/api/newsletter?course=${course}`);
+        const data = await res.json();
+        currentData = data;
+
+        document.getElementById('unitLine').textContent = data.currentUnit
+            ? data.currentUnit.title
+            : `Chapter ${data.currentChapter.number}: ${data.currentChapter.title}`;
+        document.getElementById('chapterLine').textContent = data.currentUnit
+            ? `Currently on Chapter ${data.currentChapter.number}: ${data.currentChapter.title}`
+            : '';
+
+        renderItems(document.getElementById('dueNextList'), data.dueNext, false);
+        renderItems(document.getElementById('nowLateList'), data.nowLate, true);
+        document.getElementById('notesInput').value = data.notes || '';
+
+        document.getElementById('loadingState').classList.add('d-none');
+        document.getElementById('previewContent').classList.remove('d-none');
+    } catch (e) {
+        document.getElementById('loadingState').innerHTML = '<span class="text-danger">Failed to load.</span>';
+    }
+}
+
+document.querySelectorAll('#courseTabs [data-course]').forEach(btn => {
+    btn.addEventListener('click', () => loadCourse(btn.dataset.course));
+});
+
+document.getElementById('btnCopyLink').addEventListener('click', () => {
+    navigator.clipboard.writeText(document.getElementById('shareLink').value).then(() => {
+        const btn = document.getElementById('btnCopyLink');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+        setTimeout(() => { btn.innerHTML = original; }, 1500);
+    });
+});
+
+document.getElementById('btnSaveNotes').addEventListener('click', async () => {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saving...';
+    try {
+        await fetch('/api/admin/newsletter-notes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ course: currentCourse, notes: document.getElementById('notesInput').value })
+        });
+        if (currentData) currentData.notes = document.getElementById('notesInput').value;
+        status.textContent = 'Saved.';
+        setTimeout(() => { status.textContent = ''; }, 2000);
+    } catch (e) {
+        status.textContent = 'Failed to save.';
+    }
+});
+
+document.getElementById('btnCopyText').addEventListener('click', () => {
+    if (!currentData) return;
+    const d = currentData;
+    const lines = [];
+    lines.push(`${d.courseName} — Class Update`);
+    lines.push('');
+    lines.push(d.currentUnit ? `Currently on: ${d.currentUnit.title} (Chapter ${d.currentChapter.number}: ${d.currentChapter.title})` : `Currently on: Chapter ${d.currentChapter.number}: ${d.currentChapter.title}`);
+    lines.push('');
+    lines.push('DUE NEXT');
+    if (d.dueNext.length) d.dueNext.forEach(it => lines.push(`- ${it.title} — due ${fmtDate(it.dueDate)}`));
+    else lines.push('- Nothing scheduled in the near future yet.');
+    lines.push('');
+    lines.push('NOW OFFICIALLY LATE');
+    lines.push("(If your student hasn't turned these in yet, they're past the due date.)");
+    if (d.nowLate.length) d.nowLate.forEach(it => lines.push(`- ${it.title} — was due ${fmtDate(it.dueDate)}`));
+    else lines.push('- Nothing overdue right now.');
+    if (d.notes && d.notes.trim()) {
+        lines.push('');
+        lines.push('FROM MS. MILLER');
+        lines.push(d.notes.trim());
+    }
+    lines.push('');
+    lines.push(`Full live status: ${location.origin}/newsletter.html?course=${currentCourse}`);
+
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+        const btn = document.getElementById('btnCopyText');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+        setTimeout(() => { btn.innerHTML = original; }, 1500);
+    }).catch(() => alert('Could not copy to clipboard.'));
+});
+
+loadCourse('wd1');
+</script>
+</body>
+</html>

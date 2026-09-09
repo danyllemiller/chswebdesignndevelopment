@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { sanitizeNotebookHtml } = require('../sanitizeNotebookHtml');
 
 router.get('/admin/notebooks/roster', async (req, res) => {
     try {
@@ -77,19 +78,20 @@ router.post('/student/notebook/save', async (req, res) => {
     const { id, student_id, chapter_id, title, category, content } = req.body;
     if (!student_id || !chapter_id || !title)
         return res.status(400).json({ error: 'student_id, chapter_id, and title are required' });
+    const cleanContent = sanitizeNotebookHtml(content);
     try {
         const connection = await getDbConnection();
         if (id) {
             await connection.execute(
                 'UPDATE notebook_entries SET chapter_id = ?, title = ?, category = ?, content = ?, updated_at = NOW() WHERE id = ? AND student_id = ?',
-                [Number(chapter_id), title, category || 'Notes', content || '', Number(id), student_id]
+                [Number(chapter_id), title, category || 'Notes', cleanContent, Number(id), student_id]
             );
             await connection.release();
             return res.json({ success: true, id: String(id) });
         }
         const [result] = await connection.execute(
             'INSERT INTO notebook_entries (student_id, chapter_id, title, category, content, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())',
-            [student_id, Number(chapter_id), title, category || 'Notes', content || '']
+            [student_id, Number(chapter_id), title, category || 'Notes', cleanContent]
         );
         await connection.release();
         return res.json({ success: true, id: String(result.insertId) });

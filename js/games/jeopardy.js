@@ -560,7 +560,7 @@ window.Jeopardy = (() => {
             }
         }
 
-        // BOARD COLORS: Primary Blue & File Name Color when fresh, Quaternary Grey when spent
+        // BOARD COLORS: Primary Blue & File Name Color when fresh, Quaternary Gray when spent
         document.querySelectorAll('.question-btn').forEach(btn => {
             if (!btn.dataset.question || btn.dataset.question.trim() === "" || btn.dataset.question === "undefined") {
                 btn.classList.add('disabled', 'btn-spent');

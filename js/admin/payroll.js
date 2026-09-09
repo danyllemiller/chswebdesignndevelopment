@@ -985,15 +985,18 @@ async function viewStudentHistory(studentId) {
 // ============================================================================
 // DAILY QUESTIONS (MariaDB API)
 // ============================================================================
+const DAILY_QUESTION_GROUP_KEYS = ['WD1', 'WD2', 'WD_AS', 'CS_A', 'CS_B', 'CS_MON'];
+
 async function loadDailyQuestions() {
     try {
         const res = await fetch(`/api/admin/daily-questions?date=${currentDate}`);
         if (res.ok) {
-            const q = await res.json();
-            const wdEl = document.getElementById('wdQuestionInput');
-            const csEl = document.getElementById('csQuestionInput');
-            if (wdEl) wdEl.value = q.wdQuestion || "";
-            if (csEl) csEl.value = q.csQuestion || "";
+            const data = await res.json();
+            const questions = data.questions || {};
+            DAILY_QUESTION_GROUP_KEYS.forEach(key => {
+                const el = document.getElementById(`q-${key}`);
+                if (el) el.value = questions[key] || "";
+            });
         }
     } catch (e) {
         console.error("Error loading questions", e);
@@ -1005,14 +1008,16 @@ async function saveDailyQuestions() {
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
     btn.disabled = true;
 
-    const wdQ = (document.getElementById('wdQuestionInput')?.value || '').trim();
-    const csQ = (document.getElementById('csQuestionInput')?.value || '').trim();
+    const questions = {};
+    DAILY_QUESTION_GROUP_KEYS.forEach(key => {
+        questions[key] = (document.getElementById(`q-${key}`)?.value || '').trim();
+    });
 
     try {
         const res = await fetch('/api/admin/daily-questions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ date: currentDate, wdQuestion: wdQ, csQuestion: csQ })
+            body: JSON.stringify({ date: currentDate, questions })
         });
         if (!res.ok) throw new Error('Server error');
 

@@ -3,10 +3,57 @@ import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
 import { periodToCourseKey } from '../modules/grade-weights.js?v=3';
 
+// Every previous fix here targeted a guessed cause and each one failed for
+// some students with zero visible symptom -- there was no way to see what
+// was actually throwing. This reports any error, caught or not, straight to
+// the server logs (POST /api/client-error-log) so the real failure can be
+// read directly. logTimeclockError() is used everywhere this file already
+// has a catch block; the two window listeners below catch anything that
+// happens outside all of them.
+function logTimeclockError(context, err) {
+    try {
+        fetch('/api/client-error-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: err && err.message ? err.message : String(err),
+                stack: err && err.stack ? err.stack : null,
+                url: window.location.href,
+                student_id: studentData ? studentData.student_id : null,
+                context,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            })
+        }).catch(() => {});
+    } catch (e) { /* logging must never itself break the widget */ }
+}
+
+window.addEventListener('error', (ev) => {
+    logTimeclockError('window.onerror', ev.error || { message: ev.message });
+});
+window.addEventListener('unhandledrejection', (ev) => {
+    logTimeclockError('window.onunhandledrejection', ev.reason);
+});
+
 let studentData = null;
 let currentQuestion = null;
+let currentPromptText = null; // the clock-out reflection prompt actually shown, so it can be saved alongside the answer for the WD daily journal
 let bellWindow = null; // { startMs, endMs } for whichever of the student's periods is currently active today, or null
 let currentPeriod = null; // which of the student's (possibly multiple) periods bellWindow/getCourseKey resolved to
+
+// checkStatus() gets triggered from four independent places (initial load,
+// the 60s recheck interval, the visibilitychange handler, and the manual
+// widget-button click) with no coordination between them. Two of those
+// firing close together (e.g. the tab regains focus right as the interval
+// also ticks, or a student clicks the button while an auto-recheck is
+// still in flight) used to run two overlapping async checks that both
+// fetched a question and both raced to write the same label/options DOM
+// elements -- whichever response arrived second silently won, sometimes
+// leaving the modal on a stale or half-written state with no visible
+// error. This flag makes a second call while one's already running just
+// wait for the in-flight one instead of starting a competing fetch.
+let statusCheckPromise = null;
+let checkStatusCallId = 0;
 
 // ==============================================================================
 // 1. HELPERS & CONFIGURATION
@@ -165,16 +212,75 @@ async function resolveTodaysBellWindow() {
         return { startMs: chosen.startMs, endMs: chosen.endMs };
     } catch (e) {
         console.error('[timeclock] Could not resolve today\'s bell window:', e);
+        logTimeclockError('resolveTodaysBellWindow', e);
         return null;
     }
 }
 
-function openTimeclockModal() {
+// Clears any leftover .modal-backdrop element and body scroll-lock classes
+// that Bootstrap can strand behind if a show() call ever lands while a
+// previous hide() fade transition hasn't fully finished yet. This modal is
+// re-triggered very often -- auto-popup on load, every 60s recheck, every
+// tab-refocus, every manual click -- so that race is not a rare edge case
+// here, it's routine. Once it happens, the modal is technically "shown" in
+// Bootstrap's internal state but paints behind/under the stale backdrop
+// with zero visible result and no console error -- from the student's side
+// that's just "clicking the timeclock button does nothing," and it was
+// confirmed to accumulate across a single class period for a large share
+// of a room (25 clocked in, only 15 auto-prompted to clock out) once enough
+// show/hide cycles had happened. Called proactively via the modal's own
+// 'hidden.bs.modal' event the instant a close transition genuinely
+// finishes, not just reactively before the next show -- that's what keeps
+// this from ever accumulating in the first place, instead of only papering
+// over it for the next call.
+function cleanupStrayModalState() {
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+}
+
+// bootstrap.bundle.js is loaded as a plain global from its own <script> tag,
+// not an ES module import -- unlike this file's actual imports (apiFetch,
+// getLoggedInUser, etc.), which the module system guarantees are resolved
+// before any of this file's own code runs, nothing guarantees `bootstrap`
+// itself is already defined by the moment a click fires, especially on a
+// fully cold load (confirmed live: a guest profile with zero cache produced
+// "button clicked, nothing happens at all," which is exactly what a bare
+// `bootstrap.Modal...` reference throws on if that global isn't ready yet).
+// Poll briefly instead of assuming it's there.
+function waitForBootstrap(timeoutMs = 5000) {
+    return new Promise((resolve, reject) => {
+        if (window.bootstrap && window.bootstrap.Modal) { resolve(); return; }
+        const start = Date.now();
+        const check = () => {
+            if (window.bootstrap && window.bootstrap.Modal) { resolve(); return; }
+            if (Date.now() - start > timeoutMs) { reject(new Error('bootstrap.bundle.js did not load in time')); return; }
+            setTimeout(check, 100);
+        };
+        check();
+    });
+}
+
+async function openTimeclockModal() {
     const modalEl = document.getElementById('timeclock-modal');
     if (!modalEl) return;
-    const existing = bootstrap.Modal.getInstance(modalEl);
-    if (existing && modalEl.classList.contains('show')) return; // already open
-    (existing || new bootstrap.Modal(modalEl)).show();
+    await waitForBootstrap();
+    // Previously checked our own `.show()` CSS class as a manual "already
+    // open" guard -- if that class and Bootstrap's actual internal state
+    // ever fell out of sync (e.g. the auto-popup and a manual click both
+    // touching the same modal around the same moment), every click after
+    // that silently no-opped forever with no visible error, since the guard
+    // returned early without ever calling .show() again. Bootstrap's own
+    // getOrCreateInstance().show() already no-ops safely on an
+    // already-shown modal using its own internal _isShown state, so let it
+    // handle that instead of tracking it ourselves.
+    //
+    // Belt-and-suspenders alongside the 'hidden.bs.modal' listener below:
+    // if the modal isn't currently shown, clear any stray backdrop/body-lock
+    // state one more time right before asking Bootstrap to show it fresh.
+    if (!modalEl.classList.contains('show')) cleanupStrayModalState();
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
 // Runs on load and on a 60s interval. Auto-opens the timeclock modal exactly
@@ -193,9 +299,13 @@ function openTimeclockModal() {
 // its own clock-in/out event, so each period's popup needs to be able to
 // fire independently instead of one suppressing the other.
 //
-// Both windows are open-ended on the far side (no "now <= endMs" upper
-// bound) rather than snapping shut exactly at the period boundary. The
-// 60s interval only fires reliably while the tab is in the foreground --
+// The clock-out window is open-ended on the far side (no upper bound --
+// checked below) since recording a late clock-out is still meaningful.
+// Clock-in is deliberately NOT open-ended: it closes at bellWindow.endMs
+// (checked in checkAutoPopup below, and enforced again server-side in
+// checkStatusInner's "today's class has ended" message) because clocking
+// in for a period that's already over doesn't mean anything. The 60s
+// interval only fires reliably while the tab is in the foreground --
 // browsers throttle timers in background tabs, which is exactly the kind
 // of thing a student with several tabs open runs into constantly. A
 // narrow window meant that if their tab wasn't focused at the precise
@@ -219,13 +329,13 @@ function checkAutoPopup() {
         const flag = `tc_auto_shown_in_${who}_${wherePeriod}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
-            openTimeclockModal();
+            openTimeclockModal().catch(e => { console.error('Timeclock auto-popup error:', e); logTimeclockError('checkAutoPopup:in', e); });
         }
     } else if (mode === 'out' && now >= (bellWindow.endMs - 5 * 60 * 1000)) {
         const flag = `tc_auto_shown_out_${who}_${wherePeriod}_${todayStr}`;
         if (!sessionStorage.getItem(flag)) {
             sessionStorage.setItem(flag, '1');
-            openTimeclockModal();
+            openTimeclockModal().catch(e => { console.error('Timeclock auto-popup error:', e); logTimeclockError('checkAutoPopup:out', e); });
         }
     }
 }
@@ -296,13 +406,30 @@ async function initTimeclock() {
     });
 }
 
-async function checkStatus() {
+// Public entry point -- every caller (initial load, the 60s interval, the
+// visibility handler, the button click) goes through here. If a check is
+// already running, piggyback on that same promise instead of starting a
+// second overlapping one.
+function checkStatus() {
+    if (statusCheckPromise) return statusCheckPromise;
+    statusCheckPromise = checkStatusInner().finally(() => { statusCheckPromise = null; });
+    return statusCheckPromise;
+}
+
+async function checkStatusInner() {
     if (!studentData) return;
+
+    // Tags this specific call so its DOM writes can be thrown away if a
+    // newer call finishes first -- belt-and-suspenders alongside the
+    // single-flight guard above, in case a caller ever bypasses checkStatus()
+    // and calls this directly.
+    const callId = ++checkStatusCallId;
 
     try {
         // Using our shared apiFetch module
         const periodParam = currentPeriod ? `&period=${encodeURIComponent(currentPeriod)}` : '';
         const statusData = await apiFetch(`/api/timeclock/status?student_id=${studentData.student_id}${periodParam}`);
+        if (callId !== checkStatusCallId) return; // a newer check has since started; this response is stale
 
         const label = document.getElementById('tc-question-label');
         const optsContainer = document.getElementById('tc-options-container');
@@ -335,6 +462,7 @@ async function checkStatus() {
             // Clock-in is always a real question pulled from that course's
             // actual chapter test bank -- never a manually-typed question.
             currentQuestion = await apiFetch(`/api/timeclock/question?type=${category}`);
+            if (callId !== checkStatusCallId) return; // superseded while this fetch was in flight
 
             label.innerHTML = `<span class="d-block small text-muted fw-normal mb-1">${currentQuestion.chapterLabel || ''}</span>${currentQuestion.question_text}`;
 
@@ -353,6 +481,8 @@ async function checkStatus() {
         else if (mode === 'out') {
             const category = getCourseKey();
             const promptData = await apiFetch(`/api/timeclock/reflection-prompt?type=${category}&student_id=${encodeURIComponent(studentData.student_id)}`);
+            if (callId !== checkStatusCallId) return; // superseded while this fetch was in flight
+            currentPromptText = promptData.prompt_text;
             label.innerText = promptData.prompt_text;
             optsContainer.innerHTML = `<textarea id="tc-out-answer" class="form-control" rows="3" required></textarea>`;
             btn.innerText = "Submit & Clock Out";
@@ -360,6 +490,20 @@ async function checkStatus() {
         }
     } catch (e) {
         console.error("Timeclock check status error:", e);
+        logTimeclockError('checkStatusInner', e);
+        // Previously silent -- if this background check is what the
+        // auto-popup ends up displaying (checkAutoPopup reads
+        // window.timeclock.currentMode, which is already set by this point,
+        // and can still open the modal even though the question/prompt
+        // fetch below it just failed), a blank or stale modal was exactly
+        // as confusing to a student as no popup at all. Leave a visible,
+        // actionable message instead -- the widget button now has its own
+        // fully independent retry path (handleManualOpen) that doesn't share
+        // whatever just failed here.
+        const label = document.getElementById('tc-question-label');
+        const optsContainer = document.getElementById('tc-options-container');
+        if (label) label.innerText = "Something went wrong loading the timeclock. Click the Timeclock button below to try again.";
+        if (optsContainer) optsContainer.innerHTML = '';
     }
 }
 
@@ -395,18 +539,20 @@ async function handleTimeclockSubmit(e) {
                 section_id: currentPeriod || studentData.section_id,
                 mode: mode,
                 answer: answer,
-                is_correct: isCorrect
+                is_correct: isCorrect,
+                prompt: mode === 'out' ? currentPromptText : null
             })
         });
         location.reload();
-    } catch (e) { console.error("Timeclock submit error:", e); }
+    } catch (e) { console.error("Timeclock submit error:", e); logTimeclockError('handleTimeclockSubmit', e); }
 }
 
 function injectTimeclockUI() {
     if (document.getElementById('tc-widget')) return;
     const uiHtml = `
-    <div id="tc-widget" class="position-fixed bottom-0 end-0 m-4 z-3">
-        <button class="btn btn-dark shadow-lg rounded-pill px-4 py-3" id="tc-widget-btn">Timeclock</button>
+    <div id="tc-widget" class="position-fixed bottom-0 end-0 m-4 z-3 d-flex gap-2">
+        <button class="btn btn-success shadow-lg rounded-pill px-4 py-3" id="tc-clockin-btn">Clock In</button>
+        <button class="btn btn-dark shadow-lg rounded-pill px-4 py-3" id="tc-clockout-btn">Clock Out</button>
     </div>
     <div class="modal fade" id="timeclock-modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -430,13 +576,147 @@ function injectTimeclockUI() {
     </div>`;
     document.body.insertAdjacentHTML('beforeend', uiHtml);
     document.getElementById('tc-form').addEventListener('submit', handleTimeclockSubmit);
-    document.getElementById('tc-widget-btn').addEventListener('click', async () => {
-        // Refresh status right before showing -- otherwise a click soon after
-        // page load (before the initial status check finishes) opens a modal
-        // with stale or still-empty content that looks broken.
-        await checkStatus();
-        openTimeclockModal();
+    // Bootstrap fires this the instant its own hide transition genuinely
+    // finishes -- cleaning up here, not just before the next show(), is what
+    // stops stray backdrop/body-lock state from ever accumulating across a
+    // class period's worth of auto-popups, rechecks, and clicks.
+    document.getElementById('timeclock-modal').addEventListener('hidden.bs.modal', cleanupStrayModalState);
+    document.getElementById('tc-clockin-btn').addEventListener('click', () => handleManualOpen('in'));
+    document.getElementById('tc-clockout-btn').addEventListener('click', () => handleManualOpen('out'));
+}
+
+// The manual button has to work unconditionally: a student called out of
+// class early needs to be able to clock out right then, not wait for the
+// "5 minutes before period end" auto-popup window; a student walking in
+// late still needs to be able to clock in even though they missed the
+// on-time window; and a click before or after the normal period entirely
+// (an aide covering a different block, a make-up session) still needs to
+// do something instead of nothing. Previously this routed through the same
+// checkStatus()/checkStatusInner() pipeline the auto-popup and 60s recheck
+// use -- sharing that path meant a click could silently no-op if another
+// call's staleness token (checkStatusCallId) or the mode==='in'-past-
+// bellWindow.endMs early return happened to apply, with zero visible
+// feedback. Confirmed live: half of B6 had the server correctly reporting
+// mode:'in' on every single status check, but the client never even
+// attempted the follow-up question fetch -- some exception was being
+// swallowed by the shared path's single catch-all with no visible sign of
+// failure. This handler is fully self-contained (no bellWindow gate, no
+// staleness token, no dependency on the interval/auto-popup state) and
+// always leaves the student looking at real content or a visible error
+// message -- never nothing.
+// forcedMode is which button the student actually clicked ('in' or 'out'),
+// now that Clock In and Clock Out are two separate always-visible buttons
+// instead of one button whose meaning was inferred from server state. The
+// server's real status is still fetched and is still the source of truth
+// for what's actually allowed -- a student clicking "Clock In" a second
+// time, or "Clock Out" before ever clocking in, gets a clear explanation
+// instead of the wrong flow silently proceeding.
+async function handleManualOpen(forcedMode) {
+    logTimeclockError('handleManualOpen:clicked', { message: `button click received (${forcedMode})` });
+    const modalEl = document.getElementById('timeclock-modal');
+    const label = document.getElementById('tc-question-label');
+    const optsContainer = document.getElementById('tc-options-container');
+    const btn = document.getElementById('tc-submit-btn');
+    const form = document.getElementById('tc-form');
+    const successMsg = document.getElementById('tc-success-msg');
+    const clockInBtn = document.getElementById('tc-clockin-btn');
+    const clockOutBtn = document.getElementById('tc-clockout-btn');
+    const clickedBtn = forcedMode === 'out' ? clockOutBtn : clockInBtn;
+    if (!modalEl || !label || !optsContainer || !btn || !form || !successMsg) {
+        logTimeclockError('handleManualOpen:missingDom', {
+            message: `required DOM element missing: modal=${!!modalEl} label=${!!label} opts=${!!optsContainer} btn=${!!btn} form=${!!form} success=${!!successMsg}`
+        });
+        return;
+    }
+
+    form.style.display = '';
+    successMsg.classList.add('d-none');
+    label.innerText = 'Loading...';
+    optsContainer.innerHTML = '';
+    btn.disabled = true;
+    btn.innerText = 'Loading...';
+    [clockInBtn, clockOutBtn].forEach(b => {
+        if (!b) return;
+        b.innerText = b === clockInBtn ? 'Clock In' : 'Clock Out';
+        b.classList.remove('btn-danger');
+        b.classList.add(b === clockInBtn ? 'btn-success' : 'btn-dark');
     });
+
+    try {
+        await openTimeclockModal();
+    } catch (e) {
+        // The modal itself couldn't open -- almost certainly
+        // bootstrap.bundle.js hadn't finished loading yet. There's nowhere
+        // inside a still-hidden modal to show that, so fall back to the one
+        // element guaranteed visible without Bootstrap at all: the floating
+        // button itself, with plain DOM/CSS changes that need nothing but
+        // the browser's own rendering.
+        console.error('Timeclock modal failed to open:', e);
+        logTimeclockError('handleManualOpen:openModal', e);
+        if (clickedBtn) {
+            clickedBtn.innerText = (forcedMode === 'out' ? 'Clock Out' : 'Clock In') + ' (tap to retry)';
+            clickedBtn.classList.add('btn-danger');
+            clickedBtn.classList.remove('btn-success', 'btn-dark');
+        }
+        return;
+    }
+
+    try {
+        const periodParam = currentPeriod ? `&period=${encodeURIComponent(currentPeriod)}` : '';
+        const statusData = await apiFetch(`/api/timeclock/status?student_id=${studentData.student_id}${periodParam}`);
+        const mode = statusData.mode || (statusData.type === 'out' ? 'done' : statusData.type === 'in' ? 'out' : 'in');
+        window.timeclock.currentMode = mode;
+
+        if (mode === 'done') {
+            form.style.display = 'none';
+            successMsg.classList.remove('d-none');
+            return;
+        }
+
+        // The button clicked doesn't match what the server says is actually
+        // next -- tell the student plainly instead of either silently
+        // no-oping or letting a mismatched submission through.
+        if (mode !== forcedMode) {
+            form.style.display = 'none';
+            successMsg.classList.remove('d-none');
+            successMsg.textContent = forcedMode === 'in'
+                ? "You're already clocked in. Click Clock Out when you're ready to leave."
+                : "You haven't clocked in yet. Click Clock In first.";
+            return;
+        }
+
+        if (mode === 'in') {
+            const category = `${getCourseKey()}_IN`;
+            currentQuestion = await apiFetch(`/api/timeclock/question?type=${category}`);
+            label.innerHTML = `<span class="d-block small text-muted fw-normal mb-1">${currentQuestion.chapterLabel || ''}</span>${currentQuestion.question_text}`;
+            if (currentQuestion.unavailable) {
+                optsContainer.innerHTML = `<input type="hidden" id="tc-in-fallback" value="N/A - no question bank available">`;
+            } else {
+                optsContainer.innerHTML = (currentQuestion.options || []).map((opt, i) => `
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="tc-radio" value="${(opt || '').replace(/"/g, '&quot;')}" id="opt${i}" required>
+                        <label class="form-check-label" for="opt${i}">${opt}</label>
+                    </div>
+                `).join('');
+            }
+            btn.innerText = 'Submit & Clock In';
+        } else if (mode === 'out') {
+            const category = getCourseKey();
+            const promptData = await apiFetch(`/api/timeclock/reflection-prompt?type=${category}&student_id=${encodeURIComponent(studentData.student_id)}`);
+            currentPromptText = promptData.prompt_text;
+            label.innerText = promptData.prompt_text;
+            optsContainer.innerHTML = `<textarea id="tc-out-answer" class="form-control" rows="3" required></textarea>`;
+            btn.innerText = 'Submit & Clock Out';
+        }
+    } catch (e) {
+        console.error('Timeclock manual open error:', e);
+        logTimeclockError('handleManualOpen:fetch', e);
+        label.innerText = "Something went wrong loading the timeclock. Please try again, or tell your teacher if it keeps happening.";
+        optsContainer.innerHTML = '';
+        btn.innerText = 'Retry';
+    } finally {
+        btn.disabled = false;
+    }
 }
 
 // Preserve the global namespace for other scripts

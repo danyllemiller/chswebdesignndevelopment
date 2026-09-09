@@ -6,6 +6,38 @@
  * Uses MariaDB API endpoints only.
  */
 
+// A student reported notes she'd written no longer being there, with zero
+// trace of a save attempt (successful or failed) anywhere in the server
+// logs -- meaning whatever went wrong happened entirely client-side,
+// invisible to the server. Same diagnostic pattern already used in
+// js/student/timeclock.js: report any error, caught or not, straight to
+// the server logs so a real failure is actually visible next time instead
+// of requiring guesswork.
+function logNotesError(context, err) {
+    try {
+        fetch('/api/client-error-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: err && err.message ? err.message : String(err),
+                stack: err && err.stack ? err.stack : null,
+                url: window.location.href,
+                student_id: (typeof getActiveUserId === 'function' ? getActiveUserId() : null),
+                context,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            })
+        }).catch(() => {});
+    } catch (e) { /* logging must never itself break the notebook */ }
+}
+
+window.addEventListener('error', (ev) => {
+    logNotesError('window.onerror', ev.error || { message: ev.message });
+});
+window.addEventListener('unhandledrejection', (ev) => {
+    logNotesError('window.onunhandledrejection', ev.reason);
+});
+
 (function() {
     const patch = function(original) {
         return function(selector) {
@@ -115,6 +147,7 @@ if (dom.form) {
             }
         } catch (err) {
             console.error("Save failed:", err);
+            logNotesError('note-form submit', err);
             alert("Unable to save right now. Please try again.");
         }
     });
@@ -331,7 +364,21 @@ window.syncFromIframe = function(htmlContent) {
 
 function updatePreview() {
     if (!dom.preview || !dom.content) return;
-    const src = `<!DOCTYPE html><html><head><style>:root{--primary:#000099;--secondary:#cfe1f0;--accent:var(--tertiary-color,#E07A5F);}body{font-family:sans-serif;padding:25px;color:#333;line-height:1.6;}h2,h3,h4{color:var(--primary);border-bottom:2px solid var(--secondary);padding-bottom:5px;margin-top:0;}.donow{background:#fffcf0;border-left:5px solid #ffc107;padding:15px;margin:15px 0;border-radius:4px;}.worksheet{font-family:monospace;background:#f8f9fa;padding:15px;border:1px solid #ddd;}</style><script>function sync(){if(window.parent && window.parent.syncFromIframe){window.parent.syncFromIframe(document.body.innerHTML);}}document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();document.execCommand('undo');sync();}});</script></head><body contenteditable="true" oninput="sync()">${dom.content.value}</body></html>`;
+    // Pasted screenshots: native contentEditable paste already inserts them
+    // as a bare <img>, so no custom paste handling is needed for that part.
+    // Resizing does NOT work reliably with CSS `resize` applied directly to
+    // an <img> -- it's a replaced element and support for a drag handle on
+    // it is inconsistent across browsers (confirmed live: handle rendered,
+    // dragging did nothing). The standard, reliable fix is to resize a
+    // plain wrapper element instead and stretch the image to fill it, so
+    // every bare <img> (freshly pasted, or already-saved from before this
+    // fix) gets auto-wrapped in a <span class="nb-img-wrap"> on load. The
+    // wrap-text toggle and the ResizeObserver (which calls sync() after a
+    // drag-resize, since the native handle doesn't fire an input event on
+    // its own) both act on that wrapper, not the image.
+    const imgCss = `.nb-img-wrap{display:inline-block;resize:both;overflow:hidden;cursor:pointer;vertical-align:top;max-width:100%;}.nb-img-wrap img{width:100%;height:100%;display:block;}.nb-img-wrap.nb-img-selected{outline:2px solid #3b82f6;outline-offset:2px;}#nb-img-toolbar{position:absolute;display:none;gap:2px;background:#1f2937;border-radius:6px;padding:4px;box-shadow:0 4px 12px rgba(0,0,0,.25);z-index:9999;font-family:sans-serif;}#nb-img-toolbar button{background:none;border:none;color:#fff;font-size:11px;padding:4px 8px;cursor:pointer;border-radius:4px;white-space:nowrap;}#nb-img-toolbar button:hover,#nb-img-toolbar button.active{background:#3b82f6;}`;
+    const imgJs = `var nbRO=window.ResizeObserver?new ResizeObserver(function(){sync();}):null;function nbWrapImg(img){if(img.parentElement&&img.parentElement.classList&&img.parentElement.classList.contains('nb-img-wrap'))return;var rect=img.getBoundingClientRect();var w=img.style.width||(rect.width?Math.round(rect.width)+'px':'300px');var h=img.style.height||(rect.height?Math.round(rect.height)+'px':'225px');var wrap=document.createElement('span');wrap.className='nb-img-wrap';wrap.style.width=w;wrap.style.height=h;if(img.style.float==='left'||img.style.float==='right'){wrap.style.float=img.style.float;if(img.style.margin)wrap.style.margin=img.style.margin;}img.parentNode.insertBefore(wrap,img);wrap.appendChild(img);img.removeAttribute('style');}function nbProcessImages(){document.querySelectorAll('img').forEach(nbWrapImg);if(nbRO)document.querySelectorAll('.nb-img-wrap').forEach(function(w){nbRO.observe(w);});}nbProcessImages();new MutationObserver(nbProcessImages).observe(document.body,{childList:true,subtree:true});var nbToolbar,nbSelectedWrap=null;function nbEnsureToolbar(){if(nbToolbar)return nbToolbar;nbToolbar=document.createElement('div');nbToolbar.id='nb-img-toolbar';nbToolbar.innerHTML='<button data-wrap="none">No Wrap</button><button data-wrap="left">Wrap Left</button><button data-wrap="right">Wrap Right</button>';document.body.appendChild(nbToolbar);nbToolbar.addEventListener('mousedown',function(e){e.preventDefault();});nbToolbar.addEventListener('click',function(e){var btn=e.target.closest('button');if(!btn||!nbSelectedWrap)return;var mode=btn.dataset.wrap;if(mode==='left'){nbSelectedWrap.style.float='left';nbSelectedWrap.style.margin='4px 16px 8px 0';}else if(mode==='right'){nbSelectedWrap.style.float='right';nbSelectedWrap.style.margin='4px 0 8px 16px';}else{nbSelectedWrap.style.float='none';nbSelectedWrap.style.margin='8px 0';}nbHighlightToolbar();sync();});return nbToolbar;}function nbHighlightToolbar(){if(!nbToolbar||!nbSelectedWrap)return;var mode=nbSelectedWrap.style.float==='left'?'left':(nbSelectedWrap.style.float==='right'?'right':'none');Array.prototype.forEach.call(nbToolbar.querySelectorAll('button'),function(b){b.classList.toggle('active',b.dataset.wrap===mode);});}function nbPositionToolbar(wrap){var t=nbEnsureToolbar();var r=wrap.getBoundingClientRect();t.style.left=(r.left+window.scrollX)+'px';t.style.top=(r.top+window.scrollY-34)+'px';t.style.display='flex';nbHighlightToolbar();}document.addEventListener('click',function(e){var wrap=e.target.closest('.nb-img-wrap');if(wrap){if(nbSelectedWrap)nbSelectedWrap.classList.remove('nb-img-selected');nbSelectedWrap=wrap;wrap.classList.add('nb-img-selected');nbPositionToolbar(wrap);}else if(!e.target.closest('#nb-img-toolbar')){if(nbSelectedWrap)nbSelectedWrap.classList.remove('nb-img-selected');nbSelectedWrap=null;if(nbToolbar)nbToolbar.style.display='none';}});`;
+    const src = `<!DOCTYPE html><html><head><style>:root{--primary:#000099;--secondary:#cfe1f0;--accent:var(--tertiary-color,#E07A5F);}body{font-family:sans-serif;padding:25px;color:#333;line-height:1.6;}h2,h3,h4{color:var(--primary);border-bottom:2px solid var(--secondary);padding-bottom:5px;margin-top:0;}.donow{background:#fffcf0;border-left:5px solid #ffc107;padding:15px;margin:15px 0;border-radius:4px;}.worksheet{font-family:monospace;background:#f8f9fa;padding:15px;border:1px solid #ddd;}.notebook-table{border-collapse:collapse;width:100%;margin:12px 0;}.notebook-table th,.notebook-table td{border:1px solid #b9c2cc;padding:8px 10px;text-align:left;}.notebook-table th{background:var(--secondary);color:#1a1a1a;}.notebook-table tr:nth-child(even) td{background:#f7f9fb;}${imgCss}</style><script>function sync(){if(window.parent && window.parent.syncFromIframe){window.parent.syncFromIframe(document.body.innerHTML);}}document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();document.execCommand('undo');sync();}});${imgJs}</script></head><body contenteditable="true" oninput="sync()">${dom.content.value}</body></html>`;
     dom.preview.srcdoc = src;
 }
 
@@ -427,6 +474,13 @@ function setupToolbars() {
         <div class="btn-group me-2 shadow-sm"><button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="bold"><i class="fas fa-bold"></i></button><button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="italic"><i class="fas fa-italic"></i></button><button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="underline"><i class="fas fa-underline"></i></button></div>
         <div class="btn-group me-2 shadow-sm"><button type="button" class="btn btn-sm btn-light border-secondary rt-btn fw-bold" data-command="formatBlock" data-val="H2">H1</button><button type="button" class="btn btn-sm btn-light border-secondary rt-btn fw-bold" data-command="formatBlock" data-val="H3">H2</button></div>
         <div class="btn-group me-2 shadow-sm"><button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="insertUnorderedList"><i class="fas fa-list-ul"></i></button><button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="insertOrderedList"><i class="fas fa-list-ol"></i></button></div>
+        <div class="btn-group me-2 shadow-sm">
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn" data-action="insertTable" title="Insert Table"><i class="fas fa-table"></i></button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn" data-action="addRow" title="Add Row Below">+Row</button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn" data-action="addCol" title="Add Column">+Col</button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn text-danger" data-action="delRow" title="Delete Current Row">−Row</button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn text-danger" data-action="delCol" title="Delete Current Column">−Col</button>
+        </div>
         <div class="btn-group shadow-sm"><button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-warning" data-command="hiliteColor" data-val="#fff200"><i class="fas fa-highlighter"></i></button><button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-danger" data-command="removeFormat"><i class="fas fa-eraser"></i></button></div>`;
 
     dom.preview.parentElement.insertBefore(rt, dom.preview);
@@ -440,6 +494,7 @@ function setupToolbars() {
             triggerAutoSave();
         }
     });
+    rt.querySelectorAll('.rt-table-btn').forEach(btn => btn.onclick = () => handleTableToolbarAction(btn.dataset.action));
 
     const saveBtn = document.getElementById('btn-save');
     if (saveBtn && !document.getElementById('btn-delete-bottom')) {
@@ -482,6 +537,84 @@ function setupToolbars() {
         };
     }
 };
+
+// Where the cursor currently sits, if inside a table -- addRow/addCol/
+// delRow/delCol all act on this rather than a fixed target, so a student can
+// click into whichever table (a note can have more than one) and edit it.
+function getFocusedTableNode() {
+    const win = dom.preview?.contentWindow;
+    const sel = win?.getSelection?.();
+    if (!sel || sel.rangeCount === 0) return null;
+    let node = sel.getRangeAt(0).startContainer;
+    if (node.nodeType === 3) node = node.parentElement;
+    return node;
+}
+function getFocusedTable() {
+    const node = getFocusedTableNode();
+    return node ? node.closest('table') : null;
+}
+function getFocusedCell() {
+    const node = getFocusedTableNode();
+    return node ? node.closest('td, th') : null;
+}
+
+function syncAfterTableEdit() {
+    dom.preview.contentWindow.focus();
+    if (dom.content) {
+        dom.content.value = dom.preview.contentWindow.document.body.innerHTML;
+        extractAutoTitle(dom.content.value, dom.title, 'New Entry Title');
+        triggerAutoSave();
+    }
+}
+
+function handleTableToolbarAction(action) {
+    if (!dom.preview?.contentWindow) return;
+    const doc = dom.preview.contentWindow.document;
+
+    if (action === 'insertTable') {
+        const tableHtml = `<table class="notebook-table"><tbody>
+            <tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr>
+            <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+            <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        </tbody></table><p>&nbsp;</p>`;
+        doc.execCommand('insertHTML', false, tableHtml);
+        syncAfterTableEdit();
+        return;
+    }
+
+    const table = getFocusedTable();
+    if (!table) {
+        alert('Click inside a table first, then use this button to add or remove a row/column.');
+        return;
+    }
+
+    if (action === 'addRow') {
+        const templateRow = table.rows[table.rows.length - 1];
+        const newRow = table.insertRow(-1);
+        for (let i = 0; i < templateRow.cells.length; i++) {
+            const cell = newRow.insertCell(-1);
+            cell.innerHTML = '&nbsp;';
+        }
+    } else if (action === 'addCol') {
+        Array.from(table.rows).forEach((row, i) => {
+            const cell = doc.createElement(i === 0 ? 'th' : 'td');
+            cell.innerHTML = i === 0 ? 'Header' : '&nbsp;';
+            row.appendChild(cell);
+        });
+    } else if (action === 'delRow') {
+        if (table.rows.length <= 1) { table.remove(); syncAfterTableEdit(); return; }
+        const cell = getFocusedCell();
+        const row = cell ? cell.closest('tr') : table.rows[table.rows.length - 1];
+        row.remove();
+    } else if (action === 'delCol') {
+        if (table.rows[0].cells.length <= 1) { table.remove(); syncAfterTableEdit(); return; }
+        const cell = getFocusedCell();
+        const colIndex = cell ? cell.cellIndex : table.rows[0].cells.length - 1;
+        Array.from(table.rows).forEach(row => { if (row.cells[colIndex]) row.deleteCell(colIndex); });
+    }
+
+    syncAfterTableEdit();
+}
 
 function setupTemplatesAndHTML() {
     const btnHtmlTemplate = document.getElementById('tpl-html');

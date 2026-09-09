@@ -20,7 +20,7 @@
 
   <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/loader.js?v=19"></script>
+  <script src="/js/loader.js?v=20"></script>
   <script type="module" src="/js/auth-guard.js"></script>
 
   <style>
@@ -59,6 +59,45 @@
     .paystub-doc table th { border-bottom: 1px solid #222; padding-bottom: .25rem; }
     .paystub-doc table td { padding: .2rem 0; }
 
+    /* Detachable "check" portion -- deliberately a different (serif, not
+       monospace) feel from the earnings statement above it, like a real
+       paycheck's check stub vs. the check itself. */
+    .fake-check {
+      font-family: Georgia, 'Times New Roman', serif;
+      max-width: 680px;
+      height: 2.75in;
+      box-sizing: border-box;
+      overflow: hidden;
+      margin: 1.5rem auto 0;
+      border: 2px solid #1a3a1a;
+      border-radius: 4px;
+      padding: 1.1rem 1.4rem;
+      color: #1a1a1a;
+      background:
+        repeating-linear-gradient(135deg, rgba(26,58,26,.05) 0 2px, transparent 2px 14px),
+        #f7faf5;
+    }
+    .check-top { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #1a3a1a; padding-bottom: .5rem; margin-bottom: .7rem; }
+    .check-bank-name { font-weight: 700; font-size: 1rem; }
+    .check-fake-tag { font-size: .65rem; font-style: italic; font-weight: 400; color: #6b6b6b; }
+    .check-bank-addr { font-size: .7rem; color: #444; }
+    .check-number, .check-date { font-size: .8rem; font-weight: 700; }
+    .check-payline { display: flex; align-items: baseline; gap: .6rem; margin-bottom: .6rem; }
+    .check-label { font-size: .7rem; font-weight: 700; white-space: nowrap; }
+    .check-payee { flex: 1; min-width: 0; border-bottom: 1px solid #1a1a1a; padding-bottom: 2px; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .check-amount-box { white-space: nowrap; border: 1.5px solid #1a1a1a; border-radius: 3px; padding: .2rem .6rem; font-weight: 700; font-family: 'Courier New', monospace; }
+    .check-words { border-bottom: 1px solid #1a1a1a; padding-bottom: 2px; margin-bottom: .8rem; font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .check-words span::after { content: ' ***************************'; color: #9aa89a; letter-spacing: 1px; }
+    .check-bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: .7rem; }
+    .check-memo { font-size: .7rem; color: #444; font-style: italic; }
+    .check-signature { text-align: center; }
+    .sig-line { width: 190px; border-bottom: 1px solid #1a1a1a; height: 1.6rem; font-family: 'Brush Script MT', cursive; }
+    .sig-label { font-size: .6rem; color: #444; }
+    .check-micr { text-align: center; font-family: 'Courier New', monospace; letter-spacing: .25em; font-size: .95rem; color: #333; margin-bottom: .5rem; }
+    .check-disclaimer { text-align: center; font-size: .6rem; font-weight: 700; color: #8a1f1f; letter-spacing: .03em; }
+    .missing-block { max-width: 680px; margin: 1rem auto 0; border: 2px solid #dc3545; border-radius: 4px; padding: .6rem .9rem; background: #fff; }
+    .fake-check, .paystub-doc { page-break-inside: avoid; }
+
     /* W-2 style */
     .w2-doc {
       border: 2px solid #000099;
@@ -82,8 +121,10 @@
     .status-estimated { background: #fef3c7; color: #92400e; }
 
     @media print {
+      @page { margin: 0.25in; }
       .no-print { display: none !important; }
       .paystub-doc, .w2-doc { border-color: #000 !important; }
+      .fake-check { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
   </style>
 </head>
@@ -158,9 +199,12 @@
 <script type="module">
 import { getLoggedInUser } from '/js/modules/user-session.js';
 import { apiFetch } from '/js/modules/api-client.js';
+import { renderPaystubHtml } from '/js/modules/paystub-template.js?v=2';
 
 const user = getLoggedInUser();
 if (!user) { location.href = '/login.html'; }
+
+let myMissingAssignments = [];
 
 const ON_TIME_BONUS = 5.00;
 const ANCHOR_DATE   = new Date('2026-08-02T00:00:00');
@@ -247,11 +291,28 @@ function renderFinalCard(stub) {
 }
 
 // ── Render estimated card (computed from timesheets) ───────────────
+// Server sends clock_in/clock_out as full ISO timestamps (mysql2 returns
+// TIME columns as Date objects, which JSON.stringify always renders as
+// UTC) -- combining that with t.date via string concatenation silently
+// produced "Invalid Date" every time (the old `${t.date}T${t.clock_in}`
+// pattern), zeroing out every estimated shift's hours. Only the time-of-day
+// portion is meaningful here; both values get the same UTC shift applied,
+// so it cancels out in the subtraction below even without correcting it.
+function timeToMinutes(v) {
+  if (!v) return null;
+  const timePart = String(v).includes('T') ? String(v).split('T')[1] : String(v);
+  const [h, m, s] = timePart.replace('Z', '').split(':').map(Number);
+  if (Number.isNaN(h)) return null;
+  return h * 60 + (m || 0) + (s || 0) / 60;
+}
+
 function renderEstimatedCard(period, shifts) {
   let totalMins = 0, bonusCount = 0;
   for (const t of shifts) {
-    if (t.clock_in && t.clock_out) {
-      const mins = Math.round((new Date(`${t.date}T${t.clock_out}`) - new Date(`${t.date}T${t.clock_in}`)) / 60000);
+    const inMin = timeToMinutes(t.clock_in);
+    const outMin = timeToMinutes(t.clock_out);
+    if (inMin !== null && outMin !== null) {
+      const mins = outMin - inMin;
       if (mins > 0) totalMins += mins;
     }
     if (t.in_answer  === 'On Time') bonusCount++;
@@ -305,81 +366,8 @@ function renderEstimatedCard(period, shifts) {
 // ── Paystub document modal ─────────────────────────────────────────
 window.showStubModal = function(stub) {
   if (typeof stub === 'string') stub = JSON.parse(stub.replace(/&quot;/g, '"'));
-  const isEstimated = !stub.run_by;
-  document.getElementById('paystubModalContent').innerHTML = `
-    <div class="paystub-doc">
-      <div class="stub-header">
-        <div class="row align-items-start">
-          <div class="col-7">
-            <div class="fw-bold fs-5 text-uppercase" style="letter-spacing:-1px">CHS Web Design Studio</div>
-            <div class="small">1111 N Saliman Rd · Carson City, NV 89701</div>
-          </div>
-          <div class="col-5 text-end">
-            <div class="fw-bold fs-5 text-success">${isEstimated ? 'ESTIMATED STATEMENT' : 'EARNINGS STATEMENT'}</div>
-            <div class="small fw-bold">Pay Period: ${fmtDate(stub.period_start)} – ${fmtDate(stub.period_end)}</div>
-            <div class="small fw-bold">Pay Date: ${fmtDate(stub.period_end)}</div>
-          </div>
-        </div>
-      </div>
-      <div class="stub-body">
-        <div class="border border-dark p-2 mb-3">
-          <div class="row small fw-bold">
-            <div class="col-6 border-end border-dark">EMPLOYEE: <span class="text-primary">${escHtml(currentStudentName)}</span></div>
-            <div class="col-6">TITLE: <span class="text-primary">${escHtml(stub.role_title)}</span></div>
-          </div>
-        </div>
-        <div class="row mb-3">
-          <div class="col-7 mb-3 mb-md-0">
-            <div class="fw-bold text-decoration-underline mb-2 small">EARNINGS</div>
-            <table class="table table-sm table-borderless small fw-bold mb-0">
-              <thead class="border-bottom border-dark">
-                <tr><th>Description</th><th class="text-center">Rate</th><th class="text-center">Hrs/Qty</th><th class="text-end">Total</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Regular Pay</td>
-                  <td class="text-center">${fmtMoney(stub.hourly_rate)}</td>
-                  <td class="text-center">${Number(stub.regular_hours).toFixed(2)}</td>
-                  <td class="text-end">${fmtMoney(Number(stub.regular_hours) * Number(stub.hourly_rate))}</td>
-                </tr>
-                <tr>
-                  <td>Performance Bonus</td>
-                  <td class="text-center">${fmtMoney(stub.bonus_rate || 5)}</td>
-                  <td class="text-center">${stub.bonus_count}</td>
-                  <td class="text-end">${fmtMoney(Number(stub.bonus_count) * Number(stub.bonus_rate || 5))}</td>
-                </tr>
-              </tbody>
-              <tfoot class="border-top border-dark">
-                <tr><td colspan="3"><strong>GROSS PAY</strong></td><td class="text-end text-success fs-6">${fmtMoney(stub.gross_pay)}</td></tr>
-              </tfoot>
-            </table>
-          </div>
-          <div class="col-5">
-            <div class="fw-bold text-decoration-underline mb-2 small">TAXES &amp; WITHHOLDINGS</div>
-            <table class="table table-sm table-borderless small fw-bold text-danger mb-0">
-              <thead class="border-bottom border-dark">
-                <tr><th>Description</th><th class="text-end">Amount</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Federal Income Tax</td><td class="text-end">−${fmtMoney(stub.fed_tax)}</td></tr>
-                <tr><td>Social Security (FICA)</td><td class="text-end">−${fmtMoney(stub.ss_tax)}</td></tr>
-                <tr><td>Medicare (FICA)</td><td class="text-end">−${fmtMoney(stub.med_tax)}</td></tr>
-              </tbody>
-              <tfoot class="border-top border-dark">
-                <tr><td><strong>TOTAL DEDUCTIONS</strong></td><td class="text-end">−${fmtMoney(stub.total_deductions)}</td></tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-        <div class="row bg-light border border-2 border-dark p-2 align-items-center mx-0">
-          <div class="col-6 small fw-bold text-muted">YTD GROSS: ${stub.ytd_gross !== '—' ? fmtMoney(stub.ytd_gross) : '—'}</div>
-          <div class="col-6 text-end"><strong>NET PAY:</strong> <span class="text-success fs-4 fw-bold">${fmtMoney(stub.net_pay)}</span></div>
-        </div>
-        <div class="text-center mt-3 text-muted" style="font-size:.65rem;">
-          ${isEstimated ? 'ESTIMATED — ' : ''}SIMULATED EARNINGS STATEMENT FOR EDUCATIONAL PURPOSES ONLY. NO REAL CURRENCY IS EXCHANGED.
-        </div>
-      </div>
-    </div>`;
+  stub.employeeName = currentStudentName;
+  document.getElementById('paystubModalContent').innerHTML = renderPaystubHtml(stub, myMissingAssignments);
   bootstrap.Modal.getOrCreateInstance(document.getElementById('paystubModal')).show();
 };
 
@@ -394,6 +382,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (roster.title) currentRole = roster.title;
     if (roster.hourly_rate) currentRate = Number(roster.hourly_rate);
   } catch { currentStudentName = user.username; }
+
+  // So a student's own printed/viewed stub always matches what an admin-
+  // printed check for them would show.
+  try {
+    const missingData = await apiFetch(`/api/admin/payroll/missing-assignments?student_ids=${encodeURIComponent(user.student_id)}`);
+    myMissingAssignments = (missingData.missing && missingData.missing[user.student_id]) || [];
+  } catch { myMissingAssignments = []; }
 
   document.getElementById('subtitleLine').textContent = `${currentRole} · ${currentStudentName}`;
 

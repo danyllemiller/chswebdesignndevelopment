@@ -60,6 +60,12 @@
             <button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="insertUnorderedList" title="Bullet List"><i class="fas fa-list-ul"></i></button>
             <button type="button" class="btn btn-sm btn-light border-secondary rt-btn" data-command="insertOrderedList" title="Numbered List"><i class="fas fa-list-ol"></i></button>
             <span class="border-end mx-1"></span>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn" data-action="insertTable" title="Insert Table"><i class="fas fa-table"></i></button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn" data-action="addRow" title="Add Row Below">+Row</button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn" data-action="addCol" title="Add Column">+Col</button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn text-danger" data-action="delRow" title="Delete Current Row">−Row</button>
+            <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn text-danger" data-action="delCol" title="Delete Current Column">−Col</button>
+            <span class="border-end mx-1"></span>
             <button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-warning" data-command="hiliteColor" data-val="#fff200" title="Highlight"><i class="fas fa-highlighter"></i></button>
             <button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-danger" data-command="removeFormat" title="Clear"><i class="fas fa-eraser"></i></button>
             <div class="ms-auto">
@@ -98,6 +104,9 @@
                 <button type="button" onclick="window.prepareNewNote()" class="btn btn-outline-secondary fw-bold">
                     <i class="fas fa-plus me-1"></i> New Entry
                 </button>
+                <button type="button" id="btn-delete-note" class="btn btn-outline-danger fw-bold ms-auto d-none">
+                    <i class="fas fa-trash me-1"></i> Delete
+                </button>
             </div>
         </form>
       </div>
@@ -109,7 +118,7 @@
 
   <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/loader.js?v=19"></script>
+  <script src="/js/loader.js?v=20"></script>
   
 <script type="module">
     // ========================================================
@@ -122,21 +131,105 @@
     let currentMode = 'notes'; // 'notes' or 'worksheet'
     let currentChapter = 'Misc';
     let worksheetAnswers = {}; // Store correct answers for checking
+    let saveRetryTimer = null;
+    let saveRetryCount = 0;
+    let pendingSubmitFlag = false; // was the failing save a final submit or just autosave?
     
 // Check URL params for mode and chapter
     const urlParams = new URLSearchParams(window.location.search);
     currentMode = urlParams.get('mode') || 'notes';
     let paramChapter = urlParams.get('chapter') || 'Misc';
-    
+
+    // Which real chapter/unit these notes belong to, passed by
+    // cs-interactive.js -- used to tag saves and to only load back the
+    // note that actually belongs to this chapter, instead of whatever the
+    // student happened to save most recently anywhere in the app. Falls
+    // back to the old pooled label only if this page is ever opened
+    // directly without it (e.g. manual testing).
+    const chapterLabel = urlParams.get('chapterLabel') || 'Unit Exam Scratchpad';
+
+    // When opened from the Activities dropdown, this note is bound to one
+    // specific real gradebook assignment -- saving a final submit for it
+    // also auto-grades that assignment (see saveNotes() below).
+    const activityId = urlParams.get('activityId') || null;
+    const activityTitle = urlParams.get('activityTitle') || null;
+    const activityPoints = Number(urlParams.get('activityPoints')) || null;
+
     // Handle case where chapter is 0, "Misc", or empty - use Unit 0 intro to office software worksheet
     if (paramChapter === '0' || paramChapter === 'Misc' || !paramChapter || paramChapter === 'unit0') {
         currentChapter = '0'; // Chapter 0: Intro to Office Software
     } else {
         currentChapter = paramChapter;
     }
-    
-    console.log('Worksheet chapter:', currentChapter);
-    
+
+    console.log('Worksheet chapter:', currentChapter, 'chapterLabel:', chapterLabel);
+
+    // ========================================================
+    // LOCAL DRAFT SAFETY NET
+    // The home server drops for brief stretches under load (known Wi-Fi
+    // driver flakiness), which fails an in-flight autosave with nothing
+    // else recording what was typed. Mirroring every change to
+    // localStorage first -- before the network call even goes out -- means
+    // a failed save never loses the content: it's retried automatically,
+    // and if the tab gets closed first, reopening this same browser
+    // recovers the draft. Keyed by student, so it can't leak into another
+    // student's session on a shared classroom computer.
+    // ========================================================
+    function draftKey() {
+        const sid = currentStudentData ? currentStudentData.student_id : 'anon';
+        return `csNotebookDraft:${sid}:${chapterLabel}:${activityId || 'none'}`;
+    }
+
+    function saveDraftLocal() {
+        if (!currentStudentData) return;
+        const titleInput = document.getElementById('note-title');
+        const contentIn = document.getElementById('note-content');
+        const catInput = document.getElementById('note-category');
+        try {
+            localStorage.setItem(draftKey(), JSON.stringify({
+                title: titleInput ? titleInput.value : '',
+                content: contentIn ? contentIn.value : '',
+                category: catInput ? catInput.value : 'Notes',
+                ts: Date.now()
+            }));
+        } catch (e) { console.error('Local draft save failed:', e); }
+    }
+
+    function clearDraftLocal() {
+        try { localStorage.removeItem(draftKey()); } catch (e) { /* ignore */ }
+    }
+
+    function readDraftLocal() {
+        try {
+            const raw = localStorage.getItem(draftKey());
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
+    }
+
+    // Called after a server note (or blank template) has been loaded into
+    // the form. If a local draft exists and is newer than what the server
+    // gave us -- e.g. the last save before a tab close never made it out
+    // -- it wins, and gets pushed to the server right away.
+    function restoreLocalDraftIfNewer(serverTimestamp) {
+        const draft = readDraftLocal();
+        if (!draft) return false;
+        if (serverTimestamp && draft.ts <= serverTimestamp) { clearDraftLocal(); return false; }
+        document.getElementById('note-title').value = draft.title || '';
+        document.getElementById('note-content').value = draft.content || '';
+        document.getElementById('note-category').value = draft.category || 'Notes';
+        updatePreview();
+        triggerAutoSave();
+        return true;
+    }
+
+    window.addEventListener('beforeunload', (e) => {
+        if (readDraftLocal()) {
+            e.preventDefault();
+            e.returnValue = 'Your last change hasn\'t saved yet. Leave anyway?';
+            return e.returnValue;
+        }
+    });
+
 async function init() {
         // Load worksheets library first
         await loadWorksheetsLibrary();
@@ -187,9 +280,14 @@ async function init() {
                 subtitle.textContent = `${currentStudentData.first_name} ${currentStudentData.last_name} | ID: ${currentStudentData.student_id}`;
             }
             
-            // For worksheet mode, load worksheet template; otherwise load existing notes or create new
+            // For worksheet mode, load worksheet template; for a specific
+            // activity, resume that exact activity's saved work if it
+            // exists; otherwise load existing notes or create new.
             if (currentMode === 'worksheet') {
                 window.prepareNewNote();
+                restoreLocalDraftIfNewer(null);
+            } else if (currentMode === 'activity') {
+                fetchActivityNote();
             } else {
                 fetchNotes();
             }
@@ -224,12 +322,106 @@ async function init() {
                     h2, h3, h4 { color: #000099; border-bottom: 2px solid #cfe1f0; padding-bottom: 5px; }
                     .donow { background: #fffcf0; border-left: 5px solid #ffc107; padding: 15px; margin: 15px 0; }
                     .highlight { background: #fff200; padding: 2px 5px; }
+                    .notebook-table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+                    .notebook-table th, .notebook-table td { border: 1px solid #b9c2cc; padding: 8px 10px; text-align: left; }
+                    .notebook-table th { background: #cfe1f0; color: #1a1a1a; }
+                    .notebook-table tr:nth-child(even) td { background: #f7f9fb; }
+                    /* Pasted screenshots: native contentEditable paste already
+                       inserts them as a bare <img>, so no custom paste handling
+                       is needed for that. Resizing does NOT work reliably with
+                       CSS resize applied directly to an <img> -- it's a
+                       replaced element and drag-handle support on it is
+                       inconsistent across browsers (confirmed live: handle
+                       rendered, dragging did nothing). The reliable fix is to
+                       resize a plain wrapper element instead and stretch the
+                       image to fill it -- see nbWrapImg() below, which
+                       auto-wraps every bare <img> (freshly pasted, or already
+                       saved from before this fix) in a .nb-img-wrap span. */
+                    .nb-img-wrap { display: inline-block; resize: both; overflow: hidden; cursor: pointer; vertical-align: top; max-width: 100%; }
+                    .nb-img-wrap img { width: 100%; height: 100%; display: block; }
+                    .nb-img-wrap.nb-img-selected { outline: 2px solid #3b82f6; outline-offset: 2px; }
+                    #nb-img-toolbar { position: absolute; display: none; gap: 2px; background: #1f2937; border-radius: 6px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,.25); z-index: 9999; font-family: sans-serif; }
+                    #nb-img-toolbar button { background: none; border: none; color: #fff; font-size: 11px; padding: 4px 8px; cursor: pointer; border-radius: 4px; white-space: nowrap; }
+                    #nb-img-toolbar button:hover, #nb-img-toolbar button.active { background: #3b82f6; }
                 </style>
                 <script>
                     function sync() { window.parent.postMessage({type:'updateHtml',content:document.body.innerHTML}, '*');}
                     document.addEventListener('keydown', function(e) {
                         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
                             e.preventDefault(); document.execCommand('undo'); sync();
+                        }
+                    });
+                    // Auto-wrap every bare <img> in a resizable .nb-img-wrap span
+                    // (see comment above), then a Word/Docs-style wrap-text toggle
+                    // -- click a wrapped image to select it and show No Wrap /
+                    // Wrap Left / Wrap Right. A ResizeObserver calls sync() after
+                    // a drag-resize, since the native resize handle doesn't fire
+                    // an input event on its own and the new size would otherwise
+                    // only be visual until the next reload.
+                    var nbRO = window.ResizeObserver ? new ResizeObserver(function(){ sync(); }) : null;
+                    function nbWrapImg(img) {
+                        if (img.parentElement && img.parentElement.classList && img.parentElement.classList.contains('nb-img-wrap')) return;
+                        var rect = img.getBoundingClientRect();
+                        var w = img.style.width || (rect.width ? Math.round(rect.width) + 'px' : '300px');
+                        var h = img.style.height || (rect.height ? Math.round(rect.height) + 'px' : '225px');
+                        var wrap = document.createElement('span');
+                        wrap.className = 'nb-img-wrap';
+                        wrap.style.width = w; wrap.style.height = h;
+                        if (img.style.float === 'left' || img.style.float === 'right') {
+                            wrap.style.float = img.style.float;
+                            if (img.style.margin) wrap.style.margin = img.style.margin;
+                        }
+                        img.parentNode.insertBefore(wrap, img);
+                        wrap.appendChild(img);
+                        img.removeAttribute('style');
+                    }
+                    function nbProcessImages() {
+                        document.querySelectorAll('img').forEach(nbWrapImg);
+                        if (nbRO) document.querySelectorAll('.nb-img-wrap').forEach(function(w){ nbRO.observe(w); });
+                    }
+                    nbProcessImages();
+                    new MutationObserver(nbProcessImages).observe(document.body, { childList: true, subtree: true });
+                    var nbToolbar, nbSelectedWrap = null;
+                    function nbEnsureToolbar() {
+                        if (nbToolbar) return nbToolbar;
+                        nbToolbar = document.createElement('div');
+                        nbToolbar.id = 'nb-img-toolbar';
+                        nbToolbar.innerHTML = '<button data-wrap="none">No Wrap</button><button data-wrap="left">Wrap Left</button><button data-wrap="right">Wrap Right</button>';
+                        document.body.appendChild(nbToolbar);
+                        nbToolbar.addEventListener('mousedown', function(e){ e.preventDefault(); });
+                        nbToolbar.addEventListener('click', function(e) {
+                            var btn = e.target.closest('button'); if (!btn || !nbSelectedWrap) return;
+                            var mode = btn.dataset.wrap;
+                            if (mode === 'left') { nbSelectedWrap.style.float = 'left'; nbSelectedWrap.style.margin = '4px 16px 8px 0'; }
+                            else if (mode === 'right') { nbSelectedWrap.style.float = 'right'; nbSelectedWrap.style.margin = '4px 0 8px 16px'; }
+                            else { nbSelectedWrap.style.float = 'none'; nbSelectedWrap.style.margin = '8px 0'; }
+                            nbHighlightToolbar(); sync();
+                        });
+                        return nbToolbar;
+                    }
+                    function nbHighlightToolbar() {
+                        if (!nbToolbar || !nbSelectedWrap) return;
+                        var mode = nbSelectedWrap.style.float === 'left' ? 'left' : (nbSelectedWrap.style.float === 'right' ? 'right' : 'none');
+                        Array.prototype.forEach.call(nbToolbar.querySelectorAll('button'), function(b){ b.classList.toggle('active', b.dataset.wrap === mode); });
+                    }
+                    function nbPositionToolbar(wrap) {
+                        var t = nbEnsureToolbar();
+                        var r = wrap.getBoundingClientRect();
+                        t.style.left = (r.left + window.scrollX) + 'px';
+                        t.style.top = (r.top + window.scrollY - 34) + 'px';
+                        t.style.display = 'flex';
+                        nbHighlightToolbar();
+                    }
+                    document.addEventListener('click', function(e) {
+                        var wrap = e.target.closest('.nb-img-wrap');
+                        if (wrap) {
+                            if (nbSelectedWrap) nbSelectedWrap.classList.remove('nb-img-selected');
+                            nbSelectedWrap = wrap; wrap.classList.add('nb-img-selected');
+                            nbPositionToolbar(wrap);
+                        } else if (!e.target.closest('#nb-img-toolbar')) {
+                            if (nbSelectedWrap) nbSelectedWrap.classList.remove('nb-img-selected');
+                            nbSelectedWrap = null;
+                            if (nbToolbar) nbToolbar.style.display = 'none';
                         }
                     });
                 <\/script>
@@ -247,27 +439,70 @@ async function fetchNotes() {
             const res = await fetch('/api/student/cs-notebook?student_id=' + encodeURIComponent(currentStudentData.student_id));
             if (!res.ok) throw new Error('Failed to fetch');
             const data = await res.json();
-            // Load ALL notes - students need access to all their saved notes during exams
-            const allNotes = data.notes || [];
-            
-            // Get most recent or create new
+            // Only this chapter's/exam's own notes -- previously this loaded
+            // the single most-recently-saved note across the student's
+            // ENTIRE history regardless of chapter, so opening any chapter's
+            // notes could silently load (and then autosave-overwrite) a
+            // completely different chapter's content.
+            const allNotes = (data.notes || []).filter(n => n.chapter === chapterLabel);
+
+            // Get most recent for this chapter or create new
             if (allNotes.length > 0) {
                 allNotes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 const note = allNotes[0];
                 activeNoteId = note.id;
+                updateDeleteButtonVisibility();
                 document.getElementById('note-title').value = note.title || 'Exam Notes';
                 document.getElementById('note-content').value = note.content || '';
                 document.getElementById('note-category').value = note.category || 'Notes';
                 updatePreview();
+                restoreLocalDraftIfNewer(note.timestamp);
             } else {
                 window.prepareNewNote();
+                restoreLocalDraftIfNewer(null);
             }
         } catch(e) {
             console.error('Fetch notes error:', e);
             window.prepareNewNote();
+            restoreLocalDraftIfNewer(null);
         }
     }
-    
+
+    // Like fetchNotes(), but for a specific activity -- a chapter can have
+    // several activities sharing the same chapterLabel, so this also
+    // matches on title (the activity's real name) to resume the right one
+    // instead of loading whichever activity was edited most recently.
+    async function fetchActivityNote() {
+        if (!currentStudentData || !activityTitle) return window.prepareNewNote();
+
+        try {
+            const res = await fetch('/api/student/cs-notebook?student_id=' + encodeURIComponent(currentStudentData.student_id));
+            if (!res.ok) throw new Error('Failed to fetch');
+            const data = await res.json();
+            const matches = (data.notes || []).filter(n =>
+                n.chapter === chapterLabel && n.category === 'Activity' && n.title === activityTitle);
+
+            if (matches.length > 0) {
+                matches.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                const note = matches[0];
+                activeNoteId = note.id;
+                updateDeleteButtonVisibility();
+                document.getElementById('note-title').value = note.title;
+                document.getElementById('note-content').value = note.content || '';
+                document.getElementById('note-category').value = 'Activity';
+                updatePreview();
+                restoreLocalDraftIfNewer(note.timestamp);
+            } else {
+                window.prepareNewNote();
+                restoreLocalDraftIfNewer(null);
+            }
+        } catch(e) {
+            console.error('Fetch activity note error:', e);
+            window.prepareNewNote();
+            restoreLocalDraftIfNewer(null);
+        }
+    }
+
 // Get worksheet template content - loads from worksheets library if available
     let worksheetsLibrary = {};
     
@@ -439,8 +674,16 @@ function getDefaultWorksheetTemplate() {
         });
     };
     
+    // Delete only makes sense once there's an actual saved row to delete --
+    // a brand-new, never-saved entry has nothing on the server yet.
+    function updateDeleteButtonVisibility() {
+        const btn = document.getElementById('btn-delete-note');
+        if (btn) btn.classList.toggle('d-none', !activeNoteId);
+    }
+
     window.prepareNewNote = function() {
         activeNoteId = null;
+        updateDeleteButtonVisibility();
         const form = document.getElementById('note-form');
         if (form) form.reset();
         const contentIn = document.getElementById('note-content');
@@ -452,6 +695,10 @@ function getDefaultWorksheetTemplate() {
             if (contentIn) contentIn.value = getWorksheetTemplate();
             if (titleInput) titleInput.value = '';
             if (catInput) catInput.value = 'Worksheet';
+        } else if (currentMode === 'activity') {
+            if (contentIn) contentIn.value = `<h2>${activityTitle || 'Activity'}</h2><p>Write your work for this activity here...</p>`;
+            if (titleInput) titleInput.value = activityTitle || '';
+            if (catInput) catInput.value = 'Activity';
         } else {
             // Load regular notes template
             if (contentIn) contentIn.value = '<h2>Notes</h2><p>Start writing your notes here...</p>';
@@ -490,17 +737,24 @@ function getDefaultWorksheetTemplate() {
             showTitleTooltip('Give your note an original title before saving.');
             return;
         }
-        
+
+        // Belt and suspenders: triggerAutoSave() already mirrors to
+        // localStorage before this runs, but the "Save & Turn In" button
+        // calls saveNotes() directly, bypassing that -- so the draft still
+        // needs to land here too, before the network call that might fail.
+        saveDraftLocal();
+        if (saveRetryTimer) { clearTimeout(saveRetryTimer); saveRetryTimer = null; }
+
         const btn = document.getElementById('saveStatus');
         if (btn) {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Saving...';
             btn.className = 'badge bg-warning';
         }
-        
+
         const payload = {
             id: activeNoteId || null,
             student_id: currentStudentData.student_id,
-            chapter: 'Unit Exam Scratchpad',
+            chapter: chapterLabel,
             title: titleInput.value.trim(),
             category: catInput ? catInput.value : 'Notes',
             content: contentIn ? contentIn.value : '',
@@ -522,21 +776,71 @@ function getDefaultWorksheetTemplate() {
             // another new row instead of updating this one.
             const result = await res.json();
             if (result?.id) activeNoteId = result.id;
+            updateDeleteButtonVisibility();
+
+            // Auto-grade: only on a real final submit (never the 1.5s
+            // autosave debounce -- matches how every other sync call in
+            // this codebase only fires on explicit turn-in) and only when
+            // this note is bound to a real activity. Passes the real
+            // title/points fetched from the gradebook via the Activities
+            // dropdown, not a guessed value -- submit-exam's upsert would
+            // otherwise silently overwrite the real assignment's title/
+            // points with a generic fallback if they were omitted.
+            let graded = false;
+            if (isSubmit && activityId) {
+                try {
+                    const gradeRes = await fetch('/api/submit-exam', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            student_id: currentStudentData.student_id,
+                            exam_id: activityId,
+                            score: activityPoints,
+                            total_points: activityPoints,
+                            title: activityTitle
+                        })
+                    });
+                    graded = gradeRes.ok;
+                } catch (gradeErr) {
+                    console.error('Auto-grade sync error:', gradeErr);
+                    // The note itself already saved above -- don't show a
+                    // false "Error" on a save that actually succeeded just
+                    // because the gradebook sync failed.
+                }
+            }
 
             if (btn) {
-                btn.innerHTML = '<i class="fas fa-check me-1"></i> Saved';
+                btn.innerHTML = graded
+                    ? '<i class="fas fa-check-double me-1"></i> Saved & Graded'
+                    : '<i class="fas fa-check me-1"></i> Saved';
                 btn.className = 'badge bg-success';
             }
+            // Confirmed on the server now -- the local safety copy is no
+            // longer needed and would otherwise incorrectly "win" against
+            // a genuinely newer server note the next time this page loads.
+            clearDraftLocal();
+            saveRetryCount = 0;
         } catch(e) {
             console.error('Save error:', e);
+            // Don't drop the content: the draft written above stays in
+            // localStorage (so a closed tab still recovers it on reopen),
+            // and the save itself is retried automatically with backoff
+            // rather than leaving a small badge as the only signal that
+            // something didn't make it to the server.
             if (btn) {
-                btn.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Error';
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Not saved — retrying…';
                 btn.className = 'badge bg-danger';
             }
+            saveRetryCount++;
+            const delay = Math.min(3000 * saveRetryCount, 15000);
+            pendingSubmitFlag = isSubmit;
+            if (saveRetryTimer) clearTimeout(saveRetryTimer);
+            saveRetryTimer = setTimeout(() => saveNotes(pendingSubmitFlag), delay);
         }
     }
     
 function triggerAutoSave() {
+        saveDraftLocal();
         if (autoSaveTimer) clearTimeout(autoSaveTimer);
         autoSaveTimer = setTimeout(() => saveNotes(false), 1500);
     }
@@ -564,6 +868,10 @@ function triggerAutoSave() {
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                                        <div class="mb-3 position-relative">
+                                            <i class="fas fa-search position-absolute text-muted" style="left: 12px; top: 50%; transform: translateY(-50%);"></i>
+                                            <input type="text" id="notes-search-input" class="form-control ps-5" placeholder="Search your notes by title, chapter, or content...">
+                                        </div>
                                         <div id="notes-list-container" class="text-center p-4">
                                             <div class="spinner-border text-primary"></div>
                                             <p class="mt-2 text-muted">Loading your saved notes...</p>
@@ -585,37 +893,33 @@ function triggerAutoSave() {
 
 // Fetch all notes for this student
                 const listContainer = document.getElementById('notes-list-container');
-                try {
-                    const res = await fetch(`/api/student/cs-notebook?student_id=${encodeURIComponent(currentStudentData.student_id)}`);
-                    if (!res.ok) throw new Error('Failed to fetch');
-                    const data = await res.json();
-                    // Only entries the student actually gave a real title --
-                    // untitled autosave artifacts (blank title, saved before
-                    // they typed one) just clutter this list otherwise.
-                    const allNotes = (data.notes || []).filter(n => (n.title || '').trim().length > 0);
+                const searchInput = document.getElementById('notes-search-input');
+                searchInput.value = '';
 
-                    if (allNotes.length === 0) {
+                // Renders whichever subset of notes matches the current
+                // search text (or everything, when it's empty) -- pulled out
+                // of the fetch below so typing in the search box re-filters
+                // instantly from the already-fetched list instead of
+                // re-fetching on every keystroke. This is the same view used
+                // during an exam (cs-final-exam.html embeds this page in a
+                // locked-down iframe as the "Exam Scratchpad"), so a student
+                // needs to be able to find one specific saved note out of
+                // many without scrolling a long unfiltered list mid-test.
+                const renderNotesList = (notesToShow) => {
+                    if (notesToShow.length === 0) {
                         listContainer.innerHTML = `
                             <div class="text-center p-4">
                                 <i class="fas fa-clipboard text-muted fs-1 mb-3"></i>
-                                <p class="text-muted">No saved notes found. Start a new entry!</p>
+                                <p class="text-muted">${searchInput.value.trim() ? 'No notes match your search.' : 'No saved notes found. Start a new entry!'}</p>
                             </div>`;
                         return;
                     }
 
-                    // Sort by timestamp descending (newest first). Every saved
-                    // entry is shown -- this used to collapse down to one card
-                    // per unique title, which silently hid every other note
-                    // whenever students reused the same title (e.g. many kids
-                    // titling every entry "My Computer Science Notes"), making
-                    // it look like only their most recent note was ever saved.
-                    allNotes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-                    const notesHtml = allNotes.map(n => {
+                    const notesHtml = notesToShow.map(n => {
                         const date = n.timestamp ? new Date(n.timestamp).toLocaleDateString() : 'Unknown date';
                         const preview = n.content ? n.content.substring(0, 80).replace(/<[^>]*>/g, '') + '...' : 'No content';
                         return `
-                            <div class="card mb-2 shadow-sm note-card" style="cursor: pointer; border-left: 4px solid var(--primary-color);" data-id="${n.id}" data-title="${escapeHtmlSimple(n.title || '')}" data-content="${escapeHtmlSimple(n.content || '')}">
+                            <div class="card mb-2 shadow-sm note-card" style="cursor: pointer; border-left: 4px solid var(--primary-color);" data-id="${n.id}">
                                 <div class="card-body py-2">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
@@ -635,27 +939,69 @@ function triggerAutoSave() {
                     listContainer.querySelectorAll('.note-card').forEach(card => {
                         card.onclick = () => {
                             const noteId = card.dataset.id;
-                            const noteTitle = card.dataset.title;
-                            const noteContent = card.dataset.content;
+                            // Look up the real note object from the already-
+                            // fetched list instead of reading title/content
+                            // back off HTML data-attributes -- round-tripping
+                            // a student's full rich-text content through an
+                            // attribute (escaped on the way in, unescaped by
+                            // the browser on the way out) was unreliable for
+                            // long/complex content and could come back empty.
+                            // The autosave that fires right after loading
+                            // would then silently overwrite the real saved
+                            // note with that empty content, permanently
+                            // destroying it.
+                            const note = notesToShow.find(n => String(n.id) === String(noteId));
+                            if (!note) return;
 
                             // Continue editing this exact row -- without this,
                             // the next autosave has no id to send and creates
                             // a brand-new duplicate instead of updating the
                             // note the student just opened.
                             activeNoteId = noteId;
+                            updateDeleteButtonVisibility();
 
                             // Load into the current note form
-                            document.getElementById('note-title').value = noteTitle;
-                            document.getElementById('note-content').value = noteContent;
-                            
+                            document.getElementById('note-title').value = note.title || '';
+                            document.getElementById('note-content').value = note.content || '';
+
                             // Update the preview
                             updatePreview();
                             triggerAutoSave();
-                            
+
                             // Close modal
                             if (modal) modal.hide();
                         };
                     });
+                };
+
+                try {
+                    const res = await fetch(`/api/student/cs-notebook?student_id=${encodeURIComponent(currentStudentData.student_id)}`);
+                    if (!res.ok) throw new Error('Failed to fetch');
+                    const data = await res.json();
+                    // Only entries the student actually gave a real title --
+                    // untitled autosave artifacts (blank title, saved before
+                    // they typed one) just clutter this list otherwise.
+                    const allNotes = (data.notes || []).filter(n => (n.title || '').trim().length > 0);
+
+                    // Sort by timestamp descending (newest first). Every saved
+                    // entry is shown -- this used to collapse down to one card
+                    // per unique title, which silently hid every other note
+                    // whenever students reused the same title (e.g. many kids
+                    // titling every entry "My Computer Science Notes"), making
+                    // it look like only their most recent note was ever saved.
+                    allNotes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                    renderNotesList(allNotes);
+
+                    searchInput.oninput = () => {
+                        const term = searchInput.value.trim().toLowerCase();
+                        if (!term) { renderNotesList(allNotes); return; }
+                        const matches = allNotes.filter(n => {
+                            const haystack = `${n.title || ''} ${n.chapter || ''} ${n.category || ''} ${(n.content || '').replace(/<[^>]*>/g, ' ')}`.toLowerCase();
+                            return haystack.includes(term);
+                        });
+                        renderNotesList(matches);
+                    };
                 } catch (e) {
                     listContainer.innerHTML = `<div class="text-center p-4 text-danger">
                         <i class="fas fa-exclamation-triangle fs-1 mb-2"></i>
@@ -702,7 +1048,95 @@ function triggerAutoSave() {
             });
         });
     }
-    
+
+    // ========================================================
+    // TABLE TOOLBAR (insert / add row-col / delete row-col)
+    // ========================================================
+
+    function getFocusedTableNode() {
+        const previewFrame = document.getElementById('preview-frame');
+        const win = previewFrame?.contentWindow;
+        const sel = win?.getSelection?.();
+        if (!sel || sel.rangeCount === 0) return null;
+        let node = sel.getRangeAt(0).startContainer;
+        if (node.nodeType === 3) node = node.parentElement;
+        return node;
+    }
+    function getFocusedTable() {
+        const node = getFocusedTableNode();
+        return node ? node.closest('table') : null;
+    }
+    function getFocusedCell() {
+        const node = getFocusedTableNode();
+        return node ? node.closest('td, th') : null;
+    }
+
+    function syncAfterTableEdit() {
+        const previewFrame = document.getElementById('preview-frame');
+        if (!previewFrame?.contentWindow) return;
+        previewFrame.contentWindow.focus();
+        const contentIn = document.getElementById('note-content');
+        if (contentIn) {
+            contentIn.value = previewFrame.contentWindow.document.body.innerHTML;
+            triggerAutoSave();
+        }
+    }
+
+    function setupTableToolbar() {
+        document.querySelectorAll('.rt-table-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const previewFrame = document.getElementById('preview-frame');
+                if (!previewFrame?.contentWindow) return;
+                const doc = previewFrame.contentWindow.document;
+                const action = btn.dataset.action;
+
+                if (action === 'insertTable') {
+                    const tableHtml = `<table class="notebook-table"><tbody>
+                        <tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr>
+                        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    </tbody></table><p>&nbsp;</p>`;
+                    doc.execCommand('insertHTML', false, tableHtml);
+                    syncAfterTableEdit();
+                    return;
+                }
+
+                const table = getFocusedTable();
+                if (!table) {
+                    alert('Click inside a table first, then use this button to add or remove a row/column.');
+                    return;
+                }
+
+                if (action === 'addRow') {
+                    const templateRow = table.rows[table.rows.length - 1];
+                    const newRow = table.insertRow(-1);
+                    for (let i = 0; i < templateRow.cells.length; i++) {
+                        newRow.insertCell(-1).innerHTML = '&nbsp;';
+                    }
+                } else if (action === 'addCol') {
+                    Array.from(table.rows).forEach((row, i) => {
+                        const cell = doc.createElement(i === 0 ? 'th' : 'td');
+                        cell.innerHTML = i === 0 ? 'Header' : '&nbsp;';
+                        row.appendChild(cell);
+                    });
+                } else if (action === 'delRow') {
+                    if (table.rows.length <= 1) { table.remove(); syncAfterTableEdit(); return; }
+                    const cell = getFocusedCell();
+                    const row = cell ? cell.closest('tr') : table.rows[table.rows.length - 1];
+                    row.remove();
+                } else if (action === 'delCol') {
+                    if (table.rows[0].cells.length <= 1) { table.remove(); syncAfterTableEdit(); return; }
+                    const cell = getFocusedCell();
+                    const colIndex = cell ? cell.cellIndex : table.rows[0].cells.length - 1;
+                    Array.from(table.rows).forEach(row => { if (row.cells[colIndex]) row.deleteCell(colIndex); });
+                }
+
+                syncAfterTableEdit();
+            });
+        });
+    }
+
     // ========================================================
     // EVENT LISTENERS
     // ========================================================
@@ -711,6 +1145,35 @@ function triggerAutoSave() {
         e.preventDefault();
         if (autoSaveTimer) clearTimeout(autoSaveTimer);
         await saveNotes(true);
+    });
+
+    document.getElementById('btn-delete-note').addEventListener('click', async () => {
+        if (!activeNoteId || !currentStudentData) return;
+        const category = document.getElementById('note-category')?.value;
+        const warning = category === 'Activity'
+            ? 'Delete this entry? This is a graded Activity -- deleting it does NOT undo the grade you already earned, it just removes your written work. This cannot be undone.'
+            : 'Delete this note? This cannot be undone.';
+        if (!window.confirm(warning)) return;
+
+        const btn = document.getElementById('btn-delete-note');
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/student/cs-notebook', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: activeNoteId, student_id: currentStudentData.student_id })
+            });
+            if (!res.ok) throw new Error('Delete failed');
+            if (autoSaveTimer) clearTimeout(autoSaveTimer);
+            if (saveRetryTimer) { clearTimeout(saveRetryTimer); saveRetryTimer = null; }
+            clearDraftLocal(); // otherwise the local safety-net draft would silently resurrect the just-deleted note next load
+            window.prepareNewNote();
+        } catch (e) {
+            console.error('Delete note error:', e);
+            alert("Couldn't delete that note. Please try again.");
+        } finally {
+            btn.disabled = false;
+        }
     });
     
     window.addEventListener('message', (ev) => {
@@ -726,6 +1189,7 @@ function triggerAutoSave() {
 // Initialize
     init().then(() => {
         setupRichToolbar();
+        setupTableToolbar();
         setupLoadNotes();
         
         // Also listen for iframe content changes
