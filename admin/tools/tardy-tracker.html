@@ -592,6 +592,9 @@
         });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
+          if (res.status === 401 || res.status === 403) {
+            throw new Error('Your login expired -- refresh the page and try again.');
+          }
           throw new Error(data.error || `Server returned ${res.status}`);
         }
         reflectionBtn.innerHTML = '<i class="fas fa-check me-1"></i>Sent!';
@@ -600,7 +603,7 @@
         logTardyPageError('sendReflection:' + studentId, err);
         reflectionBtn.innerHTML = '<i class="fas fa-xmark me-1"></i>Failed';
         reflectionBtn.title = err.message || 'Failed to send.';
-        setTimeout(() => { reflectionBtn.innerHTML = originalHtml; reflectionBtn.disabled = false; reflectionBtn.title = 'Send a 5-minute conference heads-up via Messages'; }, 4000);
+        setTimeout(() => { reflectionBtn.innerHTML = originalHtml; reflectionBtn.disabled = false; reflectionBtn.title = 'Send a 5-minute conference heads-up via Messages'; }, 6000);
       }
     } else if (genBtn) {
       const { studentId, firstName, lastName, count } = genBtn.dataset;

@@ -47,6 +47,17 @@ app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 // Backing the store with the same MySQL database already in use makes
 // sessions survive restarts (and would also survive a droplet failover,
 // since both boxes point at the same reconciled database).
+// express-mysql-session's own default `expiration` is 24 hours -- a teacher
+// who leaves a tab open over a weekend (or just doesn't reopen the site
+// daily) comes back to a cookie the browser still holds but whose matching
+// row has already been pruned server-side, so every click on a session-gated
+// route (sending a message, resolving a tardy consequence, etc.) 403s with
+// no obvious cause. Both the store's row lifetime and the cookie's own
+// maxAge are set here, in sync, to 30 days -- long enough that normal
+// day-to-day gaps in usage don't trigger this, while still eventually
+// expiring rather than lasting forever.
+const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
 const sessionStore = new MySQLStore({
     host: 'localhost',
     user: 'root',
@@ -55,14 +66,16 @@ const sessionStore = new MySQLStore({
     // Table is auto-created on first run if missing; explicit here so
     // it's easy to find (`SELECT * FROM sessions`) rather than guessing
     // the package's default name.
-    schema: { tableName: 'sessions' }
+    schema: { tableName: 'sessions' },
+    expiration: SESSION_MAX_AGE_MS
 });
 
 app.use(session({
     secret: 'secure-session-key-12345',
     resave: false,
     saveUninitialized: false,
-    store: sessionStore
+    store: sessionStore,
+    cookie: { maxAge: SESSION_MAX_AGE_MS }
 }));
 
 // Route Mapping - API routes must come before static routes
