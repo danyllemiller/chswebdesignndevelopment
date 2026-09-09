@@ -253,7 +253,11 @@ router.get('/tardy/followups', async (req, res) => {
             if (effectiveCount > 1 && effectiveCount > (resolvedThrough.get(s.student_id) || 1)) {
                 followups.push({
                     student_id: s.student_id, first_name: s.first_name, last_name: s.last_name, period: s.period,
-                    count: effectiveCount, step: getTardyStep(effectiveCount)
+                    count: effectiveCount, step: getTardyStep(effectiveCount),
+                    // s.dates is built from tardyRows, which is ordered by created_at ASC, so the last
+                    // entry pushed is the student's most recent tardy -- the letter's "as of" date should
+                    // reflect that day, not whatever day the teacher happens to click "Generate Letter."
+                    last_tardy: s.dates[s.dates.length - 1]
                 });
             }
         }

@@ -4,6 +4,15 @@
 // email) -- matches the ladder on discipline.html and js/modules/tardy-ladder.js.
 
 function fmtDate(d) {
+    // A bare 'YYYY-MM-DD' string parses as UTC midnight, which
+    // toLocaleDateString then renders in the browser's local timezone --
+    // for any US timezone that's a day *behind* UTC, so the letter would
+    // silently show the day before the actual tardy. Parsing the pieces by
+    // hand builds a local-time Date instead, sidestepping that shift.
+    if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+        const [y, m, day] = d.split('-').map(Number);
+        d = new Date(y, m - 1, day);
+    }
     return new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
@@ -17,9 +26,13 @@ function toTitleCase(str) {
 // student: { first_name, last_name }
 // step: result of getTardyStep(count), from tardy-ladder.js
 // counselor: { name, email } | null
-export function renderTardyLetterText(student, count, step, counselor) {
+// lastTardyDate: 'YYYY-MM-DD' string of the student's most recent tardy, or
+// falsy to fall back to today -- the letter should read "as of" the day the
+// tardy actually happened, not whatever day the teacher gets around to
+// generating the letter.
+export function renderTardyLetterText(student, count, step, counselor, lastTardyDate) {
     const firstName = toTitleCase(student.first_name) || 'Your student';
-    const today = fmtDate(new Date());
+    const today = fmtDate(lastTardyDate || new Date());
     const isFourthPlus = count >= 4;
 
     const ccLine = isFourthPlus
