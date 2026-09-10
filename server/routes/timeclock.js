@@ -166,8 +166,8 @@ function hashString(str) {
     return Math.abs(hash);
 }
 
-const PERIOD_COURSE_MAP = { A1: 'WD1', B2: 'WD2', A3: 'CS', A5: 'CS', B4: 'CS', B6: 'CS', B8: 'CS' };
-const TC_COURSE_ID_MAP = { CS: '10003GS', WD1: '05254G1S', WD2: '05254G2S' };
+const PERIOD_COURSE_MAP = { A1: 'WD1', B2: 'WD2', AS: 'AS', A3: 'CS', A5: 'CS', B4: 'CS', B6: 'CS', B8: 'CS' };
+const TC_COURSE_ID_MAP = { CS: '10003GS', WD1: '05254G1S', WD2: '05254G2S', AS: '05254ES' };
 
 function periodToCourseKeyServer(period) {
     const p = String(period || '').trim().toUpperCase();
@@ -292,7 +292,24 @@ async function getDeterministicQuestion(connection, table, chapter, groupKey) {
 // working on, never a manually-typed or generic question.
 router.get('/timeclock/question', async (req, res) => {
     const { type } = req.query;
-    const kind = String(type || '').replace(/_IN$/, ''); // CS, WD1, WD2
+    const kind = String(type || '').replace(/_IN$/, ''); // CS, WD1, WD2, AS
+
+    // WD1/WD2/AS clock-in asks a real Nevada Workplace Readiness Skills
+    // question (free response, one per calendar day) instead of a content
+    // quiz -- CS keeps the chapter test-bank quiz below, since WPR wasn't
+    // asked for there.
+    if (kind === 'WD1' || kind === 'WD2' || kind === 'AS') {
+        const picked = pickWprQuestion(getLocalDateStr());
+        return res.json({
+            question_text: `[WPR ${picked.std}] ${picked.q}`,
+            options: [],
+            correct_answer: null,
+            isFreeResponse: true,
+            wprStandard: picked.std,
+            chapterLabel: 'Workplace Readiness Check-In'
+        });
+    }
+
     try {
         const connection = await getDbConnection();
         const dayTypes = await getDayTypes(connection);
@@ -303,10 +320,6 @@ router.get('/timeclock/question', async (req, res) => {
             ({ chapter, isFallback } = await getCurrentCSChapter(connection));
             title = CS_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
             q = await getDeterministicQuestion(connection, 'questions', chapter, groupKey);
-        } else if (kind === 'WD1' || kind === 'WD2') {
-            ({ chapter, isFallback } = await getCurrentWDChapter(connection, kind));
-            title = WD_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
-            q = await getDeterministicQuestion(connection, 'wd_questions', chapter, `${kind}|${groupKey}`);
         } else {
             await connection.release();
             return res.status(400).json({ error: 'Unrecognized type' });
@@ -399,14 +412,13 @@ async function resolveQuestionGroupKey(connection, studentId) {
 // Clock-out prompt: a teacher's manually-set exit ticket for today takes
 // priority (admin/payroll.html's "Set Clock Out Prompts" modal), scoped to
 // the student's specific group so everyone in the same group sees the
-// identical question. Previously fell back to guessing from each
-// individual student's own most-recent notebook save when nothing was set
-// -- that meant two students in the same class could see completely
-// different (or, for a student with no recorded activity that day,
-// missing/broken) prompts. The fallback is now the same stable, class-wide
-// due-date chapter for everyone, never derived from individual activity.
+// identical question. Falls back to the same stable, class-wide due-date
+// chapter for everyone, never derived from individual activity. The
+// Nevada Workplace Readiness Skills question now lives on the *clock-in*
+// side instead (see /timeclock/question) -- this is just the end-of-class
+// content reflection.
 router.get('/timeclock/reflection-prompt', async (req, res) => {
-    const { type, student_id } = req.query; // CS, WD1, WD2
+    const { type, student_id } = req.query; // CS, WD1, WD2, AS
     const kind = String(type || '');
     const today = getLocalDateStr();
     try {
@@ -426,18 +438,14 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
             }
         }
 
-        // Fallback: no custom question set for this group today. WD1/WD2 get
-        // a real Nevada Workplace Readiness Skills question (one per
-        // calendar day, cycling through the whole bank) instead of a
-        // generic "reflect on the chapter" filler -- CS keeps the original
-        // chapter-based fallback since the WPR bank wasn't asked for there.
-        if (kind === 'WD1' || kind === 'WD2') {
+        // AS doesn't track its own due-date chapter pacing the way WD1/WD2
+        // do, so it gets a plain generic reflection instead of a chapter
+        // lookup.
+        if (kind === 'AS') {
             await connection.release();
-            const picked = pickWprQuestion(today);
             return res.json({
-                prompt_text: `[WPR ${picked.std}] ${picked.q}`,
-                isCustom: false,
-                wprStandard: picked.std
+                prompt_text: 'In 2-3 sentences, reflect on what you learned or worked on today.',
+                isCustom: false
             });
         }
 
@@ -445,6 +453,9 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
         if (kind === 'CS') {
             ({ chapter } = await getCurrentCSChapter(connection));
             title = CS_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
+        } else if (kind === 'WD1' || kind === 'WD2') {
+            ({ chapter } = await getCurrentWDChapter(connection, kind));
+            title = WD_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
         } else {
             await connection.release();
             return res.status(400).json({ error: 'Unrecognized type' });
@@ -501,7 +512,10 @@ router.post('/timeclock/save', async (req, res) => {
             }
 
             // Grade the clock-in: 1 pt for doing it, 1 pt for being on time
-            // (within 5 min of the bell), 1 pt for a correct answer. Written
+            // (within 5 min of the bell), plus 1 pt for a correct answer --
+            // CS only, since it's still a real multiple-choice quiz there.
+            // WD1/WD2/AS ask a free-response Workplace Readiness question
+            // instead (no right/wrong answer), so they max out at 2. Written
             // straight into the real gradebook (exams/responses) so it shows
             // up in the normal admin/student views like any other assignment
             // -- one shared entry per course per day, matching how exams and
@@ -514,6 +528,7 @@ router.post('/timeclock/save', async (req, res) => {
                     const dayTypes = await getDayTypes(connection);
                     const startTime = await getBellStartTime(connection, dayTypes, today, period);
                     const onTime = isOnTime(startTime);
+                    const maxPoints = courseKey === 'CS' ? 3 : 2;
                     let points = 1; // attempted
                     if (onTime) points += 1;
                     if (isCorrectVal === 1) points += 1;
@@ -522,7 +537,7 @@ router.post('/timeclock/save', async (req, res) => {
                     await connection.execute(
                         `INSERT INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?)
                          ON DUPLICATE KEY UPDATE title = VALUES(title), total_points = VALUES(total_points), course_id = VALUES(course_id)`,
-                        [examId, `Timeclock Check-In — ${today}`, 3, courseId]
+                        [examId, `Timeclock Check-In — ${today}`, maxPoints, courseId]
                     );
                     const [icCols] = await connection.execute(`SHOW COLUMNS FROM responses LIKE 'entered_in_ic'`);
                     if (icCols.length === 0) {
@@ -531,10 +546,29 @@ router.post('/timeclock/save', async (req, res) => {
                     await connection.execute(
                         `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic) VALUES (?, ?, ?, ?, NOW(), 0)
                          ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0`,
-                        [student_id, examId, points, 3]
+                        [student_id, examId, points, maxPoints]
                     );
                 }
             } catch (gradeErr) { console.error('[timeclock] Failed to grade clock-in:', gradeErr); }
+
+            // WD1/WD2/AS daily journal -- the clock-in question is now the
+            // Workplace Readiness reflection (see /timeclock/question), so
+            // this is where that answer actually gets journaled, one row
+            // per student per day, browsable later (My Daily Journal) the
+            // same way Intervention's journal already works. Best-effort:
+            // never block the clock-in itself if this fails.
+            try {
+                const courseKey = periodToCourseKeyServer(period);
+                if ((courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS') && prompt) {
+                    await ensureWdJournalTable(connection);
+                    await connection.execute(
+                        `INSERT INTO wd_journal (student_id, entry_date, prompt, content)
+                         VALUES (?, ?, ?, ?)
+                         ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
+                        [student_id, today, prompt, answer || '']
+                    );
+                }
+            } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry (clock-in):', journalErr); }
         } else if (mode === 'out') {
             await connection.execute(
                 'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',
@@ -549,24 +583,9 @@ router.post('/timeclock/save', async (req, res) => {
                  ORDER BY id DESC LIMIT 1`,
                 [answer || '', student_id, today, period]
             );
-
-            // WD1/WD2 daily journal -- records the reflection prompt actually
-            // shown alongside the answer, one row per student per day, so it
-            // can be browsed later (My Daily Journal) the same way
-            // Intervention's journal already works. Best-effort: never block
-            // the clock-out itself if this fails.
-            try {
-                const courseKey = periodToCourseKeyServer(period);
-                if (courseKey === 'WD1' || courseKey === 'WD2') {
-                    await ensureWdJournalTable(connection);
-                    await connection.execute(
-                        `INSERT INTO wd_journal (student_id, entry_date, prompt, content)
-                         VALUES (?, ?, ?, ?)
-                         ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
-                        [student_id, today, prompt || null, answer || '']
-                    );
-                }
-            } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry:', journalErr); }
+            // The WD daily journal is now written on clock-in instead (see
+            // above) -- that's where the Workplace Readiness question lives.
+            // Clock-out's plain chapter reflection isn't journaled.
         }
         await connection.release();
         res.json({ success: true });
