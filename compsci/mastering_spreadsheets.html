@@ -54,13 +54,24 @@
 
   <p>Always <strong>verify</strong> a new formula against a small sample you calculated by hand before trusting it on 2,000 rows. It costs thirty seconds and it's the only thing standing between you and a wrong number nobody catches.</p>
 
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-table me-2"></i> Build This Data Set First</h5>
+      <p class="mb-0">Create a new spreadsheet with these five columns: <strong>Student Name</strong>, <strong>Quiz 1 Score</strong>, <strong>Quiz 2 Score</strong>, <strong>Quiz 3 Score</strong> (all 0–100), and <strong>Study Hours per Week</strong> (0–10). Fill in 15 rows of realistic-looking made-up data yourself. You'll reuse this exact spreadsheet for the chart and dashboard activity later in this chapter, so keep it.</p>
+  </div>
+
   <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-square-root-alt fa-3x me-4 text-info"></i>
-          <div>
+      <div class="d-flex align-items-start">
+          <i class="fas fa-square-root-alt fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
               <h4 class="fw-bold mb-1">Activity: The Function Toolkit</h4>
-              <p class="mb-0">Use at least six distinct functions on a supplied data set, including one logical and one lookup function, and verify two of your results by hand.</p>
-              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Function Toolkit</strong> in your Digital Notebook on the right.</p>
+              <p class="mb-2">Using the data set you just built, write six different formulas — pulling from at least three of the four function families above, and including at least one Logical and one Lookup function.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">Example ideas (write your own, don't just copy these): total or average score per quiz (Aggregate), whether each student passed with 70+ (Logical, using IF), looking up one specific student's Quiz 2 score by name (Lookup, using VLOOKUP or INDEX/MATCH), combining a student's first and last name into one cell (Text).</li>
+                  <li class="mb-1">For at least one formula, use an absolute reference (<code>$B$2</code> style) on purpose, and explain in one sentence why that cell needed to be locked.</li>
+                  <li class="mb-0">Pick two of your six results and verify them by hand — calculate the same answer manually and confirm your formula matches.</li>
+              </ol>
+              <p class="mb-0 fw-bold">Turn In: A link to (or screenshot of) your spreadsheet with all six formulas visible, and your two by-hand verifications.</p>
+              <p class="mb-0 fw-bold mt-2">👉 Load <strong>The Function Toolkit</strong> in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
@@ -102,12 +113,19 @@
       <p class="mb-0 text-light">Name two ways a chart can mislead a reader without using any false data. <em class="text-white-50">(Example answer: a truncated axis, an inconsistent scale, or a 3D effect that distorts area.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-chart-line fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-chart-line fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: The Chart Rebuild + The Dashboard Build</h3>
-              <p class="mb-0 fs-5">Build three charts from your data set answering three different question types, find and honestly rebuild one real misleading chart, then build a dashboard with at least three linked charts and one working filter — and test it on a partner.</p>
+              <p class="mb-2 fs-5">Three parts, using the same spreadsheet you built for The Function Toolkit.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Build three charts from your data, each answering a <em>different</em> one of the five question types from 7.2.1 (Comparison, Composition, Distribution, Relationship, Change over Time). Example: a scatter plot of Study Hours vs. Quiz Score answers a Relationship question.</li>
+                  <li class="mb-1">Search online for one real chart you think is misleading (a news article, a social media post, an ad). Screenshot it, name which technique from 7.2.1 makes it misleading (truncated axis, inconsistent scale, distorted 3D effect, etc.), and rebuild it honestly using the real numbers so it tells the true story.</li>
+                  <li class="mb-1">Build one dashboard with at least three charts from your data set linked together, plus one working filter (like a dropdown that filters by student or by quiz).</li>
+                  <li class="mb-0">Have a partner use your dashboard's filter without your help, and write down one thing they got confused by.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your three charts (labeled by question type), your misleading-chart find and honest rebuild, your linked dashboard, and what your partner got confused by.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load these labs into your Digital Notebook!</p>
           </div>
       </div>

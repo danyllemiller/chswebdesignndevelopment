@@ -57,12 +57,18 @@
   <p>A microwave, a fitness band, a traffic light — each one hides a full computing system behind one or two buttons. That's an <strong>embedded system</strong>: a computer built into a device to do one job, with the complexity abstracted away completely.</p>
 
   <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-search fa-3x me-4 text-info"></i>
-          <div>
+      <div class="d-flex align-items-start">
+          <i class="fas fa-search fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
               <h4 class="fw-bold mb-1">Activity: The Abstraction Teardown</h4>
-              <p class="mb-0">Pick an everyday object with an embedded computing system, diagram all six layers from user action to physical circuitry, and name three details the interface deliberately hides from you.</p>
-              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Abstraction Teardown</strong> in your Digital Notebook on the right.</p>
+              <p class="mb-2">Pick one everyday object that has a hidden computer inside it — a microwave, a fitness band, a vending machine, a car's dashboard. Not your phone or laptop; those are too big to trace cleanly.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">Name the object and the one button or action a user actually performs (example: "press the microwave's Start button").</li>
+                  <li class="mb-1">Using the six layers from the Worked Example above (User → Application → Operating System → Firmware → Hardware → Physical circuitry) as your guide, write one sentence for each layer describing what you think happens at that layer for your object. It's okay to make an educated guess for the layers you can't see — say what you'd expect, and why.</li>
+                  <li class="mb-0">Name three specific details the object's simple interface deliberately hides from you. ("It's complicated inside" doesn't count — name an actual detail, like "the exact temperature the heating element reaches.")</li>
+              </ol>
+              <p class="mb-0 fw-bold">Turn In: Your object, your six-layer breakdown (one sentence per layer), and your three hidden details.</p>
+              <p class="mb-0 fw-bold mt-2">👉 Load <strong>The Abstraction Teardown</strong> in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
@@ -123,13 +129,34 @@
 
   <p><strong>The trap:</strong> students often think a file's extension (<code>.jpg</code>, <code>.docx</code>) is what determines its type. It isn't — the extension is just a label the OS uses to guess which app to open it with. A file's real format is determined by its internal structure, which is why renaming <code>photo.jpg</code> to <code>photo.pdf</code> doesn't actually turn it into a PDF.</p>
 
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-dark"><i class="fas fa-list-ol me-2"></i> The Eight Processes</h5>
+      <ol class="mb-0">
+          <li>Opening a photo-editing app from the desktop by double-clicking its icon.</li>
+          <li>The operating system checking whether you're allowed to open a specific file.</li>
+          <li>A printer driver translating "print this page" into signals the printer hardware understands.</li>
+          <li>Typing a sentence into a word processor.</li>
+          <li>The operating system deciding which of several open programs gets to use the CPU next.</li>
+          <li>A printer physically pressing ink onto a page.</li>
+          <li>A web browser rendering a webpage's text and images on screen.</li>
+          <li>The operating system allocating a block of memory to a program that just opened.</li>
+      </ol>
+  </div>
+
   <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-sitemap fa-3x me-4 text-info"></i>
-          <div>
+      <div class="d-flex align-items-start">
+          <i class="fas fa-sitemap fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
               <h4 class="fw-bold mb-1">Activity: The Layer Interaction Map + The File System Audit</h4>
-              <p class="mb-0">Classify eight processes as application, system, or hardware-facing, diagram one full task showing every layer handoff, then audit your own storage and reorganize a messy folder using a real naming convention.</p>
-              <p class="mb-0 fw-bold mt-1">👉 Load these labs in your Digital Notebook on the right.</p>
+              <p class="mb-2">Two labs, both about the same idea: which layer is actually doing the work.</p>
+              <ol class="mb-2">
+                  <li class="mb-1"><strong>Classify:</strong> for each of the eight processes above, label it Application, System, or Hardware-facing, using the three-layer breakdown from 3.2.1.</li>
+                  <li class="mb-1"><strong>Diagram:</strong> pick one everyday task you do on a computer (opening an app, saving a file, printing something), and diagram every layer handoff it goes through — modeled on the "Saving a File" Worked Example above (Application → Operating System → Device Driver → Hardware).</li>
+                  <li class="mb-1"><strong>Audit:</strong> open one folder on your own device that's genuinely messy (Downloads is usually a good one). Pick at least 5 files and rename them using the naming rules above (lowercase, hyphens instead of spaces, descriptive names, dates as YYYY-MM-DD where it matters).</li>
+                  <li class="mb-0">Take a before-and-after screenshot of the folder you audited.</li>
+              </ol>
+              <p class="mb-0 fw-bold">Turn In: Your eight classifications, your one-task layer diagram, and your before/after folder screenshots.</p>
+              <p class="mb-0 fw-bold mt-2">👉 Load these labs in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
@@ -165,12 +192,37 @@
       <p class="mb-0 text-light">A webpage won't load, but a different website loads fine. Which layer is most likely at fault — your device's network settings, or the specific website's server? <em class="text-white-50">(Answer: the specific website's server — since other sites work, your own network connection isn't the problem.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-tools fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="row g-3 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-secondary">
+              <div class="card-header bg-secondary text-white small fw-bold"><i class="fas fa-wifi me-1"></i> Fault A</div>
+              <div class="card-body">
+                  <p class="mb-0 small">Your laptop's Wi-Fi suddenly won't connect to any network, right after you spilled a little water near the keyboard yesterday. Your friend's laptop connects to the exact same Wi-Fi network with no problem.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-secondary">
+              <div class="card-header bg-secondary text-white small fw-bold"><i class="fas fa-window-restore me-1"></i> Fault B</div>
+              <div class="card-body">
+                  <p class="mb-0 small">One specific app keeps closing itself about five seconds after you open it. Every other app on your device works completely normally. It started right after that one app installed an update.</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-tools fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: The Troubleshooting Guide</h3>
-              <p class="mb-0 fs-5">Solve two supplied faults using the six-step protocol, then write a numbered troubleshooting guide precise enough that a partner can follow it and fix the same fault without your help.</p>
+              <p class="mb-2 fs-5">Solve both faults above using the six-step protocol from 3.3.1 — for real, in order, not just by guessing the answer.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">For each fault, work through all six steps: Reproduce, Identify What Changed, Isolate the Layer, Test One Variable, Document, Verify. Write down what you did at each step, not just your final answer.</li>
+                  <li class="mb-1">For each fault, state which layer you think is actually at fault (hardware, system software, or application) and why the clues point there.</li>
+                  <li class="mb-0">Pick one of the two faults and rewrite your steps as a clean, numbered troubleshooting guide — written precisely enough that a partner who has never seen this problem could follow your steps and fix it themselves, without asking you anything.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your six-step work for both faults, plus your one polished, partner-ready troubleshooting guide.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Troubleshooting Guide</strong> into your Digital Notebook!</p>
           </div>
       </div>

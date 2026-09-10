@@ -73,12 +73,26 @@
       <p class="mb-0 text-light">Why is cybersecurity described as everyone's responsibility, not just the IT department's? <em class="text-white-50">(Answer: most successful attacks target people through tricks like phishing, not the underlying systems themselves.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-bug fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="card h-100 shadow-sm border-secondary my-4">
+      <div class="card-header bg-secondary text-white small fw-bold"><i class="fas fa-envelope-open-text me-1"></i> Phishing Attempt to Dissect</div>
+      <div class="card-body">
+          <p class="mb-1 small text-muted font-monospace">From: security@netfIix-account.com<br>Subject: Your Payment Method Has Failed</p>
+          <p class="mb-0 small">"We were unable to process your monthly payment. Your account access will be suspended in 12 hours unless you update your billing information immediately. Click here to update your payment details and avoid service interruption: <u>Update Billing Now</u> — The Account Team"</p>
+      </div>
+  </div>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-bug fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: The Threat Log</h3>
-              <p class="mb-0 fs-5">Document four attack types with a real example of each and the data it exposed, dissect one phishing attempt marking every tell, then audit your own accounts for reused passwords and missing multi-factor authentication — and fix what you find.</p>
+              <p class="mb-2 fs-5">Three parts: document, dissect, then audit yourself.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Pick four attack types from this chapter (from the five malware families in 18.1, or phishing/impersonation/credential stuffing from 18.2). For each one, find one real, reported example online (a company or app that was actually affected) and note what data it exposed.</li>
+                  <li class="mb-1">Dissect the phishing email above. List every "tell" you can find — check the sender address letter by letter, the tone, and where the link text doesn't match where it probably actually goes.</li>
+                  <li class="mb-0">Audit three of your own real accounts: are any of them using a password you've reused somewhere else? Is multi-factor authentication turned on? Fix at least one problem you find — turn on MFA, or change a reused password — and note what you changed.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your four documented attack examples, your list of tells from the phishing email, and what you found and fixed in your own account audit.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Threat Log</strong> into your Digital Notebook!</p>
           </div>
       </div>
