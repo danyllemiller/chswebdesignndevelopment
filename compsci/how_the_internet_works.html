@@ -87,12 +87,25 @@
       <p class="mb-0 text-light">Why does a mesh topology degrade more gracefully than a star? <em class="text-white-50">(Answer: traffic can route around a single failed node instead of losing one central hub that everything depends on.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-network-wired fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="concept-box shadow-sm border-secondary bg-light">
+      <h5 class="fw-bold text-dark"><i class="fas fa-terminal me-2"></i> How to Actually Run a Traceroute</h5>
+      <p class="mb-1"><strong>Windows:</strong> open Command Prompt and type <code>tracert google.com</code></p>
+      <p class="mb-0"><strong>Mac/Chromebook:</strong> open Terminal and type <code>traceroute google.com</code> (Chromebook: use the Linux terminal if enabled, or an online traceroute tool if not)</p>
+  </div>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-network-wired fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: The Network Map + The Reliability Analysis</h3>
-              <p class="mb-0 fs-5">Run a traceroute to three destinations, draw your network from device to internet labeling every switch, router, and server, then identify every single point of failure and predict what happens at ten times the current users.</p>
+              <p class="mb-2 fs-5">Two parts: trace the real path, then evaluate the network's design.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Using the commands above, run a traceroute to three different real websites and record how many hops each one takes.</li>
+                  <li class="mb-1">Draw your own network from your device all the way out to the internet, labeling every device along the way (your device, the wall jack or Wi-Fi router, a switch if there is one, and out to your internet provider) — matching the Worked Example above.</li>
+                  <li class="mb-1">Look at your diagram and identify every single point of failure — any one device that, if it broke, would take down your whole connection.</li>
+                  <li class="mb-0">Pick one part of your network (like your home Wi-Fi router) and predict specifically what would happen if ten times as many devices tried to use it at once.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your three traceroute results with hop counts, your labeled network diagram, your single-points-of-failure list, and your ten-times-the-users prediction.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load these labs into your Digital Notebook!</p>
           </div>
       </div>
