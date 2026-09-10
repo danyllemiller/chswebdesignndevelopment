@@ -98,12 +98,19 @@
       <p class="mb-0 text-light">What does sensitivity testing actually tell you? <em class="text-white-50">(Answer: which input your model's outcome depends on most — found by changing one input at a time and observing the output.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-project-diagram fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-project-diagram fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: The Model Build</h3>
-              <p class="mb-0 fs-5">Build a model with at least three inputs and one calculated outcome, state every assumption explicitly, then run a sensitivity test and name one thing your model can't account for.</p>
+              <p class="mb-2 fs-5">Pick something you can predict with a formula — how much you'd save skipping a daily coffee run, how a phone's battery drains over a day of use, how long a road trip takes at different speeds. If you're stuck, model something from your own life you're actually curious about.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">In a spreadsheet, build your model with at least three inputs and one formula that calculates an outcome from them.</li>
+                  <li class="mb-1">Write out every assumption your model is quietly relying on — like the compound-interest example's "the rate never changes."</li>
+                  <li class="mb-1">Run a sensitivity test: change one input at a time, record how much the output moves each time, and identify which input your model depends on most.</li>
+                  <li class="mb-0">Name one real-world thing your model can't account for — something it ignores that would actually matter.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your model (inputs, formula, output), your stated assumptions, your sensitivity test results, and the one thing your model can't account for. Keep this model — you'll use it again in The Reality Check.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Model Build</strong> into your Digital Notebook!</p>
           </div>
       </div>
@@ -136,12 +143,19 @@
       <p class="mb-0 text-light">A model explains ten years of past data almost perfectly, then performs badly predicting year eleven. What's the most likely problem? <em class="text-white-50">(Answer: overfitting — the model was tuned to match the noise in the past data instead of the real underlying relationship.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-magnifying-glass-chart fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-magnifying-glass-chart fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: The Reality Check</h3>
-              <p class="mb-0 fs-5">Take the model from The Model Build, run it against a real outcome it wasn't built around, and compare the prediction to what actually happened. Calculate how far off it was, then name one specific assumption or relationship you'd adjust to close that gap.</p>
+              <p class="mb-2 fs-5">Time to find out if your model from The Model Build actually works.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Find a real, actual outcome your model wasn't built around — a real day's phone battery reading, a real road trip's actual time, a real week without your daily coffee.</li>
+                  <li class="mb-1">Plug the real-world inputs from that situation into your model and record what it predicts.</li>
+                  <li class="mb-1">Compare your model's prediction to what actually happened, and calculate how far off it was (in the actual units — minutes, dollars, percent).</li>
+                  <li class="mb-0">Name one specific assumption or relationship in your model you'd change to close that gap, and explain why that change would help.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: The real outcome you tested against, your model's prediction, how far off it was, and the specific fix you'd make.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Reality Check</strong> into your Digital Notebook!</p>
           </div>
       </div>
