@@ -37,7 +37,7 @@ window.addEventListener('unhandledrejection', (ev) => {
 
 let studentData = null;
 let currentQuestion = null;
-let currentPromptText = null; // the reflection prompt actually shown (clock-in WPR question or clock-out reflection), so it can be saved alongside the answer for the WD daily journal
+let currentPromptText = null; // the clock-out reflection prompt actually shown, so it can be saved alongside the answer for the WD daily journal
 let bellWindow = null; // { startMs, endMs } for whichever of the student's periods is currently active today, or null
 let currentPeriod = null; // which of the student's (possibly multiple) periods bellWindow/getCourseKey resolved to
 
@@ -459,19 +459,15 @@ async function checkStatusInner() {
         if (mode === 'in') {
             const category = `${getCourseKey()}_IN`;
 
-            // WD1/WD2/AS get a Workplace Readiness reflection question here
-            // (free response); CS still gets a real question pulled from
-            // its chapter test bank -- never a manually-typed question.
+            // Clock-in is always a real multiple-choice question -- WD1/WD2/AS
+            // pull from the Workplace Readiness MC bank, CS from its chapter
+            // test bank -- never a manually-typed question.
             currentQuestion = await apiFetch(`/api/timeclock/question?type=${category}`);
             if (callId !== checkStatusCallId) return; // superseded while this fetch was in flight
 
             label.innerHTML = `<span class="d-block small text-muted fw-normal mb-1">${currentQuestion.chapterLabel || ''}</span>${currentQuestion.question_text}`;
-            currentPromptText = null;
 
-            if (currentQuestion.isFreeResponse) {
-                currentPromptText = currentQuestion.question_text;
-                optsContainer.innerHTML = `<textarea id="tc-in-answer" class="form-control" rows="3" required></textarea>`;
-            } else if (currentQuestion.unavailable) {
+            if (currentQuestion.unavailable) {
                 optsContainer.innerHTML = `<input type="hidden" id="tc-in-fallback" value="N/A - no question bank available">`;
             } else {
                 optsContainer.innerHTML = (currentQuestion.options || []).map((opt, i) => `
@@ -519,11 +515,8 @@ async function handleTimeclockSubmit(e) {
     let isCorrect = null; // null = no gradable question (e.g. question bank empty); true/false once a real question was answered
 
     if (mode === 'in') {
-        const freeResponseInput = document.getElementById('tc-in-answer');
         const fallback = document.getElementById('tc-in-fallback');
-        if (freeResponseInput) {
-            answer = freeResponseInput.value;
-        } else if (fallback) {
+        if (fallback) {
             answer = fallback.value;
         } else {
             const checked = document.querySelector('input[name="tc-radio"]:checked');
@@ -548,7 +541,7 @@ async function handleTimeclockSubmit(e) {
                 mode: mode,
                 answer: answer,
                 is_correct: isCorrect,
-                prompt: currentPromptText
+                prompt: mode === 'out' ? currentPromptText : null
             })
         });
         location.reload();
@@ -697,11 +690,7 @@ async function handleManualOpen(forcedMode) {
             const category = `${getCourseKey()}_IN`;
             currentQuestion = await apiFetch(`/api/timeclock/question?type=${category}`);
             label.innerHTML = `<span class="d-block small text-muted fw-normal mb-1">${currentQuestion.chapterLabel || ''}</span>${currentQuestion.question_text}`;
-            currentPromptText = null;
-            if (currentQuestion.isFreeResponse) {
-                currentPromptText = currentQuestion.question_text;
-                optsContainer.innerHTML = `<textarea id="tc-in-answer" class="form-control" rows="3" required></textarea>`;
-            } else if (currentQuestion.unavailable) {
+            if (currentQuestion.unavailable) {
                 optsContainer.innerHTML = `<input type="hidden" id="tc-in-fallback" value="N/A - no question bank available">`;
             } else {
                 optsContainer.innerHTML = (currentQuestion.options || []).map((opt, i) => `
