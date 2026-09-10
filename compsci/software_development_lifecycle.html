@@ -72,13 +72,27 @@
   <h3 id="section-16-2" class="fw-bold border-bottom pb-2">16.2 Licensing & Intellectual Property</h3>
   <p class="fs-5">You find a code library online that does exactly what you need. Free to download doesn't automatically mean free to use — check the license before you build anything on top of it.</p>
 
-  <h4 class="fw-bold mt-4 text-primary">16.2.1 Three License Families</h4>
+  <h4 class="fw-bold mt-4 text-primary">16.2.1 What Copyright Actually Means</h4>
+  <p>The moment you create an original work — code, art, music, writing — you automatically own the <strong>copyright</strong> to it. No registration and no © symbol required. By default that means "all rights reserved": nobody else may legally copy, modify, or redistribute it without your permission.</p>
+
+  <div class="concept-box shadow-sm border-warning bg-light">
+      <h5 class="fw-bold text-dark"><i class="fas fa-lightbulb me-2"></i> Where the Confusion Starts: Copyright vs. Copyleft</h5>
+      <p>These two words look almost identical, and that's not an accident — <strong>copyleft</strong> is a deliberate pun on <strong>copyright</strong>, coined by early free-software advocates. But they point in nearly opposite directions:</p>
+      <ul class="mb-2">
+          <li><strong>Copyright</strong> (the automatic default) restricts what others can do with your work unless they get your permission.</li>
+          <li><strong>Copyleft</strong> (a specific kind of license) uses that same copyright power to guarantee the opposite: permission is already granted, on the condition that anything built on top stays just as open.</li>
+      </ul>
+      <p class="mb-0">A <strong>license</strong> is how a copyright holder writes down, in advance, exactly what permission they're giving. That's what the three families below actually are — three different answers to "what happens to your copyright once you let someone else use your work?"</p>
+  </div>
+
+  <h4 class="fw-bold mt-4 text-primary">16.2.2 Three License Families</h4>
   <div class="row g-4 my-3">
       <div class="col-md-4">
           <div class="card h-100 shadow-sm border-success">
               <div class="card-body">
                   <h5 class="fw-bold text-success">Permissive</h5>
-                  <p class="mb-0 small">Use it almost anywhere, with minimal obligations.</p>
+                  <p class="mb-1 small">Use it almost anywhere, with minimal obligations.</p>
+                  <p class="mb-0 small text-muted">e.g. MIT, BSD</p>
               </div>
           </div>
       </div>
@@ -86,7 +100,8 @@
           <div class="card h-100 shadow-sm border-warning">
               <div class="card-body">
                   <h5 class="fw-bold text-warning">Copyleft</h5>
-                  <p class="mb-0 small">Anything you build on top must be released under that same license.</p>
+                  <p class="mb-1 small">Anything you build on top must be released under that same license.</p>
+                  <p class="mb-0 small text-muted">e.g. GPL</p>
               </div>
           </div>
       </div>
@@ -94,7 +109,8 @@
           <div class="card h-100 shadow-sm border-danger">
               <div class="card-body">
                   <h5 class="fw-bold text-danger">Proprietary</h5>
-                  <p class="mb-0 small">Owned outright, use is tightly restricted by the owner's terms.</p>
+                  <p class="mb-1 small">Owned outright, use is tightly restricted by the owner's terms.</p>
+                  <p class="mb-0 small text-muted">e.g. most commercial software</p>
               </div>
           </div>
       </div>
