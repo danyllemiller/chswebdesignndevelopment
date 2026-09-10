@@ -87,12 +87,19 @@
       <p class="mb-0 text-light">Name two concrete ways to reduce bias in a system you're building. <em class="text-white-50">(Answer: testing with diverse data, and reporting results disaggregated by group instead of as one average.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-vial fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-vial fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: The Bias Test</h3>
-              <p class="mb-0 fs-5">Test your own tool or a supplied one with varied inputs, identify where bias could be entering, and implement — then document — one concrete mitigation.</p>
+              <p class="mb-2 fs-5">If you have a prototype from an earlier chapter, use that. If not, pick a free online tool to test instead — a predictive-text keyboard, an autocomplete search bar, or a free AI image generator all work well.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Like the Worked Example above, run your tool with at least 4 different inputs that vary in exactly one attribute at a time (different names, different phrasings, different assumed backgrounds).</li>
+                  <li class="mb-1">Record every output side by side, and identify at least one place where a single changed attribute produced a noticeably different result.</li>
+                  <li class="mb-1">Name where in the system that bias most likely entered from (the training data, a proxy variable, an assumption someone baked in).</li>
+                  <li class="mb-0">Propose and describe one concrete mitigation from 11.2.1 (diverse test data, disaggregated results, or an explicit review step) that would actually catch this specific bias if it were applied.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your tool and inputs, your side-by-side outputs, where you think the bias entered, and your proposed mitigation.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Bias Test</strong> into your Digital Notebook!</p>
           </div>
       </div>
