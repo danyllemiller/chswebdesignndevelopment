@@ -272,6 +272,8 @@ router.delete('/student/cs-notebook', async (req, res) => {
 router.get('/student/cs-chapter-activities', async (req, res) => {
     const { chapter, student_id } = req.query;
     if (!chapter || !student_id) return res.status(400).json({ error: 'chapter and student_id required' });
+    const chapterNum = parseInt(chapter, 10);
+    if (isNaN(chapterNum)) return res.status(400).json({ error: 'chapter must be a number' });
     try {
         const connection = await getDbConnection();
         const [[student]] = await connection.execute(
@@ -279,10 +281,17 @@ router.get('/student/cs-chapter-activities', async (req, res) => {
             [student_id]
         );
         const courseId = (student && await resolveCourseId(connection, student.section_id)) || '10003GS';
+        // LIKE's "_" is a single-character wildcard, not a literal underscore --
+        // 'cs_ch1_%' silently matched cs_ch10_/cs_ch11_/.../cs_ch19_ too (any
+        // chapter number starting with "1"), turning a 3-activity chapter into
+        // a ~20-item list. REGEXP with "_" as a literal character and an
+        // anchored chapter-number boundary avoids that (same pattern
+        // server/routes/timeclock.js's getCurrentChapter() already uses for
+        // due-date resolution).
         const [rows] = await connection.execute(
             `SELECT exam_id, title, total_points, due_date FROM exams
-             WHERE exam_id LIKE ? AND course_id = ? ORDER BY exam_id`,
-            [`cs_ch${chapter}_%`, courseId]
+             WHERE exam_id REGEXP ? AND course_id = ? ORDER BY exam_id`,
+            [`^cs_ch${chapterNum}_`, courseId]
         );
         await connection.release();
         res.json({ activities: rows });
