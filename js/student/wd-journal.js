@@ -28,7 +28,7 @@ async function loadJournal() {
         const entries = data.entries || [];
 
         if (entries.length === 0) {
-            list.innerHTML = '<div class="journal-empty"><i class="fas fa-feather-pointed mb-2 fs-3 d-block"></i>Nothing here yet — your journal fills in as you clock out each day.</div>';
+            list.innerHTML = '<div class="journal-empty"><i class="fas fa-feather-pointed mb-2 fs-3 d-block"></i>Nothing here yet — your journal fills in as you clock in and out each day.</div>';
             return;
         }
 
@@ -36,9 +36,10 @@ async function loadJournal() {
             const dateObj = new Date(entry.entry_date + 'T00:00:00');
             const dateLabel = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
             const { standard, text } = splitPrompt(entry.prompt);
+            const sessionLabel = entry.session === 'in' ? 'Clock-In' : 'Clock-Out';
             return `
                 <div class="journal-entry">
-                    <div class="journal-date">${escapeHtml(dateLabel)}${standard ? `<span class="journal-standard">WPR ${escapeHtml(standard)}</span>` : ''}</div>
+                    <div class="journal-date">${escapeHtml(dateLabel)}<span class="journal-session">${sessionLabel}</span>${standard ? `<span class="journal-standard">WPR ${escapeHtml(standard)}</span>` : ''}</div>
                     ${text ? `<div class="journal-prompt">${escapeHtml(text)}</div>` : ''}
                     <div class="journal-content">${escapeHtml(entry.content)}</div>
                 </div>

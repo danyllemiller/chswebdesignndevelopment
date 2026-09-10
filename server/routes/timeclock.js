@@ -357,24 +357,37 @@ async function ensureDailyQuestionsGroupTable(connection) {
 }
 
 // Mirrors intervention_journal's shape exactly (server/routes/intervention.js)
-// -- one entry per student per calendar day, storing both the prompt asked
-// and what they wrote, so a WD1/WD2 student can look back through their own
-// clock-out reflections over time. Kept separate from the rich-text
-// notebook (student/notes.html) on purpose -- this is the daily
-// question-and-answer record, not their class notes.
+// -- one entry per student per session (clock-in and clock-out each get
+// their own row) per calendar day, storing both the prompt asked and what
+// they wrote, so a WD1/WD2/AS student can look back through both their
+// morning Workplace Readiness question and their end-of-class reflection
+// over time. Kept separate from the rich-text notebook (student/notes.html)
+// on purpose -- this is the daily question-and-answer record, not their
+// class notes.
 async function ensureWdJournalTable(connection) {
     await connection.execute(`
         CREATE TABLE IF NOT EXISTS wd_journal (
             id         INT AUTO_INCREMENT PRIMARY KEY,
             student_id VARCHAR(50) NOT NULL,
             entry_date DATE NOT NULL,
+            session    VARCHAR(10) NOT NULL DEFAULT 'out',
             prompt     TEXT,
             content    TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            UNIQUE KEY uq_wd_journal (student_id, entry_date)
+            UNIQUE KEY uq_wd_journal (student_id, entry_date, session)
         )
     `);
+    // Migration for tables created before clock-in started journaling too --
+    // back then there was only ever one row per day (from clock-out), so the
+    // old unique key has to be widened to (student_id, entry_date, session)
+    // before clock-in's row for the same day can coexist with it.
+    const [sessionCols] = await connection.execute(`SHOW COLUMNS FROM wd_journal LIKE 'session'`);
+    if (sessionCols.length === 0) {
+        await connection.execute(`ALTER TABLE wd_journal ADD COLUMN session VARCHAR(10) NOT NULL DEFAULT 'out' AFTER entry_date`);
+        await connection.execute(`ALTER TABLE wd_journal DROP INDEX uq_wd_journal`);
+        await connection.execute(`ALTER TABLE wd_journal ADD UNIQUE KEY uq_wd_journal (student_id, entry_date, session)`);
+    }
 }
 
 async function resolveQuestionGroupKey(connection, studentId) {
@@ -530,6 +543,25 @@ router.post('/timeclock/save', async (req, res) => {
                     );
                 }
             } catch (gradeErr) { console.error('[timeclock] Failed to grade clock-in:', gradeErr); }
+
+            // WD1/WD2/AS daily journal -- clock-in's graded MC question is
+            // still worth keeping a record of alongside clock-out's
+            // reflection, one row per session per day (see
+            // ensureWdJournalTable), browsable later (My Daily Journal) the
+            // same way Intervention's journal already works. Best-effort:
+            // never block the clock-in itself if this fails.
+            try {
+                const courseKey = periodToCourseKeyServer(period);
+                if (courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS') {
+                    await ensureWdJournalTable(connection);
+                    await connection.execute(
+                        `INSERT INTO wd_journal (student_id, entry_date, session, prompt, content)
+                         VALUES (?, ?, 'in', ?, ?)
+                         ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
+                        [student_id, today, prompt || null, answer || '']
+                    );
+                }
+            } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry (clock-in):', journalErr); }
         } else if (mode === 'out') {
             await connection.execute(
                 'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',
@@ -545,33 +577,31 @@ router.post('/timeclock/save', async (req, res) => {
                 [answer || '', student_id, today, period]
             );
 
-            // WD1/WD2/AS daily journal -- clock-out asks the open-ended half
-            // of the Workplace Readiness pair (see /timeclock/reflection-prompt),
-            // and that free-response answer is what's worth keeping as a
-            // journal entry (clock-in's answer is just a graded MC pick).
-            // One row per student per day, browsable later (My Daily Journal)
-            // the same way Intervention's journal already works. Best-effort:
+            // WD1/WD2/AS daily journal -- clock-out's open-ended reflection
+            // gets its own row, alongside clock-in's (see above). Best-effort:
             // never block the clock-out itself if this fails.
             try {
                 const courseKey = periodToCourseKeyServer(period);
                 if (courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS') {
                     await ensureWdJournalTable(connection);
                     await connection.execute(
-                        `INSERT INTO wd_journal (student_id, entry_date, prompt, content)
-                         VALUES (?, ?, ?, ?)
+                        `INSERT INTO wd_journal (student_id, entry_date, session, prompt, content)
+                         VALUES (?, ?, 'out', ?, ?)
                          ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
                         [student_id, today, prompt || null, answer || '']
                     );
                 }
-            } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry:', journalErr); }
+            } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry (clock-out):', journalErr); }
         }
         await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Timeclock save failed.' }); }
 });
 
-// Student's own journal -- every clock-out reflection they've written,
-// newest first, so they can look back on it (see ensureWdJournalTable above).
+// Student's own journal -- both the clock-in Workplace Readiness question
+// and the clock-out reflection they've written, newest first (and clock-in
+// shown before clock-out within the same day), so they can look back on it
+// (see ensureWdJournalTable above).
 router.get('/student/wd-journal', async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
@@ -579,7 +609,8 @@ router.get('/student/wd-journal', async (req, res) => {
         const connection = await getDbConnection();
         await ensureWdJournalTable(connection);
         const [rows] = await connection.execute(
-            'SELECT entry_date, prompt, content, updated_at FROM wd_journal WHERE student_id = ? ORDER BY entry_date DESC',
+            `SELECT entry_date, session, prompt, content, updated_at FROM wd_journal
+             WHERE student_id = ? ORDER BY entry_date DESC, session = 'out' ASC`,
             [student_id]
         );
         await connection.release();
@@ -595,7 +626,8 @@ router.get('/admin/wd-journal/:student_id', async (req, res) => {
         const connection = await getDbConnection();
         await ensureWdJournalTable(connection);
         const [rows] = await connection.execute(
-            'SELECT entry_date, prompt, content, updated_at FROM wd_journal WHERE student_id = ? ORDER BY entry_date DESC',
+            `SELECT entry_date, session, prompt, content, updated_at FROM wd_journal
+             WHERE student_id = ? ORDER BY entry_date DESC, session = 'out' ASC`,
             [student_id]
         );
         await connection.release();

@@ -14,7 +14,7 @@ async function loadRoster() {
         const res = await fetch('/api/admin/roster');
         const data = await res.json();
         const roster = (data.roster || data || [])
-            .filter(s => s.student_id && s.first_name && s.last_name && (s.section_id === 'A1' || s.section_id === 'B2'))
+            .filter(s => s.student_id && s.first_name && s.last_name && (s.section_id === 'A1' || s.section_id === 'B2' || s.section_id === 'AS-B2'))
             .sort((a, b) => a.last_name.localeCompare(b.last_name));
 
         select.innerHTML = '<option value="">Select a student...</option>' + roster.map(s =>
@@ -49,9 +49,10 @@ async function loadJournal(studentId) {
             const dateObj = new Date(entry.entry_date + 'T00:00:00');
             const dateLabel = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
             const { standard, text } = splitPrompt(entry.prompt);
+            const sessionLabel = entry.session === 'in' ? 'Clock-In' : 'Clock-Out';
             return `
                 <div class="journal-entry">
-                    <div class="journal-date">${escapeHtml(dateLabel)}${standard ? `<span class="journal-standard">WPR ${escapeHtml(standard)}</span>` : ''}</div>
+                    <div class="journal-date">${escapeHtml(dateLabel)}<span class="journal-session">${sessionLabel}</span>${standard ? `<span class="journal-standard">WPR ${escapeHtml(standard)}</span>` : ''}</div>
                     ${text ? `<div class="journal-prompt">${escapeHtml(text)}</div>` : ''}
                     <div class="journal-content">${escapeHtml(entry.content)}</div>
                 </div>
