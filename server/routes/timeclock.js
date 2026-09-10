@@ -275,6 +275,23 @@ async function getDeterministicQuestion(connection, table, chapter, groupKey) {
 // type is one of CS_IN / WD1_IN / WD2_IN — the clock-in question is always a
 // real test-bank question pulled from the chapter the student is currently
 // working on, never a manually-typed or generic question.
+// Both question banks store the correct answer in a fixed slot -- the CS
+// bank has it in option_a on literally every row (confirmed: 420/420), and
+// the WPR bank clusters it in options[1]/[2] almost exclusively. Neither
+// was ever shuffled before reaching the student, so the position itself
+// was a giveaway. Shuffled fresh on every request (not tied to the
+// deterministic-by-day question, so two students can't just compare
+// letters) -- comparisons are by the answer's text, not its index, so this
+// changes nothing about how correctness is checked.
+function shuffleOptions(options) {
+    const arr = options.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
 router.get('/timeclock/question', async (req, res) => {
     const { type } = req.query;
     const kind = String(type || '').replace(/_IN$/, ''); // CS, WD1, WD2, AS
@@ -287,7 +304,7 @@ router.get('/timeclock/question', async (req, res) => {
         const picked = pickWprMcQuestion(getLocalDateStr());
         return res.json({
             question_text: picked.q,
-            options: picked.options,
+            options: shuffleOptions(picked.options),
             correct_answer: picked.answer,
             chapterLabel: 'Workplace Readiness Check-In'
         });
@@ -319,7 +336,7 @@ router.get('/timeclock/question', async (req, res) => {
 
         res.json({
             question_text: q.question,
-            options: q.options,
+            options: shuffleOptions(q.options),
             correct_answer: q.answer,
             chapterLabel: `Chapter ${chapter}: ${title}${isFallback ? ' (no due dates set yet — defaulting to Ch. 1)' : ''}`
         });
