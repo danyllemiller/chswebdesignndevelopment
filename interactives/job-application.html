@@ -314,6 +314,7 @@ textarea {
   z-index: 50;
 }
 .bottom-bar-left { font-size: .8rem; color: var(--ink-muted); }
+.draft-status { display: block; font-size: .72rem; font-style: italic; color: var(--ink-muted); opacity: .8; margin-top: 2px; }
 .btn-group { display: flex; gap: 10px; align-items: center; }
 
 .btn {
@@ -586,6 +587,7 @@ input.invalid, textarea.invalid {
   <div class="bottom-bar-left">
     <strong>Carson High Web Design &amp; Marketing Agency</strong><br>
     <span id="statusMsg" style="color:var(--ink-muted);">Select a position above to get started.</span>
+    <span id="draftStatus" class="draft-status"></span>
   </div>
   <div class="btn-group">
     <button class="btn btn-outline" onclick="clearForm()">Clear Form</button>
@@ -926,6 +928,7 @@ async function submitApplication() {
     });
     if (!res.ok) throw new Error('Server returned ' + res.status);
     document.getElementById('statusMsg').innerHTML = '<strong style="color:var(--success)">✅ Application submitted — your teacher can see it now.</strong>';
+    clearDraftLocal(); // safely on the server now -- the local copy would only get in the way of a fresh start next time
     alert('Application submitted! Your teacher can see it now.\n\nYou can still use "Print / Save as PDF" to keep your own copy, but that\'s optional — your submission is already saved.');
   } catch (err) {
     console.error('Application submit failed:', err);
@@ -955,7 +958,92 @@ function clearForm() {
   var ds  = mm+'/'+dd+'/'+today.getFullYear();
   document.getElementById('appDate').value = ds;
   document.getElementById('sigDate').value = ds;
+  clearDraftLocal();
 }
+
+/* ── local draft persistence ─────────────────────────────────────
+   Nothing was ever saved until the final Submit button -- a closed tab,
+   an accidental refresh, or a crash mid-way through these long
+   behavioral-question answers lost everything with zero warning.
+   Every field now mirrors to localStorage as the student types, and a
+   leftover draft is restored automatically the next time this page
+   loads (role picked first, since the role-specific questions below it
+   don't exist in the DOM until switchRole() builds them). Keyed by
+   student_id so a shared classroom computer can't leak one student's
+   in-progress answers into another's session. */
+var ALL_FIELD_IDS = ['fullName', 'classPeriod', 'appDate', 'yearTrack', 'prevExperience', 'q-why', 'q-conflict', 'q-gap', 'q-cover', 'sigName', 'sigDate'];
+
+function draftKey() {
+  var user = {};
+  try { user = JSON.parse(localStorage.getItem('user') || '{}'); } catch (e) {}
+  return 'jobAppDraft:' + (user.student_id || 'anon');
+}
+
+function collectDraft() {
+  var roleVal = document.getElementById('roleSelect').value;
+  var draft = { role: roleVal, fields: {}, ts: Date.now() };
+  ALL_FIELD_IDS.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) draft.fields[id] = el.value;
+  });
+  if (roleVal && ROLES[roleVal]) {
+    ROLES[roleVal].questions.forEach(function (item) {
+      var el = document.getElementById(item.id);
+      if (el) draft.fields[item.id] = el.value;
+    });
+  }
+  return draft;
+}
+
+function saveDraftLocal() {
+  try { localStorage.setItem(draftKey(), JSON.stringify(collectDraft())); } catch (e) { console.error('Draft save failed:', e); return; }
+  var status = document.getElementById('draftStatus');
+  if (status) status.textContent = 'Draft saved ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+function clearDraftLocal() {
+  try { localStorage.removeItem(draftKey()); } catch (e) { /* ignore */ }
+  var status = document.getElementById('draftStatus');
+  if (status) status.textContent = '';
+}
+
+function restoreDraftLocal() {
+  var raw;
+  try { raw = localStorage.getItem(draftKey()); } catch (e) { return; }
+  if (!raw) return;
+  var draft;
+  try { draft = JSON.parse(raw); } catch (e) { return; }
+  if (!draft || !draft.fields) return;
+
+  if (draft.role && ROLES[draft.role]) {
+    document.getElementById('roleSelect').value = draft.role;
+    switchRole(draft.role); // builds the role-specific textareas before their values get restored below
+  }
+  Object.keys(draft.fields).forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.value = draft.fields[id];
+  });
+  document.querySelectorAll('textarea[oninput]').forEach(function (el) { el.dispatchEvent(new Event('input')); });
+
+  var status = document.getElementById('draftStatus');
+  if (status && draft.ts) {
+    status.textContent = 'Draft restored from ' + new Date(draft.ts).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+}
+
+var draftSaveTimer = null;
+function scheduleDraftSave() {
+  if (draftSaveTimer) clearTimeout(draftSaveTimer);
+  draftSaveTimer = setTimeout(saveDraftLocal, 400);
+}
+document.addEventListener('input', function (e) {
+  if (e.target.matches('input, textarea, select')) scheduleDraftSave();
+});
+document.addEventListener('change', function (e) {
+  if (e.target.matches('select')) scheduleDraftSave();
+});
+
+restoreDraftLocal();
 </script>
 </body>
 </html>
