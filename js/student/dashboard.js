@@ -353,7 +353,8 @@ function calculateGradeStats(keys, myGrades, registryData, courseKey) {
             // and timeclock entries are NEVER exempt, regardless of exam
             // score -- previously this exempted Unit#-Pre and Unit#
             // Pre-Scale instead, the opposite of what's wanted.
-            if (courseKey === 'CS') {
+            const isCsActivity = courseKey === 'CS' && /^cs_ch\d+_/.test(key);
+            if (isCsActivity) {
                 const chMatch = key.match(/^cs_ch(\d+)_/);
                 const unit = chMatch ? unitForCsChapter(Number(chMatch[1])) : null;
                 if (unit) {
@@ -380,6 +381,11 @@ function calculateGradeStats(keys, myGrades, registryData, courseKey) {
 
             const hasScore = score !== undefined && score !== null && score !== "";
             if (!hasScore) {
+                // A CS Activity is never counted as a punishing zero just for
+                // being overdue -- it stays excluded (missing, not 0) until
+                // either the student actually turns it in, or the unit exam
+                // check above proves mastery some other way.
+                if (isCsActivity) return;
                 // Ungraded — only count it as a missed zero once its due date has
                 // actually passed. Not-yet-due (or undated) work is excluded
                 // entirely rather than dragging the average down early.

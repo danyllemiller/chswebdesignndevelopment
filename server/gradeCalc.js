@@ -134,7 +134,8 @@ async function computeStudentGrade(connection, studentId, sectionId) {
         // wanted: those diagnostic/reflection items should always count,
         // and it's the classwork that becomes redundant once the exam
         // itself proves mastery.
-        if (courseKey === 'CS') {
+        const isCsActivity = courseKey === 'CS' && /^cs_ch\d+_/.test(key);
+        if (isCsActivity) {
             const chMatch = key.match(/^cs_ch(\d+)_/);
             const unit = chMatch ? unitForCsChapter(Number(chMatch[1])) : null;
             if (unit) {
@@ -157,6 +158,12 @@ async function computeStudentGrade(connection, studentId, sectionId) {
 
         const hasScore = score !== undefined && score !== null && score !== '';
         if (!hasScore) {
+            // A CS Activity is never counted as a punishing zero just for
+            // being overdue -- it stays excluded (missing, not 0) until
+            // either the student actually turns it in, or the unit exam
+            // check above proves mastery some other way. Only real evidence
+            // moves it out of "missing," in either direction.
+            if (isCsActivity) return;
             const dueDate = formatDbDate(r.due_date);
             const isPastDue = !!dueDate && new Date(dueDate + 'T00:00:00') < today;
             if (!isPastDue) return;

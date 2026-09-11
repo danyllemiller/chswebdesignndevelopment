@@ -1418,12 +1418,21 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
         let earned = 0, possible = 0, catEarned = {assignment:0, project_quiz:0, final:0, career:0}, catPossible = {assignment:0, project_quiz:0, final:0, career:0};
 
         sortedKeys.forEach(key => {
-            // CS-only mastery exemption: 80%+ on a unit's exam exempts that
-            // unit's Pre-Test and Pre-Scale. Mirrors js/student/dashboard.js.
-            if (courseKey === 'CS') {
-                const unitMatch = key.match(/^Unit(\d+)(?:-Pre|\s+Pre-Scale)$/);
-                if (unitMatch) {
-                    const examKey = `Unit${unitMatch[1]}-Exam`;
+            // CS-only mastery exemption: once a student scores 80%+ on a
+            // unit's exam, that unit's chapter classwork (cs_chN_*) is
+            // exempt -- it exists to build toward mastery, which no longer
+            // matters once the exam itself proves it. Pre-Test, Pre-Scale,
+            // and timeclock entries are NEVER exempt. Mirrors
+            // js/student/dashboard.js and server/gradeCalc.js -- this copy
+            // previously exempted Unit#-Pre/Pre-Scale instead, the opposite
+            // of what's wanted, and disagreed with the student's own
+            // dashboard percentage as a result.
+            const isCsActivity = courseKey === 'CS' && /^cs_ch\d+_/.test(key);
+            if (isCsActivity) {
+                const chMatch = key.match(/^cs_ch(\d+)_/);
+                const unit = chMatch ? unitForCsChapter(Number(chMatch[1])) : null;
+                if (unit) {
+                    const examKey = `Unit${unit}-Exam`;
                     const examFuzzy = Object.keys(sGrades).find(k => cleanKey(k) === cleanKey(examKey));
                     const examEntry = examFuzzy ? sGrades[examFuzzy] : null;
                     const examScore = examEntry ? (typeof examEntry === 'object' ? examEntry.score : examEntry) : null;
@@ -1455,6 +1464,11 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
 
             const hasScore = score !== undefined && score !== null && score !== "";
             if (!hasScore) {
+                // A CS Activity is never counted as a punishing zero just for
+                // being overdue -- it stays excluded (missing, not 0) until
+                // either the student actually turns it in, or the unit exam
+                // check above proves mastery some other way.
+                if (isCsActivity) return;
                 // Ungraded — only count it as a missed zero once its due date
                 // has actually passed, so students aren't dinged for work
                 // that isn't due yet. Matches js/student/dashboard.js.
@@ -1562,23 +1576,13 @@ let score = "", display = '', bg = "";
                             }
                         }
                         // Didn't reach 80% on the unit exam (or hasn't taken
-                        // it yet) -- if this chapter assignment's due date has
-                        // passed with nothing turned in, flag it the same way
-                        // the student's own dashboard already counts it: a
-                        // visible MISSING marker instead of a blank cell, so
-                        // it's not mistaken for "not due yet" or silently
-                        // overlooked at a glance.
-                        if (unit && !masteryExempt) {
-                            const effectiveDueDate = studentPeriodDueDate || reg?.dueDate;
-                            const isPastDue = !!effectiveDueDate && new Date(effectiveDueDate + 'T00:00:00') < today;
-                            if (isPastDue) {
-                                display = '<span class="text-danger fw-bold" title="Missing">M</span>';
-                                // Text color alone was too easy to miss scanning
-                                // a full row -- the cell background itself is
-                                // now red too.
-                                bg = "background-color: rgb(240, 155, 155);";
-                            }
-                        }
+                        // it yet) and hasn't turned the activity in -- stays a
+                        // plain blank cell regardless of due date, same as
+                        // the student's own dashboard/percentage no longer
+                        // counting it as a zero. It only stops being "missing"
+                        // once real evidence exists (a submission, or the
+                        // exam proving mastery above) -- being overdue alone
+                        // is no longer flagged here.
                     }
                 }
             }
