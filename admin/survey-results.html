@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Teacher Admin | Survey Results</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=20"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+</head>
+<body class="bg-white">
+
+<div class="container-fluid sticky-top px-0">
+  <div id="nav-placeholder"></div>
+</div>
+
+<div class="container my-4">
+  <h2 class="gochi text-primary mb-4">Anonymous Survey Results</h2>
+
+  <div class="card shadow-sm mb-5">
+    <div class="card-header bg-white fw-bold"><i class="fas fa-clipboard-list me-2 text-primary"></i>Agency 360 / Comp Sci Course Review</div>
+    <div class="card-body">
+      <div class="row g-2 align-items-end mb-3">
+        <div class="col-auto">
+          <label class="form-label small fw-bold">Form</label>
+          <select id="survey-form-select" class="form-select">
+            <option value="agency360">Agency 360 Review (WD1/WD2/AS)</option>
+            <option value="cs_course_review">Comp Sci Course Review</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <label class="form-label small fw-bold">Administration</label>
+          <select id="survey-term-select" class="form-select"></select>
+        </div>
+        <div class="col-auto">
+          <button id="survey-export-btn" type="button" class="btn btn-outline-primary fw-bold"><i class="fas fa-download me-1"></i>Download CSV</button>
+        </div>
+        <div class="col-auto">
+          <button id="survey-clear-btn" type="button" class="btn btn-outline-danger fw-bold"><i class="fas fa-trash-alt me-1"></i>Clear this data</button>
+        </div>
+      </div>
+      <div id="survey-results-root"></div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-5">
+    <div class="card-header bg-white fw-bold"><i class="fas fa-heart-pulse me-2 text-primary"></i>Weekly Pulse</div>
+    <div class="card-body">
+      <div class="row g-2 align-items-end mb-3">
+        <div class="col-auto">
+          <label class="form-label small fw-bold">Week</label>
+          <select id="pulse-week-select" class="form-select"></select>
+        </div>
+        <div class="col-auto">
+          <button id="pulse-export-btn" type="button" class="btn btn-outline-primary fw-bold"><i class="fas fa-download me-1"></i>Download CSV</button>
+        </div>
+        <div class="col-auto">
+          <button id="pulse-clear-btn" type="button" class="btn btn-outline-danger fw-bold"><i class="fas fa-trash-alt me-1"></i>Clear this week</button>
+        </div>
+      </div>
+      <div id="pulse-results-root"></div>
+    </div>
+  </div>
+
+  <div class="alert alert-secondary small">
+    <strong>Privacy limits, plainly stated:</strong> no response row ever stores a timestamp, name, or device identifier — results only appear once at least 4 responses exist for a survey/term (3 for a Pulse week), and open-text answers are shown in a randomized order every time, never by submission order. A skipped item just isn't in the averages. Anyone with direct database access can still see raw rows below the threshold; that gate protects this page's view, not the underlying table.
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script type="module" src="/js/admin/survey-results.js?v=1"></script>
+</body>
+</html>

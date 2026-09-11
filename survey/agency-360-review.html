@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Agency 360 Review | CHS Web Design &amp; Development</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/student-pages.css" rel="stylesheet"/>
+  <link href="/css/survey.css" rel="stylesheet"/>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=20"></script>
+  <!-- No auth-guard.js on purpose: this form must work with no login at all. -->
+</head>
+<body class="bg-light">
+
+<div id="nav-placeholder"></div>
+
+<div class="container my-4" style="max-width: 900px;">
+  <div id="survey-root"></div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script type="module">
+  import { renderSurvey } from '/js/survey-common.js';
+
+  renderSurvey({
+    formId: 'agency360',
+    formKey: 'agency360',
+    title: 'Agency 360 Review',
+    intro: 'In a real agency, the team reviews the manager too. This is your turn. Answer honestly — this is anonymous, it is not graded, and nothing here changes your standing in this class.',
+    termOptions: ['Fall', 'Spring'],
+    termLabel: 'Which term is this?',
+    showPeriod: false,
+    parts: [
+      {
+        key: 'A', title: 'Does this class help me learn?', subtitle: 'NEPF 2-5.1',
+        items: [
+          { num: 1, type: 'scale', text: 'New skills are explained in a way I can actually follow.' },
+          { num: 2, type: 'scale', text: 'When I get stuck, I know how to get help in this class.' },
+          { num: 3, type: 'scale', text: 'The chapter pages, videos, and demos are there when I need to go back to something.' },
+          { num: 4, type: 'scale', text: 'I know what I am supposed to be learning and how I will be graded on it.' },
+          { num: 5, type: 'scale', text: 'The reteach and retest window gives me a real second chance to show what I learned.' },
+          { num: 6, type: 'scale', text: 'The feedback I get on my work tells me what to fix, not just what is wrong.' }
+        ]
+      },
+      {
+        key: 'B', title: 'Is this a place I can work?', subtitle: 'NEPF 2-5.2 · 1-3.4',
+        items: [
+          { num: 7, type: 'scale', text: 'I am comfortable asking a question in front of the class.' },
+          { num: 8, type: 'scale', text: 'Mistakes are treated as part of the work here, not as failures.' },
+          { num: 9, type: 'scale', text: 'Critique in this class stays about the work, not about the person.' },
+          { num: 10, type: 'scale', text: 'I am treated with respect in this class.' },
+          { num: 11, type: 'scale', text: 'If something in this class was wrong, I would be willing to say so.' }
+        ]
+      },
+      {
+        key: 'C', title: 'Am I known here?', subtitle: 'NEPF 2-5.3',
+        items: [
+          { num: 12, type: 'scale', text: 'My teacher knows what I am interested in or what I want to do after high school.' },
+          { num: 13, type: 'scale', text: 'I get checked in on as a person, not only about whether my work is done.' },
+          { num: 14, type: 'scale', text: 'I believe my teacher wants me to succeed in this class.' }
+        ]
+      },
+      {
+        key: 'D', title: 'How the agency runs', subtitle: 'Classroom systems',
+        items: [
+          { num: 15, type: 'scale', text: 'Running this class like a design agency makes the work feel real.' },
+          { num: 16, type: 'scale', text: 'Clocking in and the paycheck system are worth doing.' },
+          { num: 17, type: 'scale', text: 'I understand how my Guild Score is calculated.' },
+          { num: 18, type: 'scale', text: 'Reading the chapter page before class helps me understand the lesson.' },
+          { num: 19, type: 'scale', text: 'Working on client-style projects is better than working on practice exercises.' },
+          { num: 20, type: 'scale', text: 'I get enough hands-on build time, compared to time spent listening.' },
+          { num: 21, type: 'choice', text: 'The pace of this class is:', options: ['Too slow', 'A little slow', 'About right', 'A little fast', 'Too fast'] },
+          { num: 22, type: 'choice', text: 'The difficulty of the work is:', options: ['Too easy', 'About right', 'Hard but doable', 'Too hard'] }
+        ]
+      },
+      {
+        key: 'E', title: 'The class overall', subtitle: 'Program health',
+        items: [
+          { num: 23, type: 'scale', text: 'Overall, I like this class.' },
+          { num: 24, type: 'choice', text: 'I would recommend this class to another student.', options: ['Yes', 'Maybe', 'No'] },
+          { num: 25, type: 'choice', text: 'I plan to continue in Web Design next year.', options: ['Yes', 'No', 'Not sure', 'I graduate this year'] },
+          { num: 26, type: 'choice', text: 'If no or not sure, the main reason is:', options: ['Schedule conflict', 'I need another class to graduate', 'Not what I expected', 'Too hard', 'Not interested anymore', 'Other'] },
+          { num: 27, type: 'text', text: 'If you are continuing: what is the one thing that made you want to come back?' }
+        ]
+      },
+      {
+        key: 'F', title: 'In your own words', subtitle: 'Highest-value items',
+        items: [
+          { num: 28, type: 'text', text: 'What do you like most about this class?' },
+          { num: 29, type: 'text', text: 'What would you change?' },
+          { num: 30, type: 'text', text: 'Describe one time this year when something really clicked for you. What was happening?' },
+          { num: 31, type: 'text', text: 'What is something about this class that is hard to say out loud?' },
+          { num: 32, type: 'text', text: 'Anything else.' }
+        ]
+      }
+    ]
+  });
+</script>
+
+</body>
+</html>

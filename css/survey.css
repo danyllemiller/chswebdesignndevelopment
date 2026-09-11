@@ -1,0 +1,110 @@
+/* /css/survey.css -- shared styling for the anonymous feedback surveys.
+   Mobile-first, accessibility-first: real focus rings, large tap targets,
+   nothing that depends on color alone to convey state. */
+
+.survey-intro { max-width: 700px; margin: 0 auto 1.5rem; text-align: center; }
+.survey-title { font-size: 1.9rem; margin-bottom: .5rem; }
+.survey-intro-text { color: #444; font-size: 1.02rem; }
+.survey-anon-banner {
+    background: var(--primary-color-10, rgba(0,0,153,0.08));
+    border: 2px solid var(--primary-color, #000099);
+    border-radius: 10px;
+    padding: .9rem 1.1rem;
+    margin-top: 1rem;
+    font-size: 1rem;
+}
+
+#survey-form { max-width: 700px; margin: 0 auto; }
+
+.survey-meta-row { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem; }
+.survey-meta-field { flex: 1 1 200px; }
+.survey-meta-field label { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.survey-part-header { margin: 2.25rem 0 1rem; padding-top: 1rem; border-top: 3px solid var(--primary-color, #000099); }
+.survey-part-header:first-of-type { border-top: none; padding-top: 0; margin-top: .5rem; }
+.survey-part-title { font-size: 1.3rem; color: var(--primary-color, #000099); margin-bottom: .15rem; }
+.survey-part-subtitle { color: #777; font-size: .85rem; margin: 0; }
+
+fieldset.survey-scale-fieldset,
+fieldset.survey-choice-fieldset {
+    border: 1px solid #dde0ec;
+    border-radius: 10px;
+    padding: 1rem 1.1rem 1.2rem;
+    margin: 0 0 1.1rem;
+    background: #fff;
+}
+legend.survey-item-legend {
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0 .4rem;
+    width: auto;
+    float: none;
+    color: #1a1a2e;
+}
+
+.survey-scale-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: .6rem;
+    margin-top: .5rem;
+}
+.survey-scale-choice { position: relative; }
+.survey-scale-input {
+    position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer;
+}
+.survey-scale-label {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: .15rem;
+    border: 2px solid #c7c9db;
+    border-radius: 10px;
+    padding: .7rem .4rem;
+    min-height: 64px;
+    text-align: center;
+    cursor: pointer;
+    transition: background .1s, border-color .1s;
+}
+.survey-scale-num { font-weight: 800; font-size: 1.15rem; color: var(--primary-color, #000099); }
+.survey-scale-word { font-size: .72rem; color: #555; line-height: 1.1; }
+.survey-scale-input:checked + .survey-scale-label {
+    border-color: var(--primary-color, #000099);
+    background: var(--primary-color-10, rgba(0,0,153,0.1));
+}
+.survey-scale-input:focus-visible + .survey-scale-label,
+.survey-choice-input:focus-visible + .survey-choice-label {
+    outline: 3px solid #ff9500;
+    outline-offset: 2px;
+}
+
+.survey-choice-options { display: flex; flex-direction: column; gap: .5rem; margin-top: .5rem; }
+.survey-choice-choice { position: relative; }
+.survey-choice-input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.survey-choice-label {
+    display: block;
+    border: 2px solid #c7c9db;
+    border-radius: 10px;
+    padding: .7rem 1rem;
+    cursor: pointer;
+    min-height: 44px;
+}
+.survey-choice-input:checked + .survey-choice-label {
+    border-color: var(--primary-color, #000099);
+    background: var(--primary-color-10, rgba(0,0,153,0.1));
+    font-weight: 600;
+}
+
+.survey-text-item { margin: 0 0 1.3rem; }
+.survey-text-label { display: block; font-weight: 600; margin-bottom: .4rem; }
+.survey-textarea:focus-visible, select:focus-visible, input:focus-visible, button:focus-visible, textarea:focus {
+    outline: 3px solid #ff9500;
+    outline-offset: 1px;
+}
+
+.survey-submit-row { text-align: center; margin: 2rem 0 3rem; }
+.survey-submit-btn { min-width: 220px; min-height: 50px; }
+.survey-msg { margin-top: .75rem; font-weight: 600; }
+
+.survey-thanks { max-width: 600px; margin: 3rem auto; text-align: center; }
+
+@media (prefers-reduced-motion: reduce) {
+    .survey-scale-label, .survey-choice-label { transition: none; }
+}

@@ -545,8 +545,89 @@ async function handleTimeclockSubmit(e) {
                 prompt: currentPromptText
             })
         });
+        // Clocking out is the one moment every student already passes
+        // through, which is exactly why the Weekly Pulse lives here instead
+        // of on a page students would have to remember to visit. It's a
+        // genuinely separate, anonymous submission (see submitPulseStep) --
+        // the clock-out itself has already fully succeeded by this point
+        // either way, so a skipped or failed pulse never blocks it.
+        if (mode === 'out') { showPulseStep(); return; }
         location.reload();
     } catch (e) { console.error("Timeclock submit error:", e); logTimeclockError('handleTimeclockSubmit', e); }
+}
+
+// Monday of the current week, as a plain YYYY-MM-DD string -- never a
+// precise timestamp. This is the only thing that ties a pulse response to
+// "when," and it's coarse on purpose: with a handful of students in a
+// class, a real timestamp (down to the second) would let submission order
+// re-identify who said what.
+function getPulseWeekStr() {
+    const d = new Date();
+    const day = d.getDay(); // 0=Sun..6=Sat
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diffToMonday);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+let selectedPulseFeeling = null;
+
+function showPulseStep() {
+    const form = document.getElementById('tc-form');
+    const pulseStep = document.getElementById('tc-pulse-step');
+    const successMsg = document.getElementById('tc-success-msg');
+    if (!pulseStep) { location.reload(); return; } // defensive -- never strand a student on a broken step
+    if (form) form.classList.add('d-none');
+    if (successMsg) successMsg.classList.add('d-none');
+    pulseStep.classList.remove('d-none');
+    selectedPulseFeeling = null;
+    pulseStep.querySelectorAll('.tc-pulse-feel-btn').forEach(b => b.classList.remove('btn-primary', 'text-white'));
+}
+
+function initPulseStep() {
+    const pulseStep = document.getElementById('tc-pulse-step');
+    if (!pulseStep) return;
+    pulseStep.querySelectorAll('.tc-pulse-feel-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedPulseFeeling = btn.dataset.feeling;
+            pulseStep.querySelectorAll('.tc-pulse-feel-btn').forEach(b => {
+                b.classList.remove('btn-primary', 'text-white');
+                b.classList.add('btn-outline-secondary');
+            });
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-primary', 'text-white');
+        });
+    });
+    document.getElementById('tc-pulse-skip-btn')?.addEventListener('click', () => location.reload());
+    document.getElementById('tc-pulse-submit-btn')?.addEventListener('click', submitPulseStep);
+}
+
+async function submitPulseStep() {
+    const submitBtn = document.getElementById('tc-pulse-submit-btn');
+    if (submitBtn) submitBtn.disabled = true;
+    try {
+        // Deliberately no student_id, name, or anything else identifying in
+        // this payload -- even though this runs inside an already-logged-in
+        // session, the pulse itself stays as anonymous as the two standalone
+        // survey forms.
+        if (selectedPulseFeeling) {
+            await apiFetch('/api/survey/pulse/submit', {
+                method: 'POST',
+                body: JSON.stringify({
+                    week: getPulseWeekStr(),
+                    section: currentPeriod || studentData.section_id,
+                    feeling: selectedPulseFeeling,
+                    unsure_text: document.getElementById('tc-pulse-unsure')?.value?.trim() || '',
+                    need_text: document.getElementById('tc-pulse-need')?.value?.trim() || '',
+                    other_text: document.getElementById('tc-pulse-other')?.value?.trim() || ''
+                })
+            });
+        }
+    } catch (e) {
+        console.error('Pulse submit error:', e);
+        logTimeclockError('submitPulseStep', e);
+    } finally {
+        location.reload();
+    }
 }
 
 function injectTimeclockUI() {
@@ -571,6 +652,34 @@ function injectTimeclockUI() {
                         <button type="submit" id="tc-submit-btn" class="btn btn-primary w-100 fw-bold py-3">Submit</button>
                         <button type="button" class="btn btn-link w-100 mt-2 text-muted" data-bs-dismiss="modal">Not right now</button>
                     </form>
+                    <div id="tc-pulse-step" class="d-none">
+                        <h6 class="fw-bold text-dark mb-1">Friday Pulse</h6>
+                        <p class="text-muted small mb-3">Two minutes before you go. No name, no grade — this is how your teacher finds out what to fix before next class. Skip anything you do not want to answer.</p>
+                        <div class="mb-3">
+                            <div class="fw-bold small mb-2">1. This week I felt…</div>
+                            <div id="tc-pulse-feeling" class="d-grid gap-2" style="grid-template-columns: repeat(2, 1fr); display: grid;" role="radiogroup" aria-label="This week I felt">
+                                <button type="button" class="btn btn-outline-secondary py-3 fw-bold tc-pulse-feel-btn" data-feeling="Lost">Lost</button>
+                                <button type="button" class="btn btn-outline-secondary py-3 fw-bold tc-pulse-feel-btn" data-feeling="Behind">Behind</button>
+                                <button type="button" class="btn btn-outline-secondary py-3 fw-bold tc-pulse-feel-btn" data-feeling="Steady">Steady</button>
+                                <button type="button" class="btn btn-outline-secondary py-3 fw-bold tc-pulse-feel-btn" data-feeling="Ahead">Ahead</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tc-pulse-unsure" class="fw-bold small mb-1">2. The thing I am least sure about right now</label>
+                            <textarea id="tc-pulse-unsure" class="form-control" rows="2" placeholder="A skill, a project step, an assignment — whatever is fuzziest."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tc-pulse-need" class="fw-bold small mb-1">3. What I need from you next week</label>
+                            <textarea id="tc-pulse-need" class="form-control" rows="2" placeholder="More time on… / show us again how to… / check my…"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tc-pulse-other" class="fw-bold small mb-1">4. Anything else <span class="fw-normal text-muted">(optional)</span></label>
+                            <textarea id="tc-pulse-other" class="form-control" rows="2"></textarea>
+                        </div>
+                        <button type="button" id="tc-pulse-submit-btn" class="btn btn-primary w-100 fw-bold py-3">Submit my pulse</button>
+                        <button type="button" id="tc-pulse-skip-btn" class="btn btn-link w-100 mt-2 text-muted">Skip for now</button>
+                        <p class="text-muted small mt-3 mb-0">No name is attached to this. Your teacher sees the week's responses together, not who sent which one.</p>
+                    </div>
                     <div id="tc-success-msg" class="alert alert-success mt-3 d-none text-center fw-bold">Success!</div>
                 </div>
             </div>
@@ -585,6 +694,7 @@ function injectTimeclockUI() {
     document.getElementById('timeclock-modal').addEventListener('hidden.bs.modal', cleanupStrayModalState);
     document.getElementById('tc-clockin-btn').addEventListener('click', () => handleManualOpen('in'));
     document.getElementById('tc-clockout-btn').addEventListener('click', () => handleManualOpen('out'));
+    initPulseStep();
 }
 
 // The manual button has to work unconditionally: a student called out of
