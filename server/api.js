@@ -24,5 +24,6 @@ router.use('/', require('./routes/songRequests'));
 router.use('/', require('./routes/daily-activity'));
 router.use('/', require('./routes/messages'));
 router.use('/', require('./routes/newsletter'));
+router.use('/', require('./routes/budgetGame'));
 
 module.exports = router;

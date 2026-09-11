@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>The Paycheck | CHS Web Design &amp; Development</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/student-pages.css" rel="stylesheet"/>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=20"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    .balance-card { border: none; border-radius: 12px; color: #fff; }
+    .balance-card.checking { background: linear-gradient(135deg, #000099, #1f246b); }
+    .balance-card.savings  { background: linear-gradient(135deg, #0a6e3f, #0e8a54); }
+    .balance-card.invested { background: linear-gradient(135deg, #7a3fc8, #9a5fe0); }
+    .balance-card.networth { background: linear-gradient(135deg, #495057, #343a40); }
+    .balance-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; opacity: .8; }
+    .balance-amount { font-size: 1.9rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+    .item-card { border: 1px solid #dee2e6; border-radius: 10px; background: #fff; transition: box-shadow .15s; }
+    .item-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+
+    .txn-row { display: flex; justify-content: space-between; align-items: center; padding: .55rem .75rem; border-bottom: 1px solid #eee; font-size: .88rem; }
+    .txn-row:last-child { border-bottom: none; }
+    .txn-desc { color: #333; }
+    .txn-date { font-size: .72rem; color: #999; }
+    .txn-amount { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .txn-amount.positive { color: #0a6e3f; }
+    .txn-amount.negative { color: #c0200f; }
+
+    .paycheck-banner {
+      background: linear-gradient(135deg, #ffd700, #ffeb73);
+      border: 2px solid #daa520;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+<div id="nav-placeholder"></div>
+
+<div class="container my-4" style="max-width: 900px;">
+
+  <div class="text-center mb-4">
+    <h1 class="gochi text-primary display-5 fw-bold mb-1"><i class="fas fa-piggy-bank me-2"></i>The Paycheck</h1>
+    <p class="text-muted mb-0">Your real earned pay, your real budget. Every time a real paycheck posts, it lands here — what you do with it is up to you.</p>
+  </div>
+
+  <div id="paycheckBanner" class="paycheck-banner mb-4 text-center fw-bold">
+    <i class="fas fa-sparkles me-1"></i> <span id="paycheckBannerText"></span>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card balance-card checking p-3 h-100">
+        <div class="balance-label">Checking</div>
+        <div class="balance-amount" id="balChecking">$0.00</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card balance-card savings p-3 h-100">
+        <div class="balance-label">Savings</div>
+        <div class="balance-amount" id="balSavings">$0.00</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card balance-card invested p-3 h-100">
+        <div class="balance-label">Invested</div>
+        <div class="balance-amount" id="balInvested">$0.00</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card balance-card networth p-3 h-100">
+        <div class="balance-label">Net Worth</div>
+        <div class="balance-amount" id="balNetWorth">$0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white fw-bold"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>This Period's Bills</div>
+    <div class="card-body">
+      <div id="billsList" class="mb-3"></div>
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="fw-bold">Total due: <span id="billsTotal">$0.00</span></div>
+        <button class="btn btn-primary fw-bold" id="payBillsBtn"><i class="fas fa-check me-1"></i>Pay Bills</button>
+      </div>
+      <div id="billsMsg" class="small mt-2"></div>
+    </div>
+  </div>
+
+  <ul class="nav nav-tabs mb-3" id="storeTabs">
+    <li class="nav-item"><button class="nav-link active fw-bold" data-store="groceries" type="button"><i class="fas fa-basket-shopping me-1"></i>Groceries</button></li>
+    <li class="nav-item"><button class="nav-link fw-bold" data-store="clothes" type="button"><i class="fas fa-shirt me-1"></i>Clothes</button></li>
+  </ul>
+  <div class="row g-3 mb-4" id="storeGrid"></div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white fw-bold"><i class="fas fa-right-left me-2 text-primary"></i>Move Money</div>
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label small fw-bold">Amount</label>
+          <input type="number" min="0.01" step="0.01" class="form-control" id="transferAmount" placeholder="0.00">
+        </div>
+        <div class="col-md-8">
+          <label class="form-label small fw-bold d-block">Action</label>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-success btn-sm fw-bold" data-dir="to_savings">Checking → Savings</button>
+            <button class="btn btn-outline-success btn-sm fw-bold" data-dir="from_savings">Savings → Checking</button>
+            <button class="btn btn-outline-purple btn-sm fw-bold" data-dir="to_invest" style="border-color:#7a3fc8;color:#7a3fc8;">Checking → Invest</button>
+            <button class="btn btn-outline-purple btn-sm fw-bold" data-dir="from_invest" style="border-color:#7a3fc8;color:#7a3fc8;">Cash Out Invest</button>
+          </div>
+        </div>
+      </div>
+      <div id="transferMsg" class="small mt-2"></div>
+      <p class="small text-muted mb-0 mt-2">Savings earns a small guaranteed interest bump every time a new paycheck posts. Investing can go up <em>or</em> down — real risk, real reward.</p>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-5">
+    <div class="card-header bg-white fw-bold"><i class="fas fa-list me-2 text-primary"></i>Transaction Log</div>
+    <div id="txnLog"></div>
+  </div>
+
+</div>
+
+<div id="footer-placeholder"></div>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+
+<script type="module" src="/js/student/budget-game.js?v=1"></script>
+</body>
+</html>
