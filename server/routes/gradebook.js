@@ -145,10 +145,21 @@ async function checkRetakeClearance(connection, studentId, examId) {
     if (unitMatch) {
         const categories = requirement === 'notes' ? ['Notes', 'Worksheet', 'Activity'] : ['Worksheet', 'Activity'];
         const placeholders = categories.map(() => '?').join(',');
+        // js/cs-interactive.js builds three different chapter labels for the
+        // same unit depending on which tab was open when notes were saved:
+        // "Unit N - <chapter title>" from a chapter tab, but "Unit N Exam
+        // Scratchpad" or "Unit N General" from the exam tab or no tab -- the
+        // exact tab a student is sitting on right after failing an exam is
+        // the EXAM tab, so a `LIKE 'Unit N - %'`-only match silently missed
+        // the single most common real case (confirmed live: a student's
+        // real post-fail notes saved under "Unit 2 Exam Scratchpad" never
+        // satisfied this check). All three label shapes are equally real
+        // work on this unit, so all three count.
         const [qualifying] = await connection.execute(
-            `SELECT id FROM turnins WHERE student_id = ? AND chapter LIKE ? AND category IN (${placeholders})
+            `SELECT id FROM turnins WHERE student_id = ?
+             AND (chapter LIKE ? OR chapter = ? OR chapter = ?) AND category IN (${placeholders})
              AND is_submitted = 1 AND LENGTH(content) > 100 LIMIT 1`,
-            [studentId, `Unit ${unitMatch[1]} - %`, ...categories]
+            [studentId, `Unit ${unitMatch[1]} - %`, `Unit ${unitMatch[1]} Exam Scratchpad`, `Unit ${unitMatch[1]} General`, ...categories]
         );
         if (qualifying.length > 0) {
             await connection.execute(

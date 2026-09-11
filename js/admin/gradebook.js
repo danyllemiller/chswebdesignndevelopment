@@ -1479,7 +1479,7 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
 // Alternating row background - gray/white pattern for readability
         const rowClass = rowIndex % 2 === 0 ? 'gradebook-row-even' : 'gradebook-row-odd';
 const cellClass = rowIndex % 2 === 0 ? 'gradebook-cell-even' : 'gradebook-cell-odd';
-        html += `<tr class="${rowClass}"><td class="sticky-col student-info-cell p-2 ${cellClass}" data-student-id="${s.studentId}" data-student-name="${escapeHtml(`${s.firstName} ${s.lastName}`)}" data-current-period="${escapeHtml(displayPeriod || '')}" title="Right-click for options"><div><span class="fw-bold">${privacyMode?`Student ${rowIndex+1}`:`${s.lastName.toUpperCase()}, ${s.firstName}`}</span><div class="id-cell">${privacyMode?'HIDDEN':s.displaySchoolId} | ${displayPeriod}</div></div></td>`;
+        html += `<tr class="${rowClass}"><td class="sticky-col student-info-cell p-2 ${cellClass}" data-student-id="${s.studentId}" data-student-name="${escapeHtml(`${s.firstName} ${s.lastName}`)}" data-current-period="${escapeHtml(displayPeriod || '')}" title="${escapeHtml((privacyMode?'HIDDEN':s.displaySchoolId) + ' | ' + displayPeriod)} — right-click for options"><div><span class="fw-bold">${privacyMode?`Student ${rowIndex+1}`:`${s.lastName.toUpperCase()}, ${s.firstName}`}</span></div></td>`;
 // Summary cells match row background
         if (showSummaryColumns) html += `<td class="text-center ${cellClass}">${earned}</td><td class="text-center ${cellClass}">${possible}</td><td class="text-center ${cellClass} text-primary fw-bold">${pct}%</td><td class="text-center border-right-heavy fw-bold ${cellClass}">${letter}</td>`;
 
