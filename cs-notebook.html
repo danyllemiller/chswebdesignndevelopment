@@ -93,7 +93,21 @@
                 <textarea id="note-content" class="d-none"></textarea>
                 <iframe id="preview-frame" class="w-100 preview-frame shadow-sm" style="min-height: 400px;"></iframe>
             </div>
-            
+
+            <div id="activity-attachment-box" class="mb-3 p-3 border rounded d-none" style="background:#f8f9fa;">
+                <div class="fw-bold small mb-2"><i class="fas fa-paperclip me-1"></i>Attach your work (optional)</div>
+                <p class="small text-muted mb-2">Some activities are a document or a slide deck, not something you write here. Attach a file, or paste a link to a Google Doc/Slides you've shared with your teacher.</p>
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-6">
+                        <input type="file" id="activity-file-input" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-6">
+                        <input type="url" id="activity-link-input" class="form-control form-control-sm" placeholder="https://docs.google.com/...">
+                    </div>
+                </div>
+                <div id="activity-attachment-status" class="small mt-2"></div>
+            </div>
+
 <div class="d-flex gap-2">
                 <button type="button" id="btn-load-notes" class="btn btn-outline-primary fw-bold">
                     <i class="fas fa-folder-open me-1"></i> Load Notes
@@ -699,6 +713,7 @@ function getDefaultWorksheetTemplate() {
             if (contentIn) contentIn.value = `<h2>${activityTitle || 'Activity'}</h2><p>Write your work for this activity here...</p>`;
             if (titleInput) titleInput.value = activityTitle || '';
             if (catInput) catInput.value = 'Activity';
+            document.getElementById('activity-attachment-box')?.classList.remove('d-none');
         } else {
             // Load regular notes template
             if (contentIn) contentIn.value = '<h2>Notes</h2><p>Start writing your notes here...</p>';
@@ -726,6 +741,41 @@ function getDefaultWorksheetTemplate() {
         }, 3000);
     }
 
+    async function handleActivitySubmitAttachment(contentIn) {
+        const statusEl = document.getElementById('activity-attachment-status');
+        const linkInput = document.getElementById('activity-link-input');
+        const fileInput = document.getElementById('activity-file-input');
+        const link = linkInput ? linkInput.value.trim() : '';
+        const file = fileInput && fileInput.files.length ? fileInput.files[0] : null;
+
+        if (link && contentIn) {
+            const safeLink = link.replace(/"/g, '&quot;');
+            contentIn.value += `<p><strong>Linked file:</strong> <a href="${safeLink}" target="_blank" rel="noopener">${safeLink}</a></p>`;
+        }
+
+        if (file) {
+            if (statusEl) statusEl.innerHTML = '<span class="text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Uploading attachment...</span>';
+            try {
+                const formData = new FormData();
+                formData.append('studentId', currentStudentData.student_id);
+                formData.append('assignment', activityId || 'activity');
+                formData.append('file', file);
+                formData.append('path', `submissions/${activityId || 'activity'}_${file.name}`);
+                const resp = await fetch('/upload.php', { method: 'POST', body: formData });
+                const res = await resp.json();
+                if (res.success) {
+                    if (contentIn) contentIn.value += `<p><strong>Attached file:</strong> ${file.name}</p>`;
+                    if (statusEl) statusEl.innerHTML = '<span class="text-success"><i class="fas fa-check me-1"></i>File attached.</span>';
+                } else {
+                    if (statusEl) statusEl.innerHTML = '<span class="text-danger">Could not attach file: ' + (res.error || 'unknown error') + '</span>';
+                }
+            } catch (err) {
+                console.error('Activity attachment upload error:', err);
+                if (statusEl) statusEl.innerHTML = '<span class="text-danger">Could not attach file -- your notes/link were still saved.</span>';
+            }
+        }
+    }
+
     async function saveNotes(isSubmit = false) {
         if (!currentStudentData) return;
 
@@ -736,6 +786,21 @@ function getDefaultWorksheetTemplate() {
         if (!titleInput || !titleInput.value.trim()) {
             showTitleTooltip('Give your note an original title before saving.');
             return;
+        }
+
+        // Some activities are a rebuilt document/slide, not something a
+        // student can meaningfully type into this editor -- on a real
+        // submit, fold in whatever they attached (a pasted link goes into
+        // the note content itself; a real file goes through the same
+        // upload.php mechanism the Upload tab already uses, landing under
+        // this student's own folder tagged with the REAL activity's
+        // exam_id rather than the Upload tab's generic "Artifact Upload"
+        // key -- so it's tied to the assignment that's actually being
+        // graded). This is only ever an addition to the text editor, never
+        // a replacement -- saveNotes()'s existing submit-exam call below
+        // still runs exactly as it did before.
+        if (isSubmit && currentMode === 'activity') {
+            await handleActivitySubmitAttachment(contentIn);
         }
 
         // Belt and suspenders: triggerAutoSave() already mirrors to
