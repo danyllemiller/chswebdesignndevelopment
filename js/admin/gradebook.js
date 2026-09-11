@@ -1686,7 +1686,10 @@ window.showAnalytics = function(dbKey, displayLabel) {
     const median = (percents.length % 2 !== 0 ? percents[mid] : ((percents[mid-1]+percents[mid])/2)).toFixed(1);
     const pass = Math.round((percents.filter(p=>p>=80).length / percents.length)*100);
 
-    document.getElementById('analyticsModalTitle').innerText = displayLabel;
+    // The column header itself stays abbreviated (abbreviateAssignmentName)
+    // to fit the vertical gradebook layout, but the modal has room to show
+    // the real, full assignment title from the exams table.
+    document.getElementById('analyticsModalTitle').innerText = allAssignments[dbKey]?.title || displayLabel;
     document.getElementById('statMean').innerText = mean + '%';
     document.getElementById('statMedian').innerText = median + '%';
     document.getElementById('statPass').innerText = pass + "%";
