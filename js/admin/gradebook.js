@@ -1598,13 +1598,29 @@ let score = "", display = '', bg = "";
                             }
                         }
                         // Didn't reach 80% on the unit exam (or hasn't taken
-                        // it yet) and hasn't turned the activity in -- stays a
-                        // plain blank cell regardless of due date, same as
-                        // the student's own dashboard/percentage no longer
-                        // counting it as a zero. It only stops being "missing"
-                        // once real evidence exists (a submission, or the
-                        // exam proving mastery above) -- being overdue alone
-                        // is no longer flagged here.
+                        // it yet) and hasn't turned the activity in -- a CS
+                        // Activity stays a plain blank cell regardless of due
+                        // date, same as the student's own dashboard/percentage
+                        // no longer counting it as a zero. It only stops being
+                        // "missing" once real evidence exists (a submission,
+                        // or the exam proving mastery above).
+                        //
+                        // Every other assignment, in every course -- labs,
+                        // milestones, tests, career-readiness items -- gets
+                        // flagged the moment its due date passes with nothing
+                        // recorded: a red "M" plus a red cell background, so
+                        // it can't be missed scanning a full row. This is the
+                        // general rule the CS Activity exemption above is the
+                        // one deliberate carve-out from, not the other way
+                        // around.
+                        if (!unit) {
+                            const effectiveDueDate = studentPeriodDueDate || reg?.dueDate;
+                            const isPastDue = !!effectiveDueDate && new Date(effectiveDueDate + 'T00:00:00') < today;
+                            if (isPastDue) {
+                                display = '<span class="text-danger fw-bold" title="Missing">M</span>';
+                                bg = "background-color: rgb(240, 155, 155);";
+                            }
+                        }
                     }
                 }
             }
