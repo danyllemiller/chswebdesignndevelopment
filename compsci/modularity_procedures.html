@@ -60,12 +60,19 @@
   </div>
 
   <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-cubes fa-3x me-4 text-info"></i>
-          <div>
+      <div class="d-flex align-items-start">
+          <i class="fas fa-cubes fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
               <h4 class="fw-bold mb-1">Activity: The Procedure Library</h4>
-              <p class="mb-0">Refactor your prototype so every repeated block becomes a procedure, write three procedures with parameters and return values (each doing one nameable thing), and prove reuse by calling one procedure from two different places.</p>
-              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Procedure Library</strong> in your Digital Notebook on the right.</p>
+              <p class="mb-2">Go back to your prototype and look for repeated code — any block of lines that appears more than once.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">Turn every repeated block you find into a procedure with a clear name.</li>
+                  <li class="mb-1">Write at least three procedures total, each accepting at least one parameter and returning a value, and each doing exactly one nameable thing (if you can't name what a procedure does in one short phrase, it's probably doing too much).</li>
+                  <li class="mb-1">Prove real reuse: call at least one of your procedures from two different places in your script instead of writing the logic twice.</li>
+                  <li class="mb-0">Pick one procedure and change one rule inside its body only — confirm every place that calls it updates automatically, without you touching those call sites.</li>
+              </ol>
+              <p class="mb-0 fw-bold">Turn In: Your three procedures (with parameters and return values), proof of reuse from two call sites, and your one-rule-change test.</p>
+              <p class="mb-0 fw-bold mt-2">👉 Load <strong>The Procedure Library</strong> in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
@@ -91,12 +98,19 @@
       <p class="mb-0 text-light">What single addition lets a non-technical user run your tool without touching the script editor? <em class="text-white-50">(Answer: a custom menu.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-toolbox fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-toolbox fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: The Integrated Tool</h3>
-              <p class="mb-0 fs-5">Combine your arrays, procedures, and event triggers into one tool, add a custom menu, validate input against at least two failure cases, and peer-test it — logging every point where your partner got confused.</p>
+              <p class="mb-2 fs-5">This pulls together everything from Chapters 9-15 into one real tool.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Combine your arrays, your procedures, and your event triggers from earlier chapters into a single working tool.</li>
+                  <li class="mb-1">Add a custom menu, like the Worked Example above, so someone who's never opened the script editor could still run it with one click.</li>
+                  <li class="mb-1">Add input validation that catches at least two different failure cases (bad input types, missing values, out-of-range numbers) and fails gracefully instead of breaking.</li>
+                  <li class="mb-0">Hand it to a partner with zero explanation and watch them use it. Write down every single point where they got confused or stuck.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your integrated tool with its custom menu, your two validated failure cases, and your partner's confusion points from testing.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Integrated Tool</strong> into your Digital Notebook!</p>
           </div>
       </div>

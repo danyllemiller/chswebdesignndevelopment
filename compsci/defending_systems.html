@@ -51,13 +51,38 @@
       <p class="mb-0 text-light">Name one security measure users commonly defeat, and why. <em class="text-white-50">(Answer: forced frequent password changes — they drive people to write passwords down, which is worse than the original risk.)</em></p>
   </div>
 
+  <div class="row g-3 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-secondary">
+              <div class="card-header bg-secondary text-white small fw-bold"><i class="fas fa-hand-holding-heart me-1"></i> Scenario 1</div>
+              <div class="card-body">
+                  <p class="mb-0 small">A small nonprofit food pantry with 3 volunteers sharing one computer to check people in and track donations.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-secondary">
+              <div class="card-header bg-secondary text-white small fw-bold"><i class="fas fa-gamepad me-1"></i> Scenario 2</div>
+              <div class="card-body">
+                  <p class="mb-0 small">A hobby online multiplayer game server with thousands of anonymous players and no payment data stored on it at all.</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
   <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-shield-alt fa-3x me-4 text-info"></i>
-          <div>
+      <div class="d-flex align-items-start">
+          <i class="fas fa-shield-alt fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
               <h4 class="fw-bold mb-1">Activity: The Tradeoff Matrix</h4>
-              <p class="mb-0">Build a matrix scoring six security measures on effectiveness, cost, and user friction, then recommend a measure for two different scenarios and explain why the answer changes.</p>
-              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Tradeoff Matrix</strong> in your Digital Notebook on the right.</p>
+              <p class="mb-2">Six real measures: Unique Passwords + Manager, Multi-Factor Authentication, Encryption, Least-Privilege Access, Regular Patching, and Backups.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">Build a table with those six measures as rows and three columns: Effectiveness, Cost, and User Friction. Score each cell Low/Medium/High and justify it in a few words.</li>
+                  <li class="mb-1">For each of the two scenarios above, pick the ONE measure from your table you'd prioritize first if you could only add one.</li>
+                  <li class="mb-0">Explain in 2–3 sentences why your answer changed (or didn't) between the two scenarios — name what's actually different about their threat models.</li>
+              </ol>
+              <p class="mb-0 fw-bold">Turn In: Your completed matrix, and your two scenario recommendations with reasoning.</p>
+              <p class="mb-0 fw-bold mt-2">👉 Load <strong>The Tradeoff Matrix</strong> in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
@@ -84,12 +109,27 @@
       <p class="mb-0 text-light">What five things belong in a real security recommendation? <em class="text-white-50">(Answer: the risk in plain language, its likelihood and impact, the recommended control, its cost, and the consequence of declining it.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-clipboard-check fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="card h-100 shadow-sm border-secondary my-4">
+      <div class="card-header bg-secondary text-white small fw-bold"><i class="fas fa-store me-1"></i> The Small Business: Sierra Nevada Pet Supply</div>
+      <div class="card-body">
+          <p class="mb-2 small">A local pet store with 8 employees, one shared computer at the checkout register, and one back-office computer the owner uses for orders and payroll. They store customer names, emails, and order history (customer credit card numbers go through a separate outside payment processor, not their own system).</p>
+          <p class="mb-0 small"><strong>Their current setup:</strong> the store's Wi-Fi password hasn't changed in 3 years and is written on a sticky note behind the register. Every employee logs into the same shared account on the checkout computer — nobody has their own login. There is no backup system for the order and customer records. Software updates get installed "whenever someone remembers."</p>
+      </div>
+  </div>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-clipboard-check fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Project: The Network Audit</h3>
-              <p class="mb-0 fs-5">Assemble your network map, reliability analysis, threat log, tradeoff matrix, and security brief into one deliverable. Design a full security protocol for the supplied small business — access, passwords, patching, backups, and incident response — and write an executive summary the owner can actually act on.</p>
+              <p class="mb-2 fs-5">This is the capstone — it pulls together work from this whole unit into one real deliverable.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Assemble your network map and reliability analysis (Chapter 17), your threat log (Chapter 18), and your tradeoff matrix (above) into one document.</li>
+                  <li class="mb-1">Using the small business described above, find at least four specific problems in their current setup (the shared password, the shared login, the missing backups, and the inconsistent updates are a start — look for more).</li>
+                  <li class="mb-1">For each problem, design a specific fix: what changes about access, passwords, patching, backups, or incident response, and why.</li>
+                  <li class="mb-0">Write an executive summary for the store owner using the five-part structure from 19.2.1 (risk, likelihood and impact, recommended control, cost, and consequence of declining) — in plain language a non-technical small business owner can actually act on, not jargon.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your assembled unit artifacts, your list of problems and fixes, and your plain-language executive summary.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Network Audit</strong> into your Digital Notebook!</p>
           </div>
       </div>

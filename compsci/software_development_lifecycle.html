@@ -56,12 +56,19 @@
   </div>
 
   <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-sync-alt fa-3x me-4 text-info"></i>
-          <div>
+      <div class="d-flex align-items-start">
+          <i class="fas fa-sync-alt fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
               <h4 class="fw-bold mb-1">Activity: The Feedback Cycle</h4>
-              <p class="mb-0">Test your tool with two people outside this class and log every point of confusion. Choose two pieces of feedback to act on and two to decline — with stated reasons — and document each design decision in a short log.</p>
-              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Feedback Cycle</strong> in your Digital Notebook on the right.</p>
+              <p class="mb-2">Test your Unit 4 tool with two real people who aren't in this class — a friend, a family member, anyone who hasn't seen it before.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">Watch them use it without helping unless they're completely stuck. Write down every single point where they got confused, hesitated, or did something you didn't expect.</li>
+                  <li class="mb-1">From everything you logged, pick two pieces of feedback you'll actually act on, and make the change.</li>
+                  <li class="mb-1">Pick two more pieces of feedback you're deliberately declining, and write a real, defensible reason for each — not "I didn't feel like it."</li>
+                  <li class="mb-0">For every change you made, write a short design-log entry: what you changed, and why.</li>
+              </ol>
+              <p class="mb-0 fw-bold">Turn In: Your full feedback log, your two accepted changes, your two declined items with reasons, and your design log.</p>
+              <p class="mb-0 fw-bold mt-2">👉 Load <strong>The Feedback Cycle</strong> in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
@@ -72,13 +79,27 @@
   <h3 id="section-16-2" class="fw-bold border-bottom pb-2">16.2 Licensing & Intellectual Property</h3>
   <p class="fs-5">You find a code library online that does exactly what you need. Free to download doesn't automatically mean free to use — check the license before you build anything on top of it.</p>
 
-  <h4 class="fw-bold mt-4 text-primary">16.2.1 Three License Families</h4>
+  <h4 class="fw-bold mt-4 text-primary">16.2.1 What Copyright Actually Means</h4>
+  <p>The moment you create an original work — code, art, music, writing — you automatically own the <strong>copyright</strong> to it. No registration and no © symbol required. By default that means "all rights reserved": nobody else may legally copy, modify, or redistribute it without your permission.</p>
+
+  <div class="concept-box shadow-sm border-warning bg-light">
+      <h5 class="fw-bold text-dark"><i class="fas fa-lightbulb me-2"></i> Where the Confusion Starts: Copyright vs. Copyleft</h5>
+      <p>These two words look almost identical, and that's not an accident — <strong>copyleft</strong> is a deliberate pun on <strong>copyright</strong>, coined by early free-software advocates. But they point in nearly opposite directions:</p>
+      <ul class="mb-2">
+          <li><strong>Copyright</strong> (the automatic default) restricts what others can do with your work unless they get your permission.</li>
+          <li><strong>Copyleft</strong> (a specific kind of license) uses that same copyright power to guarantee the opposite: permission is already granted, on the condition that anything built on top stays just as open.</li>
+      </ul>
+      <p class="mb-0">A <strong>license</strong> is how a copyright holder writes down, in advance, exactly what permission they're giving. That's what the three families below actually are — three different answers to "what happens to your copyright once you let someone else use your work?"</p>
+  </div>
+
+  <h4 class="fw-bold mt-4 text-primary">16.2.2 Three License Families</h4>
   <div class="row g-4 my-3">
       <div class="col-md-4">
           <div class="card h-100 shadow-sm border-success">
               <div class="card-body">
                   <h5 class="fw-bold text-success">Permissive</h5>
-                  <p class="mb-0 small">Use it almost anywhere, with minimal obligations.</p>
+                  <p class="mb-1 small">Use it almost anywhere, with minimal obligations.</p>
+                  <p class="mb-0 small text-muted">e.g. MIT, BSD</p>
               </div>
           </div>
       </div>
@@ -86,7 +107,8 @@
           <div class="card h-100 shadow-sm border-warning">
               <div class="card-body">
                   <h5 class="fw-bold text-warning">Copyleft</h5>
-                  <p class="mb-0 small">Anything you build on top must be released under that same license.</p>
+                  <p class="mb-1 small">Anything you build on top must be released under that same license.</p>
+                  <p class="mb-0 small text-muted">e.g. GPL</p>
               </div>
           </div>
       </div>
@@ -94,7 +116,8 @@
           <div class="card h-100 shadow-sm border-danger">
               <div class="card-body">
                   <h5 class="fw-bold text-danger">Proprietary</h5>
-                  <p class="mb-0 small">Owned outright, use is tightly restricted by the owner's terms.</p>
+                  <p class="mb-1 small">Owned outright, use is tightly restricted by the owner's terms.</p>
+                  <p class="mb-0 small text-muted">e.g. most commercial software</p>
               </div>
           </div>
       </div>
@@ -103,12 +126,18 @@
   <p>Both sides of this are worth knowing honestly: IP law funds creators and protects real investment — and it can also block follow-on work that would have made something even better. Neither side is the whole truth.</p>
 
   <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-file-contract fa-3x me-4 text-info"></i>
-          <div>
+      <div class="d-flex align-items-start">
+          <i class="fas fa-file-contract fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
               <h4 class="fw-bold mb-1">Activity: The License Audit</h4>
-              <p class="mb-0">Audit three real libraries or assets and record each license and what it requires of you. Write correct attribution for every third-party element in your Unit 4 tool.</p>
-              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The License Audit</strong> in your Digital Notebook on the right.</p>
+              <p class="mb-2">Find three real libraries, images, icons, or fonts you'd realistically use in a project — not necessarily used in your Unit 4 tool yet.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">For each of the three, find its actual license (check the site or repository it came from) and record which of the three families it belongs to: Permissive, Copyleft, or Proprietary.</li>
+                  <li class="mb-1">For each one, write in your own words exactly what that license requires of you if you use it (credit the author? release your own code the same way? nothing at all?).</li>
+                  <li class="mb-0">Now look at your actual Unit 4 tool. For every third-party element already in it (an image, an icon, a font, a code snippet you didn't write yourself), write a correct attribution.</li>
+              </ol>
+              <p class="mb-0 fw-bold">Turn In: Your three audited licenses (family + requirement), and the correct attributions for every third-party element in your Unit 4 tool.</p>
+              <p class="mb-0 fw-bold mt-2">👉 Load <strong>The License Audit</strong> in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
@@ -142,12 +171,19 @@
       <p class="mb-0 text-light">What's a situational disability? Give an example. <em class="text-white-50">(Answer: a temporary condition creating the same barrier as a permanent disability — like bright sun making a screen hard to read, or a broken arm making a mouse hard to use.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-universal-access fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-universal-access fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: The Accessibility Pass</h3>
-              <p class="mb-0 fs-5">Audit your Unit 4 tool against all five barrier types and log every failure. Fix at least four, including alt text and contrast, then operate the whole tool without a mouse and document what still doesn't work.</p>
+              <p class="mb-2 fs-5">Give your Unit 4 tool a real accessibility revision pass — not a checkbox at the end, a real second look.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Go through all five barrier types (Visual, Auditory, Motor, Cognitive, Situational) and log at least one specific failure your tool has for each one you can find.</li>
+                  <li class="mb-1">Fix at least four of the failures you found, including at minimum: adding real alt text to any image, and confirming your color contrast is actually readable.</li>
+                  <li class="mb-1">Unplug your mouse (or just don't touch it) and try to operate your entire tool using only the keyboard.</li>
+                  <li class="mb-0">Document every single thing that still doesn't work keyboard-only, even if you don't have time to fix it.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your five-barrier-type failure log, your four fixes, and your keyboard-only test results (including what still doesn't work).</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Accessibility Pass</strong> into your Digital Notebook!</p>
           </div>
       </div>

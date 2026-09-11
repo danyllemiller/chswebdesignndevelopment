@@ -546,7 +546,7 @@
         </div>
         <div class="d-flex flex-column align-items-end gap-1">
           <div class="d-flex gap-1">
-            <button class="btn btn-sm btn-primary fw-bold gen-letter-btn" data-student-id="${item.student_id}" data-first-name="${escapeHtml(item.first_name || '')}" data-last-name="${escapeHtml(item.last_name || '')}" data-count="${item.count}">
+            <button class="btn btn-sm btn-primary fw-bold gen-letter-btn" data-student-id="${item.student_id}" data-first-name="${escapeHtml(item.first_name || '')}" data-last-name="${escapeHtml(item.last_name || '')}" data-count="${item.count}" data-last-tardy="${item.last_tardy || ''}">
               <i class="fas fa-envelope me-1"></i>${item.count >= 4 ? 'Parent + Counselor Letter' : 'Parent Letter'}
             </button>
             <button class="btn btn-sm btn-outline-primary fw-bold send-reflection-btn" data-student-id="${item.student_id}" data-first-name="${escapeHtml(item.first_name || '')}" title="Send a 5-minute conference heads-up via Messages">
@@ -584,7 +584,7 @@
       reflectionBtn.disabled = true;
       reflectionBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sending...';
       try {
-        const { renderStudentReflectionRequestText } = await import('/js/modules/tardy-letter-template.js?v=3');
+        const { renderStudentReflectionRequestText } = await import('/js/modules/tardy-letter-template.js?v=4');
         const body = renderStudentReflectionRequestText({ first_name: firstName });
         const res = await fetch('/api/admin/messages', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -592,6 +592,9 @@
         });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
+          if (res.status === 401 || res.status === 403) {
+            throw new Error('Your login expired -- refresh the page and try again.');
+          }
           throw new Error(data.error || `Server returned ${res.status}`);
         }
         reflectionBtn.innerHTML = '<i class="fas fa-check me-1"></i>Sent!';
@@ -600,15 +603,16 @@
         logTardyPageError('sendReflection:' + studentId, err);
         reflectionBtn.innerHTML = '<i class="fas fa-xmark me-1"></i>Failed';
         reflectionBtn.title = err.message || 'Failed to send.';
-        setTimeout(() => { reflectionBtn.innerHTML = originalHtml; reflectionBtn.disabled = false; reflectionBtn.title = 'Send a 5-minute conference heads-up via Messages'; }, 4000);
+        setTimeout(() => { reflectionBtn.innerHTML = originalHtml; reflectionBtn.disabled = false; reflectionBtn.title = 'Send a 5-minute conference heads-up via Messages'; }, 6000);
       }
     } else if (genBtn) {
-      const { studentId, firstName, lastName, count } = genBtn.dataset;
+      const { studentId, firstName, lastName, count, lastTardy } = genBtn.dataset;
       const area = genBtn.closest('.activity-row').querySelector('.letter-area');
-      const { renderTardyLetterText } = await import('/js/modules/tardy-letter-template.js?v=3');
+      const { renderTardyLetterText } = await import('/js/modules/tardy-letter-template.js?v=4');
       const step = getTardyStep(Number(count));
       const text = renderTardyLetterText({ first_name: firstName, last_name: lastName }, Number(count), step,
-        counselorContact.counselor_email ? { name: counselorContact.counselor_name, email: counselorContact.counselor_email } : null);
+        counselorContact.counselor_email ? { name: counselorContact.counselor_name, email: counselorContact.counselor_email } : null,
+        lastTardy || null);
       area.classList.remove('d-none');
       area.innerHTML = `
         <textarea class="form-control small mb-1" rows="8" readonly style="font-family: monospace; font-size: .75rem;">${escapeHtml(text)}</textarea>

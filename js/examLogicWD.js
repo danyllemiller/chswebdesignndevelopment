@@ -92,7 +92,7 @@ function injectModals() {
 }
 injectModals();
 
-function showDacConfirm(title, body, onConfirm) {
+function showDacConfirm(title, body, onConfirm, opts = {}) {
     injectModals();
     const overlay = document.getElementById('dac-modal-overlay');
     const titleEl = document.getElementById('dac-modal-title');
@@ -103,11 +103,12 @@ function showDacConfirm(title, body, onConfirm) {
     titleEl.innerText = title;
     bodyEl.innerText = body;
     cancelBtn.style.display = 'inline-block';
-    confirmBtn.innerText = "Submit Assessment";
+    cancelBtn.innerText = opts.cancelText || "Cancel";
+    confirmBtn.innerText = opts.confirmText || "Submit Assessment";
     overlay.style.display = 'flex';
 
     confirmBtn.onclick = () => { overlay.style.display = 'none'; onConfirm(); };
-    cancelBtn.onclick = () => { overlay.style.display = 'none'; };
+    cancelBtn.onclick = () => { overlay.style.display = 'none'; if (opts.onCancel) opts.onCancel(); };
 }
 
 function showDacAlert(title, body) {
@@ -141,6 +142,7 @@ function waitForAuth(timeout = 8000) {
 
 let examQuestions = [];
 let userAnswers = {};
+let flaggedQuestions = {}; // { [questionIndex]: true } -- questions the student marked to revisit
 let currentIndex = 0;
 let fName = "Unverified";
 let lName = "";
@@ -504,6 +506,7 @@ async function checkResume() {
                 if (hoursSinceSave < 12) {
                     if (confirm(`We found an unfinished session from ${new Date(data.timestamp || 0).toLocaleTimeString()}. Resume where you left off?`)) {
                         userAnswers = data.userAnswers || {};
+                        flaggedQuestions = data.flaggedQuestions || {};
                         currentIndex = data.currentIndex || 0;
                         examQuestions = data.examQuestions || examQuestions;
                     }
@@ -590,7 +593,7 @@ async function syncProgress() {
         await fetch('/api/student/exam-progress', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ student_id: studentId, exam_id: examProgressId, currentIndex, userAnswers, examQuestions, timestamp: Date.now() })
+            body: JSON.stringify({ student_id: studentId, exam_id: examProgressId, currentIndex, userAnswers, flaggedQuestions, examQuestions, timestamp: Date.now() })
         });
     } catch (err) {
         console.error("Failed to sync progress:", err);
@@ -611,7 +614,7 @@ function renderQuestion() {
     }
 
     const q = examQuestions[currentIndex];
-    const isAnswered = userAnswers[currentIndex] !== undefined;
+    const isFlagged = !!flaggedQuestions[currentIndex];
 
     const optionsHtml = q.options.map((opt, i) => {
         const selectedClass = (userAnswers[currentIndex] === i) ? 'border-primary bg-site-secondary' : 'border-secondary';
@@ -632,7 +635,22 @@ function renderQuestion() {
     const btnAction = isLastQuestion ? "confirmSubmit()" : "nextQuestion()";
     const btnText = isLastQuestion ? "Submit Test" : "Next";
     const prevDisabled = currentIndex === 0 ? "disabled" : "";
-    const nextDisabled = isAnswered ? "" : "disabled";
+    // Students can move on without answering -- a question map lets them see
+    // and jump to every question, so they can skim ahead and come back
+    // rather than being blocked one at a time. Unanswered ones are caught
+    // and listed for them right before final submit instead (confirmSubmit).
+    const flagBtnClass = isFlagged ? "btn-warning" : "btn-outline-warning";
+    const flagBtnLabel = isFlagged ? "Flagged" : "Flag for Review";
+
+    const paletteHtml = examQuestions.map((qq, i) => {
+        const answered = userAnswers[i] !== undefined;
+        const flagged = !!flaggedQuestions[i];
+        let cls = answered ? 'btn-secondary text-white' : 'btn-outline-secondary';
+        if (flagged) cls = 'btn-warning';
+        if (i === currentIndex) cls += ' border-primary border-3';
+        const titleBits = [flagged ? 'flagged' : null, answered ? 'answered' : 'unanswered'].filter(Boolean).join(', ');
+        return `<button type="button" class="btn btn-sm ${cls}" style="width: 2.5rem;" onclick="goToQuestion(${i})" title="Question ${i + 1} (${titleBits})">${i + 1}</button>`;
+    }).join(' ');
 
     pane.innerHTML = `
         <div class="card shadow-sm border-0 h-100 p-4">
@@ -643,14 +661,22 @@ function renderQuestion() {
                 <div class="progress mb-3 no-print" style="height: 10px; background-color: var(--secondary-color);">
                     <div class="progress-bar bg-primary" style="width: ${progressPercent}%"></div>
                 </div>
-                <h5 class="fw-bold text-primary mb-1">Question ${currentIndex + 1} of ${examQuestions.length}</h5>
-                <p class="small text-muted mb-4">${chapterTitle}</p>
-                <h4 class="fw-bold text-dark lh-base" style="color: var(--primary-color);">${escapeHtml(q.question)}</h4>
+                <div class="d-flex flex-wrap justify-content-center gap-1 mb-3 no-print" aria-label="Jump to any question">${paletteHtml}</div>
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="text-start">
+                        <h5 class="fw-bold text-primary mb-1">Question ${currentIndex + 1} of ${examQuestions.length}</h5>
+                        <p class="small text-muted mb-0">${chapterTitle}</p>
+                    </div>
+                    <button class="btn btn-sm ${flagBtnClass} fw-bold no-print flex-shrink-0" onclick="toggleFlag()" title="Mark this question to come back to later">
+                        <i class="fas fa-flag me-1"></i>${flagBtnLabel}
+                    </button>
+                </div>
+                <h4 class="fw-bold text-dark lh-base mt-3" style="color: var(--primary-color);">${escapeHtml(q.question)}</h4>
             </div>
             <div class="row mt-4 px-2">${optionsHtml}</div>
             <div class="d-flex justify-content-between mt-auto pt-4 border-top px-2 no-print">
                 <button class="btn btn-outline-primary px-4 shadow-sm fw-bold" onclick="prevQuestion()" ${prevDisabled}>Previous</button>
-                <button class="btn btn-primary px-5 shadow-sm fw-bold" onclick="${btnAction}" ${nextDisabled}>${btnText}</button>
+                <button class="btn btn-primary px-5 shadow-sm fw-bold" onclick="${btnAction}">${btnText}</button>
             </div>
         </div>`;
 
@@ -660,8 +686,24 @@ function renderQuestion() {
 function selectOption(idx) { userAnswers[currentIndex] = idx; renderQuestion(); }
 function nextQuestion() { currentIndex++; renderQuestion(); }
 function prevQuestion() { currentIndex--; renderQuestion(); }
+function goToQuestion(i) { if (i >= 0 && i < examQuestions.length) { currentIndex = i; renderQuestion(); } }
+function toggleFlag() { flaggedQuestions[currentIndex] = !flaggedQuestions[currentIndex]; renderQuestion(); }
 
 function confirmSubmit() {
+    const unanswered = examQuestions.map((_, i) => i).filter(i => userAnswers[i] === undefined);
+
+    if (unanswered.length > 0) {
+        const list = unanswered.map(i => i + 1).join(', ');
+        const plural = unanswered.length > 1;
+        showDacConfirm(
+            "You Have Unanswered Questions",
+            `Question${plural ? 's' : ''} ${list} ${plural ? "don't" : "doesn't"} have an answer selected yet. If you submit now, ${plural ? 'they' : 'it'} will be scored as incorrect.\n\nGo back and answer ${plural ? 'them' : 'it'}, or submit anyway?`,
+            processSubmission,
+            { confirmText: "Submit Anyway", cancelText: "Go Back", onCancel: () => goToQuestion(unanswered[0]) }
+        );
+        return;
+    }
+
     showDacConfirm(
         "Submit Chapter Exam?",
         "You have reached the end of the exam. Please review your answers if needed.\n\nAre you sure you are ready to submit your final answers for official grading?",

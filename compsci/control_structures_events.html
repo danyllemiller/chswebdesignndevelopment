@@ -42,12 +42,18 @@
   </div>
 
   <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-code-branch fa-3x me-4 text-info"></i>
-          <div>
+      <div class="d-flex align-items-start">
+          <i class="fas fa-code-branch fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
               <h4 class="fw-bold mb-1">Activity: The Decision Logic</h4>
-              <p class="mb-0">Add conditional logic to your prototype handling at least three distinct cases plus invalid input, write the same logic a second way, and justify which version you kept — naming implementation, readability, and performance explicitly.</p>
-              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Decision Logic</strong> in your Digital Notebook on the right.</p>
+              <p class="mb-2">Go back to the prototype you built in Chapter 9 — you're adding real decision-making to it.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">Add conditional logic that handles at least three distinct cases, plus a fourth case for invalid input (something the user typed that doesn't fit any of your three expected cases).</li>
+                  <li class="mb-1">Once it works, rewrite that exact same logic a second way — if you used nested <code>if</code> statements, try a lookup table or a flatter structure instead (or vice versa).</li>
+                  <li class="mb-0">Decide which version you're actually keeping, and justify it in a few sentences naming all three factors: implementation effort, readability, and performance.</li>
+              </ol>
+              <p class="mb-0 fw-bold">Turn In: Both versions of your logic, and your justification for the one you kept.</p>
+              <p class="mb-0 fw-bold mt-2">👉 Load <strong>The Decision Logic</strong> in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
@@ -75,12 +81,19 @@
   </div>
 
   <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-sync fa-3x me-4 text-info"></i>
-          <div>
+      <div class="d-flex align-items-start">
+          <i class="fas fa-sync fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
               <h4 class="fw-bold mb-1">Activity: The Iteration Build</h4>
-              <p class="mb-0">Add a loop to your prototype that processes a real range of spreadsheet data, trace the first three iterations by hand to confirm they match the output, then deliberately create an off-by-one error, document what it produced, and fix it.</p>
-              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Iteration Build</strong> in your Digital Notebook on the right.</p>
+              <p class="mb-2">Now you're adding a real loop to your prototype.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">Add a loop that processes a real range of data in your spreadsheet — at least 5 rows.</li>
+                  <li class="mb-1">By hand, on paper, trace what your loop should do on its first three passes (what the counter is, what it checks, what it outputs), then run your code and confirm the real output matches your trace exactly.</li>
+                  <li class="mb-1">Now break it on purpose: change one character to create an off-by-one error (swap a <code>&lt;</code> for a <code>&lt;=</code>, or similar). Run it and document exactly what went wrong — too many loops, too few, or a missing item.</li>
+                  <li class="mb-0">Fix the error and confirm it's back to correct.</li>
+              </ol>
+              <p class="mb-0 fw-bold">Turn In: Your working loop, your hand-traced first three iterations, and your documented off-by-one break-and-fix.</p>
+              <p class="mb-0 fw-bold mt-2">👉 Load <strong>The Iteration Build</strong> in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
@@ -113,12 +126,19 @@
       <p class="mb-0 text-light">Why does error handling matter more in event-driven code than in a script you run yourself? <em class="text-white-50">(Answer: it runs unattended, so a failure happens with nobody watching to catch it.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-bolt fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-bolt fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: The Event-Driven Artifact</h3>
-              <p class="mb-0 fs-5">Attach at least one trigger to your prototype so it runs without being launched manually, handle at least one invalid input case gracefully, and state in one sentence the practical problem your artifact addresses.</p>
+              <p class="mb-2 fs-5">Make your prototype run itself, without you clicking anything.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Attach at least one trigger to your prototype — on-open, on-edit, on-form-submit, or time-driven — so it fires on its own.</li>
+                  <li class="mb-1">Test it by actually triggering the event (edit a cell, submit the form, whatever your trigger listens for) and confirm it runs without you manually pressing "run."</li>
+                  <li class="mb-1">Like the Worked Example above, feed it one piece of invalid input on purpose (text where a number belongs, a blank where something is required) and add handling so it rejects that input gracefully instead of breaking or silently corrupting data.</li>
+                  <li class="mb-0">Write one sentence stating the practical, real problem this artifact actually solves for someone.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your triggered code, proof it fired automatically, your invalid-input handling in action, and your one-sentence problem statement.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Event-Driven Artifact</strong> into your Digital Notebook!</p>
           </div>
       </div>

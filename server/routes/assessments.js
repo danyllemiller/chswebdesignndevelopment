@@ -269,9 +269,21 @@ router.delete('/student/cs-notebook', async (req, res) => {
 // from, so what a student sees always matches what's actually seeded in
 // the gradebook via the Due Date Manager. No separate activity list to
 // keep in sync.
+//
+// Retired: activities that don't map to one of the 3 official Nevada
+// 9-12 Computing Systems standards for this chapter (CS.D.1, CS.HS.1,
+// CS.T.1) and were dropped to keep the chapter at 3. Excluded here
+// rather than deleted from `exams` -- the 4 students who already
+// submitted this before it was retired keep their recorded grade
+// untouched in `responses`; this list only stops it from being offered
+// as a pickable option going forward.
+const RETIRED_CS_ACTIVITY_IDS = ['cs_ch3_file_system_audit'];
+
 router.get('/student/cs-chapter-activities', async (req, res) => {
     const { chapter, student_id } = req.query;
     if (!chapter || !student_id) return res.status(400).json({ error: 'chapter and student_id required' });
+    const chapterNum = parseInt(chapter, 10);
+    if (isNaN(chapterNum)) return res.status(400).json({ error: 'chapter must be a number' });
     try {
         const connection = await getDbConnection();
         const [[student]] = await connection.execute(
@@ -279,10 +291,18 @@ router.get('/student/cs-chapter-activities', async (req, res) => {
             [student_id]
         );
         const courseId = (student && await resolveCourseId(connection, student.section_id)) || '10003GS';
+        // LIKE's "_" is a single-character wildcard, not a literal underscore --
+        // 'cs_ch1_%' silently matched cs_ch10_/cs_ch11_/.../cs_ch19_ too (any
+        // chapter number starting with "1"), turning a 3-activity chapter into
+        // a ~20-item list. REGEXP with "_" as a literal character and an
+        // anchored chapter-number boundary avoids that (same pattern
+        // server/routes/timeclock.js's getCurrentChapter() already uses for
+        // due-date resolution).
+        const excludePlaceholders = RETIRED_CS_ACTIVITY_IDS.map(() => '?').join(', ');
         const [rows] = await connection.execute(
             `SELECT exam_id, title, total_points, due_date FROM exams
-             WHERE exam_id LIKE ? AND course_id = ? ORDER BY exam_id`,
-            [`cs_ch${chapter}_%`, courseId]
+             WHERE exam_id REGEXP ? AND course_id = ? AND exam_id NOT IN (${excludePlaceholders}) ORDER BY exam_id`,
+            [`^cs_ch${chapterNum}_`, courseId, ...RETIRED_CS_ACTIVITY_IDS]
         );
         await connection.release();
         res.json({ activities: rows });

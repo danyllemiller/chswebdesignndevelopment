@@ -45,13 +45,33 @@
       <p class="mb-0 text-light">Convert the decimal number 20 into binary. <em class="text-white-50">(Answer: 10100 — that's 16 + 4.)</em></p>
   </div>
 
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-table me-2"></i> The Twelve Numbers</h5>
+      <div class="row">
+          <div class="col-md-6">
+              <p class="mb-1 fw-bold small">Binary → Decimal</p>
+              <p class="mb-0 font-monospace small">00000101 &nbsp; 00010011 &nbsp; 00101000<br>01100100 &nbsp; 10000001 &nbsp; 11110000</p>
+          </div>
+          <div class="col-md-6">
+              <p class="mb-1 fw-bold small mt-3 mt-md-0">Decimal → Binary</p>
+              <p class="mb-0 font-monospace small">7 &nbsp; 34 &nbsp; 65 &nbsp; 99 &nbsp; 150 &nbsp; 200</p>
+          </div>
+      </div>
+  </div>
+
   <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-binary fa-3x me-4 text-info"></i>
-          <div>
+      <div class="d-flex align-items-start">
+          <i class="fas fa-binary fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
               <h4 class="fw-bold mb-1">Activity: The Binary Translator</h4>
-              <p class="mb-0">Convert six numbers from binary to decimal and six from decimal to binary by hand, then explain in two sentences why one byte holds exactly 256 values.</p>
-              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Binary Translator</strong> in your Digital Notebook on the right.</p>
+              <p class="mb-2">Use the place-value chart from the Worked Example above (128, 64, 32, 16, 8, 4, 2, 1) to show your work — don't just write the final answer.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">Convert all six binary numbers above to decimal. Show which columns you added for each one.</li>
+                  <li class="mb-1">Convert all six decimal numbers above to binary (each as an 8-digit byte, padded with leading zeros if needed).</li>
+                  <li class="mb-0">In two sentences, explain why one byte holds exactly 256 possible values.</li>
+              </ol>
+              <p class="mb-0 fw-bold">Turn In: All twelve conversions with your work shown, plus your two-sentence explanation.</p>
+              <p class="mb-0 fw-bold mt-2">👉 Load <strong>The Binary Translator</strong> in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
@@ -94,12 +114,46 @@
       <p class="mb-0 text-light">Why couldn't ASCII represent an emoji? <em class="text-white-50">(Answer: ASCII only had 128 possible values, all reserved for basic English characters and symbols — no room was left for anything else.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-language fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="row g-3 my-3">
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm text-center">
+              <div class="card-body">
+                  <div style="width:100%;height:40px;background:#1E90FF;border-radius:4px;" class="mb-2"></div>
+                  <p class="mb-0 font-monospace fw-bold">#1E90FF</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm text-center">
+              <div class="card-body">
+                  <div style="width:100%;height:40px;background:#32CD32;border-radius:4px;" class="mb-2"></div>
+                  <p class="mb-0 font-monospace fw-bold">#32CD32</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm text-center">
+              <div class="card-body">
+                  <div style="width:100%;height:40px;background:#8B00FF;border-radius:4px;" class="mb-2"></div>
+                  <p class="mb-0 font-monospace fw-bold">#8B00FF</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-language fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: The Encoding Lab</h3>
-              <p class="mb-0 fs-5">Convert three hex colors to decimal RGB and verify each in a color tool, then encode your first name in ASCII and show the binary for one character.</p>
+              <p class="mb-2 fs-5">Two parts: colors, then letters. Both are just numbers wearing a disguise.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">For each of the three hex colors above, split it into its two-digit pairs and convert each pair to decimal, the way the Worked Example does for #FF5733. Write the result as RGB(red, green, blue).</li>
+                  <li class="mb-1">Type each hex code into an online color picker (search "hex color picker") and confirm the RGB values it shows match what you calculated by hand.</li>
+                  <li class="mb-1">Look up an ASCII table online and encode your first name — write down the decimal ASCII number for every letter.</li>
+                  <li class="mb-0">Pick just the first letter of your name and convert its ASCII decimal number into 8-digit binary, showing your work like you did in The Binary Translator.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your three RGB conversions (with the color-picker confirmation), your name's full ASCII encoding, and the binary for your first letter.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Encoding Lab</strong> into your Digital Notebook!</p>
           </div>
       </div>

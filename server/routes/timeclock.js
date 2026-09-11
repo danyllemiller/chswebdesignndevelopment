@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { getDbConnection } = require('../db');
 const { getCurrentSchoolYear } = require('../helpers');
-const { pickWprQuestion } = require('../wprQuestionBank');
+const { pickWprQuestion, pickWprMcQuestion } = require('../wprQuestionBank');
 
 // Client-side JS errors on the timeclock widget were failing completely
 // silently for some students with no way to see why -- multiple fixes
@@ -166,8 +166,8 @@ function hashString(str) {
     return Math.abs(hash);
 }
 
-const PERIOD_COURSE_MAP = { A1: 'WD1', B2: 'WD2', A3: 'CS', A5: 'CS', B4: 'CS', B6: 'CS', B8: 'CS' };
-const TC_COURSE_ID_MAP = { CS: '10003GS', WD1: '05254G1S', WD2: '05254G2S' };
+const PERIOD_COURSE_MAP = { A1: 'WD1', B2: 'WD2', AS: 'AS', A3: 'CS', A5: 'CS', B4: 'CS', B6: 'CS', B8: 'CS' };
+const TC_COURSE_ID_MAP = { CS: '10003GS', WD1: '05254G1S', WD2: '05254G2S', AS: '05254ES' };
 
 function periodToCourseKeyServer(period) {
     const p = String(period || '').trim().toUpperCase();
@@ -221,7 +221,6 @@ router.get('/timeclock/status', async (req, res) => {
 // ==============================================================================
 
 const CS_COURSE_ID = '10003GS';
-const WD_COURSE_IDS = { WD1: '05254G1S', WD2: '05254G2S' };
 
 const CS_CHAPTER_TITLES = {
     1: 'Essential Computer Skills', 2: 'Ethics, Privacy & Law', 3: 'How Computers Work',
@@ -231,16 +230,6 @@ const CS_CHAPTER_TITLES = {
     13: 'AI & Cross-Disciplinary Tech', 14: 'Advanced Data Structures', 15: 'Modularity & Procedures',
     16: 'The Software Development Lifecycle', 17: 'How the Internet Works', 18: 'Cybersecurity Threats',
     19: 'Defending Systems'
-};
-
-const WD_CHAPTER_TITLES = {
-    1: "The Developer's World", 2: 'The Rules (How Not to Get Sued)', 3: 'The Blueprint',
-    4: 'The Why (Intro to UI/UX)', 5: 'The "Bones" (Intro to HTML)', 6: 'The "Clothes" (Intro to CSS)',
-    7: 'The Style (Advanced CSS Layout)', 8: 'Sights & Sounds (Media & Tables)',
-    9: 'The "Brains" (Intro to JavaScript)', 10: 'The Game Dev (Advanced JS Game Logic)',
-    11: 'The "Cloud" (Collaboration & Hosting)', 12: 'The "Manager" (CMS Platforms)',
-    13: 'The Network (Intro to APIs)', 14: 'The "Brain" (Databases)',
-    15: 'The "Future" (The Game Never Ends)', 16: 'The "Final Boss" (Going Live)'
 };
 
 async function getCurrentChapter(connection, courseId, examIdRegex, chapterRegex) {
@@ -267,10 +256,6 @@ function getCurrentCSChapter(connection) {
     return getCurrentChapter(connection, CS_COURSE_ID, '^cs_ch[0-9]+_', /^cs_ch(\d+)_/);
 }
 
-function getCurrentWDChapter(connection, wdKey) {
-    return getCurrentChapter(connection, WD_COURSE_IDS[wdKey], '^ch[0-9]+_', /^ch(\d+)_/);
-}
-
 // Deterministic, not random -- every student in the same course must see
 // the identical question for the whole pair-group window (see
 // pairGroupKey above), so the pool is fetched in a stable order and
@@ -290,9 +275,41 @@ async function getDeterministicQuestion(connection, table, chapter, groupKey) {
 // type is one of CS_IN / WD1_IN / WD2_IN — the clock-in question is always a
 // real test-bank question pulled from the chapter the student is currently
 // working on, never a manually-typed or generic question.
+// Both question banks store the correct answer in a fixed slot -- the CS
+// bank has it in option_a on literally every row (confirmed: 420/420), and
+// the WPR bank clusters it in options[1]/[2] almost exclusively. Neither
+// was ever shuffled before reaching the student, so the position itself
+// was a giveaway. Shuffled fresh on every request (not tied to the
+// deterministic-by-day question, so two students can't just compare
+// letters) -- comparisons are by the answer's text, not its index, so this
+// changes nothing about how correctness is checked.
+function shuffleOptions(options) {
+    const arr = options.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
 router.get('/timeclock/question', async (req, res) => {
     const { type } = req.query;
-    const kind = String(type || '').replace(/_IN$/, ''); // CS, WD1, WD2
+    const kind = String(type || '').replace(/_IN$/, ''); // CS, WD1, WD2, AS
+
+    // WD1/WD2/AS clock-in asks a real multiple-choice Nevada Workplace
+    // Readiness Skills question (right/wrong, gradable, one per calendar
+    // day) instead of a chapter content quiz -- CS keeps its own chapter
+    // test-bank quiz below, since WPR wasn't asked for there.
+    if (kind === 'WD1' || kind === 'WD2' || kind === 'AS') {
+        const picked = pickWprMcQuestion(getLocalDateStr());
+        return res.json({
+            question_text: picked.q,
+            options: shuffleOptions(picked.options),
+            correct_answer: picked.answer,
+            chapterLabel: 'Workplace Readiness Check-In'
+        });
+    }
+
     try {
         const connection = await getDbConnection();
         const dayTypes = await getDayTypes(connection);
@@ -303,10 +320,6 @@ router.get('/timeclock/question', async (req, res) => {
             ({ chapter, isFallback } = await getCurrentCSChapter(connection));
             title = CS_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
             q = await getDeterministicQuestion(connection, 'questions', chapter, groupKey);
-        } else if (kind === 'WD1' || kind === 'WD2') {
-            ({ chapter, isFallback } = await getCurrentWDChapter(connection, kind));
-            title = WD_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
-            q = await getDeterministicQuestion(connection, 'wd_questions', chapter, `${kind}|${groupKey}`);
         } else {
             await connection.release();
             return res.status(400).json({ error: 'Unrecognized type' });
@@ -323,7 +336,7 @@ router.get('/timeclock/question', async (req, res) => {
 
         res.json({
             question_text: q.question,
-            options: q.options,
+            options: shuffleOptions(q.options),
             correct_answer: q.answer,
             chapterLabel: `Chapter ${chapter}: ${title}${isFallback ? ' (no due dates set yet — defaulting to Ch. 1)' : ''}`
         });
@@ -361,24 +374,37 @@ async function ensureDailyQuestionsGroupTable(connection) {
 }
 
 // Mirrors intervention_journal's shape exactly (server/routes/intervention.js)
-// -- one entry per student per calendar day, storing both the prompt asked
-// and what they wrote, so a WD1/WD2 student can look back through their own
-// clock-out reflections over time. Kept separate from the rich-text
-// notebook (student/notes.html) on purpose -- this is the daily
-// question-and-answer record, not their class notes.
+// -- one entry per student per session (clock-in and clock-out each get
+// their own row) per calendar day, storing both the prompt asked and what
+// they wrote, so a WD1/WD2/AS student can look back through both their
+// morning Workplace Readiness question and their end-of-class reflection
+// over time. Kept separate from the rich-text notebook (student/notes.html)
+// on purpose -- this is the daily question-and-answer record, not their
+// class notes.
 async function ensureWdJournalTable(connection) {
     await connection.execute(`
         CREATE TABLE IF NOT EXISTS wd_journal (
             id         INT AUTO_INCREMENT PRIMARY KEY,
             student_id VARCHAR(50) NOT NULL,
             entry_date DATE NOT NULL,
+            session    VARCHAR(10) NOT NULL DEFAULT 'out',
             prompt     TEXT,
             content    TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            UNIQUE KEY uq_wd_journal (student_id, entry_date)
+            UNIQUE KEY uq_wd_journal (student_id, entry_date, session)
         )
     `);
+    // Migration for tables created before clock-in started journaling too --
+    // back then there was only ever one row per day (from clock-out), so the
+    // old unique key has to be widened to (student_id, entry_date, session)
+    // before clock-in's row for the same day can coexist with it.
+    const [sessionCols] = await connection.execute(`SHOW COLUMNS FROM wd_journal LIKE 'session'`);
+    if (sessionCols.length === 0) {
+        await connection.execute(`ALTER TABLE wd_journal ADD COLUMN session VARCHAR(10) NOT NULL DEFAULT 'out' AFTER entry_date`);
+        await connection.execute(`ALTER TABLE wd_journal DROP INDEX uq_wd_journal`);
+        await connection.execute(`ALTER TABLE wd_journal ADD UNIQUE KEY uq_wd_journal (student_id, entry_date, session)`);
+    }
 }
 
 async function resolveQuestionGroupKey(connection, studentId) {
@@ -399,14 +425,15 @@ async function resolveQuestionGroupKey(connection, studentId) {
 // Clock-out prompt: a teacher's manually-set exit ticket for today takes
 // priority (admin/payroll.html's "Set Clock Out Prompts" modal), scoped to
 // the student's specific group so everyone in the same group sees the
-// identical question. Previously fell back to guessing from each
-// individual student's own most-recent notebook save when nothing was set
-// -- that meant two students in the same class could see completely
-// different (or, for a student with no recorded activity that day,
-// missing/broken) prompts. The fallback is now the same stable, class-wide
-// due-date chapter for everyone, never derived from individual activity.
+// identical question. WD1/WD2/AS fall back to a real Nevada Workplace
+// Readiness Skills reflection question (free response, one per calendar
+// day) instead of a generic filler -- this is the journal-worthy half of
+// the WPR pair: clock-in asks a graded multiple-choice WPR question (see
+// /timeclock/question), clock-out asks an open-ended one and that answer
+// is what actually gets saved into the WD daily journal. CS keeps the
+// original chapter-based fallback since WPR wasn't asked for there.
 router.get('/timeclock/reflection-prompt', async (req, res) => {
-    const { type, student_id } = req.query; // CS, WD1, WD2
+    const { type, student_id } = req.query; // CS, WD1, WD2, AS
     const kind = String(type || '');
     const today = getLocalDateStr();
     try {
@@ -426,12 +453,7 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
             }
         }
 
-        // Fallback: no custom question set for this group today. WD1/WD2 get
-        // a real Nevada Workplace Readiness Skills question (one per
-        // calendar day, cycling through the whole bank) instead of a
-        // generic "reflect on the chapter" filler -- CS keeps the original
-        // chapter-based fallback since the WPR bank wasn't asked for there.
-        if (kind === 'WD1' || kind === 'WD2') {
+        if (kind === 'WD1' || kind === 'WD2' || kind === 'AS') {
             await connection.release();
             const picked = pickWprQuestion(today);
             return res.json({
@@ -501,7 +523,10 @@ router.post('/timeclock/save', async (req, res) => {
             }
 
             // Grade the clock-in: 1 pt for doing it, 1 pt for being on time
-            // (within 5 min of the bell), 1 pt for a correct answer. Written
+            // (within 5 min of the bell), 1 pt for a correct answer -- every
+            // course's clock-in is a real multiple-choice question (WD1/WD2/AS
+            // pull from the Workplace Readiness MC bank, CS from its chapter
+            // test bank), so "correct" is meaningful everywhere now. Written
             // straight into the real gradebook (exams/responses) so it shows
             // up in the normal admin/student views like any other assignment
             // -- one shared entry per course per day, matching how exams and
@@ -535,6 +560,25 @@ router.post('/timeclock/save', async (req, res) => {
                     );
                 }
             } catch (gradeErr) { console.error('[timeclock] Failed to grade clock-in:', gradeErr); }
+
+            // WD1/WD2/AS daily journal -- clock-in's graded MC question is
+            // still worth keeping a record of alongside clock-out's
+            // reflection, one row per session per day (see
+            // ensureWdJournalTable), browsable later (My Daily Journal) the
+            // same way Intervention's journal already works. Best-effort:
+            // never block the clock-in itself if this fails.
+            try {
+                const courseKey = periodToCourseKeyServer(period);
+                if (courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS') {
+                    await ensureWdJournalTable(connection);
+                    await connection.execute(
+                        `INSERT INTO wd_journal (student_id, entry_date, session, prompt, content)
+                         VALUES (?, ?, 'in', ?, ?)
+                         ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
+                        [student_id, today, prompt || null, answer || '']
+                    );
+                }
+            } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry (clock-in):', journalErr); }
         } else if (mode === 'out') {
             await connection.execute(
                 'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',
@@ -550,31 +594,31 @@ router.post('/timeclock/save', async (req, res) => {
                 [answer || '', student_id, today, period]
             );
 
-            // WD1/WD2 daily journal -- records the reflection prompt actually
-            // shown alongside the answer, one row per student per day, so it
-            // can be browsed later (My Daily Journal) the same way
-            // Intervention's journal already works. Best-effort: never block
-            // the clock-out itself if this fails.
+            // WD1/WD2/AS daily journal -- clock-out's open-ended reflection
+            // gets its own row, alongside clock-in's (see above). Best-effort:
+            // never block the clock-out itself if this fails.
             try {
                 const courseKey = periodToCourseKeyServer(period);
-                if (courseKey === 'WD1' || courseKey === 'WD2') {
+                if (courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS') {
                     await ensureWdJournalTable(connection);
                     await connection.execute(
-                        `INSERT INTO wd_journal (student_id, entry_date, prompt, content)
-                         VALUES (?, ?, ?, ?)
+                        `INSERT INTO wd_journal (student_id, entry_date, session, prompt, content)
+                         VALUES (?, ?, 'out', ?, ?)
                          ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
                         [student_id, today, prompt || null, answer || '']
                     );
                 }
-            } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry:', journalErr); }
+            } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry (clock-out):', journalErr); }
         }
         await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Timeclock save failed.' }); }
 });
 
-// Student's own journal -- every clock-out reflection they've written,
-// newest first, so they can look back on it (see ensureWdJournalTable above).
+// Student's own journal -- both the clock-in Workplace Readiness question
+// and the clock-out reflection they've written, newest first (and clock-in
+// shown before clock-out within the same day), so they can look back on it
+// (see ensureWdJournalTable above).
 router.get('/student/wd-journal', async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
@@ -582,7 +626,8 @@ router.get('/student/wd-journal', async (req, res) => {
         const connection = await getDbConnection();
         await ensureWdJournalTable(connection);
         const [rows] = await connection.execute(
-            'SELECT entry_date, prompt, content, updated_at FROM wd_journal WHERE student_id = ? ORDER BY entry_date DESC',
+            `SELECT entry_date, session, prompt, content, updated_at FROM wd_journal
+             WHERE student_id = ? ORDER BY entry_date DESC, session = 'out' ASC`,
             [student_id]
         );
         await connection.release();
@@ -598,7 +643,8 @@ router.get('/admin/wd-journal/:student_id', async (req, res) => {
         const connection = await getDbConnection();
         await ensureWdJournalTable(connection);
         const [rows] = await connection.execute(
-            'SELECT entry_date, prompt, content, updated_at FROM wd_journal WHERE student_id = ? ORDER BY entry_date DESC',
+            `SELECT entry_date, session, prompt, content, updated_at FROM wd_journal
+             WHERE student_id = ? ORDER BY entry_date DESC, session = 'out' ASC`,
             [student_id]
         );
         await connection.release();

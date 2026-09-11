@@ -168,14 +168,21 @@ window.launchGame = async function(gameId) {
 async function loadGameDataFromPool() {
     try {
         // Determine chapter filter from URL path or page title
-        const path = window.location.pathname.toLowerCase();
-        let targetFilter = "Chapter 1";
+        const rawPath = window.location.pathname;
+        const path = rawPath.toLowerCase();
+        let targetFilter = "chapter-1";
         if (path.includes('web1review')) targetFilter = "Year 1 Review";
         else if (path.includes('web2review')) targetFilter = "Year 2 Review";
         else if (path.includes('webreview')) targetFilter = "Ultimate Review";
         else {
-            const chapterMatch = document.title.match(/Chapter\s*\d+/i);
-            if (chapterMatch) targetFilter = chapterMatch[0];
+            // WD1, WD2, and CS each restart their own "Chapter N" numbering
+            // independently (and some page titles are stale leftovers from a
+            // since-restructured curriculum), so two or three unrelated
+            // chapters can share the exact same "Chapter 3" title text. The
+            // page's own filename is already unique across the whole site,
+            // so use that as the lookup key instead of the title.
+            const slugMatch = rawPath.match(/\/([^\/]+)\.html?$/i);
+            if (slugMatch) targetFilter = slugMatch[1];
         }
 
         let activeQs = [];

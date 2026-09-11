@@ -37,7 +37,7 @@ window.addEventListener('unhandledrejection', (ev) => {
 
 let studentData = null;
 let currentQuestion = null;
-let currentPromptText = null; // the clock-out reflection prompt actually shown, so it can be saved alongside the answer for the WD daily journal
+let currentPromptText = null; // the question/prompt actually shown for the mode in progress (clock-in MC question or clock-out reflection), so it can be saved alongside the answer for the WD daily journal
 let bellWindow = null; // { startMs, endMs } for whichever of the student's periods is currently active today, or null
 let currentPeriod = null; // which of the student's (possibly multiple) periods bellWindow/getCourseKey resolved to
 
@@ -459,12 +459,14 @@ async function checkStatusInner() {
         if (mode === 'in') {
             const category = `${getCourseKey()}_IN`;
 
-            // Clock-in is always a real question pulled from that course's
-            // actual chapter test bank -- never a manually-typed question.
+            // Clock-in is always a real multiple-choice question -- WD1/WD2/AS
+            // pull from the Workplace Readiness MC bank, CS from its chapter
+            // test bank -- never a manually-typed question.
             currentQuestion = await apiFetch(`/api/timeclock/question?type=${category}`);
             if (callId !== checkStatusCallId) return; // superseded while this fetch was in flight
 
             label.innerHTML = `<span class="d-block small text-muted fw-normal mb-1">${currentQuestion.chapterLabel || ''}</span>${currentQuestion.question_text}`;
+            currentPromptText = currentQuestion.question_text; // so the WD journal write on submit has the actual question asked
 
             if (currentQuestion.unavailable) {
                 optsContainer.innerHTML = `<input type="hidden" id="tc-in-fallback" value="N/A - no question bank available">`;
@@ -540,7 +542,7 @@ async function handleTimeclockSubmit(e) {
                 mode: mode,
                 answer: answer,
                 is_correct: isCorrect,
-                prompt: mode === 'out' ? currentPromptText : null
+                prompt: currentPromptText
             })
         });
         location.reload();
@@ -689,6 +691,7 @@ async function handleManualOpen(forcedMode) {
             const category = `${getCourseKey()}_IN`;
             currentQuestion = await apiFetch(`/api/timeclock/question?type=${category}`);
             label.innerHTML = `<span class="d-block small text-muted fw-normal mb-1">${currentQuestion.chapterLabel || ''}</span>${currentQuestion.question_text}`;
+            currentPromptText = currentQuestion.question_text; // so the WD journal write on submit has the actual question asked
             if (currentQuestion.unavailable) {
                 optsContainer.innerHTML = `<input type="hidden" id="tc-in-fallback" value="N/A - no question bank available">`;
             } else {

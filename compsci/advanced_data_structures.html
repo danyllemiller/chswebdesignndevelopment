@@ -38,13 +38,39 @@
 
   <p><strong>The trap:</strong> students often think arrays are just "a fancier way to store stuff." The real reason they matter is generalization — one loop over an array handles any number of items, while six hardcoded variables only ever handle exactly six.</p>
 
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-code me-2"></i> The Script to Refactor</h5>
+      <pre class="mb-0 bg-dark text-light p-3 rounded small"><code>function showStudents() {
+  var student1 = "Alex";
+  var student2 = "Brianna";
+  var student3 = "Carlos";
+  var student4 = "Destiny";
+  var student5 = "Ethan";
+  var student6 = "Fatima";
+
+  Logger.log(student1);
+  Logger.log(student2);
+  Logger.log(student3);
+  Logger.log(student4);
+  Logger.log(student5);
+  Logger.log(student6);
+}</code></pre>
+  </div>
+
   <div class="alert alert-info mt-4 shadow-sm border-info">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-table fa-3x me-4 text-info"></i>
-          <div>
+      <div class="d-flex align-items-start">
+          <i class="fas fa-table fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
               <h4 class="fw-bold mb-1">Activity: The Array Refactor</h4>
-              <p class="mb-0">Refactor a supplied six-variable script into an array with a loop, then read a real spreadsheet range into an array and process every element.</p>
-              <p class="mb-0 fw-bold mt-1">👉 Load <strong>The Array Refactor</strong> in your Digital Notebook on the right.</p>
+              <p class="mb-2">The script above is exactly the "six separate variables" problem from the Worked Example — your job is to fix it for real.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">In Apps Script, rewrite the function above so the six names live in one array instead of six separate variables.</li>
+                  <li class="mb-1">Write one loop that logs every name in the array — your loop should work no matter how many names are in the array, not just six.</li>
+                  <li class="mb-1">Add three more names to your array and re-run it, without touching your loop at all, to prove it still works.</li>
+                  <li class="mb-0">Now read a real range of cells from a Google Sheet into an array (<code>SpreadsheetApp</code>'s <code>getRange().getValues()</code>), and use a loop to log every value in it.</li>
+              </ol>
+              <p class="mb-0 fw-bold">Turn In: A screenshot of your refactored array-and-loop code, and a screenshot of the spreadsheet-range code with its output.</p>
+              <p class="mb-0 fw-bold mt-2">👉 Load <strong>The Array Refactor</strong> in your Digital Notebook on the right.</p>
           </div>
       </div>
   </div>
@@ -64,8 +90,10 @@
       <tr><td>Access element by index</td><td class="text-success fw-bold">Instant</td><td>Must walk from the start</td></tr>
       <tr><td>Insert in the middle</td><td>Everything after it shifts</td><td class="text-success fw-bold">Cheap — no shifting</td></tr>
       <tr><td>Delete from the middle</td><td>Everything after it shifts</td><td class="text-success fw-bold">Cheap — no shifting</td></tr>
+      <tr><td>Search for a value by content</td><td>Must check each element</td><td>Must check each element</td></tr>
     </tbody>
   </table>
+  <p class="small text-muted">That last row is deliberate — not every operation favors one structure. Searching for a value (not by index) is equally slow on both, because neither one can skip ahead without checking.</p>
 
   <div class="image-placeholder shadow-sm">
     <i class="fas fa-link fa-3x text-muted mb-3"></i>
@@ -80,12 +108,37 @@
       <p class="mb-0 text-light">Which structure wins for deleting an item from the middle of a large list, and why? <em class="text-white-50">(Answer: a linked list — nothing has to shift, you just update the neighboring nodes' references.)</em></p>
   </div>
 
-  <div class="alert alert-primary mt-5 shadow-lg border-primary border-3 pulse-animation">
-      <div class="d-flex align-items-center">
-          <i class="fas fa-project-diagram fa-3x me-4 text-primary"></i>
-          <div>
+  <div class="row g-3 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-secondary">
+              <div class="card-header bg-secondary text-white small fw-bold"><i class="fas fa-music me-1"></i> Scenario 1</div>
+              <div class="card-body">
+                  <p class="mb-0 small">A music app's "up next" queue, where songs get added and removed from the middle of the line constantly as the user drags songs around to reorder it.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-secondary">
+              <div class="card-header bg-secondary text-white small fw-bold"><i class="fas fa-chair me-1"></i> Scenario 2</div>
+              <div class="card-body">
+                  <p class="mb-0 small">A classroom's fixed roster of exactly 30 assigned seat numbers, where the teacher mostly just needs to instantly look up who sits in seat #14.</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-project-diagram fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: The Structure Comparison</h3>
-              <p class="mb-0 fs-5">Build a comparison table for arrays and linked lists across four operations, implement a simple node-based list in Apps Script, and recommend a structure for two different scenarios — justifying each choice.</p>
+              <p class="mb-2 fs-5">Three parts: rebuild the table, build a real linked list, then make a real recommendation.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Recreate the comparison table above from memory (all four operations, both structures) — don't just copy it, actually reason through each cell.</li>
+                  <li class="mb-1">In Apps Script, implement a simple node-based linked list: each node is an object holding a value and a reference to the next node. Build a list of at least 4 nodes and log every value by walking from the first node to the last.</li>
+                  <li class="mb-0">For each of the two scenarios above, state which structure you'd use and defend it in 2–3 sentences, naming the specific operation from your table that makes the difference.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your comparison table, a screenshot of your working linked-list code and its output, and your two scenario recommendations.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Structure Comparison</strong> into your Digital Notebook!</p>
           </div>
       </div>
