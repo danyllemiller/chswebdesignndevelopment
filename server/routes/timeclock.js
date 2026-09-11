@@ -544,10 +544,18 @@ router.post('/timeclock/save', async (req, res) => {
                     if (isCorrectVal === 1) points += 1;
 
                     const examId = `TC-${courseKey}-${today}`;
+                    // due_date = the check-in's own day -- a missed day never
+                    // had this set before, which meant the normal past-due
+                    // "counts as 0 once overdue" gradebook rule could never
+                    // fire and a skipped clock-in just stayed invisible
+                    // forever instead of showing as missing. Each day is its
+                    // own exam_id, so a later real clock-in always creates
+                    // its own new row (see `today` above) and can never
+                    // retroactively fill in an earlier missed day's row.
                     await connection.execute(
-                        `INSERT INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?)
-                         ON DUPLICATE KEY UPDATE title = VALUES(title), total_points = VALUES(total_points), course_id = VALUES(course_id)`,
-                        [examId, `Timeclock Check-In — ${today}`, 3, courseId]
+                        `INSERT INTO exams (exam_id, title, total_points, course_id, due_date) VALUES (?, ?, ?, ?, ?)
+                         ON DUPLICATE KEY UPDATE title = VALUES(title), total_points = VALUES(total_points), course_id = VALUES(course_id), due_date = COALESCE(due_date, VALUES(due_date))`,
+                        [examId, `Timeclock Check-In — ${today}`, 3, courseId, today]
                     );
                     const [icCols] = await connection.execute(`SHOW COLUMNS FROM responses LIKE 'entered_in_ic'`);
                     if (icCols.length === 0) {
