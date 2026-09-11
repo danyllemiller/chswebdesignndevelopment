@@ -47,7 +47,7 @@ let privacyMode = false;
 let showSummaryColumns = true;
 let currentSortMode = 'lastName';
 let assignmentSortMode = 'dueDate'; // 'dueDate' | 'weight' | 'alpha'
-let assignmentSortDir = 'asc';
+let assignmentSortDir = 'desc';
 let allStickers = {}; // student_id -> [{ id, sticker_name, awarded_at }]
 let stickerModalStudentId = null;
 
@@ -137,7 +137,7 @@ const toggleHtml = `
             <option value="alpha">Assignments: Alphabetical</option>
         </select>
         <button type="button" id="btnAssignmentSortDir" class="btn btn-sm btn-outline-info fw-bold shadow-sm" title="Reverse assignment sort direction">
-            <i class="fas fa-arrow-down-a-z me-1"></i> Forward
+            <i class="fas fa-arrow-up-a-z me-1"></i> Backward
         </button>
         <button type="button" id="btnSyncSheets" class="btn btn-sm btn-warning fw-bold shadow-sm" title="Pull Master Grades from Google Sheet">
             <i class="fas fa-cloud-download-alt me-1"></i> Sync Sheets
