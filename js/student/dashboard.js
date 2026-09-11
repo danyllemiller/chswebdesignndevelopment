@@ -2,7 +2,7 @@
 import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
 import { escapeHtml, parsePts } from '../modules/utils.js';
-import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=3';
+import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=4';
 
 // Matches data/cs-course-map.json -- which chapters' classwork
 // (cs_chN_activity_name) belong to which unit's exam, for the mastery

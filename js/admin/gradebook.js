@@ -8,7 +8,7 @@
 
 // Weighted grading config is shared with the student dashboard via js/modules/grade-weights.js —
 // edit there, not here, so teacher and student views never diverge.
-import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=3';
+import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=4';
 
 // Dynamically load Chart.js for the Analytics Graph
 if (!document.getElementById('chartjs-lib')) {
@@ -1330,7 +1330,20 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
         const copyBtn = isUnitExam
             ? `<i class="fas fa-copy text-white-50 x-small copy-scores-btn" data-assignment="${key}" title="Copy scores for this test, in gradebook order"></i>`
             : '';
+        // T/A/C column-header tag: a one-letter tag for what this column
+        // actually counts toward -- Test/Quiz (includes Final), Assignment,
+        // or Career Readiness -- reusing the exact category the real grade
+        // calculation already uses (getAssignmentCategory), so the letter
+        // can never disagree with what the column is actually weighted as.
+        const catForTag = getAssignmentCategory(key, courseKeyForView);
+        const CATEGORY_TAG = { project_quiz: 'T', final: 'T', assignment: 'A', career: 'C' };
+        const CATEGORY_TAG_TITLE = { project_quiz: 'Test/Quiz', final: 'Final Exam', assignment: 'Assignment', career: 'Career Readiness' };
+        const tagLetter = CATEGORY_TAG[catForTag] || '';
+        const tagBadge = tagLetter
+            ? `<span class="badge bg-light text-dark border fw-bold mb-1" style="font-size:.62rem;" title="${CATEGORY_TAG_TITLE[catForTag]}">${tagLetter}</span>`
+            : '';
         headHtml += `<th class="header-main-blue" data-col-index="${i}"><div class="h-100 d-flex flex-column align-items-center justify-content-end pb-2">
+            ${tagBadge}
             <span class="vertical-text analytics-trigger text-white fw-bold" title="${tooltip.replace(/"/g, "'")}" data-assignment="${key}">${abbreviateAssignmentName(key)}</span>
             <div class="d-flex gap-1 justify-content-center w-100">${copyBtn}<i class="fas fa-edit text-white-50 x-small edit-col-btn" data-assignment="${key}"></i><i class="fas fa-trash-alt text-white-50 x-small delete-col-btn" data-assignment="${key}"></i></div></div></th>`;
     });

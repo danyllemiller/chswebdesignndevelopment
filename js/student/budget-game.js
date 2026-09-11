@@ -4,7 +4,7 @@
 // renders whatever balance/transaction state the server already synced.
 import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
-import { periodToCourseKey } from '../modules/grade-weights.js?v=3';
+import { periodToCourseKey } from '../modules/grade-weights.js?v=4';
 
 let studentData = null;
 let currentStoreTab = 'groceries';

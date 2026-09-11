@@ -32,8 +32,39 @@ function unitForCsChapter(ch) {
     return null;
 }
 
+// Explicit exam_id overrides for real Career Readiness content (Nevada's
+// Employability Skills for Career Readiness standards, 21 indicators
+// across Personal Qualities/People Skills, Professional Knowledge/Skills,
+// and Technology Knowledge/Skills -- curriculum/Employability_Skills_
+// for_Career_Readiness_STDS_ADA.pdf). Confirmed by reading every WD1/WD2
+// Chapter 1-16 lab/milestone's real content, not just its title -- only
+// Chapter 1's agency-orientation unit and one standalone pre-assessment
+// actually teach/assess a workplace-skill standard; everything from
+// Chapter 2 on is a technical/design deliverable that merely uses
+// "client"/"agency" as a project theme (e.g. "Client Infrastructure
+// Proposal" is a Markdown README exercise, not client communication).
+// This can't be a keyword rule -- none of these titles share a common
+// substring with each other or with the technical labs they need to stay
+// distinct from -- so it's a maintained exact-match list instead.
+const CAREER_READINESS_EXAM_IDS = new Set([
+    'Ch1-Know Your Guild',                 // 1.2.5 workplace org/mission
+    'Ch1-Mock Chapter Meeting',            // 1.1.3 teamwork / meeting participation
+    'Ch1-Part 2 — Employee Handbook',      // 1.1.2 workplace policies
+    'Ch1-Part 3 — Agency Application',     // 1.2.7 job acquisition
+    'ch1_lab_job_app',                     // 1.2.7 job acquisition
+    'ch1_proj_m1',                         // 1.2.7 job acquisition (Job Application)
+    'ch1_lab_client_neg',                  // 1.1.6 conflict resolution / negotiation
+    'ch1_lab_code_conduct',                // 1.1.2 integrity / workplace policy
+    'ch1_proj_m5',                         // 1.1.2 integrity / workplace policy (Code of Conduct)
+    'ch1_lab_exec_sum',                    // 1.2.2 workplace document writing
+    'ch1_proj_m2',                         // 1.2.5 workplace org (Business Plan)
+    'ch1_proj_m4',                         // 1.2.1 communication (Client Expectations)
+    'WRS-Practice-A'                       // stand-alone Workplace Readiness Skills pre-assessment
+]);
+
 function getAssignmentCategory(name, courseKey) {
     if (courseKey === 'INTV') return 'assignment';
+    if (CAREER_READINESS_EXAM_IDS.has(name)) return 'career';
     const lowerName = name.toLowerCase();
     if (lowerName.startsWith('tc-') || lowerName.includes('timeclock')) {
         return courseKey === 'CS' ? 'assignment' : 'career';

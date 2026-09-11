@@ -1,7 +1,7 @@
 // /js/student/timeclock.js
 import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
-import { periodToCourseKey } from '../modules/grade-weights.js?v=3';
+import { periodToCourseKey } from '../modules/grade-weights.js?v=4';
 
 // Every previous fix here targeted a guessed cause and each one failed for
 // some students with zero visible symptom -- there was no way to see what
