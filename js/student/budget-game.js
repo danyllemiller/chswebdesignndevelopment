@@ -49,12 +49,12 @@ async function init() {
         return;
     }
 
-    // The Paycheck is Web Design II only for now -- confirmed course, not just
-    // primary section, since a dual-enrolled student's WD2 period might not
-    // be their primary one.
+    // The Paycheck is Web Design II and Advanced Studies for now -- confirmed
+    // course, not just primary section, since a dual-enrolled student's WD2/AS
+    // period might not be their primary one.
     const courseKey = periodToCourseKey(studentData.section_id);
-    if (courseKey !== 'WD2') {
-        showBlocked('The Paycheck is currently only available to Web Design II students.');
+    if (courseKey !== 'WD2' && courseKey !== 'AS') {
+        showBlocked('The Paycheck is currently only available to Web Design II and Advanced Studies students.');
         return;
     }
 
