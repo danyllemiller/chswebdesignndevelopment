@@ -928,6 +928,7 @@ function updateCategoryDropdown() {
     if (!select) return;
     const currentVal = select.value;
     let html = '<option value="All">All Categories</option>';
+    html += '<option value="__labsactivities">Labs / Activities Only</option>';
     Object.keys(CATEGORY_LABELS).forEach(key => { html += `<option value="${key}">${CATEGORY_LABELS[key]}</option>`; });
     html += '<option value="__clockins">Clock-Ins</option>';
     html += '<option value="__preassessment">Pre-Tests / Pre-Scale</option>';
@@ -999,7 +1000,7 @@ async function markEnteredIcForCurrentView() {
     }
     const scopeParts = [];
     if (periodVal !== 'All') scopeParts.push(periodVal);
-    if (categoryVal !== 'All') scopeParts.push(CATEGORY_LABELS[categoryVal] || (categoryVal === '__clockins' ? 'Clock-Ins' : categoryVal === '__preassessment' ? 'Pre-Tests / Pre-Scale' : categoryVal));
+    if (categoryVal !== 'All') scopeParts.push(CATEGORY_LABELS[categoryVal] || (categoryVal === '__clockins' ? 'Clock-Ins' : categoryVal === '__preassessment' ? 'Pre-Tests / Pre-Scale' : categoryVal === '__labsactivities' ? 'Labs / Activities Only' : categoryVal));
     if (!confirm(`Mark ${pairs.length} grade(s) as entered in IC${scopeParts.length ? ` for ${scopeParts.join(' — ')}` : ''}?`)) return;
 
     const btn = document.getElementById('markEnteredIcBtn');
@@ -1246,6 +1247,14 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
         if (categoryVal === 'All') return true;
         if (categoryVal === '__clockins') return isClockIn(key);
         if (categoryVal === '__preassessment') return isPreAssessment(key);
+        // Labs/Activities Only: the plain "assignment" weight bucket already
+        // excludes every test/quiz/exam/summative/project/milestone (all
+        // "project_quiz"), but pre-scales and CS's clock-ins also fall into
+        // "assignment" by default (no weight keyword of their own) -- strip
+        // those two out explicitly so this is really just labs/activities.
+        if (categoryVal === '__labsactivities') {
+            return getAssignmentCategory(key, courseKeyForView) === 'assignment' && !isPreAssessment(key) && !isClockIn(key);
+        }
         return getAssignmentCategory(key, courseKeyForView) === categoryVal;
     };
 
