@@ -46,7 +46,16 @@ router.get('/admin/roster', async (req, res) => {
                 COALESCE(csc.school_year, csl.school_year, s.school_year) AS effective_year,
                 pr.title AS payroll_title
             FROM students s
-            LEFT JOIN class_sections csc ON s.course_id = csc.course_id
+            -- Matching on course_id alone let one row in class_sections fan out
+            -- into one roster row per section sharing that course_id (5 CS
+            -- periods all share course_id '10003GS') whenever a student's own
+            -- course_id happened to equal that shared value instead of being
+            -- NULL or a section-specific code -- confirmed live on one student
+            -- (Darian Bernal, since corrected) who showed up 5 times, one per
+            -- CS period, instead of once. Anchoring to the student's own
+            -- section_id too keeps this join 1:1 no matter what course_id ends
+            -- up holding.
+            LEFT JOIN class_sections csc ON s.course_id = csc.course_id AND s.section_id = csc.section_id
             LEFT JOIN courses        crc ON s.course_id = crc.course_id
             LEFT JOIN class_sections csl ON s.section_id = csl.section_id AND s.course_id IS NULL
             LEFT JOIN courses        crl ON csl.course_id = crl.course_id AND s.course_id IS NULL
