@@ -116,14 +116,20 @@ router.get('/cs-exam-questions', async (req, res) => {
     let examIds = [];
 
     if (unit === 'a' || unit === 'A') {
-        examIds = ['cs-unit-a', 'cs-u-a-exam', 'cs-unit-0', 'cs-u0-exam', 'unit-0', 'unit-a'];
+        examIds = ['cs-unit-a', 'cs-u-a-exam', 'cs-unit-0', 'cs-u0-exam', 'unit-0', 'unit-a', 'Unit0-Exam'];
         unitNum = 0;
     } else {
         const parsed = parseInt(unit, 10);
         if (isNaN(parsed) || parsed < 0 || parsed > 8)
             return res.status(400).json({ error: 'Valid unit number (0-8) or "a" required' });
         unitNum = parsed;
-        examIds = [`cs-unit-${unitNum}`, `cs-u${unitNum}-exam`, `unit-${unitNum}`];
+        // `Unit{N}-Exam` is the real, live exam_id every other part of the
+        // gradebook (prerequisite gate, retake clearance, the exams table
+        // itself) already uses for this unit's graded test -- the question
+        // bank has to be tagged with that same id, not a separate
+        // never-actually-used naming scheme, or a real unit exam can have
+        // its grading row exist while still returning zero questions.
+        examIds = [`Unit${unitNum}-Exam`, `cs-unit-${unitNum}`, `cs-u${unitNum}-exam`, `unit-${unitNum}`];
     }
 
     try {
