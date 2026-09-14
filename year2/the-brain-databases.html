@@ -458,13 +458,14 @@ if (savedScore !== null) {
         <div class="card border-success shadow-sm my-4 text-start">
             <div class="card-header bg-success text-white fw-bold">Lab 1: The CRUD App Audit [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Define the four pillars of data using real-world platform analysis.</p>
+                <p><strong>Objective:</strong> Define the four pillars of data using real-world platform analysis — then apply the same four actions to the Library Database system your labs build across this chapter.</p>
                 <ol>
                     <li class="mb-2">Open a Google Doc. Choose a popular application (e.g., Spotify, TikTok, Netflix).</li>
                     <li class="mb-2"><strong>MILESTONE STEP 1:</strong> Describe exactly what action a user takes to trigger each part of the CRUD cycle for that app.</li>
                     <li class="mb-2">For example: <strong>Create</strong> = Posting a new video. <strong>Read</strong> = Scrolling the "For You" feed. <strong>Update</strong> = Changing the caption on an existing video. <strong>Delete</strong> = Trashing an old video.</li>
+                    <li class="mb-2">Now do the same mapping for a Library system — this is the exact domain your Project builds: <strong>Create</strong> = a librarian adding a new book to the catalog. <strong>Read</strong> = a patron searching for a title. <strong>Update</strong> = updating a book's availability when it's checked out. <strong>Delete</strong> = removing a book that's been retired from the collection.</li>
                 </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your Google Doc or PDF.</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your Google Doc or PDF (both CRUD mappings).</p>
                 <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
             </div>
         </div>
@@ -664,14 +665,14 @@ WHERE id = 101;
         <div class="card border-success shadow-sm my-4 text-start">
             <div class="card-header bg-success text-white fw-bold">Lab 2: The Schema Architect Lab [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Design a database schema with proper relational connections for an agency client.</p>
+                <p><strong>Objective:</strong> Design a database schema with proper relational connections for an agency client — this is the real schema your Project's Library Database is built from, not a practice draft.</p>
                 <ol>
-                    <li class="mb-2">Open a Google Doc. Design a database schema for a "Video Game Library".</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Create two tables: <code>Games</code> and <code>Platforms</code>. List 4 columns for each.</li>
-                    <li class="mb-2">Explicitly label the Primary Key for both tables.</li>
-                    <li class="mb-2">Explain how you would link them using a Foreign Key.</li>
+                    <li class="mb-2">Design a database schema for the Library your Project will build: two tables, <code>Books</code> and <code>Authors</code>.</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Write the actual <code>CREATE TABLE Books (...)</code> and <code>CREATE TABLE Authors (...)</code> SQL statements — 4 real columns for each (e.g. Books: <code>book_id</code>, <code>title</code>, <code>year_published</code>, <code>author_id</code>; Authors: <code>author_id</code>, <code>name</code>, <code>birth_year</code>, <code>nationality</code>).</li>
+                    <li class="mb-2">Explicitly mark the <code>PRIMARY KEY</code> in both <code>CREATE TABLE</code> statements.</li>
+                    <li class="mb-2">Add the <code>FOREIGN KEY</code> constraint linking <code>Books.author_id</code> to <code>Authors.author_id</code>.</li>
                 </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your Schema Document.</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>.sql</code> file with both CREATE TABLE statements. Save this file — Labs 3 and 4 run their queries against this exact schema.</p>
                 <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
             </div>
         </div>
@@ -680,15 +681,15 @@ WHERE id = 101;
         <div class="card border-success shadow-sm my-4 text-start">
             <div class="card-header bg-success text-white fw-bold">Lab 3: The Data Detective Lab [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Execute filtering read operations using standard SQL query language.</p>
+                <p><strong>Objective:</strong> Execute filtering read operations using standard SQL query language — against your own Milestone 2 schema, not a generic practice database.</p>
                 <ol>
-                    <li class="mb-2">Open an online SQL Sandbox (like SQLFiddle or W3Schools).</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Write 3 <code>SELECT</code> queries.</li>
-                    <li class="mb-2">Query 1: Find all customers in "London" using a <code>WHERE</code> clause.</li>
-                    <li class="mb-2">Query 2: Find all products over $50.</li>
-                    <li class="mb-2">Query 3: List all employees sorted by age (oldest to youngest) using <code>ORDER BY DESC</code>.</li>
+                    <li class="mb-2">Open an online SQL Sandbox (like SQLite Online or DB Fiddle), and paste in your <code>Books</code>/<code>Authors</code> <code>CREATE TABLE</code> statements from Lab 2, plus a few <code>INSERT</code> rows of sample data so you have something to query.</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Write 3 <code>SELECT</code> queries against your own tables.</li>
+                    <li class="mb-2">Query 1: Find all books published after a chosen year, using a <code>WHERE</code> clause.</li>
+                    <li class="mb-2">Query 2: Find all authors from a specific nationality.</li>
+                    <li class="mb-2">Query 3: List all books sorted by publication year (newest to oldest) using <code>ORDER BY DESC</code>.</li>
                 </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Copy your three successful queries into a text file and upload it.</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Copy your three successful queries into a text file and upload it, along with the sample data you inserted.</p>
                 <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
             </div>
         </div>
@@ -745,14 +746,14 @@ WHERE id = 101;
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Lab 4: Secure Data Entry Lab [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Safely manipulate database records using conditional constraints.</p>
+                <p><strong>Objective:</strong> Safely manipulate database records using conditional constraints — on the same Books/Authors tables you've been building all chapter.</p>
                 <ol>
-                    <li class="mb-2">Write an <code>INSERT</code> statement to add yourself to the online SQL Sandbox database.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 4:</strong> Write an <code>UPDATE</code> statement to change your "City", and a <code>DELETE</code> statement to remove user ID 5.</li>
+                    <li class="mb-2">Using the same sandbox and schema from Lab 3, write an <code>INSERT</code> statement to add one new book to your <code>Books</code> table.</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 4:</strong> Write an <code>UPDATE</code> statement to change that book's title, and a <code>DELETE</code> statement to remove one specific book by its <code>book_id</code>.</li>
                     <li class="mb-2"><strong>Security Check:</strong> Ensure your UPDATE and DELETE statements have explicit <code>WHERE</code> clauses.</li>
                     <li class="mb-2">Write a 2-sentence reflection on why forgetting the <code>WHERE</code> clause is dangerous.</li>
                 </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your queries and reflection in a document.</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your queries and reflection in a document. These four labs together are the .sql master file your Project assembles.</p>
                 <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
             </div>
         </div>
@@ -955,13 +956,13 @@ WHERE id = 101;
       <div class="col-lg-12">
         <div class="card border-primary shadow-sm mt-5 mx-auto text-start" style="max-width: 900px;">
             <div class="card-header bg-primary text-white fw-bold">
-                🏆 Milestone: Client Database Schema [100 pts]
+                🏆 Milestone: The Library Database [100 pts]
             </div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Synthesize all database skills to architect and query a professional relational system.</p>
+                <p><strong>Objective:</strong> Synthesize all database skills to architect and query a professional relational system — by assembling the exact same Books/Authors schema you've been building across Labs 1-4.</p>
                 <ol>
-                    <li class="mb-2"><strong>Assemble:</strong> Compile your SQL scripts from Milestones 1-4 into a single <code>.sql</code> master file.</li>
-                    <li class="mb-2"><strong>Schema:</strong> Your script must build a valid schema containing two tables (e.g., <code>Books</code> and <code>Authors</code>) linked properly by Primary and Foreign Keys.</li>
+                    <li class="mb-2"><strong>Assemble:</strong> Compile your SQL scripts from Milestones 1-4 into a single <code>.sql</code> master file — your Lab 2 CREATE TABLE statements, your Lab 3 SELECT queries, and your Lab 4 INSERT/UPDATE/DELETE statements, all against the same tables.</li>
+                    <li class="mb-2"><strong>Schema:</strong> Your script must build a valid schema containing your two tables, <code>Books</code> and <code>Authors</code>, linked properly by Primary and Foreign Keys.</li>
                     <li class="mb-2"><strong>Execution:</strong> Your script must populate the tables with data using <code>INSERT</code>, and execute your <code>SELECT</code>, <code>UPDATE</code>, and <code>DELETE</code> queries securely.</li>
                     <li class="mb-2"><strong>Level 4.0 Challenge:</strong> Write a complex SQL <code>JOIN</code> statement to combine the Books and Authors tables into one unified view, demonstrating Cognitive Flexibility.</li>
                     <li class="mb-2"><strong>Privacy:</strong> List two privacy rules you will follow to protect Author data, demonstrating Probity.</li>
