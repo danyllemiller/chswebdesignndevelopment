@@ -16,8 +16,25 @@ const router = express.Router();
 // already uses client-side, so behavior stays consistent -- it just
 // becomes real instead of advisory, for every existing and future
 // /admin/* route in one place.
+// A handful of GET endpoints live under /admin/ by naming accident, not by
+// intent -- they're actually called by every regular student session, not
+// just the teacher admin pages (auth-guard.js itself calls the first one
+// for every logged-in user). None of them had any auth check of their own
+// before today; the blanket gate above broke real, live student features
+// (a dual-enrolled student's extra periods disappearing, the login flow
+// misbehaving) within hours of shipping. Exempted by exact path, GET only
+// -- their POST/write counterparts (daily-questions, calendar-settings)
+// stay admin-only, and this list should stay short and explicit rather
+// than guessing at a broader pattern.
+const ADMIN_PATH_STUDENT_EXEMPT_GET = new Set([
+    '/admin/student-sections',
+    '/admin/daily-questions',
+    '/admin/calendar-settings'
+]);
+
 router.use((req, res, next) => {
     if (!req.path.startsWith('/admin/')) return next();
+    if (req.method === 'GET' && ADMIN_PATH_STUDENT_EXEMPT_GET.has(req.path)) return next();
     const u = req.session && req.session.user;
     const isAdmin = u && (u.role === 'admin' || u.section_id === 'Teacher' || (u.username && u.username.includes('damiller')));
     if (!isAdmin) return res.status(401).json({ error: 'Not authorized.' });
