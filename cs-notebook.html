@@ -133,6 +133,7 @@
   <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
   <script src="/js/loader.js?v=20"></script>
+  <script src="/js/worksheetRender.js?v=1"></script>
   
 <script type="module">
     // ========================================================
@@ -542,7 +543,7 @@ function getWorksheetTemplate() {
         
         if (worksheetsLibrary[chapterNum]) {
             const sheet = worksheetsLibrary[chapterNum];
-            return sheet.html || getDefaultWorksheetTemplate();
+            return (window.renderWorksheetHTML && window.renderWorksheetHTML(sheet)) || getDefaultWorksheetTemplate();
         }
         // Fallback to default worksheet if not found in library
         console.log('Chapter', chapterNum, 'not in library, using default');

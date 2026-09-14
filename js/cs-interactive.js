@@ -1802,8 +1802,9 @@ if (isFinalSubmit && categoryVal === 'Worksheet') {
             btnWorksheetCS.onclick = () => {
                 const chNum = activeTab.type === 'CHAPTER' ? activeTab.data.ch : 'Misc';
                 const sheet = worksheetsLibrary[chNum];
-                if (contentIn) contentIn.value = sheet ? sheet.html : `<div class="worksheet"><h3>Chapter ${chNum} Worksheet</h3><p>Worksheet content coming soon.</p></div>`;
-                if (titleInput) titleInput.value = sheet ? sheet.title : `Chapter ${chNum} Worksheet`;
+                const renderedSheet = sheet && window.renderWorksheetHTML && window.renderWorksheetHTML(sheet);
+                if (contentIn) contentIn.value = renderedSheet || `<div class="worksheet"><h3>Chapter ${chNum} Worksheet</h3><p>Worksheet content coming soon.</p></div>`;
+                if (titleInput) titleInput.value = (sheet && sheet.title) || `Chapter ${chNum} Worksheet`;
                 if (catInput) catInput.value = "Worksheet";
                 updatePreview();
                 triggerAutoSave();
