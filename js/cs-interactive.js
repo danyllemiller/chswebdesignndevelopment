@@ -982,7 +982,20 @@ function initCSInteractive(student) {
 
 // Initialize mode toggle - set up click handlers and show initial view
     setupModeToggleHandlers();
-    
+
+    // Flashcards opens as its own page/tab rather than another workspace-view
+    // mode -- it's a study aid a student reaches for independently of
+    // whatever they're currently doing (notes, worksheet, upload), not
+    // something that replaces the workspace content.
+    document.getElementById('btn-flashcards')?.addEventListener('click', () => {
+        const unitNum = activeUnit ? activeUnit.unitNum : '';
+        const chapterNum = resolveChapterNum();
+        const params = new URLSearchParams();
+        if (unitNum !== '') params.set('unit', unitNum);
+        if (chapterNum !== null && chapterNum !== undefined) params.set('chapter', chapterNum);
+        window.open(`/cs-flashcards.html?${params.toString()}`, '_blank');
+    });
+
     // Hide ALL workspace views by default - user must select a mode
     if (viewJournal) viewJournal.classList.add('d-none');
     if (viewDropbox) viewDropbox.classList.add('d-none');

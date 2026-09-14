@@ -1,0 +1,304 @@
+{
+  "1": [
+    {
+      "q": "What's the general term for treating people online with the same respect you'd want offline?",
+      "a": "Netiquette"
+    },
+    {
+      "q": "What's the single biggest thing you can do to defend against most known software exploits?",
+      "a": "Keep your OS and apps updated with the latest patches"
+    },
+    {
+      "q": "An email demands you 'verify' your password immediately or lose access. What should you do with it?",
+      "a": "Don't click anything — delete it and report it as phishing"
+    },
+    {
+      "q": "What security feature asks for a text-message code in addition to your password?",
+      "a": "Two-Factor Authentication (2FA)"
+    },
+    {
+      "q": "Someone is being harassed in a group chat. What's the recommended response?",
+      "a": "Don't retaliate — block, save evidence, and tell a trusted adult"
+    },
+    {
+      "q": "Why is open Wi-Fi with no password risky?",
+      "a": "Traffic isn't encrypted, so others on the network can intercept it"
+    },
+    {
+      "q": "What do you call someone who behaves safely, ethically, and responsibly online?",
+      "a": "A digital citizen"
+    },
+    {
+      "q": "A scammer manipulates someone into giving up their password through trust and deception rather than hacking. What's this called?",
+      "a": "Social engineering"
+    },
+    {
+      "q": "Combining your address, birthday, and pet's name in one public post is risky mainly because of what?",
+      "a": "It can answer common account security questions, enabling identity theft"
+    },
+    {
+      "q": "How can you tell if a viral headline is actually trustworthy?",
+      "a": "Check the author's credentials and cross-reference with established news sources"
+    }
+  ],
+  "2": [
+    {
+      "q": "What's it called when data that could identify a specific person is at risk?",
+      "a": "Personally Identifiable Information (PII) exposure"
+    },
+    {
+      "q": "What does the padlock/HTTPS in your browser bar actually guarantee?",
+      "a": "The connection between you and the site is encrypted"
+    },
+    {
+      "q": "What are the small files websites store on your computer to remember you and track behavior?",
+      "a": "Cookies"
+    },
+    {
+      "q": "What law gives a creator exclusive rights to control and profit from their own work?",
+      "a": "Copyright"
+    },
+    {
+      "q": "Under what doctrine can a teacher show a short clip of a copyrighted film for a lesson?",
+      "a": "Fair Use"
+    },
+    {
+      "q": "What's it called when you clearly credit the original creator of content you're using?",
+      "a": "Attribution"
+    },
+    {
+      "q": "What licensing system lets creators pre-approve free reuse of their work under specific conditions?",
+      "a": "Creative Commons"
+    },
+    {
+      "q": "Why should you read a company's Privacy Policy before signing up?",
+      "a": "To see what data they collect and whether they sell it to others"
+    },
+    {
+      "q": "A photo from Google Images is used on a personal site without checking its license. Legal risk?",
+      "a": "Yes — unless it's explicitly marked for reuse or covered by Fair Use"
+    },
+    {
+      "q": "Personalization algorithms that isolate users from differing opinions create what effect?",
+      "a": "An echo chamber"
+    }
+  ],
+  "3": [
+    {
+      "q": "What's the umbrella term for any software built to damage or exploit a system?",
+      "a": "Malware"
+    },
+    {
+      "q": "What attack encrypts your files and demands payment for the decryption key?",
+      "a": "Ransomware"
+    },
+    {
+      "q": "What malware disguises itself as something useful to trick you into installing it?",
+      "a": "A Trojan horse"
+    },
+    {
+      "q": "What's the key difference between a virus and a worm?",
+      "a": "A virus needs a host file/human action; a worm spreads across networks on its own"
+    },
+    {
+      "q": "What attack floods a server with traffic from many devices to knock it offline?",
+      "a": "A DDoS attack"
+    },
+    {
+      "q": "What's a network of hijacked, remotely-controlled computers called?",
+      "a": "A botnet"
+    },
+    {
+      "q": "What attack secretly intercepts communication between two parties who think they're talking directly?",
+      "a": "A Man-in-the-Middle attack"
+    },
+    {
+      "q": "What's a security flaw called when hackers know about it but the developer doesn't yet?",
+      "a": "A zero-day vulnerability"
+    },
+    {
+      "q": "What security principle says users should only get the minimum access they need?",
+      "a": "The Principle of Least Privilege"
+    },
+    {
+      "q": "What attack systematically tries every possible password combination?",
+      "a": "A brute-force attack"
+    },
+    {
+      "q": "What's a highly personalized phishing attack targeting one specific person called?",
+      "a": "Spear phishing"
+    }
+  ],
+  "4": [
+    {
+      "q": "What term describes hiding complex hardware/software details so users can interact simply?",
+      "a": "Abstraction"
+    },
+    {
+      "q": "Put in order from lowest to highest: Hardware, OS, App Software, User — what's this called?",
+      "a": "The computing system's abstraction layers/hierarchy"
+    },
+    {
+      "q": "What software manages hardware resources and lets apps run on top of it?",
+      "a": "System software (the operating system)"
+    },
+    {
+      "q": "What's the very first step in systematic troubleshooting?",
+      "a": "Clearly identify and define the problem"
+    },
+    {
+      "q": "Why change only one setting at a time while troubleshooting?",
+      "a": "So you can isolate exactly what fixed or worsened the issue"
+    },
+    {
+      "q": "What's the base-2 number system all computer data reduces down to?",
+      "a": "Binary"
+    },
+    {
+      "q": "What tiny hardware component acts as an electrical on/off switch for logic?",
+      "a": "A transistor"
+    },
+    {
+      "q": "Which logic gate outputs TRUE only when both inputs are TRUE?",
+      "a": "AND gate"
+    },
+    {
+      "q": "What repeating 3-step process does a CPU use to run each instruction?",
+      "a": "Fetch-Decode-Execute cycle"
+    },
+    {
+      "q": "What measurement in GHz tells you roughly how many operations per second a CPU can do?",
+      "a": "Clock speed"
+    }
+  ],
+  "5": [
+    {
+      "q": "What term describes systematic, unfair errors in a system that favor one group over another?",
+      "a": "Algorithmic bias"
+    },
+    {
+      "q": "What's the best way to reduce bias in an AI system's outputs?",
+      "a": "Train it on diverse, representative, inclusive data"
+    },
+    {
+      "q": "What term describes unequal access to technology and connectivity across populations?",
+      "a": "An equity deficit (digital divide)"
+    },
+    {
+      "q": "What's the core difference between traditional programming and machine learning?",
+      "a": "Traditional code follows human-written rules; ML learns patterns from data"
+    },
+    {
+      "q": "What lets a voice assistant understand and respond in plain human language?",
+      "a": "Natural Language Processing (NLP)"
+    },
+    {
+      "q": "What technology lets a self-driving car identify pedestrians and signs from camera input?",
+      "a": "Computer vision"
+    },
+    {
+      "q": "Why can't a chess AI calculate every possible future move perfectly?",
+      "a": "The search space is too astronomically large"
+    },
+    {
+      "q": "What test measures whether a machine's conversation is indistinguishable from a human's?",
+      "a": "The Turing Test"
+    },
+    {
+      "q": "What's a major ethical concern with AI-generated fake video/audio?",
+      "a": "Deepfakes enabling misinformation, fraud, or defamation"
+    },
+    {
+      "q": "What AI structure is loosely modeled on the brain, using layers of connected nodes?",
+      "a": "A neural network"
+    }
+  ],
+  "6": [
+    {
+      "q": "What's a named, reusable block of code that performs one task called?",
+      "a": "A procedure (function/method)"
+    },
+    {
+      "q": "What principle bundles data with the methods that act on it, hiding internal details?",
+      "a": "Encapsulation"
+    },
+    {
+      "q": "What set of rules lets two separate applications communicate and share data?",
+      "a": "An API"
+    },
+    {
+      "q": "What tool tracks code changes over time so multiple developers can collaborate safely?",
+      "a": "Version control (e.g. Git)"
+    },
+    {
+      "q": "What legal category covers protections for software, designs, and digital art?",
+      "a": "Intellectual Property (IP)"
+    },
+    {
+      "q": "What term describes illegally copying or distributing software/media?",
+      "a": "Digital piracy"
+    },
+    {
+      "q": "What's the process of stripping identifying details from a dataset called?",
+      "a": "De-identification / anonymization"
+    },
+    {
+      "q": "What data structure uses key-value pairs for near-instant lookup?",
+      "a": "A Dictionary (Map)"
+    },
+    {
+      "q": "What classic algorithm finds a value in a sorted list by repeatedly halving the search space?",
+      "a": "Binary search"
+    },
+    {
+      "q": "What SDLC phase focuses on understanding user needs before any code is written?",
+      "a": "Planning and Requirements Analysis"
+    },
+    {
+      "q": "What's it called when a bug fix in one module accidentally breaks an unrelated feature?",
+      "a": "An unintended implication of modifying code"
+    }
+  ],
+  "7": [
+    {
+      "q": "What device connects separate networks together and forwards packets to the right destination?",
+      "a": "A router"
+    },
+    {
+      "q": "What's the difference between a router and a switch?",
+      "a": "A switch connects devices within one LAN; a router connects separate networks"
+    },
+    {
+      "q": "What system translates a domain name like google.com into its numerical IP address?",
+      "a": "DNS (Domain Name System)"
+    },
+    {
+      "q": "What's the key difference between an IP address and a MAC address?",
+      "a": "IP is a changeable logical address; MAC is a fixed physical hardware address"
+    },
+    {
+      "q": "What term measures the delay for a packet to travel from source to destination?",
+      "a": "Latency"
+    },
+    {
+      "q": "Why is a mesh network reliable but hard to scale?",
+      "a": "Every device connects to every other, so adding devices needs many new connections"
+    },
+    {
+      "q": "What's it called when a system keeps running despite one component failing?",
+      "a": "Fault tolerance"
+    },
+    {
+      "q": "What's the tradeoff between strong security measures and user convenience?",
+      "a": "Stronger security often reduces usability/convenience"
+    },
+    {
+      "q": "What kind of attack tricks someone into revealing info by posing as a trustworthy sender?",
+      "a": "Phishing"
+    },
+    {
+      "q": "Why does MFA improve security over a password alone?",
+      "a": "It requires a second, independent form of proof beyond just the password"
+    }
+  ]
+}

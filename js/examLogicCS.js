@@ -620,15 +620,19 @@ async function checkRetakeGate(unit) {
     }
 }
 
-function renderRetakeBlock(requirement, message) {
+function renderRetakeBlock(requirement, message, unit) {
     const container = document.getElementById('exam-container');
     if (!container) return;
     const label = requirement === 'notes' ? 'Notes Check Needed' : 'Chapter Work Needed';
+    const unitNum = parseInt(unit, 10);
+    const flashcardsLink = !isNaN(unitNum)
+        ? `<a href="/cs-flashcards.html?unit=${unitNum}" target="_blank" class="btn btn-outline-primary fw-bold ms-2"><i class="fas fa-layer-group me-1"></i> Study Flashcards</a>`
+        : '';
     container.innerHTML = `
         <div class="alert alert-warning text-center shadow p-5">
             <h4 class="fw-bold"><i class="fas fa-lock me-2"></i>${label}</h4>
             <p class="mb-4">${escapeHtml(message)}</p>
-            <a href="/cs-interactive.html" class="btn btn-warning fw-bold">&laquo; Back to Class</a>
+            <a href="/cs-interactive.html" class="btn btn-warning fw-bold">&laquo; Back to Class</a>${flashcardsLink}
         </div>`;
 }
 
@@ -774,7 +778,7 @@ async function initExam(config) {
 
     const retakeGate = await checkRetakeGate(currentUnit);
     if (!retakeGate.ok) {
-        renderRetakeBlock(retakeGate.requirement, retakeGate.message);
+        renderRetakeBlock(retakeGate.requirement, retakeGate.message, currentUnit);
         return;
     }
 
