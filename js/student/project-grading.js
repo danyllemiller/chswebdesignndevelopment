@@ -18,9 +18,10 @@ function criterionRow(name, crit, selectedVal) {
         <button type="button" class="btn btn-sm ${Number(selectedVal) === v ? 'btn-primary' : 'btn-outline-primary'} rubric-score-btn"
                 data-key="${crit.key}" data-value="${v}" title="${escapeHtml(scoreLabel(v))}">${v}</button>
     `).join('');
+    const bonusBadge = crit.bonus ? `<span class="badge bg-warning text-dark ms-2">Bonus - not required</span>` : '';
     return `
-        <div class="mb-3 pb-2 border-bottom" data-criterion-row="${crit.key}">
-            <p class="mb-1 fw-bold small">${escapeHtml(crit.label)}</p>
+        <div class="mb-3 pb-2 border-bottom" data-criterion-row="${crit.key}" data-bonus="${crit.bonus ? '1' : '0'}">
+            <p class="mb-1 fw-bold small">${escapeHtml(crit.label)}${bonusBadge}</p>
             <p class="mb-2 text-muted" style="font-size:.8rem;">${escapeHtml(crit.description)}</p>
             <div class="btn-group" role="group" data-name="${name}">${buttons}</div>
         </div>
@@ -51,11 +52,26 @@ function wireRubricButtons(container) {
     });
 }
 
+// Bonus criteria (e.g. an optional "challenge" step) are graded on top of
+// the core score, not folded into the same 0-4 average -- so skipping an
+// optional stretch goal can't cap a student who fully met the actual
+// requirements below 100%.
+const BONUS_MAX_POINTS = 10;
+
 function averageToScore100(values, rubric) {
-    const scores = rubric.map(c => values[c.key]).filter(v => v !== undefined);
-    if (scores.length === 0) return null;
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length; // 0-4
-    return Math.round((avg / 4) * 100);
+    const coreCriteria = rubric.filter(c => !c.bonus);
+    const coreScores = coreCriteria.map(c => values[c.key]).filter(v => v !== undefined);
+    if (coreScores.length === 0) return null;
+    const avg = coreScores.reduce((a, b) => a + b, 0) / coreScores.length; // 0-4
+    const base = Math.round((avg / 4) * 100);
+
+    const bonusCriteria = rubric.filter(c => c.bonus);
+    let bonusPoints = 0;
+    bonusCriteria.forEach(c => {
+        const v = values[c.key];
+        if (v !== undefined) bonusPoints += (v / 4) * (BONUS_MAX_POINTS / bonusCriteria.length);
+    });
+    return Math.min(100, Math.round(base + bonusPoints));
 }
 
 async function initProjectGrading(container) {

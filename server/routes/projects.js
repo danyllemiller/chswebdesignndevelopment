@@ -126,13 +126,20 @@ function readCombinedSource(studentId) {
 // criteria used for self/peer review. This is a heuristic (does the
 // required pattern appear at all?), not real execution -- feedback spells
 // out exactly what was and wasn't found so it's never a black box.
+// level4_challenge is a stretch goal beyond the assignment's core 3-step
+// requirement (assemble, logic, QA), not something every student needs to
+// attempt to fully meet the standard -- it's scored separately as bonus
+// points on top of the core score, not as a 5th equal-weight criterion,
+// so skipping it can't cap a student who nailed the actual requirements
+// below 100%.
 const CH9_AUTO_CRITERIA = [
     { key: 'event_listener', label: 'Event Listener Setup', checks: ['addEventListener', 'click'] },
     { key: 'prevent_default_inputs', label: 'Prevent Default & Input Capture', checks: ['preventDefault', '.value'] },
     { key: 'render_output', label: 'renderProfile Function & Output', checks: ['renderProfile', 'innerText'] },
-    { key: 'qa_case', label: 'QA: Case-Insensitive Logic', checks: ['toLowerCase'] },
-    { key: 'level4_challenge', label: 'Level 4.0 Challenge: Dynamic Elements', checks: ['createElement', 'appendChild'] }
+    { key: 'qa_case', label: 'QA: Case-Insensitive Logic', checks: ['toLowerCase'] }
 ];
+const CH9_BONUS_CRITERION = { key: 'level4_challenge', label: 'Level 4.0 Challenge: Dynamic Elements (Bonus)', checks: ['createElement', 'appendChild'] };
+const BONUS_MAX_POINTS = 10;
 
 router.post('/student/project-auto-grade', async (req, res) => {
     const { chapter_project_id, exam_id, student_id } = req.body;
@@ -147,10 +154,22 @@ router.post('/student/project-auto-grade', async (req, res) => {
         const rubric = CH9_AUTO_CRITERIA.map(c => {
             const found = c.checks.filter(pattern => combined.includes(pattern));
             const pct = found.length / c.checks.length; // 0, 0.5, or 1
-            return { key: c.key, label: c.label, checksLookedFor: c.checks, checksFound: found, score4: Math.round(pct * 4) };
+            return { key: c.key, label: c.label, checksLookedFor: c.checks, checksFound: found, score4: Math.round(pct * 4), bonus: false };
         });
-        const scoreOutOf100 = Math.round((rubric.reduce((sum, c) => sum + c.score4, 0) / (rubric.length * 4)) * 100);
-        const feedback = rubric.map(c => `${c.label}: ${c.checksFound.length}/${c.checksLookedFor.length} expected pattern(s) found (${c.checksFound.join(', ') || 'none'})`).join(' | ');
+        const bonusFound = CH9_BONUS_CRITERION.checks.filter(pattern => combined.includes(pattern));
+        const bonusEntry = {
+            key: CH9_BONUS_CRITERION.key, label: CH9_BONUS_CRITERION.label,
+            checksLookedFor: CH9_BONUS_CRITERION.checks, checksFound: bonusFound, bonus: true,
+            bonusPoints: Math.round((bonusFound.length / CH9_BONUS_CRITERION.checks.length) * BONUS_MAX_POINTS)
+        };
+        rubric.push(bonusEntry);
+
+        const baseScore = Math.round((rubric.filter(c => !c.bonus).reduce((sum, c) => sum + c.score4, 0) / (CH9_AUTO_CRITERIA.length * 4)) * 100);
+        const scoreOutOf100 = Math.min(100, baseScore + bonusEntry.bonusPoints);
+        const feedback = [
+            ...rubric.filter(c => !c.bonus).map(c => `${c.label}: ${c.checksFound.length}/${c.checksLookedFor.length} expected pattern(s) found (${c.checksFound.join(', ') || 'none'})`),
+            `${bonusEntry.label}: ${bonusEntry.checksFound.length}/${bonusEntry.checksLookedFor.length} found, +${bonusEntry.bonusPoints} bonus pts`
+        ].join(' | ');
 
         const connection = await getDbConnection();
         const result = await saveEvaluationAndAggregate(connection, {
