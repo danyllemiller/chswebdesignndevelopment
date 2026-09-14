@@ -182,7 +182,7 @@ async function initPreTest(config) {
     // of the real correct answer. Setting q.answer here makes every later
     // correctness check (which already prefers q.answer) use the true
     // original answer regardless of display order.
-    examQuestions = pool.slice(0, 10).map(q => {
+    examQuestions = pool.slice(0, 25).map(q => {
         const answer = q.answer || q.options[0];
         return { ...q, answer, options: shuffleArray([...q.options]) };
     });
