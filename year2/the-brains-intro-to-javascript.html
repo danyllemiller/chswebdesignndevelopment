@@ -1139,6 +1139,26 @@ btn.addEventListener("click", fn);
       </div>
     </div>
 
+    <!-- SELF / PEER / AUTO GRADING -->
+    <div class="row mb-5 pb-4 border-bottom">
+      <div class="col-lg-12">
+        <div id="project-grading-panel"
+             class="card border-info shadow-sm mx-auto text-start"
+             style="max-width: 900px;"
+             data-chapter-project-id="1"
+             data-exam-id="Ch9-Profile App Assembly"
+             data-rubric='[
+                {"key":"event_listener","label":"Event Listener Setup","description":"An addEventListener is connected to the Generate Profile button, so clicking it runs your logic."},
+                {"key":"prevent_default_inputs","label":"Prevent Default &amp; Input Capture","description":"event.preventDefault() stops the page from refreshing, and all 3 input values are correctly captured."},
+                {"key":"render_output","label":"renderProfile Function &amp; Output","description":"Captured values are passed into a renderProfile function, and the result is displayed using .innerText."},
+                {"key":"qa_case","label":"QA: Case-Insensitive Logic","description":"The app handles different capitalization correctly (e.g. &#39;red&#39; vs &#39;Red&#39;) without freezing or breaking."},
+                {"key":"level4_challenge","label":"Level 4.0 Challenge: Dynamic Elements","description":"Uses document.createElement() and appendChild() to spawn a new profile card on each click, instead of just replacing text."}
+             ]'>
+          <div class="card-body small p-4 text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading grading tool…</div>
+        </div>
+      </div>
+    </div>
+
     <!-- FINAL RECAP -->
     <div class="row mt-5">
       <div class="col-lg-8 pe-lg-5">
@@ -1225,6 +1245,7 @@ btn.addEventListener("click", fn);
 
   <!-- ASSIGNMENT UPLOADER LOGIC -->
   <script type="module" src="/js/assignment-uploader.js"></script>
+  <script type="module" src="/js/student/project-grading.js?v=1"></script>
 
 <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 </body>
