@@ -280,6 +280,12 @@ async function openTimeclockModal() {
     // if the modal isn't currently shown, clear any stray backdrop/body-lock
     // state one more time right before asking Bootstrap to show it fresh.
     if (!modalEl.classList.contains('show')) cleanupStrayModalState();
+    // Exam pages treat any visibilitychange as a possible click-out and can
+    // auto-submit the test (see examLogicWD.js/examLogicCS.js setupTabLockdown).
+    // This modal is an in-page overlay, not a real navigation, but it's
+    // flagged here anyway so the exam lockdown never counts it against the
+    // student if a browser fires visibilitychange around the modal/backdrop.
+    window.__timeclockModalOpen = true;
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
@@ -692,6 +698,7 @@ function injectTimeclockUI() {
     // stops stray backdrop/body-lock state from ever accumulating across a
     // class period's worth of auto-popups, rechecks, and clicks.
     document.getElementById('timeclock-modal').addEventListener('hidden.bs.modal', cleanupStrayModalState);
+    document.getElementById('timeclock-modal').addEventListener('hidden.bs.modal', () => { window.__timeclockModalOpen = false; });
     document.getElementById('tc-clockin-btn').addEventListener('click', () => handleManualOpen('in'));
     document.getElementById('tc-clockout-btn').addEventListener('click', () => handleManualOpen('out'));
     initPulseStep();

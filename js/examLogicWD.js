@@ -313,6 +313,7 @@ function setupTabLockdown() {
     if (tabLockdownActive) return;
     tabLockdownActive = true;
     document.addEventListener('visibilitychange', () => {
+        if (window.__timeclockModalOpen) return;
         if (examIsActive && document.visibilityState === 'hidden') {
             tabSwitchCount++;
             if (tabSwitchCount === 1) {
