@@ -59,11 +59,19 @@ export const CAREER_READINESS_EXAM_IDS = new Set([
     'WRS-Practice-A'                       // stand-alone Workplace Readiness Skills pre-assessment
 ]);
 
-export function getAssignmentCategory(name, courseKey) {
+// storedCategory is the exams.category column value, when the caller has it.
+// It's the source of truth once present -- everything below is only a
+// fallback for exam_ids that predate being categorized, or that a caller
+// doesn't have the row data for. INTV still overrides even a stored
+// category: it's a statement about how THIS student's enrollment counts
+// every grade, not a property of the exam itself.
+export function getAssignmentCategory(name, courseKey, storedCategory) {
     // Intervention is a flat pool — every assignment counts the same, no
     // final/project-quiz/career split (COURSE_WEIGHTS.INTV weights those at 0,
     // so miscategorizing something here would silently drop it from the total).
     if (courseKey === 'INTV') return 'assignment';
+
+    if (storedCategory) return storedCategory;
 
     if (CAREER_READINESS_EXAM_IDS.has(name)) return 'career';
 

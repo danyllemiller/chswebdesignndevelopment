@@ -49,7 +49,7 @@ router.get('/student/course-gradebook', async (req, res) => {
             return res.status(400).json({ error: 'Unable to resolve course for student section' });
         }
         const [rows] = await connection.execute(
-            `SELECT e.exam_id, TRIM(e.title) AS title, e.total_points, e.course_id,
+            `SELECT e.exam_id, TRIM(e.title) AS title, e.total_points, e.course_id, e.category,
                     e.due_date, e.instructions, e.period_due_dates,
                     r.score, r.timestamp
              FROM exams e
@@ -396,7 +396,7 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
         students.forEach(s => { s.additional_sections = extraByStudent[s.student_id] || []; });
 
         const [exams] = await connection.execute(
-            `SELECT exam_id, TRIM(title) AS title, total_points, course_id, due_date, instructions, period_due_dates FROM exams`
+            `SELECT exam_id, TRIM(title) AS title, total_points, course_id, category, due_date, instructions, period_due_dates FROM exams`
         );
         const [grades] = await connection.execute(
             `SELECT student_id, exam_id, score, total_points, timestamp, entered_in_ic FROM responses`
@@ -413,7 +413,7 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
             registry[e.exam_id] = {
                 title: e.title, maxPoints: e.total_points,
                 dueDate: formatDbDate(e.due_date), instructions: e.instructions || '',
-                targetCourse: e.course_id || 'All', periodDueDates
+                targetCourse: e.course_id || 'All', category: e.category, periodDueDates
             };
         });
         await connection.release();

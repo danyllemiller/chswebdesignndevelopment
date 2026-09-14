@@ -2,7 +2,7 @@
 import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
 import { escapeHtml, parsePts } from '../modules/utils.js';
-import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=4';
+import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=5';
 
 // Matches data/cs-course-map.json -- which chapters' classwork
 // (cs_chN_activity_name) belong to which unit's exam, for the mastery
@@ -250,6 +250,7 @@ async function renderCoursePanel(user, courseKey, sectionId) {
                     dueDate: assignment.due_date || '',
                     instructions: assignment.instructions || '',
                     targetCourse: assignment.course_id || 'All',
+                    category: assignment.category,
                     periodDueDates: assignment.period_due_dates
                         ? (typeof assignment.period_due_dates === 'string'
                             ? JSON.parse(assignment.period_due_dates)
@@ -399,7 +400,7 @@ function calculateGradeStats(keys, myGrades, registryData, courseKey) {
             totalEarned += num;
             if (hasScore) completed++;
 
-            const cat = getAssignmentCategory(key, courseKey);
+            const cat = getAssignmentCategory(key, courseKey, registryData?.[key]?.category);
             catEarned[cat] += num;
             catPossible[cat] += max;
         }

@@ -62,8 +62,15 @@ const CAREER_READINESS_EXAM_IDS = new Set([
     'WRS-Practice-A'                       // stand-alone Workplace Readiness Skills pre-assessment
 ]);
 
-function getAssignmentCategory(name, courseKey) {
+// storedCategory is the exams.category column value, when the caller has it
+// (e.g. from a query that selects e.category). It's the source of truth once
+// present -- everything below it is only a fallback for exam_ids that predate
+// being categorized, or that a caller doesn't have the row data for. INTV
+// still overrides even a stored category: it's a statement about how THIS
+// student's enrollment counts every grade, not a property of the exam itself.
+function getAssignmentCategory(name, courseKey, storedCategory) {
     if (courseKey === 'INTV') return 'assignment';
+    if (storedCategory) return storedCategory;
     if (CAREER_READINESS_EXAM_IDS.has(name)) return 'career';
     const lowerName = name.toLowerCase();
     if (lowerName.startsWith('tc-') || lowerName.includes('timeclock')) {
@@ -138,7 +145,7 @@ async function computeStudentGrade(connection, studentId, sectionId) {
     if (!courseKey || !courseCode) return { percent: null, letterGrade: null, courseLabel: null };
 
     const [rows] = await connection.execute(
-        `SELECT e.exam_id, TRIM(e.title) AS title, e.total_points, e.due_date, r.score
+        `SELECT e.exam_id, TRIM(e.title) AS title, e.total_points, e.due_date, e.category, r.score
          FROM exams e
          LEFT JOIN responses r ON e.exam_id = r.exam_id AND r.student_id = ?
          WHERE e.course_id = ?`,
@@ -204,7 +211,7 @@ async function computeStudentGrade(connection, studentId, sectionId) {
         totalPossible += max;
         totalEarned += num;
 
-        const cat = getAssignmentCategory(key, courseKey);
+        const cat = getAssignmentCategory(key, courseKey, r.category);
         catEarned[cat] += num;
         catPossible[cat] += max;
     });

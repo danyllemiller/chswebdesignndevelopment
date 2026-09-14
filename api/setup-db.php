@@ -48,6 +48,7 @@ $tables['exams'] = "CREATE TABLE IF NOT EXISTS `exams` (
   `due_date`         DATE                  DEFAULT NULL,
   `instructions`     TEXT,
   `course_id`        VARCHAR(50)           DEFAULT 'All',
+  `category`         VARCHAR(20)  NOT NULL DEFAULT 'assignment',
   `period_due_dates` TEXT,
   `created_at`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`exam_id`)

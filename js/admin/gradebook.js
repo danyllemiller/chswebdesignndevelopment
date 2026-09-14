@@ -8,7 +8,7 @@
 
 // Weighted grading config is shared with the student dashboard via js/modules/grade-weights.js —
 // edit there, not here, so teacher and student views never diverge.
-import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=4';
+import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=5';
 
 // Dynamically load Chart.js for the Analytics Graph
 if (!document.getElementById('chartjs-lib')) {
@@ -1063,6 +1063,7 @@ async function loadData() {
                     dueDate: e.due_date || '',
                     instructions: e.instructions || '',
                     targetCourse: e.course_id || 'All',
+                    category: e.category,
                     periodDueDates: e.period_due_dates ? (typeof e.period_due_dates === 'string' ? JSON.parse(e.period_due_dates) : e.period_due_dates) : {}
                 };
             });
@@ -1253,9 +1254,9 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
         // "assignment" by default (no weight keyword of their own) -- strip
         // those two out explicitly so this is really just labs/activities.
         if (categoryVal === '__labsactivities') {
-            return getAssignmentCategory(key, courseKeyForView) === 'assignment' && !isPreAssessment(key) && !isClockIn(key);
+            return getAssignmentCategory(key, courseKeyForView, allAssignments[key]?.category) === 'assignment' && !isPreAssessment(key) && !isClockIn(key);
         }
-        return getAssignmentCategory(key, courseKeyForView) === categoryVal;
+        return getAssignmentCategory(key, courseKeyForView, allAssignments[key]?.category) === categoryVal;
     };
 
     Object.keys(allAssignments).forEach(key => {
@@ -1302,8 +1303,8 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
     const sortedKeys = Array.from(assignmentMap.keys()).sort((a, b) => {
         let cmp;
         if (assignmentSortMode === 'weight') {
-            const wA = sortWeights[getAssignmentCategory(a, courseKeyForView)] || 0;
-            const wB = sortWeights[getAssignmentCategory(b, courseKeyForView)] || 0;
+            const wA = sortWeights[getAssignmentCategory(a, courseKeyForView, allAssignments[a]?.category)] || 0;
+            const wB = sortWeights[getAssignmentCategory(b, courseKeyForView, allAssignments[b]?.category)] || 0;
             cmp = wB - wA || a.localeCompare(b);
         } else if (assignmentSortMode === 'alpha') {
             cmp = a.localeCompare(b);
@@ -1335,7 +1336,7 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
         // or Career Readiness -- reusing the exact category the real grade
         // calculation already uses (getAssignmentCategory), so the letter
         // can never disagree with what the column is actually weighted as.
-        const catForTag = getAssignmentCategory(key, courseKeyForView);
+        const catForTag = getAssignmentCategory(key, courseKeyForView, allAssignments[key]?.category);
         const CATEGORY_TAG = { project_quiz: 'T', final: 'T', assignment: 'A', career: 'C' };
         const CATEGORY_TAG_TITLE = { project_quiz: 'Test/Quiz', final: 'Final Exam', assignment: 'Assignment', career: 'Career Readiness' };
         const tagLetter = CATEGORY_TAG[catForTag] || '';
@@ -1502,7 +1503,7 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
             const num = hasScore ? Number(score) : 0;
             const max = (g && typeof g === 'object' && g.max) ? Number(g.max) : assignmentMap.get(key).maxPoints;
             earned += num; possible += max;
-            const cat = getAssignmentCategory(key, courseKey);
+            const cat = getAssignmentCategory(key, courseKey, allAssignments[key]?.category);
             catEarned[cat] += num; catPossible[cat] += max;
         });
 
