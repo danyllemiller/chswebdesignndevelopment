@@ -957,7 +957,7 @@ const examContainer = document.getElementById('exam-container');
                                 <span class="badge bg-warning text-dark shadow-sm"><i class="fas fa-lock me-1"></i> Screen Locked</span>
                             </div>
                             <div class="card-body p-0" style="height: 80vh; min-height: 600px;">
-<iframe src="/cs-notebook.html" onload="window.lockdownIframe(this)" style="width: 100%; height: 100%; border: none;"></iframe>
+<iframe src="/cs-notebook.html?chapterLabel=${encodeURIComponent('Unit ' + currentUnit + ' Exam Scratchpad')}" onload="window.lockdownIframe(this)" style="width: 100%; height: 100%; border: none;"></iframe>
                             </div>
                         </div>
                     </div>
