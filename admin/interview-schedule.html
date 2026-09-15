@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Admin | Mock Interview Schedule</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <script src="/js/loader.js?v=20"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .sched-card { max-width: 1000px; margin: 2.5rem auto; }
+    .day-header { background: #0d6efd; color: #fff; font-weight: 700; padding: .6rem 1rem; border-radius: .4rem .4rem 0 0; }
+    .slot-row { display: grid; grid-template-columns: 90px 1fr 90px 110px; gap: .75rem; align-items: center; padding: .6rem 1rem; border-bottom: 1px solid #eee; }
+    .slot-row:last-child { border-bottom: none; }
+    .slot-row.open .slot-name { color: #adb5bd; font-style: italic; }
+    .slot-row.scored { background: #f3fbf5; }
+    .score-pill { font-size: .78rem; font-weight: 700; }
+    .empty-note { color: #adb5bd; font-style: italic; padding: 1.5rem; text-align: center; }
+    #genForm { max-width: 1000px; margin: 0 auto; }
+    .criterion-row { display: flex; align-items: center; justify-content: space-between; padding: .4rem 0; border-bottom: 1px dashed #eee; }
+    .criterion-row:last-child { border-bottom: none; }
+    .crit-btn { width: 34px; height: 34px; border-radius: 50%; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container" id="genForm">
+  <div class="card shadow-sm border-0 mb-3 mt-4">
+    <div class="card-body p-4">
+      <h2 class="gochi text-primary mb-1"><i class="fas fa-calendar-check me-2"></i>Mock Interview Schedule</h2>
+      <p class="text-muted mb-3">A1 period only, 7:55–9:00am (first 20 min held for attendance). 5-minute interviews, 3-minute buffer between.</p>
+      <div class="d-flex gap-2 align-items-end flex-wrap">
+        <div>
+          <label class="form-label small fw-bold mb-1">Add interview day</label>
+          <input type="date" id="genDate" class="form-control form-control-sm">
+        </div>
+        <button type="button" id="genBtn" class="btn btn-primary btn-sm fw-bold">Generate Slots</button>
+        <span id="genStatus" class="small ms-2"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container sched-card" id="scheduleContainer">
+  <div class="text-center py-4"><span class="spinner-border spinner-border-sm text-primary"></span> Loading schedule...</div>
+</div>
+
+<div class="modal fade" id="scoreModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="scoreModalTitle">Score Interview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="scoreModalBody"></div>
+      <div class="modal-footer">
+        <span id="scoreModalStatus" class="me-auto small"></span>
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success btn-sm fw-bold" id="saveScoreBtn">Save Score</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script type="module" src="/js/admin/interview-schedule.js?v=1"></script>
+</body>
+</html>
