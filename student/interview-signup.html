@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Student View | Mock Interview Sign-Up</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet" />
+  <link href="/css/student-pages.css" rel="stylesheet" />
+</head>
+<body class="bg-white">
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div class="container my-5" style="max-width: 640px;">
+    <div class="mb-4">
+      <h2 class="gochi text-primary mb-0"><i class="fas fa-calendar-check me-2"></i>Mock Interview Sign-Up</h2>
+      <p class="text-muted mb-0">Pick a 5-minute interview time. Your Agency Application and resume are already turned in — nothing else to submit here.</p>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <div data-interview-signup>
+          <p class="text-muted small mb-0"><i class="fas fa-spinner fa-spin me-1"></i>Loading…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+  <script src="/js/loader.js?v=20"></script>
+  <script type="module" src="/js/student/interview-signup.js?v=1"></script>
+</body>
+</html>
