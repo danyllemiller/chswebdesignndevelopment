@@ -55,7 +55,7 @@ router.get('/interview-slots', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(
-            `SELECT s.id, s.slot_date, s.start_time, s.end_time, s.student_id,
+            `SELECT s.id, DATE_FORMAT(s.slot_date, '%Y-%m-%d') AS slot_date, s.start_time, s.end_time, s.student_id,
                     st.first_name, st.last_name
              FROM interview_slots s
              LEFT JOIN students st ON st.student_id = s.student_id
@@ -144,7 +144,7 @@ router.get('/admin/interview-slots', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(
-            `SELECT s.id, s.slot_date, s.start_time, s.end_time, s.student_id,
+            `SELECT s.id, DATE_FORMAT(s.slot_date, '%Y-%m-%d') AS slot_date, s.start_time, s.end_time, s.student_id,
                     st.first_name, st.last_name,
                     r.score AS rubric_score
              FROM interview_slots s
