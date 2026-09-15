@@ -31,6 +31,75 @@ function buildSlotsForDate() {
     return slots;
 }
 
+function formatTime12h(timeStr) {
+    const [h, m] = String(timeStr).split(':').map(Number);
+    const period = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+// Writes into the same calendar_events table the PHP class calendar
+// (calendar.html / api/events.php) already reads -- no separate calendar
+// system, this is the one students and the teacher already use.
+// events.php filters student requests with `course_bucket IS NULL OR
+// course_bucket = ?bucket`, and only the teacher/admin view omits
+// ?bucket (so it gets every row back unfiltered). 'STAFF' never matches
+// a real student bucket, so a 'STAFF'-tagged event is invisible to
+// students but still shows on the teacher's own calendar -- that's the
+// only lever this table gives us for a teacher-only event, short of
+// building real per-student filtering.
+const CALENDAR_SOURCE = 'interview';
+const CALENDAR_STUDENT_BUCKET = 'WD1'; // A1 period maps to WD1 (server/routes/timeclock.js)
+
+async function addInterviewCalendarEvents(connection, slotId) {
+    const [[slot]] = await connection.execute(
+        `SELECT s.id, DATE_FORMAT(s.slot_date, '%Y-%m-%d') AS slot_date, s.start_time, s.end_time,
+                st.first_name, st.last_name
+         FROM interview_slots s LEFT JOIN students st ON st.student_id = s.student_id
+         WHERE s.id = ?`,
+        [slotId]
+    );
+    if (!slot || !slot.first_name) return;
+
+    // One generic, name-free reminder per interview day, visible to the
+    // whole class -- created once on that day's first sign-up, not
+    // duplicated on every claim after.
+    const [[existingReminder]] = await connection.execute(
+        `SELECT id FROM calendar_events WHERE source = ? AND event_date = ? AND course_bucket = ? LIMIT 1`,
+        [CALENDAR_SOURCE, slot.slot_date, CALENDAR_STUDENT_BUCKET]
+    );
+    if (!existingReminder) {
+        await connection.execute(
+            `INSERT INTO calendar_events (event_date, title, type, all_day, source, course_bucket)
+             VALUES (?, 'Mock Interviews Today', 'none', 1, ?, ?)`,
+            [slot.slot_date, CALENDAR_SOURCE, CALENDAR_STUDENT_BUCKET]
+        );
+    }
+
+    // Named entry, teacher-only (course_bucket = 'STAFF'). description
+    // carries a machine-readable key so a later release can delete this
+    // exact row without guessing off the title.
+    await connection.execute(
+        `INSERT INTO calendar_events (event_date, title, type, description, all_day, start_time, end_time, source, course_bucket)
+         VALUES (?, ?, 'none', ?, 0, ?, ?, ?, 'STAFF')`,
+        [
+            slot.slot_date,
+            `Mock Interview — ${slot.last_name}, ${slot.first_name} (${formatTime12h(slot.start_time)})`,
+            `slot_id:${slot.id}`,
+            slot.start_time,
+            slot.end_time,
+            CALENDAR_SOURCE
+        ]
+    );
+}
+
+async function removeInterviewCalendarEvent(connection, slotId) {
+    await connection.execute(
+        `DELETE FROM calendar_events WHERE source = ? AND description = ?`,
+        [CALENDAR_SOURCE, `slot_id:${slotId}`]
+    );
+}
+
 // Rubric criteria, 0-4 each, grounded in Nevada Workplace Readiness
 // Skills (Personal Qualities/People Skills + Professional Image
 // standards already used elsewhere in Ch1). Kept in one place so the
@@ -81,19 +150,27 @@ router.post('/interview-slots/claim', async (req, res) => {
         const connection = await getDbConnection();
         // One slot per student -- free any prior claim by this student
         // before taking the new one, so switching slots doesn't leave two
-        // reserved under their name.
-        await connection.execute(
-            'UPDATE interview_slots SET student_id = NULL, claimed_at = NULL WHERE student_id = ?',
-            [student_id]
+        // reserved under their name. Grab its id first so the matching
+        // calendar event can be cleaned up too, not just the slot row.
+        const [[priorSlot]] = await connection.execute(
+            'SELECT id FROM interview_slots WHERE student_id = ?', [student_id]
         );
+        if (priorSlot) {
+            await connection.execute(
+                'UPDATE interview_slots SET student_id = NULL, claimed_at = NULL WHERE id = ?', [priorSlot.id]
+            );
+            await removeInterviewCalendarEvent(connection, priorSlot.id);
+        }
         const [result] = await connection.execute(
             'UPDATE interview_slots SET student_id = ?, claimed_at = NOW() WHERE id = ? AND student_id IS NULL',
             [student_id, slot_id]
         );
-        await connection.release();
         if (result.affectedRows === 0) {
+            await connection.release();
             return res.status(409).json({ error: 'That slot was just taken by someone else. Pick another.' });
         }
+        await addInterviewCalendarEvents(connection, slot_id);
+        await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to claim slot' }); }
 });
@@ -107,6 +184,7 @@ router.post('/interview-slots/release', async (req, res) => {
             'UPDATE interview_slots SET student_id = NULL, claimed_at = NULL WHERE id = ? AND student_id = ?',
             [slot_id, student_id]
         );
+        await removeInterviewCalendarEvent(connection, slot_id);
         await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to release slot' }); }
@@ -134,6 +212,7 @@ router.post('/admin/interview-slots/generate', async (req, res) => {
 router.delete('/admin/interview-slots/:id', async (req, res) => {
     try {
         const connection = await getDbConnection();
+        await removeInterviewCalendarEvent(connection, req.params.id);
         await connection.execute('DELETE FROM interview_slots WHERE id = ?', [req.params.id]);
         await connection.release();
         res.json({ success: true });
