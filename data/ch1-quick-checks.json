@@ -1,0 +1,113 @@
+{
+  "ch1_lab_infra": {
+    "title": "Quick Check: Internet vs. Web",
+    "questions": [
+      { "q": "What's the key difference between the Internet and the World Wide Web?", "options": ["The Internet is the physical infrastructure (cables, routers, servers); the Web is the information/services that travel on it", "They're the same thing, just different names", "The Web is the hardware; the Internet is the software", "The Internet only carries email; the Web carries everything else"], "correct": 0 },
+      { "q": "Who invented the World Wide Web, and where?", "options": ["Bill Gates, at Microsoft", "Tim Berners-Lee, at CERN in Switzerland", "Steve Jobs, at Apple", "The U.S. military, at the Pentagon"], "correct": 1 },
+      { "q": "What is an intranet?", "options": ["A faster version of the internet", "A restricted, internal network only for members of a specific group (like a hospital's internal system)", "The original name for the World Wide Web", "A backup internet used when the main one goes down"], "correct": 1 }
+    ]
+  },
+  "ch1_lab_dns": {
+    "title": "Quick Check: DNS & Domains",
+    "questions": [
+      { "q": "What does DNS actually do?", "options": ["It encrypts data between browser and server", "It connects human-friendly domain names to the numerical IP addresses computers use", "It designs the visual layout of a website", "It compresses images for faster loading"], "correct": 1 },
+      { "q": "In the client-server relationship, what is the \"client\"?", "options": ["The company paying for the website", "The web server storing the files", "Your web browser, which requests pages from a server", "The domain registrar"], "correct": 2 },
+      { "q": "What does a DNS record's TTL (Time to Live) control?", "options": ["How long a website stays online before it must be renewed", "How long other servers may cache (hold onto) a DNS answer before checking again", "How fast a page loads", "How long a domain name can be"], "correct": 1 }
+    ]
+  },
+  "ch1_lab_url": {
+    "title": "Quick Check: URLs & HTTPS",
+    "questions": [
+      { "q": "In the URL https://www.pixelpaws.com/products/collars?type=nylon, what is \"pixelpaws.com\"?", "options": ["The protocol", "The domain name", "The query parameter", "The path"], "correct": 1 },
+      { "q": "What does the \"S\" in HTTPS actually mean for your data?", "options": ["It means the site was Specially approved by Google", "It means the connection between your browser and the server is encrypted", "It means the site loads Slower but Safer", "It means the site is Sponsored content"], "correct": 1 },
+      { "q": "What role does a Certificate Authority (CA) play in HTTPS?", "options": ["It hosts the actual website files", "It signs and verifies a server's SSL certificate so browsers can trust it", "It registers the domain name", "It writes the website's code"], "correct": 1 }
+    ]
+  },
+  "ch1_lab_design_teardown": {
+    "title": "Quick Check: Design Principles",
+    "questions": [
+      { "q": "What is the 60-30-10 rule used for?", "options": ["Splitting a webpage's load time across three servers", "Balancing a color palette: 60% dominant color, 30% secondary, 10% accent", "Setting font sizes for headings", "Deciding image compression ratios"], "correct": 1 },
+      { "q": "According to the reading, about how long does it take a user to understand a page's purpose without reading any text?", "options": ["3-5 seconds", "30 seconds", "1 minute", "Instantly, in under a second"], "correct": 0 },
+      { "q": "What's the main difference between an F-pattern and a Z-pattern layout?", "options": ["F-pattern is for content-heavy pages; Z-pattern is for simple pages with a clear focal path", "F-pattern is only used on mobile; Z-pattern only on desktop", "They are the same pattern with different names", "F-pattern uses color; Z-pattern uses only grayscale"], "correct": 0 }
+    ]
+  },
+  "ch1_lab_know_your_guild": {
+    "title": "Quick Check: CTSOs & the Perkins Act",
+    "questions": [
+      { "q": "What does CTSO stand for?", "options": ["Career and Technical Student Organization", "Computer Technology Student Organization", "Certified Training and Skills Office", "Career Technical Support Office"], "correct": 0 },
+      { "q": "What federal law funds and requires programs like this one, including CTSO participation?", "options": ["The No Child Left Behind Act", "The Carl D. Perkins Career and Technical Education Act", "The Individuals with Disabilities Education Act", "The Every Student Succeeds Act"], "correct": 1 },
+      { "q": "According to the SkillsUSA Framework, Technical Skills make up roughly what share of the three-part framework?", "options": ["All of it - it's the only part that matters", "Two-thirds", "One-third, alongside Personal Skills and Workplace Skills", "None - it's purely soft skills"], "correct": 2 }
+    ]
+  },
+  "ch1_lab_mock_meeting": {
+    "title": "Quick Check: Parliamentary Procedure",
+    "questions": [
+      { "q": "What set of rules is most commonly used to run formal meetings fairly, and who wrote it?", "options": ["Robert's Rules of Order, written by Henry Martyn Robert", "The Perkins Act, written by Congress", "The SkillsUSA Code, written by the U.S. Department of Education", "The Meeting Manual, written by FBLA"], "correct": 0 },
+      { "q": "What does \"seconding\" a motion actually mean?", "options": ["It means the person agrees with the motion", "It means the motion gets voted on twice", "It just keeps the motion alive for discussion - it doesn't mean agreement", "It means the motion automatically passes"], "correct": 2 },
+      { "q": "What's the difference between a Standing Committee and an Ad Hoc Committee?", "options": ["Standing committees are permanent; Ad Hoc committees are temporary, formed for one specific purpose", "Standing committees meet while standing up; Ad Hoc committees sit down", "There is no real difference", "Ad Hoc committees are always larger than Standing committees"], "correct": 0 }
+    ]
+  },
+  "ch1_lab_service_proposal": {
+    "title": "Quick Check: Service Learning & WBL",
+    "questions": [
+      { "q": "What makes something \"service learning\" instead of just volunteering?", "options": ["It has to involve money changing hands", "It's directly tied to class learning and requires structured reflection, not just helping out", "It has to happen on a weekend", "It's the exact same thing as volunteering"], "correct": 1 },
+      { "q": "On the Work-Based Learning ladder, which tier involves actually doing paid, structured work (like Cooperative Education or Apprenticeship)?", "options": ["Awareness", "Exploration", "Application", "Observation"], "correct": 2 },
+      { "q": "What does \"pro bono\" work mean for a design agency, according to the reading?", "options": ["Work done for free that's purely charity, not smart business", "Free professional work for non-profits that builds portfolio and generates referrals - smart business, not just charity", "Work that's illegal to charge for", "A discount given only to friends and family"], "correct": 1 }
+    ]
+  },
+  "ch1_lab_portfolio_audit": {
+    "title": "Quick Check: Professional Image",
+    "questions": [
+      { "q": "According to the dress code levels, when are you required to wear the SkillsUSA Official Uniform?", "options": ["Every day of class", "For ALL SkillsUSA competitions and events, no exceptions", "Only during job interviews", "Never - it's optional"], "correct": 1 },
+      { "q": "What's the \"golden rule\" given for when you're not sure how to dress for a professional situation?", "options": ["Wear whatever is most comfortable", "When in doubt, go more formal", "Always match what your classmates are wearing", "Ask a stranger for advice"], "correct": 1 },
+      { "q": "What's the approximate starting salary range for an entry-level developer in Nevada, per the reading?", "options": ["$15,000-$20,000/year", "$45,000-$65,000/year", "$200,000+/year", "$10/hour part-time only"], "correct": 1 }
+    ]
+  },
+  "ch1_lab_resume": {
+    "title": "Quick Check: Resumes & Job Postings",
+    "questions": [
+      { "q": "According to the reading, what's wrong with a resume that just lists \"web design class\" as an experience?", "options": ["Nothing - that's exactly what a resume should say", "It doesn't tell an employer anything specific - a resume's job is to turn experience into evidence", "It's too short", "It uses the wrong font"], "correct": 1 },
+      { "q": "What's the two-step process taught for building resume bullet points?", "options": ["Copy a template, then submit it", "Identify a skill you learned, then connect it to a specific real project or lab that proves it", "List every class you've ever taken", "Ask a friend to write it for you"], "correct": 1 },
+      { "q": "What does a real job posting typically specify, according to the reading?", "options": ["Only the salary", "Job title, responsibilities, required skills, education, and qualifications", "Just the company's logo and address", "Nothing useful - postings are usually vague"], "correct": 1 }
+    ]
+  },
+  "ch1_lab_interview_prep": {
+    "title": "Quick Check: Interview Answers",
+    "questions": [
+      { "q": "Why is the answer \"I'm a hard worker\" considered weak in an interview, per the reading?", "options": ["It's grammatically incorrect", "It's vague and gives the interviewer no specific evidence, unlike a story with a real example", "Interviewers don't want to hear about work ethic at all", "It's too long an answer"], "correct": 1 },
+      { "q": "What do interviewers actually evaluate beyond technical skill, according to the reading?", "options": ["Only your grades", "Your communication, professionalism, and ability to give specific, evidence-based answers", "Only how you're dressed", "Nothing else matters besides coding ability"], "correct": 1 },
+      { "q": "Which of these is one of the 8 standard interview questions covered in the reading?", "options": ["What's your favorite color?", "Tell me about a time you worked as part of a team", "How many followers do you have on social media?", "What's your home address?"], "correct": 1 }
+    ]
+  },
+  "ch1_lab_mock_interview": {
+    "title": "Quick Check: Mock Interviews",
+    "questions": [
+      { "q": "What does the mock interview bring together from earlier in the chapter?", "options": ["Only your resume", "Your professional appearance, resume, application, and interview prep answers, all at once", "Just your SkillsUSA uniform", "Nothing - it's a completely separate, unrelated activity"], "correct": 1 },
+      { "q": "How is feedback typically structured after a mock interview, per the reading?", "options": ["Only negative criticism, so you know what to fix", "One strength and one area to improve", "A numerical score only, no comments", "No feedback is given at all"], "correct": 1 }
+    ]
+  },
+  "ch1_lab_cte_advocate": {
+    "title": "Quick Check: Career Pathways & Pay",
+    "questions": [
+      { "q": "What is a \"career pathway,\" as defined in the reading?", "options": ["A single required class", "A formal, intentional sequence of courses that moves you from student to professional", "A physical hallway in the school", "A list of job interview questions"], "correct": 1 },
+      { "q": "Per the BLS salary data cited in the reading, which role has the highest projected growth rate?", "options": ["Web Developer at +16%", "UI/UX Designer at +13%", "Full-Stack Developer at +25%", "Freelance Web Designer at +5%"], "correct": 2 },
+      { "q": "Why does the reading warn against typing an email in ALL CAPS?", "options": ["It's harder to read on mobile devices", "Because it reads as yelling, even if that's not the intent", "It takes longer to type", "It's against school policy to use capital letters"], "correct": 1 }
+    ]
+  },
+  "ch1_lab_client_neg": {
+    "title": "Quick Check: The Project Triangle",
+    "questions": [
+      { "q": "According to the Project Triangle, if a client wants a project done Fast and Good, what does that mean for cost?", "options": ["It will be cheap", "It will be Expensive", "Cost doesn't matter in the Project Triangle", "It will be free"], "correct": 1 },
+      { "q": "What is a Minimum Viable Product (MVP)?", "options": ["The cheapest possible product regardless of quality", "A version of a product with just enough features to be usable, so early customers can give feedback", "The final, fully polished version of a product", "A product with no features at all"], "correct": 1 },
+      { "q": "What does the \"Critique Sandwich\" structure look like when giving feedback?", "options": ["Criticism, criticism, criticism", "Positive comment, then the criticism, then another positive comment", "Only positive comments, never criticism", "A written report with no spoken conversation"], "correct": 1 }
+    ]
+  },
+  "ch1_lab_root": {
+    "title": "Quick Check: File Naming Rules",
+    "questions": [
+      { "q": "What must your homepage file always be named?", "options": ["home.html", "index.html, all lowercase", "Homepage.html", "main.html or Main.html, either works"], "correct": 1 },
+      { "q": "Why does capitalization matter in file names for a real web server?", "options": ["It doesn't matter at all", "Linux servers are case-sensitive, so About.html and about.html are treated as two different files", "Capital letters make files load faster", "Servers automatically convert everything to lowercase anyway"], "correct": 1 },
+      { "q": "What should you use instead of a space in a file or folder name?", "options": ["An underscore only, never anything else", "A hyphen (-)", "A period", "Spaces are actually fine to use"], "correct": 1 }
+    ]
+  }
+}
