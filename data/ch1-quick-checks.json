@@ -63,27 +63,12 @@
       { "q": "What's the approximate starting salary range for an entry-level developer in Nevada, per the reading?", "options": ["$15,000-$20,000/year", "$45,000-$65,000/year", "$200,000+/year", "$10/hour part-time only"], "correct": 1 }
     ]
   },
-  "ch1_lab_resume": {
-    "title": "Quick Check: Resumes & Job Postings",
-    "questions": [
-      { "q": "According to the reading, what's wrong with a resume that just lists \"web design class\" as an experience?", "options": ["Nothing - that's exactly what a resume should say", "It doesn't tell an employer anything specific - a resume's job is to turn experience into evidence", "It's too short", "It uses the wrong font"], "correct": 1 },
-      { "q": "What's the two-step process taught for building resume bullet points?", "options": ["Copy a template, then submit it", "Identify a skill you learned, then connect it to a specific real project or lab that proves it", "List every class you've ever taken", "Ask a friend to write it for you"], "correct": 1 },
-      { "q": "What does a real job posting typically specify, according to the reading?", "options": ["Only the salary", "Job title, responsibilities, required skills, education, and qualifications", "Just the company's logo and address", "Nothing useful - postings are usually vague"], "correct": 1 }
-    ]
-  },
   "ch1_lab_interview_prep": {
     "title": "Quick Check: Interview Answers",
     "questions": [
       { "q": "Why is the answer \"I'm a hard worker\" considered weak in an interview, per the reading?", "options": ["It's grammatically incorrect", "It's vague and gives the interviewer no specific evidence, unlike a story with a real example", "Interviewers don't want to hear about work ethic at all", "It's too long an answer"], "correct": 1 },
       { "q": "What do interviewers actually evaluate beyond technical skill, according to the reading?", "options": ["Only your grades", "Your communication, professionalism, and ability to give specific, evidence-based answers", "Only how you're dressed", "Nothing else matters besides coding ability"], "correct": 1 },
       { "q": "Which of these is one of the 8 standard interview questions covered in the reading?", "options": ["What's your favorite color?", "Tell me about a time you worked as part of a team", "How many followers do you have on social media?", "What's your home address?"], "correct": 1 }
-    ]
-  },
-  "ch1_lab_mock_interview": {
-    "title": "Quick Check: Mock Interviews",
-    "questions": [
-      { "q": "What does the mock interview bring together from earlier in the chapter?", "options": ["Only your resume", "Your professional appearance, resume, application, and interview prep answers, all at once", "Just your SkillsUSA uniform", "Nothing - it's a completely separate, unrelated activity"], "correct": 1 },
-      { "q": "How is feedback typically structured after a mock interview, per the reading?", "options": ["Only negative criticism, so you know what to fix", "One strength and one area to improve", "A numerical score only, no comments", "No feedback is given at all"], "correct": 1 }
     ]
   },
   "ch1_lab_cte_advocate": {
