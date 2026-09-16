@@ -168,6 +168,7 @@
   .label-donow     { left: 23.8%;  top: calc(15.93% - 1.3rem); width: 52.14%; }
   .label-tasks     { left: 23.8%;  top: calc(38.33% - 1.3rem); width: 52.14%; }
   .label-schedule  { left: 78.39%; top: calc(15.93% - 1.3rem); width: 19.43%; }
+  .label-quote     { left: 78.39%; top: calc(71.2% - 1.3rem);  width: 19.43%; }
 
   .agenda-canvas {
     position: relative;
@@ -207,10 +208,15 @@
   .zone-donow     { left: 23.8%;  top: 15.93%; width: 52.14%; height: 16.39%; }
   .zone-tasks     { left: 23.8%;  top: 38.33%; width: 52.14%; height: 57.22%; }
   .zone-schedule  { left: 78.39%; top: 15.93%; width: 19.43%; height: 52.13%; }
+  .zone-quote     { left: 78.39%; top: 71.2%;  width: 19.43%; height: 24.4%; }
 
   .zone-donow, .zone-tasks { font-size: 1.05rem; }
 
   .zone-schedule #scheduleBox { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+
+  .zone-quote { justify-content: center; }
+  .quote-text { font-style: italic; }
+  .quote-author { margin-top: .4rem; text-align: right; opacity: .85; font-size: .85em; }
 
   .nav-logo-link { display: inline-flex; align-items: center; padding: .12rem .25rem; }
   .nav-logo { height: .6rem; width: auto; display: block; }
@@ -543,6 +549,11 @@
       <div id="scheduleBox"></div>
     </div>
 
+    <h3 class="section-label label-quote" data-tag="h3" data-cmt="Quote">Quote</h3>
+    <div class="zone zone-quote">
+      <div id="quoteBox"></div>
+    </div>
+
   </div>
   </div>
 
@@ -846,6 +857,74 @@ if (!courseCfg) {
     if (el) el.textContent = dailyStampCode();
   }
 
+  // Bottom-right box on the slide art, previously empty. One entry per
+  // day, same student-facing slide all day (not re-randomized on every
+  // render) -- picked via the same deterministic date-hash trick as
+  // dailyStampCode above, just with a different salt so the two never
+  // land on the same index by coincidence.
+  const QUOTES = [
+    { text: "The only way to learn a new programming language is by writing programs in it.", author: "Dennis Ritchie" },
+    { text: "It's not that I'm so smart, it's just that I stay with problems longer.", author: "Albert Einstein" },
+    { text: "The beautiful thing about learning is that nobody can take it away from you.", author: "B.B. King" },
+    { text: "First, solve the problem. Then, write the code.", author: "John Johnson" },
+    { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+    { text: "The expert in anything was once a beginner." },
+    { text: "Design is not just what it looks like and feels like. Design is how it works.", author: "Steve Jobs" },
+    { text: "Good design is obvious. Great design is transparent.", author: "Joe Sparano" },
+    { text: "The details are not the details. They make the design.", author: "Charles Eames" },
+    { text: "Code is like humor. When you have to explain it, it's bad.", author: "Cory House" },
+    { text: "Programs must be written for people to read, and only incidentally for machines to execute.", author: "Harold Abelson" },
+    { text: "Simplicity is the soul of efficiency.", author: "Austin Freeman" },
+    { text: "There are only 10 types of people in the world: those who understand binary and those who don't." },
+    { text: "Why do programmers prefer dark mode? Because light attracts bugs." },
+    { text: "A SQL query walks into a bar, walks up to two tables and asks: “Can I join you?”" },
+    { text: "Why do Java developers wear glasses? Because they don't C#." },
+    { text: "How many programmers does it take to change a light bulb? None — that's a hardware problem." },
+    { text: "99 little bugs in the code, 99 little bugs. Take one down, patch it around — 127 little bugs in the code." },
+    { text: "Why did the web designer leave the restaurant? The table layout was all wrong." },
+    { text: "There's no place like 127.0.0.1." },
+    { text: "A byte walks into a bar looking miserable. The bartender asks what's wrong. The byte says, “Parity error.” The bartender says, “Yeah, I thought you looked a bit off.”" },
+    { text: "My code doesn't work and I have no idea why. My code works and I have no idea why." },
+    { text: "To understand recursion, you must first understand recursion." },
+    { text: "Centering a div: the final boss of web design." },
+    { text: "Real programmers count from 0." },
+    { text: "There's no Ctrl+Z in real life — but there is in code. Commit often." },
+    { text: "If it looks good on your monitor, check it on literally anything else." },
+    { text: "console.log('why is this not working'); — every developer, every day." },
+    { text: "Debugging is being the detective in a crime movie where you're also the murderer." },
+    { text: "Whether you think you can, or you think you can't, you're right.", author: "Henry Ford" },
+    { text: "An investment in knowledge pays the best interest.", author: "Benjamin Franklin" },
+    { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+    { text: "Simplicity is the ultimate sophistication.", author: "Leonardo da Vinci" },
+    { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+    { text: "Perfect is the enemy of good.", author: "Voltaire" },
+    { text: "Ninety-nine percent of the time, it's a typo." },
+  ];
+
+  function quoteOfTheDay() {
+    const input = todayStr() + 'chs-guild-quote-2026';
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
+    return QUOTES[hash % QUOTES.length];
+  }
+
+  function renderQuote() {
+    const box = document.getElementById('quoteBox');
+    if (!box) return;
+    box.innerHTML = '';
+    const q = quoteOfTheDay();
+    const textEl = document.createElement('div');
+    textEl.className = 'quote-text';
+    textEl.textContent = `“${q.text}”`;
+    box.appendChild(textEl);
+    if (q.author) {
+      const authorEl = document.createElement('div');
+      authorEl.className = 'quote-author';
+      authorEl.textContent = `— ${q.author}`;
+      box.appendChild(authorEl);
+    }
+  }
+
   function findBlockForToday() {
     const map = schedule[track] || {};
     const today = todayStr();
@@ -856,6 +935,35 @@ if (!courseCfg) {
       if (diff < closestDiff) { closestDiff = diff; closest = parseInt(blockNum, 10); }
     }
     return exact !== null ? exact : (closest !== null ? closest : 1);
+  }
+
+  // Which course/track's page "Today" should actually land on, based on
+  // the real clock -- not just today's date. Before the first period of
+  // the day, defaults to the first period (there's nothing closer yet);
+  // during a period, that period's course; after the last period, the
+  // last period's course; in a passing/gap period between two classes,
+  // whichever period is coming up next. Returns null on a non-school day
+  // (weekend/OFF/no bell schedule), so the caller can fall back to the
+  // plain same-course behavior instead of navigating nowhere useful.
+  function findCourseTrackForNow() {
+    const key = getBellScheduleKey(todayStr());
+    if (!key) return null;
+    const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    const periods = bellSchedule
+      .filter(r => r.schedule_type === key && PERIOD_COURSE_LINKS[r.period_label])
+      .sort((a, b) => toMin(a.start_time) - toMin(b.start_time));
+    if (!periods.length) return null;
+
+    const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+    let chosen = periods[0];
+    if (nowMin >= toMin(periods[periods.length - 1].end_time)) {
+      chosen = periods[periods.length - 1];
+    } else {
+      const active = periods.find(p => nowMin >= toMin(p.start_time) && nowMin < toMin(p.end_time));
+      const upcoming = periods.find(p => toMin(p.start_time) > nowMin);
+      chosen = active || upcoming || periods[0];
+    }
+    return PERIOD_COURSE_LINKS[chosen.period_label];
   }
 
   function populateJumpSelect() {
@@ -985,6 +1093,7 @@ if (!courseCfg) {
     document.getElementById('minDayNote').classList.toggle('d-none', !(c && c.minimumDay));
     document.getElementById('courseSubtitle').textContent = courseSubtitleText();
     renderPageStamp();
+    renderQuote();
 
     document.getElementById('jumpSelect').value = currentBlock;
     renderBellSchedule(dateStr);
@@ -1069,6 +1178,13 @@ if (!courseCfg) {
     render();
   });
   document.getElementById('todayBtn').addEventListener('click', () => {
+    const target = findCourseTrackForNow();
+    if (target && (target.course !== course || (target.track || 'main') !== track)) {
+      const url = new URLSearchParams({ course: target.course });
+      if (target.track) url.set('track', target.track);
+      location.href = `?${url.toString()}`;
+      return;
+    }
     currentBlock = findBlockForToday();
     render();
   });
