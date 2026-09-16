@@ -1413,11 +1413,19 @@ if (shouldSave) {
 
     // Cleanly structure HTML mapping to prevent IDE syntax parsers from breaking
     const reviewHtml = examQuestions.map((q, i) => {
-        const studentChoice = userAnswers[i] !== undefined ? q.options[userAnswers[i]] : "Unanswered";
-        const hint = feedbackMap[q.question.trim()];
-        const isCorrect = !hint;
-        
-        const reviewBadgeHtml = isCorrect 
+        // Same fix as downloadPDFReport above: isCorrect must come from an
+        // actual answer comparison, not hint-presence -- an unanswered
+        // question never generates a hint either, so it was silently
+        // showing as Correct on this screen (the first thing a student
+        // sees right after submitting/auto-submitting).
+        const userAnswerIdx = userAnswers[i];
+        const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
+        const studentChoice = isAnswered ? q.options[userAnswerIdx] : "Unanswered";
+        const correctAnswerText = q.answer || (q.options ? q.options[0] : '');
+        const isCorrect = isAnswered && studentChoice.toLowerCase().trim() === correctAnswerText.toLowerCase().trim();
+        const hint = !isCorrect ? feedbackMap[q.question.trim()] : undefined;
+
+        const reviewBadgeHtml = isCorrect
             ? `<span class="badge bg-success text-white me-2">✅ Correct</span>` 
             : `<span class="badge bg-danger text-white me-2">❌ Incorrect</span>`;
             

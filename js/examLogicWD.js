@@ -302,6 +302,18 @@ async function fetchExamQuestionsFromAPI(chapterNum) {
     }
 }
 
+async function fetchMatchingQuestionsFromAPI(chapterNum) {
+    try {
+        const response = await fetch(`/api/wd-exam-matching?chapter=${chapterNum}`);
+        if (!response.ok) throw new Error('Failed to fetch matching questions: ' + response.status);
+        const data = await response.json();
+        return data.questions || [];
+    } catch (e) {
+        console.error("[examLogicWD] Exception fetching matching questions:", e.message);
+        return [];
+    }
+}
+
 let tabSwitchCount = 0;
 let tabLockdownActive = false;
 
@@ -351,26 +363,47 @@ function setupTabLockdown() {
     });
 }
 
+function shuffleArray(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
 async function initExam(config) {
     currentChapter = config.chapter || 1;
 
-    let pool = await fetchExamQuestionsFromAPI(currentChapter);
+    // questionTypes = {mc, tf, matching} -- how many of each to draw for
+    // this chapter's exam (EOP-style rework, chapters 9-16 for now).
+    // Omitting it keeps the original all-MC behavior for every other
+    // chapter untouched.
+    const types = config.questionTypes || null;
+    const pool = await fetchExamQuestionsFromAPI(currentChapter);
 
-    let shuffledPool = [...pool];
-    for (let i = shuffledPool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
+    if (types) {
+        const mcPool = shuffleArray(pool.filter(q => q.type === 'mc' || !q.type));
+        const tfPool = shuffleArray(pool.filter(q => q.type === 'tf'));
+        const matchingPool = (types.matching > 0) ? shuffleArray(await fetchMatchingQuestionsFromAPI(currentChapter)) : [];
+
+        examQuestions = shuffleArray([
+            ...mcPool.slice(0, types.mc || 0),
+            ...tfPool.slice(0, types.tf || 0),
+            ...matchingPool.slice(0, types.matching || 0)
+        ]);
+    } else {
+        const shuffledPool = shuffleArray(pool);
+        const count = config.questionCount || Math.min(20, shuffledPool.length);
+        examQuestions = shuffledPool.slice(0, count);
     }
-    const count = config.questionCount || Math.min(20, shuffledPool.length);
-    examQuestions = shuffledPool.slice(0, count);
 
+    // Matching questions arrive with items/targets already shuffled
+    // server-side (server/routes/assessments.js) -- only mc/tf need their
+    // options reshuffled here.
     examQuestions = examQuestions.map(q => {
-        let opts = [...q.options];
-        for (let i = opts.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [opts[i], opts[j]] = [opts[j], opts[i]];
-        }
-        return { ...q, options: opts };
+        if (q.type === 'matching') return q;
+        return { ...q, options: shuffleArray(q.options) };
     });
 
     chapterTitle = config.chapterTitle || document.title || "Assessment";
@@ -635,7 +668,7 @@ function renderQuestion() {
     const q = examQuestions[currentIndex];
     const isFlagged = !!flaggedQuestions[currentIndex];
 
-    const optionsHtml = q.options.map((opt, i) => {
+    const optionsHtml = q.type === 'matching' ? renderMatchingQuestion(q) : q.options.map((opt, i) => {
         const selectedClass = (userAnswers[currentIndex] === i) ? 'border-primary bg-site-secondary' : 'border-secondary';
         const checkedAttr = (userAnswers[currentIndex] === i) ? 'checked' : '';
         return `
@@ -702,10 +735,104 @@ function renderQuestion() {
     syncProgress();
 }
 
+// Drag-and-drop matching/labeling questions. userAnswers[currentIndex] holds
+// a plain {item: target} map as pairs get placed (built up incrementally,
+// not all-or-nothing) -- graded for partial credit in processSubmission.
+let selectedMatchItem = null;
+
+function renderMatchingQuestion(q) {
+    const answers = userAnswers[currentIndex] || {};
+
+    const itemsHtml = q.items.map(item => {
+        const isPlaced = answers[item] !== undefined;
+        const isSelected = selectedMatchItem === item;
+        const cls = isPlaced ? 'border-success bg-light' : (isSelected ? 'border-primary bg-site-secondary' : 'border-secondary');
+        return `
+            <div class="matching-item card shadow-sm mb-2 ${cls}"
+                 draggable="${isPlaced ? 'false' : 'true'}"
+                 ondragstart="matchDragStart(event, '${escapeHtml(item).replace(/'/g, "\\'")}')"
+                 onclick="matchItemClick('${escapeHtml(item).replace(/'/g, "\\'")}')"
+                 style="cursor:pointer; border-width:2px !important;">
+                <div class="card-body py-2 px-3 fw-bold small d-flex justify-content-between align-items-center">
+                    <span>${escapeHtml(item)}</span>
+                    ${isPlaced ? '<i class="fas fa-check-circle text-success"></i>' : ''}
+                </div>
+            </div>`;
+    }).join('');
+
+    const targetsHtml = q.targets.map(target => {
+        const matchedItem = Object.keys(answers).find(item => answers[item] === target);
+        return `
+            <div class="matching-target card shadow-sm mb-2 ${matchedItem ? 'border-success' : 'border-secondary'}"
+                 ondragover="event.preventDefault()"
+                 ondrop="matchDrop(event, '${escapeHtml(target).replace(/'/g, "\\'")}')"
+                 onclick="matchTargetClick('${escapeHtml(target).replace(/'/g, "\\'")}')"
+                 style="cursor:pointer; border-width:2px !important; min-height:58px;">
+                <div class="card-body py-2 px-3 small d-flex justify-content-between align-items-center">
+                    <span>${escapeHtml(target)}</span>
+                    ${matchedItem
+                        ? `<span class="badge bg-success ms-2">${escapeHtml(matchedItem)}</span>`
+                        : '<span class="text-muted fst-italic small ms-2">drop here</span>'}
+                </div>
+            </div>`;
+    }).join('');
+
+    return `
+        <div class="col-12">
+            <p class="text-muted small mb-3"><i class="fas fa-arrows-alt me-1"></i>Drag each item onto its match on the right &mdash; or click an item, then click its match. Click a placed item to undo it.</p>
+        </div>
+        <div class="col-md-6">
+            <h6 class="fw-bold small text-muted mb-2">ITEMS</h6>
+            ${itemsHtml}
+        </div>
+        <div class="col-md-6">
+            <h6 class="fw-bold small text-muted mb-2">MATCH TO</h6>
+            ${targetsHtml}
+        </div>`;
+}
+
+function placeMatch(item, target) {
+    const answers = { ...(userAnswers[currentIndex] || {}) };
+    // A target or item already in use gets freed before the new pairing --
+    // one item per target, one target per item.
+    Object.keys(answers).forEach(k => { if (answers[k] === target) delete answers[k]; });
+    delete answers[item];
+    answers[item] = target;
+    userAnswers[currentIndex] = answers;
+    selectedMatchItem = null;
+    renderQuestion();
+}
+
+function matchDragStart(event, item) {
+    event.dataTransfer.setData('text/plain', item);
+}
+function matchDrop(event, target) {
+    event.preventDefault();
+    const item = event.dataTransfer.getData('text/plain');
+    if (item) placeMatch(item, target);
+}
+function matchItemClick(item) {
+    const answers = userAnswers[currentIndex] || {};
+    if (answers[item] !== undefined) {
+        // Already placed -- clicking it again undoes that pairing.
+        const updated = { ...answers };
+        delete updated[item];
+        userAnswers[currentIndex] = Object.keys(updated).length ? updated : undefined;
+        renderQuestion();
+        return;
+    }
+    selectedMatchItem = (selectedMatchItem === item) ? null : item;
+    renderQuestion();
+}
+function matchTargetClick(target) {
+    if (!selectedMatchItem) return;
+    placeMatch(selectedMatchItem, target);
+}
+
 function selectOption(idx) { userAnswers[currentIndex] = idx; renderQuestion(); }
-function nextQuestion() { currentIndex++; renderQuestion(); }
-function prevQuestion() { currentIndex--; renderQuestion(); }
-function goToQuestion(i) { if (i >= 0 && i < examQuestions.length) { currentIndex = i; renderQuestion(); } }
+function nextQuestion() { selectedMatchItem = null; currentIndex++; renderQuestion(); }
+function prevQuestion() { selectedMatchItem = null; currentIndex--; renderQuestion(); }
+function goToQuestion(i) { if (i >= 0 && i < examQuestions.length) { selectedMatchItem = null; currentIndex = i; renderQuestion(); } }
 function toggleFlag() { flaggedQuestions[currentIndex] = !flaggedQuestions[currentIndex]; renderQuestion(); }
 
 function confirmSubmit() {
@@ -780,11 +907,20 @@ async function downloadPDFReport(event) {
             // show "CORRECT" on literally every question, answered or not
             // (confirmed live on real student PDFs). Compare the actual
             // selected answer against the actual correct answer instead.
-            const userAnswerIdx = userAnswers[i];
-            const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
-            const studentChoice = isAnswered ? q.options[userAnswerIdx] : "Unanswered";
-            const correctAnswerText = q.answer || (q.options ? q.options[0] : '');
-            const isCorrect = isAnswered && studentChoice.toLowerCase().trim() === correctAnswerText.toLowerCase().trim();
+            let studentChoice, isCorrect;
+            if (q.type === 'matching') {
+                const answers = userAnswers[i] || {};
+                const truePairs = q.pairs || [];
+                const correctPairs = truePairs.filter(p => answers[p.item] === p.target).length;
+                isCorrect = truePairs.length > 0 && correctPairs === truePairs.length;
+                studentChoice = truePairs.length > 0 ? `${correctPairs} of ${truePairs.length} matched correctly` : 'Unanswered';
+            } else {
+                const userAnswerIdx = userAnswers[i];
+                const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
+                studentChoice = isAnswered ? q.options[userAnswerIdx] : "Unanswered";
+                const correctAnswerText = q.answer || (q.options ? q.options[0] : '');
+                isCorrect = isAnswered && studentChoice.toLowerCase().trim() === correctAnswerText.toLowerCase().trim();
+            }
             const hint = !isCorrect ? feedbackMap[q.question.trim()] : undefined;
 
             doc.setFont("helvetica", "normal");
@@ -841,9 +977,18 @@ async function processSubmission() {
     container.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div><h3 class="mt-4 text-primary">Grading & Submitting...</h3></div>`;
 
     const totalQuestions = examQuestions.length;
-    let correctCount = 0;
+    let correctCount = 0; // can be fractional -- a matching question earns partial credit
     const feedbackList = [];
     examQuestions.forEach((q, i) => {
+        if (q.type === 'matching') {
+            // Partial credit: each correctly-matched pair earns its share of
+            // this one question's worth, same as every other item on the exam.
+            const answers = userAnswers[i] || {};
+            const truePairs = q.pairs || [];
+            const correctPairs = truePairs.filter(p => answers[p.item] === p.target).length;
+            if (truePairs.length > 0) correctCount += correctPairs / truePairs.length;
+            return;
+        }
         const userAnswerIdx = userAnswers[i];
         if (userAnswerIdx !== undefined && q.options && q.options.length > 0) {
             const userAnswer = q.options[userAnswerIdx];
@@ -853,9 +998,12 @@ async function processSubmission() {
             else if (q.hint) feedbackList.push({ question: q.question.trim(), hint: q.hint });
         }
     });
-    finalScore = correctCount;
-    finalTotal = totalQuestions;
-    finalPercentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+    // Every exam totals 100 points regardless of how many items it has --
+    // each item (mc/tf/matching) is worth an equal share, with matching
+    // earning its share proportionally to how many pairs were right.
+    finalScore = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+    finalTotal = 100;
+    finalPercentage = finalScore;
     serverFeedback = feedbackList;
 
     try {
@@ -903,9 +1051,24 @@ async function processSubmission() {
     serverFeedback.forEach(item => feedbackMap[item.question.trim()] = item.hint);
 
     const reviewHtml = examQuestions.map((q, i) => {
-        const studentChoice = userAnswers[i] !== undefined ? q.options[userAnswers[i]] : "Unanswered";
-        const hint = feedbackMap[q.question.trim()];
-        const isCorrect = !hint;
+        // Same fix as downloadPDFReport above: isCorrect must come from an
+        // actual answer comparison, not from hint-presence -- this is the
+        // screen every student sees immediately after submitting.
+        let studentChoice, isCorrect;
+        if (q.type === 'matching') {
+            const answers = userAnswers[i] || {};
+            const truePairs = q.pairs || [];
+            const correctPairs = truePairs.filter(p => answers[p.item] === p.target).length;
+            isCorrect = truePairs.length > 0 && correctPairs === truePairs.length;
+            studentChoice = truePairs.length > 0 ? `${correctPairs} of ${truePairs.length} matched correctly` : 'Unanswered';
+        } else {
+            const userAnswerIdx = userAnswers[i];
+            const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
+            studentChoice = isAnswered ? q.options[userAnswerIdx] : "Unanswered";
+            const correctAnswerText = q.answer || (q.options ? q.options[0] : '');
+            isCorrect = isAnswered && studentChoice.toLowerCase().trim() === correctAnswerText.toLowerCase().trim();
+        }
+        const hint = !isCorrect ? feedbackMap[q.question.trim()] : undefined;
         const reviewBadgeHtml = isCorrect
             ? `<span class="badge bg-success text-white me-2">✅ Correct</span>`
             : `<span class="badge bg-danger text-white me-2">❌ Incorrect</span>`;
@@ -940,7 +1103,7 @@ async function processSubmission() {
                         ${badgeHtml}
                     </div>
                     ${retakeMsg}
-                    <p class="fw-bold mt-2 mb-4 text-dark border-bottom pb-2">${finalScore} out of ${finalTotal} correct</p>
+                    <p class="fw-bold mt-2 mb-4 text-dark border-bottom pb-2">${finalScore} out of ${finalTotal} points</p>
                     <div class="review-section mt-3" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
                         <h6 class="fw-bold text-primary mb-3">Detailed Performance Review:</h6>
                         ${reviewHtml}

@@ -187,18 +187,56 @@ router.get('/wd-exam-questions', async (req, res) => {
         const [rows] = await connection.execute(
             `SELECT question_id AS id, question_text AS question,
                     option_a, option_b, option_c, option_d,
-                    correct_answer AS answer, chapter_number AS chapter
+                    correct_answer AS answer, chapter_number AS chapter, question_type
              FROM wd_questions WHERE chapter_number = ? ORDER BY RAND()`,
             [chapterNum]
         );
+        // T/F rows only ever populate option_a/option_b ('True'/'False') --
+        // option_c/d are empty strings (NOT NULL column), not a real 3rd/4th
+        // choice, so they're dropped from the options array for that type.
         const questions = rows.map(row => ({
             question: row.question,
-            options: [row.option_a, row.option_b, row.option_c, row.option_d],
-            answer: row.answer, chapter: row.chapter
+            options: row.question_type === 'tf' ? [row.option_a, row.option_b] : [row.option_a, row.option_b, row.option_c, row.option_d],
+            answer: row.answer, chapter: row.chapter, type: row.question_type
         }));
         await connection.release();
         res.json({ chapter: chapterNum, count: questions.length, questions });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch WD exam questions' }); }
+});
+
+// --- WD MATCHING/LABELING QUESTIONS ---
+router.get('/wd-exam-matching', async (req, res) => {
+    const { chapter } = req.query;
+    const chapterNum = parseInt(chapter, 10);
+    if (isNaN(chapterNum) || chapterNum < 1 || chapterNum > 16) {
+        return res.status(400).json({ error: 'Valid chapter number (1-16) required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.execute(
+            `SELECT question_id AS id, prompt, pairs_json FROM wd_matching_questions
+             WHERE chapter_number = ? ORDER BY RAND()`,
+            [chapterNum]
+        );
+        await connection.release();
+        const questions = rows.map(row => {
+            const pairs = JSON.parse(row.pairs_json);
+            const items = pairs.map(p => p.item);
+            const targets = pairs.map(p => p.target);
+            // Shuffle both lists independently server-side so the same
+            // exercise doesn't always show items/targets in the same order.
+            for (let i = items.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [items[i], items[j]] = [items[j], items[i]];
+            }
+            for (let i = targets.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [targets[i], targets[j]] = [targets[j], targets[i]];
+            }
+            return { id: row.id, type: 'matching', question: row.prompt, items, targets, pairs };
+        });
+        res.json({ chapter: chapterNum, count: questions.length, questions });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch WD matching questions' }); }
 });
 
 // --- CS NOTEBOOK (turnins table) ---
