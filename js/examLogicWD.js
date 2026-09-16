@@ -68,6 +68,21 @@ customStyle.innerHTML = `
         color: #495057 !important; border: 2px solid #adb5bd !important;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+
+    .dac-modal-content.urgent {
+        border: 5px solid #dc3545 !important;
+        animation: dacUrgentPulse 0.9s ease-in-out infinite;
+    }
+    .dac-modal-content.urgent #dac-modal-title {
+        color: #dc3545 !important; font-size: 1.9rem;
+    }
+    .dac-modal-content.urgent #dac-modal-body {
+        font-size: 1.3rem !important; font-weight: 700; color: #212529 !important;
+    }
+    @keyframes dacUrgentPulse {
+        0%, 100% { box-shadow: 0 0 0 6px rgba(220,53,69,.3), 0 20px 50px rgba(0,0,0,.5); }
+        50%      { box-shadow: 0 0 0 16px rgba(220,53,69,.05), 0 20px 50px rgba(0,0,0,.5); }
+    }
 `;
 document.head.appendChild(customStyle);
 
@@ -111,9 +126,10 @@ function showDacConfirm(title, body, onConfirm, opts = {}) {
     cancelBtn.onclick = () => { overlay.style.display = 'none'; if (opts.onCancel) opts.onCancel(); };
 }
 
-function showDacAlert(title, body) {
+function showDacAlert(title, body, opts = {}) {
     injectModals();
     const overlay = document.getElementById('dac-modal-overlay');
+    const content = overlay.querySelector('.dac-modal-content');
     const titleEl = document.getElementById('dac-modal-title');
     const bodyEl = document.getElementById('dac-modal-body');
     const confirmBtn = document.getElementById('dac-modal-confirm');
@@ -123,6 +139,7 @@ function showDacAlert(title, body) {
     bodyEl.innerText = body;
     cancelBtn.style.display = 'none';
     confirmBtn.innerText = "OK";
+    content.classList.toggle('urgent', !!opts.urgent);
     overlay.style.display = 'flex';
 
     confirmBtn.onclick = () => { overlay.style.display = 'none'; };
@@ -319,7 +336,8 @@ function setupTabLockdown() {
             if (tabSwitchCount === 1) {
                 showDacAlert(
                     "⚠️ SECURITY WARNING",
-                    "You have switched tabs or left the exam window. This is your ONLY warning. If you leave the exam screen again, your test will be automatically submitted with your current score."
+                    "You have switched tabs or left the exam window. This is your ONLY warning. If you leave the exam screen again, your test will be automatically submitted with your current score.",
+                    { urgent: true }
                 );
             } else if (tabSwitchCount >= 2) {
                 examIsActive = false;
@@ -754,9 +772,20 @@ async function downloadPDFReport(event) {
             doc.text(qText, 20, y);
             y += (qText.length * 6);
 
-            const studentChoice = userAnswers[i] !== undefined ? q.options[userAnswers[i]] : "Unanswered";
-            const hint = feedbackMap[q.question.trim()];
-            const isCorrect = !hint;
+            // isCorrect used to be inferred from "does this question have a hint
+            // queued up" -- but a hint only ever gets queued for a WRONG,
+            // ANSWERED question (see the `else if (q.hint)` branch in
+            // processSubmission's grading loop above), and WD questions don't
+            // even carry a hint field to begin with. That made every WD report
+            // show "CORRECT" on literally every question, answered or not
+            // (confirmed live on real student PDFs). Compare the actual
+            // selected answer against the actual correct answer instead.
+            const userAnswerIdx = userAnswers[i];
+            const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
+            const studentChoice = isAnswered ? q.options[userAnswerIdx] : "Unanswered";
+            const correctAnswerText = q.answer || (q.options ? q.options[0] : '');
+            const isCorrect = isAnswered && studentChoice.toLowerCase().trim() === correctAnswerText.toLowerCase().trim();
+            const hint = !isCorrect ? feedbackMap[q.question.trim()] : undefined;
 
             doc.setFont("helvetica", "normal");
             doc.setTextColor(isCorrect ? 0 : 200, isCorrect ? 150 : 0, 0);
