@@ -156,6 +156,52 @@ router.get('/admin/daily-activity', async (req, res) => {
             });
         });
 
+        // Unit prerequisite overrides needed: 3+ real attempts on a unit
+        // exam with the current BEST score (what checkUnitPrerequisite in
+        // routes/gradebook.js actually checks, from `responses` -- not just
+        // the latest attempt) still under 60%, permanently blocking the
+        // next unit from ever opening for that student.
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS unit_prereq_overrides (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                student_id VARCHAR(50) NOT NULL,
+                unit_exam_id VARCHAR(100) NOT NULL,
+                cleared_by VARCHAR(100),
+                cleared_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY uniq_override (student_id, unit_exam_id)
+            )
+        `);
+        const [overrideRows] = await connection.execute(`SELECT student_id, unit_exam_id FROM unit_prereq_overrides`);
+        const overrideSet = new Set(overrideRows.map(o => `${o.student_id}|${o.unit_exam_id}`));
+
+        const [bestScoreRows] = await connection.execute(
+            `SELECT student_id, exam_id, score, total_points FROM responses WHERE exam_id REGEXP '^Unit[0-9]+-Exam$'`
+        );
+        const bestScoreMap = new Map(bestScoreRows.map(r => [`${r.student_id}|${r.exam_id}`, r]));
+
+        const prereqOverridesNeeded = [];
+        attemptsByKey.forEach((attempts, key) => {
+            if (attempts.length < 3) return;
+            const first = attempts[0];
+            const m = /^Unit(\d+)-Exam$/i.exec(first.exam_id);
+            if (!m) return;
+            const unitNum = parseInt(m[1], 10);
+            if (unitNum >= 7) return; // no Unit8 gate exists to unlock
+
+            const best = bestScoreMap.get(key);
+            const pct = best && Number(best.total_points) > 0 ? (Number(best.score) / Number(best.total_points)) * 100 : 0;
+            if (pct >= 60) return;
+
+            const nextExamId = `Unit${unitNum + 1}-Exam`;
+            if (overrideSet.has(`${first.student_id}|${nextExamId}`)) return;
+
+            prereqOverridesNeeded.push({
+                student_id: first.student_id, first_name: first.first_name, last_name: first.last_name,
+                section_id: first.section_id, exam_id: first.exam_id, next_exam_id: nextExamId,
+                attempts: attempts.length, pct: Math.round(pct)
+            });
+        });
+
         // Uploaded files have zero database tracking at all (upload.php is
         // pure filesystem), so there's genuinely no way to know from this
         // data whether a file has already been graded -- labeled as
@@ -191,7 +237,7 @@ router.get('/admin/daily-activity', async (req, res) => {
             console.error('[daily-activity] upload scan failed:', e);
         }
 
-        res.json({ date: targetDate, submissions, uploads, incompleteAssessments, retakeClearancesNeeded });
+        res.json({ date: targetDate, submissions, uploads, incompleteAssessments, retakeClearancesNeeded, prereqOverridesNeeded });
     } catch (err) {
         console.error('[daily-activity] failed:', err);
         res.status(500).json({ error: 'Failed to build daily activity report.' });

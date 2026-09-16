@@ -58,6 +58,14 @@
   </div>
 
   <div class="card shadow-sm border-0 mb-4 section-card">
+    <div class="card-header bg-white"><i class="fas fa-unlock me-2 text-danger"></i>Unit Prerequisite Overrides Needed <span id="prereqCount" class="badge bg-secondary ms-1"></span></div>
+    <div class="card-body" id="prereqBody">
+      <p class="text-muted small mb-2">Comp Sci only — a student stuck below 60% on a unit test after 3+ real attempts can never open the next unit on their own. Unlocking here lets them move on without passing this one.</p>
+      <div id="prereqList"></div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4 section-card">
     <div class="card-header bg-white"><i class="fas fa-file-pen me-2 text-success"></i>Submitted Work <span id="submissionsCount" class="badge bg-secondary ms-1"></span></div>
     <div class="card-body" id="submissionsBody"><p class="text-muted small mb-0">Loading...</p></div>
   </div>
@@ -210,6 +218,37 @@
     } catch (e) { alert('Failed to save. Try again.'); btn.disabled = false; }
   });
 
+  function renderPrereqOverrides(items) {
+    document.getElementById('prereqCount').textContent = items.length;
+    const list = document.getElementById('prereqList');
+    if (items.length === 0) { list.innerHTML = '<p class="text-muted small mb-0">Nobody currently needs a prerequisite override.</p>'; return; }
+    list.innerHTML = items.map(item => `
+      <div class="activity-row d-flex align-items-start gap-2">
+        <button class="btn btn-sm btn-danger fw-bold unlock-prereq-btn flex-shrink-0" data-student-id="${item.student_id}" data-next-exam-id="${item.next_exam_id}">
+          <i class="fas fa-unlock me-1"></i>Unlock ${escapeHtml(item.next_exam_id.replace('-Exam', ''))}
+        </button>
+        <div>
+          <strong>${name(item)}</strong> <span class="text-muted small">${escapeHtml(item.section_id || '')}</span>
+          <div class="text-muted small">${escapeHtml(item.exam_id)} — ${item.attempts} attempts, best score ${item.pct}% (needs 60%) — blocking ${escapeHtml(item.next_exam_id)}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  document.getElementById('prereqList').addEventListener('click', async (e) => {
+    const btn = e.target.closest('.unlock-prereq-btn');
+    if (!btn) return;
+    const { studentId, nextExamId } = btn.dataset;
+    if (!confirm(`Unlock ${nextExamId} for this student even though they haven't passed the prerequisite?`)) return;
+    btn.disabled = true;
+    try {
+      await fetch('/api/admin/unit-prereq-override', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: studentId, unit_exam_id: nextExamId })
+      });
+      loadReport();
+    } catch (e) { alert('Failed to save. Try again.'); btn.disabled = false; }
+  });
+
   async function loadReport() {
     const date = dateInput.value;
     try {
@@ -219,6 +258,7 @@
       renderUploads(data.uploads || []);
       renderIncomplete(data.incompleteAssessments || []);
       renderRetakeClearances(data.retakeClearancesNeeded || []);
+      renderPrereqOverrides(data.prereqOverridesNeeded || []);
     } catch (e) {
       console.error(e);
     }

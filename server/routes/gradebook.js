@@ -64,6 +64,25 @@ router.get('/student/course-gradebook', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch student course gradebook.' }); }
 });
 
+// Manual escape hatch for a student stuck below 60% on a unit exam after
+// 3+ real attempts -- the teacher unlocks the NEXT unit directly (same
+// shape/spirit as retake_clearances below: a row here means "let them
+// through," never deleted/consumed, just checked first). Surfaced in
+// admin/tools/daily-activity.html next to the existing "Mark Cleared"
+// retake-clearance list.
+async function ensureUnitPrereqOverridesTable(connection) {
+    await connection.execute(`
+        CREATE TABLE IF NOT EXISTS unit_prereq_overrides (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            student_id VARCHAR(50) NOT NULL,
+            unit_exam_id VARCHAR(100) NOT NULL,
+            cleared_by VARCHAR(100),
+            cleared_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_override (student_id, unit_exam_id)
+        )
+    `);
+}
+
 // Units 1-7 are the real sequential CS curriculum (CS_MAP in
 // admin/due-dates.html); Unit 0 is a standalone intro with no prerequisite
 // and Unit 8 is an orphaned, unlinked page, so neither is gated here.
@@ -72,6 +91,13 @@ async function checkUnitPrerequisite(connection, studentId, examId) {
     if (!m) return { ok: true };
     const unitNum = parseInt(m[1], 10);
     if (unitNum < 2 || unitNum > 7) return { ok: true };
+
+    await ensureUnitPrereqOverridesTable(connection);
+    const [overrideRows] = await connection.execute(
+        'SELECT id FROM unit_prereq_overrides WHERE student_id = ? AND unit_exam_id = ?',
+        [studentId, examId]
+    );
+    if (overrideRows.length > 0) return { ok: true };
 
     const prevExamId = `Unit${unitNum - 1}-Exam`;
     const [rows] = await connection.execute(
@@ -528,6 +554,28 @@ router.post('/admin/retake-clearance', async (req, res) => {
         await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save clearance' }); }
+});
+
+// Unlocks the NEXT unit exam for a student stuck below 60% after 3+ real
+// attempts on the current one -- see ensureUnitPrereqOverridesTable/
+// checkUnitPrerequisite above. unit_exam_id is the exam being unlocked
+// (e.g. a student stuck on Unit2 gets 'Unit3-Exam' unlocked).
+router.post('/admin/unit-prereq-override', async (req, res) => {
+    const { student_id, unit_exam_id, cleared_by } = req.body;
+    if (!student_id || !unit_exam_id) {
+        return res.status(400).json({ error: 'student_id and unit_exam_id are required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        await ensureUnitPrereqOverridesTable(connection);
+        await connection.execute(
+            `INSERT INTO unit_prereq_overrides (student_id, unit_exam_id, cleared_by) VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE cleared_by = VALUES(cleared_by), cleared_at = NOW()`,
+            [student_id, unit_exam_id, cleared_by || null]
+        );
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save override' }); }
 });
 
 router.post('/admin/mark-grades-entered-ic', async (req, res) => {
