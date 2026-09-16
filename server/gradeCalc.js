@@ -105,7 +105,12 @@ function isAssignmentVisible(name, studentCourse, registryEntry) {
         return true;
     }
     if (studentCourse === 'WD2' || studentCourse === 'AS') {
-        if (num !== null) return lowerName.includes('unit') || lowerName.includes('milestone') ? num >= 5 && num <= 8 : num >= 9 && num <= 16;
+        // Milestone ids follow "ch{n}_milestone" just like every other WD2
+        // assignment (ch9_milestone .. ch16_milestone) -- there's no separate
+        // 1-4 milestone-only numbering scheme for WD2 the way this used to
+        // assume, so it needs the same 9-16 range as everything else or
+        // every WD2 milestone (including Chapter 9's) is silently invisible.
+        if (num !== null) return num >= 9 && num <= 16;
         return true;
     }
     if (studentCourse === 'CS') {
@@ -151,6 +156,23 @@ async function computeStudentGrade(connection, studentId, sectionId) {
          WHERE e.course_id = ?`,
         [studentId, courseCode]
     );
+
+    // Self/peer/auto-graded project milestones (chapter_projects, e.g.
+    // "Ch9-Profile App Assembly") only ever get a REAL score once
+    // saveEvaluationAndAggregate actually runs (server/routes/projects.js) --
+    // until a student's self/peer/auto evaluation genuinely happens, there
+    // is no legitimate score to report. Confirmed live: a student who'd
+    // aced every prerequisite lab had this milestone's due date pass with
+    // zero project_evaluations rows on file, and it silently counted as an
+    // earned 0/100 -- the single biggest weight on the exam, dragging an
+    // otherwise-strong grade down to an F. Treat these exactly like the
+    // CS-activity exemption below: missing until real evidence exists,
+    // never a punishing zero just for a due date passing.
+    const [projectRows] = await connection.execute(
+        'SELECT exam_id FROM chapter_projects WHERE course_id = ?',
+        [courseCode]
+    );
+    const projectExamIds = new Set(projectRows.map(p => p.exam_id));
 
     const today = new Date(); today.setHours(0, 0, 0, 0);
     let totalEarned = 0, totalPossible = 0;
@@ -202,6 +224,11 @@ async function computeStudentGrade(connection, studentId, sectionId) {
             // check above proves mastery some other way. Only real evidence
             // moves it out of "missing," in either direction.
             if (isCsActivity) return;
+            // Same treatment for a self/peer/auto project milestone: no
+            // evaluation has actually happened yet, so there's nothing real
+            // to score -- stays excluded until saveEvaluationAndAggregate
+            // actually writes one.
+            if (projectExamIds.has(key)) return;
             const dueDate = formatDbDate(r.due_date);
             const isPastDue = !!dueDate && new Date(dueDate + 'T00:00:00') < today;
             if (!isPastDue) return;

@@ -629,11 +629,11 @@ function assignmentRow(examId, label, type, pts, courseId) {
 }
 
 // Real course_id values (must exist as rows in the `courses` table — the
-// exams.course_id FK enforces this). WD is split at the Ch9/Ch10 boundary to
+// exams.course_id FK enforces this). WD is split at the Ch8/Ch9 boundary to
 // match the real Web Design I / Web Design II course records; CS has no such
 // split. These are NOT the flat 'wd'/'cs' bucket the old code used to send.
-const COURSE_ID_WD1 = '05254G1S'; // Web Design I  (Chapters 1-9)
-const COURSE_ID_WD2 = '05254G2S'; // Web Design II (Chapters 10-16)
+const COURSE_ID_WD1 = '05254G1S'; // Web Design I  (Chapters 1-8)
+const COURSE_ID_WD2 = '05254G2S'; // Web Design II (Chapters 9-16)
 const COURSE_ID_CS  = '10003GS';  // Comp Sci & Intg Tech (all chapters)
 
 function renderCS() {
@@ -673,8 +673,8 @@ function renderWD() {
 
   for (const ch of WD_MAP) {
     const n = ch.ch;
-    // Ch 1-9 = Level 1 (Web Design I); Ch 10-16 = Level 2 (Web Design II)
-    const courseId = n <= 9 ? COURSE_ID_WD1 : COURSE_ID_WD2;
+    // Ch 1-8 = Level 1 (Web Design I); Ch 9-16 = Level 2 (Web Design II)
+    const courseId = n <= 8 ? COURSE_ID_WD1 : COURSE_ID_WD2;
     html += `<div class="card section-card wd mb-3">
       <div class="card-header">
         <i class="fas fa-globe me-2"></i>Chapter ${n}: ${ch.title}

@@ -1492,6 +1492,13 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
                 // either the student actually turns it in, or the unit exam
                 // check above proves mastery some other way.
                 if (isCsActivity) return;
+                // Same treatment for a self/peer/auto-graded project milestone
+                // (chapter_projects): it only gets a real score once an
+                // evaluation actually runs (server/routes/projects.js), so a
+                // due date passing before that happens stays excluded rather
+                // than counting as a punishing zero. Matches
+                // js/student/dashboard.js and server/gradeCalc.js.
+                if (reg?.isProjectMilestone) return;
                 // Ungraded — only count it as a missed zero once its due date
                 // has actually passed, so students aren't dinged for work
                 // that isn't due yet. Matches js/student/dashboard.js.
@@ -1614,7 +1621,14 @@ let score = "", display = '', bg = "";
                         // general rule the CS Activity exemption above is the
                         // one deliberate carve-out from, not the other way
                         // around.
-                        if (!unit) {
+                        // A self/peer/auto-graded project milestone
+                        // (chapter_projects) only gets a real score once an
+                        // evaluation actually runs -- a due date passing
+                        // before that isn't "missing" the way a lab or exam
+                        // is, so it stays a plain blank cell instead of a red
+                        // M. Matches the row-summary calc above and
+                        // js/student/dashboard.js / server/gradeCalc.js.
+                        if (!unit && !reg?.isProjectMilestone) {
                             const effectiveDueDate = studentPeriodDueDate || reg?.dueDate;
                             const isPastDue = !!effectiveDueDate && new Date(effectiveDueDate + 'T00:00:00') < today;
                             if (isPastDue) {

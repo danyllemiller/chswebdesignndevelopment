@@ -51,9 +51,11 @@ router.get('/student/course-gradebook', async (req, res) => {
         const [rows] = await connection.execute(
             `SELECT e.exam_id, TRIM(e.title) AS title, e.total_points, e.course_id, e.category,
                     e.due_date, e.instructions, e.period_due_dates,
-                    r.score, r.timestamp
+                    r.score, r.timestamp,
+                    (cp.exam_id IS NOT NULL) AS is_project_milestone
              FROM exams e
              LEFT JOIN responses r ON e.exam_id = r.exam_id AND r.student_id = ?
+             LEFT JOIN chapter_projects cp ON cp.exam_id = e.exam_id AND cp.course_id = e.course_id
              WHERE e.course_id = ?
              ORDER BY e.title ASC, e.exam_id ASC`,
             [student_id, courseCode]
@@ -422,7 +424,11 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
         students.forEach(s => { s.additional_sections = extraByStudent[s.student_id] || []; });
 
         const [exams] = await connection.execute(
-            `SELECT exam_id, TRIM(title) AS title, total_points, course_id, category, due_date, instructions, period_due_dates FROM exams`
+            `SELECT e.exam_id, TRIM(e.title) AS title, e.total_points, e.course_id, e.category,
+                    e.due_date, e.instructions, e.period_due_dates,
+                    (cp.exam_id IS NOT NULL) AS is_project_milestone
+             FROM exams e
+             LEFT JOIN chapter_projects cp ON cp.exam_id = e.exam_id AND cp.course_id = e.course_id`
         );
         const [grades] = await connection.execute(
             `SELECT student_id, exam_id, score, total_points, timestamp, entered_in_ic FROM responses`
@@ -439,7 +445,8 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
             registry[e.exam_id] = {
                 title: e.title, maxPoints: e.total_points,
                 dueDate: formatDbDate(e.due_date), instructions: e.instructions || '',
-                targetCourse: e.course_id || 'All', category: e.category, periodDueDates
+                targetCourse: e.course_id || 'All', category: e.category,
+                isProjectMilestone: !!e.is_project_milestone, periodDueDates
             };
         });
         await connection.release();

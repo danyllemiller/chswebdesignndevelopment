@@ -128,7 +128,11 @@ function isAssignmentVisible(name, period, registryData) {
         return true;
     }
     if (studentCourse === 'WD2' || studentCourse === 'AS') {
-        if (num !== null) return lowerName.includes('unit') || lowerName.includes('milestone') ? num >= 5 && num <= 8 : num >= 9 && num <= 16;
+        // Milestone ids follow "ch{n}_milestone" just like every other WD2
+        // assignment (ch9_milestone .. ch16_milestone) -- no separate 1-4
+        // milestone-only numbering scheme, so it needs the same 9-16 range
+        // as everything else or every WD2 milestone is silently invisible.
+        if (num !== null) return num >= 9 && num <= 16;
         return true;
     }
     if (studentCourse === 'CS') {
@@ -251,6 +255,7 @@ async function renderCoursePanel(user, courseKey, sectionId) {
                     instructions: assignment.instructions || '',
                     targetCourse: assignment.course_id || 'All',
                     category: assignment.category,
+                    isProjectMilestone: !!assignment.is_project_milestone,
                     periodDueDates: assignment.period_due_dates
                         ? (typeof assignment.period_due_dates === 'string'
                             ? JSON.parse(assignment.period_due_dates)
@@ -387,6 +392,12 @@ function calculateGradeStats(keys, myGrades, registryData, courseKey) {
                 // either the student actually turns it in, or the unit exam
                 // check above proves mastery some other way.
                 if (isCsActivity) return;
+                // Same treatment for a self/peer/auto-graded project milestone:
+                // it only gets a real score once an evaluation actually runs
+                // (server/routes/projects.js). A due date passing before that
+                // happens isn't evidence of a zero, so it stays excluded
+                // rather than dragging the average down with phantom data.
+                if (registryData?.[key]?.isProjectMilestone) return;
                 // Ungraded — only count it as a missed zero once its due date has
                 // actually passed. Not-yet-due (or undated) work is excluded
                 // entirely rather than dragging the average down early.
