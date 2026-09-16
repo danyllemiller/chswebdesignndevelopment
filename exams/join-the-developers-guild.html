@@ -53,7 +53,8 @@
             chapter: 1,              // <--- CHANGE THIS (e.g., 1, 2, 3...)
             type: 'web',             // <--- 'web' or 'cs'
             chapterTitle: "Chapter 1: The Developer's World",
-            webhookUrl: "/api/submit-exam"
+            webhookUrl: "/api/submit-exam",
+            questionTypes: { mc: 12, tf: 4, matching: 4, image_label: 2 }
         });
     };
   </script>
@@ -62,6 +63,6 @@
 <div id="footer-placeholder" class="no-print"></div>
 
 <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
-<script src="/js/examLogicWD.js?v=5"></script>
+<script src="/js/examLogicWD.js?v=6"></script>
 </body>
 </html>

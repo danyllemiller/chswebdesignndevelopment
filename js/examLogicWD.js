@@ -314,6 +314,18 @@ async function fetchMatchingQuestionsFromAPI(chapterNum) {
     }
 }
 
+async function fetchImageLabelingQuestionsFromAPI(chapterNum) {
+    try {
+        const response = await fetch(`/api/wd-exam-image-labeling?chapter=${chapterNum}`);
+        if (!response.ok) throw new Error('Failed to fetch image labeling questions: ' + response.status);
+        const data = await response.json();
+        return data.questions || [];
+    } catch (e) {
+        console.error("[examLogicWD] Exception fetching image labeling questions:", e.message);
+        return [];
+    }
+}
+
 let tabSwitchCount = 0;
 let tabLockdownActive = false;
 
@@ -375,10 +387,9 @@ function shuffleArray(arr) {
 async function initExam(config) {
     currentChapter = config.chapter || 1;
 
-    // questionTypes = {mc, tf, matching} -- how many of each to draw for
-    // this chapter's exam (EOP-style rework, chapters 9-16 for now).
-    // Omitting it keeps the original all-MC behavior for every other
-    // chapter untouched.
+    // questionTypes = {mc, tf, matching, image_label} -- how many of each to
+    // draw for this chapter's exam (EOP-style rework). Omitting it keeps the
+    // original all-MC behavior for every other chapter untouched.
     const types = config.questionTypes || null;
     const pool = await fetchExamQuestionsFromAPI(currentChapter);
 
@@ -386,11 +397,13 @@ async function initExam(config) {
         const mcPool = shuffleArray(pool.filter(q => q.type === 'mc' || !q.type));
         const tfPool = shuffleArray(pool.filter(q => q.type === 'tf'));
         const matchingPool = (types.matching > 0) ? shuffleArray(await fetchMatchingQuestionsFromAPI(currentChapter)) : [];
+        const imageLabelPool = (types.image_label > 0) ? shuffleArray(await fetchImageLabelingQuestionsFromAPI(currentChapter)) : [];
 
         examQuestions = shuffleArray([
             ...mcPool.slice(0, types.mc || 0),
             ...tfPool.slice(0, types.tf || 0),
-            ...matchingPool.slice(0, types.matching || 0)
+            ...matchingPool.slice(0, types.matching || 0),
+            ...imageLabelPool.slice(0, types.image_label || 0)
         ]);
     } else {
         const shuffledPool = shuffleArray(pool);
@@ -398,11 +411,11 @@ async function initExam(config) {
         examQuestions = shuffledPool.slice(0, count);
     }
 
-    // Matching questions arrive with items/targets already shuffled
-    // server-side (server/routes/assessments.js) -- only mc/tf need their
-    // options reshuffled here.
+    // Matching/image-label questions arrive with their items/targets/labels
+    // already shuffled server-side (server/routes/assessments.js) -- only
+    // mc/tf need their options reshuffled here.
     examQuestions = examQuestions.map(q => {
-        if (q.type === 'matching') return q;
+        if (q.type === 'matching' || q.type === 'image_label') return q;
         return { ...q, options: shuffleArray(q.options) };
     });
 
@@ -668,7 +681,7 @@ function renderQuestion() {
     const q = examQuestions[currentIndex];
     const isFlagged = !!flaggedQuestions[currentIndex];
 
-    const optionsHtml = q.type === 'matching' ? renderMatchingQuestion(q) : q.options.map((opt, i) => {
+    const optionsHtml = q.type === 'matching' ? renderMatchingQuestion(q) : q.type === 'image_label' ? renderImageLabelingQuestion(q) : q.options.map((opt, i) => {
         const selectedClass = (userAnswers[currentIndex] === i) ? 'border-primary bg-site-secondary' : 'border-secondary';
         const checkedAttr = (userAnswers[currentIndex] === i) ? 'checked' : '';
         return `
@@ -829,10 +842,113 @@ function matchTargetClick(target) {
     placeMatch(selectedMatchItem, target);
 }
 
+// Image labeling: drag/click a text label onto a percentage-positioned zone
+// overlaid on a diagram image. userAnswers[currentIndex] holds a plain
+// {zoneKey: label} map, same shape/spirit as matching's {item: target}.
+let selectedImageLabel = null;
+
+function renderImageLabelingQuestion(q) {
+    const answers = userAnswers[currentIndex] || {};
+    const usedLabels = new Set(Object.values(answers));
+
+    const zonesHtml = q.zones.map(zone => {
+        const placedLabel = answers[zone.key];
+        const borderColor = placedLabel ? 'rgba(25,135,84,.85)' : 'rgba(13,110,253,.6)';
+        const bgColor = placedLabel ? 'rgba(25,135,84,.18)' : 'rgba(13,110,253,.08)';
+        return `
+            <div class="labeling-zone"
+                 ondragover="event.preventDefault()"
+                 ondrop="imageLabelDrop(event, '${escapeHtml(zone.key)}')"
+                 onclick="imageZoneClick('${escapeHtml(zone.key)}')"
+                 style="position:absolute; left:${zone.left}%; top:${zone.top}%; width:${zone.width}%; height:${zone.height}%;
+                        border:3px dashed ${borderColor}; background:${bgColor}; border-radius:6px; padding:2px;
+                        display:flex; align-items:center; justify-content:center; text-align:center; cursor:pointer;">
+                ${placedLabel ? `<span class="badge bg-success" style="font-size:.68rem; white-space:normal;">${escapeHtml(placedLabel)}</span>` : ''}
+            </div>`;
+    }).join('');
+
+    const paletteHtml = q.labels.map(label => {
+        const isPlaced = usedLabels.has(label);
+        const isSelected = selectedImageLabel === label;
+        const cls = isPlaced ? 'border-success bg-light' : (isSelected ? 'border-primary bg-site-secondary' : 'border-secondary');
+        return `
+            <div class="card shadow-sm mb-2 ${cls}"
+                 draggable="${isPlaced ? 'false' : 'true'}"
+                 ondragstart="imageLabelDragStart(event, '${escapeHtml(label).replace(/'/g, "\\'")}')"
+                 onclick="imageLabelClick('${escapeHtml(label).replace(/'/g, "\\'")}')"
+                 style="cursor:pointer; border-width:2px !important;">
+                <div class="card-body py-2 px-3 fw-bold small d-flex justify-content-between align-items-center">
+                    <span>${escapeHtml(label)}</span>
+                    ${isPlaced ? '<i class="fas fa-check-circle text-success"></i>' : ''}
+                </div>
+            </div>`;
+    }).join('');
+
+    return `
+        <div class="col-12 mb-3">
+            <p class="text-muted small mb-0"><i class="fas fa-arrows-alt me-1"></i>Drag each label onto its correct spot on the image &mdash; or click a label, then click its spot. Click a placed label (or its spot) to undo it.</p>
+        </div>
+        <div class="col-lg-8 mb-3">
+            <div style="position:relative; width:100%; border-radius:8px; overflow:hidden; border:1px solid #dee2e6; box-shadow:0 2px 8px rgba(0,0,0,.1);">
+                <img src="${q.imageUrl}" style="width:100%; display:block;" draggable="false">
+                ${zonesHtml}
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <h6 class="fw-bold small text-muted mb-2">LABELS</h6>
+            ${paletteHtml}
+        </div>`;
+}
+
+function placeImageLabel(zoneKey, label) {
+    const answers = { ...(userAnswers[currentIndex] || {}) };
+    Object.keys(answers).forEach(k => { if (answers[k] === label) delete answers[k]; });
+    delete answers[zoneKey];
+    answers[zoneKey] = label;
+    userAnswers[currentIndex] = answers;
+    selectedImageLabel = null;
+    renderQuestion();
+}
+
+function imageLabelDragStart(event, label) {
+    event.dataTransfer.setData('text/plain', label);
+}
+function imageLabelDrop(event, zoneKey) {
+    event.preventDefault();
+    const label = event.dataTransfer.getData('text/plain');
+    if (label) placeImageLabel(zoneKey, label);
+}
+function imageLabelClick(label) {
+    const answers = userAnswers[currentIndex] || {};
+    const placedZone = Object.keys(answers).find(k => answers[k] === label);
+    if (placedZone) {
+        const updated = { ...answers };
+        delete updated[placedZone];
+        userAnswers[currentIndex] = Object.keys(updated).length ? updated : undefined;
+        renderQuestion();
+        return;
+    }
+    selectedImageLabel = (selectedImageLabel === label) ? null : label;
+    renderQuestion();
+}
+function imageZoneClick(zoneKey) {
+    const answers = userAnswers[currentIndex] || {};
+    if (!selectedImageLabel) {
+        if (answers[zoneKey] !== undefined) {
+            const updated = { ...answers };
+            delete updated[zoneKey];
+            userAnswers[currentIndex] = Object.keys(updated).length ? updated : undefined;
+            renderQuestion();
+        }
+        return;
+    }
+    placeImageLabel(zoneKey, selectedImageLabel);
+}
+
 function selectOption(idx) { userAnswers[currentIndex] = idx; renderQuestion(); }
-function nextQuestion() { selectedMatchItem = null; currentIndex++; renderQuestion(); }
-function prevQuestion() { selectedMatchItem = null; currentIndex--; renderQuestion(); }
-function goToQuestion(i) { if (i >= 0 && i < examQuestions.length) { selectedMatchItem = null; currentIndex = i; renderQuestion(); } }
+function nextQuestion() { selectedMatchItem = null; selectedImageLabel = null; currentIndex++; renderQuestion(); }
+function prevQuestion() { selectedMatchItem = null; selectedImageLabel = null; currentIndex--; renderQuestion(); }
+function goToQuestion(i) { if (i >= 0 && i < examQuestions.length) { selectedMatchItem = null; selectedImageLabel = null; currentIndex = i; renderQuestion(); } }
 function toggleFlag() { flaggedQuestions[currentIndex] = !flaggedQuestions[currentIndex]; renderQuestion(); }
 
 function confirmSubmit() {
@@ -914,6 +1030,12 @@ async function downloadPDFReport(event) {
                 const correctPairs = truePairs.filter(p => answers[p.item] === p.target).length;
                 isCorrect = truePairs.length > 0 && correctPairs === truePairs.length;
                 studentChoice = truePairs.length > 0 ? `${correctPairs} of ${truePairs.length} matched correctly` : 'Unanswered';
+            } else if (q.type === 'image_label') {
+                const answers = userAnswers[i] || {};
+                const trueZones = q.answerZones || [];
+                const correctZones = trueZones.filter(z => answers[z.key] === z.label).length;
+                isCorrect = trueZones.length > 0 && correctZones === trueZones.length;
+                studentChoice = trueZones.length > 0 ? `${correctZones} of ${trueZones.length} labeled correctly` : 'Unanswered';
             } else {
                 const userAnswerIdx = userAnswers[i];
                 const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
@@ -989,6 +1111,14 @@ async function processSubmission() {
             if (truePairs.length > 0) correctCount += correctPairs / truePairs.length;
             return;
         }
+        if (q.type === 'image_label') {
+            // Same partial-credit shape as matching, one "pair" per zone.
+            const answers = userAnswers[i] || {};
+            const trueZones = q.answerZones || [];
+            const correctZones = trueZones.filter(z => answers[z.key] === z.label).length;
+            if (trueZones.length > 0) correctCount += correctZones / trueZones.length;
+            return;
+        }
         const userAnswerIdx = userAnswers[i];
         if (userAnswerIdx !== undefined && q.options && q.options.length > 0) {
             const userAnswer = q.options[userAnswerIdx];
@@ -1061,6 +1191,12 @@ async function processSubmission() {
             const correctPairs = truePairs.filter(p => answers[p.item] === p.target).length;
             isCorrect = truePairs.length > 0 && correctPairs === truePairs.length;
             studentChoice = truePairs.length > 0 ? `${correctPairs} of ${truePairs.length} matched correctly` : 'Unanswered';
+        } else if (q.type === 'image_label') {
+            const answers = userAnswers[i] || {};
+            const trueZones = q.answerZones || [];
+            const correctZones = trueZones.filter(z => answers[z.key] === z.label).length;
+            isCorrect = trueZones.length > 0 && correctZones === trueZones.length;
+            studentChoice = trueZones.length > 0 ? `${correctZones} of ${trueZones.length} labeled correctly` : 'Unanswered';
         } else {
             const userAnswerIdx = userAnswers[i];
             const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;

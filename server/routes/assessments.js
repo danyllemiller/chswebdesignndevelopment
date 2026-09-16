@@ -239,6 +239,42 @@ router.get('/wd-exam-matching', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch WD matching questions' }); }
 });
 
+// --- WD IMAGE LABELING QUESTIONS ---
+// Zones are percentage-based (left/top/width/height, 0-100) so they line up
+// with the image at any rendered size -- same technique the page's own
+// click-to-explore hotspots already use (e.g. join-the-developers-guild.html's
+// WDLC diagram), which is where these zone coordinates were pulled from.
+router.get('/wd-exam-image-labeling', async (req, res) => {
+    const { chapter } = req.query;
+    const chapterNum = parseInt(chapter, 10);
+    if (isNaN(chapterNum) || chapterNum < 1 || chapterNum > 16) {
+        return res.status(400).json({ error: 'Valid chapter number (1-16) required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.execute(
+            `SELECT question_id AS id, prompt, image_url, zones_json FROM wd_image_labeling_questions
+             WHERE chapter_number = ? ORDER BY RAND()`,
+            [chapterNum]
+        );
+        await connection.release();
+        const questions = rows.map(row => {
+            const zones = JSON.parse(row.zones_json);
+            const labels = zones.map(z => z.label);
+            for (let i = labels.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [labels[i], labels[j]] = [labels[j], labels[i]];
+            }
+            // Zones sent back WITHOUT their label attached (just key +
+            // position) so the client can't cheat by reading the answer
+            // out of the zone data -- labels are a separately shuffled list.
+            const zonesForClient = zones.map(({ key, left, top, width, height }) => ({ key, left, top, width, height }));
+            return { id: row.id, type: 'image_label', question: row.prompt, imageUrl: row.image_url, zones: zonesForClient, labels, answerZones: zones };
+        });
+        res.json({ chapter: chapterNum, count: questions.length, questions });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch WD image labeling questions' }); }
+});
+
 // --- CS NOTEBOOK (turnins table) ---
 router.get('/student/cs-notebook', async (req, res) => {
     const { student_id } = req.query;
