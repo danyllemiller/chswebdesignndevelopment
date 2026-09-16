@@ -400,7 +400,10 @@ router.get('/paystubs/my', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(`
-            SELECT sp.*, pr.period_start, pr.period_end, pr.pay_date, pr.is_finalized, pr.run_by, pr.run_at
+            SELECT sp.*, DATE_FORMAT(pr.period_start, '%Y-%m-%d') AS period_start,
+                   DATE_FORMAT(pr.period_end, '%Y-%m-%d') AS period_end,
+                   DATE_FORMAT(pr.pay_date, '%Y-%m-%d') AS pay_date,
+                   pr.is_finalized, pr.run_by, pr.run_at
             FROM student_paystubs sp
             JOIN payroll_runs pr ON sp.payroll_run_id = pr.id
             WHERE sp.student_id = ?
@@ -548,7 +551,11 @@ router.get('/admin/payroll/runs', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [runs] = await connection.execute(`
-            SELECT pr.*, COUNT(sp.id) AS stub_count,
+            SELECT pr.id, DATE_FORMAT(pr.period_start, '%Y-%m-%d') AS period_start,
+                   DATE_FORMAT(pr.period_end, '%Y-%m-%d') AS period_end,
+                   DATE_FORMAT(pr.pay_date, '%Y-%m-%d') AS pay_date,
+                   pr.run_by, pr.notes, pr.is_finalized, pr.run_at,
+                   COUNT(sp.id) AS stub_count,
                    COALESCE(SUM(sp.gross_pay), 0) AS total_gross,
                    COALESCE(SUM(sp.net_pay), 0)   AS total_net
             FROM payroll_runs pr
@@ -574,7 +581,10 @@ router.get('/admin/payroll/run-detail/:id', async (req, res) => {
         // "Pay Period" and "Pay Date" silently rendered blank.
         const [rows] = await connection.execute(`
             SELECT sp.*, s.first_name, s.last_name, s.section_id,
-                   pr.period_start, pr.period_end, pr.pay_date, pr.run_by, pr.run_at
+                   DATE_FORMAT(pr.period_start, '%Y-%m-%d') AS period_start,
+                   DATE_FORMAT(pr.period_end, '%Y-%m-%d') AS period_end,
+                   DATE_FORMAT(pr.pay_date, '%Y-%m-%d') AS pay_date,
+                   pr.run_by, pr.run_at
             FROM student_paystubs sp
             JOIN students s ON sp.student_id = s.student_id
             JOIN payroll_runs pr ON sp.payroll_run_id = pr.id
