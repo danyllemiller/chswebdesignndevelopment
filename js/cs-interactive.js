@@ -1080,39 +1080,10 @@ const syncToGradebook = async (baseName, score, maxPoints) => {
         } catch (e) { console.error("Pre-Scale sync failed:", e); }
     };
 
-// Sync Pre-Assessment (Diagnostic) to gradebook - 15 POINTS FIXED (full credit for completion)
-    const syncPreAssessment = async (score, maxPoints) => {
-        // Pre-assessment ALWAYS gives 15 points full credit for COMPLETING the test
-        // FIXED: Assignment name format to "Unit1-Pre" (no space between Unit and number)
-        const key = `Unit${activeUnit.unitNum}-Pre`;
-        const newScore = 15; // Full credit just for completing
-        try {
-            // Check existing grade first and keep highest
-            let shouldSave = true;
-            const gradesRes = await fetch(`/api/student/grades?student_id=${encodeURIComponent(student.student_id)}`);
-            if (gradesRes.ok) {
-                const gradesData = await gradesRes.json();
-                const existing = (gradesData.responses || []).find(r => r.exam_id === key);
-                if (existing && Number(existing.score) >= newScore) {
-                    shouldSave = false;
-                    console.log(`Unit${activeUnit.unitNum}-Pre: Keeping existing score:`, existing.score, "(already completed)");
-                }
-            }
-            if (shouldSave) {
-                await fetch('/api/submit-exam', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        student_id: student.student_id,
-                        exam_id: key,
-                        score: newScore,
-                        total_points: 15
-                    })
-                });
-                console.log(`Unit${activeUnit.unitNum}-Pre synced: ${newScore} points (FULL CREDIT for completion)`);
-            }
-        } catch (e) { console.error("Pre-Assessment sync failed:", e); }
-    };
+// Pre-Assessment (Diagnostic) gradebook sync is now handled entirely by
+// quizLogic.js itself, which writes both the flat completion credit and
+// the student's real diagnostic accuracy -- see the message listener
+// below for why this used to duplicate that write.
 
 const checkProgressAndGate = async (isAutoAdvance = false) => {
         if (!currentStudentData) return;
@@ -2306,11 +2277,24 @@ window.addEventListener('message', async (event) => {
                     console.log("Pre-Scale synced: 10 pts fixed");
                 }
 
-                // Sync Pre-Assessment (Diagnostic) to gradebook - FIXED 15 POINTS
+                // quizLogic.js (the diagnostic itself) already syncs the
+                // gradebook directly before it ever posts this message --
+                // flat 10pt completion credit on "Unit{n}-Pre" PLUS the
+                // student's real accuracy on "Unit{n}-Pre-Score" (e.g.
+                // 12/25). This handler used to ALSO call its own
+                // syncPreAssessment(15, 15) here -- a second, independent
+                // write to the same "Unit{n}-Pre" key, hardcoded to 15
+                // points with no real-score component at all. Racing
+                // against quizLogic.js's write explains both the
+                // inconsistent point totals seen live (10 vs 15 depending
+                // on which write landed last) and, more importantly, why
+                // most students' real diagnostic score never made it into
+                // the gradebook: quizLogic.js's OWN sync only reliably
+                // completes flat-credit-first, so anything that competes
+                // for the same request cycle risks the second, real-score
+                // write. Removed -- quizLogic.js's own sync is the complete,
+                // correct one; this only needs to refresh the UI now.
                 if (event.data.type === 'diagnostic_complete') {
-                    await syncPreAssessment(15, 15);  // FIXED: Always pass 15 points fixed
-                    console.log("Pre-Assessment synced: 15 pts fixed");
-
                     // Tell the scale iframe (curriculum-frame) to refresh its grade bars
                     // so the pre-system-overlay unlocks without the user needing to reload
                     if (dom.curriculumFrame && dom.curriculumFrame.contentWindow) {
