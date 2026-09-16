@@ -276,9 +276,26 @@ async function renderCoursePanel(user, courseKey, sectionId) {
                 .concat(Object.keys(registryData))
                 .filter(k => k !== 'lastSubmitDate' && k !== 'uid' && !k.endsWith('-Score'))
         );
+        // Newest due date on the left, oldest on the right -- so the columns
+        // a student actually needs to look at next are the first ones they
+        // see without scrolling. Undated items (no real due date registered)
+        // sort to the far right, past even the oldest dated item.
+        const getDueDateForSort = (key) => {
+            const reg = registryData[key];
+            let d = reg?.dueDate || '';
+            if (reg?.periodDueDates && reg.periodDueDates[studentPeriod]) d = reg.periodDueDates[studentPeriod];
+            return (d && d !== '9999-99-99') ? d : '';
+        };
         const keys = Array.from(allKeys)
             .filter(key => isAssignmentVisible(key, studentPeriod, registryData))
-            .sort();
+            .sort((a, b) => {
+                const da = getDueDateForSort(a);
+                const db = getDueDateForSort(b);
+                if (!da && !db) return a.localeCompare(b);
+                if (!da) return 1;
+                if (!db) return -1;
+                return db.localeCompare(da);
+            });
 
         calculateGradeStats(keys, myGrades, registryData, courseKey);
         calculateBadges(keys, myGrades, registryData, courseKey);
