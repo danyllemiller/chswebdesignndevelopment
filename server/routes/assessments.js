@@ -3,6 +3,9 @@ const router = express.Router();
 const { getDbConnection } = require('../db');
 const { sanitizeNotebookHtml } = require('../sanitizeNotebookHtml');
 const { resolveCourseId } = require('../helpers');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 const EXAM_PROGRESS_DDL = `CREATE TABLE IF NOT EXISTS exam_progress (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -554,6 +557,54 @@ const JOB_APPLICATIONS_DDL = `CREATE TABLE IF NOT EXISTS job_applications (
     INDEX (student_id)
 )`;
 
+// job_applications predates the resume upload below -- CREATE TABLE IF NOT
+// EXISTS above is a no-op against the already-live table, so the two resume
+// columns need their own existence check/ALTER, same pattern as
+// ensureEnteredIcColumn in server/routes/gradebook.js.
+async function ensureResumeColumns(connection) {
+    const [cols] = await connection.execute(`SHOW COLUMNS FROM job_applications LIKE 'resume_path'`);
+    if (cols.length === 0) {
+        await connection.execute(`ALTER TABLE job_applications ADD COLUMN resume_filename VARCHAR(255), ADD COLUMN resume_path VARCHAR(500)`);
+    }
+}
+
+// Resumes are stored on disk, one folder per student, same shape as the
+// sticker uploads in server/routes/intervention.js. Filed under uploads/ at
+// the repo root, which server.js's catch-all express.static('/', ...)
+// already serves -- no new static mount needed.
+const RESUMES_ROOT = path.join(__dirname, '../../uploads/resumes');
+const resumeStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const sid = req.query.student_id;
+        if (!sid) return cb(new Error('student_id required'));
+        const dir = path.join(RESUMES_ROOT, `user_${sid}`);
+        fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const base = path.basename(file.originalname, '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+        cb(null, `${Date.now()}_${base}.pdf`);
+    }
+});
+const resumeUpload = multer({
+    storage: resumeStorage,
+    limits: { fileSize: 10 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => cb(null, /\.pdf$/i.test(file.originalname))
+});
+
+// POST /api/upload-resume?student_id=xxx -- called before submit-job-application
+// so the returned path can ride along in that JSON payload, same two-step
+// shape as the sticker upload flow.
+router.post('/upload-resume', (req, res) => {
+    resumeUpload.single('resume')(req, res, (err) => {
+        if (err) return res.status(400).json({ error: err.message });
+        if (!req.file) return res.status(400).json({ error: 'A PDF resume file is required.' });
+        const sid = req.query.student_id;
+        if (!sid) return res.status(400).json({ error: 'student_id required' });
+        res.json({ success: true, filename: req.file.filename, url: `/uploads/resumes/user_${sid}/${req.file.filename}` });
+    });
+});
+
 // The application form (interactives/job-application.html) previously had no
 // server-side save at all -- its only action was window.print(), so a
 // student's actual answers existed nowhere unless they separately printed a
@@ -564,23 +615,25 @@ const JOB_APPLICATIONS_DDL = `CREATE TABLE IF NOT EXISTS job_applications (
 // simple way save-grade does -- full completion credit, no retake/testing-
 // window gating, since this is a one-time application, not a timed exam.
 router.post('/submit-job-application', async (req, res) => {
-    const { student_id, role, role_label, fields, answers } = req.body || {};
+    const { student_id, role, role_label, fields, answers, resumeFilename, resumePath } = req.body || {};
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     if (!answers || typeof answers !== 'object') return res.status(400).json({ error: 'answers are required' });
     try {
         const connection = await getDbConnection();
         await connection.execute(JOB_APPLICATIONS_DDL);
+        await ensureResumeColumns(connection);
 
         await connection.execute(
             `INSERT INTO job_applications
-                (student_id, role, role_label, full_name, class_period, app_date, year_track, prev_experience, answers, sig_name, sig_date)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                (student_id, role, role_label, full_name, class_period, app_date, year_track, prev_experience, answers, sig_name, sig_date, resume_filename, resume_path)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 student_id, role || null, role_label || null,
                 fields?.fullName || null, fields?.classPeriod || null, fields?.appDate || null,
                 fields?.yearTrack || null, fields?.prevExperience || null,
                 JSON.stringify(answers),
-                fields?.sigName || null, fields?.sigDate || null
+                fields?.sigName || null, fields?.sigDate || null,
+                resumeFilename || null, resumePath || null
             ]
         );
 
@@ -612,6 +665,7 @@ router.get('/admin/job-applications', async (req, res) => {
     try {
         const connection = await getDbConnection();
         await connection.execute(JOB_APPLICATIONS_DDL);
+        await ensureResumeColumns(connection);
         const [rows] = await connection.execute(
             `SELECT ja.*, s.first_name, s.last_name, s.section_id
              FROM job_applications ja

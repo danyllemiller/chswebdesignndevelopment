@@ -15,3 +15,6 @@ images/sights-sounds-making-it-pop-html-media/figure-16.gif
 
 # Secrets — never commit
 .env
+
+# Student-uploaded files (resumes, etc.) — live on the server, not in git
+uploads/

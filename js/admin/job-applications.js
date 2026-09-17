@@ -13,17 +13,21 @@ async function loadApplications() {
         applications = data.applications || [];
 
         if (applications.length === 0) {
-            body.innerHTML = '<tr><td colspan="4" class="text-center py-4 no-apps">No applications submitted yet.</td></tr>';
+            body.innerHTML = '<tr><td colspan="5" class="text-center py-4 no-apps">No applications submitted yet.</td></tr>';
             return;
         }
 
         body.innerHTML = applications.map((app, i) => {
             const name = app.first_name && app.last_name ? `${app.last_name}, ${app.first_name}` : (app.full_name || app.student_id);
             const submitted = app.submitted_at ? new Date(app.submitted_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+            const resumeCell = app.resume_path
+                ? `<a href="${escapeHtml(app.resume_path)}" target="_blank" rel="noopener" onclick="event.stopPropagation();" title="Open resume PDF"><i class="fas fa-file-pdf text-danger"></i> Resume</a>`
+                : `<span class="text-muted small">None</span>`;
             return `<tr class="app-row" data-idx="${i}">
                 <td class="fw-bold">${escapeHtml(name)}</td>
                 <td>${escapeHtml(app.section_id || app.class_period || '')}</td>
                 <td><span class="badge bg-primary role-badge">${escapeHtml(app.role_label || app.role || '')}</span></td>
+                <td>${resumeCell}</td>
                 <td class="text-muted small">${escapeHtml(submitted)}</td>
             </tr>`;
         }).join('');
@@ -33,7 +37,7 @@ async function loadApplications() {
         });
     } catch (err) {
         console.error('Failed to load applications:', err);
-        body.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-danger">Failed to load applications. Try refreshing.</td></tr>';
+        body.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger">Failed to load applications. Try refreshing.</td></tr>';
     }
 }
 
@@ -55,6 +59,10 @@ function showDetail(app) {
     let html = '<div class="mb-4">' + infoRows.map(([label, val]) =>
         `<div class="mb-1"><span class="fw-bold small text-muted">${escapeHtml(label)}:</span> ${escapeHtml(val)}</div>`
     ).join('') + '</div>';
+
+    html += app.resume_path
+        ? `<div class="mb-4"><a href="${escapeHtml(app.resume_path)}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-danger"><i class="fas fa-file-pdf"></i> Open Resume PDF</a></div>`
+        : `<div class="mb-4 text-muted small"><i class="fas fa-exclamation-triangle"></i> No resume attached to this application.</div>`;
 
     html += Object.values(answers).map(qa => `
         <div class="answer-block">

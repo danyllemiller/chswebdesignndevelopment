@@ -553,10 +553,27 @@ input.invalid, textarea.invalid {
     </div>
   </section>
 
-  <!-- ⑤ SIGNATURE -->
+  <!-- ⑤ RESUME UPLOAD -->
   <section class="app-section">
     <div class="app-section-header">
       <div class="section-num">5</div>
+      <div class="section-title-text">Resume Upload</div>
+    </div>
+    <div class="app-section-body">
+      <div class="q-block">
+        <div class="question-label">Attach your resume (PDF only) <span style="color:var(--danger)">*</span></div>
+        <div class="question-hint">Every real job application asks for this — attach the resume you built for this class as a PDF, under 10MB.</div>
+        <input type="file" id="resumeFile" accept="application/pdf" class="field-input" style="padding:8px;" onchange="onResumeChosen(this)">
+        <div id="resumeChosenName" style="font-size:.8rem;color:var(--ink-muted);margin-top:6px;"></div>
+        <span class="field-error" id="err-resumeFile">Please attach your resume as a PDF.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ SIGNATURE -->
+  <section class="app-section">
+    <div class="app-section-header">
+      <div class="section-num">6</div>
       <div class="section-title-text">Certification &amp; Signature</div>
     </div>
     <div class="app-section-body">
@@ -834,6 +851,18 @@ function validate() {
   req('q-cover', 100);
   req('sigName');
   req('sigDate');
+  // resume required
+  var resumeInput = document.getElementById('resumeFile');
+  var resumeErr = document.getElementById('err-resumeFile');
+  var resumeBad = !resumeInput.files || resumeInput.files.length === 0;
+  if (resumeBad) {
+    resumeInput.classList.add('invalid');
+    if (resumeErr) resumeErr.style.display = 'block';
+    ok = false;
+  } else {
+    resumeInput.classList.remove('invalid');
+    if (resumeErr) resumeErr.style.display = 'none';
+  }
   // role required
   var roleVal = document.getElementById('roleSelect').value;
   if (!roleVal) {
@@ -873,6 +902,25 @@ var UNIVERSAL_QUESTIONS = {
   'q-gap': 'Q3. What is one skill this role requires that you do not yet have? How do you plan to develop it this semester?',
   'q-cover': 'Professional Statement (Cover Letter): In 3–5 sentences, summarize why you are the strongest candidate for this role and what you will contribute to the agency.'
 };
+
+function onResumeChosen(input) {
+  var label = document.getElementById('resumeChosenName');
+  var file = input.files && input.files[0];
+  if (!file) { label.textContent = ''; return; }
+  if (!/\.pdf$/i.test(file.name)) {
+    label.textContent = '';
+    input.value = '';
+    alert('Please attach a PDF file — other formats (Word docs, images, etc.) are not accepted.');
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    label.textContent = '';
+    input.value = '';
+    alert('That file is too large — resumes must be under 10MB.');
+    return;
+  }
+  label.textContent = 'Attached: ' + file.name;
+}
 
 async function submitApplication() {
   if (!validate()) {
@@ -919,8 +967,21 @@ async function submitApplication() {
   var btn = document.getElementById('submitAppBtn');
   var originalText = btn.textContent;
   btn.disabled = true;
-  btn.textContent = 'Submitting…';
   try {
+    btn.textContent = 'Uploading resume…';
+    var resumeFile = document.getElementById('resumeFile').files[0];
+    var resumeForm = new FormData();
+    resumeForm.append('resume', resumeFile);
+    var resumeRes = await fetch('/api/upload-resume?student_id=' + encodeURIComponent(user.student_id), {
+      method: 'POST',
+      body: resumeForm
+    });
+    if (!resumeRes.ok) throw new Error('Resume upload failed: ' + resumeRes.status);
+    var resumeData = await resumeRes.json();
+    payload.resumeFilename = resumeData.filename;
+    payload.resumePath = resumeData.url;
+
+    btn.textContent = 'Submitting…';
     var res = await fetch('/api/submit-job-application', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -947,6 +1008,8 @@ function clearForm() {
   document.querySelectorAll('.char-counter').forEach(function(el){ el.textContent = '0 / — characters'; });
   document.querySelectorAll('.field-error').forEach(function(el){ el.style.display = 'none'; });
   document.querySelectorAll('.invalid').forEach(function(el){ el.classList.remove('invalid'); });
+  document.getElementById('resumeFile').value = '';
+  document.getElementById('resumeChosenName').textContent = '';
   document.getElementById('roleSection').style.display = 'none';
   document.getElementById('roleBadge').style.display = 'none';
   document.getElementById('statusMsg').textContent = 'Select a position above to get started.';
