@@ -170,6 +170,24 @@
   .label-schedule  { left: 78.39%; top: calc(15.93% - 1.3rem); width: 19.43%; }
   .label-quote     { left: 78.39%; top: calc(71.2% - 1.3rem);  width: 19.43%; }
 
+  .no-pass-banner {
+    position: absolute;
+    top: 12.6%;
+    left: 23.8%;
+    width: 52.14%;
+    text-align: center;
+    background: #b91c1c;
+    color: #fff;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: .3rem .8rem;
+    border-radius: .4rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.35);
+    z-index: 5;
+  }
+
   .agenda-canvas {
     position: relative;
     width: 100%;
@@ -518,6 +536,8 @@
       </div>
     </div>
 
+    <div id="noPassBanner" class="no-pass-banner d-none"><i class="fas fa-ban me-2"></i><span id="noPassBannerText">No Pass</span></div>
+
     <h2 class="section-label label-objective" data-tag="h2" data-cmt="Objective">Objective</h2>
     <div class="zone zone-objective">
       <ul id="objectiveList" class="mb-0 ps-3"></ul>
@@ -681,6 +701,7 @@ function chapterLabelToUrl(label) {
 // the day type; /api/bell-schedule.php holds the period times for each type) ──────
 let dayTypes = new Map();   // 'YYYY-MM-DD' -> { type, description }
 let bellSchedule = [];      // rows from bell_schedule table
+let myPeriodRow = null;     // today's bell_schedule row for the period this agenda page is showing (set in renderBellSchedule, read by tickClock's no-pass check)
 
 const DAY_TYPE_LABELS = { A: 'A Day', B: 'B Day', A_MIN: 'A Min Day', B_MIN: 'B Min Day', C: 'All Periods', summer: 'Summer School' };
 const EVENT_TYPE_PRI = { A: 6, B: 5, C: 4, A_MIN: 3, B_MIN: 2, S: 2, OFF: 1, none: 0 };
@@ -751,6 +772,7 @@ function fmtTime(hhmm) {
 function renderBellSchedule(dateStr) {
   const box = document.getElementById('scheduleBox');
   box.innerHTML = '';
+  myPeriodRow = null;
   const empty = (label) => {
     const d = document.createElement('div');
     d.className = 'schedule-empty small text-center';
@@ -784,6 +806,10 @@ function renderBellSchedule(dateStr) {
 
     const link = PERIOD_COURSE_LINKS[p.period_label];
     const isCurrentPage = link && link.course === course && (link.track || 'main') === track;
+    // Only meaningful for the no-pass check when the block actually being
+    // displayed is TODAY -- a teacher paging ahead to next week's lesson
+    // shouldn't trigger a "no pass" banner based on a date that isn't now.
+    if (isCurrentPage && dateStr === todayStr()) myPeriodRow = p;
     const inner = document.createElement(link && !isCurrentPage ? 'a' : 'div');
     inner.className = 'sched-inner';
     inner.style.color = PERIOD_TEXT_COLOR;
@@ -1242,10 +1268,38 @@ if (!courseCfg) {
   });
 
   // ── Live clock ──────────────────────────────────────────────────────────
+  // Students aren't allowed to use the hall pass during the first or last
+  // 15 minutes of class -- myPeriodRow (set in renderBellSchedule, only for
+  // TODAY's actual displayed block) gives the real start/end time for the
+  // period this agenda page represents, so this can check the live clock
+  // against it every second, the same cadence the clock face already ticks.
+  function updateNoPassBanner(now) {
+    const banner = document.getElementById('noPassBanner');
+    if (!banner) return;
+    if (!myPeriodRow) { banner.classList.add('d-none'); return; }
+    const toMinutes = (hhmmss) => {
+      const [h, m] = hhmmss.split(':').map(Number);
+      return h * 60 + m;
+    };
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const startMin = toMinutes(myPeriodRow.start_time);
+    const endMin = toMinutes(myPeriodRow.end_time);
+    const inFirst15 = nowMin >= startMin && nowMin < startMin + 15;
+    const inLast15 = nowMin >= endMin - 15 && nowMin < endMin;
+    if (inFirst15 || inLast15) {
+      document.getElementById('noPassBannerText').textContent =
+        `No Pass — ${inFirst15 ? 'First' : 'Last'} 15 Minutes of Class`;
+      banner.classList.remove('d-none');
+    } else {
+      banner.classList.add('d-none');
+    }
+  }
+
   function tickClock() {
     const now = new Date();
     document.getElementById('clockFace').textContent = now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' });
     document.getElementById('clockDate').textContent = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    updateNoPassBanner(now);
   }
   tickClock();
   setInterval(tickClock, 1000);
