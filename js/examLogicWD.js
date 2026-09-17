@@ -412,10 +412,14 @@ async function initExam(config) {
     }
 
     // Matching/image-label questions arrive with their items/targets/labels
-    // already shuffled server-side (server/routes/assessments.js) -- only
-    // mc/tf need their options reshuffled here.
+    // already shuffled server-side (server/routes/assessments.js) -- only mc
+    // needs its options reshuffled here. True/False stays exactly as the
+    // server sends it (['True','False'], from option_a/option_b) -- shuffling
+    // a 2-option T/F question doesn't add any real randomness (a 50/50 flip
+    // either way) and just makes "True" sometimes render second, which reads
+    // as inconsistent/wrong to a student used to seeing True first.
     examQuestions = examQuestions.map(q => {
-        if (q.type === 'matching' || q.type === 'image_label') return q;
+        if (q.type !== 'mc') return q;
         return { ...q, options: shuffleArray(q.options) };
     });
 
@@ -867,36 +871,37 @@ function renderImageLabelingQuestion(q) {
             </div>`;
     }).join('');
 
+    // Labels run in a horizontal row across the top rather than a side
+    // column, so the image itself -- the thing students actually need to
+    // read closely -- gets the full width instead of giving up a third of
+    // it to a vertical list.
     const paletteHtml = q.labels.map(label => {
         const isPlaced = usedLabels.has(label);
         const isSelected = selectedImageLabel === label;
         const cls = isPlaced ? 'border-success bg-light' : (isSelected ? 'border-primary bg-site-secondary' : 'border-secondary');
         return `
-            <div class="card shadow-sm mb-2 ${cls}"
+            <div class="shadow-sm ${cls}"
                  draggable="${isPlaced ? 'false' : 'true'}"
                  ondragstart="imageLabelDragStart(event, '${escapeHtml(label).replace(/'/g, "\\'")}')"
                  onclick="imageLabelClick('${escapeHtml(label).replace(/'/g, "\\'")}')"
-                 style="cursor:pointer; border-width:2px !important;">
-                <div class="card-body py-2 px-3 fw-bold small d-flex justify-content-between align-items-center">
-                    <span>${escapeHtml(label)}</span>
-                    ${isPlaced ? '<i class="fas fa-check-circle text-success"></i>' : ''}
-                </div>
+                 style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; border-width:2px !important; border-style:solid; border-radius:20px; padding:6px 14px; font-weight:bold; font-size:.78rem; background:#fff; white-space:nowrap;">
+                <span>${escapeHtml(label)}</span>
+                ${isPlaced ? '<i class="fas fa-check-circle text-success"></i>' : ''}
             </div>`;
     }).join('');
 
     return `
-        <div class="col-12 mb-3">
-            <p class="text-muted small mb-0"><i class="fas fa-arrows-alt me-1"></i>Drag each label onto its correct spot on the image &mdash; or click a label, then click its spot. Click a placed label (or its spot) to undo it.</p>
+        <div class="col-12 mb-2">
+            <p class="text-muted small mb-2"><i class="fas fa-arrows-alt me-1"></i>Drag each label onto its correct spot on the image &mdash; or click a label, then click its spot. Click a placed label (or its spot) to undo it.</p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                ${paletteHtml}
+            </div>
         </div>
-        <div class="col-lg-8 mb-3">
+        <div class="col-12">
             <div style="position:relative; width:100%; border-radius:8px; overflow:hidden; border:1px solid #dee2e6; box-shadow:0 2px 8px rgba(0,0,0,.1);">
                 <img src="${q.imageUrl}" style="width:100%; display:block;" draggable="false">
                 ${zonesHtml}
             </div>
-        </div>
-        <div class="col-lg-4">
-            <h6 class="fw-bold small text-muted mb-2">LABELS</h6>
-            ${paletteHtml}
         </div>`;
 }
 

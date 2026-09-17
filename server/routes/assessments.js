@@ -185,6 +185,9 @@ router.get('/wd-exam-questions', async (req, res) => {
     if (isNaN(chapterNum) || chapterNum < 1 || chapterNum > 16) {
         return res.status(400).json({ error: 'Valid chapter number (1-16) required' });
     }
+    // Every call re-shuffles/re-samples server-side -- never let a browser
+    // (or an intermediate cache) serve back a stale, previously-seen order.
+    res.set('Cache-Control', 'no-store');
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(
@@ -214,6 +217,7 @@ router.get('/wd-exam-matching', async (req, res) => {
     if (isNaN(chapterNum) || chapterNum < 1 || chapterNum > 16) {
         return res.status(400).json({ error: 'Valid chapter number (1-16) required' });
     }
+    res.set('Cache-Control', 'no-store');
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(
@@ -253,6 +257,7 @@ router.get('/wd-exam-image-labeling', async (req, res) => {
     if (isNaN(chapterNum) || chapterNum < 1 || chapterNum > 16) {
         return res.status(400).json({ error: 'Valid chapter number (1-16) required' });
     }
+    res.set('Cache-Control', 'no-store');
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(
