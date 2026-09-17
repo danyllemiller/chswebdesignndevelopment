@@ -22,6 +22,7 @@
       <a href="#section-10-1">10.1 Conditionals</a>
       <a href="#section-10-2">10.2 Loops & Iteration</a>
       <a href="#section-10-3">10.3 Events That Trigger Code</a>
+      <a href="#section-10-4">10.4 Lists & Systematic Testing</a>
   </div>
 
   <!-- Section 10.1 -->
@@ -140,6 +141,46 @@
               </ol>
               <p class="mb-0 fw-bold text-danger">Turn In: Your triggered code, proof it fired automatically, your invalid-input handling in action, and your one-sentence problem statement.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Event-Driven Artifact</strong> into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 10.4 -->
+  <h3 id="section-10-4" class="fw-bold border-bottom pb-2">10.4 Lists & Systematic Testing</h3>
+  <p class="fs-5">Thirty separate variables for thirty student names is unmanageable the moment you need to loop through them. And a program that "seems to work" hasn't actually been tested until you've deliberately tried to break it.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">10.4.1 Lists (Arrays)</h4>
+  <p>A <strong>list</strong> (or <strong>array</strong>) stores many related values under a single variable name instead of creating a separate variable for each one. Each value gets a position, called an <strong>index</strong>, usually starting at 0 — so the third item in a list of five names is at index 2, not index 3. Combined with a <code>for</code> loop, a list is what lets a program process a hundred items with the same few lines that would process one.</p>
+
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-list-ol me-2"></i> Worked Example: Looping Over a List</h5>
+      <p class="mb-0">Instead of <code>student1</code>, <code>student2</code>, <code>student3</code>... a list holds all of them: <code>students = ["Amara", "Ben", "Chen", "Deja", "Eli"]</code>. A <code>for</code> loop then visits every index automatically, printing each name, without the code caring whether the list has 5 names or 5,000.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">10.4.2 Systematic Testing</h4>
+  <p>Confirming a function works on one normal input isn't enough. <strong>Systematic testing</strong> means deliberately checking a function against a set of <strong>test cases</strong> covering the situations most likely to break it: a normal, expected input; an empty input (nothing at all); and an invalid input (the wrong type, or an out-of-range value). Each of these individual checks is one test case — running all three together is what actually gives you confidence the function is solid, not just lucky on the one input you happened to try first.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">Besides a normal expected input, name two other kinds of input a thorough test case should check. <em class="text-white-50">(Answer: an empty input, and an invalid input — like the wrong data type or an out-of-range value.)</em></p>
+  </div>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-vial fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
+              <h3 class="fw-bold mb-1">Activity: The List & Test Suite</h3>
+              <p class="mb-2 fs-5">Add a real list to your prototype and prove it holds up.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Create a list of at least five related values (names, scores, prices — your choice), and use a loop to process every item in it (print each one, total them, or something similar).</li>
+                  <li class="mb-1">Access one specific item in your list by its index and explain, in one sentence, why that index is the correct one for that item.</li>
+                  <li class="mb-1">Write three test cases for one function in your prototype: a normal input, an empty input, and an invalid input. Run all three and record exactly what happened for each.</li>
+                  <li class="mb-0">If any test case revealed a real bug, fix it and re-run all three test cases to confirm the fix didn't break the ones that were already passing.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your list and loop, your indexed-access example, and your three test cases with results (and your fix, if you found a bug).</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The List & Test Suite</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>

@@ -23,6 +23,7 @@
       <a href="#section-16-1">16.1 The Lifecycle & Real User Feedback</a>
       <a href="#section-16-2">16.2 Licensing & Intellectual Property</a>
       <a href="#section-16-3">16.3 Accessibility</a>
+      <a href="#section-16-4">16.4 Dev Tools, Process & Data Ethics</a>
   </div>
 
   <!-- Section 16.1 -->
@@ -185,6 +186,57 @@
               </ol>
               <p class="mb-0 fw-bold text-danger">Turn In: Your five-barrier-type failure log, your four fixes, and your keyboard-only test results (including what still doesn't work).</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Accessibility Pass</strong> into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 16.4 -->
+  <h3 id="section-16-4" class="fw-bold border-bottom pb-2">16.4 Dev Tools, Process & Data Ethics</h3>
+  <p class="fs-5">The lifecycle in 16.1 describes the stages. Here's the toolset real teams use to move through them, and the legal/ethical lines that come with handling real user data.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">16.4.1 The Tools of the Trade</h4>
+  <p>An <strong>IDE (Integrated Development Environment)</strong> bundles a code editor, debugger, and terminal into one application, instead of juggling three separate programs. Many real apps also need to run <strong>cross-platform</strong> — the same codebase running on Windows, macOS, and Linux (or iOS and Android) with only minor tweaks, instead of writing and maintaining a completely separate app for each.</p>
+
+  <div class="concept-box shadow-sm border-warning bg-light">
+      <h5 class="fw-bold text-dark"><i class="fas fa-bug me-2"></i> Regression: When a Fix Breaks Something Else</h5>
+      <p class="mb-0">A <strong>regression</strong> is exactly the failure mode from 16.1's "unintended implication," given its formal name: adding a new feature (or fixing one bug) accidentally causes an older, previously-working feature to stop functioning. It's why real teams re-run old tests after every change, not just tests for the new feature.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">16.4.2 Agile: Development as a Repeating Loop</h4>
+  <p>The Six Stages from 16.1 don't just loop once — most modern teams run through them in short, repeated cycles on purpose. This approach is called <strong>Agile</strong> development: release a basic version, collect real user complaints, improve it, and release again — the same "iterative" idea from Chapter 9, now formalized as a whole team's actual working process rather than one person's prototype loop.</p>
+
+  <h4 class="fw-bold mt-5 text-primary">16.4.3 Data Ethics & Security in Practice</h4>
+  <p>Handling real user data comes with real legal obligations. <strong>Data minimization</strong> means only collecting what you actually need — an app asking just for an email address instead of a full address, birthdate, and phone number it doesn't need follows this principle. Regulations like <strong>GDPR</strong> (a European privacy law) legally require practices like this, changing how developers everywhere design data collection, even outside Europe, since most apps have some European users.</p>
+  <p>When researchers study sensitive data (like medical records) after stripping out names and ID numbers, that process is called <strong>anonymization</strong> — it lets the data be studied without exposing which real person each row belongs to.</p>
+
+  <div class="concept-box shadow-sm border-danger bg-light">
+      <h5 class="fw-bold text-danger"><i class="fas fa-shield-virus me-2"></i> A Real Coding Flaw: SQL Injection</h5>
+      <p class="mb-0">A <strong>SQL injection</strong> is a coding flaw where a form doesn't properly check user input before using it in a database command — letting an attacker type something like a crafted string into a login box that tricks the database into handing over private data it was never supposed to reveal. It's one of the most common real-world <strong>vulnerabilities</strong> (Chapter 11) in web applications, and it's exactly why every value passed into a query needs to be handled safely, never trusted as-is.</p>
+  </div>
+
+  <p>And downloading a paid movie, song, or piece of software for free from an unauthorized site is <strong>piracy</strong> — a direct violation of the copyright protections covered in 16.2, regardless of how easy or common it is to do.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
+      <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">A new feature ships and an older, unrelated feature suddenly stops working. What is this specific failure called? <em class="text-white-50">(Answer: a regression.)</em></p>
+  </div>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-tools fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
+              <h3 class="fw-bold mb-1">Activity: The Data Ethics Review</h3>
+              <p class="mb-2 fs-5">Apply this section to your Unit 4 tool (or a real app of your choice if your tool doesn't collect any data).</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">List every piece of data your tool collects or could collect, and for each one, decide whether it satisfies data minimization — is it actually needed? Remove or flag anything that isn't.</li>
+                  <li class="mb-1">Explain, in your own words, why a regression is a different kind of bug than a normal one your test cases (Chapter 10) would usually catch on the first try.</li>
+                  <li class="mb-1">Research one real, documented case of a SQL injection attack (or another real data breach) and summarize what data was exposed and how.</li>
+                  <li class="mb-0">Name one real piece of software you use that's cross-platform, and one specific reason that matters to you as a user.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your data minimization review, your regression explanation, your real breach summary, and your cross-platform example.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Data Ethics Review</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>

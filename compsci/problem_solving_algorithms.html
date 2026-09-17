@@ -22,6 +22,7 @@
       <a href="#section-9-1">9.1 Decomposition</a>
       <a href="#section-9-2">9.2 Algorithms & Pseudocode</a>
       <a href="#section-9-3">9.3 Your First Prototype</a>
+      <a href="#section-9-4">9.4 Efficiency, Patterns & the Bigger Picture</a>
   </div>
 
   <!-- Section 9.1 -->
@@ -143,6 +144,51 @@
               </ol>
               <p class="mb-0 fw-bold">Turn In: Your working code, a screenshot of its successful output, and your error log with what each one taught you.</p>
               <p class="mb-0 fw-bold mt-2">👉 Load <strong>The First Prototype</strong> in your Digital Notebook on the right.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 9.4 -->
+  <h3 id="section-9-4" class="fw-bold border-bottom pb-2">9.4 Efficiency, Patterns & the Bigger Picture</h3>
+  <p class="fs-5">Getting an algorithm to work is only the first bar to clear. The next questions are: how well does it work, does it generalize, and is it even the kind of problem worth solving exactly?</p>
+
+  <h4 class="fw-bold mt-4 text-primary">9.4.1 Correctness, Efficiency & Tradeoffs</h4>
+  <p>An algorithm's logic is <strong>correct</strong> if it produces the right output for every valid input, not just the examples you happened to test. <strong>Efficiency</strong> measures how much time and memory an algorithm uses to get there — and the two often trade off against each other. Choosing between an algorithm that runs faster but uses more memory, and one that's slower but easier to read, isn't about finding a "correct" answer; it's about weighing <strong>tradeoffs</strong> against what actually matters for your specific situation.</p>
+
+  <div class="concept-box shadow-sm border-info bg-light">
+      <h5 class="fw-bold text-info"><i class="fas fa-tachometer-alt me-2"></i> Precise Algorithms vs. Heuristics</h5>
+      <p class="mb-0">A precise algorithm guarantees the mathematically best possible answer, but can take too long for huge problems. A <strong>heuristic</strong> trades that guarantee for speed — a GPS app gives you a route in half a second that's very good, not mathematically proven to be the single shortest path possible. For most real-world uses, "very good, instantly" beats "perfect, eventually."</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">9.4.2 Generalizable Patterns & Computational Artifacts</h4>
+  <p>A <strong>generalizable pattern</strong> is a solution technique from one problem that turns out to work on a completely different one — a sorting method built for a list of numbers works just as well sorting names alphabetically, because both problems share the same underlying structure. Recognizing this is what lets programmers reuse hard-won solutions instead of reinventing them every time.</p>
+  <p>Anything you build with code — a program, a website, a spreadsheet tool, a simulation — counts as a <strong>computational artifact</strong>. Because a real artifact gets used by real people, <strong>accessibility</strong> (screen-reader support, captions, readable color contrast) isn't optional polish; it's part of whether the artifact actually works for its intended audience.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
+      <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">What's the key difference between a heuristic and a precise algorithm? <em class="text-white-50">(Answer: a heuristic trades a guaranteed best answer for speed; a precise algorithm guarantees the optimal answer but can be slower.)</em></p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-primary">9.4.3 AI, and Why Teams Follow a Process</h4>
+  <p><strong>Artificial Intelligence</strong> increasingly handles problems too complex for a single hand-written algorithm — a streaming service predicting what you'll want to watch next isn't following one fixed rule, it's finding patterns across millions of other viewers' behavior.</p>
+  <p>On any project bigger than a solo script, teams don't just write code freely — they follow a <strong>Software Development Life Cycle (SDLC)</strong>: plan, design, build, test, deploy, repeat. Development is <strong>iterative</strong> on purpose: ship a basic version, collect real feedback, improve it, and ship again, rather than trying to guess everything right the first time. That's also why teams assign specific roles and track changes carefully — so real user feedback actually reaches the right person to act on it.</p>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-balance-scale fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
+              <h3 class="fw-bold mb-1">Activity: The Tradeoff Report</h3>
+              <p class="mb-2 fs-5">Go back to the prototype you've been building since 9.3.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Identify one place in your logic where you could trade speed for readability (or vice versa), implement both versions, and explain in 2-3 sentences which you'd actually keep and why.</li>
+                  <li class="mb-1">Name one other real-world problem your exact same approach (your "generalizable pattern") could also solve, and explain what structural similarity makes that possible.</li>
+                  <li class="mb-1">List one accessibility improvement your prototype is currently missing (e.g. clear labels, readable contrast, keyboard-only operability) and add it.</li>
+                  <li class="mb-0">Write one sentence describing what the next "iteration" of your prototype should fix, based on feedback from a partner who tried using it.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your two tradeoff versions with justification, your generalizable-pattern example, your accessibility fix, and your next-iteration plan.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Tradeoff Report</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>

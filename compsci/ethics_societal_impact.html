@@ -22,6 +22,7 @@
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
       <a href="#section-12-1">12.1 Five Ways Computing Reshapes Life</a>
       <a href="#section-12-2">12.2 Reading Your Own Footprint Honestly</a>
+      <a href="#section-12-3">12.3 How AI Actually Works</a>
   </div>
 
   <!-- Section 12.1 -->
@@ -103,6 +104,58 @@
               </ol>
               <p class="mb-0 fw-bold text-danger">Turn In: The privacy policy you read (what it collects, why, who receives it), what you found searching your own name, and what you fixed.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Privacy Audit</strong> into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 12.3 -->
+  <h3 id="section-12-3" class="fw-bold border-bottom pb-2">12.3 How AI Actually Works</h3>
+  <p class="fs-5">You can't seriously evaluate AI's ethical and societal impact without knowing what's actually happening inside it. "It reproduces patterns in its training data" (12.2's Quick Check) means something specific — here's what.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">12.3.1 Traditional Programming vs. Machine Learning</h4>
+  <p>A traditional program follows rules a human wrote explicitly — every "if this, then that" was typed by a programmer. A <strong>Machine Learning</strong> system flips that: instead of being told the rules, it's shown enormous amounts of <strong>training data</strong> and learns the underlying patterns itself. A spam filter isn't given a list of every possible scam phrase — it's shown thousands of real spam and real non-spam emails until it learns to tell the difference on its own.</p>
+
+  <div class="concept-box shadow-sm border-info bg-light">
+      <h5 class="fw-bold text-info"><i class="fas fa-brain me-2"></i> Neural Networks</h5>
+      <p class="mb-0">A <strong>neural network</strong> is a machine learning structure loosely modeled after the brain's neurons — layers of small connected units, each adjusting how strongly it reacts to its inputs as it sees more training data. It's the technology behind most modern AI: recognizing images, understanding speech, generating text.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-primary">12.3.2 What Neural Networks Actually Do</h4>
+  <ul class="fs-5">
+      <li class="mb-2"><strong>Computer Vision</strong> — lets a system interpret images, like a self-driving car recognizing a pedestrian stepping into the street.</li>
+      <li class="mb-2"><strong>Natural Language Processing (NLP)</strong> — lets a computer understand and generate human language, like a voice assistant understanding a spoken question and replying in plain language.</li>
+      <li class="mb-0"><strong>Recommendation Engines</strong> — predict what you'll want next based on patterns across millions of other users, like a music app or streaming service suggesting what to play next.</li>
+  </ul>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
+      <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">What's the fundamental difference between traditional programming and machine learning? <em class="text-white-50">(Answer: traditional programming follows explicit rules a human wrote; machine learning learns its own patterns from training data.)</em></p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">12.3.3 Game-Playing AI: State, Decision Trees & Minimax</h4>
+  <p>A game-playing AI represents the exact current arrangement of the board at any moment as its <strong>state</strong>. To decide its next move, it can build a <strong>decision tree</strong> mapping out possible moves and the opponent's likely responses to each. Chess has too many possible future sequences to calculate all of them, so an AI can't just brute-force every option — for large games, it often uses a <strong>heuristic</strong> to estimate a good move without exhaustively checking every possibility.</p>
+  <p>The <strong>Minimax</strong> algorithm is a specific strategy for this: it assumes the opponent will always make the smartest possible move, and picks the move that gives the best outcome even against that best-case opponent play.</p>
+
+  <h4 class="fw-bold mt-5 text-primary">12.3.4 The Turing Test & Deepfakes</h4>
+  <p>The <strong>Turing Test</strong>, proposed by Alan Turing, evaluates whether a human judge, chatting blind with both a human and a machine, can reliably tell which is which — it's a test of convincing imitation, not of genuine understanding.</p>
+  <p>That same imitation capability raises a serious modern concern: <strong>deepfakes</strong>, AI-generated videos or audio realistic enough to convincingly show someone saying or doing something they never actually did — raising real ethical questions about consent, misinformation, and trust in recorded evidence itself.</p>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-robot fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
+              <h3 class="fw-bold mb-1">Activity: The AI Explainer</h3>
+              <p class="mb-2 fs-5">Pick one real AI-powered tool you actually use (a recommendation feed, a voice assistant, a photo app that recognizes faces, a chatbot).</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Identify which category of AI it's using (computer vision, NLP, or a recommendation engine) and explain, in your own words, roughly what it's doing with training data to work.</li>
+                  <li class="mb-1">Explain why this tool is machine learning rather than traditional programming — what would be impossible to hand-write as explicit rules?</li>
+                  <li class="mb-1">Research and describe one real, documented case of this type of AI producing a biased or wrong result (tie this back to 11.1's discussion of where bias enters).</li>
+                  <li class="mb-0">If deepfakes become common in your tool's category, name one real harm that could result, and one safeguard that could help.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your tool's AI category and explanation, your traditional-programming-vs-ML reasoning, your real bias example, and your deepfake harm/safeguard.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The AI Explainer</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>

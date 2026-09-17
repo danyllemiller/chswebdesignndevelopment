@@ -19,9 +19,93 @@
 
   <div class="sticky-toc">
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#section-19-0">Know Your Threats</a>
       <a href="#section-19-1">19.1 The Usability-Security Tradeoff</a>
       <a href="#section-19-2">19.2 Writing a Recommendation Someone Will Fund</a>
   </div>
+
+  <!-- Intro: Threat Types -->
+  <h3 id="section-19-0" class="fw-bold mt-4 border-bottom pb-2">Know Your Threats</h3>
+  <p class="fs-5">You can't recommend a defense without knowing what it's defending against. Before evaluating tradeoffs, here's the real attacker's toolkit.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">Malware: The Umbrella Term</h4>
+  <p><strong>Malware</strong> (malicious software) is the general term for any software designed to damage, disrupt, or gain unauthorized access to a system. Specific types work very differently from each other:</p>
+  <div class="row g-3 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-danger">
+              <div class="card-body">
+                  <h6 class="fw-bold text-danger">Virus</h6>
+                  <p class="mb-0 small">Attaches to a real file and needs a human to run that file to spread.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body">
+                  <h6 class="fw-bold text-warning">Worm</h6>
+                  <p class="mb-0 small">Spreads on its own across a network, with no file to attach to and no human needed.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-info">
+              <div class="card-body">
+                  <h6 class="fw-bold text-info">Spyware / Keylogger</h6>
+                  <p class="mb-0 small">Runs silently, recording what you type or do, and secretly sends it to an attacker.</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-secondary">
+              <div class="card-body">
+                  <h6 class="fw-bold text-secondary">Ransomware</h6>
+                  <p class="mb-0 small">Locks up (encrypts) a victim's files and demands payment, often in cryptocurrency, to release them.</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="concept-box shadow-sm border-danger bg-light">
+      <h5 class="fw-bold text-danger"><i class="fas fa-mask me-2"></i> Disguised Malware</h5>
+      <p class="mb-0">A "free screen recorder" that secretly installs spyware once run is a classic disguise — malware hidden inside something that looks legitimate and useful, counting on the victim to run it voluntarily.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">Attacks That Target People or Networks</h4>
+  <ul class="fs-5">
+      <li class="mb-2"><strong>Phishing</strong> — a scammer impersonates a real person or company (a fake email, a fake login page) to trick a victim into handing over credentials or money.</li>
+      <li class="mb-2"><strong>Man-in-the-Middle (MitM)</strong> — an attacker quietly intercepts communication between two people who think they're talking directly to each other, reading or altering messages in transit.</li>
+      <li class="mb-2"><strong>Botnet</strong> — a network of hijacked "zombie" computers an attacker controls remotely, often without their owners ever realizing it.</li>
+      <li class="mb-0"><strong>Distributed Denial of Service (DDoS)</strong> — a botnet floods a target (like a retailer's website) with junk traffic all at once, overwhelming it so legitimate users can't get through.</li>
+  </ul>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
+      <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">What's the key difference between a computer virus and a computer worm? <em class="text-white-50">(Answer: a virus needs a human to run an infected file to spread; a worm spreads on its own across a network with no file or human needed.)</em></p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-primary">Vulnerabilities, Zero-Days & Real Defenses</h4>
+  <p>A <strong>vulnerability</strong> is a flaw in a system an attacker can exploit — like a login form that doesn't properly check a password. A <strong>zero-day</strong> is a vulnerability attackers are already actively exploiting before the software's own developer even knows it exists, making it especially dangerous since no official fix exists yet.</p>
+  <p>Two of the strongest everyday defenses: <strong>encryption</strong> scrambles a message's contents so that even if it's intercepted (like in a MitM attack), it's unreadable without the correct key. <strong>Multi-Factor Authentication (MFA)</strong> requires a second proof of identity beyond just a password (a code sent to your phone, a fingerprint) — so a stolen password alone isn't enough to get in.</p>
+
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-clipboard-list fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
+              <h4 class="fw-bold mb-1">Activity: The Threat Log</h4>
+              <p class="mb-2">Build the threat log this chapter's capstone project (19.2) will need.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">For five different threats from this section (pick from: virus, worm, spyware, ransomware, phishing, MitM, botnet/DDoS), write one real or realistic scenario showing each one in action — specific enough that a reader could identify which threat type it is without you naming it.</li>
+                  <li class="mb-1">For each of your five scenarios, name one specific defense from this section (or 19.1's measures) that would have prevented or reduced the damage.</li>
+                  <li class="mb-1">Research one real, publicly reported case of a vulnerability or zero-day being exploited, and summarize what happened in 3-4 sentences.</li>
+                  <li class="mb-0">Explain, in your own words, why MFA still helps even after a password has already been stolen.</li>
+              </ol>
+              <p class="mb-0 fw-bold">Turn In: Your five threat scenarios with matched defenses, your real vulnerability/zero-day research, and your MFA explanation. Keep this — 19.2's capstone project reuses it directly.</p>
+              <p class="mb-0 fw-bold mt-2">👉 Load <strong>The Threat Log</strong> in your Digital Notebook on the right.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
 
   <!-- Section 19.1 -->
   <h3 id="section-19-1" class="fw-bold mt-4 border-bottom pb-2">19.1 The Usability-Security Tradeoff</h3>
@@ -124,7 +208,7 @@
               <h3 class="fw-bold mb-1">Project: The Network Audit</h3>
               <p class="mb-2 fs-5">This is the capstone — it pulls together work from this whole unit into one real deliverable.</p>
               <ol class="mb-2 fs-6">
-                  <li class="mb-1">Assemble your network map and reliability analysis (Chapter 17), your threat log (Chapter 18), and your tradeoff matrix (above) into one document.</li>
+                  <li class="mb-1">Assemble your network map and reliability analysis (Chapter 17), your Threat Log (this chapter's intro section), and your tradeoff matrix (above) into one document.</li>
                   <li class="mb-1">Using the small business described above, find at least four specific problems in their current setup (the shared password, the shared login, the missing backups, and the inconsistent updates are a start — look for more).</li>
                   <li class="mb-1">For each problem, design a specific fix: what changes about access, passwords, patching, backups, or incident response, and why.</li>
                   <li class="mb-0">Write an executive summary for the store owner using the five-part structure from 19.2.1 (risk, likelihood and impact, recommended control, cost, and consequence of declining) — in plain language a non-technical small business owner can actually act on, not jargon.</li>

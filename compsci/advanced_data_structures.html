@@ -22,6 +22,7 @@
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
       <a href="#section-14-1">14.1 Arrays</a>
       <a href="#section-14-2">14.2 Linked Lists</a>
+      <a href="#section-14-3">14.3 Objects, Dictionaries & Searching Fast</a>
   </div>
 
   <!-- Section 14.1 -->
@@ -140,6 +141,46 @@
               </ol>
               <p class="mb-0 fw-bold text-danger">Turn In: Your comparison table, a screenshot of your working linked-list code and its output, and your two scenario recommendations.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Structure Comparison</strong> into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 14.3 -->
+  <h3 id="section-14-3" class="fw-bold border-bottom pb-2">14.3 Objects, Dictionaries & Searching Fast</h3>
+  <p class="fs-5">Two more structures round out your toolkit: one for bundling related data and behavior together, one for looking things up by name instead of by position.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">14.3.1 Objects</h4>
+  <p>An <strong>object</strong> bundles data together with the procedures (called <strong>methods</strong> when they belong to an object) that act on that data. A <code>car</code> object might hold data like <code>color</code> and <code>speed</code>, plus methods like <code>accelerate()</code> and <code>brake()</code> that operate directly on that same data. This is the same idea as encapsulation from Chapter 11 — the data and the logic that's allowed to touch it travel together as one unit.</p>
+
+  <h4 class="fw-bold mt-5 text-info">14.3.2 Dictionaries (Maps)</h4>
+  <p>An array looks things up by numbered position. A <strong>Dictionary</strong> (or <strong>Map</strong>) looks things up by a meaningful <strong>key</strong> instead — a phonebook keyed by name instead of by an arbitrary row number is dramatically faster to search, because you go straight to the name instead of checking every entry in order.</p>
+
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-search me-2"></i> Binary Search</h5>
+      <p class="mb-0"><strong>Binary search</strong> finds a target value in an already-sorted list by repeatedly checking the middle element and eliminating half the remaining possibilities — exactly like looking up a word in a printed dictionary by flipping to the middle, deciding which half your word is in, and repeating. It's dramatically faster than checking every item one by one, but it only works because the list is sorted first.</p>
+  </div>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
+      <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">Why would a Dictionary (Map) beat a plain Array for a phonebook-style lookup by name? <em class="text-white-50">(Answer: a Dictionary looks values up directly by a meaningful key, instead of checking every element in order like an Array search would.)</em></p>
+  </div>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-book me-4 fa-3x text-primary mt-1"></i>
+          <div class="w-100">
+              <h3 class="fw-bold mb-1">Activity: The Lookup Showdown</h3>
+              <p class="mb-2 fs-5">Compare all three ways of storing the same data.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Build one Object representing something real (a car, a student, a product) with at least three data properties and one method that uses that data.</li>
+                  <li class="mb-1">Store 10 name-to-value pairs (student names to grades, or similar) two ways: once as a plain Array of pairs, once as a Dictionary/Map keyed by name. Write the lookup code for both and time how many steps each takes to find one specific name.</li>
+                  <li class="mb-1">Implement binary search on a sorted array of at least 10 numbers, and trace on paper which middle elements it checks before finding your target.</li>
+                  <li class="mb-0">Explain in 2-3 sentences why binary search wouldn't work correctly on an unsorted list.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your Object with its method, your Array-vs-Dictionary lookup comparison, and your binary search trace with explanation.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Lookup Showdown</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>

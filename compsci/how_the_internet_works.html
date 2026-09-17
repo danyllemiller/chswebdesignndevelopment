@@ -21,6 +21,7 @@
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
       <a href="#section-17-1">17.1 Routers, Switches & Topology</a>
       <a href="#section-17-2">17.2 Scalability & Reliability</a>
+      <a href="#section-17-3">17.3 Addresses, Speed & Redundancy</a>
   </div>
 
   <!-- Section 17.1 -->
@@ -107,6 +108,54 @@
               </ol>
               <p class="mb-0 fw-bold text-danger">Turn In: Your three traceroute results with hop counts, your labeled network diagram, your single-points-of-failure list, and your ten-times-the-users prediction.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load these labs into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 17.3 -->
+  <h3 id="section-17-3" class="fw-bold border-bottom pb-2">17.3 Addresses, Speed & Redundancy</h3>
+  <p class="fs-5">Knowing the devices (17.1) and evaluating the design (17.2) still leaves two questions: how does traffic find the right destination, and how fast does it actually get there?</p>
+
+  <h4 class="fw-bold mt-4 text-primary">17.3.1 IP Address vs. MAC Address</h4>
+  <p>An <strong>IP address</strong> identifies a device's location on a network — it's assigned, and can change (your phone gets a different IP on home Wi-Fi than on cellular data). A <strong>MAC address</strong> is a physical identifier burned into a device's network hardware at the factory — it never changes and uniquely identifies that exact physical piece of hardware, regardless of which network it joins.</p>
+
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-search-location me-2"></i> DNS: The Internet's Phone Book</h5>
+      <p class="mb-0">Typing <code>google.com</code> into a browser doesn't connect you directly — computers only route by IP address, and nobody could memorize those for every site they visit. The <strong>Domain Name System (DNS)</strong> translates the human-readable name into the numeric IP address behind the scenes, then your browser connects to that address.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">17.3.2 Bandwidth & Latency</h4>
+  <p>These two measurements get confused constantly, but they measure different things:</p>
+  <ul>
+      <li><strong>Bandwidth</strong> — how much data can move per second (a fiber connection has far more bandwidth than an old DSL line — think of it as how many lanes a highway has).</li>
+      <li><strong>Latency</strong> — how long a delay there is before data starts arriving at all (a gamer complaining their actions take a noticeable moment to register is describing high latency, not low bandwidth — think of it as how long before the first car reaches the highway's end).</li>
+  </ul>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">A video call has plenty of bandwidth but everyone's voice is noticeably delayed. Is that a bandwidth or a latency problem? <em class="text-white-50">(Answer: latency — the delay before data arrives, separate from how much data the connection can carry per second.)</em></p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-primary">17.3.3 Redundancy & Load</h4>
+  <p><strong>Redundancy</strong> means keeping a backup so a single failure doesn't take everything down — a company keeping a second, backup internet line means operations continue even if the primary connection fails completely. It's the same reliability idea from 17.2, applied specifically to connections rather than network topology.</p>
+  <p>When traffic spikes dramatically — like during a big product launch — a network experiences higher <strong>load</strong>. A well-designed, scalable system (17.2) handles a load spike smoothly; a poorly designed one slows down or fails right when the most people are trying to use it.</p>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-tachometer-alt fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
+              <h3 class="fw-bold mb-1">Activity: The Connection Report Card</h3>
+              <p class="mb-2 fs-5">Test your own real internet connection.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Run a free online speed test and record your actual bandwidth (usually in Mbps) and your latency/ping (usually in ms). Explain, using your real numbers, what each measurement is telling you separately.</li>
+                  <li class="mb-1">Find your device's IP address and, if you can access it, its MAC address (check your device's network settings). Explain in one sentence why the IP could change tomorrow but the MAC wouldn't.</li>
+                  <li class="mb-1">Explain, step by step, what happens between typing a website's name and your browser actually connecting to it — naming DNS's specific role in that sequence.</li>
+                  <li class="mb-0">Describe one real redundancy measure you rely on already (a backup Wi-Fi hotspot on your phone, a second router, a backup power source) and what it protects you from.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your bandwidth/latency results with explanation, your IP-vs-MAC answer, your DNS step-by-step, and your redundancy example.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Connection Report Card</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>
