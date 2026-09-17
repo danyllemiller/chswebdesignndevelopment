@@ -22,6 +22,7 @@
       <a href="#section-8-1">8.1 Anatomy of a Model</a>
       <a href="#section-8-2">8.2 Sensitivity Testing</a>
       <a href="#section-8-3">8.3 Validating Against Reality</a>
+      <a href="#section-8-4">8.4 Simulations & Complex Systems</a>
   </div>
 
   <!-- Section 8.1 -->
@@ -157,6 +158,52 @@
               </ol>
               <p class="mb-0 fw-bold text-danger">Turn In: The real outcome you tested against, your model's prediction, how far off it was, and the specific fix you'd make.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Reality Check</strong> into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 8.4 -->
+  <h3 id="section-8-4" class="fw-bold border-bottom pb-2">8.4 Simulations & Complex Systems</h3>
+  <p class="fs-5">The compound-interest model earlier in this chapter calculates one final answer from a formula. Some real-world systems are too tangled for that — they need something that runs forward through time instead.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">8.4.1 Complex Systems</h4>
+  <p>A system counts as genuinely <strong>complex</strong> when it has many interacting parts whose combined behavior is hard to predict just by looking at each part alone — a wildfire's spread depends on wind, humidity, terrain, and fuel all interacting at once; traffic flow depends on hundreds of individual drivers reacting to each other in real time. You can't just plug numbers into one formula and get a trustworthy answer the way you could for a savings account.</p>
+
+  <h4 class="fw-bold mt-5 text-info">8.4.2 Simulation vs. a Static Model</h4>
+  <p>A static model (like this chapter's compound-interest example) calculates one output from one set of inputs. A <strong>simulation</strong> runs that process forward, often step by step through time or over many repeated trials, to see how a complex system behaves — a meteorologist's storm-tracking software doesn't solve one equation, it simulates the storm's likely path minute by minute based on current conditions and physics.</p>
+
+  <div class="concept-box shadow-sm border-info bg-light">
+      <h5 class="fw-bold text-info"><i class="fas fa-dice me-2"></i> Why Simulations Use Random Numbers</h5>
+      <p class="mb-0">Real-world systems don't behave identically every time — customers don't arrive at a store on a perfect schedule. Simulations often add a <strong>random number generator</strong> to introduce that same realistic variability (e.g. randomizing exactly when each simulated customer arrives), instead of pretending everything happens like clockwork.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-primary">8.4.3 Abstraction: Simplifying on Purpose</h4>
+  <p>A climate model could try to track every single molecule of air on Earth — but that's not practical, and it wouldn't even help. <strong>Abstraction</strong> means deliberately leaving out details that don't matter for the question you're actually asking, so the model stays understandable and runs in a reasonable amount of time. A traffic simulation that ignores each driver's personality and just models speed, spacing, and traffic lights isn't lazy — it's abstracted to the level of detail that traffic flow actually depends on.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">A climate model leaves out the behavior of every individual air molecule. Why is that a reasonable tradeoff instead of a flaw? <em class="text-white-50">(Answer: abstraction — tracking that much detail wouldn't be practical, and the model doesn't need it to answer the question being asked.)</em></p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">8.4.4 Hypotheses: What Simulations Are Really Testing</h4>
+  <p>A <strong>hypothesis</strong> is a specific, testable claim — "if we increase advertising spend by 20%, sales will rise by 5%." A model or simulation is one of the main tools for testing a hypothesis without waiting for the real thing to happen: run the simulation, compare its prediction to what actually occurs, and either the hypothesis holds up or it gets refined based on where the model's output and reality disagreed.</p>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-random fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
+              <h3 class="fw-bold mb-1">Activity: The Complex System Pitch</h3>
+              <p class="mb-2 fs-5">Pick one real complex system: traffic at a busy intersection, the spread of a wildfire, customers arriving at a coffee shop, or one of your own choosing.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Write one specific hypothesis about your system (e.g. "adding a second cash register cuts average wait time by half").</li>
+                  <li class="mb-1">List three real-world factors your system depends on, then name at least one you would deliberately leave out (abstract away) to keep a simulation manageable — and explain why leaving it out wouldn't ruin the result.</li>
+                  <li class="mb-1">Explain specifically where a random number generator would make sense in your simulation, and what real-world unpredictability it would stand in for.</li>
+                  <li class="mb-0">Explain, in your own words, why this system needs a simulation instead of one static formula like the compound-interest example.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your hypothesis, your factors and what you abstracted away, your random-number use case, and your simulation-vs-formula explanation.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Complex System Pitch</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>

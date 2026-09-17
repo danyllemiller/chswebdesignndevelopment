@@ -21,6 +21,7 @@
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
       <a href="#section-6-1">6.1 How Data Gets Organized</a>
       <a href="#section-6-2">6.2 Where Data Lives</a>
+      <a href="#section-6-3">6.3 Bits, Encoding & Compression</a>
   </div>
 
   <!-- Section 6.1 -->
@@ -151,6 +152,71 @@
               </ol>
               <p class="mb-0 fw-bold text-danger">Turn In: Your completed matrix and your two justified recommendations.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Storage Tradeoff Matrix</strong> into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 6.3 -->
+  <h3 id="section-6-3" class="fw-bold border-bottom pb-2">6.3 Bits, Encoding & Compression</h3>
+  <p class="fs-5">Before data can be organized into a table or shipped off to the cloud, it has to exist as something a computer can hold at all. Every file — text, photo, song — eventually comes down to a very long string of 1s and 0s.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">6.3.1 Analog vs. Digital</h4>
+  <p><strong>Analog</strong> data is continuous — a dimmer switch, a vinyl record's groove, a mercury thermometer can sit at literally any value in between. <strong>Digital</strong> data is discrete — it's broken into a fixed set of exact steps, ultimately represented as <strong>bits</strong> (1s and 0s). A digital photo isn't a smooth image; it's a precise grid of individually-numbered pixels.</p>
+
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-font me-2"></i> How a Computer Stores the Letter "A"</h5>
+      <p class="mb-0">Every character you type is stored as a number, using a standard called <strong>ASCII</strong> (or its modern superset, Unicode). The letter "A" is always the number 65. One <strong>byte</strong> (8 bits) can represent 256 distinct values (2<sup>8</sup>) — enough for every letter, digit, and punctuation mark on a standard keyboard, with room to spare.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">6.3.2 Compression: Lossless vs. Lossy</h4>
+  <p>A raw file is often bigger than it needs to be. Compression shrinks it — but not all compression works the same way:</p>
+  <div class="row g-3 my-3">
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-success">
+              <div class="card-body">
+                  <h5 class="fw-bold text-success"><i class="fas fa-check-double me-2"></i> Lossless</h5>
+                  <p class="mb-0 small">Shrinks the file, then rebuilds it back to <em>exactly</em> the original, byte-for-byte, with nothing lost. Used for text documents, code, and spreadsheets — anywhere a single wrong character matters (e.g. a ZIP file).</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-warning">
+              <div class="card-body">
+                  <h5 class="fw-bold text-warning"><i class="fas fa-compress me-2"></i> Lossy</h5>
+                  <p class="mb-0 small">Permanently throws away some detail to shrink the file much further — detail a human usually won't notice. Used for photos and music (e.g. a JPEG or MP3), where a much smaller file is worth a tiny, often-imperceptible quality drop.</p>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
+      <h5 class="fw-bold text-info"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">You compress a report with a lossless algorithm, then later decompress it. What do you get back? <em class="text-white-50">(Answer: the exact original file, with nothing lost.)</em></p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-primary">6.3.3 Metadata & Data Dictionaries</h4>
+  <p><strong>Metadata</strong> is data <em>about</em> data — not the content itself, but information describing it. A photo's metadata might secretly store the date it was taken, the camera model, and the GPS location, none of which show up when you just look at the picture.</p>
+  <p>On a larger scale, a <strong>data dictionary</strong> is a document a database team keeps that explains exactly what every column in a dataset means, its expected format, and its valid values — so anyone new to the project (or a computer program reading it later) knows a column labeled <code>dob</code> is a date of birth in <code>YYYY-MM-DD</code> format, not a guess.</p>
+
+  <h4 class="fw-bold mt-5 text-info">6.3.4 Scalability & Deletion</h4>
+  <p>A storage system is <strong>scalable</strong> if it keeps working smoothly as the amount of data grows — a startup whose user base doubles every month needs a database that can handle that growth without a full redesign each time.</p>
+  <p>And when you delete a file from a standard hard drive, the data isn't actually erased right away — the space is just marked as available to be overwritten later. That's also why "permanently" deleted files can sometimes be recovered, and why sensitive drives need to be securely wiped, not just have files dragged to the trash.</p>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-microchip fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
+              <h3 class="fw-bold mb-1">Activity: The File Autopsy</h3>
+              <p class="mb-2 fs-5">Pick three real files from your own device — one text document, one photo, and one song or video.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">For each file, identify whether its format uses lossless or lossy compression (research the file extension if you're not sure — .docx/.png are lossless, .jpg/.mp3 are typically lossy), and explain in one sentence why that tradeoff makes sense for that type of file.</li>
+                  <li class="mb-1">Right-click your photo file and find its metadata (file properties/details). List three pieces of metadata you find that aren't visible just by looking at the photo.</li>
+                  <li class="mb-0">Write a 3-row data dictionary (Field, Format, Valid Values) for a spreadsheet that tracks: Student Name, Grade Level, and Email Address.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your three files' compression types with justification, your metadata findings, and your data dictionary.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The File Autopsy</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>

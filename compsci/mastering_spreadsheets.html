@@ -19,9 +19,33 @@
 
   <div class="sticky-toc">
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#section-7-0">Why This Matters: Big Data</a>
       <a href="#section-7-1">7.1 Functions & References</a>
       <a href="#section-7-2">7.2 Data Visualisation</a>
-      <a href="#section-7-3">7.3 Interactive Dashboards</a>
+      <a href="#section-7-3">7.3 From Raw Data to a Clear Story</a>
+  </div>
+
+  <!-- Intro: Big Data -->
+  <h3 id="section-7-0" class="fw-bold mt-4 border-bottom pb-2">Why This Matters: Big Data</h3>
+  <p class="fs-5">Fifteen rows of quiz scores is a spreadsheet. A retail chain's fifteen <em>million</em> daily transactions, a hospital network's patient records, or a social media platform's billions of posts a day is something else entirely — that's <strong>Big Data</strong>: extremely large data sets that must be analyzed computationally to reveal patterns, trends, and associations, especially relating to human behavior.</p>
+
+  <p>You can't scroll through fifteen million rows looking for a trend by eye. Every skill in this chapter — a formula that runs once and applies to every row, a chart that answers one clear question, a dashboard that lets someone filter down to just what they need — exists because of Big Data. They're the same tools whether the sheet has 15 rows or 15 million; you're just about to find out why they matter at all.</p>
+
+  <div class="row g-3 my-4 text-center">
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm"><div class="card-body"><h6 class="fw-bold text-primary">Volume</h6><p class="small mb-0">The sheer amount of data — often too much for a human to read, only to compute</p></div></div>
+      </div>
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm"><div class="card-body"><h6 class="fw-bold text-primary">Velocity</h6><p class="small mb-0">How fast new data arrives — a sensor or app can generate new rows every second</p></div></div>
+      </div>
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm"><div class="card-body"><h6 class="fw-bold text-primary">Variety</h6><p class="small mb-0">Numbers, text, images, location, timestamps — rarely just one tidy column type</p></div></div>
+      </div>
+  </div>
+
+  <div class="concept-box shadow-sm border-info bg-light">
+      <h5 class="fw-bold text-info"><i class="fas fa-database me-2"></i> A Real Example</h5>
+      <p class="mb-0">A streaming service doesn't watch you personally decide what to recommend next. It analyzes patterns across millions of viewers' watch histories — computationally, because no team of humans could read that much data — to find "people who watched X also watched Y." That's Big Data analysis producing one small, useful recommendation.</p>
   </div>
 
   <!-- Section 7.1 -->
@@ -127,6 +151,54 @@
               </ol>
               <p class="mb-0 fw-bold text-danger">Turn In: Your three charts (labeled by question type), your misleading-chart find and honest rebuild, your linked dashboard, and what your partner got confused by.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load these labs into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 7.3 -->
+  <h3 id="section-7-3" class="fw-bold border-bottom pb-2">7.3 From Raw Data to a Clear Story</h3>
+  <p class="fs-5">A spreadsheet full of numbers isn't automatically useful. It has to be found, cleaned up, dug through for a real pattern, and finally explained to someone else — and each of those steps has its own name and its own way of going wrong.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">7.3.1 Data Mining & Data Cleaning</h4>
+  <p><strong>Data mining</strong> is the process of digging through a large dataset — software scanning years of sales records — to uncover a pattern no human noticed just by looking. It only works, though, if the data going in is trustworthy, which is why <strong>data cleaning</strong> (or "scrubbing") almost always comes first: removing duplicate entries, fixing missing or inconsistent fields, and throwing out anything obviously broken, before you trust a single number that comes out the other end.</p>
+
+  <div class="concept-box shadow-sm border-danger bg-light">
+      <h5 class="fw-bold text-danger"><i class="fas fa-exclamation-triangle me-2"></i> The Trap: Bias Before You Even Start</h5>
+      <p class="mb-0">A survey about phone habits that's only sent to people over 60 will produce numbers — but they won't represent everyone. This is <strong>bias</strong>: a flaw in how data was collected that skews the results before any analysis even begins. No formula or chart can fix bad data collection after the fact.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">7.3.2 Outliers & Correlation</h4>
+  <p>Once your data is clean, two ideas come up constantly when looking for patterns:</p>
+  <ul>
+      <li><strong>Outlier</strong> — a data point far outside the normal range. In a set of test scores mostly between 70–95, one score of 12 is an outlier. It might be a genuine result worth investigating, or it might be a data-entry error — either way, it's worth a second look before you include it in an average.</li>
+      <li><strong>Correlation</strong> — when two things rise and fall together, without one necessarily causing the other. Ice cream sales and drowning incidents both rise in the summer; ice cream doesn't cause drowning — both are driven by a third factor (hot weather). "Correlation isn't causation" is the single most important sentence in data analysis.</li>
+  </ul>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
+      <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">Two values in a dataset rise and fall together, but one doesn't cause the other. What's this relationship called? <em class="text-white-50">(Answer: a correlation.)</em></p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-primary">7.3.3 Pivot Tables & Communicating a Claim</h4>
+  <p>A <strong>pivot table</strong> lets you instantly reorganize and summarize thousands of rows — totaled by region, by month, by product — without touching or duplicating the original data. It's the fastest way to go from a wall of raw rows to a specific answer.</p>
+  <p>All of this — mining, cleaning, spotting outliers and correlations, pivoting — is in service of one final step: using data to <strong>communicate a clear claim</strong>. That means picking the specific numbers and chart that support the point you're making, and presenting them so someone else reaches the same conclusion you did, on their own, at a glance.</p>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-search-dollar fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
+              <h3 class="fw-bold mb-1">Activity: The Data Detective</h3>
+              <p class="mb-2 fs-5">Using the same spreadsheet you built earlier in this chapter.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Intentionally add three "dirty" rows to a copy of your data (a duplicate row, a missing value, a typo'd number) — then clean them out, and describe what you fixed and why.</li>
+                  <li class="mb-1">Identify (or invent, if your real data doesn't have one) one outlier in your data, and write one sentence on whether you'd keep it, investigate it, or throw it out — and why.</li>
+                  <li class="mb-1">Build one pivot table summarizing your data by a category of your choice (e.g. total or average score per student).</li>
+                  <li class="mb-0">Write one specific claim your data supports (e.g. "students who studied more scored higher"), and pick the single chart from this chapter that proves it most clearly.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your before/after cleaning, your outlier decision, your pivot table, and your claim with its supporting chart.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Data Detective</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>
