@@ -159,19 +159,27 @@ async function checkRetakeClearance(connection, studentId, examId) {
     if (cleared.length > 0) return { ok: true };
 
     // Auto-verify from real saved work before falling back to the manual
-    // "Mark Cleared" gate -- a note, worksheet, or graded Activity from
+    // "Mark Cleared" gate -- a note, worksheet, reflection, or Do Now from
     // ANY chapter in this unit counts (chapter labels are always built as
     // "Unit N - <chapter title>", so a single LIKE match already covers
     // every chapter in the unit without needing CS_UNIT_CHAPTERS here).
-    // Per direction: a completed worksheet/activity also satisfies the
-    // "notes" requirement, not just "worksheets" -- so "notes" accepts
-    // any of the three categories, "worksheets" accepts the two real-work
-    // ones. A LENGTH floor screens out empty/near-empty draft saves
-    // (confirmed live: submitted worksheets run 1900-21000 chars,
+    // 'Activity' was never a real category value in this table (confirmed
+    // live: the actual categories students save under are Notes, Worksheet,
+    // Reflection, and Do Now) -- it silently never matched anything, and
+    // Reflection/Do Now (two of the most common real submission types) were
+    // missing entirely, so this almost never auto-cleared anyone and the
+    // teacher was stuck manually clearing every blocked student by hand
+    // every day. Per direction: any of the four real categories satisfies
+    // the "notes" requirement; "worksheets" (the stricter, 2nd-failure
+    // tier) still excludes bare "Notes" so a repeat failure needs more than
+    // just notes again. A LENGTH floor screens out empty/near-empty draft
+    // saves (confirmed live: submitted worksheets run 1900-21000 chars,
     // unsubmitted drafts run 0-113).
     const unitMatch = /^Unit(\d+)-Exam$/i.exec(examId);
     if (unitMatch) {
-        const categories = requirement === 'notes' ? ['Notes', 'Worksheet', 'Activity'] : ['Worksheet', 'Activity'];
+        const categories = requirement === 'notes'
+            ? ['Notes', 'Worksheet', 'Reflection', 'Do Now']
+            : ['Worksheet', 'Reflection', 'Do Now'];
         const placeholders = categories.map(() => '?').join(',');
         // js/cs-interactive.js builds three different chapter labels for the
         // same unit depending on which tab was open when notes were saved:
