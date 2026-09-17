@@ -21,6 +21,7 @@
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
       <a href="#section-18-1">18.1 Malware Families</a>
       <a href="#section-18-2">18.2 Human Attacks</a>
+      <a href="#section-18-3">18.3 Network Attacks & Real Defenses</a>
   </div>
 
   <!-- Section 18.1 -->
@@ -94,6 +95,57 @@
               </ol>
               <p class="mb-0 fw-bold text-danger">Turn In: Your four documented attack examples, your list of tells from the phishing email, and what you found and fixed in your own account audit.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Threat Log</strong> into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 18.3 -->
+  <h3 id="section-18-3" class="fw-bold border-bottom pb-2">18.3 Network Attacks & Real Defenses</h3>
+  <p class="fs-5">18.1 and 18.2 covered malware and tricking people directly. Some attacks instead target the network connection itself, or brute-force their way past a login with no trickery at all.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">18.3.1 Spear Phishing: Phishing, Aimed</h4>
+  <p>Regular phishing (18.2) blasts the same fake message to thousands of people, hoping a few fall for it. <strong>Spear phishing</strong> is far more dangerous: one personalized message crafted specifically for a single target — like an attacker who researches a company's CFO and sends them a fake message that references real details, making it far more convincing than a generic scam.</p>
+
+  <h4 class="fw-bold mt-5 text-info">18.3.2 Attacking the Connection, Not the Person</h4>
+  <ul class="fs-5">
+      <li class="mb-2"><strong>Man-in-the-Middle (MitM)</strong> — an attacker secretly sits between two people's conversation, reading (or altering) messages neither person realizes are being intercepted.</li>
+      <li class="mb-2"><strong>Botnet</strong> — a network of hijacked, infected computers an attacker controls remotely, often without their real owners ever noticing.</li>
+      <li class="mb-0"><strong>Distributed Denial of Service (DDoS)</strong> — a botnet floods a target's website with junk traffic all at once, so real customers can't get through.</li>
+  </ul>
+
+  <div class="concept-box shadow-sm border-danger bg-light">
+      <h5 class="fw-bold text-danger"><i class="fas fa-wifi me-2"></i> Why Public Wi-Fi Is an Easy Target</h5>
+      <p class="mb-0">Traffic on an unsecured public Wi-Fi network is often unencrypted, which means an attacker on that same network can "sniff" (intercept) it in transit — the exact setup a Man-in-the-Middle attack needs. That coffee-shop Wi-Fi with no password is convenient specifically because nobody's checking who else is listening.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-primary">18.3.3 Brute Force & the Principle of Least Privilege</h4>
+  <p>A <strong>brute force</strong> attack doesn't trick anyone — it's a program systematically trying password after password ("aaaa", "aaab", "aaac"...) until one finally works. It's slow, but it eventually succeeds against a short or simple password, which is exactly why length and complexity matter.</p>
+  <p>The <strong>Principle of Least Privilege</strong> limits the damage even a successful attack can do: give every account access only to what it actually needs for its job, nothing more. A part-time employee only given access to the specific systems their role requires — not the entire company's data — is following this principle.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
+      <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">Why does the Principle of Least Privilege limit damage even after an account is successfully hacked? <em class="text-white-50">(Answer: that account never had access to anything beyond what it actually needed, so a breach can't reach data or systems it was never given permission to touch.)</em></p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">18.3.4 Firewalls & Zero-Days</h4>
+  <p>A <strong>firewall</strong> monitors incoming and outgoing network traffic and blocks anything that doesn't match its security rules — a barrier between a trusted internal network and the open internet. But even a well-defended system can be caught off guard by a <strong>zero-day vulnerability</strong>: a flaw attackers are already actively exploiting before the software's own developer even knows it exists, meaning no official fix exists yet.</p>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-shield-virus fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
+              <h3 class="fw-bold mb-1">Activity: The Network Defense Brief</h3>
+              <p class="mb-2 fs-5">Extend your Threat Log from 18.2 with these network-level threats.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">For three of this section's threats (spear phishing, MitM, botnet/DDoS, or brute force), write one real or realistic scenario showing it in action.</li>
+                  <li class="mb-1">Explain, specifically, why public Wi-Fi with no password makes a Man-in-the-Middle attack easier to pull off.</li>
+                  <li class="mb-1">Describe one real system you use (a school account, a job, an app) and name one piece of access it correctly does NOT give you, following the Principle of Least Privilege.</li>
+                  <li class="mb-0">Research one real, publicly reported zero-day vulnerability and summarize what happened before a fix was available.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your three network-threat scenarios, your public Wi-Fi explanation, your least-privilege example, and your zero-day research.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Network Defense Brief</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>

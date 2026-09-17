@@ -22,6 +22,7 @@
       <a href="#section-5-1">5.1 Bits, Bytes & Binary</a>
       <a href="#section-5-2">5.2 Hexadecimal</a>
       <a href="#section-5-3">5.3 Character Encoding</a>
+      <a href="#section-5-4">5.4 From Bits to a Running Program</a>
   </div>
 
   <!-- Section 5.1 -->
@@ -155,6 +156,59 @@
               </ol>
               <p class="mb-0 fw-bold text-danger">Turn In: Your three RGB conversions (with the color-picker confirmation), your name's full ASCII encoding, and the binary for your first letter.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Encoding Lab</strong> into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 5.4 -->
+  <h3 id="section-5-4" class="fw-bold border-bottom pb-2">5.4 From Bits to a Running Program</h3>
+  <p class="fs-5">5.1-5.3 covered how data gets represented as bits. This section covers the physical hardware that actually reads those bits and makes decisions with them.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">5.4.1 Transistors & Logic Gates</h4>
+  <p>A <strong>transistor</strong> is a microscopic electrical switch — the physical component that makes computer logic possible at all. A modern CPU contains billions of them. Wired together in specific patterns, transistors form <strong>logic gates</strong>, tiny circuits that make true/false decisions based on binary inputs:</p>
+
+  <div class="row g-3 my-3 text-center">
+      <div class="col-6 col-md-3">
+          <div class="card h-100 shadow-sm border-primary"><div class="card-body p-2"><h6 class="fw-bold text-primary mb-1">AND</h6><p class="small mb-0">TRUE only if BOTH inputs are TRUE.</p></div></div>
+      </div>
+      <div class="col-6 col-md-3">
+          <div class="card h-100 shadow-sm border-success"><div class="card-body p-2"><h6 class="fw-bold text-success mb-1">OR</h6><p class="small mb-0">TRUE if AT LEAST ONE input is TRUE.</p></div></div>
+      </div>
+      <div class="col-6 col-md-3">
+          <div class="card h-100 shadow-sm border-warning"><div class="card-body p-2"><h6 class="fw-bold text-warning mb-1">NOT</h6><p class="small mb-0">Flips a single input — 1 becomes 0, 0 becomes 1.</p></div></div>
+      </div>
+      <div class="col-6 col-md-3">
+          <div class="card h-100 shadow-sm border-info"><div class="card-body p-2"><h6 class="fw-bold text-info mb-1">NAND / NOR</h6><p class="small mb-0">The opposite of AND / OR.</p></div></div>
+      </div>
+  </div>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
+      <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">Which logic gate outputs TRUE only if both of its inputs are TRUE? <em class="text-white-50">(Answer: the AND gate.)</em></p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">5.4.2 RAM & Clock Speed</h4>
+  <p>While data is actively being worked on, it's held in <strong>RAM (Random Access Memory)</strong> — short-term memory built for lightning-fast access, wiped clean the moment the power turns off (unlike a hard drive, which keeps data with the power off). How fast the CPU can perform those logical operations is measured by its <strong>clock speed</strong>, given in <strong>Gigahertz (GHz)</strong> — a 3.0 GHz processor completes roughly 3 billion operation "ticks" every single second.</p>
+
+  <h4 class="fw-bold mt-5 text-primary">5.4.3 The Fetch-Decode-Execute Cycle</h4>
+  <p>Billions of times per second, the CPU repeats the same three-step loop on a binary instruction: <strong>Fetch</strong> (retrieve the next instruction from memory), <strong>Decode</strong> (figure out what that instruction actually means), and <strong>Execute</strong> (carry it out using its logic gates). This <strong>Fetch-Decode-Execute cycle</strong> is the fundamental heartbeat underneath every program you've ever run — it's what a clock speed in GHz is actually counting.</p>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-microchip fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
+              <h3 class="fw-bold mb-1">Activity: Build a Logic Circuit</h3>
+              <p class="mb-2 fs-5">Connect the dots between a physical switch and a running program.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">Using an online logic gate simulator (search "logic gate simulator"), build a circuit combining at least an AND gate and a NOT gate, and record every possible combination of inputs and outputs it produces (a truth table).</li>
+                  <li class="mb-1">Look up your own device's CPU clock speed (in GHz) and write one sentence on roughly how many operations per second that translates to.</li>
+                  <li class="mb-1">In your own words, explain what would happen if a CPU could Fetch and Decode an instruction but never actually Execute it.</li>
+                  <li class="mb-0">Explain why RAM gets described as "short-term" memory, and name one real consequence of that when your device loses power unexpectedly.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your logic circuit's truth table, your CPU clock speed research, your Fetch-Decode-Execute explanation, and your RAM answer.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>Build a Logic Circuit</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>

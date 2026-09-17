@@ -25,6 +25,7 @@
       <a href="#section-3-1">3.1 Abstraction & the Six Layers</a>
       <a href="#section-3-2">3.2 Hardware, System Software & Apps</a>
       <a href="#section-3-3">3.3 Systematic Troubleshooting</a>
+      <a href="#section-3-4">3.4 Input, Process, Output</a>
   </div>
 
   <!-- Section 3.1 -->
@@ -222,6 +223,59 @@
               </ol>
               <p class="mb-0 fw-bold text-danger">Turn In: Your six-step work for both faults, plus your one polished, partner-ready troubleshooting guide.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Troubleshooting Guide</strong> into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 3.4 -->
+  <h3 id="section-3-4" class="fw-bold border-bottom pb-2">3.4 Input, Process, Output</h3>
+  <p class="fs-5">Every single thing a computer does, no matter how complex, breaks down into the same three-stage cycle underneath.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">3.4.1 The Three Stages</h4>
+  <div class="row g-3 my-3 text-center">
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm border-primary"><div class="card-body"><h6 class="fw-bold text-primary">Input</h6><p class="small mb-0">Data entering the system — a keypress, a mouse click, a microphone picking up sound.</p></div></div>
+      </div>
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm border-success"><div class="card-body"><h6 class="fw-bold text-success">Process</h6><p class="small mb-0">The CPU (Section 3.2) does something with that data — calculates, decodes, transforms it.</p></div></div>
+      </div>
+      <div class="col-md-4">
+          <div class="card h-100 shadow-sm border-warning"><div class="card-body"><h6 class="fw-bold text-warning">Output</h6><p class="small mb-0">The result reaches you — a monitor, a speaker, a printer.</p></div></div>
+      </div>
+  </div>
+
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-music me-2"></i> Worked Example: Playing a Song</h5>
+      <p class="mb-0"><strong>Input:</strong> you tap play. <strong>Process:</strong> the CPU decodes the compressed audio file into raw sound data. <strong>Output:</strong> the speaker converts that data into sound waves you actually hear. Streaming a video is the exact same three-stage cycle, just with a screen doing the output instead of (or alongside) a speaker.</p>
+  </div>
+
+  <p>Typing on a keyboard is Input. A monitor, a speaker, and a printer are all <strong>Output devices</strong> — anything that presents a result back to a person, as opposed to an <strong>Input device</strong> (keyboard, mouse, microphone) that sends data in.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
+      <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">Which stage of the Input-Process-Output cycle does a monitor represent? <em class="text-white-50">(Answer: Output — it presents a result back to the user.)</em></p>
+  </div>
+
+  <div class="concept-box shadow-sm border-warning bg-light">
+      <h5 class="fw-bold text-dark"><i class="fas fa-tv me-2"></i> Applying 3.3's Troubleshooting: A Blank Monitor</h5>
+      <p class="mb-0">A monitor showing nothing at all is an Output-stage symptom — but that doesn't automatically mean the monitor itself is broken. The single best test that isolates the layer (3.3.2): swap in a different monitor (or plug your monitor into a different computer). If the second monitor also shows nothing on the same computer, the fault is upstream of Output — the computer itself. If a different monitor works fine, the original monitor is the actual problem.</p>
+  </div>
+
+  <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-exchange-alt fa-3x me-4 text-primary mt-1"></i>
+          <div class="w-100">
+              <h3 class="fw-bold mb-1">Activity: The Input-Process-Output Trace</h3>
+              <p class="mb-2 fs-5">Trace three real tasks through the full cycle.</p>
+              <ol class="mb-2 fs-6">
+                  <li class="mb-1">For three different everyday tasks (typing a text message, taking a photo, asking a voice assistant a question), identify the exact Input, Process, and Output for each — name the specific device or component at each stage.</li>
+                  <li class="mb-1">List three real devices you own and sort each one as an Input device, an Output device, or both (like a touchscreen, which is both).</li>
+                  <li class="mb-0">Using the blank-monitor troubleshooting example above as a model, describe how you'd isolate whether a different Output-stage failure (like a speaker producing no sound) is the device itself or something upstream.</li>
+              </ol>
+              <p class="mb-0 fw-bold text-danger">Turn In: Your three traced tasks, your sorted device list, and your speaker-troubleshooting isolation plan.</p>
+              <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>The Input-Process-Output Trace</strong> into your Digital Notebook!</p>
           </div>
       </div>
   </div>
