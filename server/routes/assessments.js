@@ -79,13 +79,24 @@ router.post('/student/submit-turnin', async (req, res) => {
 });
 
 // --- STUDENT PROFILE ---
+// course_id/course_name are included alongside the rest of the profile so
+// js/auth-guard.js can use this same route to refresh a stale cached
+// session after an admin moves a student to a different period -- without
+// these two fields, a refresh would lose the one piece getCourseGroup()
+// actually prefers (course_name), making a "fix" here worse than the stale
+// cache it's replacing. Mirrors the exact join /api/login uses at sign-in.
 router.get('/student/profile', async (req, res) => {
     const { username } = req.query;
     if (!username) return res.status(400).json({ error: 'username is required' });
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(
-            'SELECT student_id, first_name, last_name, section_id, username, role FROM students WHERE username = ?',
+            `SELECT s.student_id, s.first_name, s.last_name, s.section_id, s.username, s.role,
+                    cs.course_id, c.course_name
+             FROM students s
+             LEFT JOIN class_sections cs ON cs.section_id = s.section_id
+             LEFT JOIN courses c ON c.course_id = cs.course_id
+             WHERE s.username = ?`,
             [username.toLowerCase()]
         );
         await connection.release();

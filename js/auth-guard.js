@@ -77,6 +77,36 @@ async function executeAuthCheck() {
         localStorage.removeItem('user');
     }
 
+    // The cached copy of `user` in localStorage is only ever written at
+    // login -- nothing else in the app refreshes it. When an admin moves a
+    // student to a different period, every device that student is already
+    // logged into keeps using the OLD section_id/course_name until they
+    // explicitly log out and back in, since every period-scoped fetch on
+    // every page (polls, wordcloud, timeclock...) reads section_id straight
+    // off this stale cached object. Confirmed live: a student moved from
+    // B4 to A5 kept polling with section_id=B4 for hours after the move,
+    // looking to the teacher like he'd been dropped from the roster.
+    // Re-fetching the real record here, on every protected page load, and
+    // writing the refreshed fields back to localStorage makes the fix
+    // self-healing on the student's very next page load -- no logout, no
+    // admin intervention, no re-report needed.
+    const isTeacherAccount = user && (user.role === 'admin' || user.section_id === 'Teacher');
+    if (user && user.username && !isTeacherAccount) {
+        try {
+            const res = await fetch(`/api/student/profile?username=${encodeURIComponent(user.username)}`);
+            if (res.ok) {
+                const fresh = await res.json();
+                user.section_id = String(fresh.section_id || '').trim();
+                user.studentClass = user.section_id;
+                user.course_id = fresh.course_id || null;
+                user.course_name = fresh.course_name || null;
+                localStorage.setItem('user', JSON.stringify(user));
+            }
+        } catch (e) {
+            console.error('[auth-guard] Could not refresh profile from server, using cached copy:', e);
+        }
+    }
+
     const publicPages = [
         'index.html',
         'contact.html',
