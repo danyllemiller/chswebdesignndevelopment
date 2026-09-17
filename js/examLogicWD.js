@@ -365,6 +365,7 @@ function setupTabLockdown() {
                 );
             } else if (tabSwitchCount >= 2) {
                 examIsActive = false;
+                window.examIsActive = false;
                 showDacAlert(
                     "🚨 SECURITY VIOLATION",
                     "You left the exam screen multiple times. Your exam has been locked and submitted automatically."
@@ -602,6 +603,7 @@ window.lockdownIframe = function(iframe) {
 
 function startExam() {
     examIsActive = true;
+    window.examIsActive = true; // read by js/student/timeclock.js's checkAutoPopup, so the clock-out reminder defers instead of covering an active test
 
     if (!document.getElementById('exam-lockdown-css')) {
         const lockdownStyle = document.createElement('style');
@@ -1082,6 +1084,7 @@ async function downloadPDFReport(event) {
 
 async function processSubmission() {
     examIsActive = false;
+    window.examIsActive = false;
 
     const lockdownStyle = document.getElementById('exam-lockdown-css');
     if (lockdownStyle) lockdownStyle.remove();

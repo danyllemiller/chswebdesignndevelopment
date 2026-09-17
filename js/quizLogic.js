@@ -339,6 +339,7 @@ async function checkResume() {
 
 function startPreTest() {
     examIsActive = true;
+    window.examIsActive = true; // read by js/student/timeclock.js's checkAutoPopup, so the clock-out reminder defers instead of covering an active test
     document.getElementById('exam-container').innerHTML = `<div id="quiz-pane"></div>`;
     renderQuestion();
 }
@@ -506,6 +507,7 @@ examQuestions.forEach((q, i) => {
 
 async function processResults() {
     examIsActive = false;
+    window.examIsActive = false;
     const container = document.getElementById('exam-container');
     container.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div><h3 class="mt-4 text-primary">Grading & Submitting...</h3></div>`;
 

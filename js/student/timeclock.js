@@ -321,6 +321,18 @@ async function openTimeclockModal() {
 // actually responded) than not at all. The once-per-day flag still
 // prevents it from repeating once shown.
 function checkAutoPopup() {
+    // A prior fix stopped the auto-popup's visibilitychange from being
+    // miscounted as a tab-switch violation (window.__timeclockModalOpen,
+    // checked in examLogicWD.js/examLogicCS.js's setupTabLockdown) -- but
+    // that only protected the SCORE. The popup still visually covered an
+    // active test, which is disruptive on its own and is what actually
+    // reads as "getting kicked out of the test" to a student, regardless
+    // of whether anything ended up counted against them. Skipping the
+    // popup entirely while a test is active defers it instead: the once-
+    // per-day sessionStorage flag below is only set once this function
+    // actually proceeds, so the very next 60s recheck after the student
+    // submits picks the reminder back up rather than losing it for the day.
+    if (window.examIsActive) return;
     if (!bellWindow || !window.timeclock || !studentData) return;
     const now = Date.now();
     const mode = window.timeclock.currentMode;
