@@ -578,10 +578,13 @@ async function ensureResumeColumns(connection) {
 // the repo root, which server.js's catch-all express.static('/', ...)
 // already serves -- no new static mount needed.
 const RESUMES_ROOT = path.join(__dirname, '../../uploads/resumes');
+// student_id rides in a path segment via path.join, which normalizes ".."
+// segments -- an unvalidated sid could write outside RESUMES_ROOT entirely.
+const isSafeStudentId = (sid) => typeof sid === 'string' && /^[a-zA-Z0-9_-]+$/.test(sid);
 const resumeStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         const sid = req.query.student_id;
-        if (!sid) return cb(new Error('student_id required'));
+        if (!isSafeStudentId(sid)) return cb(new Error('Invalid student_id'));
         const dir = path.join(RESUMES_ROOT, `user_${sid}`);
         fs.mkdirSync(dir, { recursive: true });
         cb(null, dir);

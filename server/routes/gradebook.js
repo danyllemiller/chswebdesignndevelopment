@@ -222,6 +222,20 @@ const TEST_EXAM_ID_PATTERN = /-Exam$|-Pre$|-Pre-Score$|Pre-Assessment/i;
 router.post('/submit-exam', async (req, res) => {
     const { student_id, exam_id, score, total_points, title, course_id } = req.body;
 
+    // This endpoint had no identity check at all -- any request naming any
+    // student_id could write any score for any exam, no login required.
+    // The real exam engines (examLogicWD.js/examLogicCS.js) only ever submit
+    // the logged-in student's own id, so requiring the session to match
+    // costs nothing legitimate; teacher-entered grades go through the
+    // separate /admin/save-grade endpoint, not this one, so an admin/teacher
+    // session is also allowed through for any student_id.
+    const sessionUser = req.session?.user;
+    const isSelf = sessionUser?.student_id && String(sessionUser.student_id) === String(student_id);
+    const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
+    if (!isSelf && !isStaff) {
+        return res.status(401).json({ error: 'Not authorized.' });
+    }
+
     // Env-var gated so this can be flipped on/off per-server (e.g. only on
     // the droplet while it's standing in during a home-server outage)
     // without a code change or redeploy -- see OUTAGE-RUNBOOK.md.

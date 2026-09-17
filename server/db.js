@@ -1,10 +1,15 @@
 // server/db.js
+require('dotenv').config();
 const mysql = require('mysql2/promise');
+
+if (!process.env.DB_PASSWORD) {
+    throw new Error('DB_PASSWORD is not set -- add it to .env before starting the server.');
+}
 
 const dbConfig = {
     host: 'localhost',
     user: 'root',
-    password: 'chs_password',
+    password: process.env.DB_PASSWORD,
     database: 'chs_gradebook'
 };
 

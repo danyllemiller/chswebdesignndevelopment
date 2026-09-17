@@ -8,10 +8,16 @@ const fs = require('fs');
 // ── User sticker upload ───────────────────────────────────────────────────────
 const STICKERS_ROOT = path.join(__dirname, '../../images/stickers');
 
+// student_id rides in a path segment (`user_${sid}`) via path.join, which
+// normalizes ".." segments -- an unvalidated sid like "../../../../etc"
+// could write outside STICKERS_ROOT entirely. Same shape of bug the resume
+// upload below doesn't have (its student_id gets the same check).
+const isSafeStudentId = (sid) => typeof sid === 'string' && /^[a-zA-Z0-9_-]+$/.test(sid);
+
 const stickerStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         const sid = req.query.student_id;
-        if (!sid) return cb(new Error('student_id required'));
+        if (!isSafeStudentId(sid)) return cb(new Error('Invalid student_id'));
         const dir = path.join(STICKERS_ROOT, `user_${sid}`);
         fs.mkdirSync(dir, { recursive: true });
         cb(null, dir);
@@ -28,7 +34,10 @@ const stickerUpload = multer({
     storage: stickerStorage,
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        const ok = /\.(png|jpe?g|gif|webp|svg)$/i.test(path.extname(file.originalname));
+        // SVG dropped from the allowlist -- an SVG can carry <script>, and a
+        // viewer opening one directly (e.g. a link shared through messaging)
+        // would run it same-origin. png/jpg/gif/webp can't execute script.
+        const ok = /\.(png|jpe?g|gif|webp)$/i.test(path.extname(file.originalname));
         cb(null, ok);
     }
 });
@@ -36,7 +45,7 @@ const stickerUpload = multer({
 // GET  /api/intervention/stickers?student_id=xxx  — list uploaded stickers
 router.get('/intervention/stickers', (req, res) => {
     const { student_id } = req.query;
-    if (!student_id) return res.status(400).json({ error: 'student_id required' });
+    if (!isSafeStudentId(student_id)) return res.status(400).json({ error: 'Invalid student_id' });
     const dir = path.join(STICKERS_ROOT, `user_${student_id}`);
     if (!fs.existsSync(dir)) return res.json({ stickers: [] });
     try {

@@ -35,6 +35,28 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
+// The root static mount below (`app.use('/', express.static(...))`) serves
+// the entire repo by design -- every top-level HTML page, and folders like
+// exams/, student/, interactives/ all depend on that being broad. But it
+// was ALSO happily serving server/db.js, server/server.js (both with the
+// live DB password and session secret hardcoded in plaintext), memory/*.md,
+// readme-files/*, and this repo's own .git history to anyone on the
+// internet with no auth -- confirmed live via a plain curl. Express only
+// excludes dotfiles by default; it has no concept of "this folder is
+// backend source, not a public asset." Denylist the specific paths that
+// were never meant to be public, checked before any static handler runs.
+const BLOCKED_STATIC_PREFIXES = [
+    '/server', '/memory', '/readme-files', '/.git', '/.claude',
+    '/node_modules', '/migrations', '/_screenshot-helpers', '/tests'
+];
+app.use((req, res, next) => {
+    const p = req.path.toLowerCase();
+    if (p.endsWith('/.env') || p === '/.env' || BLOCKED_STATIC_PREFIXES.some(prefix => p === prefix || p.startsWith(prefix + '/'))) {
+        return res.status(404).end();
+    }
+    next();
+});
+
 // Previously had no `store` set, which silently defaults express-session
 // to its built-in MemoryStore -- an in-process object that's entirely
 // wiped on every restart. Express-session's own docs call MemoryStore
@@ -58,10 +80,14 @@ app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 // expiring rather than lasting forever.
 const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
+if (!process.env.DB_PASSWORD || !process.env.SESSION_SECRET) {
+    throw new Error('DB_PASSWORD and SESSION_SECRET must be set in .env before starting the server.');
+}
+
 const sessionStore = new MySQLStore({
     host: 'localhost',
     user: 'root',
-    password: 'chs_password',
+    password: process.env.DB_PASSWORD,
     database: 'chs_gradebook',
     // Table is auto-created on first run if missing; explicit here so
     // it's easy to find (`SELECT * FROM sessions`) rather than guessing
@@ -71,11 +97,17 @@ const sessionStore = new MySQLStore({
 });
 
 app.use(session({
-    secret: 'secure-session-key-12345',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
-    cookie: { maxAge: SESSION_MAX_AGE_MS }
+    // `secure: true` is deliberately NOT set here -- it depends on nginx
+    // correctly forwarding X-Forwarded-Proto for `trust proxy` to see the
+    // request as HTTPS, which hasn't been verified, and getting it wrong
+    // would silently break every login site-wide (the cookie would never
+    // get set at all). sameSite is safe to add unconditionally -- it's a
+    // browser-side default that doesn't depend on the proxy chain.
+    cookie: { maxAge: SESSION_MAX_AGE_MS, sameSite: 'lax' }
 }));
 
 // Route Mapping - API routes must come before static routes
