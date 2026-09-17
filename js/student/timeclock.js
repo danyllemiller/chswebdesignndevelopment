@@ -557,7 +557,11 @@ async function handleTimeclockSubmit(e) {
         // genuinely separate, anonymous submission (see submitPulseStep) --
         // the clock-out itself has already fully succeeded by this point
         // either way, so a skipped or failed pulse never blocks it.
-        if (mode === 'out') { showPulseStep(); return; }
+        // "Weekly" means Thursday/Friday only, not every single clock-out --
+        // same plain getDay() idiom already used for day gating elsewhere
+        // (server/routes/timeclock.js, server/helpers.js's testing-window check).
+        const dow = new Date().getDay(); // 0=Sun..6=Sat
+        if (mode === 'out' && (dow === 4 || dow === 5)) { showPulseStep(); return; }
         location.reload();
     } catch (e) { console.error("Timeclock submit error:", e); logTimeclockError('handleTimeclockSubmit', e); }
 }
