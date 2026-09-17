@@ -245,6 +245,15 @@ router.post('/reset-password', async (req, res) => {
 });
 
 router.post('/admin/reset-password-default', async (req, res) => {
+    // This route lives in auth.js, mounted separately from api.js's
+    // /admin/* session gate -- it had no auth check of its own at all, so
+    // any anonymous caller could reset any student's password to their own
+    // student_id (which is already treated as non-secret everywhere else
+    // in the app). Requiring a staff session here closes that.
+    const sessionUser = req.session?.user;
+    const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
+    if (!isStaff) return res.status(401).json({ error: 'Not authorized.' });
+
     const { student_id, default_password } = req.body;
 
     if (!student_id) {
