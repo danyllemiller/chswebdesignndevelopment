@@ -1162,7 +1162,8 @@ function isAssignmentVisible(name, period) {
         '05254G1S': 'WD1',
         '05254G2S': 'WD2',
         '10003GS': 'CS',
-        '05254ES': 'AS',
+        '05254ES': 'AS',       // last year's archived AS course code
+        '05254EF-201': 'AS',   // this year's real AS-B2 course code
         '99999999': 'Teacher'
     };
     
@@ -1914,7 +1915,7 @@ document.addEventListener('click', (e) => {
         // silently fell through to the dbCourseMap[''] fallback in
         // saveColEdit() and reassigned the assignment to the wrong course.
         const rawTarget = allAssignments[key]?.targetCourse;
-        const courseCodeMap = { '05254G1S': 'WD1', '05254G2S': 'WD2', '10003GS': 'CS', '05254ES': 'AS' };
+        const courseCodeMap = { '05254G1S': 'WD1', '05254G2S': 'WD2', '10003GS': 'CS', '05254ES': 'AS', '05254EF-201': 'AS' };
         document.getElementById('editColCourse').value = courseCodeMap[rawTarget] || rawTarget || 'All';
         renderPeriodDateInputs('editColPeriodDates', allAssignments[key]?.periodDueDates || {}, 'primary');
         getModal('editColModal').show();
@@ -2050,7 +2051,7 @@ async function saveAddCol() {
         'WD1': '05254G1S',
         'WD2': '05254G2S',
         'CS':  '10003GS',
-        'AS':  '05254ES',
+        'AS':  '05254EF-201',
         'All': '05254G1S'
     };
     const dbCourseId = dbCourseMap[course] || '05254G1S';
@@ -2085,7 +2086,7 @@ async function saveColEdit() {
         'WD1': '05254G1S',
         'WD2': '05254G2S',
         'CS':  '10003GS',
-        'AS':  '05254ES',
+        'AS':  '05254EF-201',
         'All': '05254G1S'
     };
     const dbCourseId = dbCourseMap[course] || '05254G1S';

@@ -15,7 +15,7 @@ const COURSE_WEIGHTS = {
     INTV: { assignment: 1.00, project_quiz: 0.00, final: 0.00, career: 0.00 }
 };
 
-const COURSE_MAP = { '05254G1S': 'WD1', '05254G2S': 'WD2', '10003GS': 'CS', '05254ES': 'AS', '99999999': 'Teacher' };
+const COURSE_MAP = { '05254G1S': 'WD1', '05254G2S': 'WD2', '10003GS': 'CS', '05254ES': 'AS', '05254EF-201': 'AS', '99999999': 'Teacher' };
 const COURSE_LABELS = { WD1: 'Web Design 1', WD2: 'Web Design 2', AS: 'Advanced Studies', CS: 'Computer Science', INTV: 'Intervention' };
 
 // Matches data/cs-course-map.json -- which chapters' classwork

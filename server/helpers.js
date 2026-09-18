@@ -10,7 +10,7 @@ function normalizeCourseCodeLegacy(sectionId = '') {
     const s = String(sectionId).toUpperCase();
     if (s.startsWith('WD1')) return '05254G1S';
     if (s.startsWith('WD2')) return '05254G2S';
-    if (s.startsWith('AS'))  return '05254ES';
+    if (s.startsWith('AS'))  return '05254EF-201';
     if (s.startsWith('CS'))  return '10003GS';
     return null;
 }
