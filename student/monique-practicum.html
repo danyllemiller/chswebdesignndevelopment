@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Image Practicum | CHS Web Design &amp; Development</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet" />
+  <link href="/css/student-pages.css" rel="stylesheet" />
+
+  <style>
+    body.practicum-body{
+      --bg:#f5f3ee; --surface:#ffffff; --surface-2:#eeece4; --ink:#20241f; --ink-soft:#565b52;
+      --line:#dcd8cb; --accent:#2f6b4f; --accent-soft:#e4efe8; --warn:#a2461c; --warn-soft:#f5e6dc;
+      --done:#4c7a5c; --shadow: 0 1px 2px rgba(32,36,31,.06), 0 6px 16px rgba(32,36,31,.05);
+      background:var(--bg); color:var(--ink); font-family:'Inter',ui-sans-serif,system-ui,sans-serif;
+    }
+    .practicum-wrap{max-width:920px;margin:0 auto;padding:2rem 1.25rem 5rem;}
+    .practicum-wrap header.hero{border-bottom:1px solid var(--line);padding-bottom:1.5rem;margin-bottom:1.75rem;}
+    .practicum-wrap .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+    .practicum-wrap h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.7rem,4vw,2.3rem);margin:.4rem 0 .5rem;font-weight:700;letter-spacing:-.01em;}
+    .practicum-wrap .hero p{color:var(--ink-soft);font-size:1rem;max-width:62ch;line-height:1.6;margin:0;}
+    .practicum-wrap nav.toc{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.1rem;}
+    .practicum-wrap nav.toc a{font-family:'IBM Plex Mono',monospace;font-size:.76rem;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);padding:.35rem .65rem;border-radius:6px;text-decoration:none;}
+    .practicum-wrap nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+    .practicum-wrap section{margin-bottom:2.5rem;}
+    .practicum-wrap h2{font-family:'Space Grotesk',sans-serif;font-size:1.28rem;font-weight:700;margin:0 0 .3rem;display:flex;align-items:baseline;gap:.55rem;}
+    .practicum-wrap h2 .num{font-family:'IBM Plex Mono',monospace;font-size:.82rem;color:var(--accent);font-weight:600;}
+    .practicum-wrap .section-sub{color:var(--ink-soft);font-size:.9rem;margin:0 0 1rem;max-width:65ch;line-height:1.55;}
+    .practicum-wrap .task{background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:1.05rem 1.2rem;margin-bottom:.8rem;}
+    .practicum-wrap .task-head{display:flex;align-items:flex-start;gap:.7rem;}
+    .practicum-wrap .task-check{flex:0 0 auto;width:22px;height:22px;border-radius:6px;border:2px solid var(--line);margin-top:.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--surface);transition:background .15s, border-color .15s;}
+    .practicum-wrap .task-check svg{opacity:0;width:13px;height:13px;stroke:white;transition:opacity .1s;}
+    .practicum-wrap .task-check.checking{opacity:.5;pointer-events:none;}
+    .practicum-wrap .task.done .task-check{background:var(--done);border-color:var(--done);}
+    .practicum-wrap .task.done .task-check svg{opacity:1;}
+    .practicum-wrap .task.done .task-title{color:var(--ink-soft);text-decoration:line-through;text-decoration-color:var(--line);}
+    .practicum-wrap .task-body{flex:1;min-width:0;}
+    .practicum-wrap .task-title{font-weight:600;font-size:.98rem;margin:0 0 .3rem;}
+    .practicum-wrap .task-desc{color:var(--ink-soft);font-size:.88rem;line-height:1.55;margin:0 0 .5rem;}
+    .practicum-wrap .task-note{font-size:.8rem;font-family:'IBM Plex Mono',monospace;color:var(--warn);margin:.3rem 0 0;}
+    .practicum-wrap .tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.03em;padding:.15rem .5rem;border-radius:20px;font-weight:600;margin-right:.4rem;}
+    .practicum-wrap .tag.missing{background:var(--warn-soft);color:var(--warn);}
+    .practicum-wrap .tag.sort{background:var(--accent-soft);color:var(--accent);}
+    .practicum-wrap .tag.quick{background:var(--surface-2);color:var(--ink-soft);}
+    .practicum-wrap .tag.pts{background:var(--accent-soft);color:var(--accent);}
+    .practicum-wrap code, .practicum-wrap .path{font-family:'IBM Plex Mono',monospace;font-size:.85em;background:var(--surface-2);padding:.1em .4em;border-radius:4px;color:var(--ink);}
+    .practicum-wrap table.sched{width:100%;border-collapse:collapse;font-size:.88rem;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);}
+    .practicum-wrap table.sched th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);background:var(--surface-2);padding:.55rem .85rem;border-bottom:1px solid var(--line);}
+    .practicum-wrap table.sched td{padding:.6rem .85rem;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
+    .practicum-wrap table.sched tr:last-child td{border-bottom:none;}
+    .practicum-wrap .cat-pill{font-family:'IBM Plex Mono',monospace;font-size:.66rem;padding:.15rem .5rem;border-radius:20px;font-weight:600;}
+    .practicum-wrap .cat-pill.checkin{background:var(--surface-2);color:var(--ink-soft);}
+    .practicum-wrap .cat-pill.project{background:var(--accent-soft);color:var(--accent);}
+    .practicum-wrap ol.steps{counter-reset:step;list-style:none;margin:0;padding:0;}
+    .practicum-wrap ol.steps li{counter-increment:step;position:relative;padding:0 0 1.2rem 2.5rem;margin:0;border-left:2px solid var(--line);margin-left:.9rem;}
+    .practicum-wrap ol.steps li:last-child{border-left-color:transparent;padding-bottom:0;}
+    .practicum-wrap ol.steps li::before{content:counter(step);position:absolute;left:-1.15rem;top:-.1rem;width:2.05rem;height:2.05rem;background:var(--accent);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.92rem;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+    .practicum-wrap .step-title{font-weight:600;margin:0 0 .25rem;font-size:.95rem;}
+    .practicum-wrap .step-body{color:var(--ink-soft);font-size:.88rem;line-height:1.6;margin:0;}
+    .practicum-wrap .step-body + .step-body{margin-top:.4rem;}
+    .practicum-wrap .callout{background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:.85rem 1.05rem;font-size:.86rem;color:var(--ink);line-height:1.55;margin-top:1.1rem;}
+    .practicum-wrap .callout strong{color:var(--accent);}
+    .practicum-wrap .callout.muted{background:var(--surface-2);border-color:var(--line);}
+  </style>
+</head>
+<body class="bg-white practicum-body">
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div id="practicum-gate" style="display:none;">
+    <div class="practicum-wrap">
+      <div class="callout" style="margin-top:2rem;">
+        <strong>Not available.</strong> This page is only for Monique and staff.
+      </div>
+    </div>
+  </div>
+
+  <div id="practicum-content" style="display:none;">
+    <div class="practicum-wrap">
+      <header class="hero">
+        <div class="eyebrow">CHS Web Design &amp; Development &middot; AS Practicum</div>
+        <h1>Monique's Image Practicum</h1>
+        <p>You're running site maintenance the way a junior dev handles it at a real agency: find what's broken, fix or replace it, document what you did. Check a task off once it's actually live — this page re-checks the real site before it counts, and your score updates automatically.</p>
+        <nav class="toc">
+          <a href="#punchlist">Punch List</a>
+          <a href="#howto">How-To</a>
+          <a href="#schedule">Your Schedule</a>
+          <a href="#ongoing">Ongoing Checklist</a>
+        </nav>
+      </header>
+
+      <section id="punchlist">
+        <h2><span class="num">01</span> Punch List — found this week</h2>
+        <p class="section-sub">Each of these is auto-graded. Check the box once it's really fixed on the live site — if it's not actually fixed yet, the box won't stay checked.</p>
+
+        <div class="task" data-task-id="ch4-broken">
+          <div class="task-head">
+            <div class="task-check" data-graded="1"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="task-body">
+              <span class="tag missing">Missing</span><span class="tag pts">10 pts</span>
+              <p class="task-title">3 broken images on Chapter 4 — "The Why: Intro to UI/UX"</p>
+              <p class="task-desc">
+                The page <span class="path">year1/the-why-intro-to-uiux.html</span> points at three files that no longer exist:
+              </p>
+              <p class="task-desc" style="margin-top:-.3rem;">
+                &bull; <span class="path">elementsofart.png</span> — the Elements of Design chart<br>
+                &bull; <span class="path">principlesofdesign.png</span> — the Principles of Design chart<br>
+                &bull; <span class="path">useability.png</span> — the bad-vs-good usability comparison
+              </p>
+              <p class="task-desc">Restore working versions of each, or design replacements covering the same terms — see the How-To section for the image spec.</p>
+              <p class="task-note" data-status-note></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="task" data-task-id="sort-orphans">
+          <div class="task-head">
+            <div class="task-check" data-graded="1"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="task-body">
+              <span class="tag sort">Needs sorting</span><span class="tag pts">10 pts</span>
+              <p class="task-title">7 images sitting in the wrong chapter folder, unused</p>
+              <p class="task-desc">
+                These 7 files are in <span class="path">images/the-why-intro-to-uiux/</span> (Chapter 4's folder) but don't match Chapter 4's topic:
+              </p>
+              <p class="task-desc" style="margin-top:-.3rem;">
+                &bull; <span class="path">wordpress-dashboard.png</span>, <span class="path">wordpress-mockup.png</span>, <span class="path">wordpress-coffehouse.png</span>, <span class="path">wpforms.png</span> → likely <strong>Chapter 12, "The Manager"</strong><br>
+                &bull; <span class="path">server-farm.png</span> → likely <strong>Chapter 11, "The Cloud"</strong><br>
+                &bull; <span class="path">google-lighthouse.png</span> → likely <strong>Chapter 16, "The Launch"</strong><br>
+                &bull; <span class="path">video-game-mockop.png</span> → likely <strong>Chapter 10, "The Game Dev"</strong>
+              </p>
+              <p class="task-desc">Move each file into <span class="path">images/&lt;that-chapter's-folder-name&gt;/</span> and add an <span class="path">&lt;img&gt;</span> tag where it actually illustrates something on the page.</p>
+              <p class="task-note" data-status-note></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="task" data-task-id="favicons">
+          <div class="task-head">
+            <div class="task-check" data-graded="1"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="task-body">
+              <span class="tag quick">Quick fix</span><span class="tag pts">10 pts</span>
+              <p class="task-title">3 broken favicon references</p>
+              <p class="task-desc">
+                &bull; <span class="path">notices.html</span> asks for <span class="path">favicon-16x16.png</span> and <span class="path">favicon-32x32.png</span> — neither exists.<br>
+                &bull; <span class="path">pre-assessments/workplace-readiness-skills.html</span> (and its <span class="path">-b</span>/<span class="path">-c</span>/<span class="path">-d</span>/<span class="path">wsd-unit-1.html</span> siblings) ask for <span class="path">favicon-512x512.png</span>.
+              </p>
+              <p class="task-desc">Either add the missing-named files under <span class="path">images/favicon/</span>, or edit each page's <span class="path">&lt;link rel="icon"&gt;</span> tag to point at a file that already exists.</p>
+              <p class="task-note" data-status-note></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="howto">
+        <h2><span class="num">02</span> How-To — for anything not covered in a chapter</h2>
+        <p class="section-sub">None of this is taught directly in your coursework, so here's the actual workflow.</p>
+        <ol class="steps">
+          <li>
+            <p class="step-title">Find what's actually broken</p>
+            <p class="step-body">Open the page and look for the broken-image icon. For a full sweep: right-click → <strong>Inspect</strong> → <strong>Network</strong> tab → reload → filter by <strong>Img</strong>. Anything red with status <code>404</code> is missing.</p>
+            <p class="step-body">Right-click the broken icon → <strong>Inspect</strong> — the <code>src="..."</code> is the exact path the page expects.</p>
+          </li>
+          <li>
+            <p class="step-title">Match the image to real chapter content</p>
+            <p class="step-body">Read the surrounding text before making or choosing a replacement. The <code>alt="..."</code> text on a broken <code>&lt;img&gt;</code> usually describes exactly what the original showed.</p>
+          </li>
+          <li>
+            <p class="step-title">Build or source the replacement</p>
+            <p class="step-body">PNG, roughly <strong>1200–1600px wide</strong>, compressed before upload — a multi-MB PNG slows the page down for every student. <a href="https://tinypng.com" target="_blank" rel="noopener">TinyPNG</a> or Adobe Express both work.</p>
+          </li>
+          <li>
+            <p class="step-title">Name and place the file correctly</p>
+            <p class="step-body">Every chapter has its own folder under <code>images/</code>, named after that chapter's page. Lowercase, hyphenated filenames — no spaces, no capitals.</p>
+          </li>
+          <li>
+            <p class="step-title">Hand off for deployment</p>
+            <p class="step-body">You don't have direct publish access yet, so package each fix as: chapter/page, old filename (if any), new file, and exactly where it goes. Give that to Ms. Miller — that packaged handoff is what your check-in grades on.</p>
+          </li>
+        </ol>
+        <div class="callout">
+          <strong>Why this matters:</strong> this is the real workflow a junior developer follows on a team — documenting exactly what changed, in a form someone else can act on without guessing, is being graded here as much as the image work itself.
+        </div>
+      </section>
+
+      <section id="schedule">
+        <h2><span class="num">03</span> Your Schedule</h2>
+        <p class="section-sub">Weekly check-ins are a short written update; project reviews roll up the two weeks before. Both are graded manually by Ms. Miller.</p>
+        <table class="sched">
+          <thead><tr><th>Due</th><th>Item</th><th>Type</th><th>Points</th></tr></thead>
+          <tbody>
+            <tr><td>Wed, Sep 23</td><td>Weekly Check-In: Site Image Audit</td><td><span class="cat-pill checkin">check-in</span></td><td>10 pts</td></tr>
+            <tr><td>Wed, Sep 30</td><td>Weekly Check-In: Site Image Audit</td><td><span class="cat-pill checkin">check-in</span></td><td>10 pts</td></tr>
+            <tr><td>Wed, Sep 30</td><td>Project Review: Image Fixes (2-Week)</td><td><span class="cat-pill project">project</span></td><td>25 pts</td></tr>
+            <tr><td>Wed, Oct 7</td><td>Weekly Check-In: Site Image Audit</td><td><span class="cat-pill checkin">check-in</span></td><td>10 pts</td></tr>
+            <tr><td>Fri, Oct 16</td><td>Weekly Check-In: Site Image Audit</td><td><span class="cat-pill checkin">check-in</span></td><td>10 pts</td></tr>
+            <tr><td>Fri, Oct 16</td><td>Project Review: Image Fixes (2-Week)</td><td><span class="cat-pill project">project</span></td><td>25 pts</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="ongoing">
+        <h2><span class="num">04</span> Ongoing Checklist — reuse this every week</h2>
+        <p class="section-sub">Personal tracking only — these are recurring habits, not one-time deliverables, so they're not auto-graded. Your check-in write-up is what gets scored.</p>
+        <div class="task" data-task-id="ongoing-broken"><div class="task-head"><div class="task-check" data-graded="0"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="task-body"><p class="task-title">Sweep 2–3 chapters for broken images (Network tab method above)</p></div></div></div>
+        <div class="task" data-task-id="ongoing-quality"><div class="task-head"><div class="task-check" data-graded="0"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="task-body"><p class="task-title">Check for stretched, blurry, or oversized images and flag/replace them</p></div></div></div>
+        <div class="task" data-task-id="ongoing-alt"><div class="task-head"><div class="task-check" data-graded="0"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="task-body"><p class="task-title">Confirm every image has real <code>alt</code> text (not blank, not the filename)</p></div></div></div>
+        <div class="task" data-task-id="ongoing-orphan"><div class="task-head"><div class="task-check" data-graded="0"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="task-body"><p class="task-title">Note any other orphaned/misplaced files you find along the way</p></div></div></div>
+        <div class="callout muted">Checklist state for this section saves locally in your browser only.</div>
+      </section>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+  <script src="/js/loader.js?v=20"></script>
+  <script type="module">
+    import { getLoggedInUser } from '/js/modules/user-session.js';
+
+    const MONIQUE_STUDENT_ID = '8009627';
+
+    function isAuthorized(user) {
+        if (!user) return false;
+        return user.student_id === MONIQUE_STUDENT_ID || user.role === 'admin' || user.section_id === 'Teacher';
+    }
+
+    async function init() {
+        const user = getLoggedInUser();
+        if (!isAuthorized(user)) {
+            document.getElementById('practicum-gate').style.display = '';
+            return;
+        }
+        document.getElementById('practicum-content').style.display = '';
+
+        // Real completion state comes from the server, not the checkbox's
+        // own click history -- a client-side "done" flag proves nothing.
+        let status = {};
+        try {
+            const res = await fetch('/api/practicum/status');
+            if (res.ok) { ({ status } = await res.json()); }
+        } catch (e) { console.error('Failed to load practicum status', e); }
+
+        document.querySelectorAll('.task[data-task-id]').forEach(task => {
+            const taskId = task.dataset.taskId;
+            const check = task.querySelector('.task-check');
+            const isGraded = check.dataset.graded === '1';
+
+            if (isGraded) {
+                if (status[taskId]) task.classList.add('done');
+                check.addEventListener('click', async () => {
+                    if (task.classList.contains('done') || check.classList.contains('checking')) return;
+                    check.classList.add('checking');
+                    const note = task.querySelector('[data-status-note]');
+                    try {
+                        const res = await fetch('/api/practicum/complete-task', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ task_id: taskId })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            task.classList.add('done');
+                            if (note) note.textContent = '';
+                        } else if (note) {
+                            note.textContent = "Not verified yet -- this doesn't look fixed on the live site yet.";
+                        }
+                    } catch (e) {
+                        if (note) note.textContent = 'Could not check right now -- try again in a moment.';
+                    } finally {
+                        check.classList.remove('checking');
+                    }
+                });
+            } else {
+                // Ongoing checklist: personal tracking only, no scoring.
+                let saved = {};
+                try { saved = JSON.parse(localStorage.getItem('monique-ongoing-tasks') || '{}'); } catch (e) {}
+                if (saved[taskId]) task.classList.add('done');
+                check.addEventListener('click', () => {
+                    task.classList.toggle('done');
+                    try {
+                        const state = JSON.parse(localStorage.getItem('monique-ongoing-tasks') || '{}');
+                        state[taskId] = task.classList.contains('done');
+                        localStorage.setItem('monique-ongoing-tasks', JSON.stringify(state));
+                    } catch (e) {}
+                });
+            }
+        });
+    }
+
+    init();
+  </script>
+</body>
+</html>

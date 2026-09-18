@@ -70,5 +70,6 @@ router.use('/', require('./routes/newsletter'));
 router.use('/', require('./routes/budgetGame'));
 router.use('/', require('./routes/survey'));
 router.use('/', require('./routes/interviews'));
+router.use('/', require('./routes/practicum'));
 
 module.exports = router;
