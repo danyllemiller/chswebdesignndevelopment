@@ -143,7 +143,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         if (!currentStudent) return alert("Identity error.");
 
-        const rawAssignmentText = assignSelect.options[assignSelect.selectedIndex].text;
+        // Browser/extension page-translation (a student's Chrome set to
+        // auto-translate to Mandarin, Spanish, etc.) rewrites visible DOM
+        // text -- including <option> labels -- so reading .text here would
+        // build the wrong exam_id and mis-detect points/type from translated
+        // words. data-label is a duplicate of the original English label
+        // that translation tools don't touch, since it's an attribute, not
+        // rendered text.
+        const selectedOption = assignSelect.options[assignSelect.selectedIndex];
+        const rawAssignmentText = selectedOption.dataset.label || selectedOption.text;
         const chapterNum = getCurrentChapter();
 
         // Calculate points
