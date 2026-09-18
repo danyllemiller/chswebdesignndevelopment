@@ -333,19 +333,8 @@ router.get('/wd-exam-questions', async (req, res) => {
             options: row.question_type === 'tf' ? [row.option_a, row.option_b] : [row.option_a, row.option_b, row.option_c, row.option_d],
             answer: row.answer, chapter: row.chapter, type: row.question_type
         }));
-        // exam_id is globally unique (single-column PK on `exams`), so this
-        // doesn't need the student's course_id to look up -- most chapters
-        // are the engine's standard 100 (exams row not seeded yet defaults
-        // there too), but a chapter can carry a real custom total (e.g.
-        // Ch9-Exam is deliberately 25) that must survive every future
-        // retake, not just the one manual correction that set it.
-        const [examRows] = await connection.execute(
-            `SELECT total_points FROM exams WHERE exam_id = ?`,
-            [`Ch${chapterNum}-Exam`]
-        );
-        const totalPoints = examRows.length && examRows[0].total_points !== null ? Number(examRows[0].total_points) : 100;
         await connection.release();
-        res.json({ chapter: chapterNum, count: questions.length, questions, totalPoints });
+        res.json({ chapter: chapterNum, count: questions.length, questions });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch WD exam questions' }); }
 });
 
