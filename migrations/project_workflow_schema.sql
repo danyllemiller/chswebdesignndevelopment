@@ -55,7 +55,11 @@ CREATE TABLE IF NOT EXISTS project_evaluations (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_proj_eval_student_exam (student_id, exam_id),
   INDEX idx_proj_eval_type (evaluator_type),
-  UNIQUE KEY uq_proj_eval_single (chapter_project_id, exam_id, student_id, evaluator_type),
+  -- evaluator_student_id is part of the key (using '' rather than NULL for
+  -- self/auto, since MySQL treats every NULL as distinct) so more than one
+  -- peer can review the same student's project without colliding, while a
+  -- reviewer resubmitting their own review still updates in place.
+  UNIQUE KEY uq_proj_eval_single (chapter_project_id, exam_id, student_id, evaluator_type, evaluator_student_id),
   CONSTRAINT fk_proj_eval_project FOREIGN KEY (chapter_project_id) REFERENCES chapter_projects(id) ON DELETE CASCADE
 );
 

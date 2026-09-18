@@ -161,7 +161,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             maxPoints = 25;
         }
 
-        let finalScore = (lowerName.includes('milestone') || lowerName.includes('project') || lowerName.includes('exam')) ? 0 : maxPoints;
+        // Interim milestones auto-grade at full credit for turning it in. Only the
+        // chapter's culminating item ("Project:", "Capstone:", "Final Project:") is
+        // held at 0 pending self/peer/auto review.
+        let finalScore = (lowerName.includes('project') || lowerName.includes('capstone') || lowerName.includes('exam')) ? 0 : maxPoints;
 
         // Build assignment key (used as exam_id in MariaDB)
         let cleanName = rawAssignmentText.replace(/^(lab|walkthrough|project|milestone)\s*\d*:\s*/i, "").trim();

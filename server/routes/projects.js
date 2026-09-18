@@ -14,11 +14,16 @@ router.get('/student/section-classmates', async (req, res) => {
     if (!section_id) return res.status(400).json({ error: 'section_id is required' });
     try {
         const connection = await getDbConnection();
+        // An "AS-<section>" aide section (e.g. AS-B2) sits alongside the
+        // section it aides -- those aides can also peer-grade that section's
+        // students, so pull both rosters instead of just the aide's own.
+        const sections = section_id.startsWith('AS-') ? [section_id, section_id.slice(3)] : [section_id];
+        const placeholders = sections.map(() => '?').join(', ');
         const [rows] = await connection.execute(
             `SELECT student_id, first_name, last_name FROM students
-             WHERE section_id = ? AND (archived IS NULL OR archived = 0) AND student_id != ?
+             WHERE section_id IN (${placeholders}) AND (archived IS NULL OR archived = 0) AND student_id != ?
              ORDER BY last_name ASC, first_name ASC`,
-            [section_id, exclude_student_id || '']
+            [...sections, exclude_student_id || '']
         );
         await connection.release();
         res.json(rows);
@@ -33,23 +38,19 @@ async function saveEvaluationAndAggregate(connection, { chapter_project_id, exam
     const normalizedMax = Number(max_score || 100);
     const rubricStr = rubric_json ? JSON.stringify(rubric_json) : null;
 
-    if (evaluator_type === 'peer') {
-        await connection.execute(
-            `INSERT INTO project_evaluations
-             (chapter_project_id, exam_id, student_id, evaluator_student_id, evaluator_type, score, max_score, rubric_json, feedback)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [chapter_project_id, exam_id, student_id, evaluator_student_id || null, evaluator_type, normalizedScore, normalizedMax, rubricStr, feedback || null]
-        );
-    } else {
-        await connection.execute(
-            `INSERT INTO project_evaluations
-             (chapter_project_id, exam_id, student_id, evaluator_student_id, evaluator_type, score, max_score, rubric_json, feedback)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE score = VALUES(score), max_score = VALUES(max_score),
-               rubric_json = VALUES(rubric_json), feedback = VALUES(feedback), updated_at = CURRENT_TIMESTAMP`,
-            [chapter_project_id, exam_id, student_id, evaluator_student_id || null, evaluator_type, normalizedScore, normalizedMax, rubricStr, feedback || null]
-        );
-    }
+    // evaluator_student_id is part of the unique key as '' (not NULL --
+    // MySQL treats every NULL as distinct, which would let duplicate
+    // self/auto rows pile up instead of updating in place) so each peer
+    // reviewer gets their own row for the same student's project, while a
+    // reviewer -- or self/auto -- resubmitting updates their existing row.
+    await connection.execute(
+        `INSERT INTO project_evaluations
+         (chapter_project_id, exam_id, student_id, evaluator_student_id, evaluator_type, score, max_score, rubric_json, feedback)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE score = VALUES(score), max_score = VALUES(max_score),
+           rubric_json = VALUES(rubric_json), feedback = VALUES(feedback), updated_at = CURRENT_TIMESTAMP`,
+        [chapter_project_id, exam_id, student_id, evaluator_student_id || '', evaluator_type, normalizedScore, normalizedMax, rubricStr, feedback || null]
+    );
 
     const [[selfRows], [autoRows], [peerRows]] = await Promise.all([
         connection.execute(`SELECT score, max_score FROM project_evaluations WHERE chapter_project_id = ? AND exam_id = ? AND student_id = ? AND evaluator_type = 'self' ORDER BY id DESC LIMIT 1`, [chapter_project_id, exam_id, student_id]),
@@ -301,9 +302,12 @@ router.get('/student/project-aggregate', async (req, res) => {
             [chapter_project_id, exam_id, student_id]
         );
         const [evalRows] = await connection.execute(
-            `SELECT id, evaluator_type, evaluator_student_id, score, max_score, feedback, created_at, updated_at
-             FROM project_evaluations WHERE chapter_project_id = ? AND exam_id = ? AND student_id = ?
-             ORDER BY created_at DESC`,
+            `SELECT pe.id, pe.evaluator_type, pe.evaluator_student_id, s.first_name AS evaluator_first_name,
+                    s.last_name AS evaluator_last_name, pe.score, pe.max_score, pe.feedback, pe.created_at, pe.updated_at
+             FROM project_evaluations pe
+             LEFT JOIN students s ON s.student_id = pe.evaluator_student_id
+             WHERE pe.chapter_project_id = ? AND pe.exam_id = ? AND pe.student_id = ?
+             ORDER BY pe.created_at DESC`,
             [chapter_project_id, exam_id, student_id]
         );
         await connection.release();
