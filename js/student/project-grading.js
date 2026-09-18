@@ -119,7 +119,7 @@ async function initProjectGrading(container) {
         <div class="card-body small p-4">
             <ul class="nav nav-tabs mb-3" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-tab="self" type="button">My Self-Assessment</button></li>
-                <li class="nav-item"><button class="nav-link" data-tab="peer" type="button">Grade a Classmate</button></li>
+                <li class="nav-item"><button class="nav-link" data-tab="peer" type="button">Peer Review (In Person)</button></li>
                 <li class="nav-item"><button class="nav-link" data-tab="auto" type="button">Auto-Check My Code</button></li>
                 <li class="nav-item"><button class="nav-link" data-tab="results" type="button">My Results</button></li>
             </ul>
@@ -168,18 +168,24 @@ async function initProjectGrading(container) {
     });
 
     // --- PEER pane ---
+    // In-person flow: the reviewed student stays logged in on their own
+    // computer, and the reviewer (a classmate or an AS aide) sits down next
+    // to them, looks at their code and live site, then identifies themselves
+    // here and fills this out. So the target being graded is always the
+    // logged-in student (user.student_id) -- the dropdown picks the reviewer,
+    // not who to review.
     const peerPane = container.querySelector('[data-pane="peer"]');
-    peerPane.innerHTML = `<p class="text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading classmates…</p>`;
+    peerPane.innerHTML = `<p class="text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading reviewers…</p>`;
     try {
         const res = await fetch(`/api/student/section-classmates?section_id=${encodeURIComponent(user.section_id || '')}&exclude_student_id=${encodeURIComponent(user.student_id)}`);
-        const classmates = res.ok ? await res.json() : [];
+        const reviewers = res.ok ? await res.json() : [];
         peerPane.innerHTML = `
-            <p class="text-muted mb-3">Pick a classmate whose project you've actually looked at, and grade their work honestly. This helps them the same way you'll be helped by a classmate's review of yours.</p>
+            <p class="text-muted mb-3">Stay logged in on your own computer. Have your reviewer sit with you, look at your code and live site, and give you feedback out loud -- then they select their own name below and fill this out together with you.</p>
             <div class="mb-3">
-                <label class="form-label small fw-bold">Classmate</label>
+                <label class="form-label small fw-bold">Who is reviewing this project?</label>
                 <select class="form-select form-select-sm" id="peer-select">
-                    <option value="">Select a classmate…</option>
-                    ${classmates.map(c => `<option value="${escapeHtml(c.student_id)}">${escapeHtml(c.first_name)} ${escapeHtml(c.last_name)}</option>`).join('')}
+                    <option value="">Select the reviewer's name…</option>
+                    ${reviewers.map(c => `<option value="${escapeHtml(c.student_id)}">${escapeHtml(c.first_name)} ${escapeHtml(c.last_name)}</option>`).join('')}
                 </select>
             </div>
             ${rubric.map(c => criterionRow('peer', c)).join('')}
@@ -189,9 +195,9 @@ async function initProjectGrading(container) {
         `;
         wireRubricButtons(peerPane);
         peerPane.querySelector('#btn-submit-peer').addEventListener('click', async () => {
-            const partnerId = peerPane.querySelector('#peer-select').value;
+            const reviewerId = peerPane.querySelector('#peer-select').value;
             const statusEl = peerPane.querySelector('#peer-status');
-            if (!partnerId) { statusEl.innerHTML = `<span class="text-danger">Pick a classmate first.</span>`; return; }
+            if (!reviewerId) { statusEl.innerHTML = `<span class="text-danger">Select the reviewer's name first.</span>`; return; }
             const values = readRubricValues(peerPane, 'peer');
             const score = averageToScore100(values, rubric);
             const feedback = readCritiqueSandwich(peerPane, 'peer');
@@ -199,14 +205,14 @@ async function initProjectGrading(container) {
             try {
                 const res2 = await fetch('/api/student/project-evaluation', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chapter_project_id: chapterProjectId, exam_id: examId, student_id: partnerId, evaluator_student_id: user.student_id, evaluator_type: 'peer', score, max_score: 100, rubric_json: values, feedback })
+                    body: JSON.stringify({ chapter_project_id: chapterProjectId, exam_id: examId, student_id: user.student_id, evaluator_student_id: reviewerId, evaluator_type: 'peer', score, max_score: 100, rubric_json: values, feedback })
                 });
                 if (!res2.ok) throw new Error('Request failed');
                 statusEl.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i>Peer review submitted.</span>`;
             } catch (e) { statusEl.innerHTML = `<span class="text-danger">Couldn't save the peer review. Try again.</span>`; }
         });
     } catch (e) {
-        peerPane.innerHTML = `<p class="text-danger">Couldn't load your classmates. Try again later.</p>`;
+        peerPane.innerHTML = `<p class="text-danger">Couldn't load the reviewer list. Try again later.</p>`;
     }
 
     // --- AUTO pane ---

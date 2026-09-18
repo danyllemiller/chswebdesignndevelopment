@@ -15,9 +15,10 @@ router.get('/student/section-classmates', async (req, res) => {
     try {
         const connection = await getDbConnection();
         // An "AS-<section>" aide section (e.g. AS-B2) sits alongside the
-        // section it aides -- those aides can also peer-grade that section's
-        // students, so pull both rosters instead of just the aide's own.
-        const sections = section_id.startsWith('AS-') ? [section_id, section_id.slice(3)] : [section_id];
+        // section it aides -- those aides can review that section's students'
+        // projects, and that section's students can be reviewed by those
+        // aides, so pull both rosters no matter which side is asking.
+        const sections = section_id.startsWith('AS-') ? [section_id, section_id.slice(3)] : [section_id, `AS-${section_id}`];
         const placeholders = sections.map(() => '?').join(', ');
         const [rows] = await connection.execute(
             `SELECT student_id, first_name, last_name FROM students
