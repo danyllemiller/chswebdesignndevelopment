@@ -295,6 +295,7 @@ async function fetchExamQuestionsFromAPI(chapterNum) {
         const response = await fetch(`/api/wd-exam-questions?chapter=${chapterNum}`);
         if (!response.ok) throw new Error('Failed to fetch questions: ' + response.status);
         const data = await response.json();
+        if (typeof data.totalPoints === 'number') examTotalPoints = data.totalPoints;
         return data.questions || [];
     } catch (e) {
         console.error("[examLogicWD] Exception fetching questions:", e.message);
@@ -332,6 +333,7 @@ let tabLockdownActive = false;
 let serverFeedback = [];
 let finalScore = 0;
 let finalTotal = 0;
+let examTotalPoints = 100; // this chapter's real total, from the exams table -- see fetchExamQuestionsFromAPI
 let finalPercentage = 0;
 
 function escapeHtml(str) {
@@ -1136,12 +1138,16 @@ async function processSubmission() {
             else if (q.hint) feedbackList.push({ question: q.question.trim(), hint: q.hint });
         }
     });
-    // Every exam totals 100 points regardless of how many items it has --
-    // each item (mc/tf/matching) is worth an equal share, with matching
-    // earning its share proportionally to how many pairs were right.
-    finalScore = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
-    finalTotal = 100;
-    finalPercentage = finalScore;
+    // Every exam totals examTotalPoints (100 unless this chapter's exams
+    // row carries a real custom total, e.g. Ch9-Exam's deliberate 25)
+    // regardless of how many items it has -- each item (mc/tf/matching) is
+    // worth an equal share, with matching earning its share proportionally
+    // to how many pairs were right. Scaling by the real total here (not
+    // always 100) is what keeps a future retake from silently overwriting
+    // a chapter's custom point value back to 100.
+    finalScore = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * examTotalPoints * 100) / 100 : 0;
+    finalTotal = examTotalPoints;
+    finalPercentage = finalTotal > 0 ? Math.round((finalScore / finalTotal) * 100) : 0;
     serverFeedback = feedbackList;
 
     try {
