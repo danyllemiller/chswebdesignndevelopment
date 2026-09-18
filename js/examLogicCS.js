@@ -343,14 +343,41 @@ function showCooldownMessage(remainingMs) {
 function showAttemptLimitMessage() {
     const container = document.getElementById('exam-container');
     if (!container) return;
-    
+
     container.innerHTML = `
         <div class="alert alert-danger text-center shadow">
             <h4 class="fw-bold text-danger"><i class="fas fa-ban"></i> Maximum Attempts Reached</h4>
             <p>You have used all ${MAX_ATTEMPTS} attempts for this exam.</p>
             <p class="small text-muted">Please contact your instructor if you need to retake this assessment.</p>
             <a href="/student" class="btn btn-primary mt-3">Return to Student Portal</a>
+            <div class="mt-3">
+                <a href="#" id="override-toggle-link" class="small text-muted">Override</a>
+                <div id="override-box" class="d-none mt-2">
+                    <div class="input-group input-group-sm mx-auto" style="max-width: 220px;">
+                        <input type="text" id="override-code-input" class="form-control text-center" maxlength="6" inputmode="numeric">
+                        <button class="btn btn-outline-secondary" id="override-submit-btn">Go</button>
+                    </div>
+                </div>
+            </div>
         </div>`;
+
+    document.getElementById('override-toggle-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('override-box')?.classList.remove('d-none');
+        document.getElementById('override-code-input')?.focus();
+    });
+    document.getElementById('override-submit-btn')?.addEventListener('click', () => {
+        const input = document.getElementById('override-code-input');
+        if (input && input.value.trim() === dailyOverrideCode()) {
+            attemptCount = 0;
+            lastSubmissionTime = 0;
+            saveAttemptData();
+            window.location.reload();
+        } else if (input) {
+            input.value = '';
+            input.placeholder = 'Try again';
+        }
+    });
 }
 
 // EMBEDDED FALLBACK QUESTIONS FOR EXAM ENGINE (when API is empty)
