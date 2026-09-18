@@ -563,6 +563,7 @@ let tabSwitchCount = 0;
 let tabLockdownActive = false;
 
 let serverFeedback = [];
+let studyGuide = null;
 let finalScore = 0;
 let finalTotal = 0;
 let finalPercentage = 0;
@@ -1335,7 +1336,13 @@ async function processSubmission() {
         const totalQuestions = examQuestions.length;
         let correctCount = 0;
         const feedbackList = [];
-        
+        // Per-chapter tally (q.chapter is the real chapter_number the
+        // question bank already tags each question with, from
+        // /api/cs-exam-questions) -- only meaningful on the Final, which is
+        // the only exam mixing questions across many chapters at once, but
+        // harmless to compute everywhere.
+        const chapterTally = {};
+
         examQuestions.forEach((q, i) => {
             const userAnswerIdx = userAnswers[i];
             if (userAnswerIdx !== undefined && q.options && q.options.length > 0) {
@@ -1347,13 +1354,37 @@ async function processSubmission() {
                 } else if (q.hint) {
                     feedbackList.push({ question: q.question.trim(), hint: q.hint });
                 }
+                if (q.chapter !== undefined && q.chapter !== null) {
+                    const key = String(q.chapter);
+                    if (!chapterTally[key]) chapterTally[key] = { correct: 0, total: 0 };
+                    chapterTally[key].total++;
+                    if (isCorrect) chapterTally[key].correct++;
+                }
             }
         });
-        
+
         finalScore = correctCount;
         finalTotal = totalQuestions;
         finalPercentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
         serverFeedback = feedbackList;
+
+        // Personalized study guide: only for the cumulative Final, only on
+        // a failing score, grounded in which real chapters this attempt's
+        // wrong answers actually came from (server/routes/assessments.js
+        // maps that back to the real course map + worksheet bank).
+        studyGuide = null;
+        if (chapterTitle === 'CS Final Exam' && finalPercentage < 80) {
+            try {
+                const guideRes = await fetch('/api/student/study-guide/generate', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_id: studentId, chapter_tally: chapterTally, overall_pct: finalPercentage })
+                });
+                if (guideRes.ok) {
+                    const guideData = await guideRes.json();
+                    studyGuide = guideData.guide || null;
+                }
+            } catch (e) { console.error('[examLogicCS] Study guide generation failed:', e); }
+        }
     } catch (err) {
         console.error("Scoring error:", err);
         finalScore = 0;
@@ -1517,6 +1548,28 @@ if (shouldSave) {
     let titleColor = isRetake ? "text-warning" : "text-success";
     let retakeMsg = isRetake ? `<div class="alert alert-warning fw-bold mt-3"><i class="fas fa-exclamation-triangle"></i> Score is below 80%. You need to retake this test for exams and projects.</div>` : "";
 
+    let studyGuideHtml = '';
+    if (studyGuide && studyGuide.chapters && studyGuide.chapters.length > 0) {
+        const chapterRows = studyGuide.chapters.map(c => `
+            <div class="d-flex justify-content-between align-items-start border-bottom py-2">
+                <div>
+                    <p class="mb-1 fw-bold">Ch ${c.chapter}: ${escapeHtml(c.title)}</p>
+                    <p class="mb-1 small text-muted">Missed ${escapeHtml(c.missed)} on this attempt (${c.accuracyPct}%)</p>
+                    <div class="d-flex flex-wrap gap-2 mt-1">
+                        <a href="${escapeHtml(c.file)}" target="_blank" class="btn btn-sm btn-outline-primary">Reread Chapter ${c.chapter}</a>
+                        ${c.worksheetTitle ? `<span class="badge bg-light text-dark border align-self-center">Redo: ${escapeHtml(c.worksheetTitle)}</span>` : ''}
+                        <a href="${escapeHtml(c.flashcardsUrl)}" target="_blank" class="btn btn-sm btn-outline-secondary">Unit ${c.unitNum} Flashcards</a>
+                    </div>
+                </div>
+            </div>`).join('');
+        studyGuideHtml = `
+            <div class="alert alert-info text-start mt-3 mb-0">
+                <h6 class="fw-bold text-primary mb-2"><i class="fas fa-book-open me-1"></i> Your Personalized Study Guide</h6>
+                <p class="small text-muted mb-2">Based on what you actually missed on this attempt. This is saved to your account -- ask your teacher if you need to see it again later.</p>
+                ${chapterRows}
+            </div>`;
+    }
+
     // The score above is always real (computed locally from the student's
     // own answers) -- this only covers whether it actually reached the
     // gradebook after retrying. Telling the truth here, instead of a blanket
@@ -1560,6 +1613,7 @@ if (shouldSave) {
                     </div>
                     ${saveFailedMsg}
                     ${retakeMsg}
+                    ${studyGuideHtml}
                     <p class="fw-bold mt-2 mb-4 text-dark border-bottom pb-2">${finalScore} out of ${finalTotal} correct</p>
 
                     <div class="review-section mt-3" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">

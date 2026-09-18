@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>My Study Guide | CHS Computer Science</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet" />
+  <link href="/css/student-pages.css" rel="stylesheet" />
+</head>
+<body class="bg-white">
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div class="container my-5" style="max-width: 720px;">
+    <div class="mb-4">
+      <h2 class="gochi text-primary mb-0"><i class="fas fa-book-open me-2"></i>My Study Guide</h2>
+      <p class="text-muted mb-0">What to review, based on your most recent CS Final Exam attempt.</p>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4" id="guide-body">
+        <p class="text-muted small mb-0"><i class="fas fa-spinner fa-spin me-1"></i>Loading…</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+  <script src="/js/loader.js?v=20"></script>
+  <script type="module">
+    import { getLoggedInUser } from '/js/modules/user-session.js';
+
+    function escapeHtml(s) {
+        return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    async function init() {
+        const body = document.getElementById('guide-body');
+        const user = getLoggedInUser();
+        if (!user || !user.student_id) {
+            body.innerHTML = '<p class="text-muted small mb-0">Log in to see your study guide.</p>';
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/student/study-guide/latest?student_id=${encodeURIComponent(user.student_id)}`);
+            if (!res.ok) throw new Error('Request failed');
+            const data = await res.json();
+
+            if (!data.guide || !data.guide.chapters || data.guide.chapters.length === 0) {
+                body.innerHTML = `
+                    <p class="text-muted small mb-0">No study guide yet. One is generated automatically the first time you score below 80% on the CS Final Exam.</p>`;
+                return;
+            }
+
+            const created = data.created_at ? new Date(data.created_at).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' }) : '';
+            const chapterRows = data.guide.chapters.map(c => `
+                <div class="d-flex justify-content-between align-items-start border-bottom py-3">
+                    <div>
+                        <p class="mb-1 fw-bold">Ch ${c.chapter}: ${escapeHtml(c.title)}</p>
+                        <p class="mb-1 small text-muted">Missed ${escapeHtml(c.missed)} on your last attempt (${c.accuracyPct}%)</p>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <a href="${escapeHtml(c.file)}" target="_blank" class="btn btn-sm btn-outline-primary">Reread Chapter ${c.chapter}</a>
+                            ${c.worksheetTitle ? `<span class="badge bg-light text-dark border align-self-center">Redo: ${escapeHtml(c.worksheetTitle)}</span>` : ''}
+                            <a href="${escapeHtml(c.flashcardsUrl)}" target="_blank" class="btn btn-sm btn-outline-secondary">Unit ${c.unitNum} Flashcards</a>
+                        </div>
+                    </div>
+                </div>`).join('');
+
+            body.innerHTML = `
+                <p class="text-muted small mb-3">From your ${escapeHtml(String(Math.round(data.overall_pct)))}% attempt${created ? ' on ' + created : ''}. Retaking the final will replace this with a fresh guide based on that attempt.</p>
+                ${chapterRows}`;
+        } catch (e) {
+            body.innerHTML = '<p class="text-danger small mb-0">Couldn\'t load your study guide. Try again later.</p>';
+        }
+    }
+
+    init();
+  </script>
+</body>
+</html>

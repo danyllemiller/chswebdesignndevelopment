@@ -189,6 +189,123 @@ router.get('/cs-exam-questions', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch exam questions' }); }
 });
 
+// --- CS FINAL EXAM STUDY GUIDE ---
+// A student who fails the cumulative final (<80%) gets a personalized
+// list of which real chapters to review, grounded in the actual course
+// map/worksheet bank -- not a generic "study more" message. chapter_tally
+// comes from the client's own grading loop (examLogicCS.js already knows
+// which of the 100 final questions each student got wrong, and each
+// question already carries its real chapter_number via /cs-exam-questions'
+// `chapter` field), so this only has to turn "which chapters were weak"
+// into "here's what to actually go do about it."
+const STUDY_GUIDE_DDL = `CREATE TABLE IF NOT EXISTS study_guides (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(50) NOT NULL,
+    overall_pct DECIMAL(5,2) NOT NULL,
+    guide_json LONGTEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_student_guide (student_id, created_at)
+)`;
+
+let csCourseMapCache = null;
+let csWorksheetsCache = null;
+function loadCsReferenceData() {
+    if (!csCourseMapCache) {
+        const raw = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'cs-course-map.json'), 'utf8'));
+        csCourseMapCache = {};
+        raw.courseMap.forEach(unit => {
+            unit.chapters.forEach(ch => {
+                csCourseMapCache[ch.ch] = { unitNum: unit.unitNum, unitName: unit.name, title: ch.title, file: ch.file };
+            });
+        });
+    }
+    if (!csWorksheetsCache) {
+        csWorksheetsCache = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'cs-worksheets.json'), 'utf8'));
+    }
+    return { courseMap: csCourseMapCache, worksheets: csWorksheetsCache };
+}
+
+// Builds the guide payload from a {chapter: {correct, total}} tally --
+// shared by the generate route and anything that might regenerate one later.
+function buildStudyGuide(chapterTally) {
+    const { courseMap, worksheets } = loadCsReferenceData();
+    const chapterResults = Object.entries(chapterTally)
+        .map(([ch, t]) => ({ ch: Number(ch), correct: t.correct, total: t.total, pct: t.total > 0 ? (t.correct / t.total) * 100 : 100 }))
+        .filter(r => r.total > 0 && courseMap[r.ch]);
+
+    // Weak = missed at least half of what was asked from that chapter on
+    // this attempt. Falls back to the single worst chapter if nothing hits
+    // that bar but the overall score still failed (a handful of chapters
+    // just barely missing 70% each, none alone looking "weak").
+    let weak = chapterResults.filter(r => r.pct < 70).sort((a, b) => a.pct - b.pct);
+    if (weak.length === 0 && chapterResults.length > 0) {
+        weak = [...chapterResults].sort((a, b) => a.pct - b.pct).slice(0, 1);
+    }
+
+    const chapters = weak.map(r => {
+        const info = courseMap[r.ch];
+        const ws = worksheets[String(r.ch)];
+        return {
+            chapter: r.ch,
+            title: info.title,
+            file: `/compsci/${info.file}`,
+            unitNum: info.unitNum,
+            unitName: info.unitName,
+            accuracyPct: Math.round(r.pct),
+            missed: `${r.total - r.correct} of ${r.total}`,
+            worksheetTitle: ws ? ws.title : null,
+            flashcardsUrl: `/cs-flashcards.html?unit=${info.unitNum}`
+        };
+    });
+
+    const unitNums = [...new Set(chapters.map(c => c.unitNum))];
+    return { chapters, unitsToReview: unitNums };
+}
+
+router.post('/student/study-guide/generate', async (req, res) => {
+    const { student_id, chapter_tally, overall_pct } = req.body;
+    if (!student_id || !chapter_tally || typeof chapter_tally !== 'object') {
+        return res.status(400).json({ error: 'student_id and chapter_tally are required' });
+    }
+    const sessionUser = req.session?.user;
+    const isSelf = sessionUser?.student_id && String(sessionUser.student_id) === String(student_id);
+    const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
+    if (!isSelf && !isStaff) return res.status(401).json({ error: 'Not authorized.' });
+
+    try {
+        const guide = buildStudyGuide(chapter_tally);
+        const connection = await getDbConnection();
+        await connection.execute(STUDY_GUIDE_DDL);
+        await connection.execute(
+            'INSERT INTO study_guides (student_id, overall_pct, guide_json) VALUES (?, ?, ?)',
+            [student_id, Number(overall_pct) || 0, JSON.stringify(guide)]
+        );
+        await connection.release();
+        res.json({ success: true, guide });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to generate study guide' }); }
+});
+
+router.get('/student/study-guide/latest', async (req, res) => {
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id is required' });
+    const sessionUser = req.session?.user;
+    const isSelf = sessionUser?.student_id && String(sessionUser.student_id) === String(student_id);
+    const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
+    if (!isSelf && !isStaff) return res.status(401).json({ error: 'Not authorized.' });
+
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(STUDY_GUIDE_DDL);
+        const [rows] = await connection.execute(
+            'SELECT overall_pct, guide_json, created_at FROM study_guides WHERE student_id = ? ORDER BY created_at DESC LIMIT 1',
+            [student_id]
+        );
+        await connection.release();
+        if (rows.length === 0) return res.json({ guide: null });
+        res.json({ overall_pct: rows[0].overall_pct, created_at: rows[0].created_at, guide: JSON.parse(rows[0].guide_json) });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load study guide' }); }
+});
+
 // --- WD EXAM QUESTIONS ---
 router.get('/wd-exam-questions', async (req, res) => {
     const { chapter } = req.query;

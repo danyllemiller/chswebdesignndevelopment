@@ -701,7 +701,6 @@ function chapterLabelToUrl(label) {
 // the day type; /api/bell-schedule.php holds the period times for each type) ──────
 let dayTypes = new Map();   // 'YYYY-MM-DD' -> { type, description }
 let bellSchedule = [];      // rows from bell_schedule table
-let myPeriodRow = null;     // today's bell_schedule row for the period this agenda page is showing (set in renderBellSchedule, read by tickClock's no-pass check)
 
 const DAY_TYPE_LABELS = { A: 'A Day', B: 'B Day', A_MIN: 'A Min Day', B_MIN: 'B Min Day', C: 'All Periods', summer: 'Summer School' };
 const EVENT_TYPE_PRI = { A: 6, B: 5, C: 4, A_MIN: 3, B_MIN: 2, S: 2, OFF: 1, none: 0 };
@@ -772,7 +771,6 @@ function fmtTime(hhmm) {
 function renderBellSchedule(dateStr) {
   const box = document.getElementById('scheduleBox');
   box.innerHTML = '';
-  myPeriodRow = null;
   const empty = (label) => {
     const d = document.createElement('div');
     d.className = 'schedule-empty small text-center';
@@ -806,10 +804,6 @@ function renderBellSchedule(dateStr) {
 
     const link = PERIOD_COURSE_LINKS[p.period_label];
     const isCurrentPage = link && link.course === course && (link.track || 'main') === track;
-    // Only meaningful for the no-pass check when the block actually being
-    // displayed is TODAY -- a teacher paging ahead to next week's lesson
-    // shouldn't trigger a "no pass" banner based on a date that isn't now.
-    if (isCurrentPage && dateStr === todayStr()) myPeriodRow = p;
     const inner = document.createElement(link && !isCurrentPage ? 'a' : 'div');
     inner.className = 'sched-inner';
     inner.style.color = PERIOD_TEXT_COLOR;
@@ -1269,26 +1263,36 @@ if (!courseCfg) {
 
   // ── Live clock ──────────────────────────────────────────────────────────
   // Students aren't allowed to use the hall pass during the first or last
-  // 15 minutes of class -- myPeriodRow (set in renderBellSchedule, only for
-  // TODAY's actual displayed block) gives the real start/end time for the
-  // period this agenda page represents, so this can check the live clock
-  // against it every second, the same cadence the clock face already ticks.
+  // 15 minutes of ANY class period -- this has nothing to do with which
+  // agenda slide/course/track is currently on screen, just real clock time
+  // against today's actual bell schedule, so it checks every period
+  // meeting today and shows the banner if ANY of them is in that window
+  // right now. Deliberately ignores course/track matching entirely (a
+  // prior version tried to match the banner to "the period this specific
+  // slide represents," which meant it silently depended on being on the
+  // right slide/track to ever show at all).
   function updateNoPassBanner(now) {
     const banner = document.getElementById('noPassBanner');
     if (!banner) return;
-    if (!myPeriodRow) { banner.classList.add('d-none'); return; }
+    const key = getBellScheduleKey(todayStr());
+    if (!key) { banner.classList.add('d-none'); return; }
     const toMinutes = (hhmmss) => {
       const [h, m] = hhmmss.split(':').map(Number);
       return h * 60 + m;
     };
     const nowMin = now.getHours() * 60 + now.getMinutes();
-    const startMin = toMinutes(myPeriodRow.start_time);
-    const endMin = toMinutes(myPeriodRow.end_time);
-    const inFirst15 = nowMin >= startMin && nowMin < startMin + 15;
-    const inLast15 = nowMin >= endMin - 15 && nowMin < endMin;
-    if (inFirst15 || inLast15) {
+    const periodsToday = bellSchedule.filter(r => r.schedule_type === key);
+    let active = null;
+    for (const p of periodsToday) {
+      const startMin = toMinutes(p.start_time);
+      const endMin = toMinutes(p.end_time);
+      const inFirst15 = nowMin >= startMin && nowMin < startMin + 15;
+      const inLast15 = nowMin >= endMin - 15 && nowMin < endMin;
+      if (inFirst15 || inLast15) { active = { inFirst15 }; break; }
+    }
+    if (active) {
       document.getElementById('noPassBannerText').textContent =
-        `No Pass — ${inFirst15 ? 'First' : 'Last'} 15 Minutes of Class`;
+        `No Pass — ${active.inFirst15 ? 'First' : 'Last'} 15 Minutes of Class`;
       banner.classList.remove('d-none');
     } else {
       banner.classList.add('d-none');
