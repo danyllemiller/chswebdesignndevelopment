@@ -1759,6 +1759,27 @@ if (!courseCfg) {
     .then(([data]) => {
       content = data.content || {};
       schedule = data.schedule || {};
+
+      // CS has two tracks (A meets on A-days, B on B-days); WD doesn't, so
+      // this ambiguity is exactly why the no-pass banner only ever worked
+      // reliably on Web Design -- opening the CS agenda with no explicit
+      // ?track= always defaulted to Track A regardless of which track is
+      // actually meeting today, so on a B-day the page silently showed a
+      // non-today date and the banner (which only fires for TODAY's real
+      // block) never had a chance to trigger. Auto-pick whichever track's
+      // pacing guide actually has a block dated today.
+      if (courseCfg.hasTracks && !params.get('track')) {
+        const today = todayStr();
+        const trackForToday = Object.keys(schedule).find(t => Object.values(schedule[t] || {}).includes(today));
+        if (trackForToday && trackForToday !== track) {
+          track = trackForToday;
+          document.documentElement.setAttribute('data-track', track);
+          const url = new URL(location);
+          url.searchParams.set('track', track);
+          history.replaceState(null, '', url);
+        }
+      }
+
       renderTrackToggle();
       populateJumpSelect();
       currentBlock = findBlockForToday();
