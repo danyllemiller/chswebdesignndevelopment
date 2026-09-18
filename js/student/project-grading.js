@@ -218,7 +218,7 @@ async function initProjectGrading(container) {
     // --- AUTO pane ---
     const autoPane = container.querySelector('[data-pane="auto"]');
     autoPane.innerHTML = `
-        <p class="text-muted mb-3">This scans the files you already uploaded to the Dropbox below and checks for the specific code patterns this project requires. It's a quick sanity check, not a substitute for actually testing your app.</p>
+        <p class="text-muted mb-3">This scans the files you already uploaded to the Dropbox below and checks for the specific things this project requires. It's a quick sanity check, not a substitute for your teacher (or a classmate) actually reading/testing your work.</p>
         <button type="button" class="btn btn-primary fw-bold" id="btn-run-auto">Run Auto-Check</button>
         <div class="mt-3" id="auto-result"></div>
     `;

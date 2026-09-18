@@ -89,16 +89,17 @@ async function saveEvaluationAndAggregate(connection, { chapter_project_id, exam
 // count and total bytes read so a student who uploads something huge or
 // unexpected (a video, a zipped folder, etc.) can't make this scan hang or
 // blow up memory -- it's a best-effort heuristic, not a build step.
-function collectSourceFiles(dir, depth = 0) {
+function collectSourceFiles(dir, extensions, depth = 0) {
     const results = [];
     if (depth > 4 || results.length > 200) return results;
     let entries;
     try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { return results; }
+    const extPattern = new RegExp(`\\.(${extensions.join('|')})$`, 'i');
     for (const entry of entries) {
         const full = path.join(dir, entry.name);
         if (entry.isDirectory()) {
-            results.push(...collectSourceFiles(full, depth + 1));
-        } else if (/\.(js|html|htm|css)$/i.test(entry.name)) {
+            results.push(...collectSourceFiles(full, extensions, depth + 1));
+        } else if (extPattern.test(entry.name)) {
             results.push(full);
         }
         if (results.length > 200) break;
@@ -106,9 +107,15 @@ function collectSourceFiles(dir, depth = 0) {
     return results;
 }
 
-function readCombinedSource(studentId) {
+// extensions defaults to code files (Ch9-style projects); a written-
+// document project (e.g. Ch1's business plan) passes its own list --
+// .docx/.pdf are binary and can't be read as text at all, so a project
+// that's only ever turned in that way will always report 0 files found,
+// which the caller surfaces as "can't auto-check this format" rather than
+// silently scoring it.
+function readCombinedSource(studentId, extensions = ['js', 'html', 'htm', 'css']) {
     const dir = path.join(UPLOADS_ROOT, String(studentId));
-    const files = collectSourceFiles(dir);
+    const files = collectSourceFiles(dir, extensions);
     let combined = '';
     let bytesRead = 0;
     const MAX_BYTES = 2_000_000; // 2MB combined cap
@@ -134,43 +141,79 @@ function readCombinedSource(studentId) {
 // points on top of the core score, not as a 5th equal-weight criterion,
 // so skipping it can't cap a student who nailed the actual requirements
 // below 100%.
-const CH9_AUTO_CRITERIA = [
-    { key: 'event_listener', label: 'Event Listener Setup', checks: ['addEventListener', 'click'] },
-    { key: 'prevent_default_inputs', label: 'Prevent Default & Input Capture', checks: ['preventDefault', '.value'] },
-    { key: 'render_output', label: 'renderProfile Function & Output', checks: ['renderProfile', 'innerText'] },
-    { key: 'qa_case', label: 'QA: Case-Insensitive Logic', checks: ['toLowerCase'] }
-];
-const CH9_BONUS_CRITERION = { key: 'level4_challenge', label: 'Level 4.0 Challenge: Dynamic Elements (Bonus)', checks: ['createElement', 'appendChild'] };
 const BONUS_MAX_POINTS = 10;
+
+// Auto-grade config per project, keyed by exam_id (the same stable id the
+// client already sends). Each entry names its own readable file types --
+// Ch9 is real JS/HTML/CSS source; Ch1's Founder's Blueprint is a written
+// business document, so it only makes sense to check for the required
+// section names actually appearing in whatever plain-text-readable file
+// the student turned in (a student writing it as an actual HTML page --
+// plausible in this class -- or a .txt draft). A Word doc or PDF is
+// binary and can't be read as text at all; that's a real, disclosed
+// limit of this check, not a bug, and the response says so rather than
+// silently scoring it as if nothing was found for a normal reason.
+const AUTO_GRADE_CONFIGS = {
+    'Ch9-Profile App Assembly': {
+        extensions: ['js', 'html', 'htm', 'css'],
+        criteria: [
+            { key: 'event_listener', label: 'Event Listener Setup', checks: ['addEventListener', 'click'] },
+            { key: 'prevent_default_inputs', label: 'Prevent Default & Input Capture', checks: ['preventDefault', '.value'] },
+            { key: 'render_output', label: 'renderProfile Function & Output', checks: ['renderProfile', 'innerText'] },
+            { key: 'qa_case', label: 'QA: Case-Insensitive Logic', checks: ['toLowerCase'] }
+        ],
+        bonus: { key: 'level4_challenge', label: 'Level 4.0 Challenge: Dynamic Elements (Bonus)', checks: ['createElement', 'appendChild'] }
+    },
+    'ch1_milestone_setup': {
+        extensions: ['html', 'htm', 'txt', 'md'],
+        criteria: [
+            { key: 'business_plan', label: 'Part 1: Agency Business Plan sections present', checks: ['Executive Summary', 'Target Market', 'Digital Real Estate'] },
+            { key: 'employee_handbook', label: 'Part 2: Employee Handbook sections present', checks: ['Job Description', 'Code of Conduct', 'Conflict Resolution'] },
+            { key: 'agency_application', label: 'Part 3: Agency Application sections present', checks: ['cover letter'] }
+        ],
+        bonus: null
+    }
+};
 
 router.post('/student/project-auto-grade', async (req, res) => {
     const { chapter_project_id, exam_id, student_id } = req.body;
     if (!chapter_project_id || !exam_id || !student_id)
         return res.status(400).json({ error: 'chapter_project_id, exam_id, student_id required' });
+    const config = AUTO_GRADE_CONFIGS[exam_id];
+    if (!config) return res.status(400).json({ error: 'Auto-check isn\'t set up for this project yet.' });
     try {
-        const { combined, fileCount } = readCombinedSource(student_id);
+        const { combined, fileCount } = readCombinedSource(student_id, config.extensions);
         if (fileCount === 0) {
-            return res.status(404).json({ error: 'No uploaded files found for this student yet -- submit your project before running the auto-grade check.' });
+            return res.status(404).json({
+                error: `No auto-checkable files found yet. This check can only read ${config.extensions.join('/')} files -- ` +
+                       `a Word doc or PDF can't be scanned as text, so ask your teacher to grade a document upload directly instead.`
+            });
         }
+        const combinedLower = combined.toLowerCase();
+        const caseInsensitiveIncludes = (haystackLower, needle) => haystackLower.includes(needle.toLowerCase());
 
-        const rubric = CH9_AUTO_CRITERIA.map(c => {
-            const found = c.checks.filter(pattern => combined.includes(pattern));
-            const pct = found.length / c.checks.length; // 0, 0.5, or 1
+        const rubric = config.criteria.map(c => {
+            const found = c.checks.filter(pattern => caseInsensitiveIncludes(combinedLower, pattern));
+            const pct = found.length / c.checks.length;
             return { key: c.key, label: c.label, checksLookedFor: c.checks, checksFound: found, score4: Math.round(pct * 4), bonus: false };
         });
-        const bonusFound = CH9_BONUS_CRITERION.checks.filter(pattern => combined.includes(pattern));
-        const bonusEntry = {
-            key: CH9_BONUS_CRITERION.key, label: CH9_BONUS_CRITERION.label,
-            checksLookedFor: CH9_BONUS_CRITERION.checks, checksFound: bonusFound, bonus: true,
-            bonusPoints: Math.round((bonusFound.length / CH9_BONUS_CRITERION.checks.length) * BONUS_MAX_POINTS)
-        };
-        rubric.push(bonusEntry);
 
-        const baseScore = Math.round((rubric.filter(c => !c.bonus).reduce((sum, c) => sum + c.score4, 0) / (CH9_AUTO_CRITERIA.length * 4)) * 100);
-        const scoreOutOf100 = Math.min(100, baseScore + bonusEntry.bonusPoints);
+        let bonusEntry = null;
+        if (config.bonus) {
+            const bonusFound = config.bonus.checks.filter(pattern => caseInsensitiveIncludes(combinedLower, pattern));
+            bonusEntry = {
+                key: config.bonus.key, label: config.bonus.label,
+                checksLookedFor: config.bonus.checks, checksFound: bonusFound, bonus: true,
+                bonusPoints: Math.round((bonusFound.length / config.bonus.checks.length) * BONUS_MAX_POINTS)
+            };
+            rubric.push(bonusEntry);
+        }
+
+        const baseScore = Math.round((rubric.filter(c => !c.bonus).reduce((sum, c) => sum + c.score4, 0) / (config.criteria.length * 4)) * 100);
+        const scoreOutOf100 = Math.min(100, baseScore + (bonusEntry ? bonusEntry.bonusPoints : 0));
         const feedback = [
             ...rubric.filter(c => !c.bonus).map(c => `${c.label}: ${c.checksFound.length}/${c.checksLookedFor.length} expected pattern(s) found (${c.checksFound.join(', ') || 'none'})`),
-            `${bonusEntry.label}: ${bonusEntry.checksFound.length}/${bonusEntry.checksLookedFor.length} found, +${bonusEntry.bonusPoints} bonus pts`
+            ...(bonusEntry ? [`${bonusEntry.label}: ${bonusEntry.checksFound.length}/${bonusEntry.checksLookedFor.length} found, +${bonusEntry.bonusPoints} bonus pts`] : [])
         ].join(' | ');
 
         const connection = await getDbConnection();
