@@ -91,6 +91,18 @@
       <p class="mb-0">Split it into pairs: <code>FF</code> <code>57</code> <code>33</code>. Convert each pair to decimal: <code>FF</code> = 255, <code>57</code> = 87, <code>33</code> = 51. That's the color's Red, Green, and Blue values — RGB(255, 87, 51), a bright orange-red.</p>
   </div>
 
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-calculator me-2"></i> The Actual Equation</h5>
+      <p class="mb-2 text-light">Each hex pair has a <strong>first digit</strong> and a <strong>second digit</strong>. The formula is always the same:</p>
+      <p class="mb-3 text-center fs-4 font-monospace text-white">decimal = (first digit &times; 16) + second digit</p>
+      <p class="mb-2 text-light">Use the digit's <em>value</em>, not its symbol, for A&ndash;F (A=10, B=11, C=12, D=13, E=14, F=15). Applying it to each pair of <code>#FF5733</code>:</p>
+      <ul class="mb-0 text-light">
+          <li><code>FF</code>: F=15 and F=15 &rarr; (15 &times; 16) + 15 = 240 + 15 = <strong>255</strong></li>
+          <li><code>57</code>: 5=5 and 7=7 &rarr; (5 &times; 16) + 7 = 80 + 7 = <strong>87</strong></li>
+          <li><code>33</code>: 3=3 and 3=3 &rarr; (3 &times; 16) + 3 = 48 + 3 = <strong>51</strong></li>
+      </ul>
+  </div>
+
   <p><strong>The trap:</strong> students often think hexadecimal is a completely separate system from binary, unrelated to what they just learned. It isn't — it's literally the same data, just grouped four bits at a time and relabeled with a friendlier symbol. Nothing about the underlying value changes.</p>
 
   <hr class="my-5 opacity-25">
