@@ -1210,6 +1210,21 @@ function abbreviateAssignmentName(name) {
     return abbr.replace(/\s+/g, ' ').replace(/--+/g, '-').replace(/-+$/, '').trim();
 }
 
+// abbreviateAssignmentName() is a heuristic that only works on natural-
+// language exam_ids (e.g. "Ch10-Canvas Coordinate Art Lab") -- it mangles
+// short registry slugs like "ch10_lab1" (its own "Lab" regex matches the
+// "lab" inside "ch10_lab1" and splices garbage into the middle of it).
+// Those slugs already have a real, curriculum-accurate title in the exams
+// table (exams.title, loaded into allAssignments[key].title), so prefer
+// that whenever it's a genuine title and not just the slug repeated back.
+function displayTitle(key) {
+    const title = allAssignments[key]?.title;
+    if (!title || title === key) return abbreviateAssignmentName(key);
+    let clean = title.replace(/^(Milestones?|Project|Capstone|Final Project|Lab|Walkthrough)\s*[\d&\s-]*:\s*/i, '').trim();
+    clean = clean.replace(/\s*[\[\(]\d+\s*pts?[\]\)]/i, '').trim();
+    return clean || abbreviateAssignmentName(key);
+}
+
 function resolveDueDate(key, periodFilterVal) {
     window.earliestSubmissions = {};
     allStudents.forEach(s => {
@@ -1322,7 +1337,7 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
 
     sortedKeys.forEach((key, i) => {
         const info = assignmentMap.get(key);
-        let tooltip = `${key}${info.dueDate ? ' | Due: ' + info.dueDate : ''}${info.instructions ? ' | ' + info.instructions : ''}`;
+        let tooltip = `${allAssignments[key]?.title || key}${info.dueDate ? ' | Due: ' + info.dueDate : ''}${info.instructions ? ' | ' + info.instructions : ''}`;
         // Copy Scores: unit tests only (Unit1-Exam, Unit2-Exam, ...) -- for
         // pulling just that one column's scores, in gradebook row order,
         // into whatever format the district/admin wants them reported in,
@@ -1345,7 +1360,7 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
             : '';
         headHtml += `<th class="header-main-blue" data-col-index="${i}"><div class="h-100 d-flex flex-column align-items-center justify-content-end pb-2">
             ${tagBadge}
-            <span class="vertical-text analytics-trigger text-white fw-bold" title="${tooltip.replace(/"/g, "'")}" data-assignment="${key}">${abbreviateAssignmentName(key)}</span>
+            <span class="vertical-text analytics-trigger text-white fw-bold" title="${tooltip.replace(/"/g, "'")}" data-assignment="${key}">${escapeHtml(displayTitle(key))}</span>
             <div class="d-flex gap-1 justify-content-center w-100">${copyBtn}<i class="fas fa-edit text-white-50 x-small edit-col-btn" data-assignment="${key}"></i><i class="fas fa-trash-alt text-white-50 x-small delete-col-btn" data-assignment="${key}"></i></div></div></th>`;
     });
     thead.innerHTML = headHtml + '</tr>';
