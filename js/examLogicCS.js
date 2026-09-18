@@ -619,32 +619,68 @@ async function checkUnitPrerequisite(unit) {
     const unitNum = parseInt(unit, 10);
     if (isNaN(unitNum) || unitNum < 2 || unitNum > 7) return { ok: true };
 
-    const prevExamId = `Unit${unitNum - 1}-Exam`;
+    const examId = `Unit${unitNum}-Exam`;
     try {
-        const res = await fetch(`/api/student/grades?student_id=${encodeURIComponent(studentId)}`);
+        // Shared with the real server-side gate (server/routes/gradebook.js)
+        // instead of duplicating the score check here -- this version also
+        // checks unit_prereq_overrides, so a teacher's unlock (from either
+        // the admin tool or the code box below) actually takes effect here
+        // instead of leaving the student stuck on this screen forever.
+        const res = await fetch(`/api/exam/check-prerequisite?student_id=${encodeURIComponent(studentId)}&exam_id=${encodeURIComponent(examId)}`);
         if (!res.ok) return { ok: true }; // fail open on an API hiccup
-        const data = await res.json();
-        const prev = (data.responses || []).find(r => r.exam_id === prevExamId);
-        if (!prev) return { ok: false, prevExamId, pct: 0 };
-        const pct = Number(prev.total_points) > 0 ? (Number(prev.score) / Number(prev.total_points)) * 100 : 0;
-        return { ok: pct >= 60, prevExamId, pct };
+        return await res.json();
     } catch (e) {
         console.error('[examLogicCS] Prerequisite check failed:', e);
         return { ok: true }; // fail open -- server-side check is the real gate
     }
 }
 
-function renderPrerequisiteBlock(prevExamId, pct) {
+function renderPrerequisiteBlock(prevExamId, pct, unit) {
     const container = document.getElementById('exam-container');
     if (!container) return;
     const prevLabel = prevExamId.replace(/-/g, ' ').replace('Exam', 'Exam');
+    const unitExamId = `Unit${parseInt(unit, 10)}-Exam`;
     container.innerHTML = `
         <div class="alert alert-warning text-center shadow p-5">
             <h4 class="fw-bold"><i class="fas fa-lock me-2"></i>This Unit Is Locked</h4>
             <p class="mb-1">You need a score of at least <strong>60%</strong> on <strong>${escapeHtml(prevLabel)}</strong> to unlock this exam.</p>
             <p class="text-muted small mb-4">Your current score on ${escapeHtml(prevLabel)}: ${pct.toFixed(0)}%</p>
             <a href="/cs-interactive.html" class="btn btn-warning fw-bold">&laquo; Back to Class</a>
+            <div class="mt-3">
+                <a href="#" id="override-toggle-link" class="small text-muted">Override</a>
+                <div id="override-box" class="d-none mt-2">
+                    <div class="input-group input-group-sm mx-auto" style="max-width: 220px;">
+                        <input type="text" id="override-code-input" class="form-control text-center" maxlength="6" inputmode="numeric">
+                        <button class="btn btn-outline-secondary" id="override-submit-btn">Go</button>
+                    </div>
+                </div>
+            </div>
         </div>`;
+
+    document.getElementById('override-toggle-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('override-box')?.classList.remove('d-none');
+        document.getElementById('override-code-input')?.focus();
+    });
+    document.getElementById('override-submit-btn')?.addEventListener('click', async () => {
+        const input = document.getElementById('override-code-input');
+        const code = input ? input.value.trim() : '';
+        try {
+            const res = await fetch('/api/exam/unlock-prereq', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: studentId, unit_exam_id: unitExamId, code })
+            });
+            if (res.ok) {
+                window.location.reload();
+            } else if (input) {
+                input.value = '';
+                input.placeholder = 'Try again';
+            }
+        } catch (e) {
+            if (input) { input.value = ''; input.placeholder = 'Try again'; }
+        }
+    });
 }
 
 // After a failed attempt (<80%), a retake is blocked until the teacher
@@ -818,7 +854,7 @@ async function initExam(config) {
     // someone who's actually eligible.
     const prereq = await checkUnitPrerequisite(currentUnit);
     if (!prereq.ok) {
-        renderPrerequisiteBlock(prereq.prevExamId, prereq.pct);
+        renderPrerequisiteBlock(prereq.prevExamId, prereq.pct, currentUnit);
         return;
     }
 

@@ -106,7 +106,7 @@ async function checkUnitPrerequisite(connection, studentId, examId) {
         'SELECT score, total_points FROM responses WHERE student_id = ? AND exam_id = ?',
         [studentId, prevExamId]
     );
-    if (rows.length === 0) return { ok: false, prevExamId };
+    if (rows.length === 0) return { ok: false, prevExamId, pct: 0 };
     const pct = Number(rows[0].total_points) > 0 ? (Number(rows[0].score) / Number(rows[0].total_points)) * 100 : 0;
     return { ok: pct >= 60, prevExamId, pct };
 }
@@ -601,6 +601,69 @@ router.post('/admin/unit-prereq-override', async (req, res) => {
             `INSERT INTO unit_prereq_overrides (student_id, unit_exam_id, cleared_by) VALUES (?, ?, ?)
              ON DUPLICATE KEY UPDATE cleared_by = VALUES(cleared_by), cleared_at = NOW()`,
             [student_id, unit_exam_id, cleared_by || null]
+        );
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save override' }); }
+});
+
+// Same deterministic per-day code as admin/daily-agenda.html's corner
+// stamp and examLogicCS.js's cooldown override (identical formula, ported
+// to Node) -- the teacher reads it off the agenda page and the student
+// types it in, no admin session needed on this device.
+function dailyOverrideCode() {
+    const d = new Date();
+    const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const input = dateStr + 'chs-guild-2026';
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
+    return String(hash % 1000000).padStart(6, '0');
+}
+
+// Student-reachable (unlike /admin/unit-prereq-override): the exam page's
+// own pre-check needs the real answer, overrides included, not just the
+// raw previous-exam score -- otherwise a student stays stuck on "This Unit
+// Is Locked" forever even after a teacher clears them from the admin tool,
+// since this is the gate that runs before the exam ever loads.
+router.get('/exam/check-prerequisite', async (req, res) => {
+    const { student_id, exam_id } = req.query;
+    if (!student_id || !exam_id) return res.status(400).json({ error: 'student_id and exam_id are required' });
+    const sessionUser = req.session?.user;
+    const isSelf = sessionUser?.student_id && String(sessionUser.student_id) === String(student_id);
+    const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
+    if (!isSelf && !isStaff) return res.status(401).json({ error: 'Not authorized.' });
+    try {
+        const connection = await getDbConnection();
+        const result = await checkUnitPrerequisite(connection, student_id, exam_id);
+        await connection.release();
+        res.json(result);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to check prerequisite' }); }
+});
+
+// The exam-page equivalent of /admin/unit-prereq-override -- reachable by
+// the student's own session (the code itself is the real authorization,
+// same trust model as the existing cooldown override), so a teacher can
+// clear this from the student's own screen instead of a separate admin
+// page, exactly like the cooldown override already works.
+router.post('/exam/unlock-prereq', async (req, res) => {
+    const { student_id, unit_exam_id, code } = req.body;
+    if (!student_id || !unit_exam_id || !code) {
+        return res.status(400).json({ error: 'student_id, unit_exam_id, and code are required' });
+    }
+    const sessionUser = req.session?.user;
+    const isSelf = sessionUser?.student_id && String(sessionUser.student_id) === String(student_id);
+    const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
+    if (!isSelf && !isStaff) return res.status(401).json({ error: 'Not authorized.' });
+    if (String(code).trim() !== dailyOverrideCode()) {
+        return res.status(403).json({ error: 'Incorrect code.' });
+    }
+    try {
+        const connection = await getDbConnection();
+        await ensureUnitPrereqOverridesTable(connection);
+        await connection.execute(
+            `INSERT INTO unit_prereq_overrides (student_id, unit_exam_id, cleared_by) VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE cleared_by = VALUES(cleared_by), cleared_at = NOW()`,
+            [student_id, unit_exam_id, 'daily-code']
         );
         await connection.release();
         res.json({ success: true });
