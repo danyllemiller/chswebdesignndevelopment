@@ -135,6 +135,16 @@ router.post('/practicum/complete-task', async (req, res) => {
 
     try {
         const connection = await getDbConnection();
+        // A responses row alone never shows up in either gradebook -- both
+        // the admin and student gradebook views build their assignment
+        // columns from the exams catalog, then join responses onto it. A
+        // task without a matching exams row is graded but invisible to
+        // everyone. Mirrors the same INSERT IGNORE admin/save-grade already
+        // does when a teacher grades something not yet in the catalog.
+        await connection.execute(
+            `INSERT IGNORE INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?)`,
+            [task.examId, task.title, task.points, PRACTICUM_COURSE_ID]
+        );
         await connection.execute(
             `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW())
              ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
