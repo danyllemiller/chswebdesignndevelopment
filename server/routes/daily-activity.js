@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
 const { getCurrentSchoolYear } = require('../helpers');
+const { checkRetakeClearance } = require('./gradebook');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -106,10 +107,18 @@ router.get('/admin/daily-activity', async (req, res) => {
             .sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
 
         // Retake clearances needed: CS unit-exam attempts where the most
-        // recent attempt was under 80% and the required next step (notes
-        // after the 1st fail, worksheets after the 2nd) hasn't been marked
-        // cleared yet. See checkRetakeClearance in routes/gradebook.js for
-        // the same logic applied server-side as the real enforcement gate.
+        // recent attempt was under 80%. This used to re-derive "cleared or
+        // not" itself (attempt count -> requirement, then a bare lookup
+        // against retake_clearances) instead of calling the real gate --
+        // which meant a student who'd already saved qualifying notes/
+        // worksheets still showed up here forever, because the auto-verify
+        // check that would clear them only ever runs on-demand, when THEY
+        // load the exam page (checkRetakeClearance in gradebook.js, via
+        // GET /api/exam/retake-status) -- never when a teacher just views
+        // this list. Calling the same function here runs that exact check
+        // (and its auto-INSERT into retake_clearances) for every candidate
+        // right now, so anyone who's already done the work drops off the
+        // list immediately instead of needing to visit the exam page first.
         const [attemptRows] = await connection.execute(
             `SELECT ea.student_id, ea.exam_id, ea.score, ea.total_points,
                     s.first_name, s.last_name, s.section_id
@@ -119,21 +128,6 @@ router.get('/admin/daily-activity', async (req, res) => {
              ORDER BY ea.student_id, ea.exam_id, ea.attempt_number ASC`,
             [currentYear]
         );
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS retake_clearances (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                student_id VARCHAR(50) NOT NULL,
-                exam_id VARCHAR(100) NOT NULL,
-                requirement ENUM('notes','worksheets') NOT NULL,
-                cleared_by VARCHAR(100),
-                cleared_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                INDEX idx_clearance_lookup (student_id, exam_id, requirement)
-            )
-        `);
-        const [clearanceRows] = await connection.execute(
-            `SELECT student_id, exam_id, requirement FROM retake_clearances`
-        );
-        const clearanceSet = new Set(clearanceRows.map(c => `${c.student_id}|${c.exam_id}|${c.requirement}`));
 
         const attemptsByKey = new Map();
         attemptRows.forEach(r => {
@@ -142,19 +136,18 @@ router.get('/admin/daily-activity', async (req, res) => {
             attemptsByKey.get(key).push(r);
         });
         const retakeClearancesNeeded = [];
-        attemptsByKey.forEach((attempts) => {
+        for (const attempts of attemptsByKey.values()) {
             const last = attempts[attempts.length - 1];
             const pct = Number(last.total_points) > 0 ? (Number(last.score) / Number(last.total_points)) * 100 : 0;
-            if (pct >= 80) return;
-            const requirement = attempts.length === 1 ? 'notes' : (attempts.length === 2 ? 'worksheets' : null);
-            if (!requirement) return;
-            if (clearanceSet.has(`${last.student_id}|${last.exam_id}|${requirement}`)) return;
+            if (pct >= 80) continue;
+            const status = await checkRetakeClearance(connection, last.student_id, last.exam_id);
+            if (status.ok) continue;
             retakeClearancesNeeded.push({
                 student_id: last.student_id, first_name: last.first_name, last_name: last.last_name,
                 section_id: last.section_id, exam_id: last.exam_id, attempt_number: attempts.length,
-                pct: Math.round(pct), requirement
+                pct: Math.round(pct), requirement: status.requirement
             });
-        });
+        }
 
         // Unit prerequisite overrides needed: 3+ real attempts on a unit
         // exam with the current BEST score (what checkUnitPrerequisite in

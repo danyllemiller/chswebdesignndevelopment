@@ -983,3 +983,4 @@ router.post('/admin/save-due-dates', async (req, res) => {
 });
 
 module.exports = router;
+module.exports.checkRetakeClearance = checkRetakeClearance;
