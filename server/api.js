@@ -71,6 +71,7 @@ router.use('/', require('./routes/budgetGame'));
 router.use('/', require('./routes/survey'));
 router.use('/', require('./routes/interviews'));
 router.use('/', require('./routes/practicum'));
+router.use('/', require('./routes/missed-questions'));
 router.use('/', require('./routes/uploads'));
 router.use('/', require('./routes/agenda'));
 router.use('/', require('./routes/appointments'));
