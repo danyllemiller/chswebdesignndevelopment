@@ -4,8 +4,8 @@
  */
 
 let currentStudent = null; // { student_id, first_name, last_name, username, section_id }
-const hostgatorUrl = "/upload.php";
-const hostgatorManageUrl = "/manage_files.php";
+const hostgatorUrl = "/api/upload";
+const hostgatorManageUrl = "/api/manage-files";
 
 // ==========================================
 // AUTH GUARD (MariaDB / auth-guard.js)

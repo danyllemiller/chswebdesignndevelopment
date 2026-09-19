@@ -7,21 +7,19 @@ const fs = require('fs');
 const path = require('path');
 
 // Every student needs a personal uploads/<student_id>/ folder for the
-// PHP-backed assignment dropbox (upload.php/manage_files.php) to write
-// into. Those scripts run as www-data, which previously had no way to
-// create a brand-new folder there itself (the uploads/ root wasn't
-// writable by it), so a student's very first upload attempt failed
-// outright until someone noticed. Creating it here -- the moment the
-// student record itself is created -- means it always exists before a
-// student could ever reach the upload form. chmod 777 rather than
-// matching PHP's own 755 because this folder is owned by the Node
-// process's user, not www-data, so www-data needs "other" write access
-// to actually save files into it later.
+// assignment dropbox (server/routes/uploads.js) to write into. Creating it
+// here -- the moment the student record itself is created -- means it
+// always exists before a student could ever reach the upload form, rather
+// than relying on the upload route's own mkdir on first write.
+// Plain 0o755: the dropbox route runs in this same Node process, so unlike
+// the old PHP scripts (which ran as www-data and needed world-write access
+// into a folder this process owned) there's no separate OS user that needs
+// "other" permission bits here anymore.
 function ensureUploadFolder(studentId) {
     try {
         const dir = path.join(__dirname, '..', '..', 'uploads', String(studentId));
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        fs.chmodSync(dir, 0o777);
+        fs.chmodSync(dir, 0o755);
     } catch (err) {
         console.error(`Could not create upload folder for ${studentId}:`, err.message);
     }

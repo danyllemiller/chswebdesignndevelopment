@@ -202,10 +202,10 @@ router.get('/admin/daily-activity', async (req, res) => {
             });
         });
 
-        // Uploaded files have zero database tracking at all (upload.php is
-        // pure filesystem), so there's genuinely no way to know from this
-        // data whether a file has already been graded -- labeled as
-        // "uploaded that day," not "ungraded," because that isn't knowable.
+        // Uploaded files have zero database tracking at all (the dropbox
+        // route is pure filesystem), so there's genuinely no way to know
+        // from this data whether a file has already been graded -- labeled
+        // as "uploaded that day," not "ungraded," because that isn't knowable.
         let uploads = [];
         try {
             const entries = await fs.readdir(UPLOADS_ROOT, { withFileTypes: true });

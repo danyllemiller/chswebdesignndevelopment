@@ -6,7 +6,7 @@ const { getDbConnection } = require('../db');
 const { resolveCourseId, clampScore, requireSelfOrStaff, requireLogin } = require('../helpers');
 
 // Same students.section_id -> uploads/<student_id>/ layout roster.js already
-// creates on account setup (PHP's upload.php/manage_files.php write there).
+// creates on account setup (server/routes/uploads.js writes there).
 const UPLOADS_ROOT = path.join(__dirname, '..', '..', 'uploads');
 
 router.get('/student/section-classmates', requireSelfOrStaff('exclude_student_id'), async (req, res) => {

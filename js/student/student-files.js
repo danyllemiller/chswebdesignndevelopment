@@ -5,8 +5,8 @@
  * INCLUDES: Peer-to-peer file sharing, Code Editor, and Fetch API fix.
  */
 
-const HOSTGATOR_UPLOAD_URL = "/upload.php";
-const HOSTGATOR_MANAGE_URL = "/manage_files.php";
+const HOSTGATOR_UPLOAD_URL = "/api/upload";
+const HOSTGATOR_MANAGE_URL = "/api/manage-files";
 
 let myOwnStudentId = null;
 let myOwnStudentData = null; // { student_id, first_name, last_name, section_id, username }

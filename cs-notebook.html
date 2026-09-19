@@ -762,7 +762,7 @@ function getDefaultWorksheetTemplate() {
                 formData.append('assignment', activityId || 'activity');
                 formData.append('file', file);
                 formData.append('path', `submissions/${activityId || 'activity'}_${file.name}`);
-                const resp = await fetch('/upload.php', { method: 'POST', body: formData });
+                const resp = await fetch('/api/upload', { method: 'POST', body: formData });
                 const res = await resp.json();
                 if (res.success) {
                     if (contentIn) contentIn.value += `<p><strong>Attached file:</strong> ${file.name}</p>`;
@@ -793,7 +793,7 @@ function getDefaultWorksheetTemplate() {
         // student can meaningfully type into this editor -- on a real
         // submit, fold in whatever they attached (a pasted link goes into
         // the note content itself; a real file goes through the same
-        // upload.php mechanism the Upload tab already uses, landing under
+        // /api/upload mechanism the Upload tab already uses, landing under
         // this student's own folder tagged with the REAL activity's
         // exam_id rather than the Upload tab's generic "Artifact Upload"
         // key -- so it's tied to the assignment that's actually being
