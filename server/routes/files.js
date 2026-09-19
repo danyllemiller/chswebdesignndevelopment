@@ -7,7 +7,12 @@ const { requireSelfOrStaff, requireStaff, requireLogin } = require('../helpers')
 
 const REPO_ROOT = path.join(__dirname, '..', '..');
 
-router.post('/save-csv.php', requireStaff, express.text({ type: '*/*', limit: '10mb' }), async (req, res) => {
+// Was registered at '/save-csv.php' (matching the .php file it replaced),
+// but nginx's `location ~ \.php$` block hands any .php-suffixed request
+// straight to PHP-FPM regardless of whether Node has a route there --
+// confirmed live, since that's exactly what broke every other route ported
+// this same way. Dropped the suffix here for the same reason.
+router.post('/save-csv', requireStaff, express.text({ type: '*/*', limit: '10mb' }), async (req, res) => {
     try {
         const text = typeof req.body === 'string' ? req.body : '';
         await fs.writeFile(path.join(REPO_ROOT, 'special-dates.csv'), text, 'utf8');

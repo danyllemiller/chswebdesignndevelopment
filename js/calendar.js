@@ -33,7 +33,7 @@ const PERIOD_COLORS = [
 async function getBellSchedule() {
     if (bellScheduleCache) return bellScheduleCache;
     try {
-        const res = await fetch('/api/bell-schedule.php');
+        const res = await fetch('/api/bell-schedule');
         if (!res.ok) return (bellScheduleCache = []);
         const data = await res.json();
         bellScheduleCache = data.schedule || [];
@@ -104,13 +104,13 @@ async function loadCalendarData() {
     } catch {}
 
     try {
-        const res = await fetch('/api/school-config.php');
+        const res = await fetch('/api/school-config');
         if (res.ok) schoolConfig = await res.json();
     } catch {}
 
     try {
         const bucket = getStudentCalendarBucket();
-        const url = bucket ? `/api/events.php?bucket=${encodeURIComponent(bucket)}` : '/api/events.php';
+        const url = bucket ? `/api/events?bucket=${encodeURIComponent(bucket)}` : '/api/events';
         const res = await fetch(url);
         if (res.ok) {
             const data = await res.json();
@@ -166,7 +166,7 @@ async function initCalendar() {
             const text = e.target.result;
             showCsvStatus('Saving to server…', 'success');
             try {
-                const res = await fetch('/api/save-csv.php', {
+                const res = await fetch('/api/save-csv', {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
                     body: text,
@@ -194,7 +194,7 @@ async function initCalendar() {
         if (!confirm('Remove duplicate calendar events? This only deletes exact duplicates (same date, title, type, and description) — events that just happen to share a date are left alone.')) return;
         showDedupeStatus('Checking for duplicates…', 'success');
         try {
-            const res = await fetch('/api/dedupe-calendar.php', { method: 'POST' });
+            const res = await fetch('/api/dedupe-calendar', { method: 'POST' });
             const data = await res.json();
             if (data.success) {
                 await loadCalendarData();
@@ -393,7 +393,7 @@ function updateDaySidebar(dateStr) {
 async function deleteEvent(id, dateStr) {
     if (!confirm('Delete this event?')) return;
     try {
-        const res  = await fetch(`/api/events.php?id=${id}`, { method: 'DELETE' });
+        const res  = await fetch(`/api/events?id=${id}`, { method: 'DELETE' });
         const data = await res.json();
         if (data.success) {
             rawEvents.set(dateStr, (rawEvents.get(dateStr) || []).filter(e => e.id !== id));
@@ -885,7 +885,7 @@ async function saveSingleEvent() {
     try {
         const body = { event_date: date, title, type, description: desc, all_day: allDay, start_time: start, end_time: end };
         if (id) body.id = id;
-        const res  = await fetch('/api/events.php', {
+        const res  = await fetch('/api/events', {
             method:  id ? 'PUT' : 'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify(body),
@@ -933,7 +933,7 @@ async function loadSlots(date) {
     container.innerHTML = '<p class="small text-muted">Loading...</p>';
 
     try {
-        const res  = await fetch(`/api/appointments/slots.php?date=${date}`);
+        const res  = await fetch(`/api/appointments/slots?date=${date}`);
         const data = await res.json();
 
         if (!data.slots?.length) {
@@ -990,7 +990,7 @@ async function submitBooking() {
     btn.textContent = 'Sending…';
 
     try {
-        const res  = await fetch('/api/appointments/book.php', {
+        const res  = await fetch('/api/appointments/book', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ student_id: studentId, date, time: selectedSlot, reason }),
@@ -1018,7 +1018,7 @@ async function loadTeacherDashboard() {
     const approvedEl = document.getElementById('approved-appointments');
 
     try {
-        const res  = await fetch('/api/appointments/requests.php?role=teacher');
+        const res  = await fetch('/api/appointments/requests?role=teacher');
         const data = await res.json();
         const all  = data.appointments || [];
 
@@ -1075,7 +1075,7 @@ function apptCard(a, showActions) {
 async function updateApptStatus(id, status) {
     const teacherId = window.dacAuthData?.user?.student_id;
     try {
-        const res  = await fetch('/api/appointments/update-status.php', {
+        const res  = await fetch('/api/appointments/update-status', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ id, status, teacher_id: teacherId }),
@@ -1097,7 +1097,7 @@ async function renderOfficeHoursForm() {
     // Group saved windows by day_of_week
     let byDay = {};
     try {
-        const res  = await fetch('/api/appointments/office-hours.php');
+        const res  = await fetch('/api/appointments/office-hours');
         const data = await res.json();
         (data.hours || []).forEach(h => {
             const d = +h.day_of_week;
@@ -1171,7 +1171,7 @@ async function saveOfficeHours() {
 
     const btn = document.getElementById('btn-save-office-hours');
     try {
-        const res  = await fetch('/api/appointments/office-hours.php', {
+        const res  = await fetch('/api/appointments/office-hours', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ teacher_id: teacherId, hours }),
@@ -1277,7 +1277,7 @@ async function loadBellSchedule() {
 
     let rows = [];
     try {
-        const res  = await fetch('/api/bell-schedule.php');
+        const res  = await fetch('/api/bell-schedule');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         rows = (data.schedule || []).filter(r => r.schedule_type === activeBellSched);
@@ -1354,12 +1354,12 @@ async function saveBellSchedule() {
             : { regular_start: startVal, regular_end: endVal };
 
         const [schedRes] = await Promise.all([
-            fetch('/api/bell-schedule.php', {
+            fetch('/api/bell-schedule', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ teacher_id: window.dacAuthData?.user?.student_id, schedule_types: [activeBellSched], periods }),
             }),
-            fetch('/api/school-config.php', {
+            fetch('/api/school-config', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify(configPayload),

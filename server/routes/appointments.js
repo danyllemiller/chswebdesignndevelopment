@@ -16,7 +16,7 @@ const router = express.Router();
 const { getDbConnection } = require('../db');
 const { requireLogin, requireStaff, requireSelfOrStaff, isStaffSession, isSelfOrStaffSession } = require('../helpers');
 
-router.get('/appointments/slots.php', requireLogin, async (req, res) => {
+router.get('/appointments/slots', requireLogin, async (req, res) => {
     const date = String(req.query.date || '').trim();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return res.status(400).json({ error: 'date param required (YYYY-MM-DD)' });
 
@@ -57,7 +57,7 @@ router.get('/appointments/slots.php', requireLogin, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch slots' }); }
 });
 
-router.post('/appointments/book.php', requireSelfOrStaff('student_id'), async (req, res) => {
+router.post('/appointments/book', requireSelfOrStaff('student_id'), async (req, res) => {
     const studentId = String(req.body?.student_id || '').trim();
     const date = String(req.body?.date || '').trim();
     const time = String(req.body?.time || '').trim();
@@ -85,7 +85,7 @@ router.post('/appointments/book.php', requireSelfOrStaff('student_id'), async (r
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to book appointment' }); }
 });
 
-router.get('/appointments/requests.php', async (req, res) => {
+router.get('/appointments/requests', async (req, res) => {
     const role = String(req.query.role || 'student');
     const studentId = String(req.query.student_id || '').trim();
 
@@ -129,7 +129,7 @@ router.get('/appointments/requests.php', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch appointments' }); }
 });
 
-router.post('/appointments/update-status.php', requireStaff, async (req, res) => {
+router.post('/appointments/update-status', requireStaff, async (req, res) => {
     const id = parseInt(req.body?.id, 10) || 0;
     const status = String(req.body?.status || '').trim();
     const teacherNote = String(req.body?.teacher_note || '').trim();
@@ -147,7 +147,7 @@ router.post('/appointments/update-status.php', requireStaff, async (req, res) =>
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update status' }); }
 });
 
-router.get('/appointments/office-hours.php', requireLogin, async (req, res) => {
+router.get('/appointments/office-hours', requireLogin, async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(
@@ -158,7 +158,7 @@ router.get('/appointments/office-hours.php', requireLogin, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch office hours' }); }
 });
 
-router.post('/appointments/office-hours.php', requireStaff, async (req, res) => {
+router.post('/appointments/office-hours', requireStaff, async (req, res) => {
     const hours = Array.isArray(req.body?.hours) ? req.body.hours : [];
     try {
         const connection = await getDbConnection();

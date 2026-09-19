@@ -250,49 +250,28 @@ router.post('/admin/checklist/reset', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to reset checklist' }); }
 });
 
-// --- LEGACY PHP CALENDAR ENDPOINTS (bell-schedule.php, events.php,
-// school-config.php, dedupe-calendar.php) --------------------------------
+// --- LEGACY PHP CALENDAR ENDPOINTS (bell-schedule, events, school-config,
+// dedupe-calendar) ---------------------------------------------------------
 // These four .php files had NO server-side auth at all -- bell-schedule.php's
 // POST had a client-supplied `teacher_id` check that was silently skipped
 // whenever the field was just omitted from the request, and events.php's
 // POST/PUT/DELETE had no check whatsoever, meaning anyone who found the URL
-// could wipe/rewrite the whole school calendar or bell schedule. Reusing
-// the exact same URL (including the .php suffix every existing front-end
-// caller already uses) and response shape here, then deleting the real .php
-// file, so there's no ambiguity about which implementation actually serves
-// the request regardless of how the front-facing web server routes .php.
-
-router.get('/bell-schedule.php', requireLogin, async (req, res) => {
-    const type = String(req.query.type || '').trim();
-    try {
-        const connection = await getDbConnection();
-        let rows;
-        if (type) {
-            [rows] = await connection.execute(
-                `SELECT id, schedule_type, period_label, sort_order,
-                        TIME_FORMAT(start_time,'%H:%i') AS start_time,
-                        TIME_FORMAT(end_time,'%H:%i')   AS end_time,
-                        section_id, course_name
-                 FROM bell_schedule WHERE schedule_type = ?
-                 ORDER BY sort_order ASC, start_time ASC`,
-                [type]
-            );
-        } else {
-            [rows] = await connection.execute(
-                `SELECT id, schedule_type, period_label, sort_order,
-                        TIME_FORMAT(start_time,'%H:%i') AS start_time,
-                        TIME_FORMAT(end_time,'%H:%i')   AS end_time,
-                        section_id, course_name
-                 FROM bell_schedule
-                 ORDER BY schedule_type ASC, sort_order ASC, start_time ASC`
-            );
-        }
-        await connection.release();
-        res.json({ schedule: rows });
-    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch bell schedule' }); }
-});
-
-router.post('/bell-schedule.php', requireStaff, async (req, res) => {
+// could wipe/rewrite the whole school calendar or bell schedule.
+//
+// These were first ported keeping the exact .php-suffixed URL, on the
+// assumption that deleting the real .php file would let Node's route at
+// that same path take over. That assumption was wrong: nginx's
+// `location ~ \.php$` block matches by extension alone and hands the
+// request straight to PHP-FPM, with no fallback to Node when the file is
+// missing -- confirmed live (every .php-suffixed route here 404'd after
+// deploy, while the identical non-.php routes worked). Fixing that
+// properly means editing shared nginx config that also serves other sites
+// on this box; fixing it here instead -- dropping the suffix, matching
+// every other route in this app -- is the same net result with none of
+// that blast radius. The five front-end callers were updated to match.
+// GET /bell-schedule already existed above (added earlier, same query) --
+// only the POST (write) side was missing, so only that's added here.
+router.post('/bell-schedule', requireStaff, async (req, res) => {
     const { schedule_type: type, periods } = req.body || {};
     const saveAll = !!(req.body && req.body.all);
     const schedTypes = Array.isArray(req.body?.schedule_types)
@@ -337,7 +316,7 @@ router.post('/bell-schedule.php', requireStaff, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save bell schedule' }); }
 });
 
-router.get('/events.php', requireLogin, async (req, res) => {
+router.get('/events', requireLogin, async (req, res) => {
     const bucket = String(req.query.bucket || '').trim();
     try {
         const connection = await getDbConnection();
@@ -368,7 +347,7 @@ router.get('/events.php', requireLogin, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch events' }); }
 });
 
-router.post('/events.php', requireStaff, async (req, res) => {
+router.post('/events', requireStaff, async (req, res) => {
     const { event_date, title, type, description } = req.body || {};
     const date = String(event_date || '').trim();
     const evtTitle = String(title || '').trim();
@@ -393,7 +372,7 @@ router.post('/events.php', requireStaff, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to add event' }); }
 });
 
-router.put('/events.php', requireStaff, async (req, res) => {
+router.put('/events', requireStaff, async (req, res) => {
     const id = parseInt(req.body?.id, 10) || 0;
     const date = String(req.body?.event_date || '').trim();
     const evtTitle = String(req.body?.title || '').trim();
@@ -417,7 +396,7 @@ router.put('/events.php', requireStaff, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update event' }); }
 });
 
-router.delete('/events.php', requireStaff, async (req, res) => {
+router.delete('/events', requireStaff, async (req, res) => {
     const id = parseInt(req.query.id, 10) || 0;
     if (!id) return res.status(400).json({ error: 'id required' });
     try {
@@ -429,7 +408,7 @@ router.delete('/events.php', requireStaff, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete event' }); }
 });
 
-router.post('/dedupe-calendar.php', requireStaff, async (req, res) => {
+router.post('/dedupe-calendar', requireStaff, async (req, res) => {
     try {
         const connection = await getDbConnection();
         await ensureCalendarEventsTable(connection);
@@ -458,7 +437,7 @@ const SCHOOL_CONFIG_DDL = `CREATE TABLE IF NOT EXISTS school_config (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 const SCHOOL_CONFIG_KEYS = ['regular_start', 'regular_end', 'summer_start', 'summer_end'];
 
-router.get('/school-config.php', requireLogin, async (req, res) => {
+router.get('/school-config', requireLogin, async (req, res) => {
     try {
         const connection = await getDbConnection();
         await connection.execute(SCHOOL_CONFIG_DDL);
@@ -472,7 +451,7 @@ router.get('/school-config.php', requireLogin, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch school config' }); }
 });
 
-router.post('/school-config.php', requireStaff, async (req, res) => {
+router.post('/school-config', requireStaff, async (req, res) => {
     try {
         const connection = await getDbConnection();
         await connection.execute(SCHOOL_CONFIG_DDL);

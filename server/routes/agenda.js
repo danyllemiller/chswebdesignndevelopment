@@ -27,7 +27,7 @@ const AGENDA_SCHEDULE_DDL = `CREATE TABLE IF NOT EXISTS agenda_schedule (
 
 // This is the teacher's own daily-planning tool (admin/daily-agenda.html),
 // not student-facing, so staff-only rather than merely requireLogin.
-router.get('/agenda/get.php', requireStaff, async (req, res) => {
+router.get('/agenda/get', requireStaff, async (req, res) => {
     const course = String(req.query.course || '').trim();
     if (!course) return res.status(400).json({ error: 'course is required' });
     try {
@@ -56,7 +56,7 @@ router.get('/agenda/get.php', requireStaff, async (req, res) => {
 });
 
 // Under /admin/ -- already covered by the blanket admin gate in server/api.js.
-router.post('/admin/save-agenda-content.php', async (req, res) => {
+router.post('/admin/save-agenda-content', async (req, res) => {
     const course = String(req.body?.course || '').trim();
     const blockNum = parseInt(req.body?.block_num, 10) || 0;
     const content = req.body?.content;

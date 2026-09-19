@@ -1500,7 +1500,7 @@
         // Load DB events (manually added school events + real class due dates,
         // filtered to this student's enrolled course where we can tell).
         const bucket = getPlannerCourseBucket();
-        const evUrl = bucket ? `/api/events.php?bucket=${encodeURIComponent(bucket)}` : '/api/events.php';
+        const evUrl = bucket ? `/api/events?bucket=${encodeURIComponent(bucket)}` : '/api/events';
         const evRes = await fetch(evUrl);
         if (evRes.ok) {
           const data = await evRes.json().catch(() => null);

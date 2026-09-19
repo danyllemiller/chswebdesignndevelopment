@@ -528,7 +528,7 @@ let currentCourse = 'cs';
 
 async function init() {
   try {
-    const res  = await fetch('/api/admin/get-due-dates.php');
+    const res  = await fetch('/api/admin/get-due-dates');
     const data = await res.json();
     existingExams = data.exams  || {};
     periods       = data.sections || [];
@@ -841,7 +841,7 @@ async function saveAll(syncCal) {
   }
 
   try {
-    const res  = await fetch('/api/admin/save-due-dates.php', {
+    const res  = await fetch('/api/admin/save-due-dates', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ assignments, sync_calendar: syncCal })
@@ -937,7 +937,7 @@ function toggleSmartPanel() {
 async function initSmartPanel() {
   // Fetch bell schedule to build label → type map
   try {
-    const bs = await (await fetch('/api/bell-schedule.php')).json();
+    const bs = await (await fetch('/api/bell-schedule')).json();
     bellLabelTypeMap = {};
     for (const row of (Array.isArray(bs) ? bs : (bs.periods || []))) {
       if (row.period_label && row.schedule_type) {
@@ -1040,7 +1040,7 @@ function parseSpecialDatesCSV(text) {
 // Builds the same date → day-type map the Calendar page shows: the static
 // special-dates.csv as a base, with calendar_events (DB) layered on top only
 // where the DB entry outranks the CSV's type. The Smart Auto-Schedule tools
-// used to read /api/events.php alone, which skips that base CSV entirely --
+// used to read /api/events alone, which skips that base CSV entirely --
 // if a school year's rotation was never synced into the DB (or got reset to
 // 'none' by an old import bug), every auto-schedule tool reported "no meeting
 // days" even though the real Calendar page showed the correct A/B/C days,
@@ -1055,7 +1055,7 @@ async function buildCalMap() {
     }
   } catch (_) { /* fall back to DB-only below */ }
 
-  const calData = await (await fetch('/api/events.php')).json();
+  const calData = await (await fetch('/api/events')).json();
   for (const ev of (calData.events || [])) {
     const d = ev.event_date;
     if (!d) continue;

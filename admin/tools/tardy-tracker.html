@@ -284,8 +284,8 @@
     try {
       const [csvText, eventsData, bellData] = await Promise.all([
         fetch('/special-dates.csv').then(r => r.ok ? r.text() : '').catch(() => ''),
-        fetch('/api/events.php').then(r => r.ok ? r.json() : { events: [] }).catch(() => ({ events: [] })),
-        fetch('/api/bell-schedule.php').then(r => r.ok ? r.json() : { schedule: [] }).catch(() => ({ schedule: [] })),
+        fetch('/api/events').then(r => r.ok ? r.json() : { events: [] }).catch(() => ({ events: [] })),
+        fetch('/api/bell-schedule').then(r => r.ok ? r.json() : { schedule: [] }).catch(() => ({ schedule: [] })),
       ]);
       dayTypes = parseSpecialDatesCSV(csvText);
       (eventsData.events || []).forEach(mergeEventIntoDayTypes);

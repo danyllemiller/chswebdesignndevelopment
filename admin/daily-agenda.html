@@ -698,7 +698,7 @@ function chapterLabelToUrl(label) {
 }
 
 // ── Bell schedule (shared with /calendar.html: special-dates.csv + DB events decide
-// the day type; /api/bell-schedule.php holds the period times for each type) ──────
+// the day type; /api/bell-schedule holds the period times for each type) ──────
 let dayTypes = new Map();   // 'YYYY-MM-DD' -> { type, description }
 let bellSchedule = [];      // rows from bell_schedule table
 
@@ -1248,7 +1248,7 @@ if (!courseCfg) {
     content[currentBlock] = c;
 
     try {
-      const resp = await fetch('/api/admin/save-agenda-content.php', {
+      const resp = await fetch('/api/admin/save-agenda-content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ course, block_num: currentBlock, content: c })
@@ -1752,12 +1752,12 @@ if (!courseCfg) {
   // ── Load data ───────────────────────────────────────────────────────────
   const calendarLoad = Promise.all([
     fetch('/special-dates.csv').then(r => r.ok ? r.text() : '').then(parseSpecialDatesCSV).catch(() => {}),
-    fetch('/api/events.php').then(r => r.ok ? r.json() : { events: [] }).then(d => (d.events || []).forEach(mergeEventIntoDayTypes)).catch(() => {}),
-    fetch('/api/bell-schedule.php').then(r => r.ok ? r.json() : { schedule: [] }).then(d => { bellSchedule = d.schedule || []; }).catch(() => {}),
+    fetch('/api/events').then(r => r.ok ? r.json() : { events: [] }).then(d => (d.events || []).forEach(mergeEventIntoDayTypes)).catch(() => {}),
+    fetch('/api/bell-schedule').then(r => r.ok ? r.json() : { schedule: [] }).then(d => { bellSchedule = d.schedule || []; }).catch(() => {}),
   ]);
 
   Promise.all([
-    fetch(`/api/agenda/get.php?course=${encodeURIComponent(course)}`).then(r => r.json()),
+    fetch(`/api/agenda/get?course=${encodeURIComponent(course)}`).then(r => r.json()),
     calendarLoad
   ])
     .then(([data]) => {

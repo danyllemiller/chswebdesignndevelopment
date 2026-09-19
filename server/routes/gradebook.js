@@ -881,7 +881,7 @@ router.get('/admin/attempt-analytics', async (req, res) => {
 // the shared calendar). Kept at the exact .php-suffixed path admin/due-
 // dates.html already calls; both sit under /admin/ so the blanket admin
 // gate in server/api.js already covers them like every other route here.
-router.get('/admin/get-due-dates.php', async (req, res) => {
+router.get('/admin/get-due-dates', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [examRows] = await connection.execute(
@@ -908,7 +908,7 @@ router.get('/admin/get-due-dates.php', async (req, res) => {
 
 const DUE_DATE_COURSE_BUCKETS = { '05254G1S': 'WD1', '05254G2S': 'WD2', '10003GS': 'CS' };
 
-router.post('/admin/save-due-dates.php', async (req, res) => {
+router.post('/admin/save-due-dates', async (req, res) => {
     const assignments = req.body?.assignments;
     const doCalSync = req.body?.sync_calendar !== undefined ? !!req.body.sync_calendar : true;
     if (!Array.isArray(assignments)) return res.status(400).json({ error: 'assignments must be an array' });
