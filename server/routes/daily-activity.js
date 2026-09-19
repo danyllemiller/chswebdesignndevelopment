@@ -140,7 +140,7 @@ router.get('/admin/daily-activity', async (req, res) => {
             const last = attempts[attempts.length - 1];
             const pct = Number(last.total_points) > 0 ? (Number(last.score) / Number(last.total_points)) * 100 : 0;
             if (pct >= 80) continue;
-            const status = await checkRetakeClearance(connection, last.student_id, last.exam_id);
+            const status = await checkRetakeClearance(connection, last.student_id, last.exam_id, attempts);
             if (status.ok) continue;
             retakeClearancesNeeded.push({
                 student_id: last.student_id, first_name: last.first_name, last_name: last.last_name,

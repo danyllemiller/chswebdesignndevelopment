@@ -134,14 +134,19 @@ async function ensureRetakeClearanceTable(connection) {
     `);
 }
 
-async function checkRetakeClearance(connection, studentId, examId) {
+// preloadedAttempts lets a caller that already has every candidate's full
+// attempt history in memory (the daily-activity retake-clearance list,
+// which loads it in one bulk query for everyone up front) skip re-querying
+// exam_attempts once per student -- avoids turning an 18-student admin list
+// into 18+ extra round trips on top of the ones this function already makes.
+async function checkRetakeClearance(connection, studentId, examId, preloadedAttempts) {
     const m = /^Unit\d+-Exam$/i.exec(examId || '');
     if (!m) return { ok: true };
 
-    const [attempts] = await connection.execute(
+    const attempts = preloadedAttempts || (await connection.execute(
         'SELECT score, total_points FROM exam_attempts WHERE student_id = ? AND exam_id = ? ORDER BY attempt_number ASC',
         [studentId, examId]
-    );
+    ))[0];
     if (attempts.length === 0) return { ok: true };
 
     const last = attempts[attempts.length - 1];
