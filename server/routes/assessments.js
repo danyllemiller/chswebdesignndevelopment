@@ -164,7 +164,7 @@ router.get('/cs-exam-questions', requireLogin, async (req, res) => {
                 examIds
             );
             questions = rows.map(row => ({
-                question: row.question,
+                id: row.id, question: row.question,
                 options: [row.option_a, row.option_b, row.option_c, row.option_d],
                 answer: row.answer, hint: row.hint || '',
                 chapter: row.chapter !== null ? row.chapter : unitNum
@@ -180,7 +180,7 @@ router.get('/cs-exam-questions', requireLogin, async (req, res) => {
                 [unitNum]
             );
             questions = fallbackRows.map(row => ({
-                question: row.question,
+                id: row.id, question: row.question,
                 options: [row.option_a, row.option_b, row.option_c, row.option_d],
                 answer: row.answer, hint: row.hint || '',
                 chapter: row.chapter !== null ? row.chapter : unitNum
@@ -332,7 +332,7 @@ router.get('/wd-exam-questions', requireLogin, async (req, res) => {
         // option_c/d are empty strings (NOT NULL column), not a real 3rd/4th
         // choice, so they're dropped from the options array for that type.
         const questions = rows.map(row => ({
-            question: row.question,
+            id: row.id, question: row.question,
             options: row.question_type === 'tf' ? [row.option_a, row.option_b] : [row.option_a, row.option_b, row.option_c, row.option_d],
             answer: row.answer, chapter: row.chapter, type: row.question_type
         }));

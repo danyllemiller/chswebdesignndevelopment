@@ -1109,6 +1109,12 @@ async function processSubmission() {
     const totalQuestions = examQuestions.length;
     let correctCount = 0; // can be fractional -- a matching question earns partial credit
     const feedbackList = [];
+    // Per-question detail for the Most Missed Questions report
+    // (server/routes/missed-questions.js) -- this used to only exist
+    // transiently in a student's downloaded PDF, so a teacher had to
+    // physically collect PDFs to see it. Recording it here, on every real
+    // submission, means it's captured automatically going forward.
+    const questionDetails = [];
     examQuestions.forEach((q, i) => {
         if (q.type === 'matching') {
             // Partial credit: each correctly-matched pair earns its share of
@@ -1117,6 +1123,11 @@ async function processSubmission() {
             const truePairs = q.pairs || [];
             const correctPairs = truePairs.filter(p => answers[p.item] === p.target).length;
             if (truePairs.length > 0) correctCount += correctPairs / truePairs.length;
+            questionDetails.push({
+                question_id: q.id, matched_table: 'wd_matching_questions', question_text: q.question,
+                student_choice: truePairs.length > 0 ? `${correctPairs} of ${truePairs.length} matched correctly` : 'Unanswered',
+                is_correct: (truePairs.length > 0 && correctPairs === truePairs.length) ? 1 : 0
+            });
             return;
         }
         if (q.type === 'image_label') {
@@ -1125,16 +1136,26 @@ async function processSubmission() {
             const trueZones = q.answerZones || [];
             const correctZones = trueZones.filter(z => answers[z.key] === z.label).length;
             if (trueZones.length > 0) correctCount += correctZones / trueZones.length;
+            questionDetails.push({
+                question_id: q.id, matched_table: 'wd_image_labeling_questions', question_text: q.question,
+                student_choice: trueZones.length > 0 ? `${correctZones} of ${trueZones.length} labeled correctly` : 'Unanswered',
+                is_correct: (trueZones.length > 0 && correctZones === trueZones.length) ? 1 : 0
+            });
             return;
         }
         const userAnswerIdx = userAnswers[i];
-        if (userAnswerIdx !== undefined && q.options && q.options.length > 0) {
-            const userAnswer = q.options[userAnswerIdx];
-            const correctAnswer = q.answer || (q.options ? q.options[0] : '');
-            const isCorrect = userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+        const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
+        const studentChoiceText = isAnswered ? q.options[userAnswerIdx] : 'Unanswered';
+        const correctAnswer = q.answer || (q.options ? q.options[0] : '');
+        const isCorrect = isAnswered && studentChoiceText.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+        if (isAnswered) {
             if (isCorrect) correctCount++;
             else if (q.hint) feedbackList.push({ question: q.question.trim(), hint: q.hint });
         }
+        questionDetails.push({
+            question_id: q.id, matched_table: 'wd_questions', question_text: q.question,
+            student_choice: studentChoiceText, is_correct: isCorrect ? 1 : 0
+        });
     });
     // Scored the same way CS scores its unit/final exams: raw correct count
     // out of however many items are actually on this attempt, not
@@ -1171,7 +1192,10 @@ async function processSubmission() {
             const saveRes = await fetch('/api/submit-exam', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ student_id: studentId, exam_id: finalAssignmentKey, score: finalScore, total_points: finalTotal })
+                body: JSON.stringify({
+                    student_id: studentId, exam_id: finalAssignmentKey, score: finalScore, total_points: finalTotal,
+                    chapter_title: chapterTitle, report_type: 'CHAPTER EXAM REPORT', question_details: questionDetails
+                })
             });
             if (!saveRes.ok && saveRes.status === 503) {
                 try {

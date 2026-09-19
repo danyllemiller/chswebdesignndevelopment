@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
 const { resolveCourseId, getCurrentSchoolYear, isTestingWindowOpen, requireSelfOrStaff, requireLogin } = require('../helpers');
+const { insertQuestionDetails } = require('../lib/missedQuestionsStore');
 
 // mysql2 returns DATE columns as JS Date objects (local-timezone fields set to
 // match the stored date exactly), not strings. Reading those fields directly
@@ -225,7 +226,7 @@ async function checkRetakeClearance(connection, studentId, examId, preloadedAtte
 const TEST_EXAM_ID_PATTERN = /-Exam$|-Pre$|-Pre-Score$|Pre-Assessment/i;
 
 router.post('/submit-exam', async (req, res) => {
-    const { student_id, exam_id, score, total_points } = req.body;
+    const { student_id, exam_id, score, total_points, question_details, chapter_title, report_type } = req.body;
 
     // This endpoint had no identity check at all -- any request naming any
     // student_id could write any score for any exam, no login required.
@@ -343,6 +344,24 @@ router.post('/submit-exam', async (req, res) => {
                 [student_id, exam_id, score, effectiveTotalPoints]
             );
         }
+        // Captures the same per-question detail the PDF report used to be
+        // the only record of (server/routes/missed-questions.js), directly
+        // off every real submission -- recorded regardless of shouldUpdate
+        // above, since a retake attempt that didn't beat the existing score
+        // is still real signal about which questions gave this student
+        // trouble. Never allowed to fail the actual grade save: this is an
+        // analytics side-effect, not the thing a student is waiting on.
+        if (Array.isArray(question_details) && question_details.length > 0) {
+            try {
+                await insertQuestionDetails(connection, {
+                    studentId: student_id, chapterTitle: chapter_title, reportType: report_type,
+                    sourceFile: `live:${exam_id}:${student_id}:${Date.now()}`
+                }, question_details);
+            } catch (detailErr) {
+                console.error('[submit-exam] failed to record question details', detailErr);
+            }
+        }
+
         await connection.release();
         res.json({ success: true, keptHigher: !shouldUpdate });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save exam' }); }

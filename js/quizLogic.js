@@ -515,16 +515,26 @@ async function processResults() {
     // FIX: The API returns 'answer' but quizLogic was checking 'correct_answer' first (which is undefined)
     // Then it fell back to q.options[0] which is WRONG because the options were shuffled!
     let correctCount = 0;
+    // Per-question detail for the Most Missed Questions report
+    // (server/routes/missed-questions.js) -- captured on every real
+    // submission now instead of only existing transiently in a student's
+    // downloaded PDF. These pretest pools are static per-chapter JS data
+    // (js/data/*.js), not a DB table with its own primary key, so there's
+    // no question_id to send -- the server falls back to matching by
+    // question text against the question banks it does have.
+    const questionDetails = [];
     examQuestions.forEach((q, i) => {
-        if (userAnswers[i] !== undefined) {
-            const selectedOption = q.options[userAnswers[i]];
-            // FIX: Priority is q.answer (from API) OR q.options[0] (fallback - only use if no answer field)
-            // Never use correct_answer as it doesn't exist in the MariaDB API response!
-            const correctOption = q.answer || q.options[0];
-            if (selectedOption === correctOption) {
-                correctCount++;
-            }
-        }
+        const isAnswered = userAnswers[i] !== undefined;
+        const selectedOption = isAnswered ? q.options[userAnswers[i]] : 'Unanswered';
+        // FIX: Priority is q.answer (from API) OR q.options[0] (fallback - only use if no answer field)
+        // Never use correct_answer as it doesn't exist in the MariaDB API response!
+        const correctOption = q.answer || q.options[0];
+        const isCorrect = isAnswered && selectedOption === correctOption;
+        if (isCorrect) correctCount++;
+        questionDetails.push({
+            matched_table: 'daily_questions', question_text: q.question,
+            student_choice: selectedOption, is_correct: isCorrect ? 1 : 0
+        });
     });
     finalScore = correctCount;
     finalTotal = examQuestions.length;
@@ -694,7 +704,10 @@ async function processResults() {
                         exam_id: preAssmtExamId + '-Score',
                         score: finalScore,
                         total_points: finalTotal,
-                        course_id: pretestCourseId
+                        course_id: pretestCourseId,
+                        chapter_title: chapterTitle,
+                        report_type: 'DIAGNOSTIC ASSESSMENT REPORT',
+                        question_details: questionDetails
                     })
                 });
             } catch (e) {

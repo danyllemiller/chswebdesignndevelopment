@@ -1331,6 +1331,10 @@ async function processSubmission() {
         }))
     };
 
+    // Declared here (not inside the try block below) so it's still in scope
+    // down at the /api/submit-exam call, which happens after that block ends.
+    let questionDetails = [];
+
     try {
         // Calculate score using MariaDB (not Google Sheets webhook)
         const totalQuestions = examQuestions.length;
@@ -1345,10 +1349,11 @@ async function processSubmission() {
 
         examQuestions.forEach((q, i) => {
             const userAnswerIdx = userAnswers[i];
-            if (userAnswerIdx !== undefined && q.options && q.options.length > 0) {
-                const userAnswer = q.options[userAnswerIdx];
-                const correctAnswer = q.answer || (q.options ? q.options[0] : '');
-                const isCorrect = userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+            const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
+            const studentChoiceText = isAnswered ? q.options[userAnswerIdx] : 'Unanswered';
+            const correctAnswer = q.answer || (q.options ? q.options[0] : '');
+            const isCorrect = isAnswered && studentChoiceText.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+            if (isAnswered) {
                 if (isCorrect) {
                     correctCount++;
                 } else if (q.hint) {
@@ -1361,6 +1366,10 @@ async function processSubmission() {
                     if (isCorrect) chapterTally[key].correct++;
                 }
             }
+            questionDetails.push({
+                question_id: q.id, matched_table: 'questions', question_text: q.question,
+                student_choice: studentChoiceText, is_correct: isCorrect ? 1 : 0
+            });
         });
 
         finalScore = correctCount;
@@ -1462,7 +1471,10 @@ if (shouldSave) {
                     student_id: studentId,
                     exam_id: finalAssignmentKey,
                     score: finalScore,
-                    total_points: finalTotal
+                    total_points: finalTotal,
+                    chapter_title: chapterTitle,
+                    report_type: 'SUMMATIVE ASSESSMENT REPORT',
+                    question_details: questionDetails
                 })
             });
             if (!saveRes.ok) {
