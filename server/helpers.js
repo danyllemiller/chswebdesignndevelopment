@@ -70,10 +70,6 @@ async function ensureOffDaysTable(connection) {
 // since there's no real school calendar data source in the app to check
 // against instead.
 async function isTestingWindowOpen(connection) {
-    // TEMPORARY, for tonight's after-hours security-fix QA pass only --
-    // revert this line before students are back on the site. See git log
-    // for the matching revert commit.
-    if (process.env.TESTING_WINDOW_OVERRIDE === 'true') return { ok: true };
     await ensureOffDaysTable(connection);
     const now = new Date();
     const dow = now.getDay(); // 0=Sun, 6=Sat
