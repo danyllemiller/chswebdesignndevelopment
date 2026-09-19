@@ -321,9 +321,23 @@ Browser → Nginx (443) → Node/Express :3000
                           ├── /api/*       → server/auth.js + server/api.js
                           └── /*           → Static files from repo root</pre>
 
-        <p>There is <strong>no PHP runtime</strong> active — some legacy <code>.php</code> filenames exist in the repo but
-        Node routes intercept them at the API layer (e.g. <code>POST /api/save-csv.php</code>). Any
-        <code>.php</code> file served as static content will return raw source text, not executed output.</p>
+        <p><strong>Correction (2026-09-19): this section was wrong.</strong> A PHP runtime <em>is</em> active in
+        production and legacy <code>.php</code> files under <code>api/</code> and at the repo root (<code>upload.php</code>,
+        <code>manage_files.php</code>, and ~35 files under <code>api/</code>) really do execute, with their own direct
+        DB connections and <strong>no session/auth check of any kind</strong> — confirmed live, not by reading this doc.
+        The "Node intercepts them" claim below does not hold: Node having a route at the same path string does not
+        stop the front-facing web server from routing the matching <code>.php</code> request to PHP-FPM instead.
+        Several of these files carried this same false "not executed" claim in their own header comments. Do not
+        trust a <code>.php</code> file's own comment (or this doc) to know whether it's live — check for real
+        front-end callers and audit its auth directly. Fixed so far this session: <code>upload.php</code>,
+        <code>manage_files.php</code>, <code>bell-schedule.php</code>, <code>events.php</code>,
+        <code>school-config.php</code>, <code>dedupe-calendar.php</code> (rewritten as authenticated Node routes,
+        PHP file deleted), plus <code>submit-exam.php</code>, <code>clockin.php</code>, <code>cs-exam-questions.php</code>,
+        <code>save_pre_assessment.php</code>, <code>save_summative.php</code>, <code>setup-db.php</code> (deleted outright —
+        confirmed orphaned, superseded by an existing Node route). <strong>Not yet audited:</strong> the ~24 remaining
+        files under <code>api/admin/</code>, <code>api/appointments/</code>, <code>api/seed/</code>,
+        <code>api/student/</code>, and <code>api/agenda/</code> — treat every one of them as live and unauthenticated
+        until it's individually checked.</p>
       </section>
 
       <!-- TECH STACK -->

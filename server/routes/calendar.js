@@ -1,7 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { ensureOffDaysTable, requireLogin } = require('../helpers');
+const { ensureOffDaysTable, requireLogin, requireStaff } = require('../helpers');
+
+const CALENDAR_EVENTS_DDL = `CREATE TABLE IF NOT EXISTS calendar_events (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    event_date    DATE         NOT NULL,
+    title         VARCHAR(255) NOT NULL,
+    type          VARCHAR(20)  NOT NULL DEFAULT 'none',
+    description   TEXT,
+    all_day       TINYINT(1)   NOT NULL DEFAULT 1,
+    start_time    TIME                  DEFAULT NULL,
+    end_time      TIME                  DEFAULT NULL,
+    source        VARCHAR(20)  NOT NULL DEFAULT 'manual',
+    course_bucket VARCHAR(10)           DEFAULT NULL,
+    created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_date (event_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+async function ensureCalendarEventsTable(connection) {
+    await connection.execute(CALENDAR_EVENTS_DDL);
+}
 
 // School off-days -- holidays, teacher workdays, anything students aren't
 // in class -- used to gate test-taking to real school hours (see
@@ -230,6 +248,246 @@ router.post('/admin/checklist/reset', async (req, res) => {
         await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to reset checklist' }); }
+});
+
+// --- LEGACY PHP CALENDAR ENDPOINTS (bell-schedule.php, events.php,
+// school-config.php, dedupe-calendar.php) --------------------------------
+// These four .php files had NO server-side auth at all -- bell-schedule.php's
+// POST had a client-supplied `teacher_id` check that was silently skipped
+// whenever the field was just omitted from the request, and events.php's
+// POST/PUT/DELETE had no check whatsoever, meaning anyone who found the URL
+// could wipe/rewrite the whole school calendar or bell schedule. Reusing
+// the exact same URL (including the .php suffix every existing front-end
+// caller already uses) and response shape here, then deleting the real .php
+// file, so there's no ambiguity about which implementation actually serves
+// the request regardless of how the front-facing web server routes .php.
+
+router.get('/bell-schedule.php', requireLogin, async (req, res) => {
+    const type = String(req.query.type || '').trim();
+    try {
+        const connection = await getDbConnection();
+        let rows;
+        if (type) {
+            [rows] = await connection.execute(
+                `SELECT id, schedule_type, period_label, sort_order,
+                        TIME_FORMAT(start_time,'%H:%i') AS start_time,
+                        TIME_FORMAT(end_time,'%H:%i')   AS end_time,
+                        section_id, course_name
+                 FROM bell_schedule WHERE schedule_type = ?
+                 ORDER BY sort_order ASC, start_time ASC`,
+                [type]
+            );
+        } else {
+            [rows] = await connection.execute(
+                `SELECT id, schedule_type, period_label, sort_order,
+                        TIME_FORMAT(start_time,'%H:%i') AS start_time,
+                        TIME_FORMAT(end_time,'%H:%i')   AS end_time,
+                        section_id, course_name
+                 FROM bell_schedule
+                 ORDER BY schedule_type ASC, sort_order ASC, start_time ASC`
+            );
+        }
+        await connection.release();
+        res.json({ schedule: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch bell schedule' }); }
+});
+
+router.post('/bell-schedule.php', requireStaff, async (req, res) => {
+    const { schedule_type: type, periods } = req.body || {};
+    const saveAll = !!(req.body && req.body.all);
+    const schedTypes = Array.isArray(req.body?.schedule_types)
+        ? req.body.schedule_types.map(t => String(t).trim()).filter(Boolean)
+        : [];
+
+    try {
+        const connection = await getDbConnection();
+
+        if (saveAll) {
+            await connection.execute('DELETE FROM bell_schedule');
+        } else if (schedTypes.length > 0) {
+            const placeholders = schedTypes.map(() => '?').join(',');
+            await connection.execute(`DELETE FROM bell_schedule WHERE schedule_type IN (${placeholders})`, schedTypes);
+        } else if (type) {
+            await connection.execute('DELETE FROM bell_schedule WHERE schedule_type = ?', [String(type).trim()]);
+        } else {
+            await connection.release();
+            return res.status(400).json({ error: 'schedule_types array or schedule_type required' });
+        }
+
+        if (Array.isArray(periods) && periods.length > 0) {
+            for (let i = 0; i < periods.length; i++) {
+                const p = periods[i];
+                const label = String(p.period_label || '').trim();
+                const start = p.start_time || '08:00';
+                const end = p.end_time || '09:00';
+                if (!label || start >= end) continue;
+                const section = String(p.section_id || '').trim() || null;
+                const course = String(p.course_name || '').trim() || null;
+                const rowType = String(p.schedule_type || '').trim() || String(type || '').trim();
+                await connection.execute(
+                    `INSERT INTO bell_schedule (schedule_type, period_label, sort_order, start_time, end_time, section_id, course_name)
+                     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [rowType, label, i, start, end, section, course]
+                );
+            }
+        }
+
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save bell schedule' }); }
+});
+
+router.get('/events.php', requireLogin, async (req, res) => {
+    const bucket = String(req.query.bucket || '').trim();
+    try {
+        const connection = await getDbConnection();
+        await ensureCalendarEventsTable(connection);
+        let rows;
+        if (bucket) {
+            [rows] = await connection.execute(
+                `SELECT id, DATE_FORMAT(event_date,'%Y-%m-%d') AS event_date,
+                        title, type, description, all_day, source,
+                        TIME_FORMAT(start_time,'%H:%i') AS start_time,
+                        TIME_FORMAT(end_time,'%H:%i')   AS end_time
+                 FROM calendar_events
+                 WHERE course_bucket IS NULL OR course_bucket = ?
+                 ORDER BY event_date ASC`,
+                [bucket]
+            );
+        } else {
+            [rows] = await connection.execute(
+                `SELECT id, DATE_FORMAT(event_date,'%Y-%m-%d') AS event_date,
+                        title, type, description, all_day, source,
+                        TIME_FORMAT(start_time,'%H:%i') AS start_time,
+                        TIME_FORMAT(end_time,'%H:%i')   AS end_time
+                 FROM calendar_events ORDER BY event_date ASC`
+            );
+        }
+        await connection.release();
+        res.json({ events: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch events' }); }
+});
+
+router.post('/events.php', requireStaff, async (req, res) => {
+    const { event_date, title, type, description } = req.body || {};
+    const date = String(event_date || '').trim();
+    const evtTitle = String(title || '').trim();
+    const evtType = String(type || 'none').trim();
+    const desc = String(description || '').trim();
+    const allDay = req.body?.all_day ? 1 : 0;
+    const start = allDay ? null : (String(req.body?.start_time || '').trim() || null);
+    const end = allDay ? null : (String(req.body?.end_time || '').trim() || null);
+
+    if (!date || !evtTitle) return res.status(400).json({ error: 'event_date and title are required' });
+
+    try {
+        const connection = await getDbConnection();
+        await ensureCalendarEventsTable(connection);
+        const [result] = await connection.execute(
+            `INSERT INTO calendar_events (event_date, title, type, description, all_day, start_time, end_time)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [date, evtTitle, evtType, desc, allDay, start, end]
+        );
+        await connection.release();
+        res.json({ success: true, id: result.insertId });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to add event' }); }
+});
+
+router.put('/events.php', requireStaff, async (req, res) => {
+    const id = parseInt(req.body?.id, 10) || 0;
+    const date = String(req.body?.event_date || '').trim();
+    const evtTitle = String(req.body?.title || '').trim();
+    const evtType = String(req.body?.type || 'none').trim();
+    const desc = String(req.body?.description || '').trim();
+    const allDay = req.body?.all_day ? 1 : 0;
+    const start = allDay ? null : (String(req.body?.start_time || '').trim() || null);
+    const end = allDay ? null : (String(req.body?.end_time || '').trim() || null);
+
+    if (!id || !date || !evtTitle) return res.status(400).json({ error: 'id, event_date and title are required' });
+
+    try {
+        const connection = await getDbConnection();
+        await ensureCalendarEventsTable(connection);
+        await connection.execute(
+            `UPDATE calendar_events SET event_date=?, title=?, type=?, description=?, all_day=?, start_time=?, end_time=? WHERE id=?`,
+            [date, evtTitle, evtType, desc, allDay, start, end, id]
+        );
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update event' }); }
+});
+
+router.delete('/events.php', requireStaff, async (req, res) => {
+    const id = parseInt(req.query.id, 10) || 0;
+    if (!id) return res.status(400).json({ error: 'id required' });
+    try {
+        const connection = await getDbConnection();
+        await ensureCalendarEventsTable(connection);
+        await connection.execute('DELETE FROM calendar_events WHERE id = ?', [id]);
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete event' }); }
+});
+
+router.post('/dedupe-calendar.php', requireStaff, async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await ensureCalendarEventsTable(connection);
+        const [result] = await connection.execute(`
+            DELETE t1 FROM calendar_events t1
+            INNER JOIN calendar_events t2
+              ON t1.event_date = t2.event_date
+              AND t1.title = t2.title
+              AND t1.type = t2.type
+              AND COALESCE(t1.description,'') = COALESCE(t2.description,'')
+              AND t1.source = t2.source
+              AND COALESCE(t1.course_bucket,'') = COALESCE(t2.course_bucket,'')
+              AND t1.all_day = t2.all_day
+              AND COALESCE(t1.start_time,'') = COALESCE(t2.start_time,'')
+              AND COALESCE(t1.end_time,'') = COALESCE(t2.end_time,'')
+              AND t1.id > t2.id
+        `);
+        await connection.release();
+        res.json({ success: true, deleted: result.affectedRows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Dedupe failed: ' + err.message }); }
+});
+
+const SCHOOL_CONFIG_DDL = `CREATE TABLE IF NOT EXISTS school_config (
+    config_key   VARCHAR(50) NOT NULL PRIMARY KEY,
+    config_value VARCHAR(20) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+const SCHOOL_CONFIG_KEYS = ['regular_start', 'regular_end', 'summer_start', 'summer_end'];
+
+router.get('/school-config.php', requireLogin, async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(SCHOOL_CONFIG_DDL);
+        const [rows] = await connection.execute('SELECT config_key, config_value FROM school_config');
+        await connection.release();
+        const config = {};
+        rows.forEach(r => { config[r.config_key] = r.config_value; });
+        const out = {};
+        SCHOOL_CONFIG_KEYS.forEach(k => { out[k] = config[k] || ''; });
+        res.json(out);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch school config' }); }
+});
+
+router.post('/school-config.php', requireStaff, async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(SCHOOL_CONFIG_DDL);
+        for (const key of SCHOOL_CONFIG_KEYS) {
+            if (!Object.prototype.hasOwnProperty.call(req.body || {}, key)) continue;
+            const val = String(req.body[key] || '').trim();
+            await connection.execute(
+                `INSERT INTO school_config (config_key, config_value) VALUES (?, ?)
+                 ON DUPLICATE KEY UPDATE config_value = VALUES(config_value)`,
+                [key, val]
+            );
+        }
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save school config' }); }
 });
 
 module.exports = router;
