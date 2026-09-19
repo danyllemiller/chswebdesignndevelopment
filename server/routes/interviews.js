@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { requireLogin, requireSelfOrStaff } = require('../helpers');
 
 // Mock Interview sign-up + scoring, Chapter 1 (year1/join-the-developers-guild.html).
 // Slots only ever run inside the A1 period (7:35-9:00am), skipping the
@@ -113,13 +114,13 @@ const RUBRIC_CRITERIA = [
     { key: 'confidence', label: 'Confidence & Poise' }
 ];
 
-router.get('/interview-rubric-criteria', (req, res) => {
+router.get('/interview-rubric-criteria', requireLogin, (req, res) => {
     res.json({ criteria: RUBRIC_CRITERIA, examId: EXAM_ID, maxPoints: EXAM_TOTAL_POINTS });
 });
 
 // ---- Student-facing sign-up ----
 
-router.get('/interview-slots', async (req, res) => {
+router.get('/interview-slots', requireLogin, async (req, res) => {
     const { student_id } = req.query;
     try {
         const connection = await getDbConnection();
@@ -143,7 +144,7 @@ router.get('/interview-slots', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load interview slots' }); }
 });
 
-router.post('/interview-slots/claim', async (req, res) => {
+router.post('/interview-slots/claim', requireSelfOrStaff(), async (req, res) => {
     const { student_id, slot_id } = req.body;
     if (!student_id || !slot_id) return res.status(400).json({ error: 'student_id and slot_id are required' });
     try {
@@ -175,7 +176,7 @@ router.post('/interview-slots/claim', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to claim slot' }); }
 });
 
-router.post('/interview-slots/release', async (req, res) => {
+router.post('/interview-slots/release', requireSelfOrStaff(), async (req, res) => {
     const { student_id, slot_id } = req.body;
     if (!student_id || !slot_id) return res.status(400).json({ error: 'student_id and slot_id are required' });
     try {

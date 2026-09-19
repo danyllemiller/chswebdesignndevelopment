@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { requireLogin } = require('../helpers');
 
 // GET /rank/leaderboard?section_id=XXX
 // Returns students ranked by a composite Guild Score:
 //   50% grade average (student_grade_log, last 90 days)
 //   25% habit consistency (planner_habit_log, last 28 days)
 //   25% attendance on-time rate (timesheets, last 90 days)
-router.get('/rank/leaderboard', async (req, res) => {
+router.get('/rank/leaderboard', requireLogin, async (req, res) => {
     const { section_id } = req.query;
     try {
         const connection = await getDbConnection();
@@ -116,7 +117,7 @@ router.get('/rank/leaderboard', async (req, res) => {
 });
 
 // GET /rank/sections — distinct section IDs for the filter bar
-router.get('/rank/sections', async (req, res) => {
+router.get('/rank/sections', requireLogin, async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(`

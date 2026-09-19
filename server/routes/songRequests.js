@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { requireLogin, requireStaff, isStaffSession } = require('../helpers');
 
 // ==============================================================================
 // Song requests, backed by Apple's free iTunes Search API -- no auth, no keys,
@@ -15,7 +16,7 @@ const { getDbConnection } = require('../db');
 // in the whole feature depends on Spotify (or its network access) at all.
 // ==============================================================================
 
-router.get('/song-search', async (req, res) => {
+router.get('/song-search', requireLogin, async (req, res) => {
     const { q } = req.query;
     if (!q || !q.trim()) return res.json({ tracks: [] });
     try {
@@ -76,6 +77,10 @@ router.get('/song-search', async (req, res) => {
 router.post('/song-requests', async (req, res) => {
     const { student_id, track_id, track_name, artist_name, album_art_url } = req.body;
     if (!student_id || !track_id || !track_name) return res.status(400).json({ error: 'student_id, track_id, and track_name are required' });
+    const sessionUser = req.session?.user;
+    if (!isStaffSession(req) && (!sessionUser?.student_id || String(sessionUser.student_id) !== String(student_id))) {
+        return res.status(401).json({ error: 'Not authorized.' });
+    }
     try {
         const connection = await getDbConnection();
 
@@ -102,6 +107,13 @@ router.post('/song-requests', async (req, res) => {
 
 router.get('/song-requests', async (req, res) => {
     const { student_id, status } = req.query;
+    // No student_id filter returns every student's requests (with names) at
+    // once -- that's the moderation queue, staff only. A student_id filter
+    // narrows it to one person's own requests, which that person (or staff)
+    // can see.
+    const sessionUser = req.session?.user;
+    const isSelf = student_id && sessionUser?.student_id && String(sessionUser.student_id) === String(student_id);
+    if (!isStaffSession(req) && !isSelf) return res.status(401).json({ error: 'Not authorized.' });
     try {
         const connection = await getDbConnection();
         const where = [];
@@ -125,7 +137,7 @@ router.get('/song-requests', async (req, res) => {
 // request just marks it approved and hands back an Apple Music search link
 // for the same track -- one click to find it and add it to the playlist
 // manually there.
-router.post('/song-requests/:id/approve', async (req, res) => {
+router.post('/song-requests/:id/approve', requireStaff, async (req, res) => {
     const { id } = req.params;
     try {
         const connection = await getDbConnection();
@@ -141,7 +153,7 @@ router.post('/song-requests/:id/approve', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: err.message }); }
 });
 
-router.post('/song-requests/:id/reject', async (req, res) => {
+router.post('/song-requests/:id/reject', requireStaff, async (req, res) => {
     const { id } = req.params;
     try {
         const connection = await getDbConnection();
