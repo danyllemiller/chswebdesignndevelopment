@@ -10,6 +10,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { requireSelfOrStaff } = require('../helpers');
 
 const STATE_TABLE_SQL = `
   CREATE TABLE IF NOT EXISTS budget_game_state (
@@ -162,7 +163,7 @@ async function syncRealPay(connection, studentId) {
     }
 }
 
-router.get('/student/budget-game/state', async (req, res) => {
+router.get('/student/budget-game/state', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -199,7 +200,7 @@ router.get('/student/budget-game/state', async (req, res) => {
     }
 });
 
-router.post('/student/budget-game/pay-bills', async (req, res) => {
+router.post('/student/budget-game/pay-bills', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.body || {};
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -235,7 +236,7 @@ router.post('/student/budget-game/pay-bills', async (req, res) => {
     }
 });
 
-router.post('/student/budget-game/buy', async (req, res) => {
+router.post('/student/budget-game/buy', requireSelfOrStaff(), async (req, res) => {
     const { student_id, item_key } = req.body || {};
     if (!student_id || !item_key) return res.status(400).json({ error: 'student_id and item_key required' });
     const item = ALL_ITEMS[item_key];
@@ -265,7 +266,7 @@ router.post('/student/budget-game/buy', async (req, res) => {
 });
 
 // direction: 'to_savings' | 'from_savings' | 'to_invest' | 'from_invest'
-router.post('/student/budget-game/transfer', async (req, res) => {
+router.post('/student/budget-game/transfer', requireSelfOrStaff(), async (req, res) => {
     const { student_id, direction, amount } = req.body || {};
     const amt = round2(Number(amount));
     if (!student_id || !direction || !(amt > 0)) return res.status(400).json({ error: 'student_id, direction, and a positive amount are required' });

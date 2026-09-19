@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { isStaffSession, requireSelfOrStaff } = require('../helpers');
 
 const VALID_VIS = ['public', 'classmates', 'private'];
 
@@ -121,7 +122,7 @@ router.get('/gallery/feed', async (req, res) => {
 });
 
 // ── GET /gallery/my?student_id=X — a student's own submissions (all visibilities)
-router.get('/gallery/my', async (req, res) => {
+router.get('/gallery/my', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -139,7 +140,7 @@ router.get('/gallery/my', async (req, res) => {
 });
 
 // ── POST /gallery/submit — student submits a new project
-router.post('/gallery/submit', async (req, res) => {
+router.post('/gallery/submit', requireSelfOrStaff(), async (req, res) => {
     const { student_id, title, description, project_url, thumbnail_url, tech_tags, section_id, school_year, visibility } = req.body;
     if (!student_id || !title) return res.status(400).json({ error: 'student_id and title are required' });
     const vis          = VALID_VIS.includes(visibility) ? visibility : 'classmates';
@@ -164,7 +165,7 @@ router.post('/gallery/submit', async (req, res) => {
 });
 
 // ── PUT /gallery/my/:id/visibility — student changes visibility on their own item
-router.put('/gallery/my/:id/visibility', async (req, res) => {
+router.put('/gallery/my/:id/visibility', requireSelfOrStaff(), async (req, res) => {
     const id = Number(req.params.id);
     const { student_id, visibility } = req.body;
     if (!id || !student_id || !VALID_VIS.includes(visibility))
@@ -220,6 +221,15 @@ router.put('/admin/gallery/:id', async (req, res) => {
 router.delete('/gallery/:id', async (req, res) => {
     const id = Number(req.params.id);
     const { student_id } = req.query;
+    // student_id was optional -- omitting it entirely deleted any item by id
+    // with no restriction at all, staff or not. Now it's still optional for
+    // staff (delete any item) but required and session-checked otherwise.
+    if (!isStaffSession(req)) {
+        const sessionUser = req.session?.user;
+        if (!student_id || !sessionUser?.student_id || String(sessionUser.student_id) !== String(student_id)) {
+            return res.status(401).json({ error: 'Not authorized.' });
+        }
+    }
     try {
         const connection = await getDbConnection();
         let query = 'DELETE FROM gallery_items WHERE id = ?';

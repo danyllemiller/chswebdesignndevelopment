@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
 const { sanitizeNotebookHtml } = require('../sanitizeNotebookHtml');
+const { requireSelfOrStaff } = require('../helpers');
 
 router.get('/admin/notebooks/roster', async (req, res) => {
     try {
@@ -50,7 +51,7 @@ router.get('/admin/notebooks/entries', async (req, res) => {
     } catch (err) { console.error(err); return res.status(500).json({ error: 'Failed to fetch notebook entries' }); }
 });
 
-router.get('/student/notebook', async (req, res) => {
+router.get('/student/notebook', requireSelfOrStaff(), async (req, res) => {
     const { student_id, chapter_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
@@ -74,7 +75,7 @@ router.get('/student/notebook', async (req, res) => {
     } catch (err) { console.error(err); return res.status(500).json({ error: 'Failed to fetch notebook entries' }); }
 });
 
-router.post('/student/notebook/save', async (req, res) => {
+router.post('/student/notebook/save', requireSelfOrStaff(), async (req, res) => {
     const { id, student_id, chapter_id, title, category, content } = req.body;
     if (!student_id || !chapter_id || !title)
         return res.status(400).json({ error: 'student_id, chapter_id, and title are required' });
@@ -98,7 +99,7 @@ router.post('/student/notebook/save', async (req, res) => {
     } catch (err) { console.error(err); return res.status(500).json({ error: 'Failed to save notebook entry' }); }
 });
 
-router.post('/student/notebook/delete', async (req, res) => {
+router.post('/student/notebook/delete', requireSelfOrStaff(), async (req, res) => {
     const { id, student_id } = req.body;
     if (!id || !student_id) return res.status(400).json({ error: 'id and student_id are required' });
     try {

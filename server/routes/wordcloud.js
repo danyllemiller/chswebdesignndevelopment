@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { requireLogin, requireSelfOrStaff } = require('../helpers');
 
 const CREATE_CLOUDS_SQL = `
   CREATE TABLE IF NOT EXISTS class_wordclouds (
@@ -139,7 +140,7 @@ router.get('/admin/wordcloud/results', async (req, res) => {
 });
 
 // GET /student/wordcloud/active?section_id=X&student_id=Y — what the student overlay polls
-router.get('/student/wordcloud/active', async (req, res) => {
+router.get('/student/wordcloud/active', requireLogin, async (req, res) => {
   const { section_id, student_id } = req.query;
   if (!section_id) return res.status(400).json({ error: 'section_id is required' });
   try {
@@ -168,7 +169,7 @@ router.get('/student/wordcloud/active', async (req, res) => {
 });
 
 // POST /student/wordcloud/submit — { wordcloud_id, student_id, word }
-router.post('/student/wordcloud/submit', async (req, res) => {
+router.post('/student/wordcloud/submit', requireSelfOrStaff(), async (req, res) => {
   const { wordcloud_id, student_id, word } = req.body || {};
   const normalized = normalizeWord(word);
   if (!wordcloud_id || !student_id || !normalized) {

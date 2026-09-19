@@ -10,6 +10,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { requireLogin } = require('../helpers');
 
 const RESULTS_THRESHOLD = 4;
 const PULSE_THRESHOLD = 3;
@@ -89,7 +90,7 @@ async function ensureTables(connection) {
 
 // --- STUDENT SUBMIT (public, no auth, no identifiers) ---
 
-router.post('/survey/submit', async (req, res) => {
+router.post('/survey/submit', requireLogin, async (req, res) => {
     const { form_key, term, period, answers } = req.body;
     const form = FORMS[form_key];
     if (!form) return res.status(400).json({ error: 'Unknown survey.' });
@@ -121,7 +122,7 @@ router.post('/survey/submit', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save survey response.' }); }
 });
 
-router.post('/survey/pulse/submit', async (req, res) => {
+router.post('/survey/pulse/submit', requireLogin, async (req, res) => {
     // Deliberately destructure only these five fields -- even though this
     // is called from inside the authenticated clock-out flow, no
     // student_id (or anything else identifying) is ever read off the

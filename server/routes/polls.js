@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
+const { requireLogin, requireSelfOrStaff } = require('../helpers');
 
 const CREATE_POLLS_SQL = `
   CREATE TABLE IF NOT EXISTS class_polls (
@@ -109,7 +110,7 @@ router.get('/admin/polls/results', async (req, res) => {
 });
 
 // GET /student/polls/active?section_id=X&student_id=Y — what the student overlay polls
-router.get('/student/polls/active', async (req, res) => {
+router.get('/student/polls/active', requireLogin, async (req, res) => {
   const { section_id, student_id } = req.query;
   if (!section_id) return res.status(400).json({ error: 'section_id is required' });
   try {
@@ -138,7 +139,7 @@ router.get('/student/polls/active', async (req, res) => {
 });
 
 // POST /student/polls/vote — { poll_id, student_id, option_index }
-router.post('/student/polls/vote', async (req, res) => {
+router.post('/student/polls/vote', requireSelfOrStaff(), async (req, res) => {
   const { poll_id, student_id, option_index } = req.body || {};
   if (!poll_id || !student_id || option_index === undefined) {
     return res.status(400).json({ error: 'poll_id, student_id, and option_index are required' });
