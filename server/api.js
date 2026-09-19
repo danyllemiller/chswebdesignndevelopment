@@ -72,5 +72,7 @@ router.use('/', require('./routes/survey'));
 router.use('/', require('./routes/interviews'));
 router.use('/', require('./routes/practicum'));
 router.use('/', require('./routes/uploads'));
+router.use('/', require('./routes/agenda'));
+router.use('/', require('./routes/appointments'));
 
 module.exports = router;

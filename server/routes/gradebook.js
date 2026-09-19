@@ -875,4 +875,111 @@ router.get('/admin/attempt-analytics', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to compute attempt analytics' }); }
 });
 
+// Replaces api/admin/get-due-dates.php and api/admin/save-due-dates.php --
+// both had zero server-side auth (anyone could rewrite every assignment's
+// due date and points, and silently wipe/rebuild the due-date entries on
+// the shared calendar). Kept at the exact .php-suffixed path admin/due-
+// dates.html already calls; both sit under /admin/ so the blanket admin
+// gate in server/api.js already covers them like every other route here.
+router.get('/admin/get-due-dates.php', async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        const [examRows] = await connection.execute(
+            'SELECT exam_id, title, total_points, course_id, due_date, period_due_dates FROM exams ORDER BY exam_id'
+        );
+        const exams = {};
+        examRows.forEach(r => {
+            exams[r.exam_id] = {
+                ...r,
+                due_date: formatDbDate(r.due_date),
+                period_due_dates: r.period_due_dates ? JSON.parse(r.period_due_dates) : {}
+            };
+        });
+        const [sectionRows] = await connection.execute(`
+            SELECT section_id FROM class_sections WHERE section_id IS NOT NULL AND section_id != ''
+            UNION
+            SELECT DISTINCT section_id FROM students WHERE section_id IS NOT NULL AND section_id != '' AND section_id != 'Teacher'
+            ORDER BY section_id
+        `);
+        await connection.release();
+        res.json({ exams, sections: sectionRows.map(r => r.section_id) });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch due dates' }); }
+});
+
+const DUE_DATE_COURSE_BUCKETS = { '05254G1S': 'WD1', '05254G2S': 'WD2', '10003GS': 'CS' };
+
+router.post('/admin/save-due-dates.php', async (req, res) => {
+    const assignments = req.body?.assignments;
+    const doCalSync = req.body?.sync_calendar !== undefined ? !!req.body.sync_calendar : true;
+    if (!Array.isArray(assignments)) return res.status(400).json({ error: 'assignments must be an array' });
+    if (assignments.length === 0) return res.json({ success: true, exams_saved: 0, calendar_synced: 0 });
+
+    try {
+        const connection = await getDbConnection();
+        let saved = 0;
+        for (const a of assignments) {
+            const examId = String(a.exam_id || '').trim();
+            if (!examId) continue;
+            const title = String(a.title || examId).trim();
+            const pts = parseInt(a.total_points, 10) || 100;
+            const dueDate = a.due_date || null;
+            const courseId = String(a.course_id || 'cs').trim();
+            const pdd = a.period_due_dates && Object.keys(a.period_due_dates).length ? JSON.stringify(a.period_due_dates) : null;
+            await connection.execute(
+                `INSERT INTO exams (exam_id, title, total_points, due_date, course_id, period_due_dates)
+                 VALUES (?, ?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE title = VALUES(title), total_points = VALUES(total_points),
+                   due_date = VALUES(due_date), course_id = VALUES(course_id), period_due_dates = VALUES(period_due_dates)`,
+                [examId, title, pts, dueDate, courseId, pdd]
+            );
+            saved++;
+        }
+
+        let calSynced = 0;
+        if (doCalSync) {
+            await connection.execute(`
+                CREATE TABLE IF NOT EXISTS calendar_events (
+                    id INT AUTO_INCREMENT PRIMARY KEY, event_date DATE NOT NULL, title VARCHAR(255) NOT NULL,
+                    type VARCHAR(20) NOT NULL DEFAULT 'none', description TEXT, all_day TINYINT(1) NOT NULL DEFAULT 1,
+                    start_time TIME DEFAULT NULL, end_time TIME DEFAULT NULL, source VARCHAR(20) NOT NULL DEFAULT 'manual',
+                    course_bucket VARCHAR(10) DEFAULT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    KEY idx_date (event_date)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            `);
+            await connection.execute(`DELETE FROM calendar_events WHERE source = 'due_date'`);
+
+            for (const a of assignments) {
+                const courseId = String(a.course_id || '').trim();
+                const bucket = DUE_DATE_COURSE_BUCKETS[courseId] || null;
+                const course = (courseId || 'CS').toUpperCase();
+                const title = String(a.title || a.exam_id || '').trim();
+                const desc = `${course} – ${title}`;
+
+                if (a.due_date) {
+                    await connection.execute(
+                        `INSERT INTO calendar_events (event_date, title, type, description, all_day, source, course_bucket)
+                         VALUES (?, ?, 'none', ?, 1, 'due_date', ?)`,
+                        [a.due_date, `${title} Due`, desc, bucket]
+                    );
+                    calSynced++;
+                }
+                if (a.period_due_dates && typeof a.period_due_dates === 'object') {
+                    for (const [period, pDate] of Object.entries(a.period_due_dates)) {
+                        if (!pDate) continue;
+                        await connection.execute(
+                            `INSERT INTO calendar_events (event_date, title, type, description, all_day, source, course_bucket)
+                             VALUES (?, ?, 'none', ?, 1, 'due_date', ?)`,
+                            [pDate, `${title} Due – Period ${period}`, `${course} – ${title} [Period ${period}]`, bucket]
+                        );
+                        calSynced++;
+                    }
+                }
+            }
+        }
+
+        await connection.release();
+        res.json({ success: true, exams_saved: saved, calendar_synced: calSynced });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Save failed: ' + err.message }); }
+});
+
 module.exports = router;
