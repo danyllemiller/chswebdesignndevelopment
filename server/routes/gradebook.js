@@ -220,7 +220,7 @@ async function checkRetakeClearance(connection, studentId, examId) {
 const TEST_EXAM_ID_PATTERN = /-Exam$|-Pre$|-Pre-Score$|Pre-Assessment/i;
 
 router.post('/submit-exam', async (req, res) => {
-    const { student_id, exam_id, score, total_points, title, course_id } = req.body;
+    const { student_id, exam_id, score, total_points } = req.body;
 
     // This endpoint had no identity check at all -- any request naming any
     // student_id could write any score for any exam, no login required.
@@ -275,30 +275,29 @@ router.post('/submit-exam', async (req, res) => {
             return res.status(403).json({ error: retakeGate.message, retakeBlocked: true, requirement: retakeGate.requirement });
         }
 
-        const examTitle = title || exam_id.replace(/-/g, ' ').replace(/cs unit \d+/i, (m) => m.toUpperCase());
-        // prof-scales.js (every chapter's Pre-Scale/Post-Scale, both CS and
-        // WD) never sends course_id at all -- this used to blindly default
-        // to Comp Sci whenever it was omitted, silently mistagging the
-        // first WD student's submission of any not-yet-seeded chapter as a
-        // CS assignment (confirmed live: Ch9 Pre-Scale, submitted only by
-        // B2/WD2 students, ended up tagged '10003GS' and showing up in the
-        // Comp Sci gradebook). Resolve the submitting student's own actual
-        // course from their section instead of guessing CS -- this is only
-        // a fallback for brand-new exam rows; an explicitly-passed
-        // course_id (e.g. from the Due Date Manager pre-seeding a row) is
-        // still honored above it, and ON DUPLICATE KEY UPDATE below never
-        // touches course_id once a row exists either way.
-        let examCourse = course_id;
-        if (!examCourse) {
-            const [[submittingStudent]] = await connection.execute(
-                'SELECT section_id FROM students WHERE student_id = ?', [student_id]
-            );
-            examCourse = (submittingStudent && await resolveCourseId(connection, submittingStudent.section_id)) || '10003GS';
-        }
-        await connection.execute(
-            'INSERT INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = COALESCE(VALUES(title), title), total_points = COALESCE(VALUES(total_points), total_points)',
-            [exam_id, examTitle, total_points || 100, examCourse]
+        // Every real assignment is already pre-seeded into `exams` (with a
+        // real due date) via the admin Due Date Manager, so this endpoint
+        // no longer auto-creates a catalog row for whatever exam_id/title
+        // the client happens to send. That auto-create used to fire on
+        // every not-yet-seeded submission -- fine when it just meant a
+        // slightly-early assignment, but it's also exactly how a client-
+        // side bug becomes a permanent, due-date-less gradebook column with
+        // no validation at all: a browser translation extension corrupting
+        // a lab title into Chinese, or assignment-uploader.js building a
+        // slightly different exam_id string than the one already catalogued
+        // (ch9_lab1 vs. the real Ch9-The Data Vault Lab), both silently
+        // spawned their own permanent junk column instead of erroring.
+        // The score itself is still recorded below either way -- this only
+        // stops a phantom column from being created for it. If it's a
+        // genuinely new assignment the catalog hasn't caught up to yet,
+        // it'll have no title/due date in the gradebook until added there,
+        // which is the visible signal that it needs to be.
+        const [existingExam] = await connection.execute(
+            'SELECT exam_id FROM exams WHERE exam_id = ? LIMIT 1', [exam_id]
         );
+        if (existingExam.length === 0) {
+            console.warn(`[submit-exam] No catalog entry for exam_id "${exam_id}" (student ${student_id}) -- score recorded, but it won't show as a gradebook column until this assignment is added via the Due Date Manager.`);
+        }
         // Log every submission as its own attempt, in addition to the
         // keep-highest "current best" logic below — responses only ever
         // keeps one row per (student, exam_id), so this is the only place
