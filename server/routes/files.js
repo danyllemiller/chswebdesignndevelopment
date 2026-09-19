@@ -3,10 +3,11 @@ const router = express.Router();
 const { getDbConnection } = require('../db');
 const fs   = require('fs').promises;
 const path = require('path');
+const { requireSelfOrStaff, requireStaff, requireLogin } = require('../helpers');
 
 const REPO_ROOT = path.join(__dirname, '..', '..');
 
-router.post('/save-csv.php', express.text({ type: '*/*', limit: '10mb' }), async (req, res) => {
+router.post('/save-csv.php', requireStaff, express.text({ type: '*/*', limit: '10mb' }), async (req, res) => {
     try {
         const text = typeof req.body === 'string' ? req.body : '';
         await fs.writeFile(path.join(REPO_ROOT, 'special-dates.csv'), text, 'utf8');
@@ -28,7 +29,7 @@ const SHARED_FILES_DDL = `
         INDEX idx_recipient (recipient_student_id)
     )`;
 
-router.get('/student/shared-files', async (req, res) => {
+router.get('/student/shared-files', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
@@ -43,7 +44,7 @@ router.get('/student/shared-files', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch shared files' }); }
 });
 
-router.post('/student/share-file', async (req, res) => {
+router.post('/student/share-file', requireLogin, async (req, res) => {
     const { recipient_student_id, sender_name, file_name, url, is_folder } = req.body;
     if (!recipient_student_id || !file_name || !url)
         return res.status(400).json({ error: 'recipient_student_id, file_name, and url are required' });
@@ -66,7 +67,7 @@ router.post('/student/share-file', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to share file' }); }
 });
 
-router.delete('/student/shared-file/:id', async (req, res) => {
+router.delete('/student/shared-file/:id', requireSelfOrStaff(), async (req, res) => {
     const { id } = req.params;
     const { student_id } = req.query;
     if (!id || !student_id) return res.status(400).json({ error: 'id and student_id are required' });

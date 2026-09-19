@@ -1,12 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { getCurrentSchoolYear } = require('../helpers');
+const { getCurrentSchoolYear, requireStaff } = require('../helpers');
 const { getTardyStep, computeEffectiveCount, getLocalDateStr } = require('../tardyLogic');
 
 // Standalone tardy-pass tracker -- deliberately not attendance. Logs a
 // timestamped entry per tardy so a teacher can hand out passes and see both
 // a running log and a per-student count, without touching grading/attendance.
+//
+// Entirely a staff tool -- there's no "self" case here (a student has no
+// business reading anyone's tardy log, including their own, through this
+// API), so every route in this file gates on staff alone.
+router.use(requireStaff);
 
 // Dedicated lookup, deliberately not reusing /api/admin/student -- that
 // endpoint LEFT JOINs a payroll_roster table that doesn't exist in this

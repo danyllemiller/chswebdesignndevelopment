@@ -4,6 +4,7 @@ const { getDbConnection } = require('../db');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { requireSelfOrStaff, requireStaff } = require('../helpers');
 
 // ── User sticker upload ───────────────────────────────────────────────────────
 const STICKERS_ROOT = path.join(__dirname, '../../images/stickers');
@@ -43,7 +44,7 @@ const stickerUpload = multer({
 });
 
 // GET  /api/intervention/stickers?student_id=xxx  — list uploaded stickers
-router.get('/intervention/stickers', (req, res) => {
+router.get('/intervention/stickers', requireSelfOrStaff(), (req, res) => {
     const { student_id } = req.query;
     if (!isSafeStudentId(student_id)) return res.status(400).json({ error: 'Invalid student_id' });
     const dir = path.join(STICKERS_ROOT, `user_${student_id}`);
@@ -55,7 +56,7 @@ router.get('/intervention/stickers', (req, res) => {
 });
 
 // POST /api/intervention/stickers/upload?student_id=xxx  — upload a sticker
-router.post('/intervention/stickers/upload', (req, res) => {
+router.post('/intervention/stickers/upload', requireSelfOrStaff(), (req, res) => {
     stickerUpload.single('sticker')(req, res, (err) => {
         if (err) return res.status(400).json({ error: err.message });
         if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
@@ -66,7 +67,7 @@ router.post('/intervention/stickers/upload', (req, res) => {
 });
 
 // DELETE /api/intervention/stickers/:filename?student_id=xxx  — remove a sticker
-router.delete('/intervention/stickers/:filename', (req, res) => {
+router.delete('/intervention/stickers/:filename', requireSelfOrStaff(), (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     const filePath = path.join(STICKERS_ROOT, `user_${student_id}`, req.params.filename);
@@ -206,7 +207,7 @@ function promptForDay(dayNumber, override) {
 // ════════════════════════════════════════════════════════════════════════════
 
 // Is this student enrolled in intervention?
-router.get('/intervention/status', async (req, res) => {
+router.get('/intervention/status', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -222,7 +223,7 @@ router.get('/intervention/status', async (req, res) => {
 });
 
 // Today's growth mindset prompt
-router.get('/intervention/prompt', async (req, res) => {
+router.get('/intervention/prompt', requireSelfOrStaff(), async (req, res) => {
     const { day_number } = req.query;
     const dayNum = parseInt(day_number, 10) || 1;
     try {
@@ -238,7 +239,7 @@ router.get('/intervention/prompt', async (req, res) => {
 });
 
 // All 37 prompts (for the planner calendar)
-router.get('/intervention/prompts-all', async (req, res) => {
+router.get('/intervention/prompts-all', requireSelfOrStaff(), async (req, res) => {
     try {
         const connection = await getDbConnection();
         await ensureTables(connection);
@@ -256,7 +257,7 @@ router.get('/intervention/prompts-all', async (req, res) => {
 });
 
 // Student's assignments + completion status
-router.get('/intervention/assignments', async (req, res) => {
+router.get('/intervention/assignments', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -283,7 +284,7 @@ router.get('/intervention/assignments', async (req, res) => {
 });
 
 // Submit / complete an assignment (auto-passes)
-router.post('/intervention/submit', async (req, res) => {
+router.post('/intervention/submit', requireSelfOrStaff(), async (req, res) => {
     const { student_id, assignment_id, response_text } = req.body;
     if (!student_id || !assignment_id) return res.status(400).json({ error: 'student_id and assignment_id required' });
     try {
@@ -301,7 +302,7 @@ router.post('/intervention/submit', async (req, res) => {
 });
 
 // Journal — get entries (all or for a specific date)
-router.get('/intervention/journal', async (req, res) => {
+router.get('/intervention/journal', requireSelfOrStaff(), async (req, res) => {
     const { student_id, date } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -325,7 +326,7 @@ router.get('/intervention/journal', async (req, res) => {
 });
 
 // Journal — save/update an entry
-router.post('/intervention/journal', async (req, res) => {
+router.post('/intervention/journal', requireSelfOrStaff(), async (req, res) => {
     const { student_id, date, content, prompt } = req.body;
     if (!student_id || !date) return res.status(400).json({ error: 'student_id and date required' });
     try {
@@ -343,7 +344,7 @@ router.post('/intervention/journal', async (req, res) => {
 });
 
 // Goals — get all goals for a student
-router.get('/intervention/goals', async (req, res) => {
+router.get('/intervention/goals', requireSelfOrStaff(), async (req, res) => {
     const { student_id, cadence } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -367,7 +368,7 @@ router.get('/intervention/goals', async (req, res) => {
 });
 
 // Goals — create
-router.post('/intervention/goals', async (req, res) => {
+router.post('/intervention/goals', requireSelfOrStaff(), async (req, res) => {
     const { student_id, cadence, title, notes, target_date } = req.body;
     if (!student_id || !cadence || !title) return res.status(400).json({ error: 'student_id, cadence, and title required' });
     if (!['daily','weekly','unit','yearly'].includes(cadence)) return res.status(400).json({ error: 'Invalid cadence' });
@@ -384,7 +385,7 @@ router.post('/intervention/goals', async (req, res) => {
 });
 
 // Goals — mark achieved / unachieved
-router.put('/intervention/goals/:id', async (req, res) => {
+router.put('/intervention/goals/:id', requireSelfOrStaff(), async (req, res) => {
     const { id } = req.params;
     const { student_id, achieved } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
@@ -401,7 +402,7 @@ router.put('/intervention/goals/:id', async (req, res) => {
 });
 
 // Goals — delete
-router.delete('/intervention/goals/:id', async (req, res) => {
+router.delete('/intervention/goals/:id', requireSelfOrStaff(), async (req, res) => {
     const { id } = req.params;
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
@@ -417,7 +418,7 @@ router.delete('/intervention/goals/:id', async (req, res) => {
 });
 
 // Grade log — get all self-reported grades
-router.get('/intervention/grade-log', async (req, res) => {
+router.get('/intervention/grade-log', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -433,7 +434,7 @@ router.get('/intervention/grade-log', async (req, res) => {
 });
 
 // Grade log — add or update an entry
-router.post('/intervention/grade-log', async (req, res) => {
+router.post('/intervention/grade-log', requireSelfOrStaff(), async (req, res) => {
     const { student_id, period_label, class_name, assignment, category, score, max_score, grade_date } = req.body;
     if (!student_id || !period_label) return res.status(400).json({ error: 'student_id and period_label required' });
     // Class name is optional metadata on top of the period -- fall back to the
@@ -455,7 +456,7 @@ router.post('/intervention/grade-log', async (req, res) => {
 });
 
 // Grade log — delete an entry
-router.delete('/intervention/grade-log/:id', async (req, res) => {
+router.delete('/intervention/grade-log/:id', requireSelfOrStaff(), async (req, res) => {
     const { id } = req.params;
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
@@ -487,7 +488,7 @@ CREATE TABLE IF NOT EXISTS intervention_tests (
 )`;
 
 // Get upcoming (and recent) tests for a student
-router.get('/intervention/tests', async (req, res) => {
+router.get('/intervention/tests', requireSelfOrStaff(), async (req, res) => {
     const { student_id, all } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -504,7 +505,7 @@ router.get('/intervention/tests', async (req, res) => {
 });
 
 // Add a test/quiz
-router.post('/intervention/tests', async (req, res) => {
+router.post('/intervention/tests', requireSelfOrStaff(), async (req, res) => {
     const { student_id, class_name, test_type, title, test_date, notes } = req.body;
     if (!student_id || !class_name || !test_date) return res.status(400).json({ error: 'student_id, class_name, and test_date required' });
     try {
@@ -520,7 +521,7 @@ router.post('/intervention/tests', async (req, res) => {
 });
 
 // Toggle studied / update notes
-router.put('/intervention/tests/:id', async (req, res) => {
+router.put('/intervention/tests/:id', requireSelfOrStaff(), async (req, res) => {
     const { id } = req.params;
     const { student_id, studied, notes, class_name, test_type, title, test_date } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
@@ -554,7 +555,7 @@ router.put('/intervention/tests/:id', async (req, res) => {
 });
 
 // Delete a test
-router.delete('/intervention/tests/:id', async (req, res) => {
+router.delete('/intervention/tests/:id', requireSelfOrStaff(), async (req, res) => {
     const { id } = req.params;
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
@@ -932,7 +933,7 @@ async function ensurePlannerTables(connection) {
 
 // ── Preferences (schedule, colors, stickers, decor, countdowns) ───────────
 
-router.get('/intervention/planner-prefs', async (req, res) => {
+router.get('/intervention/planner-prefs', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -956,7 +957,7 @@ router.get('/intervention/planner-prefs', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch prefs' }); }
 });
 
-router.put('/intervention/planner-prefs', async (req, res) => {
+router.put('/intervention/planner-prefs', requireSelfOrStaff(), async (req, res) => {
     const { student_id, schedule, colors, stickers, decor, countdowns, gradeCategories, periodLabels } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -997,7 +998,7 @@ const fmtDate = (d) => {
     return String(d).split('T')[0];
 };
 
-router.get('/intervention/todos', async (req, res) => {
+router.get('/intervention/todos', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -1013,7 +1014,7 @@ router.get('/intervention/todos', async (req, res) => {
 });
 
 // Upsert all todos at once (client sends full list)
-router.put('/intervention/todos', async (req, res) => {
+router.put('/intervention/todos', requireSelfOrStaff(), async (req, res) => {
     const { student_id, todos } = req.body;
     if (!student_id || !Array.isArray(todos)) return res.status(400).json({ error: 'student_id and todos[] required' });
     try {
@@ -1049,7 +1050,7 @@ router.put('/intervention/todos', async (req, res) => {
 
 // ── Habits ────────────────────────────────────────────────────────────────
 
-router.get('/intervention/habits', async (req, res) => {
+router.get('/intervention/habits', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -1076,7 +1077,7 @@ router.get('/intervention/habits', async (req, res) => {
 });
 
 // Upsert full habits list
-router.put('/intervention/habits', async (req, res) => {
+router.put('/intervention/habits', requireSelfOrStaff(), async (req, res) => {
     const { student_id, habits } = req.body;
     if (!student_id || !Array.isArray(habits)) return res.status(400).json({ error: 'student_id and habits[] required' });
     try {
@@ -1105,7 +1106,7 @@ router.put('/intervention/habits', async (req, res) => {
 });
 
 // Toggle a habit log entry for a date
-router.post('/intervention/habits/log', async (req, res) => {
+router.post('/intervention/habits/log', requireSelfOrStaff(), async (req, res) => {
     const { student_id, habit_id, log_date, done } = req.body;
     if (!student_id || !habit_id || !log_date) return res.status(400).json({ error: 'student_id, habit_id, log_date required' });
     try {
@@ -1131,7 +1132,7 @@ router.post('/intervention/habits/log', async (req, res) => {
 // TEACHER VIEW — read any enrolled student's planner data
 // ════════════════════════════════════════════════════════════════════════════
 
-router.get('/teacher/planner/students', async (req, res) => {
+router.get('/teacher/planner/students', requireStaff, async (req, res) => {
     try {
         const connection = await getDbConnection();
         await ensureTables(connection);
@@ -1149,7 +1150,7 @@ router.get('/teacher/planner/students', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch students' }); }
 });
 
-router.get('/teacher/planner/:student_id/prefs', async (req, res) => {
+router.get('/teacher/planner/:student_id/prefs', requireStaff, async (req, res) => {
     const { student_id } = req.params;
     try {
         const connection = await getDbConnection();
@@ -1171,7 +1172,7 @@ router.get('/teacher/planner/:student_id/prefs', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch prefs' }); }
 });
 
-router.get('/teacher/planner/:student_id/todos', async (req, res) => {
+router.get('/teacher/planner/:student_id/todos', requireStaff, async (req, res) => {
     const { student_id } = req.params;
     try {
         const connection = await getDbConnection();
@@ -1185,7 +1186,7 @@ router.get('/teacher/planner/:student_id/todos', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch todos' }); }
 });
 
-router.get('/teacher/planner/:student_id/habits', async (req, res) => {
+router.get('/teacher/planner/:student_id/habits', requireStaff, async (req, res) => {
     const { student_id } = req.params;
     try {
         const connection = await getDbConnection();
@@ -1209,7 +1210,7 @@ router.get('/teacher/planner/:student_id/habits', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch habits' }); }
 });
 
-router.get('/teacher/planner/:student_id/tests', async (req, res) => {
+router.get('/teacher/planner/:student_id/tests', requireStaff, async (req, res) => {
     const { student_id } = req.params;
     try {
         const connection = await getDbConnection();

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { resolveCourseId, getCurrentSchoolYear, isTestingWindowOpen } = require('../helpers');
+const { resolveCourseId, getCurrentSchoolYear, isTestingWindowOpen, requireSelfOrStaff, requireLogin } = require('../helpers');
 
 // mysql2 returns DATE columns as JS Date objects (local-timezone fields set to
 // match the stored date exactly), not strings. Reading those fields directly
@@ -26,7 +26,7 @@ async function ensureEnteredIcColumn(connection) {
     }
 }
 
-router.get('/student/course-gradebook', async (req, res) => {
+router.get('/student/course-gradebook', requireSelfOrStaff(), async (req, res) => {
     const { student_id, section_id: sectionOverride } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
@@ -336,7 +336,7 @@ router.post('/submit-exam', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save exam' }); }
 });
 
-router.get('/student/grades', async (req, res) => {
+router.get('/student/grades', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     try {
         const connection = await getDbConnection();
@@ -545,7 +545,7 @@ router.post('/admin/batch-update-grades', async (req, res) => {
 // Called client-side (examLogicCS.js) before a unit exam even starts, so a
 // blocked student sees a locked screen instead of retaking the test and
 // only finding out at submit time that the score won't be accepted.
-router.get('/exam/retake-status', async (req, res) => {
+router.get('/exam/retake-status', requireSelfOrStaff(), async (req, res) => {
     const { student_id, exam_id } = req.query;
     if (!student_id || !exam_id) return res.status(400).json({ error: 'student_id and exam_id are required' });
     try {
@@ -559,7 +559,7 @@ router.get('/exam/retake-status', async (req, res) => {
 // Called client-side (examLogicCS.js, examLogicWD.js) before a test starts,
 // so a student outside the testing window sees a locked screen up front
 // rather than finishing the whole test and only finding out at submit time.
-router.get('/exam/testing-window-status', async (req, res) => {
+router.get('/exam/testing-window-status', requireLogin, async (req, res) => {
     try {
         const connection = await getDbConnection();
         const status = await isTestingWindowOpen(connection);

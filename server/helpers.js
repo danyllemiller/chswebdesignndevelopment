@@ -85,4 +85,60 @@ async function isTestingWindowOpen(connection) {
     return { ok: true };
 }
 
-module.exports = { getCurrentSchoolYear, resolveCourseId, clampScore, validatePassword, ensureOffDaysTable, isTestingWindowOpen };
+// --- Shared auth checks -----------------------------------------------
+// Every /admin/* route already gets a blanket staff-only gate in
+// server/api.js, added after that prefix's own auth was found to be
+// entirely client-side/advisory. The much larger set of non-admin routes
+// (student_id-scoped reads/writes like /student/grades, /student/messages,
+// /tardy/*, /teacher/planner/*, etc.) never got the same treatment and had
+// no server-side check of their own -- these three helpers are the shared,
+// consistent version of the isSelf/isStaff check already written inline
+// for each route added this session (server/routes/projects.js,
+// server/routes/practicum.js, the new endpoints in gradebook.js), used
+// as real Express middleware everywhere else so 100+ routes don't each
+// hand-roll a slightly different copy of the same three lines.
+function isStaffSession(req) {
+    const u = req.session && req.session.user;
+    return !!(u && (u.role === 'admin' || u.section_id === 'Teacher'));
+}
+
+function isSelfOrStaffSession(req, studentId) {
+    const u = req.session && req.session.user;
+    if (!u) return false;
+    if (isStaffSession(req)) return true;
+    return u.student_id && studentId && String(u.student_id) === String(studentId);
+}
+
+// Requires the caller to be logged in as the student named by
+// req.query[field]/req.body[field]/req.params[field] (checked in that
+// order), or staff. Use on any route that takes a student_id and only
+// that student (or a teacher) should be able to read/write it.
+function requireSelfOrStaff(field = 'student_id') {
+    return (req, res, next) => {
+        const studentId = req.query?.[field] ?? req.body?.[field] ?? req.params?.[field];
+        if (!isSelfOrStaffSession(req, studentId)) return res.status(401).json({ error: 'Not authorized.' });
+        next();
+    };
+}
+
+// Staff (admin or Teacher section) only -- for routes that aren't under
+// /admin/* by naming convention but are staff-facing in practice (tardy
+// logs, the teacher planner view of a student, roster/payroll data).
+function requireStaff(req, res, next) {
+    if (!isStaffSession(req)) return res.status(401).json({ error: 'Not authorized.' });
+    next();
+}
+
+// Any authenticated account, student or staff -- for routes that are
+// real reference data (bell schedule, song catalog) rather than any one
+// person's private data, but still shouldn't be answering to a logged-out
+// request off the open internet.
+function requireLogin(req, res, next) {
+    if (!(req.session && req.session.user)) return res.status(401).json({ error: 'Not authorized.' });
+    next();
+}
+
+module.exports = {
+    getCurrentSchoolYear, resolveCourseId, clampScore, validatePassword, ensureOffDaysTable, isTestingWindowOpen,
+    isStaffSession, isSelfOrStaffSession, requireSelfOrStaff, requireStaff, requireLogin
+};
