@@ -1,7 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { resolveCourseId, getCurrentSchoolYear, isStaffSession, requireSelfOrStaff } = require('../helpers');
+const { resolveCourseId, getCurrentSchoolYear, isStaffSession, requireSelfOrStaff, timeToMinutes } = require('../helpers');
+
+// WD1/WD2/AS are the paid "job simulation" courses this employee-portal
+// payroll UI models; CS clocks in/out too (server/routes/timeclock.js), but
+// only for participation points, not pay -- js/student/student-payroll.js's
+// CS-detection used to check `section_id.startsWith('CS')`, which can never
+// match a real section_id (real values are period codes like A3/A5/B4/B6/B8
+// for CS, A1/B2 for WD1/WD2, "AS-B2" for Monique's practicum -- none start
+// with the literal string "CS"), so every student, CS included, saw the
+// full payroll UI. Resolving through class_sections (same as gradebook
+// weighting) instead of pattern-matching the section_id string, and
+// checking every section a student is enrolled in (not just their primary),
+// is what correctly keeps payroll visible for a CS-primary student who's
+// also enrolled in WD.
+const PAID_COURSE_IDS = new Set(['05254G1S', '05254G2S', '05254EF-201']); // WD1, WD2, AS
 
 router.get('/payroll/roster', async (req, res) => {
     const { username } = req.query;
@@ -17,10 +31,42 @@ router.get('/payroll/roster', async (req, res) => {
              WHERE s.username = ?`,
             [username]
         );
+        if (rows.length === 0) { await connection.release(); return res.json({}); }
+        const student = rows[0];
+
+        const [extraRows] = await connection.execute(
+            'SELECT section_id FROM student_additional_sections WHERE student_id = ?',
+            [student.student_id]
+        );
+        const allSectionIds = [student.section_id, ...extraRows.map(r => r.section_id)].filter(Boolean);
+        let hasPaidRole = false;
+        for (const sectionId of allSectionIds) {
+            const courseId = await resolveCourseId(connection, sectionId);
+            if (PAID_COURSE_IDS.has(courseId)) { hasPaidRole = true; break; }
+        }
+        student.has_paid_role = hasPaidRole;
+
         await connection.release();
-        res.json(rows.length > 0 ? rows[0] : {});
+        res.json(student);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch payroll roster' }); }
 });
+
+// h:mm AM/PM for display -- built from timeToMinutes (see helpers.js) so
+// this shares the exact same TIME-column handling as the actual payroll run
+// (server/routes/paystubs.js), rather than the string-concat parsing this
+// endpoint used to leave to the client (`new Date(date + 'T' + clock_in)`),
+// which silently produced Invalid Date/NaN once mysql2 started handing back
+// TIME columns as Date objects instead of "HH:MM:SS" strings.
+function formatTimeOfDay(t) {
+    const mins = timeToMinutes(t);
+    if (mins === null) return null;
+    const h = Math.floor(mins / 60);
+    const displayMin = Math.round(mins % 60);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    let displayHour = h % 12;
+    if (displayHour === 0) displayHour = 12;
+    return `${displayHour}:${String(displayMin).padStart(2, '0')} ${ampm}`;
+}
 
 router.get('/payroll/timesheets', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
@@ -31,7 +77,18 @@ router.get('/payroll/timesheets', requireSelfOrStaff(), async (req, res) => {
             [student_id]
         );
         await connection.release();
-        res.json({ timesheets: rows });
+
+        const timesheets = rows.map(row => {
+            const inMin = timeToMinutes(row.clock_in);
+            const outMin = timeToMinutes(row.clock_out);
+            return {
+                ...row,
+                clock_in_display: formatTimeOfDay(row.clock_in),
+                clock_out_display: formatTimeOfDay(row.clock_out),
+                duration_minutes: (inMin !== null && outMin !== null) ? Math.round(outMin - inMin) : null
+            };
+        });
+        res.json({ timesheets });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch timesheets' }); }
 });
 

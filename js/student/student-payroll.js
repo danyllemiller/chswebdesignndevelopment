@@ -88,7 +88,13 @@ async function initPayroll() {
             currentRate = parseFloat(userData.hourly_rate);
         }
         
-        isCSStudent = userData.section_id?.startsWith('CS') || false;
+        // Resolved server-side (server/routes/payroll.js) against the real
+        // class_sections course mapping, checking every section this
+        // student is enrolled in -- not a section_id string pattern, which
+        // never matched any real section_id (real CS periods are A3/A5/
+        // B4/B6/B8, not anything starting with "CS") and so never actually
+        // hid this page from anyone, CS students included.
+        isCSStudent = !userData.has_paid_role;
 
         if (!isCSStudent) {
             buildPayrollUI(user.student_id);
@@ -307,16 +313,24 @@ async function buildPayrollUI(student_id) {
             if (!periodsMap[pp.id]) {
                 periodsMap[pp.id] = { info: pp, shifts: [], totals: { mins: 0, gross: 0, bonusCount: 0 } };
             }
-            
-            const dur = Math.round((new Date(data.date + 'T' + data.clock_out) - new Date(data.date + 'T' + data.clock_in)) / 60000);
+
+            // duration_minutes/clock_in_display/clock_out_display come
+            // pre-computed from the server (server/routes/payroll.js) --
+            // TIME columns arrive from mysql2 as Date objects, and
+            // re-parsing them here via `date + 'T' + clock_out` produced
+            // Invalid Date/NaN every time once that changed, which is why
+            // this page was showing "Null"/"NaN" instead of real hours. A
+            // shift with no duration yet (still clocked in, or a data gap)
+            // stays null rather than being coerced into a fake 0.
+            const dur = data.duration_minutes;
             const bonus = (data.in_answer === "On Time" ? 1 : 0) + (data.out_answer === "On Time" ? 1 : 0);
-            const gross = (dur/60 * currentRate) + (bonus * ON_TIME_BONUS);
-            
+            const gross = (dur !== null ? dur / 60 * currentRate : 0) + (bonus * ON_TIME_BONUS);
+
             data.calcMins = dur;
             data.calcGross = gross;
-            
+
             periodsMap[pp.id].shifts.push(data);
-            periodsMap[pp.id].totals.mins += dur;
+            if (dur !== null) periodsMap[pp.id].totals.mins += dur;
             periodsMap[pp.id].totals.gross += gross;
             periodsMap[pp.id].totals.bonusCount += bonus;
         });
@@ -350,13 +364,14 @@ function renderCurrentPeriod() {
     let tableHtml = '';
     period.shifts.forEach(data => {
         const friendlyDate = new Date(data.date + "T12:00:00").toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        const timeLogged = data.calcMins !== null ? `${Math.floor(data.calcMins/60)}h ${data.calcMins%60}m` : '--';
         tableHtml += `<tr class="text-center">
             <td class="fw-bold text-start">${friendlyDate}</td>
-            <td>${data.clock_in ? new Date(data.date + 'T' + data.clock_in).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--'}</td>
+            <td>${data.clock_in_display || '--'}</td>
             <td>${data.in_answer || '--'}</td>
-            <td>${data.clock_out ? new Date(data.date + 'T' + data.clock_out).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--'}</td>
+            <td>${data.clock_out_display || '--'}</td>
             <td>${data.out_answer || '--'}</td>
-            <td class="fw-bold text-dark">${Math.floor(data.calcMins/60)}h ${data.calcMins%60}m</td>
+            <td class="fw-bold text-dark">${timeLogged}</td>
             <td class="text-success fw-bold">$${data.calcGross.toFixed(2)}</td>
         </tr>`;
     });

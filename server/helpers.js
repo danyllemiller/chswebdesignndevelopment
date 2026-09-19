@@ -24,6 +24,21 @@ async function resolveCourseId(connection, sectionId) {
     return normalizeCourseCodeLegacy(sectionId);
 }
 
+// mysql2 returns TIME/DATETIME columns as JS Date objects (confirmed live
+// for timesheets.clock_in/clock_out, which are DATETIME), not "HH:MM:SS"
+// strings -- a `${dateStr}T${timeVal}` string-concat pattern silently
+// produces "Invalid Date" every time as a result (Date.toString() output
+// doesn't combine into a parseable ISO string). Extracting
+// minutes-since-midnight directly sidesteps string parsing entirely, and
+// works the same regardless of which of the two column types it was.
+function timeToMinutes(t) {
+    if (!t) return null;
+    if (t instanceof Date) return t.getHours() * 60 + t.getMinutes() + t.getSeconds() / 60;
+    const [h, m, s] = String(t).split(':').map(Number);
+    if (Number.isNaN(h)) return null;
+    return h * 60 + (m || 0) + (s || 0) / 60;
+}
+
 function clampScore(score, max = 100) {
     const n = Number(score);
     if (Number.isNaN(n)) return 0;
@@ -140,5 +155,5 @@ function requireLogin(req, res, next) {
 
 module.exports = {
     getCurrentSchoolYear, resolveCourseId, clampScore, validatePassword, ensureOffDaysTable, isTestingWindowOpen,
-    isStaffSession, isSelfOrStaffSession, requireSelfOrStaff, requireStaff, requireLogin
+    isStaffSession, isSelfOrStaffSession, requireSelfOrStaff, requireStaff, requireLogin, timeToMinutes
 };

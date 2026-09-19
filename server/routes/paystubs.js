@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { resolveCourseId, getCurrentSchoolYear, requireSelfOrStaff } = require('../helpers');
+const { resolveCourseId, getCurrentSchoolYear, requireSelfOrStaff, timeToMinutes } = require('../helpers');
 const { computeStudentGrade } = require('../gradeCalc');
 
 const ON_TIME_BONUS = 5.00;
@@ -21,21 +21,6 @@ function formatDbDate(d) {
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
-}
-
-// mysql2 returns TIME columns as JS Date objects too (confirmed live --
-// timesheets.clock_in/clock_out come back as full Date objects, not "HH:MM:SS"
-// strings). The old `${t.date}T${t.clock_in}` string-concat pattern silently
-// produced "Invalid Date" every time as a result (Date.toString() output
-// doesn't combine into a parseable ISO string), which would have zeroed out
-// every student's hours the first time payroll was actually run. Extracting
-// minutes-since-midnight directly sidesteps string parsing entirely.
-function timeToMinutes(t) {
-    if (!t) return null;
-    if (t instanceof Date) return t.getHours() * 60 + t.getMinutes() + t.getSeconds() / 60;
-    const [h, m, s] = String(t).split(':').map(Number);
-    if (Number.isNaN(h)) return null;
-    return h * 60 + (m || 0) + (s || 0) / 60;
 }
 
 // Pay date is always the calendar day right after the period ends -- a
