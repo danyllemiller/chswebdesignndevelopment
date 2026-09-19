@@ -23,6 +23,12 @@ function siteFileExists(relPath) {
         return stat.isFile() && stat.size > 1024; // rule out an empty/placeholder file
     } catch (e) { return false; }
 }
+function siteFileUnderSize(relPath, maxBytes) {
+    try {
+        const stat = fs.statSync(path.join(SITE_ROOT, relPath));
+        return stat.isFile() && stat.size > 1024 && stat.size <= maxBytes; // still real, but actually compressed
+    } catch (e) { return false; }
+}
 
 const TASKS = {
     'ch4-broken': {
@@ -53,6 +59,17 @@ const TASKS = {
                 const content = readSite(f);
                 return content && wrongFiles.some(img => content.includes(img));
             });
+        }
+    },
+    'compress-bones-figures': {
+        examId: 'AS-Task-compress-bones-figures',
+        title: 'Compress 7 oversized figures on Chapter 2 ("The Bones: Intro to HTML")',
+        points: 10,
+        verify() {
+            const MAX_BYTES = 1.5 * 1024 * 1024; // 1.5MB -- originals are 5-6MB each
+            return ['figure-01.png', 'figure-02.png', 'figure-03.png', 'figure-10.png',
+                'figure-15.png', 'figure-27.png', 'figure-32.png']
+                .every(f => siteFileUnderSize(`images/the-bones-intro-to-html/${f}`, MAX_BYTES));
         }
     },
     'favicons': {
