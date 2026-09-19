@@ -3,13 +3,13 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { getDbConnection } = require('../db');
-const { resolveCourseId, clampScore } = require('../helpers');
+const { resolveCourseId, clampScore, requireSelfOrStaff, requireLogin } = require('../helpers');
 
 // Same students.section_id -> uploads/<student_id>/ layout roster.js already
 // creates on account setup (PHP's upload.php/manage_files.php write there).
 const UPLOADS_ROOT = path.join(__dirname, '..', '..', 'uploads');
 
-router.get('/student/section-classmates', async (req, res) => {
+router.get('/student/section-classmates', requireSelfOrStaff('exclude_student_id'), async (req, res) => {
     const { section_id, exclude_student_id } = req.query;
     if (!section_id) return res.status(400).json({ error: 'section_id is required' });
     try {
@@ -175,7 +175,7 @@ const AUTO_GRADE_CONFIGS = {
     }
 };
 
-router.post('/student/project-auto-grade', async (req, res) => {
+router.post('/student/project-auto-grade', requireSelfOrStaff(), async (req, res) => {
     const { chapter_project_id, exam_id, student_id } = req.body;
     if (!chapter_project_id || !exam_id || !student_id)
         return res.status(400).json({ error: 'chapter_project_id, exam_id, student_id required' });
@@ -226,7 +226,7 @@ router.post('/student/project-auto-grade', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to run auto-grade check' }); }
 });
 
-router.get('/student/assignments-visible', async (req, res) => {
+router.get('/student/assignments-visible', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
@@ -280,7 +280,7 @@ router.post('/admin/project-spec', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save project spec' }); }
 });
 
-router.get('/projects/specs', async (req, res) => {
+router.get('/projects/specs', requireLogin, async (req, res) => {
     const { course_id } = req.query;
     if (!course_id) return res.status(400).json({ error: 'course_id is required' });
     try {
@@ -298,7 +298,7 @@ router.get('/projects/specs', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch project specs' }); }
 });
 
-router.post('/student/project-submission', async (req, res) => {
+router.post('/student/project-submission', requireSelfOrStaff(), async (req, res) => {
     const { student_id, chapter_project_id, exam_id, original_filename, stored_path, file_hash, submission_mode, overwrite_of_submission_id } = req.body;
     if (!student_id || !chapter_project_id || !exam_id || !original_filename || !stored_path)
         return res.status(400).json({ error: 'Missing required submission fields' });
@@ -321,7 +321,7 @@ router.post('/student/project-submission', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save project submission metadata' }); }
 });
 
-router.post('/student/project-evaluation', async (req, res) => {
+router.post('/student/project-evaluation', requireSelfOrStaff(), async (req, res) => {
     const { chapter_project_id, exam_id, student_id, evaluator_student_id, evaluator_type, score, max_score, rubric_json, feedback } = req.body;
     if (!chapter_project_id || !exam_id || !student_id || !evaluator_type)
         return res.status(400).json({ error: 'chapter_project_id, exam_id, student_id, evaluator_type are required' });
@@ -335,7 +335,7 @@ router.post('/student/project-evaluation', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save evaluation/aggregate' }); }
 });
 
-router.get('/student/project-aggregate', async (req, res) => {
+router.get('/student/project-aggregate', requireSelfOrStaff(), async (req, res) => {
     const { chapter_project_id, exam_id, student_id } = req.query;
     if (!chapter_project_id || !exam_id || !student_id)
         return res.status(400).json({ error: 'chapter_project_id, exam_id, student_id required' });

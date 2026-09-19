@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { resolveCourseId, getCurrentSchoolYear } = require('../helpers');
+const { resolveCourseId, getCurrentSchoolYear, isStaffSession, requireSelfOrStaff } = require('../helpers');
 
 router.get('/payroll/roster', async (req, res) => {
     const { username } = req.query;
+    const sessionUser = req.session?.user;
+    const isSelf = sessionUser?.username && username && sessionUser.username === username;
+    if (!isSelf && !isStaffSession(req)) return res.status(401).json({ error: 'Not authorized.' });
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(
@@ -19,7 +22,7 @@ router.get('/payroll/roster', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch payroll roster' }); }
 });
 
-router.get('/payroll/timesheets', async (req, res) => {
+router.get('/payroll/timesheets', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     try {
         const connection = await getDbConnection();

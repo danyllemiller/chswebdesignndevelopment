@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { resolveCourseId, getCurrentSchoolYear } = require('../helpers');
+const { resolveCourseId, getCurrentSchoolYear, requireSelfOrStaff } = require('../helpers');
 const { computeStudentGrade } = require('../gradeCalc');
 
 const ON_TIME_BONUS = 5.00;
@@ -394,7 +394,7 @@ async function computePayrollForPeriod(connection, { period_start, period_end, c
 ensurePaystubTables();
 
 // GET /paystubs/my?student_id=X — all finalized paystubs for a student
-router.get('/paystubs/my', async (req, res) => {
+router.get('/paystubs/my', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -418,7 +418,7 @@ router.get('/paystubs/my', async (req, res) => {
 });
 
 // GET /paystubs/ytd?student_id=X&year=2026 — year-end tax summary
-router.get('/paystubs/ytd', async (req, res) => {
+router.get('/paystubs/ytd', requireSelfOrStaff(), async (req, res) => {
     const { student_id, year } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     const targetYear = Number(year) || new Date().getFullYear();

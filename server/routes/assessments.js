@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
 const { sanitizeNotebookHtml } = require('../sanitizeNotebookHtml');
-const { resolveCourseId } = require('../helpers');
+const { resolveCourseId, isStaffSession, requireSelfOrStaff, requireLogin } = require('../helpers');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -41,7 +41,7 @@ const REVIEW_QUESTIONS_DDL = `CREATE TABLE IF NOT EXISTS review_questions (
 )`;
 
 // --- SELF-ASSESSMENTS ---
-router.get('/student/self-assessments', async (req, res) => {
+router.get('/student/self-assessments', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     try {
         const connection = await getDbConnection();
@@ -51,7 +51,7 @@ router.get('/student/self-assessments', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch assessments' }); }
 });
 
-router.post('/student/save-self-assessment', async (req, res) => {
+router.post('/student/save-self-assessment', requireSelfOrStaff(), async (req, res) => {
     const { student_id, chapter_id, level } = req.body;
     try {
         const connection = await getDbConnection();
@@ -65,7 +65,7 @@ router.post('/student/save-self-assessment', async (req, res) => {
 });
 
 // --- TURN-INS ---
-router.post('/student/submit-turnin', async (req, res) => {
+router.post('/student/submit-turnin', requireSelfOrStaff(), async (req, res) => {
     const { student_id, assignment_name, note } = req.body;
     try {
         const connection = await getDbConnection();
@@ -88,6 +88,9 @@ router.post('/student/submit-turnin', async (req, res) => {
 router.get('/student/profile', async (req, res) => {
     const { username } = req.query;
     if (!username) return res.status(400).json({ error: 'username is required' });
+    const sessionUser = req.session?.user;
+    const isSelf = sessionUser?.username && sessionUser.username.toLowerCase() === String(username).toLowerCase();
+    if (!isSelf && !isStaffSession(req)) return res.status(401).json({ error: 'Not authorized.' });
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(
@@ -106,7 +109,7 @@ router.get('/student/profile', async (req, res) => {
 });
 
 // --- HELP REQUEST ---
-router.post('/student/help-request', async (req, res) => {
+router.post('/student/help-request', requireSelfOrStaff(), async (req, res) => {
     const { student_id, requested } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
@@ -124,7 +127,7 @@ router.post('/student/help-request', async (req, res) => {
 });
 
 // --- CS EXAM QUESTIONS ---
-router.get('/cs-exam-questions', async (req, res) => {
+router.get('/cs-exam-questions', requireLogin, async (req, res) => {
     const { unit } = req.query;
     let unitNum = 0;
     let examIds = [];
@@ -307,7 +310,7 @@ router.get('/student/study-guide/latest', async (req, res) => {
 });
 
 // --- WD EXAM QUESTIONS ---
-router.get('/wd-exam-questions', async (req, res) => {
+router.get('/wd-exam-questions', requireLogin, async (req, res) => {
     const { chapter } = req.query;
     const chapterNum = parseInt(chapter, 10);
     if (isNaN(chapterNum) || chapterNum < 1 || chapterNum > 16) {
@@ -339,7 +342,7 @@ router.get('/wd-exam-questions', async (req, res) => {
 });
 
 // --- WD MATCHING/LABELING QUESTIONS ---
-router.get('/wd-exam-matching', async (req, res) => {
+router.get('/wd-exam-matching', requireLogin, async (req, res) => {
     const { chapter } = req.query;
     const chapterNum = parseInt(chapter, 10);
     if (isNaN(chapterNum) || chapterNum < 1 || chapterNum > 16) {
@@ -379,7 +382,7 @@ router.get('/wd-exam-matching', async (req, res) => {
 // with the image at any rendered size -- same technique the page's own
 // click-to-explore hotspots already use (e.g. join-the-developers-guild.html's
 // WDLC diagram), which is where these zone coordinates were pulled from.
-router.get('/wd-exam-image-labeling', async (req, res) => {
+router.get('/wd-exam-image-labeling', requireLogin, async (req, res) => {
     const { chapter } = req.query;
     const chapterNum = parseInt(chapter, 10);
     if (isNaN(chapterNum) || chapterNum < 1 || chapterNum > 16) {
@@ -412,7 +415,7 @@ router.get('/wd-exam-image-labeling', async (req, res) => {
 });
 
 // --- CS NOTEBOOK (turnins table) ---
-router.get('/student/cs-notebook', async (req, res) => {
+router.get('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
@@ -426,7 +429,7 @@ router.get('/student/cs-notebook', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load notebook entries' }); }
 });
 
-router.post('/student/cs-notebook', async (req, res) => {
+router.post('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => {
     const { id, student_id, chapter, title, category, content, is_submitted } = req.body;
     if (!student_id || !chapter) return res.status(400).json({ error: 'student_id and chapter required' });
     const cleanContent = sanitizeNotebookHtml(content);
@@ -465,7 +468,7 @@ router.post('/student/cs-notebook', async (req, res) => {
 // the id client-side. Deleting a submitted Activity note does NOT touch
 // the gradebook -- the grade already posted via submit-exam stays as-is,
 // the client warns about this before calling here.
-router.delete('/student/cs-notebook', async (req, res) => {
+router.delete('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => {
     const { id, student_id } = req.body || {};
     if (!id || !student_id) return res.status(400).json({ error: 'id and student_id required' });
     try {
@@ -495,7 +498,7 @@ router.delete('/student/cs-notebook', async (req, res) => {
 // as a pickable option going forward.
 const RETIRED_CS_ACTIVITY_IDS = ['cs_ch3_file_system_audit'];
 
-router.get('/student/cs-chapter-activities', async (req, res) => {
+router.get('/student/cs-chapter-activities', requireSelfOrStaff(), async (req, res) => {
     const { chapter, student_id } = req.query;
     if (!chapter || !student_id) return res.status(400).json({ error: 'chapter and student_id required' });
     const chapterNum = parseInt(chapter, 10);
@@ -526,7 +529,7 @@ router.get('/student/cs-chapter-activities', async (req, res) => {
 });
 
 // --- EXAM PROGRESS ---
-router.get('/student/exam-progress', async (req, res) => {
+router.get('/student/exam-progress', requireSelfOrStaff(), async (req, res) => {
     const { student_id, exam_id } = req.query;
     if (!student_id || !exam_id) return res.status(400).json({ error: 'student_id and exam_id required' });
     try {
@@ -542,7 +545,7 @@ router.get('/student/exam-progress', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load progress' }); }
 });
 
-router.post('/student/exam-progress', async (req, res) => {
+router.post('/student/exam-progress', requireSelfOrStaff(), async (req, res) => {
     const { student_id, exam_id, ...progressData } = req.body;
     if (!student_id || !exam_id) return res.status(400).json({ error: 'student_id and exam_id required' });
     try {
@@ -558,7 +561,7 @@ router.post('/student/exam-progress', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save progress' }); }
 });
 
-router.delete('/student/exam-progress', async (req, res) => {
+router.delete('/student/exam-progress', requireSelfOrStaff(), async (req, res) => {
     const { student_id, exam_id } = req.query;
     if (!student_id || !exam_id) return res.status(400).json({ error: 'student_id and exam_id required' });
     try {
@@ -621,7 +624,7 @@ router.delete('/admin/rubrics/:id', async (req, res) => {
 });
 
 // --- REVIEW GAME QUESTIONS ---
-router.get('/review-questions', async (req, res) => {
+router.get('/review-questions', requireLogin, async (req, res) => {
     const { chapter } = req.query;
     try {
         const connection = await getDbConnection();
@@ -731,7 +734,7 @@ const resumeUpload = multer({
 // POST /api/upload-resume?student_id=xxx -- called before submit-job-application
 // so the returned path can ride along in that JSON payload, same two-step
 // shape as the sticker upload flow.
-router.post('/upload-resume', (req, res) => {
+router.post('/upload-resume', requireSelfOrStaff(), (req, res) => {
     resumeUpload.single('resume')(req, res, (err) => {
         if (err) return res.status(400).json({ error: err.message });
         if (!req.file) return res.status(400).json({ error: 'A PDF resume file is required.' });
@@ -750,7 +753,7 @@ router.post('/upload-resume', (req, res) => {
 // already used by the Chapter 1 turn-in dropdown) gets credited the same
 // simple way save-grade does -- full completion credit, no retake/testing-
 // window gating, since this is a one-time application, not a timed exam.
-router.post('/submit-job-application', async (req, res) => {
+router.post('/submit-job-application', requireSelfOrStaff(), async (req, res) => {
     const { student_id, role, role_label, fields, answers, resumeFilename, resumePath } = req.body || {};
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     if (!answers || typeof answers !== 'object') return res.status(400).json({ error: 'answers are required' });
