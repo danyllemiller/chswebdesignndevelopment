@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { ensureOffDaysTable } = require('../helpers');
+const { ensureOffDaysTable, requireLogin } = require('../helpers');
 
 // School off-days -- holidays, teacher workdays, anything students aren't
 // in class -- used to gate test-taking to real school hours (see
@@ -144,7 +144,7 @@ router.post('/admin/calendar-settings', async (req, res) => {
 });
 
 // --- BELL SCHEDULE ---
-router.get('/bell-schedule', async (req, res) => {
+router.get('/bell-schedule', requireLogin, async (req, res) => {
     const type = String(req.query.type || '').trim();
     try {
         const connection = await getDbConnection();

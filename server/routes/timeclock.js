@@ -3,7 +3,7 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { getDbConnection } = require('../db');
-const { getCurrentSchoolYear } = require('../helpers');
+const { getCurrentSchoolYear, requireLogin, requireSelfOrStaff } = require('../helpers');
 const { pickWprQuestion, pickWprMcQuestion } = require('../wprQuestionBank');
 
 // Client-side JS errors on the timeclock widget were failing completely
@@ -15,7 +15,7 @@ const { pickWprQuestion, pickWprMcQuestion } = require('../wprQuestionBank');
 // (message, stack, and where in the flow it happened) straight into the
 // server logs, so the actual failure can be read directly instead of
 // guessed at again.
-router.post('/client-error-log', async (req, res) => {
+router.post('/client-error-log', requireLogin, async (req, res) => {
     const { message, stack, url, student_id, context, userAgent, timestamp } = req.body || {};
     console.error('[CLIENT ERROR]', JSON.stringify({ message, stack, url, student_id, context, userAgent, timestamp }));
     res.json({ ok: true });
@@ -177,7 +177,7 @@ function periodToCourseKeyServer(period) {
 }
 
 // Legacy clock-in endpoint (kept for backward compatibility)
-router.post('/clockin', async (req, res) => {
+router.post('/clockin', requireSelfOrStaff(), async (req, res) => {
     const { student_id, section_id, type, answer } = req.body;
     try {
         const connection = await getDbConnection();
@@ -195,7 +195,7 @@ router.post('/clockin', async (req, res) => {
 // "clock out" the moment their afternoon period's page loads -- that's a
 // separate class with its own separate clock-in. Falls back to the old
 // student+date-only behavior if no period is given (backward compatible).
-router.get('/timeclock/status', async (req, res) => {
+router.get('/timeclock/status', requireSelfOrStaff(), async (req, res) => {
     const { student_id, period } = req.query;
     try {
         const connection = await getDbConnection();
@@ -292,7 +292,7 @@ function shuffleOptions(options) {
     return arr;
 }
 
-router.get('/timeclock/question', async (req, res) => {
+router.get('/timeclock/question', requireLogin, async (req, res) => {
     const { type } = req.query;
     const kind = String(type || '').replace(/_IN$/, ''); // CS, WD1, WD2, AS
 
@@ -432,7 +432,7 @@ async function resolveQuestionGroupKey(connection, studentId) {
 // /timeclock/question), clock-out asks an open-ended one and that answer
 // is what actually gets saved into the WD daily journal. CS keeps the
 // original chapter-based fallback since WPR wasn't asked for there.
-router.get('/timeclock/reflection-prompt', async (req, res) => {
+router.get('/timeclock/reflection-prompt', requireLogin, async (req, res) => {
     const { type, student_id } = req.query; // CS, WD1, WD2, AS
     const kind = String(type || '');
     const today = getLocalDateStr();
@@ -486,7 +486,7 @@ router.get('/timeclock/reflection-prompt', async (req, res) => {
     }
 });
 
-router.post('/timeclock/save', async (req, res) => {
+router.post('/timeclock/save', requireSelfOrStaff(), async (req, res) => {
     const { student_id, section_id, mode, answer, is_correct, prompt } = req.body;
     if (!student_id || !mode) return res.status(400).json({ error: 'student_id and mode are required' });
     const today = getLocalDateStr();
@@ -627,7 +627,7 @@ router.post('/timeclock/save', async (req, res) => {
 // and the clock-out reflection they've written, newest first (and clock-in
 // shown before clock-out within the same day), so they can look back on it
 // (see ensureWdJournalTable above).
-router.get('/student/wd-journal', async (req, res) => {
+router.get('/student/wd-journal', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
