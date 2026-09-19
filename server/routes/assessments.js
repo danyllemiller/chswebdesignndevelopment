@@ -624,6 +624,21 @@ router.delete('/admin/rubrics/:id', async (req, res) => {
 });
 
 // --- REVIEW GAME QUESTIONS ---
+// CS is tested per unit (Unit1-Exam ... Unit7-Exam), not per chapter -- a
+// student studies for "Unit 3," not for "Chapter 6" in isolation. Mirrors
+// CS_UNIT_CHAPTERS in js/student/dashboard.js and server/gradeCalc.js,
+// translated to the review_questions.chapter slugs the CS content was
+// seeded under (see the migration this was converted with).
+const CS_UNIT_CHAPTER_SLUGS = {
+    1: ['essential_computer_skills', 'ethics_privacy_law'],
+    2: ['how_computers_work', 'intro_to_office_software'],
+    3: ['language_of_computers', 'storing_data', 'mastering_spreadsheets', 'computational_modeling'],
+    4: ['problem_solving_algorithms', 'control_structures_events'],
+    5: ['culture_equity_bias', 'ai_cross_disciplinary'],
+    6: ['advanced_data_structures', 'modularity_procedures', 'software_development_lifecycle'],
+    7: ['how_the_internet_works', 'cybersecurity_threats', 'defending_systems']
+};
+
 router.get('/review-questions', requireLogin, async (req, res) => {
     const { chapter } = req.query;
     try {
@@ -631,6 +646,7 @@ router.get('/review-questions', requireLogin, async (req, res) => {
         await connection.execute(REVIEW_QUESTIONS_DDL);
         let sql = 'SELECT id, chapter, grade, cat, val, q, a, d FROM review_questions';
         const params = [];
+        const unitMatch = /^CS Unit ([1-7])$/.exec(chapter || '');
         // "Ultimate Review" used to mean "no WHERE clause at all" -- harmless
         // while every row in this table was Web Design content, but the CS
         // review bank now lives in the same table, so an unfiltered query
@@ -640,6 +656,11 @@ router.get('/review-questions', requireLogin, async (req, res) => {
         else if (chapter === 'Year 1 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 1'); }
         else if (chapter === 'Year 2 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 2'); }
         else if (chapter === 'CS Review')     { sql += ' WHERE grade = ?'; params.push('Computer Science'); }
+        else if (unitMatch) {
+            const slugs = CS_UNIT_CHAPTER_SLUGS[Number(unitMatch[1])];
+            sql += ` WHERE grade = ? AND chapter IN (${slugs.map(() => '?').join(', ')})`;
+            params.push('Computer Science', ...slugs);
+        }
         else if (chapter)                     { sql += ' WHERE chapter = ?'; params.push(chapter); }
         const [rows] = await connection.execute(sql, params);
         await connection.release();

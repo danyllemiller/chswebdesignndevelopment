@@ -175,6 +175,7 @@ async function loadGameDataFromPool() {
         else if (path.includes('web2review')) targetFilter = "Year 2 Review";
         else if (path.includes('webreview')) targetFilter = "Ultimate Review";
         else if (path.includes('csreviewgames')) targetFilter = "CS Review";
+        else if (/csunit([1-7])review/.test(path)) targetFilter = `CS Unit ${path.match(/csunit([1-7])review/)[1]}`;
         else {
             // WD1, WD2, and CS each restart their own "Chapter N" numbering
             // independently (and some page titles are stale leftovers from a
@@ -226,7 +227,13 @@ async function loadGameDataFromPool() {
         }
 
         const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
-        const allCats = [...new Set(activeQs.map(q => q.cat))];
+        // Only categories with at least one point-value-tagged question are
+        // eligible for the board -- a category with none would still get
+        // picked here (every distinct `cat` in activeQs, jeopardy-ready or
+        // not, used to qualify) and render as a fully empty column with no
+        // clickable tiles at all.
+        const jeopardyReady = activeQs.filter(q => q.val !== null && q.val !== undefined && q.val !== '');
+        const allCats = [...new Set(jeopardyReady.map(q => q.cat))];
         const selectedCats = shuffle(allCats).slice(0, 5);
 
         const mappedJeopardy = {};
