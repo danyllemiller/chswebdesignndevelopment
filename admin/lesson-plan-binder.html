@@ -17,6 +17,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
+<!-- The shared #nav-placeholder navbar (includes/navbar.html) is built with
+     Bootstrap's navbar/dropdown/collapse components -- this page never
+     loaded Bootstrap at all, so it rendered as an unstyled stacked list of
+     every link with no working dropdowns. Loaded here, before this page's
+     own <style> block below, so this page's own rules still win on
+     anything both define. -->
+<link href="/css/bootstrap.min.css" rel="stylesheet"/>
+
 <style>
   :root {
     --bg: #f6f3ec; --surface: #ffffff; --surface-2: #fbf9f4;
@@ -2486,6 +2494,10 @@
 </div>
 
 <div id="footer-placeholder"></div>
+
+<!-- Needed for the navbar's dropdown/collapse toggle behavior (data-bs-toggle) --
+     see the bootstrap.min.css comment in <head> for why this page needs it now. -->
+<script src="/js/bootstrap.bundle.js"></script>
 
 </body>
 </html>

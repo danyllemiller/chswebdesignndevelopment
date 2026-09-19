@@ -66,17 +66,21 @@ async function loadRoster() {
         if (!response.ok) throw new Error('Failed to fetch roster');
         const data = await response.json();
 
-        roster = data.map(student => ({
+        // The endpoint returns { roster: [...] } (server/routes/notebooks.js),
+        // not a bare array -- this was calling .map() on that wrapper object
+        // directly, which throws, so the roster never actually loaded.
+        roster = data.roster.map(student => ({
             ...student,
             docId: student.student_id,
             displaySchoolId: student.student_id,
             id: student.student_id,
-            lastName: student.last_name || 'Unknown',
-            firstName: student.first_name || 'Student',
-            period: student.section_id || 'Unassigned'
+            lastName: student.lastName || 'Unknown',
+            firstName: student.firstName || 'Student',
+            period: student.period || 'Unassigned'
         }));
 
         roster.sort((a, b) => a.lastName.localeCompare(b.lastName));
+        populatePeriodFilter();
 
         // BRUTE FORCE URL CATCHER
         const currentUrl = window.location.href;
@@ -135,6 +139,32 @@ async function loadRoster() {
     }
 }
 
+// Builds the period-specific options from whatever section_id values
+// actually exist on the roster (A1, B2, A3, A5, B4, B6, B8, INTV, ...)
+// instead of a hand-typed WD1-/WD2-/CS-prefixed list that never matched a
+// real student's section_id and made every specific-period filter (the
+// "All Web Design 1/2/Computer Science" options are separate and stay as
+// static options) return nobody.
+function populatePeriodFilter() {
+    const select = document.getElementById('periodFilter');
+    const periods = Array.from(new Set(roster.map(s => s.period).filter(p => p && p !== 'Unassigned')));
+    periods.sort((a, b) => {
+        const numA = parseInt(String(a).match(/\d+/), 10);
+        const numB = parseInt(String(b).match(/\d+/), 10);
+        if (!isNaN(numA) && !isNaN(numB) && numA !== numB) return numA - numB;
+        if (!isNaN(numA) !== !isNaN(numB)) return isNaN(numA) ? 1 : -1;
+        return String(a).localeCompare(String(b));
+    });
+
+    select.innerHTML = `
+        <option value="All">All Periods</option>
+        <option value="All-WD1">All Web Design 1</option>
+        <option value="All-WD2">All Web Design 2</option>
+        <option value="All-CS">All Computer Science</option>
+        ${periods.map(p => `<option value="${p}">${p}</option>`).join('')}
+    `;
+}
+
 // --- RENDER SIDEBAR ---
 function renderStudentList() {
     const listEl = document.getElementById('studentList');
@@ -145,9 +175,9 @@ function renderStudentList() {
 
     roster.forEach(student => {
         if (filter !== 'All') {
-            if (filter === 'All-WD1' && (!student.period || !student.period.startsWith('WD1'))) return;
-            else if (filter === 'All-WD2' && (!student.period || !student.period.startsWith('WD2'))) return;
-            else if (filter === 'All-CS' && (!student.period || !student.period.startsWith('CS'))) return;
+            if (filter === 'All-WD1' && student.course !== 'WD1') return;
+            else if (filter === 'All-WD2' && student.course !== 'WD2') return;
+            else if (filter === 'All-CS' && student.course !== 'CS') return;
             else if (!filter.startsWith('All-') && student.period !== filter) return;
         }
 

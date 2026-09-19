@@ -46,29 +46,18 @@
             <div class="p-3 border-bottom bg-white sticky-top">
               <label class="form-label small fw-bold text-muted mb-1">Filter by Class Period</label>
               
+              <!-- The specific-period options below "All Computer Science" are
+                   populated from the real roster (js/admin/admin-notebooks.js
+                   populatePeriodFilter) -- this used to be a hand-typed
+                   WD1-A1/WD2-A1/CS-A1-style list that never matched any real
+                   student's actual section_id (real periods are bare values
+                   like "A1", "B2", "INTV"), so every specific-period filter
+                   silently returned zero students. -->
               <select id="periodFilter" class="form-select form-select-sm fw-bold border-secondary shadow-sm">
                 <option value="All">All Periods</option>
                 <option value="All-WD1">All Web Design 1</option>
                 <option value="All-WD2">All Web Design 2</option>
                 <option value="All-CS">All Computer Science</option>
-                <optgroup label="Web Design 1 (Ch 1-8)">
-                    <option value="WD1-A1">WD1-A1</option><option value="WD1-B2">WD1-B2</option>
-                    <option value="WD1-A3">WD1-A3</option><option value="WD1-B4">WD1-B4</option>
-                    <option value="WD1-A5">WD1-A5</option><option value="WD1-B6">WD1-B6</option>
-                    <option value="WD1-A7">WD1-A7</option><option value="WD1-B8">WD1-B8</option>
-                </optgroup>
-                <optgroup label="Web Design 2 (Ch 9-16)">
-                    <option value="WD2-A1">WD2-A1</option><option value="WD2-B2">WD2-B2</option>
-                    <option value="WD2-A3">WD2-A3</option><option value="WD2-B4">WD2-B4</option>
-                    <option value="WD2-A5">WD2-A5</option><option value="WD2-B6">WD2-B6</option>
-                    <option value="WD2-A7">WD2-A7</option><option value="WD2-B8">WD2-B8</option>
-                </optgroup>
-                <optgroup label="Computer Science (Ch 1-18)">
-                    <option value="CS-A1">CS-A1</option><option value="CS-B2">CS-B2</option>
-                    <option value="CS-A3">CS-A3</option><option value="CS-B4">CS-B4</option>
-                    <option value="CS-A5">CS-A5</option><option value="CS-B6">CS-B6</option>
-                    <option value="CS-A7">CS-A7</option><option value="CS-B8">CS-B8</option>
-                </optgroup>
               </select>
             </div>
             

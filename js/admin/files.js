@@ -77,6 +77,7 @@ async function loadRoster() {
         fullRoster = (data.roster || data || []).filter(s => s.student_id && s.first_name && s.last_name);
         fullRoster.sort((a, b) => a.last_name.localeCompare(b.last_name));
 
+        populatePeriodFilter();
         populateStudentDropdown("All");
 
         document.getElementById('periodFilter').addEventListener('change', (e) => {
@@ -100,6 +101,25 @@ async function loadRoster() {
         console.error("Error loading roster:", error);
         studentSelect.innerHTML = '<option value="">Error loading roster</option>';
     }
+}
+
+// Builds the period dropdown from whatever section_id values actually exist
+// on the roster (A1, B2, A3, A5, B4, B6, B8, INTV, ...) instead of a
+// hand-typed WD1-/WD2-/CS-prefixed list that never matched a real
+// student's section_id and made every period filter return nobody.
+function populatePeriodFilter() {
+    const select = document.getElementById('periodFilter');
+    const periods = Array.from(new Set(fullRoster.map(s => s.section_id).filter(Boolean)));
+    periods.sort((a, b) => {
+        const numA = parseInt(String(a).match(/\d+/), 10);
+        const numB = parseInt(String(b).match(/\d+/), 10);
+        if (!isNaN(numA) && !isNaN(numB) && numA !== numB) return numA - numB;
+        if (!isNaN(numA) !== !isNaN(numB)) return isNaN(numA) ? 1 : -1;
+        return String(a).localeCompare(String(b));
+    });
+
+    select.innerHTML = '<option value="All">All Periods</option>' +
+        periods.map(p => `<option value="${p}">${p}</option>`).join('');
 }
 
 function populateStudentDropdown(period) {

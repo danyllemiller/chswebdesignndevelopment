@@ -4,15 +4,22 @@ const { getDbConnection } = require('../db');
 const { sanitizeNotebookHtml } = require('../sanitizeNotebookHtml');
 const { requireSelfOrStaff } = require('../helpers');
 
+// Maps a real course_id to the WD1/WD2/CS tag admin-notebooks.js's
+// "All Web Design 1/2/Computer Science" filters group by -- same mapping
+// used for the due-date calendar sync in gradebook.js.
+const COURSE_ID_TO_TAG = { '05254G1S': 'WD1', '05254G2S': 'WD2', '10003GS': 'CS' };
+
 router.get('/admin/notebooks/roster', async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute(
-            `SELECT student_id, first_name, last_name, username, section_id, role
-             FROM students
-             WHERE (role IS NULL OR LOWER(role) <> 'admin')
-               AND (section_id IS NULL OR section_id <> 'Teacher')
-             ORDER BY section_id ASC, last_name ASC, first_name ASC`
+            `SELECT s.student_id, s.first_name, s.last_name, s.username, s.section_id, s.role,
+                    COALESCE(s.course_id, cs.course_id) AS course_id
+             FROM students s
+             LEFT JOIN class_sections cs ON cs.section_id = s.section_id AND s.course_id IS NULL
+             WHERE (s.role IS NULL OR LOWER(s.role) <> 'admin')
+               AND (s.section_id IS NULL OR s.section_id <> 'Teacher')
+             ORDER BY s.section_id ASC, s.last_name ASC, s.first_name ASC`
         );
         await connection.release();
         const roster = rows.map((r) => ({
@@ -21,6 +28,7 @@ router.get('/admin/notebooks/roster', async (req, res) => {
             lastName: r.last_name || '',
             username: r.username || '',
             period: r.section_id || '',
+            course: COURSE_ID_TO_TAG[r.course_id] || null,
             role: r.role || 'student'
         }));
         return res.json({ roster });

@@ -23,26 +23,14 @@
         <h2 class="gochi text-primary mb-0"><i class="fas fa-folder-open me-2"></i> Student File Explorer</h2>
         
         <div class="d-flex gap-3 align-items-center">
+            <!-- Options beyond "All Periods" are populated from the real roster
+                 (js/admin/files.js populatePeriodFilter) -- this used to be a
+                 hand-typed WD1-A1/WD2-A1/CS-A1-style list that never matched any
+                 real student's actual section_id (real periods are bare values
+                 like "A1", "B2", "INTV"), so every period filter silently
+                 returned zero students. -->
             <select id="periodFilter" class="form-select border-primary shadow-sm fw-bold text-primary" style="width: auto;">
                 <option value="All">All Periods</option>
-                <optgroup label="Web Design 1 (Ch 1-8)">
-                    <option value="WD1-A1">WD1-A1</option><option value="WD1-B2">WD1-B2</option>
-                    <option value="WD1-A3">WD1-A3</option><option value="WD1-B4">WD1-B4</option>
-                    <option value="WD1-A5">WD1-A5</option><option value="WD1-B6">WD1-B6</option>
-                    <option value="WD1-A7">WD1-A7</option><option value="WD1-B8">WD1-B8</option>
-                </optgroup>
-                <optgroup label="Web Design 2 (Ch 9-16)">
-                    <option value="WD2-A1">WD2-A1</option><option value="WD2-B2">WD2-B2</option>
-                    <option value="WD2-A3">WD2-A3</option><option value="WD2-B4">WD2-B4</option>
-                    <option value="WD2-A5">WD2-A5</option><option value="WD2-B6">WD2-B6</option>
-                    <option value="WD2-A7">WD2-A7</option><option value="WD2-B8">WD2-B8</option>
-                </optgroup>
-                <optgroup label="Computer Science (Ch 1-18)">
-                    <option value="CS-A1">CS-A1</option><option value="CS-B2">CS-B2</option>
-                    <option value="CS-A3">CS-A3</option><option value="CS-B4">CS-B4</option>
-                    <option value="CS-A5">CS-A5</option><option value="CS-B6">CS-B6</option>
-                    <option value="CS-A7">CS-A7</option><option value="CS-B8">CS-B8</option>
-                </optgroup>
             </select>
             
             <select id="studentSelect" class="form-select border-primary shadow-sm fw-bold" style="min-width: 250px;" disabled>
