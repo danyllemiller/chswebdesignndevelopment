@@ -22,13 +22,6 @@ function waitForAuth(timeout = 8000) {
     });
 }
 
-// Helper: Extract Chapter Number from the page
-function getCurrentChapter() {
-    const textToScan = (document.title + " " + (document.querySelector('h1')?.innerText || "")).toLowerCase();
-    const match = textToScan.match(/chapter\s*(\d+)/i) || textToScan.match(/ch\s*(\d+)/i);
-    return match ? match[1] : null;
-}
-
 function setupOverwriteModal() {
     if (document.getElementById('overwriteModal')) return;
     const modalHtml = `
@@ -145,14 +138,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Browser/extension page-translation (a student's Chrome set to
         // auto-translate to Mandarin, Spanish, etc.) rewrites visible DOM
-        // text -- including <option> labels -- so reading .text here would
-        // build the wrong exam_id and mis-detect points/type from translated
-        // words. data-label is a duplicate of the original English label
-        // that translation tools don't touch, since it's an attribute, not
-        // rendered text.
+        // text -- including, it turns out, the data-label ATTRIBUTE too in
+        // at least one confirmed live case, not just rendered text as
+        // originally assumed. A corrupted exam_id built from either one
+        // used to land straight in the gradebook as a new, permanent,
+        // due-date-less column with no validation at all (one real case:
+        // a Chapter 9 milestone submitted in Chinese). The dropdown's own
+        // `value` attribute is never touched by any translation mechanism
+        // observed so far (rewriting it would break the browser's own form
+        // submission), and every option's value is already hardcoded here
+        // to exactly match its real, pre-seeded catalog exam_id -- so it's
+        // used directly now instead of ever reconstructing an exam_id from
+        // any DOM text, translated or not. rawAssignmentText is kept only
+        // for the point/type detection below and the human-readable status
+        // message -- neither is safety-critical the way exam_id is, since
+        // the server now falls back to its own catalog's point value when
+        // the exam_id already exists there (see /submit-exam).
         const selectedOption = assignSelect.options[assignSelect.selectedIndex];
         const rawAssignmentText = selectedOption.dataset.label || selectedOption.text;
-        const chapterNum = getCurrentChapter();
+        const finalAssignmentKey = selectedOption.value;
 
         // Calculate points
         const ptsMatch = rawAssignmentText.match(/[\[\(](\d+)\s*pts?[\]\)]/i);
@@ -174,14 +178,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // held at 0 pending self/peer/auto review.
         let finalScore = (lowerName.includes('project') || lowerName.includes('capstone') || lowerName.includes('exam')) ? 0 : maxPoints;
 
-        // Build assignment key (used as exam_id in MariaDB)
-        let cleanName = rawAssignmentText.replace(/^(lab|walkthrough|project|milestone)\s*\d*:\s*/i, "").trim();
-        cleanName = cleanName.replace(/\s*[\[\(]\d+\s*pts?[\]\)]/i, "").trim();
-        let finalAssignmentKey = chapterNum ? `Ch${chapterNum}-${cleanName}` : cleanName;
-        // Truncate to 95 chars for varchar(100) safety
-        finalAssignmentKey = finalAssignmentKey.substring(0, 95);
-
-        const assignmentCode = assignSelect.value;
         const status = document.getElementById('uploadStatus');
         const progBar = document.getElementById('progressBar');
         const progressContainer = document.getElementById('uploadProgress');
@@ -256,7 +252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const formData = new FormData();
             formData.append("studentId", currentStudent.student_id);
-            formData.append("assignment", assignmentCode);
+            formData.append("assignment", finalAssignmentKey);
             formData.append("file", file);
             formData.append("path", finalPath);
 

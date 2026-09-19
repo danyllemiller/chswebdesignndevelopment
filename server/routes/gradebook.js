@@ -292,11 +292,19 @@ router.post('/submit-exam', async (req, res) => {
         // genuinely new assignment the catalog hasn't caught up to yet,
         // it'll have no title/due date in the gradebook until added there,
         // which is the visible signal that it needs to be.
+        // The catalog's own total_points wins whenever the exam_id already
+        // exists there -- a corrupted/mismatched client submission can, at
+        // worst, get logged and skipped (see the warning below); it can no
+        // longer silently overwrite a real assignment's point value the
+        // way blindly trusting the client-supplied total_points would.
         const [existingExam] = await connection.execute(
-            'SELECT exam_id FROM exams WHERE exam_id = ? LIMIT 1', [exam_id]
+            'SELECT total_points FROM exams WHERE exam_id = ? LIMIT 1', [exam_id]
         );
+        let effectiveTotalPoints = total_points || 100;
         if (existingExam.length === 0) {
             console.warn(`[submit-exam] No catalog entry for exam_id "${exam_id}" (student ${student_id}) -- score recorded, but it won't show as a gradebook column until this assignment is added via the Due Date Manager.`);
+        } else {
+            effectiveTotalPoints = existingExam[0].total_points;
         }
         // Log every submission as its own attempt, in addition to the
         // keep-highest "current best" logic below — responses only ever
@@ -308,7 +316,7 @@ router.post('/submit-exam', async (req, res) => {
         );
         await connection.execute(
             'INSERT INTO exam_attempts (student_id, exam_id, attempt_number, score, total_points, timestamp) VALUES (?, ?, ?, ?, ?, NOW())',
-            [student_id, exam_id, attemptCountRows[0].n + 1, score, total_points || 100]
+            [student_id, exam_id, attemptCountRows[0].n + 1, score, effectiveTotalPoints]
         );
 
         const [existingRows] = await connection.execute(
@@ -327,7 +335,7 @@ router.post('/submit-exam', async (req, res) => {
         if (shouldUpdate) {
             await connection.execute(
                 'INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic) VALUES (?, ?, ?, ?, NOW(), 0) ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0',
-                [student_id, exam_id, score, total_points || 100]
+                [student_id, exam_id, score, effectiveTotalPoints]
             );
         }
         await connection.release();
