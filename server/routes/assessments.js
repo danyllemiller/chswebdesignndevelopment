@@ -631,11 +631,16 @@ router.get('/review-questions', requireLogin, async (req, res) => {
         await connection.execute(REVIEW_QUESTIONS_DDL);
         let sql = 'SELECT id, chapter, grade, cat, val, q, a, d FROM review_questions';
         const params = [];
-        if (chapter && chapter !== 'Ultimate Review') {
-            if (chapter === 'Year 1 Review')      { sql += ' WHERE grade = ?'; params.push('Web Design 1'); }
-            else if (chapter === 'Year 2 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 2'); }
-            else                                   { sql += ' WHERE chapter = ?'; params.push(chapter); }
-        }
+        // "Ultimate Review" used to mean "no WHERE clause at all" -- harmless
+        // while every row in this table was Web Design content, but the CS
+        // review bank now lives in the same table, so an unfiltered query
+        // would mix CS trivia into the WD launcher's "Full Course Review".
+        // Scoped explicitly to both WD grades instead of left open.
+        if (chapter === 'Ultimate Review')    { sql += ' WHERE grade IN (?, ?)'; params.push('Web Design 1', 'Web Design 2'); }
+        else if (chapter === 'Year 1 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 1'); }
+        else if (chapter === 'Year 2 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 2'); }
+        else if (chapter === 'CS Review')     { sql += ' WHERE grade = ?'; params.push('Computer Science'); }
+        else if (chapter)                     { sql += ' WHERE chapter = ?'; params.push(chapter); }
         const [rows] = await connection.execute(sql, params);
         await connection.release();
         const questions = rows.map(r => ({ ...r, d: typeof r.d === 'string' ? JSON.parse(r.d) : (r.d || []) }));

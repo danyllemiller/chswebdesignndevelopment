@@ -174,6 +174,7 @@ async function loadGameDataFromPool() {
         if (path.includes('web1review')) targetFilter = "Year 1 Review";
         else if (path.includes('web2review')) targetFilter = "Year 2 Review";
         else if (path.includes('webreview')) targetFilter = "Ultimate Review";
+        else if (path.includes('csreviewgames')) targetFilter = "CS Review";
         else {
             // WD1, WD2, and CS each restart their own "Chapter N" numbering
             // independently (and some page titles are stale leftovers from a
@@ -207,6 +208,12 @@ async function loadGameDataFromPool() {
                 activeQs = allQs.filter(q => q.grade === "Web Design 1");
             } else if (targetFilter === "Year 2 Review") {
                 activeQs = allQs.filter(q => q.grade === "Web Design 2");
+            } else if (targetFilter === "CS Review") {
+                // No local fallback pool exists for CS (js/data/*.js only ever
+                // populated window.migrationPool with WD content) -- CS review
+                // content lives in the database only, seeded from the real CS
+                // exam question bank.
+                activeQs = allQs.filter(q => q.grade === "Computer Science");
             } else {
                 const chapRegex = new RegExp('\\b' + targetFilter.replace(/\s+/g, '\\s*') + '\\b', 'i');
                 activeQs = allQs.filter(q => q.chapter && chapRegex.test(q.chapter));
