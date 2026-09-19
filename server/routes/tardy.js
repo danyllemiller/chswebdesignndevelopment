@@ -10,13 +10,24 @@ const { getTardyStep, computeEffectiveCount, getLocalDateStr } = require('../tar
 //
 // Entirely a staff tool -- there's no "self" case here (a student has no
 // business reading anyone's tardy log, including their own, through this
-// API), so every route in this file gates on staff alone.
-router.use(requireStaff);
+// API), so every route below gates on staff alone. Deliberately per-route,
+// NOT router.use(requireStaff) here -- this router is one of several
+// mounted as siblings at the same base path in server/api.js
+// (router.use('/', require('./routes/X')) repeated per file), and an
+// unpathed router.use() inside one of those sibling routers runs for
+// EVERY request that reaches this router at all, not just requests this
+// file has a matching route for. With this file mounted before several
+// others in that list, a blanket router.use(requireStaff) here silently
+// 401'd every route in every file mounted after it for any non-staff
+// caller (confirmed live: it broke the public newsletter endpoint and
+// would have broken students' own messages/survey/interviews access too),
+// since the response short-circuits the chain before Express ever gets to
+// try the next sibling router.
 
 // Dedicated lookup, deliberately not reusing /api/admin/student -- that
 // endpoint LEFT JOINs a payroll_roster table that doesn't exist in this
 // database, so it 500s on every call regardless of tardy tracking.
-router.get('/tardy/lookup', async (req, res) => {
+router.get('/tardy/lookup', requireStaff, async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
@@ -43,7 +54,7 @@ router.get('/tardy/lookup', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to look up student.' }); }
 });
 
-router.post('/tardy/log', async (req, res) => {
+router.post('/tardy/log', requireStaff, async (req, res) => {
     const { student_id, period, reason, date, time } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     // The form always sends the actual claimed arrival date+time (not "now"),
@@ -86,7 +97,7 @@ router.post('/tardy/log', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to log tardy.' }); }
 });
 
-router.get('/tardy/log', async (req, res) => {
+router.get('/tardy/log', requireStaff, async (req, res) => {
     const { student_id } = req.query;
     const currentYear = getCurrentSchoolYear();
     try {
@@ -125,7 +136,7 @@ router.get('/tardy/log', async (req, res) => {
 // the effective count (quarter-scoped, decayed per computeEffectiveCount) --
 // the effective count is what should drive any consequence-ladder decision,
 // the raw count is just "how many tardies are on file, ever."
-router.get('/tardy/summary', async (req, res) => {
+router.get('/tardy/summary', requireStaff, async (req, res) => {
     const currentYear = getCurrentSchoolYear();
     try {
         const connection = await getDbConnection();
@@ -164,7 +175,7 @@ router.get('/tardy/summary', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch tardy summary.' }); }
 });
 
-router.put('/tardy/log/:id', async (req, res) => {
+router.put('/tardy/log/:id', requireStaff, async (req, res) => {
     const { id } = req.params;
     const { period, reason, date, time } = req.body;
     const validDate = /^\d{4}-\d{2}-\d{2}$/.test(date || '') ? date : null;
@@ -182,7 +193,7 @@ router.put('/tardy/log/:id', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update entry.' }); }
 });
 
-router.delete('/tardy/log/:id', async (req, res) => {
+router.delete('/tardy/log/:id', requireStaff, async (req, res) => {
     const { id } = req.params;
     try {
         const connection = await getDbConnection();
@@ -223,7 +234,7 @@ async function ensureFollowupTables(connection) {
     `);
 }
 
-router.get('/tardy/followups', async (req, res) => {
+router.get('/tardy/followups', requireStaff, async (req, res) => {
     const currentYear = getCurrentSchoolYear();
     try {
         const connection = await getDbConnection();
@@ -278,7 +289,7 @@ router.get('/tardy/followups', async (req, res) => {
 // consequence the ladder called for at this count was actually carried out
 // -- up through their CURRENT effective count. They drop off the list until
 // the count moves past this again.
-router.post('/tardy/followup-resolve', async (req, res) => {
+router.post('/tardy/followup-resolve', requireStaff, async (req, res) => {
     const { student_id, count, resolution_type } = req.body;
     if (!student_id || !count || !['letter', 'minor_flag', 'consequence_done'].includes(resolution_type)) {
         console.warn('[tardy/followup-resolve] rejected: invalid payload', req.body);
@@ -298,7 +309,7 @@ router.post('/tardy/followup-resolve', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save resolution' }); }
 });
 
-router.get('/tardy/staff-contacts', async (req, res) => {
+router.get('/tardy/staff-contacts', requireStaff, async (req, res) => {
     try {
         const connection = await getDbConnection();
         await ensureFollowupTables(connection);
@@ -308,7 +319,7 @@ router.get('/tardy/staff-contacts', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch staff contacts.' }); }
 });
 
-router.post('/tardy/staff-contacts', async (req, res) => {
+router.post('/tardy/staff-contacts', requireStaff, async (req, res) => {
     const { counselor_name, counselor_email } = req.body;
     try {
         const connection = await getDbConnection();
