@@ -179,6 +179,12 @@
     color: var(--code-color, #588157) !important;
 }
 
+/* Referenced by js/interactive.js's updateUI() (remove/reflow/re-add on
+   every step change) but never actually defined -- the step content swap
+   has been happening with no transition at all. */
+@keyframes fadeInStepContent { from { opacity: 0; } to { opacity: 1; } }
+.fade-in { animation: fadeInStepContent 0.35s ease; }
+
 .quiz-btn.incorrect {
     border-color: var(--file-name-color, #E07A5F) !important;
     background-color: #ffffff !important;
