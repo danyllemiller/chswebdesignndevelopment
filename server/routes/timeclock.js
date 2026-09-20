@@ -166,8 +166,15 @@ function hashString(str) {
     return Math.abs(hash);
 }
 
-const PERIOD_COURSE_MAP = { A1: 'WD1', B2: 'WD2', AS: 'AS', A3: 'CS', A5: 'CS', B4: 'CS', B6: 'CS', B8: 'CS' };
-const TC_COURSE_ID_MAP = { CS: '10003GS', WD1: '05254G1S', WD2: '05254G2S', AS: '05254EF-201' };
+// INTV was missing from both maps -- periodToCourseKeyServer('INTV') fell
+// through to null, so TC_COURSE_ID_MAP[null] was always undefined and the
+// whole grading block below silently skipped writing anything to
+// exams/responses. The clock-in itself (clockins/timesheets rows) still
+// recorded fine, so this was invisible unless you went looking for the
+// missing gradebook entry specifically -- confirmed against a real
+// Intervention student's clock-in history before fixing.
+const PERIOD_COURSE_MAP = { A1: 'WD1', B2: 'WD2', AS: 'AS', A3: 'CS', A5: 'CS', B4: 'CS', B6: 'CS', B8: 'CS', INTV: 'INTV' };
+const TC_COURSE_ID_MAP = { CS: '10003GS', WD1: '05254G1S', WD2: '05254G2S', AS: '05254EF-201', INTV: '34009GF-8' };
 
 function periodToCourseKeyServer(period) {
     const p = String(period || '').trim().toUpperCase();

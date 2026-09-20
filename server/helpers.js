@@ -112,9 +112,19 @@ async function isTestingWindowOpen(connection) {
 // server/routes/practicum.js, the new endpoints in gradebook.js), used
 // as real Express middleware everywhere else so 100+ routes don't each
 // hand-roll a slightly different copy of the same three lines.
+// Both students and the teacher are rows in the same students table -- the
+// live teacher account has role='teacher' AND section_id='Teacher' (not
+// role='admin', which is what js/auth-guard.js's primary client-side check
+// assumes), so section_id='Teacher' alone already covers today's real
+// account. Checking role='teacher' too costs nothing (this can only widen
+// who counts as staff, never narrow it) and matches the same 3-way check
+// server/routes/messages.js/gallery.js/paystubs.js/payroll.js already
+// reimplement locally for exactly this reason.
 function isStaffSession(req) {
     const u = req.session && req.session.user;
-    return !!(u && (u.role === 'admin' || u.section_id === 'Teacher'));
+    if (!u) return false;
+    const role = String(u.role || '').toLowerCase();
+    return role === 'admin' || role === 'teacher' || u.section_id === 'Teacher';
 }
 
 function isSelfOrStaffSession(req, studentId) {

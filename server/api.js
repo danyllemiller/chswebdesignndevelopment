@@ -2,6 +2,7 @@
 // Route aggregator — each domain lives in its own routes/ file.
 const express = require('express');
 const router = express.Router();
+const { isStaffSession } = require('./helpers');
 
 // Every /admin/* route previously trusted the caller unconditionally --
 // the only "admin gate" was a client-side localStorage check
@@ -35,14 +36,15 @@ const ADMIN_PATH_STUDENT_EXEMPT_GET = new Set([
 router.use((req, res, next) => {
     if (!req.path.startsWith('/admin/')) return next();
     if (req.method === 'GET' && ADMIN_PATH_STUDENT_EXEMPT_GET.has(req.path)) return next();
-    const u = req.session && req.session.user;
     // The `username.includes('damiller')` fallback that used to sit here was
     // a real backdoor: registration only checks /^[a-z0-9]+$/ (server/auth.js),
     // so a student could self-register a username like 'xdamillerx' and get
     // it. The teacher's own account already has section_id === 'Teacher', so
-    // removing this substring check costs nothing legitimate.
-    const isAdmin = u && (u.role === 'admin' || u.section_id === 'Teacher');
-    if (!isAdmin) return res.status(401).json({ error: 'Not authorized.' });
+    // removing this substring check costs nothing legitimate. Now shares
+    // isStaffSession with every other staff check instead of its own
+    // separate copy (which was also missing the role==='teacher' case
+    // isStaffSession itself just gained).
+    if (!isStaffSession(req)) return res.status(401).json({ error: 'Not authorized.' });
     next();
 });
 
