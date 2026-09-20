@@ -165,6 +165,19 @@ function escapeHtml(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
+// Single source of truth for "what did the student answer, and was it
+// right" -- used by the score tally, the on-screen review, and the PDF
+// report, so the three can never drift apart on what counts as correct.
+// Comparison is an exact === match (not case-insensitive/trimmed like the
+// WD/CS engines) -- preserved as-is from the pre-existing behavior here.
+function gradeQuestion(q, answer) {
+    const isAnswered = answer !== undefined;
+    const studentChoice = isAnswered ? q.options[answer] : 'Unanswered';
+    const correctOption = q.answer || q.options[0];
+    const isCorrect = isAnswered && studentChoice === correctOption;
+    return { studentChoice, correctOption, isCorrect, isAnswered };
+}
+
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -466,11 +479,8 @@ examQuestions.forEach((q, i) => {
             doc.text(qText, 20, y);
             y += (qText.length * 6);
 
-            const studentChoice = userAnswers[i] !== undefined ? q.options[userAnswers[i]] : "Unanswered";
+            const { studentChoice, isCorrect } = gradeQuestion(q, userAnswers[i]);
             const hint = feedbackMap[q.question.trim()];
-            // FIX: Use actual answer field from question, not hints (hints may be empty without webhook)
-            const correctOption = q.answer || q.options[0];
-            const isCorrect = studentChoice === correctOption && userAnswers[i] !== undefined;
 
             doc.setFont("helvetica", "normal");
             if (isCorrect) { doc.setTextColor(0, 150, 0); }
@@ -524,16 +534,11 @@ async function processResults() {
     // question text against the question banks it does have.
     const questionDetails = [];
     examQuestions.forEach((q, i) => {
-        const isAnswered = userAnswers[i] !== undefined;
-        const selectedOption = isAnswered ? q.options[userAnswers[i]] : 'Unanswered';
-        // FIX: Priority is q.answer (from API) OR q.options[0] (fallback - only use if no answer field)
-        // Never use correct_answer as it doesn't exist in the MariaDB API response!
-        const correctOption = q.answer || q.options[0];
-        const isCorrect = isAnswered && selectedOption === correctOption;
+        const { studentChoice, isCorrect } = gradeQuestion(q, userAnswers[i]);
         if (isCorrect) correctCount++;
         questionDetails.push({
             matched_table: 'daily_questions', question_text: q.question,
-            student_choice: selectedOption, is_correct: isCorrect ? 1 : 0
+            student_choice: studentChoice, is_correct: isCorrect ? 1 : 0
         });
     });
     finalScore = correctCount;
@@ -562,10 +567,7 @@ async function processResults() {
 // FIXED: Use 'answer' field from API (correct_answer doesn't exist in API response)
     // FIX: Same issue as scoring - must use q.answer, not q.correct_answer!
     const reviewHtml = examQuestions.map((q, i) => {
-        const studentChoice = userAnswers[i] !== undefined ? q.options[userAnswers[i]] : "Unanswered";
-        // FIX: Priority is q.answer (from API) OR q.options[0] (fallback - only if no answer)
-        const correctOption = q.answer || q.options[0];
-        const isCorrect = studentChoice === correctOption && userAnswers[i] !== undefined;
+        const { studentChoice, correctOption, isCorrect } = gradeQuestion(q, userAnswers[i]);
         const hint = feedbackMap[q.question.trim()];
         
         return `

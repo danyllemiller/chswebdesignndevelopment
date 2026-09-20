@@ -573,6 +573,18 @@ function escapeHtml(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
+// Single source of truth for "what did the student answer, and was it
+// right" -- used by the score tally, the on-screen review, the PDF report,
+// and the missed-questions capture, so the four can never drift apart on
+// what counts as correct again.
+function gradeQuestion(q, answer) {
+    const isAnswered = answer !== undefined && q.options && q.options.length > 0;
+    const studentChoice = isAnswered ? q.options[answer] : 'Unanswered';
+    const correctAnswer = q.answer || (q.options ? q.options[0] : '');
+    const isCorrect = isAnswered && studentChoice.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+    return { studentChoice, isCorrect, isAnswered };
+}
+
 function enableAntiCheat() {
     document.addEventListener('contextmenu', event => event.preventDefault());
     document.addEventListener('keydown', (e) => {
@@ -1248,20 +1260,7 @@ async function downloadPDFReport(event) {
             doc.text(qText, 20, y);
             y += (qText.length * 6);
 
-            // isCorrect used to be inferred from "does this question have a hint
-            // queued up" -- but a hint only ever gets queued for a WRONG,
-            // ANSWERED question (see the `else if (q.hint)` branch in
-            // processSubmission's grading loop above). An UNANSWERED question
-            // never enters that branch, so it never gets a hint either -- and
-            // "no hint" silently read as CORRECT. That's the bug: an
-            // auto-submitted exam with unanswered questions showed them as
-            // CORRECT in the report. Compare the actual selected answer
-            // against the actual correct answer instead.
-            const userAnswerIdx = userAnswers[i];
-            const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
-            const studentChoice = isAnswered ? q.options[userAnswerIdx] : "Unanswered";
-            const correctAnswerText = q.answer || (q.options ? q.options[0] : '');
-            const isCorrect = isAnswered && studentChoice.toLowerCase().trim() === correctAnswerText.toLowerCase().trim();
+            const { studentChoice, isCorrect } = gradeQuestion(q, userAnswers[i]);
             const hint = !isCorrect ? feedbackMap[q.question.trim()] : undefined;
 
             doc.setFont("helvetica", "normal");
@@ -1348,11 +1347,7 @@ async function processSubmission() {
         const chapterTally = {};
 
         examQuestions.forEach((q, i) => {
-            const userAnswerIdx = userAnswers[i];
-            const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
-            const studentChoiceText = isAnswered ? q.options[userAnswerIdx] : 'Unanswered';
-            const correctAnswer = q.answer || (q.options ? q.options[0] : '');
-            const isCorrect = isAnswered && studentChoiceText.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+            const { studentChoice, isCorrect, isAnswered } = gradeQuestion(q, userAnswers[i]);
             if (isAnswered) {
                 if (isCorrect) {
                     correctCount++;
@@ -1368,7 +1363,7 @@ async function processSubmission() {
             }
             questionDetails.push({
                 question_id: q.id, matched_table: 'questions', question_text: q.question,
-                student_choice: studentChoiceText, is_correct: isCorrect ? 1 : 0
+                student_choice: studentChoice, is_correct: isCorrect ? 1 : 0
             });
         });
 
@@ -1522,16 +1517,7 @@ if (shouldSave) {
 
     // Cleanly structure HTML mapping to prevent IDE syntax parsers from breaking
     const reviewHtml = examQuestions.map((q, i) => {
-        // Same fix as downloadPDFReport above: isCorrect must come from an
-        // actual answer comparison, not hint-presence -- an unanswered
-        // question never generates a hint either, so it was silently
-        // showing as Correct on this screen (the first thing a student
-        // sees right after submitting/auto-submitting).
-        const userAnswerIdx = userAnswers[i];
-        const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
-        const studentChoice = isAnswered ? q.options[userAnswerIdx] : "Unanswered";
-        const correctAnswerText = q.answer || (q.options ? q.options[0] : '');
-        const isCorrect = isAnswered && studentChoice.toLowerCase().trim() === correctAnswerText.toLowerCase().trim();
+        const { studentChoice, isCorrect } = gradeQuestion(q, userAnswers[i]);
         const hint = !isCorrect ? feedbackMap[q.question.trim()] : undefined;
 
         const reviewBadgeHtml = isCorrect

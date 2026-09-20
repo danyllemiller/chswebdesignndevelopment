@@ -339,6 +339,42 @@ function escapeHtml(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
+// Single source of truth for "what did the student answer, and was it
+// right" -- used by the score tally, the on-screen review, the PDF report,
+// and the missed-questions capture, so the four can never drift apart on
+// what counts as correct again. (A past bug had the PDF report inferring
+// correctness from "does a hint exist" instead of comparing the actual
+// answer, which showed every question as CORRECT regardless of the real
+// answer -- three/four separately-maintained copies of this exact logic is
+// exactly how that kind of bug happens.)
+function gradeQuestion(q, answer) {
+    if (q.type === 'matching') {
+        const answers = answer || {};
+        const truePairs = q.pairs || [];
+        const correctPairs = truePairs.filter(p => answers[p.item] === p.target).length;
+        return {
+            studentChoice: truePairs.length > 0 ? `${correctPairs} of ${truePairs.length} matched correctly` : 'Unanswered',
+            isCorrect: truePairs.length > 0 && correctPairs === truePairs.length,
+            partialCredit: truePairs.length > 0 ? correctPairs / truePairs.length : 0
+        };
+    }
+    if (q.type === 'image_label') {
+        const answers = answer || {};
+        const trueZones = q.answerZones || [];
+        const correctZones = trueZones.filter(z => answers[z.key] === z.label).length;
+        return {
+            studentChoice: trueZones.length > 0 ? `${correctZones} of ${trueZones.length} labeled correctly` : 'Unanswered',
+            isCorrect: trueZones.length > 0 && correctZones === trueZones.length,
+            partialCredit: trueZones.length > 0 ? correctZones / trueZones.length : 0
+        };
+    }
+    const isAnswered = answer !== undefined && q.options && q.options.length > 0;
+    const studentChoice = isAnswered ? q.options[answer] : 'Unanswered';
+    const correctAnswer = q.answer || (q.options ? q.options[0] : '');
+    const isCorrect = isAnswered && studentChoice.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+    return { studentChoice, isCorrect, partialCredit: isCorrect ? 1 : 0, isAnswered };
+}
+
 function enableAntiCheat() {
     document.addEventListener('contextmenu', event => event.preventDefault());
     document.addEventListener('keydown', (e) => {
@@ -1022,34 +1058,7 @@ async function downloadPDFReport(event) {
             doc.text(qText, 20, y);
             y += (qText.length * 6);
 
-            // isCorrect used to be inferred from "does this question have a hint
-            // queued up" -- but a hint only ever gets queued for a WRONG,
-            // ANSWERED question (see the `else if (q.hint)` branch in
-            // processSubmission's grading loop above), and WD questions don't
-            // even carry a hint field to begin with. That made every WD report
-            // show "CORRECT" on literally every question, answered or not
-            // (confirmed live on real student PDFs). Compare the actual
-            // selected answer against the actual correct answer instead.
-            let studentChoice, isCorrect;
-            if (q.type === 'matching') {
-                const answers = userAnswers[i] || {};
-                const truePairs = q.pairs || [];
-                const correctPairs = truePairs.filter(p => answers[p.item] === p.target).length;
-                isCorrect = truePairs.length > 0 && correctPairs === truePairs.length;
-                studentChoice = truePairs.length > 0 ? `${correctPairs} of ${truePairs.length} matched correctly` : 'Unanswered';
-            } else if (q.type === 'image_label') {
-                const answers = userAnswers[i] || {};
-                const trueZones = q.answerZones || [];
-                const correctZones = trueZones.filter(z => answers[z.key] === z.label).length;
-                isCorrect = trueZones.length > 0 && correctZones === trueZones.length;
-                studentChoice = trueZones.length > 0 ? `${correctZones} of ${trueZones.length} labeled correctly` : 'Unanswered';
-            } else {
-                const userAnswerIdx = userAnswers[i];
-                const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
-                studentChoice = isAnswered ? q.options[userAnswerIdx] : "Unanswered";
-                const correctAnswerText = q.answer || (q.options ? q.options[0] : '');
-                isCorrect = isAnswered && studentChoice.toLowerCase().trim() === correctAnswerText.toLowerCase().trim();
-            }
+            const { studentChoice, isCorrect } = gradeQuestion(q, userAnswers[i]);
             const hint = !isCorrect ? feedbackMap[q.question.trim()] : undefined;
 
             doc.setFont("helvetica", "normal");
@@ -1115,46 +1124,14 @@ async function processSubmission() {
     // physically collect PDFs to see it. Recording it here, on every real
     // submission, means it's captured automatically going forward.
     const questionDetails = [];
+    const MATCHED_TABLE_BY_TYPE = { matching: 'wd_matching_questions', image_label: 'wd_image_labeling_questions' };
     examQuestions.forEach((q, i) => {
-        if (q.type === 'matching') {
-            // Partial credit: each correctly-matched pair earns its share of
-            // this one question's worth, same as every other item on the exam.
-            const answers = userAnswers[i] || {};
-            const truePairs = q.pairs || [];
-            const correctPairs = truePairs.filter(p => answers[p.item] === p.target).length;
-            if (truePairs.length > 0) correctCount += correctPairs / truePairs.length;
-            questionDetails.push({
-                question_id: q.id, matched_table: 'wd_matching_questions', question_text: q.question,
-                student_choice: truePairs.length > 0 ? `${correctPairs} of ${truePairs.length} matched correctly` : 'Unanswered',
-                is_correct: (truePairs.length > 0 && correctPairs === truePairs.length) ? 1 : 0
-            });
-            return;
-        }
-        if (q.type === 'image_label') {
-            // Same partial-credit shape as matching, one "pair" per zone.
-            const answers = userAnswers[i] || {};
-            const trueZones = q.answerZones || [];
-            const correctZones = trueZones.filter(z => answers[z.key] === z.label).length;
-            if (trueZones.length > 0) correctCount += correctZones / trueZones.length;
-            questionDetails.push({
-                question_id: q.id, matched_table: 'wd_image_labeling_questions', question_text: q.question,
-                student_choice: trueZones.length > 0 ? `${correctZones} of ${trueZones.length} labeled correctly` : 'Unanswered',
-                is_correct: (trueZones.length > 0 && correctZones === trueZones.length) ? 1 : 0
-            });
-            return;
-        }
-        const userAnswerIdx = userAnswers[i];
-        const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
-        const studentChoiceText = isAnswered ? q.options[userAnswerIdx] : 'Unanswered';
-        const correctAnswer = q.answer || (q.options ? q.options[0] : '');
-        const isCorrect = isAnswered && studentChoiceText.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
-        if (isAnswered) {
-            if (isCorrect) correctCount++;
-            else if (q.hint) feedbackList.push({ question: q.question.trim(), hint: q.hint });
-        }
+        const { studentChoice, isCorrect, partialCredit, isAnswered } = gradeQuestion(q, userAnswers[i]);
+        correctCount += partialCredit;
+        if (isAnswered && !isCorrect && q.hint) feedbackList.push({ question: q.question.trim(), hint: q.hint });
         questionDetails.push({
-            question_id: q.id, matched_table: 'wd_questions', question_text: q.question,
-            student_choice: studentChoiceText, is_correct: isCorrect ? 1 : 0
+            question_id: q.id, matched_table: MATCHED_TABLE_BY_TYPE[q.type] || 'wd_questions',
+            question_text: q.question, student_choice: studentChoice, is_correct: isCorrect ? 1 : 0
         });
     });
     // Scored the same way CS scores its unit/final exams: raw correct count
@@ -1215,29 +1192,7 @@ async function processSubmission() {
     serverFeedback.forEach(item => feedbackMap[item.question.trim()] = item.hint);
 
     const reviewHtml = examQuestions.map((q, i) => {
-        // Same fix as downloadPDFReport above: isCorrect must come from an
-        // actual answer comparison, not from hint-presence -- this is the
-        // screen every student sees immediately after submitting.
-        let studentChoice, isCorrect;
-        if (q.type === 'matching') {
-            const answers = userAnswers[i] || {};
-            const truePairs = q.pairs || [];
-            const correctPairs = truePairs.filter(p => answers[p.item] === p.target).length;
-            isCorrect = truePairs.length > 0 && correctPairs === truePairs.length;
-            studentChoice = truePairs.length > 0 ? `${correctPairs} of ${truePairs.length} matched correctly` : 'Unanswered';
-        } else if (q.type === 'image_label') {
-            const answers = userAnswers[i] || {};
-            const trueZones = q.answerZones || [];
-            const correctZones = trueZones.filter(z => answers[z.key] === z.label).length;
-            isCorrect = trueZones.length > 0 && correctZones === trueZones.length;
-            studentChoice = trueZones.length > 0 ? `${correctZones} of ${trueZones.length} labeled correctly` : 'Unanswered';
-        } else {
-            const userAnswerIdx = userAnswers[i];
-            const isAnswered = userAnswerIdx !== undefined && q.options && q.options.length > 0;
-            studentChoice = isAnswered ? q.options[userAnswerIdx] : "Unanswered";
-            const correctAnswerText = q.answer || (q.options ? q.options[0] : '');
-            isCorrect = isAnswered && studentChoice.toLowerCase().trim() === correctAnswerText.toLowerCase().trim();
-        }
+        const { studentChoice, isCorrect } = gradeQuestion(q, userAnswers[i]);
         const hint = !isCorrect ? feedbackMap[q.question.trim()] : undefined;
         const reviewBadgeHtml = isCorrect
             ? `<span class="badge bg-success text-white me-2">✅ Correct</span>`
