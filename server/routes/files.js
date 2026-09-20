@@ -50,7 +50,7 @@ router.get('/student/shared-files', requireSelfOrStaff(), async (req, res) => {
 });
 
 router.post('/student/share-file', requireLogin, async (req, res) => {
-    const { recipient_student_id, sender_name, file_name, url, is_folder } = req.body;
+    const { recipient_student_id, file_name, url, is_folder } = req.body;
     if (!recipient_student_id || !file_name || !url)
         return res.status(400).json({ error: 'recipient_student_id, file_name, and url are required' });
     try {
@@ -63,9 +63,24 @@ router.post('/student/share-file', requireLogin, async (req, res) => {
             await connection.release();
             return res.status(404).json({ error: 'Recipient student ID not found on roster' });
         }
+        // sender_name used to come straight from the client with no tie to
+        // the session -- any logged-in student could push a "shared file"
+        // into a classmate's dropbox while naming themselves as anyone at
+        // all (a teacher, another student) for phishing/impersonation.
+        // Looked up from the caller's own session identity instead.
+        const sessionUser = req.session?.user;
+        let senderName = 'A classmate';
+        if (sessionUser?.student_id) {
+            const [senderRows] = await connection.execute(
+                'SELECT first_name, last_name FROM students WHERE student_id = ? LIMIT 1', [sessionUser.student_id]
+            );
+            if (senderRows.length > 0) senderName = `${senderRows[0].first_name} ${senderRows[0].last_name}`;
+        } else if (sessionUser?.role === 'admin' || sessionUser?.section_id === 'Teacher') {
+            senderName = 'Your Teacher';
+        }
         await connection.execute(
             'INSERT INTO shared_files (recipient_student_id, sender_name, file_name, url, is_folder) VALUES (?, ?, ?, ?, ?)',
-            [recipient_student_id, sender_name || 'Unknown', file_name, url, is_folder ? 1 : 0]
+            [recipient_student_id, senderName, file_name, url, is_folder ? 1 : 0]
         );
         await connection.release();
         res.json({ success: true });

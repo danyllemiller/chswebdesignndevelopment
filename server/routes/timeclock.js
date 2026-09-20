@@ -486,15 +486,44 @@ router.get('/timeclock/reflection-prompt', requireLogin, async (req, res) => {
     }
 });
 
+// Re-derives whatever clock-in question would actually have been served
+// for this course today, independently of the client, and checks the
+// submitted answer against it -- pickWprMcQuestion/getDeterministicQuestion
+// are deterministic by date/chapter/groupKey, so this needs no client-side
+// state to recompute. Used instead of trusting the client's own is_correct
+// flag, which a student could otherwise just always send as true for a
+// free point on every clock-in regardless of the real answer picked.
+async function verifyClockinAnswer(connection, courseKey, submittedAnswer) {
+    if (!submittedAnswer) return null;
+    try {
+        if (courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS') {
+            const picked = pickWprMcQuestion(getLocalDateStr());
+            return String(submittedAnswer).trim().toLowerCase() === String(picked.answer).trim().toLowerCase() ? 1 : 0;
+        }
+        if (courseKey === 'CS') {
+            const dayTypes = await getDayTypes(connection);
+            const groupKey = pairGroupKey(dayTypes, getLocalDateStr());
+            const { chapter } = await getCurrentCSChapter(connection);
+            const q = await getDeterministicQuestion(connection, 'questions', chapter, groupKey);
+            if (!q) return null;
+            return String(submittedAnswer).trim().toLowerCase() === String(q.answer).trim().toLowerCase() ? 1 : 0;
+        }
+    } catch (e) {
+        console.error('[timeclock] Failed to verify clock-in answer:', e);
+    }
+    return null;
+}
+
 router.post('/timeclock/save', requireSelfOrStaff(), async (req, res) => {
-    const { student_id, section_id, mode, answer, is_correct, prompt } = req.body;
+    const { student_id, section_id, mode, answer, prompt } = req.body;
     if (!student_id || !mode) return res.status(400).json({ error: 'student_id and mode are required' });
     const today = getLocalDateStr();
     const period = section_id || '';
     try {
         const connection = await getDbConnection();
         if (mode === 'in') {
-            const isCorrectVal = is_correct === undefined || is_correct === null ? null : (is_correct ? 1 : 0);
+            const courseKey = periodToCourseKeyServer(period);
+            const isCorrectVal = await verifyClockinAnswer(connection, courseKey, answer);
             await connection.execute(
                 'INSERT INTO clockins (student_id, section_id, type, answer, is_correct, timestamp) VALUES (?, ?, ?, ?, ?, NOW())',
                 [student_id, period, 'in', answer || '', isCorrectVal]
@@ -533,7 +562,6 @@ router.post('/timeclock/save', requireSelfOrStaff(), async (req, res) => {
             // pretests already work. Best-effort: a failure here shouldn't
             // block the clock-in itself from succeeding.
             try {
-                const courseKey = periodToCourseKeyServer(period);
                 const courseId = TC_COURSE_ID_MAP[courseKey];
                 if (courseId) {
                     const dayTypes = await getDayTypes(connection);
@@ -660,7 +688,10 @@ router.get('/admin/wd-journal/:student_id', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch journal' }); }
 });
 
-router.get('/admin/daily-questions', async (req, res) => {
+// One of api.js's three GET-only /admin/* exemptions (called by every
+// logged-in student session, not just teachers) -- had no auth of its own
+// at all before this, so a fully anonymous request could read it too.
+router.get('/admin/daily-questions', requireLogin, async (req, res) => {
     const { date } = req.query;
     if (!date) return res.status(400).json({ error: 'date is required' });
     try {

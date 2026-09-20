@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
 const bcrypt = require('bcrypt');
-const { getCurrentSchoolYear } = require('../helpers');
+const { getCurrentSchoolYear, requireSelfOrStaff } = require('../helpers');
 const fs = require('fs');
 const path = require('path');
 
@@ -106,7 +106,16 @@ router.get('/admin/roster', async (req, res) => {
 });
 
 // GET /admin/student-sections?student_id=X — additional (non-primary) sections for one student
-router.get('/admin/student-sections', async (req, res) => {
+// This path is one of the three GET-only exemptions from api.js's blanket
+// /admin/* staff gate (it's called by every logged-in student session, not
+// just teachers -- see that file's comment), which had left it with no
+// auth check of its own at all: a fully anonymous request could read any
+// student's extra-period enrollment. requireSelfOrStaff scopes it back to
+// "your own sections, or a staff session looking up anyone's" -- matching
+// how every real caller (auth-guard.js, dashboard.js, timeclock.js) already
+// only ever asks for its own logged-in user's student_id; only the admin
+// roster page looks up other students', and that's a staff session.
+router.get('/admin/student-sections', requireSelfOrStaff('student_id'), async (req, res) => {
     const studentId = req.query.student_id;
     if (!studentId) return res.status(400).json({ error: 'student_id is required' });
     try {

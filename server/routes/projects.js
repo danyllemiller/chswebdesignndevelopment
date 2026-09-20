@@ -9,9 +9,27 @@ const { resolveCourseId, clampScore, requireSelfOrStaff, requireLogin } = requir
 // creates on account setup (server/routes/uploads.js writes there).
 const UPLOADS_ROOT = path.join(__dirname, '..', '..', 'uploads');
 
-router.get('/student/section-classmates', requireSelfOrStaff('exclude_student_id'), async (req, res) => {
+router.get('/student/section-classmates', requireLogin, async (req, res) => {
     const { section_id, exclude_student_id } = req.query;
     if (!section_id) return res.status(400).json({ error: 'section_id is required' });
+    // requireSelfOrStaff('exclude_student_id') used to be the guard here --
+    // it checked the caller's identity against exclude_student_id (a value
+    // that only exists to filter the caller's own name out of the results),
+    // never against section_id itself. That let any logged-in student pull
+    // the full name+ID roster of a section they aren't in by passing any
+    // section_id with their own real ID as exclude_student_id. The real
+    // check is whether the caller actually belongs to (or aides) the
+    // requested section.
+    const sessionUser = req.session?.user;
+    const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
+    if (!isStaff) {
+        const callerSection = String(sessionUser?.section_id || '').toUpperCase();
+        const requested = String(section_id).toUpperCase();
+        const related = callerSection === requested
+            || (callerSection.startsWith('AS-') && callerSection.slice(3) === requested)
+            || (requested.startsWith('AS-') && requested.slice(3) === callerSection);
+        if (!related) return res.status(401).json({ error: 'Not authorized.' });
+    }
     try {
         const connection = await getDbConnection();
         // An "AS-<section>" aide section (e.g. AS-B2) sits alongside the
@@ -327,8 +345,55 @@ router.post('/student/project-evaluation', requireSelfOrStaff(), async (req, res
         return res.status(400).json({ error: 'chapter_project_id, exam_id, student_id, evaluator_type are required' });
     if (!['self', 'peer', 'auto'].includes(evaluator_type))
         return res.status(400).json({ error: 'evaluator_type must be one of self|peer|auto' });
+
+    // requireSelfOrStaff() above only confirms student_id (the reviewee)
+    // matches the caller's session -- it never checked WHICH evaluator_type
+    // a caller may submit, so the reviewee's own session could write a
+    // fabricated 'auto' 100% (skipping the real auto-check entirely) or a
+    // 'peer' score naming any student_id as the reviewer, including a
+    // second row reviewing themselves. Both wrote straight into the real
+    // gradebook via saveEvaluationAndAggregate's INSERT INTO responses.
+    const sessionUser = req.session?.user;
+    const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
     try {
         const connection = await getDbConnection();
+
+        // Auto-grade scores only ever come from the real check
+        // (/student/project-auto-grade, which reads the student's actual
+        // uploaded source and calls saveEvaluationAndAggregate directly) --
+        // never accepted from this public endpoint for a non-staff caller.
+        if (evaluator_type === 'auto' && !isStaff) {
+            await connection.release();
+            return res.status(403).json({ error: 'Auto-grade scores can only come from the auto-check.' });
+        }
+
+        if (evaluator_type === 'peer' && !isStaff) {
+            if (!evaluator_student_id) {
+                await connection.release();
+                return res.status(400).json({ error: 'evaluator_student_id is required for a peer review.' });
+            }
+            if (String(evaluator_student_id) === String(student_id)) {
+                await connection.release();
+                return res.status(403).json({ error: "You can't peer-review your own project." });
+            }
+            // Confirm the named peer is a real, active classmate (or an
+            // AS-aide covering this section) -- not just any ID the client
+            // happens to send.
+            const [revieweeRows] = await connection.execute('SELECT section_id FROM students WHERE student_id = ? LIMIT 1', [student_id]);
+            const revieweeSection = String(revieweeRows[0]?.section_id || '').toUpperCase();
+            const validSections = revieweeSection.startsWith('AS-')
+                ? [revieweeSection, revieweeSection.slice(3)]
+                : [revieweeSection, `AS-${revieweeSection}`];
+            const [peerRows] = await connection.execute(
+                `SELECT student_id FROM students WHERE student_id = ? AND section_id IN (?, ?) AND (archived IS NULL OR archived = 0)`,
+                [evaluator_student_id, validSections[0], validSections[1]]
+            );
+            if (peerRows.length === 0) {
+                await connection.release();
+                return res.status(403).json({ error: 'evaluator_student_id must be an active classmate in the same section.' });
+            }
+        }
+
         const result = await saveEvaluationAndAggregate(connection, { chapter_project_id, exam_id, student_id, evaluator_student_id, evaluator_type, score, max_score, rubric_json, feedback });
         await connection.release();
         res.json({ success: true, aggregate: result });

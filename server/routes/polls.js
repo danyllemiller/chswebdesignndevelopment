@@ -113,6 +113,17 @@ router.get('/admin/polls/results', async (req, res) => {
 router.get('/student/polls/active', requireLogin, async (req, res) => {
   const { section_id, student_id } = req.query;
   if (!section_id) return res.status(400).json({ error: 'section_id is required' });
+  // student_id here only ever drives "did THIS student already vote, and on
+  // what" -- requireLogin alone never checked it against the caller's own
+  // session, so any logged-in student could pass a classmate's student_id
+  // and learn whether they voted and which option. Not requireSelfOrStaff()
+  // outright since student_id is legitimately optional here (a caller who
+  // omits it just gets the poll with no vote-status).
+  const sessionUser = req.session?.user;
+  const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
+  if (student_id && !isStaff && String(sessionUser?.student_id) !== String(student_id)) {
+    return res.status(401).json({ error: 'Not authorized.' });
+  }
   try {
     const connection = await getDbConnection();
     await ensureTables(connection);

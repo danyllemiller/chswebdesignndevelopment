@@ -138,7 +138,10 @@ function getAutoPeriodKey(cadence) {
 }
 
 // --- CALENDAR SETTINGS ---
-router.get('/admin/calendar-settings', async (req, res) => {
+// One of api.js's three GET-only /admin/* exemptions (called by every
+// logged-in student session, not just teachers) -- had no auth of its own
+// at all before this, so a fully anonymous request could read it too.
+router.get('/admin/calendar-settings', requireLogin, async (req, res) => {
     try {
         const connection = await getDbConnection();
         const [rows] = await connection.execute('SELECT config_json FROM calendar_settings WHERE id = 1');

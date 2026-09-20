@@ -46,30 +46,35 @@ async function ensureGalleryTable() {
 
 ensureGalleryTable();
 
-// ── Helper: resolve viewer role from student_id ─────────────────────
-async function resolveViewer(connection, student_id) {
-    if (!student_id) return { isTeacher: false, isWD: false, section_id: null };
-    const [rows] = await connection.execute(
-        'SELECT section_id, role FROM students WHERE student_id = ? LIMIT 1',
-        [student_id]
-    );
-    if (!rows.length) return { isTeacher: false, isWD: false, section_id: null };
-    const { section_id, role } = rows[0];
-    const isTeacher = role === 'admin' || section_id === 'Teacher';
-    const isWD      = !isTeacher && section_id && !section_id.toUpperCase().startsWith('CS');
-    return { isTeacher, isWD, section_id };
+// WD1/WD2 course_id literals -- same pair PAID_COURSE_IDS in
+// server/routes/payroll.js checks against (that fix's own history is why
+// this doesn't hand-roll a section_id.startsWith('CS') guess instead: a
+// real section_id never starts with "CS" -- CS periods are A3/A5/B4/B6/B8
+// -- so that check would always be false and everyone would read as "WD").
+const WD_COURSE_IDS = new Set(['05254G1S', '05254G2S']);
+
+// ── Helper: resolve viewer role from the session, never from a
+// client-supplied student_id -- that used to be trusted directly (a DB
+// lookup keyed on req.query.student_id), so any caller could pass
+// ?student_id=<victim> and be treated as that student, including inheriting
+// their private items via the "OR g.student_id = ?" clause below.
+function resolveViewer(sessionUser) {
+    if (!sessionUser) return { isTeacher: false, isWD: false, student_id: null };
+    const isTeacher = sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher';
+    const isWD = !isTeacher && WD_COURSE_IDS.has(sessionUser.course_id);
+    return { isTeacher, isWD, student_id: sessionUser.student_id || null };
 }
 
-// ── GET /gallery/feed?student_id=X
+// ── GET /gallery/feed
 // Visibility rules (approval required for all):
 //   'public'     → visible to everyone (including anonymous)
 //   'classmates' → visible to WD students (non-CS enrolled) when logged in
 //   'private'    → visible only to submitter and teacher
 router.get('/gallery/feed', async (req, res) => {
-    const { student_id } = req.query;
     try {
         const connection = await getDbConnection();
-        const viewer = await resolveViewer(connection, student_id);
+        const viewer = resolveViewer(req.session?.user);
+        const student_id = viewer.student_id;
 
         let query, params = [];
 

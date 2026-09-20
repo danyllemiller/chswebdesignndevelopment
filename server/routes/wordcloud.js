@@ -143,6 +143,15 @@ router.get('/admin/wordcloud/results', async (req, res) => {
 router.get('/student/wordcloud/active', requireLogin, async (req, res) => {
   const { section_id, student_id } = req.query;
   if (!section_id) return res.status(400).json({ error: 'section_id is required' });
+  // Same fix as /student/polls/active: student_id drives "has THIS student
+  // already submitted, and what" -- must match the caller's own session
+  // whenever it's actually provided, or any logged-in student could read a
+  // classmate's submitted words by passing their student_id instead.
+  const sessionUser = req.session?.user;
+  const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
+  if (student_id && !isStaff && String(sessionUser?.student_id) !== String(student_id)) {
+    return res.status(401).json({ error: 'Not authorized.' });
+  }
   try {
     const connection = await getDbConnection();
     await ensureTables(connection);
