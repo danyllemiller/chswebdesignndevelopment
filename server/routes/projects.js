@@ -82,7 +82,14 @@ async function saveEvaluationAndAggregate(connection, { chapter_project_id, exam
     const autoScore = autoRows.length ? Number(autoRows[0].score) : null;
     const components = [selfScore, peerScore, autoScore].filter(v => v !== null);
     const aggregate = components.length ? Number((components.reduce((a, b) => a + b, 0) / components.length).toFixed(2)) : 0;
-    const status = components.length === 3 ? 'complete' : 'partial';
+    // Only a project with a real auto-check (AUTO_GRADE_CONFIGS, defined
+    // further down this file but already fully loaded by the time any
+    // request handler actually calls this) ever expects 3 components --
+    // CS's projects are self+peer only by design, so "complete" for them
+    // means 2, not perpetually stuck at "partial" waiting on an auto-check
+    // that will never come.
+    const expectedComponents = AUTO_GRADE_CONFIGS[exam_id] ? 3 : 2;
+    const status = components.length >= expectedComponents ? 'complete' : 'partial';
 
     await connection.execute(
         `INSERT INTO project_grade_aggregates

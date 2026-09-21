@@ -132,6 +132,10 @@ function averageToScore100(values, rubric) {
 async function initProjectGrading(container) {
     const chapterProjectId = container.dataset.chapterProjectId;
     const examId = container.dataset.examId;
+    // CS's unit projects are self+peer only by design (Slides/Sheets
+    // deliverables, no source code to scan) -- the Auto-Check tab is WD-only
+    // now, not just quietly unconfigured for CS like it used to be.
+    const hasAutoCheck = container.dataset.course !== 'CS';
     let rubric;
     try { rubric = JSON.parse(container.dataset.rubric); } catch (e) { console.error('[project-grading] Bad rubric JSON', e); return; }
 
@@ -142,17 +146,17 @@ async function initProjectGrading(container) {
     }
 
     container.innerHTML = `
-        <div class="card-header bg-info text-white fw-bold"><i class="fas fa-clipboard-check me-2"></i>Grade the Project: Self, Peer, and Auto-Check</div>
+        <div class="card-header bg-info text-white fw-bold"><i class="fas fa-clipboard-check me-2"></i>Grade the Project: Self${hasAutoCheck ? ', Peer, and Auto-Check' : ' and Peer'}</div>
         <div class="card-body small p-4">
             <ul class="nav nav-tabs mb-3" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-tab="self" type="button">My Self-Assessment</button></li>
                 <li class="nav-item"><button class="nav-link" data-tab="peer" type="button">Peer Review (In Person)</button></li>
-                <li class="nav-item"><button class="nav-link" data-tab="auto" type="button">Auto-Check My Code</button></li>
+                ${hasAutoCheck ? '<li class="nav-item"><button class="nav-link" data-tab="auto" type="button">Auto-Check My Code</button></li>' : ''}
                 <li class="nav-item"><button class="nav-link" data-tab="results" type="button">My Results</button></li>
             </ul>
             <div data-pane="self"></div>
             <div data-pane="peer" class="d-none"></div>
-            <div data-pane="auto" class="d-none"></div>
+            ${hasAutoCheck ? '<div data-pane="auto" class="d-none"></div>' : ''}
             <div data-pane="results" class="d-none"></div>
         </div>
     `;
@@ -244,31 +248,33 @@ async function initProjectGrading(container) {
         peerPane.innerHTML = `<p class="text-danger">Couldn't load the reviewer list. Try again later.</p>`;
     }
 
-    // --- AUTO pane ---
-    const autoPane = container.querySelector('[data-pane="auto"]');
-    autoPane.innerHTML = `
-        <p class="text-muted mb-3">This scans the files you already uploaded to the Dropbox below and checks for the specific things this project requires. It's a quick sanity check, not a substitute for your teacher (or a classmate) actually reading/testing your work.</p>
-        <button type="button" class="btn btn-primary fw-bold" id="btn-run-auto">Run Auto-Check</button>
-        <div class="mt-3" id="auto-result"></div>
-    `;
-    autoPane.querySelector('#btn-run-auto').addEventListener('click', async () => {
-        const resultEl = autoPane.querySelector('#auto-result');
-        resultEl.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i>Scanning your uploaded files…`;
-        try {
-            const res = await fetch('/api/student/project-auto-grade', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chapter_project_id: chapterProjectId, exam_id: examId, student_id: user.student_id })
-            });
-            const data = await res.json();
-            if (!res.ok) { resultEl.innerHTML = `<span class="text-danger">${escapeHtml(data.error || 'Auto-check failed.')}</span>`; return; }
-            resultEl.innerHTML = `
-                <p class="fw-bold">Auto-check score: ${data.score}/100</p>
-                <ul class="mb-0">
-                    ${data.rubric.map(c => `<li>${escapeHtml(c.label)}: ${c.checksFound.length}/${c.checksLookedFor.length} found${c.checksFound.length ? ' (' + escapeHtml(c.checksFound.join(', ')) + ')' : ''}</li>`).join('')}
-                </ul>
-            `;
-        } catch (e) { resultEl.innerHTML = `<span class="text-danger">Couldn't run the auto-check. Try again.</span>`; }
-    });
+    // --- AUTO pane (WD only -- see hasAutoCheck above) ---
+    if (hasAutoCheck) {
+        const autoPane = container.querySelector('[data-pane="auto"]');
+        autoPane.innerHTML = `
+            <p class="text-muted mb-3">This scans the files you already uploaded to the Dropbox below and checks for the specific things this project requires. It's a quick sanity check, not a substitute for your teacher (or a classmate) actually reading/testing your work.</p>
+            <button type="button" class="btn btn-primary fw-bold" id="btn-run-auto">Run Auto-Check</button>
+            <div class="mt-3" id="auto-result"></div>
+        `;
+        autoPane.querySelector('#btn-run-auto').addEventListener('click', async () => {
+            const resultEl = autoPane.querySelector('#auto-result');
+            resultEl.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i>Scanning your uploaded files…`;
+            try {
+                const res = await fetch('/api/student/project-auto-grade', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chapter_project_id: chapterProjectId, exam_id: examId, student_id: user.student_id })
+                });
+                const data = await res.json();
+                if (!res.ok) { resultEl.innerHTML = `<span class="text-danger">${escapeHtml(data.error || 'Auto-check failed.')}</span>`; return; }
+                resultEl.innerHTML = `
+                    <p class="fw-bold">Auto-check score: ${data.score}/100</p>
+                    <ul class="mb-0">
+                        ${data.rubric.map(c => `<li>${escapeHtml(c.label)}: ${c.checksFound.length}/${c.checksLookedFor.length} found${c.checksFound.length ? ' (' + escapeHtml(c.checksFound.join(', ')) + ')' : ''}</li>`).join('')}
+                    </ul>
+                `;
+            } catch (e) { resultEl.innerHTML = `<span class="text-danger">Couldn't run the auto-check. Try again.</span>`; }
+        });
+    }
 
     // --- RESULTS pane ---
     const resultsPane = container.querySelector('[data-pane="results"]');
@@ -296,11 +302,11 @@ async function initProjectGrading(container) {
                     <tbody>
                         <tr><th>Self-assessment</th><td>${fmt(agg.self_score)}</td></tr>
                         <tr><th>Peer review (avg)</th><td>${fmt(agg.peer_score)}</td></tr>
-                        <tr><th>Auto-check</th><td>${fmt(agg.auto_score)}</td></tr>
+                        ${hasAutoCheck ? `<tr><th>Auto-check</th><td>${fmt(agg.auto_score)}</td></tr>` : ''}
                         <tr class="table-primary"><th>Current grade average</th><td class="fw-bold">${Number(agg.aggregate_score).toFixed(0)}/100</td></tr>
                     </tbody>
                 </table>
-                <p class="text-muted mb-0" style="font-size:.8rem;">${agg.status === 'complete' ? 'All three components are in.' : 'Still averaging in whatever\'s submitted so far -- your grade updates automatically as more comes in.'} Your teacher can still adjust this grade manually at any time.</p>
+                <p class="text-muted mb-0" style="font-size:.8rem;">${agg.status === 'complete' ? `All ${hasAutoCheck ? 'three' : 'two'} components are in.` : 'Still averaging in whatever\'s submitted so far -- your grade updates automatically as more comes in.'} Your teacher can still adjust this grade manually at any time.</p>
                 ${peerReviewsHtml}
             `;
         } catch (e) { resultsPane.innerHTML = `<p class="text-danger">Couldn't load your results.</p>`; }
