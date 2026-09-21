@@ -17,6 +17,14 @@ const chapterNum = chapterMatch ? parseInt(chapterMatch[1]) : 1;
 // alongside the one cs-interactive.js/dashboard.js already write.
 const isCSPage = !!(chapterMatch && /^unit/i.test(chapterMatch[0]));
 const examIdPrefix = isCSPage ? 'Unit' : 'Ch';
+// self_assessments has no separate course column -- a bare number here
+// (what this used to send) collides between e.g. WD Chapter 3 and CS Unit 3
+// for any dual-enrolled student, since they'd both write chapter_id="3" to
+// the same (student_id, chapter_id) row. dashboard.js's own self-rating
+// widget already avoids this with a prefixed "ch3"/"unit3" scheme -- using
+// the same prefix here means the two features share one real row per
+// chapter instead of silently diverging, and the collision goes away.
+const selfAssessmentChapterId = (isCSPage ? 'unit' : 'ch') + chapterNum;
 
 function setupPostMode() {
     gatewayMode = 'post';
@@ -47,50 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     loadStudentScores();
-    injectReflectionPrompts();
 });
-
-// Picking a rubric level alone isn't metacognition -- it's a guess unless
-// it's tied to actual evidence and a forward plan. Injected here (rather
-// than hand-added to all ~25 proficiencyScales/*.html pages) since this
-// script is the one thing every one of those pages already shares.
-// Required, along with the level itself, before Save & Continue unlocks.
-function injectReflectionPrompts() {
-    const submitBtn = document.getElementById('submit-btn');
-    const submitWrap = submitBtn ? submitBtn.closest('div') : null;
-    if (!submitWrap || document.getElementById('reflect-evidence')) return;
-
-    const block = document.createElement('div');
-    block.className = 'card scale-card mb-4';
-    block.style.borderLeft = '4px solid var(--tertiary-color, #3a52a4)';
-    block.innerHTML = `
-        <div class="card-body p-4">
-            <h5 class="fw-bold mb-3" style="color: var(--primary-color);"><i class="fas fa-brain me-2"></i>Reflect Before You Submit</h5>
-            <div class="mb-3">
-                <label for="reflect-evidence" class="form-label fw-bold small">What's the strongest evidence for the level you picked? Point to a specific lab, milestone, or moment from this chapter.</label>
-                <textarea id="reflect-evidence" class="form-control" rows="2" placeholder="e.g. My Grid Skeleton lab passed the Zero Error Audit on the first try, but I still had to look up flexbox syntax..."></textarea>
-            </div>
-            <div class="mb-1">
-                <label for="reflect-next" class="form-label fw-bold small">What's one specific thing you'll do before the exam to close any gap?</label>
-                <textarea id="reflect-next" class="form-control" rows="2" placeholder="e.g. Redo Lab 3 without looking at my notes, then ask about specificity..."></textarea>
-            </div>
-        </div>`;
-    submitWrap.parentNode.insertBefore(block, submitWrap);
-
-    ['reflect-evidence', 'reflect-next'].forEach(id => {
-        document.getElementById(id).addEventListener('input', updateSubmitEnabled);
-    });
-}
-
-function updateSubmitEnabled() {
-    const submitBtn = document.getElementById('submit-btn');
-    if (!submitBtn) return;
-    const evidence = (document.getElementById('reflect-evidence')?.value || '').trim();
-    const nextStep = (document.getElementById('reflect-next')?.value || '').trim();
-    const ready = currentSelfAssessment > 0 && evidence.length > 0 && nextStep.length > 0;
-    submitBtn.disabled = !ready;
-    submitBtn.style.opacity = ready ? '1' : '0.5';
-}
 
 // Refresh scores when the parent iframe controller signals that a quiz just completed
 window.addEventListener('message', (event) => {
@@ -254,7 +219,11 @@ window.setSelfAssessment = function(level) {
         }
     });
 
-    updateSubmitEnabled();
+    const submitBtn = document.getElementById('submit-btn');
+    if (submitBtn) {
+        submitBtn.style.opacity = '1';
+        submitBtn.disabled = false;
+    }
 }
 
 // 3. Update Visual Bars dynamically
@@ -314,17 +283,15 @@ window.submitToGateway = async function() {
         
         console.log("SYNCING TO GRADEBOOK:", user.student_id, preScaleExamId, "10 points");
         
-        // A.1: Save self-assessment level + reflection to self_assessments table
+        // A.1: Save self-assessment level to self_assessments table
         try {
             const saRes = await fetch('/api/student/save-self-assessment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     student_id: user.student_id,
-                    chapter_id: chapterNum,
-                    level: currentSelfAssessment,
-                    reflection_evidence: (document.getElementById('reflect-evidence')?.value || '').trim(),
-                    reflection_next_step: (document.getElementById('reflect-next')?.value || '').trim()
+                    chapter_id: selfAssessmentChapterId,
+                    level: currentSelfAssessment
                 })
             });
             const saData = await saRes.json();

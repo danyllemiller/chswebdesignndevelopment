@@ -154,18 +154,23 @@ function workListHtml(work) {
   return `<ul class="rigor-list">${items}</ul><div class="rigor-total">${work.length} items · ${total} pts total</div>`;
 }
 
+// Real metacognition tracking = completion of the end-of-chapter project's
+// required self-assessment (two open-ended reflection prompts) and peer
+// review (the required Critique Sandwich) -- see js/student/project-grading.js.
+// Only Ch1 and Ch9 have that system turned on today (chapter_projects rows);
+// every other chapter says so honestly instead of showing a fabricated 0.
 function metacognitionHtml(unitData) {
   if (!unitData) return '<div class="fill-box" aria-hidden="true"></div>';
   const m = unitData.metacognition;
-  if (!m || m.reflectedCount === 0) {
-    return `<span class="no-data">No reflections submitted yet</span><div class="fill-box mt-2" aria-hidden="true"></div>`;
+  if (!m) {
+    return `<span class="no-data">Self/peer project grading not yet built for this chapter</span>`;
   }
-  const pct = m.rosterCount > 0 ? Math.round((m.reflectedCount / m.rosterCount) * 100) : null;
-  const coverage = `${m.reflectedCount}${m.rosterCount ? `/${m.rosterCount}` : ''} students completed a reflective self-assessment${pct !== null ? ` (${pct}%)` : ''}`;
-  const avgLine = m.avgSelfLevel !== null
-    ? `<div class="text-muted small mt-1">Avg self-rated level: ${m.avgSelfLevel} / 4.0</div>`
-    : (m.reflectedCount > 0 ? `<div class="text-muted small mt-1">Avg self-rated level not shown — fewer than 5 students</div>` : '');
-  return `<div>${coverage}</div>${avgLine}`;
+  const pct = (count) => (m.rosterCount > 0 ? ` (${Math.round((count / m.rosterCount) * 100)}%)` : '');
+  return `
+    <div class="text-muted small mb-1">${esc(m.projectTitle)}</div>
+    <div>${m.selfReflectedCount}${m.rosterCount ? `/${m.rosterCount}` : ''} completed self-reflection${pct(m.selfReflectedCount)}</div>
+    <div>${m.peerReviewedCount}${m.rosterCount ? `/${m.rosterCount}` : ''} completed a peer review${pct(m.peerReviewedCount)}</div>
+  `;
 }
 
 function analyticsCellsHtml(unitData) {

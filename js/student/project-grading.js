@@ -37,8 +37,35 @@ function readCritiqueSandwich(pane, prefix) {
     const positive1 = get('fb-positive1');
     const criticism = get('fb-criticism');
     const positive2 = get('fb-positive2');
-    if (!positive1 && !criticism && !positive2) return null;
+    if (!positive1 || !criticism || !positive2) return null;
     return `Positive: ${positive1}\n\nConstructive criticism: ${criticism}\n\nPositive: ${positive2}`;
+}
+
+// The Critique Sandwich (above) is feedback on someone ELSE's work -- it
+// doesn't fit self-assessment, where the actual skill being built is
+// metacognition: naming your own process and what you'd change about it,
+// not just handing yourself a compliment/criticism/compliment. These two
+// prompts are what the Metacognition column on the Curriculum
+// Documentation page reads coverage from (see /api/public/curriculum-analytics),
+// so they're required, not optional, before a self-assessment can submit.
+function metacognitionFields(prefix) {
+    return `
+        <div class="mb-3">
+            <label class="form-label small fw-bold">Reflect on your own process</label>
+            <label class="form-label small">🧩 What was the hardest part of this project, and what specific strategy did you use to work through it?</label>
+            <textarea class="form-control form-control-sm mb-2" id="${prefix}-meta-strategy" rows="2" placeholder="Name the actual sticking point and what you did about it -- not just 'it was hard.'"></textarea>
+            <label class="form-label small">🔁 Looking back, what's one thing you'd do differently next time, and why?</label>
+            <textarea class="form-control form-control-sm" id="${prefix}-meta-nextTime" rows="2" placeholder="Be specific enough that future-you could actually act on this."></textarea>
+        </div>
+    `;
+}
+
+function readMetacognition(pane, prefix) {
+    const get = id => (pane.querySelector(`#${prefix}-${id}`)?.value || '').trim();
+    const strategy = get('meta-strategy');
+    const nextTime = get('meta-nextTime');
+    if (!strategy || !nextTime) return null;
+    return `What was hardest & how I worked through it: ${strategy}\n\nWhat I'd do differently next time: ${nextTime}`;
 }
 
 function criterionRow(name, crit, selectedVal) {
@@ -146,7 +173,7 @@ async function initProjectGrading(container) {
     selfPane.innerHTML = `
         <p class="text-muted mb-3">Rate your own work honestly against each part of the assignment. This becomes one-third of your project grade (averaged with a classmate's review and an automatic code check).</p>
         ${rubric.map(c => criterionRow('self', c)).join('')}
-        ${critiqueSandwichFields('self')}
+        ${metacognitionFields('self')}
         <button type="button" class="btn btn-primary fw-bold" id="btn-submit-self">Submit Self-Assessment</button>
         <div class="mt-2" id="self-status"></div>
     `;
@@ -154,9 +181,10 @@ async function initProjectGrading(container) {
     selfPane.querySelector('#btn-submit-self').addEventListener('click', async () => {
         const values = readRubricValues(selfPane, 'self');
         const score = averageToScore100(values, rubric);
-        const feedback = readCritiqueSandwich(selfPane, 'self');
+        const feedback = readMetacognition(selfPane, 'self');
         const statusEl = selfPane.querySelector('#self-status');
         if (score === null) { statusEl.innerHTML = `<span class="text-danger">Rate every criterion before submitting.</span>`; return; }
+        if (!feedback) { statusEl.innerHTML = `<span class="text-danger">Answer both reflection questions before submitting.</span>`; return; }
         try {
             const res = await fetch('/api/student/project-evaluation', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -202,6 +230,7 @@ async function initProjectGrading(container) {
             const score = averageToScore100(values, rubric);
             const feedback = readCritiqueSandwich(peerPane, 'peer');
             if (score === null) { statusEl.innerHTML = `<span class="text-danger">Rate every criterion before submitting.</span>`; return; }
+            if (!feedback) { statusEl.innerHTML = `<span class="text-danger">Fill in all three parts of the Critique Sandwich before submitting.</span>`; return; }
             try {
                 const res2 = await fetch('/api/student/project-evaluation', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },

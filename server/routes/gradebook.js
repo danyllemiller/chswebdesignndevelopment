@@ -935,6 +935,25 @@ router.get('/public/curriculum-analytics', async (req, res) => {
         const activeIds = new Set(students.map(s => String(s.student_id)));
         const inScope = (sid) => activeIds.has(String(sid));
 
+        // Which chapters in this course actually have the end-of-chapter
+        // self/peer project-grading system turned on (admin/rubrics.html /
+        // js/student/project-grading.js) -- that flow, not the proficiency
+        // scale's pre-test gateway, is what carries the real open-ended
+        // reflection ("hardest part & strategy", "what I'd do differently")
+        // and the peer Critique Sandwich. Matched by the leading digits in
+        // chapter_projects.chapter_id (stored like "CH01", "CH09") against
+        // this course's chapter/unit numbers, so a chapter with nothing
+        // configured yet just reports as unavailable instead of a fabricated 0.
+        const [projectRows] = await connection.execute(
+            'SELECT chapter_id, exam_id, project_title FROM chapter_projects WHERE course_id = ? AND is_active = 1',
+            [config.courseId]
+        );
+        const projectByNum = {};
+        projectRows.forEach(p => {
+            const m = String(p.chapter_id).match(/(\d+)/);
+            if (m) projectByNum[Number(m[1])] = p;
+        });
+
         function summarize(vals) {
             const pcts = vals.filter(v => v !== null && v !== undefined);
             if (pcts.length === 0) return { count: 0, avgPercent: null, masteryPercent: null };
@@ -994,25 +1013,35 @@ router.get('/public/curriculum-analytics', async (req, res) => {
                 through3Vals.push(through3 !== null ? through3 : (through2 !== null ? through2 : through1));
             });
 
-            // Metacognition tracking: a chapter counts as "reflected on" only
-            // when the student left BOTH open-ended prompts non-empty, not
-            // just picked a rubric number -- matches what prof-scales.js
-            // now requires before Save & Continue unlocks.
-            const [reflectionRows] = await connection.execute(
-                `SELECT student_id, level FROM self_assessments
-                 WHERE chapter_id = ? AND reflection_evidence IS NOT NULL AND TRIM(reflection_evidence) <> ''
-                   AND reflection_next_step IS NOT NULL AND TRIM(reflection_next_step) <> ''`,
-                [String(n)]
-            );
-            const scopedReflections = reflectionRows.filter(r => inScope(r.student_id));
-            const metacognition = {
-                reflectedCount: scopedReflections.length,
-                rosterCount: activeIds.size,
-                avgSelfLevel: scopedReflections.length
-                    ? Math.round((scopedReflections.reduce((a, r) => a + Number(r.level), 0) / scopedReflections.length) * 10) / 10
-                    : null
-            };
-            if (metacognition.reflectedCount < MIN_PUBLIC_N) metacognition.avgSelfLevel = null;
+            // Metacognition = real completion of the end-of-chapter project's
+            // self-assessment (with its two required reflection prompts) and
+            // peer review (with its required Critique Sandwich) -- both now
+            // block submission with an empty feedback field client-side
+            // (js/student/project-grading.js), so a non-empty `feedback` row
+            // here means the reflection genuinely happened, not just a
+            // rubric click. Participation counts aren't suppressed like the
+            // score/mastery figures above -- a count of who reflected
+            // doesn't reveal anyone's performance, only that they did it.
+            let metacognition = null;
+            const proj = projectByNum[n];
+            if (proj) {
+                const [selfRows] = await connection.execute(
+                    `SELECT DISTINCT student_id FROM project_evaluations
+                     WHERE exam_id = ? AND evaluator_type = 'self' AND feedback IS NOT NULL AND TRIM(feedback) <> ''`,
+                    [proj.exam_id]
+                );
+                const [peerRows2] = await connection.execute(
+                    `SELECT DISTINCT student_id FROM project_evaluations
+                     WHERE exam_id = ? AND evaluator_type = 'peer' AND feedback IS NOT NULL AND TRIM(feedback) <> ''`,
+                    [proj.exam_id]
+                );
+                metacognition = {
+                    projectTitle: proj.project_title,
+                    selfReflectedCount: selfRows.filter(r => inScope(r.student_id)).length,
+                    peerReviewedCount: peerRows2.filter(r => inScope(r.student_id)).length,
+                    rosterCount: activeIds.size
+                };
+            }
 
             units.push({
                 unit: n,
