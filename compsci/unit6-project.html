@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Unit 6 Project: The App Blueprint &amp; Build Plan | CHS Computer Science</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+
+    <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/student-pages.css">
+    <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+    <script type="module" src="/js/auth-guard.js"></script>
+    <script src="/js/bootstrap.bundle.js"></script>
+    <script src="/js/jquery.js"></script>
+    <script src="/js/loader.js?v=20"></script>
+</head>
+<body style="background-color: var(--site-secondary);">
+
+    <header class="text-center" style="background: linear-gradient(135deg, var(--primary-color), var(--tertiary-color)); border-radius: 0 0 20px 20px; padding: 3rem 2rem; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0, 0, 153, 0.2);">
+        <div class="container">
+            <span class="badge mb-2 px-3 py-2 fw-bold rounded-pill shadow-sm" style="background-color: var(--code-color); color: #ffffff;">Unit 6: Intermediate A&amp;P &mdash; Project</span>
+            <h1 class="display-5 fw-bold mb-0 text-white" style="color: #ffffff !important;">The App Blueprint &amp; Build Plan</h1>
+            <p class="lead mt-2 opacity-100 text-white" style="color: #ffffff !important;">Built in Google Sheets + Slides. 100 points.</p>
+        </div>
+    </header>
+
+    <div class="container pb-5" style="max-width: 900px;">
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold text-primary"><i class="fas fa-graduation-cap me-2"></i>Standards Addressed</h5>
+                <p class="text-muted small mb-0">Nevada Academic Content Standards for Computer Science &amp; Integrated Technology: <strong>9-12.AP.V.1</strong> (linked lists/arrays vs. simple variables), <strong>9-12.AP.M.1&ndash;2</strong> (decompose into modules/procedures), <strong>9-12.AP.PD.1</strong> (design programs incorporating user feedback), <strong>9-12.AP.PD.4</strong> (team roles &amp; collaborative tools), <strong>9-12.AP.PD.5</strong> (document design decisions) &mdash; the same standards Chapter 14 (The Array Refactor, The Structure Comparison), Chapter 15 (The Procedure Library, The Integrated Tool) and Chapter 16 (The Feedback Cycle, The License Audit, The Accessibility Pass) build toward.</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white fw-bold"><i class="fas fa-bullseye me-2"></i>Objective</div>
+            <div class="card-body p-4">
+                <p>Design a hypothetical app or program end-to-end: model its data, break it into real modules, and document a full software-development-lifecycle pass on it &mdash; including real feedback you actually got and acted on.</p>
+                <p class="mb-0"><strong>Deliverable:</strong> One Google Sheets tab (data structure comparison) + a Google Slides deck (everything else), minimum 6 slides. Turn in a PDF export of both, or a text file with your share links, below.</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-info text-white fw-bold"><i class="fas fa-list-ol me-2"></i>Steps</div>
+            <div class="card-body p-4">
+                <ol class="mb-0">
+                    <li class="mb-3">Pick a hypothetical app or program idea (a to-do list, a grade tracker, a game, etc.).</li>
+                    <li class="mb-3"><strong>Sheets: Data Structure Comparison</strong> &mdash; model a real chunk of your app's data both as a list/array-style table and as separate simple variables, then write out why the list/array version scales better as the data grows.</li>
+                    <li class="mb-3"><strong>Slides: Module Breakdown</strong> &mdash; decompose your app into at least 3 real modules/procedures (e.g. "input handling," "score calculation," "display"), each with a one-sentence job description.</li>
+                    <li class="mb-3"><strong>Slides: SDLC Walkthrough</strong> &mdash; document each phase: Planning, Design, a real Feedback round (get actual feedback from a classmate and show what you changed because of it), Testing, and one specific Accessibility finding + fix.</li>
+                    <li class="mb-0"><strong>Slides: License Check</strong> &mdash; list every outside resource, image, icon, or font you used and its license/attribution.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+          <div class="col-12">
+            <div id="project-grading-panel"
+                 class="card border-info shadow-sm text-start"
+                 data-chapter-project-id="8"
+                 data-exam-id="Unit6-Project"
+                 data-rubric='[
+                    {"key":"data_structure","label":"Data Structure Comparison","description":"The array/list version and the plain-variables version model the same real data, and the explanation of why the list scales better is specific, not generic."},
+                    {"key":"module_design","label":"Module Design","description":"At least 3 modules are logical, non-overlapping, and each has a clear, specific job."},
+                    {"key":"sdlc_docs","label":"SDLC Documentation","description":"Every phase is shown, and the feedback round shows a real, specific change made because of real feedback, not invented."},
+                    {"key":"accessibility","label":"Accessibility Finding","description":"Names one specific, real accessibility issue in the app idea and a specific fix, not a generic accessibility statement."},
+                    {"key":"license_check","label":"License Check","description":"Every outside resource used is listed with its actual license or attribution requirement."},
+                    {"key":"revision_history","label":"Revision History (Bonus)","description":"Includes a revision history or version log showing the plan actually changed over more than one round.","bonus":true}
+                 ]'>
+              <div class="card-body small p-4 text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading grading tool&hellip;</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card shadow border-success text-start mb-5" id="submission-zone">
+            <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>Student Assignment Dropbox</h4>
+                <span class="badge bg-light text-success shadow-sm" id="student-id-badge">Verifying...</span>
+            </div>
+            <div class="card-body p-4">
+                <form id="uploadForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
+                        <select id="uploadAssignment" class="form-select border-success" required>
+                            <option value="" disabled selected>Select an assignment...</option>
+                            <option value="Unit6-Project" data-label="Project: The App Blueprint &amp; Build Plan (100 pts)">Project: The App Blueprint &amp; Build Plan (100 pts)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <p class="text-muted small mb-2"><strong>Turning in Google Sheets/Slides:</strong> File &rarr; Download &rarr; PDF Document, then upload the PDF(s) below. Or upload a .txt file containing your share links.</p>
+                        <label class="form-label fw-bold">2. What type of upload is this?</label>
+                        <select id="uploadType" class="form-select border-primary bg-site-secondary">
+                            <option value="file">A Single File (PDF export or link file)</option>
+                            <option value="folder">An Entire Folder</option>
+                        </select>
+                    </div>
+                    <div class="mb-4" id="fileInputContainer">
+                        <label class="form-label fw-bold">3. Select File</label>
+                        <input type="file" id="fileInput" class="form-control" required>
+                    </div>
+                    <div class="mb-4 d-none" id="folderInputContainer">
+                        <label class="form-label fw-bold">3. Select Project Folder</label>
+                        <input type="file" id="folderInput" class="form-control" webkitdirectory directory multiple>
+                    </div>
+                    <button type="submit" id="submitBtn" class="btn btn-success w-100 fw-bold py-3 shadow-sm" disabled>Upload to Teacher Server</button>
+                </form>
+                <div id="uploadProgress" class="progress mt-3 d-none shadow-sm" style="height: 25px;">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%;">0%</div>
+                </div>
+                <div id="uploadStatus" class="mt-3 d-none p-3 rounded small fw-bold text-center shadow-sm"></div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="/proficiencyScales/cs-unit-6.html" class="btn btn-outline-primary fw-bold shadow-sm"><i class="fas fa-arrow-left me-1"></i>Back to Unit 6 Proficiency Scale</a>
+        </div>
+
+    </div>
+
+    <script type="module" src="/js/assignment-uploader.js"></script>
+    <script type="module" src="/js/student/project-grading.js?v=2"></script>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>

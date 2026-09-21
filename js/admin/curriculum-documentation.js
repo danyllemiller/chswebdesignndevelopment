@@ -86,28 +86,33 @@ const WD_DOC_DATA = [
     work: [ ['Milestone: Live Portfolio Launch', 100] ] }
 ];
 
+// Standards codes come from compsci/scope&sequence.txt (the real Nevada
+// Academic Content Standards for Computer Science & Integrated Technology
+// excerpt already in the repo), matched to each unit's actual chapters by
+// filename rather than that file's own stale "Unit N" column, which
+// predates the live 7-unit grouping in CS_MAP (admin/due-dates.html).
 const CS_DOC_DATA = [
   { unit: 1, title: 'Unit 1: Digital Citizenship', slug: 'cs-unit-1',
-    work: [ ['Ch1: The Footprint Audit', 25], ['Ch1: The Conduct Case Studies', 25], ['Ch1: The Threat Recognition Lab', 25],
-      ['Ch2: The Data Trail', 25], ['Ch2: The Attribution Lab', 25], ['Ch2: The Privacy Position', 25] ] },
+    standards: ['DC.B.1','DC.B.2','DC.A.1','DC.D.1'],
+    work: [ ['Project: The Digital Citizenship Case File', 100] ] },
   { unit: 2, title: 'Unit 2: Computing Systems', slug: 'cs-unit-2',
-    work: [ ['Ch3: The Abstraction Teardown', 25], ['Ch3: The Layer Interaction Map + File System Audit', 25], ['Ch3: The Troubleshooting Guide', 25],
-      ['Ch4: The Audience Rebuild', 25], ['Ch4: The Distributed Build', 25] ] },
+    standards: ['CS.D.1','CS.HS.1','AP.PD.4'],
+    work: [ ['Project: The System & Support Deck', 100] ] },
   { unit: 3, title: 'Unit 3: Data & Analysis', slug: 'cs-unit-3',
-    work: [ ['Ch5: The Binary Translator', 25], ['Ch5: The Encoding Lab', 25], ['Ch6: The Organization Audit', 25],
-      ['Ch6: The Storage Tradeoff Matrix', 25], ['Ch7: The Function Toolkit', 25], ['Ch7: The Chart Rebuild + Dashboard Build', 25],
-      ['Ch8: The Model Build', 25], ['Ch8: The Reality Check', 25] ] },
+    standards: ['DA.S.1','DA.S.2','DA.CVT.1','DA.IM.1'],
+    work: [ ['Project: The Data Story Dashboard', 100] ] },
   { unit: 4, title: 'Unit 4: Beg. Algorithm & Programming', slug: 'cs-unit-4',
-    work: [ ['Ch9: The Decomposition Tree', 25], ['Ch9: The Pseudocode Spec', 25], ['Ch9: The First Prototype', 25],
-      ['Ch10: The Decision Logic', 25], ['Ch10: The Iteration Build', 25], ['Ch10: The Event-Driven Artifact', 25] ] },
+    standards: ['AP.A.1','AP.C.1','AP.C.2'],
+    work: [ ['Project: The Algorithm Design Blueprint', 100] ] },
   { unit: 5, title: 'Unit 5: Impacts of Computing', slug: 'cs-unit-5',
-    work: [ ['Ch11: The Bias Test', 25], ['Ch12: The Cross-Discipline Brief', 25], ['Ch12: The Privacy Audit', 25] ] },
+    standards: ['IC.C.1','IC.C.2','IC.C.3','IC.C.4','IC.SLE.1','IC.SLE.2','IC.SLE.3'],
+    work: [ ['Project: The Tech Impact Briefing', 100] ] },
   { unit: 6, title: 'Unit 6: Intermediate A&P', slug: 'cs-unit-6',
-    work: [ ['Ch14: The Array Refactor', 25], ['Ch14: The Structure Comparison', 25], ['Ch15: The Procedure Library', 25],
-      ['Ch15: The Integrated Tool', 25], ['Ch16: The Feedback Cycle', 25], ['Ch16: The License Audit', 25], ['Ch16: The Accessibility Pass', 25] ] },
+    standards: ['AP.V.1','AP.M.1','AP.M.2','AP.PD.1','AP.PD.4','AP.PD.5'],
+    work: [ ['Project: The App Blueprint & Build Plan', 100] ] },
   { unit: 7, title: 'Unit 7: Networks and the Internet', slug: 'cs-unit-7',
-    work: [ ['Ch17: The Network Map', 25], ['Ch18: The Threat Log', 25], ['Ch19: The Tradeoff Matrix', 25],
-      ['Ch19: The Security Brief', 25], ['Project: The Network Audit', 100] ] }
+    standards: ['NI.NCO.1','NI.C.1','NI.C.2','NI.C.3','NI.C.4'],
+    work: [ ['Project: The Network Audit', 100] ] }
 ];
 
 const COURSES = {
@@ -208,8 +213,10 @@ function renderRows(courseKey, analyticsByUnit) {
     const cells = analyticsCellsHtml(unitData);
 
     const profScaleLink = `/proficiencyScales/${r.slug}.html`;
+    const stdLabel = course.kind === 'wd' ? 'Nevada CTE PIs' : 'Nevada CS Standards';
+    const stdPrefix = course.kind === 'wd' ? 'NV ' : '9-12.';
     const standardsHtml = r.standards
-      ? `<div class="std-codes"><span class="text-muted small">Nevada CTE PIs (${r.standards.length}):</span> ${r.standards.map(c => `NV ${c}`).join(', ')}</div>`
+      ? `<div class="std-codes"><span class="text-muted small">${stdLabel} (${r.standards.length}):</span> ${r.standards.map(c => `${stdPrefix}${c}`).join(', ')}</div>`
       : `<div class="std-codes text-muted small">Standards mapping not yet built for this course.</div>`;
 
     const singletonHtml = course.kind === 'wd'
