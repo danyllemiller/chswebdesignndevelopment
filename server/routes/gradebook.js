@@ -906,6 +906,130 @@ router.get('/admin/attempt-analytics', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to compute attempt analytics' }); }
 });
 
+// Public, no-login-required aggregate for the shareable Curriculum
+// Documentation page (admin/tools/curriculum-documentation.html) -- this
+// path deliberately does NOT start with /admin/, so the blanket staff-only
+// gate in server/api.js never applies to it. Everything it returns is a
+// whole-class number (no per-period breakdown, no student_id, no names),
+// and any number backed by fewer than MIN_PUBLIC_N students is suppressed
+// outright so a small period can't be effectively re-identified from an
+// aggregate percentage. This intentionally does NOT reuse the exact rows
+// the staff-only /admin/attempt-analytics above returns -- that one keeps
+// full per-period precision for the teacher's own use; this one is a
+// separate, deliberately coarser view meant for an external audience.
+const MIN_PUBLIC_N = 5;
+
+router.get('/public/curriculum-analytics', async (req, res) => {
+    const courseKey = String(req.query.course || '').toUpperCase();
+    const config = ATTEMPT_ANALYTICS_CONFIG[courseKey];
+    if (!config) return res.status(400).json({ error: 'course must be CS, WD1, or WD2' });
+
+    try {
+        const connection = await getDbConnection();
+
+        const [students] = await connection.execute(
+            `SELECT student_id FROM students
+             WHERE (archived IS NULL OR archived = 0) AND school_year = ? AND section_id IN (${config.periods.map(() => '?').join(',')})`,
+            [getCurrentSchoolYear(), ...config.periods]
+        );
+        const activeIds = new Set(students.map(s => String(s.student_id)));
+        const inScope = (sid) => activeIds.has(String(sid));
+
+        function summarize(vals) {
+            const pcts = vals.filter(v => v !== null && v !== undefined);
+            if (pcts.length === 0) return { count: 0, avgPercent: null, masteryPercent: null };
+            const avg = pcts.reduce((a, b) => a + b, 0) / pcts.length;
+            const masteryCount = pcts.filter(p => p >= 80).length;
+            return {
+                count: pcts.length,
+                avgPercent: Math.round(avg * 10) / 10,
+                masteryPercent: Math.round((masteryCount / pcts.length) * 1000) / 10
+            };
+        }
+        const suppress = (s) => (s.count < MIN_PUBLIC_N ? { count: s.count, avgPercent: null, masteryPercent: null } : s);
+
+        const units = [];
+        for (const n of config.chapters) {
+            const preExamId = config.preExamId(n);
+            const examExamId = config.examExamId(n);
+
+            const [preAttemptRows] = await connection.execute(
+                'SELECT student_id, attempt_number, score, total_points FROM exam_attempts WHERE exam_id = ?', [preExamId]);
+            const [preResponseRows] = await connection.execute(
+                'SELECT student_id, score, total_points FROM responses WHERE exam_id = ?', [preExamId]);
+            const [examAttemptRows] = await connection.execute(
+                'SELECT student_id, attempt_number, score, total_points FROM exam_attempts WHERE exam_id = ?', [examExamId]);
+            const [examResponseRows] = await connection.execute(
+                'SELECT student_id, score, total_points FROM responses WHERE exam_id = ?', [examExamId]);
+
+            const preAttempt1 = {};
+            preAttemptRows.filter(r => r.attempt_number === 1 && inScope(r.student_id)).forEach(r => { preAttempt1[r.student_id] = r; });
+            preResponseRows.filter(r => inScope(r.student_id)).forEach(r => { if (!preAttempt1[r.student_id]) preAttempt1[r.student_id] = r; });
+            const pretest = summarizeAttempts(Object.values(preAttempt1));
+
+            const attemptsByStudent = {};
+            examAttemptRows.filter(r => inScope(r.student_id)).forEach(r => {
+                if (!attemptsByStudent[r.student_id]) attemptsByStudent[r.student_id] = [];
+                attemptsByStudent[r.student_id].push(r);
+            });
+            examResponseRows.filter(r => inScope(r.student_id)).forEach(r => {
+                if (!attemptsByStudent[r.student_id]) attemptsByStudent[r.student_id] = [{ attempt_number: 1, score: r.score, total_points: r.total_points }];
+            });
+
+            const through1Vals = [], through2Vals = [], through3Vals = [];
+            let took2 = 0, took3 = 0;
+            Object.values(attemptsByStudent).forEach(attempts => {
+                let through1 = null, through2 = null, through3 = null;
+                attempts.forEach(a => {
+                    if (!(Number(a.total_points) > 0)) return;
+                    const p = (Number(a.score) / Number(a.total_points)) * 100;
+                    if (a.attempt_number <= 1) through1 = through1 === null ? p : Math.max(through1, p);
+                    if (a.attempt_number <= 2) through2 = through2 === null ? p : Math.max(through2, p);
+                    through3 = through3 === null ? p : Math.max(through3, p);
+                });
+                if (through1 !== null) through1Vals.push(through1);
+                if (attempts.some(a => a.attempt_number >= 2)) took2++;
+                if (attempts.some(a => a.attempt_number >= 3)) took3++;
+                through2Vals.push(through2 !== null ? through2 : through1);
+                through3Vals.push(through3 !== null ? through3 : (through2 !== null ? through2 : through1));
+            });
+
+            // Metacognition tracking: a chapter counts as "reflected on" only
+            // when the student left BOTH open-ended prompts non-empty, not
+            // just picked a rubric number -- matches what prof-scales.js
+            // now requires before Save & Continue unlocks.
+            const [reflectionRows] = await connection.execute(
+                `SELECT student_id, level FROM self_assessments
+                 WHERE chapter_id = ? AND reflection_evidence IS NOT NULL AND TRIM(reflection_evidence) <> ''
+                   AND reflection_next_step IS NOT NULL AND TRIM(reflection_next_step) <> ''`,
+                [String(n)]
+            );
+            const scopedReflections = reflectionRows.filter(r => inScope(r.student_id));
+            const metacognition = {
+                reflectedCount: scopedReflections.length,
+                rosterCount: activeIds.size,
+                avgSelfLevel: scopedReflections.length
+                    ? Math.round((scopedReflections.reduce((a, r) => a + Number(r.level), 0) / scopedReflections.length) * 10) / 10
+                    : null
+            };
+            if (metacognition.reflectedCount < MIN_PUBLIC_N) metacognition.avgSelfLevel = null;
+
+            units.push({
+                unit: n,
+                label: config.label(n),
+                pretest: suppress(pretest),
+                exam1: suppress(summarize(through1Vals)),
+                retake2: { count: took2, ...suppress(summarize(through2Vals)) },
+                retake3: { count: took3, ...suppress(summarize(through3Vals)) },
+                metacognition
+            });
+        }
+
+        await connection.release();
+        res.json({ course: courseKey, units });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to compute public curriculum analytics' }); }
+});
+
 // Replaces api/admin/get-due-dates.php and api/admin/save-due-dates.php --
 // both had zero server-side auth (anyone could rewrite every assignment's
 // due date and points, and silently wipe/rebuild the due-date entries on

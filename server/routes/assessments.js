@@ -52,12 +52,14 @@ router.get('/student/self-assessments', requireSelfOrStaff(), async (req, res) =
 });
 
 router.post('/student/save-self-assessment', requireSelfOrStaff(), async (req, res) => {
-    const { student_id, chapter_id, level } = req.body;
+    const { student_id, chapter_id, level, reflection_evidence, reflection_next_step } = req.body;
     try {
         const connection = await getDbConnection();
         await connection.execute(
-            'INSERT INTO self_assessments (student_id, chapter_id, level) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE level = VALUES(level)',
-            [student_id, chapter_id, level]
+            `INSERT INTO self_assessments (student_id, chapter_id, level, reflection_evidence, reflection_next_step)
+             VALUES (?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE level = VALUES(level), reflection_evidence = VALUES(reflection_evidence), reflection_next_step = VALUES(reflection_next_step)`,
+            [student_id, chapter_id, level, reflection_evidence || null, reflection_next_step || null]
         );
         await connection.release();
         res.json({ success: true });

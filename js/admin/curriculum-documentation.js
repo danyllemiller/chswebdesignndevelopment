@@ -139,10 +139,33 @@ function fmtPct(v) {
   return (v === null || v === undefined) ? '<span class="no-data">No data yet</span>' : `${v}%`;
 }
 
+// A suppressed cell (count > 0 but below MIN_PUBLIC_N server-side) reads
+// differently from a genuinely empty one -- worth saying why the number
+// isn't there instead of implying nothing happened yet.
+function fmtSuppressable(stat, formatShown) {
+  if (!stat || stat.count === 0) return '<span class="no-data">No data yet</span>';
+  if (stat.avgPercent === null) return '<span class="no-data">Not shown — fewer than 5 students</span>';
+  return formatShown(stat);
+}
+
 function workListHtml(work) {
   const total = work.reduce((sum, [, pts]) => sum + pts, 0);
   const items = work.map(([title, pts]) => `<li>${esc(title)} <span class="text-muted">— ${pts} pts</span></li>`).join('');
   return `<ul class="rigor-list">${items}</ul><div class="rigor-total">${work.length} items · ${total} pts total</div>`;
+}
+
+function metacognitionHtml(unitData) {
+  if (!unitData) return '<div class="fill-box" aria-hidden="true"></div>';
+  const m = unitData.metacognition;
+  if (!m || m.reflectedCount === 0) {
+    return `<span class="no-data">No reflections submitted yet</span><div class="fill-box mt-2" aria-hidden="true"></div>`;
+  }
+  const pct = m.rosterCount > 0 ? Math.round((m.reflectedCount / m.rosterCount) * 100) : null;
+  const coverage = `${m.reflectedCount}${m.rosterCount ? `/${m.rosterCount}` : ''} students completed a reflective self-assessment${pct !== null ? ` (${pct}%)` : ''}`;
+  const avgLine = m.avgSelfLevel !== null
+    ? `<div class="text-muted small mt-1">Avg self-rated level: ${m.avgSelfLevel} / 4.0</div>`
+    : (m.reflectedCount > 0 ? `<div class="text-muted small mt-1">Avg self-rated level not shown — fewer than 5 students</div>` : '');
+  return `<div>${coverage}</div>${avgLine}`;
 }
 
 function analyticsCellsHtml(unitData) {
@@ -153,26 +176,20 @@ function analyticsCellsHtml(unitData) {
       retake: '<span class="no-data">No data yet</span>'
     };
   }
-  const row = unitData.periods.find(p => p.period === 'All') || unitData.periods[0];
-  if (!row) return { pre: '<span class="no-data">No data yet</span>', post: '<span class="no-data">No data yet</span>', retake: '<span class="no-data">No data yet</span>' };
 
-  const pre = row.pretest.avgPercent !== null
-    ? `${fmtPct(row.pretest.avgPercent)} <span class="text-muted small">(n=${row.pretest.count})</span>`
-    : '<span class="no-data">No data yet</span>';
+  const pre = fmtSuppressable(unitData.pretest, s => `${fmtPct(s.avgPercent)} <span class="text-muted small">(n=${s.count})</span>`);
 
-  const e1 = row.examAttempts['1'];
-  const post = e1.avgPercent !== null
-    ? `${fmtPct(e1.avgPercent)} avg <span class="${e1.masteryPercent >= 80 ? 'mastery-good' : 'mastery-bad'}">· ${e1.masteryPercent}% mastery</span> <span class="text-muted small">(n=${e1.count})</span>`
-    : '<span class="no-data">No data yet</span>';
+  const post = fmtSuppressable(unitData.exam1, s =>
+    `${fmtPct(s.avgPercent)} avg <span class="${s.masteryPercent >= 80 ? 'mastery-good' : 'mastery-bad'}">· ${s.masteryPercent}% mastery</span> <span class="text-muted small">(n=${s.count})</span>`);
 
-  const e2 = row.examAttempts['2'], e3 = row.examAttempts['3+'];
+  const r2 = unitData.retake2, r3 = unitData.retake3;
   let retake;
-  if (!e2.count && !e3.count) {
+  if (!r2.count && !r3.count) {
     retake = '<span class="mastery-good">No retakes needed</span>';
   } else {
     const parts = [];
-    if (e2.count) parts.push(`${e2.count} retook once → ${fmtPct(e2.avgPercent)} cumulative avg`);
-    if (e3.count) parts.push(`${e3.count} retook 2+ times → ${fmtPct(e3.avgPercent)} cumulative avg`);
+    if (r2.count) parts.push(`${r2.count} retook once → ${fmtSuppressable(r2, s => `${fmtPct(s.avgPercent)} cumulative avg`)}`);
+    if (r3.count) parts.push(`${r3.count} retook 2+ times → ${fmtSuppressable(r3, s => `${fmtPct(s.avgPercent)} cumulative avg`)}`);
     retake = parts.join('<br>');
   }
   return { pre, post, retake };
@@ -203,7 +220,7 @@ function renderRows(courseKey, analyticsByUnit) {
           <a class="doc-link" href="${profScaleLink}" target="_blank" rel="noopener"><i class="fas fa-chart-bar me-1"></i>Proficiency Scale</a>
           ${standardsHtml}
         </td>
-        <td class="col-meta"><div class="fill-box" aria-hidden="true"></div></td>
+        <td class="col-meta">${metacognitionHtml(unitData)}</td>
         <td class="col-work">${workListHtml(r.work)}</td>
         <td class="col-singleton">${singletonHtml}</td>
         <td class="col-pre">${cells.pre}</td>
@@ -220,9 +237,13 @@ async function loadCourse(courseKey) {
   banner.textContent = course.levelLabel;
   tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4"><span class="spinner-border spinner-border-sm text-primary"></span> Loading live assessment data...</td></tr>`;
 
+  // Uses the public, no-login aggregate (not /api/admin/attempt-analytics)
+  // so this page renders the same numbers for the teacher and for anyone
+  // she shares the link with -- and so it works at all for a visitor with
+  // no session, since the admin endpoint is staff-gated server-side.
   let analyticsByUnit = {};
   try {
-    const res = await fetch(`/api/admin/attempt-analytics?course=${courseKey}`);
+    const res = await fetch(`/api/public/curriculum-analytics?course=${courseKey}`);
     if (res.ok) {
       const data = await res.json();
       (data.units || []).forEach(u => { analyticsByUnit[u.unit] = u; });

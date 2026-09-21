@@ -120,7 +120,18 @@ async function executeAuthCheck() {
         'level1.html',
         'level2andup.html',
         'computerscience.html',
-        'compscifinal.html'
+        'compscifinal.html',
+        // Shared with people outside the school's accounts (department,
+        // admin) -- deliberately public. Neither page nor anything they
+        // link to (proficiency scale rubrics, the lesson-plan binder)
+        // carries student names/IDs; the analytics they display come from
+        // the separate /api/public/curriculum-analytics endpoint, which
+        // is itself aggregate-only and suppresses any number backed by
+        // fewer than 5 students. Do not add an /admin/ page here that
+        // exposes a roster, a grade, or any write action.
+        'curriculum-documentation.html',
+        'lesson-plan-binder.html',
+        '/proficiencyscales/'
     ];
     const isPublic = publicPages.some(p => currentPath.includes(p.toLowerCase())) || currentPath === '/' || currentPath === '';
 
