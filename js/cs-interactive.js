@@ -726,6 +726,10 @@ function renderTabs() {
                          </button>`;
         });
 
+        chapHtml += `<button class="chapter-tab-btn ${activeTab.type === 'PROJECT' ? 'active' : ''}" data-target="PROJECT">
+                        <i class="fas fa-diagram-project me-1 text-muted"></i> Unit Project
+                     </button>`;
+
         chapHtml += `<button class="chapter-tab-btn exam-tab-btn ${activeTab.type === 'EXAM' ? 'active' : ''}" data-target="EXAM">
                         <i class="fas fa-trophy me-1"></i> Unit ${activeUnit.unitNum} Exam
                      </button>`;
@@ -764,8 +768,8 @@ function initCSInteractive(student) {
             chapterNum = activeTab.data.ch;
         }
 
-        // Priority 2: For PRE_SCALE, PRE_TEST, EXAM, POST_SCALE - use unit's FIRST chapter
-        if (chapterNum === null && (activeTab.type === 'PRE_SCALE' || activeTab.type === 'PRE_TEST' || activeTab.type === 'EXAM' || activeTab.type === 'POST_SCALE')) {
+        // Priority 2: For PRE_SCALE, PRE_TEST, PROJECT, EXAM, POST_SCALE - use unit's FIRST chapter
+        if (chapterNum === null && (activeTab.type === 'PRE_SCALE' || activeTab.type === 'PRE_TEST' || activeTab.type === 'PROJECT' || activeTab.type === 'EXAM' || activeTab.type === 'POST_SCALE')) {
             if (activeUnit && activeUnit.chapters && activeUnit.chapters.length > 0) {
                 chapterNum = activeUnit.chapters[0].ch;
             }
@@ -1263,6 +1267,18 @@ else if (activeTab.type === 'PRE_TEST') {
 
                 // Workspace is accessible - user manually selects mode via toggle buttons
                 // Don't auto-show any view based on chapter - let user choose
+            }
+            else if (activeTab.type === 'PROJECT') {
+                if (dom.paneTitle) dom.paneTitle.innerText = `${activeUnit.name} - Unit Project`;
+
+                // Same iframe the CHAPTER tab uses -- the project page is a full
+                // standalone page (instructions, the self/peer grading widget,
+                // and the turn-in dropbox all in one place), not a special
+                // overlay, so a student can read the brief and submit without
+                // leaving the workspace.
+                const url = `/compsci/unit${activeUnit.unitNum}-project.html`;
+                if (dom.curriculumFrame && !dom.curriculumFrame.src.includes(url)) dom.curriculumFrame.src = url;
+                if (dom.curriculumFrame) dom.curriculumFrame.classList.remove('d-none');
             }
 else if (activeTab.type === 'EXAM') {
                 if (dom.paneTitle) dom.paneTitle.innerText = `Unit ${activeUnit.unitNum}: Final Assessment`;
@@ -2253,7 +2269,10 @@ if (chapBtn) {
                     const chNum = parseInt(target.split('_')[1]);
                     activeTab = { type: 'CHAPTER', data: activeUnit.chapters.find(c => c.ch === chNum) };
                 }
-                
+                else if (target === 'PROJECT') {
+                    activeTab = { type: 'PROJECT' };
+                }
+
                 // Call checkProgressAndGate to handle the UI - it has all the logic for rendering
                 // Pass false to NOT auto-advance - we want to stay on the clicked tab
                 await checkProgressAndGate(false);
@@ -2354,6 +2373,8 @@ window.addEventListener('message', async (event) => {
                     tabType = 'PRE_SCALE';
                 } else if (target === 'PRE_TEST') {
                     tabType = 'PRE_TEST';
+                } else if (target === 'PROJECT') {
+                    tabType = 'PROJECT';
                 } else if (target === 'EXAM') {
                     tabType = 'EXAM';
                 } else if (target === 'POST_SCALE') {
