@@ -910,13 +910,17 @@ router.get('/admin/attempt-analytics', async (req, res) => {
 // Documentation page (admin/tools/curriculum-documentation.html) -- this
 // path deliberately does NOT start with /admin/, so the blanket staff-only
 // gate in server/api.js never applies to it. Everything it returns is a
-// whole-class number (no per-period breakdown, no student_id, no names),
-// and any number backed by fewer than MIN_PUBLIC_N students is suppressed
-// outright so a small period can't be effectively re-identified from an
-// aggregate percentage. This intentionally does NOT reuse the exact rows
-// the staff-only /admin/attempt-analytics above returns -- that one keeps
-// full per-period precision for the teacher's own use; this one is a
-// separate, deliberately coarser view meant for an external audience.
+// whole-class number (no per-period breakdown, no student_id, no names).
+// Pre/Post-Assessment averages show regardless of class size (an average
+// alone never discloses any one student's score, even at n=1 -- explicit
+// call, since some periods here run well under 5 students). Retake counts
+// and metacognition quotes are the pieces that DO get withheld below
+// MIN_PUBLIC_N -- a "2 of 4 retook" count or a named reflection is a much
+// smaller crowd to hide inside than an average is. This intentionally does
+// NOT reuse the exact rows the staff-only /admin/attempt-analytics above
+// returns -- that one keeps full per-period precision for the teacher's
+// own use; this one is a separate, deliberately coarser view meant for an
+// external audience.
 const MIN_PUBLIC_N = 5;
 
 router.get('/public/curriculum-analytics', async (req, res) => {
@@ -1056,8 +1060,12 @@ router.get('/public/curriculum-analytics', async (req, res) => {
             units.push({
                 unit: n,
                 label: config.label(n),
-                pretest: suppress(pretest),
-                exam1: suppress(summarize(through1Vals)),
+                // Pre/Post averages are shown regardless of class size --
+                // an average alone doesn't disclose any one student's score,
+                // unlike the retake counts/quotes below, which do get
+                // suppressed since a tiny class can make those identifying.
+                pretest: pretest,
+                exam1: summarize(through1Vals),
                 retake2: { count: took2, ...suppress(summarize(through2Vals)) },
                 retake3: { count: took3, ...suppress(summarize(through3Vals)) },
                 metacognition
