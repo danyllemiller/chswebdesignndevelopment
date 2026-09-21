@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Curriculum Documentation</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+
+  <script src="/js/loader.js?v=20"></script>
+  <script type="module" src="/js/auth-guard.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 96vw; margin: 2.5rem auto; }
+    .doc-table { font-size: 0.86rem; }
+    .doc-table th { background: var(--primary-color, #000099); color: #fff; vertical-align: middle; }
+    .doc-table td { vertical-align: top; }
+    .doc-table td.col-essential { min-width: 170px; }
+    .doc-table td.col-standards { min-width: 220px; }
+    .doc-table td.col-meta { min-width: 140px; }
+    .doc-table td.col-work { min-width: 240px; }
+    .doc-table td.col-singleton { min-width: 150px; }
+    .doc-table td.col-pre, .doc-table td.col-post, .doc-table td.col-retake { min-width: 170px; }
+
+    .level-banner {
+      background: linear-gradient(90deg, #fd7e14, #ffc107);
+      color: #3a2a00; font-weight: 700; padding: .65rem 1.1rem;
+      border-radius: .4rem; margin-bottom: 1rem; letter-spacing: .02em;
+    }
+    .doc-link { font-weight: 600; text-decoration: none; display: inline-block; margin-bottom: .35rem; }
+    .std-codes { line-height: 1.4; }
+    .rigor-list { padding-left: 1.1rem; margin-bottom: .25rem; }
+    .rigor-list li { margin-bottom: .15rem; }
+    .rigor-total { font-size: .78rem; color: #6c757d; font-weight: 600; }
+    .fill-box {
+      min-height: 90px; border: 1px dashed #c3c8d4; border-radius: .35rem;
+      background: repeating-linear-gradient(#fff, #fff 22px, #eef0f5 23px);
+    }
+    .no-data { color: #adb5bd; font-style: italic; }
+    .mastery-good { color: #198754; font-weight: 700; }
+    .mastery-bad { color: #dc3545; font-weight: 700; }
+
+    @media print {
+      .no-print { display: none !important; }
+      .doc-table { font-size: 10px; }
+      .fill-box { min-height: 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid sticky-top px-0 no-print">
+  <div id="nav-placeholder"></div>
+</div>
+
+<div class="container-fluid tools-card">
+  <div class="card shadow-sm border-0 mb-3 no-print">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <h2 class="gochi text-primary mb-1"><i class="fas fa-clipboard-list me-2"></i>Curriculum Documentation</h2>
+          <p class="text-muted mb-0">Essential Learning, standards, rigor evidence, and pre/post-assessment data per chapter — built from the same data the gradebook and Attempt Analytics tool already track.</p>
+        </div>
+        <button id="printBtn" class="btn btn-outline-primary"><i class="fas fa-print me-1"></i>Print / Export PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <ul class="nav nav-pills mb-3 no-print" id="courseTabs">
+    <li class="nav-item"><button class="nav-link active fw-bold" data-course="WD1">Web Design 1</button></li>
+    <li class="nav-item"><button class="nav-link fw-bold" data-course="WD2">Web Design 2</button></li>
+    <li class="nav-item"><button class="nav-link fw-bold" data-course="CS">Computer Science</button></li>
+  </ul>
+
+  <div id="levelBanner" class="level-banner"></div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-3">
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered doc-table mb-0">
+          <thead>
+            <tr>
+              <th>Essential Learning</th>
+              <th>Prof. Scale &amp; Standards</th>
+              <th>Metacognition</th>
+              <th>Student Work — Rigor</th>
+              <th>Beginning Essential Learning<br><span class="fw-normal">(Lesson Plan)</span></th>
+              <th>Pre-Assessment</th>
+              <th>Post Assessment</th>
+              <th>Retake — if necessary</th>
+            </tr>
+          </thead>
+          <tbody id="docBody">
+            <tr><td colspan="8" class="text-center py-4"><span class="spinner-border spinner-border-sm text-primary"></span> Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script type="module" src="/js/admin/curriculum-documentation.js?v=1"></script>
+</body>
+</html>
