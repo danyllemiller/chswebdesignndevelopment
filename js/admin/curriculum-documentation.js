@@ -159,6 +159,20 @@ function workListHtml(work) {
 // review (the required Critique Sandwich) -- see js/student/project-grading.js.
 // Only Ch1 and Ch9 have that system turned on today (chapter_projects rows);
 // every other chapter says so honestly instead of showing a fabricated 0.
+// Quotes come from the server with ONLY first_name attached (never
+// student_id or last_name -- stripped server-side in the API response
+// itself, not just hidden here) so this can render exactly what was
+// turned in without exposing who-beyond-a-first-name wrote it.
+function metacognitionQuotesHtml(quotes) {
+  if (!quotes || quotes.length === 0) return '';
+  const items = quotes.map(q => `
+    <div class="quote-card">
+      <div class="quote-name">${esc(q.firstName)}</div>
+      <div class="quote-text">${esc(q.feedback)}</div>
+    </div>`).join('');
+  return `<details class="mt-2"><summary>View ${quotes.length} submitted reflection${quotes.length === 1 ? '' : 's'}</summary>${items}</details>`;
+}
+
 function metacognitionHtml(unitData) {
   if (!unitData) return '<div class="fill-box" aria-hidden="true"></div>';
   const m = unitData.metacognition;
@@ -170,6 +184,7 @@ function metacognitionHtml(unitData) {
     <div class="text-muted small mb-1">${esc(m.projectTitle)}</div>
     <div>${m.selfReflectedCount}${m.rosterCount ? `/${m.rosterCount}` : ''} completed self-reflection${pct(m.selfReflectedCount)}</div>
     <div>${m.peerReviewedCount}${m.rosterCount ? `/${m.rosterCount}` : ''} completed a peer review${pct(m.peerReviewedCount)}</div>
+    ${metacognitionQuotesHtml(m.quotes)}
   `;
 }
 

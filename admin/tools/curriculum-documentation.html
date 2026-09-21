@@ -53,10 +53,20 @@
     .mastery-good { color: #198754; font-weight: 700; }
     .mastery-bad { color: #dc3545; font-weight: 700; }
 
+    .col-meta details summary { cursor: pointer; font-weight: 600; font-size: .8rem; color: var(--primary-color, #000099); margin-top: .25rem; }
+    .quote-card { border-left: 3px solid var(--tertiary-color, #3a52a4); background: #f8f9fb; border-radius: .3rem; padding: .5rem .6rem; margin-top: .5rem; }
+    .quote-name { font-weight: 700; font-size: .78rem; color: var(--primary-color, #000099); margin-bottom: .15rem; }
+    .quote-text { font-size: .78rem; white-space: pre-wrap; color: #333; }
+
     @media print {
       .no-print { display: none !important; }
       .doc-table { font-size: 10px; }
       .fill-box { min-height: 60px; }
+      /* Reflections are the point of a printed/exported copy -- force every
+         collapsed <details> open so they show up on the page instead of
+         needing a click that a printout can't perform. */
+      .col-meta details { display: block; }
+      .col-meta details summary { display: none; }
     }
   </style>
 </head>

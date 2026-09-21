@@ -1025,9 +1025,17 @@ router.get('/public/curriculum-analytics', async (req, res) => {
             let metacognition = null;
             const proj = projectByNum[n];
             if (proj) {
+                // Only first_name is ever selected here -- never student_id or
+                // last_name -- because this whole route is unauthenticated and
+                // public. Stripping it server-side is the actual control; a
+                // frontend that simply doesn't display a field is not one,
+                // since the raw JSON response is visible to anyone regardless
+                // of what the page renders.
                 const [selfRows] = await connection.execute(
-                    `SELECT DISTINCT student_id FROM project_evaluations
-                     WHERE exam_id = ? AND evaluator_type = 'self' AND feedback IS NOT NULL AND TRIM(feedback) <> ''`,
+                    `SELECT pe.student_id, pe.feedback, s.first_name FROM project_evaluations pe
+                     JOIN students s ON s.student_id = pe.student_id
+                     WHERE pe.exam_id = ? AND pe.evaluator_type = 'self' AND pe.feedback IS NOT NULL AND TRIM(pe.feedback) <> ''
+                     ORDER BY pe.updated_at ASC`,
                     [proj.exam_id]
                 );
                 const [peerRows2] = await connection.execute(
@@ -1035,11 +1043,13 @@ router.get('/public/curriculum-analytics', async (req, res) => {
                      WHERE exam_id = ? AND evaluator_type = 'peer' AND feedback IS NOT NULL AND TRIM(feedback) <> ''`,
                     [proj.exam_id]
                 );
+                const scopedSelf = selfRows.filter(r => inScope(r.student_id));
                 metacognition = {
                     projectTitle: proj.project_title,
-                    selfReflectedCount: selfRows.filter(r => inScope(r.student_id)).length,
+                    selfReflectedCount: scopedSelf.length,
                     peerReviewedCount: peerRows2.filter(r => inScope(r.student_id)).length,
-                    rosterCount: activeIds.size
+                    rosterCount: activeIds.size,
+                    quotes: scopedSelf.map(r => ({ firstName: r.first_name || 'A student', feedback: r.feedback }))
                 };
             }
 
