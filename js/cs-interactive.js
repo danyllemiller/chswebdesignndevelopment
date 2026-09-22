@@ -1345,7 +1345,21 @@ else if (activeTab.type === 'EXAM') {
                     if (!diagUnlocked) missing.push('the <strong>Diagnostic Pre-Assessment</strong>');
                     if (!worksUnlocked) missing.push('work for <strong>every chapter</strong> (Journal, Code, or File Upload)');
                     if (!projectUnlocked) missing.push('the <strong>Unit Project</strong> (self AND peer review both submitted)');
-                    dom.examOverlay.innerHTML = `<i class="fas fa-ban text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i><h3 class="fw-bold">Exam Locked</h3><p class="text-muted px-4 mb-4">You must complete ${missing.join(', ')} before the exam unlocks.</p>`;
+                    // This overlay is just a heads-up computed from what's
+                    // already loaded client-side -- the real, authoritative
+                    // gate (with the daily-code Override box) lives on the
+                    // exam page itself (examLogicCS.js + server/routes/
+                    // gradebook.js's checkUnitPrerequisite), same as the
+                    // pre-existing prior-unit-score lock this workspace has
+                    // never blocked on directly. Without a path to that page,
+                    // a teacher clearing a student with the daily code had no
+                    // way to actually get them to the screen the code works
+                    // on -- this link is that path.
+                    dom.examOverlay.innerHTML = `<i class="fas fa-ban text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i><h3 class="fw-bold">Exam Locked</h3><p class="text-muted px-4 mb-4">You must complete ${missing.join(', ')} before the exam unlocks.</p><a href="#" id="exam-locked-open-anyway" class="small text-muted">Already cleared by your teacher? Open the exam page</a>`;
+                    setTimeout(() => {
+                        const link = document.getElementById('exam-locked-open-anyway');
+                        if (link) link.onclick = (e) => { e.preventDefault(); window.open(`/exams/cs-unit-${activeUnit.unitNum}-exam.html`, '_blank'); };
+                    }, 50);
                 } else if (dom.examOverlay) {
                     dom.examOverlay.innerHTML = `
                         <i class="fas fa-file-signature text-primary fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
@@ -2307,7 +2321,13 @@ if (chapBtn) {
                         if (!diagUnlocked)    missing.push('Diagnostic Pre-Assessment');
                         if (!worksUnlocked)   missing.push('All Chapter Notes');
                         if (!projectUnlocked) missing.push('Unit Project (self AND peer review both submitted)');
-                        alert(`Exam Locked! You must complete the following before you can take the Unit Test:\n• ${missing.join('\n• ')}`);
+                        // Same reasoning as the EXAM-tab overlay's "Open the
+                        // exam page" link -- this workspace check is only a
+                        // heads-up, and the real gate (with the daily-code
+                        // Override) lives on the exam page itself, so a
+                        // cleared student still needs a way to reach it.
+                        const openAnyway = confirm(`Exam Locked! You must complete the following before you can take the Unit Test:\n• ${missing.join('\n• ')}\n\nAlready cleared by your teacher? Click OK to open the exam page anyway.`);
+                        if (openAnyway) window.open(`/exams/cs-unit-${activeUnit.unitNum}-exam.html`, '_blank');
                         return;
                     }
                 }
