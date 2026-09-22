@@ -45,6 +45,8 @@
       </div>
   </div>
 
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A labeled diagram of a function call and definition side by side. Left box shows &quot;greet(&quot;Jordan&quot;)&quot; with &quot;Jordan&quot; circled and labeled Argument. An arrow points to a right box showing &quot;function greet(name) { ... }&quot; with &quot;name&quot; circled and labeled Parameter, and a return arrow coming back out labeled Return Value.">
+
   <div class="concept-box shadow-sm border-danger bg-light">
       <h5 class="fw-bold text-danger"><i class="fas fa-exclamation-triangle me-2"></i> The Trap: Parameter vs. Argument</h5>
       <p class="mb-0">These two words get used interchangeably, but they're not the same thing. A <strong>parameter</strong> is the name written into the procedure's definition — <code>function greet(name)</code>, where <code>name</code> is the parameter. An <strong>argument</strong> is the actual value passed in when you call it — <code>greet("Jordan")</code>, where <code>"Jordan"</code> is the argument.</p>
@@ -87,6 +89,8 @@
   <h4 class="fw-bold mt-4 text-primary">11.2.1 Structuring a Real Tool</h4>
   <p>A well-structured script keeps data at the top, procedures grouped logically below it, and one clear entry point that orchestrates everything else — instead of logic scattered randomly wherever it was first written.</p>
 
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets menu bar with a custom menu item added at the end (after Help), labeled with a tool name, clicked open to show a dropdown of custom menu options like &quot;Run Report&quot; and &quot;Clear Data.&quot;">
+
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-mouse-pointer me-2"></i> Worked Example: A Menu for Non-Technical Users</h5>
       <p class="mb-0">Add a custom menu to a spreadsheet so someone who has never opened the script editor can still run your tool with one click. That single addition is often what actually turns a working script into something a real teammate would use.</p>
@@ -125,6 +129,8 @@
 
   <h4 class="fw-bold mt-4 text-primary">11.3.1 Recursion: A Procedure That Calls Itself</h4>
   <p><strong>Recursion</strong> is a procedure that calls itself with a smaller version of the same problem, until it reaches a <strong>base case</strong> simple enough to answer directly. A factorial function calculating <code>5!</code> calls itself to calculate <code>4!</code>, which calls itself for <code>3!</code>, and so on, until it hits the base case (<code>1! = 1</code>) and the answers combine back up the chain.</p>
+
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A vertical stack of five labeled boxes showing a recursive call chain: 5! calls 4!, which calls 3!, which calls 2!, which calls 1! at the bottom labeled &quot;Base Case.&quot; A second column of arrows curves back up the stack showing each answer multiplying and combining back to the top for the final result.">
 
   <h4 class="fw-bold mt-5 text-info">11.3.2 Version Control & Code Review</h4>
   <p>A <strong>version control</strong> system like <strong>Git</strong> lets multiple developers work on the same codebase at once without overwriting each other's changes — it tracks exactly what changed, when, and by whom, and can combine everyone's edits together safely.</p>

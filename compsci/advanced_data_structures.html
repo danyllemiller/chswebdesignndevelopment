@@ -32,6 +32,8 @@
   <h4 class="fw-bold mt-4 text-primary">14.1.1 Why Generalizing Beats Repeating</h4>
   <p>An array holds many values under one name, each reachable by a numbered position called an <strong>index</strong>. Indexes start at 0, not 1 — the first element is <code>array[0]</code>.</p>
 
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A horizontal row of six labeled boxes containing student names, with index numbers 0 through 5 printed below each box, and a curved loop arrow drawn beneath the whole row labeled &quot;one loop visits every box,&quot; contrasted above with six separate crossed-out variable-name tags.">
+
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-compress-arrows-alt me-2"></i> Worked Example: Refactoring Six Variables</h5>
       <p class="mb-0">Six separate variables, six separate lines every time you want to do something with all of them. One array plus one loop replaces every one of those lines — and unlike the six variables, the array works exactly the same whether you have 6 students or 600.</p>
@@ -96,11 +98,7 @@
   </table>
   <p class="small text-muted">That last row is deliberate — not every operation favors one structure. Searching for a value (not by index) is equally slow on both, because neither one can skip ahead without checking.</p>
 
-  <div class="image-placeholder shadow-sm">
-    <i class="fas fa-link fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">Array vs. Linked List, Visualized</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A side-by-side graphic. Left: numbered boxes in a solid row labeled "Array — direct access by index." Right: circles connected by arrows to the next one labeled "Linked List — each node points to the next."</p>
-  </div>
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A side-by-side graphic. Left: numbered boxes in a solid row labeled &quot;Array — direct access by index.&quot; Right: circles connected by arrows to the next one labeled &quot;Linked List — each node points to the next.&quot;">
 
   <p><strong>The trap:</strong> students often look for the "better" structure between the two. There isn't one — arrays win when you need instant access by position; linked lists win when you're constantly inserting and deleting in the middle. Naming both properties correctly is the actual skill being tested here, not picking a favorite.</p>
 
@@ -156,6 +154,8 @@
 
   <h4 class="fw-bold mt-5 text-info">14.3.2 Dictionaries (Maps)</h4>
   <p>An array looks things up by numbered position. A <strong>Dictionary</strong> (or <strong>Map</strong>) looks things up by a meaningful <strong>key</strong> instead — a phonebook keyed by name instead of by an arbitrary row number is dramatically faster to search, because you go straight to the name instead of checking every entry in order.</p>
+
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A sorted row of numbered boxes from 1 to 16 with three successive step panels below it. Step 1 highlights the middle box and an X over half the row that gets eliminated. Step 2 repeats on the remaining half. Step 3 lands on the target number, each step labeled and shown as a smaller shrinking row.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-search me-2"></i> Binary Search</h5>
