@@ -19,11 +19,55 @@
 
   <div class="sticky-toc">
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#section-7-0a">Spreadsheet Basics, From Zero</a>
       <a href="#section-7-0">Why This Matters: Big Data</a>
       <a href="#section-7-1">7.1 Functions & References</a>
       <a href="#section-7-2">7.2 Data Visualisation</a>
       <a href="#section-7-3">7.3 From Raw Data to a Clear Story</a>
   </div>
+
+  <!-- Section 7.0a: Absolute Basics -->
+  <h3 id="section-7-0a" class="fw-bold mt-4 border-bottom pb-2">Spreadsheet Basics, From Zero</h3>
+  <p class="fs-5">If you've never really used a spreadsheet before, start here — everything else in this chapter assumes you already know what's on this page.</p>
+
+  <h4 class="fw-bold mt-4 text-primary">Rows, Columns, and Cells</h4>
+  <p>A spreadsheet is a grid. <strong>Columns</strong> run up and down and are labeled with letters (A, B, C...). <strong>Rows</strong> run left to right and are labeled with numbers (1, 2, 3...). Where one column and one row meet is a single box called a <strong>cell</strong> — everything you type in a spreadsheet goes into a cell.</p>
+
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-border-all me-2"></i> Cell References: A1 Notation</h5>
+      <p class="mb-0">Every cell has an address made of its column letter, then its row number — no space between them. The cell in column A, row 1 is called <code>A1</code>. The cell in column C, row 4 is called <code>C4</code>. Click any cell in a real spreadsheet and its address shows up in the box at the top-left corner, called the Name Box — that's how you can always check you're looking at the cell you think you are.</p>
+  </div>
+
+  <h4 class="fw-bold mt-4 text-info">Typing Data vs. Writing a Formula</h4>
+  <p>Click a cell and start typing, and whatever you type just sits there as text or a number — that's <strong>data</strong>. Press <kbd>Enter</kbd> to move down to the next cell, or <kbd>Tab</kbd> to move right.</p>
+  <p>A <strong>formula</strong> is different: it always starts with an equals sign (<code>=</code>), and instead of showing what you typed, the cell shows the <em>result</em> of a calculation.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-calculator me-2"></i> Worked Example: Your First Formula</h5>
+      <p class="mb-1 text-light">Cell A1 contains <code>10</code>. Cell B1 contains <code>5</code>.</p>
+      <p class="mb-0 text-light">Click cell C1 and type <code>=A1+B1</code>, then press Enter. C1 doesn't show the text "A1+B1" — it shows <code>15</code>, the actual sum of whatever is really inside A1 and B1 right now. Change A1 to <code>20</code> and C1 instantly recalculates to <code>25</code>, with nothing retyped. That's the entire point of a spreadsheet over a calculator: the formula keeps working even after the numbers change.</p>
+  </div>
+
+  <p>The four basic math operators work exactly like you'd expect: <code>+</code> add, <code>-</code> subtract, <code>*</code> multiply, <code>/</code> divide. <code>=C4*2</code> doubles whatever is in C4. <code>=(A1+A2+A3)/3</code> averages three cells by hand, the long way (Chapter 7.1 covers the built-in function that does this in one word instead).</p>
+
+  <h4 class="fw-bold mt-5 text-success">Sheets and Tabs</h4>
+  <p>One spreadsheet <strong>file</strong> can hold multiple grids at once, called <strong>sheets</strong> or <strong>tabs</strong> — you'll see them as labeled tabs along the bottom edge of the screen, exactly like tabs in a web browser. Click <strong>+</strong> next to the existing tabs to add a new one, and double-click a tab's name to rename it. This matters directly for your Unit 3 Project: it asks for a workbook with four specifically-named tabs inside one file, not four separate files.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
+      <h5 class="fw-bold text-info"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">Cell B2 contains the number 8. You type <code>B2*3</code> (no equals sign) into cell C2. What shows up in C2? <em class="text-white-50">(Answer: the literal text "B2*3" -- without the leading =, Sheets treats it as plain text, not a formula, so it never calculates anything.)</em></p>
+  </div>
+
+  <div class="alert alert-secondary mt-4 shadow-sm">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-hand-point-right fa-2x me-3 text-secondary mt-1"></i>
+          <div class="w-100">
+              <p class="mb-0"><strong>Practice before you need it:</strong> open a blank Google Sheet (<a href="https://sheet.new" target="_blank" rel="noopener">sheet.new</a>), type a few numbers into column A, and write one formula in column B that adds, subtracts, multiplies, or divides two of them. Rename Sheet1 to something else just to see how. None of this is turned in — it's just getting your hands on the tool before 7.1 starts building on top of it.</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
 
   <!-- Intro: Big Data -->
   <h3 id="section-7-0" class="fw-bold mt-4 border-bottom pb-2">Why This Matters: Big Data</h3>
