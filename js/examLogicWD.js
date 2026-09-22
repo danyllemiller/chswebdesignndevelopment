@@ -266,6 +266,9 @@ function showCooldownMessage(remainingMs) {
             input.placeholder = 'Try again';
         }
     });
+    document.getElementById('override-code-input')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('override-submit-btn')?.click(); }
+    });
     const updateCountdown = () => {
         const remaining = cooldownEndTime - Date.now();
         if (remaining <= 0) { window.location.reload(); return; }

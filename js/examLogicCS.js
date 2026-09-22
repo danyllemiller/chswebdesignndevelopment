@@ -316,6 +316,9 @@ function showCooldownMessage(remainingMs) {
             input.placeholder = 'Try again';
         }
     });
+    document.getElementById('override-code-input')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('override-submit-btn')?.click(); }
+    });
 
     const updateCountdown = () => {
         const now = Date.now();
@@ -377,6 +380,9 @@ function showAttemptLimitMessage() {
             input.value = '';
             input.placeholder = 'Try again';
         }
+    });
+    document.getElementById('override-code-input')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('override-submit-btn')?.click(); }
     });
 }
 
@@ -705,6 +711,9 @@ function renderPrerequisiteBlock(prereq, unit) {
         } catch (e) {
             if (input) { input.value = ''; input.placeholder = 'Try again'; }
         }
+    });
+    document.getElementById('override-code-input')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('override-submit-btn')?.click(); }
     });
 }
 
