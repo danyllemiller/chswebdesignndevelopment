@@ -65,6 +65,8 @@
       </div>
   </div>
 
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets spreadsheet set up as a compound-interest model, with labeled input cells for Starting Balance, Interest Rate, and Years in one column, and a formula bar showing a formula that multiplies balance by (1 + rate) raised to the years, with the resulting output balance highlighted in a colored cell.">
+
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-piggy-bank me-2"></i> Worked Example: A Compound-Interest Model</h5>
       <p class="mb-0"><strong>Inputs:</strong> starting balance, interest rate, number of years. <strong>Relationship:</strong> a formula multiplying the balance by the rate each year and adding it back in. <strong>Output:</strong> the final balance. <strong>Assumption:</strong> the interest rate never changes — which is exactly the part worth questioning.</p>
@@ -81,11 +83,7 @@
   <h4 class="fw-bold mt-4 text-primary">8.2.1 Change One Input, Watch the Output</h4>
   <p><strong>Sensitivity testing</strong> means changing exactly one input at a time and recording how much the output moves. The input that swings the output the most is the one your model is most dependent on — and the one most worth questioning before you trust the result.</p>
 
-  <div class="image-placeholder shadow-sm">
-    <i class="fas fa-sliders-h fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">Testing One Variable at a Time</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A clean graphic showing three sliders labeled Input A, Input B, Input C, with only one slider highlighted and moving while an output number changes, and the other two sliders staying still and grayed out.</p>
-  </div>
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean graphic showing three sliders labeled Input A, Input B, Input C, with only one slider highlighted and moving while an output number changes, and the other two sliders staying still and grayed out.">
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
       <h5 class="fw-bold text-warning"><i class="fas fa-bug me-2"></i> Worked Example: Breaking a Model on Purpose</h5>
@@ -131,11 +129,7 @@
       <p class="mb-0">A student builds a formula that reproduces last month's daily temperatures with almost no error — by adding a separate correction term for nearly every single day. It looks incredible on a chart of the past. Fed tomorrow's conditions, it's no better than a random guess, because it never learned what actually drives temperature — it just memorized last month's answer key.</p>
   </div>
 
-  <div class="image-placeholder shadow-sm">
-    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">Two Charts, One Model</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A two-panel comparison graphic. Left panel labeled "Training Data" shows a model line and an actual-data line overlapping almost perfectly. Right panel labeled "New Data" shows the same model line now far apart from a new actual-data line, with the gap between them highlighted.</p>
-  </div>
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A two-panel comparison graphic. Left panel labeled &quot;Training Data&quot; shows a model line and an actual-data line overlapping almost perfectly. Right panel labeled &quot;New Data&quot; shows the same model line now far apart from a new actual-data line, with the gap between them highlighted.">
 
   <p><strong>The trap:</strong> students often assume the model that matches historical data most closely is automatically the best one. Often it's the opposite — a model chasing every past data point instead of the underlying pattern tends to be the one that fails hardest on anything new.</p>
 
@@ -170,6 +164,8 @@
 
   <h4 class="fw-bold mt-4 text-primary">8.4.1 Complex Systems</h4>
   <p>A system counts as genuinely <strong>complex</strong> when it has many interacting parts whose combined behavior is hard to predict just by looking at each part alone — a wildfire's spread depends on wind, humidity, terrain, and fuel all interacting at once; traffic flow depends on hundreds of individual drivers reacting to each other in real time. You can't just plug numbers into one formula and get a trustworthy answer the way you could for a savings account.</p>
+
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A side-by-side comparison diagram. Left side labeled &quot;Static Model&quot; shows a single arrow from Inputs straight into a box into one Output. Right side labeled &quot;Simulation&quot; shows a looping sequence of small steps labeled Step 1, Step 2, Step 3... progressing forward through a timeline, each step feeding into the next, ending in an Output.">
 
   <h4 class="fw-bold mt-5 text-info">8.4.2 Simulation vs. a Static Model</h4>
   <p>A static model (like this chapter's compound-interest example) calculates one output from one set of inputs. A <strong>simulation</strong> runs that process forward, often step by step through time or over many repeated trials, to see how a complex system behaves — a meteorologist's storm-tracking software doesn't solve one equation, it simulates the storm's likely path minute by minute based on current conditions and physics.</p>

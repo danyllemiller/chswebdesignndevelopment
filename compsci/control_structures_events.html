@@ -37,6 +37,8 @@
       <p class="mb-0">A conditional nested four <code>if</code> statements deep might be completely correct and still be a readability failure — nobody can verify it at a glance, including you in a month. Flattening it with an early return or a lookup table often produces the exact same behavior in a form a human can actually check.</p>
   </div>
 
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A before-and-after comparison graphic. Left side labeled &quot;Nested&quot; shows four indented if-statement boxes stacked diagonally inside one another like nested boxes, hard to follow. Right side labeled &quot;Lookup Table&quot; shows a simple two-column table with score ranges in one column and letter grades in the other, clean and flat.">
+
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-primary border-5">
       <h5 class="fw-bold text-info"><i class="fas fa-code-branch me-2"></i> Worked Example: Flattening a Nested Conditional</h5>
       <p class="mb-0 text-light">Four nested <code>if</code> statements checking a grade range, one inside the next, can become a single lookup table mapping score ranges to letter grades — same logic, same output, radically easier to scan and trust.</p>
@@ -67,6 +69,8 @@
 
   <h4 class="fw-bold mt-4 text-primary">10.2.1 The For Loop's Three Parts</h4>
   <p>A <code>for</code> loop has exactly three parts: <strong>initialize</strong> a counter, check a <strong>condition</strong> that keeps the loop running, and <strong>increment</strong> the counter each pass. A <code>while</code> loop skips the built-in counter and just keeps running as long as its condition stays true — the honest choice when you don't know in advance how many times you'll need to loop.</p>
+
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A labeled diagram of a for-loop's three parts inside its parentheses: &quot;for (let i = 0;&quot; labeled Initialize, &quot;i &lt; 5;&quot; labeled Condition, and &quot;i++)&quot; labeled Increment, with a curved arrow looping from the increment back to the condition to show the repeat cycle.">
 
   <div class="concept-box shadow-sm border-warning bg-light">
       <h5 class="fw-bold text-dark"><i class="fas fa-redo me-2"></i> The Classic Failures</h5>
@@ -108,11 +112,7 @@
   <h4 class="fw-bold mt-4 text-primary">10.3.1 Event Types</h4>
   <p>The most common triggers: <strong>on open</strong> (fires when a file is opened), <strong>on edit</strong> (fires the moment a cell changes), <strong>on form submit</strong> (fires when someone submits a linked form), and <strong>time-driven</strong> (fires on a schedule you set, with nobody present at all).</p>
 
-  <div class="image-placeholder shadow-sm">
-    <i class="fas fa-bolt fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">A Spreadsheet That Reacts on Its Own</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A clean graphic of a spreadsheet cell being edited, with a lightning bolt icon connecting it to a small gear icon labeled "trigger," and an arrow showing a script firing automatically — no mouse click on a "run" button anywhere in the image.</p>
-  </div>
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean graphic of a spreadsheet cell being edited, with a lightning bolt icon connecting it to a small gear icon labeled &quot;trigger,&quot; and an arrow showing a script firing automatically — no mouse click on a &quot;run&quot; button anywhere in the image.">
 
   <h4 class="fw-bold mt-5 text-info">10.3.2 Why Event-Driven Code Needs More Care</h4>
   <p>Nobody is watching an event-driven script run — that's the whole point. Which means if it fails, it fails silently, with nobody there to notice. Validation and error handling matter <em>more</em> here, not less.</p>
@@ -153,6 +153,8 @@
 
   <h4 class="fw-bold mt-4 text-primary">10.4.1 Lists (Arrays)</h4>
   <p>A <strong>list</strong> (or <strong>array</strong>) stores many related values under a single variable name instead of creating a separate variable for each one. Each value gets a position, called an <strong>index</strong>, usually starting at 0 — so the third item in a list of five names is at index 2, not index 3. Combined with a <code>for</code> loop, a list is what lets a program process a hundred items with the same few lines that would process one.</p>
+
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A horizontal row of five labeled boxes containing the names Amara, Ben, Chen, Deja, Eli, with index numbers 0, 1, 2, 3, 4 printed directly below each box, and an arrow pointing to the box at index 2 labeled &quot;students[2] = Chen.&quot;">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-list-ol me-2"></i> Worked Example: Looping Over a List</h5>
