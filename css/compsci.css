@@ -27,13 +27,28 @@ body.compsci-body {
     border-radius: 0 8px 8px 0; 
 }
 
-.image-placeholder { 
-    background-color: #e9ecef; 
-    border: 2px dashed #adb5bd; 
-    border-radius: 8px; 
-    padding: 2rem; 
-    text-align: center; 
-    margin: 1.5rem 0; 
+.image-placeholder {
+    background-color: #e9ecef;
+    border: 2px dashed #adb5bd;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+/* Real <img> placeholders (src="/images/gemini-placeholder.svg") whose alt
+   text carries the actual Gemini generation prompt -- unlike .image-placeholder
+   above (a decorative div with the prompt in visible <p> text), this is a
+   real image element, so the prompt lives in markup a screen reader reads
+   and a human can select from the rendered <img>'s alt on hover/inspect,
+   not just in page text. */
+.gen-media-placeholder {
+    display: block;
+    width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    margin: 1.5rem 0;
+    border-radius: 8px;
 }
 
 .highlight-text { 

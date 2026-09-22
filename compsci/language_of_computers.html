@@ -117,11 +117,7 @@
 
   <p><strong>Unicode</strong> replaced it as the modern standard, with room for every writing system on Earth and far beyond ASCII's original 128 characters. Every emoji you've ever sent is a Unicode character with its own assigned number, exactly like the letter A has one.</p>
 
-  <div class="image-placeholder shadow-sm">
-    <i class="fas fa-font fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">One Letter, One Number</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A clean infographic showing the letter "A" with an arrow pointing to the number 65, and a smiley-face emoji with an arrow pointing to its Unicode code point, both under the label "Character Encoding."</p>
-  </div>
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean infographic showing the letter &quot;A&quot; with an arrow pointing to the number 65, and a smiley-face emoji with an arrow pointing to its Unicode code point, both under the label &quot;Character Encoding.&quot;">
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
       <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -202,11 +198,15 @@
       <p class="mb-0 text-light">Which logic gate outputs TRUE only if both of its inputs are TRUE? <em class="text-white-50">(Answer: the AND gate.)</em></p>
   </div>
 
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A simple technical diagram of an AND logic gate and an OR logic gate side by side, each shown as its standard schematic symbol with two input lines and one output line, labeled with example TRUE/FALSE input combinations and the resulting output for each.">
+
   <h4 class="fw-bold mt-5 text-info">5.4.2 RAM & Clock Speed</h4>
   <p>While data is actively being worked on, it's held in <strong>RAM (Random Access Memory)</strong> — short-term memory built for lightning-fast access, wiped clean the moment the power turns off (unlike a hard drive, which keeps data with the power off). How fast the CPU can perform those logical operations is measured by its <strong>clock speed</strong>, given in <strong>Gigahertz (GHz)</strong> — a 3.0 GHz processor completes roughly 3 billion operation "ticks" every single second.</p>
 
   <h4 class="fw-bold mt-5 text-primary">5.4.3 The Fetch-Decode-Execute Cycle</h4>
   <p>Billions of times per second, the CPU repeats the same three-step loop on a binary instruction: <strong>Fetch</strong> (retrieve the next instruction from memory), <strong>Decode</strong> (figure out what that instruction actually means), and <strong>Execute</strong> (carry it out using its logic gates). This <strong>Fetch-Decode-Execute cycle</strong> is the fundamental heartbeat underneath every program you've ever run — it's what a clock speed in GHz is actually counting.</p>
+
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean circular/looping diagram showing the Fetch-Decode-Execute cycle as three connected arrows forming a loop: &quot;Fetch&quot; (an arrow pulling an instruction from a memory icon), &quot;Decode&quot; (a magnifying glass over the instruction), &quot;Execute&quot; (a lightning bolt/gear icon), looping back to Fetch.">
 
   <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
       <div class="d-flex align-items-start">
@@ -257,6 +257,8 @@
           <li class="mb-0"><strong>BIN2DEC wants text, not a number.</strong> Type <code>00010100</code> straight into a cell and Sheets may read it as the number 10100 and silently drop your leading zeros before your formula ever sees it. Format that column as Plain Text first (Format &rarr; Number &rarr; Plain Text), or wrap the value in quotes inside the formula itself, like <code>=BIN2DEC("00010100")</code>.</li>
       </ul>
   </div>
+
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets spreadsheet with cell A1 selected, the formula bar at the top showing &quot;=DEC2BIN(20,8)&quot; being typed, and the cell displaying the result &quot;00010100&quot;, with a Decimal/Binary/Hex column header row visible below.">
 
   <h4 class="fw-bold mt-4 text-primary">5.5.1 Worked Example: #FF5733 With Real Formulas</h4>
   <p>Section 5.2's Worked Example decoded <code>#FF5733</code> by hand. Here's the exact same conversion as formulas, using <code>MID()</code> to pull out each two-character pair before converting it:</p>
