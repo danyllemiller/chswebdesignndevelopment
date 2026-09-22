@@ -257,7 +257,7 @@
     <span class="sep">|</span>
     Developer Handoff Guide
     <span class="sep">|</span>
-    v1.0 — July 2026
+    v1.1 — infra section corrected 2026-09-22 (was badly stale — see Architecture note)
     <span style="margin-left:auto">
       <span class="badge badge-green">Node.js / Express</span>
       &nbsp;
@@ -314,30 +314,22 @@
         <p>
           This is a classroom management web platform for a high school Web Design &amp; Development course. It serves
           students, teachers (admin role), and handles gradebooks, calendars, timesheets, notebooks, and more.
-          Everything runs on a single VPS behind Nginx as a reverse proxy to a Node.js/Express process on port 3000.
+          The server is <strong>self-hosted</strong> (the teacher's own machine at home, not a commercial VPS/cloud
+          provider), reached over SSH via Tailscale, running Nginx as a reverse proxy to a Node.js/Express process on port 3000.
         </p>
         <pre><span class="comment">── Request flow ─────────────────────────────────────────</span>
 Browser → Nginx (443) → Node/Express :3000
                           ├── /api/*       → server/auth.js + server/api.js
                           └── /*           → Static files from repo root</pre>
 
-        <p><strong>Correction (2026-09-19): this section was wrong.</strong> A PHP runtime <em>is</em> active in
-        production and legacy <code>.php</code> files under <code>api/</code> and at the repo root (<code>upload.php</code>,
-        <code>manage_files.php</code>, and ~35 files under <code>api/</code>) really do execute, with their own direct
-        DB connections and <strong>no session/auth check of any kind</strong> — confirmed live, not by reading this doc.
-        The "Node intercepts them" claim below does not hold: Node having a route at the same path string does not
-        stop the front-facing web server from routing the matching <code>.php</code> request to PHP-FPM instead.
-        Several of these files carried this same false "not executed" claim in their own header comments. Do not
-        trust a <code>.php</code> file's own comment (or this doc) to know whether it's live — check for real
-        front-end callers and audit its auth directly. Fixed so far this session: <code>upload.php</code>,
-        <code>manage_files.php</code>, <code>bell-schedule.php</code>, <code>events.php</code>,
-        <code>school-config.php</code>, <code>dedupe-calendar.php</code> (rewritten as authenticated Node routes,
-        PHP file deleted), plus <code>submit-exam.php</code>, <code>clockin.php</code>, <code>cs-exam-questions.php</code>,
-        <code>save_pre_assessment.php</code>, <code>save_summative.php</code>, <code>setup-db.php</code> (deleted outright —
-        confirmed orphaned, superseded by an existing Node route). <strong>Not yet audited:</strong> the ~24 remaining
-        files under <code>api/admin/</code>, <code>api/appointments/</code>, <code>api/seed/</code>,
-        <code>api/student/</code>, and <code>api/agenda/</code> — treat every one of them as live and unauthenticated
-        until it's individually checked.</p>
+        <p><strong>Update (2026-09-22): the PHP migration is complete.</strong> Every earlier correction below about a
+        live, unaudited PHP layer is now obsolete — confirmed by directly checking the server, not by reading old
+        notes in this doc (that's exactly the mistake that made this stale note necessary in the first place).
+        <code>find /srv/chswebdesignndevelopment -iname '*.php'</code> returns <strong>zero files</strong>. The entire
+        site now runs on Node.js/Express only. Nginx's config still has a leftover <code>location ~ \.php$</code>
+        block pointing at PHP-FPM — it's inert (nothing left to match it) but hasn't been removed from the config
+        yet. If you find any other doc, or a future version of this one, claiming PHP is still active, verify with
+        that same <code>find</code> command before trusting it.</p>
       </section>
 
       <!-- TECH STACK -->
@@ -349,7 +341,7 @@ Browser → Nginx (443) → Node/Express :3000
             <tbody>
               <tr><td>Runtime</td><td><code>Node.js</code> + <code>Express 4</code></td><td>Entry: <code>server/server.js</code></td></tr>
               <tr><td>Database</td><td><code>MySQL 8</code> via <code>mysql2</code></td><td>DB: <code>chs_gradebook</code></td></tr>
-              <tr><td>Session</td><td><code>express-session</code></td><td>In-memory; no Redis</td></tr>
+              <tr><td>Session</td><td><code>express-session</code></td><td>MySQL-backed (<code>express-mysql-session</code>, <code>sessions</code> table) — survives PM2 restarts, 30-day expiration</td></tr>
               <tr><td>Auth</td><td>bcrypt password hashes</td><td>Roles: <code>student</code>, <code>teacher</code>, <code>admin</code></td></tr>
               <tr><td>Process mgr</td><td>PM2</td><td>App name: <code>guild-server</code></td></tr>
               <tr><td>Reverse proxy</td><td>Nginx</td><td>Listens 80/443, proxies to :3000</td></tr>
@@ -364,45 +356,45 @@ Browser → Nginx (443) → Node/Express :3000
       <!-- INFRA -->
       <section id="infra">
         <div class="section-heading">Infrastructure</div>
-        <h3>VPS</h3>
+        <h3>The Server</h3>
+        <p>Self-hosted — the teacher's own machine at home, not a commercial VPS/cloud provider. There is no hosting
+        dashboard (no DigitalOcean/AWS/etc. console) for this box; access is SSH over Tailscale, full stop.</p>
         <div class="tbl-wrap">
           <table>
             <thead><tr><th>Detail</th><th>Value</th></tr></thead>
             <tbody>
               <tr><td>SSH alias</td><td><code>webServer</code></td></tr>
-              <tr><td>IP</td><td><code>100.108.216.90</code></td></tr>
-              <tr><td>SSH user</td><td><code>administrator</code></td></tr>
-              <tr><td>Repo path</td><td><code>/srv/chswebdesignndevelopment</code></td></tr>
-              <tr><td>Web root</td><td><code>/var/www/html</code> (Nginx static fallback — repo is the live root)</td></tr>
+              <tr><td>IP</td><td><code>100.108.216.90</code> (a Tailscale address, not a public internet IP)</td></tr>
+              <tr><td>SSH user</td><td><code>administrator</code> (key-based login — no SSH password needed)</td></tr>
+              <tr><td><code>sudo</code> password</td><td>Not currently known/available to the developer — anything needing root has to be run by whoever has it</td></tr>
+              <tr><td>Repo path</td><td><code>/srv/chswebdesignndevelopment</code> — this <em>is</em> the live web root, served directly by Express's static middleware</td></tr>
             </tbody>
           </table>
         </div>
-        <div class="callout info"><strong>SSH</strong> The SSH config alias <code>webServer</code> is defined in <code>~/.ssh/config</code> on the developer's Mac. New developer machines must add their own entry or use the full <code>administrator@100.108.216.90</code> form.</div>
+        <div class="callout info"><strong>SSH</strong> The SSH config alias <code>webServer</code> is defined in <code>~/.ssh/config</code> on the developer's Mac. New developer machines must add their own entry (and be granted Tailscale network access) or use the full <code>administrator@100.108.216.90</code> form.</div>
 
         <h3>Database</h3>
         <div class="tbl-wrap">
           <table>
             <thead><tr><th>Setting</th><th>Value</th></tr></thead>
             <tbody>
-              <tr><td>Host</td><td><code>localhost</code> (same VPS)</td></tr>
+              <tr><td>Host</td><td><code>localhost</code> (same machine as the Node process)</td></tr>
               <tr><td>Database</td><td><code>chs_gradebook</code></td></tr>
               <tr><td>User</td><td><code>root</code></td></tr>
-              <tr><td>Password</td><td><code>DB_PASSWORD_IN_DB_CONFIG</code> — see <code>server/db.js</code></td></tr>
+              <tr><td>Password</td><td>In a <code>.env</code> file on the server (<code>DB_PASSWORD</code>) — never in this repo</td></tr>
             </tbody>
           </table>
         </div>
-        <div class="callout danger"><strong>Never commit credentials</strong> The real DB password lives only in <code>server/db.js</code> on the VPS. That file is not in the repo. If you need to restore it, SSH in and re-create it from the template below.</div>
-<pre><span class="comment">// server/db.js (not in repo — create on server)</span>
+        <div class="callout info"><strong>Credentials are no longer hardcoded</strong> <code>server/db.js</code> <em>is</em> committed to this repo (it contains no secrets) and uses a real connection <strong>pool</strong> (<code>mysql.createPool()</code>, not one connection per request). The actual password lives only in <code>.env</code> on the server, which is gitignored. Both <code>server/db.js</code> and <code>server/server.js</code> throw on startup if <code>DB_PASSWORD</code> / <code>SESSION_SECRET</code> aren't set.</div>
+<pre><span class="comment">// server/db.js (real file, committed to git — no secrets in it)</span>
 <span class="key">const</span> mysql = require(<span class="str">'mysql2/promise'</span>);
-
-<span class="key">async function</span> <span class="val">getDbConnection</span>() {
-    <span class="key">return</span> mysql.createConnection({
-        host:     <span class="str">'localhost'</span>,
-        user:     <span class="str">'root'</span>,
-        password: <span class="str">'DB_PASSWORD_IN_DB_CONFIG'</span>,
-        database: <span class="str">'chs_gradebook'</span>,
-    });
-}
+<span class="key">const</span> pool = mysql.createPool({
+    host: <span class="str">'localhost'</span>, user: <span class="str">'root'</span>,
+    password: process.env.DB_PASSWORD, <span class="comment">// from .env, not hardcoded</span>
+    database: <span class="str">'chs_gradebook'</span>,
+    connectionLimit: 20, waitForConnections: <span class="key">true</span>,
+});
+<span class="key">async function</span> <span class="val">getDbConnection</span>() { <span class="key">return</span> pool.getConnection(); }
 module.exports = { getDbConnection };</pre>
       </section>
 
@@ -501,11 +493,13 @@ document.addEventListener(<span class="str">'DOMContentLoaded'</span>, () => {
       <!-- DB -->
       <section id="db">
         <div class="section-heading">Database Connection</div>
-        <p>Every route handler calls <code>getDbConnection()</code> from <code>server/db.js</code>, which creates a new
-        connection per request and the handler closes it with <code>connection.end()</code>. There is no connection pool.
-        For high-concurrency workloads, migrating to <code>mysql2</code>'s <code>createPool()</code> is the recommended improvement.</p>
+        <p>Every route handler calls <code>getDbConnection()</code> from <code>server/db.js</code>, which pulls a
+        connection from a real pool (<code>mysql2</code>'s <code>createPool()</code>, <code>connectionLimit: 20</code>)
+        rather than opening a new TCP connection per request. Handlers release the connection back to the pool with
+        <code>connection.release()</code> when done (mysql2 also accepts the older <code>.end()</code> name as an
+        alias on a pooled connection, but new code should use <code>.release()</code>).</p>
 
-        <div class="callout"><strong>Heads up</strong> <code>server/db.js</code> is <em>not</em> in the git repository — it exists only on the VPS. If you re-clone to a new server, recreate the file from the template in the <a href="#infra">Infrastructure</a> section above.</div>
+        <div class="callout info"><strong>Heads up</strong> <code>server/db.js</code> <em>is</em> in the git repository — it has no hardcoded secrets, only <code>require('dotenv').config()</code> plus <code>process.env.DB_PASSWORD</code>. If you re-clone to a new machine, you need a <code>.env</code> file (gitignored, exists only on the server) with real values for <code>DB_PASSWORD</code> and <code>SESSION_SECRET</code>, not a recreated <code>db.js</code>.</div>
       </section>
 
       <!-- SCHEMA -->
@@ -698,15 +692,26 @@ nano /srv/chswebdesignndevelopment/special-dates.csv
       <section id="gotchas">
         <div class="section-heading">Known Gotchas</div>
 
-        <h3>No PHP execution</h3>
-        <p>The server is Node.js only. Any <code>.php</code> filenames are legacy artifacts. Node routes in
-        <code>server/api.js</code> intercept them at the API layer. A raw <code>.php</code> file outside <code>/api</code>
-        will be served as plain text.</p>
+        <h3>No PHP anywhere (confirmed, not assumed)</h3>
+        <p>The server is Node.js only — zero <code>.php</code> files exist in the repo as of 2026-09-22
+        (<code>find /srv/chswebdesignndevelopment -iname '*.php'</code> returns nothing). Nginx's config still has a
+        leftover <code>fastcgi_pass</code> block for <code>.php</code> requests, but with no matching files it never
+        fires. Don't spend time debugging a "PHP issue" on this site — there's no PHP left to have one.</p>
 
-        <h3>Sessions reset on PM2 restart</h3>
-        <p><code>express-session</code> uses in-memory storage. Every <code>pm2 restart</code> signs all users out.
-        Logged-in teachers and students will need to re-authenticate. If this is a problem, add
-        <code>connect-redis</code> or <code>session-file-store</code>.</p>
+        <h3>Sessions survive PM2 restarts</h3>
+        <p><code>express-session</code> is backed by <code>express-mysql-session</code> (a real MySQL-backed store,
+        <code>sessions</code> table in <code>chs_gradebook</code>), not in-memory storage. A <code>pm2 restart</code>
+        no longer signs anyone out — sessions persist for up to 30 days regardless of how many times the app restarts.</p>
+
+        <h3>Upload folder ownership (recurring, worth knowing)</h3>
+        <p>Each student's <code>uploads/&lt;student_id&gt;/</code> folder must be owned by <code>administrator</code> — the
+        user the Node process actually runs as (confirmed via <code>ps aux</code>). Folders left over from the old
+        PHP-era upload system are owned by <code>www-data</code> instead, and any write into one of those fails with
+        <code>EACCES: permission denied</code> — server-side, with nothing to do with the student's browser, account,
+        or which computer they're on. Confirmed live 2026-09-22: 73 of 189 existing folders had the wrong owner.
+        Check with <code>ls -ld uploads/&lt;id&gt;/</code> before assuming a "can't turn in work" report is a client-side
+        problem; fix (needs the <code>sudo</code> password) is <code>sudo chown -R administrator:administrator uploads/</code>,
+        safe to re-run any time.</p>
 
         <h3>calendar.js is a module — module-private state</h3>
         <p>The calendar view state (<code>currentView</code>, <code>selectedDate</code>) lives inside the ES module scope
@@ -720,9 +725,11 @@ nano /srv/chswebdesignndevelopment/special-dates.csv
         also listening to <code>click</code> on <code>.calendar-day</code> cells with a small <code>setTimeout</code>
         to let the calendar update <code>localStorage</code> first.</p>
 
-        <h3>db.js is not in git</h3>
-        <p>If you clone to a new machine or re-provision the VPS, you must manually recreate <code>server/db.js</code>
-        with the DB credentials. The template is in the <a href="#infra">Infrastructure</a> section.</p>
+        <h3>.env is not in git (db.js is)</h3>
+        <p>If you clone to a new machine or re-provision the server, <code>server/db.js</code> comes with the repo —
+        what you need to recreate is <code>.env</code> (gitignored), with real values for <code>DB_PASSWORD</code> and
+        <code>SESSION_SECRET</code>. Both <code>server/db.js</code> and <code>server/server.js</code> throw on startup
+        if either is missing, so a missing <code>.env</code> fails loudly rather than silently.</p>
 
         <h3>CSV cache-busting</h3>
         <p>The browser caches <code>special-dates.csv</code>. JS files use <code>?v=N</code> query strings to bust
