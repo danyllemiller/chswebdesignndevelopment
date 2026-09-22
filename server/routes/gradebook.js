@@ -89,27 +89,59 @@ async function ensureUnitPrereqOverridesTable(connection) {
 // Units 1-7 are the real sequential CS curriculum (CS_MAP in
 // admin/due-dates.html); Unit 0 is a standalone intro with no prerequisite
 // and Unit 8 is an orphaned, unlinked page, so neither is gated here.
+// Two independent requirements, both covered by the SAME override row (a
+// teacher clearing a student clears everything blocking that exam, not one
+// reason at a time): (1) 60%+ on the PREVIOUS unit's exam -- skipped for
+// Unit 1, which has no previous unit -- and (2) THIS unit's own Project
+// (chapter_projects/project_grade_aggregates) showing status 'complete',
+// i.e. both a self review AND a peer review submitted. See
+// js/cs-interactive.js's matching client-side gate on the Unit Project tab
+// for the same self+peer requirement, kept in sync with this one.
 async function checkUnitPrerequisite(connection, studentId, examId) {
     const m = /^Unit(\d+)-Exam$/i.exec(examId || '');
     if (!m) return { ok: true };
     const unitNum = parseInt(m[1], 10);
-    if (unitNum < 2 || unitNum > 7) return { ok: true };
+    if (unitNum < 1 || unitNum > 7) return { ok: true };
 
     await ensureUnitPrereqOverridesTable(connection);
     const [overrideRows] = await connection.execute(
         'SELECT id FROM unit_prereq_overrides WHERE student_id = ? AND unit_exam_id = ?',
         [studentId, examId]
     );
-    if (overrideRows.length > 0) return { ok: true };
+    if (overrideRows.length > 0) return { ok: true, scoreOk: true, projectOk: true, projectRequired: false };
 
-    const prevExamId = `Unit${unitNum - 1}-Exam`;
-    const [rows] = await connection.execute(
-        'SELECT score, total_points FROM responses WHERE student_id = ? AND exam_id = ?',
-        [studentId, prevExamId]
+    let scoreOk = true, prevExamId = null, pct = null;
+    if (unitNum >= 2) {
+        prevExamId = `Unit${unitNum - 1}-Exam`;
+        const [rows] = await connection.execute(
+            'SELECT score, total_points FROM responses WHERE student_id = ? AND exam_id = ?',
+            [studentId, prevExamId]
+        );
+        if (rows.length === 0) {
+            scoreOk = false;
+            pct = 0;
+        } else {
+            pct = Number(rows[0].total_points) > 0 ? (Number(rows[0].score) / Number(rows[0].total_points)) * 100 : 0;
+            scoreOk = pct >= 60;
+        }
+    }
+
+    // LEFT JOIN so a student with zero evaluations still gets one row back
+    // (status NULL, not 'complete') instead of the query returning nothing
+    // and this failing open -- only an actually-missing chapter_projects row
+    // (a unit that was never seeded, or the CS course_id itself) fails open.
+    const [projectRows] = await connection.execute(
+        `SELECT pga.status FROM chapter_projects cp
+         LEFT JOIN project_grade_aggregates pga
+           ON pga.chapter_project_id = cp.id AND pga.exam_id = cp.exam_id AND pga.student_id = ?
+         WHERE cp.chapter_id = ? AND cp.course_id = '10003GS' AND cp.is_active = 1
+         LIMIT 1`,
+        [studentId, `UNIT${unitNum}`]
     );
-    if (rows.length === 0) return { ok: false, prevExamId, pct: 0 };
-    const pct = Number(rows[0].total_points) > 0 ? (Number(rows[0].score) / Number(rows[0].total_points)) * 100 : 0;
-    return { ok: pct >= 60, prevExamId, pct };
+    const projectRequired = projectRows.length > 0;
+    const projectOk = !projectRequired || projectRows[0].status === 'complete';
+
+    return { ok: scoreOk && projectOk, prevExamId, pct, scoreOk, projectOk, projectRequired };
 }
 
 // CS-only remediation gate (WD is direct instruction and tests differently,
@@ -270,8 +302,11 @@ router.post('/submit-exam', async (req, res) => {
         const prereq = await checkUnitPrerequisite(connection, student_id, exam_id);
         if (!prereq.ok) {
             await connection.release();
+            const reasons = [];
+            if (!prereq.scoreOk) reasons.push(`a score of at least 60% on ${prereq.prevExamId}`);
+            if (!prereq.projectOk) reasons.push(`this unit's Project (self AND peer review both submitted)`);
             return res.status(403).json({
-                error: `${exam_id} is locked — a score of at least 60% on ${prereq.prevExamId} is required first.`
+                error: `${exam_id} is locked — ${reasons.join(' and ')} required first.`
             });
         }
 

@@ -627,10 +627,12 @@ function setupTabLockdown() {
 // Units 1-7 are the real sequential curriculum (see CS_MAP in
 // admin/due-dates.html); Unit 0 is a standalone intro assessment with no
 // prerequisite, and Unit 8 is an orphaned page not linked anywhere on the
-// site, so neither gets gated.
+// site, so neither gets gated. Unit 1 has no PREVIOUS unit to score-check
+// but still has its own Unit Project, so it's included here now too (the
+// server-side check skips the score half for Unit 1 on its own).
 async function checkUnitPrerequisite(unit) {
     const unitNum = parseInt(unit, 10);
-    if (isNaN(unitNum) || unitNum < 2 || unitNum > 7) return { ok: true };
+    if (isNaN(unitNum) || unitNum < 1 || unitNum > 7) return { ok: true };
 
     const examId = `Unit${unitNum}-Exam`;
     try {
@@ -648,16 +650,26 @@ async function checkUnitPrerequisite(unit) {
     }
 }
 
-function renderPrerequisiteBlock(prevExamId, pct, unit) {
+function renderPrerequisiteBlock(prereq, unit) {
     const container = document.getElementById('exam-container');
     if (!container) return;
-    const prevLabel = prevExamId.replace(/-/g, ' ').replace('Exam', 'Exam');
     const unitExamId = `Unit${parseInt(unit, 10)}-Exam`;
+
+    const reasonsHtml = [];
+    if (!prereq.scoreOk) {
+        const prevLabel = prereq.prevExamId.replace(/-/g, ' ').replace('Exam', 'Exam');
+        reasonsHtml.push(`<p class="mb-1">You need a score of at least <strong>60%</strong> on <strong>${escapeHtml(prevLabel)}</strong> to unlock this exam.</p>
+            <p class="text-muted small mb-3">Your current score on ${escapeHtml(prevLabel)}: ${(prereq.pct || 0).toFixed(0)}%</p>`);
+    }
+    if (!prereq.projectOk) {
+        reasonsHtml.push(`<p class="mb-1">You need to complete this unit's <strong>Project</strong> first — both a <strong>self review</strong> AND an in-person <strong>peer review</strong> have to be submitted.</p>
+            <p class="text-muted small mb-3">Find it on the Unit Project tab back in the workspace.</p>`);
+    }
+
     container.innerHTML = `
         <div class="alert alert-warning text-center shadow p-5">
             <h4 class="fw-bold"><i class="fas fa-lock me-2"></i>This Unit Is Locked</h4>
-            <p class="mb-1">You need a score of at least <strong>60%</strong> on <strong>${escapeHtml(prevLabel)}</strong> to unlock this exam.</p>
-            <p class="text-muted small mb-4">Your current score on ${escapeHtml(prevLabel)}: ${pct.toFixed(0)}%</p>
+            ${reasonsHtml.join('')}
             <a href="/cs-interactive.html" class="btn btn-warning fw-bold">&laquo; Back to Class</a>
             <div class="mt-3">
                 <a href="#" id="override-toggle-link" class="small text-muted">Override</a>
@@ -867,7 +879,7 @@ async function initExam(config) {
     // someone who's actually eligible.
     const prereq = await checkUnitPrerequisite(currentUnit);
     if (!prereq.ok) {
-        renderPrerequisiteBlock(prereq.prevExamId, prereq.pct, currentUnit);
+        renderPrerequisiteBlock(prereq, currentUnit);
         return;
     }
 
