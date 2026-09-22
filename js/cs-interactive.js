@@ -82,6 +82,7 @@ const GLOBAL_BYPASS_CONFIG = {
     requirePreScale: true,         // true = Pre-Scale REQUIRED before the Unit Test unlocks
     requireDiagnostic: true,      // true = Diagnostic Pre-Assessment REQUIRED before the Unit Test unlocks
     requireWorksheets: false,     // false = Worksheets NOT required (enable_worksheet=false)
+    requireProject: true,         // true = Unit Project (self+peer review both complete) REQUIRED before the Unit Test unlocks
     bypassAll: false              // If true, bypasses all gating requirements
 };
 
@@ -1033,6 +1034,33 @@ let activeNoteId = null;
     let gradesLoaded = false;
     let notes = {};
     let notesLoaded = false;
+    // Unit Project completion, keyed by unitNum -> 'complete' | 'partial' | null.
+    // 'complete' requires BOTH a self-review and a peer-review to have been
+    // submitted (see saveEvaluationAndAggregate in server/routes/projects.js) --
+    // a self-only submission stays 'partial' and does not unlock the exam.
+    let projectStatus = {};
+    // chapter_projects rows for CS, cached forever after the first fetch since
+    // the spec (chapter_project_id/exam_id per unit) doesn't change at runtime --
+    // only projectStatus needs to be re-fetched as evaluations come in.
+    let projectSpecsByUnit = null;
+
+    const loadProjectSpecs = async () => {
+        if (projectSpecsByUnit) return projectSpecsByUnit;
+        projectSpecsByUnit = {};
+        try {
+            const specsRes = await fetch('/api/projects/specs?course_id=10003GS');
+            if (specsRes.ok) {
+                const specsData = await specsRes.json();
+                (specsData.specs || []).forEach(spec => {
+                    const numMatch = String(spec.chapter_id).match(/\d+/);
+                    if (numMatch) {
+                        projectSpecsByUnit[Number(numMatch[0])] = { chapter_project_id: spec.id, exam_id: spec.exam_id };
+                    }
+                });
+            }
+        } catch (e) { console.warn("Project specs API unavailable:", e); }
+        return projectSpecsByUnit;
+    };
 
 const syncToGradebook = async (baseName, score, maxPoints) => {
         const finalAssignmentKey = `Ch${activeTab.data?.ch || '0'}-${baseName} [${maxPoints} pts]`;
@@ -1138,6 +1166,21 @@ const checkProgressAndGate = async (isAutoAdvance = false) => {
                     }
                 }
             } catch(e) { console.warn("Notes API unavailable:", e); }
+
+            // Only the ACTIVE unit's project status is needed here (that's
+            // the only one the gate below checks), so this stays a single
+            // request per call instead of fetching all 7 units' status.
+            try {
+                const specs = await loadProjectSpecs();
+                const spec = specs[activeUnit.unitNum];
+                if (spec) {
+                    const aggRes = await fetch(`/api/student/project-aggregate?student_id=${encodeURIComponent(student.student_id)}&chapter_project_id=${spec.chapter_project_id}&exam_id=${encodeURIComponent(spec.exam_id)}`);
+                    if (aggRes.ok) {
+                        const aggData = await aggRes.json();
+                        projectStatus[activeUnit.unitNum] = aggData.aggregate ? aggData.aggregate.status : null;
+                    }
+                }
+            } catch (e) { console.warn("Project status API unavailable:", e); }
 
             // FIX: Default to NOT completed - be conservative
             // Only consider completed if ALL conditions are met:
@@ -1288,17 +1331,20 @@ else if (activeTab.type === 'EXAM') {
                 const bypassWorksheets = !GLOBAL_BYPASS_CONFIG.requireWorksheets || GLOBAL_BYPASS_CONFIG.bypassAll;
                 const bypassPreScale   = !GLOBAL_BYPASS_CONFIG.requirePreScale   || GLOBAL_BYPASS_CONFIG.bypassAll;
                 const bypassDiagnostic = !GLOBAL_BYPASS_CONFIG.requireDiagnostic || GLOBAL_BYPASS_CONFIG.bypassAll;
+                const bypassProject    = !GLOBAL_BYPASS_CONFIG.requireProject    || GLOBAL_BYPASS_CONFIG.bypassAll;
 
-                const worksUnlocked = bypassWorksheets  || hasAllChapWork;
-                const scaleUnlocked = bypassPreScale    || hasPreScale;
-                const diagUnlocked  = bypassDiagnostic  || hasPreTest;
-                const examUnlocked  = worksUnlocked && scaleUnlocked && diagUnlocked;
+                const worksUnlocked   = bypassWorksheets || hasAllChapWork;
+                const scaleUnlocked   = bypassPreScale   || hasPreScale;
+                const diagUnlocked    = bypassDiagnostic || hasPreTest;
+                const projectUnlocked = bypassProject    || projectStatus[activeUnit.unitNum] === 'complete';
+                const examUnlocked    = worksUnlocked && scaleUnlocked && diagUnlocked && projectUnlocked;
 
                 if (!examUnlocked && dom.examOverlay) {
                     const missing = [];
                     if (!scaleUnlocked) missing.push('the <strong>Pre-Scale</strong>');
                     if (!diagUnlocked) missing.push('the <strong>Diagnostic Pre-Assessment</strong>');
                     if (!worksUnlocked) missing.push('work for <strong>every chapter</strong> (Journal, Code, or File Upload)');
+                    if (!projectUnlocked) missing.push('the <strong>Unit Project</strong> (self AND peer review both submitted)');
                     dom.examOverlay.innerHTML = `<i class="fas fa-ban text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i><h3 class="fw-bold">Exam Locked</h3><p class="text-muted px-4 mb-4">You must complete ${missing.join(', ')} before the exam unlocks.</p>`;
                 } else if (dom.examOverlay) {
                     dom.examOverlay.innerHTML = `
@@ -2237,6 +2283,7 @@ if (chapBtn) {
                     const bypassWorksheets = !GLOBAL_BYPASS_CONFIG.requireWorksheets || GLOBAL_BYPASS_CONFIG.bypassAll;
                     const bypassDiagnostic = !GLOBAL_BYPASS_CONFIG.requireDiagnostic || GLOBAL_BYPASS_CONFIG.bypassAll;
                     const bypassPreScale   = !GLOBAL_BYPASS_CONFIG.requirePreScale   || GLOBAL_BYPASS_CONFIG.bypassAll;
+                    const bypassProject    = !GLOBAL_BYPASS_CONFIG.requireProject    || GLOBAL_BYPASS_CONFIG.bypassAll;
 
                     const _hasPreScale = selfAssessmentsLoaded && selfAssessments[`unit${activeUnit.unitNum}`] !== undefined && selfAssessments[`unit${activeUnit.unitNum}`] > 0;
                     const _hasPreTest = Object.keys(grades).some(k => k.match(new RegExp(`Unit\\s*-?\\s*${activeUnit.unitNum}`, 'i')) && k.match(/(Diagnostic|Pre-Assessment|Pre)/i));
@@ -2246,18 +2293,20 @@ if (chapBtn) {
                         return hasNote || hasGrade;
                     });
 
-                    const scaleUnlocked = bypassPreScale   || _hasPreScale;
-                    const diagUnlocked  = bypassDiagnostic || _hasPreTest;
-                    const worksUnlocked = bypassWorksheets  || allChaptersDone;
+                    const scaleUnlocked   = bypassPreScale   || _hasPreScale;
+                    const diagUnlocked    = bypassDiagnostic || _hasPreTest;
+                    const worksUnlocked   = bypassWorksheets || allChaptersDone;
+                    const projectUnlocked = bypassProject    || projectStatus[activeUnit.unitNum] === 'complete';
 
-                    if (scaleUnlocked && diagUnlocked && worksUnlocked) {
+                    if (scaleUnlocked && diagUnlocked && worksUnlocked && projectUnlocked) {
                         window.open(`/exams/cs-unit-${activeUnit.unitNum}-exam.html`, '_blank');
                         return;
                     } else {
                         const missing = [];
-                        if (!scaleUnlocked) missing.push('Pre-Scale');
-                        if (!diagUnlocked)  missing.push('Diagnostic Pre-Assessment');
-                        if (!worksUnlocked) missing.push('All Chapter Notes');
+                        if (!scaleUnlocked)   missing.push('Pre-Scale');
+                        if (!diagUnlocked)    missing.push('Diagnostic Pre-Assessment');
+                        if (!worksUnlocked)   missing.push('All Chapter Notes');
+                        if (!projectUnlocked) missing.push('Unit Project (self AND peer review both submitted)');
                         alert(`Exam Locked! You must complete the following before you can take the Unit Test:\n• ${missing.join('\n• ')}`);
                         return;
                     }
