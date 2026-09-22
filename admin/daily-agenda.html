@@ -487,6 +487,15 @@
   .bullet-remove-btn { color: #dc3545; }
   .bullet-remove-btn:hover { color: #ff6b7a; }
 
+  /* Sub-bullet: indented, lighter marker, slightly smaller -- applied to
+     the <li> itself so it works the same whether the list uses the
+     browser's default disc marker (#objectiveList, #standardsBox) or the
+     custom star marker (.task-list). */
+  #objectiveList li.bullet-sub,
+  #standardsBox li.bullet-sub { list-style-type: circle; margin-left: 1.1rem; font-size: .92em; opacity: .92; }
+  .task-list li.bullet-sub { margin-left: 1.1rem; font-size: .92em; opacity: .92; }
+  .task-list li.bullet-sub::before { content: "\2013"; font-size: .85em; }
+
   [contenteditable="true"] {
     outline: 2px dashed #fbbf24;
     outline-offset: 2px;
@@ -1046,20 +1055,47 @@ if (!courseCfg) {
     return courseCfg.label;
   }
 
+  // Bullet items used to always be a plain string. They can now also be
+  // {text, level} (level 1 = sub-bullet) -- these two helpers let every
+  // read site accept either shape so agenda days saved before this change
+  // keep rendering exactly as they did.
+  function bulletText(item) { return typeof item === 'string' ? item : (item.text || ''); }
+  function bulletLevel(item) { return typeof item === 'string' ? 0 : (item.level || 0); }
+
   // Builds a bullet <li> with its text as an editable span plus, while
-  // editing, a small × button so lines added by mistake can be removed --
-  // otherwise the only way to get rid of an unwanted line is to blank out
-  // its text, which still saves as an empty bullet.
-  function makeBulletLi(text) {
+  // editing, an indent toggle and a small × button so lines added by
+  // mistake can be removed -- otherwise the only way to get rid of an
+  // unwanted line is to blank out its text, which still saves as an empty
+  // bullet. Indent is a single sub-level (main bullet <-> sub-bullet),
+  // toggled rather than freely nested, since that covers what an agenda
+  // slide's tasks/objectives actually need.
+  function makeBulletLi(item) {
     const li = document.createElement('li');
+    const level = bulletLevel(item);
+    li.dataset.level = level;
+    li.classList.toggle('bullet-sub', level > 0);
+
     const span = document.createElement('span');
     span.className = 'bullet-text';
-    span.textContent = text;
+    span.textContent = bulletText(item);
     span.setAttribute('contenteditable', editing);
     li.appendChild(span);
     if (editing) {
       const controls = document.createElement('span');
       controls.className = 'bullet-controls';
+
+      const indentBtn = document.createElement('button');
+      indentBtn.type = 'button';
+      indentBtn.className = 'bullet-move-btn';
+      indentBtn.innerHTML = level > 0 ? '&#8676;' : '&#8677;';
+      indentBtn.title = level > 0 ? 'Make main bullet' : 'Make sub-bullet';
+      indentBtn.addEventListener('click', () => {
+        const newLevel = li.dataset.level === '1' ? 0 : 1;
+        li.dataset.level = newLevel;
+        li.classList.toggle('bullet-sub', newLevel > 0);
+        indentBtn.innerHTML = newLevel > 0 ? '&#8676;' : '&#8677;';
+        indentBtn.title = newLevel > 0 ? 'Make main bullet' : 'Make sub-bullet';
+      });
 
       const upBtn = document.createElement('button');
       upBtn.type = 'button';
@@ -1088,6 +1124,7 @@ if (!courseCfg) {
       removeBtn.title = 'Remove this line';
       removeBtn.addEventListener('click', () => li.remove());
 
+      controls.appendChild(indentBtn);
       controls.appendChild(upBtn);
       controls.appendChild(downBtn);
       controls.appendChild(removeBtn);
@@ -1101,6 +1138,15 @@ if (!courseCfg) {
     listEl.appendChild(li);
     const span = li.querySelector('.bullet-text');
     span.focus();
+  }
+
+  // Reads a bullet <ul> back into [{text, level}] for saving, dropping
+  // any line left blank.
+  function readBulletList(selector) {
+    return Array.from(document.querySelectorAll(selector)).map(li => ({
+      text: (li.querySelector('.bullet-text')?.textContent || '').trim(),
+      level: parseInt(li.dataset.level || '0', 10)
+    })).filter(item => item.text);
   }
   document.getElementById('addObjectiveBtn').addEventListener('click', () => addBulletTo(document.getElementById('objectiveList')));
   document.getElementById('addStandardBtn').addEventListener('click', () => addBulletTo(document.querySelector('#standardsBox ul')));
@@ -1226,13 +1272,13 @@ if (!courseCfg) {
   });
   document.getElementById('saveBtn').addEventListener('click', async () => {
     const c = content[currentBlock] || {};
-    c.objective = Array.from(document.querySelectorAll('#objectiveList li .bullet-text')).map(el => el.textContent.trim()).filter(Boolean);
+    c.objective = readBulletList('#objectiveList > li');
     const stdNoteEl = document.querySelector('#standardsBox p');
     if (stdNoteEl) {
       c.standardsNote = stdNoteEl.textContent.trim();
       c.standards = [];
     } else {
-      c.standards = Array.from(document.querySelectorAll('#standardsBox li .bullet-text')).map(el => el.textContent.trim()).filter(Boolean);
+      c.standards = readBulletList('#standardsBox li');
       c.standardsNote = '';
     }
     const doNowRaw = document.getElementById('doNowPrompt').textContent;
@@ -1242,7 +1288,7 @@ if (!courseCfg) {
       c.doNowPrompt = doNowRaw.slice(colonIdx + 1).trim();
     }
     c.tasksTitle = document.getElementById('tasksTitle').textContent.trim();
-    c.tasksList = Array.from(document.querySelectorAll('#taskList li .bullet-text')).map(el => el.textContent.trim()).filter(Boolean);
+    c.tasksList = readBulletList('#taskList > li');
     c.exitTicket = document.getElementById('exitTicket').textContent.trim();
 
     content[currentBlock] = c;
