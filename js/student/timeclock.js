@@ -12,19 +12,38 @@ import { periodToCourseKey } from '../modules/grade-weights.js?v=5';
 // happens outside all of them.
 function logTimeclockError(context, err) {
     try {
-        fetch('/api/client-error-log', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: err && err.message ? err.message : String(err),
-                stack: err && err.stack ? err.stack : null,
-                url: window.location.href,
-                student_id: studentData ? studentData.student_id : null,
-                context,
-                userAgent: navigator.userAgent,
-                timestamp: new Date().toISOString()
-            })
-        }).catch(() => {});
+        const payload = JSON.stringify({
+            message: err && err.message ? err.message : String(err),
+            stack: err && err.stack ? err.stack : null,
+            url: window.location.href,
+            student_id: studentData ? studentData.student_id : null,
+            context,
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString()
+        });
+        // A plain fetch() here (the previous approach, with its own silent
+        // .catch(() => {})) reports nothing at all whenever the connection
+        // problem it's trying to report is itself what breaks this request
+        // too -- confirmed live: two full days of real "can't clock in"
+        // reports from students with zero matching entries in this exact
+        // log, on every path that's supposed to catch and report exactly
+        // this. navigator.sendBeacon queues the request in the browser
+        // itself rather than opening a new fetch, so it survives the same
+        // spotty-connection moments (and page unloads) that were most
+        // likely swallowing the plain fetch attempt. Falls back to fetch
+        // only if sendBeacon isn't available at all.
+        let queued = false;
+        if (navigator.sendBeacon) {
+            const blob = new Blob([payload], { type: 'application/json' });
+            queued = navigator.sendBeacon('/api/client-error-log', blob);
+        }
+        if (!queued) {
+            fetch('/api/client-error-log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: payload
+            }).catch(() => {});
+        }
     } catch (e) { /* logging must never itself break the widget */ }
 }
 
