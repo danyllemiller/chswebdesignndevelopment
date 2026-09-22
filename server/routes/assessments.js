@@ -192,14 +192,14 @@ router.get('/cs-exam-questions', requireLogin, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch exam questions' }); }
 });
 
-// --- CS FINAL EXAM STUDY GUIDE ---
-// A student who fails the cumulative final (<80%) gets a personalized
-// list of which real chapters to review, grounded in the actual course
-// map/worksheet bank -- not a generic "study more" message. chapter_tally
-// comes from the client's own grading loop (examLogicCS.js already knows
-// which of the 100 final questions each student got wrong, and each
-// question already carries its real chapter_number via /cs-exam-questions'
-// `chapter` field), so this only has to turn "which chapters were weak"
+// --- CS STUDY GUIDE (unit tests + cumulative Final) ---
+// A student who fails a unit test OR the cumulative final (<80%) gets a
+// personalized list of which real chapters to review, grounded in the
+// actual course map/worksheet bank -- not a generic "study more" message.
+// chapter_tally comes from the client's own grading loop (examLogicCS.js
+// already knows which questions each student got wrong, and each question
+// already carries its real chapter_number via /cs-exam-questions' `chapter`
+// field), so this only has to turn "which chapters were weak"
 // into "here's what to actually go do about it."
 const STUDY_GUIDE_DDL = `CREATE TABLE IF NOT EXISTS study_guides (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -230,11 +230,20 @@ function loadCsReferenceData() {
 
 // Builds the guide payload from a {chapter: {correct, total}} tally --
 // shared by the generate route and anything that might regenerate one later.
-function buildStudyGuide(chapterTally) {
+// restrictUnit (optional): a unit exam's tally also carries 1-2 review
+// questions from EVERY prior unit (the weighted-mix pool in examLogicCS.js),
+// each far too small a sample to fairly call a prior chapter "weak" off one
+// missed question -- a student retaking Unit 5 doesn't need to be told to
+// re-read a Unit 2 chapter over a single mixed-in review question. Passing
+// the unit number here restricts the guide to that unit's own chapters. The
+// cumulative Final has no such restriction (omit/null) since every chapter
+// is a real, equally-weighted part of that exam.
+function buildStudyGuide(chapterTally, restrictUnit) {
     const { courseMap, worksheets } = loadCsReferenceData();
     const chapterResults = Object.entries(chapterTally)
         .map(([ch, t]) => ({ ch: Number(ch), correct: t.correct, total: t.total, pct: t.total > 0 ? (t.correct / t.total) * 100 : 100 }))
-        .filter(r => r.total > 0 && courseMap[r.ch]);
+        .filter(r => r.total > 0 && courseMap[r.ch])
+        .filter(r => !restrictUnit || courseMap[r.ch].unitNum === restrictUnit);
 
     // Weak = missed at least half of what was asked from that chapter on
     // this attempt. Falls back to the single worst chapter if nothing hits
@@ -266,7 +275,7 @@ function buildStudyGuide(chapterTally) {
 }
 
 router.post('/student/study-guide/generate', async (req, res) => {
-    const { student_id, chapter_tally, overall_pct } = req.body;
+    const { student_id, chapter_tally, overall_pct, unit } = req.body;
     if (!student_id || !chapter_tally || typeof chapter_tally !== 'object') {
         return res.status(400).json({ error: 'student_id and chapter_tally are required' });
     }
@@ -276,7 +285,8 @@ router.post('/student/study-guide/generate', async (req, res) => {
     if (!isSelf && !isStaff) return res.status(401).json({ error: 'Not authorized.' });
 
     try {
-        const guide = buildStudyGuide(chapter_tally);
+        const restrictUnit = unit ? Number(unit) : null;
+        const guide = buildStudyGuide(chapter_tally, restrictUnit);
         const connection = await getDbConnection();
         await connection.execute(STUDY_GUIDE_DDL);
         await connection.execute(

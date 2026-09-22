@@ -1384,16 +1384,27 @@ async function processSubmission() {
         finalPercentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
         serverFeedback = feedbackList;
 
-        // Personalized study guide: only for the cumulative Final, only on
+        // Personalized study guide: the cumulative Final OR a real unit exam
+        // (1-7 -- same range checkUnitPrerequisite treats as real), only on
         // a failing score, grounded in which real chapters this attempt's
         // wrong answers actually came from (server/routes/assessments.js
-        // maps that back to the real course map + worksheet bank).
+        // maps that back to the real course map + worksheet bank). A unit
+        // exam passes its own unit number so the guide only ever names that
+        // unit's own chapters -- see buildStudyGuide's restrictUnit comment
+        // for why the weighted-mix review questions from prior units are
+        // deliberately excluded there.
         studyGuide = null;
-        if (chapterTitle === 'CS Final Exam' && finalPercentage < 80) {
+        const isCumulativeFinal = chapterTitle === 'CS Final Exam';
+        const realUnitNum = parseInt(currentUnit, 10);
+        const isRealUnitExam = !isCumulativeFinal && !isNaN(realUnitNum) && realUnitNum >= 1 && realUnitNum <= 7;
+        if ((isCumulativeFinal || isRealUnitExam) && finalPercentage < 80) {
             try {
                 const guideRes = await fetch('/api/student/study-guide/generate', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ student_id: studentId, chapter_tally: chapterTally, overall_pct: finalPercentage })
+                    body: JSON.stringify({
+                        student_id: studentId, chapter_tally: chapterTally, overall_pct: finalPercentage,
+                        unit: isRealUnitExam ? realUnitNum : null
+                    })
                 });
                 if (guideRes.ok) {
                     const guideData = await guideRes.json();

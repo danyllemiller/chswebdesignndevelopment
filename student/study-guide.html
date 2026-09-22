@@ -23,7 +23,7 @@
   <div class="container my-5" style="max-width: 720px;">
     <div class="mb-4">
       <h2 class="gochi text-primary mb-0"><i class="fas fa-book-open me-2"></i>My Study Guide</h2>
-      <p class="text-muted mb-0">What to review, based on your most recent CS Final Exam attempt.</p>
+      <p class="text-muted mb-0">What to review, based on your most recent unit test or CS Final Exam attempt.</p>
     </div>
 
     <div class="card shadow-sm border-0">
@@ -60,7 +60,7 @@
 
             if (!data.guide || !data.guide.chapters || data.guide.chapters.length === 0) {
                 body.innerHTML = `
-                    <p class="text-muted small mb-0">No study guide yet. One is generated automatically the first time you score below 80% on the CS Final Exam.</p>`;
+                    <p class="text-muted small mb-0">No study guide yet. One is generated automatically the first time you score below 80% on a CS unit test or the Final Exam.</p>`;
                 return;
             }
 
@@ -78,8 +78,14 @@
                     </div>
                 </div>`).join('');
 
+            // A guide spanning exactly one unit came from that unit's own
+            // test (buildStudyGuide restricts it to that unit's chapters);
+            // spanning more than one unit only happens on the cumulative
+            // Final, which isn't restricted the same way.
+            const units = Array.isArray(data.guide.unitsToReview) ? data.guide.unitsToReview : [];
+            const sourceLabel = units.length === 1 ? `your Unit ${units[0]} Test` : 'your CS Final Exam';
             body.innerHTML = `
-                <p class="text-muted small mb-3">From your ${escapeHtml(String(Math.round(data.overall_pct)))}% attempt${created ? ' on ' + created : ''}. Retaking the final will replace this with a fresh guide based on that attempt.</p>
+                <p class="text-muted small mb-3">From ${sourceLabel} ${escapeHtml(String(Math.round(data.overall_pct)))}% attempt${created ? ' on ' + created : ''}. Retaking that test will replace this with a fresh guide based on your new attempt.</p>
                 ${chapterRows}`;
         } catch (e) {
             body.innerHTML = '<p class="text-danger small mb-0">Couldn\'t load your study guide. Try again later.</p>';
