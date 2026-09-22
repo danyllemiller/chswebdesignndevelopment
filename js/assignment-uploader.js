@@ -7,6 +7,36 @@ let currentStudent = null; // { student_id, first_name, last_name, username, sec
 const hostgatorUrl = "/api/upload";
 const hostgatorManageUrl = "/api/manage-files";
 
+// "Upload failed or all files were skipped" alone gave no trail to follow --
+// every real failure (a stale session, a genuinely missing folder, a
+// rejected file type, a network drop) looked identical from both the
+// student's side and the server logs. sendBeacon (not fetch, same reasoning
+// as js/student/timeclock.js's logTimeclockError) so this still gets
+// reported even when the connection problem it's describing is also what's
+// breaking the upload itself.
+function logUploadError(reason, fileName) {
+    try {
+        const payload = JSON.stringify({
+            message: `Upload failed: ${reason}`,
+            stack: null,
+            url: window.location.href,
+            student_id: currentStudent ? currentStudent.student_id : null,
+            context: `assignment-uploader:${fileName || 'unknown file'}`,
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString()
+        });
+        if (navigator.sendBeacon) {
+            const blob = new Blob([payload], { type: 'application/json' });
+            if (navigator.sendBeacon('/api/client-error-log', blob)) return;
+        }
+        fetch('/api/client-error-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload
+        }).catch(() => {});
+    } catch (e) { /* logging must never itself break the widget */ }
+}
+
 // ==========================================
 // AUTH GUARD (MariaDB / auth-guard.js)
 // ==========================================
@@ -201,6 +231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         let successCount = 0;
+        let lastFailureReason = null;
 
         // Fetch existing files to check for duplicates
         let existingFiles = [];
@@ -258,13 +289,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             try {
                 const resp = await fetch(hostgatorUrl, { method: "POST", body: formData });
-                const res = await resp.json();
+                const res = await resp.json().catch(() => ({}));
                 if (res.success) {
                     successCount++;
                     existingFiles.push(finalPath);
+                } else {
+                    // "Upload failed" alone gave no way to tell a stale
+                    // session (401 Not authorized -- the actual cause behind
+                    // more than one "students can't turn work in" report)
+                    // apart from a genuinely missing/misconfigured folder or
+                    // any other server error. Keep the real reason so the
+                    // status message below can say what actually happened.
+                    lastFailureReason = res.error || `Server returned ${resp.status}`;
+                    logUploadError(lastFailureReason, file.name);
                 }
             } catch (err) {
                 console.error(`Failed to upload ${file.name}:`, err);
+                lastFailureReason = err.message || String(err);
+                logUploadError(lastFailureReason, file.name);
             }
 
             if (progBar) progBar.style.width = Math.round(((i + 1) / files.length) * 100) + '%';
@@ -308,7 +350,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (status) {
                 status.classList.remove('bg-light', 'text-dark', 'd-none');
                 status.classList.add('bg-danger', 'text-white');
-                status.innerHTML = `❌ Upload failed or all files were skipped.`;
+                status.innerHTML = lastFailureReason
+                    ? `❌ Upload failed: ${lastFailureReason}. If this says "Not authorized," log out and log back in, then try again.`
+                    : `❌ Upload failed or all files were skipped.`;
             }
             if (progressContainer) progressContainer.classList.add('d-none');
         }

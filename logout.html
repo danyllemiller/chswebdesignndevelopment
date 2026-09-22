@@ -37,7 +37,20 @@
   </div>
 
 <script type="module">
-    window.onload = () => {
+    window.onload = async () => {
+      // This page only ever cleared client-side localStorage -- it never
+      // once called the server to actually end the session. /api/login
+      // regenerates a fresh session on every successful login (server/
+      // auth.js), so this was never a way for one student to access
+      // another's account, but the OLD session (and its httpOnly cookie)
+      // stayed fully valid server-side, for up to the store's 30-day
+      // expiration, the entire time a computer sat on the login screen
+      // between periods. Ending it here is the correct fix regardless of
+      // any one incident -- a stale, needlessly-long-lived session sitting
+      // on a shared classroom machine is exactly the kind of thing worth
+      // closing on its own.
+      try { await fetch('/api/logout', { method: 'POST' }); } catch (e) { /* still clear local state below either way */ }
+
       // These computers are shared -- a different student sits down at the
       // same machine next period. Removing only 'user'/'shift' left every
       // other per-feature key (csLastPosition, cs_self_assessment_history,
