@@ -119,6 +119,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     course: data.user.course || (isCS ? 'CS' : 'WD')
                 };
 
+                // Shared lab computers: whoever was logged in here before
+                // rarely clicks "Log Out" (they just walk away), so
+                // logout.html's own clear never runs -- their per-feature
+                // localStorage (csLastPosition, cs_self_assessment_history,
+                // read-aloud progress, calendar view state, none of it
+                // scoped by student_id the way intervention.html's keys
+                // are) was still sitting here for whoever logs in next.
+                // Wipe it the moment a DIFFERENT student's login succeeds --
+                // guarded on student_id actually changing so the same
+                // student logging back in later the same day keeps their
+                // own state instead of losing it on every login.
+                let previousUser = null;
+                try { previousUser = JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) {}
+                if (previousUser && String(previousUser.student_id) !== String(data.user.student_id)) {
+                    const lastPage = localStorage.getItem('lastPage');
+                    localStorage.clear();
+                    if (lastPage !== null) localStorage.setItem('lastPage', lastPage);
+                }
+
                 localStorage.setItem('user', JSON.stringify(normalizedUser));
 
                 // If account is flagged, force immediate password change before any redirect.

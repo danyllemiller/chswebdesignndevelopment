@@ -120,8 +120,27 @@ app.use('/js', express.static(path.join(__dirname, '../js')));
 app.use('/css', express.static(path.join(__dirname, '../css')));
 app.use('/images', express.static(path.join(__dirname, '../images')));
 
-// Root static files (must be last so it doesn't intercept API calls)
-app.use('/', express.static(path.join(__dirname, '../')));
+// Root static files (must be last so it doesn't intercept API calls).
+// HTML pages get an explicit no-cache: express.static sends no
+// Cache-Control by default, which leaves a browser free to serve an old
+// cached copy of a page from heuristic freshness rules alone (no
+// revalidation) -- and a stale HTML page is stale in exactly the way that
+// matters here, since every JS/CSS reference on it is baked in as a
+// literal ?v=N URL. A student's browser holding a cached page from before
+// the last deploy keeps requesting the OLD, already-fixed ?v=N script
+// forever, because it never re-fetches the HTML that would tell it the
+// number changed -- consistent with the reported failures being tied to
+// specific lab computers rather than specific students. no-cache (not
+// no-store) still lets the browser cache the response, it just forces a
+// cheap revalidation round-trip on every load instead of trusting a stale
+// local copy for days. JS/CSS/images are untouched -- their own ?v=N
+// query string already changes the URL itself when they change, so normal
+// caching there is correct and left alone.
+app.use('/', express.static(path.join(__dirname, '../'), {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache');
+    }
+}));
 
 // Root index
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../index.html')));

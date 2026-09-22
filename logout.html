@@ -38,17 +38,23 @@
 
 <script type="module">
     window.onload = () => {
-      // 1. PRESERVE lastPage so user returns here after re-login
-      // (Don't clear lastPage - we want to remember where they were)
-      
-      // 2. Clear ONLY auth-related items
-      localStorage.removeItem('user');
-      localStorage.removeItem('shift');
-      
-      // Optional: Clear other app-specific items but keep lastPage
-      // localStorage.removeItem('some_other_key');
-      
-      // 3. Short delay for visual feedback, then bounce to home
+      // These computers are shared -- a different student sits down at the
+      // same machine next period. Removing only 'user'/'shift' left every
+      // other per-feature key (csLastPosition, cs_self_assessment_history,
+      // the read-aloud voice/rate/progress keys, calendar view state, and
+      // more added since this list was last updated) sitting in localStorage
+      // for whoever logs in next, since none of those are scoped by
+      // student_id the way e.g. intervention.html's `intv_*_${sid}` keys
+      // are. Clearing everything except the one key that's deliberately
+      // meant to survive a logout (lastPage, so a student who logs back in
+      // returns to where they were) closes this off for good instead of
+      // needing a manually maintained list that drifts every time a new
+      // feature adds a key.
+      const lastPage = localStorage.getItem('lastPage');
+      localStorage.clear();
+      if (lastPage !== null) localStorage.setItem('lastPage', lastPage);
+
+      // Short delay for visual feedback, then bounce to home
       setTimeout(() => {
         window.location.replace("/index.html");
       }, 1000);
