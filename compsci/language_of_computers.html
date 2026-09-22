@@ -23,6 +23,7 @@
       <a href="#section-5-2">5.2 Hexadecimal</a>
       <a href="#section-5-3">5.3 Character Encoding</a>
       <a href="#section-5-4">5.4 From Bits to a Running Program</a>
+      <a href="#section-5-5">5.5 Doing This in Google Sheets</a>
   </div>
 
   <!-- Section 5.1 -->
@@ -221,6 +222,71 @@
               </ol>
               <p class="mb-0 fw-bold text-danger">Turn In: Your logic circuit's truth table, your CPU clock speed research, your Fetch-Decode-Execute explanation, and your RAM answer.</p>
               <p class="mb-0 fw-bold mt-2 text-danger">👉 Look to your Workspace on the right. Load <strong>Build a Logic Circuit</strong> into your Digital Notebook!</p>
+          </div>
+      </div>
+  </div>
+
+  <hr class="my-5 opacity-25">
+
+  <!-- Section 5.5 -->
+  <h3 id="section-5-5" class="fw-bold border-bottom pb-2">5.5 Doing This in Google Sheets</h3>
+  <p class="fs-5">Everything above works by hand — and you should still be able to do it by hand, since that's what actually proves you understand place value. But your Unit 3 project asks you to build a <strong>working reference table</strong> that converts real values automatically, the way a real tool would. That means real formulas, not typed-in answers. Here's every conversion from this chapter, as an actual Google Sheets formula.</p>
+
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-table me-2"></i> The Conversion Functions</h5>
+      <div class="table-responsive">
+      <table class="table table-bordered table-sm mb-0 bg-white">
+        <thead class="table-dark"><tr><th>Conversion</th><th>Formula</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>Decimal &rarr; Binary</td><td><code>=DEC2BIN(number, places)</code></td><td><code>=DEC2BIN(20, 8)</code> &rarr; <code>00010100</code></td></tr>
+          <tr><td>Binary &rarr; Decimal</td><td><code>=BIN2DEC(binary_text)</code></td><td><code>=BIN2DEC("00010100")</code> &rarr; <code>20</code></td></tr>
+          <tr><td>Decimal &rarr; Hex</td><td><code>=DEC2HEX(number)</code></td><td><code>=DEC2HEX(255)</code> &rarr; <code>FF</code></td></tr>
+          <tr><td>Hex &rarr; Decimal</td><td><code>=HEX2DEC(hex_text)</code></td><td><code>=HEX2DEC("FF")</code> &rarr; <code>255</code></td></tr>
+          <tr><td>Character &rarr; code number</td><td><code>=CODE(text)</code></td><td><code>=CODE("A")</code> &rarr; <code>65</code></td></tr>
+          <tr><td>Code number &rarr; character</td><td><code>=CHAR(number)</code></td><td><code>=CHAR(65)</code> &rarr; <code>A</code></td></tr>
+          <tr><td>Unicode number &rarr; any character (emoji included)</td><td><code>=UNICHAR(number)</code></td><td><code>=UNICHAR(9731)</code> &rarr; <code>&#9731;</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+  </div>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
+      <h5 class="fw-bold text-warning"><i class="fas fa-triangle-exclamation me-2"></i> Two Things That Will Trip You Up</h5>
+      <ul class="mb-0 text-light">
+          <li class="mb-2"><strong>DEC2BIN's second argument controls padding.</strong> <code>=DEC2BIN(20)</code> alone gives you <code>10100</code> — mathematically correct, but not the 8-digit byte format this chapter uses. Add the places argument: <code>=DEC2BIN(20, 8)</code> gives you <code>00010100</code>, padded with leading zeros to match the Worked Example above.</li>
+          <li class="mb-0"><strong>BIN2DEC wants text, not a number.</strong> Type <code>00010100</code> straight into a cell and Sheets may read it as the number 10100 and silently drop your leading zeros before your formula ever sees it. Format that column as Plain Text first (Format &rarr; Number &rarr; Plain Text), or wrap the value in quotes inside the formula itself, like <code>=BIN2DEC("00010100")</code>.</li>
+      </ul>
+  </div>
+
+  <h4 class="fw-bold mt-4 text-primary">5.5.1 Worked Example: #FF5733 With Real Formulas</h4>
+  <p>Section 5.2's Worked Example decoded <code>#FF5733</code> by hand. Here's the exact same conversion as formulas, using <code>MID()</code> to pull out each two-character pair before converting it:</p>
+  <div class="concept-box shadow-sm border-warning bg-light">
+      <p class="mb-1 font-monospace small">A1: <code>FF5733</code></p>
+      <p class="mb-1 font-monospace small">Red&nbsp;&nbsp;&nbsp;&nbsp;<code>=HEX2DEC(MID(A1,1,2))</code> &rarr; 255</p>
+      <p class="mb-1 font-monospace small">Green&nbsp;&nbsp;<code>=HEX2DEC(MID(A1,3,2))</code> &rarr; 87</p>
+      <p class="mb-0 font-monospace small">Blue&nbsp;&nbsp;&nbsp;<code>=HEX2DEC(MID(A1,5,2))</code> &rarr; 51</p>
+  </div>
+  <p class="text-muted small"><code>MID(text, start, length)</code> pulls a chunk out of a longer string — <code>MID(A1,1,2)</code> means "starting at character 1, grab 2 characters." That's how you split one hex code into its Red/Green/Blue pairs without retyping anything by hand.</p>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
+      <h5 class="fw-bold text-info"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">Which formula converts the text <code>"01100100"</code> back into a decimal number, and what does it return? <em class="text-white-50">(Answer: <code>=BIN2DEC("01100100")</code> &rarr; 100.)</em></p>
+  </div>
+
+  <div class="alert alert-info mt-4 shadow-sm border-info">
+      <div class="d-flex align-items-start">
+          <i class="fas fa-table-cells fa-3x me-4 text-info mt-1"></i>
+          <div class="w-100">
+              <h4 class="fw-bold mb-1">Practice: Build a Mini Bit Translator</h4>
+              <p class="mb-2">This is direct practice for your Unit 3 Project's "Bit Translator" tab — build this now, in a scratch sheet, before you build the real one.</p>
+              <ol class="mb-2">
+                  <li class="mb-1">In a new Google Sheet, make three columns: Decimal, Binary, Hex.</li>
+                  <li class="mb-1">In the Decimal column, type the six decimal numbers from 5.1's Worked Example (7, 34, 65, 99, 150, 200).</li>
+                  <li class="mb-1">In the Binary column, use <code>DEC2BIN</code> (with places set to 8) to convert each one automatically.</li>
+                  <li class="mb-1">In the Hex column, use <code>DEC2HEX</code> to convert each one automatically.</li>
+                  <li class="mb-0">Add one more row using <code>CODE()</code> to find the character code for the first letter of your name, then use <code>CHAR()</code> on that same number to prove it converts back correctly.</li>
+              </ol>
+              <p class="mb-0 fw-bold">This isn't turned in on its own — it's the exact skill your Unit 3 Project's Bit Translator tab is graded on.</p>
           </div>
       </div>
   </div>
