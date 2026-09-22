@@ -38,6 +38,8 @@
       <p class="mb-0">Every cell has an address made of its column letter, then its row number — no space between them. The cell in column A, row 1 is called <code>A1</code>. The cell in column C, row 4 is called <code>C4</code>. Click any cell in a real spreadsheet and its address shows up in the box at the top-left corner, called the Name Box — that's how you can always check you're looking at the cell you think you are.</p>
   </div>
 
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets grid with column letters A-E and row numbers 1-6 clearly visible, cell A1 selected with a blue border, and the Name Box in the top-left corner showing &quot;A1&quot; with an arrow and label pointing to it reading &quot;This is the Name Box — it always shows which cell is selected.&quot;">
+
   <h4 class="fw-bold mt-4 text-info">Typing Data vs. Writing a Formula</h4>
   <p>Click a cell and start typing, and whatever you type just sits there as text or a number — that's <strong>data</strong>. Press <kbd>Enter</kbd> to move down to the next cell, or <kbd>Tab</kbd> to move right.</p>
   <p>A <strong>formula</strong> is different: it always starts with an equals sign (<code>=</code>), and instead of showing what you typed, the cell shows the <em>result</em> of a calculation.</p>
@@ -104,6 +106,8 @@
       <p class="mb-0">You build a formula that multiplies each row's sales by a tax rate in cell B2. Copy it down without locking B2 as absolute, and every row silently references a different, empty cell instead of your tax rate — producing confident, wrong answers across the entire sheet. It won't error. It'll just be quietly wrong.</p>
   </div>
 
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets column being dragged/filled down with a formula, showing two side-by-side examples: one column where a relative reference (B2) correctly shifts to B3, B4, B5 as it's copied down, and one column where an absolute reference ($B$2) stays locked to row 2 in every copied cell, with small callout labels explaining each.">
+
   <h4 class="fw-bold mt-5 text-info">7.1.2 The Function Families</h4>
   <div class="row g-3 my-4 text-center">
       <div class="col-md-3">
@@ -165,16 +169,14 @@
       <p class="mb-0">A bar chart with a Y-axis that starts at 90 instead of 0 can make a 2-point difference look like a massive gap. Same numbers, same bars, completely different story — just by moving where the axis starts. That's the whole trick behind most misleading charts you'll ever see.</p>
   </div>
 
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A side-by-side comparison of two identical bar charts with the exact same data (bars at 91 and 93). Left chart's Y-axis starts at 0, so the bars look almost the same height, labeled &quot;Honest.&quot; Right chart's Y-axis starts at 90, so the same bars look dramatically different heights, labeled &quot;Misleading — same data.&quot;">
+
   <p><strong>The trap:</strong> students often think a chart is only "wrong" if it uses fake numbers. It doesn't need to. A truncated axis, an inconsistent scale, or a 3D effect that distorts area can all mislead a reader while every single number on the chart stays technically correct.</p>
 
   <h4 class="fw-bold mt-5 text-info">7.2.2 Interactive Dashboards</h4>
   <p>A static chart answers your question. An <strong>interactive</strong> one — with filters, slicers, and linked charts — lets the reader ask their own. Good dashboard layout puts the most important number first, groups related charts together, and never shows more than someone can read at a glance.</p>
 
-  <div class="image-placeholder shadow-sm">
-    <i class="fas fa-tachometer-alt fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">A Clean Dashboard Layout</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A clean dashboard mockup graphic with one large key metric at the top left, three smaller related charts grouped below it, and a visible filter dropdown in the corner.</p>
-  </div>
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean dashboard mockup graphic with one large key metric at the top left, three smaller related charts grouped below it, and a visible filter dropdown in the corner.">
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
       <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -212,6 +214,8 @@
       <h5 class="fw-bold text-danger"><i class="fas fa-exclamation-triangle me-2"></i> The Trap: Bias Before You Even Start</h5>
       <p class="mb-0">A survey about phone habits that's only sent to people over 60 will produce numbers — but they won't represent everyone. This is <strong>bias</strong>: a flaw in how data was collected that skews the results before any analysis even begins. No formula or chart can fix bad data collection after the fact.</p>
   </div>
+
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A before-and-after split graphic of a small spreadsheet. Left side labeled &quot;Before&quot; shows messy rows with a duplicate entry highlighted red, a blank cell highlighted yellow, and a typo like &quot;9O&quot; instead of &quot;90&quot; highlighted orange. Right side labeled &quot;After&quot; shows the same rows cleaned up, duplicate removed, blank filled in, typo corrected, with a green checkmark.">
 
   <h4 class="fw-bold mt-5 text-info">7.3.2 Outliers & Correlation</h4>
   <p>Once your data is clean, two ideas come up constantly when looking for patterns:</p>
