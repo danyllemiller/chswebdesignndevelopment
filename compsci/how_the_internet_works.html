@@ -58,6 +58,8 @@
 
   <p>The shape of how devices connect is called <strong>topology</strong> — star, mesh, or bus. Every device on a network needs an <strong>IP address</strong> to be reachable at all; it's the identifier that lets traffic actually find it.</p>
 
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A left-to-right labeled path diagram: a laptop icon, then a wall jack icon, then a switch icon, then a router icon, then a cloud icon labeled &quot;The Internet,&quot; connected by a single line with small hop-number labels (1, 2, 3, 4) between each device.">
+
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-map-signs me-2"></i> Worked Example: Tracing the Path to the Internet</h5>
       <p class="mb-0">From your device, the wall jack, a switch, a router, and finally out to the wider internet — naming every device along that path is the same skill as running a <strong>traceroute</strong>, a tool that reveals the actual number of hops your data takes to reach a destination. The number usually surprises people.</p>
@@ -72,11 +74,7 @@
   <h4 class="fw-bold mt-4 text-primary">17.2.1 Two Different Questions</h4>
   <p><strong>Scalability</strong> asks: does this still work with ten times the users? <strong>Reliability</strong> asks: does this still work when one part fails? A <strong>single point of failure</strong> is any one component whose failure takes down the whole network or service — and it's the first thing a real network evaluation goes looking for.</p>
 
-  <div class="image-placeholder shadow-sm">
-    <i class="fas fa-project-diagram fa-3x text-muted mb-3"></i>
-    <h5 class="fw-bold text-dark">Star vs. Mesh Under Failure</h5>
-    <p class="small text-muted mb-0 font-monospace"><strong>[AI Prompt]:</strong> A side-by-side graphic. Left: a star topology with a red "X" over the central hub and every connected device shown as disconnected. Right: a mesh topology with one red "X" over a single node, while traffic visibly reroutes around it through other connections.</p>
-  </div>
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A side-by-side graphic. Left: a star topology with a red &quot;X&quot; over the central hub and every connected device shown as disconnected. Right: a mesh topology with one red &quot;X&quot; over a single node, while traffic visibly reroutes around it through other connections.">
 
   <div class="concept-box shadow-sm border-warning bg-light">
       <h5 class="fw-bold text-dark"><i class="fas fa-exclamation-triangle me-2"></i> The Trap: Cheap Isn't the Same as Reliable</h5>
@@ -120,6 +118,8 @@
 
   <h4 class="fw-bold mt-4 text-primary">17.3.1 IP Address vs. MAC Address</h4>
   <p>An <strong>IP address</strong> identifies a device's location on a network — it's assigned, and can change (your phone gets a different IP on home Wi-Fi than on cellular data). A <strong>MAC address</strong> is a physical identifier burned into a device's network hardware at the factory — it never changes and uniquely identifies that exact physical piece of hardware, regardless of which network it joins.</p>
+
+  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A browser address bar showing &quot;google.com&quot; being typed, with an arrow pointing to an open phone-book icon labeled &quot;DNS,&quot; which then points to a numeric IP address like &quot;142.250.80.14,&quot; and a final arrow to a server icon, showing the full name-to-address translation flow.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-search-location me-2"></i> DNS: The Internet's Phone Book</h5>
