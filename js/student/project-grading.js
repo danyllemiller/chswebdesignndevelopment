@@ -303,7 +303,7 @@ async function initProjectGrading(container) {
                         <tr><th>Self-assessment</th><td>${fmt(agg.self_score)}</td></tr>
                         <tr><th>Peer review (avg)</th><td>${fmt(agg.peer_score)}</td></tr>
                         ${hasAutoCheck ? `<tr><th>Auto-check</th><td>${fmt(agg.auto_score)}</td></tr>` : ''}
-                        <tr class="table-primary"><th>Current grade average</th><td class="fw-bold">${Number(agg.aggregate_score).toFixed(0)}/100</td></tr>
+                        <tr class="table-primary"><th>Current grade average</th><td class="fw-bold">${Number(agg.aggregate_score).toFixed(0)}/${agg.max_score != null ? Number(agg.max_score).toFixed(0) : 100}</td></tr>
                     </tbody>
                 </table>
                 <p class="text-muted mb-0" style="font-size:.8rem;">${agg.status === 'complete' ? `All ${hasAutoCheck ? 'three' : 'two'} components are in.` : 'Still averaging in whatever\'s submitted so far -- your grade updates automatically as more comes in.'} Your teacher can still adjust this grade manually at any time.</p>

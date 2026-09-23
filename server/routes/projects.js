@@ -81,7 +81,17 @@ async function saveEvaluationAndAggregate(connection, { chapter_project_id, exam
     const peerScore = peerRows.length && peerRows[0].avg_score !== null ? Number(peerRows[0].avg_score) : null;
     const autoScore = autoRows.length ? Number(autoRows[0].score) : null;
     const components = [selfScore, peerScore, autoScore].filter(v => v !== null);
-    const aggregate = components.length ? Number((components.reduce((a, b) => a + b, 0) / components.length).toFixed(2)) : 0;
+    // Every individual self/peer/auto evaluation is scored on its own
+    // 0-100 rubric-percentage scale (see the auto-grader above, and the
+    // self/peer rubric UI) -- that's the right scale for an evaluator
+    // judging "how much of the rubric did this hit," and stays untouched
+    // here. But the assignment itself can be configured for any real point
+    // value (e.g. 50, matching this chapter's actual milestone weight),
+    // and the FINAL aggregate written to the gradebook has to be prorated
+    // to that real value, not left hardcoded at 100 -- otherwise a 90%
+    // aggregate on a 50-point assignment silently recorded as "90 out of
+    // 50," more than doubling that category's weight in the real grade.
+    const aggregatePercent = components.length ? Number((components.reduce((a, b) => a + b, 0) / components.length).toFixed(2)) : 0;
     // Only a project with a real auto-check (AUTO_GRADE_CONFIGS, defined
     // further down this file but already fully loaded by the time any
     // request handler actually calls this) ever expects 3 components --
@@ -91,6 +101,12 @@ async function saveEvaluationAndAggregate(connection, { chapter_project_id, exam
     const expectedComponents = AUTO_GRADE_CONFIGS[exam_id] ? 3 : 2;
     const status = components.length >= expectedComponents ? 'complete' : 'partial';
 
+    const [[examRow]] = await connection.execute(
+        'SELECT total_points FROM exams WHERE exam_id = ? LIMIT 1', [exam_id]
+    );
+    const realMaxPoints = examRow && examRow.total_points ? Number(examRow.total_points) : 100;
+    const aggregateScaled = Number(((aggregatePercent / 100) * realMaxPoints).toFixed(2));
+
     await connection.execute(
         `INSERT INTO project_grade_aggregates
          (chapter_project_id, exam_id, student_id, self_score, peer_score, auto_score, aggregate_score, max_score, status)
@@ -98,15 +114,15 @@ async function saveEvaluationAndAggregate(connection, { chapter_project_id, exam
          ON DUPLICATE KEY UPDATE self_score = VALUES(self_score), peer_score = VALUES(peer_score),
            auto_score = VALUES(auto_score), aggregate_score = VALUES(aggregate_score),
            max_score = VALUES(max_score), status = VALUES(status), computed_at = CURRENT_TIMESTAMP`,
-        [chapter_project_id, exam_id, student_id, selfScore, peerScore, autoScore, aggregate, 100, status]
+        [chapter_project_id, exam_id, student_id, selfScore, peerScore, autoScore, aggregateScaled, realMaxPoints, status]
     );
     await connection.execute(
         `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW())
          ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
-        [student_id, exam_id, aggregate, 100]
+        [student_id, exam_id, aggregateScaled, realMaxPoints]
     );
 
-    return { self_score: selfScore, peer_score: peerScore, auto_score: autoScore, aggregate_score: aggregate, status };
+    return { self_score: selfScore, peer_score: peerScore, auto_score: autoScore, aggregate_score: aggregateScaled, max_score: realMaxPoints, status };
 }
 
 // Recursively collects readable-as-text source files (HTML/JS/CSS) from a
