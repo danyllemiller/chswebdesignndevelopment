@@ -106,6 +106,19 @@
 
   <p><strong>The trap:</strong> students often think hexadecimal is a completely separate system from binary, unrelated to what they just learned. It isn't — it's literally the same data, just grouped four bits at a time and relabeled with a friendlier symbol. Nothing about the underlying value changes.</p>
 
+  <h4 class="fw-bold mt-5 text-primary">5.2.2 Not Every Hex Code Is a Color</h4>
+  <p>Every example so far has been a color, because colors are an easy way to see hex pairs at work — but hex is really just a general way to write any byte's value, for anything a computer stores. A single status flag, a memory address, an error code — any one byte can be written as exactly two hex digits, with no Red/Green/Blue channels involved at all.</p>
+
+  <div class="concept-box shadow-sm border-info bg-light">
+      <h5 class="fw-bold text-info"><i class="fas fa-flag me-2"></i> Worked Example: A Single Byte, Not a Color</h5>
+      <p class="mb-0">A game engine logs a player's status as the single byte <code>4E</code>. That's it — one byte, two hex digits, no color involved. Convert it the exact same way as before: E = 14, so (4 &times; 16) + 14 = 64 + 14 = <strong>78</strong>. Decimal 78 happens to be the ASCII code for the letter <strong>N</strong> — maybe this engine uses N to mean "New Player." One byte, one meaning, nothing about color.</p>
+  </div>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-danger border-5">
+      <h5 class="fw-bold text-danger"><i class="fas fa-triangle-exclamation me-2"></i> Don't Confuse This With CSS Color Shorthand</h5>
+      <p class="mb-0 text-light">If you've done any web design, you may know a 3-character hex color like <code>#FCD</code> is shorthand for <code>#FFCCDD</code> — each digit doubles to fill out a full 6-digit color. <strong>That rule exists only for CSS colors</strong>, because a color code is always 3 channels (Red, Green, Blue) glued together, and the shorthand doubles each one. A standalone byte like <code>4E</code> above has nothing to do with that rule — it's one single byte, always exactly two digits, whether or not it happens to be part of a color. Don't try to "expand" a plain byte code the way you would a color code; a status flag, an error code, and a color are all just different uses of the same base-16 system, not the same rule applied three ways.</p>
+  </div>
+
   <hr class="my-5 opacity-25">
 
   <!-- Section 5.3 -->
