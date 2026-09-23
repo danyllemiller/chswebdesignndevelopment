@@ -644,7 +644,7 @@ const CS_UNIT_CHAPTER_SLUGS = {
     2: ['how_computers_work', 'intro_to_office_software'],
     3: ['language_of_computers', 'storing_data', 'mastering_spreadsheets', 'computational_modeling'],
     4: ['problem_solving_algorithms', 'control_structures_events'],
-    5: ['culture_equity_bias', 'ai_cross_disciplinary'],
+    5: ['culture_equity_bias', 'ethics_societal_impact', 'ai_cross_disciplinary'],
     6: ['advanced_data_structures', 'modularity_procedures', 'software_development_lifecycle'],
     7: ['how_the_internet_works', 'cybersecurity_threats', 'defending_systems']
 };

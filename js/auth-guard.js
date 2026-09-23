@@ -53,6 +53,7 @@ function getPageCourse(currentPath = '') {
         '/reviewgames/problem_solving_algorithms',
         '/reviewgames/control_structures_events',
         '/reviewgames/culture_equity_bias',
+        '/reviewgames/ethics_societal_impact',
         '/reviewgames/ai_cross_disciplinary',
         '/reviewgames/advanced_data_structures',
         '/reviewgames/modularity_procedures',
