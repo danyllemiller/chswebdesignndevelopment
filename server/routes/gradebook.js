@@ -491,6 +491,40 @@ router.post('/admin/delete-assignment', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete assignment' }); }
 });
 
+// Mirrors gradeCalc.js's own PERIOD_COURSE_MAP -- used only to resolve a
+// "group" scope value (e.g. "All-WD1") down to the course key its members
+// share, so the heavy responses query below can be scoped to just the
+// matching students instead of the whole school. Kept as a plain object
+// here (not imported) since gradeCalc.js doesn't export it.
+const PERIOD_COURSE_MAP = { A1: 'WD1', B2: 'WD2', A3: 'CS', A5: 'CS', B4: 'CS', B6: 'CS', B8: 'CS', INTV: 'INTV' };
+function sectionCourseKey(sectionId) {
+    const p = String(sectionId || '').trim().toUpperCase();
+    if (PERIOD_COURSE_MAP[p]) return PERIOD_COURSE_MAP[p];
+    const prefix = p.split('-')[0];
+    return PERIOD_COURSE_MAP[prefix] || prefix;
+}
+
+// Lightweight -- just the distinct periods/groups a teacher can choose
+// from, so the gradebook page can populate its period selector and let
+// the teacher pick a scope BEFORE the (much heavier) full data pull below
+// ever runs, instead of loading every student's entire grade history
+// first and only filtering after the fact.
+router.get('/admin/gradebook-periods', async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        const [students] = await connection.execute(
+            `SELECT DISTINCT section_id FROM students WHERE (archived IS NULL OR archived = 0) AND school_year = ?`,
+            [getCurrentSchoolYear()]
+        );
+        const [extra] = await connection.execute(`SELECT DISTINCT section_id FROM student_additional_sections`);
+        await connection.release();
+        const periods = [...new Set([...students, ...extra].map(r => r.section_id))]
+            .filter(p => p && p !== 'Teacher' && p !== 'Unassigned')
+            .sort();
+        res.json({ periods });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch periods' }); }
+});
+
 router.get('/admin/master-gradebook-data', async (req, res) => {
     try {
         const connection = await getDbConnection();
@@ -521,6 +555,24 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
         });
         students.forEach(s => { s.additional_sections = extraByStudent[s.student_id] || []; });
 
+        // Optional ?period= scope (a specific section like "A1", or a group
+        // like "All-WD1") -- restricts which students' grade history the
+        // expensive responses query below has to pull. Absent or "All"
+        // keeps the original whole-school behavior so any other caller of
+        // this endpoint is unaffected.
+        const periodScope = String(req.query.period || 'All').trim();
+        let scopedStudents = students;
+        if (periodScope && periodScope !== 'All') {
+            const isGroup = periodScope.startsWith('All-');
+            const groupKey = isGroup ? periodScope.slice(4) : null;
+            scopedStudents = students.filter(s => {
+                const sections = [s.section_id, ...(s.additional_sections || []).map(a => a.section_id)];
+                return isGroup
+                    ? sections.some(sec => sectionCourseKey(sec) === groupKey)
+                    : sections.includes(periodScope);
+            });
+        }
+
         const [exams] = await connection.execute(
             `SELECT e.exam_id, TRIM(e.title) AS title, e.total_points, e.course_id, e.category,
                     e.due_date, e.instructions, e.period_due_dates,
@@ -528,8 +580,12 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
              FROM exams e
              LEFT JOIN chapter_projects cp ON cp.exam_id = e.exam_id AND cp.course_id = e.course_id`
         );
-        const [grades] = await connection.execute(
-            `SELECT student_id, exam_id, score, total_points, timestamp, entered_in_ic FROM responses`
+        const scopedIds = scopedStudents.map(s => s.student_id);
+        const [grades] = scopedIds.length === 0 ? [[]] : await connection.execute(
+            periodScope !== 'All'
+                ? `SELECT student_id, exam_id, score, total_points, timestamp, entered_in_ic FROM responses WHERE student_id IN (${scopedIds.map(() => '?').join(',')})`
+                : `SELECT student_id, exam_id, score, total_points, timestamp, entered_in_ic FROM responses`,
+            periodScope !== 'All' ? scopedIds : []
         );
         const registry = {};
         exams.forEach(e => {
@@ -548,7 +604,7 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
             };
         });
         await connection.release();
-        res.json({ students, assignments: registry, grades });
+        res.json({ students: scopedStudents, assignments: registry, grades });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch gradebook' }); }
 });
 

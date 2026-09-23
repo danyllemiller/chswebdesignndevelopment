@@ -841,27 +841,24 @@ function updateStudentDropdown(filteredStudents) {
     });
 }
 
-function updatePeriodDropdown() {
-    const select = document.getElementById('periodFilter');
-    if (!select) return;
-    
-    const currentVal = select.value;
-    
-    // Include periods a student only has as an additional (non-primary)
-    // section too — e.g. Intervention, if nobody has it as their primary
-    // class — so it's still selectable as its own filter.
-    const allPeriods = allStudents.flatMap(s => [s.period, ...(s.additional_sections || []).map(a => a.section_id)]);
-    const periods = [...new Set(allPeriods)]
-        .filter(p => p && p !== 'Teacher' && p !== 'Unassigned')
-        .sort();
+const COURSE_GROUP_NAMES = {
+    'WD1': 'Web Design 1',
+    'WD2': 'Web Design 2',
+    'CS': 'Computer Science',
+    'AS': 'Advanced Studies',
+    'INTV': 'Intervention'
+};
 
-    let html = '<option value="All">All Periods</option>';
+// Shared by both the pre-load period picker (populated from the lightweight
+// /admin/gradebook-periods list, before any grade data has been fetched)
+// and the post-load refresh (populated from allStudents) -- same grouped
+// <option>/<optgroup> markup either way, just a different source for the
+// raw period list and whether a "nothing chosen yet" placeholder is needed.
+function buildPeriodOptionsHtml(periods, includePlaceholder) {
+    let html = includePlaceholder ? '<option value="" selected disabled>Select a period or group to load…</option>' : '';
+    html += '<option value="All">All Periods (slow — loads the whole school)</option>';
 
-    if (periods.length === 0) {
-        select.innerHTML = html;
-        select.value = 'All';
-        return;
-    }
+    if (periods.length === 0) return html;
 
     const groupedPeriods = {};
     periods.forEach(p => {
@@ -870,21 +867,13 @@ function updatePeriodDropdown() {
         groupedPeriods[prefix].push(p);
     });
 
-    const courseNames = {
-        'WD1': 'Web Design 1',
-        'WD2': 'Web Design 2',
-        'CS': 'Computer Science',
-        'AS': 'Advanced Studies',
-        'INTV': 'Intervention'
-    };
-
     Object.keys(groupedPeriods).sort().forEach(prefix => {
-        const name = courseNames[prefix] || prefix;
+        const name = COURSE_GROUP_NAMES[prefix] || prefix;
         html += `<option value="All-${prefix}">All ${name}</option>`;
     });
 
     Object.keys(groupedPeriods).sort().forEach(prefix => {
-        const name = courseNames[prefix] || prefix;
+        const name = COURSE_GROUP_NAMES[prefix] || prefix;
         html += `<optgroup label="${name}">`;
         groupedPeriods[prefix].forEach(p => {
             html += `<option value="${p}">${p}</option>`;
@@ -892,13 +881,28 @@ function updatePeriodDropdown() {
         html += `</optgroup>`;
     });
 
-    select.innerHTML = html;
+    return html;
+}
 
-    if ([...select.options].some(opt => opt.value === currentVal)) {
-        select.value = currentVal;
-    } else {
-        select.value = 'All';
+// Populates the period picker BEFORE any grade data loads, straight from
+// the lightweight /admin/gradebook-periods endpoint -- letting the teacher
+// choose a scope first instead of waiting through a whole-school load just
+// to see the dropdown populate. Left unselected on purpose (the disabled
+// placeholder option) so nothing auto-loads until she actually picks one.
+async function initPeriodPicker() {
+    const select = document.getElementById('periodFilter');
+    if (!select) return;
+    select.innerHTML = '<option value="" selected disabled>Loading periods…</option>';
+    try {
+        const res = await fetch('/api/admin/gradebook-periods');
+        const data = res.ok ? await res.json() : { periods: [] };
+        select.innerHTML = buildPeriodOptionsHtml(data.periods || [], true);
+    } catch (e) {
+        console.error('Failed to load periods', e);
+        select.innerHTML = '<option value="All">All Periods</option>';
     }
+    document.getElementById('gradebookBody').innerHTML =
+        '<tr><td colspan="100%" class="text-center p-5 text-muted">Select a period or group above to load its gradebook.</td></tr>';
 }
 
 // Filter options are the same weighted categories COURSE_WEIGHTS/getAssignmentCategory
@@ -957,12 +961,16 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     
     injectModals();
-    loadData();
+    // Populate the period picker first, from the lightweight periods-only
+    // endpoint -- the full gradebook (loadData) only fires once the teacher
+    // actually picks a period or group below, instead of pulling every
+    // student's entire grade history before she's had any chance to choose.
+    initPeriodPicker();
 
     document.getElementById('periodFilter')?.addEventListener('change', (e) => {
+        if (!e.target.value) return; // the disabled placeholder option -- ignore
         document.getElementById('studentFilter').value = 'All';
-        updateStudentDropdown(getFilteredStudents(e.target.value, 'All'));
-        applyFiltersAndRender();
+        loadData(e.target.value);
     });
 
     document.getElementById('studentFilter')?.addEventListener('change', applyFiltersAndRender);
@@ -1021,9 +1029,10 @@ async function markEnteredIcForCurrentView() {
     }
 }
 
-async function loadData() {
+async function loadData(period) {
     try {
-        const response = await fetch('/api/admin/master-gradebook-data');
+        const scope = period || document.getElementById('periodFilter')?.value || 'All';
+        const response = await fetch(`/api/admin/master-gradebook-data?period=${encodeURIComponent(scope)}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch gradebook data. HTTP ${response.status}`);
         }
@@ -1047,8 +1056,12 @@ async function loadData() {
             lastName: d.last_name,
             username: d.username
         })).filter(s => s.period !== "Teacher");
-        
-        updatePeriodDropdown();
+
+        // The period dropdown itself is left alone here on purpose --
+        // allStudents is now just the scoped subset that was actually
+        // requested, and rebuilding the dropdown from it would shrink the
+        // option list down to only the currently-loaded period. The full
+        // list was already populated once, up front, by initPeriodPicker().
         updateStudentDropdown(allStudents);
 
         calendarConfig = data.calendarConfig || null;
