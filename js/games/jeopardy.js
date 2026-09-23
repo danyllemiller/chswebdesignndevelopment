@@ -704,8 +704,8 @@ window.Jeopardy = (() => {
                 col.className = 'col'; 
                 col.innerHTML = `
                     <div class="card text-center h-100 ${shadowClass}" style="border: 2px solid ${borderColor}; overflow: hidden; transition: all 0.3s ease; ${glowStyle}">
-                        <div class="card-header p-2" style="background-color: ${headerBg}; border-bottom: 1px solid ${borderColor};">
-                            <input type="text" class="team-name-input text-center fw-bold w-100" style="background: transparent; border: none; color: ${textColor}; outline: none; font-size: 0.9rem;" value="${tName}" readonly>
+                        <div class="card-header p-2" style="background-color: ${headerBg} !important; border-bottom: 1px solid ${borderColor};">
+                            <input type="text" class="team-name-input text-center fw-bold w-100" style="background: transparent; border: none; color: ${textColor} !important; outline: none; font-size: 0.9rem;" value="${tName}" readonly>
                         </div>
                         <div class="card-body p-1 d-flex align-items-center justify-content-center" style="background-color: white; color: var(--primary-color); min-height: 60px;">
                             ${scoreContent}
