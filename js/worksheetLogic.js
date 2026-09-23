@@ -197,3 +197,21 @@ function copyWorksheetToClipboard() {
     }
     document.body.removeChild(tempTextArea);
 }
+
+/**
+ * DICTATE (speech-to-text) for the "My Notes & Reflection" textarea(s) on
+ * each chapter worksheet -- e.g. for a student whose IEP allows speaking
+ * notes instead of typing them. js/dictate-textarea.js is injected
+ * sitewide by loader.js but as a separately-created <script> tag, so its
+ * load isn't guaranteed to finish before this one runs -- poll briefly
+ * instead of assuming window.attachDictateToTextarea already exists.
+ */
+function attachWorksheetDictation(attemptsLeft = 20) {
+    if (!window.attachDictateToTextarea) {
+        if (attemptsLeft <= 0) return; // dictate-textarea.js failed to load -- fail silent, typing still works
+        setTimeout(() => attachWorksheetDictation(attemptsLeft - 1), 150);
+        return;
+    }
+    document.querySelectorAll('textarea.user-input-text').forEach(ta => window.attachDictateToTextarea(ta));
+}
+document.addEventListener('DOMContentLoaded', () => attachWorksheetDictation());

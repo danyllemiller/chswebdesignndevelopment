@@ -146,3 +146,8 @@ body.iframe-preview-body td { border: 1px solid #6c757d; padding: 10px 15px; tex
 body.iframe-preview-body th { background-color: #e9ecef; font-weight: bold; border-bottom: 2px solid #495057; }
 body.iframe-preview-body tbody tr:nth-of-type(even) { background-color: #f8f9fa; }
 body.iframe-preview-body img { max-width: 100%; height: auto; }
+
+/* Dictate (speech-to-text) recording state -- shared by every notebook
+   editor toolbar that includes a #*-dictate-btn (student/notes.html). */
+#notes-dictate-btn.notes-dictating { background: #dc3545; border-color: #dc3545; color: #fff; animation: notes-dictate-pulse 1.4s ease-in-out infinite; }
+@keyframes notes-dictate-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(220,53,69,.5); } 50% { box-shadow: 0 0 0 6px rgba(220,53,69,0); } }

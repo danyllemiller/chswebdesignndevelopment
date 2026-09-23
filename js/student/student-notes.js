@@ -481,7 +481,8 @@ function setupToolbars() {
             <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn text-danger" data-action="delRow" title="Delete Current Row">−Row</button>
             <button type="button" class="btn btn-sm btn-light border-secondary rt-table-btn text-danger" data-action="delCol" title="Delete Current Column">−Col</button>
         </div>
-        <div class="btn-group shadow-sm"><button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-warning" data-command="hiliteColor" data-val="#fff200"><i class="fas fa-highlighter"></i></button><button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-danger" data-command="removeFormat"><i class="fas fa-eraser"></i></button></div>`;
+        <div class="btn-group shadow-sm"><button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-warning" data-command="hiliteColor" data-val="#fff200"><i class="fas fa-highlighter"></i></button><button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-danger" data-command="removeFormat"><i class="fas fa-eraser"></i></button></div>
+        <div class="btn-group ms-2 shadow-sm"><button type="button" class="btn btn-sm btn-light border-secondary" id="notes-dictate-btn" title="Speak your notes instead of typing"><i class="fas fa-microphone"></i> <span id="notes-dictate-btn-label">Dictate</span></button></div>`;
 
     dom.preview.parentElement.insertBefore(rt, dom.preview);
     rt.querySelectorAll('.rt-btn').forEach(btn => btn.onclick = () => {
@@ -495,6 +496,7 @@ function setupToolbars() {
         }
     });
     rt.querySelectorAll('.rt-table-btn').forEach(btn => btn.onclick = () => handleTableToolbarAction(btn.dataset.action));
+    setupDictateButton(rt);
 
     const saveBtn = document.getElementById('btn-save');
     if (saveBtn && !document.getElementById('btn-delete-bottom')) {
@@ -537,6 +539,103 @@ function setupToolbars() {
         };
     }
 };
+
+// Speech-to-text for the notebook, e.g. for a student whose IEP allows
+// speaking notes instead of typing them. Same Web Speech API
+// (SpeechRecognition) approach as js/read-aloud.js's text-to-speech,
+// reversed direction, inserted through the same execCommand path the
+// rt-btn handlers above already use so it shares undo history and
+// (would share) autosave with normal typing.
+function setupDictateButton(rt) {
+    const btn = rt.querySelector('#notes-dictate-btn');
+    const label = rt.querySelector('#notes-dictate-btn-label');
+    if (!btn) return;
+
+    const SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognitionImpl) {
+        btn.disabled = true;
+        btn.title = "Speech-to-text isn't supported in this browser -- try Chrome.";
+        return;
+    }
+
+    let recognition = null;
+    let listening = false;
+    let userStopped = false;
+
+    function ensureCursorInBody(win, doc) {
+        const sel = win.getSelection();
+        if (sel.rangeCount > 0 && doc.body.contains(sel.getRangeAt(0).startContainer)) return;
+        const range = doc.createRange();
+        range.selectNodeContents(doc.body);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+
+    function insertTranscript(text) {
+        if (!dom.preview?.contentWindow || !text) return;
+        const doc = dom.preview.contentWindow.document;
+        dom.preview.contentWindow.focus();
+        ensureCursorInBody(dom.preview.contentWindow, doc);
+        try { doc.execCommand('insertText', false, text); }
+        catch (err) { console.error('Dictation insert error:', err); }
+        if (dom.content) {
+            dom.content.value = doc.body.innerHTML;
+            extractAutoTitle(dom.content.value, dom.title, 'New Entry Title');
+            triggerAutoSave();
+        }
+    }
+
+    function setListeningUI(isListening) {
+        listening = isListening;
+        btn.classList.toggle('notes-dictating', isListening);
+        label.textContent = isListening ? 'Listening…' : 'Dictate';
+        btn.querySelector('i').className = isListening ? 'fas fa-stop' : 'fas fa-microphone';
+    }
+
+    function startRecognition() {
+        recognition = new SpeechRecognitionImpl();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onresult = (ev) => {
+            for (let i = ev.resultIndex; i < ev.results.length; i++) {
+                if (ev.results[i].isFinal) {
+                    const transcript = ev.results[i][0].transcript.trim();
+                    if (transcript) insertTranscript(transcript + ' ');
+                }
+            }
+        };
+        recognition.onerror = (ev) => {
+            console.error('Dictation error:', ev.error);
+            if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
+                userStopped = true;
+                setListeningUI(false);
+                alert('Microphone access was blocked. Allow microphone access for this site to use Dictate.');
+            }
+        };
+        recognition.onend = () => {
+            if (!userStopped) { try { recognition.start(); } catch (err) { /* already starting */ } }
+            else setListeningUI(false);
+        };
+
+        userStopped = false;
+        setListeningUI(true);
+        recognition.start();
+    }
+
+    function stopRecognition() {
+        userStopped = true;
+        if (recognition) recognition.stop();
+        setListeningUI(false);
+    }
+
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (listening) stopRecognition(); else startRecognition();
+    });
+}
 
 // Where the cursor currently sits, if inside a table -- addRow/addCol/
 // delRow/delCol all act on this rather than a fixed target, so a student can

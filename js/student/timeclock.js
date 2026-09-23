@@ -3,6 +3,19 @@ import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
 import { periodToCourseKey } from '../modules/grade-weights.js?v=5';
 
+// js/dictate-textarea.js is injected as a separate, non-module <script> by
+// loader.js -- dynamically created script tags don't guarantee execution
+// order relative to this module script just because loader.js appends them
+// first, so poll briefly instead of assuming window.attachDictateToTextarea
+// already exists by the time a student opens the clock-out modal.
+function attachDictateWhenReady(textareaId, attemptsLeft = 20) {
+    const el = document.getElementById(textareaId);
+    if (!el) return; // modal already moved on (e.g. re-rendered) -- nothing to attach to
+    if (window.attachDictateToTextarea) { window.attachDictateToTextarea(el); return; }
+    if (attemptsLeft <= 0) return; // dictate-textarea.js failed to load -- fail silent, typing still works
+    setTimeout(() => attachDictateWhenReady(textareaId, attemptsLeft - 1), 150);
+}
+
 // Every previous fix here targeted a guessed cause and each one failed for
 // some students with zero visible symptom -- there was no way to see what
 // was actually throwing. This reports any error, caught or not, straight to
@@ -524,6 +537,7 @@ async function checkStatusInner() {
             currentPromptText = promptData.prompt_text;
             label.innerText = promptData.prompt_text;
             optsContainer.innerHTML = `<textarea id="tc-out-answer" class="form-control" rows="3" required></textarea>`;
+            attachDictateWhenReady('tc-out-answer');
             btn.innerText = "Submit & Clock Out";
             btn.disabled = false;
         }
@@ -861,6 +875,7 @@ async function handleManualOpen(forcedMode) {
             currentPromptText = promptData.prompt_text;
             label.innerText = promptData.prompt_text;
             optsContainer.innerHTML = `<textarea id="tc-out-answer" class="form-control" rows="3" required></textarea>`;
+            attachDictateWhenReady('tc-out-answer');
             btn.innerText = 'Submit & Clock Out';
         }
     } catch (e) {

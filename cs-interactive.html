@@ -15,6 +15,9 @@
   <script type="module" src="/js/auth-guard.js"></script>
   
   <style>
+    #cs-dictate-btn.cs-dictating { background: #dc3545; border-color: #dc3545; color: #fff; animation: cs-dictate-pulse 1.4s ease-in-out infinite; }
+    @keyframes cs-dictate-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(220,53,69,.5); } 50% { box-shadow: 0 0 0 6px rgba(220,53,69,0); } }
+
     /* Custom Styling for the Two-Tier Tab System */
     .unit-tab-btn { background: #e9ecef; border: 2px solid transparent; border-radius: 8px; padding: 0.5rem 1rem; font-weight: bold; color: #6c757d; cursor: pointer; transition: all 0.2s; }
     .unit-tab-btn:hover { background: #dee2e6; color: var(--primary-color); }
@@ -295,7 +298,7 @@
   </script>
 
   <!-- Centralized Controller for CS Notebook Logic -->
-<script type="module" src="/js/cs-interactive.js?v=34"></script>
+<script type="module" src="/js/cs-interactive.js?v=35"></script>
 
   <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 </body>

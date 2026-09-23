@@ -51,6 +51,20 @@
 })();
 
 // ==========================================
+// DICTATE TEXTAREA (sitewide helper -- defines window.attachDictateToTextarea
+// but only does anything on a page that actually calls it, e.g. timeclock.js's
+// clock-out journal reflection). Loaded before timeclock.js below since that's
+// its first real caller.
+// ==========================================
+(function injectDictateTextarea() {
+  if (document.getElementById('dictate-textarea-script')) return;
+  const script = document.createElement('script');
+  script.id = 'dictate-textarea-script';
+  script.src = '/js/dictate-textarea.js?v=1';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
 // TIMECLOCK (sitewide, self-guards to students only)
 // Was previously only <script>-included on 4 pages, so the auto-popup
 // silently never fired for a student whose current page wasn't one of
@@ -68,7 +82,7 @@
   const script = document.createElement('script');
   script.id = 'timeclock-script';
   script.type = 'module';
-  script.src = '/js/student/timeclock.js?v=30';
+  script.src = '/js/student/timeclock.js?v=31';
   // Repeated fixes aimed at guessed causes (stale cache, modal races, load
   // ordering) each failed for some students with zero visible symptom --
   // this catches the case none of those could see at all: the module

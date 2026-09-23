@@ -1824,6 +1824,9 @@ if (isFinalSubmit && categoryVal === 'Worksheet') {
                     <button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-warning" data-command="hiliteColor" data-val="#fff200" title="Highlight"><i class="fas fa-highlighter"></i></button>
                     <button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-danger" data-command="removeFormat" title="Clear Formatting"><i class="fas fa-eraser"></i></button>
                 </div>
+                <div class="btn-group ms-2 shadow-sm">
+                    <button type="button" class="btn btn-sm btn-light border-secondary" id="cs-dictate-btn" title="Speak your notes instead of typing"><i class="fas fa-microphone"></i> <span id="cs-dictate-btn-label">Dictate</span></button>
+                </div>
             `;
 
             frameContainer.insertBefore(rtToolbar, previewFrame);
@@ -1853,8 +1856,111 @@ if (isFinalSubmit && categoryVal === 'Worksheet') {
                     }
                 });
             });
+
+            setupDictateButton(rtToolbar);
         }
     };
+
+    // Speech-to-text for the notebook, e.g. for a student whose IEP allows
+    // speaking notes instead of typing them -- same Web Speech API
+    // (SpeechRecognition) approach as js/read-aloud.js's text-to-speech,
+    // reversed direction, and inserted through the same execCommand path
+    // the rt-btn handlers above already use so it shares undo history and
+    // autosave with normal typing.
+    function setupDictateButton(rtToolbar) {
+        const btn = rtToolbar.querySelector('#cs-dictate-btn');
+        const label = rtToolbar.querySelector('#cs-dictate-btn-label');
+        if (!btn) return;
+
+        const SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognitionImpl) {
+            btn.disabled = true;
+            btn.title = "Speech-to-text isn't supported in this browser -- try Chrome.";
+            return;
+        }
+
+        let recognition = null;
+        let listening = false;
+        let userStopped = false;
+
+        function ensureCursorInBody(win, doc) {
+            const sel = win.getSelection();
+            if (sel.rangeCount > 0 && doc.body.contains(sel.getRangeAt(0).startContainer)) return;
+            const range = doc.createRange();
+            range.selectNodeContents(doc.body);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+
+        function insertTranscript(text) {
+            if (!previewFrame || !previewFrame.contentWindow || !text) return;
+            const doc = previewFrame.contentWindow.document;
+            previewFrame.contentWindow.focus();
+            ensureCursorInBody(previewFrame.contentWindow, doc);
+            try { doc.execCommand('insertText', false, text); }
+            catch (err) { console.error('Dictation insert error:', err); }
+            if (contentIn) {
+                contentIn.value = doc.body.innerHTML;
+                extractAutoTitle(contentIn.value, titleInput, 'New Entry');
+                triggerAutoSave();
+            }
+        }
+
+        function setListeningUI(isListening) {
+            listening = isListening;
+            btn.classList.toggle('cs-dictating', isListening);
+            label.textContent = isListening ? 'Listening…' : 'Dictate';
+            btn.querySelector('i').className = isListening ? 'fas fa-stop' : 'fas fa-microphone';
+        }
+
+        function startRecognition() {
+            recognition = new SpeechRecognitionImpl();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = (ev) => {
+                for (let i = ev.resultIndex; i < ev.results.length; i++) {
+                    if (ev.results[i].isFinal) {
+                        const transcript = ev.results[i][0].transcript.trim();
+                        if (transcript) insertTranscript(transcript + ' ');
+                    }
+                }
+            };
+            recognition.onerror = (ev) => {
+                console.error('Dictation error:', ev.error);
+                if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
+                    userStopped = true;
+                    setListeningUI(false);
+                    alert('Microphone access was blocked. Allow microphone access for this site to use Dictate.');
+                }
+            };
+            recognition.onend = () => {
+                // The browser also ends a session on its own after a pause
+                // even with continuous:true -- restart seamlessly unless the
+                // student actually clicked Stop, so a pause mid-thought
+                // doesn't require re-clicking the button.
+                if (!userStopped) { try { recognition.start(); } catch (err) { /* already starting */ } }
+                else setListeningUI(false);
+            };
+
+            userStopped = false;
+            setListeningUI(true);
+            recognition.start();
+        }
+
+        function stopRecognition() {
+            userStopped = true;
+            if (recognition) recognition.stop();
+            setListeningUI(false);
+        }
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (listening) stopRecognition(); else startRecognition();
+        });
+    }
 
     const setupTemplatesAndHTML = () => {
         const btnWorksheetCS = document.getElementById('tpl-worksheet');
