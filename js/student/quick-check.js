@@ -1,9 +1,12 @@
-// Lightweight, auto-graded comprehension-check widget. Replaces a heavier
+// Lightweight, ungraded comprehension-check widget. Replaces a heavier
 // multi-step lab with 2-3 quick questions per topic so a chapter can
 // briefly introduce a topic without demanding a full deliverable for
-// each one. Submits through the same POST /api/submit-exam every other
-// lightweight grade in this app already uses (keep-highest built in, so
-// retrying to improve never hurts a student's score).
+// each one. Purely a self-check: it shows immediate right/wrong feedback
+// per question but never submits a score to the gradebook -- Danylle's
+// explicit call (2026-09-23): keep the instant feedback, drop the grade,
+// since these are meant to be low-stakes comprehension checks, not
+// scored assignments. A student can retake one as many times as they
+// want; nothing here is persisted.
 import { getLoggedInUser } from '../modules/user-session.js';
 
 function escapeHtml(s) {
@@ -21,96 +24,90 @@ async function initAllQuickChecks() {
     }
 
     let bankData = {};
-    let existingScores = {};
     try {
-        const [bankRes, gradesRes] = await Promise.all([
-            fetch('/data/ch1-quick-checks.json?v=' + Date.now()),
-            fetch(`/api/student/grades?student_id=${encodeURIComponent(user.student_id)}`)
-        ]);
+        const bankRes = await fetch('/data/ch1-quick-checks.json?v=' + Date.now());
         bankData = bankRes.ok ? await bankRes.json() : {};
-        const gradesData = gradesRes.ok ? await gradesRes.json() : { responses: [] };
-        (gradesData.responses || []).forEach(r => { existingScores[r.exam_id] = { score: Number(r.score), total_points: Number(r.total_points) }; });
     } catch (e) {
         console.error('[quick-check] Failed to load data', e);
     }
 
-    containers.forEach(container => initOneQuickCheck(container, user, bankData, existingScores));
+    containers.forEach(container => initOneQuickCheck(container, bankData));
 }
 
-function initOneQuickCheck(container, user, bankData, existingScores) {
+function initOneQuickCheck(container, bankData) {
     const examId = container.dataset.examId;
-    const points = Number(container.dataset.points || 10);
     const entry = bankData[examId];
     if (!entry || !Array.isArray(entry.questions) || entry.questions.length === 0) {
         container.innerHTML = `<p class="text-muted small mb-0">This quick check isn't available right now.</p>`;
         return;
     }
-
-    const existing = existingScores[examId];
-    if (existing && container.dataset.forceRetry !== '1') {
-        renderCompleted(container, existing.score, existing.total_points || points, entry.questions.length);
-        return;
-    }
-    delete container.dataset.forceRetry;
-
-    renderQuiz(container, examId, points, entry.questions, user);
+    renderQuiz(container, examId, entry.questions);
 }
 
-function renderCompleted(container, score, total, questionCount) {
-    container.innerHTML = `
-        <div class="alert alert-success mb-2 py-2 px-3">
-            <i class="fas fa-check-circle me-1"></i> Completed — Score: <strong>${score}/${total}</strong>
-        </div>
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-retry-btn>Retry to improve your score</button>
-    `;
-    container.querySelector('[data-retry-btn]').addEventListener('click', () => {
-        container.dataset.forceRetry = '1';
-        initAllQuickChecks();
-    });
-}
-
-function renderQuiz(container, examId, points, questions, user) {
+function renderQuiz(container, examId, questions) {
     container.innerHTML = `
         <form data-quick-check-form>
             ${questions.map((q, qi) => `
-                <fieldset class="mb-3">
+                <fieldset class="mb-3" data-question-fieldset data-correct-index="${q.correct}">
                     <legend class="fw-bold small mb-2" style="font-size:.9rem;">${qi + 1}. ${escapeHtml(q.q)}</legend>
                     ${q.options.map((opt, oi) => `
-                        <div class="form-check">
+                        <div class="form-check" data-option-row data-option-index="${oi}">
                             <input class="form-check-input" type="radio" name="q${qi}" id="${examId}-q${qi}-o${oi}" value="${oi}" required>
                             <label class="form-check-label small" for="${examId}-q${qi}-o${oi}">${escapeHtml(opt)}</label>
                         </div>
                     `).join('')}
+                    <div class="small mt-1 d-none" data-question-feedback></div>
                 </fieldset>
             `).join('')}
-            <button type="submit" class="btn btn-sm btn-primary fw-bold">Submit Quick Check</button>
-            <div class="mt-2" data-quick-check-status></div>
+            <button type="submit" class="btn btn-sm btn-primary fw-bold" data-submit-btn>Check My Answers</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary d-none" data-retry-btn>Try Again</button>
         </form>
     `;
 
-    container.querySelector('[data-quick-check-form]').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const form = e.target;
-        const statusEl = container.querySelector('[data-quick-check-status]');
-        let correctCount = 0;
-        questions.forEach((q, qi) => {
-            const picked = form.querySelector(`input[name="q${qi}"]:checked`);
-            if (picked && Number(picked.value) === q.correct) correctCount++;
-        });
-        const score = Math.round((correctCount / questions.length) * points);
+    const form = container.querySelector('[data-quick-check-form]');
+    const submitBtn = form.querySelector('[data-submit-btn]');
+    const retryBtn = form.querySelector('[data-retry-btn]');
 
-        statusEl.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i>Saving…`;
-        try {
-            const res = await fetch('/api/submit-exam', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ student_id: user.student_id, exam_id: examId, score, total_points: points })
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        let correctCount = 0;
+
+        form.querySelectorAll('[data-question-fieldset]').forEach((fieldset, qi) => {
+            const correctIndex = Number(fieldset.dataset.correctIndex);
+            const picked = fieldset.querySelector(`input[name="q${qi}"]:checked`);
+            const pickedIndex = picked ? Number(picked.value) : null;
+            const isCorrect = pickedIndex === correctIndex;
+            if (isCorrect) correctCount++;
+
+            fieldset.querySelectorAll('[data-option-row]').forEach(row => {
+                const idx = Number(row.dataset.optionIndex);
+                row.classList.remove('text-success', 'fw-bold', 'text-danger');
+                if (idx === correctIndex) row.classList.add('text-success', 'fw-bold');
+                else if (idx === pickedIndex) row.classList.add('text-danger');
             });
-            if (!res.ok) throw new Error('Request failed');
-            renderCompleted(container, score, points, questions.length);
-        } catch (err) {
-            statusEl.innerHTML = `<span class="text-danger">Couldn't save your answers. Try again.</span>`;
-        }
+            fieldset.querySelectorAll('input[type="radio"]').forEach(input => { input.disabled = true; });
+
+            const feedbackEl = fieldset.querySelector('[data-question-feedback]');
+            feedbackEl.classList.remove('d-none');
+            feedbackEl.innerHTML = isCorrect
+                ? `<i class="fas fa-check-circle text-success me-1"></i><span class="text-success">Correct!</span>`
+                : `<i class="fas fa-times-circle text-danger me-1"></i><span class="text-danger">Not quite -- the correct answer is highlighted above.</span>`;
+        });
+
+        submitBtn.classList.add('d-none');
+        retryBtn.classList.remove('d-none');
+
+        const summary = document.createElement('div');
+        summary.className = 'mt-2 small text-muted';
+        summary.dataset.checkSummary = '1';
+        summary.textContent = `${correctCount} of ${questions.length} correct. This is a self-check, not a graded assignment.`;
+        const oldSummary = form.querySelector('[data-check-summary]');
+        if (oldSummary) oldSummary.remove();
+        form.appendChild(summary);
+    });
+
+    retryBtn.addEventListener('click', () => {
+        renderQuiz(container, examId, questions);
     });
 }
 
