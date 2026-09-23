@@ -280,6 +280,14 @@ if (document.readyState === 'loading') {
 /**
  * --- NAVIGATION FORMATTER ---
  */
+// Site-maintenance practicum built for one specific WD student aide --
+// server/routes/practicum.js gates the API the same way (student_id match
+// or staff), this just keeps the nav link itself from showing to everyone
+// else in the WD dropdown. Explicitly hidden in the logged-out/default
+// case below so a previous student's session on a shared lab computer
+// can never leave it visible for whoever logs in next.
+const MONIQUE_STUDENT_ID = '8009627';
+
 function filterNavigation(authData) {
     console.log('[filterNavigation] ENTRY authData:', authData);
     const loginMenu = document.getElementById('login-menu-item');
@@ -289,6 +297,7 @@ function filterNavigation(authData) {
     const studentMenuINTV = document.getElementById('student-menu-intv');
     const webDesignNav = document.getElementById('nav-web-design');
     const compSciNav = document.getElementById('nav-computer-science');
+    const moniquePracticumItem = document.getElementById('wd-monique-practicum-item');
     console.log('[filterNavigation] DOM elements found:', { loginMenu: !!loginMenu, adminMenu: !!adminMenu, studentMenuWD: !!studentMenuWD, studentMenuCS: !!studentMenuCS, webDesignNav: !!webDesignNav, compSciNav: !!compSciNav });
 
     if (!authData || !authData.isAuthenticated) {
@@ -299,10 +308,19 @@ function filterNavigation(authData) {
         if (adminMenu) adminMenu.style.setProperty('display', 'none', 'important');
         if (webDesignNav) webDesignNav.style.display = '';
         if (compSciNav) compSciNav.style.display = '';
+        if (moniquePracticumItem) moniquePracticumItem.classList.add('d-none');
         return;
     }
 
     if (loginMenu) loginMenu.style.setProperty('display', 'none', 'important');
+
+    if (moniquePracticumItem) {
+        // Teachers/admins see it too (same "demonstrate without logging in
+        // as a student" reasoning as the rest of this branch) -- every
+        // other WD student never does.
+        const showPracticum = authData.isTeacher || authData.user?.student_id === MONIQUE_STUDENT_ID;
+        moniquePracticumItem.classList.toggle('d-none', !showPracticum);
+    }
 
     if (authData.isTeacher) {
         // --- TEACHER: SHOW ADMIN, PLUS ALL STUDENT TOOL MENUS SO THE TEACHER CAN
