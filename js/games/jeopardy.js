@@ -23,6 +23,28 @@ window.Jeopardy = (() => {
     let jeopardyCpuAnswerTimer = null;
     let jeopardyCpuPickSquareTimer = null;
 
+    // leaveGame() already removes a player (and, if they were the last
+    // human, kicks every CPU team and resets the room) -- but only when
+    // someone actually clicks "Leave Game." A student who just closes the
+    // tab or the browser at the end of class never runs that code, so the
+    // room -- and any AI opponents in it -- sat there forever. pagehide
+    // fires reliably in that case (unlike beforeunload, which some mobile/
+    // Chromebook browsers don't guarantee); sendBeacon is what actually
+    // survives the page tearing down mid-request. Server-side (POST /api/
+    // game-room/leave-team) does the same "was I the last human" check
+    // and deletes the room outright when so, which is also how the CPU
+    // teams actually leave -- a deleted room's next join re-initializes
+    // from scratch instead of inheriting stale AI opponents.
+    window.addEventListener('pagehide', () => {
+        if (!docRef || !roomID || roomID === "solo" || !myJeopardyName) return;
+        try {
+            const payload = JSON.stringify({ path: docRef.path, playerName: myJeopardyName });
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon('/api/game-room/leave-team', new Blob([payload], { type: 'application/json' }));
+            }
+        } catch (e) { /* best-effort -- nothing more to do as the page unloads */ }
+    });
+
     function safeAttributeEscape(str) {
         try {
             if (typeof str !== 'string') str = String(str || '');
