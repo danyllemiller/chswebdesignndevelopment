@@ -23,13 +23,27 @@ async function initAllQuickChecks() {
         return;
     }
 
+    // Each chapter keeps its own bank file (data/ch{N}-quick-checks.json),
+    // derived from the "ch{N}_" prefix every quick-check's own exam_id
+    // already uses -- no separate data attribute needed. A page only ever
+    // has one chapter's worth of quick-checks in practice, but this
+    // fetches whichever distinct chapter numbers are actually present
+    // (once each) rather than assuming there's exactly one.
+    const chapterNums = new Set();
+    containers.forEach(c => {
+        const m = (c.dataset.examId || '').match(/^ch(\d+)_/);
+        if (m) chapterNums.add(m[1]);
+    });
+
     let bankData = {};
-    try {
-        const bankRes = await fetch('/data/ch1-quick-checks.json?v=' + Date.now());
-        bankData = bankRes.ok ? await bankRes.json() : {};
-    } catch (e) {
-        console.error('[quick-check] Failed to load data', e);
-    }
+    await Promise.all([...chapterNums].map(async (n) => {
+        try {
+            const bankRes = await fetch(`/data/ch${n}-quick-checks.json?v=` + Date.now());
+            if (bankRes.ok) Object.assign(bankData, await bankRes.json());
+        } catch (e) {
+            console.error(`[quick-check] Failed to load ch${n} bank`, e);
+        }
+    }));
 
     containers.forEach(container => initOneQuickCheck(container, bankData));
 }
