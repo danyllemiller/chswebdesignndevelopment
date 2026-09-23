@@ -2,7 +2,15 @@
 // 1. JEOPARDY ENGINE
 // ======================================================
 window.Jeopardy = (() => {
-    let isPanelSetup = false; 
+    // Was hardcoded at 4 everywhere below -- fine for a handful of teams
+    // sharing one screen, but a whole class joining one room by individual
+    // name hit this almost immediately: anyone past the 4th became a
+    // silent, scoreless "viewer" with no card on the board at all. The
+    // scoreboard grid itself (row-cols-2 row-cols-lg-4) already wraps to
+    // as many rows as it needs, so raising this is the only change needed
+    // to actually show everyone.
+    const MAX_TEAMS = 30;
+    let isPanelSetup = false;
     let dbRef, appIdRef, roomID, docRef;
     let jUnsub = null;
     let localState = { scores: {}, spent: [], teams: [], cpuTeams: [], activeBuzzer: null, boardControl: null, activeModal: null, finalJeopardy: null };
@@ -200,8 +208,8 @@ window.Jeopardy = (() => {
                 const teams = data.teams || [];
                 const scores = data.scores || {};
                 if (!teams.includes(myJeopardyName)) {
-                    if (teams.length >= 4) {
-                        await window.GameModal.alert("Match is full! You are joining as a viewer.");
+                    if (teams.length >= MAX_TEAMS) {
+                        await window.GameModal.alert(`Match is full (${MAX_TEAMS} max)! You are joining as a viewer.`);
                     } else {
                         teams.push(myJeopardyName);
                         scores[myJeopardyName] = 0;
@@ -701,7 +709,7 @@ window.Jeopardy = (() => {
         const teamCount = (localState.teams || []).length;
         const addBtnsContainer = document.getElementById('j-add-buttons-container');
         if (addBtnsContainer) {
-            if (teamCount >= 4) {
+            if (teamCount >= MAX_TEAMS) {
                 addBtnsContainer.style.display = 'none';
             } else {
                 addBtnsContainer.style.display = 'flex';
@@ -1596,8 +1604,8 @@ window.Jeopardy = (() => {
                 addPlayerBtn.addEventListener('click', async function(e) {
                     e.preventDefault(); 
                     const currentCount = (localState.teams || []).length;
-                    if (currentCount >= 4) {
-                        if (window.GameModal) await window.GameModal.alert("Maximum of 4 teams allowed per game!");
+                    if (currentCount >= MAX_TEAMS) {
+                        if (window.GameModal) await window.GameModal.alert(`Maximum of ${MAX_TEAMS} teams allowed per game!`);
                         return;
                     }
                     let tName = null;
@@ -1631,8 +1639,8 @@ window.Jeopardy = (() => {
                 addCpuBtn.addEventListener('click', async (e) => {
                     e.preventDefault();
                     const currentCount = (localState.teams || []).length;
-                    if (currentCount >= 4) {
-                        if (window.GameModal) await window.GameModal.alert("Maximum of 4 teams allowed per game!");
+                    if (currentCount >= MAX_TEAMS) {
+                        if (window.GameModal) await window.GameModal.alert(`Maximum of ${MAX_TEAMS} teams allowed per game!`);
                         return;
                     }
                     const aiNamesList = ["James", "John", "Robert", "Michael", "William", "David", "Richard", "Joseph", "Thomas", "Charles", "Mary", "Patricia", "Jennifer", "Linda", "Elizabeth", "Barbara", "Susan", "Jessica", "Sarah", "Karen"];
