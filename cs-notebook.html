@@ -23,6 +23,8 @@
     .preview-frame { min-height: 500px; border: 2px solid var(--primary-color); border-radius: 8px; background: white; }
     .rich-toolbar { background: #f1f3f4; border-radius: 8px 8px 0 0; border: 2px solid #dee2e6; border-bottom: none; }
     .preview-frame:last-of-type { border-radius: 0 0 8px 8px; }
+    #dictate-btn.dictating { background: #dc3545; border-color: #dc3545; color: #fff; animation: dictate-pulse 1.4s ease-in-out infinite; }
+    @keyframes dictate-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(220,53,69,.5); } 50% { box-shadow: 0 0 0 6px rgba(220,53,69,0); } }
   </style>
 </head>
 <body class="bg-white">
@@ -68,6 +70,8 @@
             <span class="border-end mx-1"></span>
             <button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-warning" data-command="hiliteColor" data-val="#fff200" title="Highlight"><i class="fas fa-highlighter"></i></button>
             <button type="button" class="btn btn-sm btn-light border-secondary rt-btn text-danger" data-command="removeFormat" title="Clear"><i class="fas fa-eraser"></i></button>
+            <span class="border-end mx-1"></span>
+            <button type="button" class="btn btn-sm btn-light border-secondary" id="dictate-btn" title="Speak your notes instead of typing"><i class="fas fa-microphone"></i> <span id="dictate-btn-label">Dictate</span></button>
             <div class="ms-auto">
                 <span class="badge bg-success" id="saveStatus"><i class="fas fa-check me-1"></i> Saved</span>
             </div>
@@ -1116,6 +1120,127 @@ function triggerAutoSave() {
     }
 
     // ========================================================
+    // DICTATION (speech-to-text, for students whose IEP allows
+    // speaking their notes instead of typing them). Uses the browser's
+    // built-in Web Speech API -- same no-external-dependency approach
+    // as js/read-aloud.js's text-to-speech, just the reverse direction.
+    // Inserted the same way every other toolbar command touches the
+    // iframe's content (doc.execCommand), so it shares undo history and
+    // autosave with normal typing instead of needing its own save path.
+    // ========================================================
+
+    function setupDictation() {
+        const btn = document.getElementById('dictate-btn');
+        const label = document.getElementById('dictate-btn-label');
+        if (!btn) return;
+
+        const SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognitionImpl) {
+            btn.disabled = true;
+            btn.title = 'Speech-to-text isn\'t supported in this browser -- try Chrome.';
+            return;
+        }
+
+        let recognition = null;
+        let listening = false;
+        // A student clicking Stop should stay stopped -- the browser also
+        // stops recognition on its own after a stretch of silence, and
+        // that natural stop needs to auto-restart so a pause mid-thought
+        // doesn't require re-clicking the button, but only while the
+        // student hasn't actually asked it to stop.
+        let userStopped = false;
+
+        function ensureCursorInBody(win, doc) {
+            const sel = win.getSelection();
+            // If the student clicks Dictate before ever clicking into the
+            // notes area, there's no Range yet to insert text at --
+            // execCommand('insertText') needs one, so collapse a fresh
+            // selection to the end of the existing content first.
+            if (sel.rangeCount > 0 && doc.body.contains(sel.getRangeAt(0).startContainer)) return;
+            const range = doc.createRange();
+            range.selectNodeContents(doc.body);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+
+        function insertTranscript(text) {
+            const previewFrame = document.getElementById('preview-frame');
+            if (!previewFrame || !previewFrame.contentWindow || !text) return;
+            const doc = previewFrame.contentWindow.document;
+            previewFrame.contentWindow.focus();
+            ensureCursorInBody(previewFrame.contentWindow, doc);
+            try {
+                doc.execCommand('insertText', false, text);
+            } catch (err) { console.error('Dictation insert error:', err); }
+            const contentIn = document.getElementById('note-content');
+            if (contentIn) {
+                contentIn.value = doc.body.innerHTML;
+                triggerAutoSave();
+            }
+        }
+
+        function setListeningUI(isListening) {
+            listening = isListening;
+            btn.classList.toggle('dictating', isListening);
+            label.textContent = isListening ? 'Listening…' : 'Dictate';
+            btn.querySelector('i').className = isListening ? 'fas fa-stop' : 'fas fa-microphone';
+        }
+
+        function startRecognition() {
+            recognition = new SpeechRecognitionImpl();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = (ev) => {
+                // Only the newest result(s) this event carries -- older
+                // ones were already inserted by a previous onresult call.
+                for (let i = ev.resultIndex; i < ev.results.length; i++) {
+                    if (ev.results[i].isFinal) {
+                        const transcript = ev.results[i][0].transcript.trim();
+                        if (transcript) insertTranscript(transcript + ' ');
+                    }
+                }
+            };
+            recognition.onerror = (ev) => {
+                console.error('Dictation error:', ev.error);
+                if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
+                    userStopped = true;
+                    setListeningUI(false);
+                    alert('Microphone access was blocked. Allow microphone access for this site to use Dictate.');
+                }
+            };
+            recognition.onend = () => {
+                // Browsers end a recognition session on their own after
+                // a pause even with continuous:true -- restart seamlessly
+                // unless the student actually clicked Stop.
+                if (!userStopped) {
+                    try { recognition.start(); } catch (err) { /* already starting */ }
+                } else {
+                    setListeningUI(false);
+                }
+            };
+
+            userStopped = false;
+            setListeningUI(true);
+            recognition.start();
+        }
+
+        function stopRecognition() {
+            userStopped = true;
+            if (recognition) recognition.stop();
+            setListeningUI(false);
+        }
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (listening) stopRecognition();
+            else startRecognition();
+        });
+    }
+
+    // ========================================================
     // TABLE TOOLBAR (insert / add row-col / delete row-col)
     // ========================================================
 
@@ -1255,6 +1380,7 @@ function triggerAutoSave() {
 // Initialize
     init().then(() => {
         setupRichToolbar();
+        setupDictation();
         setupTableToolbar();
         setupLoadNotes();
         
