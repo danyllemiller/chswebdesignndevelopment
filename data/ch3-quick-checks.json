@@ -1,0 +1,26 @@
+{
+  "ch3_lab_research": {
+    "title": "Quick Check: Research & Personas",
+    "questions": [
+      { "q": "Which type of research is used to understand WHY users behave a certain way, and typically needs only 5-8 people to find patterns?", "options": ["Quantitative research", "Qualitative research", "Competitive research", "SEO research"], "correct": 1 },
+      { "q": "A teammate builds a persona that's just \"Alex, 25, likes video games.\" What is it missing to actually be useful?", "options": ["A profile picture", "Real Goals and Pain Points sourced from actual research", "A catchy nickname", "A favorite color"], "correct": 1 },
+      { "q": "In an Empathy Map, which quadrant captures a user's internal monologue -- what they're privately thinking but not necessarily saying out loud?", "options": ["Says", "Thinks", "Does", "Feels"], "correct": 1 }
+    ]
+  },
+  "ch3_lab_ia": {
+    "title": "Quick Check: Sitemaps & Wireframes",
+    "questions": [
+      { "q": "Why does a wireframe deliberately leave out color, fonts, and real images?", "options": ["To save time since color is added automatically later", "So the conversation stays focused on layout and priority instead of visual style", "Because wireframing tools can't display color", "Colors are added only after the site is coded"], "correct": 1 },
+      { "q": "Why is it risky to wireframe only the desktop version of a page and assume mobile will \"just work\"?", "options": ["Mobile devices can't load wireframes", "A layout doesn't automatically resize usably -- a multi-column layout can become cramped or unreadable on a phone", "Desktop wireframes are always approved first by clients", "It isn't risky, mobile always adjusts automatically"], "correct": 1 },
+      { "q": "If a sitemap is just a flat list of every page with no grouping, what does the chapter say is actually wrong with it?", "options": ["Nothing -- flat sitemaps are the professional standard", "It needs more pages added", "It needs more structure -- a real site should summarize into about 5-7 clear top-level nav categories", "It should be converted into a wireframe instead"], "correct": 2 }
+    ]
+  },
+  "ch3_lab_strategy": {
+    "title": "Quick Check: SWOT & User Stories",
+    "questions": [
+      { "q": "\"Our site loads slowly\" and \"a bigger competitor might launch a leaderboard feature next month\" -- which SWOT categories do these belong to, respectively?", "options": ["Both are Threats", "Weakness, then Threat", "Threat, then Weakness", "Both are Weaknesses"], "correct": 1 },
+      { "q": "\"As a user, I want a dark mode\" is missing the piece that makes it a real User Story. What's missing?", "options": ["The user's name", "The \"so that\" goal explaining why they want it", "A due date", "A MoSCoW priority label"], "correct": 1 },
+      { "q": "In the MoSCoW method, what does it mean if every single feature on the list ends up labeled \"Must Have\"?", "options": ["The MVP is perfectly scoped", "The method has failed -- the whole point is forcing real trade-offs", "It means the project is ahead of schedule", "It means more features should be added"], "correct": 1 }
+    ]
+  }
+}
