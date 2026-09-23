@@ -22,6 +22,25 @@
 (function () {
     const POLL_MS = 900;
 
+    // hollywood.js/millionaire.js/smarter.js also expect window.currentUser
+    // (Firebase Auth's anonymous-sign-in object, { uid }) -- another global
+    // that was never redefined. Hollywood's uidX/uidO reconnect logic reads
+    // it directly with no fallback in several places (e.g. the exact "Still
+    // connecting to multiplayer" alert before every move), so a permanently
+    // undefined window.currentUser wasn't a transient loading state, it was
+    // a permanent dead end -- Millionaire/Smarter have a graceful temp-id
+    // fallback so they didn't hard-block, but still couldn't reconnect a
+    // returning player to their prior seat. Using the real logged-in
+    // student_id (not a random Firebase-style uid) is strictly better here:
+    // it's stable across reloads/reconnects for the same student, which is
+    // the entire point of this identifier.
+    try {
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        window.currentUser = { uid: storedUser.student_id ? String(storedUser.student_id) : ('guest_' + Math.random().toString(36).slice(2, 10)) };
+    } catch (e) {
+        window.currentUser = { uid: 'guest_' + Math.random().toString(36).slice(2, 10) };
+    }
+
     window.doc = function (db, ...segments) {
         return { path: segments.map(String).join('/') };
     };
