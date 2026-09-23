@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { getDbConnection } = require('../db');
+const { requireStaff } = require('../helpers');
 
 // Monique's site-maintenance practicum: a handful of real, one-time fixes
 // on the live site, each auto-verified against the actual filesystem/HTML
@@ -153,6 +154,26 @@ router.post('/practicum/complete-task', async (req, res) => {
         await connection.release();
         res.json({ success: true, verified: true, points: task.points });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to record score' }); }
+});
+
+// Written by scripts/check-monique-push.js (server-side cron, runs shortly
+// after B2 ends on any day it actually meets) -- staff-only, surfaced as a
+// banner on admin/tools.html. Deliberately read-only: this route never
+// deploys anything, it just lets Danylle see what showed up before she
+// decides to pull it live.
+const REVIEW_FILE = path.join(SITE_ROOT, 'data', 'monique-pending-review.json');
+
+router.get('/admin/monique-pending-review', requireStaff, (req, res) => {
+    try {
+        res.json({ pending: JSON.parse(fs.readFileSync(REVIEW_FILE, 'utf8')) });
+    } catch (e) {
+        res.json({ pending: null });
+    }
+});
+
+router.post('/admin/monique-pending-review/dismiss', requireStaff, (req, res) => {
+    try { fs.unlinkSync(REVIEW_FILE); } catch (e) { /* already gone */ }
+    res.json({ success: true });
 });
 
 module.exports = router;
