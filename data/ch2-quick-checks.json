@@ -1,0 +1,26 @@
+{
+  "ch2_lab_ip": {
+    "title": "Quick Check: Copyright, Trademark & Patent",
+    "questions": [
+      { "q": "Which of the Big Three IP protections is automatic the moment you create the work, with no registration required?", "options": ["Trademark", "Patent", "Copyright", "None of them are automatic"], "correct": 2 },
+      { "q": "A patent protects a new invention or process. About how long does it last before entering the Public Domain?", "options": ["Your lifetime + 70 years", "Indefinitely, as long as it's renewed", "About 20 years", "It never expires"], "correct": 2 },
+      { "q": "Marisol wants to stop competitors from using a similar logo to confuse her customers. Which protection does she actually need?", "options": ["Copyright", "Trademark", "Patent", "None -- logos aren't protectable"], "correct": 1 }
+    ]
+  },
+  "ch2_lab_https": {
+    "title": "Quick Check: HTTPS & the SSL/TLS Handshake",
+    "questions": [
+      { "q": "In the SSL/TLS Handshake, what does the browser use the server's Public Key for?", "options": ["To decrypt the server's Private Key", "To encrypt the Session Key it just created", "To register the domain name", "To verify the site's trademark"], "correct": 1 },
+      { "q": "GDPR (Europe) and Nevada's SB220 both regulate data collection, but they use opposite defaults. Which one requires a user's specific consent BEFORE data can be collected?", "options": ["Nevada SB220 (Opt-Out)", "GDPR (Opt-In)", "Both require consent first", "Neither requires consent"], "correct": 1 },
+      { "q": "Why does a site with no login or forms still need HTTPS, according to the chapter?", "options": ["It doesn't -- HTTPS is only for forms and logins", "It prevents eavesdroppers from seeing what a visitor is browsing, and browsers flag HTTP-only sites as \"Not Secure\"", "It's required only for e-commerce sites", "It makes the site load faster"], "correct": 1 }
+    ]
+  },
+  "ch2_lab_a11y": {
+    "title": "Quick Check: Accessibility (a11y)",
+    "questions": [
+      { "q": "What does the \"P\" in the POUR principles stand for?", "options": ["Predictable", "Portable", "Perceivable", "Practical"], "correct": 2 },
+      { "q": "What is the minimum WCAG color contrast ratio required for normal-sized text?", "options": ["2:1", "3:1", "4.5:1", "10:1"], "correct": 2 },
+      { "q": "In the Domino's Pizza lawsuit referenced in the chapter, what was the actual legal outcome?", "options": ["Domino's won, since accessibility rules only apply to government sites", "The case was dismissed before trial", "Domino's lost, all the way up through the Supreme Court declining to hear their appeal", "The lawsuit was settled out of court with no ruling"], "correct": 2 }
+    ]
+  }
+}
