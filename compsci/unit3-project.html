@@ -62,22 +62,100 @@
                 <p class="text-muted small mb-3"><i class="fas fa-circle-info me-1"></i>Each stage links to the chapter section that actually teaches how to do it — do that first if you haven't already. Work through them in order — each one hands off to the next.</p>
                 <ol class="mb-0">
                     <li class="mb-4">
-                        <strong>Stage 1 — Tab &ldquo;Decode the Feed&rdquo;:</strong> Byte Size Games' engine logs player events as raw binary/hex codes instead of plain text, to save bandwidth — an item-pickup code, a player-status code, a cosmetic color code like a hex value. Build a decoder key: a working reference table converting at least 8 real codes across binary, hexadecimal, decimal, and their real ASCII/Unicode character meaning, so the rest of the studio can actually read the engine's raw logs.
+                        <strong>Stage 1 — Tab &ldquo;Decode the Feed&rdquo;:</strong> Byte Size Games' engine logs player events as raw binary/hex/decimal codes instead of plain text, to save bandwidth — item-rarity flags, player-status flags. Use the 8 raw codes in the <strong>Raw Data</strong> section below (copy them into your sheet) and build a decoder key: a working reference table converting each one across binary, hexadecimal, decimal, and its real ASCII character meaning, so the rest of the studio can actually read the engine's raw logs.
                         <div class="mt-1"><a href="/compsci/language_of_computers.html#section-5-5" target="_blank" rel="noopener">How to: Ch 5.5, Doing This in Google Sheets &raquo;</a></div>
                     </li>
                     <li class="mb-4">
-                        <strong>Stage 2 — Tab &ldquo;Organize the Player Data&rdquo;:</strong> Now that you can read the engine's codes, the studio hands you a real player dataset — scores, playtime, item pickups, whatever fits the codes you just decoded (self-generate realistic rows if you don't have a real export; at least 15 players/rows). Organize that <em>same</em> dataset two different ways — e.g. one big flat table vs. split into related tables — and write out the real tradeoffs of each: speed, size, ease of updating. The lead engineer is going to use your recommendation to decide how the real database gets built.
+                        <strong>Stage 2 — Tab &ldquo;Organize the Player Data&rdquo;:</strong> Now that you can read the engine's codes, the studio hands you their real <strong>Player Roster</strong> (20 players — copy it from the <strong>Raw Data</strong> section below into this tab). Organize that <em>same</em> dataset two different ways — e.g. one big flat table vs. split into related tables (like a separate Regions table linked by Region code) — and write out the real tradeoffs of each: speed, size, ease of updating. The lead engineer is going to use your recommendation to decide how the real database gets built.
                         <div class="mt-1"><a href="/compsci/storing_data.html#section-6-1" target="_blank" rel="noopener">How to: Ch 6.1, Organizing Data &raquo;</a></div>
                     </li>
                     <li class="mb-4">
-                        <strong>Stage 3 — Tab &ldquo;Studio Dashboard&rdquo;:</strong> Using that <em>same</em> player dataset from Stage 2, build a dashboard with at least 2 real charts driven by live formulas (SUM, AVERAGE, COUNTIF, etc.) — not typed-in numbers — that the studio's producer could actually check every week to see how the game's doing.
+                        <strong>Stage 3 — Tab &ldquo;Studio Dashboard&rdquo;:</strong> Using that <em>same</em> Player Roster from Stage 2, build a dashboard with at least 2 real charts driven by live formulas (SUM, AVERAGE, COUNTIF, etc.) — not typed-in numbers — that the studio's producer could actually check every week to see how the game's doing.
                         <div class="mt-1"><a href="/compsci/mastering_spreadsheets.html#section-7-1" target="_blank" rel="noopener">How to: Ch 7.1–7.2, Formulas &amp; Data Visualisation &raquo;</a></div>
                     </li>
                     <li class="mb-0">
-                        <strong>Stage 4 — Tab &ldquo;Predict What's Next&rdquo;:</strong> Based on a trend you can actually see in your Stage 3 dashboard, build a simple formula-based model that predicts a real future outcome for that <em>same</em> data (e.g. next week's active players, or whether a player with a given pattern is likely to keep playing). Then write a sentence checking whether the prediction actually held up against real or plausible follow-up data.
+                        <strong>Stage 4 — Tab &ldquo;Predict What's Next&rdquo;:</strong> Copy the <strong>Daily Active Players</strong> table from the <strong>Raw Data</strong> section below into this tab — it's the studio's real login activity for the last 14 days. Build a simple formula-based model that predicts Day 15 and Day 16's active player counts from that trend, then write a sentence checking your prediction against a plausible actual value.
                         <div class="mt-1"><a href="/compsci/computational_modeling.html#section-8-1" target="_blank" rel="noopener">How to: Ch 8.1, Building a Model &raquo;</a></div>
                     </li>
                 </ol>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-secondary text-white fw-bold"><i class="fas fa-table me-2"></i>Raw Data (copy these into your workbook)</div>
+            <div class="card-body p-4">
+                <p class="text-muted small">Select each table below and copy/paste it directly into the matching tab in your own Google Sheet — this is the same data every student in the class starts from, so Stage 1's codes, the Stage 2 roster, and the Stage 4 login trend are all real, given data, not something you need to invent.</p>
+
+                <h6 class="fw-bold text-primary mt-4">For Stage 1 — Raw Engine Codes</h6>
+                <div class="table-responsive">
+                <table class="table table-sm table-bordered small">
+                    <thead class="table-light"><tr><th>Raw Code</th><th>Given As</th><th>Flag Type</th></tr></thead>
+                    <tbody>
+                        <tr><td>67</td><td>Decimal</td><td>Item Rarity</td></tr>
+                        <tr><td>52</td><td>Hex</td><td>Item Rarity</td></tr>
+                        <tr><td>1000101</td><td>Binary</td><td>Item Rarity</td></tr>
+                        <tr><td>76</td><td>Decimal</td><td>Item Rarity</td></tr>
+                        <tr><td>41</td><td>Hex</td><td>Player Status</td></tr>
+                        <tr><td>1001001</td><td>Binary</td><td>Player Status</td></tr>
+                        <tr><td>78</td><td>Decimal</td><td>Player Status</td></tr>
+                        <tr><td>56</td><td>Hex</td><td>Player Status</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p class="text-muted small mb-0"><i class="fas fa-lightbulb me-1"></i>Each code's decoded character is a one-letter flag Byte Size Games actually uses in the Player Roster below — C/R/E/L for item rarity (Common/Rare/Epic/Legendary) and A/I/N/V for player status (Active/Inactive/New/VIP). Figuring out what each code decodes to is part of Stage 1 — don't just copy this hint table, use it to check your own conversion work.</p>
+
+                <h6 class="fw-bold text-primary mt-4">For Stages 2 &amp; 3 — Player Roster (20 players)</h6>
+                <div class="table-responsive">
+                <table class="table table-sm table-bordered small">
+                    <thead class="table-light"><tr><th>Player ID</th><th>Username</th><th>Region</th><th>Sessions</th><th>Total Playtime (min)</th><th>High Score</th><th>Rarest Item</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td>P001</td><td>pixelpioneer</td><td>NA</td><td>42</td><td>1860</td><td>9840</td><td>L</td><td>V</td></tr>
+                        <tr><td>P002</td><td>byteblaster99</td><td>EU</td><td>18</td><td>540</td><td>4210</td><td>C</td><td>A</td></tr>
+                        <tr><td>P003</td><td>questcrafter</td><td>NA</td><td>65</td><td>2705</td><td>11200</td><td>L</td><td>V</td></tr>
+                        <tr><td>P004</td><td>shadowhopper</td><td>APAC</td><td>5</td><td>95</td><td>820</td><td>C</td><td>N</td></tr>
+                        <tr><td>P005</td><td>glitchgremlin</td><td>EU</td><td>33</td><td>1420</td><td>7650</td><td>R</td><td>A</td></tr>
+                        <tr><td>P006</td><td>nova_striker</td><td>NA</td><td>2</td><td>40</td><td>310</td><td>C</td><td>I</td></tr>
+                        <tr><td>P007</td><td>pixelpioneer2</td><td>NA</td><td>29</td><td>980</td><td>6100</td><td>E</td><td>A</td></tr>
+                        <tr><td>P008</td><td>drift_kingz</td><td>APAC</td><td>51</td><td>2210</td><td>10450</td><td>L</td><td>V</td></tr>
+                        <tr><td>P009</td><td>echo_walker</td><td>EU</td><td>1</td><td>20</td><td>150</td><td>C</td><td>N</td></tr>
+                        <tr><td>P010</td><td>rustyrocket</td><td>NA</td><td>22</td><td>760</td><td>5300</td><td>R</td><td>A</td></tr>
+                        <tr><td>P011</td><td>mapleminer</td><td>NA</td><td>8</td><td>210</td><td>1450</td><td>C</td><td>I</td></tr>
+                        <tr><td>P012</td><td>zenithzee</td><td>APAC</td><td>47</td><td>1990</td><td>9200</td><td>E</td><td>A</td></tr>
+                        <tr><td>P013</td><td>frostbyte_jr</td><td>EU</td><td>13</td><td>330</td><td>2600</td><td>R</td><td>A</td></tr>
+                        <tr><td>P014</td><td>voidrunner</td><td>NA</td><td>38</td><td>1650</td><td>8400</td><td>E</td><td>A</td></tr>
+                        <tr><td>P015</td><td>copperclaw</td><td>APAC</td><td>3</td><td>60</td><td>410</td><td>C</td><td>N</td></tr>
+                        <tr><td>P016</td><td>lunarlacer</td><td>EU</td><td>60</td><td>2540</td><td>11800</td><td>L</td><td>V</td></tr>
+                        <tr><td>P017</td><td>stormsailor</td><td>NA</td><td>16</td><td>500</td><td>3700</td><td>R</td><td>A</td></tr>
+                        <tr><td>P018</td><td>ashen_ace</td><td>APAC</td><td>0</td><td>10</td><td>0</td><td>C</td><td>I</td></tr>
+                        <tr><td>P019</td><td>quillquake</td><td>EU</td><td>25</td><td>890</td><td>5900</td><td>E</td><td>A</td></tr>
+                        <tr><td>P020</td><td>tidaltempo</td><td>NA</td><td>44</td><td>1900</td><td>9500</td><td>L</td><td>V</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h6 class="fw-bold text-primary mt-4">For Stage 4 — Daily Active Players (last 14 days)</h6>
+                <div class="table-responsive">
+                <table class="table table-sm table-bordered small">
+                    <thead class="table-light"><tr><th>Day</th><th>Active Players</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>210</td></tr>
+                        <tr><td>2</td><td>224</td></tr>
+                        <tr><td>3</td><td>219</td></tr>
+                        <tr><td>4</td><td>238</td></tr>
+                        <tr><td>5</td><td>251</td></tr>
+                        <tr><td>6</td><td>247</td></tr>
+                        <tr><td>7</td><td>265</td></tr>
+                        <tr><td>8</td><td>272</td></tr>
+                        <tr><td>9</td><td>269</td></tr>
+                        <tr><td>10</td><td>281</td></tr>
+                        <tr><td>11</td><td>296</td></tr>
+                        <tr><td>12</td><td>290</td></tr>
+                        <tr><td>13</td><td>305</td></tr>
+                        <tr><td>14</td><td>312</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p class="text-muted small mb-0"><i class="fas fa-lightbulb me-1"></i>This trend is steadily climbing but noisy day to day &mdash; a good Stage 4 model doesn't just guess the next number, it uses a real formula (like a moving average or a trendline formula) to predict Day 15 and Day 16.</p>
             </div>
         </div>
 
