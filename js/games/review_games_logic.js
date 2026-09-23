@@ -256,11 +256,20 @@ async function loadGameDataFromPool() {
         buildGameShells();
         window.currentRoom = (new URLSearchParams(window.location.search)).get('room') || 'solo';
 
-        // Pass null for db/appId — game engines use window.setDoc / window.onSnapshot shims
-        if (window.Jeopardy)    window.Jeopardy.setup(null, null, window.currentRoom);
-        if (window.Hollywood)   window.Hollywood.setup(null, null, window.currentRoom);
-        if (window.Millionaire) window.Millionaire.setup(null, null, window.currentRoom);
-        if (window.Smarter)     window.Smarter.setup(null, null, window.currentRoom);
+        // db/appId are meaningless now (no real Firestore instance exists --
+        // see js/games/firestore-shim.js), but every engine's ENTIRE
+        // multiplayer branch is gated behind `roomID && roomID !== "solo"
+        // && dbRef`, so passing null here (as this used to) made "join
+        // room" a complete no-op regardless of what room code was typed in.
+        // A truthy placeholder is all that's actually needed -- the engines
+        // never read db/appId for anything except building the shim's
+        // opaque room-path string.
+        const dbPlaceholder = {};
+        const appIdPlaceholder = 'chs-review-games';
+        if (window.Jeopardy)    window.Jeopardy.setup(dbPlaceholder, appIdPlaceholder, window.currentRoom);
+        if (window.Hollywood)   window.Hollywood.setup(dbPlaceholder, appIdPlaceholder, window.currentRoom);
+        if (window.Millionaire) window.Millionaire.setup(dbPlaceholder, appIdPlaceholder, window.currentRoom);
+        if (window.Smarter)     window.Smarter.setup(dbPlaceholder, appIdPlaceholder, window.currentRoom);
         if (window.WordGames)   window.WordGames.setup();
 
         if (document.getElementById('word-games')) document.getElementById('word-games').classList.remove('d-none');
