@@ -40,25 +40,32 @@
         </div>
 
         <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-warning text-dark fw-bold"><i class="fas fa-drafting-compass me-2"></i>The Scenario</div>
+            <div class="card-body p-4">
+                <p class="mb-0">You're a software architect at a small dev studio. Before any engineer on your team is allowed to write a single line of code, they need a complete <strong>design blueprint</strong> from you &mdash; one document that walks them from "here's the problem" all the way to "here's proof it actually works," with nothing assumed and nothing skipped. One algorithm, one blueprint, five connected stages &mdash; each one building directly on the last.</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-primary text-white fw-bold"><i class="fas fa-bullseye me-2"></i>Objective</div>
             <div class="card-body p-4">
-                <p>Design a complete algorithm for a real problem &mdash; decomposed, written in pseudocode, with your control-structure choices explicitly justified. This is a design document, not a coding assignment; no code editor required.</p>
+                <p>Design a complete algorithm for a real problem &mdash; decomposed, written in pseudocode, with your control-structure choices explicitly justified, and proven correct by hand. The same problem and the same pseudocode carry through every stage below; nothing here stands alone. This is a design document, not a coding assignment; no code editor required.</p>
                 <p class="mb-0"><strong>Deliverable:</strong> A Google Slides deck, minimum 6 slides. Turn in a PDF export or a text file with your share link below.</p>
                 <p class="mb-0 mt-2 small text-muted"><i class="fas fa-circle-info me-1"></i>New to Google Slides? <a href="/compsci/intro_to_office_software.html#section-4-0" target="_blank" rel="noopener">Start here: Ch 4.0, The Office Suite, From Zero &raquo;</a></p>
             </div>
         </div>
 
         <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-info text-white fw-bold"><i class="fas fa-list-ol me-2"></i>Steps</div>
+            <div class="card-header bg-info text-white fw-bold"><i class="fas fa-list-ol me-2"></i>The Five Stages (one blueprint, start to finish)</div>
             <div class="card-body p-4">
-                <p class="text-muted small mb-3"><i class="fas fa-circle-info me-1"></i>Each step below links to the chapter section that actually teaches how to do it &mdash; do that first if you haven't already.</p>
+                <p class="text-muted small mb-3"><i class="fas fa-circle-info me-1"></i>Each stage links to the chapter section that actually teaches how to do it &mdash; do that first if you haven't already. Every stage after the first works directly with what you produced in the one before it.</p>
                 <ol class="mb-0">
-                    <li class="mb-3">Pick a real problem to solve (a simple game, a quiz scorer, a class-schedule picker, etc.).</li>
-                    <li class="mb-3"><strong>Decomposition Tree</strong> &mdash; a visual breakdown of the problem into its smaller subproblems. <a href="/compsci/problem_solving_algorithms.html#section-9-1" target="_blank" rel="noopener">How to: Ch 9.1, Decomposition &raquo;</a></li>
-                    <li class="mb-3"><strong>Pseudocode</strong> &mdash; write out the full algorithm in pseudocode, not real code. <a href="/compsci/problem_solving_algorithms.html#section-9-2" target="_blank" rel="noopener">How to: Ch 9.2, Algorithms &amp; Pseudocode &raquo;</a></li>
-                    <li class="mb-3"><strong>Control Structure Justification</strong> &mdash; your pseudocode must include at least one decision (if/else) and one loop; explain why you chose that specific structure over an alternative. <a href="/compsci/control_structures_events.html#section-10-1" target="_blank" rel="noopener">How to: Ch 10.1, Conditionals &raquo;</a> &middot; <a href="/compsci/control_structures_events.html#section-10-2" target="_blank" rel="noopener">Ch 10.2, Loops &amp; Iteration &raquo;</a></li>
-                    <li class="mb-3"><strong>Event-Driven Design</strong> &mdash; describe one real user action that would trigger your algorithm, and exactly what response follows. <a href="/compsci/control_structures_events.html#section-10-3" target="_blank" rel="noopener">How to: Ch 10.3, Events That Trigger Code &raquo;</a></li>
-                    <li class="mb-0"><strong>Trace Walkthrough</strong> &mdash; hand-run your algorithm with 2 different sample inputs and show the output for each, step by step. <a href="/compsci/control_structures_events.html#section-10-4" target="_blank" rel="noopener">How to: Ch 10.4, Lists &amp; Systematic Testing &raquo;</a></li>
+                    <li class="mb-3">Pick a real problem to solve (a simple game, a quiz scorer, a class-schedule picker, etc.) &mdash; this is the one problem every stage below is built on.</li>
+                    <li class="mb-3"><strong>Stage 1 &mdash; Decomposition Tree</strong> &mdash; a visual breakdown of your problem into its smaller subproblems. <a href="/compsci/problem_solving_algorithms.html#section-9-1" target="_blank" rel="noopener">How to: Ch 9.1, Decomposition &raquo;</a></li>
+                    <li class="mb-3"><strong>Stage 2 &mdash; Pseudocode</strong> &mdash; write the full algorithm in pseudocode for the exact subproblems you just mapped in Stage 1, not real code. <a href="/compsci/problem_solving_algorithms.html#section-9-2" target="_blank" rel="noopener">How to: Ch 9.2, Algorithms &amp; Pseudocode &raquo;</a></li>
+                    <li class="mb-3"><strong>Stage 3 &mdash; Control Structure Justification</strong> &mdash; the pseudocode you just wrote in Stage 2 must include at least one decision (if/else) and one loop; explain why you chose that specific structure over an alternative. <a href="/compsci/control_structures_events.html#section-10-1" target="_blank" rel="noopener">How to: Ch 10.1, Conditionals &raquo;</a> &middot; <a href="/compsci/control_structures_events.html#section-10-2" target="_blank" rel="noopener">Ch 10.2, Loops &amp; Iteration &raquo;</a></li>
+                    <li class="mb-3"><strong>Stage 4 &mdash; Event-Driven Design</strong> &mdash; describe one real user action that would trigger the same algorithm from Stage 2, and exactly what response follows. <a href="/compsci/control_structures_events.html#section-10-3" target="_blank" rel="noopener">How to: Ch 10.3, Events That Trigger Code &raquo;</a></li>
+                    <li class="mb-0"><strong>Stage 5 &mdash; Trace Walkthrough</strong> &mdash; hand-run the exact pseudocode from Stage 2 with 2 different sample inputs and show the output for each, step by step &mdash; the proof your blueprint actually works. <a href="/compsci/control_structures_events.html#section-10-4" target="_blank" rel="noopener">How to: Ch 10.4, Lists &amp; Systematic Testing &raquo;</a></li>
                 </ol>
             </div>
         </div>
@@ -71,11 +78,11 @@
                  data-course="CS"
                  data-exam-id="Unit4-Project"
                  data-rubric='[
-                    {"key":"decomposition","label":"Decomposition","description":"The problem is broken into real, non-trivial subproblems that together cover the whole problem."},
-                    {"key":"pseudocode","label":"Pseudocode Correctness","description":"The pseudocode is complete, logically correct, and readable by someone who did not write it."},
-                    {"key":"control_justification","label":"Control Structure Justification","description":"Explains a real tradeoff for why this decision/loop structure was chosen over an alternative, not just because it works."},
-                    {"key":"event_driven","label":"Event-Driven Design","description":"Clearly maps one real trigger to one real response in the algorithm."},
-                    {"key":"trace","label":"Trace Walkthrough","description":"Both sample inputs are hand-traced correctly, step by step, matching what the pseudocode would actually produce."},
+                    {"key":"decomposition","label":"Stage 1: Decomposition","description":"The problem is broken into real, non-trivial subproblems that together cover the whole problem."},
+                    {"key":"pseudocode","label":"Stage 2: Pseudocode Correctness","description":"The pseudocode is complete, logically correct, and readable by someone who did not write it."},
+                    {"key":"control_justification","label":"Stage 3: Control Structure Justification","description":"Explains a real tradeoff for why this decision/loop structure was chosen over an alternative, not just because it works."},
+                    {"key":"event_driven","label":"Stage 4: Event-Driven Design","description":"Clearly maps one real trigger to one real response in the algorithm."},
+                    {"key":"trace","label":"Stage 5: Trace Walkthrough","description":"Both sample inputs are hand-traced correctly, step by step, matching what the pseudocode would actually produce."},
                     {"key":"edge_case","label":"Edge Case Trace (Bonus)","description":"A third trace input is an edge case (empty input, zero, a boundary value) and is handled correctly.","bonus":true}
                  ]'>
               <div class="card-body small p-4 text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading grading tool&hellip;</div>
