@@ -254,8 +254,18 @@ async function checkRetakeClearance(connection, studentId, examId, preloadedAtte
 // "Unit3-Pre", "Unit3-Pre-Score"; WD: "Ch5-Exam", "Ch5 Pre-Assessment [15
 // pts]", "...-Score") -- deliberately narrow so regular assignments,
 // projects, timeclock grading, etc. (which never match this) keep working
-// even while this is on.
+// even while this is on. Used by the outage kill-switch below, where
+// pausing everything (including pre-tests) during a real DB-sync
+// emergency is the intended behavior.
 const TEST_EXAM_ID_PATTERN = /-Exam$|-Pre$|-Pre-Score$|Pre-Assessment/i;
+
+// The 7am-4pm school-hours window applies to real unit exams ONLY, not
+// pre-tests/pre-assessments -- those are meant to be assigned as prep
+// work due before class (e.g. "Ch10 Pre-Scale and Pre-Assessment due
+// Friday before you come to class"), which requires students to actually
+// be able to take them from home. Kept separate from the broader
+// TEST_EXAM_ID_PATTERN above on purpose.
+const SCHOOL_HOURS_ONLY_PATTERN = /-Exam$/i;
 
 router.post('/submit-exam', async (req, res) => {
     const { student_id, exam_id, score, total_points, question_details, chapter_title, report_type } = req.body;
@@ -288,7 +298,7 @@ router.post('/submit-exam', async (req, res) => {
         const connection = await getDbConnection();
         await ensureEnteredIcColumn(connection);
 
-        if (TEST_EXAM_ID_PATTERN.test(exam_id || '')) {
+        if (SCHOOL_HOURS_ONLY_PATTERN.test(exam_id || '')) {
             const windowStatus = await isTestingWindowOpen(connection);
             if (!windowStatus.ok) {
                 await connection.release();
