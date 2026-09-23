@@ -48,10 +48,11 @@
     <div>
       <i class="fas fa-code-branch me-2"></i>
       <span id="moniquePushText" class="fw-bold"></span>
-      <span class="d-block small text-muted mt-1">Checked automatically after B2 class. Review the diff on GitHub before you pull it onto the live server.</span>
+      <span class="d-block small text-muted mt-1">Checked automatically after B2 class. Review the diff on GitHub, then deploy it or just mark it reviewed.</span>
     </div>
     <div class="d-flex gap-2 flex-shrink-0">
       <a id="moniquePushCompareLink" href="#" target="_blank" class="btn btn-sm btn-warning fw-bold"><i class="fas fa-external-link-alt me-1"></i>Review on GitHub</a>
+      <button type="button" id="moniquePushDeploy" class="btn btn-sm btn-success fw-bold"><i class="fas fa-cloud-upload-alt me-1"></i>Deploy Live</button>
       <button type="button" id="moniquePushDismiss" class="btn btn-sm btn-outline-secondary">Mark Reviewed</button>
     </div>
   </div>
@@ -104,6 +105,30 @@
             await fetch('/api/admin/monique-pending-review/dismiss', { method: 'POST' });
         } catch (e) {}
         document.getElementById('moniquePushBanner').classList.add('d-none');
+    });
+
+    document.getElementById('moniquePushDeploy').addEventListener('click', async () => {
+        const btn = document.getElementById('moniquePushDeploy');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deploying…';
+        try {
+            const res = await fetch('/api/admin/monique-pending-review/deploy', { method: 'POST' });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.error || 'Deploy failed');
+
+            if (!data.deployed) {
+                alert('Already up to date -- nothing to deploy.');
+            } else if (data.needsRestart) {
+                alert(`Deployed ${data.before_sha.slice(0,7)} → ${data.after_sha.slice(0,7)}.\n\nThis touched server code, so the app needs a manual restart to pick it up -- ask Claude to restart guild-server.`);
+            } else {
+                alert(`Deployed ${data.before_sha.slice(0,7)} → ${data.after_sha.slice(0,7)}. Live now.`);
+            }
+            document.getElementById('moniquePushBanner').classList.add('d-none');
+        } catch (e) {
+            alert('Deploy failed: ' + e.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-cloud-upload-alt me-1"></i>Deploy Live';
+        }
     });
 
     loadMoniquePushBanner();

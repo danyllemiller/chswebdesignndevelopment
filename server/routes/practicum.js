@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 const { getDbConnection } = require('../db');
 const { requireStaff } = require('../helpers');
 
@@ -174,6 +175,35 @@ router.get('/admin/monique-pending-review', requireStaff, (req, res) => {
 router.post('/admin/monique-pending-review/dismiss', requireStaff, (req, res) => {
     try { fs.unlinkSync(REVIEW_FILE); } catch (e) { /* already gone */ }
     res.json({ success: true });
+});
+
+// Runs the exact `git pull` deploy step this whole project already does by
+// hand after every review -- from the banner instead of an SSH session.
+// Deliberately does NOT restart the app itself, even if the pull touched
+// server/ -- this route runs inside the very process a self-restart would
+// kill mid-request, and Monique's practicum has no reason to ever touch
+// server code in the first place. It just flags that case so a restart can
+// be done deliberately instead of attempted unattended.
+router.post('/admin/monique-pending-review/deploy', requireStaff, (req, res) => {
+    try {
+        const beforeSha = execSync('git rev-parse HEAD', { cwd: SITE_ROOT, encoding: 'utf8' }).trim();
+        execSync('git pull', { cwd: SITE_ROOT, encoding: 'utf8' });
+        const afterSha = execSync('git rev-parse HEAD', { cwd: SITE_ROOT, encoding: 'utf8' }).trim();
+
+        if (beforeSha === afterSha) {
+            return res.json({ success: true, deployed: false, message: 'Already up to date -- nothing to deploy.' });
+        }
+
+        const changedFiles = execSync(`git diff --name-only ${beforeSha} ${afterSha}`, { cwd: SITE_ROOT, encoding: 'utf8' });
+        const needsRestart = changedFiles.split('\n').some(f => f.startsWith('server/'));
+
+        try { fs.unlinkSync(REVIEW_FILE); } catch (e) { /* already gone */ }
+
+        res.json({ success: true, deployed: true, before_sha: beforeSha, after_sha: afterSha, needsRestart });
+    } catch (err) {
+        console.error('[practicum] deploy failed', err);
+        res.status(500).json({ error: 'git pull failed: ' + err.message });
+    }
 });
 
 module.exports = router;
