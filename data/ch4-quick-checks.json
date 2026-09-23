@@ -1,0 +1,26 @@
+{
+  "ch4_lab_uiux": {
+    "title": "Quick Check: UI vs. UX & Elements of Design",
+    "questions": [
+      { "q": "A UI Designer asks \"Is this beautiful and on-brand?\" A UX Designer asks a different question. What is it?", "options": ["\"Is this easy? Can the user achieve their goal without thinking?\"", "\"What font should we use?\"", "\"Is this beautiful and on-brand?\" -- they ask the same question", "\"What color is trending this year?\""], "correct": 0 },
+      { "q": "A designer says a button \"needs more contrast\" but only changes its hue, not how light or dark it is. Will that fix the contrast problem?", "options": ["Yes, hue changes always fix contrast", "Not necessarily -- contrast is primarily a Value problem, not a Color/hue problem", "No, contrast can never be fixed with color", "Yes, but only for large text"], "correct": 1 },
+      { "q": "In the \"Ketchup Bottle\" analogy, the glass bottle looks beautiful but requires smacking the bottom to get ketchup out. What does that represent?", "options": ["High UI, Low UX", "Low UI, High UX", "High UI, High UX", "Low UI, Low UX"], "correct": 0 }
+    ]
+  },
+  "ch4_lab_gestalt": {
+    "title": "Quick Check: Gestalt & Core UX Principles",
+    "questions": [
+      { "q": "A homepage has one big photo on the left and, on the right, a headline plus two paragraphs with breathing room around them. Is this page unbalanced?", "options": ["Yes, it needs a mirror-image layout to be balanced", "No -- this is asymmetrical balance, where visual weight is offset without being a mirror image", "Yes, only symmetrical layouts count as balanced", "Balance doesn't apply to layouts with images"], "correct": 1 },
+      { "q": "Which Gestalt principle explains why navigation links that all share the same color are instantly perceived as \"the same kind of thing\"?", "options": ["Proximity", "Similarity", "Closure", "Figure/Ground"], "correct": 1 },
+      { "q": "Showing a \"Success\" message after a user submits a form is an example of which Core Principle of Good UX?", "options": ["Clarity", "Consistency (Jakob's Law)", "Feedback", "Forgiveness"], "correct": 2 }
+    ]
+  },
+  "ch4_lab_colortype": {
+    "title": "Quick Check: Color Theory, Typography & White Space",
+    "questions": [
+      { "q": "In the 60-30-10 rule, what is the 10% Accent Color reserved for?", "options": ["Body text", "Background sections", "Call-to-Action buttons specifically", "Whichever color the designer likes best"], "correct": 2 },
+      { "q": "What's the difference between legibility and readability, as the chapter defines them?", "options": ["They're the same thing", "Legibility is whether letters are distinguishable (a font property); readability is whether a full paragraph is comfortable to read (a layout property)", "Legibility only applies to headings; readability only applies to body text", "Readability is about color; legibility is about size"], "correct": 1 },
+      { "q": "A complementary color scheme (colors directly opposite on the wheel) is best used for what, according to the chapter?", "options": ["Calm, cohesive backgrounds", "Making one CTA button impossible to miss, via maximum contrast", "The safest, most cohesive option for an entire site", "Avoiding all color entirely"], "correct": 1 }
+    ]
+  }
+}
