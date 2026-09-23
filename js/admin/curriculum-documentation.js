@@ -100,7 +100,7 @@ const CS_DOC_DATA = [
     work: [ ['Project: The System & Support Deck', 100] ] },
   { unit: 3, title: 'Unit 3: Data & Analysis', slug: 'cs-unit-3',
     standards: ['DA.S.1','DA.S.2','DA.CVT.1','DA.IM.1'],
-    work: [ ['Project: The Data Story Dashboard', 100] ] },
+    work: [ ['Project: The Player Data Pipeline', 100] ] },
   { unit: 4, title: 'Unit 4: Beg. Algorithm & Programming', slug: 'cs-unit-4',
     standards: ['AP.A.1','AP.C.1','AP.C.2'],
     work: [ ['Project: The Algorithm Design Blueprint', 100] ] },

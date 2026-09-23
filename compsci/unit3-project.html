@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Unit 3 Project: The Data Story Dashboard | CHS Computer Science</title>
+    <title>Unit 3 Project: The Player Data Pipeline | CHS Computer Science</title>
     <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
     <link href="/css/bootstrap.min.css" rel="stylesheet"/>
@@ -25,8 +25,8 @@
     <header class="text-center" style="background: linear-gradient(135deg, var(--primary-color), var(--tertiary-color)); border-radius: 0 0 20px 20px; padding: 3rem 2rem; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0, 0, 153, 0.2);">
         <div class="container">
             <span class="badge mb-2 px-3 py-2 fw-bold rounded-pill shadow-sm" style="background-color: var(--code-color); color: #ffffff;">Unit 3: Data &amp; Analysis &mdash; Project</span>
-            <h1 class="display-5 fw-bold mb-0 text-white" style="color: #ffffff !important;">The Data Story Dashboard</h1>
-            <p class="lead mt-2 opacity-100 text-white" style="color: #ffffff !important;">Built in Google Sheets. 100 points.</p>
+            <h1 class="display-5 fw-bold mb-0 text-white" style="color: #ffffff !important;">The Player Data Pipeline</h1>
+            <p class="lead mt-2 opacity-100 text-white" style="color: #ffffff !important;">You're the new data analyst at an indie game studio. Built in Google Sheets. 100 points.</p>
         </div>
     </header>
 
@@ -40,23 +40,43 @@
         </div>
 
         <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white fw-bold"><i class="fas fa-bullseye me-2"></i>The Scenario</div>
+            <div class="card-body p-4">
+                <p><strong>Byte Size Games</strong>, a small indie studio, just hired you as their first data analyst. Their game engine is live and generating real player data &mdash; but right now that data is either unreadable (raw binary/hex codes the engine logs to save space) or just sitting in a messy pile nobody can actually use. Your job over this project is to take that data through the same four stages every real data analyst does: <strong>decode it, organize it, visualize it, and use it to predict what happens next.</strong></p>
+                <p class="mb-0">This isn't 4 separate assignments &mdash; it's <strong>one pipeline, one dataset, four stages.</strong> The player dataset you build in Stage 2 is the exact same dataset your Stage 3 dashboard charts and your Stage 4 prediction are built from. If your dashboard is about player scores, your prediction has to be about player scores too &mdash; not a random new topic. Each tab should feel like the next step in the same investigation, not a fresh start.</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-primary text-white fw-bold"><i class="fas fa-bullseye me-2"></i>Objective</div>
             <div class="card-body p-4">
-                <p>Build a real, multi-tab Google Sheets workbook that translates raw bits into readable data, weighs real storage tradeoffs, visualizes a dataset you actually care about, and tests a simple prediction against it.</p>
-                <p class="mb-0"><strong>Deliverable:</strong> A Google Sheets workbook with 4 tabs (see below). Turn in a PDF export or a text file with your share link below.</p>
+                <p>Build a real, 4-tab Google Sheets workbook that tells <strong>one continuous story</strong> about Byte Size Games' player data: decode it, store it well, show it clearly, and predict from it.</p>
+                <p class="mb-0"><strong>Deliverable:</strong> A Google Sheets workbook with 4 tabs (see below), built around one player dataset that carries through all four. Turn in a PDF export or a text file with your share link below.</p>
                 <p class="mb-0 mt-2 small text-muted"><i class="fas fa-circle-info me-1"></i>New to spreadsheets entirely &mdash; rows, columns, cells? <a href="/compsci/mastering_spreadsheets.html#section-7-0a" target="_blank" rel="noopener">Start here: Spreadsheet Basics, From Zero &raquo;</a></p>
             </div>
         </div>
 
         <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-info text-white fw-bold"><i class="fas fa-list-ol me-2"></i>Steps (one tab each)</div>
+            <div class="card-header bg-info text-white fw-bold"><i class="fas fa-list-ol me-2"></i>The Four Stages (one tab each)</div>
             <div class="card-body p-4">
-                <p class="text-muted small mb-3"><i class="fas fa-circle-info me-1"></i>Each step below links to the chapter section that actually teaches how to do it — do that first if you haven't already.</p>
+                <p class="text-muted small mb-3"><i class="fas fa-circle-info me-1"></i>Each stage links to the chapter section that actually teaches how to do it — do that first if you haven't already. Work through them in order — each one hands off to the next.</p>
                 <ol class="mb-0">
-                    <li class="mb-3"><strong>Tab &ldquo;Bit Translator&rdquo;</strong> &mdash; build a working reference table converting at least 8 real values across binary, hexadecimal, decimal, and ASCII/Unicode character. <a href="/compsci/language_of_computers.html#section-5-5" target="_blank" rel="noopener">How to: Ch 5.5, Doing This in Google Sheets &raquo;</a></li>
-                    <li class="mb-3"><strong>Tab &ldquo;Storage Tradeoffs&rdquo;</strong> &mdash; pick a real dataset you care about (sports stats, a music library, game scores, etc.), organize it two different ways (e.g. one big flat table vs. split into related tables), and write out the real pros/cons of each &mdash; speed, size, ease of updating. <a href="/compsci/storing_data.html#section-6-1" target="_blank" rel="noopener">How to: Ch 6.1, Organizing Data &raquo;</a></li>
-                    <li class="mb-3"><strong>Tab &ldquo;Dashboard&rdquo;</strong> &mdash; build at least 2 real charts from your dataset using actual formulas (SUM, AVERAGE, COUNTIF, etc.) &mdash; not typed-in numbers. <a href="/compsci/mastering_spreadsheets.html#section-7-1" target="_blank" rel="noopener">How to: Ch 7.1&ndash;7.2, Formulas &amp; Data Visualisation &raquo;</a></li>
-                    <li class="mb-0"><strong>Tab &ldquo;Model &amp; Predict&rdquo;</strong> &mdash; build a simple formula-based model that predicts an outcome from your data, then write a sentence checking whether the prediction actually held up against real or plausible data. <a href="/compsci/computational_modeling.html#section-8-1" target="_blank" rel="noopener">How to: Ch 8.1, Building a Model &raquo;</a></li>
+                    <li class="mb-4">
+                        <strong>Stage 1 — Tab &ldquo;Decode the Feed&rdquo;:</strong> Byte Size Games' engine logs player events as raw binary/hex codes instead of plain text, to save bandwidth — an item-pickup code, a player-status code, a cosmetic color code like a hex value. Build a decoder key: a working reference table converting at least 8 real codes across binary, hexadecimal, decimal, and their real ASCII/Unicode character meaning, so the rest of the studio can actually read the engine's raw logs.
+                        <div class="mt-1"><a href="/compsci/language_of_computers.html#section-5-5" target="_blank" rel="noopener">How to: Ch 5.5, Doing This in Google Sheets &raquo;</a></div>
+                    </li>
+                    <li class="mb-4">
+                        <strong>Stage 2 — Tab &ldquo;Organize the Player Data&rdquo;:</strong> Now that you can read the engine's codes, the studio hands you a real player dataset — scores, playtime, item pickups, whatever fits the codes you just decoded (self-generate realistic rows if you don't have a real export; at least 15 players/rows). Organize that <em>same</em> dataset two different ways — e.g. one big flat table vs. split into related tables — and write out the real tradeoffs of each: speed, size, ease of updating. The lead engineer is going to use your recommendation to decide how the real database gets built.
+                        <div class="mt-1"><a href="/compsci/storing_data.html#section-6-1" target="_blank" rel="noopener">How to: Ch 6.1, Organizing Data &raquo;</a></div>
+                    </li>
+                    <li class="mb-4">
+                        <strong>Stage 3 — Tab &ldquo;Studio Dashboard&rdquo;:</strong> Using that <em>same</em> player dataset from Stage 2, build a dashboard with at least 2 real charts driven by live formulas (SUM, AVERAGE, COUNTIF, etc.) — not typed-in numbers — that the studio's producer could actually check every week to see how the game's doing.
+                        <div class="mt-1"><a href="/compsci/mastering_spreadsheets.html#section-7-1" target="_blank" rel="noopener">How to: Ch 7.1–7.2, Formulas &amp; Data Visualisation &raquo;</a></div>
+                    </li>
+                    <li class="mb-0">
+                        <strong>Stage 4 — Tab &ldquo;Predict What's Next&rdquo;:</strong> Based on a trend you can actually see in your Stage 3 dashboard, build a simple formula-based model that predicts a real future outcome for that <em>same</em> data (e.g. next week's active players, or whether a player with a given pattern is likely to keep playing). Then write a sentence checking whether the prediction actually held up against real or plausible follow-up data.
+                        <div class="mt-1"><a href="/compsci/computational_modeling.html#section-8-1" target="_blank" rel="noopener">How to: Ch 8.1, Building a Model &raquo;</a></div>
+                    </li>
                 </ol>
             </div>
         </div>
@@ -69,11 +89,11 @@
                  data-course="CS"
                  data-exam-id="Unit3-Project"
                  data-rubric='[
-                    {"key":"bit_translator","label":"Bit Translator","description":"At least 8 values are correctly converted across binary, hex, decimal, and ASCII/Unicode, with no calculation errors."},
-                    {"key":"storage_tradeoffs","label":"Storage Tradeoffs","description":"Two real organization approaches are shown for the same dataset, with specific, real tradeoffs, not generic pros/cons."},
-                    {"key":"dashboard_charts","label":"Dashboard Charts","description":"At least 2 charts are built from live formulas (not hardcoded numbers) and are readable and labeled."},
-                    {"key":"model_validation","label":"Model &amp; Validation","description":"A real formula-based model makes a prediction, and the student writes a genuine check of whether it held up."},
-                    {"key":"organization","label":"Workbook Organization","description":"Tabs are clearly labeled and the workbook is easy for someone else to navigate without explanation."},
+                    {"key":"bit_translator","label":"Stage 1: Decode the Feed","description":"At least 8 values are correctly converted across binary, hex, decimal, and ASCII/Unicode, with no calculation errors."},
+                    {"key":"storage_tradeoffs","label":"Stage 2: Organize the Player Data","description":"Two real organization approaches are shown for the SAME player dataset carried through the rest of the workbook, with specific, real tradeoffs, not generic pros/cons."},
+                    {"key":"dashboard_charts","label":"Stage 3: Studio Dashboard","description":"At least 2 charts are built from live formulas (not hardcoded numbers), are readable and labeled, and visualize that SAME player dataset from Stage 2."},
+                    {"key":"model_validation","label":"Stage 4: Predict What's Next","description":"A real formula-based model predicts a future outcome for that SAME data (not a new, unrelated topic), and the student writes a genuine check of whether it held up."},
+                    {"key":"organization","label":"One Connected Pipeline","description":"This is one continuous story about one dataset, not four unrelated exercises stapled together — Stage 2's dataset is what Stage 3 charts and Stage 4 predicts from. Tabs are clearly labeled and easy for someone else to follow without explanation."},
                     {"key":"advanced_formula","label":"Advanced Formula (Bonus)","description":"Uses conditional formatting or an advanced formula (VLOOKUP, INDEX/MATCH, QUERY) anywhere in the workbook.","bonus":true}
                  ]'>
               <div class="card-body small p-4 text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading grading tool&hellip;</div>
@@ -92,7 +112,7 @@
                         <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
                         <select id="uploadAssignment" class="form-select border-success" required>
                             <option value="" disabled selected>Select an assignment...</option>
-                            <option value="Unit3-Project" data-label="Project: The Data Story Dashboard (100 pts)">Project: The Data Story Dashboard (100 pts)</option>
+                            <option value="Unit3-Project" data-label="Project: The Player Data Pipeline (100 pts)">Project: The Player Data Pipeline (100 pts)</option>
                         </select>
                     </div>
                     <div class="mb-3">
