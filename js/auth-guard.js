@@ -28,13 +28,36 @@ function getCourseGroup(sectionId = '', courseName = '') {
 
 function getPageCourse(currentPath = '') {
     const path = String(currentPath).toLowerCase();
+    // reviewGames/ is a shared folder holding both WD and CS chapter games
+    // with no course-indicating URL segment, so each side has to be listed
+    // by name -- this only had 6 of the 19 real CS chapters (plus none of
+    // the 7 csUnitNReview.html pages or the csReviewGames.html hub), so a
+    // CS student clicking almost any review game fell through to the
+    // wdPatterns catch-all below, got classified as a WD page, and got
+    // bounced straight back to their CS home page since they're not
+    // enrolled in WD. Keep this in sync with compsci/*.html -- same list
+    // that went stale in includes/navbar.html's WD/CS Review Games menus.
     const csPatterns = [
         'computerscience',
         'cs-interactive',
         'compscifinal',
-        '/reviewgames/how_computers_work',
+        '/reviewgames/csreviewgames',
+        '/reviewgames/csunit',
         '/reviewgames/essential_computer_skills',
+        '/reviewgames/ethics_privacy_law',
+        '/reviewgames/how_computers_work',
         '/reviewgames/intro_to_office_software',
+        '/reviewgames/language_of_computers',
+        '/reviewgames/mastering_spreadsheets',
+        '/reviewgames/computational_modeling',
+        '/reviewgames/problem_solving_algorithms',
+        '/reviewgames/control_structures_events',
+        '/reviewgames/culture_equity_bias',
+        '/reviewgames/ai_cross_disciplinary',
+        '/reviewgames/advanced_data_structures',
+        '/reviewgames/modularity_procedures',
+        '/reviewgames/software_development_lifecycle',
+        '/reviewgames/storing_data',
         '/reviewgames/how_the_internet_works',
         '/reviewgames/cybersecurity_threats',
         '/reviewgames/defending_systems',
