@@ -1,0 +1,26 @@
+{
+  "ch6_lab_hierarchy": {
+    "title": "Quick Check: Cascade &amp; Specificity",
+    "questions": [
+      { "q": "The priority order of power is Inline > Embedded > External > Browser (Default). If all four style sources target the same element with different colors, which one wins?", "options": ["Browser (Default)", "External", "Embedded", "Inline"], "correct": 3 },
+      { "q": "In your stylesheet, an <h2> rule at the top sets color: blue, and another <h2> rule 100 lines later sets color: red. Both are plain element selectors (equal specificity). What color will the <h2> actually be?", "options": ["Blue, because it was written first", "Red, because when specificity is equal, the last rule in the file wins (the Cascade)", "It will be a mix of blue and red", "Neither -- the browser will show an error"], "correct": 1 },
+      { "q": "A <p> tag has both class=\"highlight\" and id=\"intro\". One rule targets .highlight { color: blue; } and another targets #intro { color: red; }. What color wins, and why?", "options": ["Blue, because class was written second", "Red, because ID selectors have higher specificity than class selectors", "Blue, because class selectors always beat ID selectors", "It's a tie, so the browser picks black"], "correct": 1 }
+    ]
+  },
+  "ch6_lab_typography": {
+    "title": "Quick Check: Color &amp; Typography",
+    "questions": [
+      { "q": "In HSL, what does a Saturation of 0% mean, regardless of what the Hue value is set to?", "options": ["Full, vibrant color", "The color will be some shade of gray (no color)", "The color will be pure white only", "Saturation has no visual effect"], "correct": 1 },
+      { "q": "Why should you always write a 'font stack' like font-family: \"Roboto\", \"Helvetica Neue\", Arial, sans-serif; instead of just one font name?", "options": ["It makes the file load faster", "It provides backup fonts in case the first choice fails to load, ending in a safe generic family", "Browsers require at least 4 font names to work", "It's only for decoration, it has no real function"], "correct": 1 },
+      { "q": "Why do professionals prefer rem units over fixed px units for font sizing?", "options": ["rem is relative to the root <html> element's font size, so text scales properly if a user changes their browser's accessibility font settings; px stays fixed no matter what", "px and rem are exactly the same, it's just a style preference", "rem only works on mobile devices", "px automatically adjusts for screen size while rem does not"], "correct": 0 }
+    ]
+  },
+  "ch6_lab_boxmodel": {
+    "title": "Quick Check: Box Model, Reset &amp; Pseudo-Classes",
+    "questions": [
+      { "q": "Without box-sizing: border-box, if you add 20px of padding to an element with width: 100px, what happens to its total rendered width?", "options": ["It stays exactly 100px", "It grows to 140px, because padding is added on top of the declared width", "It shrinks to 80px", "The browser throws an error"], "correct": 1 },
+      { "q": "Why do professionals add a Universal Reset (the * selector setting margin: 0; padding: 0;) at the top of their stylesheet?", "options": ["To make the page load faster", "To strip away each browser's own default margins/padding so the site looks consistent instead of slightly different on Chrome vs Safari vs Edge", "It's required for CSS to work at all", "To disable all CSS on the page"], "correct": 1 },
+      { "q": "What is the key difference between a pseudo-class like :hover and a pseudo-element like ::before?", "options": ["They are identical, just different spellings", "A pseudo-class (one colon) targets a special state of an element; a pseudo-element (two colons) targets a specific part of an element or generates new phantom content", "Pseudo-elements only work on links", "Pseudo-classes require JavaScript to function"], "correct": 1 }
+    ]
+  }
+}
