@@ -1,0 +1,26 @@
+{
+  "ch10_lab_canvas": {
+    "title": "Quick Check: The Canvas API &amp; Coordinates",
+    "questions": [
+      { "q": "Which method must you call on a canvas element to get the drawing toolkit before you can draw anything on it?", "options": ["canvas.draw()", "canvas.getContext('2d')", "canvas.paint()", "canvas.render()"], "correct": 1 },
+      { "q": "On an HTML canvas, if you increase an object's Y coordinate value, which direction does it move on screen?", "options": ["Up, just like in math class", "Down -- Y increases from top to bottom, the opposite of math class", "Left", "It doesn't move, only X controls position"], "correct": 1 },
+      { "q": "Before drawing a new custom shape with ctx.arc(), which method must you call first to avoid the canvas re-drawing old paths on top of the new one?", "options": ["ctx.fillStyle()", "ctx.beginPath()", "ctx.clearRect()", "ctx.save()"], "correct": 1 }
+    ]
+  },
+  "ch10_lab_gameloop": {
+    "title": "Quick Check: The Game Loop &amp; OOP Classes",
+    "questions": [
+      { "q": "What are the three steps of a proper game loop, in the correct order?", "options": ["Draw -> Update -> Clear", "Clear -> Update -> Draw", "Update -> Clear -> Draw", "Draw -> Clear -> Update"], "correct": 1 },
+      { "q": "Why is requestAnimationFrame() preferred over setInterval() for building a game loop?", "options": ["It runs code slower on purpose for safety", "It syncs with the monitor's refresh rate for smooth motion and automatically pauses when the user switches tabs, saving battery", "setInterval doesn't work in any browser", "requestAnimationFrame only works with images, not shapes"], "correct": 1 },
+      { "q": "Inside a JavaScript class's method, what does the 'this' keyword refer to?", "options": ["The global window object", "The specific instance of the object currently being created or updated", "The HTML canvas element", "Nothing -- 'this' only works in functions, not classes"], "correct": 1 }
+    ]
+  },
+  "ch10_lab_physics": {
+    "title": "Quick Check: Collision, Physics &amp; Game State",
+    "questions": [
+      { "q": "AABB collision detection checks four overlap conditions (x, x+width, y, y+height). Which logical operator must combine all four, and why?", "options": ["|| (OR), because only one side needs to overlap", "&& (AND), because all four sides must overlap simultaneously for a true collision", "! (NOT), to invert the check", "No operator is needed, they're checked separately"], "correct": 1 },
+      { "q": "What technique controls which screens or logic blocks are active in a game (e.g., start screen vs. playing vs. game over)?", "options": ["A CSS media query", "A Game State variable (e.g., gameState = 'playing')", "The canvas width property", "An AABB collision check"], "correct": 1 },
+      { "q": "To simulate gravity pulling a jumping character back down, what must happen every single frame?", "options": ["The character's X position resets to 0", "A constant value is added to the character's Y-velocity", "The canvas is resized", "The game loop pauses"], "correct": 1 }
+    ]
+  }
+}
