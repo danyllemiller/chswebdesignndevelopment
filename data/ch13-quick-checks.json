@@ -1,0 +1,26 @@
+{
+  "ch13_lab_apibasics": {
+    "title": "Quick Check: APIs, CRUD &amp; JSON",
+    "questions": [
+      { "q": "In the 'Waiter' analogy for how APIs work, what does 'the Kitchen' represent?", "options": ["The user's web browser", "The Server and its Database -- where the actual work happens and data is stored", "The API documentation", "The HTTP request itself"], "correct": 1 },
+      { "q": "Which HTTP method maps to the 'Create' action in CRUD, sending data to the server to make a new record?", "options": ["GET", "POST", "DELETE", "PUT"], "correct": 1 },
+      { "q": "What does JSON.stringify() do?", "options": ["Converts a raw JSON text string back into a usable JavaScript object", "Converts a usable JavaScript object into a raw string of JSON text so it can be transmitted over a network", "Deletes all the data in an object", "Checks if a string is valid JSON"], "correct": 1 }
+    ]
+  },
+  "ch13_lab_asyncfetch": {
+    "title": "Quick Check: Async/Await &amp; fetch()",
+    "questions": [
+      { "q": "Why is the fetch() command in JavaScript considered 'Asynchronous'?", "options": ["It only works once per page load", "It runs in the background, allowing the rest of the website to load while waiting for the server's response, instead of freezing the browser", "It requires a special asynchronous internet connection", "It only fetches images, not text data"], "correct": 1 },
+      { "q": "If you write const data = fetch('url') WITHOUT using the await keyword, what does the variable 'data' actually contain?", "options": ["The actual JSON data from the server", "A Pending Promise, not the real data yet", "An error message", "undefined, with no further information"], "correct": 1 },
+      { "q": "What does the await keyword do when placed before response.json()?", "options": ["It deletes the response after reading it", "It pauses the function until the raw text response finishes converting into a usable JavaScript object, instead of returning a pending Promise", "It converts the response into an image", "It sends a second request automatically"], "correct": 1 }
+    ]
+  },
+  "ch13_lab_security": {
+    "title": "Quick Check: API Security &amp; Error Handling",
+    "questions": [
+      { "q": "Why should you NEVER expose a private API key (like a client's payment key) directly in your front-end JavaScript?", "options": ["It will make the page load slower", "Anyone can view your JS code in DevTools, steal the key, and rack up charges or cause damage on the client's account", "Front-end JavaScript can't use API keys at all", "It will cause a CSS styling conflict"], "correct": 1 },
+      { "q": "What is the primary purpose of a try/catch block around a fetch() request?", "options": ["It makes the request run faster", "It provides a safety net that catches errors (like no Wi-Fi) without crashing the entire application", "It automatically retries failed requests forever", "It hides the request from the browser console"], "correct": 1 },
+      { "q": "If response.ok returns false after a fetch() call (e.g., the server replied with a 404), what should your code do next?", "options": ["Nothing -- fetch already threw an error automatically", "Manually throw an error so the catch block can handle the failure gracefully", "Immediately reload the whole page", "Ignore it and use the data anyway"], "correct": 1 }
+    ]
+  }
+}
