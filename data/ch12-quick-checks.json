@@ -1,0 +1,26 @@
+{
+  "ch12_lab_cmsbasics": {
+    "title": "Quick Check: CMS Architecture &amp; Platform Choice",
+    "questions": [
+      { "q": "What core architectural feature is what actually makes a piece of software a true CMS?", "options": ["It has a colorful visual design", "It separates content creation (stored in a database) from the code structure and design (stored in a Theme)", "It runs entirely in the browser with no server", "It only works for blogs, nothing else"], "correct": 1 },
+      { "q": "In the 3 tiers of web creation, which model is the 'Rental' model where the hosting company (like WordPress.com) manages everything for you?", "options": ["No-Code Builder (Wix)", "SaaS CMS (WordPress.com)", "Self-Hosted CMS (WordPress.org)", "Static HTML hosting"], "correct": 1 },
+      { "q": "If you switch a WordPress site to a completely different Theme, what happens to your existing blog posts and content?", "options": ["All the content is permanently deleted", "The content stays perfectly intact -- only the visual design changes, since content and design are stored separately", "The content becomes uneditable", "You have to re-upload the Media Library"], "correct": 1 }
+    ]
+  },
+  "ch12_lab_pagesposts": {
+    "title": "Quick Check: Pages, Posts &amp; Permalinks",
+    "questions": [
+      { "q": "You want to announce a weekend coffee sale that expires on Sunday. Should you create a Post or a Page?", "options": ["A Page, because sales are permanent information", "A Post, because it's timely content meant for a reverse-chronological feed, not permanent like a Page", "Neither -- sales go in the Theme settings", "A Category"], "correct": 1 },
+      { "q": "Which organizational label is REQUIRED on every WordPress Post -- a Category or a Tag?", "options": ["Category is required; Tags are optional", "Tags are required; Categories are optional", "Both are required", "Neither is required"], "correct": 0 },
+      { "q": "What is the purpose of the WordPress 'Permalink' setting?", "options": ["It permanently deletes old posts", "It controls the structure of the URL (e.g., /about-us instead of /?p=123) for better SEO and readability", "It locks the site so only Administrators can edit it", "It sets the site's color scheme"], "correct": 1 }
+    ]
+  },
+  "ch12_lab_pluginsecurity": {
+    "title": "Quick Check: Child Themes, Plugins &amp; Security",
+    "questions": [
+      { "q": "What is the primary purpose of a Child Theme in WordPress?", "options": ["To make the site load faster", "To preserve your custom CSS and code so it isn't wiped out when the parent theme receives an update", "To create a second, backup copy of the whole website", "To let two developers log in with the same account"], "correct": 1 },
+      { "q": "What is the main risk of installing too many WordPress plugins, known as 'Plugin Bloat'?", "options": ["The dashboard changes color", "It can slow down the site, cause conflicts between plugins, and create security vulnerabilities", "WordPress automatically deletes old posts", "It has no real downside, more plugins is always better"], "correct": 1 },
+      { "q": "Before updating the WordPress core or installing a major plugin, what is the single most important action a professional developer must take first?", "options": ["Change the site's color scheme", "Perform a complete database and file backup", "Delete all existing plugins", "Log out of the dashboard"], "correct": 1 }
+    ]
+  }
+}
