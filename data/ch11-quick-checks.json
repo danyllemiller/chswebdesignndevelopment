@@ -1,0 +1,26 @@
+{
+  "ch11_lab_git": {
+    "title": "Quick Check: Git, GitHub &amp; the Command Line",
+    "questions": [
+      { "q": "What is the fundamental difference between Git and GitHub?", "options": ["They are the exact same tool with two names", "Git is the local Version Control System software installed on your laptop; GitHub is the online cloud hub where you store and share that history with a team", "GitHub is installed locally; Git is the cloud website", "Git only works for JavaScript, GitHub works for all languages"], "correct": 1 },
+      { "q": "Which Git command downloads a full copy of a remote repository (files + complete history) when you're joining a project for the first time?", "options": ["git pull", "git clone", "git push", "git init"], "correct": 1 },
+      { "q": "What causes a Merge Conflict in Git?", "options": ["Two developers used different variable names", "Two branches changed the exact same line of the same file, so Git can't automatically decide which version to keep", "A developer forgot to run git init", "The internet connection dropped during a push"], "correct": 1 }
+    ]
+  },
+  "ch11_lab_cloud": {
+    "title": "Quick Check: Cloud Computing &amp; Data Centers",
+    "questions": [
+      { "q": "\"The Cloud\" is often called a nickname because it actually refers to what?", "options": ["A weather pattern that affects internet speed", "Physical computers (servers) inside secured Data Center buildings, rented over the internet", "A single supercomputer owned by one company", "Software that has no physical hardware at all"], "correct": 1 },
+      { "q": "Why does Linux dominate web server hosting compared to Windows Server?", "options": ["Windows Server can't connect to the internet", "Linux is free/open-source with no per-server license fee, is extremely stable under heavy traffic, and has a massive community patching security holes", "Linux only works on Apple computers", "Windows Server is actually more popular for hosting"], "correct": 1 },
+      { "q": "Which of the 'Big Three' cloud providers is described as 'the Original & the Biggest,' hosting Netflix and Twitch?", "options": ["Azure (Microsoft)", "AWS (Amazon Web Services)", "GCP (Google Cloud Platform)", "None of the Big Three host video streaming"], "correct": 1 }
+    ]
+  },
+  "ch11_lab_servicemodels": {
+    "title": "Quick Check: Service Models &amp; Scalability",
+    "questions": [
+      { "q": "In the 'Pizza as a Service' analogy, which cloud service model gives you a fully stocked kitchen where you just bring your code and 'cook' (deploy), without managing hardware or the OS?", "options": ["IaaS (you rent the raw dough/hardware)", "PaaS (the kitchen is stocked, you just cook)", "SaaS (you just eat at a restaurant)", "On-Premises (you own the whole restaurant)"], "correct": 1 },
+      { "q": "A bank keeps sensitive customer data in a locked private server but runs its public blog on cheap shared hosting. What deployment model is this?", "options": ["Public Cloud", "Private Cloud", "Hybrid Cloud", "IaaS"], "correct": 2 },
+      { "q": "What is the key difference between Scalability and Elasticity?", "options": ["They mean exactly the same thing", "Scalability is the ability to add power as demand grows; Elasticity also includes automatically scaling BACK DOWN when demand drops, to save money", "Scalability only applies to storage; Elasticity only applies to CPU", "Elasticity means the site never needs more servers"], "correct": 1 }
+    ]
+  }
+}
