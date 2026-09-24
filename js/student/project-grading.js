@@ -129,7 +129,27 @@ function averageToScore100(values, rubric) {
     return Math.min(100, Math.round(base + bonusPoints));
 }
 
+// A failure anywhere below this point used to just return, leaving the
+// page's own static "Loading grading tool..." placeholder on screen
+// forever -- indistinguishable from it still being mid-load, and no
+// student would ever think to reload over what looks like ordinary
+// loading. Confirmed happening live 2026-09-24 (a student stuck on that
+// spinner for 15+ minutes, unable to find the self/peer form at all).
+// Every early-exit path now replaces it with a visible message instead.
 async function initProjectGrading(container) {
+    try {
+        await initProjectGradingInner(container);
+    } catch (e) {
+        console.error('[project-grading] Failed to initialize', e);
+        container.innerHTML = `<div class="card-body small p-4 text-center">
+            <p class="text-danger fw-bold mb-2"><i class="fas fa-triangle-exclamation me-1"></i>This grading tool didn't load correctly.</p>
+            <p class="text-muted mb-3">Try reloading the page. If it happens again, tell your teacher.</p>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.location.reload()">Reload Page</button>
+        </div>`;
+    }
+}
+
+async function initProjectGradingInner(container) {
     const chapterProjectId = container.dataset.chapterProjectId;
     const examId = container.dataset.examId;
     // CS's unit projects are self+peer only by design (Slides/Sheets
@@ -137,11 +157,15 @@ async function initProjectGrading(container) {
     // now, not just quietly unconfigured for CS like it used to be.
     const hasAutoCheck = container.dataset.course !== 'CS';
     let rubric;
-    try { rubric = JSON.parse(container.dataset.rubric); } catch (e) { console.error('[project-grading] Bad rubric JSON', e); return; }
+    try { rubric = JSON.parse(container.dataset.rubric); }
+    catch (e) { throw new Error('Bad rubric JSON on this project page: ' + e.message); }
 
     const user = getLoggedInUser();
     if (!user || !user.student_id) {
-        container.innerHTML = `<div class="card-body small p-4 text-muted">Log in to grade this project.</div>`;
+        container.innerHTML = `<div class="card-body small p-4 text-center">
+            <p class="text-muted mb-3">You need to be logged in to grade this project.</p>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.location.reload()">Reload Page</button>
+        </div>`;
         return;
     }
 
