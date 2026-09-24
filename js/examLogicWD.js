@@ -342,6 +342,22 @@ function escapeHtml(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
+// For text dropped into a single-quoted JS string literal inside an inline
+// on*="..." attribute (e.g. ondrop="matchDrop(event, '${...}')"). The
+// browser HTML-decodes the attribute value before handing it to the JS
+// engine, so escapeHtml()'s &#039; comes back out as a bare ' -- running
+// escapeHtml() first (as this used to) leaves nothing for a later
+// .replace(/'/g, "\\'") to find, and any item/target text with a real
+// apostrophe (e.g. "the website's address") silently breaks the handler's
+// JS syntax, killing drag-and-drop for that one card with no visible
+// error. Escaping backslash+quote for JS *before* the HTML-entity pass
+// keeps the backslash-quote intact through HTML decoding instead.
+function escapeForJsAttr(str) {
+    if (typeof str !== 'string') return str;
+    return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 // Single source of truth for "what did the student answer, and was it
 // right" -- used by the score tally, the on-screen review, the PDF report,
 // and the missed-questions capture, so the four can never drift apart on
@@ -840,8 +856,8 @@ function renderMatchingQuestion(q) {
         return `
             <div class="matching-item card shadow-sm mb-2 ${cls}"
                  draggable="${isPlaced ? 'false' : 'true'}"
-                 ondragstart="matchDragStart(event, '${escapeHtml(item).replace(/'/g, "\\'")}')"
-                 onclick="matchItemClick('${escapeHtml(item).replace(/'/g, "\\'")}')"
+                 ondragstart="matchDragStart(event, '${escapeForJsAttr(item)}')"
+                 onclick="matchItemClick('${escapeForJsAttr(item)}')"
                  style="cursor:pointer; border-width:2px !important;">
                 <div class="card-body py-2 px-3 fw-bold small d-flex justify-content-between align-items-center">
                     <span>${escapeHtml(item)}</span>
@@ -855,8 +871,8 @@ function renderMatchingQuestion(q) {
         return `
             <div class="matching-target card shadow-sm mb-2 ${matchedItem ? 'border-success' : 'border-secondary'}"
                  ondragover="event.preventDefault()"
-                 ondrop="matchDrop(event, '${escapeHtml(target).replace(/'/g, "\\'")}')"
-                 onclick="matchTargetClick('${escapeHtml(target).replace(/'/g, "\\'")}')"
+                 ondrop="matchDrop(event, '${escapeForJsAttr(target)}')"
+                 onclick="matchTargetClick('${escapeForJsAttr(target)}')"
                  style="cursor:pointer; border-width:2px !important; min-height:58px;">
                 <div class="card-body py-2 px-3 small d-flex justify-content-between align-items-center">
                     <span>${escapeHtml(target)}</span>
@@ -935,8 +951,8 @@ function renderImageLabelingQuestion(q) {
         return `
             <div class="labeling-zone"
                  ondragover="event.preventDefault()"
-                 ondrop="imageLabelDrop(event, '${escapeHtml(zone.key)}')"
-                 onclick="imageZoneClick('${escapeHtml(zone.key)}')"
+                 ondrop="imageLabelDrop(event, '${escapeForJsAttr(zone.key)}')"
+                 onclick="imageZoneClick('${escapeForJsAttr(zone.key)}')"
                  style="position:absolute; left:${zone.left}%; top:${zone.top}%; width:${zone.width}%; height:${zone.height}%;
                         border:3px dashed ${borderColor}; background:${bgColor}; border-radius:6px; padding:2px;
                         display:flex; align-items:center; justify-content:center; text-align:center; cursor:pointer;">
@@ -955,8 +971,8 @@ function renderImageLabelingQuestion(q) {
         return `
             <div class="shadow-sm ${cls}"
                  draggable="${isPlaced ? 'false' : 'true'}"
-                 ondragstart="imageLabelDragStart(event, '${escapeHtml(label).replace(/'/g, "\\'")}')"
-                 onclick="imageLabelClick('${escapeHtml(label).replace(/'/g, "\\'")}')"
+                 ondragstart="imageLabelDragStart(event, '${escapeForJsAttr(label)}')"
+                 onclick="imageLabelClick('${escapeForJsAttr(label)}')"
                  style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; border-width:2px !important; border-style:solid; border-radius:20px; padding:6px 14px; font-weight:bold; font-size:.78rem; background:#fff; white-space:nowrap;">
                 <span>${escapeHtml(label)}</span>
                 ${isPlaced ? '<i class="fas fa-check-circle text-success"></i>' : ''}
