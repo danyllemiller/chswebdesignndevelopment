@@ -2,14 +2,20 @@ const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
 const { requireLogin, requireSelfOrStaff } = require('../helpers');
+const { getDayTypes, getBellScheduleKeyForDate } = require('../tardyLogic');
 
 // Mock Interview sign-up + scoring, Chapter 1 (year1/join-the-developers-guild.html).
-// Slots only ever run inside the A1 period (7:35-9:00am), skipping the
-// first 20 minutes for attendance/classroom admin -- so the bookable
-// window is 7:55am-9:00am. 5-minute interview + a 3-minute buffer for the
-// teacher to switch files/students = an 8-minute cadence.
-const WINDOW_START_MIN = 7 * 60 + 55; // 7:55am
-const WINDOW_END_MIN = 9 * 60;        // 9:00am
+// A1's actual start/end time isn't fixed -- it depends on that calendar
+// date's rotation (special-dates.csv -> bell_schedule, same resolution
+// tardyLogic.js already uses for tardy tracking), so a C-day (e.g. an
+// "All Period Day") can run A1 as short as 7:35-8:21 instead of the usual
+// 7:35-9:00. The bookable window always skips the first 20 minutes for
+// attendance/classroom admin, and always ends at least 5 minutes before
+// the period's real end time so an interview never runs into clock-out.
+// 5-minute interview + a 3-minute buffer for the teacher to switch
+// files/students = an 8-minute cadence.
+const ATTENDANCE_SKIP_MIN = 20;
+const BUFFER_BEFORE_END_MIN = 5;
 const INTERVIEW_MIN = 5;
 const BUFFER_MIN = 3;
 const SLOT_CADENCE_MIN = INTERVIEW_MIN + BUFFER_MIN;
@@ -24,9 +30,32 @@ function minutesToTimeStr(mins) {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
 }
 
-function buildSlotsForDate() {
+function timeStrToMinutes(t) {
+    const [h, m] = String(t).split(':').map(Number);
+    return h * 60 + m;
+}
+
+// Returns null when A1 doesn't meet at all on this date (weekend, day
+// off, or a rotation that skips A1 entirely) -- callers must treat that
+// as "no slots can be generated," not fall back to a default window.
+async function getInterviewWindowForDate(connection, dateStr) {
+    const dayTypes = await getDayTypes(connection);
+    const scheduleKey = getBellScheduleKeyForDate(dayTypes, dateStr);
+    if (!scheduleKey) return null;
+    const [[period]] = await connection.execute(
+        `SELECT start_time, end_time FROM bell_schedule WHERE schedule_type = ? AND period_label = 'A1' LIMIT 1`,
+        [scheduleKey]
+    );
+    if (!period) return null;
+    return {
+        start: timeStrToMinutes(period.start_time) + ATTENDANCE_SKIP_MIN,
+        end: timeStrToMinutes(period.end_time) - BUFFER_BEFORE_END_MIN
+    };
+}
+
+function buildSlotsForWindow(windowStart, windowEnd) {
     const slots = [];
-    for (let start = WINDOW_START_MIN; start + INTERVIEW_MIN <= WINDOW_END_MIN; start += SLOT_CADENCE_MIN) {
+    for (let start = windowStart; start + INTERVIEW_MIN <= windowEnd; start += SLOT_CADENCE_MIN) {
         slots.push({ start: minutesToTimeStr(start), end: minutesToTimeStr(start + INTERVIEW_MIN) });
     }
     return slots;
@@ -118,6 +147,44 @@ router.get('/interview-rubric-criteria', requireLogin, (req, res) => {
     res.json({ criteria: RUBRIC_CRITERIA, examId: EXAM_ID, maxPoints: EXAM_TOTAL_POINTS });
 });
 
+// ---- Interview question script (teacher's talking points, editable from
+// the same schedule page she scores from -- see interview_questions table) ----
+
+router.get('/interview-questions', requireLogin, async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.execute(
+            'SELECT id, question_text FROM interview_questions ORDER BY sort_order ASC, id ASC'
+        );
+        await connection.release();
+        res.json(rows);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load interview questions' }); }
+});
+
+router.post('/admin/interview-questions', async (req, res) => {
+    const { question_text } = req.body;
+    if (!question_text || !question_text.trim()) return res.status(400).json({ error: 'question_text is required' });
+    try {
+        const connection = await getDbConnection();
+        const [[row]] = await connection.execute('SELECT COALESCE(MAX(sort_order), -1) + 1 AS next FROM interview_questions');
+        const [result] = await connection.execute(
+            'INSERT INTO interview_questions (question_text, sort_order) VALUES (?, ?)',
+            [question_text.trim(), row.next]
+        );
+        await connection.release();
+        res.json({ success: true, id: result.insertId });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to add question' }); }
+});
+
+router.delete('/admin/interview-questions/:id', async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await connection.execute('DELETE FROM interview_questions WHERE id = ?', [req.params.id]);
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete question' }); }
+});
+
 // ---- Student-facing sign-up ----
 
 router.get('/interview-slots', requireLogin, async (req, res) => {
@@ -198,7 +265,12 @@ router.post('/admin/interview-slots/generate', async (req, res) => {
     if (!slot_date) return res.status(400).json({ error: 'slot_date is required' });
     try {
         const connection = await getDbConnection();
-        const slots = buildSlotsForDate();
+        const window = await getInterviewWindowForDate(connection, slot_date);
+        if (!window) {
+            await connection.release();
+            return res.status(400).json({ error: 'A1 does not meet on this date, so no interview slots can be generated.' });
+        }
+        const slots = buildSlotsForWindow(window.start, window.end);
         for (const s of slots) {
             await connection.execute(
                 'INSERT IGNORE INTO interview_slots (slot_date, start_time, end_time) VALUES (?, ?, ?)',

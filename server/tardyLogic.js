@@ -191,5 +191,7 @@ module.exports = {
     QUARTER_BOUNDARIES,
     getCurrentQuarterStart,
     getLocalDateStr,
-    computeEffectiveCount
+    computeEffectiveCount,
+    getDayTypes,
+    getBellScheduleKeyForDate
 };

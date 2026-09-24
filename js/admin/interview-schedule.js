@@ -29,6 +29,56 @@ async function loadCriteria() {
     } catch (e) { console.error('Failed to load rubric criteria', e); }
 }
 
+async function loadQuestions() {
+    const list = document.getElementById('questionsList');
+    try {
+        const res = await fetch('/api/interview-questions');
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        const questions = await res.json();
+        if (questions.length === 0) {
+            list.innerHTML = '<div class="empty-note">No questions yet. Add one below.</div>';
+            return;
+        }
+        list.innerHTML = questions.map((q, i) => `
+            <div class="question-row">
+                <div class="question-num">${i + 1}.</div>
+                <div class="question-text small">${escapeHtml(q.question_text)}</div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-remove-question="${q.id}" title="Remove"><i class="fas fa-times"></i></button>
+            </div>
+        `).join('');
+        list.querySelectorAll('[data-remove-question]').forEach(btn => {
+            btn.addEventListener('click', () => removeQuestion(btn.dataset.removeQuestion));
+        });
+    } catch (err) {
+        console.error('Failed to load interview questions:', err);
+        list.innerHTML = '<div class="text-center py-3 text-danger small">Failed to load questions.</div>';
+    }
+}
+
+async function addQuestion() {
+    const input = document.getElementById('newQuestionInput');
+    const text = input.value.trim();
+    if (!text) return;
+    try {
+        const res = await fetch('/api/admin/interview-questions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question_text: text })
+        });
+        if (!res.ok) throw new Error('Failed to add question');
+        input.value = '';
+        loadQuestions();
+    } catch (e) { alert("Couldn't add that question."); }
+}
+
+async function removeQuestion(id) {
+    if (!confirm('Remove this question?')) return;
+    try {
+        await fetch(`/api/admin/interview-questions/${id}`, { method: 'DELETE' });
+        loadQuestions();
+    } catch (e) { alert("Couldn't remove that question."); }
+}
+
 async function loadSchedule() {
     const container = document.getElementById('scheduleContainer');
     try {
@@ -223,6 +273,11 @@ async function generateDay() {
 window.addEventListener('DOMContentLoaded', async () => {
     await loadCriteria();
     loadSchedule();
+    loadQuestions();
     document.getElementById('genBtn').addEventListener('click', generateDay);
     document.getElementById('saveScoreBtn').addEventListener('click', saveScore);
+    document.getElementById('addQuestionBtn').addEventListener('click', addQuestion);
+    document.getElementById('newQuestionInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') addQuestion();
+    });
 });
