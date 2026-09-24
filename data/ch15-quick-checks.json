@@ -1,0 +1,26 @@
+{
+  "ch15_lab_ai": {
+    "title": "Quick Check: AI, Machine Learning &amp; Ethics",
+    "questions": [
+      { "q": "What is the primary difference between Artificial Intelligence (AI) and Machine Learning (ML)?", "options": ["They are exactly the same thing with two different names", "AI is the broad concept of machines acting smartly; ML is a specific subset where machines learn and improve from data over time", "ML is a type of hardware; AI is a type of software", "AI only refers to robots, ML only refers to chatbots"], "correct": 1 },
+      { "q": "What is Algorithmic Bias primarily caused by?", "options": ["A computer's processor overheating", "Biased or incomplete training data, meaning the system inherits human prejudices found in the data it was given", "Users typing prompts too quickly", "A lack of internet bandwidth"], "correct": 1 },
+      { "q": "What is the 'Black Box Problem' in AI?", "options": ["When an AI runs out of storage space", "The inability to understand exactly how the AI reached a particular decision", "When an AI is trained on too little data", "A hardware malfunction in a server rack"], "correct": 1 }
+    ]
+  },
+  "ch15_lab_immersive": {
+    "title": "Quick Check: AR, VR &amp; IoT Security",
+    "questions": [
+      { "q": "What is the key difference between Augmented Reality (AR) and Virtual Reality (VR)?", "options": ["They are identical technologies with different marketing names", "AR overlays digital content on top of the real world (you still see your surroundings); VR fully replaces the real world with a simulated environment", "VR only works on phones; AR only works with headsets", "AR is fully immersive; VR just adds overlays"], "correct": 1 },
+      { "q": "What makes Mixed Reality (MR) different from basic AR?", "options": ["MR has no visual component at all", "In MR, digital objects are anchored to and interact with the physical world -- e.g., a virtual ball can roll off a real table", "MR only works with voice commands", "MR is just a cheaper version of VR"], "correct": 1 },
+      { "q": "Why are IoT devices like smart refrigerators frequently targeted by hackers?", "options": ["They contain more processing power than laptops", "They often ship with weak default passwords and are rarely updated by users, making them an easy backdoor into a home or business network", "They are too expensive to secure properly", "IoT devices cannot connect to the internet at all"], "correct": 1 }
+    ]
+  },
+  "ch15_lab_architecture": {
+    "title": "Quick Check: Modern Web Architecture",
+    "questions": [
+      { "q": "What is a PWA (Progressive Web App)?", "options": ["A website that only works on desktop computers", "A web app that uses service workers and a manifest file to behave like a native mobile app -- installable on a home screen, works offline, and sends push notifications", "A programming language for building APIs", "A type of database used for e-commerce"], "correct": 1 },
+      { "q": "What does JAMstack stand for, and why are JAMstack sites so fast?", "options": ["Java, Angular, MySQL -- because it uses a lightweight database", "JavaScript, APIs, and Markup -- because it serves pre-built static HTML files via CDN, with no server rendering HTML on-demand", "Just Another Modern stack -- it has no real technical meaning", "JSON, AJAX, Markdown -- because it avoids using HTML entirely"], "correct": 1 },
+      { "q": "Conceptually, how does Web 3.0 primarily differ from Web 2.0?", "options": ["Web 3.0 removed JavaScript entirely from the web", "Web 3.0 focuses on decentralization (like blockchain) rather than centralized corporate servers", "Web 3.0 is just a faster version of Web 2.0 with no other differences", "Web 3.0 only works on mobile devices"], "correct": 1 }
+    ]
+  }
+}
