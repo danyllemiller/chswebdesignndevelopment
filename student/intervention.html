@@ -750,9 +750,29 @@
             <label class="form-label fw-bold small">Notes (optional)</label>
             <textarea class="form-control" id="goalNotes" rows="2" placeholder="Why does this matter to you?"></textarea>
           </div>
-          <div>
+          <div class="mb-3">
             <label class="form-label fw-bold small">Target Date (optional)</label>
             <input type="date" class="form-control" id="goalTargetDate">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold small mb-1">Micro-Steps (optional)</label>
+            <div class="text-muted mb-2" style="font-size:.72rem;">Break the goal into small steps you can check off one at a time.</div>
+            <div id="goalStepsList" class="mb-2"></div>
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control" id="newGoalStepText" placeholder="Add a step…">
+              <button class="btn btn-outline-success" type="button" id="btnAddGoalStep"><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="goalTrackDaily">
+              <label class="form-check-label fw-bold small" for="goalTrackDaily">Track it daily in my Habit Tracker</label>
+            </div>
+          </div>
+          <div>
+            <label class="form-label fw-bold small mb-1">Reminder (optional)</label>
+            <div class="d-flex gap-1 flex-wrap mb-2" id="goalReminderDays"></div>
+            <input type="time" class="form-control form-control-sm" id="goalReminderTime" style="max-width:150px;">
           </div>
         </div>
         <div class="modal-footer py-2">
@@ -1219,6 +1239,10 @@
     import { apiFetch }        from '/js/modules/api-client.js';
 
     // ── State ─────────────────────────────────────────────────────────────
+    const escapeHtml = (str) => String(str ?? '').replace(/[&<>"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+
     let user, assignments = [], goals = [], gradeLog = [], prompts = [], calEvents = {};
     let classDueDates = []; // real WD/CS chapter due dates, filtered to the student's enrolled course
     let calYear, calMonth, calDay, currentView = 'month';
@@ -1966,6 +1990,76 @@
       </div>`;
     }
 
+    // ── New-goal modal state (steps + reminder days, held here while the
+    // modal is open, sent along with the create POST, then reset) ─────────
+    let newGoalSteps = [];
+    let newGoalReminderDays = new Set();
+    const REMINDER_DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    function renderGoalStepsList() {
+      const el = document.getElementById('goalStepsList');
+      if (!el) return;
+      el.innerHTML = newGoalSteps.length
+        ? newGoalSteps.map((s, i) => `
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <i class="fas fa-grip-lines text-muted" style="font-size:.65rem;"></i>
+              <div class="flex-grow-1 small">${escapeHtml(s)}</div>
+              <button class="btn btn-sm p-0 text-muted" type="button" onclick="window.removeNewGoalStep(${i})"><i class="fas fa-times" style="font-size:.7rem;"></i></button>
+            </div>`).join('')
+        : '';
+    }
+
+    function renderGoalReminderDayChips() {
+      const el = document.getElementById('goalReminderDays');
+      if (!el) return;
+      el.innerHTML = REMINDER_DAY_LABELS.map(d => {
+        const active = newGoalReminderDays.has(d);
+        return `<span class="suggest-chip" style="cursor:pointer;${active ? 'background:var(--bs-success);color:#fff;border-color:var(--bs-success);' : ''}"
+                  onclick="window.toggleNewGoalReminderDay('${d}')">${d}</span>`;
+      }).join('');
+    }
+
+    window.removeNewGoalStep = (i) => { newGoalSteps.splice(i, 1); renderGoalStepsList(); };
+    window.toggleNewGoalReminderDay = (d) => {
+      if (newGoalReminderDays.has(d)) newGoalReminderDays.delete(d); else newGoalReminderDays.add(d);
+      renderGoalReminderDayChips();
+    };
+
+    function resetGoalModal() {
+      newGoalSteps = [];
+      newGoalReminderDays = new Set();
+      document.getElementById('goalTitle').value = '';
+      document.getElementById('goalNotes').value = '';
+      document.getElementById('goalTargetDate').value = '';
+      document.getElementById('goalTrackDaily').checked = false;
+      document.getElementById('goalReminderTime').value = '';
+      document.getElementById('newGoalStepText').value = '';
+      renderGoalStepsList();
+      renderGoalReminderDayChips();
+    }
+    renderGoalReminderDayChips();
+    document.getElementById('goalModal').addEventListener('hidden.bs.modal', resetGoalModal);
+
+    document.getElementById('btnAddGoalStep').addEventListener('click', () => {
+      const input = document.getElementById('newGoalStepText');
+      const text = input.value.trim();
+      if (!text) return;
+      newGoalSteps.push(text);
+      input.value = '';
+      renderGoalStepsList();
+    });
+    document.getElementById('newGoalStepText').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btnAddGoalStep').click(); }
+    });
+
+    function formatReminderTime(t) {
+      if (!t) return '';
+      const [h, m] = String(t).split(':').map(Number);
+      const period = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      return `${h12}:${String(m).padStart(2,'0')} ${period}`;
+    }
+
     function renderGoals() {
       renderGoalStats();
       ['daily','weekly','unit','yearly'].forEach(c => {
@@ -1974,14 +2068,34 @@
         if (!list.length) { el.innerHTML = '<p class="text-muted small">No goals yet. Add one above.</p>'; return; }
         el.innerHTML = list.map(g => {
           const done = !!g.achieved_at;
+          const steps = g.steps || [];
+          const stepsDone = steps.filter(s => s.done).length;
+          const reminderBits = [];
+          if (g.reminder_days) reminderBits.push(g.reminder_days);
+          if (g.reminder_time) reminderBits.push(formatReminderTime(g.reminder_time));
           return `<div class="goal-card ${done ? 'achieved' : ''}">
             <div class="goal-check ${done ? 'done' : ''}" onclick="window.toggleGoal(${g.id}, ${done})">
               ${done ? '<i class="fas fa-check" style="font-size:.7rem;"></i>' : ''}
             </div>
             <div class="flex-grow-1">
-              <div class="fw-bold small">${g.title}</div>
-              ${g.notes ? `<div class="text-muted" style="font-size:.75rem;">${g.notes}</div>` : ''}
-              ${g.target_date ? `<div class="text-muted" style="font-size:.7rem;">Target: ${g.target_date}</div>` : ''}
+              <div class="fw-bold small">${escapeHtml(g.title)}</div>
+              ${g.notes ? `<div class="text-muted" style="font-size:.75rem;">${escapeHtml(g.notes)}</div>` : ''}
+              <div class="d-flex flex-wrap gap-2 mt-1" style="font-size:.68rem;">
+                ${g.target_date ? `<span class="text-muted">Target: ${g.target_date}</span>` : ''}
+                ${g.track_daily ? `<span class="text-primary fw-bold"><i class="fas fa-fire me-1"></i>Tracked daily</span>` : ''}
+                ${reminderBits.length ? `<span class="text-warning fw-bold"><i class="fas fa-bell me-1"></i>${escapeHtml(reminderBits.join(' at '))}</span>` : ''}
+              </div>
+              ${steps.length ? `
+                <div class="mt-2 ps-1" style="border-left:2px solid #eee;">
+                  <div class="text-muted mb-1" style="font-size:.65rem;">${stepsDone}/${steps.length} steps</div>
+                  ${steps.map((s, i) => `
+                    <div class="d-flex align-items-center gap-2 mb-1" style="cursor:pointer;" onclick="window.toggleGoalStep(${g.id}, ${i})">
+                      <div class="goal-check ${s.done ? 'done' : ''}" style="width:16px;height:16px;flex-shrink:0;">
+                        ${s.done ? '<i class="fas fa-check" style="font-size:.55rem;"></i>' : ''}
+                      </div>
+                      <div class="small ${s.done ? 'text-muted text-decoration-line-through' : ''}">${escapeHtml(s.text)}</div>
+                    </div>`).join('')}
+                </div>` : ''}
             </div>
             <button class="btn btn-sm p-0 text-muted" onclick="window.deleteGoal(${g.id})"><i class="fas fa-times" style="font-size:.7rem;"></i></button>
           </div>`;
@@ -1993,15 +2107,20 @@
       const title = document.getElementById('goalTitle').value.trim();
       if (!title) return;
       await apiFetch('/api/intervention/goals', { method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ student_id: user.student_id, cadence: document.getElementById('goalCadence').value,
-          title, notes: document.getElementById('goalNotes').value, target_date: document.getElementById('goalTargetDate').value || null }) });
+        body: JSON.stringify({
+          student_id: user.student_id, cadence: document.getElementById('goalCadence').value,
+          title, notes: document.getElementById('goalNotes').value, target_date: document.getElementById('goalTargetDate').value || null,
+          steps: newGoalSteps,
+          track_daily: document.getElementById('goalTrackDaily').checked,
+          reminder_days: [...newGoalReminderDays].length ? REMINDER_DAY_LABELS.filter(d => newGoalReminderDays.has(d)).join(', ') : null,
+          reminder_time: document.getElementById('goalReminderTime').value || null
+        }) });
       bootstrap.Modal.getInstance(document.getElementById('goalModal'))?.hide();
-      document.getElementById('goalTitle').value = '';
-      document.getElementById('goalNotes').value = '';
-      document.getElementById('goalTargetDate').value = '';
+      resetGoalModal();
       const data = await apiFetch(`/api/intervention/goals?student_id=${user.student_id}`);
       goals = data.goals || [];
       renderGoals();
+      loadHabits().then(() => { renderHabitTracker(); renderHabitGrid(); });
     });
 
     window.toggleGoal = async (id, currentlyDone) => {
@@ -2010,6 +2129,17 @@
       const data = await apiFetch(`/api/intervention/goals?student_id=${user.student_id}`);
       goals = data.goals || [];
       renderGoals();
+      loadHabits().then(() => { renderHabitTracker(); renderHabitGrid(); });
+    };
+
+    window.toggleGoalStep = async (goalId, stepIndex) => {
+      const g = goals.find(x => x.id === goalId);
+      if (!g) return;
+      const steps = (g.steps || []).map((s, i) => i === stepIndex ? { ...s, done: !s.done } : s);
+      g.steps = steps; // optimistic
+      renderGoals();
+      await apiFetch(`/api/intervention/goals/${goalId}/steps`, { method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ student_id: user.student_id, steps }) });
     };
 
     window.deleteGoal = async (id) => {
@@ -2017,6 +2147,7 @@
       await apiFetch(`/api/intervention/goals/${id}?student_id=${user.student_id}`, { method:'DELETE' });
       goals = goals.filter(g => g.id !== id);
       renderGoals();
+      loadHabits().then(() => { renderHabitTracker(); renderHabitGrid(); });
     };
 
     // ── Assignments tab ───────────────────────────────────────────────────
@@ -3688,7 +3819,7 @@
         : `/api/intervention/habits?student_id=${sid}`;
       try {
         const data = await apiFetch(url);
-        habitList = (data.habits || []).map(h => ({ id: h.id, name: h.text, color: h.color }));
+        habitList = (data.habits || []).map(h => ({ id: h.id, name: h.text, color: h.color, fromGoal: !!h.fromGoal }));
         habitLog  = data.log || {};
         if (!isReadOnly) {
           localStorage.setItem(HABITS_KEY(), JSON.stringify(habitList));
@@ -3708,7 +3839,11 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             student_id: user.student_id,
-            habits: habitList.map(h => ({ id: h.id, text: h.name, color: h.color || null }))
+            // Goal-linked entries aren't owned by this list -- they're
+            // derived from the Goals tab (see getGoalLinkedHabits server-
+            // side) and never sent back here, so editing/deleting a
+            // manual habit can't accidentally touch or drop one.
+            habits: habitList.filter(h => !h.fromGoal).map(h => ({ id: h.id, text: h.name, color: h.color || null }))
           })
         }).catch(() => {});
       }
@@ -3750,10 +3885,12 @@
             ${done ? '<i class="fas fa-check" style="font-size:.7rem;"></i>' : ''}
           </div>
           <div class="flex-grow-1">
-            <div class="small fw-bold ${done ? 'text-success' : ''}">${h.name}</div>
+            <div class="small fw-bold ${done ? 'text-success' : ''}">${escapeHtml(h.name)}</div>
             ${streak > 0 ? `<small class="text-warning">🔥 ${streak} day streak</small>` : ''}
           </div>
-          <button class="btn btn-sm p-0 text-muted" onclick="window.deleteHabit('${h.id}')"><i class="fas fa-times" style="font-size:.7rem;"></i></button>
+          ${h.fromGoal
+            ? `<span class="text-muted" title="From a goal in the Goals tab" style="font-size:.7rem;"><i class="fas fa-lock"></i></span>`
+            : `<button class="btn btn-sm p-0 text-muted" onclick="window.deleteHabit('${h.id}')"><i class="fas fa-times" style="font-size:.7rem;"></i></button>`}
         </div>`;
       }).join('');
     }
@@ -3786,7 +3923,7 @@
           return `<div class="habit-hm-cell ${done ? 'hm-done' : 'hm-miss'}${isToday ? ' hm-today' : ''}" style="${style}" title="${d}${done ? ' ✓' : ''}"></div>`;
         }).join('');
         return `<div class="habit-hm-row">
-          <div class="habit-hm-name" title="${h.name}">${h.name}</div>
+          <div class="habit-hm-name" title="${escapeHtml(h.name)}">${escapeHtml(h.name)}</div>
           <div class="habit-hm-cells">${cells}</div>
           <div class="habit-streak">${streak > 0 ? `🔥${streak}d` : ''}</div>
         </div>`;
@@ -3825,6 +3962,8 @@
 
     window.deleteHabit = (id) => {
       if (isReadOnly) return;
+      const target = habitList.find(h => h.id === id);
+      if (target?.fromGoal) { alert('This is tracked from a goal — edit or delete it from the Goals tab instead.'); return; }
       habitList = habitList.filter(h => h.id !== id);
       delete habitLog[id];
       saveHabits(); saveHabitLog();

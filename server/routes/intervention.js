@@ -193,6 +193,22 @@ async function ensureTables(connection) {
     await connection.execute(
         `ALTER TABLE student_grade_log ADD COLUMN IF NOT EXISTS category VARCHAR(100) DEFAULT NULL`
     ).catch(() => {});
+    // Micro-steps, reminder, and daily-tracker link for goals (see the
+    // planner_habits merge in the /intervention/habits GET below -- a
+    // track_daily goal isn't stored as its own habit row, it's read
+    // straight off this table and blended in at request time).
+    await connection.execute(
+        `ALTER TABLE intervention_goals ADD COLUMN IF NOT EXISTS steps_json TEXT NULL`
+    ).catch(() => {});
+    await connection.execute(
+        `ALTER TABLE intervention_goals ADD COLUMN IF NOT EXISTS track_daily TINYINT(1) NOT NULL DEFAULT 0`
+    ).catch(() => {});
+    await connection.execute(
+        `ALTER TABLE intervention_goals ADD COLUMN IF NOT EXISTS reminder_days VARCHAR(40) NULL`
+    ).catch(() => {});
+    await connection.execute(
+        `ALTER TABLE intervention_goals ADD COLUMN IF NOT EXISTS reminder_time TIME NULL`
+    ).catch(() => {});
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -343,6 +359,15 @@ router.post('/intervention/journal', requireSelfOrStaff(), async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save journal entry' }); }
 });
 
+// A goal's steps_json is an array of {text, done} objects -- parsed back
+// out here so every route that returns a goal returns it the same shape,
+// instead of leaving JSON.parse to callers.
+function parseGoalRow(row) {
+    let steps = [];
+    try { steps = row.steps_json ? JSON.parse(row.steps_json) : []; } catch { steps = []; }
+    return { ...row, steps, track_daily: !!row.track_daily };
+}
+
 // Goals — get all goals for a student
 router.get('/intervention/goals', requireSelfOrStaff(), async (req, res) => {
     const { student_id, cadence } = req.query;
@@ -363,21 +388,26 @@ router.get('/intervention/goals', requireSelfOrStaff(), async (req, res) => {
             );
         }
         await connection.release();
-        res.json({ goals: rows });
+        res.json({ goals: rows.map(parseGoalRow) });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch goals' }); }
 });
 
 // Goals — create
 router.post('/intervention/goals', requireSelfOrStaff(), async (req, res) => {
-    const { student_id, cadence, title, notes, target_date } = req.body;
+    const { student_id, cadence, title, notes, target_date, steps, track_daily, reminder_days, reminder_time } = req.body;
     if (!student_id || !cadence || !title) return res.status(400).json({ error: 'student_id, cadence, and title required' });
     if (!['daily','weekly','unit','yearly'].includes(cadence)) return res.status(400).json({ error: 'Invalid cadence' });
+    const stepsJson = Array.isArray(steps) && steps.length
+        ? JSON.stringify(steps.filter(s => s && String(s).trim()).map(s => ({ text: String(s).trim(), done: false })))
+        : null;
     try {
         const connection = await getDbConnection();
         await ensureTables(connection);
         const [result] = await connection.execute(
-            'INSERT INTO intervention_goals (student_id, cadence, title, notes, target_date) VALUES (?, ?, ?, ?, ?)',
-            [student_id, cadence, title, notes || null, target_date || null]
+            `INSERT INTO intervention_goals (student_id, cadence, title, notes, target_date, steps_json, track_daily, reminder_days, reminder_time)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [student_id, cadence, title, notes || null, target_date || null, stepsJson,
+             track_daily ? 1 : 0, reminder_days || null, reminder_time || null]
         );
         await connection.release();
         res.json({ success: true, id: result.insertId });
@@ -399,6 +429,43 @@ router.put('/intervention/goals/:id', requireSelfOrStaff(), async (req, res) => 
         await connection.release();
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update goal' }); }
+});
+
+// Goals — replace the full micro-steps list (add/remove/toggle all go
+// through this one full-array replace, same pattern as habits/todos below)
+router.put('/intervention/goals/:id/steps', requireSelfOrStaff(), async (req, res) => {
+    const { id } = req.params;
+    const { student_id, steps } = req.body;
+    if (!student_id || !Array.isArray(steps)) return res.status(400).json({ error: 'student_id and steps[] required' });
+    try {
+        const connection = await getDbConnection();
+        await ensureTables(connection);
+        const cleaned = steps.filter(s => s && String(s.text || '').trim())
+            .map(s => ({ text: String(s.text).trim(), done: !!s.done }));
+        await connection.execute(
+            'UPDATE intervention_goals SET steps_json = ? WHERE id = ? AND student_id = ?',
+            [cleaned.length ? JSON.stringify(cleaned) : null, id, student_id]
+        );
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update steps' }); }
+});
+
+// Goals — reminder + daily-tracker settings
+router.put('/intervention/goals/:id/settings', requireSelfOrStaff(), async (req, res) => {
+    const { id } = req.params;
+    const { student_id, track_daily, reminder_days, reminder_time } = req.body;
+    if (!student_id) return res.status(400).json({ error: 'student_id required' });
+    try {
+        const connection = await getDbConnection();
+        await ensureTables(connection);
+        await connection.execute(
+            'UPDATE intervention_goals SET track_daily = ?, reminder_days = ?, reminder_time = ? WHERE id = ? AND student_id = ?',
+            [track_daily ? 1 : 0, reminder_days || null, reminder_time || null, id, student_id]
+        );
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update goal settings' }); }
 });
 
 // Goals — delete
@@ -811,7 +878,7 @@ router.get('/admin/intervention/goals/:student_id', async (req, res) => {
             [student_id]
         );
         await connection.release();
-        res.json({ goals: rows });
+        res.json({ goals: rows.map(parseGoalRow) });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch goals' }); }
 });
 
@@ -1050,16 +1117,35 @@ router.put('/intervention/todos', requireSelfOrStaff(), async (req, res) => {
 
 // ── Habits ────────────────────────────────────────────────────────────────
 
+// A goal saved with "track it daily" on doesn't get its own planner_habits
+// row -- it's read live off intervention_goals and blended into the habits
+// list at request time, so the Goals tab stays the single source of truth
+// (editing/completing/deleting the goal is instantly reflected here with
+// nothing to keep in sync). Its id is prefixed 'goal_<id>' and it logs
+// through the exact same planner_habit_log table as any other habit, which
+// is what actually makes the streaks/28-day grid "connect" to the goal.
+async function getGoalLinkedHabits(connection, studentId) {
+    const [goals] = await connection.execute(
+        `SELECT id, title FROM intervention_goals
+         WHERE student_id = ? AND track_daily = 1 AND achieved_at IS NULL
+         ORDER BY created_at`,
+        [studentId]
+    );
+    return goals.map(g => ({ id: `goal_${g.id}`, text: `🎯 ${g.title}`, color: '#6f42c1', sort_order: -1, fromGoal: true }));
+}
+
 router.get('/intervention/habits', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
         const connection = await getDbConnection();
         await ensurePlannerTables(connection);
+        await ensureTables(connection);
         const [habits] = await connection.execute(
             'SELECT habit_id AS id, text_val AS text, color, sort_order FROM planner_habits WHERE student_id = ? ORDER BY sort_order, created_at',
             [student_id]
         );
+        const goalHabits = await getGoalLinkedHabits(connection, student_id);
         const [logs] = await connection.execute(
             'SELECT habit_id, log_date FROM planner_habit_log WHERE student_id = ? AND log_date >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)',
             [student_id]
@@ -1072,14 +1158,18 @@ router.get('/intervention/habits', requireSelfOrStaff(), async (req, res) => {
             if (!logMap[l.habit_id]) logMap[l.habit_id] = {};
             logMap[l.habit_id][ymd] = true;
         });
-        res.json({ habits, log: logMap });
+        res.json({ habits: [...goalHabits, ...habits], log: logMap });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch habits' }); }
 });
 
-// Upsert full habits list
+// Upsert full habits list. Goal-linked entries ('goal_<id>') are never
+// stored here -- they're derived, not owned, by this table (see
+// getGoalLinkedHabits above) -- so they're filtered out before anything
+// else runs, regardless of whether the client included them.
 router.put('/intervention/habits', requireSelfOrStaff(), async (req, res) => {
-    const { student_id, habits } = req.body;
-    if (!student_id || !Array.isArray(habits)) return res.status(400).json({ error: 'student_id and habits[] required' });
+    const { student_id } = req.body;
+    const habits = Array.isArray(req.body.habits) ? req.body.habits.filter(h => !String(h?.id || '').startsWith('goal_')) : null;
+    if (!student_id || !habits) return res.status(400).json({ error: 'student_id and habits[] required' });
     try {
         const connection = await getDbConnection();
         await ensurePlannerTables(connection);
@@ -1191,10 +1281,12 @@ router.get('/teacher/planner/:student_id/habits', requireStaff, async (req, res)
     try {
         const connection = await getDbConnection();
         await ensurePlannerTables(connection);
+        await ensureTables(connection);
         const [habits] = await connection.execute(
             'SELECT habit_id AS id, text_val AS text, color, sort_order FROM planner_habits WHERE student_id = ? ORDER BY sort_order, created_at',
             [student_id]
         );
+        const goalHabits = await getGoalLinkedHabits(connection, student_id);
         const [logs] = await connection.execute(
             'SELECT habit_id, log_date FROM planner_habit_log WHERE student_id = ? AND log_date >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)',
             [student_id]
@@ -1206,7 +1298,7 @@ router.get('/teacher/planner/:student_id/habits', requireStaff, async (req, res)
             if (!logMap[l.habit_id]) logMap[l.habit_id] = {};
             logMap[l.habit_id][ymd] = true;
         });
-        res.json({ habits, log: logMap });
+        res.json({ habits: [...goalHabits, ...habits], log: logMap });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch habits' }); }
 });
 
