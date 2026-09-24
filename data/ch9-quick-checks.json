@@ -1,0 +1,26 @@
+{
+  "ch9_lab_datatypes": {
+    "title": "Quick Check: Variables, Data Types &amp; Operators",
+    "questions": [
+      { "q": "Which keyword should you use to declare a variable that is expected to change, like a running shopping cart total?", "options": ["const", "let", "var", "static"], "correct": 1 },
+      { "q": "What is the result of the expression 5 === \"5\"?", "options": ["true, because both represent the number 5", "false, because strict equality checks both value AND data type, and one is a Number while the other is a String", "true, because JavaScript automatically converts strings to numbers", "It throws an error"], "correct": 1 },
+      { "q": "Due to JavaScript's type coercion, what is the result of '5' + 5?", "options": ["10 (real math addition)", "\"55\" (the number is converted to a string and glued on)", "An error, since you can't mix strings and numbers", "5 (only the string is kept)"], "correct": 1 }
+    ]
+  },
+  "ch9_lab_functions": {
+    "title": "Quick Check: Functions, Parameters &amp; Scope",
+    "questions": [
+      { "q": "What is the difference between declaring a function and calling a function?", "options": ["They are the same thing", "Declaring writes out the instructions (the recipe); calling actually executes those instructions (cooking the meal)", "Declaring runs the code immediately; calling just saves it for later", "Calling a function deletes it after use"], "correct": 1 },
+      { "q": "A function calculates a total but has no return statement. If you store its output in a variable and log it, what will print?", "options": ["The correct calculated total", "undefined, because without return the result never gets sent back out", "An error message", "null"], "correct": 1 },
+      { "q": "A variable is declared with let INSIDE a function. Can you access that variable from code OUTSIDE the function?", "options": ["Yes, all variables are always global", "No -- it has Local Scope, so using it outside the function throws a ReferenceError", "Yes, but only if you use const instead of let", "Only on Tuesdays"], "correct": 1 }
+    ]
+  },
+  "ch9_lab_domevents": {
+    "title": "Quick Check: DOM Selection, Events &amp; Loops",
+    "questions": [
+      { "q": "Which DOM selector method uses flexible, CSS-style syntax (like '.hero-image' or '#submit-btn') to grab an element?", "options": ["getElementById", "querySelector", "document.find", "selectElement"], "correct": 1 },
+      { "q": "What does event.preventDefault() do when called inside a form's submit event handler?", "options": ["It deletes the form from the page", "It stops the browser's default action (refreshing/submitting the page) so your JS can handle it instead", "It automatically validates every input", "It prevents the event listener from ever running again"], "correct": 1 },
+      { "q": "Which loop is specifically designed to iterate over the values inside an Array?", "options": ["for...in", "while", "for...of", "do...while"], "correct": 2 }
+    ]
+  }
+}
