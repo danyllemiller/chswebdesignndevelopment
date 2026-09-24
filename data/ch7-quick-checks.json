@@ -1,0 +1,26 @@
+{
+  "ch7_lab_boxmodel": {
+    "title": "Quick Check: Box Model Math &amp; Document Flow",
+    "questions": [
+      { "q": "Using default content-box math, an element has width: 100px, 10px of padding, and a 5px border on every side. What is its total rendered width?", "options": ["100px", "115px", "130px", "150px"], "correct": 2 },
+      { "q": "An <h2> has margin-bottom: 30px and the <p> right below it has margin-top: 20px. Due to margin collapse, what is the actual visible gap between them?", "options": ["50px (they add together)", "30px (the larger value wins, the smaller is absorbed)", "20px (the smaller value wins)", "0px (margins cancel out)"], "correct": 1 },
+      { "q": "What is the key difference between display: none and visibility: hidden?", "options": ["They behave identically", "display: none completely removes the element from document flow so adjacent boxes fill the space; visibility: hidden hides it but still reserves its physical space", "visibility: hidden removes the element from flow; display: none just hides it visually", "display: none only works on images"], "correct": 1 }
+    ]
+  },
+  "ch7_lab_flexgrid": {
+    "title": "Quick Check: Flexbox &amp; CSS Grid",
+    "questions": [
+      { "q": "To turn a group of child elements into 'flex items,' which element do you apply display: flex; to?", "options": ["Each individual child element", "The parent container", "The <body> tag only", "You apply it to the CSS file itself, not any element"], "correct": 1 },
+      { "q": "In CSS Grid, what does the fr unit (e.g., grid-template-columns: 1fr 1fr 1fr;) represent?", "options": ["A fixed number of pixels", "A fraction of the available free space in the grid container", "A percentage of the viewport width", "The same thing as 1rem"], "correct": 1 },
+      { "q": "What is the key difference between auto-fill and auto-fit when building a responsive grid?", "options": ["They are exactly the same", "auto-fill leaves empty ghost tracks if there's extra space; auto-fit collapses those empty tracks so existing items stretch to fill the row", "auto-fit only works on Flexbox, not Grid", "auto-fill requires media queries to work; auto-fit does not"], "correct": 1 }
+    ]
+  },
+  "ch7_lab_responsive": {
+    "title": "Quick Check: Positioning, Units &amp; Media Queries",
+    "questions": [
+      { "q": "How does position: sticky behave differently from position: fixed?", "options": ["They are identical in every way", "sticky acts like 'relative' until the user scrolls past a defined threshold, then it locks in place like 'fixed'; 'fixed' is glued to the viewport from the start", "fixed scrolls normally with the page; sticky never moves at all", "sticky only works on images"], "correct": 1 },
+      { "q": "Which relative unit is based on the font size of the root <html> element, not the direct parent?", "options": ["em", "%", "rem", "vh"], "correct": 2 },
+      { "q": "Why does the chapter recommend a 'Mobile-First' strategy, writing base styles for phones and using min-width media queries to layer on desktop styles?", "options": ["It's required by all browsers", "It forces you to prioritize essential content for users on the go, then progressively add complexity for larger screens", "Mobile-First sites load slower on purpose", "Desktop-First is actually faster and Mobile-First is outdated"], "correct": 1 }
+    ]
+  }
+}
