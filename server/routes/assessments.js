@@ -334,17 +334,21 @@ router.get('/wd-exam-questions', requireLogin, async (req, res) => {
         const [rows] = await connection.execute(
             `SELECT question_id AS id, question_text AS question,
                     option_a, option_b, option_c, option_d,
-                    correct_answer AS answer, chapter_number AS chapter, question_type
+                    correct_answer AS answer, chapter_number AS chapter, question_type, section
              FROM wd_questions WHERE chapter_number = ? ORDER BY RAND()`,
             [chapterNum]
         );
         // T/F rows only ever populate option_a/option_b ('True'/'False') --
         // option_c/d are empty strings (NOT NULL column), not a real 3rd/4th
         // choice, so they're dropped from the options array for that type.
+        // `section` is NULL for chapters not yet tagged (see
+        // ch1-ch2-question-sections.sql) -- examLogicWD.js falls back to
+        // plain random sampling whenever every question in a chapter comes
+        // back with section === null, so untagged chapters are unaffected.
         const questions = rows.map(row => ({
             id: row.id, question: row.question,
             options: row.question_type === 'tf' ? [row.option_a, row.option_b] : [row.option_a, row.option_b, row.option_c, row.option_d],
-            answer: row.answer, chapter: row.chapter, type: row.question_type
+            answer: row.answer, chapter: row.chapter, type: row.question_type, section: row.section
         }));
         await connection.release();
         res.json({ chapter: chapterNum, count: questions.length, questions });

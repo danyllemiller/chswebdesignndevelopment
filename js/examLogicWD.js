@@ -424,6 +424,39 @@ function shuffleArray(arr) {
     return a;
 }
 
+// Picks `count` questions from `pool`, guaranteeing at least one question
+// from every distinct `section` tag present before filling the rest
+// randomly -- so no attempt can skip an entire topic area of the chapter.
+// Falls back to plain random selection for any chapter whose questions have
+// no section tag yet (see ch1-ch2-question-sections.sql), so every chapter
+// besides 1 and 2 keeps today's exact behavior until it's tagged too.
+function pickWithSectionCoverage(pool, count) {
+    const sections = [...new Set(pool.map(q => q.section).filter(Boolean))];
+    if (sections.length === 0) {
+        return shuffleArray(pool).slice(0, count);
+    }
+    const bySection = {};
+    sections.forEach(s => { bySection[s] = shuffleArray(pool.filter(q => q.section === s)); });
+
+    const picked = [];
+    const pickedIds = new Set();
+    // One guaranteed pick per section first, in random section order so no
+    // section is systematically favored when count < sections.length.
+    shuffleArray(sections).forEach(s => {
+        if (picked.length >= count) return;
+        const q = bySection[s][0];
+        if (q && !pickedIds.has(q.id)) { picked.push(q); pickedIds.add(q.id); }
+    });
+
+    // Fill remaining slots from whatever's left in the whole pool.
+    if (picked.length < count) {
+        const remaining = shuffleArray(pool.filter(q => !pickedIds.has(q.id)));
+        picked.push(...remaining.slice(0, count - picked.length));
+    }
+
+    return shuffleArray(picked.slice(0, count));
+}
+
 async function initExam(config) {
     currentChapter = config.chapter || 1;
 
@@ -446,9 +479,8 @@ async function initExam(config) {
             ...imageLabelPool.slice(0, types.image_label || 0)
         ]);
     } else {
-        const shuffledPool = shuffleArray(pool);
-        const count = config.questionCount || Math.min(20, shuffledPool.length);
-        examQuestions = shuffledPool.slice(0, count);
+        const count = config.questionCount || Math.min(20, pool.length);
+        examQuestions = pickWithSectionCoverage(pool, count);
     }
 
     // Matching/image-label questions arrive with their items/targets/labels
