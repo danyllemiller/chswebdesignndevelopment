@@ -1,0 +1,26 @@
+{
+  "ch5_lab_boilerplate": {
+    "title": "Quick Check: The HTML Boilerplate & Doctype",
+    "questions": [
+      { "q": "What is the correct HTML5 doctype declaration?", "options": ["<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">", "<!DOCTYPE html>", "<html5>", "<!TYPE doctype=\"html5\">"], "correct": 1 },
+      { "q": "How did XHTML's rules differ from HTML5's, according to the chapter?", "options": ["XHTML required every tag closed and lowercase with no exceptions; HTML5 relaxed those strict rules", "XHTML and HTML5 have identical rules", "HTML5 is stricter than XHTML about closing tags", "XHTML came after HTML5"], "correct": 0 },
+      { "q": "Which part of the HTML boilerplate is described as \"the brain of the page,\" holding info the user doesn't see (like the title and meta tags)?", "options": ["<html>", "<head>", "<body>", "<footer>"], "correct": 1 }
+    ]
+  },
+  "ch5_lab_semantics": {
+    "title": "Quick Check: Semantic Tags & Grouping Elements",
+    "questions": [
+      { "q": "Why does the chapter say you should sell 'Semantic Architecture' using tags like <article> and <nav> instead of generic <div> tags?", "options": ["Semantic tags load faster in every browser", "They explicitly tell Google and screen readers what the content means, which boosts SEO and accessibility", "Div tags are being removed from HTML6", "There's no real difference, it's just a style preference"], "correct": 1 },
+      { "q": "What is the key difference in behavior between a <div> and a <span>?", "options": ["<div> is a block element that takes the full width and starts a new line; <span> is inline and only takes the space its content needs", "<span> always starts a new line; <div> never does", "They behave identically in every browser", "<div> is only for images; <span> is only for text"], "correct": 0 },
+      { "q": "Following the \"First-In, Last-Out\" nesting rule, if you open <p> and then <em> inside it, which tag must you close first?", "options": ["<p>, because it was opened first", "<em>, because it was opened last", "It doesn't matter which one closes first", "Both must close on the same line"], "correct": 1 }
+    ]
+  },
+  "ch5_lab_forms": {
+    "title": "Quick Check: Accessible Forms",
+    "questions": [
+      { "q": "Why must every <input> have a matching <label> linked by for/id?", "options": ["It's optional styling that makes the form look nicer", "A screen reader can't tell a user what a blank text field is for without it -- it's a required accessibility link", "Labels are required for the form to submit data at all", "Only <textarea> elements need labels, not <input>"], "correct": 1 },
+      { "q": "What does wrapping form fields in <fieldset> with a <legend> do for a screen reader user?", "options": ["It hides those fields from screen readers entirely", "It announces the group's name (like \"Personal Information\") before reading the fields inside it, giving context", "It automatically validates the fields", "It changes the fields' HTML input type"], "correct": 1 },
+      { "q": "A \"Skip to main content\" link helps a keyboard-only user, but a mouse user never notices it exists. Why?", "options": ["It only works on mobile devices", "A keyboard user would otherwise have to Tab through the entire nav menu every page load just to reach the content; a mouse user just clicks directly where they want to go", "It's a decorative element with no real function", "Mouse users can't see hidden links at all"], "correct": 1 }
+    ]
+  }
+}
