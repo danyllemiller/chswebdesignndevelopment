@@ -1,0 +1,26 @@
+{
+  "ch8_lab_images": {
+    "title": "Quick Check: Image Formats, Compression &amp; Rights",
+    "questions": [
+      { "q": "Which type of compression permanently deletes some image data to shrink file size, and is best used for large, complex photographs (like JPG or WebP)?", "options": ["Lossless compression", "Lossy compression", "Dithering", "Vector compression"], "correct": 1 },
+      { "q": "Why is SVG the best format for a logo that needs to look crisp on both a business card and a billboard?", "options": ["SVG files are always smaller than JPGs no matter what", "SVGs are made of mathematical paths, not pixels, so they scale to any size without ever getting blurry", "SVG is the only format browsers support", "SVGs automatically compress themselves"], "correct": 1 },
+      { "q": "A client tells you a photo is 'royalty-free' so you can use it for nothing. Is that correct?", "options": ["Yes, royalty-free always means completely free of cost", "No -- royalty-free means you pay once (or use a free tier) and can reuse it many times; it does not mean 'free of cost'", "No, royalty-free means you can never use the image", "Yes, but only for non-commercial projects"], "correct": 1 }
+    ]
+  },
+  "ch8_lab_video": {
+    "title": "Quick Check: Video, Audio &amp; Iframes",
+    "questions": [
+      { "q": "Which attribute MUST be paired with autoplay on a <video> tag for browsers to actually allow it to play automatically?", "options": ["loop", "controls", "muted", "poster"], "correct": 2 },
+      { "q": "What is the purpose of the <track> tag inside a <video> element?", "options": ["It sets the video's file size", "It links a .vtt file to provide subtitles/captions for deaf and hard-of-hearing users", "It controls the video's autoplay behavior", "It adds a poster thumbnail image"], "correct": 1 },
+      { "q": "Why should you add a sandbox attribute to an <iframe> that embeds untrusted third-party content?", "options": ["It makes the iframe load faster", "By default an iframe has full permissions (can run scripts, submit forms); sandbox restricts those permissions, and you only add back what's specifically needed", "sandbox is required for all iframes to display at all", "It changes the iframe's aspect ratio"], "correct": 1 }
+    ]
+  },
+  "ch8_lab_tablesfit": {
+    "title": "Quick Check: Semantic Tables, Object-Fit &amp; Accessibility",
+    "questions": [
+      { "q": "Which HTML table attribute stretches a single cell horizontally across multiple columns?", "options": ["rowspan", "colspan", "thead", "tfoot"], "correct": 1 },
+      { "q": "What's the key difference between object-fit: cover and object-fit: contain?", "options": ["They behave identically", "cover scales and crops the image to fill the entire box with no empty space; contain shrinks the image to fit entirely inside the box, possibly leaving empty bars", "contain always distorts the image; cover never does", "cover only works on video, contain only works on images"], "correct": 1 },
+      { "q": "In the POUR accessibility principles, what does it mean for a site to be 'Operable'?", "options": ["The site must load in under 1 second", "The site must be fully usable and navigable using just a keyboard, not only a mouse", "The site must use only one color", "The site must have a search bar"], "correct": 1 }
+    ]
+  }
+}
