@@ -1205,7 +1205,17 @@ async function processSubmission() {
 
     const finalAssignmentKey = `Ch${currentChapter}-Exam`;
 
-    try {
+    // A failed save here used to be silent -- caught, logged to the console
+    // only, and the student still saw a normal "Assessment Submitted!"
+    // screen with their real score, because everything below this point is
+    // computed client-side regardless of whether the save worked. That's
+    // exactly how a student can finish an exam, see and print a score, and
+    // the gradebook never gets it (confirmed happening live 2026-09-24).
+    // gradeSaveFailed now drives a banner on the results screen instead of
+    // failing invisibly, and one retry covers a transient blip before
+    // declaring it failed.
+    let gradeSaveFailed = false;
+    async function attemptSave() {
         let shouldSave = true;
         const gradesRes = await fetch(`/api/student/grades?student_id=${encodeURIComponent(studentId)}`);
         if (gradesRes.ok) {
@@ -1216,23 +1226,45 @@ async function processSubmission() {
                 if (existingScore > finalScore) shouldSave = false;
             }
         }
-        if (shouldSave) {
-            const saveRes = await fetch('/api/submit-exam', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    student_id: studentId, exam_id: finalAssignmentKey, score: finalScore, total_points: finalTotal,
-                    chapter_title: chapterTitle, report_type: 'CHAPTER EXAM REPORT', question_details: questionDetails
-                })
-            });
-            if (!saveRes.ok && saveRes.status === 503) {
+        if (!shouldSave) return;
+        const saveRes = await fetch('/api/submit-exam', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                student_id: studentId, exam_id: finalAssignmentKey, score: finalScore, total_points: finalTotal,
+                chapter_title: chapterTitle, report_type: 'CHAPTER EXAM REPORT', question_details: questionDetails
+            })
+        });
+        if (!saveRes.ok) {
+            if (saveRes.status === 503) {
                 try {
                     const errBody = await saveRes.json();
                     if (errBody.testingPaused) alert(errBody.error);
                 } catch {}
             }
+            throw new Error(`submit-exam returned ${saveRes.status}`);
         }
-    } catch(e) { console.warn("Could not save grade:", e); }
+    }
+    try {
+        await attemptSave();
+    } catch (e1) {
+        try {
+            await attemptSave(); // one retry -- covers a transient network blip
+        } catch (e2) {
+            gradeSaveFailed = true;
+            console.error("Could not save grade after retry:", e2);
+            try {
+                fetch('/api/client-error-log', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: `submit-exam grade save failed: ${e2.message}`,
+                        stack: e2.stack, url: window.location.href, student_id: studentId,
+                        context: `processSubmission:${finalAssignmentKey}:score=${finalScore}/${finalTotal}`
+                    })
+                });
+            } catch {}
+        }
+    }
 
     let badgeHtml = '';
     if (finalPercentage >= 100) badgeHtml = '<span class="badge rounded-pill badge-platinum shadow-sm ms-3 fs-5 align-middle"><i class="fas fa-crown text-dark me-1"></i> Platinum Rank</span>';
@@ -1265,10 +1297,16 @@ async function processSubmission() {
     let titleText = isRetake ? "Assessment Submitted - Retake Required" : "Assessment Submitted!";
     let titleColor = isRetake ? "text-warning" : "text-success";
     let retakeMsg = isRetake ? `<div class="alert alert-warning fw-bold mt-3"><i class="fas fa-exclamation-triangle"></i> Score is below 80%. You need to retake this test for exams and projects.</div>` : "";
+    const saveFailedBanner = gradeSaveFailed ? `
+        <div class="alert alert-danger fw-bold text-start mb-3">
+            <i class="fas fa-triangle-exclamation me-1"></i> Your score below did NOT save to the gradebook (connection problem).
+            Screenshot or print this screen right now and show it to your teacher -- do not just retake the exam, this attempt needs to be entered manually.
+        </div>` : '';
 
     container.innerHTML = `
         <div class="card shadow border-success mx-auto text-center" style="max-width: 750px;">
             <div class="card-body p-4 p-md-5">
+                ${saveFailedBanner}
                 <div class="display-4 mb-3 no-print">${isRetake ? '⚠️' : '✅'}</div>
                 <h2 class="fw-bold ${titleColor} mb-3">${titleText}</h2>
                 <div class="p-4 rounded text-start" style="${boxStyle}">
