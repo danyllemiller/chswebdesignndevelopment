@@ -1,0 +1,26 @@
+{
+  "ch16_lab_deployment": {
+    "title": "Quick Check: FTP vs. CI/CD &amp; Launch Errors",
+    "questions": [
+      { "q": "What is the critical security difference between FTP and SFTP?", "options": ["They are identical, just different names for the same protocol", "FTP transmits your username, password, and files in plain unencrypted text; SFTP encrypts the entire connection", "SFTP is slower but otherwise the same as FTP", "FTP only works on Mac computers; SFTP only works on Windows"], "correct": 1 },
+      { "q": "Why is Continuous Deployment (CI/CD) considered safer than manually uploading files via FTP?", "options": ["It requires fewer login credentials", "It relies on version control, meaning every update is tracked and can be instantly rolled back if a bug occurs", "It skips testing entirely to save time", "It only works for very small websites"], "correct": 1 },
+      { "q": "A live site shows a 404 error for an image that works fine on localhost. What is the most likely cause?", "options": ["The website's CSS file is missing", "Wrong file path in the HTML, the image file was never uploaded, or a Linux case-sensitivity mismatch (e.g., Logo.PNG vs. logo.png)", "The user's internet connection is too slow", "The image file is too large for any server"], "correct": 1 }
+    ]
+  },
+  "ch16_lab_domains": {
+    "title": "Quick Check: DNS, Domains &amp; HTTPS",
+    "questions": [
+      { "q": "What does a DNS 'A Record' do?", "options": ["Points a domain name to a specific numeric IP address", "Automatically renews a domain name every year", "Encrypts traffic between a browser and a server", "Blocks spam email sent to the domain"], "correct": 0 },
+      { "q": "What is 'DNS Propagation'?", "options": ["The process of buying a new domain name", "The time it takes for a new DNS setting to spread and update across every internet provider around the globe", "A type of SSL certificate", "The act of deleting an old domain"], "correct": 1 },
+      { "q": "What is the primary difference between HTTP and HTTPS?", "options": ["HTTPS is only for mobile devices; HTTP is only for desktops", "HTTPS encrypts the data being transferred between browser and server; HTTP sends it in plain, readable text", "They are exactly the same, just different abbreviations", "HTTP is newer and faster than HTTPS"], "correct": 1 }
+    ]
+  },
+  "ch16_lab_qa": {
+    "title": "Quick Check: QA Testing &amp; Lighthouse",
+    "questions": [
+      { "q": "What is 'Link Rot'?", "options": ["When a website's CSS file becomes corrupted", "When hyperlinks point to pages or resources that have been deleted or moved, resulting in 404 errors", "When a domain name expires", "A type of malware that infects old websites"], "correct": 1 },
+      { "q": "A QA test reveals that body text is light gray on a white background. Which Google Lighthouse score will drop as a result?", "options": ["SEO", "Accessibility, due to low color contrast", "Best Practices", "Performance"], "correct": 1 },
+      { "q": "Why does the chapter single out Safari as the most critical browser to test before launch?", "options": ["Safari is the most popular browser worldwide", "Safari on iOS/macOS uses its own rendering engine (WebKit) and notoriously lags behind on new CSS features", "Safari cannot display images", "Safari requires a paid license to test with"], "correct": 1 }
+    ]
+  }
+}
