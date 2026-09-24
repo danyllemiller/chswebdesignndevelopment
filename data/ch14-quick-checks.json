@@ -1,0 +1,26 @@
+{
+  "ch14_lab_relational": {
+    "title": "Quick Check: Keys &amp; Data Normalization",
+    "questions": [
+      { "q": "What is the defining characteristic of a Primary Key in a relational database table?", "options": ["It can repeat across multiple rows", "It must contain a unique value for each row and cannot be null", "It must always be a text string", "It links to a table in a different database"], "correct": 1 },
+      { "q": "What is a Foreign Key?", "options": ["A key used to encrypt the entire database", "A column in one table that points back to the Primary Key of another table, creating a link between them", "The very first column created in any table", "A key that only works for foreign (non-US) clients"], "correct": 1 },
+      { "q": "What is the purpose of Data Normalization?", "options": ["To make queries run slower on purpose", "To organize a database to reduce redundancy -- avoiding storing the same data in multiple places -- so updates only need to happen in one location", "To convert all data into JSON format", "To delete unused tables automatically"], "correct": 1 }
+    ]
+  },
+  "ch14_lab_sql": {
+    "title": "Quick Check: SQL Commands &amp; CRUD",
+    "questions": [
+      { "q": "Which SQL command corresponds to the 'Read' action in CRUD?", "options": ["INSERT INTO", "SELECT", "UPDATE", "DELETE"], "correct": 1 },
+      { "q": "What does the SQL WHERE clause do?", "options": ["Deletes the entire table", "Filters the results to only include rows that meet a specific condition", "Sorts the results alphabetically", "Creates a new table"], "correct": 1 },
+      { "q": "What does the SQL JOIN command do?", "options": ["Deletes duplicate rows automatically", "Combines columns from two or more tables based on a related column (like linking HighScores to Users)", "Merges two entire databases into one file", "Joins a user's browser session to the server"], "correct": 1 }
+    ]
+  },
+  "ch14_lab_security": {
+    "title": "Quick Check: SQL Injection, Hashing &amp; Privacy Law",
+    "questions": [
+      { "q": "How do professional developers prevent SQL Injection attacks?", "options": ["By making the database password longer", "By using Parameterized Queries to sanitize inputs, treating them as harmless text rather than executable commands", "By hiding the database on a different server", "By disabling all SELECT queries"], "correct": 1 },
+      { "q": "What does adding a 'Salt' to a password hash accomplish?", "options": ["It makes the password taste better to hackers (a joke term with no real function)", "It adds random characters to the password before hashing, so two users with the same password end up with completely different hashes", "It deletes the password after one use", "It converts the password into a Primary Key"], "correct": 1 },
+      { "q": "Under GDPR's 'Data Minimization' principle, what should a developer do when designing a database?", "options": ["Collect as much user data as possible in case it's needed later", "Only collect the data you actually need -- e.g., don't store a full birth date if all you need is whether the user is 18+", "Store every field as plain text for easy access", "Only apply this rule to companies based in the EU"], "correct": 1 }
+    ]
+  }
+}
