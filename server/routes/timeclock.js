@@ -598,10 +598,19 @@ router.post('/timeclock/save', requireSelfOrStaff(), async (req, res) => {
                     if (icCols.length === 0) {
                         await connection.execute(`ALTER TABLE responses ADD COLUMN entered_in_ic TINYINT(1) DEFAULT 0`);
                     }
+                    // on_time is stored separately from the rolled-up point
+                    // total -- a raw score of 2/3 is ambiguous (on-time-but-
+                    // wrong and late-but-correct both land on 2), which is
+                    // exactly why the gradebook couldn't tell those apart.
+                    // NULL for every non-timeclock row.
+                    const [onTimeCols] = await connection.execute(`SHOW COLUMNS FROM responses LIKE 'on_time'`);
+                    if (onTimeCols.length === 0) {
+                        await connection.execute(`ALTER TABLE responses ADD COLUMN on_time TINYINT(1) DEFAULT NULL`);
+                    }
                     await connection.execute(
-                        `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic) VALUES (?, ?, ?, ?, NOW(), 0)
-                         ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0`,
-                        [student_id, examId, points, 3]
+                        `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic, on_time) VALUES (?, ?, ?, ?, NOW(), 0, ?)
+                         ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0, on_time = VALUES(on_time)`,
+                        [student_id, examId, points, 3, onTime === null ? null : (onTime ? 1 : 0)]
                     );
                 }
             } catch (gradeErr) { console.error('[timeclock] Failed to grade clock-in:', gradeErr); }

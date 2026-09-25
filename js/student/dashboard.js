@@ -253,7 +253,8 @@ async function renderCoursePanel(user, courseKey, sectionId) {
                     score: assignment.score,
                     timestamp: assignment.timestamp,
                     exam_id: examIdKey,
-                    title: assignment.title || examIdKey
+                    title: assignment.title || examIdKey,
+                    onTime: assignment.on_time // 1/0 for a timeclock check-in, null otherwise
                 };
             });
         }
@@ -535,6 +536,32 @@ function renderGradeTable(keys, myGrades, studentId, registryData, studentPeriod
                 const pct = (Number(safeScore) / max) * 100;
                 if (pct < 80) customStyle = "background-color: #FFF2CC;";
             }
+        }
+
+        // "L" corner badge = turned in/clocked in late, on every graded (or
+        // pending) cell, not just timeclock. A TC- row uses onTime (bell-
+        // schedule-precise, set at /timeclock/save, since clock-in points
+        // roll "attempted + on-time + correct" into one total where the raw
+        // number alone can't say which point was lost); everything else
+        // compares the submission date against the assignment's own due
+        // date (period-specific first, same resolution the due-date column
+        // above already uses).
+        const isTcKey = key.startsWith('TC-');
+        let isLate = false;
+        if (typeof grade === 'object') {
+            if (isTcKey) {
+                isLate = grade.onTime === 0;
+            } else {
+                const regInfo = registryData[key];
+                let effectiveDueDate = regInfo?.dueDate || '';
+                if (regInfo?.periodDueDates && regInfo.periodDueDates[studentPeriod]) effectiveDueDate = regInfo.periodDueDates[studentPeriod];
+                const submittedDateStr = time ? String(time).split('T')[0].split(' ')[0] : null;
+                isLate = !!(effectiveDueDate && effectiveDueDate !== '9999-99-99' && submittedDateStr && submittedDateStr > effectiveDueDate);
+            }
+        }
+        if (isLate) {
+            display += `<span title="${isTcKey ? 'Clocked in late' : 'Turned in late'}" style="position:absolute;top:1px;right:2px;font-size:.6rem;font-weight:800;color:#fff;background:#dc3545;border-radius:3px;padding:0 3px;line-height:1.3;">L</span>`;
+            customStyle += 'position:relative;';
         }
         bodyHtml += `<td style="${customStyle}">${display} <small class="d-block text-muted opacity-75 font-monospace mt-1">${dateStr}</small></td>`;
     });

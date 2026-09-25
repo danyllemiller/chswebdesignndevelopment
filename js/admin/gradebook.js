@@ -1094,7 +1094,8 @@ async function loadData(period) {
                     score: g.score,
                     max: g.total_points,
                     timestamp: g.timestamp,
-                    enteredIC: !!g.entered_in_ic
+                    enteredIC: !!g.entered_in_ic,
+                    onTime: g.on_time // 1/0 for a timeclock check-in, null for everything else
                 };
             });
         }
@@ -1605,6 +1606,30 @@ let score = "", display = '', bg = "";
                     // reusing yellow here is exactly what made it ambiguous
                     // with the new 70-80% exam tier.
                     if (score !== "" && typeof g === 'object' && !g.enteredIC) bg = "background-color: rgb(174, 214, 241);";
+                }
+                // "L" corner badge = turned in/clocked in late, on every
+                // graded cell, not just timeclock -- a raw score alone can't
+                // tell a late-but-correct answer from an on-time-but-wrong
+                // one, or a late-but-full-credit submission from an on-time
+                // one. A TC- row uses onTime (bell-schedule-precise, set at
+                // /timeclock/save); everything else compares the submission
+                // date against the assignment's own due date -- same
+                // due-date resolution (period-specific first) the past-due
+                // "missing" check below already uses.
+                if (score !== "EX" && typeof g === 'object') {
+                    const isTcKey = key.startsWith('TC-');
+                    let isLate = false;
+                    if (isTcKey) {
+                        isLate = g.onTime === 0;
+                    } else {
+                        const effectiveDueDate = studentPeriodDueDate || reg?.dueDate;
+                        const submittedDateStr = g.timestamp ? String(g.timestamp).split('T')[0].split(' ')[0] : null;
+                        isLate = !!(effectiveDueDate && submittedDateStr && submittedDateStr > effectiveDueDate);
+                    }
+                    if (isLate) {
+                        display += `<span class="late-badge" title="${isTcKey ? 'Clocked in late' : 'Turned in late'}" style="position:absolute;top:1px;right:2px;font-size:.6rem;font-weight:800;color:#fff;background:#dc3545;border-radius:3px;padding:0 3px;line-height:1.3;">L</span>`;
+                        bg += 'position:relative;';
+                    }
                 }
             } else {
                 if (isPeriodExempt) {

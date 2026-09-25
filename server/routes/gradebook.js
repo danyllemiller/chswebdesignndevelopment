@@ -27,6 +27,16 @@ async function ensureEnteredIcColumn(connection) {
     }
 }
 
+// Whether a timeclock check-in (responses.exam_id LIKE 'TC-%') was clocked
+// in on time -- see server/routes/timeclock.js's /timeclock/save, which is
+// what actually writes it. NULL for every non-timeclock row.
+async function ensureOnTimeColumn(connection) {
+    const [cols] = await connection.execute(`SHOW COLUMNS FROM responses LIKE 'on_time'`);
+    if (cols.length === 0) {
+        await connection.execute(`ALTER TABLE responses ADD COLUMN on_time TINYINT(1) DEFAULT NULL`);
+    }
+}
+
 router.get('/student/course-gradebook', requireSelfOrStaff(), async (req, res) => {
     const { student_id, section_id: sectionOverride } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
@@ -49,10 +59,11 @@ router.get('/student/course-gradebook', requireSelfOrStaff(), async (req, res) =
             await connection.release();
             return res.status(400).json({ error: 'Unable to resolve course for student section' });
         }
+        await ensureOnTimeColumn(connection);
         const [rows] = await connection.execute(
             `SELECT e.exam_id, TRIM(e.title) AS title, e.total_points, e.course_id, e.category,
                     e.due_date, e.instructions, e.period_due_dates,
-                    r.score, r.timestamp,
+                    r.score, r.timestamp, r.on_time,
                     (cp.exam_id IS NOT NULL) AS is_project_milestone
              FROM exams e
              LEFT JOIN responses r ON e.exam_id = r.exam_id AND r.student_id = ?
@@ -529,6 +540,7 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
     try {
         const connection = await getDbConnection();
         await ensureEnteredIcColumn(connection);
+        await ensureOnTimeColumn(connection);
         const [students] = await connection.execute(
             `SELECT student_id, first_name, last_name, username, section_id
              FROM students
@@ -583,8 +595,8 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
         const scopedIds = scopedStudents.map(s => s.student_id);
         const [grades] = scopedIds.length === 0 ? [[]] : await connection.execute(
             periodScope !== 'All'
-                ? `SELECT student_id, exam_id, score, total_points, timestamp, entered_in_ic FROM responses WHERE student_id IN (${scopedIds.map(() => '?').join(',')})`
-                : `SELECT student_id, exam_id, score, total_points, timestamp, entered_in_ic FROM responses`,
+                ? `SELECT student_id, exam_id, score, total_points, timestamp, entered_in_ic, on_time FROM responses WHERE student_id IN (${scopedIds.map(() => '?').join(',')})`
+                : `SELECT student_id, exam_id, score, total_points, timestamp, entered_in_ic, on_time FROM responses`,
             periodScope !== 'All' ? scopedIds : []
         );
         const registry = {};
