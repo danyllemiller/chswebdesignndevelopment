@@ -8,18 +8,18 @@
   <link rel="shortcut icon" href="/images/favicon/favicon.ico">
   <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
-  
+
   <!-- BootStrap & FontAwesome -->
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
-  
+
   <link href="https://fonts.googleapis.com" rel="preconnect"/>
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
   <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&family=Gochi+Hand&display=swap" rel="stylesheet"/>
-  
+
   <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
 <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>  <link href="/css/guided-notes.css" rel="stylesheet"/>
-  
+
   <!-- Security Guard -->
   <script type="module" src="/js/auth-guard.js"></script>
 
@@ -31,10 +31,10 @@
   </div>
 
   <section class="container-ultrawide my-5">
-    
+
     <div class="row justify-content-center">
       <div class="col-lg-9 col-xl-8">
-        
+
         <!-- Action Buttons -->
         <div class="d-flex justify-content-between align-items-center mb-4 no-print">
             <a href="/year2/the-game-dev-advanced-js-game-logic.html" class="text-decoration-none small fw-bold">&laquo; Back to Chapter 10</a>
@@ -49,11 +49,11 @@
         <!-- The Worksheet Content -->
         <div class="card shadow-sm border-primary" id="worksheet-content">
             <div class="card-header bg-primary text-white text-center py-4">
-                <h2 class="mb-0 gochi fs-1">Chapter 10: The "Remodeler" (Advanced JavaScript &amp; DOM Lab)</h2>
+                <h2 class="mb-0 gochi fs-1">Chapter 10: The Game Developer (Advanced JS &amp; Game Logic)</h2>
                 <p class="mb-0 fw-bold">Guided Notes</p>
             </div>
             <div class="card-body p-4 p-md-5 notes-container">
-                
+
                 <!-- Student Info Header -->
                 <div class="student-info-grid border-bottom pb-4">
                     <div>
@@ -70,178 +70,153 @@
                 <!-- Essential Question -->
                 <div class="bg-site-secondary p-3 rounded border border-primary mt-4 mb-4">
                     <h5 class="fw-bold text-primary mb-2"><i class="fas fa-check-square me-2"></i> Essential Question:</h5>
-                    <p class="mb-0 fst-italic">How does a developer use mathematical logic and persistent loops to "remodel" the browser into a simulated world?</p>
+                    <p class="mb-0 fst-italic">How does a developer use the Canvas API, a continuous loop, and Object-Oriented Classes to turn a blank rectangle into a playable game like "Cosmic Clicker"?</p>
                 </div>
 
                 <!-- PART 1 -->
-                <div class="section-heading mt-4">I. The DOM and Grabbing Elements</div>
-                
-                <ul class="ps-3 mb-4">
-                    <li class="mb-2">
-                        &bull; <strong>Goal:</strong> This chapter turns you into a "JavaScript <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>," allowing your code to change the website <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (instantly, without reloading).
-                    </li>
-                </ul>
+                <div class="section-heading mt-4">I. The Canvas API &amp; Coordinates</div>
 
-                <h5 class="fw-bold mt-4 text-primary">The DOM (Document Object Model)</h5>
                 <ul class="ps-3 mb-4">
                     <li class="mb-3">
-                        &bull; <strong>Definition:</strong> When the browser loads HTML, it creates a "live," in-memory version of the page called the <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (DOM).
+                        &bull; <strong>Why Canvas:</strong> A game with 500 moving asteroids can't use 500 HTML <code>&lt;div&gt;</code> elements &mdash; the DOM is too <span class="fill-blank" style="min-width: 120px;" contenteditable="true"></span> for that much movement. Instead, we use the HTML5 <span class="fill-blank" style="min-width: 120px;" contenteditable="true"></span> tag, a blank digital painting surface.
                     </li>
                     <li class="mb-3">
-                        &bull; <strong>The Split:</strong>
-                        <ul class="mt-2">
-                            <li class="mb-2">HTML: The architect's <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (the plan on paper).</li>
-                            <li class="mb-2">DOM: The <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> building that JavaScript can remodel.</li>
-                        </ul>
+                        &bull; <strong>Getting the tools:</strong> To get the 2D drawing context for a canvas (usually stored in a variable named <code>ctx</code>), you call <span class="fill-blank" style="min-width: 160px;" contenteditable="true"></span>.
+                    </li>
+                    <li class="mb-3">
+                        &bull; <strong>Coordinates (not like math class!):</strong> The top-left corner of the canvas is always coordinate <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>. Unlike a math graph, Y increases from top to <span class="fill-blank" style="min-width: 120px;" contenteditable="true"></span> &mdash; so a bullet traveling upward needs a <span class="fill-blank" style="min-width: 120px;" contenteditable="true"></span> Y-velocity.
                     </li>
                     <li class="mb-0">
-                        &bull; <strong>Rule:</strong> JavaScript cannot read your .html file. It can only talk to the <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>.
-                    </li>
-                </ul>
-
-                <h5 class="fw-bold mt-4 text-primary">The "Grabber"</h5>
-                <ul class="ps-3 mb-4">
-                    <li class="mb-2">
-                        &bull; <strong>Command:</strong> The magic "grabby hand" used to find and "grab" elements is <span class="fill-blank" style="min-width: 200px;" contenteditable="true"></span>.
-                    </li>
-                    <li class="mb-0">
-                        &bull; <strong>How it Works:</strong> It uses the <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> you use in CSS (e.g., #my-id or .my-class).
+                        &bull; <strong>Drawing:</strong> <code>ctx.<span class="fill-blank" style="min-width: 130px;" contenteditable="true"></span>(x, y, width, height)</code> draws a solid rectangle. The property used to set its color before drawing is <code>ctx.<span class="fill-blank" style="min-width: 120px;" contenteditable="true"></span></code>.
                     </li>
                 </ul>
 
                 <div class="mt-4 p-4 bg-light rounded border shadow-sm mb-4">
                     <h5 class="fw-bold text-dark mb-3"><i class="fas fa-comments me-2 text-primary"></i> Deep Dive Discussion</h5>
-                    <p class="small fw-bold text-primary mb-1">1. The Live Building:</p>
-                    <p class="small text-muted mb-3">Why is the DOM necessary? If JavaScript is the "remodeling crew," why can't it just read the index.html file directly to find the elements it needs to change?</p>
-                    <div class="cornell-summary mb-4 bg-white" contenteditable="true"></div>
-
-                    <p class="small fw-bold text-primary mb-1">2. Scaffolding:</p>
-                    <p class="small text-muted mb-3">What is scaffolding in a professional project, and why is it important to create empty container elements (like <code>&lt;div class="gallery-grid"&gt;&lt;/div&gt;</code>) in your HTML shell before writing your JavaScript?</p>
+                    <p class="small fw-bold text-primary mb-1">1. Painting, Not Building:</p>
+                    <p class="small text-muted mb-3">The chapter calls Canvas "digital paintbrushes" instead of HTML elements. Why does that difference matter once you have hundreds of moving game objects on screen at once?</p>
                     <div class="cornell-summary bg-white" contenteditable="true"></div>
                 </div>
 
                 <!-- PART 2 -->
-                <div class="section-heading mt-4">II. Data (Model) and the Magic Wand (Creation)</div>
-                
-                <h5 class="fw-bold mt-4 text-primary">Data-Driven Design</h5>
+                <div class="section-heading mt-4">II. Animation &amp; The Game Loop</div>
+
                 <ul class="ps-3 mb-4">
                     <li class="mb-3">
-                        &bull; <strong>Concept:</strong> A <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> site stores its content in JavaScript, not hard-coded in HTML.
+                        &bull; <strong>The engine:</strong> The professional method that syncs animation with the monitor's refresh rate is <span class="fill-blank" style="min-width: 180px;" contenteditable="true"></span>. To stop the loop when the player loses, you call <span class="fill-blank" style="min-width: 180px;" contenteditable="true"></span>.
                     </li>
                     <li class="mb-3">
-                        &bull; <strong>Arrays ([]):</strong> A variable that acts as a <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> or list, holding multiple items in order.
+                        &bull; <strong>The 3 steps, in order, every single frame:</strong> <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> &rarr; <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> &rarr; <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>.
                     </li>
                     <li class="mb-3">
-                        &bull; <strong>Objects ({}):</strong> A variable that acts as a <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>, organizing related info using <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> pairs.
+                        &bull; <strong>Clearing:</strong> <code>ctx.<span class="fill-blank" style="min-width: 160px;" contenteditable="true"></span>(0, 0, canvas.width, canvas.height)</code> wipes the canvas. Skip it, and old frames stay drawn underneath the new ones &mdash; an ugly <span class="fill-blank" style="min-width: 120px;" contenteditable="true"></span> effect.
                     </li>
                     <li class="mb-0">
-                        &bull; <strong>Database:</strong> A combination of an <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> of <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (e.g., the artworks list).
+                        &bull; <strong>Fast monitors:</strong> On a high-refresh-rate screen, the concept that keeps movement speed consistent regardless of framerate is called <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>.
                     </li>
                 </ul>
 
-                <h5 class="fw-bold mt-4 text-primary">The Magic Wand (DOM Manipulation)</h5>
-                <p>These are the commands used to build and change the page structure.</p>
-                <table class="table table-bordered table-sm small bg-white shadow-sm mb-4">
-                    <thead class="bg-light text-center">
-                        <tr>
-                            <th style="width: 30%;">Command/Property</th>
-                            <th style="width: 25%;">Analogy</th>
-                            <th style="width: 45%;">Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="fw-bold align-middle"><code>document.createElement('div')</code></td>
-                            <td class="align-middle text-center">The "<span class="fill-blank" style="width: 80%;" contenteditable="true"></span>"</td>
-                            <td class="align-middle">Creates a new HTML element invisibly in memory.</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold align-middle"><code>container.append(newElement)</code></td>
-                            <td class="align-middle text-center">The "<span class="fill-blank" style="width: 80%;" contenteditable="true"></span>"</td>
-                            <td class="align-middle">Attaches a new HTML element to the DOM, making it <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>.</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold align-middle"><code>.innerHTML</code></td>
-                            <td class="align-middle text-center">The "<span class="fill-blank" style="width: 80%;" contenteditable="true"></span>"</td>
-                            <td class="align-middle">Allows you to write a complex string of HTML and "stamp" it inside an element.</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold align-middle"><code>.classList</code></td>
-                            <td class="align-middle text-center">The "<span class="fill-blank" style="width: 80%;" contenteditable="true"></span>"</td>
-                            <td class="align-middle">The professional way to change style by <span class="fill-blank" style="min-width: 60px;" contenteditable="true"></span> or <span class="fill-blank" style="min-width: 60px;" contenteditable="true"></span> a CSS class.</td>
-                        </tr>
-                    </tbody>
-                </table>
-
                 <div class="mt-4 p-4 bg-white rounded border border-primary shadow-sm mb-5">
                     <h5 class="fw-bold text-primary mb-3"><i class="fas fa-laptop-code me-2"></i> Application Activity</h5>
-                    <p class="small fw-bold text-dark mb-1">1. Template Literal:</p>
-                    <p class="small text-muted mb-3">Rewrite the following regular string as a Template Literal (using backticks <code>` `</code>) that injects the <code>userName</code> variable using <code>${}</code>.</p>
-                    
-                    <div class="p-3 bg-light border rounded font-monospace small mb-3">
-                        const userName = "Alex";<br><br>
-                        <strong>Regular String:</strong> "&lt;h2&gt;Hello, " + userName + "! Welcome Back.&lt;/h2&gt;"
-                    </div>
-                    
-                    <div class="p-3 bg-light border rounded">
-                        <strong>Template Literal:</strong> <span class="fill-blank" style="min-width: 300px;" contenteditable="true"></span>
+                    <p class="small fw-bold text-dark mb-1">1. Build the Loop Skeleton:</p>
+                    <p class="small text-muted mb-3">Fill in the 3 missing lines of a real game loop.</p>
+                    <div class="p-4 bg-light border rounded font-monospace small" contenteditable="true" style="outline: none;">
+                        function gameLoop() {<br>
+                        &nbsp;&nbsp;// 1. Clear<br>
+                        &nbsp;&nbsp;ctx.<span class="fill-blank" style="min-width: 220px;" contenteditable="true"></span>;<br><br>
+                        &nbsp;&nbsp;// 2. Update<br>
+                        &nbsp;&nbsp;<span class="fill-blank" style="min-width: 220px;" contenteditable="true"></span><br><br>
+                        &nbsp;&nbsp;// 3. Draw<br>
+                        &nbsp;&nbsp;ctx.fillRect(playerX, 50, 40, 40);<br><br>
+                        &nbsp;&nbsp;// Loop again next frame<br>
+                        &nbsp;&nbsp;<span class="fill-blank" style="min-width: 220px;" contenteditable="true"></span>(gameLoop);<br>
+                        }
                     </div>
                 </div>
 
                 <!-- PART 3 -->
-                <div class="section-heading mt-4">III. The Engine (Loops and Control)</div>
-                
-                <h5 class="fw-bold mt-4 text-primary">Building with Loops</h5>
-                <ul class="ps-3 mb-4">
-                    <li class="mb-3">
-                        &bull; <strong>Loop Method:</strong> The preferred JavaScript method for looping through every item in an Array is <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>.
-                    </li>
-                    <li class="mb-0">
-                        &bull; <strong>Dynamic Construction:</strong> Inside this loop, we use the data from the Array and the <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> (from section II) to build a new HTML card for each item automatically.
-                    </li>
-                </ul>
+                <div class="section-heading mt-4">III. OOP &amp; Classes (The Blueprint)</div>
 
-                <h5 class="fw-bold mt-4 text-primary">The Controller</h5>
                 <ul class="ps-3 mb-4">
                     <li class="mb-3">
-                        &bull; <strong><code>querySelectorAll()</code>:</strong> The "Grab <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>" tool. It returns a <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> of every element that matches the selector.
+                        &bull; <strong>Why bother:</strong> A game with 50 enemies shouldn't need 50 separate <code>enemyX</code>/<code>enemyY</code> variables &mdash; that's "spaghetti code." The blueprint used to stamp out many similar objects is called a <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>.
+                    </li>
+                    <li class="mb-3">
+                        &bull; <strong>The constructor:</strong> The function that runs automatically the moment a new instance is created is <span class="fill-blank" style="min-width: 160px;" contenteditable="true"></span>. Inside a class method, the keyword <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> refers to the specific instance currently being created or updated.
+                    </li>
+                    <li class="mb-3">
+                        &bull; <strong>Spawning:</strong> You create a brand-new <code>Enemy</code> object using the <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> keyword, then usually store it inside an array.
                     </li>
                     <li class="mb-0">
-                        &bull; <strong>Making it Interactive:</strong> To add a click listener to all the dynamically created elements, you must:
-                        <ul class="mt-2 ps-3">
-                            <li class="mb-2">1. Use <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> to grab all the elements.</li>
-                            <li class="mb-2">2. Use a <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> loop to iterate over that list.</li>
-                            <li class="mb-0">3. Add an <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> to each element.</li>
-                        </ul>
+                        &bull; <strong>Array cleanup:</strong> To add a newly spawned bullet to an array, use <code>.<span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>()</code>. To remove the very first item after it's destroyed, use <code>.<span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>()</code>. To build a new array containing only the asteroids that are NOT destroyed, use <code>.<span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>()</code>.
                     </li>
                 </ul>
 
                 <div class="mt-4 p-4 bg-light rounded border shadow-sm mb-4">
                     <h5 class="fw-bold text-dark mb-3"><i class="fas fa-comments me-2 text-primary"></i> Deep Dive Discussion</h5>
-                    <p class="small fw-bold text-primary mb-1">1. Efficiency of Data-Driven Design:</p>
-                    <p class="small text-muted mb-3">Once the Cosmic Canvas site is launched, an artist wants to add a new piece of art. What is the only thing they need to change in the entire project to make that new art appear on the live site?</p>
-                    <div class="cornell-summary mb-4 bg-white" contenteditable="true"></div>
-
-                    <p class="small fw-bold text-primary mb-1">2. Model-View-Controller (MVC):</p>
-                    <p class="small text-muted mb-3">This chapter introduces the MVC pattern. Match the following elements to their correct role:</p>
-                    <ul class="list-unstyled mb-0 ms-2 small">
-                        <li class="mb-3"><strong>Model:</strong> <span class="fill-blank" style="min-width: 250px;" contenteditable="true"></span> <span class="text-muted">(Role: The Data)</span></li>
-                        <li class="mb-3"><strong>View:</strong> <span class="fill-blank" style="min-width: 250px;" contenteditable="true"></span> <span class="text-muted">(Role: The HTML/CSS Shell)</span></li>
-                        <li class="mb-0"><strong>Controller:</strong> <span class="fill-blank" style="min-width: 250px;" contenteditable="true"></span> <span class="text-muted">(Role: The JavaScript Logic/Event Listeners)</span></li>
-                    </ul>
+                    <p class="small fw-bold text-primary mb-1">1. One Blueprint, a Thousand Enemies:</p>
+                    <p class="small text-muted mb-3">What's the actual advantage of writing one <code>Enemy</code> class instead of copy-pasting variables for every single enemy you want on screen?</p>
+                    <div class="cornell-summary bg-white" contenteditable="true"></div>
                 </div>
+
+                <!-- PART 4 -->
+                <div class="section-heading mt-4">IV. Physics, Collisions, &amp; User Input</div>
+
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        &bull; <strong>Hitbox:</strong> The invisible area used to calculate whether two objects are touching is called a <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>.
+                    </li>
+                    <li class="mb-3">
+                        &bull; <strong>Rectangle collision:</strong> <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span> stands for Axis-Aligned Bounding Box. It requires comparing all four of these properties on both objects at once, joined by the <span class="fill-blank" style="min-width: 60px;" contenteditable="true"></span> operator: x, y, <span class="fill-blank" style="min-width: 90px;" contenteditable="true"></span>, and <span class="fill-blank" style="min-width: 90px;" contenteditable="true"></span>.
+                    </li>
+                    <li class="mb-3">
+                        &bull; <strong>Circular collision:</strong> To find the distance between two circles' centers, we apply the <span class="fill-blank" style="min-width: 180px;" contenteditable="true"></span> theorem.
+                    </li>
+                    <li class="mb-3">
+                        &bull; <strong>Gravity:</strong> Simulating gravity means adding a small constant value every frame to an object's <span class="fill-blank" style="min-width: 120px;" contenteditable="true"></span>.
+                    </li>
+                    <li class="mb-0">
+                        &bull; <strong>Input:</strong> The property of a keyboard event that tells you the physical key pressed is <code><span class="fill-blank" style="min-width: 120px;" contenteditable="true"></span></code>. The event fired when a key is released (useful for stopping movement) is <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>.
+                    </li>
+                </ul>
 
                 <div class="mt-4 p-4 bg-white rounded border border-primary shadow-sm mb-5">
                     <h5 class="fw-bold text-primary mb-3"><i class="fas fa-laptop-code me-2"></i> Application Activity</h5>
-                    <p class="small fw-bold text-dark mb-1">1. DOM Grab and Change:</p>
-                    <p class="small text-muted mb-3">Write the JavaScript code that first grabs the HTML element with the ID <code>main-title</code> and then changes its visible content to "Welcome to the Live DOM!"</p>
-                    
+                    <p class="small fw-bold text-dark mb-1">1. Write the AABB Check:</p>
+                    <p class="small text-muted mb-3">Fill in the 4 comparisons that must ALL be true for two rectangles to be colliding.</p>
                     <div class="p-4 bg-light border rounded font-monospace small" contenteditable="true" style="outline: none;">
-                        // Grab the element:<br>
-                        const titleElement = document.<span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>("#main-title");<br><br>
-                        // Change its content:<br>
-                        titleElement.<span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> = "Welcome to the Live DOM!";
+                        if (rect1.x &lt; rect2.x + <span class="fill-blank" style="min-width: 120px;" contenteditable="true"></span> &amp;&amp;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;rect1.x + rect1.width &gt; <span class="fill-blank" style="min-width: 120px;" contenteditable="true"></span> &amp;&amp;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;rect1.y &lt; rect2.y + <span class="fill-blank" style="min-width: 120px;" contenteditable="true"></span> &amp;&amp;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;rect1.y + rect1.height &gt; <span class="fill-blank" style="min-width: 120px;" contenteditable="true"></span>) {<br>
+                        &nbsp;&nbsp;// Collision detected!<br>
+                        }
                     </div>
+                </div>
+
+                <!-- PART 5 -->
+                <div class="section-heading mt-4">V. Advanced Logic, Graphics &amp; Validating Code</div>
+
+                <ul class="ps-3 mb-4">
+                    <li class="mb-3">
+                        &bull; <strong>Game State:</strong> A variable like <code>gameState = 'menu'</code> controls which screens or logic blocks are currently active. Reading a state variable and running only the matching block is usually written as a <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span> statement.
+                    </li>
+                    <li class="mb-3">
+                        &bull; <strong>Sprite Sheets:</strong> A single image file containing multiple animation frames arranged in a grid is called a <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>. Cutting out one frame to draw uses the <span class="fill-blank" style="min-width: 90px;" contenteditable="true"></span>-parameter version of <code>drawImage()</code>.
+                    </li>
+                    <li class="mb-3">
+                        &bull; <strong>Depth:</strong> Background layers scrolling at different speeds to create the illusion of depth is called <span class="fill-blank" style="min-width: 180px;" contenteditable="true"></span>.
+                    </li>
+                    <li class="mb-0">
+                        &bull; <strong>Linting:</strong> A tool that reads your JavaScript <em>without running it</em> to flag likely bugs is called a <span class="fill-blank" style="min-width: 100px;" contenteditable="true"></span>. "No red errors in the Console" only proves your code hasn't crashed &mdash; it does NOT prove your code is free of <span class="fill-blank" style="min-width: 150px;" contenteditable="true"></span>.
+                    </li>
+                </ul>
+
+                <div class="mt-4 p-4 bg-light rounded border shadow-sm mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-comments me-2 text-primary"></i> Deep Dive Discussion</h5>
+                    <p class="small fw-bold text-primary mb-1">1. Console vs. Linter:</p>
+                    <p class="small text-muted mb-3">Explain the difference between a bug the browser Console would catch and a bug only a linter (static analysis) would catch. Give an example of each from your own game code.</p>
+                    <div class="cornell-summary bg-white" contenteditable="true"></div>
                 </div>
 
             </div>
