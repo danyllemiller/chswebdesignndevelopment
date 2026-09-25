@@ -64,7 +64,7 @@
       </div>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean infographic comparing four data structures side by side: a jumbled pile of loose text for &quot;Flat File&quot;, a neat grid/spreadsheet for &quot;Table&quot;, nested folder icons inside folders for &quot;Hierarchical&quot;, and a simple key-icon-pointing-to-a-value-box for &quot;Key-Value&quot;.">
+  <img src="/images/storing_data/fig6.1.1.png" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean infographic comparing four data structures side by side: a jumbled pile of loose text for &quot;Flat File&quot;, a neat grid/spreadsheet for &quot;Table&quot;, nested folder icons inside folders for &quot;Hierarchical&quot;, and a simple key-icon-pointing-to-a-value-box for &quot;Key-Value&quot;.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-search me-2"></i> Worked Example: Restructuring a Messy List</h5>
@@ -72,6 +72,52 @@
   </div>
 
   <p><strong>The trap:</strong> students often think adding structure is pure upside. It isn't free — restructuring costs real effort up front. What it buys you is every query afterward becoming faster and actually possible. That's the tradeoff you're always making.</p>
+
+  <h4 class="fw-bold mt-4 text-primary" id="section-6-1-2">6.1.2 Splitting One Table Into Several</h4>
+  <p>The infographic above treats "Table" as one option among four — but a single table can still be organized well or badly. When the same information repeats on every row, that's a sign one table is doing too much, and the fix is to split it into two related tables instead.</p>
+
+  <div class="concept-box shadow-sm border-primary bg-light">
+      <h5 class="fw-bold text-primary"><i class="fas fa-table me-2"></i> Worked Example: Splitting a Club Sign-Up List</h5>
+      <p class="fw-bold mb-1">Before — one flat table:</p>
+      <table class="table table-bordered table-sm shadow-sm mb-2">
+        <thead class="table-dark"><tr><th>Student</th><th>Club</th><th>Advisor</th><th>Room</th></tr></thead>
+        <tbody>
+          <tr><td>Maria</td><td>Robotics</td><td>Mr. Chen</td><td>204</td></tr>
+          <tr><td>Diego</td><td>Robotics</td><td>Mr. Chen</td><td>204</td></tr>
+          <tr><td>Priya</td><td>Robotics</td><td>Mr. Chen</td><td>204</td></tr>
+          <tr><td>Jordan</td><td>Chess Club</td><td>Ms. Patel</td><td>118</td></tr>
+          <tr><td>Sam</td><td>Chess Club</td><td>Ms. Patel</td><td>118</td></tr>
+        </tbody>
+      </table>
+      <p class="mb-3">"Mr. Chen" and "204" repeat for every Robotics student. If he switches rooms, you'd have to find and fix that in every single row — miss just one, and your data now disagrees with itself.</p>
+      <p class="fw-bold mb-1">After — split into two tables, linked by a Club Code:</p>
+      <div class="row g-3 mb-2">
+        <div class="col-md-5">
+          <p class="small fw-bold mb-1">Students</p>
+          <table class="table table-bordered table-sm shadow-sm mb-0">
+            <thead class="table-dark"><tr><th>Student</th><th>Club Code</th></tr></thead>
+            <tbody>
+              <tr><td>Maria</td><td>RBT</td></tr>
+              <tr><td>Diego</td><td>RBT</td></tr>
+              <tr><td>Priya</td><td>RBT</td></tr>
+              <tr><td>Jordan</td><td>CHS</td></tr>
+              <tr><td>Sam</td><td>CHS</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-md-7">
+          <p class="small fw-bold mb-1">Clubs</p>
+          <table class="table table-bordered table-sm shadow-sm mb-0">
+            <thead class="table-dark"><tr><th>Club Code</th><th>Club Name</th><th>Advisor</th><th>Room</th></tr></thead>
+            <tbody>
+              <tr><td>RBT</td><td>Robotics</td><td>Mr. Chen</td><td>204</td></tr>
+              <tr><td>CHS</td><td>Chess Club</td><td>Ms. Patel</td><td>118</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="mb-0">Mr. Chen's room now exists in exactly one place — the Clubs table. Update it once there, and every student's row is still correct, because it doesn't store the room at all — it just points to a Club Code that looks the answer up. That shared code is what "links" two tables back together, and it's the same move Stage 2 of your Unit 3 project asks you to make on the Player Roster.</p>
+  </div>
 
   <div class="alert alert-info mt-4 shadow-sm border-info">
       <div class="d-flex align-items-start">
