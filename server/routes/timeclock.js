@@ -269,14 +269,14 @@ function getCurrentCSChapter(connection) {
 // indexed via a hash of (groupKey, table, chapter) instead of RAND().
 async function getDeterministicQuestion(connection, table, chapter, groupKey) {
     const [rows] = await connection.execute(
-        `SELECT question_text AS question, option_a, option_b, option_c, option_d, correct_answer AS answer
+        `SELECT question_text AS question, option_a, option_b, option_c, option_d, correct_answer AS answer, study_hint
          FROM ${table} WHERE chapter_number = ? ORDER BY question_id ASC`,
         [chapter]
     );
     if (rows.length === 0) return null;
     const idx = hashString(`${groupKey}|${table}|${chapter}`) % rows.length;
     const r = rows[idx];
-    return { question: r.question, options: [r.option_a, r.option_b, r.option_c, r.option_d], answer: r.answer };
+    return { question: r.question, options: [r.option_a, r.option_b, r.option_c, r.option_d], answer: r.answer, hint: r.study_hint || null };
 }
 
 // type is one of CS_IN / WD1_IN / WD2_IN — the clock-in question is always a
@@ -313,6 +313,7 @@ router.get('/timeclock/question', requireLogin, async (req, res) => {
             question_text: picked.q,
             options: shuffleOptions(picked.options),
             correct_answer: picked.answer,
+            explanation: picked.hint || null,
             chapterLabel: 'Workplace Readiness Check-In'
         });
     }
@@ -345,6 +346,7 @@ router.get('/timeclock/question', requireLogin, async (req, res) => {
             question_text: q.question,
             options: shuffleOptions(q.options),
             correct_answer: q.answer,
+            explanation: q.hint || null,
             chapterLabel: `Chapter ${chapter}: ${title}${isFallback ? ' (no due dates set yet — defaulting to Ch. 1)' : ''}`
         });
     } catch (err) {

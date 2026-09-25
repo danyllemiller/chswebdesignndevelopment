@@ -50,7 +50,10 @@ function _pad(n) {
 }
 
 function getPayPeriodForDate(dateStr) {
-    const d = new Date(dateStr + "T12:00:00");
+    // dateStr is expected as a plain YYYY-MM-DD (server/routes/payroll.js
+    // normalizes it), but stripping any time portion defensively means a
+    // stray full ISO string here can't silently produce Invalid Date again.
+    const d = new Date(String(dateStr).split('T')[0] + "T12:00:00");
     const diffTime = d.getTime() - ANCHOR_DATE.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const periodsPassed = Math.floor(diffDays / 14);
@@ -363,7 +366,7 @@ function renderCurrentPeriod() {
     
     let tableHtml = '';
     period.shifts.forEach(data => {
-        const friendlyDate = new Date(data.date + "T12:00:00").toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        const friendlyDate = new Date(String(data.date).split('T')[0] + "T12:00:00").toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
         const timeLogged = data.calcMins !== null ? `${Math.floor(data.calcMins/60)}h ${data.calcMins%60}m` : '--';
         tableHtml += `<tr class="text-center">
             <td class="fw-bold text-start">${friendlyDate}</td>

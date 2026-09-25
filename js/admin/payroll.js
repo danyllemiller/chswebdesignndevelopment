@@ -915,7 +915,7 @@ async function viewStudentHistory(studentId) {
                 const dailyPay = (durationMins / 60 * hourlyRate) + (shiftBonusCount * ON_TIME_BONUS);
                 totalGross += dailyPay;
 
-                const friendlyDate = new Date(ts.date + "T12:00:00").toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                const friendlyDate = new Date(String(ts.date).split('T')[0] + "T12:00:00").toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
                 const inTime = ts.clockInTime ? new Date(ts.clockInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--';
                 const outTime = ts.clockOutTime ? new Date(ts.clockOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '<span class="text-danger">Missed Punch</span>';
 

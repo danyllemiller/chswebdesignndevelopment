@@ -68,6 +68,12 @@ function formatTimeOfDay(t) {
     return `${displayHour}:${String(displayMin).padStart(2, '0')} ${ampm}`;
 }
 
+function fmtDate(d) {
+    if (!d) return null;
+    if (d instanceof Date) return d.toISOString().split('T')[0];
+    return String(d).split('T')[0];
+}
+
 router.get('/payroll/timesheets', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     try {
@@ -83,6 +89,14 @@ router.get('/payroll/timesheets', requireSelfOrStaff(), async (req, res) => {
             const outMin = timeToMinutes(row.clock_out);
             return {
                 ...row,
+                // row.date arrives from mysql2 as a real Date object, which
+                // JSON.stringifies to a full ISO datetime -- the student
+                // payroll page used to re-parse that by appending "T12:00:00"
+                // onto it (the same anti-pattern already fixed for
+                // duration_minutes below), producing Invalid Date on every
+                // row. Normalized to a plain YYYY-MM-DD here so nothing
+                // downstream needs to re-derive it.
+                date: fmtDate(row.date),
                 clock_in_display: formatTimeOfDay(row.clock_in),
                 clock_out_display: formatTimeOfDay(row.clock_out),
                 duration_minutes: (inMin !== null && outMin !== null) ? Math.round(outMin - inMin) : null
@@ -147,7 +161,7 @@ router.get('/admin/payroll/timesheets-daily', async (req, res) => {
             [date]
         );
         await connection.release();
-        res.json({ timesheets: rows });
+        res.json({ timesheets: rows.map(r => ({ ...r, date: fmtDate(r.date) })) });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch daily timesheets' }); }
 });
 
@@ -161,7 +175,7 @@ router.get('/admin/payroll/timesheets-period', async (req, res) => {
             [from, to]
         );
         await connection.release();
-        res.json({ timesheets: rows });
+        res.json({ timesheets: rows.map(r => ({ ...r, date: fmtDate(r.date) })) });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch period timesheets' }); }
 });
 

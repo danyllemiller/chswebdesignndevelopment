@@ -560,6 +560,10 @@ async function checkStatusInner() {
     }
 }
 
+function escapeHtmlTc(s) {
+    return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 async function handleTimeclockSubmit(e) {
     e.preventDefault();
     const mode = window.timeclock.currentMode;
@@ -584,6 +588,48 @@ async function handleTimeclockSubmit(e) {
         answer = document.getElementById('tc-out-answer').value;
     }
 
+    // A gradable clock-in question used to just save and reload with no
+    // indication of right/wrong until a student dug up their own shift log
+    // later -- they asked to know right then, and if they missed it, WHY
+    // the real answer is correct, not just told what it was. Reflection
+    // (clock-out) answers have no "correct" concept, so they save straight
+    // through same as before.
+    if (mode === 'in' && isCorrect !== null) {
+        showTimeclockAnswerFeedback(isCorrect, currentQuestion?.correct_answer, currentQuestion?.explanation, () => {
+            finalizeTimeclockSubmit(mode, answer, isCorrect);
+        });
+        return;
+    }
+
+    await finalizeTimeclockSubmit(mode, answer, isCorrect);
+}
+
+function showTimeclockAnswerFeedback(isCorrect, correctAnswer, explanation, onContinue) {
+    const form = document.getElementById('tc-form');
+    if (!form) { onContinue(); return; }
+    form.querySelectorAll('input, textarea, button').forEach(el => el.disabled = true);
+
+    const panel = document.createElement('div');
+    panel.className = `alert ${isCorrect ? 'alert-success' : 'alert-danger'} mt-3`;
+    panel.innerHTML = isCorrect
+        ? `<div class="fw-bold mb-1"><i class="fas fa-check-circle me-1"></i>Correct!</div>`
+        : `<div class="fw-bold mb-1"><i class="fas fa-times-circle me-1"></i>Not quite.</div>
+           <div class="mb-1">The correct answer was: <strong>${escapeHtmlTc(correctAnswer)}</strong></div>
+           ${explanation ? `<div class="small">${escapeHtmlTc(explanation)}</div>` : ''}`;
+    const continueBtn = document.createElement('button');
+    continueBtn.type = 'button';
+    continueBtn.className = 'btn btn-primary w-100 fw-bold py-2 mt-2';
+    continueBtn.textContent = 'Continue';
+    continueBtn.addEventListener('click', () => {
+        continueBtn.disabled = true;
+        continueBtn.textContent = 'Saving...';
+        onContinue();
+    });
+    panel.appendChild(continueBtn);
+    form.appendChild(panel);
+}
+
+async function finalizeTimeclockSubmit(mode, answer, isCorrect) {
     try {
         await apiFetch('/api/timeclock/save', {
             method: 'POST',
