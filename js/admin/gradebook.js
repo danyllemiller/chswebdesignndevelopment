@@ -476,13 +476,29 @@ function injectModals() {
             <div class="row mb-3">
                 <div class="col-12">
                   <label class="form-label small fw-bold text-muted">Target Course Visibility</label>
-                  <select id="editColCourse" class="form-select border-primary fw-bold">
-                    <option value="All">All Courses & Periods</option>
-                    <option value="WD1">Web Design 1 (WD1) Only</option>
-                    <option value="WD2">Advanced Web Design (WD2) Only</option>
-                    <option value="AS">Advanced Studies (AS) Only</option>
-                    <option value="CS">Computer Science (CS) Only</option>
-                  </select>
+                  <div class="form-check">
+                    <input class="form-check-input editcol-course-check" type="checkbox" value="All" id="editColCourseAll">
+                    <label class="form-check-label small fw-bold" for="editColCourseAll">All Courses &amp; Periods</label>
+                  </div>
+                  <div class="border-top pt-2 mt-2">
+                    <p class="small text-muted mb-1">Check additional courses to also assign this to them (a new linked column is added per course you check beyond the current one):</p>
+                    <div class="form-check">
+                      <input class="form-check-input editcol-course-check" type="checkbox" value="WD1" id="editColCourseWD1">
+                      <label class="form-check-label small" for="editColCourseWD1">Web Design 1 (WD1)</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input editcol-course-check" type="checkbox" value="WD2" id="editColCourseWD2">
+                      <label class="form-check-label small" for="editColCourseWD2">Advanced Web Design (WD2)</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input editcol-course-check" type="checkbox" value="AS" id="editColCourseAS">
+                      <label class="form-check-label small" for="editColCourseAS">Advanced Studies (AS)</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input editcol-course-check" type="checkbox" value="CS" id="editColCourseCS">
+                      <label class="form-check-label small" for="editColCourseCS">Computer Science (CS)</label>
+                    </div>
+                  </div>
                 </div>
             </div>
             <div class="row mb-1">
@@ -601,6 +617,16 @@ function injectModals() {
                 if (cb.checked) document.querySelectorAll('.addcol-course-check').forEach(other => { if (other !== cb) other.checked = false; });
             } else if (cb.checked) {
                 document.getElementById('addColCourseAll').checked = false;
+            }
+        });
+    });
+
+    document.querySelectorAll('.editcol-course-check').forEach(cb => {
+        cb.addEventListener('change', () => {
+            if (cb.id === 'editColCourseAll') {
+                if (cb.checked) document.querySelectorAll('.editcol-course-check').forEach(other => { if (other !== cb) other.checked = false; });
+            } else if (cb.checked) {
+                document.getElementById('editColCourseAll').checked = false;
             }
         });
     });
@@ -1971,19 +1997,28 @@ document.addEventListener('click', (e) => {
     if (target.closest('.edit-col-btn')) {
         const key = target.closest('.edit-col-btn').dataset.assignment;
         document.getElementById('editColOldName').value = key;
-        document.getElementById('editColNewName').value = key.replace(/\s*[\[\(]\d+\s*pts?[\]\)]/i, '');
+        // Strip both the "[100 pts]" suffix and, if this row is one course
+        // of a multi-course set (see saveAddCol), its "(WD2)"-style course
+        // suffix -- the teacher should see and edit the plain assignment
+        // name either way, not the internal per-course exam_id.
+        document.getElementById('editColNewName').value = key
+            .replace(/\s*[\[\(]\d+\s*pts?[\]\)]/i, '')
+            .replace(/\s*\((?:WD1|WD2|AS|CS)\)\s*$/i, '');
         document.getElementById('editColNewPts').value = parseAssignmentInfo(key).maxPoints;
         document.getElementById('editColDueDate').value = allAssignments[key]?.dueDate || "";
         document.getElementById('editColInstructions').value = allAssignments[key]?.instructions || "";
-        // targetCourse holds the raw DB course_id (e.g. '10003GS'), but the
-        // <select>'s <option> values are the short codes ('CS'/'WD1'/...) --
-        // setting .value to an unmatched string leaves the <select> with
-        // nothing selected, so saving (even without touching this field)
-        // silently fell through to the dbCourseMap[''] fallback in
-        // saveColEdit() and reassigned the assignment to the wrong course.
+        // targetCourse holds the raw DB course_id (e.g. '10003GS') -- map it
+        // back to the short code and check only that box. Any OTHER courses
+        // this same assignment already exists under (sibling rows from a
+        // multi-course create) aren't detectable from this one row alone,
+        // so they're intentionally left unchecked here -- checking them
+        // again would just re-save that sibling unchanged, harmless, but
+        // there's no reliable way to know they exist without asking the
+        // teacher, so this only ever pre-checks what THIS row actually is.
         const rawTarget = allAssignments[key]?.targetCourse;
         const courseCodeMap = { '05254G1S': 'WD1', '05254G2S': 'WD2', '10003GS': 'CS', '05254ES': 'AS', '05254EF-201': 'AS' };
-        document.getElementById('editColCourse').value = courseCodeMap[rawTarget] || rawTarget || 'All';
+        const currentCourse = courseCodeMap[rawTarget] || rawTarget || 'All';
+        document.querySelectorAll('.editcol-course-check').forEach(cb => cb.checked = (cb.value === currentCourse));
         renderPeriodDateInputs('editColPeriodDates', allAssignments[key]?.periodDueDates || {}, 'primary');
         getModal('editColModal').show();
         return;
@@ -2154,13 +2189,11 @@ async function saveColEdit() {
     const name = document.getElementById('editColNewName').value.trim();
     const pts = Number(document.getElementById('editColNewPts').value) || 100;
     const date = document.getElementById('editColDueDate').value;
-    const final = `${name} [${pts} pts]`;
-    const course = document.getElementById('editColCourse').value;
+    const inst = document.getElementById('editColInstructions').value;
 
     const periodDates = {};
     document.querySelectorAll('#editColPeriodDates .period-due-date-input').forEach(i => periodDates[i.dataset.period] = i.value);
-    
-    // Map visible track types back to database state code keys to satisfy relational constraints
+
     const dbCourseMap = {
         'WD1': '05254G1S',
         'WD2': '05254G2S',
@@ -2168,26 +2201,50 @@ async function saveColEdit() {
         'AS':  '05254EF-201',
         'All': '05254G1S'
     };
-    const dbCourseId = dbCourseMap[course] || '05254G1S';
-    
+    const courseCodeMap = { '05254G1S': 'WD1', '05254G2S': 'WD2', '10003GS': 'CS', '05254ES': 'AS', '05254EF-201': 'AS' };
+
+    const checked = [...document.querySelectorAll('.editcol-course-check:checked')].map(cb => cb.value);
+    const courses = checked.length ? checked : ['All'];
+    const isMulti = courses.length > 1 && !courses.includes('All');
+
+    // The row being edited belongs to one real course today -- if that
+    // course is still checked, it keeps being THAT row (renamed/updated in
+    // place, existing student scores follow via edit-assignment). Any other
+    // checked course is purely additive: a new sibling row, same as
+    // Create's saveAddCol, never touching scores that already exist
+    // elsewhere. Nothing checked here is ever deleted.
+    const originalCourse = courseCodeMap[allAssignments[old]?.targetCourse] || allAssignments[old]?.targetCourse || 'All';
+    const primaryCourse = courses.includes(originalCourse) ? originalCourse : courses[0];
+
     try {
-        await fetch('/api/admin/edit-assignment', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ old_exam_id: old, exam_id: final, title: name, total_points: pts, due_date: date || null, instructions: document.getElementById('editColInstructions').value, course_id: dbCourseId })
-        });
+        for (const course of courses) {
+            const dbCourseId = dbCourseMap[course] || '05254G1S';
+            const finalName = isMulti ? `${name} (${course}) [${pts} pts]` : `${name} [${pts} pts]`;
+            const finalTitle = isMulti ? `${name} (${course})` : name;
 
-        delete allAssignments[old];
-        allAssignments[final] = { maxPoints: pts, dueDate: date, periodDueDates: periodDates, instructions: document.getElementById('editColInstructions').value, targetCourse: dbCourseId };
-        updateCategoryDropdown();
-
-        Object.keys(allGrades).forEach(sId => {
-            if (allGrades[sId][old]) {
-                allGrades[sId][final] = allGrades[sId][old];
-                delete allGrades[sId][old];
+            if (course === primaryCourse) {
+                await fetch('/api/admin/edit-assignment', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ old_exam_id: old, exam_id: finalName, title: finalTitle, total_points: pts, due_date: date || null, instructions: inst, course_id: dbCourseId })
+                });
+                delete allAssignments[old];
+                Object.keys(allGrades).forEach(sId => {
+                    if (allGrades[sId][old]) {
+                        allGrades[sId][finalName] = allGrades[sId][old];
+                        delete allGrades[sId][old];
+                    }
+                });
+            } else {
+                await fetch('/api/admin/save-assignment', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ exam_id: finalName, title: finalTitle, total_points: pts, due_date: date || null, instructions: inst, course_id: dbCourseId })
+                });
             }
-        });
-        
+            allAssignments[finalName] = { maxPoints: pts, dueDate: date, periodDueDates: periodDates, instructions: inst, targetCourse: dbCourseId };
+        }
+        updateCategoryDropdown();
         applyFiltersAndRender();
         getModal('editColModal').hide();
     } catch (err) { alert("Failed to save edits."); }
