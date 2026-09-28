@@ -1032,6 +1032,15 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('categoryFilter')?.addEventListener('change', applyFiltersAndRender);
 
     document.getElementById('markEnteredIcBtn')?.addEventListener('click', markEnteredIcForCurrentView);
+
+    document.getElementById('needsIcFilterBtn')?.addEventListener('click', (e) => {
+        const btn = e.currentTarget;
+        const active = btn.classList.toggle('active');
+        btn.classList.toggle('btn-outline-primary', !active);
+        btn.classList.toggle('btn-primary', active);
+        btn.classList.toggle('text-white', active);
+        applyFiltersAndRender();
+    });
 });
 
 // Scoped to exactly what's rendered on screen right now -- period, student,
@@ -1344,12 +1353,32 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
         return getAssignmentCategory(key, courseKeyForView, allAssignments[key]?.category) === categoryVal;
     };
 
+    // "Needs IC Entry Only" narrows the whole view down to just the columns
+    // that currently have at least one real, un-entered score -- a new
+    // assignment (nothing entered yet) or an existing one where a retake
+    // beat the old score (save-grade resets entered_in_ic on any change).
+    // Built once here from the full, unfiltered grade set so it reflects
+    // reality regardless of which columns would otherwise be visible.
+    const needsIcOnly = document.getElementById('needsIcFilterBtn')?.classList.contains('active');
+    let keysNeedingIc = null;
+    if (needsIcOnly) {
+        keysNeedingIc = new Set();
+        Object.values(grades).forEach(sGrades => {
+            Object.entries(sGrades || {}).forEach(([key, g]) => {
+                if (g && typeof g === 'object' && g.score !== '' && g.score !== undefined && g.score !== null && !g.enteredIC) {
+                    keysNeedingIc.add(cleanKey(key));
+                }
+            });
+        });
+    }
+
     Object.keys(allAssignments).forEach(key => {
         // "-Score" entries hold the raw accuracy behind a flat completion
         // credit (e.g. diagnostic performance behind "Unit3-Pre"'s 15/15).
         // They're shown as a tooltip on the real column, not their own column.
         if (key.endsWith('-Score')) return;
         if (!columnMatchesCategory(key)) return;
+        if (keysNeedingIc && !keysNeedingIc.has(cleanKey(key))) return;
         if(key !== 'lastSubmitDate' && isAssignmentVisible(key, currentPeriod)) {
             const ck = cleanKey(key);
             if (!seenCleanKeys.has(ck)) {
@@ -1367,6 +1396,7 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
         Object.keys(sGrades).forEach(key => {
             if (key.endsWith('-Score')) return;
             if (!columnMatchesCategory(key)) return;
+            if (keysNeedingIc && !keysNeedingIc.has(cleanKey(key))) return;
             if(key !== 'lastSubmitDate' && isAssignmentVisible(key, currentPeriod)) {
                 const ck = cleanKey(key);
                 if (!seenCleanKeys.has(ck)) {
@@ -1398,6 +1428,14 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
         }
         return assignmentSortDir === 'desc' ? -cmp : cmp;
     });
+
+    if (needsIcOnly && sortedKeys.length === 0) {
+        thead.innerHTML = '';
+        tbody.innerHTML = '<tr><td class="text-center p-5 text-success"><i class="fas fa-circle-check fa-2x mb-3 d-block"></i><h5 class="fw-bold mb-0">All caught up!</h5><p class="text-muted mb-0">Nothing in this view needs entering into IC right now.</p></td></tr>';
+        lastOrderedStudents = students; lastGrades = grades; lastSortedKeys = [];
+        return;
+    }
+
     let headHtml = '<tr><th class="sticky-corner px-2 pb-2">';
     const privacyIcon = privacyMode ? "fa-user-secret" : "fa-eye";
     headHtml += `<div class="d-flex justify-content-between align-items-center mb-1">Student Info<button id="btnTogglePrivacy" class="btn btn-sm ${privacyMode?'btn-warning':'btn-outline-light'} py-0 px-2"><i class="fas ${privacyIcon}"></i></button></div></th>`;
