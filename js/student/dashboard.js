@@ -98,7 +98,8 @@ function isAssignmentVisible(name, period, registryData) {
             '05254G1S': 'WD1',
             '05254G2S': 'WD2',
             '10003GS': 'CS',
-            '05254ES': 'AS',
+            '05254ES': 'AS',       // last year's archived AS course code
+            '05254EF-201': 'AS',   // this year's real AS-B2 course code
             '99999999': 'Teacher'
         };
         const targetRaw = registryEntry.targetCourse;

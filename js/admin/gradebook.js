@@ -205,7 +205,7 @@ const btnAddAssignment = document.getElementById('btnAddAssignment');
             document.getElementById('addColPts').value = '100';
             document.getElementById('addColDueDate').value = '';
             document.getElementById('addColInstructions').value = '';
-            document.getElementById('addColCourse').value = 'All';
+            document.querySelectorAll('.addcol-course-check').forEach(cb => cb.checked = (cb.id === 'addColCourseAll'));
             renderPeriodDateInputs('addColPeriodDates', {}, 'success');
             getModal('addColModal').show();
         });
@@ -388,13 +388,29 @@ function injectModals() {
             <div class="row mb-3">
                 <div class="col-12">
                   <label class="form-label small fw-bold text-muted">Target Course Visibility</label>
-                  <select id="addColCourse" class="form-select border-success fw-bold">
-                    <option value="All">All Courses & Periods</option>
-                    <option value="WD1">Web Design 1 (WD1) Only</option>
-                    <option value="WD2">Advanced Web Design (WD2) Only</option>
-                    <option value="AS">Advanced Studies (AS) Only</option>
-                    <option value="CS">Computer Science (CS) Only</option>
-                  </select>
+                  <div class="form-check">
+                    <input class="form-check-input addcol-course-check" type="checkbox" value="All" id="addColCourseAll" checked>
+                    <label class="form-check-label small fw-bold" for="addColCourseAll">All Courses &amp; Periods</label>
+                  </div>
+                  <div class="border-top pt-2 mt-2">
+                    <p class="small text-muted mb-1">Or pick one or more specific courses (e.g. Web 2 AND AS for the same assignment):</p>
+                    <div class="form-check">
+                      <input class="form-check-input addcol-course-check" type="checkbox" value="WD1" id="addColCourseWD1">
+                      <label class="form-check-label small" for="addColCourseWD1">Web Design 1 (WD1)</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input addcol-course-check" type="checkbox" value="WD2" id="addColCourseWD2">
+                      <label class="form-check-label small" for="addColCourseWD2">Advanced Web Design (WD2)</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input addcol-course-check" type="checkbox" value="AS" id="addColCourseAS">
+                      <label class="form-check-label small" for="addColCourseAS">Advanced Studies (AS)</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input addcol-course-check" type="checkbox" value="CS" id="addColCourseCS">
+                      <label class="form-check-label small" for="addColCourseCS">Computer Science (CS)</label>
+                    </div>
+                  </div>
                 </div>
             </div>
             <div class="row mb-1">
@@ -575,6 +591,19 @@ function injectModals() {
     </div>
     `;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // "All Courses" and picking specific courses are mutually exclusive --
+    // checking one clears the other, so saveAddCol never has to guess which
+    // the teacher actually meant.
+    document.querySelectorAll('.addcol-course-check').forEach(cb => {
+        cb.addEventListener('change', () => {
+            if (cb.id === 'addColCourseAll') {
+                if (cb.checked) document.querySelectorAll('.addcol-course-check').forEach(other => { if (other !== cb) other.checked = false; });
+            } else if (cb.checked) {
+                document.getElementById('addColCourseAll').checked = false;
+            }
+        });
+    });
 
     document.getElementById('btnSaveAddCol').addEventListener('click', saveAddCol);
     document.getElementById('btnSaveColEdit').addEventListener('click', saveColEdit);
@@ -2076,14 +2105,23 @@ async function saveAddCol() {
     const pts = Number(document.getElementById('addColPts').value) || 100;
     const date = document.getElementById('addColDueDate').value;
     const inst = document.getElementById('addColInstructions').value;
-    const course = document.getElementById('addColCourse').value;
 
     if (!name) return alert("Name required");
-    const finalName = `${name} [${pts} pts]`;
-    
+
+    // exams.course_id is a single FK column (one row can't belong to two
+    // courses at once), so "assign to Web 2 AND AS" creates one exam row
+    // per selected course instead of trying to cram both into one column.
+    // Each shares the same base name/points/due date and only differs by
+    // its course suffix, so they read as the same assignment everywhere a
+    // teacher actually looks at them (they're just filtered to different
+    // period views, same as any other assignment). Picking only one course
+    // (or "All") behaves exactly as before -- no suffix, one row.
+    const checked = [...document.querySelectorAll('.addcol-course-check:checked')].map(cb => cb.value);
+    const courses = checked.length ? checked : ['All'];
+
     const periodDates = {};
     document.querySelectorAll('#addColPeriodDates .period-due-date-input').forEach(i => periodDates[i.dataset.period] = i.value);
-    
+
     // Map visible track types back to database state code keys to satisfy relational constraints
     const dbCourseMap = {
         'WD1': '05254G1S',
@@ -2092,16 +2130,19 @@ async function saveAddCol() {
         'AS':  '05254EF-201',
         'All': '05254G1S'
     };
-    const dbCourseId = dbCourseMap[course] || '05254G1S';
-    
-    try {
-        await fetch('/api/admin/save-assignment', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ exam_id: finalName, title: name, total_points: pts, due_date: date || null, instructions: inst, course_id: dbCourseId })
-        });
 
-        allAssignments[finalName] = { maxPoints: pts, dueDate: date, instructions: inst, targetCourse: dbCourseId, periodDueDates: periodDates };
+    const isMulti = courses.length > 1 && !courses.includes('All');
+    try {
+        for (const course of courses) {
+            const dbCourseId = dbCourseMap[course] || '05254G1S';
+            const finalName = isMulti ? `${name} (${course}) [${pts} pts]` : `${name} [${pts} pts]`;
+            await fetch('/api/admin/save-assignment', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ exam_id: finalName, title: isMulti ? `${name} (${course})` : name, total_points: pts, due_date: date || null, instructions: inst, course_id: dbCourseId })
+            });
+            allAssignments[finalName] = { maxPoints: pts, dueDate: date, instructions: inst, targetCourse: dbCourseId, periodDueDates: periodDates };
+        }
         updateCategoryDropdown();
         applyFiltersAndRender();
         getModal('addColModal').hide();
