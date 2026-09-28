@@ -66,7 +66,7 @@
                         <div class="mt-1"><a href="/compsci/language_of_computers.html#section-5-5" target="_blank" rel="noopener">How to: Ch 5.5, Doing This in Google Sheets &raquo;</a></div>
                     </li>
                     <li class="mb-4">
-                        <strong>Stage 2 — Tab &ldquo;Organize the Player Data&rdquo;:</strong> Now that you can read the engine's codes, the studio hands you their real <strong>Player Roster</strong> (20 players — copy it from the <strong>Raw Data</strong> section below into this tab). Organize that <em>same</em> dataset two different ways — e.g. one big flat table vs. split into related tables (like a separate Regions table linked by Region code) — and write out the real tradeoffs of each: speed, size, ease of updating. Not sure what "split into related tables" actually looks like? <a href="/compsci/storing_data.html#section-6-1-2" target="_blank" rel="noopener">See the worked example in 6.1.2</a> first — it walks through the exact same move on a totally different dataset. The lead engineer is going to use your recommendation to decide how the real database gets built.
+                        <strong>Stage 2 — Tab &ldquo;Organize the Player Data&rdquo;:</strong> Now that you can read the engine's codes, the studio hands you their real <strong>Player Roster</strong> (20 players — copy it from the <strong>Raw Data</strong> section below into this tab). Organize that <em>same</em> dataset two different ways — e.g. one big flat table vs. splitting the repeated "Region Name" text out into its own Regions table (linked back by Region code) — and write out the real tradeoffs of each: speed, size, ease of updating. Not sure what "split into related tables" actually looks like? <a href="/compsci/storing_data.html#section-6-1-2" target="_blank" rel="noopener">See the worked example in 6.1.2</a> first — it walks through the exact same move on a totally different dataset. The lead engineer is going to use your recommendation to decide how the real database gets built.
                         <div class="mt-1"><a href="/compsci/storing_data.html#section-6-1" target="_blank" rel="noopener">How to: Ch 6.1, Organizing Data &raquo;</a></div>
                     </li>
                     <li class="mb-4">
@@ -107,31 +107,32 @@
                 <h6 class="fw-bold text-primary mt-4">For Stages 2 &amp; 3 — Player Roster (20 players)</h6>
                 <div class="table-responsive">
                 <table class="table table-sm table-bordered small">
-                    <thead class="table-light"><tr><th>Player ID</th><th>Username</th><th>Region</th><th>Sessions</th><th>Total Playtime (min)</th><th>High Score</th><th>Rarest Item</th><th>Status</th></tr></thead>
+                    <thead class="table-light"><tr><th>Player ID</th><th>Username</th><th>Region</th><th>Region Name</th><th>Sessions</th><th>Total Playtime (min)</th><th>High Score</th><th>Rarest Item</th><th>Status</th></tr></thead>
                     <tbody>
-                        <tr><td>P001</td><td>pixelpioneer</td><td>NA</td><td>42</td><td>1860</td><td>9840</td><td>L</td><td>V</td></tr>
-                        <tr><td>P002</td><td>byteblaster99</td><td>EU</td><td>18</td><td>540</td><td>4210</td><td>C</td><td>A</td></tr>
-                        <tr><td>P003</td><td>questcrafter</td><td>NA</td><td>65</td><td>2705</td><td>11200</td><td>L</td><td>V</td></tr>
-                        <tr><td>P004</td><td>shadowhopper</td><td>APAC</td><td>5</td><td>95</td><td>820</td><td>C</td><td>N</td></tr>
-                        <tr><td>P005</td><td>glitchgremlin</td><td>EU</td><td>33</td><td>1420</td><td>7650</td><td>R</td><td>A</td></tr>
-                        <tr><td>P006</td><td>nova_striker</td><td>NA</td><td>2</td><td>40</td><td>310</td><td>C</td><td>I</td></tr>
-                        <tr><td>P007</td><td>pixelpioneer2</td><td>NA</td><td>29</td><td>980</td><td>6100</td><td>E</td><td>A</td></tr>
-                        <tr><td>P008</td><td>drift_kingz</td><td>APAC</td><td>51</td><td>2210</td><td>10450</td><td>L</td><td>V</td></tr>
-                        <tr><td>P009</td><td>echo_walker</td><td>EU</td><td>1</td><td>20</td><td>150</td><td>C</td><td>N</td></tr>
-                        <tr><td>P010</td><td>rustyrocket</td><td>NA</td><td>22</td><td>760</td><td>5300</td><td>R</td><td>A</td></tr>
-                        <tr><td>P011</td><td>mapleminer</td><td>NA</td><td>8</td><td>210</td><td>1450</td><td>C</td><td>I</td></tr>
-                        <tr><td>P012</td><td>zenithzee</td><td>APAC</td><td>47</td><td>1990</td><td>9200</td><td>E</td><td>A</td></tr>
-                        <tr><td>P013</td><td>frostbyte_jr</td><td>EU</td><td>13</td><td>330</td><td>2600</td><td>R</td><td>A</td></tr>
-                        <tr><td>P014</td><td>voidrunner</td><td>NA</td><td>38</td><td>1650</td><td>8400</td><td>E</td><td>A</td></tr>
-                        <tr><td>P015</td><td>copperclaw</td><td>APAC</td><td>3</td><td>60</td><td>410</td><td>C</td><td>N</td></tr>
-                        <tr><td>P016</td><td>lunarlacer</td><td>EU</td><td>60</td><td>2540</td><td>11800</td><td>L</td><td>V</td></tr>
-                        <tr><td>P017</td><td>stormsailor</td><td>NA</td><td>16</td><td>500</td><td>3700</td><td>R</td><td>A</td></tr>
-                        <tr><td>P018</td><td>ashen_ace</td><td>APAC</td><td>0</td><td>10</td><td>0</td><td>C</td><td>I</td></tr>
-                        <tr><td>P019</td><td>quillquake</td><td>EU</td><td>25</td><td>890</td><td>5900</td><td>E</td><td>A</td></tr>
-                        <tr><td>P020</td><td>tidaltempo</td><td>NA</td><td>44</td><td>1900</td><td>9500</td><td>L</td><td>V</td></tr>
+                        <tr><td>P001</td><td>pixelpioneer</td><td>NA</td><td>North America</td><td>42</td><td>1860</td><td>9840</td><td>L</td><td>V</td></tr>
+                        <tr><td>P002</td><td>byteblaster99</td><td>EU</td><td>Europe</td><td>18</td><td>540</td><td>4210</td><td>C</td><td>A</td></tr>
+                        <tr><td>P003</td><td>questcrafter</td><td>NA</td><td>North America</td><td>65</td><td>2705</td><td>11200</td><td>L</td><td>V</td></tr>
+                        <tr><td>P004</td><td>shadowhopper</td><td>APAC</td><td>Asia-Pacific</td><td>5</td><td>95</td><td>820</td><td>C</td><td>N</td></tr>
+                        <tr><td>P005</td><td>glitchgremlin</td><td>EU</td><td>Europe</td><td>33</td><td>1420</td><td>7650</td><td>R</td><td>A</td></tr>
+                        <tr><td>P006</td><td>nova_striker</td><td>NA</td><td>North America</td><td>2</td><td>40</td><td>310</td><td>C</td><td>I</td></tr>
+                        <tr><td>P007</td><td>pixelpioneer2</td><td>NA</td><td>North America</td><td>29</td><td>980</td><td>6100</td><td>E</td><td>A</td></tr>
+                        <tr><td>P008</td><td>drift_kingz</td><td>APAC</td><td>Asia-Pacific</td><td>51</td><td>2210</td><td>10450</td><td>L</td><td>V</td></tr>
+                        <tr><td>P009</td><td>echo_walker</td><td>EU</td><td>Europe</td><td>1</td><td>20</td><td>150</td><td>C</td><td>N</td></tr>
+                        <tr><td>P010</td><td>rustyrocket</td><td>NA</td><td>North America</td><td>22</td><td>760</td><td>5300</td><td>R</td><td>A</td></tr>
+                        <tr><td>P011</td><td>mapleminer</td><td>NA</td><td>North America</td><td>8</td><td>210</td><td>1450</td><td>C</td><td>I</td></tr>
+                        <tr><td>P012</td><td>zenithzee</td><td>APAC</td><td>Asia-Pacific</td><td>47</td><td>1990</td><td>9200</td><td>E</td><td>A</td></tr>
+                        <tr><td>P013</td><td>frostbyte_jr</td><td>EU</td><td>Europe</td><td>13</td><td>330</td><td>2600</td><td>R</td><td>A</td></tr>
+                        <tr><td>P014</td><td>voidrunner</td><td>NA</td><td>North America</td><td>38</td><td>1650</td><td>8400</td><td>E</td><td>A</td></tr>
+                        <tr><td>P015</td><td>copperclaw</td><td>APAC</td><td>Asia-Pacific</td><td>3</td><td>60</td><td>410</td><td>C</td><td>N</td></tr>
+                        <tr><td>P016</td><td>lunarlacer</td><td>EU</td><td>Europe</td><td>60</td><td>2540</td><td>11800</td><td>L</td><td>V</td></tr>
+                        <tr><td>P017</td><td>stormsailor</td><td>NA</td><td>North America</td><td>16</td><td>500</td><td>3700</td><td>R</td><td>A</td></tr>
+                        <tr><td>P018</td><td>ashen_ace</td><td>APAC</td><td>Asia-Pacific</td><td>0</td><td>10</td><td>0</td><td>C</td><td>I</td></tr>
+                        <tr><td>P019</td><td>quillquake</td><td>EU</td><td>Europe</td><td>25</td><td>890</td><td>5900</td><td>E</td><td>A</td></tr>
+                        <tr><td>P020</td><td>tidaltempo</td><td>NA</td><td>North America</td><td>44</td><td>1900</td><td>9500</td><td>L</td><td>V</td></tr>
                     </tbody>
                 </table>
                 </div>
+                <p class="text-muted small mb-0"><i class="fas fa-lightbulb me-1"></i><strong>This is the redundancy Stage 2 asks you to fix:</strong> "Region Name" repeats the exact same text on every row that shares a Region code (all 8 "North America" rows say the identical thing). That's the tell that it belongs in its own table — pull Region + Region Name out into a separate Regions table (3 rows, one per region), and leave just the Region <em>code</em> behind in the Player Roster to point to it. If a column doesn't repeat like that, it doesn't need splitting.</p>
 
                 <h6 class="fw-bold text-primary mt-4">For Stage 4 — Daily Active Players (last 14 days)</h6>
                 <div class="table-responsive">
