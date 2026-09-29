@@ -79,7 +79,13 @@
                         <div class="mt-1"><a href="/compsci/mastering_spreadsheets.html#section-7-1" target="_blank" rel="noopener">How to: Ch 7.1–7.2, Formulas &amp; Data Visualisation &raquo;</a></div>
                     </li>
                     <li class="mb-0">
-                        <strong>Stage 4 — Tab &ldquo;Predict What's Next&rdquo;:</strong> Copy the <strong>Daily Active Players</strong> table from the <strong>Raw Data</strong> section below into this tab — it's the studio's real login activity for the last 14 days. Build a simple formula-based model that predicts Day 15 and Day 16's active player counts from that trend, then write a sentence checking your prediction against a plausible actual value.
+                        <strong>Stage 4 — Tab &ldquo;Predict What's Next&rdquo;:</strong> Copy the <strong>Daily Active Players</strong> table from the <strong>Raw Data</strong> section below into this tab — it's the studio's real login activity for the last 14 days. Build a prediction using this exact method:
+                        <ol class="mt-2 mb-0">
+                            <li class="mb-1">Add a third column, <strong>Daily Change</strong>. Starting on Day 2, subtract each day from the day before it (<code>=B3-B2</code>, then <code>=B4-B3</code>, and so on down through Day 14) — 13 formulas in total.</li>
+                            <li class="mb-1">Below that column, calculate <code>=AVERAGE(...)</code> of all 13 Daily Change values. That's the studio's <strong>average daily change</strong> — on average, roughly how many more (or fewer) players log in each day compared to the day before.</li>
+                            <li class="mb-1"><strong>Predict Day 15:</strong> Day 14's value <em>plus</em> your average daily change. <strong>Predict Day 16:</strong> your Day 15 prediction <em>plus</em> that same average daily change again. Both as live formulas referencing your average — not typed-in numbers.</li>
+                            <li class="mb-0">Write one sentence checking your prediction: if the real Day 15 count came in 20+ players away from what you predicted, would that mean your model was wrong, or that something genuinely changed? Explain which, and why.</li>
+                        </ol>
                         <div class="mt-1"><a href="/compsci/computational_modeling.html#section-8-1" target="_blank" rel="noopener">How to: Ch 8.1, Building a Model &raquo;</a></div>
                     </li>
                 </ol>
@@ -174,7 +180,7 @@
                     {"key":"bit_translator","label":"Stage 1: Decode the Feed","description":"At least 8 values are correctly converted across binary, hex, decimal, and ASCII/Unicode, with no calculation errors."},
                     {"key":"storage_tradeoffs","label":"Stage 2: Organize the Player Data","description":"Two real organization approaches are shown for the SAME player dataset carried through the rest of the workbook, with specific, real tradeoffs, not generic pros/cons."},
                     {"key":"dashboard_charts","label":"Stage 3: Studio Dashboard","description":"SUM (Sessions) and AVERAGE (Total Playtime) KPI numbers, plus a COUNTIF-based Status Name chart and a COUNTIF-based Region Name chart — all from live formulas (not hardcoded numbers), readable and labeled, on that SAME player dataset from Stage 2."},
-                    {"key":"model_validation","label":"Stage 4: Predict What's Next","description":"A real formula-based model predicts a future outcome for that SAME data (not a new, unrelated topic), and the student writes a genuine check of whether it held up."},
+                    {"key":"model_validation","label":"Stage 4: Predict What's Next","description":"A Daily Change column (13 day-over-day formulas), an AVERAGE of those changes, and Day 15/Day 16 predictions built as live formulas from that average — plus a genuine sentence checking what a big miss on Day 15 would actually mean."},
                     {"key":"organization","label":"One Connected Pipeline","description":"This is one continuous story about one dataset, not four unrelated exercises stapled together — Stage 2's dataset is what Stage 3 charts and Stage 4 predicts from. Tabs are clearly labeled and easy for someone else to follow without explanation."},
                     {"key":"advanced_formula","label":"Advanced Formula (Bonus)","description":"Uses conditional formatting or an advanced formula (VLOOKUP, INDEX/MATCH, QUERY) anywhere in the workbook.","bonus":true}
                  ]'>

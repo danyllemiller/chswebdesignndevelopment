@@ -35,6 +35,7 @@
               <div class="card-body">
                   <h5 class="fw-bold"><i class="fas fa-align-left me-2"></i> Flat File</h5>
                   <p class="mb-0 small">Everything in one long, unstructured list. Fast to write, painful to search.</p>
+                  <p class="mb-0 small text-muted mt-2"><strong>Why you'd still use it:</strong> a raw server log or sensor feed writes thousands of lines a second — pausing to organize each one as it arrives would be too slow. Speed of writing wins over ease of searching later.</p>
               </div>
           </div>
       </div>
@@ -43,6 +44,7 @@
               <div class="card-body">
                   <h5 class="fw-bold text-primary"><i class="fas fa-table me-2"></i> Table (Fields & Records)</h5>
                   <p class="mb-0 small">Each row is one record, each column a consistent field. This is what a spreadsheet does for you automatically.</p>
+                  <p class="mb-0 small text-muted mt-2"><strong>Why you'd use it:</strong> the default choice any time you need to sort, filter, or run a formula across many similar records — a gradebook, a roster, an inventory. Consistent columns are what makes a formula like <code>AVERAGE</code> possible in the first place.</p>
               </div>
           </div>
       </div>
@@ -51,6 +53,7 @@
               <div class="card-body">
                   <h5 class="fw-bold text-success"><i class="fas fa-sitemap me-2"></i> Hierarchical</h5>
                   <p class="mb-0 small">Nested parent-child relationships — like folders inside folders.</p>
+                  <p class="mb-0 small text-muted mt-2"><strong>Why you'd use it:</strong> when the data itself is naturally nested and one flat row can't capture it — a family tree, a company's org chart, or a website's own folder structure, where "belongs inside" is the whole point.</p>
               </div>
           </div>
       </div>
@@ -59,6 +62,7 @@
               <div class="card-body">
                   <h5 class="fw-bold text-warning"><i class="fas fa-key me-2"></i> Key-Value</h5>
                   <p class="mb-0 small">A simple lookup: one unique key points to one value, built for speed.</p>
+                  <p class="mb-0 small text-muted mt-2"><strong>Why you'd use it:</strong> when you only ever need to ask "what's stored under this exact key?" and nothing more complex — a login session token, a shopping cart ID, a cache. Skipping rows/columns entirely is what makes the lookup nearly instant.</p>
               </div>
           </div>
       </div>
@@ -221,6 +225,8 @@ Aaliyah, 10th grade, Chemistry, D+</pre>
 
   <h4 class="fw-bold mt-4 text-primary">6.3.1 Analog vs. Digital</h4>
   <p><strong>Analog</strong> data is continuous — a dimmer switch, a vinyl record's groove, a mercury thermometer can sit at literally any value in between. <strong>Digital</strong> data is discrete — it's broken into a fixed set of exact steps, ultimately represented as <strong>bits</strong> (1s and 0s). A digital photo isn't a smooth image; it's a precise grid of individually-numbered pixels.</p>
+
+  <p><strong>Why bother converting analog to digital at all?</strong> Copy an analog signal — record a cassette tape off another cassette tape — and it degrades a little every single time, picking up hiss and noise it never fully loses. Copy a digital file a million times and the millionth copy is still a byte-for-byte perfect match of the original, because a computer is only ever checking "is this closer to a 0 or a 1?" — a question with no room for the signal to drift. That's the entire reason nearly everything got converted to digital: it copies, stores, and transmits without decaying.</p>
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-font me-2"></i> How a Computer Stores the Letter "A"</h5>
