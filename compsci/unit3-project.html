@@ -70,7 +70,12 @@
                         <div class="mt-1"><a href="/compsci/storing_data.html#section-6-1" target="_blank" rel="noopener">How to: Ch 6.1, Organizing Data &raquo;</a></div>
                     </li>
                     <li class="mb-4">
-                        <strong>Stage 3 — Tab &ldquo;Studio Dashboard&rdquo;:</strong> Using that <em>same</em> Player Roster from Stage 2, build a dashboard with at least 2 real charts driven by live formulas (SUM, AVERAGE, COUNTIF, etc.) — not typed-in numbers — that the studio's producer could actually check every week to see how the game's doing.
+                        <strong>Stage 3 — Tab &ldquo;Studio Dashboard&rdquo;:</strong> Using that <em>same</em> Player Roster from Stage 2, build a dashboard the studio's producer could actually check every week. Every number below must come from a live formula referencing the Player Roster — never typed in by hand — so it stays correct if the roster changes.
+                        <ul class="mt-2 mb-0">
+                            <li class="mb-1"><strong>Two KPI numbers</strong> above your charts: <code>=SUM(...)</code> on the <strong>Sessions</strong> column for Total Sessions This Week, and <code>=AVERAGE(...)</code> on the <strong>Total Playtime (min)</strong> column for Average Playtime Per Player.</li>
+                            <li class="mb-1"><strong>Chart 1 — Players by Status:</strong> four <code>=COUNTIF(...)</code> formulas on the <strong>Status Name</strong> column, one each counting "Active", "Inactive", "New", and "VIP" — then chart those 4 counts as a bar or pie chart.</li>
+                            <li class="mb-0"><strong>Chart 2 — Players by Region:</strong> the same move on the <strong>Region Name</strong> column instead — one <code>=COUNTIF(...)</code> for each region that actually appears in your roster — then chart those counts as a bar or pie chart.</li>
+                        </ul>
                         <div class="mt-1"><a href="/compsci/mastering_spreadsheets.html#section-7-1" target="_blank" rel="noopener">How to: Ch 7.1–7.2, Formulas &amp; Data Visualisation &raquo;</a></div>
                     </li>
                     <li class="mb-0">
@@ -168,7 +173,7 @@
                  data-rubric='[
                     {"key":"bit_translator","label":"Stage 1: Decode the Feed","description":"At least 8 values are correctly converted across binary, hex, decimal, and ASCII/Unicode, with no calculation errors."},
                     {"key":"storage_tradeoffs","label":"Stage 2: Organize the Player Data","description":"Two real organization approaches are shown for the SAME player dataset carried through the rest of the workbook, with specific, real tradeoffs, not generic pros/cons."},
-                    {"key":"dashboard_charts","label":"Stage 3: Studio Dashboard","description":"At least 2 charts are built from live formulas (not hardcoded numbers), are readable and labeled, and visualize that SAME player dataset from Stage 2."},
+                    {"key":"dashboard_charts","label":"Stage 3: Studio Dashboard","description":"SUM (Sessions) and AVERAGE (Total Playtime) KPI numbers, plus a COUNTIF-based Status Name chart and a COUNTIF-based Region Name chart — all from live formulas (not hardcoded numbers), readable and labeled, on that SAME player dataset from Stage 2."},
                     {"key":"model_validation","label":"Stage 4: Predict What's Next","description":"A real formula-based model predicts a future outcome for that SAME data (not a new, unrelated topic), and the student writes a genuine check of whether it held up."},
                     {"key":"organization","label":"One Connected Pipeline","description":"This is one continuous story about one dataset, not four unrelated exercises stapled together — Stage 2's dataset is what Stage 3 charts and Stage 4 predicts from. Tabs are clearly labeled and easy for someone else to follow without explanation."},
                     {"key":"advanced_formula","label":"Advanced Formula (Bonus)","description":"Uses conditional formatting or an advanced formula (VLOOKUP, INDEX/MATCH, QUERY) anywhere in the workbook.","bonus":true}
