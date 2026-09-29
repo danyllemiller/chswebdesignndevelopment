@@ -130,6 +130,19 @@
 
   <p><strong>Unicode</strong> replaced it as the modern standard, with room for every writing system on Earth and far beyond ASCII's original 128 characters. Every emoji you've ever sent is a Unicode character with its own assigned number, exactly like the letter A has one.</p>
 
+  <div class="table-responsive my-4">
+      <table class="table table-bordered table-sm text-center align-middle shadow-sm">
+          <thead class="table-light"><tr><th>Character</th><th>Standard</th><th>Decimal Value</th><th>8-Bit Binary</th></tr></thead>
+          <tbody>
+              <tr><td class="fs-5">A</td><td>ASCII</td><td>65</td><td class="font-monospace">01000001</td></tr>
+              <tr><td class="fs-5">a</td><td>ASCII</td><td>97</td><td class="font-monospace">01100001</td></tr>
+              <tr><td class="fs-5">!</td><td>ASCII</td><td>33</td><td class="font-monospace">00100001</td></tr>
+              <tr><td class="fs-5">😀</td><td>Unicode</td><td>128,512</td><td class="text-muted small">too large for one byte</td></tr>
+          </tbody>
+      </table>
+      <p class="small text-muted mb-0">"A" and "a" are two completely different numbers to a computer — capitalization isn't a font style, it's a different value. 😀's number is over 128,000, which is exactly why ASCII's 128-value limit could never have fit it.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean infographic showing the letter &quot;A&quot; with an arrow pointing to the number 65, and a smiley-face emoji with an arrow pointing to its Unicode code point, both under the label &quot;Character Encoding.&quot;">
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
@@ -211,6 +224,34 @@
       <p class="mb-0 text-light">Which logic gate outputs TRUE only if both of its inputs are TRUE? <em class="text-white-50">(Answer: the AND gate.)</em></p>
   </div>
 
+  <div class="row g-4 my-4">
+      <div class="col-md-6">
+          <p class="fw-bold text-primary small text-uppercase mb-1">AND Gate — Truth Table</p>
+          <table class="table table-bordered table-sm text-center shadow-sm mb-0">
+              <thead class="table-light"><tr><th>Input A</th><th>Input B</th><th>Output</th></tr></thead>
+              <tbody>
+                  <tr><td>0</td><td>0</td><td class="fw-bold">0</td></tr>
+                  <tr><td>0</td><td>1</td><td class="fw-bold">0</td></tr>
+                  <tr><td>1</td><td>0</td><td class="fw-bold">0</td></tr>
+                  <tr class="table-primary"><td>1</td><td>1</td><td class="fw-bold">1</td></tr>
+              </tbody>
+          </table>
+      </div>
+      <div class="col-md-6">
+          <p class="fw-bold text-success small text-uppercase mb-1">OR Gate — Truth Table</p>
+          <table class="table table-bordered table-sm text-center shadow-sm mb-0">
+              <thead class="table-light"><tr><th>Input A</th><th>Input B</th><th>Output</th></tr></thead>
+              <tbody>
+                  <tr><td>0</td><td>0</td><td class="fw-bold">0</td></tr>
+                  <tr class="table-success"><td>0</td><td>1</td><td class="fw-bold">1</td></tr>
+                  <tr class="table-success"><td>1</td><td>0</td><td class="fw-bold">1</td></tr>
+                  <tr class="table-success"><td>1</td><td>1</td><td class="fw-bold">1</td></tr>
+              </tbody>
+          </table>
+      </div>
+      <p class="small text-muted mb-0 mt-2">Every possible combination of two binary inputs, and what each gate outputs for it — that's a truth table. AND only lights up on one row out of four; OR lights up on three.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A simple technical diagram of an AND logic gate and an OR logic gate side by side, each shown as its standard schematic symbol with two input lines and one output line, labeled with example TRUE/FALSE input combinations and the resulting output for each.">
 
   <h4 class="fw-bold mt-5 text-info">5.4.2 RAM & Clock Speed</h4>
@@ -218,6 +259,18 @@
 
   <h4 class="fw-bold mt-5 text-primary">5.4.3 The Fetch-Decode-Execute Cycle</h4>
   <p>Billions of times per second, the CPU repeats the same three-step loop on a binary instruction: <strong>Fetch</strong> (retrieve the next instruction from memory), <strong>Decode</strong> (figure out what that instruction actually means), and <strong>Execute</strong> (carry it out using its logic gates). This <strong>Fetch-Decode-Execute cycle</strong> is the fundamental heartbeat underneath every program you've ever run — it's what a clock speed in GHz is actually counting.</p>
+
+  <div class="table-responsive my-4">
+      <table class="table table-bordered table-sm shadow-sm">
+          <thead class="table-dark"><tr><th style="width:15%">Step</th><th>What the CPU Does</th><th>Tapping "7 + 5 =" on a calculator app</th></tr></thead>
+          <tbody>
+              <tr><td class="fw-bold text-primary">Fetch</td><td>Pull the next instruction out of RAM</td><td>Grabs the instruction "add these two numbers"</td></tr>
+              <tr><td class="fw-bold text-warning">Decode</td><td>Figure out what the instruction means and which data it needs</td><td>Recognizes this as an ADD operation and locates 7 and 5</td></tr>
+              <tr><td class="fw-bold text-success">Execute</td><td>Carry it out using logic gates, produce a result</td><td>Runs it through the logic gates, gets 12</td></tr>
+          </tbody>
+      </table>
+      <p class="small text-muted mb-0">One cycle, one instruction, one result — then it immediately fetches the next instruction and does it again. A 3.0 GHz processor runs roughly 3 billion of these cycles every second.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean circular/looping diagram showing the Fetch-Decode-Execute cycle as three connected arrows forming a loop: &quot;Fetch&quot; (an arrow pulling an instruction from a memory icon), &quot;Decode&quot; (a magnifying glass over the instruction), &quot;Execute&quot; (a lightning bolt/gear icon), looping back to Fetch.">
 

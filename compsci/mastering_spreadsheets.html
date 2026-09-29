@@ -38,6 +38,19 @@
       <p class="mb-0">Every cell has an address made of its column letter, then its row number — no space between them. The cell in column A, row 1 is called <code>A1</code>. The cell in column C, row 4 is called <code>C4</code>. Click any cell in a real spreadsheet and its address shows up in the box at the top-left corner, called the Name Box — that's how you can always check you're looking at the cell you think you are.</p>
   </div>
 
+  <div class="table-responsive my-4">
+      <table class="table table-bordered table-sm text-center align-middle shadow-sm" style="max-width: 420px;">
+          <thead class="table-light"><tr><th style="width:15%"></th><th>A</th><th>B</th><th>C</th></tr></thead>
+          <tbody>
+              <tr><th class="table-light">1</th><td class="table-primary fw-bold">A1</td><td>B1</td><td>C1</td></tr>
+              <tr><th class="table-light">2</th><td>A2</td><td>B2</td><td>C2</td></tr>
+              <tr><th class="table-light">3</th><td>A3</td><td>B3</td><td>C3</td></tr>
+              <tr><th class="table-light">4</th><td>A4</td><td>B4</td><td class="table-primary fw-bold">C4</td></tr>
+          </tbody>
+      </table>
+      <p class="small text-muted mb-0">Column letter first, row number second — no space, no punctuation. Column A, row 1 is <code>A1</code>; column C, row 4 is <code>C4</code>.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets grid with column letters A-E and row numbers 1-6 clearly visible, cell A1 selected with a blue border, and the Name Box in the top-left corner showing &quot;A1&quot; with an arrow and label pointing to it reading &quot;This is the Name Box — it always shows which cell is selected.&quot;">
 
   <h4 class="fw-bold mt-4 text-info">Typing Data vs. Writing a Formula</h4>
@@ -106,6 +119,20 @@
       <p class="mb-0">You build a formula that multiplies each row's sales by a tax rate in cell B2. Copy it down without locking B2 as absolute, and every row silently references a different, empty cell instead of your tax rate — producing confident, wrong answers across the entire sheet. It won't error. It'll just be quietly wrong.</p>
   </div>
 
+  <div class="table-responsive my-4">
+      <table class="table table-bordered table-sm text-center align-middle shadow-sm">
+          <thead class="table-dark">
+              <tr><th></th><th>A: Sales</th><th>B: Tax Rate</th><th class="text-danger">C: Relative — <code>=A2*B2</code></th><th class="text-success">D: Absolute — <code>=A2*$B$2</code></th></tr>
+          </thead>
+          <tbody>
+              <tr><th class="table-light">2</th><td>200</td><td>0.08</td><td>16</td><td>16</td></tr>
+              <tr><th class="table-light">3</th><td>350</td><td><em class="text-muted">(empty)</em></td><td class="text-danger fw-bold">0</td><td class="text-success fw-bold">28</td></tr>
+              <tr><th class="table-light">4</th><td>90</td><td><em class="text-muted">(empty)</em></td><td class="text-danger fw-bold">0</td><td class="text-success fw-bold">7.2</td></tr>
+          </tbody>
+      </table>
+      <p class="small text-muted mb-0">Column C was copied straight down (<code>=A2*B2</code>, <code>=A3*B3</code>, <code>=A4*B4</code>) — the tax rate reference shifts to a blank cell after row 2, so every row after the first quietly multiplies by nothing. Column D locks the tax rate with <code>$</code> (<code>=A2*$B$2</code>, <code>=A3*$B$2</code>, <code>=A4*$B$2</code>) — every row keeps pointing at the real 0.08, no matter where the formula is copied.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets column being dragged/filled down with a formula, showing two side-by-side examples: one column where a relative reference (B2) correctly shifts to B3, B4, B5 as it's copied down, and one column where an absolute reference ($B$2) stays locked to row 2 in every copied cell, with small callout labels explaining each.">
 
   <h4 class="fw-bold mt-5 text-info">7.1.2 The Function Families</h4>
@@ -169,12 +196,37 @@
       <p class="mb-0">A bar chart with a Y-axis that starts at 90 instead of 0 can make a 2-point difference look like a massive gap. Same numbers, same bars, completely different story — just by moving where the axis starts. That's the whole trick behind most misleading charts you'll ever see.</p>
   </div>
 
+  <div class="table-responsive my-4">
+      <table class="table table-bordered table-sm text-center align-middle shadow-sm">
+          <thead class="table-light">
+              <tr><th>Class</th><th>Real Score</th><th>Bar Height, Axis 0–100</th><th>Bar Height, Axis 90–100</th></tr>
+          </thead>
+          <tbody>
+              <tr><td>Period A1</td><td>91</td><td>91%</td><td class="text-warning fw-bold">10%</td></tr>
+              <tr><td>Period B2</td><td>93</td><td>93%</td><td class="text-warning fw-bold">30%</td></tr>
+          </tbody>
+      </table>
+      <p class="small text-muted mb-0">The real gap between 91 and 93 is 2 points either way. Start the axis at 0 and the bars land at 91% and 93% of the chart's height — nearly identical. Start it at 90 (a 10-point range instead of 100) and that same 2-point gap now spans 20% of the chart's height, three times taller relative to the axis — same two numbers, wildly different visual story.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A side-by-side comparison of two identical bar charts with the exact same data (bars at 91 and 93). Left chart's Y-axis starts at 0, so the bars look almost the same height, labeled &quot;Honest.&quot; Right chart's Y-axis starts at 90, so the same bars look dramatically different heights, labeled &quot;Misleading — same data.&quot;">
 
   <p><strong>The trap:</strong> students often think a chart is only "wrong" if it uses fake numbers. It doesn't need to. A truncated axis, an inconsistent scale, or a 3D effect that distorts area can all mislead a reader while every single number on the chart stays technically correct.</p>
 
   <h4 class="fw-bold mt-5 text-info">7.2.2 Interactive Dashboards</h4>
   <p>A static chart answers your question. An <strong>interactive</strong> one — with filters, slicers, and linked charts — lets the reader ask their own. Good dashboard layout puts the most important number first, groups related charts together, and never shows more than someone can read at a glance.</p>
+
+  <div class="table-responsive my-4">
+      <table class="table table-bordered table-sm shadow-sm">
+          <thead class="table-light"><tr><th style="width:20%">Position</th><th>What's There</th><th>Why It's There</th></tr></thead>
+          <tbody>
+              <tr><td class="fw-bold">Top-left, largest</td><td>Class average across all three quizzes</td><td>The one number everyone actually wants first</td></tr>
+              <tr><td class="fw-bold">Below it, grouped</td><td>Bar chart of average score per quiz + scatter plot of Study Hours vs. Score</td><td>Two related questions, side by side, not scattered around the page</td></tr>
+              <tr><td class="fw-bold">Top-right corner</td><td>Dropdown filter: "Show data for [All Students ▾]"</td><td>Picking one student re-draws every chart above without rebuilding anything</td></tr>
+          </tbody>
+      </table>
+      <p class="small text-muted mb-0">That's a dashboard built from the exact data set you're using in this chapter — one key number, two grouped charts answering related questions, and one filter that drives all of them at once.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean dashboard mockup graphic with one large key metric at the top left, three smaller related charts grouped below it, and a visible filter dropdown in the corner.">
 
@@ -213,6 +265,35 @@
   <div class="concept-box shadow-sm border-danger bg-light">
       <h5 class="fw-bold text-danger"><i class="fas fa-exclamation-triangle me-2"></i> The Trap: Bias Before You Even Start</h5>
       <p class="mb-0">A survey about phone habits that's only sent to people over 60 will produce numbers — but they won't represent everyone. This is <strong>bias</strong>: a flaw in how data was collected that skews the results before any analysis even begins. No formula or chart can fix bad data collection after the fact.</p>
+  </div>
+
+  <div class="row g-3 my-4">
+      <div class="col-md-6">
+          <p class="fw-bold text-danger small text-uppercase mb-1">Before</p>
+          <table class="table table-bordered table-sm text-center align-middle shadow-sm mb-0">
+              <thead class="table-light"><tr><th>Name</th><th>Quiz 1</th></tr></thead>
+              <tbody>
+                  <tr><td>Maria</td><td>90</td></tr>
+                  <tr class="table-warning"><td>Devon</td><td><em class="text-muted">(blank)</em></td></tr>
+                  <tr class="table-danger"><td>Priya</td><td>85</td></tr>
+                  <tr class="table-danger"><td>Priya</td><td>85</td></tr>
+                  <tr class="table-warning"><td>Sam</td><td>9O</td></tr>
+              </tbody>
+          </table>
+      </div>
+      <div class="col-md-6">
+          <p class="fw-bold text-success small text-uppercase mb-1">After</p>
+          <table class="table table-bordered table-sm text-center align-middle shadow-sm mb-0">
+              <thead class="table-light"><tr><th>Name</th><th>Quiz 1</th></tr></thead>
+              <tbody>
+                  <tr><td>Maria</td><td>90</td></tr>
+                  <tr class="table-success"><td>Devon</td><td>78</td></tr>
+                  <tr><td>Priya</td><td>85</td></tr>
+                  <tr class="table-success"><td>Sam</td><td>90</td></tr>
+              </tbody>
+          </table>
+      </div>
+      <p class="small text-muted mb-0">Priya's duplicate row is gone, Devon's blank got filled in (from the gradebook, not guessed), and Sam's "9O" — a letter O, not a zero, so it wasn't even a number to the spreadsheet — got corrected to <code>90</code>. Nothing here changed what actually happened; it just made the sheet tell the truth.</p>
   </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A before-and-after split graphic of a small spreadsheet. Left side labeled &quot;Before&quot; shows messy rows with a duplicate entry highlighted red, a blank cell highlighted yellow, and a typo like &quot;9O&quot; instead of &quot;90&quot; highlighted orange. Right side labeled &quot;After&quot; shows the same rows cleaned up, duplicate removed, blank filled in, typo corrected, with a green checkmark.">

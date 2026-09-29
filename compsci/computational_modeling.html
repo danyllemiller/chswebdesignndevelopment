@@ -70,6 +70,16 @@
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-piggy-bank me-2"></i> Worked Example: A Compound-Interest Model</h5>
       <p class="mb-0"><strong>Inputs:</strong> starting balance, interest rate, number of years. <strong>Relationship:</strong> a formula multiplying the balance by the rate each year and adding it back in. <strong>Output:</strong> the final balance. <strong>Assumption:</strong> the interest rate never changes — which is exactly the part worth questioning.</p>
+      <table class="table table-bordered table-sm text-center shadow-sm mt-3 mb-0 bg-white">
+          <thead class="table-light"><tr><th>Year</th><th>Formula</th><th>Balance</th></tr></thead>
+          <tbody>
+              <tr><td>0</td><td>Starting balance</td><td>$1,000.00</td></tr>
+              <tr><td>1</td><td><code>=1000 * 1.05</code></td><td>$1,050.00</td></tr>
+              <tr><td>2</td><td><code>=1050 * 1.05</code></td><td>$1,102.50</td></tr>
+              <tr><td>3</td><td><code>=1102.50 * 1.05</code></td><td>$1,157.63</td></tr>
+          </tbody>
+      </table>
+      <p class="small text-muted mb-0 mt-2">Inputs: $1,000 starting balance, 5% rate. Each row's output feeds straight into the next row's formula — that's the "relationship" doing the same job, year after year, without being retyped.</p>
   </div>
 
   <p><strong>The trap:</strong> students often think a model with more inputs is automatically more accurate. It isn't, if the relationships are wrong or an assumption is unrealistic. A simple model with honest, stated assumptions beats a complicated one hiding a bad guess.</p>
@@ -82,6 +92,19 @@
 
   <h4 class="fw-bold mt-4 text-primary">8.2.1 Change One Input, Watch the Output</h4>
   <p><strong>Sensitivity testing</strong> means changing exactly one input at a time and recording how much the output moves. The input that swings the output the most is the one your model is most dependent on — and the one most worth questioning before you trust the result.</p>
+
+  <div class="table-responsive my-4">
+      <table class="table table-bordered table-sm text-center shadow-sm">
+          <thead class="table-light"><tr><th>Test</th><th>Starting Balance</th><th>Rate</th><th>Years</th><th>Output</th><th>Swing from Baseline</th></tr></thead>
+          <tbody>
+              <tr class="table-secondary"><td class="fw-bold">Baseline</td><td>$1,000</td><td>5%</td><td>10</td><td>$1,628.89</td><td>—</td></tr>
+              <tr><td>Rate → 8%</td><td>$1,000</td><td class="fw-bold text-danger">8%</td><td>10</td><td>$2,158.92</td><td class="text-danger fw-bold">+32.5%</td></tr>
+              <tr><td>Years → 15</td><td>$1,000</td><td>5%</td><td class="fw-bold text-danger">15</td><td>$2,078.93</td><td class="text-danger fw-bold">+27.6%</td></tr>
+              <tr><td>Balance → $2,000</td><td class="fw-bold text-warning">$2,000</td><td>5%</td><td>10</td><td>$3,257.79</td><td class="text-warning fw-bold">+100.0% (exactly matches the doubled input)</td></tr>
+          </tbody>
+      </table>
+      <p class="small text-muted mb-0">Change the rate alone, and the 10-year output swings 32.5%. Change years alone, it swings 27.6%. This model's output is more sensitive to the interest rate than to how long the money sits — that's exactly the kind of thing sensitivity testing is built to reveal.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean graphic showing three sliders labeled Input A, Input B, Input C, with only one slider highlighted and moving while an output number changes, and the other two sliders staying still and grayed out.">
 
@@ -127,6 +150,16 @@
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-cloud-sun-rain me-2"></i> Worked Example: The Forecast That Only Works Backward</h5>
       <p class="mb-0">A student builds a formula that reproduces last month's daily temperatures with almost no error — by adding a separate correction term for nearly every single day. It looks incredible on a chart of the past. Fed tomorrow's conditions, it's no better than a random guess, because it never learned what actually drives temperature — it just memorized last month's answer key.</p>
+      <table class="table table-bordered table-sm text-center shadow-sm mt-3 mb-0 bg-white">
+          <thead class="table-light"><tr><th></th><th>Day</th><th>Actual Temp</th><th>Model Predicted</th><th>Error</th></tr></thead>
+          <tbody>
+              <tr class="table-success"><td rowspan="3" class="fw-bold align-middle">Training Data</td><td>Mar 1</td><td>58°F</td><td>58°F</td><td class="fw-bold text-success">0°</td></tr>
+              <tr class="table-success"><td>Mar 2</td><td>61°F</td><td>61°F</td><td class="fw-bold text-success">0°</td></tr>
+              <tr class="table-success"><td>Mar 3</td><td>55°F</td><td>55°F</td><td class="fw-bold text-success">0°</td></tr>
+              <tr class="table-danger"><td class="fw-bold">New Data</td><td>Mar 31</td><td>64°F</td><td>41°F</td><td class="fw-bold text-danger">23°</td></tr>
+          </tbody>
+      </table>
+      <p class="small text-muted mb-0 mt-2">Perfect on every training day — because it had a custom-fitted term for each one — and off by 23 degrees the first time it had to predict a day it hadn't already memorized the answer to.</p>
   </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A two-panel comparison graphic. Left panel labeled &quot;Training Data&quot; shows a model line and an actual-data line overlapping almost perfectly. Right panel labeled &quot;New Data&quot; shows the same model line now far apart from a new actual-data line, with the gap between them highlighted.">
@@ -169,6 +202,29 @@
 
   <h4 class="fw-bold mt-5 text-info">8.4.2 Simulation vs. a Static Model</h4>
   <p>A static model (like this chapter's compound-interest example) calculates one output from one set of inputs. A <strong>simulation</strong> runs that process forward, often step by step through time or over many repeated trials, to see how a complex system behaves — a meteorologist's storm-tracking software doesn't solve one equation, it simulates the storm's likely path minute by minute based on current conditions and physics.</p>
+
+  <div class="row g-3 my-4">
+      <div class="col-md-5">
+          <p class="small fw-bold mb-1">Static Model — one formula, one answer</p>
+          <table class="table table-bordered table-sm text-center shadow-sm mb-0">
+              <tbody>
+                  <tr><th class="table-light">Input</th><td>20 bacteria, doubling every hour</td></tr>
+                  <tr><th class="table-light">Formula</th><td><code>=20 * 2^6</code></td></tr>
+                  <tr><th class="table-light">Output</th><td class="fw-bold">1,280 after 6 hours</td></tr>
+              </tbody>
+          </table>
+      </div>
+      <div class="col-md-7">
+          <p class="small fw-bold mb-1">Simulation — the same system, walked forward hour by hour</p>
+          <table class="table table-bordered table-sm text-center shadow-sm mb-0">
+              <thead class="table-light"><tr><th>Hour</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr></thead>
+              <tbody>
+                  <tr><th class="table-light">Population</th><td>20</td><td>40</td><td>80</td><td>160</td><td>320</td><td>640</td><td class="fw-bold">1,280</td></tr>
+              </tbody>
+          </table>
+      </div>
+      <p class="small text-muted mb-0 mt-2">Both land on the same final number — but the simulation shows the population at every hour along the way, not just the ending. That's what lets a simulation catch something a static formula can't: what if food ran out at hour 4, before the population ever reached 1,280?</p>
+  </div>
 
   <div class="concept-box shadow-sm border-info bg-light">
       <h5 class="fw-bold text-info"><i class="fas fa-dice me-2"></i> Why Simulations Use Random Numbers</h5>

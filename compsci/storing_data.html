@@ -69,6 +69,19 @@
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-search me-2"></i> Worked Example: Restructuring a Messy List</h5>
       <p class="mb-0">A flat list of "Jordan, 10th grade, A-, Chemistry" repeated 500 times can't answer "who's failing Chemistry?" without reading every single line. Turn it into a table with real fields — Student, Grade Level, Class, Score — and that same question becomes one sort and one glance.</p>
+      <p class="fw-bold mb-1 mt-3">Before — a flat file (just lines of text):</p>
+      <pre class="p-2 rounded bg-white border mb-2 no-copy small">Jordan, 10th grade, Chemistry, A-
+Marcus, 11th grade, Chemistry, F
+Aaliyah, 10th grade, Chemistry, D+</pre>
+      <p class="fw-bold mb-1">After — a table (consistent fields you can sort or filter):</p>
+      <table class="table table-bordered table-sm shadow-sm mb-0">
+        <thead class="table-dark"><tr><th>Student</th><th>Grade Level</th><th>Class</th><th>Score</th></tr></thead>
+        <tbody>
+          <tr><td>Jordan</td><td>10th</td><td>Chemistry</td><td>A-</td></tr>
+          <tr class="table-danger"><td>Marcus</td><td>11th</td><td>Chemistry</td><td>F</td></tr>
+          <tr class="table-danger"><td>Aaliyah</td><td>10th</td><td>Chemistry</td><td>D+</td></tr>
+        </tbody>
+      </table>
   </div>
 
   <p><strong>The trap:</strong> students often think adding structure is pure upside. It isn't free — restructuring costs real effort up front. What it buys you is every query afterward becoming faster and actually possible. That's the tradeoff you're always making.</p>
@@ -235,6 +248,17 @@
       </div>
   </div>
 
+  <div class="table-responsive my-4">
+      <table class="table table-bordered table-sm text-center align-middle shadow-sm">
+          <thead class="table-light"><tr><th>File</th><th>Original Size</th><th>Compressed</th><th>Rebuilds To</th></tr></thead>
+          <tbody>
+              <tr><td>Essay.docx → .zip <span class="badge bg-success">Lossless</span></td><td>2.1 MB</td><td>~1.4 MB</td><td class="text-success">Byte-for-byte identical</td></tr>
+              <tr><td>Photo.png → .jpg <span class="badge bg-warning text-dark">Lossy</span></td><td>8.4 MB</td><td>~600 KB</td><td class="text-warning">Visually close, detail permanently gone</td></tr>
+          </tbody>
+      </table>
+      <p class="small text-muted mb-0">The ZIP shrinks by roughly a third and still hands back the exact original document — every character intact, because a single dropped letter in an essay is a real problem. The JPEG shrinks to a fraction of its size by throwing away pixel detail a human mostly can't see — but that detail is gone for good, even if you re-save it back to PNG.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A side-by-side comparison of the same photo of a flower compressed two ways: left labeled &quot;Lossless&quot; showing a crisp, perfectly sharp image; right labeled &quot;Lossy (heavily compressed)&quot; showing visible blocky compression artifacts and blurred detail, so the quality difference is obvious.">
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
@@ -245,6 +269,30 @@
   <h4 class="fw-bold mt-5 text-primary">6.3.3 Metadata & Data Dictionaries</h4>
   <p><strong>Metadata</strong> is data <em>about</em> data — not the content itself, but information describing it. A photo's metadata might secretly store the date it was taken, the camera model, and the GPS location, none of which show up when you just look at the picture.</p>
   <p>On a larger scale, a <strong>data dictionary</strong> is a document a database team keeps that explains exactly what every column in a dataset means, its expected format, and its valid values — so anyone new to the project (or a computer program reading it later) knows a column labeled <code>dob</code> is a date of birth in <code>YYYY-MM-DD</code> format, not a guess.</p>
+
+  <div class="row g-3 my-4">
+      <div class="col-md-5">
+          <p class="small fw-bold mb-1">A photo's real metadata:</p>
+          <table class="table table-bordered table-sm shadow-sm mb-0">
+              <tbody>
+                  <tr><th class="table-light">Date Taken</th><td>2026-08-14 3:41 PM</td></tr>
+                  <tr><th class="table-light">Camera Model</th><td>iPhone 15 Pro</td></tr>
+                  <tr><th class="table-light">Dimensions</th><td>4032 × 3024</td></tr>
+                  <tr><th class="table-light">GPS</th><td>36.1699° N, 115.1398° W</td></tr>
+              </tbody>
+          </table>
+      </div>
+      <div class="col-md-7">
+          <p class="small fw-bold mb-1">A data dictionary entry for that same column:</p>
+          <table class="table table-bordered table-sm shadow-sm mb-0">
+              <thead class="table-dark"><tr><th>Field</th><th>Format</th><th>Valid Values</th></tr></thead>
+              <tbody>
+                  <tr><td><code>dob</code></td><td>YYYY-MM-DD</td><td>Any real past date</td></tr>
+              </tbody>
+          </table>
+      </div>
+      <p class="small text-muted mb-0 mt-2">None of the metadata on the left shows up just by looking at the photo — you'd only see it by checking the file's properties. A data dictionary does the same job for a spreadsheet column: it tells you what's really there before you trust it.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a photo file's real properties/details panel on a computer (right-click > Properties > Details), showing metadata fields like Date Taken, Camera Model, Dimensions, and GPS coordinates, with the actual photo thumbnail visible in the corner.">
 
