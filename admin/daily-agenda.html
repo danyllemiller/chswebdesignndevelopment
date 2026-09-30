@@ -1345,11 +1345,29 @@ if (!courseCfg) {
     }
   }
 
+  // If this page is left open/projected across back-to-back periods (e.g.
+  // WD1 during A1, then CS during A3/B4), automatically jump to whichever
+  // course/track's period is actually happening right now, instead of
+  // requiring a manual click on the "Today" button or a bell-schedule link
+  // after every class change. Skipped entirely while mid-edit, so an
+  // in-progress, unsaved change to today's slide never gets silently
+  // navigated away from.
+  function checkAutoAdvance() {
+    if (editing) return;
+    const target = findCourseTrackForNow();
+    if (!target) return;
+    if (target.course === course && (target.track || 'main') === track) return;
+    const url = new URLSearchParams({ course: target.course });
+    if (target.track) url.set('track', target.track);
+    location.href = `?${url.toString()}`;
+  }
+
   function tickClock() {
     const now = new Date();
     document.getElementById('clockFace').textContent = now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' });
     document.getElementById('clockDate').textContent = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
     updateNoPassBanner(now);
+    checkAutoAdvance();
   }
   tickClock();
   setInterval(tickClock, 1000);
