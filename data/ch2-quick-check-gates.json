@@ -1,0 +1,17 @@
+{
+    "ch2_lab_ip": {
+        "q": "True or False: If you're a professional developer working under a contract, you usually own the copyright to the code you write on the job.",
+        "answer": false,
+        "explain": "False — that's \"Work Made for Hire.\" The company that paid for the work owns the copyright, not the person who wrote it."
+    },
+    "ch2_lab_https": {
+        "q": "True or False: A site with no login form or payment processing doesn't really need HTTPS.",
+        "answer": false,
+        "explain": "False — even a \"read-only\" site leaks a visitor's browsing behavior over plain HTTP. HTTPS isn't just for forms and logins."
+    },
+    "ch2_lab_a11y": {
+        "q": "True or False: Adding alt text to every image is enough to make a website fully accessible.",
+        "answer": false,
+        "explain": "False — alt text only solves the visual barrier. It does nothing for a deaf user who needs captions or a user with tremors who needs bigger click targets."
+    }
+}

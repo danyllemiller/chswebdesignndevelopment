@@ -589,6 +589,71 @@ router.delete('/student/exam-progress', requireSelfOrStaff(), async (req, res) =
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete progress' }); }
 });
 
+// --- QUICK CHECKS (graded, 2026-09-30) ---
+// A chapter's individual quick-check widgets (ch2_lab_ip, ch2_lab_https,
+// ch2_lab_a11y, ...) don't each get their own gradebook column -- per
+// Danylle's existing rule against per-lab clutter, they roll up into ONE
+// combined "Chapter N Quick Checks" grade instead. This table remembers
+// each widget's own best score so the aggregate can be recomputed anytime
+// without losing progress on the others when just one gets retaken.
+const QUICK_CHECK_PROGRESS_DDL = `CREATE TABLE IF NOT EXISTS quick_check_progress (
+    student_id VARCHAR(100) NOT NULL,
+    chapter_exam_id VARCHAR(100) NOT NULL,
+    widget_id VARCHAR(100) NOT NULL,
+    points_earned DECIMAL(6,2) NOT NULL,
+    max_points DECIMAL(6,2) NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (student_id, chapter_exam_id, widget_id)
+)`;
+
+router.post('/student/quick-check-submit', requireSelfOrStaff(), async (req, res) => {
+    const { student_id, widget_id, chapter_exam_id, score, max_score } = req.body;
+    if (!student_id || !widget_id || !chapter_exam_id || score == null || max_score == null) {
+        return res.status(400).json({ error: 'student_id, widget_id, chapter_exam_id, score, and max_score are required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(QUICK_CHECK_PROGRESS_DDL);
+
+        // Keep the best attempt per widget -- a retry can only help the
+        // combined grade, never accidentally lower it.
+        await connection.execute(
+            `INSERT INTO quick_check_progress (student_id, chapter_exam_id, widget_id, points_earned, max_points)
+             VALUES (?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+               points_earned = GREATEST(points_earned, VALUES(points_earned)),
+               max_points = VALUES(max_points),
+               updated_at = NOW()`,
+            [student_id, chapter_exam_id, widget_id, score, max_score]
+        );
+
+        const [[agg]] = await connection.execute(
+            `SELECT SUM(points_earned) AS total_earned, SUM(max_points) AS total_max
+             FROM quick_check_progress WHERE student_id = ? AND chapter_exam_id = ?`,
+            [student_id, chapter_exam_id]
+        );
+        const [[examRow]] = await connection.execute(
+            'SELECT total_points FROM exams WHERE exam_id = ? LIMIT 1', [chapter_exam_id]
+        );
+        // Scale to the exams row's real total_points so the aggregate stays
+        // correct even if more quick-checks get added to this chapter later
+        // without the exams row being manually updated to match.
+        const realMax = examRow ? Number(examRow.total_points) : Number(agg.total_max);
+        const totalEarned = Number(agg.total_earned) || 0;
+        const totalMax = Number(agg.total_max) || 0;
+        const scaledScore = (realMax && totalMax) ? Number(((totalEarned / totalMax) * realMax).toFixed(2)) : totalEarned;
+
+        await connection.execute(
+            `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW())
+             ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
+            [student_id, chapter_exam_id, scaledScore, realMax]
+        );
+
+        await connection.release();
+        res.json({ success: true, chapter_score: scaledScore, chapter_max: realMax });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save quick-check score' }); }
+});
+
 // --- RUBRICS ---
 router.get('/admin/rubrics', async (req, res) => {
     try {
