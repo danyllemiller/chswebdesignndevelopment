@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Chapter 1 Retest Practice | CHS Web Design</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=21"></script>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <style>
+    .retest-hero { background: linear-gradient(135deg, #1e3a5f, #2c5f6f); color: #fff; padding: 2.25rem 1.5rem; border-radius: 1rem; margin-bottom: 2rem; }
+    .retest-hero h1 { font-weight: 700; }
+    .partner-note { background: #fff3cd; border: 1px solid #ffe69c; border-radius: .6rem; padding: 1rem 1.25rem; font-size: .95rem; }
+    .progress-rail { position: sticky; top: 0; z-index: 20; background: #fff; border-bottom: 1px solid #e5e7eb; padding: .6rem 1rem; }
+    .progress-rail .bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; }
+    .progress-rail .bar-fill { height: 100%; background: #2c5f6f; transition: width .3s; }
+    .retest-section { margin-bottom: 3rem; scroll-margin-top: 70px; }
+    .retest-section h2 { font-weight: 700; color: #1e3a5f; border-bottom: 3px solid #2c5f6f; padding-bottom: .4rem; display: inline-block; }
+    .section-why { color: #555; font-size: .95rem; max-width: 70ch; margin-bottom: 1rem; }
+    .match-board { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 720px) { .match-board { grid-template-columns: 1fr; } }
+    .chip-pool, .slot-col { display: flex; flex-direction: column; gap: .6rem; }
+    .chip-col-label, .slot-col-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: #888; font-weight: 700; margin-bottom: .2rem; }
+    .term-chip {
+      background: #fff; border: 2px solid #2c5f6f; color: #1e3a5f; border-radius: .5rem;
+      padding: .55rem .9rem; font-weight: 600; cursor: grab; user-select: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08); transition: transform .15s, box-shadow .15s;
+    }
+    .term-chip:hover { box-shadow: 0 3px 8px rgba(0,0,0,.15); }
+    .term-chip.armed { background: #2c5f6f; color: #fff; transform: scale(1.03); }
+    .term-chip.placed { display: none; }
+    .term-chip.dragging { opacity: .4; }
+    .drop-slot {
+      background: #f4f6f8; border: 2px dashed #b7c0c8; border-radius: .5rem;
+      padding: .6rem .9rem; min-height: 52px; display: flex; align-items: center; font-size: .92rem; color: #444;
+      transition: border-color .15s, background .15s;
+    }
+    .drop-slot.dragover { border-color: #2c5f6f; background: #e4eeec; }
+    .drop-slot.correct { border: 2px solid #2e7d4f; background: #e7f6ec; color: #1e3a5f; font-weight: 600; }
+    .drop-slot.correct .placed-chip { color: #2e7d4f; }
+    .drop-slot.wrong-flash { border-color: #c0392b; background: #fbe9e7; animation: shake .3s; }
+    .placed-chip { font-weight: 700; }
+    @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
+    .section-complete-banner {
+      display: none; background: #e7f6ec; border: 1px solid #2e7d4f; color: #1e3a5f;
+      border-radius: .6rem; padding: .75rem 1rem; margin-top: 1rem; font-weight: 600;
+    }
+    .section-complete-banner.show { display: block; }
+    .order-track { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1.25rem; }
+    .order-slot {
+      flex: 1 1 110px; min-height: 64px; border: 2px dashed #b7c0c8; border-radius: .5rem;
+      background: #f4f6f8; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: .8rem; color: #888; text-align: center; padding: .4rem;
+    }
+    .order-slot .num { font-weight: 700; font-size: .7rem; color: #2c5f6f; }
+    .order-slot.filled { border-style: solid; background: #fff; color: #1e3a5f; font-weight: 600; }
+    .order-slot.correct { border-color: #2e7d4f; background: #e7f6ec; }
+    .order-slot.wrong-flash { border-color: #c0392b; background: #fbe9e7; animation: shake .3s; }
+    .order-pool { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .reset-btn { font-size: .8rem; }
+    .toc-pill { text-decoration: none; font-size: .82rem; }
+  </style>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print"><div id="nav-placeholder"></div></div>
+
+  <div class="progress-rail no-print">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <span class="small fw-bold text-muted">Chapter 1 Retest Practice</span>
+      <span class="small fw-bold" id="progressLabel">0 / 6 sections done</span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="progressBar" style="width:0%"></div></div>
+  </div>
+
+  <section class="container my-4">
+
+    <nav class="mb-3 small fw-bold">
+      <a href="/year1/join-the-developers-guild.html" class="text-decoration-none da-primary">
+        <i class="fas fa-angles-left me-1"></i> Back to Chapter 1 Reading
+      </a>
+    </nav>
+
+    <div class="retest-hero">
+      <h1 class="mb-2">Chapter 1 Retest Practice</h1>
+      <p class="mb-0 fs-5">Six quick rounds, built from the exact things this class missed most on the real exam. Work through them with a partner before you retest.</p>
+    </div>
+
+    <div class="partner-note mb-4">
+      <strong><i class="fas fa-people-arrows me-1"></i> How to use this with a partner:</strong>
+      Read each question together and talk through your answer out loud <em>before</em> anyone touches a chip. Once you both agree, either partner can drag it into place (or tap the term, then tap where it goes). If you're both wrong, that's useful — argue about it, then try again. Getting it right without discussing it doesn't actually help you on the retest.
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-5">
+      <a href="#section-url" class="badge rounded-pill text-bg-light border toc-pill">1. URL Anatomy</a>
+      <a href="#section-career" class="badge rounded-pill text-bg-light border toc-pill">2. Career Roles &amp; Tools</a>
+      <a href="#section-ctso" class="badge rounded-pill text-bg-light border toc-pill">3. CTSO &amp; Parliamentary Procedure</a>
+      <a href="#section-wdlc" class="badge rounded-pill text-bg-light border toc-pill">4. Web Dev Life Cycle</a>
+      <a href="#section-infra" class="badge rounded-pill text-bg-light border toc-pill">5. Web Infrastructure</a>
+      <a href="#section-mixed" class="badge rounded-pill text-bg-light border toc-pill">6. Project Triangle &amp; More</a>
+    </div>
+
+    <!-- SECTION 1: URL ANATOMY -->
+    <div class="retest-section" id="section-url" data-section-id="url">
+      <h2>1. URL Anatomy</h2>
+      <p class="section-why">This was the single most-missed thing on the real exam — two different drag-and-drop questions on labeling a URL, missed a combined 38 times. Here's the same real URL from your chapter reading.</p>
+      <div class="card bg-light border-0 text-center p-3 mb-3">
+        <code class="fs-5 text-break">https://www.pixelpaws.com/products/collars?type=nylon#details</code>
+      </div>
+      <p class="fw-bold small text-muted mb-3">Drag each term onto the part of the URL it describes.</p>
+      <div class="match-widget" data-match="url"></div>
+      <div class="section-complete-banner" data-banner="url"><i class="fas fa-circle-check me-1"></i> All 7 parts matched. Nice work.</div>
+      <button class="btn btn-sm btn-outline-secondary reset-btn mt-2" data-reset="url">Reset this section</button>
+    </div>
+
+    <!-- SECTION 2: CAREER ROLES & TOOLS -->
+    <div class="retest-section" id="section-career" data-section-id="career">
+      <h2>2. Career Roles &amp; Tools</h2>
+      <p class="section-why">Twenty students missed at least one question in this cluster — mostly mixing up who does what, and which language nickname (Bones/Clothes/Brains) matches which real language.</p>
+      <div class="match-widget" data-match="career"></div>
+      <div class="section-complete-banner" data-banner="career"><i class="fas fa-circle-check me-1"></i> All matched. Nice work.</div>
+      <button class="btn btn-sm btn-outline-secondary reset-btn mt-2" data-reset="career">Reset this section</button>
+    </div>
+
+    <!-- SECTION 3: CTSO & PARLIAMENTARY PROCEDURE -->
+    <div class="retest-section" id="section-ctso" data-section-id="ctso">
+      <h2>3. CTSO &amp; Parliamentary Procedure</h2>
+      <p class="section-why">Nineteen students missed something here — mostly officer roles and meeting vocabulary (Minutes vs. Agenda vs. Motion). This is memorized content, not web design logic, so it fades fast without repeating it.</p>
+      <div class="match-widget" data-match="ctso"></div>
+      <div class="section-complete-banner" data-banner="ctso"><i class="fas fa-circle-check me-1"></i> All matched. Nice work.</div>
+      <button class="btn btn-sm btn-outline-secondary reset-btn mt-2" data-reset="ctso">Reset this section</button>
+    </div>
+
+    <!-- SECTION 4: WDLC ORDERING -->
+    <div class="retest-section" id="section-wdlc" data-section-id="wdlc">
+      <h2>4. Web Development Life Cycle</h2>
+      <p class="section-why">Seventeen students missed the phase-ordering question. Click (or drag) each phase into the next open slot, in the order the cycle actually runs.</p>
+      <div class="order-track" id="orderSlots"></div>
+      <div class="order-pool" id="orderPool"></div>
+      <div class="section-complete-banner" data-banner="wdlc"><i class="fas fa-circle-check me-1"></i> All 8 phases in order. The cycle repeats back to Research after Maintenance.</div>
+      <button class="btn btn-sm btn-outline-secondary reset-btn mt-2" data-reset="wdlc">Reset this section</button>
+    </div>
+
+    <!-- SECTION 5: WEB INFRASTRUCTURE -->
+    <div class="retest-section" id="section-infra" data-section-id="infra">
+      <h2>5. Web Infrastructure &amp; Networking</h2>
+      <p class="section-why">Sixteen students missed something here. These terms get confused with each other because they're all "the internet, but slightly different" — read each one carefully before you place it.</p>
+      <div class="match-widget" data-match="infra"></div>
+      <div class="section-complete-banner" data-banner="infra"><i class="fas fa-circle-check me-1"></i> All matched. Nice work.</div>
+      <button class="btn btn-sm btn-outline-secondary reset-btn mt-2" data-reset="infra">Reset this section</button>
+    </div>
+
+    <!-- SECTION 6: MIXED TAIL -->
+    <div class="retest-section" id="section-mixed" data-section-id="mixed">
+      <h2>6. Project Triangle, Hosting &amp; Design/UX</h2>
+      <p class="section-why">A smaller mixed group of misses — one quick round covers all of it.</p>
+      <div class="match-widget" data-match="mixed"></div>
+      <div class="section-complete-banner" data-banner="mixed"><i class="fas fa-circle-check me-1"></i> All matched. Nice work.</div>
+      <button class="btn btn-sm btn-outline-secondary reset-btn mt-2" data-reset="mixed">Reset this section</button>
+    </div>
+
+    <div class="alert alert-success text-center fw-bold" id="allDoneBanner" style="display:none;">
+      <i class="fas fa-trophy me-1"></i> All six sections complete — you and your partner are ready to retest.
+    </div>
+
+  </section>
+
+  <div id="footer-placeholder"></div>
+
+  <script>
+  // ── Content, grounded directly in year1/join-the-developers-guild.html ──
+  const MATCH_DATA = {
+    url: [
+      { term: 'Protocol', def: 'https:// — the rules the browser and server use to communicate' },
+      { term: 'Domain Name', def: 'www.pixelpaws.com — the registered main address' },
+      { term: 'Subdomain', def: 'www. — often classifies a section of the site' },
+      { term: 'TLD', def: '.com — classifies the type of entity (business, org, government...)' },
+      { term: 'Path', def: '/products/collars — the folder structure on the server' },
+      { term: 'Query Parameters', def: '?type=nylon — data sent to filter or search' },
+      { term: 'Fragment/Anchor', def: '#details — a local instruction to jump to a specific spot on the page' }
+    ],
+    career: [
+      { term: 'Frontend Developer', def: 'Crafts what users see and interact with — HTML, CSS, JavaScript' },
+      { term: 'Backend Developer', def: 'Builds the logic/data layer — APIs, databases, server-side code' },
+      { term: 'Mobile Developer', def: 'Builds iOS/Android apps — Swift, Kotlin, React Native, Flutter' },
+      { term: 'UI/UX Designer', def: 'Builds wireframes and mockups, commonly using Figma' },
+      { term: '"Bones"', def: 'This chapter’s nickname for HTML — the structure of a page' },
+      { term: '"Brains"', def: 'This chapter’s nickname for JavaScript — the interactivity and logic' },
+      { term: 'Soft Skills', def: 'Work ethic, communication, teamwork — not a coding language at all' }
+    ],
+    ctso: [
+      { term: 'President', def: 'Runs all meetings; is the public face of the chapter' },
+      { term: 'Vice President', def: 'Steps in when the president is out; leads programs' },
+      { term: 'Secretary', def: 'Takes minutes; handles all official correspondence' },
+      { term: 'Treasurer', def: 'Manages the money; tracks every dollar' },
+      { term: 'Reporter/Historian', def: 'Documents activities; handles social media and PR' },
+      { term: 'Motion', def: 'A formal proposal for the group to take action — starts with "I move that we..."' },
+      { term: 'Agenda', def: 'The pre-planned list of topics for a meeting, published before it starts' },
+      { term: 'Minutes', def: 'The official written record of what was discussed and decided' }
+    ],
+    infra: [
+      { term: 'The Internet', def: 'The massive, public physical network of cables, routers, and servers' },
+      { term: 'The Web', def: 'The system of linked documents and apps that runs ON that network' },
+      { term: 'Intranet', def: 'A restricted, internal network only for members of one organization' },
+      { term: 'Client-Server Model', def: 'Your browser (client) requests files; a server sends them back' },
+      { term: 'A Record', def: 'Maps a domain to an IPv4 address' },
+      { term: 'MX Record', def: 'Routes email for the domain' },
+      { term: 'CNAME Record', def: 'Aliases one domain name to another domain name' }
+    ],
+    mixed: [
+      { term: 'Project Triangle', def: 'Fast, Cheap, Good — pick two, you can’t have all three' },
+      { term: 'index.html', def: 'The mandatory, all-lowercase filename every homepage must use' },
+      { term: 'Dark Patterns', def: 'Deceptive UI tricks designed to manipulate users into clicking something' },
+      { term: 'Spamdexing', def: 'Deceptive SEO tricks like keyword stuffing and hidden text' },
+      { term: 'Complementary Colors', def: 'Opposites on the color wheel — e.g. red & green, blue & orange' }
+    ]
+  };
+
+  const WDLC_ORDER = ['Research & Analysis', 'Planning', 'Design', 'Content', 'Development', 'Testing', 'Deployment', 'Maintenance'];
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function updateProgress() {
+    const banners = document.querySelectorAll('.section-complete-banner');
+    const done = Array.from(banners).filter(b => b.classList.contains('show')).length;
+    const total = banners.length;
+    document.getElementById('progressLabel').textContent = `${done} / ${total} sections done`;
+    document.getElementById('progressBar').style.width = `${Math.round((done / total) * 100)}%`;
+    document.getElementById('allDoneBanner').style.display = (done === total) ? 'block' : 'none';
+  }
+
+  function markSectionComplete(sectionId) {
+    const banner = document.querySelector(`[data-banner="${sectionId}"]`);
+    if (banner) banner.classList.add('show');
+    updateProgress();
+  }
+  function markSectionIncomplete(sectionId) {
+    const banner = document.querySelector(`[data-banner="${sectionId}"]`);
+    if (banner) banner.classList.remove('show');
+    updateProgress();
+  }
+
+  // ── Matching widget (drag OR click-to-pair) ──────────────────────────────
+  function buildMatchWidget(container, sectionId, pairs) {
+    container.innerHTML = '';
+    const board = document.createElement('div');
+    board.className = 'match-board';
+
+    const poolCol = document.createElement('div'); poolCol.className = 'chip-pool';
+    poolCol.innerHTML = '<div class="chip-col-label">Terms</div>';
+    const slotCol = document.createElement('div'); slotCol.className = 'slot-col';
+    slotCol.innerHTML = '<div class="slot-col-label">Definitions</div>';
+
+    const shuffledTerms = shuffle(pairs.map(p => p.term));
+    const shuffledDefs = shuffle(pairs.map(p => p.def));
+    const defToTerm = {};
+    pairs.forEach(p => { defToTerm[p.def] = p.term; });
+
+    let armedChip = null;
+    let correctCount = 0;
+
+    const chipEls = {};
+    shuffledTerms.forEach(term => {
+      const chip = document.createElement('div');
+      chip.className = 'term-chip';
+      chip.textContent = term;
+      chip.draggable = true;
+      chip.dataset.term = term;
+      chip.addEventListener('dragstart', (e) => {
+        chip.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', term);
+      });
+      chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+      chip.addEventListener('click', () => {
+        if (chip.classList.contains('placed')) return;
+        if (armedChip === chip) {
+          chip.classList.remove('armed'); armedChip = null; return;
+        }
+        if (armedChip) armedChip.classList.remove('armed');
+        armedChip = chip;
+        chip.classList.add('armed');
+      });
+      chipEls[term] = chip;
+      poolCol.appendChild(chip);
+    });
+
+    shuffledDefs.forEach(def => {
+      const slot = document.createElement('div');
+      slot.className = 'drop-slot';
+      slot.textContent = def;
+      slot.dataset.def = def;
+
+      function tryPlace(term) {
+        if (slot.classList.contains('correct')) return;
+        const correctTerm = defToTerm[def];
+        if (term === correctTerm) {
+          slot.classList.add('correct');
+          slot.innerHTML = `<span class="placed-chip">${term}</span> — ${def}`;
+          chipEls[term].classList.add('placed');
+          correctCount++;
+          if (correctCount === pairs.length) markSectionComplete(sectionId);
+        } else {
+          slot.classList.add('wrong-flash');
+          setTimeout(() => slot.classList.remove('wrong-flash'), 300);
+        }
+      }
+
+      slot.addEventListener('dragover', (e) => { e.preventDefault(); slot.classList.add('dragover'); });
+      slot.addEventListener('dragleave', () => slot.classList.remove('dragover'));
+      slot.addEventListener('drop', (e) => {
+        e.preventDefault();
+        slot.classList.remove('dragover');
+        const term = e.dataTransfer.getData('text/plain');
+        if (term) tryPlace(term);
+      });
+      slot.addEventListener('click', () => {
+        if (!armedChip) return;
+        const term = armedChip.dataset.term;
+        armedChip.classList.remove('armed');
+        armedChip = null;
+        tryPlace(term);
+      });
+
+      slotCol.appendChild(slot);
+    });
+
+    board.appendChild(poolCol);
+    board.appendChild(slotCol);
+    container.appendChild(board);
+  }
+
+  function initMatchWidgets() {
+    document.querySelectorAll('[data-match]').forEach(el => {
+      const id = el.getAttribute('data-match');
+      buildMatchWidget(el, id, MATCH_DATA[id]);
+    });
+  }
+
+  // ── Ordering widget (WDLC phases) ────────────────────────────────────────
+  function buildOrderWidget() {
+    const slotsWrap = document.getElementById('orderSlots');
+    const poolWrap = document.getElementById('orderPool');
+    slotsWrap.innerHTML = '';
+    poolWrap.innerHTML = '';
+
+    const slots = WDLC_ORDER.map((phase, i) => {
+      const slot = document.createElement('div');
+      slot.className = 'order-slot';
+      slot.dataset.index = i;
+      slot.innerHTML = `<span class="num">Step ${i + 1}</span>`;
+      slotsWrap.appendChild(slot);
+      return slot;
+    });
+
+    let armedChip = null;
+    let filledCount = 0;
+    const chips = shuffle(WDLC_ORDER).map(phase => {
+      const chip = document.createElement('div');
+      chip.className = 'term-chip';
+      chip.textContent = phase;
+      chip.draggable = true;
+      chip.dataset.phase = phase;
+      chip.addEventListener('dragstart', (e) => {
+        chip.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', phase);
+      });
+      chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+      chip.addEventListener('click', () => {
+        if (chip.classList.contains('placed')) return;
+        if (armedChip === chip) { chip.classList.remove('armed'); armedChip = null; return; }
+        if (armedChip) armedChip.classList.remove('armed');
+        armedChip = chip;
+        chip.classList.add('armed');
+      });
+      poolWrap.appendChild(chip);
+      return chip;
+    });
+
+    function nextOpenSlot() {
+      return slots.find(s => !s.classList.contains('filled'));
+    }
+
+    function tryPlace(phase, chipEl) {
+      const slot = nextOpenSlot();
+      if (!slot) return;
+      const idx = parseInt(slot.dataset.index, 10);
+      if (WDLC_ORDER[idx] === phase) {
+        slot.classList.add('filled', 'correct');
+        slot.innerHTML = `<span class="num">Step ${idx + 1}</span><span>${phase}</span>`;
+        chipEl.classList.add('placed');
+        filledCount++;
+        if (filledCount === WDLC_ORDER.length) markSectionComplete('wdlc');
+      } else {
+        slot.classList.add('wrong-flash');
+        setTimeout(() => slot.classList.remove('wrong-flash'), 300);
+      }
+    }
+
+    slots.forEach(slot => {
+      slot.addEventListener('dragover', (e) => { if (slot === nextOpenSlot()) e.preventDefault(); });
+      slot.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (slot !== nextOpenSlot()) return;
+        const phase = e.dataTransfer.getData('text/plain');
+        const chipEl = chips.find(c => c.dataset.phase === phase && !c.classList.contains('placed'));
+        if (phase && chipEl) tryPlace(phase, chipEl);
+      });
+      slot.addEventListener('click', () => {
+        if (!armedChip || slot !== nextOpenSlot()) return;
+        const phase = armedChip.dataset.phase;
+        const chipEl = armedChip;
+        armedChip.classList.remove('armed');
+        armedChip = null;
+        tryPlace(phase, chipEl);
+      });
+    });
+  }
+
+  // ── Reset handlers ────────────────────────────────────────────────────────
+  document.querySelectorAll('[data-reset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-reset');
+      markSectionIncomplete(id);
+      if (id === 'wdlc') {
+        buildOrderWidget();
+      } else {
+        const container = document.querySelector(`[data-match="${id}"]`);
+        buildMatchWidget(container, id, MATCH_DATA[id]);
+      }
+    });
+  });
+
+  initMatchWidgets();
+  buildOrderWidget();
+  updateProgress();
+  </script>
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>
