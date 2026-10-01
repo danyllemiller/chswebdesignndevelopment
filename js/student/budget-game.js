@@ -49,16 +49,19 @@ async function init() {
     }
 
     studentData = getLoggedInUser();
+
+    // Check staff FIRST, before falling back on studentData.student_id --
+    // a teacher account (e.g. Danylle's own "damiller" login) is itself a
+    // row in the students table, so it has a real (but meaningless, for
+    // this page) student_id of its own. Checking student_id first meant a
+    // staff login silently loaded as if it were that account's own empty
+    // budget data instead of ever reaching the preview picker below.
+    if (isStaffUser(studentData)) {
+        initStaffPreview();
+        return;
+    }
+
     if (!studentData || !studentData.student_id) {
-        // A staff login has no student_id of its own -- instead of bouncing
-        // to login, offer a read-only preview of any real student's data,
-        // the same way the teacher's other admin tools already can (the
-        // backend already allows a staff session to read any student_id;
-        // this just gives staff a UI for it on this specific page).
-        if (isStaffUser(studentData)) {
-            initStaffPreview();
-            return;
-        }
         window.location.replace('/login.html');
         return;
     }
