@@ -357,8 +357,14 @@ async function fetchRoster() {
                 return sec.course_name || '';
             })();
 
-            // filtering
-            if (periodFilterVal && periodFilterVal !== 'All' && period !== periodFilterVal) return;
+            // filtering -- a period filter must also match a student whose
+            // primary section is something else but who's enrolled in this
+            // period as an additional section (e.g. an A1 student also in
+            // Intervention), not just an exact match on their primary period.
+            if (periodFilterVal && periodFilterVal !== 'All') {
+                const inAdditional = (s.additional_sections || []).some(a => a.section_id === periodFilterVal);
+                if (period !== periodFilterVal && !inAdditional) return;
+            }
             if (courseFilterVal && courseFilterVal !== '') {
                 if (courseName !== courseFilterVal && courseId !== courseFilterVal) return;
             }
