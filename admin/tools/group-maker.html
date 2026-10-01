@@ -174,19 +174,38 @@
     document.getElementById('splitValueLabel').textContent = e.target.value === 'count' ? 'Groups' : 'Per group';
   });
 
-  document.getElementById('makeGroupsBtn').addEventListener('click', () => {
+  let lastGroupSignature = null;
+
+  function shuffledNames() {
     const names = [...currentNames];
-    if (names.length < 2) { alert('Need at least 2 names to make groups.'); return; }
     for (let i = names.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [names[i], names[j]] = [names[j], names[i]];
     }
+    return names;
+  }
+
+  document.getElementById('makeGroupsBtn').addEventListener('click', () => {
+    // Clicking this always produces a brand-new shuffle, regardless of
+    // whether groups are already on screen. Re-rolls (up to 10 tries) if
+    // the fresh shuffle happens to land on the exact same grouping as last
+    // time -- rare, but with a small roster and few groups it's not rare
+    // enough to risk "I clicked it and nothing changed."
+    if (currentNames.length < 2) { alert('Need at least 2 names to make groups.'); return; }
+
     const mode = document.getElementById('splitMode').value;
     const val = Math.max(1, parseInt(document.getElementById('splitValue').value, 10) || 1);
-    const groupCount = mode === 'count' ? Math.min(val, names.length) : Math.max(1, Math.ceil(names.length / val));
+    const groupCount = mode === 'count' ? Math.min(val, currentNames.length) : Math.max(1, Math.ceil(currentNames.length / val));
 
-    const groups = Array.from({ length: groupCount }, () => []);
-    names.forEach((name, i) => groups[i % groupCount].push(name));
+    let groups, signature;
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const names = shuffledNames();
+      groups = Array.from({ length: groupCount }, () => []);
+      names.forEach((name, i) => groups[i % groupCount].push(name));
+      signature = groups.map(g => [...g].sort().join(',')).sort().join('|');
+      if (signature !== lastGroupSignature || groupCount < 2) break;
+    }
+    lastGroupSignature = signature;
 
     const grid = document.getElementById('groupsGrid');
     grid.innerHTML = '';
