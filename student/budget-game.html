@@ -59,6 +59,17 @@
     <p class="text-muted mb-0">Your real earned pay, your real budget. Every time a real paycheck posts, it lands here — what you do with it is up to you.</p>
   </div>
 
+  <div id="staffPreviewPicker" class="card shadow-sm mb-4 border-primary d-none">
+    <div class="card-body">
+      <label class="form-label fw-bold small mb-1"><i class="fas fa-user-magnifying-glass me-1 text-primary"></i>Staff Preview — pick a student to view their real Paycheck (read-only)</label>
+      <select id="staffPreviewSelect" class="form-select"><option value="">Loading roster…</option></select>
+    </div>
+  </div>
+
+  <div id="staffPreviewBanner" class="alert alert-primary mb-4 text-center fw-bold d-none">
+    <i class="fas fa-eye me-1"></i> Staff Preview Mode — viewing a student's real data, read-only. Nothing you do here can change it.
+  </div>
+
   <div id="paycheckBanner" class="paycheck-banner mb-4 text-center fw-bold">
     <i class="fas fa-sparkles me-1"></i> <span id="paycheckBannerText"></span>
   </div>
@@ -141,6 +152,6 @@
 <div id="footer-placeholder"></div>
 <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 
-<script type="module" src="/js/student/budget-game.js?v=2"></script>
+<script type="module" src="/js/student/budget-game.js?v=3"></script>
 </body>
 </html>

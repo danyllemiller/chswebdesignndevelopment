@@ -4,11 +4,12 @@
 // renders whatever balance/transaction state the server already synced.
 import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
-import { periodToCourseKey } from '../modules/grade-weights.js?v=5';
 
 let studentData = null;
 let currentStoreTab = 'groceries';
 let lastStoreCatalog = null;
+let previewStudentId = null; // set only in staff read-only preview mode
+let isStaffPreview = false;
 
 function money(n) {
     const v = Number(n) || 0;
@@ -36,6 +37,10 @@ function showBlocked(message) {
         </div>`;
 }
 
+function isStaffUser(u) {
+    return !!u && (u.role === 'admin' || u.section_id === 'Teacher');
+}
+
 async function init() {
     const authData = await waitForAuth();
     if (!authData.isAuthenticated) {
@@ -45,16 +50,16 @@ async function init() {
 
     studentData = getLoggedInUser();
     if (!studentData || !studentData.student_id) {
+        // A staff login has no student_id of its own -- instead of bouncing
+        // to login, offer a read-only preview of any real student's data,
+        // the same way the teacher's other admin tools already can (the
+        // backend already allows a staff session to read any student_id;
+        // this just gives staff a UI for it on this specific page).
+        if (isStaffUser(studentData)) {
+            initStaffPreview();
+            return;
+        }
         window.location.replace('/login.html');
-        return;
-    }
-
-    // The Paycheck is Web Design II and Advanced Studies for now -- confirmed
-    // course, not just primary section, since a dual-enrolled student's WD2/AS
-    // period might not be their primary one.
-    const courseKey = periodToCourseKey(studentData.section_id);
-    if (courseKey !== 'WD2' && courseKey !== 'AS') {
-        showBlocked('The Paycheck is currently only available to Web Design II and Advanced Studies students.');
         return;
     }
 
@@ -76,12 +81,40 @@ async function init() {
 }
 
 async function loadState() {
+    const targetId = previewStudentId || studentData.student_id;
     try {
-        const data = await apiFetch(`/api/student/budget-game/state?student_id=${encodeURIComponent(studentData.student_id)}`);
+        const data = await apiFetch(`/api/student/budget-game/state?student_id=${encodeURIComponent(targetId)}`);
         renderState(data);
     } catch (e) {
         console.error('Failed to load budget game state:', e);
     }
+}
+
+// Staff has no student_id of their own, so there's no roster of a staff
+// member's own data to fetch -- they pick a real student from the actual
+// class roster and view that student's real, live state. Read-only: the
+// action buttons are simply never wired up with click handlers below, and
+// renderState() disables/hides them outright so it's visually obvious too.
+async function initStaffPreview() {
+    isStaffPreview = true;
+    document.getElementById('staffPreviewPicker').classList.remove('d-none');
+    const select = document.getElementById('staffPreviewSelect');
+    try {
+        const roster = await apiFetch('/api/admin/roster');
+        const students = roster
+            .filter(s => !s.archived && s.role !== 'teacher' && s.student_id)
+            .sort((a, b) => `${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`));
+        select.innerHTML = '<option value="">Select a student to preview…</option>' +
+            students.map(s => `<option value="${s.student_id}">${s.last_name}, ${s.first_name} — ${s.display_period || s.section_id || ''}</option>`).join('');
+    } catch (e) {
+        select.innerHTML = '<option value="">Failed to load roster</option>';
+        return;
+    }
+    select.addEventListener('change', () => {
+        previewStudentId = select.value || null;
+        document.getElementById('staffPreviewBanner').classList.toggle('d-none', !previewStudentId);
+        if (previewStudentId) loadState();
+    });
 }
 
 function renderState(data) {
@@ -100,7 +133,11 @@ function renderState(data) {
 
     const payBtn = document.getElementById('payBillsBtn');
     const billsMsg = document.getElementById('billsMsg');
-    if (data.bills_paid_this_period) {
+    if (isStaffPreview) {
+        payBtn.disabled = true;
+        payBtn.innerHTML = '<i class="fas fa-eye me-1"></i>Staff Preview (Read-Only)';
+        billsMsg.textContent = '';
+    } else if (data.bills_paid_this_period) {
         payBtn.disabled = true;
         payBtn.innerHTML = '<i class="fas fa-check me-1"></i>Paid This Period';
         billsMsg.textContent = '';
@@ -108,11 +145,12 @@ function renderState(data) {
         payBtn.disabled = false;
         payBtn.innerHTML = '<i class="fas fa-check me-1"></i>Pay Bills';
     }
+    document.querySelectorAll('[data-dir]').forEach(btn => { btn.disabled = isStaffPreview; });
 
     lastStoreCatalog = data.store;
     renderStore();
     renderTransactions(data.transactions);
-    maybeShowPaycheckBanner(data.transactions);
+    if (!isStaffPreview) maybeShowPaycheckBanner(data.transactions);
 }
 
 function renderStore() {
@@ -123,9 +161,10 @@ function renderStore() {
             <div class="item-card p-3 text-center h-100 d-flex flex-column justify-content-between">
                 <div class="fw-bold mb-2">${item.label}</div>
                 <div class="text-muted mb-2">${money(item.price)}</div>
-                <button class="btn btn-sm btn-outline-primary fw-bold buy-btn" data-key="${item.key}">Buy</button>
+                <button class="btn btn-sm btn-outline-primary fw-bold buy-btn" data-key="${item.key}" ${isStaffPreview ? 'disabled' : ''}>Buy</button>
             </div>
         </div>`).join('');
+    if (isStaffPreview) return;
     document.querySelectorAll('.buy-btn').forEach(btn => {
         btn.addEventListener('click', () => buyItem(btn.dataset.key));
     });
