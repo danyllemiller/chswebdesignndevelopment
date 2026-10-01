@@ -103,13 +103,28 @@
       const grouped = new Map();
       rows.forEach(s => {
         if (s.archived) return;
+        if (s.role === 'teacher') return;
+        const name = `${s.first_name || ''} ${s.last_name || ''}`.trim() || s.student_id;
+
         const period = s.display_period || s.section_id;
         const courseName = s.display_course_name || '';
-        if (!period || period === 'Teacher' || s.role === 'teacher') return;
-        const key = periodKey(period, courseName);
-        if (!grouped.has(key)) grouped.set(key, { period, courseName, names: [] });
-        const name = `${s.first_name || ''} ${s.last_name || ''}`.trim() || s.student_id;
-        grouped.get(key).names.push(name);
+        if (period && period !== 'Teacher') {
+          const key = periodKey(period, courseName);
+          if (!grouped.has(key)) grouped.set(key, { period, courseName, names: [] });
+          grouped.get(key).names.push(name);
+        }
+
+        // A student can also be physically enrolled in a period that isn't
+        // their primary section (e.g. an Intervention student who also sits
+        // in a real A1/B2/B8 class) -- student_additional_sections, already
+        // returned per-student by /api/admin/roster. Without this, that
+        // student never shows up under the period they actually sit in.
+        (s.additional_sections || []).forEach(extra => {
+          if (!extra.section_id || extra.section_id === 'Teacher') return;
+          const key = periodKey(extra.section_id, extra.course_name || '');
+          if (!grouped.has(key)) grouped.set(key, { period: extra.section_id, courseName: extra.course_name || '', names: [] });
+          if (!grouped.get(key).names.includes(name)) grouped.get(key).names.push(name);
+        });
       });
       periods = Array.from(grouped.entries()).map(([key, v]) => ({
         key, label: `${v.period} — ${v.courseName}`, names: v.names.sort()
