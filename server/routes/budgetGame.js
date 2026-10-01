@@ -1,5 +1,6 @@
 // /server/routes/budgetGame.js
-// "The Paycheck" -- a real-money budgeting game for WD2 and AS students. Every real,
+// "The Paycheck" -- a real-money budgeting game, live for every level (WD1
+// included as of 2026-10-01, not just WD2/AS). Every real,
 // finalized payroll run (server/routes/payroll.js) becomes a paycheck event
 // here: the first time a student opens the game after a new payroll run
 // posts, that real net_pay deposits into their in-game checking balance,
