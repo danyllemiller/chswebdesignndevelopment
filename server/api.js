@@ -65,6 +65,7 @@ router.use('/', require('./routes/stickers'));
 router.use('/', require('./routes/polls'));
 router.use('/', require('./routes/wordcloud'));
 router.use('/', require('./routes/tardy'));
+router.use('/', require('./routes/attendance'));
 router.use('/', require('./routes/songRequests'));
 router.use('/', require('./routes/daily-activity'));
 router.use('/', require('./routes/messages'));

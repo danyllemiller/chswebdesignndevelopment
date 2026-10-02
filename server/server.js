@@ -8,6 +8,7 @@ const authRoutes = require('./auth');
 const apiRoutes = require('./api');
 const shortlinkRoutes = require('./routes/shortlinks');
 const { scheduleDailyAutoClockout } = require('./jobs/autoClockout');
+const { scheduleDailyAttendanceSweep } = require('./jobs/attendanceSweep');
 
 const app = express();
 const PORT = 3000;
@@ -148,3 +149,4 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../index.html')));
 
 app.listen(PORT, () => console.log(`Guild Server listening on port ${PORT}`));
 scheduleDailyAutoClockout();
+scheduleDailyAttendanceSweep();

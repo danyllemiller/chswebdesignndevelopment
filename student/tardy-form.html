@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Running Late? | CHS Web Design &amp; Development</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/student-pages.css" rel="stylesheet"/>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=21"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+</head>
+<body class="bg-light">
+
+<div id="nav-placeholder"></div>
+
+<div class="container my-4" style="max-width: 560px;">
+  <div class="text-center mb-4">
+    <h1 class="gochi text-primary display-6 fw-bold mb-1"><i class="fas fa-triangle-exclamation me-2 text-warning"></i>Running Late?</h1>
+    <p class="text-muted mb-0">Fill this out <strong>before</strong> you scan in, so your scan counts as tardy instead of getting stuck.</p>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <div id="formArea">
+        <label class="form-label fw-bold" for="reasonInput">Why are you late?</label>
+        <textarea id="reasonInput" class="form-control" rows="3" maxlength="500" placeholder="e.g. Car trouble, overslept, doctor appointment..."></textarea>
+        <div id="formMsg" class="small mt-2"></div>
+        <button id="submitBtn" class="btn btn-primary fw-bold w-100 mt-3"><i class="fas fa-paper-plane me-1"></i>Submit &amp; Go Scan In</button>
+      </div>
+      <div id="successArea" class="text-center d-none">
+        <i class="fas fa-circle-check fa-3x text-success mb-3"></i>
+        <h5 class="fw-bold">You're all set.</h5>
+        <p class="text-muted mb-0">Go scan your ID at the door now — it'll mark you tardy instead of blocking you.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script type="module" src="/js/student/tardy-form.js?v=1"></script>
+</body>
+</html>
