@@ -75,6 +75,56 @@ const SAVINGS_INTEREST_RATE = 0.02;   // guaranteed, applied per new paycheck sy
 const INVEST_MIN_RETURN = -0.10;      // simulated market swing, applied per new paycheck synced
 const INVEST_MAX_RETURN = 0.15;
 
+// "Game of Life"-style random life events -- rolled once per newly-synced
+// real paycheck (same "one real paycheck = one real turn" cadence the
+// interest/investment rolls above use), so they stay rare and different
+// for each student rather than firing on every page load or hitting
+// everyone at once. weight controls how often an event is picked relative
+// to the others once LIFE_EVENT_CHANCE has already decided an event fires
+// at all -- common inconveniences are weighted heavily, milestones are
+// deliberately rare so they still feel special when they land.
+const LIFE_EVENT_CHANCE = 0.3; // 30% chance per new paycheck that ANY event fires
+const LIFE_EVENTS = [
+    // Common minor expenses
+    { key: 'dentist', label: 'Dentist Checkup', message: 'Time for your 6-month dentist checkup.', amount: -4.00, weight: 10 },
+    { key: 'flat_tire', label: 'Flat Tire', message: 'You got a flat tire and had to patch it.', amount: -6.00, weight: 10 },
+    { key: 'cracked_screen', label: 'Cracked Phone Screen', message: 'You dropped your phone and cracked the screen.', amount: -8.00, weight: 8 },
+    { key: 'parking_ticket', label: 'Parking Ticket', message: 'Oops -- you got a parking ticket.', amount: -3.00, weight: 10 },
+    { key: 'vet_bill', label: 'Vet Visit', message: 'Your pet needed a check-up at the vet.', amount: -5.00, weight: 8 },
+    { key: 'birthday_gift', label: "Friend's Birthday", message: "You bought a gift for a friend's birthday.", amount: -3.00, weight: 10 },
+    { key: 'oil_change', label: 'Oil Change', message: 'Your car needed an oil change.', amount: -4.00, weight: 9 },
+    { key: 'haircut', label: 'Haircut', message: 'You got a haircut.', amount: -3.00, weight: 9 },
+    { key: 'fast_food', label: 'Ate Out With Friends', message: 'You grabbed food with friends after school.', amount: -4.00, weight: 10 },
+    // Moderate, less frequent setbacks
+    { key: 'car_trouble', label: 'Car Trouble', message: 'Your car broke down and needed real repairs.', amount: -15.00, weight: 5 },
+    { key: 'doctor_visit', label: 'Doctor Visit', message: 'You got sick and had to see a doctor.', amount: -10.00, weight: 6 },
+    { key: 'lost_phone', label: 'Lost Your Phone', message: 'You lost your phone and had to replace it.', amount: -14.00, weight: 4 },
+    { key: 'speeding_ticket', label: 'Speeding Ticket', message: 'You got pulled over for speeding.', amount: -12.00, weight: 4 },
+    { key: 'home_repair', label: 'Something Broke at Home', message: 'Something broke at home and needed fixing.', amount: -12.00, weight: 5 },
+    // Windfalls
+    { key: 'birthday_cash', label: 'Birthday Cash', message: 'Grandma sent you some birthday cash!', amount: 10.00, weight: 8 },
+    { key: 'found_money', label: 'Found Money', message: 'You found cash in an old jacket pocket!', amount: 5.00, weight: 7 },
+    { key: 'tax_refund', label: 'Tax Refund', message: 'You got a small tax refund.', amount: 8.00, weight: 5 },
+    { key: 'garage_sale', label: 'Garage Sale', message: 'You sold some old stuff at a garage sale.', amount: 7.00, weight: 6 },
+    { key: 'raffle_win', label: 'Won a Raffle', message: 'You won a school raffle prize!', amount: 6.00, weight: 5 },
+    // Rare milestones -- bigger financial swing, more narrative weight
+    { key: 'got_married', label: 'Got Married!', message: 'Congratulations -- you got married! The wedding cost more than expected, but you also got some generous gifts.', amount: -10.00, weight: 1 },
+    { key: 'had_baby', label: 'Had a Baby!', message: "Congratulations -- you're a parent now! Time to budget for diapers and baby gear.", amount: -20.00, weight: 1 },
+    { key: 'bought_car', label: 'Bought a (Used) Car', message: 'You saved up and bought your first car!', amount: -25.00, weight: 1 },
+    { key: 'moved_out', label: 'Moved Into Your Own Place', message: 'You moved into your first apartment -- deposit and moving costs added up.', amount: -22.00, weight: 1 },
+    { key: 'got_raise', label: 'Got a Raise!', message: 'Your hard work paid off -- you got a raise!', amount: 15.00, weight: 1 }
+];
+const LIFE_EVENT_TOTAL_WEIGHT = LIFE_EVENTS.reduce((sum, e) => sum + e.weight, 0);
+
+function pickLifeEvent() {
+    let roll = Math.random() * LIFE_EVENT_TOTAL_WEIGHT;
+    for (const e of LIFE_EVENTS) {
+        if (roll < e.weight) return e;
+        roll -= e.weight;
+    }
+    return LIFE_EVENTS[LIFE_EVENTS.length - 1];
+}
+
 function round2(n) { return Math.round((n + Number.EPSILON) * 100) / 100; }
 
 async function logTxn(connection, studentId, type, description, amount, balanceAfter) {
@@ -132,6 +182,18 @@ async function syncRealPay(connection, studentId) {
             checking = round2(checking + pay);
             const periodLabel = stub.period_end ? new Date(stub.period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
             await logTxn(connection, studentId, 'paycheck', `Paycheck deposited (${stub.role_title || 'pay period'}${periodLabel ? ', ' + periodLabel : ''})`, pay, checking);
+
+            // Random "Game of Life" event -- not every period, not every
+            // student, never the same one twice in a row for the same
+            // reason. Checking is allowed to go negative here (unlike a
+            // student-initiated buy/pay-bills, which block if they can't
+            // afford it) -- getting caught short by a surprise expense is
+            // the actual lesson, same as it would be for real.
+            if (Math.random() < LIFE_EVENT_CHANCE) {
+                const event = pickLifeEvent();
+                checking = round2(checking + event.amount);
+                await logTxn(connection, studentId, 'life_event', `${event.label} -- ${event.message}`, event.amount, checking);
+            }
         }
         if (savings > 0) {
             const interest = round2(savings * SAVINGS_INTEREST_RATE);

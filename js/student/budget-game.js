@@ -153,7 +153,10 @@ function renderState(data) {
     lastStoreCatalog = data.store;
     renderStore();
     renderTransactions(data.transactions);
-    if (!isStaffPreview) maybeShowPaycheckBanner(data.transactions);
+    if (!isStaffPreview) {
+        maybeShowPaycheckBanner(data.transactions);
+        maybeShowLifeEventBanner(data.transactions);
+    }
 }
 
 function renderStore() {
@@ -209,6 +212,25 @@ function maybeShowPaycheckBanner(txns) {
     text.textContent = `Payday! ${latestPaycheck.description} — ${money(latestPaycheck.amount)} deposited.`;
     banner.style.display = 'block';
     try { localStorage.setItem(paycheckSeenKey(), latestPaycheck.created_at); } catch (e) {}
+}
+
+function lifeEventSeenKey() {
+    return `budgetGameLifeEventSeen:${studentData.student_id}`;
+}
+
+function maybeShowLifeEventBanner(txns) {
+    const latestEvent = (txns || []).find(t => t.type === 'life_event');
+    if (!latestEvent) return;
+    let lastSeen = null;
+    try { lastSeen = localStorage.getItem(lifeEventSeenKey()); } catch (e) {}
+    if (lastSeen === latestEvent.created_at) return;
+
+    const banner = document.getElementById('lifeEventBanner');
+    const text = document.getElementById('lifeEventBannerText');
+    const amt = Number(latestEvent.amount);
+    text.textContent = `${latestEvent.description} (${amt >= 0 ? '+' : ''}${money(amt)})`;
+    banner.style.display = 'block';
+    try { localStorage.setItem(lifeEventSeenKey(), latestEvent.created_at); } catch (e) {}
 }
 
 async function payBills() {
