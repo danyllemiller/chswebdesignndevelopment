@@ -31,6 +31,10 @@
     .status-none { background: #e9ecef; color: #6c757d; }
     .report-table td, .report-table th { vertical-align: middle; }
     .summary-pill { font-weight: 800; font-size: 1.1rem; }
+    .fix-btn { font-size: .75rem; padding: .2rem .5rem; }
+    .fix-btn.active-present { background: #198754; color: #fff; border-color: #198754; }
+    .fix-btn.active-tardy { background: #e8a500; color: #fff; border-color: #e8a500; }
+    .fix-btn.active-absent { background: #dc3545; color: #fff; border-color: #dc3545; }
   </style>
 </head>
 <body>
@@ -67,10 +71,10 @@
       <div class="table-responsive">
         <table class="table table-hover table-bordered report-table bg-white">
           <thead class="table-primary">
-            <tr><th>Student</th><th>Status</th><th>Time</th></tr>
+            <tr><th>Student</th><th>Status</th><th>Time</th><th>Fix</th></tr>
           </thead>
           <tbody id="reportBody">
-            <tr><td colspan="3" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading…</td></tr>
+            <tr><td colspan="4" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading…</td></tr>
           </tbody>
         </table>
       </div>

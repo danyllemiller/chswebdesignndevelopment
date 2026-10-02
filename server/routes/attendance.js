@@ -113,14 +113,14 @@ router.post('/admin/attendance/scan', requireStaff, async (req, res) => {
             return res.status(409).json({ error: `${student.first_name}, you're late -- please fill out the tardy form first, then scan again.`, needsForm: true, student });
         }
 
-        await connection.execute(
-            'INSERT INTO attendance (student_id, section_id, date, status, scanned_at) VALUES (?, ?, ?, ?, NOW())',
-            [student_id, section_id, today, 'tardy']
-        );
         await connection.execute('UPDATE tardy_form_pending SET consumed_at = NOW() WHERE id = ?', [pending.id]);
-        await connection.execute(
+        const [passResult] = await connection.execute(
             'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
             [student_id, student.section_id, pending.reason || '']
+        );
+        await connection.execute(
+            'INSERT INTO attendance (student_id, section_id, date, status, scanned_at, tardy_pass_id) VALUES (?, ?, ?, ?, NOW(), ?)',
+            [student_id, section_id, today, 'tardy', passResult.insertId]
         );
         await connection.release();
         res.json({ success: true, status: 'tardy', student, reason: pending.reason });
@@ -166,19 +166,79 @@ router.post('/admin/attendance/mark-tardy', requireStaff, async (req, res) => {
             return res.json({ already: true, status: existing.status, student, scanned_at: existing.scanned_at });
         }
 
-        await connection.execute(
-            'INSERT INTO attendance (student_id, section_id, date, status, scanned_at) VALUES (?, ?, ?, ?, NOW())',
-            [student_id, section_id, today, 'tardy']
-        );
-        await connection.execute(
+        const [passResult] = await connection.execute(
             'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
             [student_id, student.section_id, String(reason || '').trim().slice(0, 255)]
+        );
+        await connection.execute(
+            'INSERT INTO attendance (student_id, section_id, date, status, scanned_at, tardy_pass_id) VALUES (?, ?, ?, ?, NOW(), ?)',
+            [student_id, section_id, today, 'tardy', passResult.insertId]
         );
         await connection.release();
         res.json({ success: true, status: 'tardy', student, reason: reason || '' });
     } catch (err) {
         console.error('[attendance] mark-tardy error:', err);
         res.status(500).json({ error: 'Failed to mark tardy.' });
+    }
+});
+
+// POST /admin/attendance/correct -- { student_id, section_id, date, status,
+// reason? }. Fixes a wrong status after the fact (e.g. a scan line that
+// ran past the 3-minute grace window through no fault of the students
+// still in it -- rather than loosening the grace window itself, which
+// would make every future scan less accurate). Works whether or not an
+// attendance row already exists yet. Entering/leaving "tardy" creates or
+// deletes the matching tardy_passes entry so the consequence ladder
+// reflects the correction too, and ic_synced resets to 0 since whatever
+// was (or wasn't) entered in Infinite Campus for the old status is now
+// stale either way.
+router.post('/admin/attendance/correct', requireStaff, async (req, res) => {
+    const { student_id, section_id, date, status, reason } = req.body || {};
+    if (!student_id || !section_id || !/^\d{4}-\d{2}-\d{2}$/.test(date || '') || !['present', 'tardy', 'absent'].includes(status)) {
+        return res.status(400).json({ error: 'student_id, section_id, a valid date, and a valid status are required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        await ensureAttendanceTables(connection);
+
+        const [[student]] = await connection.execute('SELECT first_name, last_name, section_id FROM students WHERE student_id = ?', [student_id]);
+        if (!student) { await connection.release(); return res.status(404).json({ error: 'Unknown student.' }); }
+
+        const [[existing]] = await connection.execute(
+            'SELECT * FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
+            [student_id, section_id, date]
+        );
+        if (existing && existing.status === status) {
+            await connection.release();
+            return res.json({ success: true, unchanged: true });
+        }
+
+        let tardyPassId = existing ? existing.tardy_pass_id : null;
+
+        if (existing && existing.status === 'tardy' && status !== 'tardy' && tardyPassId) {
+            await connection.execute('DELETE FROM tardy_passes WHERE id = ?', [tardyPassId]);
+            tardyPassId = null;
+        }
+        if (status === 'tardy' && (!existing || existing.status !== 'tardy')) {
+            const [passResult] = await connection.execute(
+                'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
+                [student_id, student.section_id, String(reason || 'Corrected by staff').trim().slice(0, 255)]
+            );
+            tardyPassId = passResult.insertId;
+        }
+
+        await connection.execute(
+            `INSERT INTO attendance (student_id, section_id, date, status, tardy_pass_id, ic_synced)
+             VALUES (?, ?, ?, ?, ?, 0)
+             ON DUPLICATE KEY UPDATE status = VALUES(status), tardy_pass_id = VALUES(tardy_pass_id), ic_synced = 0`,
+            [student_id, section_id, date, status, tardyPassId]
+        );
+
+        await connection.release();
+        res.json({ success: true, status });
+    } catch (err) {
+        console.error('[attendance] correct error:', err);
+        res.status(500).json({ error: 'Failed to correct attendance.' });
     }
 });
 

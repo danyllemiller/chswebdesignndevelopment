@@ -19,11 +19,37 @@ async function loadPeriods() {
     }
 }
 
+function fixButtonsHtml(studentId, currentStatus) {
+    return ['present', 'tardy', 'absent'].map(s => {
+        const isActive = currentStatus === s;
+        return `<button type="button" class="btn btn-sm btn-outline-secondary fix-btn ${isActive ? `active-${s}` : ''}" data-student-id="${studentId}" data-status="${s}" ${isActive ? 'disabled' : ''}>${s[0].toUpperCase() + s.slice(1)}</button>`;
+    }).join(' ');
+}
+
+async function correctStatus(studentId, status) {
+    const section_id = periodSelect.value;
+    const date = dateInput.value;
+    let reason = '';
+    if (status === 'tardy') {
+        reason = window.prompt('Reason for tardy (shown on the Tardy Tracker):', '') || '';
+        if (reason === null) return;
+    }
+    try {
+        await apiFetch('/api/admin/attendance/correct', {
+            method: 'POST',
+            body: JSON.stringify({ student_id: studentId, section_id, date, status, reason })
+        });
+        loadReport();
+    } catch (e) {
+        alert('Failed to update: ' + e.message);
+    }
+}
+
 async function loadReport() {
     const section_id = periodSelect.value;
     const date = dateInput.value;
     if (!section_id || !date) return;
-    reportBody.innerHTML = `<tr><td colspan="3" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading…</td></tr>`;
+    reportBody.innerHTML = `<tr><td colspan="4" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading…</td></tr>`;
     try {
         const data = await apiFetch(`/api/admin/attendance/summary?section_id=${encodeURIComponent(section_id)}&date=${encodeURIComponent(date)}`);
         const rows = data.rows || [];
@@ -33,7 +59,7 @@ async function loadReport() {
         document.getElementById('sumNone').textContent = rows.filter(r => !r.status).length;
 
         if (rows.length === 0) {
-            reportBody.innerHTML = '<tr><td colspan="3" class="text-center p-4 text-muted">No students found for this period.</td></tr>';
+            reportBody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">No students found for this period.</td></tr>';
             return;
         }
         reportBody.innerHTML = rows.map(r => {
@@ -44,10 +70,14 @@ async function loadReport() {
                 <td class="fw-bold">${r.last_name}, ${r.first_name}</td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 <td>${time}</td>
+                <td>${fixButtonsHtml(r.student_id, r.status)}</td>
             </tr>`;
         }).join('');
+        reportBody.querySelectorAll('.fix-btn').forEach(btn => {
+            btn.addEventListener('click', () => correctStatus(btn.dataset.studentId, btn.dataset.status));
+        });
     } catch (e) {
-        reportBody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-danger">Failed to load: ${e.message}</td></tr>`;
+        reportBody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-danger">Failed to load: ${e.message}</td></tr>`;
     }
 }
 

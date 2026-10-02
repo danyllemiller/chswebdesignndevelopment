@@ -26,6 +26,15 @@ async function ensureAttendanceTables(connection) {
     if (col.length === 0) {
         await connection.execute(`ALTER TABLE attendance ADD COLUMN ic_synced TINYINT(1) DEFAULT 0`);
     }
+    // Links a tardy attendance row to the exact tardy_passes row it created,
+    // so a staff correction (e.g. a scan line that ran past the grace
+    // window through no fault of the student's) can delete that specific
+    // consequence-ladder entry instead of leaving a phantom tardy behind
+    // after the attendance status itself gets fixed.
+    const [col2] = await connection.execute(`SHOW COLUMNS FROM attendance LIKE 'tardy_pass_id'`);
+    if (col2.length === 0) {
+        await connection.execute(`ALTER TABLE attendance ADD COLUMN tardy_pass_id INT NULL`);
+    }
     // One active "I'm late, here's why" claim per student per day -- a late
     // scan consumes it (sets consumed_at) so it can't cover a second late
     // scan to a different class the same day without refilling the form.
