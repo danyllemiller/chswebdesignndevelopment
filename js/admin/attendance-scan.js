@@ -9,6 +9,8 @@ import { apiFetch } from '../modules/api-client.js';
 const TARDY_FORM_URL = `${location.origin}/student/tardy-form.html`;
 let currentPeriod = null;
 let feedbackTimer = null;
+let currentRoster = [];
+let noIdPanelOpen = false;
 
 const input = document.getElementById('scanInput');
 const periodLabel = document.getElementById('periodLabel');
@@ -18,6 +20,10 @@ const icon = document.getElementById('feedbackIcon');
 const nameEl = document.getElementById('feedbackName');
 const subEl = document.getElementById('feedbackSub');
 const tardyLinkBox = document.getElementById('tardyLinkBox');
+const noIdToggle = document.getElementById('noIdToggle');
+const noIdPanel = document.getElementById('noIdPanel');
+const nameSearch = document.getElementById('nameSearch');
+const nameList = document.getElementById('nameList');
 
 function focusInput() {
     input.value = '';
@@ -79,10 +85,28 @@ async function refreshTally() {
     try {
         const data = await apiFetch(`/api/admin/attendance/summary?section_id=${encodeURIComponent(currentPeriod)}`);
         const rows = data.rows || [];
+        currentRoster = rows;
         document.getElementById('tallyPresent').textContent = rows.filter(r => r.status === 'present').length;
         document.getElementById('tallyTardy').textContent = rows.filter(r => r.status === 'tardy').length;
         document.getElementById('tallyAbsent').textContent = rows.filter(r => !r.status).length;
+        renderNameList();
     } catch (e) { /* tally is a convenience, not critical */ }
+}
+
+function renderNameList() {
+    const q = nameSearch.value.trim().toLowerCase();
+    const filtered = q
+        ? currentRoster.filter(r => `${r.first_name} ${r.last_name}`.toLowerCase().includes(q))
+        : currentRoster;
+    if (filtered.length === 0) {
+        nameList.innerHTML = '<div class="text-muted small">No matching students.</div>';
+        return;
+    }
+    nameList.innerHTML = filtered.map(r => {
+        const statusClass = r.status === 'present' ? 'marked-present' : r.status === 'tardy' ? 'marked-tardy' : '';
+        const statusTag = r.status ? ` <i class="fas ${r.status === 'present' ? 'fa-check' : 'fa-triangle-exclamation'}"></i>` : '';
+        return `<button type="button" class="name-btn ${statusClass}" data-student-id="${r.student_id}">${r.first_name} ${r.last_name}${statusTag}</button>`;
+    }).join('');
 }
 
 async function handleScan(studentId) {
@@ -141,13 +165,38 @@ input.addEventListener('keydown', (e) => {
     }
 });
 
-document.addEventListener('click', () => { if (document.activeElement !== input) focusInput(); });
-setInterval(() => { if (document.activeElement !== input) focusInput(); }, 2000);
+document.addEventListener('click', (e) => {
+    if (noIdPanelOpen || noIdPanel.contains(e.target) || e.target === noIdToggle) return;
+    if (document.activeElement !== input) focusInput();
+});
+setInterval(() => {
+    if (noIdPanelOpen) return;
+    if (document.activeElement !== input) focusInput();
+}, 2000);
 
 periodSelect.addEventListener('change', () => {
     currentPeriod = periodSelect.value || null;
     periodLabel.textContent = currentPeriod ? `Period ${currentPeriod}` : 'No period selected';
     refreshTally();
+});
+
+noIdToggle.addEventListener('click', () => {
+    noIdPanelOpen = !noIdPanelOpen;
+    noIdPanel.classList.toggle('d-none', !noIdPanelOpen);
+    if (noIdPanelOpen) {
+        refreshTally();
+        nameSearch.focus();
+    } else {
+        focusInput();
+    }
+});
+
+nameSearch.addEventListener('input', renderNameList);
+
+nameList.addEventListener('click', (e) => {
+    const btn = e.target.closest('.name-btn');
+    if (!btn) return;
+    handleScan(btn.dataset.studentId);
 });
 
 loadCurrentPeriod();
