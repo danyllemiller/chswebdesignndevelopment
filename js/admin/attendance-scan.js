@@ -20,6 +20,10 @@ const icon = document.getElementById('feedbackIcon');
 const nameEl = document.getElementById('feedbackName');
 const subEl = document.getElementById('feedbackSub');
 const tardyLinkBox = document.getElementById('tardyLinkBox');
+const overrideBox = document.getElementById('overrideBox');
+const overrideReason = document.getElementById('overrideReason');
+const overrideBtn = document.getElementById('overrideBtn');
+let pendingOverrideStudentId = null;
 const noIdToggle = document.getElementById('noIdToggle');
 const noIdPanel = document.getElementById('noIdPanel');
 const nameSearch = document.getElementById('nameSearch');
@@ -52,7 +56,7 @@ function beep(freq, durationMs) {
     } catch (e) { /* audio isn't essential */ }
 }
 
-function showFeedback(kind, { iconClass, name, sub, tardyLink }) {
+function showFeedback(kind, { iconClass, name, sub, tardyLink, overrideStudentId, persistent }) {
     clearTimeout(feedbackTimer);
     panel.className = `feedback-panel mx-auto ${kind}`;
     panel.style.display = 'block';
@@ -65,7 +69,17 @@ function showFeedback(kind, { iconClass, name, sub, tardyLink }) {
     } else {
         tardyLinkBox.classList.add('d-none');
     }
-    feedbackTimer = setTimeout(() => { panel.style.display = 'none'; refreshTally(); }, kind === 'error' ? 6000 : 3500);
+    if (overrideStudentId) {
+        pendingOverrideStudentId = overrideStudentId;
+        overrideReason.value = '';
+        overrideBox.classList.remove('d-none');
+    } else {
+        pendingOverrideStudentId = null;
+        overrideBox.classList.add('d-none');
+    }
+    if (!persistent) {
+        feedbackTimer = setTimeout(() => { panel.style.display = 'none'; refreshTally(); }, kind === 'error' ? 6000 : 3500);
+    }
 }
 
 async function loadCurrentPeriod() {
@@ -148,7 +162,9 @@ async function handleScan(studentId) {
                     iconClass: 'fas fa-clipboard-list text-danger',
                     name: data.student ? `${data.student.first_name} ${data.student.last_name}` : 'Tardy form needed',
                     sub: data.error,
-                    tardyLink: true
+                    tardyLink: true,
+                    overrideStudentId: studentId,
+                    persistent: true
                 });
             } else {
                 beep(220, 400);
@@ -190,12 +206,38 @@ input.addEventListener('keydown', (e) => {
 document.addEventListener('click', (e) => {
     if (noIdPanelOpen || noIdPanel.contains(e.target) || e.target === noIdToggle) return;
     if (rosterPanel.contains(e.target) || e.target === rosterToggle) return;
+    if (pendingOverrideStudentId && overrideBox.contains(e.target)) return;
     if (document.activeElement !== input) focusInput();
 });
 setInterval(() => {
-    if (noIdPanelOpen) return;
+    if (noIdPanelOpen || pendingOverrideStudentId) return;
     if (document.activeElement !== input) focusInput();
 }, 2000);
+
+overrideBtn.addEventListener('click', async () => {
+    if (!pendingOverrideStudentId || !currentPeriod) return;
+    const reason = overrideReason.value.trim();
+    overrideBtn.disabled = true;
+    try {
+        const res = await fetch('/api/admin/attendance/mark-tardy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: pendingOverrideStudentId, section_id: currentPeriod, reason })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to mark tardy.');
+        beep(660, 250);
+        showFeedback('tardy', {
+            iconClass: 'fas fa-triangle-exclamation text-warning',
+            name: `${data.student.first_name} ${data.student.last_name}`,
+            sub: data.already ? `Already marked ${data.status} today.` : `Tardy — ${data.reason || 'no reason given'}`
+        });
+    } catch (e) {
+        showFeedback('error', { iconClass: 'fas fa-circle-xmark text-danger', name: 'Error', sub: e.message });
+    } finally {
+        overrideBtn.disabled = false;
+    }
+});
 
 periodSelect.addEventListener('change', () => {
     currentPeriod = periodSelect.value || null;

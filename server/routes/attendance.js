@@ -130,6 +130,58 @@ router.post('/admin/attendance/scan', requireStaff, async (req, res) => {
     }
 });
 
+// POST /admin/attendance/mark-tardy -- { student_id, section_id, reason }.
+// Staff-only shortcut for a paper tardy slip (or any case with no online
+// tardy-form submission) -- skips the tardy_form_pending lookup entirely,
+// since a staff member entering it directly from the kiosk IS the
+// accountability check the online form normally provides. Writes the same
+// attendance + tardy_passes rows a real "form then scan" tardy would.
+router.post('/admin/attendance/mark-tardy', requireStaff, async (req, res) => {
+    const { student_id, section_id, reason } = req.body || {};
+    if (!student_id || !section_id) return res.status(400).json({ error: 'student_id and section_id are required' });
+    try {
+        const connection = await getDbConnection();
+        await ensureAttendanceTables(connection);
+
+        const [[student]] = await connection.execute(
+            'SELECT student_id, first_name, last_name, section_id FROM students WHERE student_id = ? LIMIT 1',
+            [student_id]
+        );
+        if (!student) { await connection.release(); return res.status(404).json({ error: 'Unknown ID -- no student found.' }); }
+
+        const [extra] = await connection.execute('SELECT section_id FROM student_additional_sections WHERE student_id = ?', [student_id]);
+        const enrolledPeriods = new Set([realPeriod(student.section_id), ...extra.map(r => realPeriod(r.section_id))]);
+        if (!enrolledPeriods.has(section_id)) {
+            await connection.release();
+            return res.status(400).json({ error: `${student.first_name} ${student.last_name} isn't enrolled in ${section_id}.`, student });
+        }
+
+        const today = getLocalDateStr();
+        const [[existing]] = await connection.execute(
+            'SELECT * FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
+            [student_id, section_id, today]
+        );
+        if (existing) {
+            await connection.release();
+            return res.json({ already: true, status: existing.status, student, scanned_at: existing.scanned_at });
+        }
+
+        await connection.execute(
+            'INSERT INTO attendance (student_id, section_id, date, status, scanned_at) VALUES (?, ?, ?, ?, NOW())',
+            [student_id, section_id, today, 'tardy']
+        );
+        await connection.execute(
+            'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
+            [student_id, student.section_id, String(reason || '').trim().slice(0, 255)]
+        );
+        await connection.release();
+        res.json({ success: true, status: 'tardy', student, reason: reason || '' });
+    } catch (err) {
+        console.error('[attendance] mark-tardy error:', err);
+        res.status(500).json({ error: 'Failed to mark tardy.' });
+    }
+});
+
 // POST /student/tardy-form/submit -- { reason }. student_id always comes
 // from the session, never the request body, so a student can only ever
 // file this for themselves.
