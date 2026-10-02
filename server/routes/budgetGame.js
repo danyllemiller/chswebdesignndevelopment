@@ -11,7 +11,8 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { requireSelfOrStaff } = require('../helpers');
+const { requireSelfOrStaff, requireStaff } = require('../helpers');
+const { QUARTER_BOUNDARIES } = require('../tardyLogic');
 
 const STATE_TABLE_SQL = `
   CREATE TABLE IF NOT EXISTS budget_game_state (
@@ -377,6 +378,77 @@ router.post('/student/budget-game/transfer', requireSelfOrStaff(), async (req, r
     } catch (err) {
         console.error('[budget-game] transfer error:', err);
         res.status(500).json({ error: 'Failed to complete transfer' });
+    }
+});
+
+// GET /admin/budget-game/leaderboard?start=YYYY-MM-DD&end=YYYY-MM-DD -- a
+// quarterly "winner" score, deliberately NOT just whoever has the highest
+// net worth (that would mostly just reward whoever has the highest-paying
+// role or the most hours, neither of which is a budgeting decision). Scores
+// three things a student actually controls, each worth up to 40/40/20:
+//   - Bills Rate: paid bills every period they got paid, not just some.
+//   - Savings Rate: how much of what they earned actually got moved into
+//     savings/invest instead of sitting in checking or going to the store.
+//   - No Overdrafts: checking never went negative (-5/incident, floor 0).
+// All three come straight out of budget_game_transactions for the date
+// range -- no point-in-time net-worth snapshot needed (transfers only log
+// the checking side of the move, so savings/invested balances can't be
+// reliably reconstructed as of a past date from this log alone; current
+// net_worth is included on each row for context only, never scored).
+router.get('/admin/budget-game/leaderboard', requireStaff, async (req, res) => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const start = req.query.start || QUARTER_BOUNDARIES.find(q => todayStr >= q.start && todayStr <= q.end)?.start || QUARTER_BOUNDARIES[0].start;
+    const end = req.query.end || QUARTER_BOUNDARIES.find(q => todayStr >= q.start && todayStr <= q.end)?.end || QUARTER_BOUNDARIES[QUARTER_BOUNDARIES.length - 1].end;
+    try {
+        const connection = await getDbConnection();
+        await ensureTables(connection);
+
+        const [rows] = await connection.execute(
+            `SELECT s.student_id, s.first_name, s.last_name, s.section_id,
+                    COALESCE(gs.checking_balance, 0) + COALESCE(gs.savings_balance, 0) + COALESCE(gs.invested_balance, 0) AS net_worth,
+                    SUM(CASE WHEN t.type = 'paycheck' THEN 1 ELSE 0 END) AS paychecks,
+                    SUM(CASE WHEN t.type = 'paycheck' THEN t.amount ELSE 0 END) AS income_total,
+                    SUM(CASE WHEN t.type = 'bill' THEN 1 ELSE 0 END) AS bills_paid,
+                    SUM(CASE WHEN t.type IN ('to_savings', 'to_invest') THEN ABS(t.amount) ELSE 0 END) AS saved_in,
+                    SUM(CASE WHEN t.type IN ('from_savings', 'from_invest') THEN ABS(t.amount) ELSE 0 END) AS saved_out,
+                    SUM(CASE WHEN t.type NOT IN ('interest', 'invest_return') AND t.balance_after < 0 THEN 1 ELSE 0 END) AS overdrafts,
+                    SUM(CASE WHEN t.type = 'life_event' THEN 1 ELSE 0 END) AS life_events,
+                    SUM(CASE WHEN t.type = 'life_event' AND t.amount < 0 THEN 1 ELSE 0 END) AS life_events_negative
+             FROM budget_game_transactions t
+             JOIN students s ON s.student_id = t.student_id
+             LEFT JOIN budget_game_state gs ON gs.student_id = t.student_id
+             WHERE t.created_at >= ? AND t.created_at < DATE_ADD(?, INTERVAL 1 DAY)
+             GROUP BY s.student_id, s.first_name, s.last_name, s.section_id, gs.checking_balance, gs.savings_balance, gs.invested_balance`,
+            [start, end]
+        );
+        await connection.release();
+
+        const leaderboard = rows.map(r => {
+            const paychecks = Number(r.paychecks);
+            const billsRate = paychecks > 0 ? Math.min(1, Number(r.bills_paid) / paychecks) : 0;
+            const income = Number(r.income_total);
+            const netSaved = Number(r.saved_in) - Number(r.saved_out);
+            const savingsRate = income > 0 ? Math.min(1, Math.max(0, netSaved / income)) : 0;
+            const overdraftPenalty = Math.min(20, Number(r.overdrafts) * 5);
+            const score = Math.round(billsRate * 40 + savingsRate * 40 + (20 - overdraftPenalty));
+            return {
+                student_id: r.student_id, first_name: r.first_name, last_name: r.last_name, section_id: r.section_id,
+                net_worth: round2(Number(r.net_worth)),
+                paychecks, bills_paid: Number(r.bills_paid), bills_rate: round2(billsRate),
+                income_total: round2(income), net_saved: round2(netSaved), savings_rate: round2(savingsRate),
+                overdrafts: Number(r.overdrafts), life_events: Number(r.life_events), life_events_negative: Number(r.life_events_negative),
+                score
+            };
+        }).sort((a, b) => b.score - a.score || b.net_worth - a.net_worth);
+
+        res.json({
+            start, end,
+            quarters: QUARTER_BOUNDARIES.map((q, i) => ({ label: `Q${i + 1}`, start: q.start, end: q.end })),
+            rows: leaderboard
+        });
+    } catch (err) {
+        console.error('[budget-game] leaderboard error:', err);
+        res.status(500).json({ error: 'Failed to compute leaderboard' });
     }
 });
 

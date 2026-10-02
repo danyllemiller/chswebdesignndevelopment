@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | The Paycheck -- Quarterly Winner</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=21"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 1100px; margin: 2.5rem auto; }
+    .score-table th, .score-table td { vertical-align: middle; text-align: center; font-variant-numeric: tabular-nums; }
+    .score-table th:nth-child(2), .score-table td:nth-child(2) { text-align: left; }
+    .rank-cell { font-weight: 800; font-size: 1.05rem; }
+    .rank-1 { color: #b8860b; }
+    .rank-2 { color: #71797E; }
+    .rank-3 { color: #8c5a2b; }
+    .score-pill { display: inline-block; min-width: 3rem; padding: .3rem .6rem; border-radius: 999px; font-weight: 800; color: #fff; }
+    .score-high { background: #198754; }
+    .score-mid { background: #fd7e14; }
+    .score-low { background: #dc3545; }
+    .overdraft-flag { color: #dc3545; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+        <div>
+          <h2 class="gochi text-primary mb-1"><i class="fas fa-trophy me-2"></i>The Paycheck -- Quarterly Winner</h2>
+          <p class="text-muted mb-0">Ranked by financial <em>habits</em>, not just who ended up with the most money.</p>
+        </div>
+        <div>
+          <label class="form-label small fw-bold text-muted mb-1">Quarter</label>
+          <select id="quarterSelect" class="form-select border-primary fw-bold text-primary"></select>
+        </div>
+      </div>
+
+      <div class="alert alert-light border small mb-4">
+        <strong>How the score works (100 pts max):</strong>
+        <ul class="mb-0 mt-1">
+          <li><strong>Bills Rate (40 pts)</strong> -- paid bills every period they got a real paycheck, not just some periods.</li>
+          <li><strong>Savings Rate (40 pts)</strong> -- how much of what they earned actually got moved into savings/invest, instead of sitting in checking or going to the store.</li>
+          <li><strong>No Overdrafts (20 pts)</strong> -- checking never went negative. -5 pts per time it did.</li>
+        </ul>
+      </div>
+
+      <div id="tableWrap" class="table-responsive">
+        <table class="table table-hover table-bordered score-table bg-white">
+          <thead class="table-primary">
+            <tr>
+              <th>Rank</th>
+              <th>Student</th>
+              <th>Period</th>
+              <th>Score</th>
+              <th>Bills Paid</th>
+              <th>Savings Rate</th>
+              <th>Overdrafts</th>
+              <th>Life Events</th>
+              <th>Net Worth</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <tr><td colspan="9" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script type="module" src="/js/admin/budget-game-leaderboard.js?v=1"></script>
+</body>
+</html>
