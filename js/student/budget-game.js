@@ -48,6 +48,7 @@ async function init() {
     }
 
     studentData = getLoggedInUser();
+    initStickyBalances(); // both staff preview and real students show the same balance row
 
     // Check staff FIRST, before falling back on studentData.student_id --
     // a teacher account (e.g. Danylle's own "damiller" login) is itself a
@@ -70,7 +71,6 @@ async function init() {
         btn.addEventListener('click', () => transfer(btn.dataset.dir));
     });
 
-    initStickyBalances();
     await loadState();
 }
 
