@@ -113,6 +113,11 @@ router.get('/admin/payroll/roster', async (req, res) => {
         // runs use (server/routes/paystubs.js computePayrollForPeriod), so
         // the course checklist this feeds on Run Payroll doesn't offer
         // courses/sections that don't actually apply to anyone current.
+        // Advanced Studies students carry "AS-B2" (the real B2 period,
+        // tracked separately from WD2 for grading), which isn't a real
+        // bell_schedule period_label either -- stripping a leading "AS-"
+        // before the check recovers it without losing the legacy-label
+        // filter this exists for. Same fix as computePayrollForPeriod.
         const [rows] = await connection.execute(`
             SELECT s.student_id, s.first_name, s.last_name, s.section_id, s.username,
                    COALESCE(pr.title, 'Web Developer') AS pay_role_title,
@@ -123,7 +128,8 @@ router.get('/admin/payroll/roster', async (req, res) => {
               AND (s.section_id IS NULL OR s.section_id != 'Teacher')
               AND (s.archived IS NULL OR s.archived = 0)
               AND s.school_year = ?
-              AND s.section_id IN (SELECT DISTINCT period_label FROM bell_schedule)
+              AND (s.section_id IN (SELECT DISTINCT period_label FROM bell_schedule)
+                   OR REPLACE(s.section_id, 'AS-', '') IN (SELECT DISTINCT period_label FROM bell_schedule))
             ORDER BY s.last_name ASC, s.first_name ASC
         `, [getCurrentSchoolYear()]);
         // Same section_id -> course_id resolution payroll runs use (raw

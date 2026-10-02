@@ -236,6 +236,14 @@ async function computePayrollForPeriod(connection, { period_start, period_end, c
     // but they were still passing the archived/school_year check above,
     // so a payroll run was sweeping in every one of them as extra
     // students who don't actually belong on this pay period.
+    // Advanced Studies students carry "AS-B2" (they sit in the real B2
+    // period, same room/time as WD2, tracked separately for grading) --
+    // that compound label isn't a real bell_schedule period_label either,
+    // so it was being caught by this same filter and silently excluding
+    // every AS student from every payroll run ever since. Stripping a
+    // leading "AS-" before the bell_schedule check recovers the real
+    // period underneath without loosening the filter for the actual
+    // legacy junk labels it exists to exclude.
     const [allStudents] = await connection.execute(`
         SELECT s.student_id, s.first_name, s.last_name, s.section_id, s.course_id,
                COALESCE(r.title, 'Web Developer')                   AS role_title,
@@ -246,7 +254,8 @@ async function computePayrollForPeriod(connection, { period_start, period_end, c
           AND (s.section_id IS NULL OR s.section_id != 'Teacher')
           AND (s.archived IS NULL OR s.archived = 0)
           AND s.school_year = ?
-          AND s.section_id IN (SELECT DISTINCT period_label FROM bell_schedule)`, [getCurrentSchoolYear()]);
+          AND (s.section_id IN (SELECT DISTINCT period_label FROM bell_schedule)
+               OR REPLACE(s.section_id, 'AS-', '') IN (SELECT DISTINCT period_label FROM bell_schedule))`, [getCurrentSchoolYear()]);
     const resolved = await resolveEffectiveCourseIds(connection, allStudents);
     const hasFilter = Array.isArray(course_ids) && course_ids.length > 0;
     let students = resolved;
