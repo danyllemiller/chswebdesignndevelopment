@@ -16,6 +16,16 @@ async function ensureAttendanceTables(connection) {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE KEY unique_attendance (student_id, section_id, date)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+    // Nothing here ever touches Infinite Campus (the school's actual system
+    // of record) -- no API access to it exists. This just tracks which
+    // tardy/absent rows the teacher has NOT yet manually re-entered there
+    // yet, so the reminder badge has something to count down from. Present
+    // isn't tracked here since IC defaults everyone to present already --
+    // only the exceptions need a manual IC edit.
+    const [col] = await connection.execute(`SHOW COLUMNS FROM attendance LIKE 'ic_synced'`);
+    if (col.length === 0) {
+        await connection.execute(`ALTER TABLE attendance ADD COLUMN ic_synced TINYINT(1) DEFAULT 0`);
+    }
     // One active "I'm late, here's why" claim per student per day -- a late
     // scan consumes it (sets consumed_at) so it can't cover a second late
     // scan to a different class the same day without refilling the form.

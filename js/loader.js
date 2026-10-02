@@ -40,6 +40,17 @@
 })();
 
 // ==========================================
+// INFINITE CAMPUS SYNC REMINDER (sitewide, self-guards to the teacher)
+// ==========================================
+(function injectIcReminderBadge() {
+  if (document.getElementById('ic-reminder-badge-script')) return;
+  const script = document.createElement('script');
+  script.id = 'ic-reminder-badge-script';
+  script.src = '/js/ic-reminder-badge.js?v=1';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
 // READ ALOUD (sitewide, self-guards to curriculum content pages by URL path)
 // ==========================================
 (function injectReadAloud() {

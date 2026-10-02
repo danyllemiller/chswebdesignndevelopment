@@ -182,6 +182,48 @@ router.post('/admin/attendance/mark-tardy', requireStaff, async (req, res) => {
     }
 });
 
+// GET /admin/attendance/ic-pending -- every tardy/absent row not yet
+// flagged as re-entered in Infinite Campus. Nothing here talks to IC
+// itself (no API access to it exists) -- this just tracks what still
+// needs the teacher to go do that by hand.
+router.get('/admin/attendance/ic-pending', requireStaff, async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await ensureAttendanceTables(connection);
+        const [rows] = await connection.execute(
+            `SELECT a.id, a.student_id, a.section_id, a.date, a.status, a.scanned_at, s.first_name, s.last_name
+             FROM attendance a
+             JOIN students s ON s.student_id = a.student_id
+             WHERE a.status IN ('tardy', 'absent') AND (a.ic_synced IS NULL OR a.ic_synced = 0)
+             ORDER BY a.date DESC, s.last_name ASC`
+        );
+        await connection.release();
+        res.json({ count: rows.length, rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load IC-pending attendance.' }); }
+});
+
+// POST /admin/attendance/ic-sync -- { ids: [...] } or { all: true }
+router.post('/admin/attendance/ic-sync', requireStaff, async (req, res) => {
+    const { ids, all } = req.body || {};
+    try {
+        const connection = await getDbConnection();
+        await ensureAttendanceTables(connection);
+        if (all) {
+            await connection.execute(`UPDATE attendance SET ic_synced = 1 WHERE status IN ('tardy', 'absent') AND (ic_synced IS NULL OR ic_synced = 0)`);
+        } else if (Array.isArray(ids) && ids.length > 0) {
+            await connection.execute(
+                `UPDATE attendance SET ic_synced = 1 WHERE id IN (${ids.map(() => '?').join(',')})`,
+                ids
+            );
+        } else {
+            await connection.release();
+            return res.status(400).json({ error: 'ids or all is required' });
+        }
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update IC-sync status.' }); }
+});
+
 // POST /student/tardy-form/submit -- { reason }. student_id always comes
 // from the session, never the request body, so a student can only ever
 // file this for themselves.
