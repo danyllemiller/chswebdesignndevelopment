@@ -41,10 +41,9 @@
     .feedback-name { font-size: 1.6rem; font-weight: 800; margin: .3rem 0; }
     .feedback-sub { font-size: 1.05rem; font-weight: 600; }
     .tardy-link-box { margin-top: .75rem; background: #fff; border-radius: .5rem; padding: .6rem 1rem; font-size: 1.1rem; font-weight: 700; color: #0d6efd; word-break: break-all; }
-    .name-btn { border-radius: 2rem; border: 2px solid #dee2e6; background: #fff; padding: .45rem 1rem; font-weight: 700; font-size: .95rem; }
-    .name-btn:hover { border-color: #0d6efd; }
-    .name-btn.marked-present { border-color: #198754; color: #198754; }
-    .name-btn.marked-tardy { border-color: #e8a500; color: #b8860b; }
+    .name-list-item { font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+    .name-list-item.marked-present { color: #198754; }
+    .name-list-item.marked-tardy { color: #b8860b; }
     .roster-table { max-height: 320px; display: block; overflow-y: auto; }
     .roster-table thead, .roster-table tbody, .roster-table tr { display: table; width: 100%; table-layout: fixed; }
     .roster-table tbody { display: block; max-height: 280px; overflow-y: auto; }
@@ -98,9 +97,9 @@
       </div>
 
       <button id="noIdToggle" class="btn btn-link btn-sm mt-3 fw-bold text-decoration-none"><i class="fas fa-magnifying-glass me-1"></i>No ID? Click your name instead</button>
-      <div id="noIdPanel" class="d-none mt-2">
-        <input type="text" id="nameSearch" class="form-control mx-auto mb-3" style="max-width: 420px;" placeholder="Type to search names…">
-        <div id="nameList" class="d-flex flex-wrap gap-2 justify-content-center"></div>
+      <div id="noIdPanel" class="d-none mt-2 text-start mx-auto" style="max-width: 420px;">
+        <input type="text" id="nameSearch" class="form-control mb-2" placeholder="Type to search names…">
+        <div id="nameList" class="list-group" style="max-height: 320px; overflow-y: auto;"></div>
       </div>
     </div>
   </div>

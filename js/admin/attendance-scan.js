@@ -135,13 +135,15 @@ function renderNameList() {
         ? currentRoster.filter(r => `${r.first_name} ${r.last_name}`.toLowerCase().includes(q))
         : currentRoster;
     if (filtered.length === 0) {
-        nameList.innerHTML = '<div class="text-muted small">No matching students.</div>';
+        nameList.innerHTML = '<div class="list-group-item text-muted small">No matching students.</div>';
         return;
     }
     nameList.innerHTML = filtered.map(r => {
         const statusClass = r.status === 'present' ? 'marked-present' : r.status === 'tardy' ? 'marked-tardy' : '';
-        const statusTag = r.status ? ` <i class="fas ${r.status === 'present' ? 'fa-check' : 'fa-triangle-exclamation'}"></i>` : '';
-        return `<button type="button" class="name-btn ${statusClass}" data-student-id="${r.student_id}">${r.first_name} ${r.last_name}${statusTag}</button>`;
+        const statusTag = r.status
+            ? `<span class="small"><i class="fas ${r.status === 'present' ? 'fa-check' : 'fa-triangle-exclamation'} me-1"></i>${r.status[0].toUpperCase() + r.status.slice(1)}</span>`
+            : '';
+        return `<button type="button" class="list-group-item list-group-item-action name-list-item ${statusClass}" data-student-id="${r.student_id}"><span>${r.last_name}, ${r.first_name}</span>${statusTag}</button>`;
     }).join('');
 }
 
@@ -259,7 +261,7 @@ noIdToggle.addEventListener('click', () => {
 nameSearch.addEventListener('input', renderNameList);
 
 nameList.addEventListener('click', (e) => {
-    const btn = e.target.closest('.name-btn');
+    const btn = e.target.closest('.name-list-item');
     if (!btn) return;
     handleScan(btn.dataset.studentId);
 });
