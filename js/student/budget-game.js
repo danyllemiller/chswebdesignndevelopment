@@ -120,7 +120,11 @@ async function initStaffPreview() {
         const roster = await apiFetch('/api/admin/roster');
         const students = roster
             .filter(s => !s.archived && s.role !== 'teacher' && s.student_id)
-            .sort((a, b) => `${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`));
+            .sort((a, b) => {
+                const periodA = a.display_period || a.section_id || '';
+                const periodB = b.display_period || b.section_id || '';
+                return periodA.localeCompare(periodB) || `${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`);
+            });
         select.innerHTML = '<option value="">Select a student to preview…</option>' +
             students.map(s => `<option value="${s.student_id}">${s.last_name}, ${s.first_name} — ${s.display_period || s.section_id || ''}</option>`).join('');
     } catch (e) {
