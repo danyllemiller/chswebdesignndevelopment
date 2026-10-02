@@ -73,10 +73,32 @@ const SEED_STORE_ITEMS = [
     { item_key: 'jacket', category: 'clothes', label: 'Jacket', price: 10.00, sort_order: 4 }
 ];
 
+const CARDS_TABLE_SQL = `
+  CREATE TABLE IF NOT EXISTS budget_game_cards (
+    student_id VARCHAR(50) PRIMARY KEY,
+    card_number VARCHAR(19) NOT NULL,
+    card_name VARCHAR(100) NOT NULL,
+    expiry VARCHAR(5) NOT NULL,
+    cvv VARCHAR(3) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
+const CART_TABLE_SQL = `
+  CREATE TABLE IF NOT EXISTS budget_game_cart_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(50) NOT NULL,
+    item_key VARCHAR(60) NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_cart_item (student_id, item_key)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
 async function ensureTables(connection) {
     await connection.execute(STATE_TABLE_SQL);
     await connection.execute(TXN_TABLE_SQL);
     await connection.execute(STORE_ITEMS_TABLE_SQL);
+    await connection.execute(CARDS_TABLE_SQL);
+    await connection.execute(CART_TABLE_SQL);
     const [[{ cnt }]] = await connection.execute('SELECT COUNT(*) AS cnt FROM budget_game_store_items');
     if (cnt === 0) {
         for (const item of SEED_STORE_ITEMS) {
@@ -86,6 +108,45 @@ async function ensureTables(connection) {
             );
         }
     }
+}
+
+// "groceries" is its own page/checkout (the Grocery Store); every other
+// category (clothes, household, other, ...) lives together on one Mall
+// page with a shared cart -- new categories added later via Store Manager
+// automatically land in the Mall without needing code changes here.
+function storeForCategory(category) {
+    return category === 'groceries' ? 'groceries' : 'mall';
+}
+
+function randomDigits(n) {
+    let s = '';
+    for (let i = 0; i < n; i++) s += Math.floor(Math.random() * 10);
+    return s;
+}
+
+// Issued once per student, first time they touch the card/cart/checkout --
+// a realistic-LOOKING 16-digit number (clearly fake test-range BIN, not a
+// real network's actual range) and a few-years-out expiry, so "My Card"
+// has something to actually show without ever being a usable real card
+// number by construction.
+async function ensureCard(connection, studentId) {
+    const [[existing]] = await connection.execute('SELECT * FROM budget_game_cards WHERE student_id = ?', [studentId]);
+    if (existing) return existing;
+
+    const [[student]] = await connection.execute('SELECT first_name, last_name FROM students WHERE student_id = ?', [studentId]);
+    const cardName = student ? `${student.first_name} ${student.last_name}`.toUpperCase() : 'CHS STUDENT';
+    const cardNumber = `4900 ${randomDigits(4)} ${randomDigits(4)} ${randomDigits(4)}`;
+    const now = new Date();
+    const expiryYear = String((now.getFullYear() + 3) % 100).padStart(2, '0');
+    const expiryMonth = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+    const expiry = `${expiryMonth}/${expiryYear}`;
+    const cvv = randomDigits(3);
+
+    await connection.execute(
+        `INSERT INTO budget_game_cards (student_id, card_number, card_name, expiry, cvv) VALUES (?, ?, ?, ?, ?)`,
+        [studentId, cardNumber, cardName, expiry, cvv]
+    );
+    return { student_id: studentId, card_number: cardNumber, card_name: cardName, expiry, cvv };
 }
 
 async function getStoreCatalog(connection) {
@@ -447,6 +508,163 @@ router.post('/student/budget-game/transfer', requireSelfOrStaff(), async (req, r
     } catch (err) {
         console.error('[budget-game] transfer error:', err);
         res.status(500).json({ error: 'Failed to complete transfer' });
+    }
+});
+
+// GET /student/budget-game/card?student_id=X -- auto-issues on first call
+router.get('/student/budget-game/card', requireSelfOrStaff(), async (req, res) => {
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id required' });
+    try {
+        const connection = await getDbConnection();
+        await ensureTables(connection);
+        const card = await ensureCard(connection, student_id);
+        await connection.release();
+        res.json({
+            card_number: card.card_number, card_name: card.card_name,
+            expiry: card.expiry, cvv: card.cvv
+        });
+    } catch (err) {
+        console.error('[budget-game] card error:', err);
+        res.status(500).json({ error: 'Failed to load card' });
+    }
+});
+
+// GET /student/budget-game/cart?student_id=X&store=groceries|mall
+router.get('/student/budget-game/cart', requireSelfOrStaff(), async (req, res) => {
+    const { student_id, store } = req.query;
+    if (!student_id || !['groceries', 'mall'].includes(store)) {
+        return res.status(400).json({ error: 'student_id and a valid store (groceries or mall) are required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        await ensureTables(connection);
+        const [rows] = await connection.execute(
+            `SELECT c.item_key, c.quantity, i.label, i.price, i.image_url, i.category, i.active
+             FROM budget_game_cart_items c
+             JOIN budget_game_store_items i ON i.item_key = c.item_key
+             WHERE c.student_id = ?`,
+            [student_id]
+        );
+        const items = rows
+            .filter(r => storeForCategory(r.category) === store)
+            .map(r => ({ key: r.item_key, label: r.label, price: Number(r.price), image: r.image_url, category: r.category, quantity: r.quantity, active: !!r.active }));
+        const subtotal = round2(items.reduce((sum, it) => sum + (it.active ? it.price * it.quantity : 0), 0));
+        await connection.release();
+        res.json({ items, subtotal });
+    } catch (err) {
+        console.error('[budget-game] cart error:', err);
+        res.status(500).json({ error: 'Failed to load cart' });
+    }
+});
+
+// POST /student/budget-game/cart/add -- { student_id, item_key, quantity? }
+router.post('/student/budget-game/cart/add', requireSelfOrStaff(), async (req, res) => {
+    const { student_id, item_key } = req.body || {};
+    const quantity = Math.max(1, Math.floor(Number(req.body?.quantity) || 1));
+    if (!student_id || !item_key) return res.status(400).json({ error: 'student_id and item_key required' });
+    try {
+        const connection = await getDbConnection();
+        await ensureTables(connection);
+        const item = await getActiveItemByKey(connection, item_key);
+        if (!item) { await connection.release(); return res.status(400).json({ error: 'Unknown item' }); }
+        await connection.execute(
+            `INSERT INTO budget_game_cart_items (student_id, item_key, quantity) VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)`,
+            [student_id, item_key, quantity]
+        );
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) {
+        console.error('[budget-game] cart add error:', err);
+        res.status(500).json({ error: 'Failed to add to cart' });
+    }
+});
+
+// POST /student/budget-game/cart/update -- { student_id, item_key, quantity }
+// quantity 0 removes the line entirely.
+router.post('/student/budget-game/cart/update', requireSelfOrStaff(), async (req, res) => {
+    const { student_id, item_key } = req.body || {};
+    const quantity = Math.floor(Number(req.body?.quantity));
+    if (!student_id || !item_key || Number.isNaN(quantity) || quantity < 0) {
+        return res.status(400).json({ error: 'student_id, item_key, and a non-negative quantity are required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        await ensureTables(connection);
+        if (quantity === 0) {
+            await connection.execute('DELETE FROM budget_game_cart_items WHERE student_id = ? AND item_key = ?', [student_id, item_key]);
+        } else {
+            await connection.execute(
+                `UPDATE budget_game_cart_items SET quantity = ? WHERE student_id = ? AND item_key = ?`,
+                [quantity, student_id, item_key]
+            );
+        }
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) {
+        console.error('[budget-game] cart update error:', err);
+        res.status(500).json({ error: 'Failed to update cart' });
+    }
+});
+
+// POST /student/budget-game/checkout -- { student_id, store }. One-click
+// "pay with my CHS Card" -- no card re-entry since the card was already
+// auto-issued and is tied to the student's own real checking balance here,
+// not a separately-tracked card balance.
+router.post('/student/budget-game/checkout', requireSelfOrStaff(), async (req, res) => {
+    const { student_id, store } = req.body || {};
+    if (!student_id || !['groceries', 'mall'].includes(store)) {
+        return res.status(400).json({ error: 'student_id and a valid store (groceries or mall) are required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        await ensureTables(connection);
+        const card = await ensureCard(connection, student_id);
+
+        const [cartRows] = await connection.execute(
+            `SELECT c.item_key, c.quantity, i.label, i.price, i.category, i.active
+             FROM budget_game_cart_items c
+             JOIN budget_game_store_items i ON i.item_key = c.item_key
+             WHERE c.student_id = ?`,
+            [student_id]
+        );
+        const items = cartRows.filter(r => storeForCategory(r.category) === store);
+        if (items.length === 0) { await connection.release(); return res.status(400).json({ error: 'Your cart is empty.' }); }
+        const inactiveItem = items.find(r => !r.active);
+        if (inactiveItem) { await connection.release(); return res.status(400).json({ error: `${inactiveItem.label} is no longer available -- remove it from your cart.` }); }
+
+        const total = round2(items.reduce((sum, it) => sum + Number(it.price) * it.quantity, 0));
+
+        const [[state]] = await connection.execute('SELECT * FROM budget_game_state WHERE student_id = ?', [student_id]);
+        if (!state) { await connection.release(); return res.status(400).json({ error: 'No game state yet -- open the game first.' }); }
+        const checking = Number(state.checking_balance);
+        if (checking < total) {
+            await connection.release();
+            return res.status(400).json({ error: `Your card was declined -- insufficient funds. Total is $${total.toFixed(2)}, but you only have $${checking.toFixed(2)} in checking.`, declined: true });
+        }
+
+        const newChecking = round2(checking - total);
+        await connection.execute('UPDATE budget_game_state SET checking_balance = ? WHERE student_id = ?', [newChecking, student_id]);
+        const storeName = store === 'groceries' ? 'Grocery Store' : 'The Mall';
+        const itemCount = items.reduce((sum, it) => sum + it.quantity, 0);
+        await logTxn(connection, student_id, 'purchase', `${storeName} -- ${itemCount} item${itemCount === 1 ? '' : 's'} (card ending in ${card.card_number.slice(-4)})`, -total, newChecking);
+
+        const itemKeys = items.map(it => it.item_key);
+        await connection.execute(
+            `DELETE FROM budget_game_cart_items WHERE student_id = ? AND item_key IN (${itemKeys.map(() => '?').join(',')})`,
+            [student_id, ...itemKeys]
+        );
+
+        await connection.release();
+        res.json({
+            success: true, checking: newChecking, total,
+            card_last4: card.card_number.slice(-4),
+            receipt: items.map(it => ({ label: it.label, price: Number(it.price), quantity: it.quantity }))
+        });
+    } catch (err) {
+        console.error('[budget-game] checkout error:', err);
+        res.status(500).json({ error: 'Checkout failed' });
     }
 });
 

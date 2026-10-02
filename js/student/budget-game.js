@@ -6,7 +6,6 @@ import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
 
 let studentData = null;
-let lastStoreCatalog = null;
 let previewStudentId = null; // set only in staff read-only preview mode
 let isStaffPreview = false;
 
@@ -168,62 +167,11 @@ function renderState(data) {
     }
     document.querySelectorAll('[data-dir]').forEach(btn => { btn.disabled = isStaffPreview; });
 
-    lastStoreCatalog = data.store;
-    renderStore();
     renderTransactions(data.transactions);
     if (!isStaffPreview) {
         maybeShowPaycheckBanner(data.transactions);
         maybeShowLifeEventBanner(data.transactions);
     }
-}
-
-const CATEGORY_META = {
-    groceries: { label: 'Groceries', icon: 'fa-basket-shopping', placeholderIcon: 'fa-apple-whole' },
-    clothes:   { label: 'Clothes',   icon: 'fa-shirt',           placeholderIcon: 'fa-shirt' }
-};
-
-function itemCardHtml(item) {
-    const img = item.image
-        ? `<img src="${item.image}" alt="${item.label}" loading="lazy">`
-        : `<i class="fas ${CATEGORY_META[item.category]?.placeholderIcon || 'fa-box'} item-image-placeholder"></i>`;
-    return `
-        <div class="col-6 col-md-4 col-lg-3 col-xl-2">
-            <div class="item-card">
-                <div class="item-image-wrap">${img}</div>
-                <div class="item-card-body">
-                    <div class="item-label">${item.label}</div>
-                    <div class="item-price-row">
-                        <span class="item-price-tag">${money(item.price)}</span>
-                        <button class="btn btn-sm btn-primary fw-bold buy-btn" data-key="${item.key}" ${isStaffPreview ? 'disabled' : ''}>Buy</button>
-                    </div>
-                </div>
-            </div>
-        </div>`;
-}
-
-function renderStore() {
-    const container = document.getElementById('storeSections');
-    if (!lastStoreCatalog) return;
-    const categories = Object.keys(lastStoreCatalog).filter(c => lastStoreCatalog[c] && lastStoreCatalog[c].length);
-    if (categories.length === 0) {
-        container.innerHTML = '<div class="text-muted text-center small py-4">The store is empty right now.</div>';
-        return;
-    }
-    container.innerHTML = categories.map(cat => {
-        const meta = CATEGORY_META[cat] || { label: cat[0].toUpperCase() + cat.slice(1), icon: 'fa-store' };
-        const items = lastStoreCatalog[cat].map(item => ({ ...item, category: cat }));
-        return `
-            <div class="store-section ${cat} mb-4">
-                <div class="store-section-header"><i class="fas ${meta.icon}"></i>${meta.label}</div>
-                <div class="store-section-body">
-                    <div class="row g-3">${items.map(itemCardHtml).join('')}</div>
-                </div>
-            </div>`;
-    }).join('');
-    if (isStaffPreview) return;
-    container.querySelectorAll('.buy-btn').forEach(btn => {
-        btn.addEventListener('click', () => buyItem(btn.dataset.key));
-    });
 }
 
 function renderTransactions(txns) {
@@ -299,18 +247,6 @@ async function payBills() {
         msg.classList.add('text-danger', 'fw-bold');
         msg.textContent = e.message || 'Could not pay bills.';
         btn.disabled = false;
-    }
-}
-
-async function buyItem(itemKey) {
-    try {
-        await apiFetch('/api/student/budget-game/buy', {
-            method: 'POST',
-            body: JSON.stringify({ student_id: studentData.student_id, item_key: itemKey })
-        });
-        await loadState();
-    } catch (e) {
-        alert(e.message || 'Could not complete purchase.');
     }
 }
 

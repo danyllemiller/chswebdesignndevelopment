@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>My Card | The Paycheck</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+  <link href="/css/student-pages.css" rel="stylesheet"/>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=22"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+
+  <style>
+    .card-wrap { max-width: 440px; margin: 2rem auto 0; }
+    .fake-card {
+      aspect-ratio: 1.586 / 1;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #1f246b, #000099 60%, #3a3fb0);
+      color: #fff;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 1rem 2.5rem rgba(0,0,153,.35);
+      position: relative;
+      overflow: hidden;
+      font-variant-numeric: tabular-nums;
+    }
+    .fake-card::after {
+      content: '';
+      position: absolute; top: -40%; right: -20%;
+      width: 70%; height: 180%;
+      background: rgba(255,255,255,.06);
+      transform: rotate(20deg);
+    }
+    .fake-card .chip { width: 42px; height: 32px; border-radius: 6px; background: linear-gradient(135deg, #e3c158, #b8912f); }
+    .fake-card .number { font-size: 1.35rem; font-weight: 700; letter-spacing: .08em; }
+    .fake-card .bottom-row { display: flex; justify-content: space-between; align-items: flex-end; }
+    .fake-card .label { font-size: .6rem; text-transform: uppercase; opacity: .7; letter-spacing: .08em; }
+    .fake-card .value { font-weight: 700; }
+    .fake-card .brand { font-style: italic; font-weight: 800; font-size: 1.3rem; }
+  </style>
+</head>
+<body class="bg-light">
+
+<div id="nav-placeholder"></div>
+
+<div class="container my-4 card-wrap">
+  <div class="text-center mb-3">
+    <h1 class="gochi text-primary fw-bold mb-1"><i class="fas fa-credit-card me-2"></i>My Card</h1>
+    <p class="text-muted mb-0">Not a real card -- just your checking account, with a number on it.</p>
+  </div>
+
+  <div id="cardArea" class="fake-card mb-3">
+    <div class="d-flex justify-content-between align-items-start">
+      <div class="chip"></div>
+      <i class="fas fa-wifi fa-rotate-90"></i>
+    </div>
+    <div class="number" id="cardNumber">•••• •••• •••• ••••</div>
+    <div class="bottom-row">
+      <div>
+        <div class="label">Card Holder</div>
+        <div class="value" id="cardName">LOADING</div>
+      </div>
+      <div>
+        <div class="label">Expires</div>
+        <div class="value" id="cardExpiry">••/••</div>
+      </div>
+      <div class="brand">CHS</div>
+    </div>
+  </div>
+
+  <div class="text-center">
+    <button id="revealBtn" class="btn btn-outline-primary fw-bold"><i class="fas fa-eye me-1"></i>Reveal Full Number &amp; CVV</button>
+  </div>
+  <p class="small text-muted text-center mt-3">This card is tied straight to your checking balance in The Paycheck -- there's nothing to load onto it separately. Checkout just checks you have enough in checking.</p>
+
+  <div class="text-center mt-3">
+    <a href="/student/budget-game.html" class="btn btn-link fw-bold"><i class="fas fa-arrow-left me-1"></i>Back to The Paycheck</a>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script type="module" src="/js/student/budget-game-card.js?v=1"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@ function money(n) {
     return '$' + (Number(n) || 0).toFixed(2);
 }
 
-const CATEGORY_LABELS = { groceries: 'Groceries', clothes: 'Clothes' };
+const CATEGORY_LABELS = { groceries: 'Groceries', clothes: 'Clothes', household: 'Household', other: 'Other' };
 
 function renderItems(items) {
     const container = document.getElementById('itemsList');
