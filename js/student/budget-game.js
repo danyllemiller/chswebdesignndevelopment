@@ -187,7 +187,7 @@ function itemCardHtml(item) {
         ? `<img src="${item.image}" alt="${item.label}" loading="lazy">`
         : `<i class="fas ${CATEGORY_META[item.category]?.placeholderIcon || 'fa-box'} item-image-placeholder"></i>`;
     return `
-        <div class="col-6 col-md-4 col-lg-3">
+        <div class="col-6 col-md-4 col-lg-3 col-xl-2">
             <div class="item-card">
                 <div class="item-image-wrap">${img}</div>
                 <div class="item-card-body">
