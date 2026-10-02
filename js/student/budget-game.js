@@ -6,7 +6,6 @@ import { getLoggedInUser } from '../modules/user-session.js';
 import { apiFetch } from '../modules/api-client.js';
 
 let studentData = null;
-let currentStoreTab = 'groceries';
 let lastStoreCatalog = null;
 let previewStudentId = null; // set only in staff read-only preview mode
 let isStaffPreview = false;
@@ -66,21 +65,36 @@ async function init() {
         return;
     }
 
-    document.querySelectorAll('#storeTabs button').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#storeTabs button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentStoreTab = btn.dataset.store;
-            renderStore();
-        });
-    });
-
     document.getElementById('payBillsBtn').addEventListener('click', payBills);
     document.querySelectorAll('[data-dir]').forEach(btn => {
         btn.addEventListener('click', () => transfer(btn.dataset.dir));
     });
 
+    initStickyBalances();
     await loadState();
+}
+
+// The navbar (includes/navbar.html) is itself sticky-top with a height that
+// varies by viewport (the countdown banner wraps differently, mobile
+// collapses the menu), so a hardcoded px offset would drift out of sync --
+// measuring it directly and re-measuring on resize keeps the balance bar
+// pinned exactly below the real navbar instead of overlapping or gapping.
+function initStickyBalances() {
+    const bar = document.getElementById('stickyBalances');
+    if (!bar) return;
+    function positionBar() {
+        const nav = document.querySelector('nav.navbar');
+        bar.style.top = `${nav ? nav.getBoundingClientRect().height : 0}px`;
+    }
+    positionBar();
+    window.addEventListener('resize', positionBar);
+    setTimeout(positionBar, 500); // catches late navbar reflow (fonts/logo loading in)
+
+    const sentinel = document.createElement('div');
+    bar.before(sentinel);
+    new IntersectionObserver(([entry]) => {
+        bar.classList.toggle('is-pinned', !entry.isIntersecting);
+    }, { threshold: 1 }).observe(sentinel);
 }
 
 async function loadState() {
@@ -159,19 +173,51 @@ function renderState(data) {
     }
 }
 
-function renderStore() {
-    if (!lastStoreCatalog) return;
-    const items = lastStoreCatalog[currentStoreTab] || [];
-    document.getElementById('storeGrid').innerHTML = items.map(item => `
+const CATEGORY_META = {
+    groceries: { label: 'Groceries', icon: 'fa-basket-shopping', placeholderIcon: 'fa-apple-whole' },
+    clothes:   { label: 'Clothes',   icon: 'fa-shirt',           placeholderIcon: 'fa-shirt' }
+};
+
+function itemCardHtml(item) {
+    const img = item.image
+        ? `<img src="${item.image}" alt="${item.label}" loading="lazy">`
+        : `<i class="fas ${CATEGORY_META[item.category]?.placeholderIcon || 'fa-box'} item-image-placeholder"></i>`;
+    return `
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="item-card p-3 text-center h-100 d-flex flex-column justify-content-between">
-                <div class="fw-bold mb-2">${item.label}</div>
-                <div class="text-muted mb-2">${money(item.price)}</div>
-                <button class="btn btn-sm btn-outline-primary fw-bold buy-btn" data-key="${item.key}" ${isStaffPreview ? 'disabled' : ''}>Buy</button>
+            <div class="item-card">
+                <div class="item-image-wrap">${img}</div>
+                <div class="item-card-body">
+                    <div class="item-label">${item.label}</div>
+                    <div class="item-price-row">
+                        <span class="item-price-tag">${money(item.price)}</span>
+                        <button class="btn btn-sm btn-primary fw-bold buy-btn" data-key="${item.key}" ${isStaffPreview ? 'disabled' : ''}>Buy</button>
+                    </div>
+                </div>
             </div>
-        </div>`).join('');
+        </div>`;
+}
+
+function renderStore() {
+    const container = document.getElementById('storeSections');
+    if (!lastStoreCatalog) return;
+    const categories = Object.keys(lastStoreCatalog).filter(c => lastStoreCatalog[c] && lastStoreCatalog[c].length);
+    if (categories.length === 0) {
+        container.innerHTML = '<div class="text-muted text-center small py-4">The store is empty right now.</div>';
+        return;
+    }
+    container.innerHTML = categories.map(cat => {
+        const meta = CATEGORY_META[cat] || { label: cat[0].toUpperCase() + cat.slice(1), icon: 'fa-store' };
+        const items = lastStoreCatalog[cat].map(item => ({ ...item, category: cat }));
+        return `
+            <div class="store-section ${cat} mb-4">
+                <div class="store-section-header"><i class="fas ${meta.icon}"></i>${meta.label}</div>
+                <div class="store-section-body">
+                    <div class="row g-3">${items.map(itemCardHtml).join('')}</div>
+                </div>
+            </div>`;
+    }).join('');
     if (isStaffPreview) return;
-    document.querySelectorAll('.buy-btn').forEach(btn => {
+    container.querySelectorAll('.buy-btn').forEach(btn => {
         btn.addEventListener('click', () => buyItem(btn.dataset.key));
     });
 }

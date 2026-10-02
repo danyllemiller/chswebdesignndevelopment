@@ -10,9 +10,15 @@
 // the money arriving in the first place is always their own real pay.
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 const { getDbConnection } = require('../db');
 const { requireSelfOrStaff, requireStaff } = require('../helpers');
 const { QUARTER_BOUNDARIES } = require('../tardyLogic');
+
+const STORE_IMAGE_ROOT = path.join(__dirname, '..', '..', 'images', 'budget-game-store');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
 
 const STATE_TABLE_SQL = `
   CREATE TABLE IF NOT EXISTS budget_game_state (
@@ -37,9 +43,87 @@ const TXN_TABLE_SQL = `
     KEY idx_student (student_id, id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
+const STORE_ITEMS_TABLE_SQL = `
+  CREATE TABLE IF NOT EXISTS budget_game_store_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_key VARCHAR(60) NOT NULL UNIQUE,
+    category VARCHAR(30) NOT NULL,
+    label VARCHAR(100) NOT NULL,
+    price DECIMAL(6,2) NOT NULL,
+    image_url VARCHAR(255) DEFAULT NULL,
+    sort_order INT DEFAULT 0,
+    active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
+// Starting catalog -- same items/prices the store always had, now rows in a
+// real table instead of hardcoded, so a teacher can add real student-submitted
+// photos (or whole new items) from admin/tools/budget-game-store.html without
+// a code deploy. Only seeded once, on an empty table, so it never stomps on
+// items a teacher has since added, edited, or deactivated.
+const SEED_STORE_ITEMS = [
+    { item_key: 'milk', category: 'groceries', label: 'Milk', price: 1.00, sort_order: 1 },
+    { item_key: 'bread', category: 'groceries', label: 'Bread', price: 0.75, sort_order: 2 },
+    { item_key: 'fruit', category: 'groceries', label: 'Fresh Fruit', price: 1.25, sort_order: 3 },
+    { item_key: 'frozen_meal', category: 'groceries', label: 'Frozen Meal', price: 2.00, sort_order: 4 },
+    { item_key: 'snacks', category: 'groceries', label: 'Snacks', price: 1.50, sort_order: 5 },
+    { item_key: 'tshirt', category: 'clothes', label: 'T-Shirt', price: 3.00, sort_order: 1 },
+    { item_key: 'jeans', category: 'clothes', label: 'Jeans', price: 6.00, sort_order: 2 },
+    { item_key: 'shoes', category: 'clothes', label: 'Shoes', price: 8.00, sort_order: 3 },
+    { item_key: 'jacket', category: 'clothes', label: 'Jacket', price: 10.00, sort_order: 4 }
+];
+
 async function ensureTables(connection) {
     await connection.execute(STATE_TABLE_SQL);
     await connection.execute(TXN_TABLE_SQL);
+    await connection.execute(STORE_ITEMS_TABLE_SQL);
+    const [[{ cnt }]] = await connection.execute('SELECT COUNT(*) AS cnt FROM budget_game_store_items');
+    if (cnt === 0) {
+        for (const item of SEED_STORE_ITEMS) {
+            await connection.execute(
+                `INSERT INTO budget_game_store_items (item_key, category, label, price, sort_order) VALUES (?, ?, ?, ?, ?)`,
+                [item.item_key, item.category, item.label, item.price, item.sort_order]
+            );
+        }
+    }
+}
+
+async function getStoreCatalog(connection) {
+    const [rows] = await connection.execute(
+        `SELECT item_key, category, label, price, image_url FROM budget_game_store_items WHERE active = 1 ORDER BY category, sort_order, label`
+    );
+    const catalog = {};
+    rows.forEach(r => {
+        if (!catalog[r.category]) catalog[r.category] = [];
+        catalog[r.category].push({ key: r.item_key, label: r.label, price: Number(r.price), image: r.image_url });
+    });
+    return catalog;
+}
+
+async function getActiveItemByKey(connection, itemKey) {
+    const [[row]] = await connection.execute(
+        `SELECT item_key, category, label, price, image_url FROM budget_game_store_items WHERE item_key = ? AND active = 1`,
+        [itemKey]
+    );
+    return row ? { key: row.item_key, category: row.category, label: row.label, price: Number(row.price), image: row.image_url } : null;
+}
+
+function slugify(text) {
+    return String(text).toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 50) || 'item';
+}
+
+const BLOCKED_IMG_EXTENSIONS = new Set(['php', 'php3', 'php4', 'php5', 'phtml', 'phar', 'cgi', 'pl', 'py', 'rb', 'sh', 'exe', 'jsp', 'asp', 'aspx', 'svg', 'html', 'htm']);
+const ALLOWED_IMG_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif']);
+
+function saveStoreImage(category, itemKey, file) {
+    const ext = (file.originalname.split('.').pop() || '').toLowerCase();
+    if (BLOCKED_IMG_EXTENSIONS.has(ext) || !ALLOWED_IMG_EXTENSIONS.has(ext)) return null;
+    const safeCategory = slugify(category);
+    const dir = path.join(STORE_IMAGE_ROOT, safeCategory);
+    fs.mkdirSync(dir, { recursive: true });
+    const filename = `${itemKey}-${Date.now()}.${ext}`;
+    fs.writeFileSync(path.join(dir, filename), file.buffer, { mode: 0o644 });
+    return `/images/budget-game-store/${safeCategory}/${filename}`;
 }
 
 // Fixed, small-dollar "starter economy" -- deliberately scaled to match what
@@ -53,24 +137,6 @@ const BILLS = [
     { key: 'phone', label: 'Phone Bill', amount: 2.00 }
 ];
 const BILLS_TOTAL = BILLS.reduce((sum, b) => sum + b.amount, 0);
-
-const STORE_ITEMS = {
-    groceries: [
-        { key: 'milk', label: 'Milk', price: 1.00 },
-        { key: 'bread', label: 'Bread', price: 0.75 },
-        { key: 'fruit', label: 'Fresh Fruit', price: 1.25 },
-        { key: 'frozen_meal', label: 'Frozen Meal', price: 2.00 },
-        { key: 'snacks', label: 'Snacks', price: 1.50 }
-    ],
-    clothes: [
-        { key: 'tshirt', label: 'T-Shirt', price: 3.00 },
-        { key: 'jeans', label: 'Jeans', price: 6.00 },
-        { key: 'shoes', label: 'Shoes', price: 8.00 },
-        { key: 'jacket', label: 'Jacket', price: 10.00 }
-    ]
-};
-const ALL_ITEMS = {};
-Object.values(STORE_ITEMS).forEach(cat => cat.forEach(item => { ALL_ITEMS[item.key] = item; }));
 
 const SAVINGS_INTEREST_RATE = 0.02;   // guaranteed, applied per new paycheck synced
 const INVEST_MIN_RETURN = -0.10;      // simulated market swing, applied per new paycheck synced
@@ -245,6 +311,7 @@ router.get('/student/budget-game/state', requireSelfOrStaff(), async (req, res) 
 
         const billsPaidThisPeriod = state.bills_paid_through_paystub_id === state.last_synced_paystub_id
             && state.last_synced_paystub_id !== null;
+        const store = await getStoreCatalog(connection);
 
         await connection.release();
         res.json({
@@ -255,7 +322,7 @@ router.get('/student/budget-game/state', requireSelfOrStaff(), async (req, res) 
             bills: BILLS,
             bills_total: round2(BILLS_TOTAL),
             bills_paid_this_period: billsPaidThisPeriod,
-            store: STORE_ITEMS,
+            store,
             transactions: txns
         });
     } catch (err) {
@@ -303,11 +370,13 @@ router.post('/student/budget-game/pay-bills', requireSelfOrStaff(), async (req, 
 router.post('/student/budget-game/buy', requireSelfOrStaff(), async (req, res) => {
     const { student_id, item_key } = req.body || {};
     if (!student_id || !item_key) return res.status(400).json({ error: 'student_id and item_key required' });
-    const item = ALL_ITEMS[item_key];
-    if (!item) return res.status(400).json({ error: 'Unknown item' });
     try {
         const connection = await getDbConnection();
         await ensureTables(connection);
+
+        const item = await getActiveItemByKey(connection, item_key);
+        if (!item) { await connection.release(); return res.status(400).json({ error: 'Unknown item' }); }
+
         const [[state]] = await connection.execute(
             'SELECT * FROM budget_game_state WHERE student_id = ?', [student_id]
         );
@@ -449,6 +518,96 @@ router.get('/admin/budget-game/leaderboard', requireStaff, async (req, res) => {
     } catch (err) {
         console.error('[budget-game] leaderboard error:', err);
         res.status(500).json({ error: 'Failed to compute leaderboard' });
+    }
+});
+
+// ============================================================================
+// STORE ITEM MANAGEMENT (staff -- lets a teacher add real student-submitted
+// photos / new items without a code deploy)
+// ============================================================================
+
+// GET /admin/budget-game/store-items -- every item, active or not, for the
+// management page's own list (a deactivated item still needs to show up
+// there so it can be reactivated or re-edited).
+router.get('/admin/budget-game/store-items', requireStaff, async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await ensureTables(connection);
+        const [rows] = await connection.execute(
+            `SELECT id, item_key, category, label, price, image_url, sort_order, active FROM budget_game_store_items ORDER BY category, sort_order, label`
+        );
+        await connection.release();
+        res.json({ items: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load store items.' }); }
+});
+
+// POST /admin/budget-game/store-items -- multipart form: category, label,
+// price, image (optional file)
+router.post('/admin/budget-game/store-items', requireStaff, upload.single('image'), async (req, res) => {
+    const { category, label } = req.body || {};
+    const price = Number(req.body?.price);
+    if (!category || !label || !(price > 0)) {
+        return res.status(400).json({ error: 'category, label, and a positive price are required' });
+    }
+    try {
+        const connection = await getDbConnection();
+        await ensureTables(connection);
+
+        let itemKey = slugify(label);
+        const [[existing]] = await connection.execute('SELECT id FROM budget_game_store_items WHERE item_key = ?', [itemKey]);
+        if (existing) itemKey = `${itemKey}_${Date.now().toString().slice(-5)}`;
+
+        let imageUrl = null;
+        if (req.file) {
+            imageUrl = saveStoreImage(category, itemKey, req.file);
+            if (!imageUrl) { await connection.release(); return res.status(400).json({ error: 'That image file type is not allowed. Use JPG, PNG, WEBP, or GIF.' }); }
+        }
+
+        const [[{ maxSort }]] = await connection.execute(
+            'SELECT COALESCE(MAX(sort_order), 0) AS maxSort FROM budget_game_store_items WHERE category = ?', [category]
+        );
+
+        await connection.execute(
+            `INSERT INTO budget_game_store_items (item_key, category, label, price, image_url, sort_order) VALUES (?, ?, ?, ?, ?, ?)`,
+            [itemKey, category, label.trim().slice(0, 100), round2(price), imageUrl, maxSort + 1]
+        );
+        await connection.release();
+        res.json({ success: true, item_key: itemKey, image_url: imageUrl });
+    } catch (err) {
+        console.error('[budget-game] create store item error:', err);
+        res.status(500).json({ error: 'Failed to add item.' });
+    }
+});
+
+// PATCH /admin/budget-game/store-items/:id -- multipart or JSON: label,
+// price, active, image (optional replacement file)
+router.patch('/admin/budget-game/store-items/:id', requireStaff, upload.single('image'), async (req, res) => {
+    const { id } = req.params;
+    try {
+        const connection = await getDbConnection();
+        await ensureTables(connection);
+        const [[item]] = await connection.execute('SELECT * FROM budget_game_store_items WHERE id = ?', [id]);
+        if (!item) { await connection.release(); return res.status(404).json({ error: 'Item not found.' }); }
+
+        const updates = [];
+        const values = [];
+        if (req.body?.label) { updates.push('label = ?'); values.push(String(req.body.label).trim().slice(0, 100)); }
+        if (req.body?.price) { updates.push('price = ?'); values.push(round2(Number(req.body.price))); }
+        if (req.body?.active !== undefined) { updates.push('active = ?'); values.push(req.body.active === 'true' || req.body.active === true || req.body.active === '1' ? 1 : 0); }
+        if (req.file) {
+            const imageUrl = saveStoreImage(item.category, item.item_key, req.file);
+            if (!imageUrl) { await connection.release(); return res.status(400).json({ error: 'That image file type is not allowed. Use JPG, PNG, WEBP, or GIF.' }); }
+            updates.push('image_url = ?'); values.push(imageUrl);
+        }
+        if (updates.length === 0) { await connection.release(); return res.status(400).json({ error: 'Nothing to update.' }); }
+
+        values.push(id);
+        await connection.execute(`UPDATE budget_game_store_items SET ${updates.join(', ')} WHERE id = ?`, values);
+        await connection.release();
+        res.json({ success: true });
+    } catch (err) {
+        console.error('[budget-game] update store item error:', err);
+        res.status(500).json({ error: 'Failed to update item.' });
     }
 });
 

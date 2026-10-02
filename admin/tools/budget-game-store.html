@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | The Paycheck -- Store Manager</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=22"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 1000px; margin: 2.5rem auto; }
+    .item-row-img { width: 56px; height: 56px; border-radius: .5rem; object-fit: cover; background: #eef1f4; }
+    .item-row-img-placeholder { width: 56px; height: 56px; border-radius: .5rem; background: #eef1f4; display: flex; align-items: center; justify-content: center; color: #c3cad1; font-size: 1.3rem; }
+    .inactive-row { opacity: .5; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <h2 class="gochi text-primary mb-1"><i class="fas fa-store me-2"></i>The Paycheck -- Store Manager</h2>
+      <p class="text-muted mb-4">Add new items (with a real photo students sent in) or retire old ones. Changes show up in the store immediately.</p>
+
+      <form id="addItemForm" class="row g-3 align-items-end border rounded p-3 mb-4 bg-light">
+        <div class="col-md-3">
+          <label class="form-label small fw-bold">Category</label>
+          <select id="newCategory" class="form-select" required>
+            <option value="groceries">Groceries</option>
+            <option value="clothes">Clothes</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small fw-bold">Item Name</label>
+          <input type="text" id="newLabel" class="form-control" placeholder="e.g. Energy Drink" required maxlength="100">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small fw-bold">Price</label>
+          <input type="number" id="newPrice" class="form-control" min="0.01" step="0.01" placeholder="0.00" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small fw-bold">Photo (optional)</label>
+          <input type="file" id="newImage" class="form-control" accept="image/png,image/jpeg,image/webp,image/gif">
+        </div>
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-primary fw-bold w-100" id="addItemBtn"><i class="fas fa-plus"></i></button>
+        </div>
+        <div id="addItemMsg" class="small"></div>
+      </form>
+
+      <div id="itemsList"><div class="text-center p-4 text-muted"><div class="spinner-border text-primary mb-2"></div><br>Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script type="module" src="/js/admin/budget-game-store.js?v=1"></script>
+</body>
+</html>
