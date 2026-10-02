@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { resolveCourseId, getCurrentSchoolYear, isStaffSession, requireSelfOrStaff, timeToMinutes } = require('../helpers');
+const { resolveCourseId, getCurrentSchoolYear, isStaffSession, requireSelfOrStaff, requireStaff, timeToMinutes } = require('../helpers');
+const { runAutoClockout } = require('../jobs/autoClockout');
 
 // WD1/WD2/AS are the paid "job simulation" courses this employee-portal
 // payroll UI models; CS clocks in/out too (server/routes/timeclock.js), but
@@ -183,6 +184,21 @@ router.get('/admin/payroll/timesheets-period', async (req, res) => {
         await connection.release();
         res.json({ timesheets: rows.map(r => ({ ...r, date: fmtDate(r.date) })) });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch period timesheets' }); }
+});
+
+// POST /admin/payroll/auto-clockout?date=YYYY-MM-DD -- manually force the
+// same sweep server/jobs/autoClockout.js runs automatically every day at
+// 2:30 PM, for whichever date the teacher is currently reviewing (defaults
+// to today). Staff-only since it writes real clock_out times.
+router.post('/admin/payroll/auto-clockout', requireStaff, async (req, res) => {
+    const date = req.body?.date || req.query?.date;
+    try {
+        const result = await runAutoClockout(date);
+        res.json({ success: true, ...result });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: 'Failed to run auto clock-out' });
+    }
 });
 
 router.post('/admin/update-student-role', async (req, res) => {

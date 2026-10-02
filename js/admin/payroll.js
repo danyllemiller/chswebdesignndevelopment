@@ -280,6 +280,7 @@ function adaptTimesheetRow(row, periodStr) {
         clockOutTime,
         statusIn: clockInTime ? calcClockInStatus(clockInTime, dateStr, periodStr) : null,
         statusOut: clockOutTime ? calcClockOutStatus(clockOutTime, dateStr, periodStr) : null,
+        autoClockedOut: !!row.auto_clocked_out,
         notebookIn: {
             question: "Clock-in knowledge check",
             answerGiven: row.in_answer || "",
@@ -387,6 +388,9 @@ async function init() {
 
     const btnSaveCal = document.getElementById('btnSaveCalendar');
     if (btnSaveCal) btnSaveCal.addEventListener('click', saveCalendarConfig);
+
+    const btnAutoClockout = document.getElementById('btnAutoClockout');
+    if (btnAutoClockout) btnAutoClockout.addEventListener('click', runAutoClockoutForSelectedDate);
 
     document.addEventListener('click', (e) => {
         const historyLink = e.target.closest('.view-student-history');
@@ -762,7 +766,9 @@ async function loadTimesheets(filteredStudents) {
             const outTime = ts?.clockOutTime
                 ? new Date(ts.clockOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 : '<span class="text-danger small">No Punch</span>';
-            const outStatus = ts?.statusOut === "Early Departure"
+            const outStatus = ts?.autoClockedOut
+                ? `<span class="badge bg-warning text-dark" title="Student never clocked out -- the system filled in the period's scheduled end time.">AUTO</span>`
+                : ts?.statusOut === "Early Departure"
                 ? `<span class="badge bg-danger">EARLY</span>`
                 : (ts?.statusOut ? `<span class="badge bg-success text-uppercase">${ts.statusOut}</span>` : '');
 
@@ -861,6 +867,40 @@ function populateCalendarModal() {
 }
 
 // ============================================================================
+// AUTO CLOCK-OUT (manual trigger -- same sweep runs automatically at 2:30 PM)
+// ============================================================================
+async function runAutoClockoutForSelectedDate() {
+    const btn = document.getElementById('btnAutoClockout');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking…';
+    try {
+        const res = await fetch('/api/admin/payroll/auto-clockout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date: currentDate })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Failed');
+
+        if (!data.ran) {
+            alert(data.reason || 'No school on this date -- nothing to close out.');
+        } else if (data.closed === 0) {
+            alert('Nothing to close out -- every clock-in on this date already has a clock-out.');
+        } else {
+            alert(`Closed out ${data.closed} missed punch${data.closed === 1 ? '' : 'es'} for ${currentDate}, using each student's scheduled period end time.` +
+                (data.skipped ? ` (${data.skipped} skipped -- no bell-schedule time found for that period.)` : ''));
+        }
+        applyFiltersAndRender();
+    } catch (e) {
+        alert('Auto clock-out failed: ' + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    }
+}
+
+// ============================================================================
 // AUDIT MODAL: VIEW INDIVIDUAL STUDENT HISTORY
 // ============================================================================
 async function viewStudentHistory(studentId) {
@@ -917,7 +957,8 @@ async function viewStudentHistory(studentId) {
 
                 const friendlyDate = new Date(String(ts.date).split('T')[0] + "T12:00:00").toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
                 const inTime = ts.clockInTime ? new Date(ts.clockInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--';
-                const outTime = ts.clockOutTime ? new Date(ts.clockOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '<span class="text-danger">Missed Punch</span>';
+                let outTime = ts.clockOutTime ? new Date(ts.clockOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '<span class="text-danger">Missed Punch</span>';
+                if (ts.autoClockedOut) outTime += ' <span class="badge bg-warning text-dark" title="Student never clocked out -- the system filled in the period\'s scheduled end time.">AUTO</span>';
 
                 let durationText = durationMins > 0 ? `${Math.floor(durationMins / 60)}h ${durationMins % 60}m` : '-';
                 if (durationMins > 0 && durationMins < 60) durationText = `${durationMins}m`;
