@@ -43,7 +43,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
 
     btn.disabled = true;
     try {
-        await apiFetch('/api/student/tardy-form/submit', {
+        const data = await apiFetch('/api/student/tardy-form/submit', {
             method: 'POST',
             body: JSON.stringify({
                 reason, had_pass: hadPass, notes,
@@ -52,6 +52,12 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
         });
         document.getElementById('formArea').classList.add('d-none');
         document.getElementById('successArea').classList.remove('d-none');
+        const successText = document.getElementById('successText');
+        if (data.auto_marked) {
+            successText.textContent = `You're marked tardy for ${data.period} — no need to scan in, you're all set.`;
+        } else {
+            successText.textContent = "Go scan your ID at the door now — it'll mark you tardy instead of blocking you.";
+        }
     } catch (e) {
         msg.classList.add('text-danger', 'fw-bold');
         msg.textContent = e.message || 'Could not submit -- try again.';

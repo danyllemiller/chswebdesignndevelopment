@@ -35,6 +35,38 @@ async function getEffectiveTardyCount(connection, studentId) {
     return effectiveCount;
 }
 
+// Which of THIS student's own enrolled periods (primary + additional
+// sections) is actually in session right now, per today's real bell
+// schedule -- used so submitting the tardy form alone can mark them tardy
+// immediately, without also needing a scan. Returns null if nothing
+// resolves (outside any period's time window, or a day type with no
+// school), in which case the caller falls back to the old scan-required
+// behavior rather than guessing.
+async function resolveCurrentPeriodForStudent(connection, studentId) {
+    const [[student]] = await connection.execute(
+        'SELECT section_id FROM students WHERE student_id = ? LIMIT 1', [studentId]
+    );
+    if (!student) return null;
+    const [extra] = await connection.execute('SELECT section_id FROM student_additional_sections WHERE student_id = ?', [studentId]);
+    const enrolledPeriods = new Set([realPeriod(student.section_id), ...extra.map(r => realPeriod(r.section_id))]);
+
+    const today = getLocalDateStr();
+    const dayTypes = await getDayTypes(connection);
+    const scheduleKey = getBellScheduleKeyForDate(dayTypes, today);
+    if (!scheduleKey) return null;
+
+    const [periods] = await connection.execute(
+        'SELECT period_label, start_time, end_time FROM bell_schedule WHERE schedule_type = ?',
+        [scheduleKey]
+    );
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+    const current = periods.find(p =>
+        enrolledPeriods.has(p.period_label) && nowMin >= timeToMinutes(p.start_time) && nowMin <= timeToMinutes(p.end_time)
+    );
+    return current ? current.period_label : null;
+}
+
 // GET /admin/attendance/current-period -- auto-detects which real
 // bell-schedule period is in session right now, for the kiosk's header
 // (still overridable client-side, e.g. taking attendance for a period that
@@ -354,7 +386,7 @@ router.post('/student/tardy-form/submit', requireLogin, async (req, res) => {
         }
 
         const today = getLocalDateStr();
-        await connection.execute(
+        const [pendingResult] = await connection.execute(
             `INSERT INTO tardy_form_pending (student_id, date, reason, had_pass, notes, reflection_1, reflection_2, reflection_3, reflection_4)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
              ON DUPLICATE KEY UPDATE reason = VALUES(reason), had_pass = VALUES(had_pass), notes = VALUES(notes),
@@ -363,8 +395,38 @@ router.post('/student/tardy-form/submit', requireLogin, async (req, res) => {
                submitted_at = NOW(), consumed_at = NULL`,
             [studentId, today, reason, hadPass, notes, reflection1, reflection2, reflection3, reflection4]
         );
+
+        // The form itself is the proof they're on their way in -- mark them
+        // tardy right now for whichever of their own periods is actually in
+        // session, same as a real tardy scan would, instead of making staff
+        // also scan them at the door. Only does this when a period resolves
+        // confidently and nothing's recorded for it yet today; otherwise
+        // falls back to the old scan-required flow untouched.
+        let autoMarked = false, autoPeriod = null;
+        const resolvedPeriod = await resolveCurrentPeriodForStudent(connection, studentId);
+        if (resolvedPeriod) {
+            const [[existingAttendance]] = await connection.execute(
+                'SELECT id FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
+                [studentId, resolvedPeriod, today]
+            );
+            if (!existingAttendance) {
+                const [[studentRow]] = await connection.execute('SELECT section_id FROM students WHERE student_id = ?', [studentId]);
+                const [passResult] = await connection.execute(
+                    'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
+                    [studentId, studentRow?.section_id || resolvedPeriod, reason]
+                );
+                await connection.execute(
+                    'INSERT INTO attendance (student_id, section_id, date, status, scanned_at, tardy_pass_id) VALUES (?, ?, ?, ?, NOW(), ?)',
+                    [studentId, resolvedPeriod, today, 'tardy', passResult.insertId]
+                );
+                await connection.execute('UPDATE tardy_form_pending SET consumed_at = NOW() WHERE id = ?', [pendingResult.insertId]);
+                autoMarked = true;
+                autoPeriod = resolvedPeriod;
+            }
+        }
+
         await connection.release();
-        res.json({ success: true });
+        res.json({ success: true, auto_marked: autoMarked, period: autoPeriod });
     } catch (err) {
         console.error('[attendance] tardy form error:', err);
         res.status(500).json({ error: 'Failed to submit tardy form.' });
