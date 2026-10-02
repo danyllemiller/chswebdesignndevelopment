@@ -24,6 +24,10 @@ const noIdToggle = document.getElementById('noIdToggle');
 const noIdPanel = document.getElementById('noIdPanel');
 const nameSearch = document.getElementById('nameSearch');
 const nameList = document.getElementById('nameList');
+const rosterToggle = document.getElementById('rosterToggle');
+const rosterPanel = document.getElementById('rosterPanel');
+const rosterBody = document.getElementById('rosterBody');
+let rosterPanelOpen = false;
 
 function focusInput() {
     input.value = '';
@@ -90,7 +94,25 @@ async function refreshTally() {
         document.getElementById('tallyTardy').textContent = rows.filter(r => r.status === 'tardy').length;
         document.getElementById('tallyAbsent').textContent = rows.filter(r => !r.status).length;
         renderNameList();
+        renderRosterTable();
     } catch (e) { /* tally is a convenience, not critical */ }
+}
+
+function renderRosterTable() {
+    if (currentRoster.length === 0) {
+        rosterBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No students found for this period.</td></tr>';
+        return;
+    }
+    rosterBody.innerHTML = currentRoster.map(r => {
+        const statusClass = r.status === 'present' ? 'status-present' : r.status === 'tardy' ? 'status-tardy' : 'status-none';
+        const statusText = r.status ? r.status[0].toUpperCase() + r.status.slice(1) : 'Not yet';
+        const time = r.scanned_at ? new Date(r.scanned_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—';
+        return `<tr>
+            <td class="fw-bold">${r.first_name} ${r.last_name}</td>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            <td>${time}</td>
+        </tr>`;
+    }).join('');
 }
 
 function renderNameList() {
@@ -167,6 +189,7 @@ input.addEventListener('keydown', (e) => {
 
 document.addEventListener('click', (e) => {
     if (noIdPanelOpen || noIdPanel.contains(e.target) || e.target === noIdToggle) return;
+    if (rosterPanel.contains(e.target) || e.target === rosterToggle) return;
     if (document.activeElement !== input) focusInput();
 });
 setInterval(() => {
@@ -197,6 +220,15 @@ nameList.addEventListener('click', (e) => {
     const btn = e.target.closest('.name-btn');
     if (!btn) return;
     handleScan(btn.dataset.studentId);
+});
+
+rosterToggle.addEventListener('click', () => {
+    rosterPanelOpen = !rosterPanelOpen;
+    rosterPanel.classList.toggle('d-none', !rosterPanelOpen);
+    rosterToggle.innerHTML = rosterPanelOpen
+        ? '<i class="fas fa-xmark me-1"></i>Hide List'
+        : '<i class="fas fa-list me-1"></i>View List';
+    if (rosterPanelOpen) refreshTally();
 });
 
 loadCurrentPeriod();

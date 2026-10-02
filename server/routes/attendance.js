@@ -41,6 +41,18 @@ router.get('/admin/attendance/current-period', requireStaff, async (req, res) =>
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to resolve current period.' }); }
 });
 
+// GET /admin/attendance/periods -- every real period label that ever
+// appears in the bell schedule (not just today's), for a date/period picker
+// that needs to work for a day other than today.
+router.get('/admin/attendance/periods', requireStaff, async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.execute(`SELECT DISTINCT period_label FROM bell_schedule ORDER BY period_label`);
+        await connection.release();
+        res.json({ periods: rows.map(r => r.period_label) });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load periods.' }); }
+});
+
 // POST /admin/attendance/scan -- { student_id, section_id }
 router.post('/admin/attendance/scan', requireStaff, async (req, res) => {
     const { student_id, section_id } = req.body || {};

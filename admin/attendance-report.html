@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Attendance Report</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=21"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 900px; margin: 2.5rem auto; }
+    .status-badge { font-weight: 700; font-size: .8rem; padding: .3rem .65rem; border-radius: 999px; }
+    .status-present { background: #d1f2e0; color: #0f5132; }
+    .status-tardy { background: #fff3cd; color: #997404; }
+    .status-absent { background: #fde0de; color: #842029; }
+    .status-none { background: #e9ecef; color: #6c757d; }
+    .report-table td, .report-table th { vertical-align: middle; }
+    .summary-pill { font-weight: 800; font-size: 1.1rem; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container tools-card">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+        <div>
+          <h2 class="gochi text-primary mb-1"><i class="fas fa-clipboard-check me-2"></i>Attendance Report</h2>
+          <p class="text-muted mb-0">Who was here, tardy, or absent for any period, any day.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <div>
+            <label class="form-label small fw-bold text-muted mb-1">Date</label>
+            <input type="date" id="dateInput" class="form-control border-primary fw-bold text-primary">
+          </div>
+          <div>
+            <label class="form-label small fw-bold text-muted mb-1">Period</label>
+            <select id="periodSelect" class="form-select border-primary fw-bold text-primary"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-4 mb-3">
+        <div class="summary-pill text-success"><span id="sumPresent">0</span> Present</div>
+        <div class="summary-pill text-warning"><span id="sumTardy">0</span> Tardy</div>
+        <div class="summary-pill text-danger"><span id="sumAbsent">0</span> Absent</div>
+        <div class="summary-pill text-secondary"><span id="sumNone">0</span> Not Marked</div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered report-table bg-white">
+          <thead class="table-primary">
+            <tr><th>Student</th><th>Status</th><th>Time</th></tr>
+          </thead>
+          <tbody id="reportBody">
+            <tr><td colspan="3" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script type="module" src="/js/admin/attendance-report.js?v=1"></script>
+</body>
+</html>

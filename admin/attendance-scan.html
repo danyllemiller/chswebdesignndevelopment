@@ -45,6 +45,13 @@
     .name-btn:hover { border-color: #0d6efd; }
     .name-btn.marked-present { border-color: #198754; color: #198754; }
     .name-btn.marked-tardy { border-color: #e8a500; color: #b8860b; }
+    .roster-table { max-height: 320px; display: block; overflow-y: auto; }
+    .roster-table thead, .roster-table tbody, .roster-table tr { display: table; width: 100%; table-layout: fixed; }
+    .roster-table tbody { display: block; max-height: 280px; overflow-y: auto; }
+    .status-badge { font-weight: 700; font-size: .8rem; padding: .25rem .6rem; border-radius: 999px; }
+    .status-present { background: #d1f2e0; color: #0f5132; }
+    .status-tardy { background: #fff3cd; color: #997404; }
+    .status-none { background: #e9ecef; color: #6c757d; }
   </style>
 </head>
 <body>
@@ -67,6 +74,13 @@
       <div><span class="count text-success" id="tallyPresent">0</span>Present</div>
       <div><span class="count text-warning" id="tallyTardy">0</span>Tardy</div>
       <div><span class="count text-secondary" id="tallyAbsent">0</span>Not Yet Scanned</div>
+      <button id="rosterToggle" class="btn btn-sm btn-outline-primary ms-auto fw-bold"><i class="fas fa-list me-1"></i>View List</button>
+    </div>
+    <div id="rosterPanel" class="d-none border-bottom">
+      <table class="table table-sm mb-0 roster-table">
+        <thead class="table-light"><tr><th>Student</th><th>Status</th><th>Time</th></tr></thead>
+        <tbody id="rosterBody"></tbody>
+      </table>
     </div>
     <div class="scan-body">
       <i class="fas fa-id-card fa-2x text-primary mb-3"></i>
