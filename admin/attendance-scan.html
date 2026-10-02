@@ -44,9 +44,7 @@
     .name-list-item { font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
     .name-list-item.marked-present { color: #198754; }
     .name-list-item.marked-tardy { color: #b8860b; }
-    .roster-table { max-height: 320px; display: block; overflow-y: auto; }
     .roster-table thead, .roster-table tbody, .roster-table tr { display: table; width: 100%; table-layout: fixed; }
-    .roster-table tbody { display: block; max-height: 280px; overflow-y: auto; }
     .status-badge { font-weight: 700; font-size: .8rem; padding: .25rem .6rem; border-radius: 999px; }
     .status-present { background: #d1f2e0; color: #0f5132; }
     .status-tardy { background: #fff3cd; color: #997404; }
@@ -99,7 +97,7 @@
       <button id="noIdToggle" class="btn btn-link btn-sm mt-3 fw-bold text-decoration-none"><i class="fas fa-magnifying-glass me-1"></i>No ID? Click your name instead</button>
       <div id="noIdPanel" class="d-none mt-2 text-start mx-auto" style="max-width: 420px;">
         <input type="text" id="nameSearch" class="form-control mb-2" placeholder="Type to search names…">
-        <div id="nameList" class="list-group" style="max-height: 320px; overflow-y: auto;"></div>
+        <div id="nameList" class="list-group"></div>
       </div>
     </div>
   </div>
