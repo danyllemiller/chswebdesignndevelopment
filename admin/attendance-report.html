@@ -23,7 +23,9 @@
 
   <style>
     body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
-    .tools-card { max-width: 900px; margin: 2.5rem auto; }
+    .tools-card { max-width: 1000px; margin: 2.5rem auto; }
+    .form-q { font-weight: 700; font-size: .85rem; margin-bottom: .25rem; color: #495057; }
+    .form-a { background: #f8f9fa; border-radius: .4rem; padding: .5rem .75rem; margin-bottom: .75rem; font-size: .92rem; }
     .status-badge { font-weight: 700; font-size: .8rem; padding: .3rem .65rem; border-radius: 999px; }
     .status-present { background: #d1f2e0; color: #0f5132; }
     .status-tardy { background: #fff3cd; color: #997404; }
@@ -71,12 +73,27 @@
       <div class="table-responsive">
         <table class="table table-hover table-bordered report-table bg-white">
           <thead class="table-primary">
-            <tr><th>Student</th><th>Status</th><th>Time</th><th>Fix</th></tr>
+            <tr><th>Student</th><th>Status</th><th>Time</th><th>Form</th><th>Fix</th></tr>
           </thead>
           <tbody id="reportBody">
-            <tr><td colspan="4" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading…</td></tr>
+            <tr><td colspan="5" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading…</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="formModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="formModalTitle">Tardy Form</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="formModalBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary fw-bold" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -85,6 +102,6 @@
 <div id="footer-placeholder"></div>
 
 <script src="/js/bootstrap.bundle.js"></script>
-<script type="module" src="/js/admin/attendance-report.js?v=1"></script>
+<script type="module" src="/js/admin/attendance-report.js?v=2"></script>
 </body>
 </html>

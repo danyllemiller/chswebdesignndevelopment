@@ -18,12 +18,17 @@
   <script src="/js/jquery.js"></script>
   <script src="/js/loader.js?v=22"></script>
   <script type="module" src="/js/auth-guard.js?v=1"></script>
+
+  <style>
+    .reflection-block { background: #fff8e6; border: 1px solid #ffe4a6; border-radius: .6rem; padding: 1rem 1.1rem; }
+    .reflection-q { font-weight: 700; font-size: .92rem; margin-bottom: .35rem; }
+  </style>
 </head>
 <body class="bg-light">
 
 <div id="nav-placeholder"></div>
 
-<div class="container my-4" style="max-width: 560px;">
+<div class="container my-4" style="max-width: 600px;">
   <div class="text-center mb-4">
     <h1 class="gochi text-primary display-6 fw-bold mb-1"><i class="fas fa-triangle-exclamation me-2 text-warning"></i>Running Late?</h1>
     <p class="text-muted mb-0">Fill this out <strong>before</strong> you scan in, so your scan counts as tardy instead of getting stuck.</p>
@@ -32,8 +37,46 @@
   <div class="card shadow-sm">
     <div class="card-body p-4">
       <div id="formArea">
-        <label class="form-label fw-bold" for="reasonInput">Why are you late?</label>
-        <textarea id="reasonInput" class="form-control" rows="3" maxlength="500" placeholder="e.g. Car trouble, overslept, doctor appointment..."></textarea>
+        <div class="mb-3">
+          <label class="form-label fw-bold" for="reasonInput">Reason for being late</label>
+          <textarea id="reasonInput" class="form-control" rows="2" maxlength="500" placeholder="e.g. Car trouble, overslept, doctor appointment..." required></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold d-block">Did you have a signed pass?</label>
+          <div class="btn-group w-100" role="group">
+            <input type="radio" class="btn-check" name="hadPass" id="passYes" value="yes" autocomplete="off">
+            <label class="btn btn-outline-success fw-bold" for="passYes">Yes</label>
+            <input type="radio" class="btn-check" name="hadPass" id="passNo" value="no" autocomplete="off">
+            <label class="btn btn-outline-secondary fw-bold" for="passNo">No</label>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold" for="notesInput">Anything I should know? <span class="fw-normal text-muted">(optional)</span></label>
+          <textarea id="notesInput" class="form-control" rows="2" maxlength="1000" placeholder="If something is going on, you can write it here or just say &quot;talk to me.&quot;"></textarea>
+        </div>
+
+        <div id="reflectionArea" class="d-none mb-3">
+          <p class="small fw-bold text-warning-emphasis mb-2"><i class="fas fa-pen-to-square me-1"></i>Complete this section too -- this is your 2nd tardy (or more) this quarter.</p>
+          <div class="reflection-block mb-2">
+            <div class="reflection-q">1. What specifically got in the way of arriving on time today? Be concrete — "I stopped to talk to a friend by the gym" is more useful than "I was late."</div>
+            <textarea id="reflection1" class="form-control" rows="2" maxlength="1000"></textarea>
+          </div>
+          <div class="reflection-block mb-2">
+            <div class="reflection-q">2. Was this a one-time thing, or is it becoming a pattern?</div>
+            <textarea id="reflection2" class="form-control" rows="2" maxlength="1000"></textarea>
+          </div>
+          <div class="reflection-block mb-2">
+            <div class="reflection-q">3. What is ONE thing you will change before the next class? Make it small and specific enough that you'll actually do it.</div>
+            <textarea id="reflection3" class="form-control" rows="2" maxlength="1000"></textarea>
+          </div>
+          <div class="reflection-block">
+            <div class="reflection-q">4. Is there anything I could do that would make it easier for you to get here on time?</div>
+            <textarea id="reflection4" class="form-control" rows="2" maxlength="1000"></textarea>
+          </div>
+        </div>
+
         <div id="formMsg" class="small mt-2"></div>
         <button id="submitBtn" class="btn btn-primary fw-bold w-100 mt-3"><i class="fas fa-paper-plane me-1"></i>Submit &amp; Go Scan In</button>
       </div>
@@ -48,6 +91,6 @@
 
 <div id="footer-placeholder"></div>
 
-<script type="module" src="/js/student/tardy-form.js?v=1"></script>
+<script type="module" src="/js/student/tardy-form.js?v=2"></script>
 </body>
 </html>

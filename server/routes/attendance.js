@@ -10,9 +10,30 @@
 const express = require('express');
 const router = express.Router();
 const { getDbConnection } = require('../db');
-const { requireStaff, requireLogin, timeToMinutes } = require('../helpers');
-const { getDayTypes, getBellScheduleKeyForDate, getLocalDateStr } = require('../tardyLogic');
+const { requireStaff, requireLogin, timeToMinutes, getCurrentSchoolYear } = require('../helpers');
+const { getDayTypes, getBellScheduleKeyForDate, getLocalDateStr, computeEffectiveCount } = require('../tardyLogic');
 const { GRACE_MINUTES, ensureAttendanceTables, realPeriod, getEnrolledStudents } = require('../lib/attendanceStore');
+
+// Same effective-count computation server/routes/tardy.js uses for the
+// consequence ladder -- this is what decides whether the tardy form's
+// 2nd-tardy-and-after reflection section is required for this student
+// right now, so "2nd tardy" always means the same thing here as it does
+// on the Tardy Tracker.
+async function getEffectiveTardyCount(connection, studentId) {
+    const currentYear = getCurrentSchoolYear();
+    const [rows] = await connection.execute(
+        `SELECT t.period, t.created_at, s.section_id
+         FROM tardy_passes t
+         LEFT JOIN students s ON s.student_id = t.student_id
+         WHERE t.student_id = ? AND (s.archived IS NULL OR s.archived = 0) AND s.school_year = ?`,
+        [studentId, currentYear]
+    );
+    if (rows.length === 0) return 0;
+    const period = rows[0].period || rows[0].section_id || '';
+    const tardyDates = rows.map(r => getLocalDateStr(new Date(r.created_at)));
+    const { effectiveCount } = await computeEffectiveCount(connection, period, tardyDates);
+    return effectiveCount;
+}
 
 // GET /admin/attendance/current-period -- auto-detects which real
 // bell-schedule period is in session right now, for the kiosk's header
@@ -284,21 +305,63 @@ router.post('/admin/attendance/ic-sync', requireStaff, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update IC-sync status.' }); }
 });
 
-// POST /student/tardy-form/submit -- { reason }. student_id always comes
-// from the session, never the request body, so a student can only ever
-// file this for themselves.
+// GET /student/tardy-form/status -- tells the form whether this student
+// needs to fill out the 2nd-tardy-and-after reflection section right now.
+router.get('/student/tardy-form/status', requireLogin, async (req, res) => {
+    const studentId = req.session.user?.student_id;
+    if (!studentId) return res.status(400).json({ error: 'No student account on this session.' });
+    try {
+        const connection = await getDbConnection();
+        const effectiveCount = await getEffectiveTardyCount(connection, studentId);
+        await connection.release();
+        res.json({ effective_count: effectiveCount, needs_reflection: effectiveCount >= 1 });
+    } catch (err) {
+        console.error('[attendance] tardy form status error:', err);
+        res.status(500).json({ error: 'Failed to check tardy status.' });
+    }
+});
+
+// POST /student/tardy-form/submit -- { reason, had_pass, notes,
+// reflection_1..4 }. student_id always comes from the session, never the
+// request body, so a student can only ever file this for themselves.
 router.post('/student/tardy-form/submit', requireLogin, async (req, res) => {
     const studentId = req.session.user?.student_id;
     if (!studentId) return res.status(400).json({ error: 'No student account on this session.' });
+
     const reason = String(req.body?.reason || '').trim().slice(0, 500);
+    const hadPass = req.body?.had_pass === 'yes' ? 'yes' : req.body?.had_pass === 'no' ? 'no' : '';
+    const notes = String(req.body?.notes || '').trim().slice(0, 1000);
+    const reflection1 = String(req.body?.reflection_1 || '').trim().slice(0, 1000);
+    const reflection2 = String(req.body?.reflection_2 || '').trim().slice(0, 1000);
+    const reflection3 = String(req.body?.reflection_3 || '').trim().slice(0, 1000);
+    const reflection4 = String(req.body?.reflection_4 || '').trim().slice(0, 1000);
+
+    if (!reason || !hadPass) {
+        return res.status(400).json({ error: 'Reason for being late and whether you had a signed pass are both required.' });
+    }
+
     try {
         const connection = await getDbConnection();
         await ensureAttendanceTables(connection);
+
+        // Recompute server-side rather than trusting the client's own
+        // "was reflection shown" state -- a student could otherwise submit
+        // with those fields simply left blank.
+        const effectiveCount = await getEffectiveTardyCount(connection, studentId);
+        if (effectiveCount >= 1 && (!reflection1 || !reflection2 || !reflection3 || !reflection4)) {
+            await connection.release();
+            return res.status(400).json({ error: 'This is your 2nd or later tardy this quarter -- please complete all 4 reflection questions too.' });
+        }
+
         const today = getLocalDateStr();
         await connection.execute(
-            `INSERT INTO tardy_form_pending (student_id, date, reason) VALUES (?, ?, ?)
-             ON DUPLICATE KEY UPDATE reason = VALUES(reason), submitted_at = NOW(), consumed_at = NULL`,
-            [studentId, today, reason]
+            `INSERT INTO tardy_form_pending (student_id, date, reason, had_pass, notes, reflection_1, reflection_2, reflection_3, reflection_4)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE reason = VALUES(reason), had_pass = VALUES(had_pass), notes = VALUES(notes),
+               reflection_1 = VALUES(reflection_1), reflection_2 = VALUES(reflection_2),
+               reflection_3 = VALUES(reflection_3), reflection_4 = VALUES(reflection_4),
+               submitted_at = NOW(), consumed_at = NULL`,
+            [studentId, today, reason, hadPass, notes, reflection1, reflection2, reflection3, reflection4]
         );
         await connection.release();
         res.json({ success: true });
@@ -323,15 +386,33 @@ router.get('/admin/attendance/summary', requireStaff, async (req, res) => {
             'SELECT * FROM attendance WHERE section_id = ? AND date = ?',
             [section_id, date]
         );
+        // The full tardy-form submission (reason, pass, notes, reflection)
+        // for the same date -- not just whether one existed -- so a tardy
+        // row on the report can show what the student actually wrote
+        // instead of staff having to go look it up separately.
+        const [formRows] = await connection.execute(
+            'SELECT * FROM tardy_form_pending WHERE date = ?',
+            [date]
+        );
         await connection.release();
         const byStudent = {};
         attendanceRows.forEach(r => { byStudent[r.student_id] = r; });
+        const formByStudent = {};
+        formRows.forEach(r => { formByStudent[r.student_id] = r; });
         const rows = roster
-            .map(s => ({
-                student_id: s.student_id, first_name: s.first_name, last_name: s.last_name, section_id: s.section_id,
-                status: byStudent[s.student_id]?.status || null,
-                scanned_at: byStudent[s.student_id]?.scanned_at || null
-            }))
+            .map(s => {
+                const form = formByStudent[s.student_id];
+                return {
+                    student_id: s.student_id, first_name: s.first_name, last_name: s.last_name, section_id: s.section_id,
+                    status: byStudent[s.student_id]?.status || null,
+                    scanned_at: byStudent[s.student_id]?.scanned_at || null,
+                    tardy_form: form ? {
+                        reason: form.reason, had_pass: form.had_pass, notes: form.notes,
+                        reflection_1: form.reflection_1, reflection_2: form.reflection_2,
+                        reflection_3: form.reflection_3, reflection_4: form.reflection_4
+                    } : null
+                };
+            })
             .sort((a, b) => a.last_name.localeCompare(b.last_name));
         res.json({ date, section_id, rows });
     } catch (err) {

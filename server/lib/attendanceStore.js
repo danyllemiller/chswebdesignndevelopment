@@ -38,6 +38,10 @@ async function ensureAttendanceTables(connection) {
     // One active "I'm late, here's why" claim per student per day -- a late
     // scan consumes it (sets consumed_at) so it can't cover a second late
     // scan to a different class the same day without refilling the form.
+    // Rows are never deleted after being consumed either -- this doubles as
+    // the permanent record of what the student actually wrote, since
+    // tardy_passes.reason (VARCHAR(255)) only ever gets the short "reason
+    // for being late" line, not the full form.
     await connection.execute(`
         CREATE TABLE IF NOT EXISTS tardy_form_pending (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -48,6 +52,20 @@ async function ensureAttendanceTables(connection) {
             consumed_at TIMESTAMP NULL,
             UNIQUE KEY unique_pending (student_id, date)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+    // had_pass: 'yes'/'no'. notes: the optional "anything I should know"
+    // field. reflection_1-4: only required (both client- and server-side)
+    // once this is the student's 2nd+ effective tardy this quarter -- same
+    // threshold the existing TARDY_LADDER's step-2 "written reflection"
+    // consequence already uses, computeEffectiveCount() in tardyLogic.js.
+    const tardyFormCols = ['had_pass VARCHAR(10) NULL', 'notes TEXT NULL',
+        'reflection_1 TEXT NULL', 'reflection_2 TEXT NULL', 'reflection_3 TEXT NULL', 'reflection_4 TEXT NULL'];
+    for (const colDef of tardyFormCols) {
+        const colName = colDef.split(' ')[0];
+        const [col] = await connection.execute(`SHOW COLUMNS FROM tardy_form_pending LIKE '${colName}'`);
+        if (col.length === 0) {
+            await connection.execute(`ALTER TABLE tardy_form_pending ADD COLUMN ${colDef}`);
+        }
+    }
 }
 
 // AS students carry "AS-B2" (the real B2 period, tracked separately for
