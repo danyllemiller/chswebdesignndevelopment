@@ -1093,6 +1093,60 @@ async function markEnteredIcForCurrentView() {
     }
 }
 
+// "Needs IC Entry Only" + "Verified in IC" mark everything currently
+// visible at once -- this is the column-level equivalent, one assignment
+// at a time, for going through IC entry test-by-test/assignment-by-
+// assignment instead of needing to filter everything else out of view
+// first. Scoped to whichever students are currently filtered into view
+// (same students param renderGradebook already has), not the whole roster.
+function getColumnIcStatus(students, grades, key) {
+    const targetKey = cleanKey(key);
+    let hasScored = false, allEntered = true;
+    students.forEach(s => {
+        const sGrades = grades[s.studentId] || {};
+        const matchKey = Object.keys(sGrades).find(k => cleanKey(k) === targetKey);
+        if (!matchKey) return;
+        const g = sGrades[matchKey];
+        if (g && typeof g === 'object' && g.score !== '' && g.score !== undefined && g.score !== null) {
+            hasScored = true;
+            if (!g.enteredIC) allEntered = false;
+        }
+    });
+    if (!hasScored) return 'none';
+    return allEntered ? 'done' : 'pending';
+}
+
+async function markColumnEnteredIc(key) {
+    const targetKey = cleanKey(key);
+    const pairs = [];
+    lastOrderedStudents.forEach(s => {
+        const sGrades = allGrades[s.studentId] || {};
+        const matchKey = Object.keys(sGrades).find(k => cleanKey(k) === targetKey);
+        if (!matchKey) return;
+        const g = sGrades[matchKey];
+        if (g && typeof g === 'object' && g.score !== '' && g.score !== undefined && g.score !== null && !g.enteredIC) {
+            pairs.push({ student_id: s.studentId, exam_id: matchKey });
+        }
+    });
+    if (pairs.length === 0) {
+        alert('Nothing to mark for this assignment -- either no one has a score yet, or it\'s already entered.');
+        return;
+    }
+    if (!confirm(`Mark ${pairs.length} grade(s) for "${displayTitle(key)}" as entered in IC?`)) return;
+    try {
+        const res = await fetch('/api/admin/mark-grades-entered-ic', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pairs })
+        });
+        if (!res.ok) throw new Error();
+        pairs.forEach(p => { allGrades[p.student_id][p.exam_id].enteredIC = true; });
+        applyFiltersAndRender();
+    } catch (e) {
+        alert('Failed to mark this assignment as entered. Try again.');
+    }
+}
+
 async function loadData(period) {
     try {
         const scope = period || document.getElementById('periodFilter')?.value || 'All';
@@ -1466,10 +1520,22 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
         const tagBadge = tagLetter
             ? `<span class="badge bg-light text-dark border fw-bold mb-1" style="font-size:.62rem;" title="${CATEGORY_TAG_TITLE[catForTag]}">${tagLetter}</span>`
             : '';
+        // Per-column IC marker: click to mark just THIS assignment entered
+        // in IC, instead of needing "Needs IC Entry Only" + "Verified in IC"
+        // to isolate and clear one column at a time. Icon state mirrors the
+        // blue un-entered-cell highlighting below -- green check once every
+        // scored student in this view is entered, otherwise an actionable
+        // outline icon; nothing shown at all if no one has a score yet.
+        const icStatus = getColumnIcStatus(students, grades, key);
+        const icIcon = icStatus === 'done'
+            ? `<i class="fas fa-circle-check text-success x-small mark-ic-col-btn" data-assignment="${key}" title="All entered in IC"></i>`
+            : icStatus === 'pending'
+            ? `<i class="far fa-circle-check text-white-50 x-small mark-ic-col-btn" data-assignment="${key}" title="Mark this assignment entered in IC"></i>`
+            : '';
         headHtml += `<th class="header-main-blue" data-col-index="${i}"><div class="h-100 d-flex flex-column align-items-center justify-content-end pb-2">
             ${tagBadge}
             <span class="vertical-text analytics-trigger text-white fw-bold" title="${tooltip.replace(/"/g, "'")}" data-assignment="${key}">${escapeHtml(displayTitle(key))}</span>
-            <div class="d-flex gap-1 justify-content-center w-100">${copyBtn}<i class="fas fa-edit text-white-50 x-small edit-col-btn" data-assignment="${key}"></i><i class="fas fa-trash-alt text-white-50 x-small delete-col-btn" data-assignment="${key}"></i></div></div></th>`;
+            <div class="d-flex gap-1 justify-content-center w-100">${copyBtn}${icIcon}<i class="fas fa-edit text-white-50 x-small edit-col-btn" data-assignment="${key}"></i><i class="fas fa-trash-alt text-white-50 x-small delete-col-btn" data-assignment="${key}"></i></div></div></th>`;
     });
     thead.innerHTML = headHtml + '</tr>';
 
@@ -2008,7 +2074,12 @@ document.addEventListener('click', (e) => {
     const target = e.target;
     if (target.closest('#btnTogglePrivacy')) { privacyMode = !privacyMode; applyFiltersAndRender(); return; }
     if (target.closest('.analytics-trigger')) { const t = target.closest('.analytics-trigger'); showAnalytics(t.dataset.assignment, t.innerText); return; }
-    
+
+    if (target.closest('.mark-ic-col-btn')) {
+        markColumnEnteredIc(target.closest('.mark-ic-col-btn').dataset.assignment);
+        return;
+    }
+
     if (target.closest('.copy-scores-btn')) {
         const btn = target.closest('.copy-scores-btn');
         const key = btn.dataset.assignment;
