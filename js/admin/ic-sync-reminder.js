@@ -19,14 +19,23 @@ async function load() {
             markSelectedBtn.classList.add('d-none');
             return;
         }
-        pendingBody.innerHTML = rows.map(r => `
-            <tr>
+        pendingBody.innerHTML = rows.map(r => {
+            // An excused (signed) pass on a tardy flips the real IC action --
+            // present, not tardy -- so this has to read as the opposite of
+            // the ordinary tardy badge, not a footnote on it.
+            const isExcused = r.status === 'tardy' && r.had_pass === 'yes';
+            const actionHtml = isExcused
+                ? `<span class="status-badge status-excused"><i class="fas fa-circle-check me-1"></i>Mark PRESENT</span><div class="excused-note">Signed pass on file -- excused</div>`
+                : `<span class="status-badge status-${r.status}">Mark ${r.status[0].toUpperCase() + r.status.slice(1)}</span>`;
+            return `
+            <tr class="${isExcused ? 'excused-row' : ''}">
                 <td><input type="checkbox" class="form-check-input row-check" value="${r.id}"></td>
                 <td class="fw-bold">${r.first_name} ${r.last_name}</td>
                 <td>${r.section_id}</td>
                 <td>${fmtDate(r.date)}</td>
-                <td><span class="status-badge status-${r.status}">${r.status[0].toUpperCase() + r.status.slice(1)}</span></td>
-            </tr>`).join('');
+                <td>${actionHtml}</td>
+            </tr>`;
+        }).join('');
         markSelectedBtn.classList.remove('d-none');
     } catch (e) {
         pendingBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-danger">Failed to load: ${e.message}</td></tr>`;

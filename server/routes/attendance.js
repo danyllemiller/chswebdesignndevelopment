@@ -303,10 +303,14 @@ router.get('/admin/attendance/ic-pending', requireStaff, async (req, res) => {
     try {
         const connection = await getDbConnection();
         await ensureAttendanceTables(connection);
+        // had_pass comes along so the review page can flag "excused pass ->
+        // mark PRESENT in IC" distinctly from an ordinary tardy -- those are
+        // opposite IC actions, not a detail to bury in a separate form view.
         const [rows] = await connection.execute(
-            `SELECT a.id, a.student_id, a.section_id, a.date, a.status, a.scanned_at, s.first_name, s.last_name
+            `SELECT a.id, a.student_id, a.section_id, a.date, a.status, a.scanned_at, s.first_name, s.last_name, tfp.had_pass
              FROM attendance a
              JOIN students s ON s.student_id = a.student_id
+             LEFT JOIN tardy_form_pending tfp ON tfp.student_id = a.student_id AND tfp.date = a.date
              WHERE a.status IN ('tardy', 'absent') AND (a.ic_synced IS NULL OR a.ic_synced = 0)
              ORDER BY a.date DESC, s.last_name ASC`
         );

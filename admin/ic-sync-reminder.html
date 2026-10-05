@@ -27,6 +27,9 @@
     .status-badge { font-weight: 700; font-size: .8rem; padding: .3rem .65rem; border-radius: 999px; }
     .status-tardy { background: #fff3cd; color: #997404; }
     .status-absent { background: #fde0de; color: #842029; }
+    .status-excused { background: #cfe2ff; color: #084298; }
+    .excused-row { background: #f0f6ff; }
+    .excused-note { font-size: .75rem; color: #084298; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -47,7 +50,7 @@
       <div class="table-responsive">
         <table class="table table-hover table-bordered bg-white">
           <thead class="table-warning">
-            <tr><th style="width:2.5rem;"></th><th>Student</th><th>Period</th><th>Date</th><th>Status</th></tr>
+            <tr><th style="width:2.5rem;"></th><th>Student</th><th>Period</th><th>Date</th><th>What to enter in IC</th></tr>
           </thead>
           <tbody id="pendingBody">
             <tr><td colspan="5" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading…</td></tr>
