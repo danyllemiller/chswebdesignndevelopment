@@ -1535,7 +1535,7 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
         headHtml += `<th class="header-main-blue" data-col-index="${i}"><div class="h-100 d-flex flex-column align-items-center justify-content-end pb-2">
             ${tagBadge}
             <span class="vertical-text analytics-trigger text-white fw-bold" title="${tooltip.replace(/"/g, "'")}" data-assignment="${key}">${escapeHtml(displayTitle(key))}</span>
-            <div class="d-flex gap-1 justify-content-center w-100">${copyBtn}${icIcon}<i class="fas fa-edit text-white-50 x-small edit-col-btn" data-assignment="${key}"></i><i class="fas fa-trash-alt text-white-50 x-small delete-col-btn" data-assignment="${key}"></i></div></div></th>`;
+            <div class="d-flex flex-column gap-1 align-items-center w-100">${copyBtn}${icIcon}<i class="fas fa-edit text-white-50 x-small edit-col-btn" data-assignment="${key}"></i><i class="fas fa-trash-alt text-white-50 x-small delete-col-btn" data-assignment="${key}"></i></div></div></th>`;
     });
     thead.innerHTML = headHtml + '</tr>';
 
