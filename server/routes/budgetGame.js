@@ -187,17 +187,30 @@ function saveStoreImage(category, itemKey, file) {
     return `/images/budget-game-store/${safeCategory}/${filename}`;
 }
 
-// Fixed, small-dollar "starter economy" -- deliberately scaled to match what
-// a real student payroll run actually pays out this early in the year
-// (single digits to low tens of dollars per period), not real-world prices.
-// As real pay grows over the semester the same numbers stay proportionate
-// enough to still mean something; revisit if that stops being true.
-const BILLS = [
-    { key: 'rent', label: 'Rent', amount: 6.00 },
-    { key: 'utilities', label: 'Utilities', amount: 2.00 },
-    { key: 'phone', label: 'Phone Bill', amount: 2.00 }
-];
-const BILLS_TOTAL = BILLS.reduce((sum, b) => sum + b.amount, 0);
+// Rent follows the real "30% rule" (here 1/3, so it tracks a quick mental-math
+// ratio) of this student's OWN average real paycheck -- their rent should
+// scale with their own actual income, same as every other number in this
+// game is theirs, not a shared flat rate. Utilities/phone stay small and
+// fixed; rent is the one bill meant to feel proportionate to what they
+// actually earn. Falls back to the original flat $6 for a student with no
+// finalized paycheck yet (nothing to average), so Bills never shows $0 due
+// before their first real payday.
+async function computeBillsForStudent(connection, studentId) {
+    const [[row]] = await connection.execute(
+        `SELECT AVG(sp.net_pay) AS avg_pay
+         FROM student_paystubs sp JOIN payroll_runs pr ON sp.payroll_run_id = pr.id
+         WHERE sp.student_id = ? AND pr.is_finalized = 1`,
+        [studentId]
+    );
+    const avgPay = row && row.avg_pay !== null ? Number(row.avg_pay) : null;
+    const rentAmount = avgPay ? round2(avgPay / 3) : 6.00;
+    const bills = [
+        { key: 'rent', label: 'Rent', amount: rentAmount },
+        { key: 'utilities', label: 'Utilities', amount: 2.00 },
+        { key: 'phone', label: 'Phone Bill', amount: 2.00 }
+    ];
+    return { bills, total: round2(bills.reduce((sum, b) => sum + b.amount, 0)) };
+}
 
 const SAVINGS_INTEREST_RATE = 0.02;   // guaranteed, applied per new paycheck synced
 const INVEST_MIN_RETURN = -0.10;      // simulated market swing, applied per new paycheck synced
@@ -373,6 +386,7 @@ router.get('/student/budget-game/state', requireSelfOrStaff(), async (req, res) 
         const billsPaidThisPeriod = state.bills_paid_through_paystub_id === state.last_synced_paystub_id
             && state.last_synced_paystub_id !== null;
         const store = await getStoreCatalog(connection);
+        const { bills, total: billsTotal } = await computeBillsForStudent(connection, student_id);
 
         await connection.release();
         res.json({
@@ -380,8 +394,8 @@ router.get('/student/budget-game/state', requireSelfOrStaff(), async (req, res) 
             savings: Number(state.savings_balance),
             invested: Number(state.invested_balance),
             net_worth: round2(Number(state.checking_balance) + Number(state.savings_balance) + Number(state.invested_balance)),
-            bills: BILLS,
-            bills_total: round2(BILLS_TOTAL),
+            bills,
+            bills_total: billsTotal,
             bills_paid_this_period: billsPaidThisPeriod,
             store,
             transactions: txns
@@ -408,18 +422,19 @@ router.post('/student/budget-game/pay-bills', requireSelfOrStaff(), async (req, 
             return res.status(400).json({ error: 'Bills for this period are already paid.' });
         }
 
+        const { bills, total: billsTotal } = await computeBillsForStudent(connection, student_id);
         const checking = Number(state.checking_balance);
-        if (checking < BILLS_TOTAL) {
+        if (checking < billsTotal) {
             await connection.release();
-            return res.status(400).json({ error: `You need $${BILLS_TOTAL.toFixed(2)} to cover this period's bills, but only have $${checking.toFixed(2)}.` });
+            return res.status(400).json({ error: `You need $${billsTotal.toFixed(2)} to cover this period's bills, but only have $${checking.toFixed(2)}.` });
         }
 
-        const newChecking = round2(checking - BILLS_TOTAL);
+        const newChecking = round2(checking - billsTotal);
         await connection.execute(
             `UPDATE budget_game_state SET checking_balance = ?, bills_paid_through_paystub_id = ? WHERE student_id = ?`,
             [newChecking, state.last_synced_paystub_id, student_id]
         );
-        await logTxn(connection, student_id, 'bill', `Paid bills (${BILLS.map(b => b.label).join(', ')})`, -BILLS_TOTAL, newChecking);
+        await logTxn(connection, student_id, 'bill', `Paid bills (${bills.map(b => b.label).join(', ')})`, -billsTotal, newChecking);
         await connection.release();
         res.json({ success: true, checking: newChecking });
     } catch (err) {
