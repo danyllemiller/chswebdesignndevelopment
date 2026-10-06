@@ -463,6 +463,9 @@ router.post('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => {
                  WHERE id = ? AND student_id = ?`,
                 [chapter, title || '', category || 'Reflection', cleanContent, is_submitted ? 1 : 0, id, student_id]
             );
+            try {
+                await tryAutoGradeNotebookActivity(connection, { student_id, chapter, title, is_submitted });
+            } catch (gradeErr) { console.error('[cs-notebook] auto-grade check failed', gradeErr); }
             await connection.release();
             return res.json({ success: true, id: Number(id) });
         }
@@ -472,6 +475,9 @@ router.post('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => {
              VALUES (?, ?, ?, ?, ?, ?, NOW())`,
             [student_id, chapter, title || '', category || 'Reflection', cleanContent, is_submitted ? 1 : 0]
         );
+        try {
+            await tryAutoGradeNotebookActivity(connection, { student_id, chapter, title, is_submitted });
+        } catch (gradeErr) { console.error('[cs-notebook] auto-grade check failed', gradeErr); }
         await connection.release();
         res.json({ success: true, id: result.insertId });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save notebook entry' }); }
@@ -511,6 +517,64 @@ router.delete('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => 
 // untouched in `responses`; this list only stops it from being offered
 // as a pickable option going forward.
 const RETIRED_CS_ACTIVITY_IDS = ['cs_ch3_file_system_audit'];
+
+// Safety net for a real gap: a student can open the Digital Notebook
+// directly in plain notes mode (not via the Activities dropdown) and type
+// their activity response under the exact real activity title -- the note
+// saves fine but, outside the dropdown flow, is never bound to that
+// activity's exam_id, so cs-notebook.html's own submit-exam call never
+// fires and the "turned in" work never reaches the gradebook (confirmed
+// live: a student's turnins rows showed is_submitted=1 under titles that
+// exactly matched real cs_ch#_* activity titles, with zero matching
+// exam_attempts/responses rows). This runs on every submitted note and, if
+// the title is an exact (case/whitespace-insensitive) match for one of
+// this chapter's real activities, grades it the same way submit-exam would
+// -- full credit, same as every other completion-based CS activity (these
+// aren't quality-scored). Never throws into the caller: a note that
+// doesn't match stays just a note, and any lookup error here must not cost
+// the student their already-saved note.
+async function tryAutoGradeNotebookActivity(connection, { student_id, chapter, title, is_submitted }) {
+    if (!is_submitted || !title || !chapter) return;
+    const chapterMatch = /Ch\s*(\d+)/i.exec(chapter);
+    if (!chapterMatch) return;
+    const chapterNum = parseInt(chapterMatch[1], 10);
+
+    const [[student]] = await connection.execute(
+        'SELECT section_id FROM students WHERE student_id = ? LIMIT 1',
+        [student_id]
+    );
+    if (!student) return;
+    const courseId = (await resolveCourseId(connection, student.section_id)) || '10003GS';
+
+    const excludePlaceholders = RETIRED_CS_ACTIVITY_IDS.map(() => '?').join(', ');
+    const [activities] = await connection.execute(
+        `SELECT exam_id, title, total_points FROM exams
+         WHERE exam_id REGEXP ? AND course_id = ? AND exam_id NOT IN (${excludePlaceholders})`,
+        [`^cs_ch${chapterNum}_`, courseId, ...RETIRED_CS_ACTIVITY_IDS]
+    );
+    const normalizedTitle = title.trim().toLowerCase();
+    const match = activities.find(a => a.title.trim().toLowerCase() === normalizedTitle);
+    if (!match) return;
+
+    const [existing] = await connection.execute(
+        'SELECT score FROM responses WHERE student_id = ? AND exam_id = ?',
+        [student_id, match.exam_id]
+    );
+    if (existing.length > 0 && Number(existing[0].score) >= Number(match.total_points)) return;
+
+    const [attemptCountRows] = await connection.execute(
+        'SELECT COUNT(*) AS n FROM exam_attempts WHERE student_id = ? AND exam_id = ?',
+        [student_id, match.exam_id]
+    );
+    await connection.execute(
+        'INSERT INTO exam_attempts (student_id, exam_id, attempt_number, score, total_points, timestamp) VALUES (?, ?, ?, ?, ?, NOW())',
+        [student_id, match.exam_id, attemptCountRows[0].n + 1, match.total_points, match.total_points]
+    );
+    await connection.execute(
+        'INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic) VALUES (?, ?, ?, ?, NOW(), 0) ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0',
+        [student_id, match.exam_id, match.total_points, match.total_points]
+    );
+}
 
 router.get('/student/cs-chapter-activities', requireSelfOrStaff(), async (req, res) => {
     const { chapter, student_id } = req.query;
