@@ -464,7 +464,7 @@ router.post('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => {
                 [chapter, title || '', category || 'Reflection', cleanContent, is_submitted ? 1 : 0, id, student_id]
             );
             try {
-                await tryAutoGradeNotebookActivity(connection, { student_id, chapter, title, is_submitted });
+                await tryAutoGradeNotebookActivity(connection, { student_id, title, is_submitted });
             } catch (gradeErr) { console.error('[cs-notebook] auto-grade check failed', gradeErr); }
             await connection.release();
             return res.json({ success: true, id: Number(id) });
@@ -476,7 +476,7 @@ router.post('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => {
             [student_id, chapter, title || '', category || 'Reflection', cleanContent, is_submitted ? 1 : 0]
         );
         try {
-            await tryAutoGradeNotebookActivity(connection, { student_id, chapter, title, is_submitted });
+            await tryAutoGradeNotebookActivity(connection, { student_id, title, is_submitted });
         } catch (gradeErr) { console.error('[cs-notebook] auto-grade check failed', gradeErr); }
         await connection.release();
         res.json({ success: true, id: result.insertId });
@@ -524,20 +524,23 @@ const RETIRED_CS_ACTIVITY_IDS = ['cs_ch3_file_system_audit'];
 // saves fine but, outside the dropdown flow, is never bound to that
 // activity's exam_id, so cs-notebook.html's own submit-exam call never
 // fires and the "turned in" work never reaches the gradebook (confirmed
-// live: a student's turnins rows showed is_submitted=1 under titles that
-// exactly matched real cs_ch#_* activity titles, with zero matching
+// live: several students' turnins rows showed is_submitted=1 under titles
+// that exactly matched real cs_ch#_* activity titles, with zero matching
 // exam_attempts/responses rows). This runs on every submitted note and, if
-// the title is an exact (case/whitespace-insensitive) match for one of
-// this chapter's real activities, grades it the same way submit-exam would
-// -- full credit, same as every other completion-based CS activity (these
-// aren't quality-scored). Never throws into the caller: a note that
-// doesn't match stays just a note, and any lookup error here must not cost
-// the student their already-saved note.
-async function tryAutoGradeNotebookActivity(connection, { student_id, chapter, title, is_submitted }) {
-    if (!is_submitted || !title || !chapter) return;
-    const chapterMatch = /Ch\s*(\d+)/i.exec(chapter);
-    if (!chapterMatch) return;
-    const chapterNum = parseInt(chapterMatch[1], 10);
+// the title is an exact (case/whitespace-insensitive) match for one real
+// activity, grades it the same way submit-exam would -- full credit, same
+// as every other completion-based CS activity (these aren't quality-
+// scored). Matched against every chapter's activities, not just the note's
+// own recorded chapter -- confirmed live that the chapter field isn't
+// reliable either (it reflects whichever curriculum tab happened to be
+// open, not necessarily the chapter the activity actually belongs to; one
+// student's Chapter 2 activity was saved under a Chapter 1 label). Activity
+// titles are confirmed globally unique across the whole bank, so this
+// can't cross-match the wrong chapter's activity. Never throws into the
+// caller: a note that doesn't match stays just a note, and any lookup
+// error here must not cost the student their already-saved note.
+async function tryAutoGradeNotebookActivity(connection, { student_id, title, is_submitted }) {
+    if (!is_submitted || !title) return;
 
     const [[student]] = await connection.execute(
         'SELECT section_id FROM students WHERE student_id = ? LIMIT 1',
@@ -549,8 +552,8 @@ async function tryAutoGradeNotebookActivity(connection, { student_id, chapter, t
     const excludePlaceholders = RETIRED_CS_ACTIVITY_IDS.map(() => '?').join(', ');
     const [activities] = await connection.execute(
         `SELECT exam_id, title, total_points FROM exams
-         WHERE exam_id REGEXP ? AND course_id = ? AND exam_id NOT IN (${excludePlaceholders})`,
-        [`^cs_ch${chapterNum}_`, courseId, ...RETIRED_CS_ACTIVITY_IDS]
+         WHERE exam_id REGEXP '^cs_ch[0-9]+_' AND course_id = ? AND exam_id NOT IN (${excludePlaceholders})`,
+        [courseId, ...RETIRED_CS_ACTIVITY_IDS]
     );
     const normalizedTitle = title.trim().toLowerCase();
     const match = activities.find(a => a.title.trim().toLowerCase() === normalizedTitle);
