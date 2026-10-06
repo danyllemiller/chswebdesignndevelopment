@@ -516,7 +516,15 @@ router.delete('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => 
 // submitted this before it was retired keep their recorded grade
 // untouched in `responses`; this list only stops it from being offered
 // as a pickable option going forward.
-const RETIRED_CS_ACTIVITY_IDS = ['cs_ch3_file_system_audit'];
+//
+// cs_ch19_security_brief: seeded in `exams` and referenced in
+// unit7-project.html's standards blurb, but no "Activity: The Security
+// Brief" content was ever actually written into compsci/defending_systems.html
+// (confirmed by reading the chapter page -- it only has The Tradeoff Matrix
+// activity and The Network Audit project). Retired rather than deleted for
+// the same reason as above, though confirmed live that zero students had
+// a response recorded for it, so nothing is lost either way.
+const RETIRED_CS_ACTIVITY_IDS = ['cs_ch3_file_system_audit', 'cs_ch19_security_brief'];
 
 // Safety net for a real gap: a student can open the Digital Notebook
 // directly in plain notes mode (not via the Activities dropdown) and type
