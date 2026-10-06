@@ -404,24 +404,30 @@ router.post('/student/tardy-form/submit', requireLogin, async (req, res) => {
         // tardy right now for whichever of their own periods is actually in
         // session, same as a real tardy scan would, instead of making staff
         // also scan them at the door. Only does this when a period resolves
-        // confidently and nothing's recorded for it yet today; otherwise
-        // falls back to the old scan-required flow untouched.
+        // confidently, and when nothing's recorded yet OR what's recorded is
+        // "absent" -- an absent mark (whether from the end-of-day sweep or a
+        // staff correction) just means "we don't have a scan for them," and
+        // a late form submission is exactly the proof that overturns that,
+        // same as it would if staff caught the mistake by hand. Present or
+        // already-tardy rows are left alone -- this never downgrades those.
         let autoMarked = false, autoPeriod = null;
         const resolvedPeriod = await resolveCurrentPeriodForStudent(connection, studentId);
         if (resolvedPeriod) {
             const [[existingAttendance]] = await connection.execute(
-                'SELECT id FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
+                'SELECT status FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
                 [studentId, resolvedPeriod, today]
             );
-            if (!existingAttendance) {
+            if (!existingAttendance || existingAttendance.status === 'absent') {
                 const [[studentRow]] = await connection.execute('SELECT section_id FROM students WHERE student_id = ?', [studentId]);
                 const [passResult] = await connection.execute(
                     'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
                     [studentId, studentRow?.section_id || resolvedPeriod, reason]
                 );
                 await connection.execute(
-                    'INSERT INTO attendance (student_id, section_id, date, status, scanned_at, tardy_pass_id) VALUES (?, ?, ?, ?, NOW(), ?)',
-                    [studentId, resolvedPeriod, today, 'tardy', passResult.insertId]
+                    `INSERT INTO attendance (student_id, section_id, date, status, scanned_at, tardy_pass_id, ic_synced)
+                     VALUES (?, ?, ?, 'tardy', NOW(), ?, 0)
+                     ON DUPLICATE KEY UPDATE status = 'tardy', scanned_at = NOW(), tardy_pass_id = VALUES(tardy_pass_id), ic_synced = 0`,
+                    [studentId, resolvedPeriod, today, passResult.insertId]
                 );
                 await connection.execute('UPDATE tardy_form_pending SET consumed_at = NOW() WHERE id = ?', [pendingResult.insertId]);
                 autoMarked = true;
