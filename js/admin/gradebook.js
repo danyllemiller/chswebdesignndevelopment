@@ -1921,7 +1921,26 @@ function stickCalcRows(thead) {
 window.showAnalytics = function(dbKey, displayLabel) {
     let percents = [];
     let periodData = {};
-    const filtered = getFilteredStudents(document.getElementById('periodFilter').value, 'All');
+    const periodVal = document.getElementById('periodFilter').value;
+    let filtered = getFilteredStudents(periodVal, 'All');
+
+    // The gradebook roster (getFilteredStudents) deliberately includes a
+    // dual-enrolled student under every period/group they're actually in --
+    // that's the student LIST, and it must keep showing them everywhere
+    // they're really enrolled (reverted once already after removing them
+    // broke that). But this stats popup is different: when a specific
+    // period is picked, "mean/median/mastery for A1" should reflect A1's
+    // own kids, not also fold in a CS-primary student's real score just
+    // because they're additionally rostered into A1. getFilteredStudents
+    // tags matchedPeriod with whichever period actually qualified a student
+    // -- their own primary period when matched that way, or the additional
+    // section when matched only through that -- so dropping anyone whose
+    // matchedPeriod isn't their real primary period keeps the roster
+    // untouched everywhere else while scoping just these stats to the
+    // period's home students.
+    if (periodVal !== 'All') {
+        filtered = filtered.filter(s => s.matchedPeriod === s.period);
+    }
 
     // Pre-assessments/diagnostics award flat completion credit for taking them
     // (e.g. always 15/15) and store the real diagnostic accuracy separately
