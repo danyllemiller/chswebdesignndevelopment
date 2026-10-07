@@ -856,28 +856,25 @@ function getViewCourseKey(periodVal) {
     return periodToCourseKey(periodVal);
 }
 
-// A student matches a course/period filter either through their primary
-// period or through an additional (non-primary) section — e.g. a CS-primary
-// student who's also enrolled in Intervention or a second real class should
-// still show up, correctly weighted, when that other course's gradebook is
-// filtered. matchedPeriod records which period actually qualified them so
-// period-specific due dates/exemptions use the right one for this view.
+// A student matches a course/period filter through their PRIMARY period
+// only, not an additional (non-primary) section -- a dual-enrolled student
+// (e.g. CS-primary but also rostered into a WD1 period) previously showed
+// up, fully weighted with real scores, in both courses' period views and
+// aggregate stats. Confirmed with the teacher this is unwanted: a period
+// view should show only that period's own roster. The dual enrollment and
+// that student's grade history under the other course are untouched --
+// still reachable with period set to "All" or to their primary period and
+// searching by name -- just not shown by default here. matchedPeriod is
+// kept (always equal to their primary period now) since period-specific
+// due dates/exemptions elsewhere still read it.
 function getFilteredStudents(periodVal, studentVal) {
     let filtered = allStudents.map(s => ({ ...s, matchedPeriod: s.period }));
 
     if (periodVal !== 'All') {
         const groupPrefix = periodVal.startsWith('All-') ? periodVal.slice(4) : null;
-
-        filtered = filtered.filter(s => {
-            if (groupPrefix ? periodGroupPrefix(s.period) === groupPrefix : s.period === periodVal) {
-                return true;
-            }
-            const extraMatch = (s.additional_sections || []).find(a =>
-                groupPrefix ? periodGroupPrefix(a.section_id) === groupPrefix : a.section_id === periodVal
-            );
-            if (extraMatch) { s.matchedPeriod = extraMatch.section_id; return true; }
-            return false;
-        });
+        filtered = filtered.filter(s =>
+            groupPrefix ? periodGroupPrefix(s.period) === groupPrefix : s.period === periodVal
+        );
     }
 
     if (studentVal && studentVal !== 'All') filtered = filtered.filter(s => s.studentId === studentVal);

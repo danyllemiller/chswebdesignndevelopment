@@ -572,17 +572,26 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
         // expensive responses query below has to pull. Absent or "All"
         // keeps the original whole-school behavior so any other caller of
         // this endpoint is unaffected.
+        //
+        // Matches on the student's PRIMARY section_id only, not
+        // additional_sections -- a dual-enrolled student (e.g. a CS-primary
+        // student also rostered into a WD1 period) used to show up, fully
+        // weighted with real scores, in both courses' period views and
+        // aggregate stats. Confirmed with the teacher this is unwanted: she
+        // wants a period view to show only that period's own roster, even
+        // though the dual enrollment itself (and that student's grade
+        // history under the other course) stays untouched -- reachable by
+        // switching to "All" or to their primary period and searching by
+        // name, just not shown by default when browsing a period that
+        // isn't their primary one.
         const periodScope = String(req.query.period || 'All').trim();
         let scopedStudents = students;
         if (periodScope && periodScope !== 'All') {
             const isGroup = periodScope.startsWith('All-');
             const groupKey = isGroup ? periodScope.slice(4) : null;
-            scopedStudents = students.filter(s => {
-                const sections = [s.section_id, ...(s.additional_sections || []).map(a => a.section_id)];
-                return isGroup
-                    ? sections.some(sec => sectionCourseKey(sec) === groupKey)
-                    : sections.includes(periodScope);
-            });
+            scopedStudents = students.filter(s => isGroup
+                ? sectionCourseKey(s.section_id) === groupKey
+                : s.section_id === periodScope);
         }
 
         const [exams] = await connection.execute(
