@@ -84,6 +84,34 @@
   let startOverBtn = null;
   let voiceSelect = null;
 
+  // Bumped every time a NEW utterance actually starts -- lets onend/onerror
+  // tell a stale, just-interrupted utterance apart from the current one.
+  // Needed once jumpToChunk() below can cancel an utterance that's still
+  // mid-flight and immediately start a different one: without this, the
+  // cancelled utterance's own onerror firing a moment later would stomp
+  // the new one's `speaking` state back to false.
+  let speechGen = 0;
+
+  function normalize(s) { return (s || '').replace(/\s+/g, ' ').trim(); }
+  const normalizedChunks = chunks.map(normalize);
+
+  // Maps a clicked block element back to the chunk it starts in, by
+  // fingerprinting its own text (first 40 normalized chars) and finding
+  // the chunk that contains -- or is contained by, for a short element --
+  // that fingerprint. Approximate on purpose: good enough to land a
+  // student back within a sentence or two of where they actually clicked,
+  // without needing to restructure chapter content into per-sentence spans.
+  function findChunkIndexForElement(el) {
+    const text = normalize(el.innerText || el.textContent || '');
+    if (!text) return -1;
+    const fingerprint = text.slice(0, 40);
+    if (!fingerprint) return -1;
+    for (let i = 0; i < normalizedChunks.length; i++) {
+      if (normalizedChunks[i].includes(fingerprint) || fingerprint.includes(normalizedChunks[i])) return i;
+    }
+    return -1;
+  }
+
   function saveProgress() {
     if (chunkIndex > 0 && chunkIndex < chunks.length) localStorage.setItem(PROGRESS_KEY, String(chunkIndex));
     else localStorage.removeItem(PROGRESS_KEY);
@@ -115,16 +143,20 @@
       updateUi();
       return;
     }
+    const myGen = ++speechGen;
     const utterance = new SpeechSynthesisUtterance(chunks[chunkIndex]);
     utterance.rate = getSavedRate();
     const voice = getSelectedVoice();
     if (voice) utterance.voice = voice;
     utterance.onend = () => {
-      if (!speaking) return; // stopped mid-sentence -- index already saved by stopReading()
+      if (myGen !== speechGen || !speaking) return; // stale (jumped/stopped) -- a newer utterance already owns the state
       chunkIndex++;
       speakNext();
     };
-    utterance.onerror = () => { speaking = false; saveProgress(); updateUi(); };
+    utterance.onerror = () => {
+      if (myGen !== speechGen) return;
+      speaking = false; saveProgress(); updateUi();
+    };
     window.speechSynthesis.speak(utterance);
     updateUi();
   }
@@ -132,6 +164,20 @@
   function startReading() {
     if (chunks.length === 0) return;
     speaking = true;
+    speakNext();
+  }
+
+  // Click-to-start-here: lets a student pick up reading from wherever they
+  // actually remember leaving off (or jump ahead/back) instead of only
+  // trusting the auto-saved "Resume Reading" position. Cancels whatever's
+  // currently playing (if anything) and starts fresh from the clicked
+  // paragraph/heading/list item.
+  function jumpToChunk(idx) {
+    if (idx < 0 || idx >= chunks.length) return;
+    window.speechSynthesis.cancel();
+    chunkIndex = idx;
+    speaking = true;
+    saveProgress();
     speakNext();
   }
 
@@ -175,6 +221,7 @@
     btn.type = 'button';
     btn.className = 'btn btn-outline-primary btn-sm fw-bold align-middle';
     btn.setAttribute('aria-label', 'Read this page aloud');
+    btn.title = 'Tip: click any paragraph or heading in the text to start reading from there.';
     btn.addEventListener('click', () => { speaking ? stopReading() : startReading(); });
 
     progressLabel = document.createElement('span');
@@ -263,6 +310,20 @@
     window.speechSynthesis.cancel();
     if (speaking) saveProgress();
   });
+
+  // Click anywhere in the actual lesson text to start reading from there --
+  // skips the nav bar, the read-aloud controls themselves, and real links
+  // (which should still navigate normally, not get hijacked).
+  if (chunks.length > 0) {
+    container.addEventListener('click', (e) => {
+      if (e.target.closest('.no-print') || e.target.closest('a')) return;
+      const el = e.target.closest('p, li, h2, h3, h4, h5, h6, blockquote, td, th, dd, dt');
+      if (!el) return;
+      const idx = findChunkIndexForElement(el);
+      if (idx < 0) return;
+      jumpToChunk(idx);
+    });
+  }
 
   createButton();
 })();

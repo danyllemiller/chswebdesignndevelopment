@@ -758,9 +758,38 @@ async function syncProgress() {
     }
 }
 
+// Click-to-advance read-aloud for the current question only -- resets
+// whenever the question itself changes, but survives a re-render of the
+// SAME question (e.g. selectOption() redraws the whole pane every click),
+// so picking an answer mid-reading doesn't interrupt it.
+let qReadAloud = null;
+let qReadAloudIndex = -1;
+
+function startQuestionReadAloud() {
+    const q = examQuestions[currentIndex];
+    if (!qReadAloud || !q || !Array.isArray(q.options)) return;
+    qReadAloud.start([q.question, ...q.options], renderQuestion);
+}
+function advanceQuestionReadAloud() {
+    if (!qReadAloud) return;
+    qReadAloud.next(renderQuestion);
+}
+function stopQuestionReadAloud() {
+    if (!qReadAloud) return;
+    qReadAloud.stop();
+    renderQuestion();
+}
+window.addEventListener('pagehide', () => { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); });
+
 function renderQuestion() {
     const pane = document.getElementById('quiz-pane');
     if (!pane) return;
+
+    if (qReadAloudIndex !== currentIndex) {
+        if (qReadAloud) qReadAloud.stop();
+        qReadAloud = (typeof window.createStepReadAloud === 'function') ? window.createStepReadAloud() : null;
+        qReadAloudIndex = currentIndex;
+    }
 
     if (!examQuestions || examQuestions.length === 0) {
         pane.innerHTML = `
@@ -810,6 +839,18 @@ function renderQuestion() {
         return `<button type="button" class="btn btn-sm ${cls}" style="width: 2.5rem;" onclick="goToQuestion(${i})" title="Question ${i + 1} (${titleBits})">${i + 1}</button>`;
     }).join(' ');
 
+    // Only for plain MC questions -- matching/image-labeling don't have a
+    // flat list of answer choices to step through the same way.
+    const canReadAloud = qReadAloud && Array.isArray(q.options);
+    const readAloudHtml = !canReadAloud ? '' : !qReadAloud.isActive()
+        ? `<button class="btn btn-sm btn-outline-primary fw-bold no-print" onclick="startQuestionReadAloud()">
+               <i class="fas fa-volume-up me-1"></i>Read Aloud</button>`
+        : `<span class="small text-muted fw-bold no-print">${qReadAloud.stepLabel()}</span>
+           <button class="btn btn-sm btn-primary fw-bold no-print" onclick="advanceQuestionReadAloud()">
+               ${qReadAloud.isLastStep() ? 'Done' : 'Next ▶'}</button>
+           <button class="btn btn-sm btn-outline-secondary no-print" onclick="stopQuestionReadAloud()" title="Stop reading">
+               <i class="fas fa-stop"></i></button>`;
+
     pane.innerHTML = `
         <div class="card shadow-sm border-0 h-100 p-4">
             <div class="text-center mb-4">
@@ -830,6 +871,7 @@ function renderQuestion() {
                     </button>
                 </div>
                 <h4 class="fw-bold text-dark lh-base mt-3" style="color: var(--primary-color);">${escapeHtml(q.question)}</h4>
+                <div class="d-flex align-items-center justify-content-center gap-2 mt-2">${readAloudHtml}</div>
             </div>
             <div class="row mt-4 px-2">${optionsHtml}</div>
             <div class="d-flex justify-content-between mt-auto pt-4 border-top px-2 no-print">

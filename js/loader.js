@@ -57,7 +57,22 @@
   if (document.getElementById('read-aloud-script')) return;
   const script = document.createElement('script');
   script.id = 'read-aloud-script';
-  script.src = '/js/read-aloud.js?v=3';
+  script.src = '/js/read-aloud.js?v=4';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
+// STEP READ-ALOUD (sitewide helper -- defines window.createStepReadAloud,
+// used by js/examLogicWD.js and js/examLogicCS.js's exam question
+// rendering). Cheap no-op on every page that never calls it; injected
+// here instead of per-exam-page <script> tags so a new exam page never
+// has to remember to include it.
+// ==========================================
+(function injectStepReadAloud() {
+  if (document.getElementById('step-read-aloud-script')) return;
+  const script = document.createElement('script');
+  script.id = 'step-read-aloud-script';
+  script.src = '/js/modules/step-read-aloud.js?v=1';
   document.body ? document.body.appendChild(script) : document.head.appendChild(script);
 })();
 
