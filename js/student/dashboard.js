@@ -444,7 +444,13 @@ function renderGradeTable(keys, myGrades, studentId, registryData, studentPeriod
 
     let headHtml = `<tr><th class="label-cell sticky-col font-monospace px-3 py-3 assignment-header">Assignment</th>`;
     keys.forEach(key => {
-        const displayLabel = abbreviateAssignmentName(key);
+        // The real title from the exams table, not the lossy abbreviation
+        // admin/gradebook.js uses to squeeze names into its super-narrow
+        // spreadsheet columns -- that abbreviation (e.g. "The Conduct Case
+        // Studies" -> "The-Conduct") doesn't match the real assignment name
+        // shown everywhere else a student sees it (tooltips, due dates, the
+        // Digital Notebook), which is exactly what was confusing them here.
+        const displayLabel = registryData[key]?.title || abbreviateAssignmentName(key);
         let tooltipText = key;
         const regInfo = registryData[key];
 

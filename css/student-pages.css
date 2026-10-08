@@ -151,3 +151,35 @@ body.iframe-preview-body img { max-width: 100%; height: auto; }
    editor toolbar that includes a #*-dictate-btn (student/notes.html). */
 #notes-dictate-btn.notes-dictating { background: #dc3545; border-color: #dc3545; color: #fff; animation: notes-dictate-pulse 1.4s ease-in-out infinite; }
 @keyframes notes-dictate-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(220,53,69,.5); } 50% { box-shadow: 0 0 0 6px rgba(220,53,69,0); } }
+
+/* Student Grade Table -- diagonal assignment headers (js/student/
+   dashboard.js renderGradeTable). This page never loaded the stylesheet
+   that defines .vertical-text (it only exists in teacher-gradebook.css,
+   for the admin spreadsheet's fully-vertical 90deg headers), so these
+   headers rendered as plain unstyled horizontal text wrapped into a
+   narrow column -- unreadable. Angled at 67.5deg (diagonal, not fully
+   vertical, not horizontal) per direction, with the real assignment
+   title now shown instead of the admin view's abbreviation. */
+table.table-spreadsheet thead th.header-main-blue {
+    background-color: #0d6efd;
+    color: #fff;
+    height: 11rem;
+    min-width: 4.5rem;
+    max-width: 4.5rem;
+    padding: 0 0 0.5rem;
+    vertical-align: bottom;
+    border-right: 0.0625rem solid rgba(255,255,255,0.2);
+    overflow: visible;
+}
+table.table-spreadsheet thead th.header-main-blue .vertical-text {
+    display: inline-block;
+    white-space: nowrap;
+    transform: rotate(-67.5deg);
+    transform-origin: left bottom;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02rem;
+    color: #fff;
+    cursor: help;
+}
