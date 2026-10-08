@@ -579,9 +579,19 @@ async function handleTimeclockSubmit(e) {
             if (!checked) return;
             answer = checked.value;
 
+            // Used to append a human-readable "Correct"/"Incorrect" note onto
+            // `answer` here for the feedback modal below -- except that modal
+            // (showTimeclockAnswerFeedback) already gets everything it shows
+            // from currentQuestion/isCorrect directly, never from `answer`.
+            // The appended text only ever mattered for server-side grading,
+            // where it broke it: /api/timeclock/save re-verifies the answer
+            // itself with an exact string match against the canonical correct
+            // answer, so the moment this text got appended, that match could
+            // never succeed again -- every WD1/WD2/AS student who chose
+            // correctly was still scored as wrong, system-wide, every day
+            // this ran. `answer` now stays exactly what was clicked.
             if (currentQuestion?.correct_answer) {
                 isCorrect = checked.value === currentQuestion.correct_answer;
-                answer += ` | ${currentQuestion.chapterLabel || 'Review'}: ${isCorrect ? 'Correct' : `Incorrect (chose "${checked.value}", correct was "${currentQuestion.correct_answer}")`}`;
             }
         }
     } else {
