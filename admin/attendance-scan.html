@@ -71,7 +71,10 @@
       <div><span class="count text-success" id="tallyPresent">0</span>Present</div>
       <div><span class="count text-warning" id="tallyTardy">0</span>Tardy</div>
       <div><span class="count text-secondary" id="tallyAbsent">0</span>Not Yet Scanned</div>
-      <button id="rosterToggle" class="btn btn-sm btn-outline-primary ms-auto fw-bold"><i class="fas fa-list me-1"></i>View List</button>
+      <div class="ms-auto d-flex gap-2">
+        <a href="/admin/attendance-report.html" class="btn btn-sm btn-outline-secondary fw-bold"><i class="fas fa-clipboard-check me-1"></i>Attendance Report</a>
+        <button id="rosterToggle" class="btn btn-sm btn-outline-primary fw-bold"><i class="fas fa-list me-1"></i>View List</button>
+      </div>
     </div>
     <div id="rosterPanel" class="d-none border-bottom">
       <table class="table table-sm mb-0 roster-table">
