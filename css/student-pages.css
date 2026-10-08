@@ -171,6 +171,12 @@ table.table-spreadsheet thead th.header-main-blue {
     border-right: 0.0625rem solid rgba(255,255,255,0.2);
     overflow: visible;
 }
+/* Red flag for a past-due cell with nothing turned in yet -- not a
+   not-yet-due cell, which stays neutral. */
+table.table-spreadsheet tbody td.missing-assignment-cell {
+    background-color: #fde0de !important;
+}
+
 table.table-spreadsheet thead th.header-main-blue .vertical-text {
     display: inline-block;
     white-space: nowrap;

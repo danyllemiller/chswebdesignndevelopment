@@ -510,10 +510,24 @@ function renderGradeTable(keys, myGrades, studentId, registryData, studentPeriod
         const max = registryData?.[key]?.maxPoints || parsePts(key);
         
         if (!grade || grade.score === "") {
-            bodyHtml += `<td class="text-center align-middle">
-                <button class="btn btn-sm btn-outline-primary fw-bold px-2 py-1 shadow-sm mark-done-btn" 
-                    onclick="openTurnInModal('${studentId}', '${key.replace(/'/g, "\\'")}', this)" 
-                    title="Click to turn in a link or mark as done!">
+            // Red-flag a cell only once it's actually overdue with nothing
+            // turned in -- not yet due isn't "missing," it's just not due
+            // yet, and shouldn't look like a problem. Same dueDate
+            // resolution (period-specific override first) as the Due Date
+            // row above and computeGradeStats' own past-due check.
+            let dueDate = registryData?.[key]?.dueDate || '';
+            if (registryData?.[key]?.periodDueDates && registryData[key].periodDueDates[studentPeriod]) {
+                dueDate = registryData[key].periodDueDates[studentPeriod];
+            }
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const isMissing = !!dueDate && dueDate !== '9999-99-99' && new Date(dueDate + 'T00:00:00') < today;
+            const missingClass = isMissing ? 'missing-assignment-cell' : '';
+            const missingTitle = isMissing ? 'Past due with nothing turned in' : 'Click to turn in a link or mark as done!';
+
+            bodyHtml += `<td class="text-center align-middle ${missingClass}">
+                <button class="btn btn-sm ${isMissing ? 'btn-outline-danger' : 'btn-outline-primary'} fw-bold px-2 py-1 shadow-sm mark-done-btn"
+                    onclick="openTurnInModal('${studentId}', '${key.replace(/'/g, "\\'")}', this)"
+                    title="${missingTitle}">
                     <i class="fas fa-paper-plane me-1"></i> Turn In
                 </button>
             </td>`;
