@@ -93,12 +93,38 @@ const CART_TABLE_SQL = `
     UNIQUE KEY unique_cart_item (student_id, item_key)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
+// One row per vehicle a student has actually bought (category 'vehicles' in
+// budget_game_store_items) -- not just a flag, so a student who buys more
+// than one still only owes one Auto Insurance bill (computeBillsForStudent
+// below only checks whether any row exists), but the purchase history
+// itself survives if that ever needs to change.
+const VEHICLES_TABLE_SQL = `
+  CREATE TABLE IF NOT EXISTS budget_game_vehicles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(50) NOT NULL,
+    item_key VARCHAR(60) NOT NULL,
+    label VARCHAR(100) NOT NULL,
+    purchased_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_student (student_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
+// Added after groceries/clothes were already seeded -- the empty-table
+// seed below only fires once, ever, so these go in through their own
+// idempotent check instead (same INSERT ... WHERE NOT EXISTS pattern
+// everywhere else in this codebase self-migrates new rows).
+const VEHICLE_ITEMS = [
+    { item_key: 'used_sedan', category: 'vehicles', label: 'Used Sedan', price: 180.00, sort_order: 1 },
+    { item_key: 'motorcycle', category: 'vehicles', label: 'Motorcycle', price: 90.00, sort_order: 2 },
+    { item_key: 'pickup_truck', category: 'vehicles', label: 'Pickup Truck', price: 220.00, sort_order: 3 }
+];
+
 async function ensureTables(connection) {
     await connection.execute(STATE_TABLE_SQL);
     await connection.execute(TXN_TABLE_SQL);
     await connection.execute(STORE_ITEMS_TABLE_SQL);
     await connection.execute(CARDS_TABLE_SQL);
     await connection.execute(CART_TABLE_SQL);
+    await connection.execute(VEHICLES_TABLE_SQL);
     const [[{ cnt }]] = await connection.execute('SELECT COUNT(*) AS cnt FROM budget_game_store_items');
     if (cnt === 0) {
         for (const item of SEED_STORE_ITEMS) {
@@ -107,6 +133,14 @@ async function ensureTables(connection) {
                 [item.item_key, item.category, item.label, item.price, item.sort_order]
             );
         }
+    }
+    for (const item of VEHICLE_ITEMS) {
+        await connection.execute(
+            `INSERT INTO budget_game_store_items (item_key, category, label, price, sort_order)
+             SELECT ?, ?, ?, ?, ? FROM (SELECT 1) AS dummy
+             WHERE NOT EXISTS (SELECT 1 FROM budget_game_store_items WHERE item_key = ?)`,
+            [item.item_key, item.category, item.label, item.price, item.sort_order, item.item_key]
+        );
     }
 }
 
@@ -209,6 +243,15 @@ async function computeBillsForStudent(connection, studentId) {
         { key: 'utilities', label: 'Utilities', amount: 2.00 },
         { key: 'phone', label: 'Phone Bill', amount: 2.00 }
     ];
+
+    // Owning a car isn't free -- only shows up once they've actually bought
+    // one from the Mall (category 'vehicles'), same "the bill follows the
+    // real choice" logic as rent following their real pay.
+    const [[vehicleRow]] = await connection.execute(
+        'SELECT id FROM budget_game_vehicles WHERE student_id = ? LIMIT 1', [studentId]
+    );
+    if (vehicleRow) bills.push({ key: 'auto_insurance', label: 'Auto Insurance', amount: 5.00 });
+
     return { bills, total: round2(bills.reduce((sum, b) => sum + b.amount, 0)) };
 }
 
@@ -670,6 +713,20 @@ router.post('/student/budget-game/checkout', requireSelfOrStaff(), async (req, r
             `DELETE FROM budget_game_cart_items WHERE student_id = ? AND item_key IN (${itemKeys.map(() => '?').join(',')})`,
             [student_id, ...itemKeys]
         );
+
+        // Buying a vehicle starts an Auto Insurance bill from the next pay
+        // period on -- one ownership row per unit bought (quantity > 1 on a
+        // car is an edge case nobody needs to be blocked on; the insurance
+        // bill itself stays flat regardless of how many are owned).
+        const vehiclesBought = items.filter(it => it.category === 'vehicles');
+        for (const v of vehiclesBought) {
+            for (let i = 0; i < v.quantity; i++) {
+                await connection.execute(
+                    'INSERT INTO budget_game_vehicles (student_id, item_key, label) VALUES (?, ?, ?)',
+                    [student_id, v.item_key, v.label]
+                );
+            }
+        }
 
         await connection.release();
         res.json({

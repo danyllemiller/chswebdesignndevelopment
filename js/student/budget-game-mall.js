@@ -30,6 +30,7 @@ function isStaffUser(u) {
 const CATEGORY_META = {
     clothes:   { label: 'Clothes',   icon: 'fa-shirt' },
     household: { label: 'Household', icon: 'fa-house-chimney' },
+    vehicles:  { label: 'Vehicles',  icon: 'fa-car' },
     other:     { label: 'Other',     icon: 'fa-store' }
 };
 
