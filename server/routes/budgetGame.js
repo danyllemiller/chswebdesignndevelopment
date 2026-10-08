@@ -108,6 +108,20 @@ const VEHICLES_TABLE_SQL = `
     KEY idx_student (student_id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
+// Same one-row-per-purchase shape as vehicles above. Owning any property
+// here means computeBillsForStudent stops charging Rent (you don't rent a
+// place you bought) and starts charging the much smaller Property Tax &
+// HOA bill instead -- the real trade a home purchase actually makes.
+const PROPERTIES_TABLE_SQL = `
+  CREATE TABLE IF NOT EXISTS budget_game_properties (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(50) NOT NULL,
+    item_key VARCHAR(60) NOT NULL,
+    label VARCHAR(100) NOT NULL,
+    purchased_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_student (student_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
 // Added after groceries/clothes were already seeded -- the empty-table
 // seed below only fires once, ever, so these go in through their own
 // idempotent check instead (same INSERT ... WHERE NOT EXISTS pattern
@@ -118,6 +132,15 @@ const VEHICLE_ITEMS = [
     { item_key: 'pickup_truck', category: 'vehicles', label: 'Pickup Truck', price: 220.00, sort_order: 3 }
 ];
 
+// Cheapest to priciest, same real-world ordering a renter-turned-buyer
+// would actually shop in.
+const PROPERTY_ITEMS = [
+    { item_key: 'trailer', category: 'housing', label: 'Trailer', price: 400.00, sort_order: 1 },
+    { item_key: 'condo', category: 'housing', label: 'Condo', price: 600.00, sort_order: 2 },
+    { item_key: 'townhome', category: 'housing', label: 'Townhome', price: 800.00, sort_order: 3 },
+    { item_key: 'single_family_home', category: 'housing', label: 'Single-Family Home', price: 1200.00, sort_order: 4 }
+];
+
 async function ensureTables(connection) {
     await connection.execute(STATE_TABLE_SQL);
     await connection.execute(TXN_TABLE_SQL);
@@ -125,6 +148,7 @@ async function ensureTables(connection) {
     await connection.execute(CARDS_TABLE_SQL);
     await connection.execute(CART_TABLE_SQL);
     await connection.execute(VEHICLES_TABLE_SQL);
+    await connection.execute(PROPERTIES_TABLE_SQL);
     const [[{ cnt }]] = await connection.execute('SELECT COUNT(*) AS cnt FROM budget_game_store_items');
     if (cnt === 0) {
         for (const item of SEED_STORE_ITEMS) {
@@ -134,7 +158,7 @@ async function ensureTables(connection) {
             );
         }
     }
-    for (const item of VEHICLE_ITEMS) {
+    for (const item of [...VEHICLE_ITEMS, ...PROPERTY_ITEMS]) {
         await connection.execute(
             `INSERT INTO budget_game_store_items (item_key, category, label, price, sort_order)
              SELECT ?, ?, ?, ?, ? FROM (SELECT 1) AS dummy
@@ -238,15 +262,25 @@ async function computeBillsForStudent(connection, studentId) {
     );
     const avgPay = row && row.avg_pay !== null ? Number(row.avg_pay) : null;
     const rentAmount = avgPay ? round2(avgPay / 3) : 6.00;
+
+    // Buying a place (category 'housing') replaces Rent with Property Tax &
+    // HOA, not an addition to it -- you don't pay rent on a home you own.
+    // That's the actual trade a real home purchase makes: a bigger one-time
+    // cost in exchange for a smaller recurring one from then on.
+    const [[propertyRow]] = await connection.execute(
+        'SELECT id FROM budget_game_properties WHERE student_id = ? LIMIT 1', [studentId]
+    );
     const bills = [
-        { key: 'rent', label: 'Rent', amount: rentAmount },
+        propertyRow
+            ? { key: 'property_tax_hoa', label: 'Property Tax & HOA', amount: 8.00 }
+            : { key: 'rent', label: 'Rent', amount: rentAmount },
         { key: 'utilities', label: 'Utilities', amount: 2.00 },
         { key: 'phone', label: 'Phone Bill', amount: 2.00 }
     ];
 
     // Owning a car isn't free -- only shows up once they've actually bought
     // one from the Mall (category 'vehicles'), same "the bill follows the
-    // real choice" logic as rent following their real pay.
+    // real choice" logic as housing above.
     const [[vehicleRow]] = await connection.execute(
         'SELECT id FROM budget_game_vehicles WHERE student_id = ? LIMIT 1', [studentId]
     );
@@ -724,6 +758,18 @@ router.post('/student/budget-game/checkout', requireSelfOrStaff(), async (req, r
                 await connection.execute(
                     'INSERT INTO budget_game_vehicles (student_id, item_key, label) VALUES (?, ?, ?)',
                     [student_id, v.item_key, v.label]
+                );
+            }
+        }
+
+        // Same pattern for buying a place (category 'housing') -- starts
+        // Property Tax & HOA and drops Rent from the very next bills cycle.
+        const propertiesBought = items.filter(it => it.category === 'housing');
+        for (const p of propertiesBought) {
+            for (let i = 0; i < p.quantity; i++) {
+                await connection.execute(
+                    'INSERT INTO budget_game_properties (student_id, item_key, label) VALUES (?, ?, ?)',
+                    [student_id, p.item_key, p.label]
                 );
             }
         }

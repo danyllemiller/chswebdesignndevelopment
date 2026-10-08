@@ -31,6 +31,7 @@ const CATEGORY_META = {
     clothes:   { label: 'Clothes',   icon: 'fa-shirt' },
     household: { label: 'Household', icon: 'fa-house-chimney' },
     vehicles:  { label: 'Vehicles',  icon: 'fa-car' },
+    housing:   { label: 'Housing',   icon: 'fa-house' },
     other:     { label: 'Other',     icon: 'fa-store' }
 };
 
