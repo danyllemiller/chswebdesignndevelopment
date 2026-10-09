@@ -223,8 +223,8 @@ export function renderPaystubHtml(stub, missingAssignments) {
         </div>
         <div class="row border border-top-0 border-2 border-dark p-2 align-items-center mx-0">
           <div class="col-6 small fw-bold text-muted">5 STAR POINTS EARNED</div>
-          <div class="col-6 text-end"><span class="fs-5 fw-bold" style="color:#b5480f;">${Math.floor(Number(stub.net_pay || 0) / 10)}</span>
-            <span class="text-muted small">(1 per $10 of net pay)</span></div>
+          <div class="col-6 text-end"><span class="fs-5 fw-bold" style="color:#b5480f;">${stub.wd_star_points ?? Math.floor(Number(stub.net_pay || 0) / 10)}</span>
+            <span class="text-muted small">(1 per $10 of Web Design pay)</span></div>
         </div>
         <div class="text-center mt-3 text-muted" style="font-size:.65rem;">
           ${isEstimated ? 'ESTIMATED — ' : ''}SIMULATED EARNINGS STATEMENT FOR EDUCATIONAL PURPOSES ONLY. NO REAL CURRENCY IS EXCHANGED.

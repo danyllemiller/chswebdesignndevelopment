@@ -387,6 +387,44 @@ async function computePayrollForPeriod(connection, { period_start, period_end, c
 
 ensurePaystubTables();
 
+// 5 Star points are only ever earned from Web Design pay, never Computer
+// Science or anything else -- but a dual-enrolled student's paystub
+// (student_paystubs) is one COMBINED figure for the whole pay period, not
+// split by course, so a student who's primarily CS but also clocks real
+// shifts in a WD1/WD2 period (confirmed live: Triston Hopper, Malachi De
+// Dios Cayetano, Xavier Reyes Mascarua all have real A1 shifts mixed into
+// the same pay period as their B4/B6/A3 CS shifts) would otherwise get
+// points on their CS pay too. Re-derives the WD-only share directly from
+// this student's own timesheets for the period -- the fraction of their
+// total CLOCKED MINUTES that fall under a WD1/WD2 section (AS- stripped,
+// matching every other dual-enrollment check in this codebase) -- and
+// applies that same fraction to their real net pay, so the exact effective
+// tax/bonus rate already baked into net_pay carries over untouched. A
+// student who only ever worked WD1/WD2 hours gets this fraction = 1 (no
+// behavior change); a CS-only student gets 0.
+const WD_SECTION_IDS = new Set(['A1', 'B2']);
+
+async function computeWdStarPoints(connection, studentId, periodStart, periodEnd, netPay) {
+    if (!netPay || Number(netPay) <= 0) return 0;
+    const [shifts] = await connection.execute(
+        `SELECT clock_in, clock_out, section_id FROM timesheets WHERE student_id = ? AND date >= ? AND date <= ?`,
+        [studentId, periodStart, periodEnd]
+    );
+    let wdMinutes = 0, totalMinutes = 0;
+    shifts.forEach(t => {
+        const inMin = timeToMinutes(t.clock_in);
+        const outMin = timeToMinutes(t.clock_out);
+        if (inMin === null || outMin === null) return;
+        const mins = outMin - inMin;
+        if (mins <= 0) return;
+        totalMinutes += mins;
+        if (WD_SECTION_IDS.has(String(t.section_id || '').replace(/^AS-/, ''))) wdMinutes += mins;
+    });
+    if (totalMinutes === 0 || wdMinutes === 0) return 0;
+    const wdNet = Number(netPay) * (wdMinutes / totalMinutes);
+    return Math.floor(wdNet / 10);
+}
+
 // GET /paystubs/my?student_id=X — all finalized paystubs for a student
 router.get('/paystubs/my', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
@@ -403,6 +441,9 @@ router.get('/paystubs/my', requireSelfOrStaff(), async (req, res) => {
             WHERE sp.student_id = ?
             ORDER BY pr.period_end DESC
         `, [student_id]);
+        for (const row of rows) {
+            row.wd_star_points = await computeWdStarPoints(connection, student_id, row.period_start, row.period_end, row.net_pay);
+        }
         await connection.release();
         res.json({ paystubs: rows });
     } catch (err) {
@@ -585,6 +626,9 @@ router.get('/admin/payroll/run-detail/:id', async (req, res) => {
             WHERE sp.payroll_run_id = ?
             ORDER BY s.section_id, s.last_name, s.first_name
         `, [runId]);
+        for (const row of rows) {
+            row.wd_star_points = await computeWdStarPoints(connection, row.student_id, row.period_start, row.period_end, row.net_pay);
+        }
         await connection.release();
         res.json({ stubs: rows });
     } catch (err) {
