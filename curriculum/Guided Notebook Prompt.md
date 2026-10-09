@@ -5,14 +5,14 @@ Run the whole thing twice — once per course — since these produce two separa
 
 Attach **both** of these files to the session:
 - `curriculum/wd-daily-agenda-full.json` — the complete, authoritative day-by-day content: every real
-  lesson day for both courses (96 WD1 days, 107 WD2 days — including Boot Camp, the capstones, and the
-  28-day Agency Studio sprints, none of which exist anywhere else as structured data). This is the
+  lesson day for both courses (96 WD1 days, 97 WD2 days — including Boot Camp, the capstones, and the
+  28-day Agency Studio sprint, none of which exist anywhere else as structured data). This is the
   primary content source.
-- `admin/lesson-plan-binder.html` — secondary. Its day-by-day detail is incomplete (only 77 of 96 WD1
-  days and 72 of 107 WD2 days are written out there; capstones are one paragraph, and Boot Camp/the
-  Agency Studio aren't in it at all), so don't rely on it for per-day content. Use it only for each
-  chapter's overview block: duration, standards, CFA date, and the "Instructional Strategies Used This
-  Chapter" box.
+- `admin/lesson-plan-binder.html` — secondary. Its day-by-day detail is incomplete relative to the full
+  day count above (capstones are one paragraph, and Boot Camp/the Agency Studio sprint aren't written
+  out day-by-day in it at all), so don't rely on it for per-day content. Use it only for each chapter's
+  overview block: duration, standards, CFA date, and the "Instructional Strategies Used This Chapter"
+  box.
 
 ---
 
@@ -43,13 +43,14 @@ Attach **both** of these files to the session:
 > - `exitTicket` — the real one-line exit check for the day, where present.
 > - `milestone` — populated on days that are a real project/capstone milestone, naming it.
 >
-> **`admin/lesson-plan-binder.html`** is secondary — its day-by-day detail is incomplete (only 77 of 96
-> WD1 days and 72 of 107 WD2 days are written out there; capstones are one paragraph, and Boot Camp/the
-> Agency Studio aren't in it at all). Use it only for each chapter's overview: duration, full standards
+> **`admin/lesson-plan-binder.html`** is secondary — its day-by-day detail is incomplete relative to the
+> full 96/97-day count (capstones are one paragraph, and Boot Camp/the Agency Studio sprint aren't
+> written out day-by-day in it at all). Use it only for each chapter's overview: duration, full standards
 > list, CFA date, and the "Instructional Strategies Used This Chapter" box (`chapter-head`/`chapter-meta`
 > plus the `card tracker` box right after it). Where it DOES have a day written out in more depth than
 > the JSON (the real 5E `dl.phases` content, `card lab`/`card milestone` objective and numbered
-> instructions), use that richer version for that day's activity block instead of just `tasksList`.
+> instructions), use that richer version for that day's activity block instead of just `tasksList`. The
+> binder's final WD2 capstone section is titled "The Agency Studio," matching the JSON.
 >
 > ### Document structure
 >
@@ -120,10 +121,10 @@ Attach **both** of these files to the session:
 
 ## COURSE BRIEF: WEB DESIGN 2
 
-> Build the notebook from the `wd2` array in `wd-daily-agenda-full.json` — all 107 entries, in
+> Build the notebook from the `wd2` array in `wd-daily-agenda-full.json` — all 97 entries, in
 > `block_num` order, with no skipping or merging. That array already includes the Boot Camp
 > recertification days at the start, the capstone/studio blocks between chapters, the EOP Review & Exam
 > block, and "The Agency Studio" 28-day dual-project sprint sequence at the end — you don't need to
-> identify these separately, just process every entry in order. Your finished page count should be 107
+> identify these separately, just process every entry in order. Your finished page count should be 97
 > (plus the 4 front-matter pages and cover); if it's off, you skipped or merged a day, which isn't
 > allowed.
