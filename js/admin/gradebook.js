@@ -1087,7 +1087,16 @@ async function markEnteredIcForCurrentView() {
             body: JSON.stringify({ pairs })
         });
         if (!res.ok) throw new Error();
-        pairs.forEach(p => { allGrades[p.student_id][p.exam_id].enteredIC = true; });
+        // See the matching comment in markColumnEnteredIc -- the server
+        // write above already succeeded; this only updates the in-memory
+        // cache, and a stale allGrades (period/view switched mid-request)
+        // must not throw a false "Failed" alert over an update that
+        // actually went through.
+        pairs.forEach(p => {
+            if (allGrades[p.student_id] && allGrades[p.student_id][p.exam_id]) {
+                allGrades[p.student_id][p.exam_id].enteredIC = true;
+            }
+        });
         applyFiltersAndRender();
     } catch (e) {
         alert('Failed to mark grades as entered. Try again.');
@@ -1143,7 +1152,22 @@ async function markColumnEnteredIc(key) {
             body: JSON.stringify({ pairs })
         });
         if (!res.ok) throw new Error();
-        pairs.forEach(p => { allGrades[p.student_id][p.exam_id].enteredIC = true; });
+        // The server write above already succeeded -- this just updates the
+        // in-memory cache so the screen reflects it without a full reload.
+        // allGrades can be reassigned by a loadData() call (switching
+        // period/view) while this fetch was in flight, in which case a pair
+        // built from the OLD allGrades no longer has a matching entry in
+        // the NEW one. That used to throw here and land in the catch below,
+        // showing "Failed to mark this assignment as entered" even though
+        // the database update had already gone through -- confirmed live
+        // (25 of 26 A3 Unit3-Exam rows got marked; the 26th just never
+        // updated on screen). Missing an entry now just skips it; a later
+        // reload picks up the real, already-correct server state anyway.
+        pairs.forEach(p => {
+            if (allGrades[p.student_id] && allGrades[p.student_id][p.exam_id]) {
+                allGrades[p.student_id][p.exam_id].enteredIC = true;
+            }
+        });
         applyFiltersAndRender();
     } catch (e) {
         alert('Failed to mark this assignment as entered. Try again.');
