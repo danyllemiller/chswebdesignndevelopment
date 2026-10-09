@@ -1,0 +1,1156 @@
+{
+  "cs": [
+    {
+      "block_num": 1,
+      "content": {
+        "chapterLabel": "Unit 0: Basic Computer Knowledge · Day 1 of 3",
+        "minimumDay": false,
+        "objective": [
+          "Set up every account and tool you will use this semester."
+        ],
+        "standards": [],
+        "standardsNote": "Practice & application day — no new performance indicator introduced.",
+        "doNowType": "Predict",
+        "doNowPrompt": "this class is self-paced with a test-out option. What is the biggest risk of that for you personally?",
+        "tasksTitle": "Course Launch: How This Class Actually Works",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Syllabus, clock-in rules, and the test-out policy",
+          "Accounts, Chromebook setup, and the class website",
+          "Exit Ticket"
+        ],
+        "exitTicket": "set up every account and tool you will use this semester.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 2,
+      "content": {
+        "chapterLabel": "Unit 0: Basic Computer Knowledge · Day 2 of 3",
+        "minimumDay": false,
+        "objective": [
+          "Design and develop artifacts working in team roles using collaborative tools."
+        ],
+        "standards": [
+          "9-12.AP.PD.4 Design and develop computational artifacts working in team roles using collaborative tools."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "name one job that does NOT involve a document, a spreadsheet, or a slide deck.",
+        "tasksTitle": "Office Software: The Tools You Will Actually Be Handed",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Documents, spreadsheets, slides: what each is genuinely for",
+          "Cloud collaboration: comments, version history, and sharing",
+          "Lab: Create, Save & Open",
+          "Exit Ticket"
+        ],
+        "exitTicket": "design and develop artifacts working in team roles using collaborative tools.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 3,
+      "content": {
+        "chapterLabel": "Unit 0: Basic Computer Knowledge · Day 3 of 3",
+        "minimumDay": true,
+        "objective": [
+          "Work in a team role using shared collaborative tools."
+        ],
+        "standards": [
+          "9-12.AP.PD.4 Design and develop computational artifacts working in team roles using collaborative tools."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "what is the difference between sharing a file and collaborating on one?",
+        "tasksTitle": "Collaborating Without Chaos (Ch 0 assessment)",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Team roles, shared ownership, and who breaks the document",
+          "Chapter 0 check for understanding",
+          "Exit Ticket"
+        ],
+        "exitTicket": "work in a team role using shared collaborative tools.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 4,
+      "content": {
+        "chapterLabel": "Unit 1: Digital Citizenship · Day 1 of 6",
+        "minimumDay": false,
+        "objective": [
+          "Demonstrate the everyday operating skills a workplace assumes you have."
+        ],
+        "standards": [
+          "9-12.DC.B.1"
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "your teacher says \"attach the file.\" Where is it? Can you find it in under ten seconds?",
+        "tasksTitle": "Essential Computer Skills: Files, Folders & Fluency",
+        "tasksList": [
+          "Do Now & Clock In",
+          "File systems, paths, search, and shortcuts that save real time",
+          "Hardware basics: what the parts do and what to call them",
+          "Lab: The File System Sprint",
+          "Exit Ticket"
+        ],
+        "exitTicket": "demonstrate the everyday operating skills a workplace assumes you have.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 5,
+      "content": {
+        "chapterLabel": "Unit 1: Digital Citizenship · Day 2 of 6",
+        "minimumDay": false,
+        "objective": [
+          "Apply systematic strategies to identify and fix common problems."
+        ],
+        "standards": [
+          "9-12.DC.B.2"
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one shortcut from last class you will actually use again.",
+        "tasksTitle": "Troubleshooting Like a Professional",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Isolate, reproduce, test one change at a time",
+          "Writing a troubleshooting guide someone else could follow",
+          "Lab: The Fix-It Guide",
+          "Exit Ticket"
+        ],
+        "exitTicket": "apply systematic strategies to identify and fix common problems.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 6,
+      "content": {
+        "chapterLabel": "Unit 1: Digital Citizenship · Day 3 of 6",
+        "minimumDay": true,
+        "objective": [
+          "Explain the legal and ethical responsibilities that come with technology."
+        ],
+        "standards": [
+          "9-12.DC.A.1"
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "you find a login left open on a school computer. What are your options, and what do you owe the person?",
+        "tasksTitle": "Ethics, Privacy & The Law",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Acceptable use, consent, and where your rights actually end",
+          "Copyright, licensing, and citing digital work",
+          "Exit Ticket"
+        ],
+        "exitTicket": "explain the legal and ethical responsibilities that come with technology.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 7,
+      "content": {
+        "chapterLabel": "Unit 1: Digital Citizenship · Day 4 of 6",
+        "minimumDay": false,
+        "objective": [
+          "Evaluate the long-term consequences of your online activity."
+        ],
+        "standards": [
+          "9-12.DC.D.1"
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one thing you learned about acceptable use that surprised you.",
+        "tasksTitle": "Your Digital Footprint",
+        "tasksList": [
+          "Do Now & Clock In",
+          "What a search for your name returns, and who is looking",
+          "Permanence: screenshots, archives, and the myth of deleting",
+          "Lab: The Footprint Audit",
+          "Exit Ticket"
+        ],
+        "exitTicket": "evaluate the long-term consequences of your online activity.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 8,
+      "content": {
+        "chapterLabel": "Unit 1: Digital Citizenship · Day 5 of 6",
+        "minimumDay": false,
+        "objective": [
+          "Give examples to illustrate how sensitive data can be affected by malware and other attacks."
+        ],
+        "standards": [
+          "9-12.NI.C.1 Give examples to illustrate how sensitive data can be affected by malware and other attacks."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "how do most people actually get hacked? Guess before we look at the data.",
+        "tasksTitle": "Cybersecurity Threats: How Data Actually Gets Stolen",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Phishing, malware, ransomware, and social engineering",
+          "Real breaches: what got in, and what it cost",
+          "Lab: The Threat Teardown",
+          "Exit Ticket"
+        ],
+        "exitTicket": "give examples to illustrate how sensitive data can be affected by malware and other attacks.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 9,
+      "content": {
+        "chapterLabel": "Unit 1: Digital Citizenship · Day 6 of 6",
+        "minimumDay": false,
+        "objective": [
+          "Demonstrate mastery of digital citizenship and threat awareness."
+        ],
+        "standards": [
+          "9-12.NI.C.1 Give examples to illustrate how sensitive data can be affected by malware and other attacks."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "which of the four attack types would fool you? Be honest — that is the one to study.",
+        "tasksTitle": "Unit 1 Checkpoint (Ch 1–3 assessment)",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Unit 1 assessment",
+          "Reteach the two lowest-scoring standards",
+          "Exit Ticket"
+        ],
+        "exitTicket": "demonstrate mastery of digital citizenship and threat awareness.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 10,
+      "content": {
+        "chapterLabel": "Unit 2: Computing Systems · Day 1 of 4",
+        "minimumDay": false,
+        "objective": [
+          "Explain how abstractions hide the underlying implementation details of computing systems."
+        ],
+        "standards": [
+          "9-12.CS.D.1 Explain how abstractions hide the underlying implementation details of computing systems embedded in everyday objects."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "you press a key and a letter appears. Roughly how many layers are between those two events?",
+        "tasksTitle": "How Computers Work: Abstraction",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Abstraction: why you do not have to think about electrons",
+          "Input, processing, storage, output — traced end to end",
+          "Exit Ticket"
+        ],
+        "exitTicket": "explain how abstractions hide the underlying implementation details of computing systems.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 11,
+      "content": {
+        "chapterLabel": "Unit 2: Computing Systems · Day 2 of 4",
+        "minimumDay": true,
+        "objective": [
+          "Compare levels of abstraction and interactions between application software, system software, and hardware."
+        ],
+        "standards": [
+          "9-12.CS.HS.1 Compare levels of abstraction and interactions between application software, system software, and hardware layers."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one thing an abstraction hides from you, and one cost of that.",
+        "tasksTitle": "Hardware, Software & The Layers Between",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Applications, operating system, firmware, hardware",
+          "What actually happens when a program crashes",
+          "Lab: The Layer Map",
+          "Exit Ticket"
+        ],
+        "exitTicket": "compare levels of abstraction and interactions between application software, system software, and hardware.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 12,
+      "content": {
+        "chapterLabel": "Unit 2: Computing Systems · Day 3 of 4",
+        "minimumDay": false,
+        "objective": [
+          "Translate between different bit representations of real-world phenomena."
+        ],
+        "standards": [
+          "9-12.DA.S.1 Translate between different bit representations of real-world phenomena, such as characters, numbers, and images (e.g., convert hexadecimal colors to decimal percentages, ASCII/Unicode representation)."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "a computer only stores 0s and 1s. How does it store the letter A? Or a photo?",
+        "tasksTitle": "The Language of Computers: Binary",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Counting in binary and converting by hand",
+          "Bits to characters, colors, and sound",
+          "Lab: The Binary Translator",
+          "Exit Ticket"
+        ],
+        "exitTicket": "translate between different bit representations of real-world phenomena.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 13,
+      "content": {
+        "chapterLabel": "Unit 2: Computing Systems · Day 4 of 4",
+        "minimumDay": false,
+        "objective": [
+          "Represent text, numbers, images, and sound as bits."
+        ],
+        "standards": [
+          "9-12.DA.S.1 Translate between different bit representations of real-world phenomena, such as characters, numbers, and images (e.g., convert hexadecimal colors to decimal percentages, ASCII/Unicode representation)."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "convert 1101 to decimal without looking. What did you do first?",
+        "tasksTitle": "Representing the Real World (Ch 4–5 assessment)",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Hex, RGB, and why file sizes are what they are",
+          "Unit 2 assessment",
+          "Exit Ticket"
+        ],
+        "exitTicket": "represent text, numbers, images, and sound as bits.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 14,
+      "content": {
+        "chapterLabel": "Unit 3: Data & Analysis · Day 1 of 7",
+        "minimumDay": false,
+        "objective": [
+          {
+            "text": "Evaluate the tradeoffs in how data elements are organized and where data is stored.",
+            "level": 0
+          }
+        ],
+        "standards": [
+          {
+            "text": "9-12.DA.S.2 Evaluate the tradeoffs in how data elements are organized and where data is stored.",
+            "level": 0
+          }
+        ],
+        "standardsNote": "",
+        "doNowType": "Predict",
+        "doNowPrompt": "local drive, external drive, or cloud. Name one thing each is better at.",
+        "tasksTitle": "Storing Data: Where It Goes and What It Costs",
+        "tasksList": [
+          {
+            "text": "Do Now & Clock In",
+            "level": 0
+          },
+          {
+            "text": "Play study games",
+            "level": 0
+          },
+          {
+            "text": "Local vs. network vs. cloud: speed, cost, risk, access",
+            "level": 0
+          },
+          {
+            "text": "File formats and what you lose in each",
+            "level": 0
+          },
+          {
+            "text": "Exit Ticket",
+            "level": 0
+          }
+        ],
+        "exitTicket": "evaluate the tradeoffs in how data elements are organized and where data is stored.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 15,
+      "content": {
+        "chapterLabel": "Unit 3: Data & Analysis · Day 2 of 7",
+        "minimumDay": false,
+        "objective": [
+          "Evaluate tradeoffs in data organization."
+        ],
+        "standards": [
+          "9-12.DA.S.2 Evaluate the tradeoffs in how data elements are organized and where data is stored."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one tradeoff of storing everything in the cloud.",
+        "tasksTitle": "Organizing Data So You Can Find It Later",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Naming conventions, folder depth, and metadata",
+          "Backups: the 3-2-1 rule and why people ignore it",
+          "Lab: The Storage Tradeoff Brief",
+          "Exit Ticket"
+        ],
+        "exitTicket": "evaluate tradeoffs in data organization.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 16,
+      "content": {
+        "chapterLabel": "Unit 3: Data & Analysis · Day 3 of 7",
+        "minimumDay": true,
+        "objective": [
+          "Use software tools to organize and calculate over real data."
+        ],
+        "standards": [
+          "9-12.DA.CVT.1 Create interactive data visualizations or alternative representations using software tools to help others better understand real-world phenomena."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "you have 500 rows of numbers. How long should it take to find the average?",
+        "tasksTitle": "Mastering Spreadsheets: Formulas",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Cells, ranges, absolute vs. relative references",
+          "SUM, AVERAGE, COUNT, MIN, MAX, and IF",
+          "Lab: The Formula Sprint",
+          "Exit Ticket"
+        ],
+        "exitTicket": "use software tools to organize and calculate over real data.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 17,
+      "content": {
+        "chapterLabel": "Unit 3: Data & Analysis · Day 4 of 7",
+        "minimumDay": false,
+        "objective": [
+          "Transform messy data into something you can actually analyze."
+        ],
+        "standards": [
+          "9-12.DA.CVT.1 Create interactive data visualizations or alternative representations using software tools to help others better understand real-world phenomena."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "what does an absolute reference do, and when do you need one?",
+        "tasksTitle": "Spreadsheets: Sorting, Filtering & Cleaning",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Sorting, filtering, conditional formatting, and find/replace",
+          "Dirty data: duplicates, blanks, and inconsistent entries",
+          "Lab: The Data Cleanup",
+          "Exit Ticket"
+        ],
+        "exitTicket": "transform messy data into something you can actually analyze.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 18,
+      "content": {
+        "chapterLabel": "Unit 3: Data & Analysis · Day 5 of 7",
+        "minimumDay": false,
+        "objective": [
+          "Create interactive data visualizations or alternative representations to help others understand real phenomena."
+        ],
+        "standards": [
+          "9-12.DA.CVT.1 Create interactive data visualizations or alternative representations using software tools to help others better understand real-world phenomena."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "same data, two different charts. Can one of them lie without being wrong?",
+        "tasksTitle": "Creating Interactive Data Visualizations",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Choosing a chart type that matches the question",
+          "Misleading axes, cherry-picked ranges, and honest labeling",
+          "Lab: The Visualization Build",
+          "Exit Ticket"
+        ],
+        "exitTicket": "create interactive data visualizations or alternative representations to help others understand real phenomena.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 19,
+      "content": {
+        "chapterLabel": "Unit 3: Data & Analysis · Day 6 of 7",
+        "minimumDay": true,
+        "objective": [
+          "Create computational models that represent relationships among data elements."
+        ],
+        "standards": [
+          "9-12.DA.IM.1 Create computational models that represent the relationships among different elements of data collected from a phenomenon, process, or model."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one chart type you would never use for comparison, and why.",
+        "tasksTitle": "Computational Modeling",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Building a model: inputs, rules, outputs",
+          "What-if analysis and testing an assumption",
+          "Lab: The Model Build",
+          "Exit Ticket"
+        ],
+        "exitTicket": "create computational models that represent relationships among data elements.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 20,
+      "content": {
+        "chapterLabel": "Unit 3: Data & Analysis · Day 7 of 7",
+        "minimumDay": false,
+        "objective": [
+          "Demonstrate mastery of data storage, analysis, and modeling."
+        ],
+        "standards": [
+          "9-12.DA.IM.1 Create computational models that represent the relationships among different elements of data collected from a phenomenon, process, or model."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "what will your model do if you feed it a number nobody expected?",
+        "tasksTitle": "Unit 3 Checkpoint (Ch 6–8 assessment)",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Unit 3 assessment",
+          "Reteach the two lowest-scoring standards",
+          "Exit Ticket"
+        ],
+        "exitTicket": "demonstrate mastery of data storage, analysis, and modeling.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 21,
+      "content": {
+        "chapterLabel": "Unit 4: Beginning Algorithms & Programming · Day 1 of 9",
+        "minimumDay": false,
+        "objective": [
+          "Create prototypes that use algorithms to solve computational problems."
+        ],
+        "standards": [
+          "9-12.AP.A.1 Create prototypes that use algorithms to solve computational problems by leveraging prior student knowledge and personal interests."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "describe how to make a sandwich so precisely that a robot could not get it wrong.",
+        "tasksTitle": "Problem Solving: Thinking Before Typing",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Decomposition, pattern finding, abstraction, algorithms",
+          "Pseudocode and flowcharts before any code",
+          "Lab: The Algorithm Draft",
+          "Exit Ticket"
+        ],
+        "exitTicket": "create prototypes that use algorithms to solve computational problems.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 22,
+      "content": {
+        "chapterLabel": "Unit 4: Beginning Algorithms & Programming · Day 2 of 9",
+        "minimumDay": false,
+        "objective": [
+          "Build a working prototype from a problem you care about."
+        ],
+        "standards": [
+          "9-12.AP.A.1 Create prototypes that use algorithms to solve computational problems by leveraging prior student knowledge and personal interests."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "where did your sandwich instructions break down?",
+        "tasksTitle": "Building Your First Algorithm",
+        "tasksList": [
+          "Do Now & Clock In",
+          "From pseudocode to working steps",
+          "Tracing an algorithm by hand to find the bug",
+          "Lab: The Prototype Build",
+          "Exit Ticket"
+        ],
+        "exitTicket": "build a working prototype from a problem you care about.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 23,
+      "content": {
+        "chapterLabel": "Unit 4: Beginning Algorithms & Programming · Day 3 of 9",
+        "minimumDay": false,
+        "objective": [
+          "Test a prototype against cases you did not design for."
+        ],
+        "standards": [
+          "9-12.AP.A.1 Create prototypes that use algorithms to solve computational problems by leveraging prior student knowledge and personal interests."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "your algorithm works on your example. Name one input that will break it.",
+        "tasksTitle": "Testing & Refining an Algorithm (Ch 9 assessment)",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Edge cases, invalid input, and the empty case",
+          "Chapter 9 check for understanding",
+          "Exit Ticket"
+        ],
+        "exitTicket": "test a prototype against cases you did not design for.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 24,
+      "content": {
+        "chapterLabel": "Unit 4: Beginning Algorithms & Programming · Day 4 of 9",
+        "minimumDay": true,
+        "objective": [
+          "Justify the selection of specific control structures when tradeoffs involve readability and performance."
+        ],
+        "standards": [
+          "9-12.AP.C.1 Justify the selection of specific control structures when tradeoffs involve implementation, readability, and program performance, and explain the benefits and drawbacks of choices made."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "a program has to do something 1,000 times. Do you write it 1,000 times?",
+        "tasksTitle": "Control Structures: Making Decisions",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Sequence, selection, repetition",
+          "if/else, and choosing between a loop and a conditional",
+          "Lab: The Decision Tree",
+          "Exit Ticket"
+        ],
+        "exitTicket": "justify the selection of specific control structures when tradeoffs involve readability and performance.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 25,
+      "content": {
+        "chapterLabel": "Unit 4: Beginning Algorithms & Programming · Day 5 of 9",
+        "minimumDay": false,
+        "objective": [
+          "Explain the benefits and drawbacks of the control structures you chose."
+        ],
+        "standards": [
+          "9-12.AP.C.1 Justify the selection of specific control structures when tradeoffs involve implementation, readability, and program performance, and explain the benefits and drawbacks of choices made."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one thing that is easier to read but slower to run.",
+        "tasksTitle": "Loops & The Tradeoffs You Are Making",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Counted vs. conditional loops, and infinite loop traps",
+          "Readability vs. performance: defending your choice",
+          "Lab: The Loop Lab",
+          "Exit Ticket"
+        ],
+        "exitTicket": "explain the benefits and drawbacks of the control structures you chose.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 26,
+      "content": {
+        "chapterLabel": "Unit 4: Beginning Algorithms & Programming · Day 6 of 9",
+        "minimumDay": false,
+        "objective": [
+          "Design and iteratively develop computational artifacts using events to initiate instructions."
+        ],
+        "standards": [
+          "9-12.AP.C.2 Design and iteratively develop computational artifacts for practical intent, personal expression, or to address a societal issue by using events to initiate instructions."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "a program that runs top to bottom and stops. What can it never do?",
+        "tasksTitle": "Events: Programs That Respond",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Event-driven thinking: waiting instead of running",
+          "Building something that reacts to a user",
+          "Lab: The Event Build",
+          "Exit Ticket"
+        ],
+        "exitTicket": "design and iteratively develop computational artifacts using events to initiate instructions.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 27,
+      "content": {
+        "chapterLabel": "Unit 4: Beginning Algorithms & Programming · Day 7 of 9",
+        "minimumDay": false,
+        "objective": [
+          "Decompose problems into smaller components through systematic analysis."
+        ],
+        "standards": [
+          "9-12.AP.M.1 Decompose problems into smaller components through systematic analysis, using constructs such as procedures, modules, and/or objects."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one thing your event program does that a linear program could not.",
+        "tasksTitle": "Modularity: Breaking Big Problems Apart",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Procedures, modules, and objects as containers for logic",
+          "Why one 300-line block is a maintenance disaster",
+          "Lab: The Decomposition Lab",
+          "Exit Ticket"
+        ],
+        "exitTicket": "decompose problems into smaller components through systematic analysis.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 28,
+      "content": {
+        "chapterLabel": "Unit 4: Beginning Algorithms & Programming · Day 8 of 9",
+        "minimumDay": false,
+        "objective": [
+          "Create artifacts by using procedures within a program."
+        ],
+        "standards": [
+          "9-12.AP.M.2 Create artifacts by using procedures within a program, combinations of data and procedures, or independent but interrelated programs."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "you wrote the same eight lines in four places. What is about to go wrong?",
+        "tasksTitle": "Writing & Reusing Procedures",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Parameters, return values, and naming things well",
+          "Refactoring: same behavior, less code",
+          "Lab: The Procedure Refactor",
+          "Exit Ticket"
+        ],
+        "exitTicket": "create artifacts by using procedures within a program.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 29,
+      "content": {
+        "chapterLabel": "Unit 4: Beginning Algorithms & Programming · Day 9 of 9",
+        "minimumDay": false,
+        "objective": [
+          "Demonstrate mastery of algorithms, control structures, and modularity."
+        ],
+        "standards": [
+          "9-12.AP.M.2 Create artifacts by using procedures within a program, combinations of data and procedures, or independent but interrelated programs."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "what is the difference between a parameter and a return value?",
+        "tasksTitle": "Unit 4 Checkpoint (Ch 9–11 assessment)",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Unit 4 assessment",
+          "Reteach the two lowest-scoring standards",
+          "Exit Ticket"
+        ],
+        "exitTicket": "demonstrate mastery of algorithms, control structures, and modularity.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 30,
+      "content": {
+        "chapterLabel": "Unit 5: Impacts of Computing · Day 1 of 4",
+        "minimumDay": false,
+        "objective": [
+          "Test and refine computational artifacts to reduce bias and equity deficits."
+        ],
+        "standards": [
+          "9-12.IC.C.2 Test and refine computational artifacts to reduce bias and equity deficits."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "a soap dispenser does not detect some people's hands. How does that happen?",
+        "tasksTitle": "Culture, Equity & Bias in Computing",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Who was in the room when the system was designed",
+          "Real cases: facial recognition, hiring tools, medical algorithms",
+          "Lab: The Bias Audit",
+          "Exit Ticket"
+        ],
+        "exitTicket": "test and refine computational artifacts to reduce bias and equity deficits.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 31,
+      "content": {
+        "chapterLabel": "Unit 5: Impacts of Computing · Day 2 of 4",
+        "minimumDay": false,
+        "objective": [
+          "Test and refine an artifact so it serves more people."
+        ],
+        "standards": [
+          "9-12.IC.C.2 Test and refine computational artifacts to reduce bias and equity deficits."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one assumption a designer made that excluded someone.",
+        "tasksTitle": "Refining an Artifact to Reduce Bias (Ch 12 assessment)",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Testing with people unlike yourself",
+          "Chapter 12 check for understanding",
+          "Exit Ticket"
+        ],
+        "exitTicket": "test and refine an artifact so it serves more people.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 32,
+      "content": {
+        "chapterLabel": "Unit 5: Impacts of Computing · Day 3 of 4",
+        "minimumDay": false,
+        "objective": [
+          "Evaluate the ways computing impacts personal, ethical, social, economic, and cultural practices."
+        ],
+        "standards": [
+          "9-12.IC.C.1 Evaluate the ways computing impacts personal, ethical, social, economic, and cultural practices.",
+          "9-12.IC.SLE.1 Explain the beneficial and harmful effects that intellectual property laws can have on innovation."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "name one job that exists today because of computing, and one it erased.",
+        "tasksTitle": "How Computing Changes Society",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Economic and cultural shifts, both directions",
+          "Intellectual property law: what it protects and what it blocks",
+          "Exit Ticket"
+        ],
+        "exitTicket": "evaluate the ways computing impacts personal, ethical, social, economic, and cultural practices.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 33,
+      "content": {
+        "chapterLabel": "Unit 5: Impacts of Computing · Day 4 of 4",
+        "minimumDay": true,
+        "objective": [
+          "Explain privacy concerns related to automated data collection and evaluate their implications."
+        ],
+        "standards": [
+          "9-12.IC.SLE.2 Explain the privacy concerns related to the collection and generation of data through automated processes that may not be evident to users.",
+          "9-12.IC.SLE.3 Evaluate the social and economic implications of privacy in the context of safety, law, or ethics."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one benefit and one harm of the same piece of technology.",
+        "tasksTitle": "Privacy, Data Collection & The Law (Ch 13 assessment)",
+        "tasksList": [
+          "Do Now & Clock In",
+          "What gets collected automatically, and by whom",
+          "Safety vs. privacy: the tradeoff nobody solves cleanly",
+          "Unit 5 assessment",
+          "Exit Ticket"
+        ],
+        "exitTicket": "explain privacy concerns related to automated data collection and evaluate their implications.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 34,
+      "content": {
+        "chapterLabel": "Unit 6: Intermediate Algorithms & Programming · Day 1 of 4",
+        "minimumDay": false,
+        "objective": [
+          "Demonstrate the use of arrays to generalize computational problems."
+        ],
+        "standards": [
+          "9-12.AP.V.1 Demonstrate the use of both linked lists and arrays to simplify solutions, generalizing computational problems instead of repeatedly using simple variables."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "you need to store 200 student names. How many variables should you create?",
+        "tasksTitle": "Advanced Data Structures: Arrays",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Arrays: one name, many values, and an index",
+          "Looping an array instead of repeating yourself",
+          "Lab: The Array Lab",
+          "Exit Ticket"
+        ],
+        "exitTicket": "demonstrate the use of arrays to generalize computational problems.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 35,
+      "content": {
+        "chapterLabel": "Unit 6: Intermediate Algorithms & Programming · Day 2 of 4",
+        "minimumDay": false,
+        "objective": [
+          "Demonstrate the use of both linked lists and arrays to simplify solutions."
+        ],
+        "standards": [
+          "9-12.AP.V.1 Demonstrate the use of both linked lists and arrays to simplify solutions, generalizing computational problems instead of repeatedly using simple variables."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "what is the index of the first item in an array, and why that number?",
+        "tasksTitle": "Linked Lists & Choosing a Structure (Ch 14 assessment)",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Linked lists: what they cost and what they buy you",
+          "Choosing between an array and a list, with a reason",
+          "Exit Ticket"
+        ],
+        "exitTicket": "demonstrate the use of both linked lists and arrays to simplify solutions.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 36,
+      "content": {
+        "chapterLabel": "Unit 6: Intermediate Algorithms & Programming · Day 3 of 4",
+        "minimumDay": true,
+        "objective": [
+          "Systematically design and develop programs for broad audiences by incorporating user feedback."
+        ],
+        "standards": [
+          "9-12.AP.PD.1 Systematically design and develop programs for broad audiences by incorporating feedback from users."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "you build exactly what a client asked for and they hate it. What went wrong?",
+        "tasksTitle": "The Software Development Lifecycle",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Plan, design, build, test, deploy, maintain",
+          "Getting user feedback before you are finished",
+          "Lab: The Feedback Round",
+          "Exit Ticket"
+        ],
+        "exitTicket": "systematically design and develop programs for broad audiences by incorporating user feedback.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 37,
+      "content": {
+        "chapterLabel": "Unit 6: Intermediate Algorithms & Programming · Day 4 of 4",
+        "minimumDay": false,
+        "objective": [
+          "Work in team roles using collaborative tools and document design decisions."
+        ],
+        "standards": [
+          "9-12.AP.PD.4 Design and develop computational artifacts working in team roles using collaborative tools.",
+          "9-12.AP.PD.5 Document design decisions using text, graphics, presentations, and/or demonstrations in the development of complex programs."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one thing a user told you that you did not want to hear.",
+        "tasksTitle": "Team Roles & Documentation (Ch 15 assessment)",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Splitting work without stepping on each other",
+          "Documenting decisions so the next person understands why",
+          "Unit 6 assessment",
+          "Exit Ticket"
+        ],
+        "exitTicket": "work in team roles using collaborative tools and document design decisions.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 38,
+      "content": {
+        "chapterLabel": "Unit 7: Networks & The Internet · Day 1 of 4",
+        "minimumDay": false,
+        "objective": [
+          "Describe the relationship between routers, switches, servers, and topology."
+        ],
+        "standards": [
+          "9-12.NI.NCO.1 Evaluate the scalability and reliability of networks, by describing the relationship between routers, switches, servers, topology, and addressing."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "you load a page. How many machines touched that request before it reached you?",
+        "tasksTitle": "How the Internet Actually Works",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Packets, routers, switches, servers, and DNS",
+          "Tracing a real route from this room to another country",
+          "Lab: The Route Trace",
+          "Exit Ticket"
+        ],
+        "exitTicket": "describe the relationship between routers, switches, servers, and topology.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 39,
+      "content": {
+        "chapterLabel": "Unit 7: Networks & The Internet · Day 2 of 4",
+        "minimumDay": true,
+        "objective": [
+          "Evaluate the scalability and reliability of networks."
+        ],
+        "standards": [
+          "9-12.NI.NCO.1 Evaluate the scalability and reliability of networks, by describing the relationship between routers, switches, servers, topology, and addressing."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one thing that has to work for this page to load, that you never think about.",
+        "tasksTitle": "Scalability & Reliability (Ch 16 assessment)",
+        "tasksList": [
+          "Do Now & Clock In",
+          "What breaks when a million people show up at once",
+          "Redundancy, bandwidth, and single points of failure",
+          "Exit Ticket"
+        ],
+        "exitTicket": "evaluate the scalability and reliability of networks.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 40,
+      "content": {
+        "chapterLabel": "Unit 7: Networks & The Internet · Day 3 of 4",
+        "minimumDay": false,
+        "objective": [
+          "Recommend security measures based on efficiency, feasibility, and ethical impact."
+        ],
+        "standards": [
+          "9-12.NI.C.2 Recommend security measures to address various scenarios based on factors such as efficiency, feasibility, and ethical impacts."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "the most secure system is one nobody can use. What is the real goal, then?",
+        "tasksTitle": "Defending Systems: Choosing Security Measures",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Authentication, encryption, firewalls, and access control",
+          "Recommending a measure for a specific scenario",
+          "Lab: The Security Recommendation",
+          "Exit Ticket"
+        ],
+        "exitTicket": "recommend security measures based on efficiency, feasibility, and ethical impact.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 41,
+      "content": {
+        "chapterLabel": "Unit 7: Networks & The Internet · Day 4 of 4",
+        "minimumDay": false,
+        "objective": [
+          "Compare security measures and explain the tradeoffs in implementing them."
+        ],
+        "standards": [
+          "9-12.NI.C.3 Compare various security measures, considering tradeoffs between the usability and security of a computing system.",
+          "9-12.NI.C.4 Explain tradeoffs when selecting and implementing cybersecurity recommendations."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one security measure people bypass because it is annoying.",
+        "tasksTitle": "Security Tradeoffs (Ch 17 assessment)",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Usability vs. security, cost vs. risk",
+          "Unit 7 assessment",
+          "Exit Ticket"
+        ],
+        "exitTicket": "compare security measures and explain the tradeoffs in implementing them.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 42,
+      "content": {
+        "chapterLabel": "Unit 8: Artificial Intelligence · Day 1 of 3",
+        "minimumDay": true,
+        "objective": [
+          "Demonstrate ways a given algorithm applies to problems across disciplines."
+        ],
+        "standards": [
+          "9-12.IC.C.3 Demonstrate ways a given algorithm applies to problems across disciplines."
+        ],
+        "standardsNote": null,
+        "doNowType": "Predict",
+        "doNowPrompt": "the same algorithm that recommends music also does something in medicine. What?",
+        "tasksTitle": "Algorithms Across Disciplines",
+        "tasksList": [
+          "Do Now & Clock In",
+          "Pattern matching in music, medicine, farming, and finance",
+          "One algorithm, four industries",
+          "Lab: The Cross-Discipline Map",
+          "Exit Ticket"
+        ],
+        "exitTicket": "demonstrate ways a given algorithm applies to problems across disciplines.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 43,
+      "content": {
+        "chapterLabel": "Unit 8: Artificial Intelligence · Day 2 of 3",
+        "minimumDay": false,
+        "objective": [
+          "Explain the potential impacts of artificial intelligence on society."
+        ],
+        "standards": [
+          "9-12.IC.C.4 Explain the potential impacts of artificial intelligence on society."
+        ],
+        "standardsNote": null,
+        "doNowType": "Reflect",
+        "doNowPrompt": "name one field you did not expect to be using algorithms.",
+        "tasksTitle": "The Impact of AI on Society",
+        "tasksList": [
+          "Do Now & Clock In",
+          "What AI is genuinely good at, and what it is sold as",
+          "Jobs, bias, energy cost, and who is accountable",
+          "Lab: The AI Impact Brief",
+          "Exit Ticket"
+        ],
+        "exitTicket": "explain the potential impacts of artificial intelligence on society.",
+        "milestone": null
+      }
+    },
+    {
+      "block_num": 44,
+      "content": {
+        "chapterLabel": "Unit 8: Artificial Intelligence · Day 3 of 3",
+        "minimumDay": false,
+        "objective": [
+          "Demonstrate mastery across all nine units."
+        ],
+        "standards": [
+          "9-12.IC.C.4 Explain the potential impacts of artificial intelligence on society."
+        ],
+        "standardsNote": null,
+        "doNowType": "",
+        "doNowPrompt": "Two minutes of silent review. Then everything goes away.",
+        "tasksTitle": "Final Exam & Course Wrap",
+        "tasksList": [
+          "Clock In",
+          "Semester Final Exam",
+          "Course reflection and what to take into your next CS class",
+          "Exit Ticket"
+        ],
+        "exitTicket": "demonstrate mastery across all nine units.",
+        "milestone": null
+      }
+    }
+  ]
+}
