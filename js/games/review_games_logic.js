@@ -245,11 +245,19 @@ async function loadGameDataFromPool() {
             });
         });
 
+        // Many questions (most of the CS bank) were written in pure Jeopardy
+        // clue format with no wrong answers at all -- fine for jeopardyData,
+        // which only needs a q/a pair, but Millionaire and Hollywood Squares
+        // need real distractors to build a multiple-choice question. Without
+        // this filter, a distractor-less question silently becomes a
+        // "multiple choice" question with exactly one option.
+        const mcReady = activeQs.filter(q => Array.isArray(q.d) && q.d.length >= 3);
+
         window.currentChapterData = {
             chapterTitle: targetFilter,
             jeopardyData: mappedJeopardy,
-            hollywoodData: shuffle(activeQs).map(i => ({ question: i.q, answer: i.a, lie: i.d[0] })),
-            millionaireData: shuffle(activeQs).map(i => ({ category: i.cat, question: i.q, options: shuffle([i.a, ...i.d]), answer: i.a })),
+            hollywoodData: shuffle(mcReady).map(i => ({ question: i.q, answer: i.a, lie: i.d[0] })),
+            millionaireData: shuffle(mcReady).map(i => ({ category: i.cat, question: i.q, options: shuffle([i.a, ...i.d]), answer: i.a })),
             vocabList: activeQs.map(item => ({ word: item.a.toUpperCase().replace(/[^A-Z]/g, ''), clue: item.q }))
         };
 

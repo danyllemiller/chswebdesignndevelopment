@@ -63,6 +63,10 @@ window.Hollywood = (() => {
         if (!container) return;
         const data = window.currentChapterData?.hollywoodData;
         if (!data) return;
+        if (data.length === 0) {
+            container.innerHTML = `<div class="text-center p-5"><p class="fw-bold mb-0">This chapter doesn't have enough multiple-choice questions written for Hollywood Squares yet.</p><p class="text-muted small">Try Jeopardy instead -- it works from the same question bank without needing wrong answers.</p></div>`;
+            return;
+        }
 
         if (roomID && roomID !== "solo" && dbRef) {
             const chapterKey = window.currentChapterData?.chapterTitle ? window.currentChapterData.chapterTitle.replace(/[^a-zA-Z0-9]/g, '') : 'General';

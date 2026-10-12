@@ -104,8 +104,12 @@ window.Smarter = (() => {
         const container = document.getElementById('smarter-ui'); 
         if(!container) return;
         
-        const data = window.currentChapterData?.smarterData || window.currentChapterData?.millionaireData; 
+        const data = window.currentChapterData?.smarterData || window.currentChapterData?.millionaireData;
         if (!data || !Array.isArray(data)) return;
+        if (data.length === 0) {
+            container.innerHTML = `<div class="text-center p-5"><p class="fw-bold mb-0">This chapter doesn't have enough multiple-choice questions written for this game yet.</p><p class="text-muted small">Try Jeopardy instead -- it works from the same question bank without needing wrong answers.</p></div>`;
+            return;
+        }
 
         renderBaseLayout(container);
 

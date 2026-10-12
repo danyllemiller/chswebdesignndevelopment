@@ -146,10 +146,14 @@ window.Millionaire = (() => {
         dbRef = db; appIdRef = appId; roomID = room;
         const container = document.getElementById('millionaire-ui'); 
         if(!container) return;
-        const data = window.currentChapterData?.millionaireData; 
+        const data = window.currentChapterData?.millionaireData;
         if (!data || !Array.isArray(data)) return;
-        
-        levelsPool = []; 
+        if (data.length === 0) {
+            container.innerHTML = `<div class="text-center p-5"><p class="fw-bold mb-0">This chapter doesn't have enough multiple-choice questions written for Millionaire yet.</p><p class="text-muted small">Try Jeopardy instead -- it works from the same question bank without needing wrong answers.</p></div>`;
+            return;
+        }
+
+        levelsPool = [];
         const chunkSize = 5;
         for (let i = 0; i < data.length; i += chunkSize) levelsPool.push(data.slice(i, i + chunkSize));
         if (levelsPool.length > 15) levelsPool = levelsPool.slice(0, 15);
