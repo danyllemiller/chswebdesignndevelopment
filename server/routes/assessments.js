@@ -823,6 +823,45 @@ router.get('/review-questions', requireLogin, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch review questions' }); }
 });
 
+const VOCAB_TERMS_DDL = `CREATE TABLE IF NOT EXISTS vocab_terms (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    chapter VARCHAR(200),
+    grade VARCHAR(100),
+    term VARCHAR(200) NOT NULL,
+    clue TEXT NOT NULL,
+    INDEX idx_chapter (chapter),
+    INDEX idx_grade (grade)
+)`;
+
+// Dedicated vocabulary bank for word search/crossword, separate from
+// review_questions -- a question-bank answer ("What is 256?") makes a
+// nonsense word-search entry once stripped to letters, so these games need
+// real single/short terms with a real definition as the clue, authored on
+// their own rather than derived from quiz content.
+router.get('/vocab-terms', requireLogin, async (req, res) => {
+    const { chapter } = req.query;
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(VOCAB_TERMS_DDL);
+        let sql = 'SELECT term, clue FROM vocab_terms';
+        const params = [];
+        const unitMatch = /^CS Unit ([1-7])$/.exec(chapter || '');
+        if (chapter === 'Ultimate Review')    { sql += ' WHERE grade IN (?, ?)'; params.push('Web Design 1', 'Web Design 2'); }
+        else if (chapter === 'Year 1 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 1'); }
+        else if (chapter === 'Year 2 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 2'); }
+        else if (chapter === 'CS Review')     { sql += ' WHERE grade = ?'; params.push('Computer Science'); }
+        else if (unitMatch) {
+            const slugs = CS_UNIT_CHAPTER_SLUGS[Number(unitMatch[1])];
+            sql += ` WHERE grade = ? AND chapter IN (${slugs.map(() => '?').join(', ')})`;
+            params.push('Computer Science', ...slugs);
+        }
+        else if (chapter)                     { sql += ' WHERE chapter = ?'; params.push(chapter); }
+        const [rows] = await connection.execute(sql, params);
+        await connection.release();
+        res.json({ terms: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch vocab terms' }); }
+});
+
 router.post('/admin/review-questions/seed', async (req, res) => {
     const { questions, truncate = false } = req.body;
     if (!Array.isArray(questions) || questions.length === 0)

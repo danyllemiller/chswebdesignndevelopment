@@ -26,6 +26,11 @@ window.WordGames = (() => {
 
         if (mapped.length === 0) {
             console.error("WordGames Error: No valid vocabulary words found after filtering.");
+            const msg = `<div class="text-center p-5"><p class="fw-bold mb-0">This chapter's vocabulary list hasn't been written yet.</p></div>`;
+            const wsEl = document.getElementById('ws-grid');
+            const cwEl = document.getElementById('cw-grid');
+            if (wsEl) wsEl.innerHTML = msg;
+            if (cwEl) cwEl.innerHTML = msg;
             return;
         }
 

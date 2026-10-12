@@ -188,6 +188,7 @@ async function loadGameDataFromPool() {
         }
 
         let activeQs = [];
+        let vocabTerms = [];
 
         // Try MariaDB API first
         try {
@@ -198,6 +199,19 @@ async function loadGameDataFromPool() {
             }
         } catch (e) {
             console.warn("Review questions API unavailable, falling back to local pool.");
+        }
+
+        // Dedicated vocab bank for word search/crossword -- separate from the
+        // quiz question pool above (see server/routes/assessments.js's
+        // /vocab-terms route for why).
+        try {
+            const vocabRes = await fetch(`/api/vocab-terms?chapter=${encodeURIComponent(targetFilter)}`);
+            if (vocabRes.ok) {
+                const vocabData = await vocabRes.json();
+                vocabTerms = vocabData.terms || [];
+            }
+        } catch (e) {
+            console.warn("Vocab terms API unavailable.");
         }
 
         // Fall back to local migrationPool if DB returned nothing
@@ -258,7 +272,7 @@ async function loadGameDataFromPool() {
             jeopardyData: mappedJeopardy,
             hollywoodData: shuffle(mcReady).map(i => ({ question: i.q, answer: i.a, lie: i.d[0] })),
             millionaireData: shuffle(mcReady).map(i => ({ category: i.cat, question: i.q, options: shuffle([i.a, ...i.d]), answer: i.a })),
-            vocabList: activeQs.map(item => ({ word: item.a.toUpperCase().replace(/[^A-Z]/g, ''), clue: item.q }))
+            vocabList: vocabTerms.map(item => ({ word: item.term.toUpperCase().replace(/[^A-Z]/g, ''), clue: item.clue }))
         };
 
         buildGameShells();
