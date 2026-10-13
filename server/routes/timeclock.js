@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { getCurrentSchoolYear, requireLogin, requireSelfOrStaff } = require('../helpers');
 const { pickWprQuestion, pickWprMcQuestion } = require('../wprQuestionBank');
 
@@ -187,12 +187,10 @@ function periodToCourseKeyServer(period) {
 router.post('/clockin', requireSelfOrStaff(), async (req, res) => {
     const { student_id, section_id, type, answer } = req.body;
     try {
-        const connection = await getDbConnection();
-        await connection.execute(
+        await withConnection((connection) => connection.execute(
             'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',
             [student_id, section_id, type, answer]
-        );
-        await connection.release();
+        ));
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Clock in failed.' }); }
 });
@@ -205,17 +203,18 @@ router.post('/clockin', requireSelfOrStaff(), async (req, res) => {
 router.get('/timeclock/status', requireSelfOrStaff(), async (req, res) => {
     const { student_id, period } = req.query;
     try {
-        const connection = await getDbConnection();
-        const today = getLocalDateStr();
-        const sql = period
-            ? 'SELECT * FROM clockins WHERE student_id = ? AND section_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC LIMIT 1'
-            : 'SELECT * FROM clockins WHERE student_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC LIMIT 1';
-        const params = period ? [student_id, period, today] : [student_id, today];
-        const [rows] = await connection.execute(sql, params);
-        await connection.release();
-        if (rows.length === 0) return res.json({ mode: 'in' });
-        const type = rows[0].type;
-        res.json({ mode: type === 'out' ? 'done' : 'out', ...rows[0] });
+        const result = await withConnection(async (connection) => {
+            const today = getLocalDateStr();
+            const sql = period
+                ? 'SELECT * FROM clockins WHERE student_id = ? AND section_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC LIMIT 1'
+                : 'SELECT * FROM clockins WHERE student_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC LIMIT 1';
+            const params = period ? [student_id, period, today] : [student_id, today];
+            const [rows] = await connection.execute(sql, params);
+            if (rows.length === 0) return { mode: 'in' };
+            const type = rows[0].type;
+            return { mode: type === 'out' ? 'done' : 'out', ...rows[0] };
+        });
+        res.json(result);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch status' }); }
 });
 
@@ -319,36 +318,41 @@ router.get('/timeclock/question', requireLogin, async (req, res) => {
     }
 
     try {
-        const connection = await getDbConnection();
-        const dayTypes = await getDayTypes(connection);
-        const groupKey = pairGroupKey(dayTypes, getLocalDateStr());
+        const outcome = await withConnection(async (connection) => {
+            const dayTypes = await getDayTypes(connection);
+            const groupKey = pairGroupKey(dayTypes, getLocalDateStr());
 
-        let chapter, isFallback, title, q;
-        if (kind === 'CS') {
-            ({ chapter, isFallback } = await getCurrentCSChapter(connection));
-            title = CS_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
-            q = await getDeterministicQuestion(connection, 'questions', chapter, groupKey);
-        } else {
-            await connection.release();
-            return res.status(400).json({ error: 'Unrecognized type' });
-        }
+            let chapter, isFallback, title, q;
+            if (kind === 'CS') {
+                ({ chapter, isFallback } = await getCurrentCSChapter(connection));
+                title = CS_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
+                q = await getDeterministicQuestion(connection, 'questions', chapter, groupKey);
+            } else {
+                return { status: 400, body: { error: 'Unrecognized type' } };
+            }
 
-        await connection.release();
+            if (!q) {
+                return {
+                    status: 200,
+                    body: {
+                        question_text: `No test-bank questions found yet for Chapter ${chapter}: ${title}.`,
+                        options: [], correct_answer: null, chapterLabel: `Chapter ${chapter}: ${title}`, unavailable: true
+                    }
+                };
+            }
 
-        if (!q) {
-            return res.json({
-                question_text: `No test-bank questions found yet for Chapter ${chapter}: ${title}.`,
-                options: [], correct_answer: null, chapterLabel: `Chapter ${chapter}: ${title}`, unavailable: true
-            });
-        }
-
-        res.json({
-            question_text: q.question,
-            options: shuffleOptions(q.options),
-            correct_answer: q.answer,
-            explanation: q.hint || null,
-            chapterLabel: `Chapter ${chapter}: ${title}${isFallback ? ' (no due dates set yet — defaulting to Ch. 1)' : ''}`
+            return {
+                status: 200,
+                body: {
+                    question_text: q.question,
+                    options: shuffleOptions(q.options),
+                    correct_answer: q.answer,
+                    explanation: q.hint || null,
+                    chapterLabel: `Chapter ${chapter}: ${title}${isFallback ? ' (no due dates set yet — defaulting to Ch. 1)' : ''}`
+                }
+            };
         });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to fetch clock-in question' });
@@ -446,46 +450,45 @@ router.get('/timeclock/reflection-prompt', requireLogin, async (req, res) => {
     const kind = String(type || '');
     const today = getLocalDateStr();
     try {
-        const connection = await getDbConnection();
-        await ensureDailyQuestionsGroupTable(connection);
+        const result = await withConnection(async (connection) => {
+            await ensureDailyQuestionsGroupTable(connection);
 
-        const groupKey = student_id ? await resolveQuestionGroupKey(connection, student_id) : null;
-        if (groupKey) {
-            const [rows] = await connection.execute(
-                'SELECT question_text FROM teacher_daily_questions_v2 WHERE date = ? AND group_key = ?',
-                [today, groupKey]
-            );
-            const custom = rows[0]?.question_text;
-            if (custom && custom.trim()) {
-                await connection.release();
-                return res.json({ prompt_text: custom.trim(), isCustom: true, groupKey });
+            const groupKey = student_id ? await resolveQuestionGroupKey(connection, student_id) : null;
+            if (groupKey) {
+                const [rows] = await connection.execute(
+                    'SELECT question_text FROM teacher_daily_questions_v2 WHERE date = ? AND group_key = ?',
+                    [today, groupKey]
+                );
+                const custom = rows[0]?.question_text;
+                if (custom && custom.trim()) {
+                    return { prompt_text: custom.trim(), isCustom: true, groupKey };
+                }
             }
-        }
 
-        if (kind === 'WD1' || kind === 'WD2' || kind === 'AS') {
-            await connection.release();
-            const picked = pickWprQuestion(today);
-            return res.json({
-                prompt_text: `[WPR ${picked.std}] ${picked.q}`,
-                isCustom: false,
-                wprStandard: picked.std
-            });
-        }
+            if (kind === 'WD1' || kind === 'WD2' || kind === 'AS') {
+                const picked = pickWprQuestion(today);
+                return {
+                    prompt_text: `[WPR ${picked.std}] ${picked.q}`,
+                    isCustom: false,
+                    wprStandard: picked.std
+                };
+            }
 
-        let chapter, title;
-        if (kind === 'CS') {
-            ({ chapter } = await getCurrentCSChapter(connection));
-            title = CS_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
-        } else {
-            await connection.release();
-            return res.status(400).json({ error: 'Unrecognized type' });
-        }
-        await connection.release();
+            let chapter, title;
+            if (kind === 'CS') {
+                ({ chapter } = await getCurrentCSChapter(connection));
+                title = CS_CHAPTER_TITLES[chapter] || `Chapter ${chapter}`;
+            } else {
+                return { error: 'Unrecognized type' };
+            }
 
-        res.json({
-            prompt_text: `In 2-3 sentences, reflect on what you learned today in Chapter ${chapter}: ${title}. What's one thing that made sense, and one thing you're still working through?`,
-            isCustom: false
+            return {
+                prompt_text: `In 2-3 sentences, reflect on what you learned today in Chapter ${chapter}: ${title}. What's one thing that made sense, and one thing you're still working through?`,
+                isCustom: false
+            };
         });
+        if (result.error) return res.status(400).json({ error: result.error });
+        res.json(result);
     } catch (err) {
         console.error(err);
         res.json({
@@ -529,142 +532,142 @@ router.post('/timeclock/save', requireSelfOrStaff(), async (req, res) => {
     const today = getLocalDateStr();
     const period = section_id || '';
     try {
-        const connection = await getDbConnection();
-        if (mode === 'in') {
-            const courseKey = periodToCourseKeyServer(period);
-            const isCorrectVal = await verifyClockinAnswer(connection, courseKey, answer);
-            await connection.execute(
-                'INSERT INTO clockins (student_id, section_id, type, answer, is_correct, timestamp) VALUES (?, ?, ?, ?, ?, NOW())',
-                [student_id, period, 'in', answer || '', isCorrectVal]
-            );
-            // timesheets has no unique constraint to make "ON DUPLICATE KEY
-            // UPDATE" actually trigger (it never has -- every prior clock-in
-            // silently INSERTed a brand-new row instead of updating, which is
-            // why some students have dozens of rows for a single day).
-            // Explicit check-then-write instead, scoped by period so a
-            // dual-enrolled student's two classes each get their own row for
-            // the same day rather than colliding or overwriting each other.
-            const [existing] = await connection.execute(
-                'SELECT id FROM timesheets WHERE student_id = ? AND date = ? AND section_id = ? LIMIT 1',
-                [student_id, today, period]
-            );
-            if (existing.length > 0) {
+        await withConnection(async (connection) => {
+            if (mode === 'in') {
+                const courseKey = periodToCourseKeyServer(period);
+                const isCorrectVal = await verifyClockinAnswer(connection, courseKey, answer);
                 await connection.execute(
-                    'UPDATE timesheets SET clock_in = CURTIME(), in_answer = ? WHERE id = ?',
-                    [answer || '', existing[0].id]
+                    'INSERT INTO clockins (student_id, section_id, type, answer, is_correct, timestamp) VALUES (?, ?, ?, ?, ?, NOW())',
+                    [student_id, period, 'in', answer || '', isCorrectVal]
                 );
-            } else {
+                // timesheets has no unique constraint to make "ON DUPLICATE KEY
+                // UPDATE" actually trigger (it never has -- every prior clock-in
+                // silently INSERTed a brand-new row instead of updating, which is
+                // why some students have dozens of rows for a single day).
+                // Explicit check-then-write instead, scoped by period so a
+                // dual-enrolled student's two classes each get their own row for
+                // the same day rather than colliding or overwriting each other.
+                const [existing] = await connection.execute(
+                    'SELECT id FROM timesheets WHERE student_id = ? AND date = ? AND section_id = ? LIMIT 1',
+                    [student_id, today, period]
+                );
+                if (existing.length > 0) {
+                    await connection.execute(
+                        'UPDATE timesheets SET clock_in = CURTIME(), in_answer = ? WHERE id = ?',
+                        [answer || '', existing[0].id]
+                    );
+                } else {
+                    await connection.execute(
+                        'INSERT INTO timesheets (student_id, date, section_id, clock_in, in_answer) VALUES (?, ?, ?, CURTIME(), ?)',
+                        [student_id, today, period, answer || '']
+                    );
+                }
+
+                // Grade the clock-in: 1 pt for doing it, 1 pt for being on time
+                // (within 5 min of the bell), 1 pt for a correct answer -- every
+                // course's clock-in is a real multiple-choice question (WD1/WD2/AS
+                // pull from the Workplace Readiness MC bank, CS from its chapter
+                // test bank), so "correct" is meaningful everywhere now. Written
+                // straight into the real gradebook (exams/responses) so it shows
+                // up in the normal admin/student views like any other assignment
+                // -- one shared entry per course per day, matching how exams and
+                // pretests already work. Best-effort: a failure here shouldn't
+                // block the clock-in itself from succeeding.
+                try {
+                    const courseId = TC_COURSE_ID_MAP[courseKey];
+                    if (courseId) {
+                        const dayTypes = await getDayTypes(connection);
+                        const startTime = await getBellStartTime(connection, dayTypes, today, period);
+                        const onTime = isOnTime(startTime);
+                        let points = 1; // attempted
+                        if (onTime) points += 1;
+                        if (isCorrectVal === 1) points += 1;
+
+                        const examId = `TC-${courseKey}-${today}`;
+                        // due_date = the check-in's own day -- a missed day never
+                        // had this set before, which meant the normal past-due
+                        // "counts as 0 once overdue" gradebook rule could never
+                        // fire and a skipped clock-in just stayed invisible
+                        // forever instead of showing as missing. Each day is its
+                        // own exam_id, so a later real clock-in always creates
+                        // its own new row (see `today` above) and can never
+                        // retroactively fill in an earlier missed day's row.
+                        await connection.execute(
+                            `INSERT INTO exams (exam_id, title, total_points, course_id, due_date) VALUES (?, ?, ?, ?, ?)
+                             ON DUPLICATE KEY UPDATE title = VALUES(title), total_points = VALUES(total_points), course_id = VALUES(course_id), due_date = COALESCE(due_date, VALUES(due_date))`,
+                            [examId, `Timeclock Check-In — ${today}`, 3, courseId, today]
+                        );
+                        const [icCols] = await connection.execute(`SHOW COLUMNS FROM responses LIKE 'entered_in_ic'`);
+                        if (icCols.length === 0) {
+                            await connection.execute(`ALTER TABLE responses ADD COLUMN entered_in_ic TINYINT(1) DEFAULT 0`);
+                        }
+                        // on_time is stored separately from the rolled-up point
+                        // total -- a raw score of 2/3 is ambiguous (on-time-but-
+                        // wrong and late-but-correct both land on 2), which is
+                        // exactly why the gradebook couldn't tell those apart.
+                        // NULL for every non-timeclock row.
+                        const [onTimeCols] = await connection.execute(`SHOW COLUMNS FROM responses LIKE 'on_time'`);
+                        if (onTimeCols.length === 0) {
+                            await connection.execute(`ALTER TABLE responses ADD COLUMN on_time TINYINT(1) DEFAULT NULL`);
+                        }
+                        await connection.execute(
+                            `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic, on_time) VALUES (?, ?, ?, ?, NOW(), 0, ?)
+                             ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0, on_time = VALUES(on_time)`,
+                            [student_id, examId, points, 3, onTime === null ? null : (onTime ? 1 : 0)]
+                        );
+                    }
+                } catch (gradeErr) { console.error('[timeclock] Failed to grade clock-in:', gradeErr); }
+
+                // WD1/WD2/AS daily journal -- clock-in's graded MC question is
+                // still worth keeping a record of alongside clock-out's
+                // reflection, one row per session per day (see
+                // ensureWdJournalTable), browsable later (My Daily Journal) the
+                // same way Intervention's journal already works. Best-effort:
+                // never block the clock-in itself if this fails.
+                try {
+                    const courseKey = periodToCourseKeyServer(period);
+                    if (courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS') {
+                        await ensureWdJournalTable(connection);
+                        await connection.execute(
+                            `INSERT INTO wd_journal (student_id, entry_date, session, prompt, content)
+                             VALUES (?, ?, 'in', ?, ?)
+                             ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
+                            [student_id, today, prompt || null, answer || '']
+                        );
+                    }
+                } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry (clock-in):', journalErr); }
+            } else if (mode === 'out') {
                 await connection.execute(
-                    'INSERT INTO timesheets (student_id, date, section_id, clock_in, in_answer) VALUES (?, ?, ?, CURTIME(), ?)',
-                    [student_id, today, period, answer || '']
+                    'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',
+                    [student_id, period, 'out', answer || '']
                 );
+                // Scoped by section_id and limited to one row so clocking out of
+                // one period can never stamp the same clock-out time onto a
+                // different period's still-open record for the same day.
+                await connection.execute(
+                    `UPDATE timesheets SET clock_out = CURTIME(), out_answer = ?
+                     WHERE student_id = ? AND date = ? AND section_id = ? AND clock_out IS NULL
+                     ORDER BY id DESC LIMIT 1`,
+                    [answer || '', student_id, today, period]
+                );
+
+                // WD1/WD2/AS daily journal -- clock-out's open-ended reflection
+                // gets its own row, alongside clock-in's (see above). Best-effort:
+                // never block the clock-out itself if this fails.
+                try {
+                    const courseKey = periodToCourseKeyServer(period);
+                    if (courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS') {
+                        await ensureWdJournalTable(connection);
+                        await connection.execute(
+                            `INSERT INTO wd_journal (student_id, entry_date, session, prompt, content)
+                             VALUES (?, ?, 'out', ?, ?)
+                             ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
+                            [student_id, today, prompt || null, answer || '']
+                        );
+                    }
+                } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry (clock-out):', journalErr); }
             }
-
-            // Grade the clock-in: 1 pt for doing it, 1 pt for being on time
-            // (within 5 min of the bell), 1 pt for a correct answer -- every
-            // course's clock-in is a real multiple-choice question (WD1/WD2/AS
-            // pull from the Workplace Readiness MC bank, CS from its chapter
-            // test bank), so "correct" is meaningful everywhere now. Written
-            // straight into the real gradebook (exams/responses) so it shows
-            // up in the normal admin/student views like any other assignment
-            // -- one shared entry per course per day, matching how exams and
-            // pretests already work. Best-effort: a failure here shouldn't
-            // block the clock-in itself from succeeding.
-            try {
-                const courseId = TC_COURSE_ID_MAP[courseKey];
-                if (courseId) {
-                    const dayTypes = await getDayTypes(connection);
-                    const startTime = await getBellStartTime(connection, dayTypes, today, period);
-                    const onTime = isOnTime(startTime);
-                    let points = 1; // attempted
-                    if (onTime) points += 1;
-                    if (isCorrectVal === 1) points += 1;
-
-                    const examId = `TC-${courseKey}-${today}`;
-                    // due_date = the check-in's own day -- a missed day never
-                    // had this set before, which meant the normal past-due
-                    // "counts as 0 once overdue" gradebook rule could never
-                    // fire and a skipped clock-in just stayed invisible
-                    // forever instead of showing as missing. Each day is its
-                    // own exam_id, so a later real clock-in always creates
-                    // its own new row (see `today` above) and can never
-                    // retroactively fill in an earlier missed day's row.
-                    await connection.execute(
-                        `INSERT INTO exams (exam_id, title, total_points, course_id, due_date) VALUES (?, ?, ?, ?, ?)
-                         ON DUPLICATE KEY UPDATE title = VALUES(title), total_points = VALUES(total_points), course_id = VALUES(course_id), due_date = COALESCE(due_date, VALUES(due_date))`,
-                        [examId, `Timeclock Check-In — ${today}`, 3, courseId, today]
-                    );
-                    const [icCols] = await connection.execute(`SHOW COLUMNS FROM responses LIKE 'entered_in_ic'`);
-                    if (icCols.length === 0) {
-                        await connection.execute(`ALTER TABLE responses ADD COLUMN entered_in_ic TINYINT(1) DEFAULT 0`);
-                    }
-                    // on_time is stored separately from the rolled-up point
-                    // total -- a raw score of 2/3 is ambiguous (on-time-but-
-                    // wrong and late-but-correct both land on 2), which is
-                    // exactly why the gradebook couldn't tell those apart.
-                    // NULL for every non-timeclock row.
-                    const [onTimeCols] = await connection.execute(`SHOW COLUMNS FROM responses LIKE 'on_time'`);
-                    if (onTimeCols.length === 0) {
-                        await connection.execute(`ALTER TABLE responses ADD COLUMN on_time TINYINT(1) DEFAULT NULL`);
-                    }
-                    await connection.execute(
-                        `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic, on_time) VALUES (?, ?, ?, ?, NOW(), 0, ?)
-                         ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0, on_time = VALUES(on_time)`,
-                        [student_id, examId, points, 3, onTime === null ? null : (onTime ? 1 : 0)]
-                    );
-                }
-            } catch (gradeErr) { console.error('[timeclock] Failed to grade clock-in:', gradeErr); }
-
-            // WD1/WD2/AS daily journal -- clock-in's graded MC question is
-            // still worth keeping a record of alongside clock-out's
-            // reflection, one row per session per day (see
-            // ensureWdJournalTable), browsable later (My Daily Journal) the
-            // same way Intervention's journal already works. Best-effort:
-            // never block the clock-in itself if this fails.
-            try {
-                const courseKey = periodToCourseKeyServer(period);
-                if (courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS') {
-                    await ensureWdJournalTable(connection);
-                    await connection.execute(
-                        `INSERT INTO wd_journal (student_id, entry_date, session, prompt, content)
-                         VALUES (?, ?, 'in', ?, ?)
-                         ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
-                        [student_id, today, prompt || null, answer || '']
-                    );
-                }
-            } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry (clock-in):', journalErr); }
-        } else if (mode === 'out') {
-            await connection.execute(
-                'INSERT INTO clockins (student_id, section_id, type, answer, timestamp) VALUES (?, ?, ?, ?, NOW())',
-                [student_id, period, 'out', answer || '']
-            );
-            // Scoped by section_id and limited to one row so clocking out of
-            // one period can never stamp the same clock-out time onto a
-            // different period's still-open record for the same day.
-            await connection.execute(
-                `UPDATE timesheets SET clock_out = CURTIME(), out_answer = ?
-                 WHERE student_id = ? AND date = ? AND section_id = ? AND clock_out IS NULL
-                 ORDER BY id DESC LIMIT 1`,
-                [answer || '', student_id, today, period]
-            );
-
-            // WD1/WD2/AS daily journal -- clock-out's open-ended reflection
-            // gets its own row, alongside clock-in's (see above). Best-effort:
-            // never block the clock-out itself if this fails.
-            try {
-                const courseKey = periodToCourseKeyServer(period);
-                if (courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS') {
-                    await ensureWdJournalTable(connection);
-                    await connection.execute(
-                        `INSERT INTO wd_journal (student_id, entry_date, session, prompt, content)
-                         VALUES (?, ?, 'out', ?, ?)
-                         ON DUPLICATE KEY UPDATE content = VALUES(content), prompt = COALESCE(VALUES(prompt), prompt), updated_at = NOW()`,
-                        [student_id, today, prompt || null, answer || '']
-                    );
-                }
-            } catch (journalErr) { console.error('[timeclock] Failed to save WD journal entry (clock-out):', journalErr); }
-        }
-        await connection.release();
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Timeclock save failed.' }); }
 });
@@ -677,15 +680,16 @@ router.get('/student/wd-journal', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
-        const connection = await getDbConnection();
-        await ensureWdJournalTable(connection);
-        const [rows] = await connection.execute(
-            `SELECT entry_date, session, prompt, content, updated_at FROM wd_journal
-             WHERE student_id = ? ORDER BY entry_date DESC, session = 'out' ASC`,
-            [student_id]
-        );
-        await connection.release();
-        res.json({ entries: rows });
+        const entries = await withConnection(async (connection) => {
+            await ensureWdJournalTable(connection);
+            const [rows] = await connection.execute(
+                `SELECT entry_date, session, prompt, content, updated_at FROM wd_journal
+                 WHERE student_id = ? ORDER BY entry_date DESC, session = 'out' ASC`,
+                [student_id]
+            );
+            return rows;
+        });
+        res.json({ entries });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch journal' }); }
 });
 
@@ -694,15 +698,16 @@ router.get('/student/wd-journal', requireSelfOrStaff(), async (req, res) => {
 router.get('/admin/wd-journal/:student_id', async (req, res) => {
     const { student_id } = req.params;
     try {
-        const connection = await getDbConnection();
-        await ensureWdJournalTable(connection);
-        const [rows] = await connection.execute(
-            `SELECT entry_date, session, prompt, content, updated_at FROM wd_journal
-             WHERE student_id = ? ORDER BY entry_date DESC, session = 'out' ASC`,
-            [student_id]
-        );
-        await connection.release();
-        res.json({ entries: rows });
+        const entries = await withConnection(async (connection) => {
+            await ensureWdJournalTable(connection);
+            const [rows] = await connection.execute(
+                `SELECT entry_date, session, prompt, content, updated_at FROM wd_journal
+                 WHERE student_id = ? ORDER BY entry_date DESC, session = 'out' ASC`,
+                [student_id]
+            );
+            return rows;
+        });
+        res.json({ entries });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch journal' }); }
 });
 
@@ -713,15 +718,16 @@ router.get('/admin/daily-questions', requireLogin, async (req, res) => {
     const { date } = req.query;
     if (!date) return res.status(400).json({ error: 'date is required' });
     try {
-        const connection = await getDbConnection();
-        await ensureDailyQuestionsGroupTable(connection);
-        const [rows] = await connection.execute(
-            'SELECT group_key, question_text FROM teacher_daily_questions_v2 WHERE date = ?',
-            [date]
-        );
-        await connection.release();
-        const questions = {};
-        rows.forEach(r => { questions[r.group_key] = r.question_text || ''; });
+        const questions = await withConnection(async (connection) => {
+            await ensureDailyQuestionsGroupTable(connection);
+            const [rows] = await connection.execute(
+                'SELECT group_key, question_text FROM teacher_daily_questions_v2 WHERE date = ?',
+                [date]
+            );
+            const questions = {};
+            rows.forEach(r => { questions[r.group_key] = r.question_text || ''; });
+            return questions;
+        });
         res.json({ groups: QUESTION_GROUPS, questions });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch daily questions' }); }
 });
@@ -730,16 +736,16 @@ router.post('/admin/daily-questions', async (req, res) => {
     const { date, questions } = req.body; // { WD1: "...", WD2: "...", WD_AS: "...", CS_A: "...", CS_B: "...", CS_MON: "..." }
     if (!date) return res.status(400).json({ error: 'date is required' });
     try {
-        const connection = await getDbConnection();
-        await ensureDailyQuestionsGroupTable(connection);
-        for (const g of QUESTION_GROUPS) {
-            await connection.execute(
-                `INSERT INTO teacher_daily_questions_v2 (date, group_key, question_text) VALUES (?, ?, ?)
-                 ON DUPLICATE KEY UPDATE question_text = VALUES(question_text)`,
-                [date, g.key, (questions && questions[g.key]) || '']
-            );
-        }
-        await connection.release();
+        await withConnection(async (connection) => {
+            await ensureDailyQuestionsGroupTable(connection);
+            for (const g of QUESTION_GROUPS) {
+                await connection.execute(
+                    `INSERT INTO teacher_daily_questions_v2 (date, group_key, question_text) VALUES (?, ?, ?)
+                     ON DUPLICATE KEY UPDATE question_text = VALUES(question_text)`,
+                    [date, g.key, (questions && questions[g.key]) || '']
+                );
+            }
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save daily questions' }); }
 });
@@ -752,21 +758,22 @@ router.get('/admin/timeclock-answers', async (req, res) => {
     const date = req.query.date || getLocalDateStr();
     const section = (req.query.section || '').trim();
     try {
-        const currentYear = getCurrentSchoolYear();
-        const connection = await getDbConnection();
-        const params = [date, currentYear];
-        let sectionClause = '';
-        if (section) { sectionClause = 'AND t.section_id = ?'; params.push(section); }
-        const [rows] = await connection.execute(
-            `SELECT t.id, t.student_id, t.section_id, t.clock_in, t.clock_out, t.in_answer, t.out_answer,
-                    s.first_name, s.last_name
-             FROM timesheets t
-             JOIN students s ON s.student_id = t.student_id
-             WHERE t.date = ? AND (s.archived IS NULL OR s.archived = 0) AND s.school_year = ? ${sectionClause}
-             ORDER BY t.section_id, s.last_name, s.first_name`,
-            params
-        );
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            const currentYear = getCurrentSchoolYear();
+            const params = [date, currentYear];
+            let sectionClause = '';
+            if (section) { sectionClause = 'AND t.section_id = ?'; params.push(section); }
+            const [rows] = await connection.execute(
+                `SELECT t.id, t.student_id, t.section_id, t.clock_in, t.clock_out, t.in_answer, t.out_answer,
+                        s.first_name, s.last_name
+                 FROM timesheets t
+                 JOIN students s ON s.student_id = t.student_id
+                 WHERE t.date = ? AND (s.archived IS NULL OR s.archived = 0) AND s.school_year = ? ${sectionClause}
+                 ORDER BY t.section_id, s.last_name, s.first_name`,
+                params
+            );
+            return rows;
+        });
         res.json({ date, rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load timeclock answers' }); }
 });
@@ -777,21 +784,22 @@ router.post('/admin/inject-timesheets', async (req, res) => {
         return res.status(400).json({ error: 'student_id and timesheets array are required' });
     }
     try {
-        const connection = await getDbConnection();
-        let count = 0;
-        for (const ts of timesheets) {
-            await connection.execute(
-                'DELETE FROM timesheets WHERE student_id = ? AND date = ?',
-                [student_id, ts.date]
-            );
-            await connection.execute(
-                `INSERT INTO timesheets (student_id, date, clock_in, clock_out, in_answer, out_answer)
-                 VALUES (?, ?, ?, ?, ?, ?)`,
-                [student_id, ts.date, ts.clock_in, ts.clock_out, ts.in_answer || 'Simulated Answer', ts.out_answer || 'Simulated Reflection']
-            );
-            count++;
-        }
-        await connection.release();
+        const count = await withConnection(async (connection) => {
+            let count = 0;
+            for (const ts of timesheets) {
+                await connection.execute(
+                    'DELETE FROM timesheets WHERE student_id = ? AND date = ?',
+                    [student_id, ts.date]
+                );
+                await connection.execute(
+                    `INSERT INTO timesheets (student_id, date, clock_in, clock_out, in_answer, out_answer)
+                     VALUES (?, ?, ?, ?, ?, ?)`,
+                    [student_id, ts.date, ts.clock_in, ts.clock_out, ts.in_answer || 'Simulated Answer', ts.out_answer || 'Simulated Reflection']
+                );
+                count++;
+            }
+            return count;
+        });
         res.json({ success: true, count });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to inject timesheets' }); }
 });
