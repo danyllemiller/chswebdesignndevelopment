@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { ensureOffDaysTable, requireLogin, requireStaff } = require('../helpers');
 
 const CALENDAR_EVENTS_DDL = `CREATE TABLE IF NOT EXISTS calendar_events (
@@ -27,10 +27,11 @@ async function ensureCalendarEventsTable(connection) {
 // exists in the app, so this is a small manually-maintained list.
 router.get('/admin/off-days', async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await ensureOffDaysTable(connection);
-        const [rows] = await connection.execute('SELECT off_date, label FROM school_off_days ORDER BY off_date');
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await ensureOffDaysTable(connection);
+            const [rows] = await connection.execute('SELECT off_date, label FROM school_off_days ORDER BY off_date');
+            return rows;
+        });
         res.json({ offDays: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch off days' }); }
 });
@@ -41,23 +42,23 @@ router.post('/admin/off-days', async (req, res) => {
         return res.status(400).json({ error: 'A valid off_date (YYYY-MM-DD) is required' });
     }
     try {
-        const connection = await getDbConnection();
-        await ensureOffDaysTable(connection);
-        await connection.execute(
-            'INSERT INTO school_off_days (off_date, label) VALUES (?, ?) ON DUPLICATE KEY UPDATE label = VALUES(label)',
-            [off_date, label || null]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await ensureOffDaysTable(connection);
+            await connection.execute(
+                'INSERT INTO school_off_days (off_date, label) VALUES (?, ?) ON DUPLICATE KEY UPDATE label = VALUES(label)',
+                [off_date, label || null]
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save off day' }); }
 });
 
 router.delete('/admin/off-days/:date', async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await ensureOffDaysTable(connection);
-        await connection.execute('DELETE FROM school_off_days WHERE off_date = ?', [req.params.date]);
-        await connection.release();
+        await withConnection(async (connection) => {
+            await ensureOffDaysTable(connection);
+            await connection.execute('DELETE FROM school_off_days WHERE off_date = ?', [req.params.date]);
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete off day' }); }
 });
@@ -143,9 +144,9 @@ function getAutoPeriodKey(cadence) {
 // at all before this, so a fully anonymous request could read it too.
 router.get('/admin/calendar-settings', requireLogin, async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute('SELECT config_json FROM calendar_settings WHERE id = 1');
-        await connection.release();
+        const rows = await withConnection((connection) => connection.execute(
+            'SELECT config_json FROM calendar_settings WHERE id = 1'
+        ).then(([rows]) => rows));
         if (rows.length > 0) return res.json(rows[0].config_json);
         res.status(404).json({ error: 'Configuration not found' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch calendar settings' }); }
@@ -154,12 +155,10 @@ router.get('/admin/calendar-settings', requireLogin, async (req, res) => {
 router.post('/admin/calendar-settings', async (req, res) => {
     const config = req.body;
     try {
-        const connection = await getDbConnection();
-        await connection.execute(
+        await withConnection((connection) => connection.execute(
             'INSERT INTO calendar_settings (id, config_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE config_json = VALUES(config_json)',
             [JSON.stringify(config)]
-        );
-        await connection.release();
+        ));
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save calendar settings' }); }
 });
@@ -168,29 +167,27 @@ router.post('/admin/calendar-settings', async (req, res) => {
 router.get('/bell-schedule', requireLogin, async (req, res) => {
     const type = String(req.query.type || '').trim();
     try {
-        const connection = await getDbConnection();
-        let rows;
-        if (type) {
-            [rows] = await connection.execute(
-                `SELECT id, schedule_type, period_label, sort_order,
-                        TIME_FORMAT(start_time,'%H:%i') AS start_time,
-                        TIME_FORMAT(end_time,'%H:%i')   AS end_time,
-                        section_id, course_name
-                 FROM bell_schedule WHERE schedule_type = ?
-                 ORDER BY sort_order ASC, start_time ASC`,
-                [type]
-            );
-        } else {
-            [rows] = await connection.execute(
+        const rows = await withConnection((connection) => {
+            if (type) {
+                return connection.execute(
+                    `SELECT id, schedule_type, period_label, sort_order,
+                            TIME_FORMAT(start_time,'%H:%i') AS start_time,
+                            TIME_FORMAT(end_time,'%H:%i')   AS end_time,
+                            section_id, course_name
+                     FROM bell_schedule WHERE schedule_type = ?
+                     ORDER BY sort_order ASC, start_time ASC`,
+                    [type]
+                ).then(([rows]) => rows);
+            }
+            return connection.execute(
                 `SELECT id, schedule_type, period_label, sort_order,
                         TIME_FORMAT(start_time,'%H:%i') AS start_time,
                         TIME_FORMAT(end_time,'%H:%i')   AS end_time,
                         section_id, course_name
                  FROM bell_schedule
                  ORDER BY schedule_type ASC, sort_order ASC, start_time ASC`
-            );
-        }
-        await connection.release();
+            ).then(([rows]) => rows);
+        });
         res.json({ schedule: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch bell schedule' }); }
 });
@@ -203,15 +200,16 @@ router.get('/admin/checklist', async (req, res) => {
     const pKey = period_key || getAutoPeriodKey(cadence);
     const items = CHECKLIST_ITEMS[cadence];
     try {
-        const connection = await getDbConnection();
-        await connection.execute(CHECKLIST_DDL);
-        const [rows] = await connection.execute(
-            'SELECT item_key, completed FROM teacher_checklist_state WHERE teacher_id = ? AND cadence = ? AND period_key = ?',
-            [teacher_id, cadence, pKey]
-        );
-        const stateMap = {};
-        rows.forEach(r => { stateMap[r.item_key] = !!r.completed; });
-        await connection.release();
+        const stateMap = await withConnection(async (connection) => {
+            await connection.execute(CHECKLIST_DDL);
+            const [rows] = await connection.execute(
+                'SELECT item_key, completed FROM teacher_checklist_state WHERE teacher_id = ? AND cadence = ? AND period_key = ?',
+                [teacher_id, cadence, pKey]
+            );
+            const stateMap = {};
+            rows.forEach(r => { stateMap[r.item_key] = !!r.completed; });
+            return stateMap;
+        });
         res.json({
             cadence, period_key: pKey,
             items: items.map(item => ({ key: item.key, text: item.text, completed: stateMap[item.key] || false }))
@@ -224,15 +222,15 @@ router.post('/admin/checklist/toggle', async (req, res) => {
     if (!teacher_id || !cadence || !item_key || !period_key)
         return res.status(400).json({ error: 'teacher_id, cadence, item_key, and period_key are required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(CHECKLIST_DDL);
-        await connection.execute(
-            `INSERT INTO teacher_checklist_state (teacher_id, cadence, item_key, period_key, completed)
-             VALUES (?, ?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE completed = VALUES(completed), updated_at = CURRENT_TIMESTAMP`,
-            [teacher_id, cadence, item_key, period_key, completed ? 1 : 0]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(CHECKLIST_DDL);
+            await connection.execute(
+                `INSERT INTO teacher_checklist_state (teacher_id, cadence, item_key, period_key, completed)
+                 VALUES (?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE completed = VALUES(completed), updated_at = CURRENT_TIMESTAMP`,
+                [teacher_id, cadence, item_key, period_key, completed ? 1 : 0]
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to toggle checklist item' }); }
 });
@@ -242,13 +240,13 @@ router.post('/admin/checklist/reset', async (req, res) => {
     if (!teacher_id || !cadence || !period_key)
         return res.status(400).json({ error: 'teacher_id, cadence, and period_key are required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(CHECKLIST_DDL);
-        await connection.execute(
-            'UPDATE teacher_checklist_state SET completed = 0 WHERE teacher_id = ? AND cadence = ? AND period_key = ?',
-            [teacher_id, cadence, period_key]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(CHECKLIST_DDL);
+            await connection.execute(
+                'UPDATE teacher_checklist_state SET completed = 0 WHERE teacher_id = ? AND cadence = ? AND period_key = ?',
+                [teacher_id, cadence, period_key]
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to reset checklist' }); }
 });
@@ -282,70 +280,69 @@ router.post('/bell-schedule', requireStaff, async (req, res) => {
         : [];
 
     try {
-        const connection = await getDbConnection();
-
-        if (saveAll) {
-            await connection.execute('DELETE FROM bell_schedule');
-        } else if (schedTypes.length > 0) {
-            const placeholders = schedTypes.map(() => '?').join(',');
-            await connection.execute(`DELETE FROM bell_schedule WHERE schedule_type IN (${placeholders})`, schedTypes);
-        } else if (type) {
-            await connection.execute('DELETE FROM bell_schedule WHERE schedule_type = ?', [String(type).trim()]);
-        } else {
-            await connection.release();
-            return res.status(400).json({ error: 'schedule_types array or schedule_type required' });
-        }
-
-        if (Array.isArray(periods) && periods.length > 0) {
-            for (let i = 0; i < periods.length; i++) {
-                const p = periods[i];
-                const label = String(p.period_label || '').trim();
-                const start = p.start_time || '08:00';
-                const end = p.end_time || '09:00';
-                if (!label || start >= end) continue;
-                const section = String(p.section_id || '').trim() || null;
-                const course = String(p.course_name || '').trim() || null;
-                const rowType = String(p.schedule_type || '').trim() || String(type || '').trim();
-                await connection.execute(
-                    `INSERT INTO bell_schedule (schedule_type, period_label, sort_order, start_time, end_time, section_id, course_name)
-                     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                    [rowType, label, i, start, end, section, course]
-                );
+        const outcome = await withConnection(async (connection) => {
+            if (saveAll) {
+                await connection.execute('DELETE FROM bell_schedule');
+            } else if (schedTypes.length > 0) {
+                const placeholders = schedTypes.map(() => '?').join(',');
+                await connection.execute(`DELETE FROM bell_schedule WHERE schedule_type IN (${placeholders})`, schedTypes);
+            } else if (type) {
+                await connection.execute('DELETE FROM bell_schedule WHERE schedule_type = ?', [String(type).trim()]);
+            } else {
+                return { status: 400, body: { error: 'schedule_types array or schedule_type required' } };
             }
-        }
 
-        await connection.release();
-        res.json({ success: true });
+            if (Array.isArray(periods) && periods.length > 0) {
+                for (let i = 0; i < periods.length; i++) {
+                    const p = periods[i];
+                    const label = String(p.period_label || '').trim();
+                    const start = p.start_time || '08:00';
+                    const end = p.end_time || '09:00';
+                    if (!label || start >= end) continue;
+                    const section = String(p.section_id || '').trim() || null;
+                    const course = String(p.course_name || '').trim() || null;
+                    const rowType = String(p.schedule_type || '').trim() || String(type || '').trim();
+                    await connection.execute(
+                        `INSERT INTO bell_schedule (schedule_type, period_label, sort_order, start_time, end_time, section_id, course_name)
+                         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        [rowType, label, i, start, end, section, course]
+                    );
+                }
+            }
+
+            return { status: 200, body: { success: true } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save bell schedule' }); }
 });
 
 router.get('/events', requireLogin, async (req, res) => {
     const bucket = String(req.query.bucket || '').trim();
     try {
-        const connection = await getDbConnection();
-        await ensureCalendarEventsTable(connection);
-        let rows;
-        if (bucket) {
-            [rows] = await connection.execute(
-                `SELECT id, DATE_FORMAT(event_date,'%Y-%m-%d') AS event_date,
-                        title, type, description, all_day, source,
-                        TIME_FORMAT(start_time,'%H:%i') AS start_time,
-                        TIME_FORMAT(end_time,'%H:%i')   AS end_time
-                 FROM calendar_events
-                 WHERE course_bucket IS NULL OR course_bucket = ?
-                 ORDER BY event_date ASC`,
-                [bucket]
-            );
-        } else {
-            [rows] = await connection.execute(
+        const rows = await withConnection(async (connection) => {
+            await ensureCalendarEventsTable(connection);
+            if (bucket) {
+                const [rows] = await connection.execute(
+                    `SELECT id, DATE_FORMAT(event_date,'%Y-%m-%d') AS event_date,
+                            title, type, description, all_day, source,
+                            TIME_FORMAT(start_time,'%H:%i') AS start_time,
+                            TIME_FORMAT(end_time,'%H:%i')   AS end_time
+                     FROM calendar_events
+                     WHERE course_bucket IS NULL OR course_bucket = ?
+                     ORDER BY event_date ASC`,
+                    [bucket]
+                );
+                return rows;
+            }
+            const [rows] = await connection.execute(
                 `SELECT id, DATE_FORMAT(event_date,'%Y-%m-%d') AS event_date,
                         title, type, description, all_day, source,
                         TIME_FORMAT(start_time,'%H:%i') AS start_time,
                         TIME_FORMAT(end_time,'%H:%i')   AS end_time
                  FROM calendar_events ORDER BY event_date ASC`
             );
-        }
-        await connection.release();
+            return rows;
+        });
         res.json({ events: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch events' }); }
 });
@@ -363,15 +360,16 @@ router.post('/events', requireStaff, async (req, res) => {
     if (!date || !evtTitle) return res.status(400).json({ error: 'event_date and title are required' });
 
     try {
-        const connection = await getDbConnection();
-        await ensureCalendarEventsTable(connection);
-        const [result] = await connection.execute(
-            `INSERT INTO calendar_events (event_date, title, type, description, all_day, start_time, end_time)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [date, evtTitle, evtType, desc, allDay, start, end]
-        );
-        await connection.release();
-        res.json({ success: true, id: result.insertId });
+        const id = await withConnection(async (connection) => {
+            await ensureCalendarEventsTable(connection);
+            const [result] = await connection.execute(
+                `INSERT INTO calendar_events (event_date, title, type, description, all_day, start_time, end_time)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [date, evtTitle, evtType, desc, allDay, start, end]
+            );
+            return result.insertId;
+        });
+        res.json({ success: true, id });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to add event' }); }
 });
 
@@ -388,13 +386,13 @@ router.put('/events', requireStaff, async (req, res) => {
     if (!id || !date || !evtTitle) return res.status(400).json({ error: 'id, event_date and title are required' });
 
     try {
-        const connection = await getDbConnection();
-        await ensureCalendarEventsTable(connection);
-        await connection.execute(
-            `UPDATE calendar_events SET event_date=?, title=?, type=?, description=?, all_day=?, start_time=?, end_time=? WHERE id=?`,
-            [date, evtTitle, evtType, desc, allDay, start, end, id]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await ensureCalendarEventsTable(connection);
+            await connection.execute(
+                `UPDATE calendar_events SET event_date=?, title=?, type=?, description=?, all_day=?, start_time=?, end_time=? WHERE id=?`,
+                [date, evtTitle, evtType, desc, allDay, start, end, id]
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update event' }); }
 });
@@ -403,34 +401,35 @@ router.delete('/events', requireStaff, async (req, res) => {
     const id = parseInt(req.query.id, 10) || 0;
     if (!id) return res.status(400).json({ error: 'id required' });
     try {
-        const connection = await getDbConnection();
-        await ensureCalendarEventsTable(connection);
-        await connection.execute('DELETE FROM calendar_events WHERE id = ?', [id]);
-        await connection.release();
+        await withConnection(async (connection) => {
+            await ensureCalendarEventsTable(connection);
+            await connection.execute('DELETE FROM calendar_events WHERE id = ?', [id]);
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete event' }); }
 });
 
 router.post('/dedupe-calendar', requireStaff, async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await ensureCalendarEventsTable(connection);
-        const [result] = await connection.execute(`
-            DELETE t1 FROM calendar_events t1
-            INNER JOIN calendar_events t2
-              ON t1.event_date = t2.event_date
-              AND t1.title = t2.title
-              AND t1.type = t2.type
-              AND COALESCE(t1.description,'') = COALESCE(t2.description,'')
-              AND t1.source = t2.source
-              AND COALESCE(t1.course_bucket,'') = COALESCE(t2.course_bucket,'')
-              AND t1.all_day = t2.all_day
-              AND COALESCE(t1.start_time,'') = COALESCE(t2.start_time,'')
-              AND COALESCE(t1.end_time,'') = COALESCE(t2.end_time,'')
-              AND t1.id > t2.id
-        `);
-        await connection.release();
-        res.json({ success: true, deleted: result.affectedRows });
+        const affectedRows = await withConnection(async (connection) => {
+            await ensureCalendarEventsTable(connection);
+            const [result] = await connection.execute(`
+                DELETE t1 FROM calendar_events t1
+                INNER JOIN calendar_events t2
+                  ON t1.event_date = t2.event_date
+                  AND t1.title = t2.title
+                  AND t1.type = t2.type
+                  AND COALESCE(t1.description,'') = COALESCE(t2.description,'')
+                  AND t1.source = t2.source
+                  AND COALESCE(t1.course_bucket,'') = COALESCE(t2.course_bucket,'')
+                  AND t1.all_day = t2.all_day
+                  AND COALESCE(t1.start_time,'') = COALESCE(t2.start_time,'')
+                  AND COALESCE(t1.end_time,'') = COALESCE(t2.end_time,'')
+                  AND t1.id > t2.id
+            `);
+            return result.affectedRows;
+        });
+        res.json({ success: true, deleted: affectedRows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Dedupe failed: ' + err.message }); }
 });
 
@@ -442,12 +441,13 @@ const SCHOOL_CONFIG_KEYS = ['regular_start', 'regular_end', 'summer_start', 'sum
 
 router.get('/school-config', requireLogin, async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await connection.execute(SCHOOL_CONFIG_DDL);
-        const [rows] = await connection.execute('SELECT config_key, config_value FROM school_config');
-        await connection.release();
-        const config = {};
-        rows.forEach(r => { config[r.config_key] = r.config_value; });
+        const config = await withConnection(async (connection) => {
+            await connection.execute(SCHOOL_CONFIG_DDL);
+            const [rows] = await connection.execute('SELECT config_key, config_value FROM school_config');
+            const config = {};
+            rows.forEach(r => { config[r.config_key] = r.config_value; });
+            return config;
+        });
         const out = {};
         SCHOOL_CONFIG_KEYS.forEach(k => { out[k] = config[k] || ''; });
         res.json(out);
@@ -456,18 +456,18 @@ router.get('/school-config', requireLogin, async (req, res) => {
 
 router.post('/school-config', requireStaff, async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await connection.execute(SCHOOL_CONFIG_DDL);
-        for (const key of SCHOOL_CONFIG_KEYS) {
-            if (!Object.prototype.hasOwnProperty.call(req.body || {}, key)) continue;
-            const val = String(req.body[key] || '').trim();
-            await connection.execute(
-                `INSERT INTO school_config (config_key, config_value) VALUES (?, ?)
-                 ON DUPLICATE KEY UPDATE config_value = VALUES(config_value)`,
-                [key, val]
-            );
-        }
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(SCHOOL_CONFIG_DDL);
+            for (const key of SCHOOL_CONFIG_KEYS) {
+                if (!Object.prototype.hasOwnProperty.call(req.body || {}, key)) continue;
+                const val = String(req.body[key] || '').trim();
+                await connection.execute(
+                    `INSERT INTO school_config (config_key, config_value) VALUES (?, ?)
+                     ON DUPLICATE KEY UPDATE config_value = VALUES(config_value)`,
+                    [key, val]
+                );
+            }
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save school config' }); }
 });
