@@ -9,7 +9,7 @@
 // of a second, disconnected "attendance tardy" that the ladder never sees.
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { requireStaff, requireLogin, timeToMinutes, getCurrentSchoolYear } = require('../helpers');
 const { getDayTypes, getBellScheduleKeyForDate, getLocalDateStr, computeEffectiveCount } = require('../tardyLogic');
 const { GRACE_MINUTES, ensureAttendanceTables, realPeriod, getEnrolledStudents } = require('../lib/attendanceStore');
@@ -73,24 +73,25 @@ async function resolveCurrentPeriodForStudent(connection, studentId) {
 // just ended because the line was long).
 router.get('/admin/attendance/current-period', requireStaff, async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        const todayStr = getLocalDateStr();
-        const dayTypes = await getDayTypes(connection);
-        const scheduleKey = getBellScheduleKeyForDate(dayTypes, todayStr);
-        if (!scheduleKey) { await connection.release(); return res.json({ date: todayStr, current: null, periods: [] }); }
-        const [periods] = await connection.execute(
-            `SELECT period_label, start_time, end_time FROM bell_schedule WHERE schedule_type = ? ORDER BY sort_order`,
-            [scheduleKey]
-        );
-        await connection.release();
-        const now = new Date();
-        const nowMin = now.getHours() * 60 + now.getMinutes();
-        const current = periods.find(p => nowMin >= timeToMinutes(p.start_time) - 10 && nowMin <= timeToMinutes(p.end_time));
-        res.json({
-            date: todayStr, scheduleKey,
-            current: current ? current.period_label : null,
-            periods: periods.map(p => ({ label: p.period_label, start_time: p.start_time, end_time: p.end_time }))
+        const result = await withConnection(async (connection) => {
+            const todayStr = getLocalDateStr();
+            const dayTypes = await getDayTypes(connection);
+            const scheduleKey = getBellScheduleKeyForDate(dayTypes, todayStr);
+            if (!scheduleKey) return { date: todayStr, current: null, periods: [] };
+            const [periods] = await connection.execute(
+                `SELECT period_label, start_time, end_time FROM bell_schedule WHERE schedule_type = ? ORDER BY sort_order`,
+                [scheduleKey]
+            );
+            const now = new Date();
+            const nowMin = now.getHours() * 60 + now.getMinutes();
+            const current = periods.find(p => nowMin >= timeToMinutes(p.start_time) - 10 && nowMin <= timeToMinutes(p.end_time));
+            return {
+                date: todayStr, scheduleKey,
+                current: current ? current.period_label : null,
+                periods: periods.map(p => ({ label: p.period_label, start_time: p.start_time, end_time: p.end_time }))
+            };
         });
+        res.json(result);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to resolve current period.' }); }
 });
 
@@ -99,10 +100,11 @@ router.get('/admin/attendance/current-period', requireStaff, async (req, res) =>
 // that needs to work for a day other than today.
 router.get('/admin/attendance/periods', requireStaff, async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(`SELECT DISTINCT period_label FROM bell_schedule ORDER BY period_label`);
-        await connection.release();
-        res.json({ periods: rows.map(r => r.period_label) });
+        const periods = await withConnection(async (connection) => {
+            const [rows] = await connection.execute(`SELECT DISTINCT period_label FROM bell_schedule ORDER BY period_label`);
+            return rows.map(r => r.period_label);
+        });
+        res.json({ periods });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load periods.' }); }
 });
 
@@ -111,72 +113,69 @@ router.post('/admin/attendance/scan', requireStaff, async (req, res) => {
     const { student_id, section_id } = req.body || {};
     if (!student_id || !section_id) return res.status(400).json({ error: 'student_id and section_id are required' });
     try {
-        const connection = await getDbConnection();
-        await ensureAttendanceTables(connection);
+        const outcome = await withConnection(async (connection) => {
+            await ensureAttendanceTables(connection);
 
-        const [[student]] = await connection.execute(
-            'SELECT student_id, first_name, last_name, section_id FROM students WHERE student_id = ? LIMIT 1',
-            [student_id]
-        );
-        if (!student) { await connection.release(); return res.status(404).json({ error: 'Unknown ID -- no student found.' }); }
-
-        const [extra] = await connection.execute('SELECT section_id FROM student_additional_sections WHERE student_id = ?', [student_id]);
-        const enrolledPeriods = new Set([realPeriod(student.section_id), ...extra.map(r => realPeriod(r.section_id))]);
-        if (!enrolledPeriods.has(section_id)) {
-            await connection.release();
-            return res.status(400).json({ error: `${student.first_name} ${student.last_name} isn't enrolled in ${section_id}.`, student });
-        }
-
-        const today = getLocalDateStr();
-        const [[existing]] = await connection.execute(
-            'SELECT * FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
-            [student_id, section_id, today]
-        );
-        if (existing) {
-            await connection.release();
-            return res.json({ already: true, status: existing.status, student, scanned_at: existing.scanned_at });
-        }
-
-        const dayTypes = await getDayTypes(connection);
-        const scheduleKey = getBellScheduleKeyForDate(dayTypes, today);
-        const [[periodRow]] = scheduleKey
-            ? await connection.execute('SELECT start_time FROM bell_schedule WHERE schedule_type = ? AND period_label = ? LIMIT 1', [scheduleKey, section_id])
-            : [[null]];
-
-        const now = new Date();
-        const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
-        const startMin = periodRow ? timeToMinutes(periodRow.start_time) : null;
-        const withinGrace = startMin === null ? true : nowMin <= startMin + GRACE_MINUTES;
-
-        if (withinGrace) {
-            await connection.execute(
-                'INSERT INTO attendance (student_id, section_id, date, status, scanned_at) VALUES (?, ?, ?, ?, NOW())',
-                [student_id, section_id, today, 'present']
+            const [[student]] = await connection.execute(
+                'SELECT student_id, first_name, last_name, section_id FROM students WHERE student_id = ? LIMIT 1',
+                [student_id]
             );
-            await connection.release();
-            return res.json({ success: true, status: 'present', student });
-        }
+            if (!student) return { status: 404, body: { error: 'Unknown ID -- no student found.' } };
 
-        const [[pending]] = await connection.execute(
-            'SELECT * FROM tardy_form_pending WHERE student_id = ? AND date = ? AND consumed_at IS NULL',
-            [student_id, today]
-        );
-        if (!pending) {
-            await connection.release();
-            return res.status(409).json({ error: `${student.first_name}, you're late -- please fill out the tardy form first, then scan again.`, needsForm: true, student });
-        }
+            const [extra] = await connection.execute('SELECT section_id FROM student_additional_sections WHERE student_id = ?', [student_id]);
+            const enrolledPeriods = new Set([realPeriod(student.section_id), ...extra.map(r => realPeriod(r.section_id))]);
+            if (!enrolledPeriods.has(section_id)) {
+                return { status: 400, body: { error: `${student.first_name} ${student.last_name} isn't enrolled in ${section_id}.`, student } };
+            }
 
-        await connection.execute('UPDATE tardy_form_pending SET consumed_at = NOW() WHERE id = ?', [pending.id]);
-        const [passResult] = await connection.execute(
-            'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
-            [student_id, student.section_id, pending.reason || '']
-        );
-        await connection.execute(
-            'INSERT INTO attendance (student_id, section_id, date, status, scanned_at, tardy_pass_id) VALUES (?, ?, ?, ?, NOW(), ?)',
-            [student_id, section_id, today, 'tardy', passResult.insertId]
-        );
-        await connection.release();
-        res.json({ success: true, status: 'tardy', student, reason: pending.reason });
+            const today = getLocalDateStr();
+            const [[existing]] = await connection.execute(
+                'SELECT * FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
+                [student_id, section_id, today]
+            );
+            if (existing) {
+                return { status: 200, body: { already: true, status: existing.status, student, scanned_at: existing.scanned_at } };
+            }
+
+            const dayTypes = await getDayTypes(connection);
+            const scheduleKey = getBellScheduleKeyForDate(dayTypes, today);
+            const [[periodRow]] = scheduleKey
+                ? await connection.execute('SELECT start_time FROM bell_schedule WHERE schedule_type = ? AND period_label = ? LIMIT 1', [scheduleKey, section_id])
+                : [[null]];
+
+            const now = new Date();
+            const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+            const startMin = periodRow ? timeToMinutes(periodRow.start_time) : null;
+            const withinGrace = startMin === null ? true : nowMin <= startMin + GRACE_MINUTES;
+
+            if (withinGrace) {
+                await connection.execute(
+                    'INSERT INTO attendance (student_id, section_id, date, status, scanned_at) VALUES (?, ?, ?, ?, NOW())',
+                    [student_id, section_id, today, 'present']
+                );
+                return { status: 200, body: { success: true, status: 'present', student } };
+            }
+
+            const [[pending]] = await connection.execute(
+                'SELECT * FROM tardy_form_pending WHERE student_id = ? AND date = ? AND consumed_at IS NULL',
+                [student_id, today]
+            );
+            if (!pending) {
+                return { status: 409, body: { error: `${student.first_name}, you're late -- please fill out the tardy form first, then scan again.`, needsForm: true, student } };
+            }
+
+            await connection.execute('UPDATE tardy_form_pending SET consumed_at = NOW() WHERE id = ?', [pending.id]);
+            const [passResult] = await connection.execute(
+                'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
+                [student_id, student.section_id, pending.reason || '']
+            );
+            await connection.execute(
+                'INSERT INTO attendance (student_id, section_id, date, status, scanned_at, tardy_pass_id) VALUES (?, ?, ?, ?, NOW(), ?)',
+                [student_id, section_id, today, 'tardy', passResult.insertId]
+            );
+            return { status: 200, body: { success: true, status: 'tardy', student, reason: pending.reason } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error('[attendance] scan error:', err);
         res.status(500).json({ error: 'Scan failed.' });
@@ -193,42 +192,41 @@ router.post('/admin/attendance/mark-tardy', requireStaff, async (req, res) => {
     const { student_id, section_id, reason } = req.body || {};
     if (!student_id || !section_id) return res.status(400).json({ error: 'student_id and section_id are required' });
     try {
-        const connection = await getDbConnection();
-        await ensureAttendanceTables(connection);
+        const outcome = await withConnection(async (connection) => {
+            await ensureAttendanceTables(connection);
 
-        const [[student]] = await connection.execute(
-            'SELECT student_id, first_name, last_name, section_id FROM students WHERE student_id = ? LIMIT 1',
-            [student_id]
-        );
-        if (!student) { await connection.release(); return res.status(404).json({ error: 'Unknown ID -- no student found.' }); }
+            const [[student]] = await connection.execute(
+                'SELECT student_id, first_name, last_name, section_id FROM students WHERE student_id = ? LIMIT 1',
+                [student_id]
+            );
+            if (!student) return { status: 404, body: { error: 'Unknown ID -- no student found.' } };
 
-        const [extra] = await connection.execute('SELECT section_id FROM student_additional_sections WHERE student_id = ?', [student_id]);
-        const enrolledPeriods = new Set([realPeriod(student.section_id), ...extra.map(r => realPeriod(r.section_id))]);
-        if (!enrolledPeriods.has(section_id)) {
-            await connection.release();
-            return res.status(400).json({ error: `${student.first_name} ${student.last_name} isn't enrolled in ${section_id}.`, student });
-        }
+            const [extra] = await connection.execute('SELECT section_id FROM student_additional_sections WHERE student_id = ?', [student_id]);
+            const enrolledPeriods = new Set([realPeriod(student.section_id), ...extra.map(r => realPeriod(r.section_id))]);
+            if (!enrolledPeriods.has(section_id)) {
+                return { status: 400, body: { error: `${student.first_name} ${student.last_name} isn't enrolled in ${section_id}.`, student } };
+            }
 
-        const today = getLocalDateStr();
-        const [[existing]] = await connection.execute(
-            'SELECT * FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
-            [student_id, section_id, today]
-        );
-        if (existing) {
-            await connection.release();
-            return res.json({ already: true, status: existing.status, student, scanned_at: existing.scanned_at });
-        }
+            const today = getLocalDateStr();
+            const [[existing]] = await connection.execute(
+                'SELECT * FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
+                [student_id, section_id, today]
+            );
+            if (existing) {
+                return { status: 200, body: { already: true, status: existing.status, student, scanned_at: existing.scanned_at } };
+            }
 
-        const [passResult] = await connection.execute(
-            'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
-            [student_id, student.section_id, String(reason || '').trim().slice(0, 255)]
-        );
-        await connection.execute(
-            'INSERT INTO attendance (student_id, section_id, date, status, scanned_at, tardy_pass_id) VALUES (?, ?, ?, ?, NOW(), ?)',
-            [student_id, section_id, today, 'tardy', passResult.insertId]
-        );
-        await connection.release();
-        res.json({ success: true, status: 'tardy', student, reason: reason || '' });
+            const [passResult] = await connection.execute(
+                'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
+                [student_id, student.section_id, String(reason || '').trim().slice(0, 255)]
+            );
+            await connection.execute(
+                'INSERT INTO attendance (student_id, section_id, date, status, scanned_at, tardy_pass_id) VALUES (?, ?, ?, ?, NOW(), ?)',
+                [student_id, section_id, today, 'tardy', passResult.insertId]
+            );
+            return { status: 200, body: { success: true, status: 'tardy', student, reason: reason || '' } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error('[attendance] mark-tardy error:', err);
         res.status(500).json({ error: 'Failed to mark tardy.' });
@@ -251,44 +249,44 @@ router.post('/admin/attendance/correct', requireStaff, async (req, res) => {
         return res.status(400).json({ error: 'student_id, section_id, a valid date, and a valid status are required' });
     }
     try {
-        const connection = await getDbConnection();
-        await ensureAttendanceTables(connection);
+        const outcome = await withConnection(async (connection) => {
+            await ensureAttendanceTables(connection);
 
-        const [[student]] = await connection.execute('SELECT first_name, last_name, section_id FROM students WHERE student_id = ?', [student_id]);
-        if (!student) { await connection.release(); return res.status(404).json({ error: 'Unknown student.' }); }
+            const [[student]] = await connection.execute('SELECT first_name, last_name, section_id FROM students WHERE student_id = ?', [student_id]);
+            if (!student) return { status: 404, body: { error: 'Unknown student.' } };
 
-        const [[existing]] = await connection.execute(
-            'SELECT * FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
-            [student_id, section_id, date]
-        );
-        if (existing && existing.status === status) {
-            await connection.release();
-            return res.json({ success: true, unchanged: true });
-        }
-
-        let tardyPassId = existing ? existing.tardy_pass_id : null;
-
-        if (existing && existing.status === 'tardy' && status !== 'tardy' && tardyPassId) {
-            await connection.execute('DELETE FROM tardy_passes WHERE id = ?', [tardyPassId]);
-            tardyPassId = null;
-        }
-        if (status === 'tardy' && (!existing || existing.status !== 'tardy')) {
-            const [passResult] = await connection.execute(
-                'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
-                [student_id, student.section_id, String(reason || 'Corrected by staff').trim().slice(0, 255)]
+            const [[existing]] = await connection.execute(
+                'SELECT * FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
+                [student_id, section_id, date]
             );
-            tardyPassId = passResult.insertId;
-        }
+            if (existing && existing.status === status) {
+                return { status: 200, body: { success: true, unchanged: true } };
+            }
 
-        await connection.execute(
-            `INSERT INTO attendance (student_id, section_id, date, status, tardy_pass_id, ic_synced)
-             VALUES (?, ?, ?, ?, ?, 0)
-             ON DUPLICATE KEY UPDATE status = VALUES(status), tardy_pass_id = VALUES(tardy_pass_id), ic_synced = 0`,
-            [student_id, section_id, date, status, tardyPassId]
-        );
+            let tardyPassId = existing ? existing.tardy_pass_id : null;
 
-        await connection.release();
-        res.json({ success: true, status });
+            if (existing && existing.status === 'tardy' && status !== 'tardy' && tardyPassId) {
+                await connection.execute('DELETE FROM tardy_passes WHERE id = ?', [tardyPassId]);
+                tardyPassId = null;
+            }
+            if (status === 'tardy' && (!existing || existing.status !== 'tardy')) {
+                const [passResult] = await connection.execute(
+                    'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
+                    [student_id, student.section_id, String(reason || 'Corrected by staff').trim().slice(0, 255)]
+                );
+                tardyPassId = passResult.insertId;
+            }
+
+            await connection.execute(
+                `INSERT INTO attendance (student_id, section_id, date, status, tardy_pass_id, ic_synced)
+                 VALUES (?, ?, ?, ?, ?, 0)
+                 ON DUPLICATE KEY UPDATE status = VALUES(status), tardy_pass_id = VALUES(tardy_pass_id), ic_synced = 0`,
+                [student_id, section_id, date, status, tardyPassId]
+            );
+
+            return { status: 200, body: { success: true, status } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error('[attendance] correct error:', err);
         res.status(500).json({ error: 'Failed to correct attendance.' });
@@ -301,20 +299,21 @@ router.post('/admin/attendance/correct', requireStaff, async (req, res) => {
 // needs the teacher to go do that by hand.
 router.get('/admin/attendance/ic-pending', requireStaff, async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await ensureAttendanceTables(connection);
-        // had_pass comes along so the review page can flag "excused pass ->
-        // mark PRESENT in IC" distinctly from an ordinary tardy -- those are
-        // opposite IC actions, not a detail to bury in a separate form view.
-        const [rows] = await connection.execute(
-            `SELECT a.id, a.student_id, a.section_id, a.date, a.status, a.scanned_at, s.first_name, s.last_name, tfp.had_pass
-             FROM attendance a
-             JOIN students s ON s.student_id = a.student_id
-             LEFT JOIN tardy_form_pending tfp ON tfp.student_id = a.student_id AND tfp.date = a.date
-             WHERE a.status IN ('tardy', 'absent') AND (a.ic_synced IS NULL OR a.ic_synced = 0)
-             ORDER BY a.date DESC, s.last_name ASC`
-        );
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await ensureAttendanceTables(connection);
+            // had_pass comes along so the review page can flag "excused pass ->
+            // mark PRESENT in IC" distinctly from an ordinary tardy -- those are
+            // opposite IC actions, not a detail to bury in a separate form view.
+            const [rows] = await connection.execute(
+                `SELECT a.id, a.student_id, a.section_id, a.date, a.status, a.scanned_at, s.first_name, s.last_name, tfp.had_pass
+                 FROM attendance a
+                 JOIN students s ON s.student_id = a.student_id
+                 LEFT JOIN tardy_form_pending tfp ON tfp.student_id = a.student_id AND tfp.date = a.date
+                 WHERE a.status IN ('tardy', 'absent') AND (a.ic_synced IS NULL OR a.ic_synced = 0)
+                 ORDER BY a.date DESC, s.last_name ASC`
+            );
+            return rows;
+        });
         res.json({ count: rows.length, rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load IC-pending attendance.' }); }
 });
@@ -323,21 +322,21 @@ router.get('/admin/attendance/ic-pending', requireStaff, async (req, res) => {
 router.post('/admin/attendance/ic-sync', requireStaff, async (req, res) => {
     const { ids, all } = req.body || {};
     try {
-        const connection = await getDbConnection();
-        await ensureAttendanceTables(connection);
-        if (all) {
-            await connection.execute(`UPDATE attendance SET ic_synced = 1 WHERE status IN ('tardy', 'absent') AND (ic_synced IS NULL OR ic_synced = 0)`);
-        } else if (Array.isArray(ids) && ids.length > 0) {
-            await connection.execute(
-                `UPDATE attendance SET ic_synced = 1 WHERE id IN (${ids.map(() => '?').join(',')})`,
-                ids
-            );
-        } else {
-            await connection.release();
-            return res.status(400).json({ error: 'ids or all is required' });
-        }
-        await connection.release();
-        res.json({ success: true });
+        const outcome = await withConnection(async (connection) => {
+            await ensureAttendanceTables(connection);
+            if (all) {
+                await connection.execute(`UPDATE attendance SET ic_synced = 1 WHERE status IN ('tardy', 'absent') AND (ic_synced IS NULL OR ic_synced = 0)`);
+            } else if (Array.isArray(ids) && ids.length > 0) {
+                await connection.execute(
+                    `UPDATE attendance SET ic_synced = 1 WHERE id IN (${ids.map(() => '?').join(',')})`,
+                    ids
+                );
+            } else {
+                return { status: 400, body: { error: 'ids or all is required' } };
+            }
+            return { status: 200, body: { success: true } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update IC-sync status.' }); }
 });
 
@@ -347,9 +346,7 @@ router.get('/student/tardy-form/status', requireLogin, async (req, res) => {
     const studentId = req.session.user?.student_id;
     if (!studentId) return res.status(400).json({ error: 'No student account on this session.' });
     try {
-        const connection = await getDbConnection();
-        const effectiveCount = await getEffectiveTardyCount(connection, studentId);
-        await connection.release();
+        const effectiveCount = await withConnection((connection) => getEffectiveTardyCount(connection, studentId));
         res.json({ effective_count: effectiveCount, needs_reflection: effectiveCount >= 1 });
     } catch (err) {
         console.error('[attendance] tardy form status error:', err);
@@ -377,66 +374,66 @@ router.post('/student/tardy-form/submit', requireLogin, async (req, res) => {
     }
 
     try {
-        const connection = await getDbConnection();
-        await ensureAttendanceTables(connection);
+        const outcome = await withConnection(async (connection) => {
+            await ensureAttendanceTables(connection);
 
-        // Recompute server-side rather than trusting the client's own
-        // "was reflection shown" state -- a student could otherwise submit
-        // with those fields simply left blank.
-        const effectiveCount = await getEffectiveTardyCount(connection, studentId);
-        if (effectiveCount >= 1 && (!reflection1 || !reflection2 || !reflection3 || !reflection4)) {
-            await connection.release();
-            return res.status(400).json({ error: 'This is your 2nd or later tardy this quarter -- please complete all 4 reflection questions too.' });
-        }
-
-        const today = getLocalDateStr();
-        const [pendingResult] = await connection.execute(
-            `INSERT INTO tardy_form_pending (student_id, date, reason, had_pass, notes, reflection_1, reflection_2, reflection_3, reflection_4)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE reason = VALUES(reason), had_pass = VALUES(had_pass), notes = VALUES(notes),
-               reflection_1 = VALUES(reflection_1), reflection_2 = VALUES(reflection_2),
-               reflection_3 = VALUES(reflection_3), reflection_4 = VALUES(reflection_4),
-               submitted_at = NOW(), consumed_at = NULL`,
-            [studentId, today, reason, hadPass, notes, reflection1, reflection2, reflection3, reflection4]
-        );
-
-        // The form itself is the proof they're on their way in -- mark them
-        // tardy right now for whichever of their own periods is actually in
-        // session, same as a real tardy scan would, instead of making staff
-        // also scan them at the door. Only does this when a period resolves
-        // confidently, and when nothing's recorded yet OR what's recorded is
-        // "absent" -- an absent mark (whether from the end-of-day sweep or a
-        // staff correction) just means "we don't have a scan for them," and
-        // a late form submission is exactly the proof that overturns that,
-        // same as it would if staff caught the mistake by hand. Present or
-        // already-tardy rows are left alone -- this never downgrades those.
-        let autoMarked = false, autoPeriod = null;
-        const resolvedPeriod = await resolveCurrentPeriodForStudent(connection, studentId);
-        if (resolvedPeriod) {
-            const [[existingAttendance]] = await connection.execute(
-                'SELECT status FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
-                [studentId, resolvedPeriod, today]
-            );
-            if (!existingAttendance || existingAttendance.status === 'absent') {
-                const [[studentRow]] = await connection.execute('SELECT section_id FROM students WHERE student_id = ?', [studentId]);
-                const [passResult] = await connection.execute(
-                    'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
-                    [studentId, studentRow?.section_id || resolvedPeriod, reason]
-                );
-                await connection.execute(
-                    `INSERT INTO attendance (student_id, section_id, date, status, scanned_at, tardy_pass_id, ic_synced)
-                     VALUES (?, ?, ?, 'tardy', NOW(), ?, 0)
-                     ON DUPLICATE KEY UPDATE status = 'tardy', scanned_at = NOW(), tardy_pass_id = VALUES(tardy_pass_id), ic_synced = 0`,
-                    [studentId, resolvedPeriod, today, passResult.insertId]
-                );
-                await connection.execute('UPDATE tardy_form_pending SET consumed_at = NOW() WHERE id = ?', [pendingResult.insertId]);
-                autoMarked = true;
-                autoPeriod = resolvedPeriod;
+            // Recompute server-side rather than trusting the client's own
+            // "was reflection shown" state -- a student could otherwise submit
+            // with those fields simply left blank.
+            const effectiveCount = await getEffectiveTardyCount(connection, studentId);
+            if (effectiveCount >= 1 && (!reflection1 || !reflection2 || !reflection3 || !reflection4)) {
+                return { status: 400, body: { error: 'This is your 2nd or later tardy this quarter -- please complete all 4 reflection questions too.' } };
             }
-        }
 
-        await connection.release();
-        res.json({ success: true, auto_marked: autoMarked, period: autoPeriod });
+            const today = getLocalDateStr();
+            const [pendingResult] = await connection.execute(
+                `INSERT INTO tardy_form_pending (student_id, date, reason, had_pass, notes, reflection_1, reflection_2, reflection_3, reflection_4)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE reason = VALUES(reason), had_pass = VALUES(had_pass), notes = VALUES(notes),
+                   reflection_1 = VALUES(reflection_1), reflection_2 = VALUES(reflection_2),
+                   reflection_3 = VALUES(reflection_3), reflection_4 = VALUES(reflection_4),
+                   submitted_at = NOW(), consumed_at = NULL`,
+                [studentId, today, reason, hadPass, notes, reflection1, reflection2, reflection3, reflection4]
+            );
+
+            // The form itself is the proof they're on their way in -- mark them
+            // tardy right now for whichever of their own periods is actually in
+            // session, same as a real tardy scan would, instead of making staff
+            // also scan them at the door. Only does this when a period resolves
+            // confidently, and when nothing's recorded yet OR what's recorded is
+            // "absent" -- an absent mark (whether from the end-of-day sweep or a
+            // staff correction) just means "we don't have a scan for them," and
+            // a late form submission is exactly the proof that overturns that,
+            // same as it would if staff caught the mistake by hand. Present or
+            // already-tardy rows are left alone -- this never downgrades those.
+            let autoMarked = false, autoPeriod = null;
+            const resolvedPeriod = await resolveCurrentPeriodForStudent(connection, studentId);
+            if (resolvedPeriod) {
+                const [[existingAttendance]] = await connection.execute(
+                    'SELECT status FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
+                    [studentId, resolvedPeriod, today]
+                );
+                if (!existingAttendance || existingAttendance.status === 'absent') {
+                    const [[studentRow]] = await connection.execute('SELECT section_id FROM students WHERE student_id = ?', [studentId]);
+                    const [passResult] = await connection.execute(
+                        'INSERT INTO tardy_passes (student_id, period, reason) VALUES (?, ?, ?)',
+                        [studentId, studentRow?.section_id || resolvedPeriod, reason]
+                    );
+                    await connection.execute(
+                        `INSERT INTO attendance (student_id, section_id, date, status, scanned_at, tardy_pass_id, ic_synced)
+                         VALUES (?, ?, ?, 'tardy', NOW(), ?, 0)
+                         ON DUPLICATE KEY UPDATE status = 'tardy', scanned_at = NOW(), tardy_pass_id = VALUES(tardy_pass_id), ic_synced = 0`,
+                        [studentId, resolvedPeriod, today, passResult.insertId]
+                    );
+                    await connection.execute('UPDATE tardy_form_pending SET consumed_at = NOW() WHERE id = ?', [pendingResult.insertId]);
+                    autoMarked = true;
+                    autoPeriod = resolvedPeriod;
+                }
+            }
+
+            return { status: 200, body: { success: true, auto_marked: autoMarked, period: autoPeriod } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error('[attendance] tardy form error:', err);
         res.status(500).json({ error: 'Failed to submit tardy form.' });
@@ -451,41 +448,41 @@ router.get('/admin/attendance/summary', requireStaff, async (req, res) => {
     const date = /^\d{4}-\d{2}-\d{2}$/.test(req.query.date || '') ? req.query.date : getLocalDateStr();
     if (!section_id) return res.status(400).json({ error: 'section_id is required' });
     try {
-        const connection = await getDbConnection();
-        await ensureAttendanceTables(connection);
-        const roster = await getEnrolledStudents(connection, section_id);
-        const [attendanceRows] = await connection.execute(
-            'SELECT * FROM attendance WHERE section_id = ? AND date = ?',
-            [section_id, date]
-        );
-        // The full tardy-form submission (reason, pass, notes, reflection)
-        // for the same date -- not just whether one existed -- so a tardy
-        // row on the report can show what the student actually wrote
-        // instead of staff having to go look it up separately.
-        const [formRows] = await connection.execute(
-            'SELECT * FROM tardy_form_pending WHERE date = ?',
-            [date]
-        );
-        await connection.release();
-        const byStudent = {};
-        attendanceRows.forEach(r => { byStudent[r.student_id] = r; });
-        const formByStudent = {};
-        formRows.forEach(r => { formByStudent[r.student_id] = r; });
-        const rows = roster
-            .map(s => {
-                const form = formByStudent[s.student_id];
-                return {
-                    student_id: s.student_id, first_name: s.first_name, last_name: s.last_name, section_id: s.section_id,
-                    status: byStudent[s.student_id]?.status || null,
-                    scanned_at: byStudent[s.student_id]?.scanned_at || null,
-                    tardy_form: form ? {
-                        reason: form.reason, had_pass: form.had_pass, notes: form.notes,
-                        reflection_1: form.reflection_1, reflection_2: form.reflection_2,
-                        reflection_3: form.reflection_3, reflection_4: form.reflection_4
-                    } : null
-                };
-            })
-            .sort((a, b) => a.last_name.localeCompare(b.last_name));
+        const rows = await withConnection(async (connection) => {
+            await ensureAttendanceTables(connection);
+            const roster = await getEnrolledStudents(connection, section_id);
+            const [attendanceRows] = await connection.execute(
+                'SELECT * FROM attendance WHERE section_id = ? AND date = ?',
+                [section_id, date]
+            );
+            // The full tardy-form submission (reason, pass, notes, reflection)
+            // for the same date -- not just whether one existed -- so a tardy
+            // row on the report can show what the student actually wrote
+            // instead of staff having to go look it up separately.
+            const [formRows] = await connection.execute(
+                'SELECT * FROM tardy_form_pending WHERE date = ?',
+                [date]
+            );
+            const byStudent = {};
+            attendanceRows.forEach(r => { byStudent[r.student_id] = r; });
+            const formByStudent = {};
+            formRows.forEach(r => { formByStudent[r.student_id] = r; });
+            return roster
+                .map(s => {
+                    const form = formByStudent[s.student_id];
+                    return {
+                        student_id: s.student_id, first_name: s.first_name, last_name: s.last_name, section_id: s.section_id,
+                        status: byStudent[s.student_id]?.status || null,
+                        scanned_at: byStudent[s.student_id]?.scanned_at || null,
+                        tardy_form: form ? {
+                            reason: form.reason, had_pass: form.had_pass, notes: form.notes,
+                            reflection_1: form.reflection_1, reflection_2: form.reflection_2,
+                            reflection_3: form.reflection_3, reflection_4: form.reflection_4
+                        } : null
+                    };
+                })
+                .sort((a, b) => a.last_name.localeCompare(b.last_name));
+        });
         res.json({ date, section_id, rows });
     } catch (err) {
         console.error('[attendance] summary error:', err);

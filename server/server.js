@@ -13,6 +13,23 @@ const { scheduleDailyAttendanceSweep } = require('./jobs/attendanceSweep');
 const app = express();
 const PORT = 3000;
 
+// Last-resort safety net: nothing in this codebase previously caught these,
+// so a single uncaught throw or unhandled promise rejection anywhere (the
+// DB pool's own 'error' event used to be exactly this before it got a
+// listener in server/db.js) took down the whole process for every
+// concurrent user. Log loudly and exit so pm2 restarts into a clean state --
+// continuing to run after an uncaughtException is explicitly unsafe (Node's
+// own internal state can be inconsistent), so swallowing it silently here
+// would trade a fast, visible restart for an unpredictable zombie process.
+process.on('uncaughtException', (err) => {
+    console.error('[fatal] uncaughtException -- exiting for pm2 to restart:', err);
+    process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('[fatal] unhandledRejection -- exiting for pm2 to restart:', reason);
+    process.exit(1);
+});
+
 // Tells browsers to only ever contact this domain over HTTPS, for a year,
 // including subdomains -- closes the gap where a visitor's very first
 // request could still go out over plain HTTP before any redirect happens.

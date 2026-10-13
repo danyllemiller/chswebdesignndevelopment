@@ -36,6 +36,18 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
+// mysql2's Pool is an EventEmitter. A background/idle pooled connection can
+// die on its own (MySQL restart, a dropped TCP connection, PROTOCOL_CONNECTION_LOST)
+// and the pool emits 'error' when that happens -- not tied to any one
+// in-flight request. With no listener, Node's default EventEmitter behavior
+// is to throw, which (with no process-level handler either) crashes the
+// entire server for every concurrent user over a single dead connection.
+// Logging it here is enough: the pool itself already drops the bad
+// connection and opens a fresh one on the next getConnection() call.
+pool.on('error', (err) => {
+    console.error('[db] pool error (connection dropped, pool will recover):', err);
+});
+
 let socketPool = null;
 
 async function getDbConnection() {
@@ -54,6 +66,9 @@ async function getDbConnection() {
                         waitForConnections: true,
                         queueLimit: 0
                     });
+                    socketPool.on('error', (socketErr) => {
+                        console.error('[db] socket pool error (connection dropped, pool will recover):', socketErr);
+                    });
                 }
                 return await socketPool.getConnection();
             } catch (socketErr) { throw err; }
@@ -62,4 +77,20 @@ async function getDbConnection() {
     }
 }
 
-module.exports = { getDbConnection };
+// Acquires a connection, runs fn(connection), and always releases it --
+// including on error. Prefer this over a hand-rolled
+// `const connection = await getDbConnection(); try {...} catch {...}` in new
+// code: the leading cause of pool exhaustion in this codebase has been
+// routes that release the connection on their success paths but not in the
+// catch block, silently leaking one connection per failed request until the
+// pool runs out and every subsequent request hangs.
+async function withConnection(fn) {
+    const connection = await getDbConnection();
+    try {
+        return await fn(connection);
+    } finally {
+        connection.release();
+    }
+}
+
+module.exports = { getDbConnection, withConnection };
