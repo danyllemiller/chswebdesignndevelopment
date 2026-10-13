@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 
 // Private 1:1 messaging between the teacher and a student -- one running
 // thread per student (not per-project/per-topic), used for 5-minute
@@ -54,17 +54,18 @@ router.get('/student/messages', async (req, res) => {
         return res.status(401).json({ error: 'Not authenticated.' });
     }
     try {
-        const connection = await getDbConnection();
-        await ensureMessagesTable(connection);
-        const [rows] = await connection.execute(
-            'SELECT id, sender, body, created_at, read_at FROM messages WHERE student_id = ? ORDER BY created_at ASC',
-            [sessionUser.student_id]
-        );
-        await connection.execute(
-            `UPDATE messages SET read_at = NOW() WHERE student_id = ? AND sender = 'teacher' AND read_at IS NULL`,
-            [sessionUser.student_id]
-        );
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await ensureMessagesTable(connection);
+            const [rows] = await connection.execute(
+                'SELECT id, sender, body, created_at, read_at FROM messages WHERE student_id = ? ORDER BY created_at ASC',
+                [sessionUser.student_id]
+            );
+            await connection.execute(
+                `UPDATE messages SET read_at = NOW() WHERE student_id = ? AND sender = 'teacher' AND read_at IS NULL`,
+                [sessionUser.student_id]
+            );
+            return rows;
+        });
         res.json({ messages: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load messages.' }); }
 });
@@ -77,14 +78,15 @@ router.get('/student/messages/unread-count', async (req, res) => {
         return res.status(401).json({ error: 'Not authenticated.' });
     }
     try {
-        const connection = await getDbConnection();
-        await ensureMessagesTable(connection);
-        const [rows] = await connection.execute(
-            `SELECT COUNT(*) AS count FROM messages WHERE student_id = ? AND sender = 'teacher' AND read_at IS NULL`,
-            [sessionUser.student_id]
-        );
-        await connection.release();
-        res.json({ count: rows[0].count });
+        const count = await withConnection(async (connection) => {
+            await ensureMessagesTable(connection);
+            const [rows] = await connection.execute(
+                `SELECT COUNT(*) AS count FROM messages WHERE student_id = ? AND sender = 'teacher' AND read_at IS NULL`,
+                [sessionUser.student_id]
+            );
+            return rows[0].count;
+        });
+        res.json({ count });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load unread count.' }); }
 });
 
@@ -97,14 +99,15 @@ router.post('/student/messages', async (req, res) => {
     if (!body) return res.status(400).json({ error: 'Message cannot be empty.' });
     if (body.length > 5000) return res.status(400).json({ error: 'Message is too long.' });
     try {
-        const connection = await getDbConnection();
-        await ensureMessagesTable(connection);
-        const [result] = await connection.execute(
-            `INSERT INTO messages (student_id, sender, body) VALUES (?, 'student', ?)`,
-            [sessionUser.student_id, body]
-        );
-        await connection.release();
-        res.json({ success: true, id: result.insertId });
+        const id = await withConnection(async (connection) => {
+            await ensureMessagesTable(connection);
+            const [result] = await connection.execute(
+                `INSERT INTO messages (student_id, sender, body) VALUES (?, 'student', ?)`,
+                [sessionUser.student_id, body]
+            );
+            return result.insertId;
+        });
+        res.json({ success: true, id });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to send message.' }); }
 });
 
@@ -117,18 +120,19 @@ router.post('/student/messages', async (req, res) => {
 router.get('/admin/messages/threads', async (req, res) => {
     if (!isTeacherSession(req.session?.user)) return res.status(403).json({ error: 'Not authorized.' });
     try {
-        const connection = await getDbConnection();
-        await ensureMessagesTable(connection);
-        const [rows] = await connection.execute(`
-            SELECT m.student_id, s.first_name, s.last_name, s.section_id,
-                   MAX(m.created_at) AS last_message_at,
-                   SUM(CASE WHEN m.sender = 'student' AND m.read_at IS NULL THEN 1 ELSE 0 END) AS unread_count
-            FROM messages m
-            LEFT JOIN students s ON s.student_id = m.student_id
-            GROUP BY m.student_id, s.first_name, s.last_name, s.section_id
-            ORDER BY last_message_at DESC
-        `);
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await ensureMessagesTable(connection);
+            const [rows] = await connection.execute(`
+                SELECT m.student_id, s.first_name, s.last_name, s.section_id,
+                       MAX(m.created_at) AS last_message_at,
+                       SUM(CASE WHEN m.sender = 'student' AND m.read_at IS NULL THEN 1 ELSE 0 END) AS unread_count
+                FROM messages m
+                LEFT JOIN students s ON s.student_id = m.student_id
+                GROUP BY m.student_id, s.first_name, s.last_name, s.section_id
+                ORDER BY last_message_at DESC
+            `);
+            return rows;
+        });
         res.json({ threads: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load message threads.' }); }
 });
@@ -138,26 +142,26 @@ router.get('/admin/messages/thread', async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
-        const connection = await getDbConnection();
-        await ensureMessagesTable(connection);
-        const [students] = await connection.execute(
-            'SELECT student_id, first_name, last_name, section_id FROM students WHERE student_id = ? LIMIT 1',
-            [student_id]
-        );
-        if (students.length === 0) {
-            await connection.release();
-            return res.status(404).json({ error: 'No student found with that ID.' });
-        }
-        const [rows] = await connection.execute(
-            'SELECT id, sender, body, created_at, read_at FROM messages WHERE student_id = ? ORDER BY created_at ASC',
-            [student_id]
-        );
-        await connection.execute(
-            `UPDATE messages SET read_at = NOW() WHERE student_id = ? AND sender = 'student' AND read_at IS NULL`,
-            [student_id]
-        );
-        await connection.release();
-        res.json({ student: students[0], messages: rows });
+        const outcome = await withConnection(async (connection) => {
+            await ensureMessagesTable(connection);
+            const [students] = await connection.execute(
+                'SELECT student_id, first_name, last_name, section_id FROM students WHERE student_id = ? LIMIT 1',
+                [student_id]
+            );
+            if (students.length === 0) {
+                return { status: 404, body: { error: 'No student found with that ID.' } };
+            }
+            const [rows] = await connection.execute(
+                'SELECT id, sender, body, created_at, read_at FROM messages WHERE student_id = ? ORDER BY created_at ASC',
+                [student_id]
+            );
+            await connection.execute(
+                `UPDATE messages SET read_at = NOW() WHERE student_id = ? AND sender = 'student' AND read_at IS NULL`,
+                [student_id]
+            );
+            return { status: 200, body: { student: students[0], messages: rows } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load thread.' }); }
 });
 
@@ -187,23 +191,23 @@ router.post('/admin/messages', async (req, res) => {
         return res.status(400).json({ error: 'Message is too long.' });
     }
     try {
-        const connection = await getDbConnection();
-        await ensureMessagesTable(connection);
-        const [students] = await connection.execute(
-            'SELECT student_id FROM students WHERE student_id = ? LIMIT 1',
-            [student_id]
-        );
-        if (students.length === 0) {
-            console.warn('[messages] rejected: no student found', { student_id });
-            await connection.release();
-            return res.status(404).json({ error: 'No student found with that ID.' });
-        }
-        const [result] = await connection.execute(
-            `INSERT INTO messages (student_id, sender, body) VALUES (?, 'teacher', ?)`,
-            [student_id, body]
-        );
-        await connection.release();
-        res.json({ success: true, id: result.insertId });
+        const outcome = await withConnection(async (connection) => {
+            await ensureMessagesTable(connection);
+            const [students] = await connection.execute(
+                'SELECT student_id FROM students WHERE student_id = ? LIMIT 1',
+                [student_id]
+            );
+            if (students.length === 0) {
+                console.warn('[messages] rejected: no student found', { student_id });
+                return { status: 404, body: { error: 'No student found with that ID.' } };
+            }
+            const [result] = await connection.execute(
+                `INSERT INTO messages (student_id, sender, body) VALUES (?, 'teacher', ?)`,
+                [student_id, body]
+            );
+            return { status: 200, body: { success: true, id: result.insertId } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to send message.' }); }
 });
 
@@ -211,13 +215,14 @@ router.post('/admin/messages', async (req, res) => {
 router.get('/admin/messages/unread-count', async (req, res) => {
     if (!isTeacherSession(req.session?.user)) return res.status(403).json({ error: 'Not authorized.' });
     try {
-        const connection = await getDbConnection();
-        await ensureMessagesTable(connection);
-        const [rows] = await connection.execute(
-            `SELECT COUNT(*) AS count FROM messages WHERE sender = 'student' AND read_at IS NULL`
-        );
-        await connection.release();
-        res.json({ count: rows[0].count });
+        const count = await withConnection(async (connection) => {
+            await ensureMessagesTable(connection);
+            const [rows] = await connection.execute(
+                `SELECT COUNT(*) AS count FROM messages WHERE sender = 'student' AND read_at IS NULL`
+            );
+            return rows[0].count;
+        });
+        res.json({ count });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load unread count.' }); }
 });
 

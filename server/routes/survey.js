@@ -9,7 +9,7 @@
 // threshold, enforced here in the endpoint, not left to the admin page.
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { requireLogin } = require('../helpers');
 
 const RESULTS_THRESHOLD = 4;
@@ -111,13 +111,13 @@ router.post('/survey/submit', requireLogin, async (req, res) => {
     }
 
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        await connection.execute(
-            'INSERT INTO survey_responses (form_key, term, period, answers_json) VALUES (?, ?, ?, ?)',
-            [form_key, term, (period ? String(period).slice(0, 10) : null), JSON.stringify(cleaned)]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await ensureTables(connection);
+            await connection.execute(
+                'INSERT INTO survey_responses (form_key, term, period, answers_json) VALUES (?, ?, ?, ?)',
+                [form_key, term, (period ? String(period).slice(0, 10) : null), JSON.stringify(cleaned)]
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save survey response.' }); }
 });
@@ -133,16 +133,16 @@ router.post('/survey/pulse/submit', requireLogin, async (req, res) => {
     if (!['Lost', 'Behind', 'Steady', 'Ahead'].includes(feeling)) return res.status(400).json({ error: 'Invalid response.' });
 
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        await connection.execute(
-            'INSERT INTO pulse_responses (week, section, feeling, unsure_text, need_text, other_text) VALUES (?, ?, ?, ?, ?, ?)',
-            [String(week).slice(0, 20), section ? String(section).slice(0, 20) : null, feeling,
-             unsure_text ? String(unsure_text).slice(0, 2000) : null,
-             need_text ? String(need_text).slice(0, 2000) : null,
-             other_text ? String(other_text).slice(0, 2000) : null]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await ensureTables(connection);
+            await connection.execute(
+                'INSERT INTO pulse_responses (week, section, feeling, unsure_text, need_text, other_text) VALUES (?, ?, ?, ?, ?, ?)',
+                [String(week).slice(0, 20), section ? String(section).slice(0, 20) : null, feeling,
+                 unsure_text ? String(unsure_text).slice(0, 2000) : null,
+                 need_text ? String(need_text).slice(0, 2000) : null,
+                 other_text ? String(other_text).slice(0, 2000) : null]
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save your pulse response.' }); }
 });
@@ -186,13 +186,14 @@ router.get('/admin/survey/results', async (req, res) => {
     const form = FORMS[form_key];
     if (!form) return res.status(400).json({ error: 'Unknown survey.' });
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        const [rows] = await connection.execute(
-            'SELECT answers_json FROM survey_responses WHERE form_key = ? AND term = ? ORDER BY RAND()',
-            [form_key, term]
-        );
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            const [rows] = await connection.execute(
+                'SELECT answers_json FROM survey_responses WHERE form_key = ? AND term = ? ORDER BY RAND()',
+                [form_key, term]
+            );
+            return rows;
+        });
         if (rows.length < RESULTS_THRESHOLD) {
             return res.json({ ready: false, count: rows.length, threshold: RESULTS_THRESHOLD });
         }
@@ -206,13 +207,14 @@ router.get('/admin/survey/export', async (req, res) => {
     const form = FORMS[form_key];
     if (!form) return res.status(400).json({ error: 'Unknown survey.' });
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        const [rows] = await connection.execute(
-            'SELECT answers_json, period FROM survey_responses WHERE form_key = ? AND term = ? ORDER BY RAND()',
-            [form_key, term]
-        );
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            const [rows] = await connection.execute(
+                'SELECT answers_json, period FROM survey_responses WHERE form_key = ? AND term = ? ORDER BY RAND()',
+                [form_key, term]
+            );
+            return rows;
+        });
         if (rows.length < RESULTS_THRESHOLD) {
             return res.json({ ready: false, count: rows.length, threshold: RESULTS_THRESHOLD });
         }
@@ -225,29 +227,31 @@ router.get('/admin/survey/pulse-results', async (req, res) => {
     const { week } = req.query;
     if (!week) return res.status(400).json({ error: 'Missing week.' });
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        const [rows] = await connection.execute(
-            'SELECT feeling, unsure_text, need_text, other_text FROM pulse_responses WHERE week = ? ORDER BY RAND()',
-            [week]
-        );
-        // Trend line: every distinct week that individually meets the
-        // threshold gets one point -- a week below threshold is omitted
-        // entirely rather than shown with a suppressed/fuzzed count, so
-        // the chart never implies a shape for data that isn't really there.
-        const [weekRows] = await connection.execute(
-            `SELECT week, feeling, COUNT(*) AS n FROM pulse_responses GROUP BY week, feeling ORDER BY week ASC`
-        );
-        await connection.release();
+        const { rows, trend } = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            const [rows] = await connection.execute(
+                'SELECT feeling, unsure_text, need_text, other_text FROM pulse_responses WHERE week = ? ORDER BY RAND()',
+                [week]
+            );
+            // Trend line: every distinct week that individually meets the
+            // threshold gets one point -- a week below threshold is omitted
+            // entirely rather than shown with a suppressed/fuzzed count, so
+            // the chart never implies a shape for data that isn't really there.
+            const [weekRows] = await connection.execute(
+                `SELECT week, feeling, COUNT(*) AS n FROM pulse_responses GROUP BY week, feeling ORDER BY week ASC`
+            );
 
-        const byWeek = {};
-        weekRows.forEach(r => {
-            if (!byWeek[r.week]) byWeek[r.week] = { Lost: 0, Behind: 0, Steady: 0, Ahead: 0, total: 0 };
-            byWeek[r.week][r.feeling] = r.n; byWeek[r.week].total += r.n;
+            const byWeek = {};
+            weekRows.forEach(r => {
+                if (!byWeek[r.week]) byWeek[r.week] = { Lost: 0, Behind: 0, Steady: 0, Ahead: 0, total: 0 };
+                byWeek[r.week][r.feeling] = r.n; byWeek[r.week].total += r.n;
+            });
+            const trend = Object.entries(byWeek)
+                .filter(([, counts]) => counts.total >= PULSE_THRESHOLD)
+                .map(([wk, counts]) => ({ week: wk, ...counts }));
+
+            return { rows, trend };
         });
-        const trend = Object.entries(byWeek)
-            .filter(([, counts]) => counts.total >= PULSE_THRESHOLD)
-            .map(([wk, counts]) => ({ week: wk, ...counts }));
 
         if (rows.length < PULSE_THRESHOLD) {
             return res.json({ ready: false, count: rows.length, threshold: PULSE_THRESHOLD, trend });
@@ -267,10 +271,11 @@ router.get('/admin/survey/pulse-results', async (req, res) => {
 
 router.get('/admin/survey/pulse-weeks', async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        const [rows] = await connection.execute('SELECT DISTINCT week FROM pulse_responses ORDER BY week DESC');
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            const [rows] = await connection.execute('SELECT DISTINCT week FROM pulse_responses ORDER BY week DESC');
+            return rows;
+        });
         res.json({ weeks: rows.map(r => r.week) });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load weeks.' }); }
 });
@@ -280,9 +285,9 @@ router.delete('/admin/survey/clear', async (req, res) => {
     const form = FORMS[form_key];
     if (!form) return res.status(400).json({ error: 'Unknown survey.' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute('DELETE FROM survey_responses WHERE form_key = ? AND term = ?', [form_key, term]);
-        await connection.release();
+        await withConnection((connection) => connection.execute(
+            'DELETE FROM survey_responses WHERE form_key = ? AND term = ?', [form_key, term]
+        ));
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to clear survey data.' }); }
 });
@@ -291,9 +296,9 @@ router.delete('/admin/survey/pulse-clear', async (req, res) => {
     const { week } = req.query;
     if (!week) return res.status(400).json({ error: 'Missing week.' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute('DELETE FROM pulse_responses WHERE week = ?', [week]);
-        await connection.release();
+        await withConnection((connection) => connection.execute(
+            'DELETE FROM pulse_responses WHERE week = ?', [week]
+        ));
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to clear pulse data.' }); }
 });

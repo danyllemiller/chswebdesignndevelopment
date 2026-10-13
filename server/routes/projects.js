@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { resolveCourseId, clampScore, requireSelfOrStaff, requireLogin } = require('../helpers');
 
 // Same students.section_id -> uploads/<student_id>/ layout roster.js already
@@ -31,20 +31,20 @@ router.get('/student/section-classmates', requireLogin, async (req, res) => {
         if (!related) return res.status(401).json({ error: 'Not authorized.' });
     }
     try {
-        const connection = await getDbConnection();
-        // An "AS-<section>" aide section (e.g. AS-B2) sits alongside the
-        // section it aides -- those aides can review that section's students'
-        // projects, and that section's students can be reviewed by those
-        // aides, so pull both rosters no matter which side is asking.
-        const sections = section_id.startsWith('AS-') ? [section_id, section_id.slice(3)] : [section_id, `AS-${section_id}`];
-        const placeholders = sections.map(() => '?').join(', ');
-        const [rows] = await connection.execute(
-            `SELECT student_id, first_name, last_name FROM students
-             WHERE section_id IN (${placeholders}) AND (archived IS NULL OR archived = 0) AND student_id != ?
-             ORDER BY last_name ASC, first_name ASC`,
-            [...sections, exclude_student_id || '']
-        );
-        await connection.release();
+        const rows = await withConnection((connection) => {
+            // An "AS-<section>" aide section (e.g. AS-B2) sits alongside the
+            // section it aides -- those aides can review that section's students'
+            // projects, and that section's students can be reviewed by those
+            // aides, so pull both rosters no matter which side is asking.
+            const sections = section_id.startsWith('AS-') ? [section_id, section_id.slice(3)] : [section_id, `AS-${section_id}`];
+            const placeholders = sections.map(() => '?').join(', ');
+            return connection.execute(
+                `SELECT student_id, first_name, last_name FROM students
+                 WHERE section_id IN (${placeholders}) AND (archived IS NULL OR archived = 0) AND student_id != ?
+                 ORDER BY last_name ASC, first_name ASC`,
+                [...sections, exclude_student_id || '']
+            ).then(([rows]) => rows);
+        });
         res.json(rows);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch classmates' }); }
 });
@@ -257,12 +257,10 @@ router.post('/student/project-auto-grade', requireSelfOrStaff(), async (req, res
             ...(bonusEntry ? [`${bonusEntry.label}: ${bonusEntry.checksFound.length}/${bonusEntry.checksLookedFor.length} found, +${bonusEntry.bonusPoints} bonus pts`] : [])
         ].join(' | ');
 
-        const connection = await getDbConnection();
-        const result = await saveEvaluationAndAggregate(connection, {
+        const result = await withConnection((connection) => saveEvaluationAndAggregate(connection, {
             chapter_project_id, exam_id, student_id, evaluator_student_id: null, evaluator_type: 'auto',
             score: scoreOutOf100, max_score: 100, rubric_json: rubric, feedback
-        });
-        await connection.release();
+        }));
         res.json({ success: true, rubric, score: scoreOutOf100, aggregate: result });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to run auto-grade check' }); }
 });
@@ -271,20 +269,21 @@ router.get('/student/assignments-visible', requireSelfOrStaff(), async (req, res
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
-        const connection = await getDbConnection();
-        const [students] = await connection.execute(
-            'SELECT student_id, section_id FROM students WHERE student_id = ? LIMIT 1',
-            [student_id]
-        );
-        if (students.length === 0) { await connection.release(); return res.status(404).json({ error: 'Student not found' }); }
-        const courseCode = await resolveCourseId(connection, students[0].section_id);
-        if (!courseCode) { await connection.release(); return res.status(400).json({ error: 'Unable to resolve course for student section' }); }
-        const [assignments] = await connection.execute(
-            'SELECT exam_id, title, total_points, course_id FROM exams WHERE course_id = ? ORDER BY title ASC, exam_id ASC',
-            [courseCode]
-        );
-        await connection.release();
-        res.json({ student_id, course_id: courseCode, assignments });
+        const outcome = await withConnection(async (connection) => {
+            const [students] = await connection.execute(
+                'SELECT student_id, section_id FROM students WHERE student_id = ? LIMIT 1',
+                [student_id]
+            );
+            if (students.length === 0) return { status: 404, body: { error: 'Student not found' } };
+            const courseCode = await resolveCourseId(connection, students[0].section_id);
+            if (!courseCode) return { status: 400, body: { error: 'Unable to resolve course for student section' } };
+            const [assignments] = await connection.execute(
+                'SELECT exam_id, title, total_points, course_id FROM exams WHERE course_id = ? ORDER BY title ASC, exam_id ASC',
+                [courseCode]
+            );
+            return { status: 200, body: { student_id, course_id: courseCode, assignments } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch visible assignments' }); }
 });
 
@@ -296,8 +295,7 @@ router.post('/admin/project-spec', async (req, res) => {
     if (!chapter_id || !course_id || !exam_id || !project_title)
         return res.status(400).json({ error: 'chapter_id, course_id, exam_id, and project_title are required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(
+        await withConnection((connection) => connection.execute(
             `INSERT INTO chapter_projects
              (chapter_id, chapter_title, course_id, exam_id, project_title, project_spec_html,
               self_reflection_weight, peer_review_weight, auto_grade_weight, is_active)
@@ -315,8 +313,7 @@ router.post('/admin/project-spec', async (req, res) => {
                 Number(peer_review_weight ?? 33.33), Number(auto_grade_weight ?? 33.34),
                 Number(is_active ?? 1)
             ]
-        );
-        await connection.release();
+        ));
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save project spec' }); }
 });
@@ -325,16 +322,14 @@ router.get('/projects/specs', requireLogin, async (req, res) => {
     const { course_id } = req.query;
     if (!course_id) return res.status(400).json({ error: 'course_id is required' });
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(
+        const rows = await withConnection((connection) => connection.execute(
             `SELECT id, chapter_id, chapter_title, course_id, exam_id, project_title, project_spec_html,
                     self_reflection_weight, peer_review_weight, auto_grade_weight, is_active, updated_at
              FROM chapter_projects
              WHERE course_id = ? AND is_active = 1
              ORDER BY chapter_id ASC`,
             [course_id]
-        );
-        await connection.release();
+        ).then(([rows]) => rows));
         res.json({ specs: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch project specs' }); }
 });
@@ -345,19 +340,20 @@ router.post('/student/project-submission', requireSelfOrStaff(), async (req, res
         return res.status(400).json({ error: 'Missing required submission fields' });
     const mode = ['new', 'overwrite', 'new_version'].includes(submission_mode) ? submission_mode : 'new';
     try {
-        const connection = await getDbConnection();
-        const [versionRows] = await connection.execute(
-            'SELECT COALESCE(MAX(version_no), 0) AS max_version FROM project_submissions WHERE student_id = ? AND chapter_project_id = ?',
-            [student_id, chapter_project_id]
-        );
-        const nextVersion = Number(versionRows[0]?.max_version || 0) + 1;
-        await connection.execute(
-            `INSERT INTO project_submissions
-             (student_id, chapter_project_id, exam_id, original_filename, stored_path, file_hash, submission_mode, version_no, overwrite_of_submission_id)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [student_id, chapter_project_id, exam_id, original_filename, stored_path, file_hash || null, mode, nextVersion, overwrite_of_submission_id || null]
-        );
-        await connection.release();
+        const nextVersion = await withConnection(async (connection) => {
+            const [versionRows] = await connection.execute(
+                'SELECT COALESCE(MAX(version_no), 0) AS max_version FROM project_submissions WHERE student_id = ? AND chapter_project_id = ?',
+                [student_id, chapter_project_id]
+            );
+            const nextVersion = Number(versionRows[0]?.max_version || 0) + 1;
+            await connection.execute(
+                `INSERT INTO project_submissions
+                 (student_id, chapter_project_id, exam_id, original_filename, stored_path, file_hash, submission_mode, version_no, overwrite_of_submission_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [student_id, chapter_project_id, exam_id, original_filename, stored_path, file_hash || null, mode, nextVersion, overwrite_of_submission_id || null]
+            );
+            return nextVersion;
+        });
         res.json({ success: true, version_no: nextVersion });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save project submission metadata' }); }
 });
@@ -379,47 +375,43 @@ router.post('/student/project-evaluation', requireSelfOrStaff(), async (req, res
     const sessionUser = req.session?.user;
     const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
     try {
-        const connection = await getDbConnection();
-
-        // Auto-grade scores only ever come from the real check
-        // (/student/project-auto-grade, which reads the student's actual
-        // uploaded source and calls saveEvaluationAndAggregate directly) --
-        // never accepted from this public endpoint for a non-staff caller.
-        if (evaluator_type === 'auto' && !isStaff) {
-            await connection.release();
-            return res.status(403).json({ error: 'Auto-grade scores can only come from the auto-check.' });
-        }
-
-        if (evaluator_type === 'peer' && !isStaff) {
-            if (!evaluator_student_id) {
-                await connection.release();
-                return res.status(400).json({ error: 'evaluator_student_id is required for a peer review.' });
+        const outcome = await withConnection(async (connection) => {
+            // Auto-grade scores only ever come from the real check
+            // (/student/project-auto-grade, which reads the student's actual
+            // uploaded source and calls saveEvaluationAndAggregate directly) --
+            // never accepted from this public endpoint for a non-staff caller.
+            if (evaluator_type === 'auto' && !isStaff) {
+                return { status: 403, body: { error: 'Auto-grade scores can only come from the auto-check.' } };
             }
-            if (String(evaluator_student_id) === String(student_id)) {
-                await connection.release();
-                return res.status(403).json({ error: "You can't peer-review your own project." });
-            }
-            // Confirm the named peer is a real, active classmate (or an
-            // AS-aide covering this section) -- not just any ID the client
-            // happens to send.
-            const [revieweeRows] = await connection.execute('SELECT section_id FROM students WHERE student_id = ? LIMIT 1', [student_id]);
-            const revieweeSection = String(revieweeRows[0]?.section_id || '').toUpperCase();
-            const validSections = revieweeSection.startsWith('AS-')
-                ? [revieweeSection, revieweeSection.slice(3)]
-                : [revieweeSection, `AS-${revieweeSection}`];
-            const [peerRows] = await connection.execute(
-                `SELECT student_id FROM students WHERE student_id = ? AND section_id IN (?, ?) AND (archived IS NULL OR archived = 0)`,
-                [evaluator_student_id, validSections[0], validSections[1]]
-            );
-            if (peerRows.length === 0) {
-                await connection.release();
-                return res.status(403).json({ error: 'evaluator_student_id must be an active classmate in the same section.' });
-            }
-        }
 
-        const result = await saveEvaluationAndAggregate(connection, { chapter_project_id, exam_id, student_id, evaluator_student_id, evaluator_type, score, max_score, rubric_json, feedback });
-        await connection.release();
-        res.json({ success: true, aggregate: result });
+            if (evaluator_type === 'peer' && !isStaff) {
+                if (!evaluator_student_id) {
+                    return { status: 400, body: { error: 'evaluator_student_id is required for a peer review.' } };
+                }
+                if (String(evaluator_student_id) === String(student_id)) {
+                    return { status: 403, body: { error: "You can't peer-review your own project." } };
+                }
+                // Confirm the named peer is a real, active classmate (or an
+                // AS-aide covering this section) -- not just any ID the client
+                // happens to send.
+                const [revieweeRows] = await connection.execute('SELECT section_id FROM students WHERE student_id = ? LIMIT 1', [student_id]);
+                const revieweeSection = String(revieweeRows[0]?.section_id || '').toUpperCase();
+                const validSections = revieweeSection.startsWith('AS-')
+                    ? [revieweeSection, revieweeSection.slice(3)]
+                    : [revieweeSection, `AS-${revieweeSection}`];
+                const [peerRows] = await connection.execute(
+                    `SELECT student_id FROM students WHERE student_id = ? AND section_id IN (?, ?) AND (archived IS NULL OR archived = 0)`,
+                    [evaluator_student_id, validSections[0], validSections[1]]
+                );
+                if (peerRows.length === 0) {
+                    return { status: 403, body: { error: 'evaluator_student_id must be an active classmate in the same section.' } };
+                }
+            }
+
+            const result = await saveEvaluationAndAggregate(connection, { chapter_project_id, exam_id, student_id, evaluator_student_id, evaluator_type, score, max_score, rubric_json, feedback });
+            return { status: 200, body: { success: true, aggregate: result } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save evaluation/aggregate' }); }
 });
 
@@ -428,22 +420,23 @@ router.get('/student/project-aggregate', requireSelfOrStaff(), async (req, res) 
     if (!chapter_project_id || !exam_id || !student_id)
         return res.status(400).json({ error: 'chapter_project_id, exam_id, student_id required' });
     try {
-        const connection = await getDbConnection();
-        const [aggregateRows] = await connection.execute(
-            'SELECT * FROM project_grade_aggregates WHERE chapter_project_id = ? AND exam_id = ? AND student_id = ? LIMIT 1',
-            [chapter_project_id, exam_id, student_id]
-        );
-        const [evalRows] = await connection.execute(
-            `SELECT pe.id, pe.evaluator_type, pe.evaluator_student_id, s.first_name AS evaluator_first_name,
-                    s.last_name AS evaluator_last_name, pe.score, pe.max_score, pe.feedback, pe.created_at, pe.updated_at
-             FROM project_evaluations pe
-             LEFT JOIN students s ON s.student_id = pe.evaluator_student_id
-             WHERE pe.chapter_project_id = ? AND pe.exam_id = ? AND pe.student_id = ?
-             ORDER BY pe.created_at DESC`,
-            [chapter_project_id, exam_id, student_id]
-        );
-        await connection.release();
-        res.json({ aggregate: aggregateRows[0] || null, evaluations: evalRows });
+        const result = await withConnection(async (connection) => {
+            const [aggregateRows] = await connection.execute(
+                'SELECT * FROM project_grade_aggregates WHERE chapter_project_id = ? AND exam_id = ? AND student_id = ? LIMIT 1',
+                [chapter_project_id, exam_id, student_id]
+            );
+            const [evalRows] = await connection.execute(
+                `SELECT pe.id, pe.evaluator_type, pe.evaluator_student_id, s.first_name AS evaluator_first_name,
+                        s.last_name AS evaluator_last_name, pe.score, pe.max_score, pe.feedback, pe.created_at, pe.updated_at
+                 FROM project_evaluations pe
+                 LEFT JOIN students s ON s.student_id = pe.evaluator_student_id
+                 WHERE pe.chapter_project_id = ? AND pe.exam_id = ? AND pe.student_id = ?
+                 ORDER BY pe.created_at DESC`,
+                [chapter_project_id, exam_id, student_id]
+            );
+            return { aggregate: aggregateRows[0] || null, evaluations: evalRows };
+        });
+        res.json(result);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch project aggregate' }); }
 });
 
