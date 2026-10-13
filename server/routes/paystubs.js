@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { resolveCourseId, getCurrentSchoolYear, requireSelfOrStaff, timeToMinutes } = require('../helpers');
 const { computeStudentGrade } = require('../gradeCalc');
 
@@ -85,9 +85,8 @@ async function resolveAllCourseIdsByStudent(connection, students) {
 }
 
 async function ensurePaystubTables() {
-    let connection;
     try {
-        connection = await getDbConnection();
+        await withConnection(async (connection) => {
         await connection.execute(`
             CREATE TABLE IF NOT EXISTS payroll_runs (
                 id           INT AUTO_INCREMENT PRIMARY KEY,
@@ -173,10 +172,9 @@ async function ensurePaystubTables() {
         if (tardyCols.length === 0) {
             await connection.execute(`ALTER TABLE student_paystubs ADD COLUMN tardy_count INT DEFAULT 0`);
         }
+        });
     } catch (e) {
         console.error('[paystubs] Migration error:', e.message);
-    } finally {
-        if (connection) await connection.release();
     }
 }
 
@@ -430,21 +428,22 @@ router.get('/paystubs/my', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(`
-            SELECT sp.*, DATE_FORMAT(pr.period_start, '%Y-%m-%d') AS period_start,
-                   DATE_FORMAT(pr.period_end, '%Y-%m-%d') AS period_end,
-                   DATE_FORMAT(pr.pay_date, '%Y-%m-%d') AS pay_date,
-                   pr.is_finalized, pr.run_by, pr.run_at
-            FROM student_paystubs sp
-            JOIN payroll_runs pr ON sp.payroll_run_id = pr.id
-            WHERE sp.student_id = ?
-            ORDER BY pr.period_end DESC
-        `, [student_id]);
-        for (const row of rows) {
-            row.wd_star_points = await computeWdStarPoints(connection, student_id, row.period_start, row.period_end, row.net_pay);
-        }
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            const [rows] = await connection.execute(`
+                SELECT sp.*, DATE_FORMAT(pr.period_start, '%Y-%m-%d') AS period_start,
+                       DATE_FORMAT(pr.period_end, '%Y-%m-%d') AS period_end,
+                       DATE_FORMAT(pr.pay_date, '%Y-%m-%d') AS pay_date,
+                       pr.is_finalized, pr.run_by, pr.run_at
+                FROM student_paystubs sp
+                JOIN payroll_runs pr ON sp.payroll_run_id = pr.id
+                WHERE sp.student_id = ?
+                ORDER BY pr.period_end DESC
+            `, [student_id]);
+            for (const row of rows) {
+                row.wd_star_points = await computeWdStarPoints(connection, student_id, row.period_start, row.period_end, row.net_pay);
+            }
+            return rows;
+        });
         res.json({ paystubs: rows });
     } catch (err) {
         console.error(err);
@@ -458,8 +457,7 @@ router.get('/paystubs/ytd', requireSelfOrStaff(), async (req, res) => {
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     const targetYear = Number(year) || new Date().getFullYear();
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(`
+        const rows = await withConnection((connection) => connection.execute(`
             SELECT
                 COALESCE(SUM(sp.gross_pay), 0)        AS total_gross,
                 COALESCE(SUM(sp.fed_tax), 0)          AS total_fed_tax,
@@ -475,8 +473,7 @@ router.get('/paystubs/ytd', requireSelfOrStaff(), async (req, res) => {
             FROM student_paystubs sp
             JOIN payroll_runs pr ON sp.payroll_run_id = pr.id
             WHERE sp.student_id = ? AND YEAR(pr.period_end) = ?
-        `, [student_id, targetYear]);
-        await connection.release();
+        `, [student_id, targetYear]).then(([rows]) => rows));
         res.json({ ytd: rows[0] || null, year: targetYear });
     } catch (err) {
         console.error(err);
@@ -503,51 +500,51 @@ router.get('/admin/payroll/missing-assignments', async (req, res) => {
     const studentIds = String(req.query.student_ids || '').split(',').map(s => s.trim()).filter(Boolean);
     if (studentIds.length === 0) return res.json({ missing: {} });
     try {
-        const connection = await getDbConnection();
-        const [students] = await connection.execute(
-            `SELECT student_id, section_id FROM students WHERE student_id IN (${studentIds.map(() => '?').join(',')})`,
-            studentIds
-        );
-        const resolved = await resolveEffectiveCourseIds(connection, students);
-
-        const courseIds = [...new Set(resolved.map(s => s.effective_course_id).filter(Boolean))];
-        let exams = [];
-        if (courseIds.length > 0) {
-            const [examRows] = await connection.execute(
-                `SELECT exam_id, TRIM(title) AS title, course_id, due_date, period_due_dates
-                 FROM exams WHERE course_id IN (${courseIds.map(() => '?').join(',')})`,
-                courseIds
+        const missing = await withConnection(async (connection) => {
+            const [students] = await connection.execute(
+                `SELECT student_id, section_id FROM students WHERE student_id IN (${studentIds.map(() => '?').join(',')})`,
+                studentIds
             );
-            exams = examRows;
-        }
+            const resolved = await resolveEffectiveCourseIds(connection, students);
 
-        const [responses] = await connection.execute(
-            `SELECT student_id, exam_id, score FROM responses WHERE student_id IN (${studentIds.map(() => '?').join(',')})`,
-            studentIds
-        );
-        const responded = new Set(responses.map(r => `${r.student_id}::${r.exam_id}`));
-
-        const today = new Date(); today.setHours(0, 0, 0, 0);
-        const missing = {};
-        for (const s of resolved) {
-            missing[s.student_id] = [];
-            for (const e of exams) {
-                if (e.course_id !== s.effective_course_id) continue;
-                if (isExemptFromMissingList(e.exam_id, e.title)) continue;
-                if (responded.has(`${s.student_id}::${e.exam_id}`)) continue;
-
-                let periodDueDates = {};
-                try { periodDueDates = e.period_due_dates ? JSON.parse(e.period_due_dates) : {}; } catch { /* malformed override, fall back to base due_date */ }
-                const dueDateRaw = periodDueDates[s.section_id] || e.due_date;
-                if (!dueDateRaw) continue;
-                const dueDate = formatDbDate(dueDateRaw);
-                if (new Date(dueDate + 'T00:00:00') >= today) continue;
-
-                missing[s.student_id].push({ exam_id: e.exam_id, title: e.title, due_date: dueDate });
+            const courseIds = [...new Set(resolved.map(s => s.effective_course_id).filter(Boolean))];
+            let exams = [];
+            if (courseIds.length > 0) {
+                const [examRows] = await connection.execute(
+                    `SELECT exam_id, TRIM(title) AS title, course_id, due_date, period_due_dates
+                     FROM exams WHERE course_id IN (${courseIds.map(() => '?').join(',')})`,
+                    courseIds
+                );
+                exams = examRows;
             }
-        }
 
-        await connection.release();
+            const [responses] = await connection.execute(
+                `SELECT student_id, exam_id, score FROM responses WHERE student_id IN (${studentIds.map(() => '?').join(',')})`,
+                studentIds
+            );
+            const responded = new Set(responses.map(r => `${r.student_id}::${r.exam_id}`));
+
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const missing = {};
+            for (const s of resolved) {
+                missing[s.student_id] = [];
+                for (const e of exams) {
+                    if (e.course_id !== s.effective_course_id) continue;
+                    if (isExemptFromMissingList(e.exam_id, e.title)) continue;
+                    if (responded.has(`${s.student_id}::${e.exam_id}`)) continue;
+
+                    let periodDueDates = {};
+                    try { periodDueDates = e.period_due_dates ? JSON.parse(e.period_due_dates) : {}; } catch { /* malformed override, fall back to base due_date */ }
+                    const dueDateRaw = periodDueDates[s.section_id] || e.due_date;
+                    if (!dueDateRaw) continue;
+                    const dueDate = formatDbDate(dueDateRaw);
+                    if (new Date(dueDate + 'T00:00:00') >= today) continue;
+
+                    missing[s.student_id].push({ exam_id: e.exam_id, title: e.title, due_date: dueDate });
+                }
+            }
+            return missing;
+        });
         res.json({ missing });
     } catch (err) {
         console.error(err);
@@ -564,16 +561,17 @@ router.get('/admin/payroll/grade-summary', async (req, res) => {
     const studentIds = String(req.query.student_ids || '').split(',').map(s => s.trim()).filter(Boolean);
     if (studentIds.length === 0) return res.json({ grades: {} });
     try {
-        const connection = await getDbConnection();
-        const [students] = await connection.execute(
-            `SELECT student_id, section_id FROM students WHERE student_id IN (${studentIds.map(() => '?').join(',')})`,
-            studentIds
-        );
-        const grades = {};
-        for (const s of students) {
-            grades[s.student_id] = await computeStudentGrade(connection, s.student_id, s.section_id);
-        }
-        await connection.release();
+        const grades = await withConnection(async (connection) => {
+            const [students] = await connection.execute(
+                `SELECT student_id, section_id FROM students WHERE student_id IN (${studentIds.map(() => '?').join(',')})`,
+                studentIds
+            );
+            const grades = {};
+            for (const s of students) {
+                grades[s.student_id] = await computeStudentGrade(connection, s.student_id, s.section_id);
+            }
+            return grades;
+        });
         res.json({ grades });
     } catch (err) {
         console.error(err);
@@ -584,8 +582,7 @@ router.get('/admin/payroll/grade-summary', async (req, res) => {
 // GET /admin/payroll/runs — all payroll runs for admin dashboard
 router.get('/admin/payroll/runs', async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        const [runs] = await connection.execute(`
+        const runs = await withConnection((connection) => connection.execute(`
             SELECT pr.id, DATE_FORMAT(pr.period_start, '%Y-%m-%d') AS period_start,
                    DATE_FORMAT(pr.period_end, '%Y-%m-%d') AS period_end,
                    DATE_FORMAT(pr.pay_date, '%Y-%m-%d') AS pay_date,
@@ -597,8 +594,7 @@ router.get('/admin/payroll/runs', async (req, res) => {
             LEFT JOIN student_paystubs sp ON pr.id = sp.payroll_run_id
             GROUP BY pr.id
             ORDER BY pr.period_end DESC
-        `);
-        await connection.release();
+        `).then(([runs]) => runs));
         res.json({ runs });
     } catch (err) {
         console.error(err);
@@ -610,26 +606,27 @@ router.get('/admin/payroll/runs', async (req, res) => {
 router.get('/admin/payroll/run-detail/:id', async (req, res) => {
     const runId = Number(req.params.id);
     try {
-        const connection = await getDbConnection();
         // Was missing the payroll_runs join entirely -- period_start/end/
         // pay_date/run_by never actually came back, so every printed stub's
         // "Pay Period" and "Pay Date" silently rendered blank.
-        const [rows] = await connection.execute(`
-            SELECT sp.*, s.first_name, s.last_name, s.section_id,
-                   DATE_FORMAT(pr.period_start, '%Y-%m-%d') AS period_start,
-                   DATE_FORMAT(pr.period_end, '%Y-%m-%d') AS period_end,
-                   DATE_FORMAT(pr.pay_date, '%Y-%m-%d') AS pay_date,
-                   pr.run_by, pr.run_at
-            FROM student_paystubs sp
-            JOIN students s ON sp.student_id = s.student_id
-            JOIN payroll_runs pr ON sp.payroll_run_id = pr.id
-            WHERE sp.payroll_run_id = ?
-            ORDER BY s.section_id, s.last_name, s.first_name
-        `, [runId]);
-        for (const row of rows) {
-            row.wd_star_points = await computeWdStarPoints(connection, row.student_id, row.period_start, row.period_end, row.net_pay);
-        }
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            const [rows] = await connection.execute(`
+                SELECT sp.*, s.first_name, s.last_name, s.section_id,
+                       DATE_FORMAT(pr.period_start, '%Y-%m-%d') AS period_start,
+                       DATE_FORMAT(pr.period_end, '%Y-%m-%d') AS period_end,
+                       DATE_FORMAT(pr.pay_date, '%Y-%m-%d') AS pay_date,
+                       pr.run_by, pr.run_at
+                FROM student_paystubs sp
+                JOIN students s ON sp.student_id = s.student_id
+                JOIN payroll_runs pr ON sp.payroll_run_id = pr.id
+                WHERE sp.payroll_run_id = ?
+                ORDER BY s.section_id, s.last_name, s.first_name
+            `, [runId]);
+            for (const row of rows) {
+                row.wd_star_points = await computeWdStarPoints(connection, row.student_id, row.period_start, row.period_end, row.net_pay);
+            }
+            return rows;
+        });
         res.json({ stubs: rows });
     } catch (err) {
         console.error(err);
@@ -644,15 +641,15 @@ router.get('/admin/payroll/preview', async (req, res) => {
     const course_ids = req.query.course_ids ? String(req.query.course_ids).split(',').filter(Boolean) : [];
     if (!period_start || !period_end) return res.status(400).json({ error: 'period_start and period_end required' });
     try {
-        const connection = await getDbConnection();
-        const [[existingRun]] = await connection.execute(
-            'SELECT id FROM payroll_runs WHERE period_start = ? AND period_end = ?',
-            [period_start, period_end]
-        );
-        const rows = await computePayrollForPeriod(connection, {
-            period_start, period_end, course_ids, ownRunId: existingRun ? existingRun.id : null
+        const rows = await withConnection(async (connection) => {
+            const [[existingRun]] = await connection.execute(
+                'SELECT id FROM payroll_runs WHERE period_start = ? AND period_end = ?',
+                [period_start, period_end]
+            );
+            return computePayrollForPeriod(connection, {
+                period_start, period_end, course_ids, ownRunId: existingRun ? existingRun.id : null
+            });
         });
-        await connection.release();
         res.json({ rows });
     } catch (err) {
         console.error(err);
@@ -666,82 +663,82 @@ router.post('/admin/payroll/run', async (req, res) => {
     if (!period_start || !period_end) return res.status(400).json({ error: 'period_start and period_end required' });
 
     try {
-        const connection = await getDbConnection();
-
-        // pay_date is tied to the PERIOD, not to whenever the run happens
-        // to be clicked -- the nearest 1st or 15th on/after period_end, so
-        // a period ending 8/29 always pays 9/1 no matter when it's run or
-        // re-run, and reprinting an old stub later never shows a
-        // different date than it did originally.
-        const payDate = computeNextPayDate(period_end);
-        await connection.execute(
-            `INSERT INTO payroll_runs (period_start, period_end, pay_date, run_by, notes, is_finalized)
-             VALUES (?, ?, ?, ?, ?, 1)
-             ON DUPLICATE KEY UPDATE pay_date = VALUES(pay_date), run_by = VALUES(run_by), notes = VALUES(notes),
-               is_finalized = 1, run_at = CURRENT_TIMESTAMP`,
-            [period_start, period_end, payDate, (run_by || 'teacher').substring(0, 100), notes || null]
-        );
-        const [[runRow]] = await connection.execute(
-            'SELECT id FROM payroll_runs WHERE period_start = ? AND period_end = ?',
-            [period_start, period_end]
-        );
-        const runId = runRow.id;
-
-        // Release this run's own prior claims (if re-running the same
-        // period) so computePayrollForPeriod sees those hours as unpaid
-        // again instead of finding nothing the second time.
-        await connection.execute('UPDATE timesheets SET paid_run_id = NULL WHERE paid_run_id = ?', [runId]);
-
-        const rows = await computePayrollForPeriod(connection, {
-            period_start, period_end,
-            course_ids: Array.isArray(course_ids) ? course_ids : []
-        });
-
-        // Re-running a period only ever inserted/updated rows for students
-        // in the current result -- a student who no longer belongs (wrong
-        // course scoping, now-excluded legacy section, etc.) kept their
-        // stale stub from a prior run instead of being removed. Purge
-        // anyone not in this run's fresh computation before inserting it.
-        const keepIds = rows.map(s => s.student_id);
-        if (keepIds.length > 0) {
+        const { runId, generated } = await withConnection(async (connection) => {
+            // pay_date is tied to the PERIOD, not to whenever the run happens
+            // to be clicked -- the nearest 1st or 15th on/after period_end, so
+            // a period ending 8/29 always pays 9/1 no matter when it's run or
+            // re-run, and reprinting an old stub later never shows a
+            // different date than it did originally.
+            const payDate = computeNextPayDate(period_end);
             await connection.execute(
-                `DELETE FROM student_paystubs WHERE payroll_run_id = ? AND student_id NOT IN (${keepIds.map(() => '?').join(',')})`,
-                [runId, ...keepIds]
+                `INSERT INTO payroll_runs (period_start, period_end, pay_date, run_by, notes, is_finalized)
+                 VALUES (?, ?, ?, ?, ?, 1)
+                 ON DUPLICATE KEY UPDATE pay_date = VALUES(pay_date), run_by = VALUES(run_by), notes = VALUES(notes),
+                   is_finalized = 1, run_at = CURRENT_TIMESTAMP`,
+                [period_start, period_end, payDate, (run_by || 'teacher').substring(0, 100), notes || null]
             );
-        } else {
-            await connection.execute('DELETE FROM student_paystubs WHERE payroll_run_id = ?', [runId]);
-        }
+            const [[runRow]] = await connection.execute(
+                'SELECT id FROM payroll_runs WHERE period_start = ? AND period_end = ?',
+                [period_start, period_end]
+            );
+            const runId = runRow.id;
 
-        let generated = 0;
-        for (const s of rows) {
-            await connection.execute(`
-                INSERT INTO student_paystubs
-                  (payroll_run_id, student_id, role_title, hourly_rate, regular_hours,
-                   bonus_count, bonus_rate, gross_pay, fed_tax, ss_tax, med_tax,
-                   total_deductions, net_pay, ytd_gross, earnings_lines, tardy_count)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE
-                  role_title = VALUES(role_title), hourly_rate = VALUES(hourly_rate),
-                  regular_hours = VALUES(regular_hours), bonus_count = VALUES(bonus_count),
-                  gross_pay = VALUES(gross_pay), fed_tax = VALUES(fed_tax),
-                  ss_tax = VALUES(ss_tax), med_tax = VALUES(med_tax),
-                  total_deductions = VALUES(total_deductions), net_pay = VALUES(net_pay),
-                  ytd_gross = VALUES(ytd_gross), earnings_lines = VALUES(earnings_lines),
-                  tardy_count = VALUES(tardy_count), generated_at = CURRENT_TIMESTAMP
-            `, [runId, s.student_id, s.role_title, s.hourly_rate, s.regular_hours.toFixed(4),
-                s.bonus_count, ON_TIME_BONUS, s.gross_pay, s.fed_tax, s.ss_tax, s.med_tax,
-                s.total_deductions, s.net_pay, s.ytd_gross, JSON.stringify(s.earnings_lines), s.tardy_count]);
+            // Release this run's own prior claims (if re-running the same
+            // period) so computePayrollForPeriod sees those hours as unpaid
+            // again instead of finding nothing the second time.
+            await connection.execute('UPDATE timesheets SET paid_run_id = NULL WHERE paid_run_id = ?', [runId]);
 
-            if (s.timesheet_ids.length > 0) {
+            const rows = await computePayrollForPeriod(connection, {
+                period_start, period_end,
+                course_ids: Array.isArray(course_ids) ? course_ids : []
+            });
+
+            // Re-running a period only ever inserted/updated rows for students
+            // in the current result -- a student who no longer belongs (wrong
+            // course scoping, now-excluded legacy section, etc.) kept their
+            // stale stub from a prior run instead of being removed. Purge
+            // anyone not in this run's fresh computation before inserting it.
+            const keepIds = rows.map(s => s.student_id);
+            if (keepIds.length > 0) {
                 await connection.execute(
-                    `UPDATE timesheets SET paid_run_id = ? WHERE id IN (${s.timesheet_ids.map(() => '?').join(',')})`,
-                    [runId, ...s.timesheet_ids]
+                    `DELETE FROM student_paystubs WHERE payroll_run_id = ? AND student_id NOT IN (${keepIds.map(() => '?').join(',')})`,
+                    [runId, ...keepIds]
                 );
+            } else {
+                await connection.execute('DELETE FROM student_paystubs WHERE payroll_run_id = ?', [runId]);
             }
-            generated++;
-        }
 
-        await connection.release();
+            let generated = 0;
+            for (const s of rows) {
+                await connection.execute(`
+                    INSERT INTO student_paystubs
+                      (payroll_run_id, student_id, role_title, hourly_rate, regular_hours,
+                       bonus_count, bonus_rate, gross_pay, fed_tax, ss_tax, med_tax,
+                       total_deductions, net_pay, ytd_gross, earnings_lines, tardy_count)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE
+                      role_title = VALUES(role_title), hourly_rate = VALUES(hourly_rate),
+                      regular_hours = VALUES(regular_hours), bonus_count = VALUES(bonus_count),
+                      gross_pay = VALUES(gross_pay), fed_tax = VALUES(fed_tax),
+                      ss_tax = VALUES(ss_tax), med_tax = VALUES(med_tax),
+                      total_deductions = VALUES(total_deductions), net_pay = VALUES(net_pay),
+                      ytd_gross = VALUES(ytd_gross), earnings_lines = VALUES(earnings_lines),
+                      tardy_count = VALUES(tardy_count), generated_at = CURRENT_TIMESTAMP
+                `, [runId, s.student_id, s.role_title, s.hourly_rate, s.regular_hours.toFixed(4),
+                    s.bonus_count, ON_TIME_BONUS, s.gross_pay, s.fed_tax, s.ss_tax, s.med_tax,
+                    s.total_deductions, s.net_pay, s.ytd_gross, JSON.stringify(s.earnings_lines), s.tardy_count]);
+
+                if (s.timesheet_ids.length > 0) {
+                    await connection.execute(
+                        `UPDATE timesheets SET paid_run_id = ? WHERE id IN (${s.timesheet_ids.map(() => '?').join(',')})`,
+                        [runId, ...s.timesheet_ids]
+                    );
+                }
+                generated++;
+            }
+
+            return { runId, generated };
+        });
         res.json({ success: true, payroll_run_id: runId, paystubs_generated: generated });
     } catch (err) {
         console.error(err);
