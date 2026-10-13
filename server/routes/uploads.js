@@ -18,7 +18,7 @@ const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { requireSelfOrStaff, isSelfOrStaffSession } = require('../helpers');
 
 const UPLOADS_ROOT = path.join(__dirname, '..', '..', 'uploads');
@@ -113,12 +113,10 @@ async function canListFolder(req, studentId) {
     const viewerId = req.session?.user?.student_id;
     if (!viewerId) return false;
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(
+        const rows = await withConnection((connection) => connection.execute(
             `SELECT id FROM shared_files WHERE recipient_student_id = ? AND url LIKE ? LIMIT 1`,
             [viewerId, `/uploads/${studentId}/%`]
-        );
-        await connection.release();
+        ).then(([rows]) => rows));
         return rows.length > 0;
     } catch (err) {
         // Table not created yet (nobody has ever shared anything) or a real

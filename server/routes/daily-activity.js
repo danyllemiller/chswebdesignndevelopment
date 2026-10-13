@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { getCurrentSchoolYear } = require('../helpers');
 const { checkRetakeClearance } = require('./gradebook');
 const fs = require('fs').promises;
@@ -56,143 +56,144 @@ router.get('/admin/daily-activity', async (req, res) => {
     const activeStudentFilter = '(s.archived IS NULL OR s.archived = 0) AND s.school_year = ?';
 
     try {
-        const connection = await getDbConnection();
+        const result = await withConnection(async (connection) => {
+            const [roster] = await connection.execute(
+                `SELECT student_id, first_name, last_name, section_id FROM students
+                 WHERE (archived IS NULL OR archived = 0) AND school_year = ?`,
+                [currentYear]
+            );
+            const rosterMap = new Map(roster.map(r => [r.student_id, r]));
 
-        const [roster] = await connection.execute(
-            `SELECT student_id, first_name, last_name, section_id FROM students
-             WHERE (archived IS NULL OR archived = 0) AND school_year = ?`,
-            [currentYear]
-        );
-        const rosterMap = new Map(roster.map(r => [r.student_id, r]));
+            const [submissions] = await connection.execute(
+                `SELECT t.student_id, t.title, t.category, t.chapter, t.timestamp,
+                        s.first_name, s.last_name, s.section_id
+                 FROM turnins t
+                 JOIN students s ON s.student_id = t.student_id
+                 WHERE t.is_submitted = 1 AND DATE(t.timestamp) = ? AND ${activeStudentFilter}
+                 ORDER BY s.section_id, t.timestamp DESC`,
+                [targetDate, currentYear]
+            );
 
-        const [submissions] = await connection.execute(
-            `SELECT t.student_id, t.title, t.category, t.chapter, t.timestamp,
-                    s.first_name, s.last_name, s.section_id
-             FROM turnins t
-             JOIN students s ON s.student_id = t.student_id
-             WHERE t.is_submitted = 1 AND DATE(t.timestamp) = ? AND ${activeStudentFilter}
-             ORDER BY s.section_id, t.timestamp DESC`,
-            [targetDate, currentYear]
-        );
+            // Incomplete pretests/exams -- also a standing list, not date-scoped,
+            // since "started but never finished" doesn't have a natural single day.
+            const [progressRows] = await connection.execute(
+                `SELECT ep.student_id, ep.exam_id, ep.updated_at, s.first_name, s.last_name, s.section_id
+                 FROM exam_progress ep
+                 JOIN students s ON s.student_id = ep.student_id
+                 WHERE ${activeStudentFilter}`,
+                [currentYear]
+            );
+            const [allResponses] = await connection.execute(
+                `SELECT r.student_id, r.exam_id FROM responses r
+                 JOIN students s ON s.student_id = r.student_id
+                 WHERE ${activeStudentFilter}`,
+                [currentYear]
+            );
 
-        // Incomplete pretests/exams -- also a standing list, not date-scoped,
-        // since "started but never finished" doesn't have a natural single day.
-        const [progressRows] = await connection.execute(
-            `SELECT ep.student_id, ep.exam_id, ep.updated_at, s.first_name, s.last_name, s.section_id
-             FROM exam_progress ep
-             JOIN students s ON s.student_id = ep.student_id
-             WHERE ${activeStudentFilter}`,
-            [currentYear]
-        );
-        const [allResponses] = await connection.execute(
-            `SELECT r.student_id, r.exam_id FROM responses r
-             JOIN students s ON s.student_id = r.student_id
-             WHERE ${activeStudentFilter}`,
-            [currentYear]
-        );
-        await connection.release();
-
-        const scoredByStudent = new Map();
-        allResponses.forEach(r => {
-            if (!scoredByStudent.has(r.student_id)) scoredByStudent.set(r.student_id, new Set());
-            scoredByStudent.get(r.student_id).add(r.exam_id);
-        });
-        const incompleteAssessments = progressRows
-            .map(p => {
-                const expected = expectedGradebookExamId(p.exam_id, p.section_id);
-                const alreadyScored = expected && scoredByStudent.get(p.student_id)?.has(expected);
-                return { ...p, expected_exam_id: expected, unverified: expected === null, alreadyScored };
-            })
-            .filter(p => !p.alreadyScored)
-            .sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
-
-        // Retake clearances needed: CS unit-exam attempts where the most
-        // recent attempt was under 80%. This used to re-derive "cleared or
-        // not" itself (attempt count -> requirement, then a bare lookup
-        // against retake_clearances) instead of calling the real gate --
-        // which meant a student who'd already saved qualifying notes/
-        // worksheets still showed up here forever, because the auto-verify
-        // check that would clear them only ever runs on-demand, when THEY
-        // load the exam page (checkRetakeClearance in gradebook.js, via
-        // GET /api/exam/retake-status) -- never when a teacher just views
-        // this list. Calling the same function here runs that exact check
-        // (and its auto-INSERT into retake_clearances) for every candidate
-        // right now, so anyone who's already done the work drops off the
-        // list immediately instead of needing to visit the exam page first.
-        const [attemptRows] = await connection.execute(
-            `SELECT ea.student_id, ea.exam_id, ea.score, ea.total_points,
-                    s.first_name, s.last_name, s.section_id
-             FROM exam_attempts ea
-             JOIN students s ON s.student_id = ea.student_id
-             WHERE ea.exam_id REGEXP '^Unit[0-9]+-Exam$' AND ${activeStudentFilter}
-             ORDER BY ea.student_id, ea.exam_id, ea.attempt_number ASC`,
-            [currentYear]
-        );
-
-        const attemptsByKey = new Map();
-        attemptRows.forEach(r => {
-            const key = `${r.student_id}|${r.exam_id}`;
-            if (!attemptsByKey.has(key)) attemptsByKey.set(key, []);
-            attemptsByKey.get(key).push(r);
-        });
-        const retakeClearancesNeeded = [];
-        for (const attempts of attemptsByKey.values()) {
-            const last = attempts[attempts.length - 1];
-            const pct = Number(last.total_points) > 0 ? (Number(last.score) / Number(last.total_points)) * 100 : 0;
-            if (pct >= 80) continue;
-            const status = await checkRetakeClearance(connection, last.student_id, last.exam_id, attempts);
-            if (status.ok) continue;
-            retakeClearancesNeeded.push({
-                student_id: last.student_id, first_name: last.first_name, last_name: last.last_name,
-                section_id: last.section_id, exam_id: last.exam_id, attempt_number: attempts.length,
-                pct: Math.round(pct), requirement: status.requirement
+            const scoredByStudent = new Map();
+            allResponses.forEach(r => {
+                if (!scoredByStudent.has(r.student_id)) scoredByStudent.set(r.student_id, new Set());
+                scoredByStudent.get(r.student_id).add(r.exam_id);
             });
-        }
+            const incompleteAssessments = progressRows
+                .map(p => {
+                    const expected = expectedGradebookExamId(p.exam_id, p.section_id);
+                    const alreadyScored = expected && scoredByStudent.get(p.student_id)?.has(expected);
+                    return { ...p, expected_exam_id: expected, unverified: expected === null, alreadyScored };
+                })
+                .filter(p => !p.alreadyScored)
+                .sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
 
-        // Unit prerequisite overrides needed: 3+ real attempts on a unit
-        // exam with the current BEST score (what checkUnitPrerequisite in
-        // routes/gradebook.js actually checks, from `responses` -- not just
-        // the latest attempt) still under 60%, permanently blocking the
-        // next unit from ever opening for that student.
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS unit_prereq_overrides (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                student_id VARCHAR(50) NOT NULL,
-                unit_exam_id VARCHAR(100) NOT NULL,
-                cleared_by VARCHAR(100),
-                cleared_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE KEY uniq_override (student_id, unit_exam_id)
-            )
-        `);
-        const [overrideRows] = await connection.execute(`SELECT student_id, unit_exam_id FROM unit_prereq_overrides`);
-        const overrideSet = new Set(overrideRows.map(o => `${o.student_id}|${o.unit_exam_id}`));
+            // Retake clearances needed: CS unit-exam attempts where the most
+            // recent attempt was under 80%. This used to re-derive "cleared or
+            // not" itself (attempt count -> requirement, then a bare lookup
+            // against retake_clearances) instead of calling the real gate --
+            // which meant a student who'd already saved qualifying notes/
+            // worksheets still showed up here forever, because the auto-verify
+            // check that would clear them only ever runs on-demand, when THEY
+            // load the exam page (checkRetakeClearance in gradebook.js, via
+            // GET /api/exam/retake-status) -- never when a teacher just views
+            // this list. Calling the same function here runs that exact check
+            // (and its auto-INSERT into retake_clearances) for every candidate
+            // right now, so anyone who's already done the work drops off the
+            // list immediately instead of needing to visit the exam page first.
+            const [attemptRows] = await connection.execute(
+                `SELECT ea.student_id, ea.exam_id, ea.score, ea.total_points,
+                        s.first_name, s.last_name, s.section_id
+                 FROM exam_attempts ea
+                 JOIN students s ON s.student_id = ea.student_id
+                 WHERE ea.exam_id REGEXP '^Unit[0-9]+-Exam$' AND ${activeStudentFilter}
+                 ORDER BY ea.student_id, ea.exam_id, ea.attempt_number ASC`,
+                [currentYear]
+            );
 
-        const [bestScoreRows] = await connection.execute(
-            `SELECT student_id, exam_id, score, total_points FROM responses WHERE exam_id REGEXP '^Unit[0-9]+-Exam$'`
-        );
-        const bestScoreMap = new Map(bestScoreRows.map(r => [`${r.student_id}|${r.exam_id}`, r]));
-
-        const prereqOverridesNeeded = [];
-        attemptsByKey.forEach((attempts, key) => {
-            if (attempts.length < 3) return;
-            const first = attempts[0];
-            const m = /^Unit(\d+)-Exam$/i.exec(first.exam_id);
-            if (!m) return;
-            const unitNum = parseInt(m[1], 10);
-            if (unitNum >= 7) return; // no Unit8 gate exists to unlock
-
-            const best = bestScoreMap.get(key);
-            const pct = best && Number(best.total_points) > 0 ? (Number(best.score) / Number(best.total_points)) * 100 : 0;
-            if (pct >= 60) return;
-
-            const nextExamId = `Unit${unitNum + 1}-Exam`;
-            if (overrideSet.has(`${first.student_id}|${nextExamId}`)) return;
-
-            prereqOverridesNeeded.push({
-                student_id: first.student_id, first_name: first.first_name, last_name: first.last_name,
-                section_id: first.section_id, exam_id: first.exam_id, next_exam_id: nextExamId,
-                attempts: attempts.length, pct: Math.round(pct)
+            const attemptsByKey = new Map();
+            attemptRows.forEach(r => {
+                const key = `${r.student_id}|${r.exam_id}`;
+                if (!attemptsByKey.has(key)) attemptsByKey.set(key, []);
+                attemptsByKey.get(key).push(r);
             });
+            const retakeClearancesNeeded = [];
+            for (const attempts of attemptsByKey.values()) {
+                const last = attempts[attempts.length - 1];
+                const pct = Number(last.total_points) > 0 ? (Number(last.score) / Number(last.total_points)) * 100 : 0;
+                if (pct >= 80) continue;
+                const status = await checkRetakeClearance(connection, last.student_id, last.exam_id, attempts);
+                if (status.ok) continue;
+                retakeClearancesNeeded.push({
+                    student_id: last.student_id, first_name: last.first_name, last_name: last.last_name,
+                    section_id: last.section_id, exam_id: last.exam_id, attempt_number: attempts.length,
+                    pct: Math.round(pct), requirement: status.requirement
+                });
+            }
+
+            // Unit prerequisite overrides needed: 3+ real attempts on a unit
+            // exam with the current BEST score (what checkUnitPrerequisite in
+            // routes/gradebook.js actually checks, from `responses` -- not just
+            // the latest attempt) still under 60%, permanently blocking the
+            // next unit from ever opening for that student.
+            await connection.execute(`
+                CREATE TABLE IF NOT EXISTS unit_prereq_overrides (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    student_id VARCHAR(50) NOT NULL,
+                    unit_exam_id VARCHAR(100) NOT NULL,
+                    cleared_by VARCHAR(100),
+                    cleared_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY uniq_override (student_id, unit_exam_id)
+                )
+            `);
+            const [overrideRows] = await connection.execute(`SELECT student_id, unit_exam_id FROM unit_prereq_overrides`);
+            const overrideSet = new Set(overrideRows.map(o => `${o.student_id}|${o.unit_exam_id}`));
+
+            const [bestScoreRows] = await connection.execute(
+                `SELECT student_id, exam_id, score, total_points FROM responses WHERE exam_id REGEXP '^Unit[0-9]+-Exam$'`
+            );
+            const bestScoreMap = new Map(bestScoreRows.map(r => [`${r.student_id}|${r.exam_id}`, r]));
+
+            const prereqOverridesNeeded = [];
+            attemptsByKey.forEach((attempts, key) => {
+                if (attempts.length < 3) return;
+                const first = attempts[0];
+                const m = /^Unit(\d+)-Exam$/i.exec(first.exam_id);
+                if (!m) return;
+                const unitNum = parseInt(m[1], 10);
+                if (unitNum >= 7) return; // no Unit8 gate exists to unlock
+
+                const best = bestScoreMap.get(key);
+                const pct = best && Number(best.total_points) > 0 ? (Number(best.score) / Number(best.total_points)) * 100 : 0;
+                if (pct >= 60) return;
+
+                const nextExamId = `Unit${unitNum + 1}-Exam`;
+                if (overrideSet.has(`${first.student_id}|${nextExamId}`)) return;
+
+                prereqOverridesNeeded.push({
+                    student_id: first.student_id, first_name: first.first_name, last_name: first.last_name,
+                    section_id: first.section_id, exam_id: first.exam_id, next_exam_id: nextExamId,
+                    attempts: attempts.length, pct: Math.round(pct)
+                });
+            });
+
+            return { rosterMap, submissions, incompleteAssessments, retakeClearancesNeeded, prereqOverridesNeeded };
         });
 
         // Uploaded files have zero database tracking at all (the dropbox
@@ -205,7 +206,7 @@ router.get('/admin/daily-activity', async (req, res) => {
             const studentDirs = entries.filter(e => e.isDirectory());
             for (const dir of studentDirs) {
                 const studentId = dir.name;
-                const info = rosterMap.get(studentId);
+                const info = result.rosterMap.get(studentId);
                 if (!info) continue; // archived/unknown student -- skip rather than show a blank name
                 const dirPath = path.join(UPLOADS_ROOT, studentId);
                 const files = await fs.readdir(dirPath, { withFileTypes: true });
@@ -230,7 +231,14 @@ router.get('/admin/daily-activity', async (req, res) => {
             console.error('[daily-activity] upload scan failed:', e);
         }
 
-        res.json({ date: targetDate, submissions, uploads, incompleteAssessments, retakeClearancesNeeded, prereqOverridesNeeded });
+        res.json({
+            date: targetDate,
+            submissions: result.submissions,
+            uploads,
+            incompleteAssessments: result.incompleteAssessments,
+            retakeClearancesNeeded: result.retakeClearancesNeeded,
+            prereqOverridesNeeded: result.prereqOverridesNeeded
+        });
     } catch (err) {
         console.error('[daily-activity] failed:', err);
         res.status(500).json({ error: 'Failed to build daily activity report.' });

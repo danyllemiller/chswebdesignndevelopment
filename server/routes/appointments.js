@@ -13,7 +13,7 @@
 //   to anyone who added that query param, no check at all.
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { requireLogin, requireStaff, requireSelfOrStaff, isStaffSession, isSelfOrStaffSession } = require('../helpers');
 
 router.get('/appointments/slots', requireLogin, async (req, res) => {
@@ -21,39 +21,39 @@ router.get('/appointments/slots', requireLogin, async (req, res) => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return res.status(400).json({ error: 'date param required (YYYY-MM-DD)' });
 
     try {
-        const connection = await getDbConnection();
-        const dow = new Date(date + 'T00:00:00').getDay();
-        const [windows] = await connection.execute(
-            'SELECT start_time, end_time, slot_duration FROM office_hours WHERE day_of_week = ? ORDER BY start_time ASC',
-            [dow]
-        );
-        if (windows.length === 0) {
-            await connection.release();
-            return res.json({ slots: [], message: 'No office hours set for this day.' });
-        }
-
-        const slotMap = new Map();
-        for (const w of windows) {
-            const start = new Date(`${date}T${w.start_time}`);
-            const end = new Date(`${date}T${w.end_time}`);
-            const stepMs = Number(w.slot_duration) * 60000;
-            for (let t = start.getTime(); t < end.getTime(); t += stepMs) {
-                const d = new Date(t);
-                const hh = String(d.getHours()).padStart(2, '0');
-                const mm = String(d.getMinutes()).padStart(2, '0');
-                slotMap.set(`${hh}:${mm}`, Number(w.slot_duration));
+        const result = await withConnection(async (connection) => {
+            const dow = new Date(date + 'T00:00:00').getDay();
+            const [windows] = await connection.execute(
+                'SELECT start_time, end_time, slot_duration FROM office_hours WHERE day_of_week = ? ORDER BY start_time ASC',
+                [dow]
+            );
+            if (windows.length === 0) {
+                return { slots: [], message: 'No office hours set for this day.' };
             }
-        }
 
-        const [bookedRows] = await connection.execute(
-            `SELECT TIME_FORMAT(time,'%H:%i') AS t FROM appointments WHERE date = ? AND status != 'denied'`,
-            [date]
-        );
-        const booked = new Set(bookedRows.map(r => r.t));
-        await connection.release();
+            const slotMap = new Map();
+            for (const w of windows) {
+                const start = new Date(`${date}T${w.start_time}`);
+                const end = new Date(`${date}T${w.end_time}`);
+                const stepMs = Number(w.slot_duration) * 60000;
+                for (let t = start.getTime(); t < end.getTime(); t += stepMs) {
+                    const d = new Date(t);
+                    const hh = String(d.getHours()).padStart(2, '0');
+                    const mm = String(d.getMinutes()).padStart(2, '0');
+                    slotMap.set(`${hh}:${mm}`, Number(w.slot_duration));
+                }
+            }
 
-        const times = Array.from(slotMap.keys()).sort();
-        res.json({ slots: times.map(time => ({ time, available: !booked.has(time) })) });
+            const [bookedRows] = await connection.execute(
+                `SELECT TIME_FORMAT(time,'%H:%i') AS t FROM appointments WHERE date = ? AND status != 'denied'`,
+                [date]
+            );
+            const booked = new Set(bookedRows.map(r => r.t));
+
+            const times = Array.from(slotMap.keys()).sort();
+            return { slots: times.map(time => ({ time, available: !booked.has(time) })) };
+        });
+        res.json(result);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch slots' }); }
 });
 
@@ -65,23 +65,22 @@ router.post('/appointments/book', requireSelfOrStaff('student_id'), async (req, 
     if (!studentId || !date || !time) return res.status(400).json({ error: 'student_id, date, and time are required' });
 
     try {
-        const connection = await getDbConnection();
-        const [existing] = await connection.execute('SELECT student_id FROM students WHERE student_id = ? LIMIT 1', [studentId]);
-        if (existing.length === 0) {
-            await connection.release();
-            return res.status(403).json({ error: 'Invalid student' });
-        }
-        try {
-            const [result] = await connection.execute(
-                `INSERT INTO appointments (student_id, date, time, reason, status) VALUES (?, ?, ?, ?, 'pending')`,
-                [studentId, date, time, reason]
-            );
-            await connection.release();
-            res.json({ success: true, appointment_id: result.insertId });
-        } catch (dupErr) {
-            await connection.release();
-            res.status(409).json({ error: 'That time slot is already booked. Please pick another.' });
-        }
+        const outcome = await withConnection(async (connection) => {
+            const [existing] = await connection.execute('SELECT student_id FROM students WHERE student_id = ? LIMIT 1', [studentId]);
+            if (existing.length === 0) {
+                return { status: 403, body: { error: 'Invalid student' } };
+            }
+            try {
+                const [result] = await connection.execute(
+                    `INSERT INTO appointments (student_id, date, time, reason, status) VALUES (?, ?, ?, ?, 'pending')`,
+                    [studentId, date, time, reason]
+                );
+                return { status: 200, body: { success: true, appointment_id: result.insertId } };
+            } catch (dupErr) {
+                return { status: 409, body: { error: 'That time slot is already booked. Please pick another.' } };
+            }
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to book appointment' }); }
 });
 
@@ -92,21 +91,22 @@ router.get('/appointments/requests', async (req, res) => {
     if (role === 'teacher' || role === 'admin') {
         if (!isStaffSession(req)) return res.status(401).json({ error: 'Not authorized.' });
         try {
-            const connection = await getDbConnection();
-            const [rows] = await connection.execute(`
-                SELECT a.id, a.student_id,
-                       COALESCE(CONCAT(s.first_name,' ',s.last_name), a.student_id) AS student_name,
-                       s.section_id,
-                       DATE_FORMAT(a.date,'%Y-%m-%d') AS date,
-                       TIME_FORMAT(a.time,'%H:%i')    AS time,
-                       a.reason, a.status, a.teacher_note,
-                       DATE_FORMAT(a.created_at,'%Y-%m-%d %H:%i') AS created_at
-                FROM appointments a
-                LEFT JOIN students s ON s.student_id = a.student_id
-                ORDER BY a.date ASC, a.time ASC
-            `);
-            await connection.release();
-            res.json({ appointments: rows });
+            const appointments = await withConnection(async (connection) => {
+                const [rows] = await connection.execute(`
+                    SELECT a.id, a.student_id,
+                           COALESCE(CONCAT(s.first_name,' ',s.last_name), a.student_id) AS student_name,
+                           s.section_id,
+                           DATE_FORMAT(a.date,'%Y-%m-%d') AS date,
+                           TIME_FORMAT(a.time,'%H:%i')    AS time,
+                           a.reason, a.status, a.teacher_note,
+                           DATE_FORMAT(a.created_at,'%Y-%m-%d %H:%i') AS created_at
+                    FROM appointments a
+                    LEFT JOIN students s ON s.student_id = a.student_id
+                    ORDER BY a.date ASC, a.time ASC
+                `);
+                return rows;
+            });
+            res.json({ appointments });
         } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch appointments' }); }
         return;
     }
@@ -114,18 +114,19 @@ router.get('/appointments/requests', async (req, res) => {
     if (!studentId) return res.status(400).json({ error: 'student_id required' });
     if (!isSelfOrStaffSession(req, studentId)) return res.status(401).json({ error: 'Not authorized.' });
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(
-            `SELECT id, student_id,
-                    DATE_FORMAT(date,'%Y-%m-%d') AS date,
-                    TIME_FORMAT(time,'%H:%i')    AS time,
-                    reason, status, teacher_note,
-                    DATE_FORMAT(created_at,'%Y-%m-%d %H:%i') AS created_at
-             FROM appointments WHERE student_id = ? ORDER BY date ASC, time ASC`,
-            [studentId]
-        );
-        await connection.release();
-        res.json({ appointments: rows });
+        const appointments = await withConnection(async (connection) => {
+            const [rows] = await connection.execute(
+                `SELECT id, student_id,
+                        DATE_FORMAT(date,'%Y-%m-%d') AS date,
+                        TIME_FORMAT(time,'%H:%i')    AS time,
+                        reason, status, teacher_note,
+                        DATE_FORMAT(created_at,'%Y-%m-%d %H:%i') AS created_at
+                 FROM appointments WHERE student_id = ? ORDER BY date ASC, time ASC`,
+                [studentId]
+            );
+            return rows;
+        });
+        res.json({ appointments });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch appointments' }); }
 });
 
@@ -137,44 +138,46 @@ router.post('/appointments/update-status', requireStaff, async (req, res) => {
         return res.status(400).json({ error: 'id and valid status required' });
     }
     try {
-        const connection = await getDbConnection();
-        const [result] = await connection.execute(
-            'UPDATE appointments SET status = ?, teacher_note = ? WHERE id = ?',
-            [status, teacherNote, id]
-        );
-        await connection.release();
-        res.json({ success: result.affectedRows > 0 });
+        const affectedRows = await withConnection(async (connection) => {
+            const [result] = await connection.execute(
+                'UPDATE appointments SET status = ?, teacher_note = ? WHERE id = ?',
+                [status, teacherNote, id]
+            );
+            return result.affectedRows;
+        });
+        res.json({ success: affectedRows > 0 });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update status' }); }
 });
 
 router.get('/appointments/office-hours', requireLogin, async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(
-            'SELECT id, day_of_week, start_time, end_time, slot_duration FROM office_hours ORDER BY day_of_week ASC, start_time ASC'
-        );
-        await connection.release();
-        res.json({ hours: rows });
+        const hours = await withConnection(async (connection) => {
+            const [rows] = await connection.execute(
+                'SELECT id, day_of_week, start_time, end_time, slot_duration FROM office_hours ORDER BY day_of_week ASC, start_time ASC'
+            );
+            return rows;
+        });
+        res.json({ hours });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch office hours' }); }
 });
 
 router.post('/appointments/office-hours', requireStaff, async (req, res) => {
     const hours = Array.isArray(req.body?.hours) ? req.body.hours : [];
     try {
-        const connection = await getDbConnection();
-        await connection.execute('DELETE FROM office_hours');
-        for (const h of hours) {
-            const dow = parseInt(h.day_of_week, 10) || 0;
-            const start = h.start_time || '08:00';
-            const end = h.end_time || '09:00';
-            const duration = parseInt(h.slot_duration, 10) || 15;
-            if (start >= end) continue;
-            await connection.execute(
-                'INSERT INTO office_hours (day_of_week, start_time, end_time, slot_duration) VALUES (?, ?, ?, ?)',
-                [dow, start, end, duration]
-            );
-        }
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute('DELETE FROM office_hours');
+            for (const h of hours) {
+                const dow = parseInt(h.day_of_week, 10) || 0;
+                const start = h.start_time || '08:00';
+                const end = h.end_time || '09:00';
+                const duration = parseInt(h.slot_duration, 10) || 15;
+                if (start >= end) continue;
+                await connection.execute(
+                    'INSERT INTO office_hours (day_of_week, start_time, end_time, slot_duration) VALUES (?, ?, ?, ?)',
+                    [dow, start, end, duration]
+                );
+            }
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save office hours' }); }
 });

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { requireLogin, requireSelfOrStaff } = require('../helpers');
 
 const CREATE_CLOUDS_SQL = `
@@ -57,19 +57,20 @@ router.post('/admin/wordcloud/create', async (req, res) => {
   }
   const maxWords = Math.min(Math.max(parseInt(max_words, 10) || 3, 1), 10);
   try {
-    const connection = await getDbConnection();
-    await ensureTables(connection);
-    // Only one live word cloud per section at a time, same convention as polls.
-    await connection.execute(
-      'UPDATE class_wordclouds SET active = 0, closed_at = NOW() WHERE section_id = ? AND active = 1',
-      [section_id]
-    );
-    const [result] = await connection.execute(
-      'INSERT INTO class_wordclouds (section_id, prompt, max_words, active) VALUES (?, ?, ?, 1)',
-      [section_id, String(prompt).trim(), maxWords]
-    );
-    await connection.release();
-    res.json({ success: true, id: result.insertId });
+    const id = await withConnection(async (connection) => {
+      await ensureTables(connection);
+      // Only one live word cloud per section at a time, same convention as polls.
+      await connection.execute(
+        'UPDATE class_wordclouds SET active = 0, closed_at = NOW() WHERE section_id = ? AND active = 1',
+        [section_id]
+      );
+      const [result] = await connection.execute(
+        'INSERT INTO class_wordclouds (section_id, prompt, max_words, active) VALUES (?, ?, ?, 1)',
+        [section_id, String(prompt).trim(), maxWords]
+      );
+      return result.insertId;
+    });
+    res.json({ success: true, id });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to create word cloud' });
@@ -81,10 +82,10 @@ router.post('/admin/wordcloud/close', async (req, res) => {
   const { id } = req.body || {};
   if (!id) return res.status(400).json({ error: 'id is required' });
   try {
-    const connection = await getDbConnection();
-    await ensureTables(connection);
-    await connection.execute('UPDATE class_wordclouds SET active = 0, closed_at = NOW() WHERE id = ?', [id]);
-    await connection.release();
+    await withConnection(async (connection) => {
+      await ensureTables(connection);
+      await connection.execute('UPDATE class_wordclouds SET active = 0, closed_at = NOW() WHERE id = ?', [id]);
+    });
     res.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -97,10 +98,10 @@ router.post('/admin/wordcloud/clear', async (req, res) => {
   const { id } = req.body || {};
   if (!id) return res.status(400).json({ error: 'id is required' });
   try {
-    const connection = await getDbConnection();
-    await ensureTables(connection);
-    await connection.execute('DELETE FROM class_wordcloud_entries WHERE wordcloud_id = ?', [id]);
-    await connection.release();
+    await withConnection(async (connection) => {
+      await ensureTables(connection);
+      await connection.execute('DELETE FROM class_wordcloud_entries WHERE wordcloud_id = ?', [id]);
+    });
     res.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -113,26 +114,30 @@ router.get('/admin/wordcloud/results', async (req, res) => {
   const id = req.query.id;
   if (!id) return res.status(400).json({ error: 'id is required' });
   try {
-    const connection = await getDbConnection();
-    await ensureTables(connection);
-    const [cloudRows] = await connection.execute('SELECT * FROM class_wordclouds WHERE id = ? LIMIT 1', [id]);
-    if (cloudRows.length === 0) { await connection.release(); return res.status(404).json({ error: 'Word cloud not found' }); }
-    const cloud = cloudRowToJson(cloudRows[0]);
-    const [wordRows] = await connection.execute(
-      'SELECT word, COUNT(*) AS cnt FROM class_wordcloud_entries WHERE wordcloud_id = ? GROUP BY word ORDER BY cnt DESC, word ASC',
-      [id]
-    );
-    const [studentRows] = await connection.execute(
-      'SELECT COUNT(DISTINCT student_id) AS cnt FROM class_wordcloud_entries WHERE wordcloud_id = ?',
-      [id]
-    );
-    await connection.release();
-    res.json({
-      wordcloud: cloud,
-      words: wordRows.map(r => ({ word: r.word, count: r.cnt })),
-      totalEntries: wordRows.reduce((s, r) => s + r.cnt, 0),
-      totalStudents: studentRows[0]?.cnt || 0
+    const outcome = await withConnection(async (connection) => {
+      await ensureTables(connection);
+      const [cloudRows] = await connection.execute('SELECT * FROM class_wordclouds WHERE id = ? LIMIT 1', [id]);
+      if (cloudRows.length === 0) return { status: 404, body: { error: 'Word cloud not found' } };
+      const cloud = cloudRowToJson(cloudRows[0]);
+      const [wordRows] = await connection.execute(
+        'SELECT word, COUNT(*) AS cnt FROM class_wordcloud_entries WHERE wordcloud_id = ? GROUP BY word ORDER BY cnt DESC, word ASC',
+        [id]
+      );
+      const [studentRows] = await connection.execute(
+        'SELECT COUNT(DISTINCT student_id) AS cnt FROM class_wordcloud_entries WHERE wordcloud_id = ?',
+        [id]
+      );
+      return {
+        status: 200,
+        body: {
+          wordcloud: cloud,
+          words: wordRows.map(r => ({ word: r.word, count: r.cnt })),
+          totalEntries: wordRows.reduce((s, r) => s + r.cnt, 0),
+          totalStudents: studentRows[0]?.cnt || 0
+        }
+      };
     });
+    res.status(outcome.status).json(outcome.body);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch word cloud results' });
@@ -153,24 +158,25 @@ router.get('/student/wordcloud/active', requireLogin, async (req, res) => {
     return res.status(401).json({ error: 'Not authorized.' });
   }
   try {
-    const connection = await getDbConnection();
-    await ensureTables(connection);
-    const [rows] = await connection.execute(
-      'SELECT * FROM class_wordclouds WHERE section_id = ? AND active = 1 ORDER BY created_at DESC LIMIT 1',
-      [section_id]
-    );
-    if (rows.length === 0) { await connection.release(); return res.json({ wordcloud: null }); }
-    const cloud = cloudRowToJson(rows[0]);
-    let myWords = [];
-    if (student_id) {
-      const [wordRows] = await connection.execute(
-        'SELECT word FROM class_wordcloud_entries WHERE wordcloud_id = ? AND student_id = ? ORDER BY submitted_at ASC',
-        [cloud.id, student_id]
+    const result = await withConnection(async (connection) => {
+      await ensureTables(connection);
+      const [rows] = await connection.execute(
+        'SELECT * FROM class_wordclouds WHERE section_id = ? AND active = 1 ORDER BY created_at DESC LIMIT 1',
+        [section_id]
       );
-      myWords = wordRows.map(r => r.word);
-    }
-    await connection.release();
-    res.json({ wordcloud: cloud, myWords, remaining: Math.max(cloud.max_words - myWords.length, 0) });
+      if (rows.length === 0) return { wordcloud: null };
+      const cloud = cloudRowToJson(rows[0]);
+      let myWords = [];
+      if (student_id) {
+        const [wordRows] = await connection.execute(
+          'SELECT word FROM class_wordcloud_entries WHERE wordcloud_id = ? AND student_id = ? ORDER BY submitted_at ASC',
+          [cloud.id, student_id]
+        );
+        myWords = wordRows.map(r => r.word);
+      }
+      return { wordcloud: cloud, myWords, remaining: Math.max(cloud.max_words - myWords.length, 0) };
+    });
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to check active word cloud' });
@@ -185,38 +191,36 @@ router.post('/student/wordcloud/submit', requireSelfOrStaff(), async (req, res) 
     return res.status(400).json({ error: 'wordcloud_id, student_id, and word are required' });
   }
   try {
-    const connection = await getDbConnection();
-    await ensureTables(connection);
-    const [cloudRows] = await connection.execute(
-      'SELECT active, max_words FROM class_wordclouds WHERE id = ? LIMIT 1',
-      [wordcloud_id]
-    );
-    if (cloudRows.length === 0 || !cloudRows[0].active) {
-      await connection.release();
-      return res.status(409).json({ error: 'This word cloud is no longer active' });
-    }
-    const [countRows] = await connection.execute(
-      'SELECT COUNT(*) AS cnt FROM class_wordcloud_entries WHERE wordcloud_id = ? AND student_id = ?',
-      [wordcloud_id, student_id]
-    );
-    if ((countRows[0]?.cnt || 0) >= cloudRows[0].max_words) {
-      await connection.release();
-      return res.status(409).json({ error: `You've already submitted your ${cloudRows[0].max_words} word(s).` });
-    }
-    try {
-      await connection.execute(
-        'INSERT INTO class_wordcloud_entries (wordcloud_id, student_id, word) VALUES (?, ?, ?)',
-        [wordcloud_id, student_id, normalized]
+    const outcome = await withConnection(async (connection) => {
+      await ensureTables(connection);
+      const [cloudRows] = await connection.execute(
+        'SELECT active, max_words FROM class_wordclouds WHERE id = ? LIMIT 1',
+        [wordcloud_id]
       );
-    } catch (dupErr) {
-      if (dupErr.code === 'ER_DUP_ENTRY') {
-        await connection.release();
-        return res.status(409).json({ error: 'You already submitted that word' });
+      if (cloudRows.length === 0 || !cloudRows[0].active) {
+        return { status: 409, body: { error: 'This word cloud is no longer active' } };
       }
-      throw dupErr;
-    }
-    await connection.release();
-    res.json({ success: true, word: normalized });
+      const [countRows] = await connection.execute(
+        'SELECT COUNT(*) AS cnt FROM class_wordcloud_entries WHERE wordcloud_id = ? AND student_id = ?',
+        [wordcloud_id, student_id]
+      );
+      if ((countRows[0]?.cnt || 0) >= cloudRows[0].max_words) {
+        return { status: 409, body: { error: `You've already submitted your ${cloudRows[0].max_words} word(s).` } };
+      }
+      try {
+        await connection.execute(
+          'INSERT INTO class_wordcloud_entries (wordcloud_id, student_id, word) VALUES (?, ?, ?)',
+          [wordcloud_id, student_id, normalized]
+        );
+      } catch (dupErr) {
+        if (dupErr.code === 'ER_DUP_ENTRY') {
+          return { status: 409, body: { error: 'You already submitted that word' } };
+        }
+        throw dupErr;
+      }
+      return { status: 200, body: { success: true, word: normalized } };
+    });
+    res.status(outcome.status).json(outcome.body);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to submit word' });

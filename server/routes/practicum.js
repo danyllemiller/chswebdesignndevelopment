@@ -3,7 +3,7 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { requireStaff } = require('../helpers');
 
 // Monique's site-maintenance practicum: a handful of real, one-time fixes
@@ -106,14 +106,12 @@ function isAuthorized(req) {
 router.get('/practicum/status', async (req, res) => {
     if (!isAuthorized(req)) return res.status(401).json({ error: 'Not authorized.' });
     try {
-        const connection = await getDbConnection();
         const examIds = Object.values(TASKS).map(t => t.examId);
         const placeholders = examIds.map(() => '?').join(', ');
-        const [rows] = await connection.execute(
+        const rows = await withConnection((connection) => connection.execute(
             `SELECT exam_id, score, total_points FROM responses WHERE student_id = ? AND exam_id IN (${placeholders})`,
             [MONIQUE_STUDENT_ID, ...examIds]
-        );
-        await connection.release();
+        ).then(([rows]) => rows));
         const doneByExamId = new Set(rows.filter(r => Number(r.score) > 0).map(r => r.exam_id));
         const status = {};
         Object.entries(TASKS).forEach(([taskId, t]) => {
@@ -136,23 +134,23 @@ router.post('/practicum/complete-task', async (req, res) => {
     if (!verified) return res.json({ success: false, verified: false });
 
     try {
-        const connection = await getDbConnection();
-        // A responses row alone never shows up in either gradebook -- both
-        // the admin and student gradebook views build their assignment
-        // columns from the exams catalog, then join responses onto it. A
-        // task without a matching exams row is graded but invisible to
-        // everyone. Mirrors the same INSERT IGNORE admin/save-grade already
-        // does when a teacher grades something not yet in the catalog.
-        await connection.execute(
-            `INSERT IGNORE INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?)`,
-            [task.examId, task.title, task.points, PRACTICUM_COURSE_ID]
-        );
-        await connection.execute(
-            `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW())
-             ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
-            [MONIQUE_STUDENT_ID, task.examId, task.points, task.points]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            // A responses row alone never shows up in either gradebook -- both
+            // the admin and student gradebook views build their assignment
+            // columns from the exams catalog, then join responses onto it. A
+            // task without a matching exams row is graded but invisible to
+            // everyone. Mirrors the same INSERT IGNORE admin/save-grade already
+            // does when a teacher grades something not yet in the catalog.
+            await connection.execute(
+                `INSERT IGNORE INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?)`,
+                [task.examId, task.title, task.points, PRACTICUM_COURSE_ID]
+            );
+            await connection.execute(
+                `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW())
+                 ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
+                [MONIQUE_STUDENT_ID, task.examId, task.points, task.points]
+            );
+        });
         res.json({ success: true, verified: true, points: task.points });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to record score' }); }
 });
