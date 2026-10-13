@@ -33,9 +33,17 @@ function renderUnitChart(unit) {
     // One bar per category (the cumulative "All Periods" number) -- the
     // per-period breakdown lives in the hover tooltip instead of as
     // separate bars, since that's what the row above the chart already is.
+    // A course with only one real period (WD1's A1, WD2's B2) never gets
+    // an "All Periods" row at all (see showAllRow in the admin route) --
+    // this used to bail out entirely whenever that row was missing, which
+    // left the chart blank for WD1/WD2 on every unit even though the table
+    // next to it had real numbers. Falls back to that single period's own
+    // row instead of requiring an aggregate that can't exist yet.
     const periods = unit.periods.filter(p => p.period !== 'All');
-    const allRow = unit.periods.find(p => p.period === 'All');
+    const hasAllRow = unit.periods.some(p => p.period === 'All');
+    const allRow = unit.periods.find(p => p.period === 'All') || (periods.length === 1 ? periods[0] : null);
     if (!allRow || periods.length === 0) return;
+    const summaryLabel = hasAllRow ? 'All Periods' : `Period ${allRow.period}`;
 
     const categories = [
         { label: 'Pre-Test', color: 'rgba(108,117,125,0.75)', value: allRow.pretest.avgPercent, key: 'pretest' },
@@ -63,14 +71,19 @@ function renderUnitChart(unit) {
                 tooltip: {
                     callbacks: {
                         title: (items) => categories[items[0].dataIndex].label,
-                        label: (item) => `All Periods: ${item.parsed.y ?? '—'}%`,
-                        afterBody: (items) => {
+                        label: (item) => `${summaryLabel}: ${item.parsed.y ?? '—'}%`,
+                        // Only worth a per-period breakdown line when the main
+                        // bar is a real multi-period aggregate -- when it's
+                        // already just the one period (the fallback above),
+                        // the label line already says so, so repeating it here
+                        // would just show the same number twice.
+                        afterBody: hasAllRow ? (items) => {
                             const key = categories[items[0].dataIndex].key;
                             return periods.map(p => {
                                 const val = key === 'pretest' ? p.pretest.avgPercent : p.examAttempts[key].avgPercent;
                                 return `Period ${p.period}: ${val !== null && val !== undefined ? val + '%' : '—'}`;
                             });
-                        }
+                        } : undefined
                     }
                 }
             }
