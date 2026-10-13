@@ -13,7 +13,7 @@ const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { requireSelfOrStaff, requireStaff } = require('../helpers');
 const { QUARTER_BOUNDARIES } = require('../tardyLogic');
 
@@ -448,35 +448,36 @@ router.get('/student/budget-game/state', requireSelfOrStaff(), async (req, res) 
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        await syncRealPay(connection, student_id);
+        const result = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            await syncRealPay(connection, student_id);
 
-        const [[state]] = await connection.execute(
-            'SELECT * FROM budget_game_state WHERE student_id = ?', [student_id]
-        );
-        const [txns] = await connection.execute(
-            'SELECT type, description, amount, balance_after, created_at FROM budget_game_transactions WHERE student_id = ? ORDER BY id DESC LIMIT 25',
-            [student_id]
-        );
+            const [[state]] = await connection.execute(
+                'SELECT * FROM budget_game_state WHERE student_id = ?', [student_id]
+            );
+            const [txns] = await connection.execute(
+                'SELECT type, description, amount, balance_after, created_at FROM budget_game_transactions WHERE student_id = ? ORDER BY id DESC LIMIT 25',
+                [student_id]
+            );
 
-        const billsPaidThisPeriod = state.bills_paid_through_paystub_id === state.last_synced_paystub_id
-            && state.last_synced_paystub_id !== null;
-        const store = await getStoreCatalog(connection);
-        const { bills, total: billsTotal } = await computeBillsForStudent(connection, student_id);
+            const billsPaidThisPeriod = state.bills_paid_through_paystub_id === state.last_synced_paystub_id
+                && state.last_synced_paystub_id !== null;
+            const store = await getStoreCatalog(connection);
+            const { bills, total: billsTotal } = await computeBillsForStudent(connection, student_id);
 
-        await connection.release();
-        res.json({
-            checking: Number(state.checking_balance),
-            savings: Number(state.savings_balance),
-            invested: Number(state.invested_balance),
-            net_worth: round2(Number(state.checking_balance) + Number(state.savings_balance) + Number(state.invested_balance)),
-            bills,
-            bills_total: billsTotal,
-            bills_paid_this_period: billsPaidThisPeriod,
-            store,
-            transactions: txns
+            return {
+                checking: Number(state.checking_balance),
+                savings: Number(state.savings_balance),
+                invested: Number(state.invested_balance),
+                net_worth: round2(Number(state.checking_balance) + Number(state.savings_balance) + Number(state.invested_balance)),
+                bills,
+                bills_total: billsTotal,
+                bills_paid_this_period: billsPaidThisPeriod,
+                store,
+                transactions: txns
+            };
         });
+        res.json(result);
     } catch (err) {
         console.error('[budget-game] state error:', err);
         res.status(500).json({ error: 'Failed to load budget game state' });
@@ -487,33 +488,32 @@ router.post('/student/budget-game/pay-bills', requireSelfOrStaff(), async (req, 
     const { student_id } = req.body || {};
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        const [[state]] = await connection.execute(
-            'SELECT * FROM budget_game_state WHERE student_id = ?', [student_id]
-        );
-        if (!state) { await connection.release(); return res.status(400).json({ error: 'No game state yet -- open the game first.' }); }
+        const outcome = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            const [[state]] = await connection.execute(
+                'SELECT * FROM budget_game_state WHERE student_id = ?', [student_id]
+            );
+            if (!state) return { status: 400, body: { error: 'No game state yet -- open the game first.' } };
 
-        if (state.bills_paid_through_paystub_id === state.last_synced_paystub_id && state.last_synced_paystub_id !== null) {
-            await connection.release();
-            return res.status(400).json({ error: 'Bills for this period are already paid.' });
-        }
+            if (state.bills_paid_through_paystub_id === state.last_synced_paystub_id && state.last_synced_paystub_id !== null) {
+                return { status: 400, body: { error: 'Bills for this period are already paid.' } };
+            }
 
-        const { bills, total: billsTotal } = await computeBillsForStudent(connection, student_id);
-        const checking = Number(state.checking_balance);
-        if (checking < billsTotal) {
-            await connection.release();
-            return res.status(400).json({ error: `You need $${billsTotal.toFixed(2)} to cover this period's bills, but only have $${checking.toFixed(2)}.` });
-        }
+            const { bills, total: billsTotal } = await computeBillsForStudent(connection, student_id);
+            const checking = Number(state.checking_balance);
+            if (checking < billsTotal) {
+                return { status: 400, body: { error: `You need $${billsTotal.toFixed(2)} to cover this period's bills, but only have $${checking.toFixed(2)}.` } };
+            }
 
-        const newChecking = round2(checking - billsTotal);
-        await connection.execute(
-            `UPDATE budget_game_state SET checking_balance = ?, bills_paid_through_paystub_id = ? WHERE student_id = ?`,
-            [newChecking, state.last_synced_paystub_id, student_id]
-        );
-        await logTxn(connection, student_id, 'bill', `Paid bills (${bills.map(b => b.label).join(', ')})`, -billsTotal, newChecking);
-        await connection.release();
-        res.json({ success: true, checking: newChecking });
+            const newChecking = round2(checking - billsTotal);
+            await connection.execute(
+                `UPDATE budget_game_state SET checking_balance = ?, bills_paid_through_paystub_id = ? WHERE student_id = ?`,
+                [newChecking, state.last_synced_paystub_id, student_id]
+            );
+            await logTxn(connection, student_id, 'bill', `Paid bills (${bills.map(b => b.label).join(', ')})`, -billsTotal, newChecking);
+            return { status: 200, body: { success: true, checking: newChecking } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error('[budget-game] pay-bills error:', err);
         res.status(500).json({ error: 'Failed to pay bills' });
@@ -524,27 +524,27 @@ router.post('/student/budget-game/buy', requireSelfOrStaff(), async (req, res) =
     const { student_id, item_key } = req.body || {};
     if (!student_id || !item_key) return res.status(400).json({ error: 'student_id and item_key required' });
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
+        const outcome = await withConnection(async (connection) => {
+            await ensureTables(connection);
 
-        const item = await getActiveItemByKey(connection, item_key);
-        if (!item) { await connection.release(); return res.status(400).json({ error: 'Unknown item' }); }
+            const item = await getActiveItemByKey(connection, item_key);
+            if (!item) return { status: 400, body: { error: 'Unknown item' } };
 
-        const [[state]] = await connection.execute(
-            'SELECT * FROM budget_game_state WHERE student_id = ?', [student_id]
-        );
-        if (!state) { await connection.release(); return res.status(400).json({ error: 'No game state yet -- open the game first.' }); }
+            const [[state]] = await connection.execute(
+                'SELECT * FROM budget_game_state WHERE student_id = ?', [student_id]
+            );
+            if (!state) return { status: 400, body: { error: 'No game state yet -- open the game first.' } };
 
-        const checking = Number(state.checking_balance);
-        if (checking < item.price) {
-            await connection.release();
-            return res.status(400).json({ error: `${item.label} costs $${item.price.toFixed(2)}, but you only have $${checking.toFixed(2)} in checking.` });
-        }
-        const newChecking = round2(checking - item.price);
-        await connection.execute('UPDATE budget_game_state SET checking_balance = ? WHERE student_id = ?', [newChecking, student_id]);
-        await logTxn(connection, student_id, 'purchase', `Bought ${item.label}`, -item.price, newChecking);
-        await connection.release();
-        res.json({ success: true, checking: newChecking });
+            const checking = Number(state.checking_balance);
+            if (checking < item.price) {
+                return { status: 400, body: { error: `${item.label} costs $${item.price.toFixed(2)}, but you only have $${checking.toFixed(2)} in checking.` } };
+            }
+            const newChecking = round2(checking - item.price);
+            await connection.execute('UPDATE budget_game_state SET checking_balance = ? WHERE student_id = ?', [newChecking, student_id]);
+            await logTxn(connection, student_id, 'purchase', `Bought ${item.label}`, -item.price, newChecking);
+            return { status: 200, body: { success: true, checking: newChecking } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error('[budget-game] buy error:', err);
         res.status(500).json({ error: 'Failed to complete purchase' });
@@ -560,43 +560,44 @@ router.post('/student/budget-game/transfer', requireSelfOrStaff(), async (req, r
     if (!validDirections.includes(direction)) return res.status(400).json({ error: 'Invalid direction' });
 
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        const [[state]] = await connection.execute(
-            'SELECT * FROM budget_game_state WHERE student_id = ?', [student_id]
-        );
-        if (!state) { await connection.release(); return res.status(400).json({ error: 'No game state yet -- open the game first.' }); }
+        const outcome = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            const [[state]] = await connection.execute(
+                'SELECT * FROM budget_game_state WHERE student_id = ?', [student_id]
+            );
+            if (!state) return { status: 400, body: { error: 'No game state yet -- open the game first.' } };
 
-        let checking = Number(state.checking_balance);
-        let savings = Number(state.savings_balance);
-        let invested = Number(state.invested_balance);
-        let txnLabel, txnAmount, txnBalanceAfter;
+            let checking = Number(state.checking_balance);
+            let savings = Number(state.savings_balance);
+            let invested = Number(state.invested_balance);
+            let txnLabel, txnAmount, txnBalanceAfter;
 
-        if (direction === 'to_savings') {
-            if (checking < amt) { await connection.release(); return res.status(400).json({ error: `You only have $${checking.toFixed(2)} in checking.` }); }
-            checking = round2(checking - amt); savings = round2(savings + amt);
-            txnLabel = 'Moved to savings'; txnAmount = -amt; txnBalanceAfter = checking;
-        } else if (direction === 'from_savings') {
-            if (savings < amt) { await connection.release(); return res.status(400).json({ error: `You only have $${savings.toFixed(2)} in savings.` }); }
-            savings = round2(savings - amt); checking = round2(checking + amt);
-            txnLabel = 'Moved from savings'; txnAmount = amt; txnBalanceAfter = checking;
-        } else if (direction === 'to_invest') {
-            if (checking < amt) { await connection.release(); return res.status(400).json({ error: `You only have $${checking.toFixed(2)} in checking.` }); }
-            checking = round2(checking - amt); invested = round2(invested + amt);
-            txnLabel = 'Invested'; txnAmount = -amt; txnBalanceAfter = checking;
-        } else {
-            if (invested < amt) { await connection.release(); return res.status(400).json({ error: `You only have $${invested.toFixed(2)} invested.` }); }
-            invested = round2(invested - amt); checking = round2(checking + amt);
-            txnLabel = 'Cashed out investment'; txnAmount = amt; txnBalanceAfter = checking;
-        }
+            if (direction === 'to_savings') {
+                if (checking < amt) return { status: 400, body: { error: `You only have $${checking.toFixed(2)} in checking.` } };
+                checking = round2(checking - amt); savings = round2(savings + amt);
+                txnLabel = 'Moved to savings'; txnAmount = -amt; txnBalanceAfter = checking;
+            } else if (direction === 'from_savings') {
+                if (savings < amt) return { status: 400, body: { error: `You only have $${savings.toFixed(2)} in savings.` } };
+                savings = round2(savings - amt); checking = round2(checking + amt);
+                txnLabel = 'Moved from savings'; txnAmount = amt; txnBalanceAfter = checking;
+            } else if (direction === 'to_invest') {
+                if (checking < amt) return { status: 400, body: { error: `You only have $${checking.toFixed(2)} in checking.` } };
+                checking = round2(checking - amt); invested = round2(invested + amt);
+                txnLabel = 'Invested'; txnAmount = -amt; txnBalanceAfter = checking;
+            } else {
+                if (invested < amt) return { status: 400, body: { error: `You only have $${invested.toFixed(2)} invested.` } };
+                invested = round2(invested - amt); checking = round2(checking + amt);
+                txnLabel = 'Cashed out investment'; txnAmount = amt; txnBalanceAfter = checking;
+            }
 
-        await connection.execute(
-            'UPDATE budget_game_state SET checking_balance = ?, savings_balance = ?, invested_balance = ? WHERE student_id = ?',
-            [checking, savings, invested, student_id]
-        );
-        await logTxn(connection, student_id, direction, `${txnLabel} ($${amt.toFixed(2)})`, txnAmount, txnBalanceAfter);
-        await connection.release();
-        res.json({ success: true, checking, savings, invested });
+            await connection.execute(
+                'UPDATE budget_game_state SET checking_balance = ?, savings_balance = ?, invested_balance = ? WHERE student_id = ?',
+                [checking, savings, invested, student_id]
+            );
+            await logTxn(connection, student_id, direction, `${txnLabel} ($${amt.toFixed(2)})`, txnAmount, txnBalanceAfter);
+            return { status: 200, body: { success: true, checking, savings, invested } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error('[budget-game] transfer error:', err);
         res.status(500).json({ error: 'Failed to complete transfer' });
@@ -608,10 +609,10 @@ router.get('/student/budget-game/card', requireSelfOrStaff(), async (req, res) =
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        const card = await ensureCard(connection, student_id);
-        await connection.release();
+        const card = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            return ensureCard(connection, student_id);
+        });
         res.json({
             card_number: card.card_number, card_name: card.card_name,
             expiry: card.expiry, cvv: card.cvv
@@ -629,21 +630,22 @@ router.get('/student/budget-game/cart', requireSelfOrStaff(), async (req, res) =
         return res.status(400).json({ error: 'student_id and a valid store (groceries or mall) are required' });
     }
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        const [rows] = await connection.execute(
-            `SELECT c.item_key, c.quantity, i.label, i.price, i.image_url, i.category, i.active
-             FROM budget_game_cart_items c
-             JOIN budget_game_store_items i ON i.item_key = c.item_key
-             WHERE c.student_id = ?`,
-            [student_id]
-        );
-        const items = rows
-            .filter(r => storeForCategory(r.category) === store)
-            .map(r => ({ key: r.item_key, label: r.label, price: Number(r.price), image: r.image_url, category: r.category, quantity: r.quantity, active: !!r.active }));
-        const subtotal = round2(items.reduce((sum, it) => sum + (it.active ? it.price * it.quantity : 0), 0));
-        await connection.release();
-        res.json({ items, subtotal });
+        const result = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            const [rows] = await connection.execute(
+                `SELECT c.item_key, c.quantity, i.label, i.price, i.image_url, i.category, i.active
+                 FROM budget_game_cart_items c
+                 JOIN budget_game_store_items i ON i.item_key = c.item_key
+                 WHERE c.student_id = ?`,
+                [student_id]
+            );
+            const items = rows
+                .filter(r => storeForCategory(r.category) === store)
+                .map(r => ({ key: r.item_key, label: r.label, price: Number(r.price), image: r.image_url, category: r.category, quantity: r.quantity, active: !!r.active }));
+            const subtotal = round2(items.reduce((sum, it) => sum + (it.active ? it.price * it.quantity : 0), 0));
+            return { items, subtotal };
+        });
+        res.json(result);
     } catch (err) {
         console.error('[budget-game] cart error:', err);
         res.status(500).json({ error: 'Failed to load cart' });
@@ -656,17 +658,18 @@ router.post('/student/budget-game/cart/add', requireSelfOrStaff(), async (req, r
     const quantity = Math.max(1, Math.floor(Number(req.body?.quantity) || 1));
     if (!student_id || !item_key) return res.status(400).json({ error: 'student_id and item_key required' });
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        const item = await getActiveItemByKey(connection, item_key);
-        if (!item) { await connection.release(); return res.status(400).json({ error: 'Unknown item' }); }
-        await connection.execute(
-            `INSERT INTO budget_game_cart_items (student_id, item_key, quantity) VALUES (?, ?, ?)
-             ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)`,
-            [student_id, item_key, quantity]
-        );
-        await connection.release();
-        res.json({ success: true });
+        const outcome = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            const item = await getActiveItemByKey(connection, item_key);
+            if (!item) return { status: 400, body: { error: 'Unknown item' } };
+            await connection.execute(
+                `INSERT INTO budget_game_cart_items (student_id, item_key, quantity) VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)`,
+                [student_id, item_key, quantity]
+            );
+            return { status: 200, body: { success: true } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error('[budget-game] cart add error:', err);
         res.status(500).json({ error: 'Failed to add to cart' });
@@ -682,17 +685,17 @@ router.post('/student/budget-game/cart/update', requireSelfOrStaff(), async (req
         return res.status(400).json({ error: 'student_id, item_key, and a non-negative quantity are required' });
     }
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        if (quantity === 0) {
-            await connection.execute('DELETE FROM budget_game_cart_items WHERE student_id = ? AND item_key = ?', [student_id, item_key]);
-        } else {
-            await connection.execute(
-                `UPDATE budget_game_cart_items SET quantity = ? WHERE student_id = ? AND item_key = ?`,
-                [quantity, student_id, item_key]
-            );
-        }
-        await connection.release();
+        await withConnection(async (connection) => {
+            await ensureTables(connection);
+            if (quantity === 0) {
+                await connection.execute('DELETE FROM budget_game_cart_items WHERE student_id = ? AND item_key = ?', [student_id, item_key]);
+            } else {
+                await connection.execute(
+                    `UPDATE budget_game_cart_items SET quantity = ? WHERE student_id = ? AND item_key = ?`,
+                    [quantity, student_id, item_key]
+                );
+            }
+        });
         res.json({ success: true });
     } catch (err) {
         console.error('[budget-game] cart update error:', err);
@@ -710,76 +713,79 @@ router.post('/student/budget-game/checkout', requireSelfOrStaff(), async (req, r
         return res.status(400).json({ error: 'student_id and a valid store (groceries or mall) are required' });
     }
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        const card = await ensureCard(connection, student_id);
+        const outcome = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            const card = await ensureCard(connection, student_id);
 
-        const [cartRows] = await connection.execute(
-            `SELECT c.item_key, c.quantity, i.label, i.price, i.category, i.active
-             FROM budget_game_cart_items c
-             JOIN budget_game_store_items i ON i.item_key = c.item_key
-             WHERE c.student_id = ?`,
-            [student_id]
-        );
-        const items = cartRows.filter(r => storeForCategory(r.category) === store);
-        if (items.length === 0) { await connection.release(); return res.status(400).json({ error: 'Your cart is empty.' }); }
-        const inactiveItem = items.find(r => !r.active);
-        if (inactiveItem) { await connection.release(); return res.status(400).json({ error: `${inactiveItem.label} is no longer available -- remove it from your cart.` }); }
+            const [cartRows] = await connection.execute(
+                `SELECT c.item_key, c.quantity, i.label, i.price, i.category, i.active
+                 FROM budget_game_cart_items c
+                 JOIN budget_game_store_items i ON i.item_key = c.item_key
+                 WHERE c.student_id = ?`,
+                [student_id]
+            );
+            const items = cartRows.filter(r => storeForCategory(r.category) === store);
+            if (items.length === 0) return { status: 400, body: { error: 'Your cart is empty.' } };
+            const inactiveItem = items.find(r => !r.active);
+            if (inactiveItem) return { status: 400, body: { error: `${inactiveItem.label} is no longer available -- remove it from your cart.` } };
 
-        const total = round2(items.reduce((sum, it) => sum + Number(it.price) * it.quantity, 0));
+            const total = round2(items.reduce((sum, it) => sum + Number(it.price) * it.quantity, 0));
 
-        const [[state]] = await connection.execute('SELECT * FROM budget_game_state WHERE student_id = ?', [student_id]);
-        if (!state) { await connection.release(); return res.status(400).json({ error: 'No game state yet -- open the game first.' }); }
-        const checking = Number(state.checking_balance);
-        if (checking < total) {
-            await connection.release();
-            return res.status(400).json({ error: `Your card was declined -- insufficient funds. Total is $${total.toFixed(2)}, but you only have $${checking.toFixed(2)} in checking.`, declined: true });
-        }
-
-        const newChecking = round2(checking - total);
-        await connection.execute('UPDATE budget_game_state SET checking_balance = ? WHERE student_id = ?', [newChecking, student_id]);
-        const storeName = store === 'groceries' ? 'Grocery Store' : 'The Mall';
-        const itemCount = items.reduce((sum, it) => sum + it.quantity, 0);
-        await logTxn(connection, student_id, 'purchase', `${storeName} -- ${itemCount} item${itemCount === 1 ? '' : 's'} (card ending in ${card.card_number.slice(-4)})`, -total, newChecking);
-
-        const itemKeys = items.map(it => it.item_key);
-        await connection.execute(
-            `DELETE FROM budget_game_cart_items WHERE student_id = ? AND item_key IN (${itemKeys.map(() => '?').join(',')})`,
-            [student_id, ...itemKeys]
-        );
-
-        // Buying a vehicle starts an Auto Insurance bill from the next pay
-        // period on -- one ownership row per unit bought (quantity > 1 on a
-        // car is an edge case nobody needs to be blocked on; the insurance
-        // bill itself stays flat regardless of how many are owned).
-        const vehiclesBought = items.filter(it => it.category === 'vehicles');
-        for (const v of vehiclesBought) {
-            for (let i = 0; i < v.quantity; i++) {
-                await connection.execute(
-                    'INSERT INTO budget_game_vehicles (student_id, item_key, label) VALUES (?, ?, ?)',
-                    [student_id, v.item_key, v.label]
-                );
+            const [[state]] = await connection.execute('SELECT * FROM budget_game_state WHERE student_id = ?', [student_id]);
+            if (!state) return { status: 400, body: { error: 'No game state yet -- open the game first.' } };
+            const checking = Number(state.checking_balance);
+            if (checking < total) {
+                return { status: 400, body: { error: `Your card was declined -- insufficient funds. Total is $${total.toFixed(2)}, but you only have $${checking.toFixed(2)} in checking.`, declined: true } };
             }
-        }
 
-        // Same pattern for buying a place (category 'housing') -- starts
-        // Property Tax & HOA and drops Rent from the very next bills cycle.
-        const propertiesBought = items.filter(it => it.category === 'housing');
-        for (const p of propertiesBought) {
-            for (let i = 0; i < p.quantity; i++) {
-                await connection.execute(
-                    'INSERT INTO budget_game_properties (student_id, item_key, label) VALUES (?, ?, ?)',
-                    [student_id, p.item_key, p.label]
-                );
+            const newChecking = round2(checking - total);
+            await connection.execute('UPDATE budget_game_state SET checking_balance = ? WHERE student_id = ?', [newChecking, student_id]);
+            const storeName = store === 'groceries' ? 'Grocery Store' : 'The Mall';
+            const itemCount = items.reduce((sum, it) => sum + it.quantity, 0);
+            await logTxn(connection, student_id, 'purchase', `${storeName} -- ${itemCount} item${itemCount === 1 ? '' : 's'} (card ending in ${card.card_number.slice(-4)})`, -total, newChecking);
+
+            const itemKeys = items.map(it => it.item_key);
+            await connection.execute(
+                `DELETE FROM budget_game_cart_items WHERE student_id = ? AND item_key IN (${itemKeys.map(() => '?').join(',')})`,
+                [student_id, ...itemKeys]
+            );
+
+            // Buying a vehicle starts an Auto Insurance bill from the next pay
+            // period on -- one ownership row per unit bought (quantity > 1 on a
+            // car is an edge case nobody needs to be blocked on; the insurance
+            // bill itself stays flat regardless of how many are owned).
+            const vehiclesBought = items.filter(it => it.category === 'vehicles');
+            for (const v of vehiclesBought) {
+                for (let i = 0; i < v.quantity; i++) {
+                    await connection.execute(
+                        'INSERT INTO budget_game_vehicles (student_id, item_key, label) VALUES (?, ?, ?)',
+                        [student_id, v.item_key, v.label]
+                    );
+                }
             }
-        }
 
-        await connection.release();
-        res.json({
-            success: true, checking: newChecking, total,
-            card_last4: card.card_number.slice(-4),
-            receipt: items.map(it => ({ label: it.label, price: Number(it.price), quantity: it.quantity }))
+            // Same pattern for buying a place (category 'housing') -- starts
+            // Property Tax & HOA and drops Rent from the very next bills cycle.
+            const propertiesBought = items.filter(it => it.category === 'housing');
+            for (const p of propertiesBought) {
+                for (let i = 0; i < p.quantity; i++) {
+                    await connection.execute(
+                        'INSERT INTO budget_game_properties (student_id, item_key, label) VALUES (?, ?, ?)',
+                        [student_id, p.item_key, p.label]
+                    );
+                }
+            }
+
+            return {
+                status: 200,
+                body: {
+                    success: true, checking: newChecking, total,
+                    card_last4: card.card_number.slice(-4),
+                    receipt: items.map(it => ({ label: it.label, price: Number(it.price), quantity: it.quantity }))
+                }
+            };
         });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error('[budget-game] checkout error:', err);
         res.status(500).json({ error: 'Checkout failed' });
@@ -805,28 +811,29 @@ router.get('/admin/budget-game/leaderboard', requireStaff, async (req, res) => {
     const start = req.query.start || QUARTER_BOUNDARIES.find(q => todayStr >= q.start && todayStr <= q.end)?.start || QUARTER_BOUNDARIES[0].start;
     const end = req.query.end || QUARTER_BOUNDARIES.find(q => todayStr >= q.start && todayStr <= q.end)?.end || QUARTER_BOUNDARIES[QUARTER_BOUNDARIES.length - 1].end;
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
+        const rows = await withConnection(async (connection) => {
+            await ensureTables(connection);
 
-        const [rows] = await connection.execute(
-            `SELECT s.student_id, s.first_name, s.last_name, s.section_id,
-                    COALESCE(gs.checking_balance, 0) + COALESCE(gs.savings_balance, 0) + COALESCE(gs.invested_balance, 0) AS net_worth,
-                    SUM(CASE WHEN t.type = 'paycheck' THEN 1 ELSE 0 END) AS paychecks,
-                    SUM(CASE WHEN t.type = 'paycheck' THEN t.amount ELSE 0 END) AS income_total,
-                    SUM(CASE WHEN t.type = 'bill' THEN 1 ELSE 0 END) AS bills_paid,
-                    SUM(CASE WHEN t.type IN ('to_savings', 'to_invest') THEN ABS(t.amount) ELSE 0 END) AS saved_in,
-                    SUM(CASE WHEN t.type IN ('from_savings', 'from_invest') THEN ABS(t.amount) ELSE 0 END) AS saved_out,
-                    SUM(CASE WHEN t.type NOT IN ('interest', 'invest_return') AND t.balance_after < 0 THEN 1 ELSE 0 END) AS overdrafts,
-                    SUM(CASE WHEN t.type = 'life_event' THEN 1 ELSE 0 END) AS life_events,
-                    SUM(CASE WHEN t.type = 'life_event' AND t.amount < 0 THEN 1 ELSE 0 END) AS life_events_negative
-             FROM budget_game_transactions t
-             JOIN students s ON s.student_id = t.student_id
-             LEFT JOIN budget_game_state gs ON gs.student_id = t.student_id
-             WHERE t.created_at >= ? AND t.created_at < DATE_ADD(?, INTERVAL 1 DAY)
-             GROUP BY s.student_id, s.first_name, s.last_name, s.section_id, gs.checking_balance, gs.savings_balance, gs.invested_balance`,
-            [start, end]
-        );
-        await connection.release();
+            const [rows] = await connection.execute(
+                `SELECT s.student_id, s.first_name, s.last_name, s.section_id,
+                        COALESCE(gs.checking_balance, 0) + COALESCE(gs.savings_balance, 0) + COALESCE(gs.invested_balance, 0) AS net_worth,
+                        SUM(CASE WHEN t.type = 'paycheck' THEN 1 ELSE 0 END) AS paychecks,
+                        SUM(CASE WHEN t.type = 'paycheck' THEN t.amount ELSE 0 END) AS income_total,
+                        SUM(CASE WHEN t.type = 'bill' THEN 1 ELSE 0 END) AS bills_paid,
+                        SUM(CASE WHEN t.type IN ('to_savings', 'to_invest') THEN ABS(t.amount) ELSE 0 END) AS saved_in,
+                        SUM(CASE WHEN t.type IN ('from_savings', 'from_invest') THEN ABS(t.amount) ELSE 0 END) AS saved_out,
+                        SUM(CASE WHEN t.type NOT IN ('interest', 'invest_return') AND t.balance_after < 0 THEN 1 ELSE 0 END) AS overdrafts,
+                        SUM(CASE WHEN t.type = 'life_event' THEN 1 ELSE 0 END) AS life_events,
+                        SUM(CASE WHEN t.type = 'life_event' AND t.amount < 0 THEN 1 ELSE 0 END) AS life_events_negative
+                 FROM budget_game_transactions t
+                 JOIN students s ON s.student_id = t.student_id
+                 LEFT JOIN budget_game_state gs ON gs.student_id = t.student_id
+                 WHERE t.created_at >= ? AND t.created_at < DATE_ADD(?, INTERVAL 1 DAY)
+                 GROUP BY s.student_id, s.first_name, s.last_name, s.section_id, gs.checking_balance, gs.savings_balance, gs.invested_balance`,
+                [start, end]
+            );
+            return rows;
+        });
 
         const leaderboard = rows.map(r => {
             const paychecks = Number(r.paychecks);
@@ -867,12 +874,13 @@ router.get('/admin/budget-game/leaderboard', requireStaff, async (req, res) => {
 // there so it can be reactivated or re-edited).
 router.get('/admin/budget-game/store-items', requireStaff, async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        const [rows] = await connection.execute(
-            `SELECT id, item_key, category, label, price, image_url, sort_order, active FROM budget_game_store_items ORDER BY category, sort_order, label`
-        );
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            const [rows] = await connection.execute(
+                `SELECT id, item_key, category, label, price, image_url, sort_order, active FROM budget_game_store_items ORDER BY category, sort_order, label`
+            );
+            return rows;
+        });
         res.json({ items: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load store items.' }); }
 });
@@ -886,29 +894,30 @@ router.post('/admin/budget-game/store-items', requireStaff, upload.single('image
         return res.status(400).json({ error: 'category, label, and a positive price are required' });
     }
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
+        const outcome = await withConnection(async (connection) => {
+            await ensureTables(connection);
 
-        let itemKey = slugify(label);
-        const [[existing]] = await connection.execute('SELECT id FROM budget_game_store_items WHERE item_key = ?', [itemKey]);
-        if (existing) itemKey = `${itemKey}_${Date.now().toString().slice(-5)}`;
+            let itemKey = slugify(label);
+            const [[existing]] = await connection.execute('SELECT id FROM budget_game_store_items WHERE item_key = ?', [itemKey]);
+            if (existing) itemKey = `${itemKey}_${Date.now().toString().slice(-5)}`;
 
-        let imageUrl = null;
-        if (req.file) {
-            imageUrl = saveStoreImage(category, itemKey, req.file);
-            if (!imageUrl) { await connection.release(); return res.status(400).json({ error: 'That image file type is not allowed. Use JPG, PNG, WEBP, or GIF.' }); }
-        }
+            let imageUrl = null;
+            if (req.file) {
+                imageUrl = saveStoreImage(category, itemKey, req.file);
+                if (!imageUrl) return { status: 400, body: { error: 'That image file type is not allowed. Use JPG, PNG, WEBP, or GIF.' } };
+            }
 
-        const [[{ maxSort }]] = await connection.execute(
-            'SELECT COALESCE(MAX(sort_order), 0) AS maxSort FROM budget_game_store_items WHERE category = ?', [category]
-        );
+            const [[{ maxSort }]] = await connection.execute(
+                'SELECT COALESCE(MAX(sort_order), 0) AS maxSort FROM budget_game_store_items WHERE category = ?', [category]
+            );
 
-        await connection.execute(
-            `INSERT INTO budget_game_store_items (item_key, category, label, price, image_url, sort_order) VALUES (?, ?, ?, ?, ?, ?)`,
-            [itemKey, category, label.trim().slice(0, 100), round2(price), imageUrl, maxSort + 1]
-        );
-        await connection.release();
-        res.json({ success: true, item_key: itemKey, image_url: imageUrl });
+            await connection.execute(
+                `INSERT INTO budget_game_store_items (item_key, category, label, price, image_url, sort_order) VALUES (?, ?, ?, ?, ?, ?)`,
+                [itemKey, category, label.trim().slice(0, 100), round2(price), imageUrl, maxSort + 1]
+            );
+            return { status: 200, body: { success: true, item_key: itemKey, image_url: imageUrl } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error('[budget-game] create store item error:', err);
         res.status(500).json({ error: 'Failed to add item.' });
@@ -920,27 +929,28 @@ router.post('/admin/budget-game/store-items', requireStaff, upload.single('image
 router.patch('/admin/budget-game/store-items/:id', requireStaff, upload.single('image'), async (req, res) => {
     const { id } = req.params;
     try {
-        const connection = await getDbConnection();
-        await ensureTables(connection);
-        const [[item]] = await connection.execute('SELECT * FROM budget_game_store_items WHERE id = ?', [id]);
-        if (!item) { await connection.release(); return res.status(404).json({ error: 'Item not found.' }); }
+        const outcome = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            const [[item]] = await connection.execute('SELECT * FROM budget_game_store_items WHERE id = ?', [id]);
+            if (!item) return { status: 404, body: { error: 'Item not found.' } };
 
-        const updates = [];
-        const values = [];
-        if (req.body?.label) { updates.push('label = ?'); values.push(String(req.body.label).trim().slice(0, 100)); }
-        if (req.body?.price) { updates.push('price = ?'); values.push(round2(Number(req.body.price))); }
-        if (req.body?.active !== undefined) { updates.push('active = ?'); values.push(req.body.active === 'true' || req.body.active === true || req.body.active === '1' ? 1 : 0); }
-        if (req.file) {
-            const imageUrl = saveStoreImage(item.category, item.item_key, req.file);
-            if (!imageUrl) { await connection.release(); return res.status(400).json({ error: 'That image file type is not allowed. Use JPG, PNG, WEBP, or GIF.' }); }
-            updates.push('image_url = ?'); values.push(imageUrl);
-        }
-        if (updates.length === 0) { await connection.release(); return res.status(400).json({ error: 'Nothing to update.' }); }
+            const updates = [];
+            const values = [];
+            if (req.body?.label) { updates.push('label = ?'); values.push(String(req.body.label).trim().slice(0, 100)); }
+            if (req.body?.price) { updates.push('price = ?'); values.push(round2(Number(req.body.price))); }
+            if (req.body?.active !== undefined) { updates.push('active = ?'); values.push(req.body.active === 'true' || req.body.active === true || req.body.active === '1' ? 1 : 0); }
+            if (req.file) {
+                const imageUrl = saveStoreImage(item.category, item.item_key, req.file);
+                if (!imageUrl) return { status: 400, body: { error: 'That image file type is not allowed. Use JPG, PNG, WEBP, or GIF.' } };
+                updates.push('image_url = ?'); values.push(imageUrl);
+            }
+            if (updates.length === 0) return { status: 400, body: { error: 'Nothing to update.' } };
 
-        values.push(id);
-        await connection.execute(`UPDATE budget_game_store_items SET ${updates.join(', ')} WHERE id = ?`, values);
-        await connection.release();
-        res.json({ success: true });
+            values.push(id);
+            await connection.execute(`UPDATE budget_game_store_items SET ${updates.join(', ')} WHERE id = ?`, values);
+            return { status: 200, body: { success: true } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error('[budget-game] update store item error:', err);
         res.status(500).json({ error: 'Failed to update item.' });
