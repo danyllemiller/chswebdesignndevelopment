@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const bcrypt = require('bcrypt');
 const { getCurrentSchoolYear, requireSelfOrStaff } = require('../helpers');
 const fs = require('fs');
@@ -36,7 +36,7 @@ const AGENCY_PAY_SCALES = {
 router.get('/admin/roster', async (req, res) => {
     const year = req.query.year || null;
     try {
-        const connection = await getDbConnection();
+        const students = await withConnection(async (connection) => {
         const baseSelect = `
             SELECT DISTINCT s.*,
                 COALESCE(csc.section_id, csl.section_id, s.section_id)   AS display_period,
@@ -99,8 +99,8 @@ router.get('/admin/roster', async (req, res) => {
             extraByStudent[r.student_id].push({ section_id: r.section_id, course_name: r.course_name });
         });
         students.forEach(s => { s.additional_sections = extraByStudent[s.student_id] || []; });
-
-        await connection.release();
+        return students;
+        });
         res.json(students);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch roster.' }); }
 });
@@ -119,24 +119,25 @@ router.get('/admin/student-sections', requireSelfOrStaff('student_id'), async (r
     const studentId = req.query.student_id;
     if (!studentId) return res.status(400).json({ error: 'student_id is required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS student_additional_sections (
-              student_id VARCHAR(50) NOT NULL,
-              section_id VARCHAR(50) NOT NULL,
-              added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-              PRIMARY KEY (student_id, section_id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-        `);
-        const [rows] = await connection.execute(
-            `SELECT sas.section_id, COALESCE(c.course_name, '') AS course_name
-             FROM student_additional_sections sas
-             LEFT JOIN class_sections cs ON sas.section_id = cs.section_id
-             LEFT JOIN courses c ON cs.course_id = c.course_id
-             WHERE sas.student_id = ?`,
-            [studentId]
-        );
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await connection.execute(`
+                CREATE TABLE IF NOT EXISTS student_additional_sections (
+                  student_id VARCHAR(50) NOT NULL,
+                  section_id VARCHAR(50) NOT NULL,
+                  added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                  PRIMARY KEY (student_id, section_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            `);
+            const [rows] = await connection.execute(
+                `SELECT sas.section_id, COALESCE(c.course_name, '') AS course_name
+                 FROM student_additional_sections sas
+                 LEFT JOIN class_sections cs ON sas.section_id = cs.section_id
+                 LEFT JOIN courses c ON cs.course_id = c.course_id
+                 WHERE sas.student_id = ?`,
+                [studentId]
+            );
+            return rows;
+        });
         res.json(rows);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch student sections' }); }
 });
@@ -149,30 +150,28 @@ router.post('/admin/set-student-sections', async (req, res) => {
     if (!student_id || !Array.isArray(section_ids)) {
         return res.status(400).json({ error: 'student_id and section_ids array are required' });
     }
-    let connection;
     try {
-        connection = await getDbConnection();
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS student_additional_sections (
-              student_id VARCHAR(50) NOT NULL,
-              section_id VARCHAR(50) NOT NULL,
-              added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-              PRIMARY KEY (student_id, section_id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-        `);
-        await connection.execute('DELETE FROM student_additional_sections WHERE student_id = ?', [student_id]);
-        for (const sid of section_ids) {
-            const clean = String(sid).trim();
-            if (!clean) continue;
-            await connection.execute(
-                'INSERT IGNORE INTO student_additional_sections (student_id, section_id) VALUES (?, ?)',
-                [student_id, clean]
-            );
-        }
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(`
+                CREATE TABLE IF NOT EXISTS student_additional_sections (
+                  student_id VARCHAR(50) NOT NULL,
+                  section_id VARCHAR(50) NOT NULL,
+                  added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                  PRIMARY KEY (student_id, section_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            `);
+            await connection.execute('DELETE FROM student_additional_sections WHERE student_id = ?', [student_id]);
+            for (const sid of section_ids) {
+                const clean = String(sid).trim();
+                if (!clean) continue;
+                await connection.execute(
+                    'INSERT IGNORE INTO student_additional_sections (student_id, section_id) VALUES (?, ?)',
+                    [student_id, clean]
+                );
+            }
+        });
         res.json({ success: true, count: section_ids.length });
     } catch (err) {
-        if (connection) try { await connection.release(); } catch (_) {}
         console.error(err);
         res.status(500).json({ error: 'Failed to save student sections' });
     }
@@ -181,32 +180,30 @@ router.post('/admin/set-student-sections', async (req, res) => {
 router.get('/admin/sections', async (req, res) => {
     const year = req.query.year || null;
     try {
-        const connection = await getDbConnection();
-        let sql = `SELECT cs.section_id, cs.course_id, cs.school_year, cs.archived, cs.permanent,
-                          COALESCE(c.course_name, '') AS course_name
-                   FROM class_sections cs
-                   LEFT JOIN courses c ON cs.course_id = c.course_id`;
-        const params = [];
-        if (year) { sql += ' WHERE cs.school_year = ?'; params.push(year); }
-        else { sql += ' WHERE cs.archived = 0'; }
-        sql += ' ORDER BY cs.section_id ASC, c.course_name ASC';
-        const [sections] = await connection.execute(sql, params);
-        await connection.release();
+        const sections = await withConnection((connection) => {
+            let sql = `SELECT cs.section_id, cs.course_id, cs.school_year, cs.archived, cs.permanent,
+                              COALESCE(c.course_name, '') AS course_name
+                       FROM class_sections cs
+                       LEFT JOIN courses c ON cs.course_id = c.course_id`;
+            const params = [];
+            if (year) { sql += ' WHERE cs.school_year = ?'; params.push(year); }
+            else { sql += ' WHERE cs.archived = 0'; }
+            sql += ' ORDER BY cs.section_id ASC, c.course_name ASC';
+            return connection.execute(sql, params).then(([sections]) => sections);
+        });
         res.json(sections);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch class section catalog.' }); }
 });
 
 router.get('/admin/school-years', async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(
+        const rows = await withConnection((connection) => connection.execute(
             `SELECT DISTINCT school_year FROM (
                 SELECT school_year FROM class_sections WHERE school_year IS NOT NULL
                 UNION
                 SELECT school_year FROM students WHERE school_year IS NOT NULL
              ) combined ORDER BY school_year DESC`
-        );
-        await connection.release();
+        ).then(([rows]) => rows));
         res.json(rows.map(r => r.school_year).filter(Boolean));
     } catch (err) { res.status(500).json({ error: 'Failed to fetch school years' }); }
 });
@@ -215,14 +212,15 @@ router.post('/admin/archive-year', async (req, res) => {
     const { school_year } = req.body || {};
     if (!school_year) return res.status(400).json({ error: 'school_year is required' });
     try {
-        const connection = await getDbConnection();
-        const [s] = await connection.execute(
-            'UPDATE class_sections SET archived = 1 WHERE school_year = ? AND permanent = 0', [school_year]
-        );
-        const [u] = await connection.execute(
-            'UPDATE students SET archived = 1 WHERE school_year = ? AND section_id NOT IN (SELECT section_id FROM class_sections WHERE permanent = 1)', [school_year]
-        );
-        await connection.release();
+        const { s, u } = await withConnection(async (connection) => {
+            const [s] = await connection.execute(
+                'UPDATE class_sections SET archived = 1 WHERE school_year = ? AND permanent = 0', [school_year]
+            );
+            const [u] = await connection.execute(
+                'UPDATE students SET archived = 1 WHERE school_year = ? AND section_id NOT IN (SELECT section_id FROM class_sections WHERE permanent = 1)', [school_year]
+            );
+            return { s, u };
+        });
         res.json({ success: true, school_year, sections: s.affectedRows, students: u.affectedRows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to archive year' }); }
 });
@@ -232,13 +230,13 @@ router.post('/admin/archive-students', async (req, res) => {
     if (!Array.isArray(student_ids) || student_ids.length === 0)
         return res.status(400).json({ error: 'student_ids array is required' });
     try {
-        const connection = await getDbConnection();
-        const placeholders = student_ids.map(() => '?').join(',');
-        const [result] = await connection.execute(
-            `UPDATE students SET archived = 1 WHERE student_id IN (${placeholders})`, student_ids
-        );
-        await connection.release();
-        res.json({ success: true, archivedCount: result.affectedRows });
+        const affectedRows = await withConnection((connection) => {
+            const placeholders = student_ids.map(() => '?').join(',');
+            return connection.execute(
+                `UPDATE students SET archived = 1 WHERE student_id IN (${placeholders})`, student_ids
+            ).then(([result]) => result.affectedRows);
+        });
+        res.json({ success: true, archivedCount: affectedRows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to archive students' }); }
 });
 
@@ -250,21 +248,19 @@ router.post('/admin/sections', async (req, res) => {
     const cid   = String(course_id).trim();
     const cname = course_name ? String(course_name).trim() : cid;
     const year  = getCurrentSchoolYear();
-    let connection;
     try {
-        connection = await getDbConnection();
-        await connection.execute(
-            'INSERT INTO courses (course_id, course_name, department) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE course_name = VALUES(course_name)',
-            [cid, cname, '']
-        );
-        await connection.execute(
-            'INSERT IGNORE INTO class_sections (section_id, course_id, school_year, archived) VALUES (?, ?, ?, 0)',
-            [sid, cid, year]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(
+                'INSERT INTO courses (course_id, course_name, department) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE course_name = VALUES(course_name)',
+                [cid, cname, '']
+            );
+            await connection.execute(
+                'INSERT IGNORE INTO class_sections (section_id, course_id, school_year, archived) VALUES (?, ?, ?, 0)',
+                [sid, cid, year]
+            );
+        });
         res.json({ success: true, section_id: sid, school_year: year });
     } catch (err) {
-        if (connection) try { await connection.release(); } catch(_) {}
         console.error(err);
         res.status(500).json({ error: err.message });
     }
@@ -275,32 +271,30 @@ router.put('/admin/sections/:section_id', async (req, res) => {
     const cid = String(req.query.course_id || '').trim();
     const { course_name, school_year } = req.body || {};
     if (!sid || !cid) return res.status(400).json({ error: 'section_id and course_id required' });
-    let connection;
     try {
-        connection = await getDbConnection();
-        const [pRows] = await connection.execute(
-            'SELECT permanent FROM class_sections WHERE section_id = ? AND course_id = ?', [sid, cid]
-        );
-        if (pRows.length > 0 && pRows[0].permanent === 1 && school_year !== undefined) {
-            await connection.release();
-            return res.status(403).json({ error: 'School year cannot be changed for permanent sections.' });
-        }
-        if (school_year !== undefined) {
-            await connection.execute(
-                'UPDATE class_sections SET school_year = ? WHERE section_id = ? AND course_id = ?',
-                [String(school_year).trim(), sid, cid]
+        const outcome = await withConnection(async (connection) => {
+            const [pRows] = await connection.execute(
+                'SELECT permanent FROM class_sections WHERE section_id = ? AND course_id = ?', [sid, cid]
             );
-        }
-        if (course_name !== undefined) {
-            await connection.execute(
-                'UPDATE courses SET course_name = ? WHERE course_id = ?',
-                [String(course_name).trim(), cid]
-            );
-        }
-        await connection.release();
-        res.json({ success: true });
+            if (pRows.length > 0 && pRows[0].permanent === 1 && school_year !== undefined) {
+                return { status: 403, body: { error: 'School year cannot be changed for permanent sections.' } };
+            }
+            if (school_year !== undefined) {
+                await connection.execute(
+                    'UPDATE class_sections SET school_year = ? WHERE section_id = ? AND course_id = ?',
+                    [String(school_year).trim(), sid, cid]
+                );
+            }
+            if (course_name !== undefined) {
+                await connection.execute(
+                    'UPDATE courses SET course_name = ? WHERE course_id = ?',
+                    [String(course_name).trim(), cid]
+                );
+            }
+            return { status: 200, body: { success: true } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
-        if (connection) try { await connection.release(); } catch(_) {}
         console.error(err);
         res.status(500).json({ error: err.message });
     }
@@ -310,30 +304,27 @@ router.delete('/admin/sections/:section_id', async (req, res) => {
     const sid = String(req.params.section_id || '').trim();
     const cid = String(req.query.course_id || '').trim();
     if (!sid) return res.status(400).json({ error: 'section_id required' });
-    let connection;
     try {
-        connection = await getDbConnection();
-        const [permRows] = await connection.execute(
-            'SELECT permanent FROM class_sections WHERE section_id = ?' + (cid ? ' AND course_id = ?' : ''),
-            cid ? [sid, cid] : [sid]
-        );
-        if (permRows.some(r => r.permanent === 1)) {
-            await connection.release();
-            return res.status(403).json({ error: `"${sid}" is a permanent section and cannot be deleted.` });
-        }
-        const [rows] = await connection.execute(
-            'SELECT COUNT(*) AS cnt FROM students WHERE section_id = ?', [sid]
-        );
-        if (rows[0].cnt > 0) {
-            await connection.release();
-            return res.status(409).json({ error: `Cannot delete — ${rows[0].cnt} student(s) still enrolled in period ${sid}.` });
-        }
-        const sql = cid ? 'DELETE FROM class_sections WHERE section_id = ? AND course_id = ?' : 'DELETE FROM class_sections WHERE section_id = ?';
-        await connection.execute(sql, cid ? [sid, cid] : [sid]);
-        await connection.release();
-        res.json({ success: true });
+        const outcome = await withConnection(async (connection) => {
+            const [permRows] = await connection.execute(
+                'SELECT permanent FROM class_sections WHERE section_id = ?' + (cid ? ' AND course_id = ?' : ''),
+                cid ? [sid, cid] : [sid]
+            );
+            if (permRows.some(r => r.permanent === 1)) {
+                return { status: 403, body: { error: `"${sid}" is a permanent section and cannot be deleted.` } };
+            }
+            const [rows] = await connection.execute(
+                'SELECT COUNT(*) AS cnt FROM students WHERE section_id = ?', [sid]
+            );
+            if (rows[0].cnt > 0) {
+                return { status: 409, body: { error: `Cannot delete — ${rows[0].cnt} student(s) still enrolled in period ${sid}.` } };
+            }
+            const sql = cid ? 'DELETE FROM class_sections WHERE section_id = ? AND course_id = ?' : 'DELETE FROM class_sections WHERE section_id = ?';
+            await connection.execute(sql, cid ? [sid, cid] : [sid]);
+            return { status: 200, body: { success: true } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
-        if (connection) try { await connection.release(); } catch(_) {}
         res.status(500).json({ error: err.message });
     }
 });
@@ -363,9 +354,8 @@ router.post('/admin/upload-roster', async (req, res) => {
 
     if (cleaned.length === 0) return res.status(400).json({ error: 'At least one student record with student_id is required.' });
 
-    let connection;
     try {
-        connection = await getDbConnection();
+        const result = await withConnection(async (connection) => {
         const [catalogRows] = await connection.execute('SELECT section_id, course_id FROM class_sections');
         const courseToSection = {};
         const validCourseIds = new Set();
@@ -387,11 +377,11 @@ router.post('/admin/upload-roster', async (req, res) => {
             }
         }
         if (invalid.length > 0) {
-            await connection.release();
-            return res.status(400).json({ error: 'Unknown course/section IDs in payload', invalid: Array.from(new Set(invalid)) });
+            return { status: 400, body: { error: 'Unknown course/section IDs in payload', invalid: Array.from(new Set(invalid)) } };
         }
 
         await connection.beginTransaction();
+        try {
         const year = getCurrentSchoolYear();
 
         // Snapshot who's currently active BEFORE the upsert below touches
@@ -440,11 +430,15 @@ router.post('/admin/upload-roster', async (req, res) => {
         }
 
         await connection.commit();
-        await connection.release();
-        res.json({ success: true, count: cleaned.length, created, updated, archived });
+        return { status: 200, body: { success: true, count: cleaned.length, created, updated, archived } };
+        } catch (txErr) {
+            await connection.rollback();
+            throw txErr;
+        }
+        });
+        res.status(result.status).json(result.body);
     } catch (err) {
         console.error(err && err.stack ? err.stack : err);
-        try { if (connection) { await connection.rollback(); await connection.release(); } } catch (_) {}
         res.status(500).json({ error: 'Failed to upload roster.' });
     }
 });
@@ -453,13 +447,11 @@ router.post('/admin/reset-student', async (req, res) => {
     const { student_id } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id is required.' });
     try {
-        const connection = await getDbConnection();
-        const [result] = await connection.execute(
+        const affectedRows = await withConnection((connection) => connection.execute(
             'UPDATE students SET username = NULL, password = NULL, password_hash = NULL WHERE student_id = ?',
             [student_id]
-        );
-        await connection.release();
-        if (result.affectedRows === 0) return res.status(404).json({ error: 'Student not found.' });
+        ).then(([result]) => result.affectedRows));
+        if (affectedRows === 0) return res.status(404).json({ error: 'Student not found.' });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to reset student.' }); }
 });
@@ -468,18 +460,16 @@ router.get('/admin/student', async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
-        const connection = await getDbConnection();
         // pay_roles (keyed by students.role_id) is the real, live payroll table --
         // also used by payroll.js for actual paycheck calculations. This used to
         // join a "payroll_roster" table that was never actually created, which
         // made this endpoint 500 on every call.
-        const [rows] = await connection.execute(
+        const rows = await withConnection((connection) => connection.execute(
             `SELECT s.student_id, s.first_name, s.last_name, s.username, s.section_id, s.role, s.archived,
                     COALESCE(pr.title, 'Intern') AS payroll_title, COALESCE(pr.hourly_rate, 15.00) AS hourly_rate
              FROM students s LEFT JOIN pay_roles pr ON s.role_id = pr.id
              WHERE s.student_id = ? LIMIT 1`, [student_id]
-        );
-        await connection.release();
+        ).then(([rows]) => rows));
         if (rows.length === 0) return res.status(404).json({ error: 'Student not found' });
         res.json(rows[0]);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch student' }); }
@@ -489,82 +479,80 @@ router.post('/admin/save-student', async (req, res) => {
     const { student_id, first_name, last_name, username, section_id, role, password, payroll_title, payroll_effective_date, archived } = req.body || {};
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
-        const connection = await getDbConnection();
-        if (section_id && String(section_id).trim().length > 0) {
-            const [sections] = await connection.execute('SELECT section_id FROM class_sections WHERE section_id = ?', [section_id]);
-            if (sections.length === 0) {
-                await connection.release();
-                return res.status(400).json({ error: 'Invalid section_id' });
+        const outcome = await withConnection(async (connection) => {
+            if (section_id && String(section_id).trim().length > 0) {
+                const [sections] = await connection.execute('SELECT section_id FROM class_sections WHERE section_id = ?', [section_id]);
+                if (sections.length === 0) {
+                    return { status: 400, body: { error: 'Invalid section_id' } };
+                }
             }
-        }
-        const [existing] = await connection.execute('SELECT student_id FROM students WHERE student_id = ?', [student_id]);
-        if (existing.length === 0) {
-            await connection.release();
-            return res.status(404).json({ error: 'Student not found' });
-        }
-        const updates = [], params = [];
-        if (first_name !== undefined) { updates.push('first_name = ?'); params.push(first_name); }
-        if (last_name  !== undefined) { updates.push('last_name = ?');  params.push(last_name); }
-        if (username   !== undefined) { updates.push('username = ?');   params.push(username || null); }
-        if (section_id !== undefined) { updates.push('section_id = ?'); params.push(section_id || null); }
-        if (role       !== undefined) { updates.push('role = ?');       params.push(role); }
-        // The individual edit form previously had no way to un-archive a
-        // student at all -- only bulk actions (archive-students/archive-year)
-        // could set the flag, none could clear it, so a student assigned a
-        // new section while still archived would keep their new section_id
-        // (it really did save) but stay invisible everywhere that filters
-        // archived IS NULL OR archived = 0, making the edit look like it
-        // silently failed no matter how many times it was repeated.
-        if (archived !== undefined) { updates.push('archived = ?'); params.push(archived ? 1 : 0); }
-        if (password !== undefined && password !== null && String(password).length > 0) {
-            const hash = await bcrypt.hash(String(password), 10);
-            updates.push('password = ?', 'password_hash = ?');
-            params.push(hash, hash);
-        }
-        if (updates.length === 0) {
-            await connection.release();
-            return res.status(400).json({ error: 'No update fields provided' });
-        }
-        params.push(student_id);
-        const [result] = await connection.execute(`UPDATE students SET ${updates.join(', ')} WHERE student_id = ?`, params);
+            const [existing] = await connection.execute('SELECT student_id FROM students WHERE student_id = ?', [student_id]);
+            if (existing.length === 0) {
+                return { status: 404, body: { error: 'Student not found' } };
+            }
+            const updates = [], params = [];
+            if (first_name !== undefined) { updates.push('first_name = ?'); params.push(first_name); }
+            if (last_name  !== undefined) { updates.push('last_name = ?');  params.push(last_name); }
+            if (username   !== undefined) { updates.push('username = ?');   params.push(username || null); }
+            if (section_id !== undefined) { updates.push('section_id = ?'); params.push(section_id || null); }
+            if (role       !== undefined) { updates.push('role = ?');       params.push(role); }
+            // The individual edit form previously had no way to un-archive a
+            // student at all -- only bulk actions (archive-students/archive-year)
+            // could set the flag, none could clear it, so a student assigned a
+            // new section while still archived would keep their new section_id
+            // (it really did save) but stay invisible everywhere that filters
+            // archived IS NULL OR archived = 0, making the edit look like it
+            // silently failed no matter how many times it was repeated.
+            if (archived !== undefined) { updates.push('archived = ?'); params.push(archived ? 1 : 0); }
+            if (password !== undefined && password !== null && String(password).length > 0) {
+                const hash = await bcrypt.hash(String(password), 10);
+                updates.push('password = ?', 'password_hash = ?');
+                params.push(hash, hash);
+            }
+            if (updates.length === 0) {
+                return { status: 400, body: { error: 'No update fields provided' } };
+            }
+            params.push(student_id);
+            const [result] = await connection.execute(`UPDATE students SET ${updates.join(', ')} WHERE student_id = ?`, params);
 
-        // pay_roles is the real payroll table (keyed by students.role_id) --
-        // this used to insert into a "payroll_roster" table that was never
-        // actually created, which threw AFTER the update above had already
-        // committed, so the save looked like it failed (500, no roster
-        // refresh) even though the real change had already gone through.
-        //
-        // Only writes a new student_role_history row (payroll's real,
-        // date-aware source of truth) when the title is actually changing --
-        // the edit modal always submits payroll_title on every save, so
-        // without this check saving an unrelated field (name, section...)
-        // would spam a new no-op history row every time.
-        if (payroll_title && AGENCY_PAY_SCALES[payroll_title] !== undefined) {
-            const rate = AGENCY_PAY_SCALES[payroll_title];
-            await connection.execute(
-                `INSERT INTO pay_roles (title, hourly_rate) VALUES (?, ?)
-                 ON DUPLICATE KEY UPDATE hourly_rate = VALUES(hourly_rate)`,
-                [payroll_title, rate]
-            );
-            const [roleRows] = await connection.execute('SELECT id FROM pay_roles WHERE title = ?', [payroll_title]);
-            const [[currentRole]] = await connection.execute(
-                `SELECT r.id, r.title FROM students s LEFT JOIN pay_roles r ON s.role_id = r.id WHERE s.student_id = ?`,
-                [student_id]
-            );
-            if (roleRows.length > 0 && (!currentRole || currentRole.title !== payroll_title)) {
-                const newRoleId = roleRows[0].id;
-                const effectiveDate = (payroll_effective_date && /^\d{4}-\d{2}-\d{2}$/.test(payroll_effective_date))
-                    ? payroll_effective_date
-                    : new Date().toISOString().split('T')[0];
-                await connection.execute('UPDATE students SET role_id = ? WHERE student_id = ?', [newRoleId, student_id]);
+            // pay_roles is the real payroll table (keyed by students.role_id) --
+            // this used to insert into a "payroll_roster" table that was never
+            // actually created, which threw AFTER the update above had already
+            // committed, so the save looked like it failed (500, no roster
+            // refresh) even though the real change had already gone through.
+            //
+            // Only writes a new student_role_history row (payroll's real,
+            // date-aware source of truth) when the title is actually changing --
+            // the edit modal always submits payroll_title on every save, so
+            // without this check saving an unrelated field (name, section...)
+            // would spam a new no-op history row every time.
+            if (payroll_title && AGENCY_PAY_SCALES[payroll_title] !== undefined) {
+                const rate = AGENCY_PAY_SCALES[payroll_title];
                 await connection.execute(
-                    'INSERT INTO student_role_history (student_id, role_id, effective_date) VALUES (?, ?, ?)',
-                    [student_id, newRoleId, effectiveDate]
+                    `INSERT INTO pay_roles (title, hourly_rate) VALUES (?, ?)
+                     ON DUPLICATE KEY UPDATE hourly_rate = VALUES(hourly_rate)`,
+                    [payroll_title, rate]
                 );
+                const [roleRows] = await connection.execute('SELECT id FROM pay_roles WHERE title = ?', [payroll_title]);
+                const [[currentRole]] = await connection.execute(
+                    `SELECT r.id, r.title FROM students s LEFT JOIN pay_roles r ON s.role_id = r.id WHERE s.student_id = ?`,
+                    [student_id]
+                );
+                if (roleRows.length > 0 && (!currentRole || currentRole.title !== payroll_title)) {
+                    const newRoleId = roleRows[0].id;
+                    const effectiveDate = (payroll_effective_date && /^\d{4}-\d{2}-\d{2}$/.test(payroll_effective_date))
+                        ? payroll_effective_date
+                        : new Date().toISOString().split('T')[0];
+                    await connection.execute('UPDATE students SET role_id = ? WHERE student_id = ?', [newRoleId, student_id]);
+                    await connection.execute(
+                        'INSERT INTO student_role_history (student_id, role_id, effective_date) VALUES (?, ?, ?)',
+                        [student_id, newRoleId, effectiveDate]
+                    );
+                }
             }
-        }
-        await connection.release();
-        res.json({ success: true, affectedRows: result.affectedRows });
+            return { status: 200, body: { success: true, affectedRows: result.affectedRows } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error(err && err.stack ? err.stack : err);
         if (err && err.code === 'ER_DUP_ENTRY') {
@@ -578,10 +566,10 @@ router.delete('/admin/delete-student', async (req, res) => {
     const { student_id } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id is required.' });
     try {
-        const connection = await getDbConnection();
-        const [result] = await connection.execute('DELETE FROM students WHERE student_id = ?', [student_id]);
-        await connection.release();
-        if (result.affectedRows === 0) return res.status(404).json({ error: 'Student not found.' });
+        const affectedRows = await withConnection((connection) => connection.execute(
+            'DELETE FROM students WHERE student_id = ?', [student_id]
+        ).then(([result]) => result.affectedRows));
+        if (affectedRows === 0) return res.status(404).json({ error: 'Student not found.' });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete student.' }); }
 });
@@ -591,13 +579,13 @@ router.post('/admin/delete-multiple-students', async (req, res) => {
     if (!student_ids || !Array.isArray(student_ids) || student_ids.length === 0)
         return res.status(400).json({ error: 'student_ids array is required.' });
     try {
-        const connection = await getDbConnection();
-        const placeholders = student_ids.map(() => '?').join(', ');
-        const [result] = await connection.execute(
-            `DELETE FROM students WHERE student_id IN (${placeholders})`, student_ids
-        );
-        await connection.release();
-        res.json({ success: true, deletedCount: result.affectedRows });
+        const deletedCount = await withConnection((connection) => {
+            const placeholders = student_ids.map(() => '?').join(', ');
+            return connection.execute(
+                `DELETE FROM students WHERE student_id IN (${placeholders})`, student_ids
+            ).then(([result]) => result.affectedRows);
+        });
+        res.json({ success: true, deletedCount });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete students.' }); }
 });
 
