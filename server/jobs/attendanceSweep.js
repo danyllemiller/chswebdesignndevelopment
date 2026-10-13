@@ -4,7 +4,7 @@
 // enrolled in a period that actually met today who never got an
 // attendance row at all, same end goal as server/jobs/autoClockout.js for
 // missed clock-outs.
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { getDayTypes, getBellScheduleKeyForDate, getLocalDateStr } = require('../tardyLogic');
 const { ensureAttendanceTables, getEnrolledStudents } = require('../lib/attendanceStore');
 
@@ -37,8 +37,7 @@ async function sweepOnePeriod(connection, periodLabel, dateStr) {
 // for a stretch and missed several periods' own sweeps below, or fixing a
 // past date), so this stays exported and unchanged in what it does.
 async function runAttendanceSweep(dateStr = getLocalDateStr()) {
-    const connection = await getDbConnection();
-    try {
+    return withConnection(async (connection) => {
         await ensureAttendanceTables(connection);
 
         const dayTypes = await getDayTypes(connection);
@@ -55,9 +54,7 @@ async function runAttendanceSweep(dateStr = getLocalDateStr()) {
             marked += await sweepOnePeriod(connection, period_label, dateStr);
         }
         return { date: dateStr, ran: true, scheduleKey, marked };
-    } finally {
-        await connection.release();
-    }
+    });
 }
 
 // Sweeps each period shortly after ITS OWN end time today, instead of
@@ -94,8 +91,7 @@ function scheduleDailyAttendanceSweep() {
         const todayStr = getLocalDateStr(now);
         const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
-        const connection = await getDbConnection();
-        try {
+        await withConnection(async (connection) => {
             await ensureAttendanceTables(connection);
 
             if (cachedDate !== todayStr) {
@@ -121,9 +117,7 @@ function scheduleDailyAttendanceSweep() {
                     console.error(`[attendanceSweep] ${period_label} sweep failed:`, err);
                 }
             }
-        } finally {
-            await connection.release();
-        }
+        });
     }
 
     tick();

@@ -17,7 +17,7 @@
 // still needs to be able to tell "the system guessed this" from "the student
 // actually tapped out," since the guess is always a same-period estimate,
 // not a measurement.
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { getDayTypes, getBellScheduleKeyForDate, getLocalDateStr } = require('../tardyLogic');
 
 async function ensureAutoClockoutColumn(connection) {
@@ -31,8 +31,7 @@ async function ensureAutoClockoutColumn(connection) {
 // of throwing on a no-school day / a period with no bell-schedule row --
 // both are expected, routine outcomes, not failures.
 async function runAutoClockout(dateStr = getLocalDateStr()) {
-    const connection = await getDbConnection();
-    try {
+    return withConnection(async (connection) => {
         await ensureAutoClockoutColumn(connection);
 
         const dayTypes = await getDayTypes(connection);
@@ -63,9 +62,7 @@ async function runAutoClockout(dateStr = getLocalDateStr()) {
             closed++;
         }
         return { date: dateStr, ran: true, scheduleKey, closed, skipped, totalOpen: openShifts.length };
-    } finally {
-        await connection.release();
-    }
+    });
 }
 
 const AUTO_CLOCKOUT_TIME = { hour: 14, minute: 30 }; // 2:30 PM -- after the latest real period end (2:07 PM) on any known schedule type (A/B/C), with margin.
