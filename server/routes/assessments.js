@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { sanitizeNotebookHtml } = require('../sanitizeNotebookHtml');
 const { resolveCourseId, isStaffSession, requireSelfOrStaff, requireLogin } = require('../helpers');
 const multer = require('multer');
@@ -44,9 +44,9 @@ const REVIEW_QUESTIONS_DDL = `CREATE TABLE IF NOT EXISTS review_questions (
 router.get('/student/self-assessments', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute('SELECT * FROM self_assessments WHERE student_id = ?', [student_id]);
-        await connection.release();
+        const rows = await withConnection((connection) => connection.execute(
+            'SELECT * FROM self_assessments WHERE student_id = ?', [student_id]
+        ).then(([rows]) => rows));
         res.json({ assessments: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch assessments' }); }
 });
@@ -54,12 +54,10 @@ router.get('/student/self-assessments', requireSelfOrStaff(), async (req, res) =
 router.post('/student/save-self-assessment', requireSelfOrStaff(), async (req, res) => {
     const { student_id, chapter_id, level } = req.body;
     try {
-        const connection = await getDbConnection();
-        await connection.execute(
+        await withConnection((connection) => connection.execute(
             'INSERT INTO self_assessments (student_id, chapter_id, level) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE level = VALUES(level)',
             [student_id, chapter_id, level]
-        );
-        await connection.release();
+        ));
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save assessment' }); }
 });
@@ -68,12 +66,10 @@ router.post('/student/save-self-assessment', requireSelfOrStaff(), async (req, r
 router.post('/student/submit-turnin', requireSelfOrStaff(), async (req, res) => {
     const { student_id, assignment_name, note } = req.body;
     try {
-        const connection = await getDbConnection();
-        await connection.execute(
+        await withConnection((connection) => connection.execute(
             'INSERT INTO turnins (student_id, assignment_name, note, timestamp) VALUES (?, ?, ?, NOW())',
             [student_id, assignment_name, note]
-        );
-        await connection.release();
+        ));
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save turn-in' }); }
 });
@@ -92,8 +88,7 @@ router.get('/student/profile', async (req, res) => {
     const isSelf = sessionUser?.username && sessionUser.username.toLowerCase() === String(username).toLowerCase();
     if (!isSelf && !isStaffSession(req)) return res.status(401).json({ error: 'Not authorized.' });
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(
+        const rows = await withConnection((connection) => connection.execute(
             `SELECT s.student_id, s.first_name, s.last_name, s.section_id, s.username, s.role,
                     cs.course_id, c.course_name
              FROM students s
@@ -101,8 +96,7 @@ router.get('/student/profile', async (req, res) => {
              LEFT JOIN courses c ON c.course_id = cs.course_id
              WHERE s.username = ?`,
             [username.toLowerCase()]
-        );
-        await connection.release();
+        ).then(([rows]) => rows));
         if (rows.length === 0) return res.status(404).json({ error: 'Student not found' });
         res.json(rows[0]);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch student profile' }); }
@@ -113,15 +107,15 @@ router.post('/student/help-request', requireSelfOrStaff(), async (req, res) => {
     const { student_id, requested } = req.body;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(
-            'ALTER TABLE students ADD COLUMN IF NOT EXISTS help_requested TINYINT(1) DEFAULT 0'
-        );
-        await connection.execute(
-            'UPDATE students SET help_requested = ? WHERE student_id = ?',
-            [requested ? 1 : 0, student_id]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(
+                'ALTER TABLE students ADD COLUMN IF NOT EXISTS help_requested TINYINT(1) DEFAULT 0'
+            );
+            await connection.execute(
+                'UPDATE students SET help_requested = ? WHERE student_id = ?',
+                [requested ? 1 : 0, student_id]
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to update help request' }); }
 });
@@ -150,7 +144,7 @@ router.get('/cs-exam-questions', requireLogin, async (req, res) => {
     }
 
     try {
-        const connection = await getDbConnection();
+        const questions = await withConnection(async (connection) => {
         let questions = [];
 
         if (examIds.length > 0) {
@@ -187,7 +181,8 @@ router.get('/cs-exam-questions', requireLogin, async (req, res) => {
             }));
         }
 
-        await connection.release();
+        return questions;
+        });
         res.json({ unit: unitNum, count: questions.length, questions });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch exam questions' }); }
 });
@@ -287,13 +282,13 @@ router.post('/student/study-guide/generate', async (req, res) => {
     try {
         const restrictUnit = unit ? Number(unit) : null;
         const guide = buildStudyGuide(chapter_tally, restrictUnit);
-        const connection = await getDbConnection();
-        await connection.execute(STUDY_GUIDE_DDL);
-        await connection.execute(
-            'INSERT INTO study_guides (student_id, overall_pct, guide_json) VALUES (?, ?, ?)',
-            [student_id, Number(overall_pct) || 0, JSON.stringify(guide)]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(STUDY_GUIDE_DDL);
+            await connection.execute(
+                'INSERT INTO study_guides (student_id, overall_pct, guide_json) VALUES (?, ?, ?)',
+                [student_id, Number(overall_pct) || 0, JSON.stringify(guide)]
+            );
+        });
         res.json({ success: true, guide });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to generate study guide' }); }
 });
@@ -307,13 +302,14 @@ router.get('/student/study-guide/latest', async (req, res) => {
     if (!isSelf && !isStaff) return res.status(401).json({ error: 'Not authorized.' });
 
     try {
-        const connection = await getDbConnection();
-        await connection.execute(STUDY_GUIDE_DDL);
-        const [rows] = await connection.execute(
-            'SELECT overall_pct, guide_json, created_at FROM study_guides WHERE student_id = ? ORDER BY created_at DESC LIMIT 1',
-            [student_id]
-        );
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await connection.execute(STUDY_GUIDE_DDL);
+            const [rows] = await connection.execute(
+                'SELECT overall_pct, guide_json, created_at FROM study_guides WHERE student_id = ? ORDER BY created_at DESC LIMIT 1',
+                [student_id]
+            );
+            return rows;
+        });
         if (rows.length === 0) return res.json({ guide: null });
         res.json({ overall_pct: rows[0].overall_pct, created_at: rows[0].created_at, guide: JSON.parse(rows[0].guide_json) });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load study guide' }); }
@@ -330,27 +326,27 @@ router.get('/wd-exam-questions', requireLogin, async (req, res) => {
     // (or an intermediate cache) serve back a stale, previously-seen order.
     res.set('Cache-Control', 'no-store');
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(
-            `SELECT question_id AS id, question_text AS question,
-                    option_a, option_b, option_c, option_d,
-                    correct_answer AS answer, chapter_number AS chapter, question_type, section
-             FROM wd_questions WHERE chapter_number = ? ORDER BY RAND()`,
-            [chapterNum]
-        );
-        // T/F rows only ever populate option_a/option_b ('True'/'False') --
-        // option_c/d are empty strings (NOT NULL column), not a real 3rd/4th
-        // choice, so they're dropped from the options array for that type.
-        // `section` is NULL for chapters not yet tagged (see
-        // ch1-ch2-question-sections.sql) -- examLogicWD.js falls back to
-        // plain random sampling whenever every question in a chapter comes
-        // back with section === null, so untagged chapters are unaffected.
-        const questions = rows.map(row => ({
-            id: row.id, question: row.question,
-            options: row.question_type === 'tf' ? [row.option_a, row.option_b] : [row.option_a, row.option_b, row.option_c, row.option_d],
-            answer: row.answer, chapter: row.chapter, type: row.question_type, section: row.section
-        }));
-        await connection.release();
+        const questions = await withConnection(async (connection) => {
+            const [rows] = await connection.execute(
+                `SELECT question_id AS id, question_text AS question,
+                        option_a, option_b, option_c, option_d,
+                        correct_answer AS answer, chapter_number AS chapter, question_type, section
+                 FROM wd_questions WHERE chapter_number = ? ORDER BY RAND()`,
+                [chapterNum]
+            );
+            // T/F rows only ever populate option_a/option_b ('True'/'False') --
+            // option_c/d are empty strings (NOT NULL column), not a real 3rd/4th
+            // choice, so they're dropped from the options array for that type.
+            // `section` is NULL for chapters not yet tagged (see
+            // ch1-ch2-question-sections.sql) -- examLogicWD.js falls back to
+            // plain random sampling whenever every question in a chapter comes
+            // back with section === null, so untagged chapters are unaffected.
+            return rows.map(row => ({
+                id: row.id, question: row.question,
+                options: row.question_type === 'tf' ? [row.option_a, row.option_b] : [row.option_a, row.option_b, row.option_c, row.option_d],
+                answer: row.answer, chapter: row.chapter, type: row.question_type, section: row.section
+            }));
+        });
         res.json({ chapter: chapterNum, count: questions.length, questions });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch WD exam questions' }); }
 });
@@ -364,13 +360,11 @@ router.get('/wd-exam-matching', requireLogin, async (req, res) => {
     }
     res.set('Cache-Control', 'no-store');
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(
+        const rows = await withConnection((connection) => connection.execute(
             `SELECT question_id AS id, prompt, pairs_json FROM wd_matching_questions
              WHERE chapter_number = ? ORDER BY RAND()`,
             [chapterNum]
-        );
-        await connection.release();
+        ).then(([rows]) => rows));
         const questions = rows.map(row => {
             const pairs = JSON.parse(row.pairs_json);
             const items = pairs.map(p => p.item);
@@ -404,13 +398,11 @@ router.get('/wd-exam-image-labeling', requireLogin, async (req, res) => {
     }
     res.set('Cache-Control', 'no-store');
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(
+        const rows = await withConnection((connection) => connection.execute(
             `SELECT question_id AS id, prompt, image_url, zones_json FROM wd_image_labeling_questions
              WHERE chapter_number = ? ORDER BY RAND()`,
             [chapterNum]
-        );
-        await connection.release();
+        ).then(([rows]) => rows));
         const questions = rows.map(row => {
             const zones = JSON.parse(row.zones_json);
             const labels = zones.map(z => z.label);
@@ -433,12 +425,10 @@ router.get('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id required' });
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(
+        const rows = await withConnection((connection) => connection.execute(
             'SELECT id, chapter, title, category, content, is_submitted, timestamp FROM turnins WHERE student_id = ? ORDER BY timestamp DESC',
             [student_id]
-        );
-        await connection.release();
+        ).then(([rows]) => rows));
         res.json({ notes: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load notebook entries' }); }
 });
@@ -448,38 +438,37 @@ router.post('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => {
     if (!student_id || !chapter) return res.status(400).json({ error: 'student_id and chapter required' });
     const cleanContent = sanitizeNotebookHtml(content);
     try {
-        const connection = await getDbConnection();
+        const resultId = await withConnection(async (connection) => {
+            // turnins has no unique constraint tying a chapter to one row per
+            // student, so the old INSERT ... ON DUPLICATE KEY never actually
+            // triggered -- every autosave (every 1.5s while editing) created a
+            // brand-new row instead of updating the one already in progress,
+            // which is why some students had 50+ "notes" that were really just
+            // repeated autosaves of the same session. Update by id once a row
+            // exists, same pattern as /student/notebook/save.
+            if (id) {
+                await connection.execute(
+                    `UPDATE turnins SET chapter = ?, title = ?, category = ?, content = ?, is_submitted = ?, timestamp = NOW()
+                     WHERE id = ? AND student_id = ?`,
+                    [chapter, title || '', category || 'Reflection', cleanContent, is_submitted ? 1 : 0, id, student_id]
+                );
+                try {
+                    await tryAutoGradeNotebookActivity(connection, { student_id, title, is_submitted });
+                } catch (gradeErr) { console.error('[cs-notebook] auto-grade check failed', gradeErr); }
+                return Number(id);
+            }
 
-        // turnins has no unique constraint tying a chapter to one row per
-        // student, so the old INSERT ... ON DUPLICATE KEY never actually
-        // triggered -- every autosave (every 1.5s while editing) created a
-        // brand-new row instead of updating the one already in progress,
-        // which is why some students had 50+ "notes" that were really just
-        // repeated autosaves of the same session. Update by id once a row
-        // exists, same pattern as /student/notebook/save.
-        if (id) {
-            await connection.execute(
-                `UPDATE turnins SET chapter = ?, title = ?, category = ?, content = ?, is_submitted = ?, timestamp = NOW()
-                 WHERE id = ? AND student_id = ?`,
-                [chapter, title || '', category || 'Reflection', cleanContent, is_submitted ? 1 : 0, id, student_id]
+            const [result] = await connection.execute(
+                `INSERT INTO turnins (student_id, chapter, title, category, content, is_submitted, timestamp)
+                 VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+                [student_id, chapter, title || '', category || 'Reflection', cleanContent, is_submitted ? 1 : 0]
             );
             try {
                 await tryAutoGradeNotebookActivity(connection, { student_id, title, is_submitted });
             } catch (gradeErr) { console.error('[cs-notebook] auto-grade check failed', gradeErr); }
-            await connection.release();
-            return res.json({ success: true, id: Number(id) });
-        }
-
-        const [result] = await connection.execute(
-            `INSERT INTO turnins (student_id, chapter, title, category, content, is_submitted, timestamp)
-             VALUES (?, ?, ?, ?, ?, ?, NOW())`,
-            [student_id, chapter, title || '', category || 'Reflection', cleanContent, is_submitted ? 1 : 0]
-        );
-        try {
-            await tryAutoGradeNotebookActivity(connection, { student_id, title, is_submitted });
-        } catch (gradeErr) { console.error('[cs-notebook] auto-grade check failed', gradeErr); }
-        await connection.release();
-        res.json({ success: true, id: result.insertId });
+            return result.insertId;
+        });
+        res.json({ success: true, id: resultId });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save notebook entry' }); }
 });
 
@@ -492,13 +481,11 @@ router.delete('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => 
     const { id, student_id } = req.body || {};
     if (!id || !student_id) return res.status(400).json({ error: 'id and student_id required' });
     try {
-        const connection = await getDbConnection();
-        const [result] = await connection.execute(
+        const affectedRows = await withConnection((connection) => connection.execute(
             'DELETE FROM turnins WHERE id = ? AND student_id = ?',
             [id, student_id]
-        );
-        await connection.release();
-        if (result.affectedRows === 0) return res.status(404).json({ error: 'Note not found' });
+        ).then(([result]) => result.affectedRows));
+        if (affectedRows === 0) return res.status(404).json({ error: 'Note not found' });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete notebook entry' }); }
 });
@@ -593,26 +580,27 @@ router.get('/student/cs-chapter-activities', requireSelfOrStaff(), async (req, r
     const chapterNum = parseInt(chapter, 10);
     if (isNaN(chapterNum)) return res.status(400).json({ error: 'chapter must be a number' });
     try {
-        const connection = await getDbConnection();
-        const [[student]] = await connection.execute(
-            'SELECT section_id FROM students WHERE student_id = ? LIMIT 1',
-            [student_id]
-        );
-        const courseId = (student && await resolveCourseId(connection, student.section_id)) || '10003GS';
-        // LIKE's "_" is a single-character wildcard, not a literal underscore --
-        // 'cs_ch1_%' silently matched cs_ch10_/cs_ch11_/.../cs_ch19_ too (any
-        // chapter number starting with "1"), turning a 3-activity chapter into
-        // a ~20-item list. REGEXP with "_" as a literal character and an
-        // anchored chapter-number boundary avoids that (same pattern
-        // server/routes/timeclock.js's getCurrentChapter() already uses for
-        // due-date resolution).
-        const excludePlaceholders = RETIRED_CS_ACTIVITY_IDS.map(() => '?').join(', ');
-        const [rows] = await connection.execute(
-            `SELECT exam_id, title, total_points, due_date FROM exams
-             WHERE exam_id REGEXP ? AND course_id = ? AND exam_id NOT IN (${excludePlaceholders}) ORDER BY exam_id`,
-            [`^cs_ch${chapterNum}_`, courseId, ...RETIRED_CS_ACTIVITY_IDS]
-        );
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            const [[student]] = await connection.execute(
+                'SELECT section_id FROM students WHERE student_id = ? LIMIT 1',
+                [student_id]
+            );
+            const courseId = (student && await resolveCourseId(connection, student.section_id)) || '10003GS';
+            // LIKE's "_" is a single-character wildcard, not a literal underscore --
+            // 'cs_ch1_%' silently matched cs_ch10_/cs_ch11_/.../cs_ch19_ too (any
+            // chapter number starting with "1"), turning a 3-activity chapter into
+            // a ~20-item list. REGEXP with "_" as a literal character and an
+            // anchored chapter-number boundary avoids that (same pattern
+            // server/routes/timeclock.js's getCurrentChapter() already uses for
+            // due-date resolution).
+            const excludePlaceholders = RETIRED_CS_ACTIVITY_IDS.map(() => '?').join(', ');
+            const [rows] = await connection.execute(
+                `SELECT exam_id, title, total_points, due_date FROM exams
+                 WHERE exam_id REGEXP ? AND course_id = ? AND exam_id NOT IN (${excludePlaceholders}) ORDER BY exam_id`,
+                [`^cs_ch${chapterNum}_`, courseId, ...RETIRED_CS_ACTIVITY_IDS]
+            );
+            return rows;
+        });
         res.json({ activities: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load chapter activities' }); }
 });
@@ -622,13 +610,14 @@ router.get('/student/exam-progress', requireSelfOrStaff(), async (req, res) => {
     const { student_id, exam_id } = req.query;
     if (!student_id || !exam_id) return res.status(400).json({ error: 'student_id and exam_id required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(EXAM_PROGRESS_DDL);
-        const [rows] = await connection.execute(
-            'SELECT progress_json FROM exam_progress WHERE student_id = ? AND exam_id = ?',
-            [student_id, exam_id]
-        );
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await connection.execute(EXAM_PROGRESS_DDL);
+            const [rows] = await connection.execute(
+                'SELECT progress_json FROM exam_progress WHERE student_id = ? AND exam_id = ?',
+                [student_id, exam_id]
+            );
+            return rows;
+        });
         if (rows.length === 0) return res.json({ found: false });
         res.json({ found: true, ...JSON.parse(rows[0].progress_json || '{}') });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load progress' }); }
@@ -638,14 +627,14 @@ router.post('/student/exam-progress', requireSelfOrStaff(), async (req, res) => 
     const { student_id, exam_id, ...progressData } = req.body;
     if (!student_id || !exam_id) return res.status(400).json({ error: 'student_id and exam_id required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(EXAM_PROGRESS_DDL);
-        await connection.execute(
-            `INSERT INTO exam_progress (student_id, exam_id, progress_json) VALUES (?, ?, ?)
-             ON DUPLICATE KEY UPDATE progress_json = VALUES(progress_json)`,
-            [student_id, exam_id, JSON.stringify(progressData)]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(EXAM_PROGRESS_DDL);
+            await connection.execute(
+                `INSERT INTO exam_progress (student_id, exam_id, progress_json) VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE progress_json = VALUES(progress_json)`,
+                [student_id, exam_id, JSON.stringify(progressData)]
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save progress' }); }
 });
@@ -654,12 +643,10 @@ router.delete('/student/exam-progress', requireSelfOrStaff(), async (req, res) =
     const { student_id, exam_id } = req.query;
     if (!student_id || !exam_id) return res.status(400).json({ error: 'student_id and exam_id required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(
+        await withConnection((connection) => connection.execute(
             'DELETE FROM exam_progress WHERE student_id = ? AND exam_id = ?',
             [student_id, exam_id]
-        );
-        await connection.release();
+        ));
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete progress' }); }
 });
@@ -687,44 +674,45 @@ router.post('/student/quick-check-submit', requireSelfOrStaff(), async (req, res
         return res.status(400).json({ error: 'student_id, widget_id, chapter_exam_id, score, and max_score are required' });
     }
     try {
-        const connection = await getDbConnection();
-        await connection.execute(QUICK_CHECK_PROGRESS_DDL);
+        const { scaledScore, realMax } = await withConnection(async (connection) => {
+            await connection.execute(QUICK_CHECK_PROGRESS_DDL);
 
-        // Keep the best attempt per widget -- a retry can only help the
-        // combined grade, never accidentally lower it.
-        await connection.execute(
-            `INSERT INTO quick_check_progress (student_id, chapter_exam_id, widget_id, points_earned, max_points)
-             VALUES (?, ?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE
-               points_earned = GREATEST(points_earned, VALUES(points_earned)),
-               max_points = VALUES(max_points),
-               updated_at = NOW()`,
-            [student_id, chapter_exam_id, widget_id, score, max_score]
-        );
+            // Keep the best attempt per widget -- a retry can only help the
+            // combined grade, never accidentally lower it.
+            await connection.execute(
+                `INSERT INTO quick_check_progress (student_id, chapter_exam_id, widget_id, points_earned, max_points)
+                 VALUES (?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE
+                   points_earned = GREATEST(points_earned, VALUES(points_earned)),
+                   max_points = VALUES(max_points),
+                   updated_at = NOW()`,
+                [student_id, chapter_exam_id, widget_id, score, max_score]
+            );
 
-        const [[agg]] = await connection.execute(
-            `SELECT SUM(points_earned) AS total_earned, SUM(max_points) AS total_max
-             FROM quick_check_progress WHERE student_id = ? AND chapter_exam_id = ?`,
-            [student_id, chapter_exam_id]
-        );
-        const [[examRow]] = await connection.execute(
-            'SELECT total_points FROM exams WHERE exam_id = ? LIMIT 1', [chapter_exam_id]
-        );
-        // Scale to the exams row's real total_points so the aggregate stays
-        // correct even if more quick-checks get added to this chapter later
-        // without the exams row being manually updated to match.
-        const realMax = examRow ? Number(examRow.total_points) : Number(agg.total_max);
-        const totalEarned = Number(agg.total_earned) || 0;
-        const totalMax = Number(agg.total_max) || 0;
-        const scaledScore = (realMax && totalMax) ? Number(((totalEarned / totalMax) * realMax).toFixed(2)) : totalEarned;
+            const [[agg]] = await connection.execute(
+                `SELECT SUM(points_earned) AS total_earned, SUM(max_points) AS total_max
+                 FROM quick_check_progress WHERE student_id = ? AND chapter_exam_id = ?`,
+                [student_id, chapter_exam_id]
+            );
+            const [[examRow]] = await connection.execute(
+                'SELECT total_points FROM exams WHERE exam_id = ? LIMIT 1', [chapter_exam_id]
+            );
+            // Scale to the exams row's real total_points so the aggregate stays
+            // correct even if more quick-checks get added to this chapter later
+            // without the exams row being manually updated to match.
+            const realMax = examRow ? Number(examRow.total_points) : Number(agg.total_max);
+            const totalEarned = Number(agg.total_earned) || 0;
+            const totalMax = Number(agg.total_max) || 0;
+            const scaledScore = (realMax && totalMax) ? Number(((totalEarned / totalMax) * realMax).toFixed(2)) : totalEarned;
 
-        await connection.execute(
-            `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW())
-             ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
-            [student_id, chapter_exam_id, scaledScore, realMax]
-        );
+            await connection.execute(
+                `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW())
+                 ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
+                [student_id, chapter_exam_id, scaledScore, realMax]
+            );
 
-        await connection.release();
+            return { scaledScore, realMax };
+        });
         res.json({ success: true, chapter_score: scaledScore, chapter_max: realMax });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save quick-check score' }); }
 });
@@ -732,10 +720,11 @@ router.post('/student/quick-check-submit', requireSelfOrStaff(), async (req, res
 // --- RUBRICS ---
 router.get('/admin/rubrics', async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await connection.execute(RUBRICS_DDL);
-        const [rows] = await connection.execute('SELECT * FROM rubrics ORDER BY title ASC');
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await connection.execute(RUBRICS_DDL);
+            const [rows] = await connection.execute('SELECT * FROM rubrics ORDER BY title ASC');
+            return rows;
+        });
         const rubrics = rows.map(r => ({
             id: r.id, title: r.title, course: r.course,
             enableSelfGrade: !!r.enable_self_grade, enablePeerGrade: !!r.enable_peer_grade,
@@ -750,18 +739,18 @@ router.post('/admin/rubrics/save', async (req, res) => {
     const { id, title, course, enableSelfGrade, enablePeerGrade, criteria, totalPoints, lastUpdated } = req.body;
     if (!id || !title) return res.status(400).json({ error: 'id and title are required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(RUBRICS_DDL);
-        await connection.execute(
-            `INSERT INTO rubrics (id, title, course, enable_self_grade, enable_peer_grade, criteria_json, total_points, last_updated)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE title = VALUES(title), course = VALUES(course),
-               enable_self_grade = VALUES(enable_self_grade), enable_peer_grade = VALUES(enable_peer_grade),
-               criteria_json = VALUES(criteria_json), total_points = VALUES(total_points), last_updated = VALUES(last_updated)`,
-            [id, title, course || '', enableSelfGrade ? 1 : 0, enablePeerGrade ? 1 : 0,
-             JSON.stringify(criteria || []), totalPoints || 0, lastUpdated || Date.now()]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(RUBRICS_DDL);
+            await connection.execute(
+                `INSERT INTO rubrics (id, title, course, enable_self_grade, enable_peer_grade, criteria_json, total_points, last_updated)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE title = VALUES(title), course = VALUES(course),
+                   enable_self_grade = VALUES(enable_self_grade), enable_peer_grade = VALUES(enable_peer_grade),
+                   criteria_json = VALUES(criteria_json), total_points = VALUES(total_points), last_updated = VALUES(last_updated)`,
+                [id, title, course || '', enableSelfGrade ? 1 : 0, enablePeerGrade ? 1 : 0,
+                 JSON.stringify(criteria || []), totalPoints || 0, lastUpdated || Date.now()]
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save rubric' }); }
 });
@@ -770,9 +759,7 @@ router.delete('/admin/rubrics/:id', async (req, res) => {
     const { id } = req.params;
     if (!id) return res.status(400).json({ error: 'id is required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute('DELETE FROM rubrics WHERE id = ?', [id]);
-        await connection.release();
+        await withConnection((connection) => connection.execute('DELETE FROM rubrics WHERE id = ?', [id]));
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete rubric' }); }
 });
@@ -796,28 +783,29 @@ const CS_UNIT_CHAPTER_SLUGS = {
 router.get('/review-questions', requireLogin, async (req, res) => {
     const { chapter } = req.query;
     try {
-        const connection = await getDbConnection();
-        await connection.execute(REVIEW_QUESTIONS_DDL);
-        let sql = 'SELECT id, chapter, grade, cat, val, q, a, d FROM review_questions';
-        const params = [];
-        const unitMatch = /^CS Unit ([1-7])$/.exec(chapter || '');
-        // "Ultimate Review" used to mean "no WHERE clause at all" -- harmless
-        // while every row in this table was Web Design content, but the CS
-        // review bank now lives in the same table, so an unfiltered query
-        // would mix CS trivia into the WD launcher's "Full Course Review".
-        // Scoped explicitly to both WD grades instead of left open.
-        if (chapter === 'Ultimate Review')    { sql += ' WHERE grade IN (?, ?)'; params.push('Web Design 1', 'Web Design 2'); }
-        else if (chapter === 'Year 1 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 1'); }
-        else if (chapter === 'Year 2 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 2'); }
-        else if (chapter === 'CS Review')     { sql += ' WHERE grade = ?'; params.push('Computer Science'); }
-        else if (unitMatch) {
-            const slugs = CS_UNIT_CHAPTER_SLUGS[Number(unitMatch[1])];
-            sql += ` WHERE grade = ? AND chapter IN (${slugs.map(() => '?').join(', ')})`;
-            params.push('Computer Science', ...slugs);
-        }
-        else if (chapter)                     { sql += ' WHERE chapter = ?'; params.push(chapter); }
-        const [rows] = await connection.execute(sql, params);
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await connection.execute(REVIEW_QUESTIONS_DDL);
+            let sql = 'SELECT id, chapter, grade, cat, val, q, a, d FROM review_questions';
+            const params = [];
+            const unitMatch = /^CS Unit ([1-7])$/.exec(chapter || '');
+            // "Ultimate Review" used to mean "no WHERE clause at all" -- harmless
+            // while every row in this table was Web Design content, but the CS
+            // review bank now lives in the same table, so an unfiltered query
+            // would mix CS trivia into the WD launcher's "Full Course Review".
+            // Scoped explicitly to both WD grades instead of left open.
+            if (chapter === 'Ultimate Review')    { sql += ' WHERE grade IN (?, ?)'; params.push('Web Design 1', 'Web Design 2'); }
+            else if (chapter === 'Year 1 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 1'); }
+            else if (chapter === 'Year 2 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 2'); }
+            else if (chapter === 'CS Review')     { sql += ' WHERE grade = ?'; params.push('Computer Science'); }
+            else if (unitMatch) {
+                const slugs = CS_UNIT_CHAPTER_SLUGS[Number(unitMatch[1])];
+                sql += ` WHERE grade = ? AND chapter IN (${slugs.map(() => '?').join(', ')})`;
+                params.push('Computer Science', ...slugs);
+            }
+            else if (chapter)                     { sql += ' WHERE chapter = ?'; params.push(chapter); }
+            const [rows] = await connection.execute(sql, params);
+            return rows;
+        });
         const questions = rows.map(r => ({ ...r, d: typeof r.d === 'string' ? JSON.parse(r.d) : (r.d || []) }));
         res.json({ questions });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch review questions' }); }
@@ -841,23 +829,24 @@ const VOCAB_TERMS_DDL = `CREATE TABLE IF NOT EXISTS vocab_terms (
 router.get('/vocab-terms', requireLogin, async (req, res) => {
     const { chapter } = req.query;
     try {
-        const connection = await getDbConnection();
-        await connection.execute(VOCAB_TERMS_DDL);
-        let sql = 'SELECT term, clue FROM vocab_terms';
-        const params = [];
-        const unitMatch = /^CS Unit ([1-7])$/.exec(chapter || '');
-        if (chapter === 'Ultimate Review')    { sql += ' WHERE grade IN (?, ?)'; params.push('Web Design 1', 'Web Design 2'); }
-        else if (chapter === 'Year 1 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 1'); }
-        else if (chapter === 'Year 2 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 2'); }
-        else if (chapter === 'CS Review')     { sql += ' WHERE grade = ?'; params.push('Computer Science'); }
-        else if (unitMatch) {
-            const slugs = CS_UNIT_CHAPTER_SLUGS[Number(unitMatch[1])];
-            sql += ` WHERE grade = ? AND chapter IN (${slugs.map(() => '?').join(', ')})`;
-            params.push('Computer Science', ...slugs);
-        }
-        else if (chapter)                     { sql += ' WHERE chapter = ?'; params.push(chapter); }
-        const [rows] = await connection.execute(sql, params);
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await connection.execute(VOCAB_TERMS_DDL);
+            let sql = 'SELECT term, clue FROM vocab_terms';
+            const params = [];
+            const unitMatch = /^CS Unit ([1-7])$/.exec(chapter || '');
+            if (chapter === 'Ultimate Review')    { sql += ' WHERE grade IN (?, ?)'; params.push('Web Design 1', 'Web Design 2'); }
+            else if (chapter === 'Year 1 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 1'); }
+            else if (chapter === 'Year 2 Review') { sql += ' WHERE grade = ?'; params.push('Web Design 2'); }
+            else if (chapter === 'CS Review')     { sql += ' WHERE grade = ?'; params.push('Computer Science'); }
+            else if (unitMatch) {
+                const slugs = CS_UNIT_CHAPTER_SLUGS[Number(unitMatch[1])];
+                sql += ` WHERE grade = ? AND chapter IN (${slugs.map(() => '?').join(', ')})`;
+                params.push('Computer Science', ...slugs);
+            }
+            else if (chapter)                     { sql += ' WHERE chapter = ?'; params.push(chapter); }
+            const [rows] = await connection.execute(sql, params);
+            return rows;
+        });
         res.json({ terms: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch vocab terms' }); }
 });
@@ -867,30 +856,30 @@ router.post('/admin/review-questions/seed', async (req, res) => {
     if (!Array.isArray(questions) || questions.length === 0)
         return res.status(400).json({ error: 'questions array required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(REVIEW_QUESTIONS_DDL);
-        if (truncate) await connection.execute('TRUNCATE TABLE review_questions');
-        const placeholders = questions.map(() => '(?,?,?,?,?,?,?)').join(',');
-        const values = [];
-        questions.forEach(q => {
-            values.push(q.chapter || null, q.grade || null, q.cat || null,
-                q.val != null ? Number(q.val) : null, q.q, q.a || null,
-                JSON.stringify(Array.isArray(q.d) ? q.d : []));
+        await withConnection(async (connection) => {
+            await connection.execute(REVIEW_QUESTIONS_DDL);
+            if (truncate) await connection.execute('TRUNCATE TABLE review_questions');
+            const placeholders = questions.map(() => '(?,?,?,?,?,?,?)').join(',');
+            const values = [];
+            questions.forEach(q => {
+                values.push(q.chapter || null, q.grade || null, q.cat || null,
+                    q.val != null ? Number(q.val) : null, q.q, q.a || null,
+                    JSON.stringify(Array.isArray(q.d) ? q.d : []));
+            });
+            await connection.execute(
+                `INSERT INTO review_questions (chapter, grade, cat, val, q, a, d) VALUES ${placeholders}`, values
+            );
         });
-        await connection.execute(
-            `INSERT INTO review_questions (chapter, grade, cat, val, q, a, d) VALUES ${placeholders}`, values
-        );
-        await connection.release();
         res.json({ success: true, count: questions.length });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to seed review questions' }); }
 });
 
 router.delete('/admin/review-questions', async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await connection.execute(REVIEW_QUESTIONS_DDL);
-        await connection.execute('TRUNCATE TABLE review_questions');
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(REVIEW_QUESTIONS_DDL);
+            await connection.execute('TRUNCATE TABLE review_questions');
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to clear review questions' }); }
 });
@@ -977,39 +966,38 @@ router.post('/submit-job-application', requireSelfOrStaff(), async (req, res) =>
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     if (!answers || typeof answers !== 'object') return res.status(400).json({ error: 'answers are required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(JOB_APPLICATIONS_DDL);
-        await ensureResumeColumns(connection);
+        await withConnection(async (connection) => {
+            await connection.execute(JOB_APPLICATIONS_DDL);
+            await ensureResumeColumns(connection);
 
-        await connection.execute(
-            `INSERT INTO job_applications
-                (student_id, role, role_label, full_name, class_period, app_date, year_track, prev_experience, answers, sig_name, sig_date, resume_filename, resume_path)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-                student_id, role || null, role_label || null,
-                fields?.fullName || null, fields?.classPeriod || null, fields?.appDate || null,
-                fields?.yearTrack || null, fields?.prevExperience || null,
-                JSON.stringify(answers),
-                fields?.sigName || null, fields?.sigDate || null,
-                resumeFilename || null, resumePath || null
-            ]
-        );
+            await connection.execute(
+                `INSERT INTO job_applications
+                    (student_id, role, role_label, full_name, class_period, app_date, year_track, prev_experience, answers, sig_name, sig_date, resume_filename, resume_path)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    student_id, role || null, role_label || null,
+                    fields?.fullName || null, fields?.classPeriod || null, fields?.appDate || null,
+                    fields?.yearTrack || null, fields?.prevExperience || null,
+                    JSON.stringify(answers),
+                    fields?.sigName || null, fields?.sigDate || null,
+                    resumeFilename || null, resumePath || null
+                ]
+            );
 
-        const [[student]] = await connection.execute('SELECT section_id FROM students WHERE student_id = ?', [student_id]);
-        const courseId = (student && await resolveCourseId(connection, student.section_id)) || '05254G1S';
+            const [[student]] = await connection.execute('SELECT section_id FROM students WHERE student_id = ?', [student_id]);
+            const courseId = (student && await resolveCourseId(connection, student.section_id)) || '05254G1S';
 
-        await connection.execute(
-            'INSERT IGNORE INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?)',
-            ['ch1_lab_job_app', 'Milestone: Part 3 — Agency Application', 25, courseId]
-        );
-        await connection.execute(
-            `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic)
-             VALUES (?, 'ch1_lab_job_app', 25, 25, NOW(), 0)
-             ON DUPLICATE KEY UPDATE score = 25, total_points = 25, timestamp = NOW(), entered_in_ic = 0`,
-            [student_id]
-        );
-
-        await connection.release();
+            await connection.execute(
+                'INSERT IGNORE INTO exams (exam_id, title, total_points, course_id) VALUES (?, ?, ?, ?)',
+                ['ch1_lab_job_app', 'Milestone: Part 3 — Agency Application', 25, courseId]
+            );
+            await connection.execute(
+                `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic)
+                 VALUES (?, 'ch1_lab_job_app', 25, 25, NOW(), 0)
+                 ON DUPLICATE KEY UPDATE score = 25, total_points = 25, timestamp = NOW(), entered_in_ic = 0`,
+                [student_id]
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to submit application' }); }
 });
@@ -1021,16 +1009,17 @@ router.post('/submit-job-application', requireSelfOrStaff(), async (req, res) =>
 // list-then-detail round trip.
 router.get('/admin/job-applications', async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await connection.execute(JOB_APPLICATIONS_DDL);
-        await ensureResumeColumns(connection);
-        const [rows] = await connection.execute(
-            `SELECT ja.*, s.first_name, s.last_name, s.section_id
-             FROM job_applications ja
-             LEFT JOIN students s ON s.student_id = ja.student_id
-             ORDER BY ja.submitted_at DESC`
-        );
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await connection.execute(JOB_APPLICATIONS_DDL);
+            await ensureResumeColumns(connection);
+            const [rows] = await connection.execute(
+                `SELECT ja.*, s.first_name, s.last_name, s.section_id
+                 FROM job_applications ja
+                 LEFT JOIN students s ON s.student_id = ja.student_id
+                 ORDER BY ja.submitted_at DESC`
+            );
+            return rows;
+        });
         res.json({ applications: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load applications' }); }
 });

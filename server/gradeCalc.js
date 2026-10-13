@@ -4,7 +4,6 @@
 // this on js/admin/gradebook.js's row-summary builder instead -- that one
 // diverges (period-specific due dates, an "EX" sentinel) and would produce
 // a different number than the student-facing one this is meant to mirror.
-const { getDbConnection } = require('./db');
 const { resolveCourseId } = require('./helpers');
 
 const COURSE_WEIGHTS = {
