@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { unitForCsChapter } = require('../gradeCalc');
 
 // Public, course-wide status page for parents -- no student-specific data,
@@ -73,65 +73,66 @@ router.get('/newsletter', async (req, res) => {
     if (!info) return res.status(400).json({ error: 'course must be wd1, wd2, or cs' });
 
     try {
-        const connection = await getDbConnection();
-        const today = getLocalDateStr();
+        const result = await withConnection(async (connection) => {
+            const today = getLocalDateStr();
 
-        // Current chapter: lowest-numbered chapter whose lab exam_id has the
-        // earliest due date that hasn't passed yet.
-        const examIdRegex = course === 'cs' ? '^cs_ch[0-9]+_' : '^ch[0-9]+_';
-        const chapterRegex = course === 'cs' ? /^cs_ch(\d+)_/ : /^ch(\d+)_/;
-        const [chapterRows] = await connection.execute(
-            `SELECT exam_id, due_date FROM exams WHERE course_id = ? AND exam_id REGEXP ? AND due_date IS NOT NULL ORDER BY due_date ASC`,
-            [info.courseId, examIdRegex]
-        );
-        const parsedChapters = chapterRows
-            .map(r => {
-                const m = r.exam_id.match(chapterRegex);
-                return m ? { chapter: parseInt(m[1], 10), dueDate: formatDbDate(r.due_date) } : null;
-            })
-            .filter(Boolean)
-            .sort((a, b) => a.chapter - b.chapter);
-        const upcomingChapter = parsedChapters.find(r => r.dueDate >= today);
-        const currentChapterNum = upcomingChapter
-            ? upcomingChapter.chapter
-            : (parsedChapters.length ? parsedChapters[parsedChapters.length - 1].chapter : 1);
+            // Current chapter: lowest-numbered chapter whose lab exam_id has the
+            // earliest due date that hasn't passed yet.
+            const examIdRegex = course === 'cs' ? '^cs_ch[0-9]+_' : '^ch[0-9]+_';
+            const chapterRegex = course === 'cs' ? /^cs_ch(\d+)_/ : /^ch(\d+)_/;
+            const [chapterRows] = await connection.execute(
+                `SELECT exam_id, due_date FROM exams WHERE course_id = ? AND exam_id REGEXP ? AND due_date IS NOT NULL ORDER BY due_date ASC`,
+                [info.courseId, examIdRegex]
+            );
+            const parsedChapters = chapterRows
+                .map(r => {
+                    const m = r.exam_id.match(chapterRegex);
+                    return m ? { chapter: parseInt(m[1], 10), dueDate: formatDbDate(r.due_date) } : null;
+                })
+                .filter(Boolean)
+                .sort((a, b) => a.chapter - b.chapter);
+            const upcomingChapter = parsedChapters.find(r => r.dueDate >= today);
+            const currentChapterNum = upcomingChapter
+                ? upcomingChapter.chapter
+                : (parsedChapters.length ? parsedChapters[parsedChapters.length - 1].chapter : 1);
 
-        const chapterTitles = course === 'cs' ? CS_CHAPTER_TITLES : WD_CHAPTER_TITLES;
-        const currentChapter = { number: currentChapterNum, title: chapterTitles[currentChapterNum] || '' };
+            const chapterTitles = course === 'cs' ? CS_CHAPTER_TITLES : WD_CHAPTER_TITLES;
+            const currentChapter = { number: currentChapterNum, title: chapterTitles[currentChapterNum] || '' };
 
-        let currentUnit = null;
-        if (info.hasUnits) {
-            const unitNum = unitForCsChapter(currentChapterNum);
-            if (unitNum) currentUnit = { number: unitNum, title: CS_UNIT_TITLES[unitNum] || `Unit ${unitNum}` };
-        }
+            let currentUnit = null;
+            if (info.hasUnits) {
+                const unitNum = unitForCsChapter(currentChapterNum);
+                if (unitNum) currentUnit = { number: unitNum, title: CS_UNIT_TITLES[unitNum] || `Unit ${unitNum}` };
+            }
 
-        // Due next / now late -- every real assignment for this course, split
-        // around today. "Now late" keeps only the most recent 8 so it reads as
-        // "what's freshly overdue," not the entire semester's backlog.
-        const [rows] = await connection.execute(
-            `SELECT exam_id, title, total_points, due_date FROM exams
-             WHERE course_id = ? AND due_date IS NOT NULL
-             ORDER BY due_date ASC`,
-            [info.courseId]
-        );
-        const items = rows
-            .filter(r => !NOISE_EXAM_ID.test(r.exam_id))
-            .map(r => ({ examId: r.exam_id, title: r.title, points: r.total_points, dueDate: formatDbDate(r.due_date) }));
+            // Due next / now late -- every real assignment for this course, split
+            // around today. "Now late" keeps only the most recent 8 so it reads as
+            // "what's freshly overdue," not the entire semester's backlog.
+            const [rows] = await connection.execute(
+                `SELECT exam_id, title, total_points, due_date FROM exams
+                 WHERE course_id = ? AND due_date IS NOT NULL
+                 ORDER BY due_date ASC`,
+                [info.courseId]
+            );
+            const items = rows
+                .filter(r => !NOISE_EXAM_ID.test(r.exam_id))
+                .map(r => ({ examId: r.exam_id, title: r.title, points: r.total_points, dueDate: formatDbDate(r.due_date) }));
 
-        const dueNext = items.filter(it => it.dueDate >= today).slice(0, 8);
-        const nowLate = items.filter(it => it.dueDate < today).slice(-8);
+            const dueNext = items.filter(it => it.dueDate >= today).slice(0, 8);
+            const nowLate = items.filter(it => it.dueDate < today).slice(-8);
 
-        await ensureNotesTable(connection);
-        const [noteRows] = await connection.execute('SELECT notes, updated_at FROM newsletter_notes WHERE course_id = ?', [course]);
-        const notes = noteRows.length ? (noteRows[0].notes || '') : '';
-        const notesUpdatedAt = noteRows.length ? noteRows[0].updated_at : null;
+            await ensureNotesTable(connection);
+            const [noteRows] = await connection.execute('SELECT notes, updated_at FROM newsletter_notes WHERE course_id = ?', [course]);
+            const notes = noteRows.length ? (noteRows[0].notes || '') : '';
+            const notesUpdatedAt = noteRows.length ? noteRows[0].updated_at : null;
 
-        await connection.release();
+            return { currentChapter, currentUnit, dueNext, nowLate, notes, notesUpdatedAt };
+        });
         res.json({
             course, courseName: info.label,
-            currentChapter, currentUnit,
-            dueNext, nowLate,
-            notes, notesUpdatedAt,
+            currentChapter: result.currentChapter, currentUnit: result.currentUnit,
+            dueNext: result.dueNext, nowLate: result.nowLate,
+            notes: result.notes, notesUpdatedAt: result.notesUpdatedAt,
             generatedAt: new Date().toISOString()
         });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to build newsletter' }); }
@@ -141,14 +142,14 @@ router.post('/admin/newsletter-notes', async (req, res) => {
     const { course, notes } = req.body || {};
     if (!COURSE_INFO[course]) return res.status(400).json({ error: 'course must be wd1, wd2, or cs' });
     try {
-        const connection = await getDbConnection();
-        await ensureNotesTable(connection);
-        await connection.execute(
-            `INSERT INTO newsletter_notes (course_id, notes) VALUES (?, ?)
-             ON DUPLICATE KEY UPDATE notes = VALUES(notes)`,
-            [course, notes || '']
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await ensureNotesTable(connection);
+            await connection.execute(
+                `INSERT INTO newsletter_notes (course_id, notes) VALUES (?, ?)
+                 ON DUPLICATE KEY UPDATE notes = VALUES(notes)`,
+                [course, notes || '']
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save notes' }); }
 });

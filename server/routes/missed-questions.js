@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { requireStaff } = require('../helpers');
 const { ensureTable, insertQuestionDetails } = require('../lib/missedQuestionsStore');
 
@@ -93,33 +93,33 @@ router.post('/admin/missed-questions/import', requireStaff, upload.array('pdfs',
     if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No PDF files received.' });
 
     try {
-        const connection = await getDbConnection();
-        await ensureTable(connection);
+        const results = await withConnection(async (connection) => {
+            await ensureTable(connection);
 
-        const results = [];
-        for (const file of req.files) {
-            try {
-                const { text } = await pdfParse(file.buffer);
-                const parsed = parseReportText(text);
+            const results = [];
+            for (const file of req.files) {
+                try {
+                    const { text } = await pdfParse(file.buffer);
+                    const parsed = parseReportText(text);
 
-                const matched = await insertQuestionDetails(connection, {
-                    studentId: parsed.studentId, studentName: parsed.studentName,
-                    chapterTitle: parsed.chapterTitle, reportType: parsed.reportType, sourceFile: file.originalname
-                }, parsed.questions);
+                    const matched = await insertQuestionDetails(connection, {
+                        studentId: parsed.studentId, studentName: parsed.studentName,
+                        chapterTitle: parsed.chapterTitle, reportType: parsed.reportType, sourceFile: file.originalname
+                    }, parsed.questions);
 
-                results.push({
-                    file: file.originalname, studentName: parsed.studentName, studentId: parsed.studentId,
-                    chapterTitle: parsed.chapterTitle, totalQuestions: parsed.questions.length,
-                    matched, unmatched: parsed.questions.length - matched,
-                    error: parsed.questions.length === 0 ? 'No questions could be parsed from this file -- is it a real exam report PDF?' : null
-                });
-            } catch (fileErr) {
-                console.error('[missed-questions] failed to parse', file.originalname, fileErr);
-                results.push({ file: file.originalname, error: 'Could not read this PDF.' });
+                    results.push({
+                        file: file.originalname, studentName: parsed.studentName, studentId: parsed.studentId,
+                        chapterTitle: parsed.chapterTitle, totalQuestions: parsed.questions.length,
+                        matched, unmatched: parsed.questions.length - matched,
+                        error: parsed.questions.length === 0 ? 'No questions could be parsed from this file -- is it a real exam report PDF?' : null
+                    });
+                } catch (fileErr) {
+                    console.error('[missed-questions] failed to parse', file.originalname, fileErr);
+                    results.push({ file: file.originalname, error: 'Could not read this PDF.' });
+                }
             }
-        }
-
-        await connection.release();
+            return results;
+        });
         res.json({ results });
     } catch (err) {
         console.error('[missed-questions] import failed', err);
@@ -129,26 +129,27 @@ router.post('/admin/missed-questions/import', requireStaff, upload.array('pdfs',
 
 router.get('/admin/missed-questions/summary', requireStaff, async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await ensureTable(connection);
-        const [rows] = await connection.execute(`
-            SELECT question_text, chapter_title, correct_choice, study_hint, concept_tag,
-                   COUNT(*) AS times_seen,
-                   SUM(CASE WHEN is_correct = 0 THEN 1 ELSE 0 END) AS times_missed
-            FROM missed_question_reports
-            GROUP BY question_text, chapter_title, correct_choice, study_hint, concept_tag
-            HAVING times_missed > 0
-            ORDER BY times_missed DESC, times_seen DESC
-        `);
-        const [unmatchedCount] = await connection.execute(
-            `SELECT COUNT(*) AS n FROM missed_question_reports WHERE matched_table IS NULL`
-        );
-        const [totals] = await connection.execute(
-            `SELECT COUNT(DISTINCT student_id) AS students, COUNT(DISTINCT source_file) AS files, COUNT(*) AS questionRows
-             FROM missed_question_reports`
-        );
-        await connection.release();
-        res.json({ questions: rows, unmatchedCount: unmatchedCount[0].n, totals: totals[0] });
+        const result = await withConnection(async (connection) => {
+            await ensureTable(connection);
+            const [rows] = await connection.execute(`
+                SELECT question_text, chapter_title, correct_choice, study_hint, concept_tag,
+                       COUNT(*) AS times_seen,
+                       SUM(CASE WHEN is_correct = 0 THEN 1 ELSE 0 END) AS times_missed
+                FROM missed_question_reports
+                GROUP BY question_text, chapter_title, correct_choice, study_hint, concept_tag
+                HAVING times_missed > 0
+                ORDER BY times_missed DESC, times_seen DESC
+            `);
+            const [unmatchedCount] = await connection.execute(
+                `SELECT COUNT(*) AS n FROM missed_question_reports WHERE matched_table IS NULL`
+            );
+            const [totals] = await connection.execute(
+                `SELECT COUNT(DISTINCT student_id) AS students, COUNT(DISTINCT source_file) AS files, COUNT(*) AS questionRows
+                 FROM missed_question_reports`
+            );
+            return { questions: rows, unmatchedCount: unmatchedCount[0].n, totals: totals[0] };
+        });
+        res.json(result);
     } catch (err) {
         console.error('[missed-questions] summary failed', err);
         res.status(500).json({ error: 'Failed to load summary.' });
@@ -157,13 +158,14 @@ router.get('/admin/missed-questions/summary', requireStaff, async (req, res) => 
 
 router.get('/admin/missed-questions/unmatched', requireStaff, async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        await ensureTable(connection);
-        const [rows] = await connection.execute(
-            `SELECT DISTINCT question_text, chapter_title, source_file FROM missed_question_reports
-             WHERE matched_table IS NULL ORDER BY imported_at DESC LIMIT 200`
-        );
-        await connection.release();
+        const rows = await withConnection(async (connection) => {
+            await ensureTable(connection);
+            const [rows] = await connection.execute(
+                `SELECT DISTINCT question_text, chapter_title, source_file FROM missed_question_reports
+                 WHERE matched_table IS NULL ORDER BY imported_at DESC LIMIT 200`
+            );
+            return rows;
+        });
         res.json({ rows });
     } catch (err) {
         console.error('[missed-questions] unmatched failed', err);

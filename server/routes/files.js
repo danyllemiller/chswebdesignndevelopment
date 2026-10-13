@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const fs   = require('fs').promises;
 const path = require('path');
 const { requireSelfOrStaff, requireStaff, requireLogin } = require('../helpers');
@@ -38,14 +38,15 @@ router.get('/student/shared-files', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     if (!student_id) return res.status(400).json({ error: 'student_id is required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(SHARED_FILES_DDL);
-        const [rows] = await connection.execute(
-            'SELECT * FROM shared_files WHERE recipient_student_id = ? ORDER BY created_at DESC',
-            [student_id]
-        );
-        await connection.release();
-        res.json({ files: rows });
+        const files = await withConnection(async (connection) => {
+            await connection.execute(SHARED_FILES_DDL);
+            const [rows] = await connection.execute(
+                'SELECT * FROM shared_files WHERE recipient_student_id = ? ORDER BY created_at DESC',
+                [student_id]
+            );
+            return rows;
+        });
+        res.json({ files });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch shared files' }); }
 });
 
@@ -54,36 +55,36 @@ router.post('/student/share-file', requireLogin, async (req, res) => {
     if (!recipient_student_id || !file_name || !url)
         return res.status(400).json({ error: 'recipient_student_id, file_name, and url are required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(SHARED_FILES_DDL);
-        const [checkRows] = await connection.execute(
-            'SELECT student_id FROM students WHERE student_id = ?', [recipient_student_id]
-        );
-        if (checkRows.length === 0) {
-            await connection.release();
-            return res.status(404).json({ error: 'Recipient student ID not found on roster' });
-        }
-        // sender_name used to come straight from the client with no tie to
-        // the session -- any logged-in student could push a "shared file"
-        // into a classmate's dropbox while naming themselves as anyone at
-        // all (a teacher, another student) for phishing/impersonation.
-        // Looked up from the caller's own session identity instead.
-        const sessionUser = req.session?.user;
-        let senderName = 'A classmate';
-        if (sessionUser?.student_id) {
-            const [senderRows] = await connection.execute(
-                'SELECT first_name, last_name FROM students WHERE student_id = ? LIMIT 1', [sessionUser.student_id]
+        const outcome = await withConnection(async (connection) => {
+            await connection.execute(SHARED_FILES_DDL);
+            const [checkRows] = await connection.execute(
+                'SELECT student_id FROM students WHERE student_id = ?', [recipient_student_id]
             );
-            if (senderRows.length > 0) senderName = `${senderRows[0].first_name} ${senderRows[0].last_name}`;
-        } else if (sessionUser?.role === 'admin' || sessionUser?.section_id === 'Teacher') {
-            senderName = 'Your Teacher';
-        }
-        await connection.execute(
-            'INSERT INTO shared_files (recipient_student_id, sender_name, file_name, url, is_folder) VALUES (?, ?, ?, ?, ?)',
-            [recipient_student_id, senderName, file_name, url, is_folder ? 1 : 0]
-        );
-        await connection.release();
-        res.json({ success: true });
+            if (checkRows.length === 0) {
+                return { status: 404, body: { error: 'Recipient student ID not found on roster' } };
+            }
+            // sender_name used to come straight from the client with no tie to
+            // the session -- any logged-in student could push a "shared file"
+            // into a classmate's dropbox while naming themselves as anyone at
+            // all (a teacher, another student) for phishing/impersonation.
+            // Looked up from the caller's own session identity instead.
+            const sessionUser = req.session?.user;
+            let senderName = 'A classmate';
+            if (sessionUser?.student_id) {
+                const [senderRows] = await connection.execute(
+                    'SELECT first_name, last_name FROM students WHERE student_id = ? LIMIT 1', [sessionUser.student_id]
+                );
+                if (senderRows.length > 0) senderName = `${senderRows[0].first_name} ${senderRows[0].last_name}`;
+            } else if (sessionUser?.role === 'admin' || sessionUser?.section_id === 'Teacher') {
+                senderName = 'Your Teacher';
+            }
+            await connection.execute(
+                'INSERT INTO shared_files (recipient_student_id, sender_name, file_name, url, is_folder) VALUES (?, ?, ?, ?, ?)',
+                [recipient_student_id, senderName, file_name, url, is_folder ? 1 : 0]
+            );
+            return { status: 200, body: { success: true } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to share file' }); }
 });
 
@@ -92,12 +93,10 @@ router.delete('/student/shared-file/:id', requireSelfOrStaff(), async (req, res)
     const { student_id } = req.query;
     if (!id || !student_id) return res.status(400).json({ error: 'id and student_id are required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(
+        await withConnection((connection) => connection.execute(
             'DELETE FROM shared_files WHERE id = ? AND recipient_student_id = ?',
             [Number(id), student_id]
-        );
-        await connection.release();
+        ));
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to delete shared file' }); }
 });

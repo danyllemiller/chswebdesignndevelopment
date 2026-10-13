@@ -5,7 +5,7 @@
 const express = require('express');
 const path = require('path');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 
 const RESERVED_SLUGS = new Set(['admin', 'api', 'new', 'login', 'logout', 'go', 'edit', 'delete']);
 const SLUG_RE = /^[a-z0-9-]+$/;
@@ -87,11 +87,12 @@ router.get('/admin/api/check', (req, res) => {
 // ── Links: create + list (Stage 1 — edit/delete are a follow-up) ─────────
 router.get('/admin/api/links', requireShortlinkAuth, async (req, res) => {
   try {
-    const connection = await getDbConnection();
-    await ensureTable(connection);
-    const [rows] = await connection.execute('SELECT * FROM short_links ORDER BY created_at DESC');
-    await connection.release();
-    res.json({ links: rows });
+    const links = await withConnection(async (connection) => {
+      await ensureTable(connection);
+      const [rows] = await connection.execute('SELECT * FROM short_links ORDER BY created_at DESC');
+      return rows;
+    });
+    res.json({ links });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch links' });
@@ -120,19 +121,19 @@ router.post('/admin/api/new', requireShortlinkAuth, async (req, res) => {
   }
 
   try {
-    const connection = await getDbConnection();
-    await ensureTable(connection);
-    const [existing] = await connection.execute('SELECT id FROM short_links WHERE slug = ?', [slug]);
-    if (existing.length > 0) {
-      await connection.release();
-      return res.status(409).json({ error: `"${slug}" is already taken — pick another slug.` });
-    }
-    await connection.execute(
-      'INSERT INTO short_links (slug, destination_url, note) VALUES (?, ?, ?)',
-      [slug, destination_url, note]
-    );
-    await connection.release();
-    res.json({ success: true, slug });
+    const outcome = await withConnection(async (connection) => {
+      await ensureTable(connection);
+      const [existing] = await connection.execute('SELECT id FROM short_links WHERE slug = ?', [slug]);
+      if (existing.length > 0) {
+        return { status: 409, body: { error: `"${slug}" is already taken — pick another slug.` } };
+      }
+      await connection.execute(
+        'INSERT INTO short_links (slug, destination_url, note) VALUES (?, ?, ?)',
+        [slug, destination_url, note]
+      );
+      return { status: 200, body: { success: true, slug } };
+    });
+    res.status(outcome.status).json(outcome.body);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to create link' });
@@ -169,14 +170,15 @@ const NOT_FOUND_HTML = `<!doctype html>
 router.get('/:slug', async (req, res) => {
   const slug = String(req.params.slug || '').trim().toLowerCase();
   try {
-    const connection = await getDbConnection();
-    await ensureTable(connection);
-    const [rows] = await connection.execute('SELECT destination_url FROM short_links WHERE slug = ?', [slug]);
-    await connection.release();
-    if (rows.length === 0) return res.status(404).send(NOT_FOUND_HTML);
+    const destinationUrl = await withConnection(async (connection) => {
+      await ensureTable(connection);
+      const [rows] = await connection.execute('SELECT destination_url FROM short_links WHERE slug = ?', [slug]);
+      return rows.length ? rows[0].destination_url : null;
+    });
+    if (!destinationUrl) return res.status(404).send(NOT_FOUND_HTML);
     // 302, not 301 -- a typo'd destination has to stay fixable without
     // fighting every visitor's browser cache.
-    res.redirect(302, rows[0].destination_url);
+    res.redirect(302, destinationUrl);
   } catch (err) {
     console.error(err);
     res.status(500).send('Something went wrong.');

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { requireLogin } = require('../helpers');
 
 // Backs js/games/firestore-shim.js -- a drop-in replacement for the small
@@ -48,12 +48,13 @@ router.get('/game-room', requireLogin, async (req, res) => {
     const { path } = req.query;
     if (!path) return res.status(400).json({ error: 'path is required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(GAME_ROOMS_DDL);
-        const [rows] = await connection.execute('SELECT state_json FROM game_rooms WHERE room_path = ?', [path]);
-        await connection.release();
-        if (rows.length === 0) return res.json({ exists: false, data: null });
-        res.json({ exists: true, data: JSON.parse(rows[0].state_json) });
+        const result = await withConnection(async (connection) => {
+            await connection.execute(GAME_ROOMS_DDL);
+            const [rows] = await connection.execute('SELECT state_json FROM game_rooms WHERE room_path = ?', [path]);
+            if (rows.length === 0) return { exists: false, data: null };
+            return { exists: true, data: JSON.parse(rows[0].state_json) };
+        });
+        res.json(result);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to read game room' }); }
 });
 
@@ -63,13 +64,13 @@ router.post('/game-room', requireLogin, async (req, res) => {
     const { path, data } = req.body;
     if (!path || !data) return res.status(400).json({ error: 'path and data are required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(GAME_ROOMS_DDL);
-        await connection.execute(
-            'INSERT INTO game_rooms (room_path, state_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE state_json = VALUES(state_json), updated_at = NOW()',
-            [path, JSON.stringify(data)]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(GAME_ROOMS_DDL);
+            await connection.execute(
+                'INSERT INTO game_rooms (room_path, state_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE state_json = VALUES(state_json), updated_at = NOW()',
+                [path, JSON.stringify(data)]
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to write game room' }); }
 });
@@ -77,27 +78,30 @@ router.post('/game-room', requireLogin, async (req, res) => {
 router.patch('/game-room', requireLogin, async (req, res) => {
     const { path, updates } = req.body;
     if (!path || !updates) return res.status(400).json({ error: 'path and updates are required' });
-    let connection;
     try {
-        connection = await getDbConnection();
-        await connection.execute(GAME_ROOMS_DDL);
-        // Locks the row for the duration of this read-modify-write so two
-        // near-simultaneous updates (two students buzzing in within the
-        // same poll interval, say) apply in sequence instead of one
-        // silently clobbering the other.
-        await connection.beginTransaction();
-        const [rows] = await connection.execute('SELECT state_json FROM game_rooms WHERE room_path = ? FOR UPDATE', [path]);
-        const state = rows.length ? JSON.parse(rows[0].state_json) : {};
-        applyDotNotationMerge(state, updates);
-        await connection.execute(
-            'INSERT INTO game_rooms (room_path, state_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE state_json = VALUES(state_json), updated_at = NOW()',
-            [path, JSON.stringify(state)]
-        );
-        await connection.commit();
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(GAME_ROOMS_DDL);
+            // Locks the row for the duration of this read-modify-write so two
+            // near-simultaneous updates (two students buzzing in within the
+            // same poll interval, say) apply in sequence instead of one
+            // silently clobbering the other.
+            await connection.beginTransaction();
+            try {
+                const [rows] = await connection.execute('SELECT state_json FROM game_rooms WHERE room_path = ? FOR UPDATE', [path]);
+                const state = rows.length ? JSON.parse(rows[0].state_json) : {};
+                applyDotNotationMerge(state, updates);
+                await connection.execute(
+                    'INSERT INTO game_rooms (room_path, state_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE state_json = VALUES(state_json), updated_at = NOW()',
+                    [path, JSON.stringify(state)]
+                );
+                await connection.commit();
+            } catch (txErr) {
+                await connection.rollback();
+                throw txErr;
+            }
+        });
         res.json({ success: true });
     } catch (err) {
-        if (connection) { try { await connection.rollback(); await connection.release(); } catch (_) {} }
         console.error(err);
         res.status(500).json({ error: 'Failed to update game room' });
     }
@@ -123,44 +127,46 @@ router.patch('/game-room', requireLogin, async (req, res) => {
 router.post('/game-room/leave-team', requireLogin, async (req, res) => {
     const { path, playerName } = req.body;
     if (!path || !playerName) return res.status(400).json({ error: 'path and playerName are required' });
-    let connection;
     try {
-        connection = await getDbConnection();
-        await connection.execute(GAME_ROOMS_DDL);
-        await connection.beginTransaction();
-        const [rows] = await connection.execute('SELECT state_json FROM game_rooms WHERE room_path = ? FOR UPDATE', [path]);
-        if (rows.length === 0) {
-            await connection.commit();
-            await connection.release();
-            return res.json({ success: true, roomClosed: false });
-        }
-        const state = JSON.parse(rows[0].state_json);
-        const teams = (state.teams || []).filter(t => t !== playerName);
-        const scores = { ...(state.scores || {}) };
-        delete scores[playerName];
-        const cpuTeams = state.cpuTeams || [];
-        const remainingHumans = teams.filter(t => !cpuTeams.includes(t));
+        const roomClosed = await withConnection(async (connection) => {
+            await connection.execute(GAME_ROOMS_DDL);
+            await connection.beginTransaction();
+            try {
+                const [rows] = await connection.execute('SELECT state_json FROM game_rooms WHERE room_path = ? FOR UPDATE', [path]);
+                if (rows.length === 0) {
+                    await connection.commit();
+                    return null; // no room to touch, not "closed" -- caller treats this as roomClosed:false
+                }
+                const state = JSON.parse(rows[0].state_json);
+                const teams = (state.teams || []).filter(t => t !== playerName);
+                const scores = { ...(state.scores || {}) };
+                delete scores[playerName];
+                const cpuTeams = state.cpuTeams || [];
+                const remainingHumans = teams.filter(t => !cpuTeams.includes(t));
 
-        if (remainingHumans.length === 0) {
-            await connection.execute('DELETE FROM game_rooms WHERE room_path = ?', [path]);
-            await connection.commit();
-            await connection.release();
-            return res.json({ success: true, roomClosed: true });
-        }
+                if (remainingHumans.length === 0) {
+                    await connection.execute('DELETE FROM game_rooms WHERE room_path = ?', [path]);
+                    await connection.commit();
+                    return true;
+                }
 
-        state.teams = teams;
-        state.scores = scores;
-        if (state.boardControl === playerName) state.boardControl = teams[0];
-        if (state.activeBuzzer === playerName) state.activeBuzzer = null;
-        await connection.execute(
-            'INSERT INTO game_rooms (room_path, state_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE state_json = VALUES(state_json), updated_at = NOW()',
-            [path, JSON.stringify(state)]
-        );
-        await connection.commit();
-        await connection.release();
-        res.json({ success: true, roomClosed: false });
+                state.teams = teams;
+                state.scores = scores;
+                if (state.boardControl === playerName) state.boardControl = teams[0];
+                if (state.activeBuzzer === playerName) state.activeBuzzer = null;
+                await connection.execute(
+                    'INSERT INTO game_rooms (room_path, state_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE state_json = VALUES(state_json), updated_at = NOW()',
+                    [path, JSON.stringify(state)]
+                );
+                await connection.commit();
+                return false;
+            } catch (txErr) {
+                await connection.rollback();
+                throw txErr;
+            }
+        });
+        res.json({ success: true, roomClosed: !!roomClosed });
     } catch (err) {
-        if (connection) { try { await connection.rollback(); await connection.release(); } catch (_) {} }
         console.error(err);
         res.status(500).json({ error: 'Failed to leave game room' });
     }

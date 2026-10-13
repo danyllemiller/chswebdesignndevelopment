@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { requireLogin } = require('../helpers');
 
 // GET /rank/leaderboard?section_id=XXX
@@ -11,51 +11,52 @@ const { requireLogin } = require('../helpers');
 router.get('/rank/leaderboard', requireLogin, async (req, res) => {
     const { section_id } = req.query;
     try {
-        const connection = await getDbConnection();
+        const { gradeRows, habitRows, attendRows, students } = await withConnection(async (connection) => {
+            const [gradeRows] = await connection.execute(`
+                SELECT student_id,
+                       ROUND(AVG(score / NULLIF(max_score, 0) * 100), 1) AS grade_score,
+                       COUNT(*)                                           AS entry_count
+                FROM student_grade_log
+                WHERE grade_date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)
+                  AND max_score > 0
+                GROUP BY student_id
+            `);
 
-        const [gradeRows] = await connection.execute(`
-            SELECT student_id,
-                   ROUND(AVG(score / NULLIF(max_score, 0) * 100), 1) AS grade_score,
-                   COUNT(*)                                           AS entry_count
-            FROM student_grade_log
-            WHERE grade_date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)
-              AND max_score > 0
-            GROUP BY student_id
-        `);
+            const [habitRows] = await connection.execute(`
+                SELECT student_id,
+                       ROUND(COUNT(DISTINCT log_date) / 28 * 100, 1) AS habit_score,
+                       COUNT(DISTINCT log_date)                       AS habit_days
+                FROM planner_habit_log
+                WHERE log_date >= DATE_SUB(CURDATE(), INTERVAL 28 DAY)
+                GROUP BY student_id
+            `);
 
-        const [habitRows] = await connection.execute(`
-            SELECT student_id,
-                   ROUND(COUNT(DISTINCT log_date) / 28 * 100, 1) AS habit_score,
-                   COUNT(DISTINCT log_date)                       AS habit_days
-            FROM planner_habit_log
-            WHERE log_date >= DATE_SUB(CURDATE(), INTERVAL 28 DAY)
-            GROUP BY student_id
-        `);
+            const [attendRows] = await connection.execute(`
+                SELECT student_id,
+                       ROUND(
+                           (SUM(CASE WHEN in_answer  = 'On Time' THEN 1 ELSE 0 END) +
+                            SUM(CASE WHEN out_answer = 'On Time' THEN 1 ELSE 0 END))
+                           / NULLIF(COUNT(*) * 2, 0) * 100, 1
+                       ) AS attend_score,
+                       COUNT(*) AS shift_count
+                FROM timesheets
+                WHERE date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)
+                GROUP BY student_id
+            `);
 
-        const [attendRows] = await connection.execute(`
-            SELECT student_id,
-                   ROUND(
-                       (SUM(CASE WHEN in_answer  = 'On Time' THEN 1 ELSE 0 END) +
-                        SUM(CASE WHEN out_answer = 'On Time' THEN 1 ELSE 0 END))
-                       / NULLIF(COUNT(*) * 2, 0) * 100, 1
-                   ) AS attend_score,
-                   COUNT(*) AS shift_count
-            FROM timesheets
-            WHERE date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)
-            GROUP BY student_id
-        `);
+            let studentSql = `
+                SELECT student_id, first_name, last_name, section_id
+                FROM students
+                WHERE (role IS NULL OR LOWER(role) NOT IN ('admin','teacher'))
+                  AND (section_id IS NULL OR section_id != 'Teacher')
+            `;
+            const params = [];
+            if (section_id) { studentSql += ' AND section_id = ?'; params.push(section_id); }
+            studentSql += ' ORDER BY last_name, first_name';
+            const [students] = await connection.execute(studentSql, params);
 
-        let studentSql = `
-            SELECT student_id, first_name, last_name, section_id
-            FROM students
-            WHERE (role IS NULL OR LOWER(role) NOT IN ('admin','teacher'))
-              AND (section_id IS NULL OR section_id != 'Teacher')
-        `;
-        const params = [];
-        if (section_id) { studentSql += ' AND section_id = ?'; params.push(section_id); }
-        studentSql += ' ORDER BY last_name, first_name';
-        const [students] = await connection.execute(studentSql, params);
-        await connection.release();
+            return { gradeRows, habitRows, attendRows, students };
+        });
 
         const gradeMap  = {};
         gradeRows.forEach(r  => { gradeMap[r.student_id]  = { score: Number(r.grade_score),  count: Number(r.entry_count) }; });
@@ -119,15 +120,16 @@ router.get('/rank/leaderboard', requireLogin, async (req, res) => {
 // GET /rank/sections — distinct section IDs for the filter bar
 router.get('/rank/sections', requireLogin, async (req, res) => {
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute(`
-            SELECT DISTINCT section_id FROM students
-            WHERE (role IS NULL OR LOWER(role) NOT IN ('admin','teacher'))
-              AND section_id IS NOT NULL AND section_id != 'Teacher'
-            ORDER BY section_id
-        `);
-        await connection.release();
-        res.json({ sections: rows.map(r => r.section_id) });
+        const sections = await withConnection(async (connection) => {
+            const [rows] = await connection.execute(`
+                SELECT DISTINCT section_id FROM students
+                WHERE (role IS NULL OR LOWER(role) NOT IN ('admin','teacher'))
+                  AND section_id IS NOT NULL AND section_id != 'Teacher'
+                ORDER BY section_id
+            `);
+            return rows.map(r => r.section_id);
+        });
+        res.json({ sections });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to fetch sections' });

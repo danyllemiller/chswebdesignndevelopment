@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 
 const CREATE_TABLE_SQL = `
   CREATE TABLE IF NOT EXISTS student_stickers (
@@ -14,13 +14,14 @@ const CREATE_TABLE_SQL = `
 // GET /admin/stickers — every awarded sticker, for client-side grouping by student
 router.get('/admin/stickers', async (req, res) => {
   try {
-    const connection = await getDbConnection();
-    await connection.execute(CREATE_TABLE_SQL);
-    const [rows] = await connection.execute(
-      'SELECT id, student_id, sticker_name, awarded_at FROM student_stickers ORDER BY awarded_at DESC'
-    );
-    await connection.release();
-    res.json({ stickers: rows });
+    const stickers = await withConnection(async (connection) => {
+      await connection.execute(CREATE_TABLE_SQL);
+      const [rows] = await connection.execute(
+        'SELECT id, student_id, sticker_name, awarded_at FROM student_stickers ORDER BY awarded_at DESC'
+      );
+      return rows;
+    });
+    res.json({ stickers });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch stickers' });
@@ -34,14 +35,15 @@ router.post('/admin/award-sticker', async (req, res) => {
     return res.status(400).json({ error: 'student_id and sticker_name are required' });
   }
   try {
-    const connection = await getDbConnection();
-    await connection.execute(CREATE_TABLE_SQL);
-    const [result] = await connection.execute(
-      'INSERT INTO student_stickers (student_id, sticker_name) VALUES (?, ?)',
-      [String(student_id).trim(), String(sticker_name).trim()]
-    );
-    await connection.release();
-    res.json({ success: true, id: result.insertId });
+    const id = await withConnection(async (connection) => {
+      await connection.execute(CREATE_TABLE_SQL);
+      const [result] = await connection.execute(
+        'INSERT INTO student_stickers (student_id, sticker_name) VALUES (?, ?)',
+        [String(student_id).trim(), String(sticker_name).trim()]
+      );
+      return result.insertId;
+    });
+    res.json({ success: true, id });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to award sticker' });
@@ -53,11 +55,12 @@ router.delete('/admin/remove-sticker', async (req, res) => {
   const { id } = req.body || {};
   if (!id) return res.status(400).json({ error: 'id is required' });
   try {
-    const connection = await getDbConnection();
-    await connection.execute(CREATE_TABLE_SQL);
-    const [result] = await connection.execute('DELETE FROM student_stickers WHERE id = ?', [id]);
-    await connection.release();
-    if (result.affectedRows === 0) return res.status(404).json({ error: 'Sticker award not found' });
+    const affectedRows = await withConnection(async (connection) => {
+      await connection.execute(CREATE_TABLE_SQL);
+      const [result] = await connection.execute('DELETE FROM student_stickers WHERE id = ?', [id]);
+      return result.affectedRows;
+    });
+    if (affectedRows === 0) return res.status(404).json({ error: 'Sticker award not found' });
     res.json({ success: true });
   } catch (err) {
     console.error(err);

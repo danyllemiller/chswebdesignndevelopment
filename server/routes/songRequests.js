@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { requireLogin, requireStaff, isStaffSession } = require('../helpers');
 
 // ==============================================================================
@@ -43,11 +43,12 @@ router.get('/song-search', requireLogin, async (req, res) => {
         const norm = (s) => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
         let statusByTrackId = {};
         let statusByNameArtist = {};
-        const connection = await getDbConnection();
-        const [existing] = await connection.execute(
-            `SELECT track_id, track_name, artist_name, status FROM song_requests WHERE status IN ('pending','approved')`
-        );
-        await connection.release();
+        const existing = await withConnection(async (connection) => {
+            const [existing] = await connection.execute(
+                `SELECT track_id, track_name, artist_name, status FROM song_requests WHERE status IN ('pending','approved')`
+            );
+            return existing;
+        });
         existing.forEach(r => {
             // approved takes priority if a track somehow matches both an
             // approved row and a separate still-pending one
@@ -82,26 +83,26 @@ router.post('/song-requests', async (req, res) => {
         return res.status(401).json({ error: 'Not authorized.' });
     }
     try {
-        const connection = await getDbConnection();
+        const id = await withConnection(async (connection) => {
+            // Re-check the explicit flag against Apple directly rather than trusting
+            // whatever the client sent -- this is what the teacher relies on to screen
+            // requests, so it shouldn't be something a request body could misreport.
+            let explicit = 0;
+            try {
+                const lookupRes = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(track_id)}`);
+                if (lookupRes.ok) {
+                    const lookupData = await lookupRes.json();
+                    explicit = lookupData.results?.[0]?.trackExplicitness === 'explicit' ? 1 : 0;
+                }
+            } catch (e) { console.error('[song-search] explicit lookup failed:', e); }
 
-        // Re-check the explicit flag against Apple directly rather than trusting
-        // whatever the client sent -- this is what the teacher relies on to screen
-        // requests, so it shouldn't be something a request body could misreport.
-        let explicit = 0;
-        try {
-            const lookupRes = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(track_id)}`);
-            if (lookupRes.ok) {
-                const lookupData = await lookupRes.json();
-                explicit = lookupData.results?.[0]?.trackExplicitness === 'explicit' ? 1 : 0;
-            }
-        } catch (e) { console.error('[song-search] explicit lookup failed:', e); }
-
-        const [result] = await connection.execute(
-            'INSERT INTO song_requests (student_id, track_id, track_name, artist_name, album_art_url, explicit) VALUES (?, ?, ?, ?, ?, ?)',
-            [student_id, track_id, track_name, artist_name || '', album_art_url || null, explicit]
-        );
-        await connection.release();
-        res.json({ success: true, id: result.insertId });
+            const [result] = await connection.execute(
+                'INSERT INTO song_requests (student_id, track_id, track_name, artist_name, album_art_url, explicit) VALUES (?, ?, ?, ?, ?, ?)',
+                [student_id, track_id, track_name, artist_name || '', album_art_url || null, explicit]
+            );
+            return result.insertId;
+        });
+        res.json({ success: true, id });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to submit request' }); }
 });
 
@@ -115,20 +116,21 @@ router.get('/song-requests', async (req, res) => {
     const isSelf = student_id && sessionUser?.student_id && String(sessionUser.student_id) === String(student_id);
     if (!isStaffSession(req) && !isSelf) return res.status(401).json({ error: 'Not authorized.' });
     try {
-        const connection = await getDbConnection();
-        const where = [];
-        const params = [];
-        if (student_id) { where.push('r.student_id = ?'); params.push(student_id); }
-        if (status) { where.push('r.status = ?'); params.push(status); }
-        const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
-        const [rows] = await connection.execute(
-            `SELECT r.*, s.first_name, s.last_name
-             FROM song_requests r
-             LEFT JOIN students s ON s.student_id = r.student_id
-             ${whereSql} ORDER BY r.requested_at DESC`, params
-        );
-        await connection.release();
-        res.json({ requests: rows });
+        const requests = await withConnection(async (connection) => {
+            const where = [];
+            const params = [];
+            if (student_id) { where.push('r.student_id = ?'); params.push(student_id); }
+            if (status) { where.push('r.status = ?'); params.push(status); }
+            const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+            const [rows] = await connection.execute(
+                `SELECT r.*, s.first_name, s.last_name
+                 FROM song_requests r
+                 LEFT JOIN students s ON s.student_id = r.student_id
+                 ${whereSql} ORDER BY r.requested_at DESC`, params
+            );
+            return rows;
+        });
+        res.json({ requests });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch requests' }); }
 });
 
@@ -140,26 +142,28 @@ router.get('/song-requests', async (req, res) => {
 router.post('/song-requests/:id/approve', requireStaff, async (req, res) => {
     const { id } = req.params;
     try {
-        const connection = await getDbConnection();
-        const [rows] = await connection.execute('SELECT * FROM song_requests WHERE id = ?', [id]);
-        if (rows.length === 0) { await connection.release(); return res.status(404).json({ error: 'Request not found' }); }
-        const request = rows[0];
+        const outcome = await withConnection(async (connection) => {
+            const [rows] = await connection.execute('SELECT * FROM song_requests WHERE id = ?', [id]);
+            if (rows.length === 0) return { status: 404, body: { error: 'Request not found' } };
+            const request = rows[0];
 
-        await connection.execute('UPDATE song_requests SET status = "approved", decided_at = NOW() WHERE id = ?', [id]);
-        await connection.release();
-        const searchTerm = `${request.track_name} ${request.artist_name}`.trim();
-        const appleMusicUrl = `https://music.apple.com/us/search?term=${encodeURIComponent(searchTerm)}`;
-        res.json({ success: true, track_id: request.track_id, apple_music_url: appleMusicUrl });
+            await connection.execute('UPDATE song_requests SET status = "approved", decided_at = NOW() WHERE id = ?', [id]);
+            const searchTerm = `${request.track_name} ${request.artist_name}`.trim();
+            const appleMusicUrl = `https://music.apple.com/us/search?term=${encodeURIComponent(searchTerm)}`;
+            return { status: 200, body: { success: true, track_id: request.track_id, apple_music_url: appleMusicUrl } };
+        });
+        res.status(outcome.status).json(outcome.body);
     } catch (err) { console.error(err); res.status(500).json({ error: err.message }); }
 });
 
 router.post('/song-requests/:id/reject', requireStaff, async (req, res) => {
     const { id } = req.params;
     try {
-        const connection = await getDbConnection();
-        const [result] = await connection.execute('UPDATE song_requests SET status = "rejected", decided_at = NOW() WHERE id = ?', [id]);
-        await connection.release();
-        if (result.affectedRows === 0) return res.status(404).json({ error: 'Request not found' });
+        const affectedRows = await withConnection(async (connection) => {
+            const [result] = await connection.execute('UPDATE song_requests SET status = "rejected", decided_at = NOW() WHERE id = ?', [id]);
+            return result.affectedRows;
+        });
+        if (affectedRows === 0) return res.status(404).json({ error: 'Request not found' });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to reject request' }); }
 });

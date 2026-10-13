@@ -5,7 +5,7 @@
 // day's lesson plan/warm-up content with no check at all.
 const express = require('express');
 const router = express.Router();
-const { getDbConnection } = require('../db');
+const { withConnection } = require('../db');
 const { requireStaff } = require('../helpers');
 
 const AGENDA_CONTENT_DDL = `CREATE TABLE IF NOT EXISTS agenda_content (
@@ -31,27 +31,28 @@ router.get('/agenda/get', requireStaff, async (req, res) => {
     const course = String(req.query.course || '').trim();
     if (!course) return res.status(400).json({ error: 'course is required' });
     try {
-        const connection = await getDbConnection();
-        await connection.execute(AGENDA_CONTENT_DDL);
-        await connection.execute(AGENDA_SCHEDULE_DDL);
+        const result = await withConnection(async (connection) => {
+            await connection.execute(AGENDA_CONTENT_DDL);
+            await connection.execute(AGENDA_SCHEDULE_DDL);
 
-        const [contentRows] = await connection.execute(
-            'SELECT block_num, content FROM agenda_content WHERE course = ? ORDER BY block_num', [course]
-        );
-        const content = {};
-        contentRows.forEach(r => { content[r.block_num] = JSON.parse(r.content); });
+            const [contentRows] = await connection.execute(
+                'SELECT block_num, content FROM agenda_content WHERE course = ? ORDER BY block_num', [course]
+            );
+            const content = {};
+            contentRows.forEach(r => { content[r.block_num] = JSON.parse(r.content); });
 
-        const [scheduleRows] = await connection.execute(
-            'SELECT track, block_num, event_date FROM agenda_schedule WHERE course = ? ORDER BY track, block_num', [course]
-        );
-        const schedule = {};
-        scheduleRows.forEach(r => {
-            if (!schedule[r.track]) schedule[r.track] = {};
-            schedule[r.track][r.block_num] = r.event_date.toISOString().split('T')[0];
+            const [scheduleRows] = await connection.execute(
+                'SELECT track, block_num, event_date FROM agenda_schedule WHERE course = ? ORDER BY track, block_num', [course]
+            );
+            const schedule = {};
+            scheduleRows.forEach(r => {
+                if (!schedule[r.track]) schedule[r.track] = {};
+                schedule[r.track][r.block_num] = r.event_date.toISOString().split('T')[0];
+            });
+
+            return { content, schedule };
         });
-
-        await connection.release();
-        res.json({ course, content, schedule });
+        res.json({ course, content: result.content, schedule: result.schedule });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch agenda' }); }
 });
 
@@ -64,14 +65,14 @@ router.post('/admin/save-agenda-content', async (req, res) => {
         return res.status(400).json({ error: 'course, block_num, and content are required' });
     }
     try {
-        const connection = await getDbConnection();
-        await connection.execute(AGENDA_CONTENT_DDL);
-        await connection.execute(
-            `INSERT INTO agenda_content (course, block_num, content) VALUES (?, ?, ?)
-             ON DUPLICATE KEY UPDATE content = VALUES(content)`,
-            [course, blockNum, JSON.stringify(content)]
-        );
-        await connection.release();
+        await withConnection(async (connection) => {
+            await connection.execute(AGENDA_CONTENT_DDL);
+            await connection.execute(
+                `INSERT INTO agenda_content (course, block_num, content) VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE content = VALUES(content)`,
+                [course, blockNum, JSON.stringify(content)]
+            );
+        });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save agenda content' }); }
 });
