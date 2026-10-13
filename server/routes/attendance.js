@@ -310,7 +310,7 @@ router.get('/admin/attendance/ic-pending', requireStaff, async (req, res) => {
                  JOIN students s ON s.student_id = a.student_id
                  LEFT JOIN tardy_form_pending tfp ON tfp.student_id = a.student_id AND tfp.date = a.date
                  WHERE a.status IN ('tardy', 'absent') AND (a.ic_synced IS NULL OR a.ic_synced = 0)
-                 ORDER BY a.date DESC, s.last_name ASC`
+                 ORDER BY a.section_id ASC, s.last_name ASC`
             );
             return rows;
         });
