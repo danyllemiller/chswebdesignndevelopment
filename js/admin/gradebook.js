@@ -1377,12 +1377,34 @@ function abbreviateAssignmentName(name) {
 // Those slugs already have a real, curriculum-accurate title in the exams
 // table (exams.title, loaded into allAssignments[key].title), so prefer
 // that whenever it's a genuine title and not just the slug repeated back.
+// "U4" for a unit-level item (Unit4-Project, "Unit4 Pre-Scale"), "CH10" for
+// a chapter-level one (cs_ch10_..., ch10_lab1, ch10_milestone, "Ch10-...") --
+// read straight off the exam_id, which already encodes it for every entry in
+// the CS_MAP/WD_MAP course maps (admin/due-dates.html). Prefixed onto column
+// headers so a column can be matched to its IC category at a glance.
+function chapterUnitTag(key) {
+    let m = key.match(/^Unit\s*[-_]?\s*(\d+)/i);
+    if (m) return `U${m[1]}`;
+    m = key.match(/(?:^|_)ch(?:apter)?\s*[-_]?\s*(\d+)/i);
+    if (m) return `CH${m[1]}`;
+    return '';
+}
+
 function displayTitle(key) {
     const title = allAssignments[key]?.title;
-    if (!title || title === key) return abbreviateAssignmentName(key);
-    let clean = title.replace(/^(Milestones?|Project|Capstone|Final Project|Lab|Walkthrough)\s*[\d&\s-]*:\s*/i, '').trim();
-    clean = clean.replace(/\s*[\[\(]\d+\s*pts?[\]\)]/i, '').trim();
-    return clean || abbreviateAssignmentName(key);
+    let label;
+    if (!title || title === key) {
+        label = abbreviateAssignmentName(key);
+    } else {
+        let clean = title.replace(/^(Milestones?|Project|Capstone|Final Project|Lab|Walkthrough)\s*[\d&\s-]*:\s*/i, '').trim();
+        clean = clean.replace(/\s*[\[\(]\d+\s*pts?[\]\)]/i, '').trim();
+        label = clean || abbreviateAssignmentName(key);
+    }
+    const tag = chapterUnitTag(key);
+    // Natural-language ids ("Ch10-Canvas...", "Unit4 Pre-Scale") already lead
+    // with their own chapter/unit after abbreviation -- don't double it up.
+    if (!tag || /^(ch(apter)?|unit|u)\s*-?\s*\d/i.test(label)) return label;
+    return `${tag} ${label}`;
 }
 
 function resolveDueDate(key, periodFilterVal) {
