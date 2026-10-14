@@ -967,7 +967,7 @@ async function initPeriodPicker() {
 // already use to compute the real final grade (grade-weights.js) -- so "Tests/Quizzes"
 // here means exactly the assignments counted in that weight bucket, not a separate
 // manually-tagged label that could drift out of sync with how grades actually add up.
-const CATEGORY_LABELS = { project_quiz: 'Tests/Quizzes', assignment: 'Assignments', final: 'Final Exam', career: 'Career Readiness' };
+const CATEGORY_LABELS = { project_quiz: 'Projects, Tests & Quizzes', assignment: 'Assignments', final: 'Final Exam', career: 'Career Readiness' };
 
 // A clock-in is identified by its exam_id naming pattern (matching the exact
 // check grade-weights.js uses), not by weight bucket -- CS folds clock-ins
@@ -1564,7 +1564,7 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
         // can never disagree with what the column is actually weighted as.
         const catForTag = getAssignmentCategory(key, courseKeyForView, allAssignments[key]?.category);
         const CATEGORY_TAG = { project_quiz: 'T', final: 'T', assignment: 'A', career: 'C' };
-        const CATEGORY_TAG_TITLE = { project_quiz: 'Test/Quiz', final: 'Final Exam', assignment: 'Assignment', career: 'Career Readiness' };
+        const CATEGORY_TAG_TITLE = { project_quiz: 'Project/Test/Quiz', final: 'Final Exam', assignment: 'Assignment', career: 'Career Readiness' };
         const tagLetter = CATEGORY_TAG[catForTag] || '';
         const tagBadge = tagLetter
             ? `<span class="badge bg-light text-dark border fw-bold mb-1" style="font-size:.62rem;" title="${CATEGORY_TAG_TITLE[catForTag]}">${tagLetter}</span>`
