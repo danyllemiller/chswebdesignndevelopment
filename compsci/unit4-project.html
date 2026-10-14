@@ -70,6 +70,122 @@
             </div>
         </div>
 
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white fw-bold"><i class="fas fa-table-list me-2"></i>Your Slide-by-Slide Plan</div>
+            <div class="card-body p-4">
+                <p class="text-muted small mb-3"><i class="fas fa-circle-info me-1"></i>Not sure how to lay out the deck? Use exactly this order. One slide per row is the minimum &mdash; use more if a stage needs the room.</p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle mb-0">
+                        <thead class="table-light">
+                            <tr><th>Slide</th><th>Title it</th><th>What goes on it</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>The Problem</td><td>Your name, your problem in one sentence, and who would use it. Example sentence: <em>"A program that ___ so that ___ can ___."</em></td></tr>
+                            <tr><td>2</td><td>Stage 1: Decomposition Tree</td><td>A tree diagram (boxes + lines). Your problem at the top, 3&ndash;5 smaller jobs underneath it. Every box should be a job the program does, written as a verb phrase ("Add up the prices," not "Prices").</td></tr>
+                            <tr><td>3</td><td>Stage 2: Pseudocode</td><td>The full algorithm in plain-English steps using <code>START</code>, <code>GET</code>, <code>SET</code>, <code>IF / ELSE</code>, a loop (<code>FOR EACH</code> or <code>WHILE</code>), <code>DISPLAY</code>, <code>END</code>. Each box from Slide 2 should show up as part of these steps.</td></tr>
+                            <tr><td>4</td><td>Stage 3: Why These Structures?</td><td>Point to your IF and your loop on Slide 3. For each one, answer: <em>"I used ___ instead of ___ because ___."</em> &ldquo;Because it works&rdquo; does not count &mdash; name the alternative and why it would be worse.</td></tr>
+                            <tr><td>5</td><td>Stage 4: The Event</td><td>Three lines: <strong>Trigger</strong> (what the user does), <strong>Algorithm</strong> (your Slide 3 algorithm runs), <strong>Response</strong> (exactly what the user sees after).</td></tr>
+                            <tr><td>6+</td><td>Stage 5: Trace Walkthrough</td><td>Two different inputs, each traced line by line in a table showing every variable's value as it changes, ending with the final output. (Bonus: a third trace with an edge case like an empty list or zero.)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-warning text-dark fw-bold"><i class="fas fa-lightbulb me-2"></i>Worked Example: What a Finished Blueprint Looks Like</div>
+            <div class="card-body p-4">
+                <p class="small mb-3"><strong class="text-danger"><i class="fas fa-ban me-1"></i>You may NOT use this problem for your own project.</strong> It's here so you can see how all five stages connect to one problem &mdash; pick your own problem and follow the same pattern.</p>
+
+                <p class="mb-1"><strong>The Problem:</strong> A snack bar checkout that adds up a customer's order and takes $1 off any order of $10 or more.</p>
+
+                <p class="mb-1 mt-3"><strong>Stage 1 &mdash; Decomposition Tree</strong></p>
+<pre class="bg-light p-3 rounded small mb-3">                Snack Bar Checkout
+      ┌────────────┬────────┴─────┬──────────────┐
+ Get the order  Add up the   Check for the   Show the
+     list        prices        discount        total</pre>
+
+                <p class="mb-1"><strong>Stage 2 &mdash; Pseudocode</strong></p>
+<pre class="bg-light p-3 rounded small mb-3">START
+  GET orderList
+  SET total = 0
+  FOR EACH price IN orderList
+      SET total = total + price
+  END FOR
+  IF total &gt;= 10 THEN
+      SET total = total - 1
+      DISPLAY "Discount applied!"
+  END IF
+  DISPLAY "Your total is $" + total
+END</pre>
+
+                <p class="mb-1"><strong>Stage 3 &mdash; Control Structure Justification</strong></p>
+                <ul class="small mb-3">
+                    <li><strong>Loop:</strong> I used <code>FOR EACH</code> instead of a <code>WHILE</code> loop because the order list already knows how many items it has. A <code>WHILE</code> loop would need a counter I could forget to increase, which could cause an infinite loop.</li>
+                    <li><strong>Decision:</strong> I used an <code>IF</code> with no <code>ELSE</code> because something extra only happens when the discount applies. An <code>IF/ELSE</code> would need an empty ELSE branch that does nothing, which makes the logic harder to read.</li>
+                </ul>
+
+                <p class="mb-1"><strong>Stage 4 &mdash; Event-Driven Design</strong></p>
+                <ul class="small mb-3">
+                    <li><strong>Trigger:</strong> The cashier clicks the <em>Checkout</em> button.</li>
+                    <li><strong>Algorithm:</strong> The Stage 2 pseudocode runs on the items currently in the order.</li>
+                    <li><strong>Response:</strong> The screen shows the final total, plus "Discount applied!" if the order was $10 or more.</li>
+                </ul>
+
+                <p class="mb-1"><strong>Stage 5 &mdash; Trace Walkthrough</strong></p>
+                <p class="small mb-1">Input A: <code>orderList = [3, 4]</code></p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-2">
+                        <thead class="table-light"><tr><th>Step</th><th>price</th><th>total</th><th>What happens</th></tr></thead>
+                        <tbody>
+                            <tr><td>SET total = 0</td><td>&ndash;</td><td>0</td><td>Start at zero</td></tr>
+                            <tr><td>Loop, item 1</td><td>3</td><td>3</td><td>0 + 3</td></tr>
+                            <tr><td>Loop, item 2</td><td>4</td><td>7</td><td>3 + 4</td></tr>
+                            <tr><td>IF total &gt;= 10</td><td>&ndash;</td><td>7</td><td>7 &gt;= 10 is FALSE, skip discount</td></tr>
+                            <tr><td>DISPLAY</td><td>&ndash;</td><td>7</td><td><strong>Output: "Your total is $7"</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small mb-1">Input B: <code>orderList = [5, 2, 4]</code></p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-2">
+                        <thead class="table-light"><tr><th>Step</th><th>price</th><th>total</th><th>What happens</th></tr></thead>
+                        <tbody>
+                            <tr><td>SET total = 0</td><td>&ndash;</td><td>0</td><td>Start at zero</td></tr>
+                            <tr><td>Loop, item 1</td><td>5</td><td>5</td><td>0 + 5</td></tr>
+                            <tr><td>Loop, item 2</td><td>2</td><td>7</td><td>5 + 2</td></tr>
+                            <tr><td>Loop, item 3</td><td>4</td><td>11</td><td>7 + 4</td></tr>
+                            <tr><td>IF total &gt;= 10</td><td>&ndash;</td><td>10</td><td>11 &gt;= 10 is TRUE, so 11 &minus; 1 = 10, show "Discount applied!"</td></tr>
+                            <tr><td>DISPLAY</td><td>&ndash;</td><td>10</td><td><strong>Output: "Discount applied!" then "Your total is $10"</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small text-muted mb-0"><i class="fas fa-star me-1"></i><strong>Bonus edge case:</strong> <code>orderList = []</code> (empty order) &mdash; the loop runs zero times, total stays 0, 0 &gt;= 10 is FALSE, output "Your total is $0." No crash, so the edge case is handled.</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-success text-white fw-bold"><i class="fas fa-clipboard-check me-2"></i>Before You Turn It In</div>
+            <div class="card-body p-4">
+                <ul class="list-unstyled mb-3">
+                    <li class="mb-2"><i class="far fa-square me-2"></i>My problem is <strong>not</strong> the same one I used in my Chapter 9&ndash;10 activities, and not the snack bar example above.</li>
+                    <li class="mb-2"><i class="far fa-square me-2"></i>Every box in my decomposition tree shows up somewhere in my pseudocode.</li>
+                    <li class="mb-2"><i class="far fa-square me-2"></i>My pseudocode has at least one <code>IF</code> and at least one loop.</li>
+                    <li class="mb-2"><i class="far fa-square me-2"></i>My Stage 3 slide names an <em>alternative</em> structure for each choice and explains why mine is better.</li>
+                    <li class="mb-2"><i class="far fa-square me-2"></i>My event slide has a trigger, the algorithm, and a response.</li>
+                    <li class="mb-2"><i class="far fa-square me-2"></i>I traced <strong>two different</strong> inputs, step by step, and my traces match what my pseudocode actually does.</li>
+                    <li class="mb-0"><i class="far fa-square me-2"></i>I have at least 6 slides and exported them as a PDF (File &rarr; Download &rarr; PDF Document).</li>
+                </ul>
+                <p class="fw-bold mb-1 small">Most common mistakes:</p>
+                <ul class="small mb-0">
+                    <li><strong>Trace doesn't match the pseudocode.</strong> If your pseudocode says <code>total - 1</code>, your trace has to subtract 1. Trace what you <em>wrote</em>, not what you meant.</li>
+                    <li><strong>Writing real code instead of pseudocode.</strong> No semicolons, curly braces, or <code>console.log</code> &mdash; plain English steps.</li>
+                    <li><strong>Uploading the Google Slides link without sharing it.</strong> If you turn in a link, set sharing to "Anyone with the link can view" first, or upload the PDF instead.</li>
+                    <li><strong>Turning in an unfinished deck to "save a spot."</strong> Upload once, when all five stages are done.</li>
+                </ul>
+            </div>
+        </div>
+
         <div class="row mb-5">
           <div class="col-12">
             <div id="project-grading-panel"
