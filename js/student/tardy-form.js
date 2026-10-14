@@ -54,9 +54,9 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
         document.getElementById('successArea').classList.remove('d-none');
         const successText = document.getElementById('successText');
         if (data.auto_marked) {
-            successText.textContent = `You're marked tardy for ${data.period} — no need to scan in, you're all set.`;
+            successText.textContent = `You're marked tardy for ${data.period}. You're all set.`;
         } else {
-            successText.textContent = "Go scan your ID at the door now — it'll mark you tardy instead of blocking you.";
+            successText.textContent = "Your late form has been submitted.";
         }
     } catch (e) {
         msg.classList.add('text-danger', 'fw-bold');
