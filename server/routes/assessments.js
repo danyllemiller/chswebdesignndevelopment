@@ -550,8 +550,12 @@ async function tryAutoGradeNotebookActivity(connection, { student_id, title, is_
          WHERE exam_id REGEXP '^cs_ch[0-9]+_' AND course_id = ? AND exam_id NOT IN (${excludePlaceholders})`,
         [courseId, ...RETIRED_CS_ACTIVITY_IDS]
     );
-    const normalizedTitle = title.trim().toLowerCase();
-    const match = activities.find(a => a.title.trim().toLowerCase() === normalizedTitle);
+    // Activity titles gained a leading "CH10 "-style tag (admin/due-dates.html
+    // TITLE_MAP) -- strip it from both sides so a note started under the old,
+    // untagged title still auto-grades against the renamed activity.
+    const normalize = (t) => String(t || '').trim().toLowerCase().replace(/^ch\d+\s+/, '');
+    const normalizedTitle = normalize(title);
+    const match = activities.find(a => normalize(a.title) === normalizedTitle);
     if (!match) return;
 
     const [existing] = await connection.execute(

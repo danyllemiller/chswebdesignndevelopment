@@ -823,7 +823,7 @@ function initCSInteractive(student) {
                 return;
             }
             activitySelect.innerHTML = '<option value="">Select an activity…</option>' +
-                currentChapterActivities.map(a => `<option value="${a.exam_id}">Ch ${chapterNum}: ${a.title} (${a.total_points} pts)</option>`).join('');
+                currentChapterActivities.map(a => `<option value="${a.exam_id}">${/^CH\d+ /i.test(a.title) ? a.title : `Ch ${chapterNum}: ${a.title}`} (${a.total_points} pts)</option>`).join('');
             if (btnStartActivity) btnStartActivity.disabled = false;
         } catch (e) {
             activitySelect.innerHTML = '<option value="">Failed to load activities</option>';
@@ -2097,7 +2097,9 @@ const escapeHtmlSimple = function(str) {
                     // Filter to only keep ONE note per unique title (the most recent one)
                     const uniqueNotesMap = new Map();
                     allNotes.forEach(n => {
-                        const titleKey = (n.title || '').trim().toLowerCase();
+                        // Ignore a leading "CH10 "/"U4 " tag so a note saved before activity
+                        // titles gained one still dedupes against one saved after.
+                        const titleKey = (n.title || '').trim().toLowerCase().replace(/^(ch|u)\d+\s+/, '');
                         // Only add if we haven't seen this title yet (first one is most recent due to sort)
                         if (titleKey && !uniqueNotesMap.has(titleKey)) {
                             uniqueNotesMap.set(titleKey, n);

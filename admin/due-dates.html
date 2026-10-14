@@ -514,9 +514,13 @@ const TITLE_MAP = (() => {
     // substring the weighted-grading category matcher in gradebook.js and
     // dashboard.js relies on — only the display title says CFA.
     m[`Unit${n}-Exam`] = `Unit ${n} Common Formative Assessment (CFA)`;
+    // CS activity/project titles lead with "CH#"/"U#" so a gradebook column
+    // or a student's grades page row can be matched to its IC category at a
+    // glance. Saving here upserts exams.title, so the tag has to live in this
+    // map or the next save would strip it back off.
     for (const ch of unit.chapters) {
-      for (const lab of (ch.labs || []))       m[lab.id] = lab.title;
-      for (const ms  of (ch.milestones || [])) m[ms.id]  = ms.title;
+      for (const lab of (ch.labs || []))       m[lab.id] = `CH${ch.ch} ${lab.title}`;
+      for (const ms  of (ch.milestones || [])) m[ms.id]  = /^Unit\d+-Project$/i.test(ms.id) ? `U${n} ${ms.title}` : ms.title;
     }
   }
   for (const ch of WD_MAP) {
