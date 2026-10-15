@@ -148,7 +148,14 @@ if (dom.form) {
         } catch (err) {
             console.error("Save failed:", err);
             logNotesError('note-form submit', err);
-            alert("Unable to save right now. Please try again.");
+            // A 401 means the server no longer recognizes this login (e.g. a
+            // session from before a server switch) -- retrying will never
+            // work, so say exactly what fixes it instead of "try again".
+            if (err?.status === 401) {
+                alert("Your login has expired, so this note was NOT saved.\n\n1. Select all your note text and copy it (Ctrl+A, then Ctrl+C).\n2. Log out and log back in.\n3. Paste your note back in and click Save.");
+            } else {
+                alert("Unable to save right now. Please try again.");
+            }
         }
     });
 }
@@ -446,7 +453,11 @@ async function saveNoteData() {
         body: JSON.stringify(payload)
     });
 
-    if (!response.ok) throw new Error(`Save failed with status ${response.status}`);
+    if (!response.ok) {
+        const err = new Error(`Save failed with status ${response.status}`);
+        err.status = response.status;
+        throw err;
+    }
 
     const result = await response.json();
     if (result?.id) activeNoteId = String(result.id);
