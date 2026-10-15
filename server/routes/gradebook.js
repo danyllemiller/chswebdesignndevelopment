@@ -245,8 +245,10 @@ async function checkRetakeClearance(connection, studentId, examId, preloadedAtte
         // auto-cleared and the teacher still had to unlock by hand. For the
         // 'notes' tier, a saved entry with real content counts too -- the
         // 300-char floor stays well above empty/near-empty drafts (0-113
-        // chars). The stricter 'worksheets' tier still needs submitted work.
-        const savedCounts = requirement === 'notes' ? 'OR LENGTH(content) >= 300' : '';
+        // chars). Per direction, saved work counts for the 'worksheets' tier
+        // too (only 73 of ~1,300 unit Worksheet rows are ever submitted); that
+        // tier stays stricter only by excluding bare 'Notes' (see categories).
+        const savedCounts = 'OR LENGTH(content) >= 300';
         const [qualifying] = await connection.execute(
             `SELECT id FROM turnins WHERE student_id = ?
              AND (chapter LIKE ? OR chapter = ? OR chapter = ?) AND category IN (${placeholders})
