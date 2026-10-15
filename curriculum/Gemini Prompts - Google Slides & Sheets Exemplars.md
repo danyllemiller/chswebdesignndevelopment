@@ -746,37 +746,107 @@ Worked Example: What a Finished Briefing Looks Like
 
 You may NOT use this technology (automated license plate readers) for your own project. It's here so you can see how every slide connects to one technology — pick your own and follow the same pattern.
 
-The Technology: Automated license plate readers (ALPRs).
+Below is a preview of a finished deck, slide by slide. Notice that each slide has only a title, a few short bullets, and a picture or diagram. The full explanation goes in what you say while presenting. Put that in your Speaker Notes in Google Slides (View → Show speaker notes).
 
-Explain It
+Slide 1Jordan Example
 
-An ALPR is a camera, mounted on a pole or a police car, that photographs every license plate passing by. Software uses optical character recognition (OCR) to turn the photo into text, then saves it with the time and GPS location. Each plate is checked against a “hot list” of plates linked to stolen cars or Amber Alerts, and a match alerts an officer.
+License Plate Readers: Who's Watching the Road?
+
+- Unit 5 Tech Impact Briefing
+- Jordan Example · CS, Period A3
+
+Photo: a plate-reader camera mounted on a traffic pole
+
+What Jordan says: Today I'm briefing you on automated license plate readers, or ALPRs, and whether they're worth what they cost us in privacy.
+
+Slide 2Jordan Example
+
+Explain It: How an ALPR Works
+
+- A camera photographs every plate that drives by
+- Software (OCR) turns the photo into text
+- Saves the plate + time + GPS location
+- Checks it against a "hot list" → alerts an officer on a match
+
+Diagram: Camera → OCR text → Database → Hot-list check → Alert
+
+What Jordan says: An ALPR is a camera, mounted on a pole or a police car, that photographs every license plate passing by. Software uses optical character recognition (OCR) to turn the photo into text, then saves it with the time and GPS location. Each plate is checked against a “hot list” of plates linked to stolen cars or Amber Alerts, and a match alerts an officer.
+
+Slide 3Jordan Example
 
 Bias & Equity Test
 
-OCR can misread a character, and that happens to whoever drives past. In 2009, a San Francisco ALPR misread one digit on Denise Green's plate, and officers stopped her at gunpoint without checking the plate themselves. A realistic test: map where a city's cameras are placed and compare that to neighborhood demographics, since more cameras in one area means more misreads and more stops for the people who live there.
+- OCR can misread one character
+- 2009, San Francisco: a misread plate → Denise Green stopped at gunpoint
+- My test: map where cameras are vs. who lives there
+- More cameras in one area = more misreads and stops there
 
-Cross-Disciplinary Connection
+Map: a city with camera locations marked as dots
 
-The same plate-recognition technology runs cashless toll roads that mail a bill to the plate's owner, and parking garages that let you in and out without a ticket. In transportation, it's a billing tool instead of a policing tool.
+What Jordan says: OCR can misread a character, and that happens to whoever drives past. In 2009, a San Francisco ALPR misread one digit on Denise Green's plate, and officers stopped her at gunpoint without checking the plate themselves. A realistic test: map where a city's cameras are placed and compare that to neighborhood demographics, since more cameras in one area means more misreads and more stops for the people who live there.
+
+Slide 4Jordan Example
+
+Same Tech, Different Field: Transportation
+
+- Cashless toll roads read your plate and mail you the bill
+- Parking garages: no ticket, the camera reads your plate
+- Same plate-reading tech: a billing tool, not a policing tool
+
+Photo: an overhead toll-road camera gantry
+
+What Jordan says: The same plate-recognition technology runs cashless toll roads that mail a bill to the plate's owner, and parking garages that let you in and out without a ticket. In transportation, it's a billing tool instead of a policing tool.
+
+Slide 5Jordan Example
 
 Privacy & Data
 
-A single plate read seems harmless, but many reads over time can show where a car sleeps, where it goes to school or worship, and who it visits. How long that data is kept depends on local rules. New Hampshire, for example, has required plate reads that don't match a hot list to be deleted within three minutes, while other places keep them much longer.
+- One plate read seems harmless
+- Many reads over time show where a car sleeps, goes to school or worship, and who it visits
+- New Hampshire: non-matches deleted within 3 minutes
+- Other places keep reads much longer
 
-IP & Legal Angle
+Map: one car's dots over a week, connecting home, school, and a friend's house
 
-Many ALPR systems are built and run by private companies that cities pay to use, so the company owns the software and often controls the database. That can make it faster for police to search across many towns. It can also make it harder for the public to see how the system works or who can search it, because the code is proprietary.
+What Jordan says: A single plate read seems harmless, but many reads over time can show where a car sleeps, where it goes to school or worship, and who it visits. How long that data is kept depends on local rules. New Hampshire, for example, has required plate reads that don't match a hot list to be deleted within three minutes, while other places keep them much longer.
 
-Your Verdict
+Slide 6Jordan Example
 
-- Position: ALPRs are a net positive only with a human double-check and short data-retention limits.
+IP & Legal Angle: Who Owns It?
 
-- Evidence 1: The hot-list match itself is useful: it can flag a stolen car or an Amber Alert vehicle faster than an officer reading plates by eye.
+- Many systems are built and run by private companies
+- Cities pay to use them, and the company often controls the database
+- Pro: police can search across many towns fast
+- Con: proprietary code is hard for the public to check
 
-- Evidence 2: The Green case shows the cost of skipping the human check. In 2014, the Ninth Circuit let her lawsuit go forward because officers never confirmed the camera's read.
+Icon pair: a city hall and a company building, with a database between them
 
-- Counterargument: Short retention limits make the data less useful for solving older crimes. That's a real cost, but I'd accept it, because a database of where everyone drove is a much bigger risk if it's misused or leaked.
+What Jordan says: Many ALPR systems are built and run by private companies that cities pay to use, so the company owns the software and often controls the database. That can make it faster for police to search across many towns. It can also make it harder for the public to see how the system works or who can search it, because the code is proprietary.
+
+Slide 7Jordan Example
+
+My Verdict
+
+- Net positive, but only with 2 rules: (1) a human double-checks every match, (2) short data-retention limits
+- Evidence: hot-list matches flag stolen cars and Amber Alert vehicles fast
+- Evidence: the Green case shows what happens without a human check
+- Counterargument: short retention makes old crimes harder to solve
+
+Simple scale graphic: Safety benefits vs. Privacy risks
+
+What Jordan says: Position: ALPRs are a net positive only with a human double-check and short data-retention limits. The hot-list match itself is useful: it can flag a stolen car or an Amber Alert vehicle faster than an officer reading plates by eye. The Green case shows the cost of skipping the human check. In 2014, the Ninth Circuit let her lawsuit go forward because officers never confirmed the camera's read. Short retention limits make the data less useful for solving older crimes. That's a real cost, but I'd accept it, because a database of where everyone drove is a much bigger risk if it's misused or leaked.
+
+Slide 8Jordan Example
+
+Works Cited
+
+- Green v. City & County of San Francisco, U.S. Court of Appeals for the Ninth Circuit, 2014.
+- New Hampshire Revised Statutes, RSA 261:75-b (license plate reader data).
+- Electronic Frontier Foundation, “Automated License Plate Readers (ALPRs),” Street-Level Surveillance.
+
+No picture needed: just clean, complete citations
+
+What Jordan says: Every fact in my deck comes from one of these sources. I cited the court case and the state law directly, not just a news story about them.
 ```
 
 ---
