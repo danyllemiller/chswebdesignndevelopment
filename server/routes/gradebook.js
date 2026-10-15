@@ -239,10 +239,18 @@ async function checkRetakeClearance(connection, studentId, examId, preloadedAtte
         // real post-fail notes saved under "Unit 2 Exam Scratchpad" never
         // satisfied this check). All three label shapes are equally real
         // work on this unit, so all three count.
+        // Notes are SAVED, almost never "submitted" (confirmed live: 837 of
+        // 934 unit-chapter Notes rows have is_submitted = 0), so requiring
+        // is_submitted = 1 meant real post-fail notes (7,000+ chars) never
+        // auto-cleared and the teacher still had to unlock by hand. For the
+        // 'notes' tier, a saved entry with real content counts too -- the
+        // 300-char floor stays well above empty/near-empty drafts (0-113
+        // chars). The stricter 'worksheets' tier still needs submitted work.
+        const savedCounts = requirement === 'notes' ? 'OR LENGTH(content) >= 300' : '';
         const [qualifying] = await connection.execute(
             `SELECT id FROM turnins WHERE student_id = ?
              AND (chapter LIKE ? OR chapter = ? OR chapter = ?) AND category IN (${placeholders})
-             AND is_submitted = 1 AND LENGTH(content) > 100 LIMIT 1`,
+             AND ((is_submitted = 1 AND LENGTH(content) > 100) ${savedCounts}) LIMIT 1`,
             [studentId, `Unit ${unitMatch[1]} - %`, `Unit ${unitMatch[1]} Exam Scratchpad`, `Unit ${unitMatch[1]} General`, ...categories]
         );
         if (qualifying.length > 0) {
