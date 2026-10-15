@@ -18,3 +18,23 @@ images/sights-sounds-making-it-pop-html-media/figure-16.gif
 
 # Student-uploaded files (resumes, etc.) — live on the server, not in git
 uploads/
+
+# macOS Finder metadata
+.DS_Store
+
+# ---------------------------------------------------------------------------
+# THIS REPO IS PUBLIC. Keep these local-only (added 2026-10-15):
+# Working files -- may contain real student data (IC exports, grade diffs)
+scratch-*
+wd-due-dates-import.csv
+wd1-wd2-gradebook-cleanup.sql
+# Teacher-only documents (answer keys, parent letters, standards PDFs, drafts)
+/*.pdf
+/*.docx
+/Claude Code Prompt - Password Validation.md
+/READ-ALOUD-IMPLEMENTATION-PROMPT.md
+/Welcome Letters 2026-2027 (ParentSquare).md
+curriculum/*.docx
+curriculum/*.pdf
+curriculum/Chapter Rewrite Prompts.md
+curriculum/VS Code - Chapter Rewrite Instructions.md
