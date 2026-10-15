@@ -32,8 +32,16 @@
 
     <div class="container pb-5" style="max-width: 900px;">
 
-        <div class="alert alert-info shadow-sm mb-4 small">
-            <i class="fas fa-circle-info me-2"></i><strong>Already started the Byte Size Games version?</strong> Finish that one instead &mdash; it counts for the same grade: <a href="/compsci/unit3-project-byte-size-games.html" class="alert-link">Original version (The Player Data Pipeline) &raquo;</a>
+        <div class="card shadow-sm border-primary mb-4">
+            <div class="card-header bg-primary text-white fw-bold"><i class="fas fa-code-fork me-2"></i>Choose Your Pipeline</div>
+            <div class="card-body p-4">
+                <p class="small mb-3">Pick <strong>one</strong> version. Both use the same four stages, are worth the same 100 points, and are turned in to the same dropbox.</p>
+                <div class="row g-3">
+                    <div class="col-md-6"><div class="border border-3 border-primary rounded p-3 h-100 bg-light"><div class="fw-bold text-primary"><i class="fas fa-circle-check me-1"></i>Option A: Personal Finance (you're here)</div><div class="small mt-1">Analyze one month of a checking account. Everyone starts from the same given bank data.</div></div></div>
+                    <div class="col-md-6"><a href="/compsci/unit3-project-grades.html" class="text-decoration-none"><div class="border rounded p-3 h-100"><div class="fw-bold text-dark">Option B: Grade Tracker &raquo;</div><div class="small text-muted mt-1">Analyze your own real grades from this class, from your Grades page.</div></div></a></div>
+                </div>
+                <p class="small text-muted mt-3 mb-0">Already started the older Byte Size Games version? <a href="/compsci/unit3-project-byte-size-games.html">Finish that one instead &raquo;</a></p>
+            </div>
         </div>
 
         <div class="card shadow-sm border-0 mb-4">
@@ -307,7 +315,7 @@
                         <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
                         <select id="uploadAssignment" class="form-select border-success" required>
                             <option value="" disabled selected>Select an assignment...</option>
-                            <option value="Unit3-Project" data-label="Project: The Personal Finance Pipeline (100 pts)">Project: The Personal Finance Pipeline (100 pts)</option>
+                            <option value="Unit3-Project" data-label="Project: The Data Pipeline (Finance or Grades) (100 pts)">Project: The Data Pipeline &mdash; Finance or Grades (100 pts)</option>
                         </select>
                     </div>
                     <div class="mb-3">

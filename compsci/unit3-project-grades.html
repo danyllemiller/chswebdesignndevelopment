@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Unit 3 Project (Option B): The Grade Tracker Pipeline | CHS Computer Science</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+
+    <link href="/css/dacStyleSheets.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/student-pages.css">
+    <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+    <script type="module" src="/js/auth-guard.js?v=1"></script>
+    <script src="/js/bootstrap.bundle.js"></script>
+    <script src="/js/jquery.js"></script>
+    <script src="/js/loader.js?v=23"></script>
+</head>
+<body style="background-color: var(--site-secondary);">
+
+    <header class="text-center" style="background: linear-gradient(135deg, var(--primary-color), var(--tertiary-color)); border-radius: 0 0 20px 20px; padding: 3rem 2rem; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0, 0, 153, 0.2);">
+        <div class="container">
+            <span class="badge mb-2 px-3 py-2 fw-bold rounded-pill shadow-sm" style="background-color: var(--code-color); color: #ffffff;">Unit 3: Data &amp; Analysis &mdash; Project</span>
+            <h1 class="display-5 fw-bold mb-0 text-white" style="color: #ffffff !important;">The Grade Tracker Pipeline</h1>
+            <p class="lead mt-2 opacity-100 text-white" style="color: #ffffff !important;">Option B: your own real grades, decoded, organized, charted, and predicted. Built in Google Sheets. 100 points.</p>
+        </div>
+    </header>
+
+    <div class="container pb-5" style="max-width: 900px;">
+
+        <div class="card shadow-sm border-primary mb-4">
+            <div class="card-header bg-primary text-white fw-bold"><i class="fas fa-code-fork me-2"></i>Choose Your Pipeline</div>
+            <div class="card-body p-4">
+                <p class="small mb-3">Pick <strong>one</strong> version. Both use the same four stages, are worth the same 100 points, and are turned in to the same dropbox.</p>
+                <div class="row g-3">
+                    <div class="col-md-6"><a href="/compsci/unit3-project.html" class="text-decoration-none"><div class="border rounded p-3 h-100"><div class="fw-bold text-dark">Option A: Personal Finance &raquo;</div><div class="small text-muted mt-1">Analyze one month of a checking account. Everyone starts from the same given bank data.</div></div></a></div>
+                    <div class="col-md-6"><div class="border border-3 border-primary rounded p-3 h-100 bg-light"><div class="fw-bold text-primary"><i class="fas fa-circle-check me-1"></i>Option B: Grade Tracker (you're here)</div><div class="small mt-1">Analyze your own real grades from this class, from your Grades page.</div></div></div>
+                </div>
+                <p class="small text-muted mt-3 mb-0">Already started the older Byte Size Games version? <a href="/compsci/unit3-project-byte-size-games.html">Finish that one instead &raquo;</a></p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold text-primary"><i class="fas fa-graduation-cap me-2"></i>Standards Addressed</h5>
+                <p class="text-muted small mb-0">Nevada Academic Content Standards for Computer Science &amp; Integrated Technology: <strong>9-12.DA.S.1</strong> (translate between bit representations), <strong>9-12.DA.S.2</strong> (tradeoffs in how data is organized/stored), <strong>9-12.DA.CVT.1</strong> (interactive data visualizations), <strong>9-12.DA.IM.1</strong> (computational models of data relationships) &mdash; the same standards Chapter 5 (The Binary Translator, The Encoding Lab), Chapter 6 (The Organization Audit, The Storage Tradeoff Matrix), Chapter 7 (The Function Toolkit, The Chart Rebuild) and Chapter 8 (The Model Build, The Reality Check) build toward.</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white fw-bold"><i class="fas fa-bullseye me-2"></i>The Scenario</div>
+            <div class="card-body p-4">
+                <p>Your grade isn't a mystery number. It's data, and you can analyze it the same way a data analyst analyzes anything else. In this version you'll take <strong>your own real grades from this class</strong> through the same four stages every data analyst uses: <strong>decode it, organize it, visualize it, and use it to predict what happens next.</strong></p>
+                <p class="mb-0">This isn't 4 separate assignments &mdash; it's <strong>one pipeline, one dataset (your grades), four stages.</strong> The grade register you build in Stage 2 is the exact same data your Stage 3 dashboard charts and your Stage 4 prediction comes from. By the end you'll know exactly where your grade stands, why, and what it would take to reach your goal. And the next time someone asks "why do I need spreadsheets?", you'll have your own answer.</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white fw-bold"><i class="fas fa-bullseye me-2"></i>Objective</div>
+            <div class="card-body p-4">
+                <p>Build a real, 4-tab Google Sheets workbook that tells <strong>one continuous story</strong> about your own grades: decode the grade codes, store your grades well, show them clearly, and predict where they're heading.</p>
+                <p class="mb-0"><strong>Deliverable:</strong> A Google Sheets workbook with 4 tabs (see below), built from <strong>at least 15 of your own graded or missing assignments</strong> from this class. Turn in a PDF export or a text file with your share link below. Share it only with your teacher; it's your private grade data.</p>
+                <p class="mb-0 mt-2 small text-muted"><i class="fas fa-circle-info me-1"></i>New to spreadsheets entirely &mdash; rows, columns, cells? <a href="/compsci/mastering_spreadsheets.html#section-7-0a" target="_blank" rel="noopener">Start here: Spreadsheet Basics, From Zero &raquo;</a></p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-info text-white fw-bold"><i class="fas fa-list-ol me-2"></i>The Four Stages (one tab each)</div>
+            <div class="card-body p-4">
+                <p class="text-muted small mb-3"><i class="fas fa-circle-info me-1"></i>Each stage links to the chapter section that actually teaches how to do it &mdash; do that first if you haven't already. Work through them in order &mdash; each one hands off to the next.</p>
+                <ol class="mb-0">
+                    <li class="mb-4">
+                        <strong>Stage 1 &mdash; Tab &ldquo;Decode the Grade Codes&rdquo;:</strong> Many school grade systems store an assignment's category, type, and status as short codes instead of words. Build a decoder key so you can label your own grades:
+                        <ul class="mt-2 mb-0">
+                            <li class="mb-1">Copy all <strong>8 raw codes</strong> from the <strong>Grade Code Key</strong> section below into your sheet, with each one's <strong>Given As</strong> and <strong>Code Type</strong>.</li>
+                            <li class="mb-1">Add three columns: <strong>Binary</strong>, <strong>Hexadecimal</strong>, and <strong>Decimal</strong>. Fill in all three for every code (one of them is just the value you were given).</li>
+                            <li class="mb-1">Add a column for the <strong>ASCII character</strong> each code decodes to (a single capital letter).</li>
+                            <li class="mb-0">Add a final column, <strong>Meaning</strong>, using the hint under the key. You'll use these letters to label every row in Stage 2.</li>
+                        </ul>
+                        <div class="mt-1"><a href="/compsci/language_of_computers.html#section-5-5" target="_blank" rel="noopener">How to: Ch 5.5, Doing This in Google Sheets &raquo;</a></div>
+                    </li>
+                    <li class="mb-4">
+                        <strong>Stage 2 &mdash; Tab &ldquo;Organize My Grades&rdquo;:</strong> Open your <a href="/student/grades.html" target="_blank" rel="noopener">Grades page</a> and copy <strong>at least 15 assignments that are already due</strong> (graded or missing &mdash; skip anything not due yet) into a table with these columns: <strong>Item #</strong>, <strong>Due Date</strong>, <strong>Assignment</strong>, <strong>Type</strong> + <strong>Type Name</strong>, <strong>Category</strong> + <strong>Category Name</strong>, <strong>Status</strong> + <strong>Status Name</strong>, <strong>Points Earned</strong>, <strong>Points Possible</strong>. Put the rows in order by due date, oldest first.
+                        <ul class="mt-2 mb-0">
+                            <li class="mb-1"><strong>Labeling tip:</strong> titles starting with <strong>CH#</strong> are labs/activities (Type L, Category A). <strong>U# Project</strong> is a project (Type P, Category T). Unit tests/CFAs are tests (Type Q, Category T). A missing assignment has Status M and <strong>0</strong> points earned.</li>
+                            <li class="mb-1"><strong>Version A &mdash; One Flat Table:</strong> all the columns above together in one table.</li>
+                            <li class="mb-1"><strong>Version B &mdash; Split Into Related Tables:</strong> Type Name, Category Name, and Status Name repeat the same words over and over. Move each into its own small lookup table (code + name), and keep only the one-letter codes in your grade table. Not sure what this looks like? <a href="/compsci/storing_data.html#section-6-1-2" target="_blank" rel="noopener">See the worked example in 6.1.2</a>.</li>
+                            <li class="mb-0"><strong>Explain your choice:</strong> If the school renamed the &ldquo;Projects, Tests &amp; Quizzes&rdquo; category, which version would be easier to update, and why? Write 2&ndash;3 real sentences comparing <strong>speed</strong>, <strong>size</strong>, and <strong>ease of updating</strong>, specific to your grade table.</li>
+                        </ul>
+                        <div class="mt-1"><a href="/compsci/storing_data.html#section-6-1" target="_blank" rel="noopener">How to: Ch 6.1, Organizing Data &raquo;</a></div>
+                    </li>
+                    <li class="mb-4">
+                        <strong>Stage 3 &mdash; Tab &ldquo;My Grade Dashboard&rdquo;:</strong> Using that <em>same</em> grade table (Version A), build the dashboard you'd actually check every week. Every number must come from a live formula referencing your table &mdash; never typed in by hand.
+                        <ul class="mt-2 mb-0">
+                            <li class="mb-1"><strong>Percent column:</strong> add a <strong>Percent</strong> column to your table: <code>Points Earned &divide; Points Possible</code>, formatted as a percent.</li>
+                            <li class="mb-1"><strong>Four KPI numbers</strong> above your charts: <code>=SUM(...)</code> of Points Earned, <code>=SUM(...)</code> of Points Possible, your <strong>Overall %</strong> (total earned &divide; total possible), and <strong>Missing Count</strong> with <code>=COUNTIF(...)</code> on the Status Name column.</li>
+                            <li class="mb-1"><strong>Chart 1 &mdash; Assignments by Status:</strong> one <code>=COUNTIF(...)</code> each for &ldquo;Graded&rdquo; and &ldquo;Missing,&rdquo; charted as a bar or pie chart.</li>
+                            <li class="mb-1"><strong>Chart 2 &mdash; Assignments by Type:</strong> one <code>=COUNTIF(...)</code> each for &ldquo;Lab / Activity,&rdquo; &ldquo;Project,&rdquo; and &ldquo;Test / Quiz,&rdquo; charted as a bar or pie chart.</li>
+                            <li class="mb-0"><strong>Check yourself:</strong> compare your Overall % to the grade on your Grades page. If they're different, write one sentence explaining why. (Hint: this class weights categories &mdash; Assignments 60%, Projects, Tests &amp; Quizzes 20%, Final Exam 20% &mdash; and your table may not include every assignment.)</li>
+                        </ul>
+                        <div class="mt-1"><a href="/compsci/mastering_spreadsheets.html#section-7-1" target="_blank" rel="noopener">How to: Ch 7.1&ndash;7.2, Formulas &amp; Data Visualisation &raquo;</a></div>
+                    </li>
+                    <li class="mb-0">
+                        <strong>Stage 4 &mdash; Tab &ldquo;Will I Hit My Goal?&rdquo;:</strong> Pick a real goal grade for this class (for example, 80% for a B or 90% for an A). Copy your Item #, Points Earned, and Points Possible (in due-date order) into this tab, then:
+                        <ol class="mt-2 mb-0">
+                            <li class="mb-1">Add a <strong>Running %</strong> column: your overall grade <em>after</em> each assignment. Use an absolute starting cell so it grows as you fill down, like <code>=SUM($B$2:B2)/SUM($C$2:C2)</code>.</li>
+                            <li class="mb-1">Add a <strong>Change</strong> column: starting on the second row, each Running % minus the one above it.</li>
+                            <li class="mb-1">Below it, <code>=AVERAGE(...)</code> all your Change values. That's your <strong>average change per assignment</strong> &mdash; is your grade trending up or down?</li>
+                            <li class="mb-1"><strong>Predict</strong> your Running % after the next assignment and the one after that (last Running % plus the average change, then plus it again), as live formulas.</li>
+                            <li class="mb-1"><strong>Goal check:</strong> <code>=(goal - last Running %) / average change</code> estimates how many more assignments until you reach your goal. If the answer is negative, your trend is moving <em>away</em> from your goal &mdash; say so.</li>
+                            <li class="mb-0">Write 2 sentences: Is this prediction realistic? Name one specific thing that could change it (like turning in a missing assignment) and estimate its effect using your own numbers.</li>
+                        </ol>
+                        <div class="mt-1"><a href="/compsci/computational_modeling.html#section-8-1" target="_blank" rel="noopener">How to: Ch 8.1, Building a Model &raquo;</a></div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-secondary text-white fw-bold"><i class="fas fa-table me-2"></i>Grade Code Key (for Stage 1)</div>
+            <div class="card-body p-4">
+                <p class="text-muted small">Everyone decodes the same 8 codes. Your <em>grades</em> are your own &mdash; that's what makes this version personal.</p>
+                <div class="table-responsive">
+                <table class="table table-sm table-bordered small">
+                    <thead class="table-light"><tr><th>Raw Code</th><th>Given As</th><th>Code Type</th></tr></thead>
+                    <tbody>
+                        <tr><td>1000001</td><td>Binary</td><td>Category</td></tr>
+                        <tr><td>54</td><td>Hex</td><td>Category</td></tr>
+                        <tr><td>1000110</td><td>Binary</td><td>Category</td></tr>
+                        <tr><td>4C</td><td>Hex</td><td>Item Type</td></tr>
+                        <tr><td>80</td><td>Decimal</td><td>Item Type</td></tr>
+                        <tr><td>1010001</td><td>Binary</td><td>Item Type</td></tr>
+                        <tr><td>47</td><td>Hex</td><td>Status</td></tr>
+                        <tr><td>77</td><td>Decimal</td><td>Status</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p class="text-muted small mb-0"><i class="fas fa-lightbulb me-1"></i>Each code decodes to one capital letter. <strong>Category</strong> letters stand for <strong>A</strong>ssignments, Projects/<strong>T</strong>ests &amp; Quizzes, or <strong>F</strong>inal Exam (this class's three weighted categories). <strong>Item Type</strong> letters stand for <strong>L</strong>ab / Activity, <strong>P</strong>roject, or Test / <strong>Q</strong>uiz. <strong>Status</strong> letters stand for <strong>G</strong>raded or <strong>M</strong>issing. Figuring out which code is which letter is your Stage 1 job.</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-warning text-dark fw-bold"><i class="fas fa-lightbulb me-2"></i>Worked Example: A Mini Grade Pipeline</div>
+            <div class="card-body p-4">
+                <p class="small mb-3"><strong class="text-danger"><i class="fas fa-ban me-1"></i>These are a fictional student's grades, not yours.</strong> Your table uses your own grades and needs at least 15 rows; this mini version uses 5 so you can see every formula.</p>
+                <p class="mb-1"><strong>Stage 2 &mdash; Jordan's grade table (Version A, headers in row 3, data in rows 4&ndash;8)</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-3">
+                        <thead class="table-light"><tr><th>Row</th><th>Assignment</th><th>Type</th><th>Category</th><th>Status Name</th><th>I: Earned</th><th>J: Possible</th><th>K: Percent</th></tr></thead>
+                        <tbody>
+                            <tr><td>4</td><td>CH5 The Binary Translator</td><td>L</td><td>A</td><td>Graded</td><td>23</td><td>25</td><td><code>=I4/J4</code> &rarr; 92%</td></tr>
+                            <tr><td>5</td><td>CH5 The Encoding Lab</td><td>L</td><td>A</td><td>Graded</td><td>18</td><td>25</td><td>72%</td></tr>
+                            <tr><td>6</td><td>Unit 3 CFA</td><td>Q</td><td>T</td><td>Graded</td><td>20</td><td>25</td><td>80%</td></tr>
+                            <tr><td>7</td><td>CH6 The Organization Audit</td><td>L</td><td>A</td><td>Missing</td><td>0</td><td>25</td><td>0%</td></tr>
+                            <tr><td>8</td><td>CH6 The Storage Tradeoff Matrix</td><td>L</td><td>A</td><td>Graded</td><td>24</td><td>25</td><td>96%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Stage 3 &mdash; KPIs</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-3">
+                        <thead class="table-light"><tr><th>KPI</th><th>Formula</th><th>Result</th></tr></thead>
+                        <tbody>
+                            <tr><td>Total Earned</td><td><code>=SUM(I4:I8)</code></td><td>85</td></tr>
+                            <tr><td>Total Possible</td><td><code>=SUM(J4:J8)</code></td><td>125</td></tr>
+                            <tr><td>Overall %</td><td><code>=SUM(I4:I8)/SUM(J4:J8)</code></td><td>68%</td></tr>
+                            <tr><td>Missing Count</td><td><code>=COUNTIF(E4:E8,"Missing")</code></td><td>1</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Stage 4 &mdash; Running % and prediction</strong> (Earned in column B, Possible in column C, data in rows 2&ndash;6)</p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-2">
+                        <thead class="table-light"><tr><th>Item</th><th>D: Running %</th><th>E: Change</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td><code>=SUM($B$2:B2)/SUM($C$2:C2)</code> &rarr; 92.0%</td><td>&ndash;</td></tr>
+                            <tr><td>2</td><td>82.0%</td><td><code>=D3-D2</code> &rarr; &minus;10.0</td></tr>
+                            <tr><td>3</td><td>81.3%</td><td>&minus;0.7</td></tr>
+                            <tr><td>4</td><td>61.0%</td><td>&minus;20.3</td></tr>
+                            <tr><td>5</td><td>68.0%</td><td>+7.0</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small mb-2">Average change: <code>=AVERAGE(E3:E6)</code> &rarr; <strong>&minus;6.0</strong> points per assignment. Predicted next two: <strong>62.0%</strong>, then <strong>56.0%</strong>. Goal check for 80%: <code>=(0.80-D6)/E8</code> comes out <em>negative</em>, which means Jordan's trend is moving <strong>away</strong> from the goal.</p>
+                <p class="small mb-0"><strong>Jordan's 2 sentences:</strong> &ldquo;This prediction isn't realistic long-term, because one missing assignment caused most of the drop. If I turn in the Organization Audit and earn 20/25, my overall goes from 68% to 84%, which is already above my 80% goal.&rdquo;</p>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+          <div class="col-12">
+            <div id="project-grading-panel"
+                 class="card border-info shadow-sm text-start"
+                 data-chapter-project-id="5"
+                 data-course="CS"
+                 data-exam-id="Unit3-Project"
+                 data-rubric='[
+                    {"key":"bit_translator","label":"Stage 1: Decode the Grade Codes","description":"All 8 codes are correctly converted across binary, hex, decimal, and ASCII, each with its correct Meaning, with no calculation errors."},
+                    {"key":"storage_tradeoffs","label":"Stage 2: Organize My Grades","description":"At least 15 of the student&#39;s own due assignments, correctly coded, shown as Version A (flat) and Version B (split into lookup tables), with specific, real tradeoffs (including the category-rename question)."},
+                    {"key":"dashboard_charts","label":"Stage 3: My Grade Dashboard","description":"A Percent column, four KPI numbers (SUM earned, SUM possible, Overall %, COUNTIF missing), a COUNTIF-based Status chart and Type chart -- all live formulas, readable and labeled -- plus a real sentence comparing Overall % to the Grades page."},
+                    {"key":"model_validation","label":"Stage 4: Will I Hit My Goal?","description":"A Running % column with an absolute-start SUM, a Change column, an AVERAGE of the changes, two live-formula predictions, a goal-check formula, and 2 honest sentences using the student&#39;s own numbers."},
+                    {"key":"organization","label":"One Connected Pipeline","description":"One continuous story about the student&#39;s own grades, not four unrelated exercises -- the Stage 1 key labels the Stage 2 table, which is what Stage 3 charts and Stage 4 predicts from. Tabs are clearly labeled and easy for someone else to follow."},
+                    {"key":"advanced_formula","label":"Advanced Formula (Bonus)","description":"Calculates a weighted grade with SUMIF per category and this class&#39;s 60/20/20 weights, OR uses conditional formatting (e.g. red for Missing) or VLOOKUP from the Version B lookup tables.","bonus":true}
+                 ]'>
+              <div class="card-body small p-4 text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading grading tool&hellip;</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card shadow border-success text-start mb-5" id="submission-zone">
+            <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>Student Assignment Dropbox</h4>
+                <span class="badge bg-light text-success shadow-sm" id="student-id-badge">Verifying...</span>
+            </div>
+            <div class="card-body p-4">
+                <form id="uploadForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
+                        <select id="uploadAssignment" class="form-select border-success" required>
+                            <option value="" disabled selected>Select an assignment...</option>
+                            <option value="Unit3-Project" data-label="Project: The Data Pipeline (Finance or Grades) (100 pts)">Project: The Data Pipeline &mdash; Finance or Grades (100 pts)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <p class="text-muted small mb-2"><strong>Turning in Google Sheets:</strong> File &rarr; Download &rarr; PDF Document, then upload that PDF below. Or upload a .txt file containing your share link.</p>
+                        <label class="form-label fw-bold">2. What type of upload is this?</label>
+                        <select id="uploadType" class="form-select border-primary bg-site-secondary">
+                            <option value="file">A Single File (PDF export or link file)</option>
+                            <option value="folder">An Entire Folder</option>
+                        </select>
+                    </div>
+                    <div class="mb-4" id="fileInputContainer">
+                        <label class="form-label fw-bold">3. Select File</label>
+                        <input type="file" id="fileInput" class="form-control" required>
+                    </div>
+                    <div class="mb-4 d-none" id="folderInputContainer">
+                        <label class="form-label fw-bold">3. Select Project Folder</label>
+                        <input type="file" id="folderInput" class="form-control" webkitdirectory directory multiple>
+                    </div>
+                    <button type="submit" id="submitBtn" class="btn btn-success w-100 fw-bold py-3 shadow-sm" disabled>Upload to Teacher Server</button>
+                </form>
+                <div id="uploadProgress" class="progress mt-3 d-none shadow-sm" style="height: 25px;">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%;">0%</div>
+                </div>
+                <div id="uploadStatus" class="mt-3 d-none p-3 rounded small fw-bold text-center shadow-sm"></div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="/proficiencyScales/cs-unit-3.html" class="btn btn-outline-primary fw-bold shadow-sm"><i class="fas fa-arrow-left me-1"></i>Back to Unit 3 Proficiency Scale</a>
+        </div>
+
+    </div>
+
+    <script type="module" src="/js/assignment-uploader.js"></script>
+    <script type="module" src="/js/student/project-grading.js?v=4"></script>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>
