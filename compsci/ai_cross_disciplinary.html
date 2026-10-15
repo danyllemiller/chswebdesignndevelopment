@@ -28,6 +28,14 @@
   <h3 id="section-13-1" class="fw-bold mt-4 border-bottom pb-2">13.1 One Algorithm, Many Fields</h3>
   <p class="fs-5">A sorting algorithm doesn't know or care whether it's sorting hospital patients by urgency, crop yields by field, or songs by tempo. The logic transfers completely — only the data and the stakes change.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Transferability: Learn It Once, Use It Everywhere</h5>
+      <p><strong>Transferability</strong> means a skill or solution learned in one place still works somewhere else. You already know this from math class. Once you learn percentages, you can use them for a store discount, a test grade, or a phone battery. The math doesn't care what the numbers stand for.</p>
+      <p>Algorithms work the same way. An algorithm is a set of steps for handling data, and those steps don't know <em>what</em> the data means. To a sorting algorithm, a list of hospital patients, a list of crop fields, and a list of songs are all just lists of things with numbers attached. Sort by the number, and you're done.</p>
+      <p>This is great news for you. You don't need to learn a brand-new kind of programming for every career. A small set of patterns, mainly <strong>sorting</strong>, <strong>matching</strong>, and <strong>classification</strong>, shows up in almost every field. Learn those patterns well, and you can bring them into medicine, sports, music, farming, fashion, or whatever you care about.</p>
+      <p class="mb-0">What <em>does</em> change from field to field are the <strong>stakes</strong>, meaning how much it matters when the algorithm gets something wrong. A bad song recommendation is a mild annoyance. A bad medical decision can hurt someone. Same logic, very different consequences. Keep that difference in mind for 13.2.</p>
+  </div>
+
   <h4 class="fw-bold mt-4 text-primary">13.1.1 The Transferability Insight</h4>
   <div class="row g-4 my-3">
       <div class="col-md-4">
@@ -56,6 +64,13 @@
       </div>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Classification</h5>
+      <p><strong>Classification</strong> means sorting things into categories, or "classes," based on their features. Every time you decide whether an email is spam or not spam, or whether a fruit is ripe or not ripe, you're classifying.</p>
+      <p>A classification algorithm learns which features point to which category. A medical system might learn that certain shapes and shadows in a scan often mean a problem, and flag those scans for a doctor to look at first. A farm system can use the same approach on drone photos of crops, flagging rows whose leaves show early signs of disease. Same steps, different pictures.</p>
+      <p class="mb-0">Notice the word "flag" in both examples. In high-stakes fields, classification usually doesn't make the final decision. It sorts the pile so a human expert looks at the most likely problems first. That's a smart way to use AI: let it handle the volume, and let people handle the judgment.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A central box labeled &quot;Matching Algorithm&quot; with three arrows branching out to three labeled icons: a heartbeat/medical cross icon labeled &quot;Patients ↔ Donors,&quot; a seedling icon labeled &quot;Seed ↔ Soil,&quot; and a musical note icon labeled &quot;Listener ↔ Song,&quot; showing the same core logic applied to three different fields.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
@@ -63,7 +78,21 @@
       <p class="mb-0">Take a matching algorithm — the kind that pairs two things based on shared attributes. In healthcare, it matches patients to donors. In agriculture, it matches seed varieties to soil conditions. In music, it matches listeners to recommended songs. What changes: the data and the consequences of a wrong match. What stays identical: the algorithm's core logic.</p>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Matching</h5>
+      <p>A <strong>matching</strong> algorithm pairs things up based on how well their features fit together. Dating apps, team-picking tools, and "you might also like" lists are all matching problems.</p>
+      <p>In medicine, matching can save lives. Kidney donation programs use matching algorithms to find donors and patients whose blood and tissue types fit. They can even build chains. Donor A gives to Patient B. Then B's family member gives to Patient C, and so on. In the U.S., new doctors are placed in hospital training programs through "the Match." Each doctor ranks the hospitals they want. Each hospital ranks the doctors it wants. A matching algorithm pairs them up.</p>
+      <p class="mb-0">A music app's matching is much lower-stakes: it pairs you with songs that fit your listening history. But the core question is identical in every case: <em>"Given what we know about both sides, which pairs fit best?"</em></p>
+  </div>
+
   <p><strong>The trap:</strong> students often think each field needs its own specialized programming knowledge from scratch. Often it doesn't — the same handful of algorithmic patterns (sorting, matching, classification) reappear constantly across completely unrelated industries, which is exactly why "learn to code" transfers so widely.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Sorting</h5>
+      <p><strong>Sorting</strong> means putting items in order: smallest to largest, A to Z, most urgent to least urgent. It sounds simple, but sorting is one of the most-used algorithms in all of computing.</p>
+      <p>Look around and you'll see sorting everywhere. A hospital emergency room sorts patients by how urgent their condition is, not by who arrived first. A search engine sorts millions of web pages so the most useful ones appear at the top. Your phone sorts messages by time, an online store sorts products by price or rating, and a sports app sorts teams by wins.</p>
+      <p class="mb-0">The tricky part usually isn't the sorting itself. It's choosing <em>what to sort by</em>. Sorting a store's products by "most popular" helps shoppers, but it also means new products rarely get seen. That choice is a lot like the "proxy" problem from Chapter 11: whatever you sort by is what wins.</p>
+  </div>
 
   <div class="alert alert-info mt-4 shadow-sm border-info">
       <div class="d-flex align-items-start">
@@ -98,13 +127,62 @@
       </ul>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Limit 1: Patterns, Not Reasoning</h5>
+      <p>Today's AI tools are very good at spotting and repeating patterns from their training data. But spotting patterns is different from understanding. An AI that has read millions of recipes can write a recipe that sounds delicious. It has never tasted food, though, and it has no idea whether the recipe actually works.</p>
+      <p>This matters most when something is new or unusual. If a situation looks like the patterns in the training data, AI often does well. If it's something the training data never covered, like a brand-new event or a rare medical condition, AI may confidently give an answer that just follows old patterns and doesn't fit the new situation.</p>
+      <p class="mb-0">A good habit is to treat AI like a very fast assistant who has read a lot but has no real-world experience. It's useful for drafting, brainstorming, and summarizing. It's not a replacement for checking facts and using your own judgment.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Limit 2: It Can't Explain Itself (and Can Be Confidently Wrong)</h5>
+      <p>When a person gives you an answer, you can ask "How do you know?" and they can show their reasoning. Most AI systems can't do that in a trustworthy way. As you learned in Chapter 12, a neural network's answer comes from millions of tiny adjustments, not from a clear chain of reasons.</p>
+      <p>Even worse, AI chatbots can produce answers that sound completely confident but are simply made up. This is often called a <strong>hallucination</strong>. In a real 2023 court case, lawyers turned in a legal document that cited court cases a chatbot had invented. The cases didn't exist. The judge fined the lawyers.</p>
+      <p class="mb-0">The lesson: <strong>confidence is not evidence</strong>. A smooth, certain-sounding answer can still be wrong. Before you use an AI answer for anything important, verify it with a reliable source. That's exactly why the Impact Brief activity asks you to name one fact you independently checked.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Limit 3: Someone Is Still Responsible</h5>
+      <p>An AI system doesn't have a job, a reputation, or a conscience. It can't be fired, sued, or held to a promise. So when an AI makes a harmful mistake, the responsibility has to land on people: the company that built it, the organization that chose to use it, or the person who relied on it.</p>
+      <p>This is why it matters <em>who deployed</em> the AI. If your school used an AI tool to grade essays and it graded unfairly, the tool can't fix it or apologize. The school and the company that made the tool are the ones who have to answer for it and make it right.</p>
+      <p class="mb-0">For you, it also means this: if you use AI to help with your work, you are responsible for what you turn in. "The AI wrote it" doesn't make a wrong fact or a copied paragraph okay.</p>
+  </div>
+
   <h4 class="fw-bold mt-5 text-info">13.2.2 Impacts Beyond Job Displacement</h4>
   <p>"AI will take jobs" is the headline everyone's heard. It's real, but it's also not the whole picture — and it crowds out impacts that matter just as much:</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Job Displacement, Honestly</h5>
+      <p><strong>Job displacement</strong> means people losing jobs because machines or software can now do that work. It's not new. Machines replaced many factory jobs decades ago, and ATMs changed what bank tellers do. AI is making it happen in new places, like writing, customer service, translation, and some office work.</p>
+      <p>The honest picture has two sides. Some tasks really are being automated, and some people really are losing work or seeing their pay drop. At the same time, many jobs aren't disappearing, they're <em>changing</em>. Workers use AI tools for some tasks and spend more time on the parts that need human judgment, creativity, or care. Brand-new jobs also appear.</p>
+      <p class="mb-0">The big questions are about fairness and timing. The people who lose jobs aren't always the ones who get the new ones, and retraining takes time and money. That's why "AI will take jobs" is true but incomplete, and why the impacts below matter just as much.</p>
+  </div>
   <ul class="fs-5">
       <li class="mb-2"><strong>Accountability gaps</strong> — when an automated decision harms someone, who's actually responsible?</li>
       <li class="mb-2"><strong>Unequal access</strong> — the most powerful tools often cost the most, widening gaps that already existed.</li>
       <li class="mb-0"><strong>Concentration of power</strong> — the data and computing resources needed to build advanced systems sit with a small number of organizations.</li>
   </ul>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Accountability Gaps</h5>
+      <p>An <strong>accountability gap</strong> happens when something goes wrong and no one is clearly responsible. With AI, many hands touch each decision. One company built it. Another company bought it. A person used it. And it learned from data that came from somewhere else. When everyone is a little bit involved, it's easy for everyone to say "not my fault."</p>
+      <p>Here's a real example. In 2018, a self-driving test car run by Uber hit and killed a woman crossing the street in Tempe, Arizona. The backup safety driver in the car was charged with a crime. People still argue about how much of the blame belonged to the company, its software, and the rules that allowed the test.</p>
+      <p class="mb-0">How do you close an accountability gap? Decide who is responsible for what <em>before</em> anything goes wrong. Keep records of how decisions were made. And make sure a real person can always review a computer's decision and change it.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Unequal Access</h5>
+      <p><strong>Unequal access</strong> means some people get the benefits of powerful AI tools while others don't. The most capable tools often cost money every month, need a fast internet connection, and work best on newer devices. That's the digital divide from Chapter 11, showing up again.</p>
+      <p>Think about what that could mean in school. A student who can pay for a top AI tutor and has fast internet at home gets an extra advantage. A student without those things doesn't. If schools and workplaces start expecting everyone to use these tools, the people without access fall further behind.</p>
+      <p class="mb-0">So when someone says "AI will help everyone," a good follow-up question is: "Everyone who can afford it, or everyone?" Free versions, school-provided access, and tools that work on older devices and slower connections all help close that gap.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Concentration of Power</h5>
+      <p>Building the most advanced AI takes three expensive things. It needs huge amounts of data. It needs thousands of powerful computers. And it needs teams of highly paid experts. Training one top AI model can cost many millions of dollars. Only a few very large companies and governments can pay that.</p>
+      <p>Millions of people now depend on AI. When only a few groups control it, those few groups hold a lot of <strong>power</strong>. They decide what the AI will and won't do. They decide what it costs and what data it collects. They decide whose values get built in. Everyone else mostly has to accept those choices.</p>
+      <p class="mb-0">This isn't always bad, but it's worth watching. Societies have ways to push back. They can pass laws. People can build open-source AI that anyone can study and use. And independent researchers can test these systems and share what they find.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean infographic with &quot;Job Displacement&quot; as one labeled icon among four equal-sized icons — the others labeled &quot;Accountability Gaps,&quot; &quot;Unequal Access,&quot; and &quot;Concentration of Power&quot; — showing all four as comparably important.">
 

@@ -29,6 +29,14 @@
   <h3 id="section-11-1" class="fw-bold mt-4 border-bottom pb-2">11.1 Where Bias Actually Enters</h3>
   <p class="fs-5">Math itself doesn't have opinions. But every algorithm is trained on data, built around a chosen goal, and designed by specific people — and bias slips in through all three, without anyone intending it.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: What "Bias" Means in Computing</h5>
+      <p>In everyday life, <strong>bias</strong> means leaning unfairly toward or against someone. In computing, <strong>algorithmic bias</strong> means a computer system gives unfair results to certain groups of people, again and again, in a pattern. For example, a system might work great for some people but make many more mistakes for others.</p>
+      <p>Here's the surprising part: a computer can be biased even when no one wanted it to be. The math inside a program doesn't have opinions. But programs learn from <em>data</em> collected from the real world, and they're built by <em>people</em> who make choices. If the data or the choices are lopsided, the program's results will be lopsided too.</p>
+      <p>Why does this matter so much? Because computers now help make big decisions: who gets a job interview, who gets approved for a loan, which patients get extra medical care. A biased person affects the people they meet. A biased program can affect millions of people at once, very quickly, and it can look "objective" while doing it.</p>
+      <p class="mb-0">The good news is that bias in computing is a problem you can find and fix, like any other bug. The rest of this chapter shows you the three places it usually sneaks in, and how to test for it on purpose.</p>
+  </div>
+
   <h4 class="fw-bold mt-4 text-primary">11.1.1 Three Entry Points</h4>
   <div class="row g-4 my-3">
       <div class="col-md-4">
@@ -57,6 +65,27 @@
       </div>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Entry Point 1: The Training Data</h5>
+      <p>Many modern programs learn by studying examples. This collection of examples is called <strong>training data</strong>. A program that recognizes faces studies thousands of photos of faces. A program that understands speech listens to thousands of hours of people talking. Whatever is in those examples is what the program learns to be good at.</p>
+      <p>Now imagine the examples aren't balanced. If most of the face photos show light-skinned men, the program gets lots of practice with light-skinned men and very little practice with anyone else. This really happened. A 2018 MIT study called "Gender Shades," led by researcher Joy Buolamwini, tested commercial face-analysis systems. They were nearly perfect on lighter-skinned men but made far more mistakes on darker-skinned women.</p>
+      <p class="mb-0">Nobody programmed those systems to treat people differently. The gap came straight from the training data. That's why the first question to ask about any system that learns is: <em>"Who is in the examples, and who is missing?"</em></p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Entry Point 2: The Chosen Proxy</h5>
+      <p>Computers can only measure things that can be turned into numbers. But many things we care about, like "Is this student working hard?" or "Does this patient need extra care?", can't be measured directly. So designers pick a <strong>proxy</strong>: something measurable that stands in for the thing they really care about.</p>
+      <p>A proxy is like judging how hard a student studied by how many hours they sat at their desk. Sometimes that works, but someone could sit there for hours watching videos. If you pick the wrong proxy, your program carefully measures the wrong thing.</p>
+      <p class="mb-0">A real example: a 2019 study published in the journal <em>Science</em> examined a hospital algorithm that predicted which patients needed extra care. It used <em>how much money had been spent on a patient's health care</em> as a proxy for <em>how sick they were</em>. But because of unequal access to care, less money had historically been spent on Black patients who were just as sick. So the algorithm flagged them less often. The researchers showed that changing the proxy greatly reduced that bias.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Entry Point 3: Who Was in the Room</h5>
+      <p>Every program is designed by a team of people, and every person has <strong>blind spots</strong>: things they don't notice because those things never happen to them. Someone who has never used a wheelchair might not notice a website that's impossible to use without a mouse. Someone whose name is always spelled "normally" by forms might not think about names with accents or hyphens.</p>
+      <p>When everyone on a design team shares the same background, they tend to share the same blind spots. They test the app the way <em>they</em> would use it, and it works. Then it reaches millions of people who are different from them, and problems show up that nobody on the team ever thought to check.</p>
+      <p class="mb-0">Voice assistants are a real example. A 2020 Stanford study found that major speech-recognition systems made almost twice as many errors with Black speakers as with white speakers. A team with a wider range of voices, accents, and life experiences is much more likely to catch problems like this before the product ships, not after.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot mockup of a search engine or autocomplete tool shown twice side by side with two different names typed into the search box, with the two very different sets of suggested results highlighted to show how a single changed word produced different outputs.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
@@ -72,12 +101,40 @@
   <h3 id="section-11-2" class="fw-bold border-bottom pb-2">11.2 Testing for Bias</h3>
   <p class="fs-5">Testing for bias isn't a philosophy debate — it's an engineering task with an actual method, the same way testing for any other bug is.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Bias Testing Is Bug Testing</h5>
+      <p>Think back to Chapter 10, where you tested a function with a normal input, an empty input, and an invalid input. You didn't just hope it worked. You planned tests to prove it. Testing for bias works the same way. Instead of asking "Does it work?", you ask "Does it work <em>equally well for different groups of people</em>?"</p>
+      <p>The basic method is simple. Run the system with inputs that are the same in every way except one, such as a different name, a different accent, or a different neighborhood. Then compare the results side by side. If changing just that one thing changes the outcome, you've found a pattern worth investigating.</p>
+      <p class="mb-0">Real companies and researchers use the three steps listed below. None of them requires guessing anyone's intentions. They're just careful, honest testing, which makes them something any programmer can do.</p>
+  </div>
+
   <h4 class="fw-bold mt-4 text-primary">11.2.1 The Mitigations</h4>
   <ul class="fs-5">
       <li class="mb-2"><strong>Diverse test data</strong> — deliberately test with inputs representing many different groups, not just the easiest ones to find.</li>
       <li class="mb-2"><strong>Disaggregated results</strong> — report outcomes broken out by group instead of one averaged number that can hide unequal results.</li>
       <li class="mb-0"><strong>An explicit review before release</strong> — a dedicated check for unequal handling, not an assumption that testing "in general" was enough.</li>
   </ul>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Diverse Test Data</h5>
+      <p><strong>Diverse test data</strong> means testing your system with examples from many different kinds of people and situations, on purpose. It's easy to test with whatever is closest: your own name, your own voice, your friends' photos. But your friends probably have a lot in common with you, so they share your blind spots.</p>
+      <p>Imagine testing a new video game controller only on adults with large hands. It might feel perfect to them and be awkward for kids. To really test it, you'd need people with small hands, large hands, and people who play one-handed. Diverse test data is the same idea for software.</p>
+      <p class="mb-0">In practice, this means making a checklist of the groups your system will be used on and making sure each group shows up in your tests. If a group is missing from your test data, you have no idea how your system treats them.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Disaggregated Results</h5>
+      <p><strong>Disaggregated</strong> is a long word with a simple meaning: "broken apart into groups." Instead of reporting one overall number, you report the results separately for each group.</p>
+      <p>Here's why that matters. Suppose a face-unlock feature works 95% of the time overall. Sounds great! But break it apart, and you might find it works 99% of the time for one group and only 80% for another. The single average hid the problem. Both of these statements are true at once, but only the disaggregated one tells you who is being let down.</p>
+      <p class="mb-0">A good habit: whenever you see one big average, ask, "Is it the same for everyone?" Averages are useful, but they can hide real unfairness inside them.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: An Explicit Review Before Release</h5>
+      <p>An <strong>explicit review</strong> is a planned step, right before a product is released, where someone's whole job is to check for unequal treatment. It's like a final inspection before a car leaves the factory, but for fairness.</p>
+      <p>Why make it a separate step? Because when people are rushing to finish a project, "we tested it in general" can feel like enough. A dedicated review forces the team to stop and ask specific questions: Did we test with diverse data? Did we look at disaggregated results? Who might this fail, and what happens to them if it does?</p>
+      <p class="mb-0">Some companies have entire teams for this, and some governments are beginning to require these reviews for systems used in hiring, lending, and policing. Even on a small school project, you can do your own version: before you call it finished, write down who might be left out and how you checked.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean bar chart graphic showing one &quot;overall average&quot; bar looking fine, next to two disaggregated bars underneath it — one much higher, one much lower — revealing the average was hiding real inequality.">
 
@@ -113,10 +170,25 @@
   <h4 class="fw-bold mt-4 text-primary">11.3.1 The Equity Deficit (Digital Divide)</h4>
   <p>An <strong>equity deficit</strong> — often called the <strong>digital divide</strong> — is unequal access to computing resources: a rural community with no reliable broadband and few CS classes, compared to a nearby city with both. This gap shapes everything downstream — education, job access, even which voices get represented in the training data behind the algorithms discussed in 11.1. A developer building software for a global audience has to remember not every user has a new phone, fast internet, or an unlimited data plan.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: The Digital Divide</h5>
+      <p>The <strong>digital divide</strong> is the gap between people who have good access to technology and people who don't. "Access" includes having a working device, fast and reliable internet, and the skills and classes to use them well.</p>
+      <p>The divide shows up in many places. Some rural areas still don't have fast home internet, because running cables to spread-out homes is expensive. Some families share one phone among several people, or have a limited data plan that runs out by the middle of the month. When schools switched to online learning in 2020, many students couldn't join video classes from home. This problem is often called the "homework gap."</p>
+      <p>This gap has ripple effects. Students with less access get less practice with technology, which can mean fewer tech classes and fewer tech jobs later. And because those communities are online less, they show up less in the training data from 11.1, which means the systems built from that data may work worse for them. The divide feeds itself.</p>
+      <p class="mb-0">As a builder, you can help close the gap with simple choices: make your website work on older phones, keep images small so they load on slow connections, and don't assume every user has unlimited data or a brand-new device.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A split-scene illustration. Left side shows a city skyline with a student on a laptop next to a strong Wi-Fi signal icon with full bars. Right side shows a rural landscape with a student on an older phone next to a weak Wi-Fi signal icon with only one bar, a broadband cable visibly stopping short of the house.">
 
   <h4 class="fw-bold mt-5 text-info">11.3.2 Computational Artifacts & Accessibility</h4>
   <p>Anything built with code — an app, a website, a program — is a <strong>computational artifact</strong>. Making one usable by everyone means designing in features like text-to-speech and adjustable font sizes from the start, not bolting them on afterward. <strong>Accessibility</strong> is a requirement, not an extra: an artifact that only works for users without disabilities has failed part of its actual audience.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Designing for Everyone from the Start</h5>
+      <p>Around 1 in 4 adults in the United States lives with some kind of disability, according to the CDC. That includes people who are blind or have low vision, people who are deaf or hard of hearing, people who have trouble using their hands, and people with learning or attention differences. If your app doesn't work for them, it doesn't work for a huge part of its audience.</p>
+      <p>Many accessibility features are simple. <strong>Text-to-speech</strong> reads the screen out loud. <strong>Adjustable font sizes</strong> let people zoom in without breaking the layout. <strong>Captions</strong> make videos usable for people who can't hear them, and for anyone watching in a noisy cafeteria. <strong>Alt text</strong> describes images for screen readers.</p>
+      <p class="mb-0">The key phrase in this section is "from the start." Adding accessibility at the very end is like trying to add a wheelchair ramp to a building after it's finished. It's possible, but it's harder, more expensive, and usually worse. When you plan accessibility from the first sketch, it becomes part of the design instead of a patch. Bonus: features like captions and bigger buttons end up helping almost everyone.</p>
+  </div>
 
   <div class="concept-box shadow-sm border-info bg-light">
       <h5 class="fw-bold text-info"><i class="fas fa-users me-2"></i> Why Diverse Teams Build Better Artifacts</h5>
@@ -125,6 +197,20 @@
 
   <h4 class="fw-bold mt-5 text-primary">11.3.3 Computing's Cultural & Economic Ripple Effects</h4>
   <p>A <strong>computational innovation</strong> doesn't just add a new tool — it can reshape a cultural practice (how people meet, shop, or get news) and reshape the job market at the same time (new roles created, others automated away). Before shipping something new, a responsible team thinks ahead about how it could be misused — a social app's addictive design, or how easily it could spread misinformation — not just how it's meant to be used.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Cultural & Economic Ripple Effects</h5>
+      <p>When a new technology spreads, it rarely changes just one thing. It sends out <strong>ripples</strong>, like a stone dropped in a pond. Think about smartphones. They changed how we take photos, but they also changed how people meet, how news spreads, how we shop, and even how we give directions ("just send me the location").</p>
+      <p>A <strong>cultural</strong> change is a change in people's habits and shared expectations. For example, many people now expect an instant reply to a text. An <strong>economic</strong> change is a change in money and jobs. Streaming music created new jobs in data and app design, while CD stores mostly disappeared. Usually both kinds of change happen at the same time.</p>
+      <p class="mb-0">Some ripples are good, and some are harmful. That's why the next idea, thinking ahead about misuse, is part of building responsibly.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Thinking Ahead About Misuse</h5>
+      <p>Every tool can be used in ways its designers never intended. A messaging app built to keep friends in touch can also be used to bully someone. A video app built for fun can be designed so it's very hard to put down. A tool that makes sharing easy also makes sharing false information easy.</p>
+      <p>Responsible teams ask "How could this go wrong?" <em>before</em> they release a product, not after the headlines. Some teams even run a planning exercise where they pretend to be a bad actor and try to misuse their own app, so they can block the worst problems early.</p>
+      <p class="mb-0">Practical fixes often come from design choices. Examples include limits on how fast a message can be forwarded to many people, easy ways to report and block, and reminders to take a break. You'll practice spotting misuse and designing a fix in the Global Audience Redesign activity below.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
       <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
