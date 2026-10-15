@@ -41,6 +41,21 @@
   </div>
   <p>Six stages, and the arrow doesn't stop at Maintain — real feedback loops back around to Analyze, starting the cycle again. Feedback isn't a courtesy tacked onto the end. It's a required stage.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: The Six Stages, One at a Time</h5>
+      <p><strong>Analyze:</strong> figure out the real problem and who has it, before building anything. Talk to the people who will use it. <strong>Design:</strong> plan how your solution will work, with sketches, decomposition trees, and pseudocode. You learned these tools in Chapter 9, and this is where they belong.</p>
+      <p><strong>Develop:</strong> write the actual code. <strong>Test:</strong> try hard to break it, using normal inputs, empty inputs, and bad inputs like you practiced in Chapter 10. Fix what breaks, then test again.</p>
+      <p><strong>Deploy:</strong> give it to real users. For an app, that means publishing it. For your Apps Script tool, it might mean sharing the spreadsheet with your class. <strong>Maintain:</strong> keep it working as people use it: fix new bugs, answer questions, and make small improvements.</p>
+      <p class="mb-0">The key word in this section's title is <strong>loop</strong>. Maintaining a tool means listening to users, and what they tell you sends you right back to Analyze to plan the next version. Games, phone apps, and websites go around this circle again and again. That's what every update is.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Collecting Real Feedback</h5>
+      <p><strong>Feedback</strong> is information from real users about what works and what doesn't. The tricky part is that people often don't say what's wrong. Ask "Do you like it?" and most people will politely say "Yeah, it's good." That tells you almost nothing.</p>
+      <p>The most useful method is to <strong>watch</strong>, not ask. Give someone your tool with a real task, like "Add a new student and find their average," and then stay quiet. Notice where they pause, where they click the wrong thing, and where they say "Wait, what?" Every hesitation is feedback. Ask them to think out loud as they go.</p>
+      <p class="mb-0">Don't jump in to help unless they're completely stuck. The moment you explain how it works, you've lost the chance to learn what wasn't clear. Your real users won't have you sitting next to them, so the tool has to explain itself.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: Six labeled boxes — Analyze, Design, Develop, Test, Deploy, Maintain — arranged in a circle, connected by arrows flowing clockwise from one to the next, with the arrow from Maintain curving back around to Analyze to show the cycle repeats instead of ending.">
 
 
@@ -51,8 +66,22 @@
 
   <p><strong>The trap:</strong> students often think every piece of feedback should be implemented. It shouldn't — declining feedback with a stated reason is a legitimate design decision, as long as you can defend why.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Accepting vs. Declining Feedback</h5>
+      <p>Not every suggestion should become a change. Sometimes two users ask for opposite things. Sometimes a suggestion would help one person but confuse everyone else. Sometimes it would take a month to build something that saves a few seconds. A good developer weighs each piece of feedback instead of saying yes to everything.</p>
+      <p>Ask three questions. <strong>How many people does this affect?</strong> If one tester struggled but five breezed through, maybe it's a small issue. <strong>How serious is it?</strong> "I couldn't submit at all" is much bigger than "I wish the button were blue." <strong>What does it cost?</strong> A quick fix that helps everyone is an easy yes.</p>
+      <p class="mb-0">When you decline, write down <em>why</em>. "Declined: adding a dark mode would take longer than the rest of the project, and only one tester asked for it" is a real, defensible reason. "I didn't want to" is not. Writing it down also shows the next person that you heard the feedback and made a choice on purpose.</p>
+  </div>
+
   <h4 class="fw-bold mt-5 text-info">16.1.2 Documenting Design Decisions</h4>
   <p>An undocumented decision gets reversed by the next person who works on it, simply because they don't know why it was made that way in the first place. A short design log — decision plus reasoning — prevents that.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Keeping a Design Log</h5>
+      <p>A <strong>design log</strong> is a simple running list of the important decisions you made and why you made them. It's like the notes a coach writes after each game, so next season they remember what worked and what didn't.</p>
+      <p>Here's why it matters. Months from now, someone (maybe you) will look at your tool and think, "Why does it ask for a password twice? That's annoying, let me remove it." If a design log says "Added a second password box because three testers made typos and got locked out," they'll understand and leave it alone.</p>
+      <p class="mb-0">Each entry only needs a few parts: the <strong>date</strong>, <strong>what changed</strong>, and <strong>why</strong>, ideally pointing to the feedback that caused it. For example: "Oct 15: added 'Saved!' message after submitting. Reason: 2 of 3 testers couldn't tell if their work went through." That's it. Short, specific, and useful.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
       <h5 class="fw-bold text-info"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -85,6 +114,13 @@
 
   <h4 class="fw-bold mt-4 text-primary">16.2.1 What Copyright Actually Means</h4>
   <p>The moment you create an original work — code, art, music, writing — you automatically own the <strong>copyright</strong> to it. No registration and no © symbol required. By default that means "all rights reserved": nobody else may legally copy, modify, or redistribute it without your permission.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Copyright, Explained</h5>
+      <p><strong>Copyright</strong> is a legal right that protects original creative work: songs, drawings, videos, stories, photos, and code. The person who creates the work owns it automatically. You don't have to sign up anywhere or put a © symbol on it. The drawing you made in art class and the code you write for this course are already protected.</p>
+      <p>Copyright gives the owner control over who can copy the work, change it, share it, or sell it. In the United States, it usually lasts for the creator's whole life plus 70 more years. That's why you can't legally upload a whole movie to your own channel, even if you bought the DVD. Owning a copy is not the same as owning the copyright.</p>
+      <p class="mb-0">"I found it on Google" doesn't mean it's free to use. Almost everything online, including images, fonts, music, and code, belongs to someone. To use it legally, you need permission. Usually that permission comes from a <strong>license</strong>, which is exactly what the rest of this section is about.</p>
+  </div>
 
   <div class="concept-box shadow-sm border-warning bg-light">
       <h5 class="fw-bold text-dark"><i class="fas fa-lightbulb me-2"></i> Where the Confusion Starts: Copyright vs. Copyleft</h5>
@@ -127,7 +163,42 @@
       </div>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Permissive Licenses</h5>
+      <p>A <strong>permissive</strong> license says, "Use this almost any way you want." You can put the code in your own projects. You can change it. You can even sell what you build with it.</p>
+      <p>Usually there's just one small rule. Keep the author's name and the license text with the code. The <strong>MIT License</strong> is the most popular example. You can read it in about a minute. It basically says, "Do what you like. Just give credit, and don't blame us if it breaks."</p>
+      <p class="mb-0">That's why so many people use permissive code. Big companies and solo coders can both build on it without worrying about strict rules.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Copyleft Licenses</h5>
+      <p>A <strong>copyleft</strong> license also lets you use, change, and share the code for free, but with one big condition: if you share or sell something built from it, your version must use the <em>same</em> license. You have to keep it just as open, including sharing your source code.</p>
+      <p>The best-known copyleft license is the <strong>GPL</strong> (GNU General Public License). The idea behind it is "share and share alike." People gave their work away freely, so anything built on it has to stay free and open for the next person too.</p>
+      <p class="mb-0">Copyleft is great for open projects, but it matters a lot for businesses. A company that adds GPL code to its app and then sells that app may have to release its own code to the public. That's why checking the license <em>before</em> you build matters.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Proprietary Licenses</h5>
+      <p><strong>Proprietary</strong> software is owned by a company or person who keeps tight control. You usually can't see the code, change it, or share copies. You're only allowed to <em>use</em> it, under the owner's rules.</p>
+      <p>Most software you pay for works this way, like many video games, Microsoft Office, and Adobe Photoshop. When you "buy" them, you're actually buying a license to use them. The long "Terms of Service" you agree to before installing is the license.</p>
+      <p class="mb-0">Proprietary doesn't mean bad. Companies spend a lot of money building software, and licenses let them earn that money back and pay their developers. It just means the rules are set by the owner, and you need to follow them.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Creative Commons & Public Domain</h5>
+      <p>Images, icons, fonts, and music have their own common license family called <strong>Creative Commons</strong> (CC). You'll see short codes that tell you the rules. <strong>BY</strong> means you must credit the creator. <strong>NC</strong> means non-commercial only, so you can't use it in something you sell. <strong>SA</strong> means share-alike, so your version must use the same license. <strong>ND</strong> means no derivatives, so you can't change it.</p>
+      <p>So "CC BY" means "use it however you like, just give credit," while "CC BY-NC" means "give credit, and don't use it to make money." Free image sites often tell you the license right next to the download button.</p>
+      <p class="mb-0">The most open option is the <strong>public domain</strong>, meaning nobody owns the copyright anymore, or the creator gave it up. Very old works, like Shakespeare's plays, are in the public domain, and creators can mark new work as public domain using <strong>CC0</strong>. Public-domain work is free for anyone to use, with no permission needed.</p>
+  </div>
+
   <p>Both sides of this are worth knowing honestly: IP law funds creators and protects real investment — and it can also block follow-on work that would have made something even better. Neither side is the whole truth.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: How to Write an Attribution</h5>
+      <p>An <strong>attribution</strong> is a credit line that tells people where something came from and that you're allowed to use it. Many licenses, including MIT and CC BY, <em>require</em> it, and leaving it out breaks the license.</p>
+      <p>A good attribution answers four questions, often remembered as <strong>TASL</strong>: <strong>Title</strong> (what is it?), <strong>Author</strong> (who made it?), <strong>Source</strong> (where did you get it? Include a link), and <strong>License</strong> (what license allows you to use it?). For example: "'Sunset Over Lake Tahoe' by Jordan Lee, from Unsplash, used under the Unsplash License."</p>
+      <p class="mb-0">Put attributions where people can find them, such as a Credits slide, the bottom of a web page, or a README file for code. When you do the License Audit, every image, icon, font, and code snippet you didn't make yourself needs one.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A horizontal spectrum bar with three labeled zones from left to right: green &quot;Permissive&quot; (a lock icon that's mostly open), yellow &quot;Copyleft&quot; (a lock icon that's half open with a chain), and red &quot;Proprietary&quot; (a fully closed padlock icon), showing increasing restriction left to right.">
 
@@ -164,12 +235,55 @@
       <div class="col-6 col-md-3"><div class="card h-100 shadow-sm"><div class="card-body p-2"><small class="fw-bold">Situational</small></div></div></div>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Visual Barriers</h5>
+      <p><strong>Visual</strong> barriers affect people who are blind, have low vision, or are colorblind. Someone who is blind may use a <strong>screen reader</strong>, software that reads everything on the screen aloud. A screen reader can read text, but it can't "see" a picture unless you describe it with <strong>alt text</strong>.</p>
+      <p>People with low vision may zoom in to 200% or more, so layouts need to stay usable when everything is huge. About 1 in 12 men has some form of colorblindness, most often trouble telling red and green apart. If your tool shows "good" in green and "bad" in red with no words or icons, many users can't tell them apart.</p>
+      <p class="mb-0">Easy fixes: add alt text to every image and chart, use strong contrast like dark text on a light background, and never use color as the <em>only</em> signal. Add a word or symbol too, like "✔ Passed" and "✖ Failed."</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Auditory Barriers</h5>
+      <p><strong>Auditory</strong> barriers affect people who are deaf or hard of hearing. Some information only comes through sound. Think of a video's narration, a voice message, or a beep that means "error." People who can't hear it miss it completely.</p>
+      <p>The main fixes are <strong>captions</strong> and <strong>transcripts</strong>. Captions show the words of a video on the screen. A transcript is a written copy of audio. If your tool uses a sound to signal something, like "time's up," add something to see too, like a message or a color change.</p>
+      <p class="mb-0">Captions help far more people than you'd expect. They help anyone in a noisy cafeteria, anyone in a quiet library with no headphones, and anyone learning English. You'll see this pattern in all five barrier types. A fix for one group usually helps many others too.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Motor Barriers</h5>
+      <p><strong>Motor</strong> barriers affect people who have trouble with precise movement, like people with arthritis, tremors, paralysis, or missing limbs. Using a mouse, tapping tiny buttons, or dragging things exactly into place can be hard or impossible.</p>
+      <p>Many people with motor disabilities navigate with only a keyboard, or with tools that act like one. They press <strong>Tab</strong> to jump from one control to the next and <strong>Enter</strong> to click. If something in your tool only works with a mouse, like a drag-and-drop or a button that isn't a real button, those users are completely stuck.</p>
+      <p class="mb-0">Fixes: make sure every action can be done with the keyboard, keep buttons and tap targets large enough to hit easily, and don't require fast or precise movements. The keyboard-only test in the Accessibility Pass checks exactly this.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Cognitive Barriers</h5>
+      <p><strong>Cognitive</strong> barriers affect how people understand, remember, and focus. This includes people with learning disabilities like dyslexia, people with ADHD, people with memory challenges, and anyone who is tired, stressed, or reading in a second language.</p>
+      <p>Confusing instructions, cluttered screens, too many choices at once, and time limits all create cognitive barriers. Error messages full of jargon, like "Exception: invalid range reference," are a big one. So are sheets named "Sheet1" and "Sheet2" that give no hint of what's inside.</p>
+      <p class="mb-0">Fixes: use plain, simple language. Break tasks into clear, numbered steps. Give sheets and buttons meaningful names. Keep layouts consistent, and write error messages that say how to fix the problem. These choices make your tool faster for <em>everyone</em> to use.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Situational Barriers</h5>
+      <p>A <strong>situational</strong> barrier comes from where you are or what you're doing, not from a disability. Bright sun on your screen creates a visual barrier. A loud bus creates an auditory one. Holding a baby or carrying groceries means you only have one hand free, which creates a motor barrier.</p>
+      <p>This is a powerful idea: <em>everyone</em> faces accessibility barriers sometimes. Some are temporary, like a broken arm for six weeks. Some only last a moment, like a phone call while you're trying to read. Designing for permanent disabilities automatically helps people in all these temporary situations.</p>
+      <p class="mb-0">So when someone asks, "Why should I bother with accessibility? Hardly any of my users have disabilities," the honest answer is that all of your users will run into a situational barrier at some point. Accessible design is simply good design.</p>
+  </div>
+
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-sun me-2"></i> Worked Example: A Situational Disability</h5>
       <p class="mb-0">A "situational disability" is a temporary condition creating the exact same barrier as a permanent one — bright sunlight washing out low-contrast text, or a broken arm making a mouse impossible to use for a few weeks. Fixing for permanent disabilities helps everyone dealing with a temporary version of the same barrier.</p>
   </div>
 
   <p>Concrete, low-effort fixes: alt text on images and charts, sufficient color contrast, meaningful sheet and range names instead of "Sheet1," fully keyboard-reachable controls, and plain-language instructions.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Quick Fixes You Can Do Today</h5>
+      <p><strong>Alt text</strong> is a short description of an image for people who can't see it. Describe what matters, not every detail. For a chart, say what it shows: "Bar chart: Period B4 has the highest average score, 87%." In Google Sheets, right-click a chart or image and choose <strong>Alt text</strong> to add it.</p>
+      <p><strong>Color contrast</strong> is the difference between text color and background color. Light gray text on a white background might look stylish, but it's hard to read for many people, and for anyone in bright sunlight. Free online contrast checkers will tell you if your colors pass. When in doubt, use dark text on a light background.</p>
+      <p><strong>Meaningful names</strong> help everyone find their way. Rename "Sheet1" to "Student Roster" and "Sheet2" to "Weekly Report." Screen-reader users hear those names read aloud, so "Sheet1, Sheet2, Sheet3" tells them nothing.</p>
+      <p class="mb-0"><strong>Keyboard access</strong> and <strong>plain language</strong> round out the list. Try your whole tool using only Tab, Shift+Tab, and Enter. Then reread your instructions and swap any technical words for everyday ones. Each of these fixes takes minutes, and together they open your tool to far more people.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — short video/gif]: A short screen-recording gif of someone navigating a web form using only the Tab key, showing a visible blue focus outline moving from field to field in order, with a mouse cursor sitting untouched off to the side the whole time.">
 
@@ -208,26 +322,91 @@
   <h4 class="fw-bold mt-4 text-primary">16.4.1 The Tools of the Trade</h4>
   <p>An <strong>IDE (Integrated Development Environment)</strong> bundles a code editor, debugger, and terminal into one application, instead of juggling three separate programs. Many real apps also need to run <strong>cross-platform</strong> — the same codebase running on Windows, macOS, and Linux (or iOS and Android) with only minor tweaks, instead of writing and maintaining a completely separate app for each.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: IDEs</h5>
+      <p>An <strong>IDE</strong> (Integrated Development Environment) is an app made for writing code. It puts a coder's main tools in one window. The <strong>code editor</strong> is where you type. The <strong>debugger</strong> lets you pause your program and look inside it. The <strong>terminal</strong> is where you type commands.</p>
+      <p>A good IDE also helps while you type. It colors parts of your code so they're easier to read. It guesses the rest of a command as you start it. And it underlines mistakes before you even run the program. It's a lot like spell-check for code.</p>
+      <p class="mb-0">You've already used a simple IDE. The Apps Script editor has a place to type, a Run button, a debugger, and a log, all in one spot. Many pros use bigger ones, like Visual Studio Code. The idea is the same.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Cross-Platform</h5>
+      <p>A <strong>platform</strong> is the system an app runs on, like Windows, macOS, iPhone (iOS), Android, or a web browser. Each platform works a little differently, so an app built for one won't automatically run on another.</p>
+      <p>A <strong>cross-platform</strong> app is built so the same code runs on several platforms with only small changes. Many popular apps work this way, which is why they look and act almost the same on your phone and your computer.</p>
+      <p class="mb-0">For developers, the payoff is huge. Instead of building and fixing three separate apps for iPhone, Android, and the web, a team maintains one codebase. For users, it means you can switch devices and keep using the same tool. Web apps like Google Sheets are naturally cross-platform, since they run anywhere a browser does.</p>
+  </div>
+
   <div class="concept-box shadow-sm border-warning bg-light">
       <h5 class="fw-bold text-dark"><i class="fas fa-bug me-2"></i> Regression: When a Fix Breaks Something Else</h5>
-      <p class="mb-0">A <strong>regression</strong> is exactly the failure mode from 16.1's "unintended implication," given its formal name: adding a new feature (or fixing one bug) accidentally causes an older, previously-working feature to stop functioning. It's why real teams re-run old tests after every change, not just tests for the new feature.</p>
+      <p class="mb-0">A <strong>regression</strong> is exactly the failure mode from Chapter 15's "unintended implication," given its formal name: adding a new feature (or fixing one bug) accidentally causes an older, previously-working feature to stop functioning. It's why real teams re-run old tests after every change, not just tests for the new feature.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Regressions</h5>
+      <p>"Regress" means to go backward. A <strong>regression</strong> is a bug where something that <em>used to work</em> stops working after a change. Your program moved backward.</p>
+      <p>Here's how it happens. You add a feature that lets users enter scores as percentages. It works great. But a part of the code you didn't touch was expecting whole numbers, and now your report shows averages like 0.87 instead of 87. You never edited the report, yet you broke it.</p>
+      <p class="mb-0">The defense is <strong>regression testing</strong>: after <em>every</em> change, re-run your <em>old</em> tests, not just tests for the new feature. Keep a list of test cases from Chapter 10 and run all of them each time. Professional teams often have computers run thousands of these tests automatically whenever someone changes the code.</p>
   </div>
 
   <h4 class="fw-bold mt-5 text-info">16.4.2 Agile: Development as a Repeating Loop</h4>
   <p>The Six Stages from 16.1 don't just loop once — most modern teams run through them in short, repeated cycles on purpose. This approach is called <strong>Agile</strong> development: release a basic version, collect real user complaints, improve it, and release again — the same "iterative" idea from Chapter 9, now formalized as a whole team's actual working process rather than one person's prototype loop.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: How Agile Teams Work</h5>
+      <p>Older software projects often followed a plan called <strong>Waterfall</strong>: spend months planning everything, months building, then months testing, and finally release. The problem is that by the time users saw it, their needs had often changed, or the team had misunderstood them from the start.</p>
+      <p><strong>Agile</strong> flips that. Teams work in short cycles called <strong>sprints</strong>, usually one to four weeks long. Each sprint ends with a small, working piece of the product that real users can try. Their feedback shapes the next sprint, so mistakes get caught in weeks instead of months.</p>
+      <p>Agile teams often hold a short daily meeting called a <strong>stand-up</strong>, where each person shares what they did yesterday, what they'll do today, and what's blocking them. They also write features as <strong>user stories</strong>, like: "As a teacher, I want to see which students are missing work, so I can remind them." That keeps everyone focused on what real users need.</p>
+      <p class="mb-0">You've already been working in an Agile-like way: build a prototype, test it with a partner, improve it, repeat. The Feedback Cycle activity is one sprint.</p>
+  </div>
+
   <h4 class="fw-bold mt-5 text-primary">16.4.3 Data Ethics & Security in Practice</h4>
   <p>Handling real user data comes with real legal obligations. <strong>Data minimization</strong> means only collecting what you actually need — an app asking just for an email address instead of a full address, birthdate, and phone number it doesn't need follows this principle. Regulations like <strong>GDPR</strong> (a European privacy law) legally require practices like this, changing how developers everywhere design data collection, even outside Europe, since most apps have some European users.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Data Minimization</h5>
+      <p><strong>Data minimization</strong> means collecting only the information you actually need, and nothing extra. If your app just needs to send a reminder email, ask for an email address. Don't also ask for a birthday, home address, and phone number "just in case."</p>
+      <p>Why does it matter? Every piece of data you store is something that could be stolen in a breach, misused, or shared by mistake. Data you never collected can't be leaked. Less data also means less to protect and less to explain in your privacy policy.</p>
+      <p class="mb-0">A simple test for every form field: "What will my tool <em>do</em> with this?" If you can't name a real use, remove the field. You'll do exactly this in the Data Ethics Review.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: GDPR & Privacy Laws</h5>
+      <p>The <strong>GDPR</strong> (General Data Protection Regulation) is a privacy law from the European Union that took effect in 2018. It's one of the strongest privacy laws in the world. It gives people the right to see the data a company has about them, to fix it, and to ask for it to be deleted.</p>
+      <p>The GDPR also requires companies to collect only what they need (data minimization), explain clearly what they collect and why, and protect it properly. Companies that break the rules can be fined up to 4% of their yearly worldwide revenue. For big tech companies, that can mean billions of dollars.</p>
+      <p class="mb-0">Even though it's a European law, it applies to any company with users in Europe, which includes most popular websites and apps. That's why so many sites around the world show cookie pop-ups and "manage your data" settings. Some U.S. states, including California, have passed similar privacy laws of their own.</p>
+  </div>
   <p>When researchers study sensitive data (like medical records) after stripping out names and ID numbers, that process is called <strong>anonymization</strong> — it lets the data be studied without exposing which real person each row belongs to.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Anonymization (and Its Limits)</h5>
+      <p>To <strong>anonymize</strong> data means to remove anything that shows who it's about. That includes names, ID numbers, addresses, and phone numbers. Then people can study the data without knowing whose it is. Hospitals study diseases this way. Schools study test scores this way to learn which teaching methods work.</p>
+      <p>But it's harder than it sounds. Even without names, a few details put together can point to one person. In a small town, "16 years old, lives on Elm Street, plays varsity soccer" might fit only one student. Researchers found that ZIP code, birth date, and gender together are enough to pick out most Americans.</p>
+      <p class="mb-0">Here's a famous example. In 2006, Netflix shared "anonymous" movie ratings for a contest. Researchers compared them with public reviews people had posted on IMDb. That let them figure out who some of the users were. So removing names isn't enough. You have to remove or blur <em>any</em> mix of details that could point to one person.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A login form screenshot mockup with a suspicious crafted string typed into the password field, an arrow pointing from that field into a database icon, and a red warning label reading &quot;Unsanitized input reaches the database directly&quot; over the connection.">
 
   <div class="concept-box shadow-sm border-danger bg-light">
       <h5 class="fw-bold text-danger"><i class="fas fa-shield-virus me-2"></i> A Real Coding Flaw: SQL Injection</h5>
-      <p class="mb-0">A <strong>SQL injection</strong> is a coding flaw where a form doesn't properly check user input before using it in a database command — letting an attacker type something like a crafted string into a login box that tricks the database into handing over private data it was never supposed to reveal. It's one of the most common real-world <strong>vulnerabilities</strong> (Chapter 11) in web applications, and it's exactly why every value passed into a query needs to be handled safely, never trusted as-is.</p>
+      <p class="mb-0">A <strong>SQL injection</strong> is a coding flaw where a form doesn't properly check user input before using it in a database command — letting an attacker type something like a crafted string into a login box that tricks the database into handing over private data it was never supposed to reveal. It's one of the most common real-world <strong>vulnerabilities</strong> (Chapter 15) in web applications, and it's exactly why every value passed into a query needs to be handled safely, never trusted as-is.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: How SQL Injection Works</h5>
+      <p>Many websites store information in a <strong>database</strong>, and they talk to it in a language called <strong>SQL</strong>. When you log in, the website builds a SQL command behind the scenes. In plain words it says: "Find the user whose username is <em>[what you typed]</em> and whose password is <em>[what you typed]</em>."</p>
+      <p>The danger comes when the website pastes whatever you typed directly into that command. An attacker can type special characters that <em>end</em> the website's command early and add their own instructions. A classic trick input is <code>' OR '1'='1</code>. It turns the password check into "...or 1 equals 1," which is always true, so the database may let them in without the real password.</p>
+      <p>It's like a substitute teacher reading a note from a student that says: "Please let Sam leave early. Also, cancel today's test." If the teacher reads every line out loud as an instruction, the student slipped in a command that was never supposed to be there.</p>
+      <p class="mb-0">The fix is to never paste user input straight into a command. Real developers use <strong>parameterized queries</strong>, which keep user input in a separate, labeled box that the database treats only as data, never as instructions. Combined with input validation from Chapter 15, this blocks SQL injection.</p>
   </div>
 
   <p>And downloading a paid movie, song, or piece of software for free from an unauthorized site is <strong>piracy</strong> — a direct violation of the copyright protections covered in 16.2, regardless of how easy or common it is to do.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Piracy</h5>
+      <p><strong>Piracy</strong> means copying or downloading someone's movies, music, games, or software without permission. It's against the law. That's true even if the site looks real, and even if "everybody does it."</p>
+      <p>Piracy has real costs. The artists, coders, and small studios who made that game or album don't get paid. Pirated software is also a common way that malware spreads, because nobody checks where it came from. A "free" copy of a pricey program might also install something that steals your passwords.</p>
+      <p class="mb-0">There are lots of free options that are legal. Many programs have free or student versions. Public-domain and Creative Commons media are free to use. Library apps lend books and movies. And open-source programs are free too. When you know your options, you never need to take the risk.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
       <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>

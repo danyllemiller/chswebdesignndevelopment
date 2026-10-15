@@ -3,7 +3,7 @@
 <head>
   <!-- File: compsci/modularity_procedures.html -->
   <meta charset="utf-8"/>
-  <title>Chapter 11: Modularity & Procedures</title>
+  <title>Chapter 15: Modularity & Procedures</title>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
@@ -13,23 +13,30 @@
 <body class="compsci-body">
 
   <div class="chapter-header">
-    <span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 4: Beg. Algorithm & Programming</span>
-    <h1 class="display-4 fw-bold">Chapter 11: Modularity & Procedures</h1>
+    <span class="badge bg-secondary text-primary mb-2 font-monospace px-3 py-2 fs-6">Unit 6: Intermediate A&P</span>
+    <h1 class="display-4 fw-bold">Chapter 15: Modularity & Procedures</h1>
     <p class="lead text-muted">You have arrays and working logic. What still separates a script from something a real person would actually use?</p>
   </div>
 
   <div class="sticky-toc">
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
-      <a href="#section-11-1">11.1 Procedures, Parameters & Return Values</a>
-      <a href="#section-11-2">11.2 Combining Data & Procedures Into One Artifact</a>
-      <a href="#section-11-3">11.3 Working Like a Real Dev Team</a>
+      <a href="#section-15-1">15.1 Procedures, Parameters & Return Values</a>
+      <a href="#section-15-2">15.2 Combining Data & Procedures Into One Artifact</a>
+      <a href="#section-15-3">15.3 Working Like a Real Dev Team</a>
   </div>
 
-  <!-- Section 11.1 -->
-  <h3 id="section-11-1" class="fw-bold mt-4 border-bottom pb-2">11.1 Procedures, Parameters & Return Values</h3>
+  <!-- Section 15.1 -->
+  <h3 id="section-15-1" class="fw-bold mt-4 border-bottom pb-2">15.1 Procedures, Parameters & Return Values</h3>
   <p class="fs-5">Copy the same five lines of code into four different places in your script, and you've created four separate places that all have to be updated the moment the rule changes. A <strong>procedure</strong> fixes that by giving those five lines one name, called from wherever it's needed.</p>
 
-  <h4 class="fw-bold mt-4 text-primary">11.1.1 The Anatomy of a Procedure</h4>
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Why Procedures Exist</h5>
+      <p>A <strong>procedure</strong> (in JavaScript, a <strong>function</strong>) is a named set of steps you can use again and again. You've already been writing them: every <code>function</code> you made in Apps Script is a procedure. This chapter is about using them <em>on purpose</em> to keep your code organized.</p>
+      <p>Think about a school's rule for calculating a late penalty. If you copy that math into four different places, then the day the rule changes from 10% to 15%, you have to find and fix all four. Miss one, and your program now gives different answers in different places. That's a hard bug to spot.</p>
+      <p class="mb-0">Programmers have a saying: <strong>DRY</strong>, which stands for "Don't Repeat Yourself." Put the rule in one procedure, give it a clear name like <code>latePenalty</code>, and call that name everywhere you need it. Now there's only one place to change, and every part of your program stays in sync.</p>
+  </div>
+
+  <h4 class="fw-bold mt-4 text-primary">15.1.1 The Anatomy of a Procedure</h4>
   <div class="row g-3 my-4 text-center">
       <div class="col-md-3">
           <div class="card h-100 shadow-sm border-primary"><div class="card-body"><h6 class="fw-bold text-primary">Name</h6><p class="small mb-0">What you call it</p></div></div>
@@ -47,6 +54,24 @@
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A labeled diagram of a function call and definition side by side. Left box shows &quot;greet(&quot;Jordan&quot;)&quot; with &quot;Jordan&quot; circled and labeled Argument. An arrow points to a right box showing &quot;function greet(name) { ... }&quot; with &quot;name&quot; circled and labeled Parameter, and a return arrow coming back out labeled Return Value.">
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: The Four Parts, in Real Code</h5>
+      <p>Every procedure has the same four parts. The <strong>name</strong> is what you call it, so pick a name that says what it does, like <code>average</code> instead of <code>doStuff</code>. The <strong>parameters</strong> are the inputs it expects, listed inside the parentheses. They're like the blanks on a form.</p>
+      <p>The <strong>body</strong> is the steps inside the curly braces, where the work happens. The <strong>return value</strong> is the answer the procedure hands back with the word <code>return</code>. When the program reaches <code>return</code>, the procedure stops and sends that value back to whoever called it.</p>
+      <p>Here's a procedure with all four parts labeled:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>function average(scores) {               // name + parameter
+  let total = 0;                         // body starts
+  for (let i = 0; i &lt; scores.length; i++) {
+    total = total + scores[i];
+  }
+  return total / scores.length;          // return value
+}
+
+let myAvg = average([80, 90, 100]);      // [80, 90, 100] is the argument
+Logger.log(myAvg);                       // 90</code></pre>
+      <p>Notice that <code>average</code> doesn't know or care whose scores it's averaging. You can call it with any list of numbers, from anywhere in your program. That flexibility is the whole reason parameters and return values exist.</p>
+  </div>
+
   <div class="concept-box shadow-sm border-danger bg-light">
       <h5 class="fw-bold text-danger"><i class="fas fa-exclamation-triangle me-2"></i> The Trap: Parameter vs. Argument</h5>
       <p class="mb-0">These two words get used interchangeably, but they're not the same thing. A <strong>parameter</strong> is the name written into the procedure's definition — <code>function greet(name)</code>, where <code>name</code> is the parameter. An <strong>argument</strong> is the actual value passed in when you call it — <code>greet("Jordan")</code>, where <code>"Jordan"</code> is the argument.</p>
@@ -54,8 +79,34 @@
 
   <p>Change one rule inside a well-named procedure once, and every place that calls it updates automatically — that's the entire payoff for the extra structure. A good procedure also follows the <strong>single-responsibility rule</strong>: it should do one nameable thing. A procedure trying to do five unrelated jobs is a sign it needs to be split.</p>
 
-  <h4 class="fw-bold mt-5 text-info">11.1.2 Scope: What a Procedure Can See</h4>
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: The Single-Responsibility Rule</h5>
+      <p>The <strong>single-responsibility rule</strong> says each procedure should do <em>one</em> job. Here's a quick test: can you describe what it does in a short phrase without using the word "and"? "Calculates the average" passes. "Reads the sheet and calculates the average and emails the teacher and formats the cells" fails.</p>
+      <p>Why does this matter? Small, focused procedures are easier to test, because you only need to check one thing. They're easier to reuse, because "calculate an average" is useful in many places, but "read this exact sheet and email this exact teacher" is useful in only one. And when something breaks, the procedure's name usually tells you exactly where to look.</p>
+      <p class="mb-0">If a procedure is doing too much, split it. Make one procedure for each job, then write one short "main" procedure that calls them in order: <code>readScores()</code>, then <code>average()</code>, then <code>sendReport()</code>. Your code ends up reading almost like a to-do list.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">15.1.2 Scope: What a Procedure Can See</h4>
   <p>Relying on a <strong>global</strong> variable inside a procedure — instead of passing it in as a parameter — makes that procedure unsafe to reuse elsewhere, because it silently depends on something existing outside itself that a future caller might not have set up.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Scope: Local vs. Global</h5>
+      <p><strong>Scope</strong> means where in your program a variable can be seen and used. A variable created <em>inside</em> a procedure is <strong>local</strong>: it only exists while that procedure runs, and nothing outside can see it. A variable created <em>outside</em> every procedure is <strong>global</strong>: every procedure in the file can see it and change it.</p>
+      <p>Globals seem convenient, but they cause sneaky problems. If a procedure quietly uses a global variable, it only works when that global exists and holds the right value. Copy the procedure into another project, or let some other code change the global, and it breaks, often without any error message.</p>
+      <p>Compare these two versions:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>let taxRate = 0.08;   // global
+
+// Risky: secretly depends on the global taxRate
+function priceWithTax(price) {
+  return price + price * taxRate;
+}
+
+// Safe: everything it needs comes in as a parameter
+function priceWithTaxSafe(price, rate) {
+  return price + price * rate;
+}</code></pre>
+      <p>The safe version gets everything it needs through its parameters, so it works anywhere, every time. A good rule: if a procedure needs a value, pass it in as a parameter instead of reaching outside for it.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
       <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -82,12 +133,30 @@
 
   <hr class="my-5 opacity-25">
 
-  <!-- Section 11.2 -->
-  <h3 id="section-11-2" class="fw-bold border-bottom pb-2">11.2 Combining Data & Procedures Into One Artifact</h3>
+  <!-- Section 15.2 -->
+  <h3 id="section-15-2" class="fw-bold border-bottom pb-2">15.2 Combining Data & Procedures Into One Artifact</h3>
   <p class="fs-5">A working script and a finished tool can run the exact same logic and still feel completely different to use. The difference is integration: a menu, input validation, and clear feedback wrapped around the same working code.</p>
 
-  <h4 class="fw-bold mt-4 text-primary">11.2.1 Structuring a Real Tool</h4>
+  <h4 class="fw-bold mt-4 text-primary">15.2.1 Structuring a Real Tool</h4>
   <p>A well-structured script keeps data at the top, procedures grouped logically below it, and one clear entry point that orchestrates everything else — instead of logic scattered randomly wherever it was first written.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Structuring a Real Tool</h5>
+      <p>Imagine opening a kitchen where pots, food, and spices are all mixed together in random drawers. You could cook, but it would be slow and frustrating. A well-structured script is like a well-organized kitchen: everything has a place, so anyone can find what they need.</p>
+      <p>A good layout has three parts, top to bottom. <strong>1. Data and settings</strong>: things like sheet names and limits, kept at the top so they're easy to change. <strong>2. Procedures</strong>: each one doing a single job, grouped by topic. <strong>3. An entry point</strong>: one main procedure that runs the whole tool by calling the others in order.</p>
+      <p>The entry point is the "start here" of your tool. When a teammate opens your code, they can read that one procedure and understand the whole flow in a few lines, then dive into a specific procedure only when they need the details:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-0"><code>const SHEET_NAME = "Scores";        // 1. settings
+
+function readScores() { /* ... */ }  // 2. procedures
+function average(scores) { /* ... */ }
+function writeReport(avg) { /* ... */ }
+
+function runReport() {               // 3. entry point
+  const scores = readScores();
+  const avg = average(scores);
+  writeReport(avg);
+}</code></pre>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets menu bar with a custom menu item added at the end (after Help), labeled with a tool name, clicked open to show a dropdown of custom menu options like &quot;Run Report&quot; and &quot;Clear Data.&quot;">
 
@@ -96,7 +165,36 @@
       <p class="mb-0">Add a custom menu to a spreadsheet so someone who has never opened the script editor can still run your tool with one click. That single addition is often what actually turns a working script into something a real teammate would use.</p>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Building a Custom Menu</h5>
+      <p>Most people who use your spreadsheet will never open the script editor, and they shouldn't have to. A <strong>custom menu</strong> adds your own menu to the top of the sheet, right next to Help, so anyone can run your tool with one click.</p>
+      <p>You build it inside an <code>onOpen</code> function. Remember from Chapter 10 that <code>onOpen</code> runs automatically every time the spreadsheet opens. Each <code>addItem</code> line takes two things: the words people will see in the menu, and the exact name of the procedure to run when they click it.</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu("Grade Tool")
+    .addItem("Run Report", "runReport")
+    .addItem("Clear Data", "clearData")
+    .addToUi();
+}</code></pre>
+      <p>After you save, reload the spreadsheet tab and your menu appears. If clicking an item does nothing or shows an error, check that the procedure name in quotes matches your function's name exactly, including capital letters.</p>
+  </div>
+
   <p><strong>The trap:</strong> students often think "it works when I run it" means the tool is done. It means the logic is done. Validating input and handling failure cases gracefully is the part that separates a demo from something safe to hand to someone else.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Failing Gracefully</h5>
+      <p><strong>Failing gracefully</strong> means that when something goes wrong, your tool explains the problem in plain words instead of crashing or quietly producing wrong answers. A vending machine that says "Exact change only" is failing gracefully. One that just eats your money is not.</p>
+      <p>Before your tool uses any data, check it. Is the cell empty? Is it a number when it should be? Is it in a sensible range, like a score between 0 and 100? If a check fails, stop and show a helpful message. In a menu-driven tool, <code>SpreadsheetApp.getUi().alert()</code> pops up a message box:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>function runReport() {
+  const score = SpreadsheetApp.getActiveSheet().getRange("B4").getValue();
+  if (score === "" || typeof score !== "number" || score &lt; 0 || score > 100) {
+    SpreadsheetApp.getUi().alert("Cell B4 must be a number between 0 and 100.");
+    return;   // stop here instead of continuing with bad data
+  }
+  // ...the rest of the report only runs with good data
+}</code></pre>
+      <p>A good error message tells the person three things: <strong>what</strong> went wrong, <strong>where</strong> it happened, and <strong>how</strong> to fix it. "Error" is useless. "Cell B4 must be a number between 0 and 100" tells them exactly what to do.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
       <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -123,42 +221,120 @@
 
   <hr class="my-5 opacity-25">
 
-  <!-- Section 11.3 -->
-  <h3 id="section-11-3" class="fw-bold border-bottom pb-2">11.3 Working Like a Real Dev Team</h3>
+  <!-- Section 15.3 -->
+  <h3 id="section-15-3" class="fw-bold border-bottom pb-2">15.3 Working Like a Real Dev Team</h3>
   <p class="fs-5">One person writing one script is one kind of programming. A team of developers sharing one codebase, building on each other's work, and reusing code nobody on the team wrote themselves is a different skill set entirely.</p>
 
-  <h4 class="fw-bold mt-4 text-primary">11.3.1 Recursion: A Procedure That Calls Itself</h4>
+  <h4 class="fw-bold mt-4 text-primary">15.3.1 Recursion: A Procedure That Calls Itself</h4>
   <p><strong>Recursion</strong> is a procedure that calls itself with a smaller version of the same problem, until it reaches a <strong>base case</strong> simple enough to answer directly. A factorial function calculating <code>5!</code> calls itself to calculate <code>4!</code>, which calls itself for <code>3!</code>, and so on, until it hits the base case (<code>1! = 1</code>) and the answers combine back up the chain.</p>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A vertical stack of five labeled boxes showing a recursive call chain: 5! calls 4!, which calls 3!, which calls 2!, which calls 1! at the bottom labeled &quot;Base Case.&quot; A second column of arrows curves back up the stack showing each answer multiplying and combining back to the top for the final result.">
 
-  <h4 class="fw-bold mt-5 text-info">11.3.2 Version Control & Code Review</h4>
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Recursion</h5>
+      <p><strong>Recursion</strong> is when a procedure solves a problem by calling <em>itself</em> on a smaller version of that same problem. It sounds like a loop that never ends, but it has a built-in stopping point called the <strong>base case</strong>.</p>
+      <p>Picture a line of people, and you want to know how many there are. You ask the person in front of you, "How many people are ahead of you, counting yourself?" They ask the person ahead of them, and so on. The very first person in line doesn't need to ask anyone. They just say "1." That's the base case. Then each answer passes back down the line, with each person adding 1, until the answer reaches you.</p>
+      <p><code>5!</code> ("five factorial") means 5 × 4 × 3 × 2 × 1 = 120. Notice that 5! is just 5 × 4!, and 4! is 4 × 3!. Each problem contains a smaller copy of itself, which is exactly the shape recursion is built for:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>function factorial(n) {
+  if (n &lt;= 1) {
+    return 1;                  // base case: stop here
+  }
+  return n * factorial(n - 1); // recursive case: smaller problem
+}
+
+Logger.log(factorial(5));      // 120</code></pre>
+      <p>Every recursive procedure needs two parts: a <strong>base case</strong> that stops the chain, and a <strong>recursive case</strong> that moves closer to the base case each time. Forget the base case, and the procedure keeps calling itself until the program crashes, which is recursion's version of an infinite loop.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-info">15.3.2 Version Control & Code Review</h4>
   <p>A <strong>version control</strong> system like <strong>Git</strong> lets multiple developers work on the same codebase at once without overwriting each other's changes — it tracks exactly what changed, when, and by whom, and can combine everyone's edits together safely.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Version Control & Git</h5>
+      <p>Have you ever saved files called "essay_final," "essay_final2," and "essay_REAL_final"? That's a homemade version-control system, and it gets messy fast. <strong>Version control</strong> is software that keeps a full history of every change to your code automatically, so you can see what changed, who changed it, and go back if something breaks.</p>
+      <p><strong>Git</strong> is the most popular version-control system in the world. It was created in 2005 by Linus Torvalds, the creator of Linux. Each saved snapshot in Git is called a <strong>commit</strong>, and every commit gets a short message describing the change, like "Fix late penalty math." Websites like GitHub store Git projects online so teams can share them.</p>
+      <p>Teams use <strong>branches</strong> to work at the same time without getting in each other's way. A branch is your own copy of the project where you can build a feature. When the feature is ready, you <strong>merge</strong> it back into the main project, and Git combines your changes with everyone else's.</p>
+      <p class="mb-0">Sometimes two people change the exact same line in different ways. Git can't guess which one is right, so it flags a <strong>merge conflict</strong> and asks a human to decide. That's not an error. It's Git protecting your team from accidentally erasing each other's work.</p>
+  </div>
   <p>Before new code gets merged in, a teammate typically performs a <strong>code review</strong>: reading through it looking for bugs, style problems, and anything confusing to a future reader. It catches mistakes before they reach real users, and it's also how a team keeps a shared, consistent style across code written by different people.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Code Review</h5>
+      <p>A <strong>code review</strong> is when a teammate reads your code before it becomes part of the shared project. It's a lot like peer editing an essay: a second set of eyes catches things the writer is too close to see.</p>
+      <p>Reviewers look for a few main things. Are there <strong>bugs</strong>, like a loop that's off by one? Are the <strong>names</strong> clear, or would a newcomer wonder what <code>x2</code> means? Is anything <strong>missing</strong>, like a check for empty input? And does it follow the team's <strong>style</strong>, so the whole project reads like one person wrote it?</p>
+      <p class="mb-0">Good review comments are specific and kind. "This is confusing" doesn't help. "Could you rename <code>d</code> to <code>daysLate</code> so it's clear what it stores?" does. Even professional programmers with decades of experience have their code reviewed, because everyone misses things.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
       <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
       <p class="mb-0 text-light">What tool lets three developers edit the same file at once without wiping out each other's work? <em class="text-white-50">(Answer: a version control system like Git.)</em></p>
   </div>
 
-  <h4 class="fw-bold mt-5 text-primary">11.3.3 APIs & Libraries</h4>
+  <h4 class="fw-bold mt-5 text-primary">15.3.3 APIs & Libraries</h4>
   <p>An <strong>API (Application Programming Interface)</strong> is a defined way for one piece of software to request something from another — a weather app doesn't recreate a national weather database, it sends a request in the exact format a weather service's API expects and gets data back. A <strong>library</strong> is similar in spirit: instead of writing your own date-formatting code from scratch, you import a well-tested package that already does it, saving time and avoiding bugs someone else already fixed.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: APIs</h5>
+      <p>An <strong>API</strong> (Application Programming Interface) is a set of rules for how one program can ask another program for something. Think of a restaurant. You don't walk into the kitchen and cook. You order from a menu, the server takes your order to the kitchen, and your food comes back. The menu is the API: it lists exactly what you can ask for and how to ask.</p>
+      <p>Apps use APIs constantly. A weather app sends a request to a weather service's API, like "current temperature for Carson City," and gets back data, not a whole web page. A "Sign in with Google" button uses Google's API. Even Apps Script commands like <code>SpreadsheetApp.getActiveSheet()</code> are part of Google's API for Sheets.</p>
+      <p class="mb-0">The big benefit is that you don't need to know how the other program works inside. You only need to know how to ask. The weather service could completely rebuild its system, and your app would keep working as long as the API's "menu" stays the same.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Libraries</h5>
+      <p>A <strong>library</strong> is a collection of code that someone else wrote, tested, and shared so you can use it in your own project. Instead of writing your own code to handle dates, charts, or encryption from scratch, you include a library that already does it well.</p>
+      <p>Using libraries is like building with LEGO pieces instead of carving every brick yourself. It saves huge amounts of time, and popular libraries have been used and fixed by thousands of programmers. That usually makes them more reliable than something brand-new you wrote last night.</p>
+      <p class="mb-0">There are two things to check first. Is the library <strong>maintained</strong>, meaning someone still fixes its bugs and security problems? And what does its <strong>license</strong> allow? That's the trap described below, and Chapter 16 goes deeper into licenses.</p>
+  </div>
 
   <div class="concept-box shadow-sm border-warning bg-light">
       <h5 class="fw-bold text-dark"><i class="fas fa-file-contract me-2"></i> The Trap: Skipping the License</h5>
       <p class="mb-0">Not every free library is free to use in every context. Before including one in a project — especially anything commercial — check its <strong>license</strong>. Some require crediting the author, some forbid commercial use entirely, and using code without checking is a real legal risk, not just bad etiquette.</p>
   </div>
 
-  <h4 class="fw-bold mt-5 text-info">11.3.4 Encapsulation & Vulnerabilities</h4>
+  <h4 class="fw-bold mt-5 text-info">15.3.4 Encapsulation & Vulnerabilities</h4>
   <p><strong>Encapsulation</strong> means a piece of code keeps its internal data private and only lets other code interact with it through specific, defined methods — hiding the messy implementation details behind a clean, controlled interface, so nothing outside can reach in and corrupt its internal state directly.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Encapsulation</h5>
+      <p><strong>Encapsulation</strong> means hiding an object's inner data and only letting other code change it through approved methods. Think of an ATM. You can't reach into the machine and grab cash. You have to use the buttons, and the machine checks your PIN and your balance before giving you anything. The buttons are the approved methods, and the cash is the protected data.</p>
+      <p>Why protect data this way? Imagine a bank-account object where any code could directly set <code>balance = -5000</code>. One bug anywhere in the program could wreck the account. If the only way to change the balance is through <code>deposit()</code> and <code>withdraw()</code> methods, those methods can enforce the rules, like "you can't withdraw more than you have."</p>
+      <p>Here's the idea in code. The rules live inside the methods, so every change to the balance has to pass through them:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>const account = {
+  balance: 0,
+  deposit: function(amount) {
+    if (amount > 0) this.balance = this.balance + amount;
+  },
+  withdraw: function(amount) {
+    if (amount > 0 && amount &lt;= this.balance) {
+      this.balance = this.balance - amount;
+    }
+  }
+};</code></pre>
+      <p>Encapsulation also makes code easier to change. As long as <code>deposit()</code> and <code>withdraw()</code> keep working the same way from the outside, you can completely rewrite how the inside works without breaking anyone else's code.</p>
+  </div>
   <p>When code doesn't enforce boundaries like this carefully, it can create a <strong>vulnerability</strong> — a flaw an attacker can exploit, like a login form that doesn't properly check a password before granting access. Modifying existing code can also introduce an <strong>unintended implication</strong>: a change to one module unexpectedly breaking a completely different, seemingly unrelated part of the app that quietly depended on the old behavior.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Vulnerabilities</h5>
+      <p>A <strong>vulnerability</strong> is a weak spot in software. An attacker can use it to do something they shouldn't. They might see private data, log in as someone else, or crash the system. Most weak spots are honest mistakes. Someone forgot a check, missed a rule, or never expected a certain input.</p>
+      <p>The login example above is a classic. Say a login form doesn't check the password the right way. An attacker might find a trick input that skips the check. Chapter 16 shows a famous example called SQL injection. In that attack, typing a special bit of text into a form tricks a database.</p>
+      <p class="mb-0">You already know many of the defenses. Check every input. Keep data protected so it can only change through approved methods. And never trust users to type what you expect. Real teams also run security reviews, and they fix weak spots fast once they find them.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Unintended Implications</h5>
+      <p>An <strong>unintended implication</strong> is a side effect you didn't see coming: you change one part of your program, and a totally different part breaks. It happens because parts of a program quietly depend on each other in ways that aren't obvious.</p>
+      <p>Here's an example. You change a procedure so it returns a grade as a letter ("B") instead of a number (85), because your report looks nicer that way. But another procedure somewhere else was using that number to calculate class averages. Now the average calculation breaks, even though you never touched it.</p>
+      <p class="mb-0">This is why everything in this chapter works together. Small single-responsibility procedures, parameters instead of globals, encapsulation, and code review all make hidden dependencies easier to see. And it's why teams re-run <em>all</em> their tests after a change, not just the new ones. Chapter 16 gives this kind of bug its official name: a <strong>regression</strong>.</p>
+  </div>
 
   <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
       <div class="d-flex align-items-start">
           <i class="fas fa-code-branch fa-3x me-4 text-primary mt-1"></i>
           <div class="w-100">
               <h3 class="fw-bold mb-1">Activity: Documenting for a Teammate</h3>
-              <p class="mb-2 fs-5">Go back to your Integrated Tool from 11.2 and prepare it to be handed off to a developer who has never seen it.</p>
+              <p class="mb-2 fs-5">Go back to your Integrated Tool from 15.2 and prepare it to be handed off to a developer who has never seen it.</p>
               <ol class="mb-2 fs-6">
                   <li class="mb-1">Write a README explaining what your tool does, how to run it, and why you made at least one specific design choice — this combination of comments plus an explanatory document is what <strong>documentation</strong> means in a real project.</li>
                   <li class="mb-1">Find one procedure in your tool that could be rewritten recursively (or write a small new one — like a factorial or countdown function — if none fit naturally), and implement it, clearly marking its base case.</li>

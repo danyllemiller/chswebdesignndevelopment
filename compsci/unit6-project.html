@@ -55,11 +55,76 @@
                 <ol class="mb-0">
                     <li class="mb-3">Pick a real app idea that would solve an actual annoyance or gap in your life or someone else's &mdash; not "make school better," something specific: splitting gas money fairly on a carpool, tracking practice reps for a skill you're actually working on, finding what's already in the fridge before a grocery run, splitting chores evenly with siblings or roommates. It doesn't need to get built for real &mdash; you're designing it, not coding it &mdash; but it needs to be something you'd genuinely want to exist.</li>
                     <li class="mb-3"><strong>Sheets: Data Structure Comparison</strong> &mdash; model a real chunk of your app's data both as a list/array-style table and as separate simple variables, then write out why the list/array version scales better as the data grows. <a href="/compsci/advanced_data_structures.html#section-14-1" target="_blank" rel="noopener">How to: Ch 14.1, Arrays &raquo;</a></li>
-                    <li class="mb-3"><strong>Slides: Module Breakdown</strong> &mdash; decompose your app into at least 3 real modules/procedures (e.g. "input handling," "score calculation," "display"), each with a one-sentence job description. <a href="/compsci/modularity_procedures.html#section-11-1" target="_blank" rel="noopener">How to: Ch 15.1, Procedures, Parameters &amp; Return Values &raquo;</a></li>
+                    <li class="mb-3"><strong>Slides: Module Breakdown</strong> &mdash; decompose your app into at least 3 real modules/procedures (e.g. "input handling," "score calculation," "display"), each with a one-sentence job description. <a href="/compsci/modularity_procedures.html#section-15-1" target="_blank" rel="noopener">How to: Ch 15.1, Procedures, Parameters &amp; Return Values &raquo;</a></li>
                     <li class="mb-3"><strong>Slides: SDLC Walkthrough</strong> &mdash; document each phase: Planning, Design, a real Feedback round (get actual feedback from a classmate and show what you changed because of it), Testing, and one specific Accessibility finding + fix. <a href="/compsci/software_development_lifecycle.html#section-16-1" target="_blank" rel="noopener">How to: Ch 16.1, The Lifecycle &amp; Real User Feedback &raquo;</a> &middot; <a href="/compsci/software_development_lifecycle.html#section-16-3" target="_blank" rel="noopener">Ch 16.3, Accessibility &raquo;</a></li>
                     <li class="mb-3"><strong>Slides: License Check</strong> &mdash; list every outside resource, image, icon, or font you used and its license/attribution. <a href="/compsci/software_development_lifecycle.html#section-16-2" target="_blank" rel="noopener">How to: Ch 16.2, Licensing &amp; Intellectual Property &raquo;</a></li>
                     <li class="mb-0"><strong>Slides: Why This App, For Real</strong> &mdash; name one specific real person (it can be you) who would actually use this app, and the specific real moment where not having it causes a real problem. Not "it would be useful" &mdash; the actual moment.</li>
                 </ol>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-warning text-dark fw-bold"><i class="fas fa-lightbulb me-2"></i>Worked Example: What a Finished App Blueprint Looks Like</div>
+            <div class="card-body p-4">
+                <p class="small mb-3"><strong class="text-danger"><i class="fas fa-ban me-1"></i>You may NOT use this app idea (a pet-feeding tracker) for your own project.</strong> It's here so you can see how every step connects to one app &mdash; pick your own real annoyance and follow the same pattern.</p>
+
+                <p class="mb-1"><strong>The App:</strong> &ldquo;Who's Feeding the Dog?&rdquo; &mdash; one tap logs that the dog was fed, so nobody in the family double-feeds or forgets.</p>
+
+                <p class="mb-1 mt-3"><strong>Sheets: Data Structure Comparison</strong></p>
+                <div class="row g-3 mb-2">
+                    <div class="col-md-5">
+                        <p class="small mb-1"><strong>Separate simple variables</strong></p>
+<pre class="bg-light p-3 rounded small mb-0">feeding1 = "Mon AM, Leo"
+feeding2 = "Mon PM, Dad"
+feeding3 = "Tue AM, Leo"
+feeding4 = "Tue PM, ???"</pre>
+                    </div>
+                    <div class="col-md-7">
+                        <p class="small mb-1"><strong>One list/array table</strong></p>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered small mb-0">
+                                <thead class="table-light"><tr><th>Day</th><th>Meal</th><th>Fed By</th><th>Time</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Mon</td><td>AM</td><td>Leo</td><td>7:05</td></tr>
+                                    <tr><td>Mon</td><td>PM</td><td>Dad</td><td>6:30</td></tr>
+                                    <tr><td>Tue</td><td>AM</td><td>Leo</td><td>7:12</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <p class="small mb-3"><strong>Why the list scales:</strong> After a year, the variable version needs 730 separately named variables, and checking &ldquo;was the dog fed tonight?&rdquo; means writing code that knows every name. The list just grows by one row per feeding, and one loop or one COUNTIF can search all of it.</p>
+
+                <p class="mb-1"><strong>Slides: Module Breakdown</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-3">
+                        <thead class="table-light"><tr><th>Module</th><th>Job</th><th>Inputs (parameters)</th><th>Returns</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>logFeeding</code></td><td>Adds a new row when someone taps &ldquo;I fed him.&rdquo;</td><td>person, meal, time</td><td>the updated feeding list</td></tr>
+                            <tr><td><code>wasFed</code></td><td>Checks whether a meal has already been logged today.</td><td>feedingList, day, meal</td><td><code>true</code> or <code>false</code></td></tr>
+                            <tr><td><code>buildReminder</code></td><td>Writes the reminder text if a meal is overdue.</td><td>meal, lastPersonWhoFed</td><td>a message string, e.g. &ldquo;Dinner not logged yet. Leo fed him last.&rdquo;</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="mb-1"><strong>Slides: SDLC Walkthrough</strong></p>
+                <ul class="small mb-3">
+                    <li><strong>Planning:</strong> Users are the 4 people in one household. Goal: anyone can see in 2 seconds whether the dog ate.</li>
+                    <li><strong>Design:</strong> One screen with two big buttons (Breakfast, Dinner), each showing who fed him and when.</li>
+                    <li><strong>Feedback:</strong> Classmate Ari tested the sketch and said, &ldquo;If two people tap at the same time, both think they fed him.&rdquo; <strong>Change:</strong> after one tap, the button locks and shows &ldquo;Fed by Leo, 7:12&rdquo; instead of letting a second person log the same meal.</li>
+                    <li><strong>Testing:</strong> Tapped Breakfast twice from two phones. Expected: second tap shows &ldquo;Already fed by Leo.&rdquo; Result: passed after the lock was added.</li>
+                    <li><strong>Accessibility:</strong> <em>Finding:</em> &ldquo;fed&rdquo; and &ldquo;not fed&rdquo; were shown only as green vs. red, which some color-blind users can't tell apart. <em>Fix:</em> added a check-mark icon and the words &ldquo;Fed&rdquo; / &ldquo;Not fed yet.&rdquo;</li>
+                </ul>
+
+                <p class="mb-1"><strong>Slides: License Check</strong></p>
+                <ul class="small mb-3">
+                    <li>Dog and check-mark icons: Font Awesome Free, CC BY 4.0, attribution on the credits slide.</li>
+                    <li>Font: Atkinson Hyperlegible, SIL Open Font License, free to use and embed.</li>
+                    <li>All screen sketches: drawn by me.</li>
+                </ul>
+
+                <p class="mb-1"><strong>Slides: Why This App, For Real</strong></p>
+                <p class="small mb-0">Leo Example, 15. Last Tuesday he got home at 6:00 and fed Biscuit; his dad got home at 6:45 and fed him again because nobody had said anything. Biscuit's vet had just put him on a diet, so the double dinner set the diet back. The app exists for that 45-minute gap.</p>
             </div>
         </div>
 

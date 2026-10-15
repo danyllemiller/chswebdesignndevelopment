@@ -32,6 +32,19 @@
   <h4 class="fw-bold mt-4 text-primary">14.1.1 Why Generalizing Beats Repeating</h4>
   <p>An array holds many values under one name, each reachable by a numbered position called an <strong>index</strong>. Indexes start at 0, not 1 — the first element is <code>array[0]</code>.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Arrays: One Name, Many Values</h5>
+      <p>You met lists back in Chapter 10. An <strong>array</strong> is the same idea: one variable that holds many values in order, like a row of lockers under a single name. Each spot has a number, its <strong>index</strong>, and counting starts at 0. So in an array of 6 names, the first name is at index 0 and the last is at index 5.</p>
+      <p>Why bother? Look at the script below with six separate variables. To print all six names, you need six separate lines. To add a seventh student, you have to add a new variable <em>and</em> a new line. Every change means editing the code in several places, and it's easy to forget one.</p>
+      <p>With an array, you write the names once and use one loop to visit them all. The loop uses <code>names.length</code>, the number of items in the array, to know when to stop. That's what <strong>generalizing</strong> means: writing code that works for <em>any</em> number of items instead of exactly six. Add a seventh, or seventy, and the loop doesn't change at all.</p>
+      <p>Here's the pattern you'll use in the Array Refactor activity:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-0"><code>const names = ["Alex", "Brianna", "Carlos"];
+for (let i = 0; i &lt; names.length; i++) {
+  Logger.log(names[i]);
+}
+// Add a name to the list, and the loop still works unchanged.</code></pre>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A horizontal row of six labeled boxes containing student names, with index numbers 0 through 5 printed below each box, and a curved loop arrow drawn beneath the whole row labeled &quot;one loop visits every box,&quot; contrasted above with six separate crossed-out variable-name tags.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
@@ -60,6 +73,19 @@
 }</code></pre>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Reading Spreadsheet Data into an Array</h5>
+      <p>The last step of the Array Refactor asks you to read real cells from a Google Sheet into an array. You do that with <code>getRange(...).getValues()</code>. This is one of the most useful lines in Apps Script, but it has one surprise: it gives you an <strong>array of arrays</strong>, also called a <strong>2D array</strong>.</p>
+      <p>Think of it like this: the outer array is a list of <strong>rows</strong>, and each row is its own little array of <strong>cells</strong>. So <code>data[0]</code> is the whole first row, and <code>data[0][1]</code> is the first row's second cell (column B). The first number picks the row, and the second number picks the column. Both start counting at 0.</p>
+      <p>To visit every row, loop through the outer array. Here's code that reads names from A2:A6 and logs each one:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>const sheet = SpreadsheetApp.getActiveSheet();
+const data = sheet.getRange("A2:A6").getValues();   // 5 rows, 1 column
+for (let i = 0; i &lt; data.length; i++) {
+  Logger.log(data[i][0]);   // row i, column 0 (column A)
+}</code></pre>
+      <p>If your log shows things like <code>[Alex]</code> with square brackets around each name, you logged a whole row (<code>data[i]</code>) instead of the cell inside it (<code>data[i][0]</code>). That's the most common mistake with <code>getValues()</code>, and now you know the fix.</p>
+  </div>
+
   <div class="alert alert-info mt-4 shadow-sm border-info">
       <div class="d-flex align-items-start">
           <i class="fas fa-table fa-3x me-4 text-info mt-1"></i>
@@ -84,6 +110,27 @@
   <h3 id="section-14-2" class="fw-bold border-bottom pb-2">14.2 Linked Lists</h3>
   <p class="fs-5">Picture students standing in a numbered row — that's an array. Inserting someone new in the middle means everyone after them has to physically shift down one spot. Now picture each student instead holding a card naming who comes next — that's a <strong>linked list</strong>, and inserting someone new only means updating two cards.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: How a Linked List Works</h5>
+      <p>A <strong>linked list</strong> stores items in a chain. Each item is called a <strong>node</strong>, and every node holds two things: its <strong>value</strong> (like a name) and a <strong>pointer</strong> to the next node (often called <code>next</code>). The last node's <code>next</code> is <code>null</code>, which means "nothing comes after me."</p>
+      <p>Picture a scavenger hunt. Each clue tells you something, and also tells you where to find the next clue. You can't skip straight to clue #7. You have to follow the chain from the start. That's exactly how a linked list works, and it's why getting "item #7" is slower than with an array.</p>
+      <p>But inserting is easy. To add someone between Amara and Ben, you don't move anyone. You make a new node pointing to Ben, then change Amara's pointer to the new node. That's just two changes, whether the list has 4 people or 4 million. In Apps Script, each node can be a simple object:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>const node3 = { value: "Chen",  next: null };
+const node2 = { value: "Ben",   next: node3 };
+const node1 = { value: "Amara", next: node2 };
+
+// Insert "Bea" between Amara and Ben: only two changes
+const newNode = { value: "Bea", next: node2 };
+node1.next = newNode;
+
+let current = node1;
+while (current !== null) {
+  Logger.log(current.value);   // Amara, Bea, Ben, Chen
+  current = current.next;
+}</code></pre>
+      <p>The <code>while</code> loop follows the chain: start at the first node, log its value, then jump to <code>current.next</code>. When <code>current</code> becomes <code>null</code>, you've reached the end. This is the walk you'll write in the Structure Comparison activity.</p>
+  </div>
+
   <h4 class="fw-bold mt-4 text-primary">14.2.1 Honest Tradeoffs, Not a "Better" Structure</h4>
   <table class="table table-bordered table-sm shadow-sm mt-3">
     <thead class="table-dark">
@@ -97,6 +144,14 @@
     </tbody>
   </table>
   <p class="small text-muted">That last row is deliberate — not every operation favors one structure. Searching for a value (not by index) is equally slow on both, because neither one can skip ahead without checking.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Reading the Tradeoff Table</h5>
+      <p><strong>Access by index</strong> means "give me item #14." An array can jump straight there, because it knows exactly where each numbered spot is, like going straight to locker #14. A linked list has to start at the first node and follow 13 pointers to get there.</p>
+      <p><strong>Insert or delete in the middle</strong> is the opposite. In an array, everything after that spot has to shift over to make room or close the gap, like everyone in a numbered line taking one step. With 10,000 items, that could mean thousands of moves. In a linked list, you only update the pointers on the neighbors, so nobody else moves.</p>
+      <p><strong>Search by content</strong> means "find the item that says Chen" when you don't know where it is. Neither structure can guess, so both have to check items one at a time from the start. That's why this row is a tie.</p>
+      <p class="mb-0">So the skill isn't picking a favorite. It's asking, "What will my program do <em>most often</em>?" Lots of looking things up by position? Use an array. Lots of inserting and removing in the middle? Use a linked list.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A side-by-side graphic. Left: numbered boxes in a solid row labeled &quot;Array — direct access by index.&quot; Right: circles connected by arrows to the next one labeled &quot;Linked List — each node points to the next.&quot;">
 
@@ -150,16 +205,55 @@
   <p class="fs-5">Two more structures round out your toolkit: one for bundling related data and behavior together, one for looking things up by name instead of by position.</p>
 
   <h4 class="fw-bold mt-4 text-primary">14.3.1 Objects</h4>
-  <p>An <strong>object</strong> bundles data together with the procedures (called <strong>methods</strong> when they belong to an object) that act on that data. A <code>car</code> object might hold data like <code>color</code> and <code>speed</code>, plus methods like <code>accelerate()</code> and <code>brake()</code> that operate directly on that same data. This is the same idea as encapsulation from Chapter 11 — the data and the logic that's allowed to touch it travel together as one unit.</p>
+  <p>An <strong>object</strong> bundles data together with the procedures (called <strong>methods</strong> when they belong to an object) that act on that data. A <code>car</code> object might hold data like <code>color</code> and <code>speed</code>, plus methods like <code>accelerate()</code> and <code>brake()</code> that operate directly on that same data. This is the same idea as encapsulation, which you'll study in Chapter 15 — the data and the logic that's allowed to touch it travel together as one unit.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Objects & Methods</h5>
+      <p>An <strong>object</strong> groups related information together under one name. Instead of separate variables like <code>carColor</code>, <code>carSpeed</code>, and <code>carModel</code>, you make one <code>car</code> object that holds all three. Each piece of information is called a <strong>property</strong>, and you reach it with a dot: <code>car.color</code>.</p>
+      <p>Objects can also hold <strong>methods</strong>, which are functions that belong to the object and work on its own data. A car's <code>accelerate</code> method changes the car's own speed. Inside a method, the word <code>this</code> means "this object," so <code>this.speed</code> is the speed of the car whose method was called.</p>
+      <p>Here's a car object with three properties and one method:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>const car = {
+  color: "red",
+  model: "Civic",
+  speed: 0,
+  accelerate: function(amount) {
+    this.speed = this.speed + amount;
+  }
+};
+
+car.accelerate(10);
+Logger.log(car.speed);   // 10</code></pre>
+      <p>Objects match how we think about the real world. A student has a name, a grade, and a period, plus things you do with them, like updating their grade. Keeping the data and the actions together makes code easier to read and harder to mess up.</p>
+  </div>
 
   <h4 class="fw-bold mt-5 text-info">14.3.2 Dictionaries (Maps)</h4>
   <p>An array looks things up by numbered position. A <strong>Dictionary</strong> (or <strong>Map</strong>) looks things up by a meaningful <strong>key</strong> instead — a phonebook keyed by name instead of by an arbitrary row number is dramatically faster to search, because you go straight to the name instead of checking every entry in order.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Dictionaries: Look It Up by Name</h5>
+      <p>A <strong>dictionary</strong> (also called a <strong>map</strong>) stores pairs: a <strong>key</strong> and its <strong>value</strong>. The key is how you find something, and the value is what you find. In a real dictionary, the word is the key and the definition is the value. In a phone's contact list, the name is the key and the phone number is the value.</p>
+      <p>The big advantage is speed. With an array of 1,000 contacts, finding "Maya" means checking names one by one until you hit her. With a dictionary, you ask for <code>contacts["Maya"]</code> and jump straight to her, just like going straight to the M section in a book.</p>
+      <p>In JavaScript and Apps Script, you can build a simple dictionary with an object, using names as the keys:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>const grades = { "Amara": 92, "Ben": 85, "Chen": 78 };
+Logger.log(grades["Ben"]);   // 85, found directly by key
+grades["Deja"] = 88;          // add a new pair
+grades["Ben"] = 90;           // update an existing value</code></pre>
+      <p>One rule: keys must be <strong>unique</strong>. If two students are both named "Alex," saving the second one would overwrite the first. That's why real systems often use something guaranteed to be unique, like a student ID, as the key.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A sorted row of numbered boxes from 1 to 16 with three successive step panels below it. Step 1 highlights the middle box and an X over half the row that gets eliminated. Step 2 repeats on the remaining half. Step 3 lands on the target number, each step labeled and shown as a smaller shrinking row.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-search me-2"></i> Binary Search</h5>
       <p class="mb-0"><strong>Binary search</strong> finds a target value in an already-sorted list by repeatedly checking the middle element and eliminating half the remaining possibilities — exactly like looking up a word in a printed dictionary by flipping to the middle, deciding which half your word is in, and repeating. It's dramatically faster than checking every item one by one, but it only works because the list is sorted first.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Binary Search, Step by Step</h5>
+      <p>Play this game: "I'm thinking of a number from 1 to 100." A smart guesser doesn't say 1, 2, 3, 4... They say 50. If the answer is "higher," they've just ruled out half the numbers in one guess. Then they say 75, then 62, and so on. That strategy is <strong>binary search</strong>. "Binary" means two, because each step splits what's left into two halves.</p>
+      <p>Let's search this sorted list for 72: <code>[2, 5, 8, 12, 16, 23, 38, 45, 56, 72, 91]</code>. <strong>Step 1:</strong> check the middle (index 5), which is 23. Since 72 is bigger, throw away everything from 23 down. <strong>Step 2:</strong> the middle of what's left (index 8) is 56. Still too small, so throw away the left half again. <strong>Step 3:</strong> the middle of what's left (index 9) is 72. Found it in 3 checks instead of 10.</p>
+      <p>The savings get huge as lists grow. Checking one item at a time through 1,000 items could take 1,000 checks. Binary search needs about 10. For a million items, it needs about 20. Every check cuts the problem in half.</p>
+      <p class="mb-0">But there's a rule you can't break: <strong>the list must be sorted</strong>. Binary search throws away half the list based on whether the target is bigger or smaller than the middle. In an unsorted list, a number bigger than the middle could be hiding on either side, so throwing half away might throw away the answer.</p>
   </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
