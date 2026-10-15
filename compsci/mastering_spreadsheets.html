@@ -153,6 +153,49 @@
 
   <p>Always <strong>verify</strong> a new formula against a small sample you calculated by hand before trusting it on 2,000 rows. It costs thirty seconds and it's the only thing standing between you and a wrong number nobody catches.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Ranges: Working With Many Cells at Once</h5>
+      <p>Most spreadsheet functions work on a <strong>range</strong>, a group of cells written as two cell addresses with a colon between them. <code>B2:B16</code> means "every cell from B2 down to B16," which is 15 cells in one column. <code>A2:E16</code> means the whole rectangle from A2 to E16.</p>
+      <p>You can type a range, or just click and drag across the cells while writing a formula, and Sheets fills in the range for you. Leave out row 1 if it holds your headers. You want the numbers, not the column titles.</p>
+      <p class="mb-0">Ranges are what make spreadsheets powerful. <code>=SUM(B2:B16)</code> adds 15 numbers. If you add more rows inside the range later, the formula keeps working. That's the "write the rule once" idea from 7.1 in action.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Aggregate Functions: SUM, AVERAGE, COUNT</h5>
+      <p><strong>Aggregate</strong> functions take many values and turn them into one number that summarizes them. They're the functions you'll use most.</p>
+      <p><code>=SUM(B2:B16)</code> adds every number in the range, which is good for totals like total points or total sales. <code>=AVERAGE(B2:B16)</code> adds them up and divides by how many there are, which gives the typical value. <code>=COUNT(B2:B16)</code> tells you how many cells contain numbers, which is handy for "how many quizzes were turned in?" Two more useful ones: <code>=MAX(B2:B16)</code> finds the highest value and <code>=MIN(B2:B16)</code> finds the lowest.</p>
+      <p class="mb-0">One detail to know: AVERAGE and COUNT skip blank cells, but they include zeros. A student who scored 0 pulls the average down, while a student with a blank cell is left out completely. Make sure blanks and zeros in your data mean what you think they mean.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Counting & Adding With Conditions: COUNTIF & SUMIF</h5>
+      <p>Sometimes you don't want to count <em>everything</em>, just the cells that match a rule. <code>COUNTIF</code> does that. It has two parts: the range to look in, and what to look for. <code>=COUNTIF(C2:C16, "A")</code> counts how many cells in C2:C16 say exactly "A." <code>=COUNTIF(B2:B16, ">=90")</code> counts how many scores are 90 or higher.</p>
+      <p>A common way to use it is to make a small table of categories, with one COUNTIF per category. If column D lists each student's favorite subject, you could write <code>=COUNTIF(D2:D16, "Math")</code>, <code>=COUNTIF(D2:D16, "Art")</code>, and so on. Those counts are exactly what you'd turn into a bar or pie chart.</p>
+      <p><code>SUMIF</code> works the same way, but it <em>adds</em> numbers instead of counting them. It has three parts: where to check the rule, the rule, and which numbers to add. <code>=SUMIF(D2:D16, "Math", E2:E16)</code> adds up column E, but only on rows where column D says "Math."</p>
+      <p class="mb-0">Watch out for exact spelling. COUNTIF is looking for an exact match, so "Math" and "Math " (with a space at the end) don't match. If a count looks too low, check for extra spaces or different spellings in your data. The TRIM function below can help.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Logical Functions: IF</h5>
+      <p><code>IF</code> lets a cell make a decision, exactly like the if/else statements you'll write in code later. It has three parts: a <strong>condition</strong> to check, what to show if it's true, and what to show if it's false.</p>
+      <p><code>=IF(B2>=70, "Pass", "Retake")</code> checks whether B2 is 70 or more. If yes, the cell shows Pass. If not, it shows Retake. Copy it down the column, and every row makes its own decision based on its own score.</p>
+      <p class="mb-0">You can combine IF with AND or OR for rules with more than one part. <code>=IF(AND(B2>=70, C2>=70), "Both passed", "Check")</code> only says "Both passed" when <em>both</em> scores are 70 or higher. That's the same AND logic from logic gates in Chapter 5.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Lookup Functions: VLOOKUP</h5>
+      <p>A <strong>lookup</strong> function finds a value in one table and pulls back related information, like looking up a student ID to find the student's name. <code>VLOOKUP</code> ("vertical lookup") searches down the first column of a table for a match, then returns a value from another column in that same row.</p>
+      <p>It has four parts: <code>=VLOOKUP(what to find, the table, which column to return, FALSE)</code>. For example, <code>=VLOOKUP("MTH", G2:H6, 2, FALSE)</code> looks for "MTH" in the first column of G2:H6 and returns whatever is in the table's 2nd column on that row, maybe "Mathematics." The <code>FALSE</code> at the end means "exact match only." Always include it.</p>
+      <p class="mb-0">VLOOKUP only searches the <em>first</em> column of the table you give it, and it counts columns starting from 1 within that table, not from column A of the sheet. Most VLOOKUP mistakes come from one of those two things. It's especially useful for the split tables from Chapter 6, because it pulls the full name back from a lookup table using a short code.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Text Functions: TRIM & CONCATENATE</h5>
+      <p>Real data is often messy: extra spaces, names split across columns, and inconsistent capitals. Text functions clean and reshape it before you analyze it.</p>
+      <p><code>=TRIM(A2)</code> removes extra spaces at the start and end of a cell and squashes double spaces in the middle. That fixes the sneaky "Math " problem that makes COUNTIF miss matches. <code>=CONCATENATE(A2, " ", B2)</code>, or the shorter <code>=A2 & " " & B2</code>, glues text together, like a first name, a space, and a last name.</p>
+      <p class="mb-0">A good habit is to clean into a <em>new</em> column instead of overwriting the original. Then if your cleaning formula has a mistake, the original data is still there to check against.</p>
+  </div>
+
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-table me-2"></i> Build This Data Set First</h5>
       <p class="mb-0">Create a new spreadsheet with these five columns: <strong>Student Name</strong>, <strong>Quiz 1 Score</strong>, <strong>Quiz 2 Score</strong>, <strong>Quiz 3 Score</strong> (all 0–100), and <strong>Study Hours per Week</strong> (0–10). Fill in 15 rows of realistic-looking made-up data yourself. You'll reuse this exact spreadsheet for the chart and dashboard activity later in this chapter, so keep it.</p>
@@ -190,6 +233,21 @@
       <li><strong>Relationship</strong> — scatter plots</li>
       <li><strong>Change over time</strong> — line charts</li>
   </ul>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: The Five Chart Questions</h5>
+      <p>Before you make a chart, decide what question it answers. <strong>Comparison</strong> asks "which is bigger?", like the average score of each class period. Use a <strong>bar chart</strong>, because bars side by side are easy to compare by height.</p>
+      <p><strong>Composition</strong> asks "what are the parts of the whole?", like what percent of your spending goes to food, gas, and fun. Use a <strong>pie chart</strong> for just a few parts, or a stacked bar for more. <strong>Distribution</strong> asks "how spread out are the values?", like how many students scored in the 60s, 70s, 80s, and 90s. Use a <strong>histogram</strong>.</p>
+      <p><strong>Relationship</strong> asks "do these two things move together?", like study hours and quiz scores. Use a <strong>scatter plot</strong>, with one dot per student. <strong>Change over time</strong> asks "is it going up or down?", like your savings week by week. Use a <strong>line chart</strong>, because the line shows the trend.</p>
+      <p class="mb-0">If you can't say what question your chart answers in one sentence, you're not ready to make it yet. And if the chart type doesn't match the question, like a pie chart for change over time, readers will struggle to see the point even if every number is right.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Making a Chart in Google Sheets</h5>
+      <p><strong>Step 1:</strong> select the data, including the header row, so Sheets can label things. For a category chart, that's usually two columns: the category names and their counts. <strong>Step 2:</strong> click <strong>Insert → Chart</strong>. Sheets guesses a chart type and opens the <strong>Chart editor</strong> on the right side of the screen.</p>
+      <p><strong>Step 3:</strong> in the editor's <strong>Setup</strong> tab, change the <strong>Chart type</strong> if Sheets guessed wrong. Check that the X-axis and the data series are the columns you meant. <strong>Step 4:</strong> in the <strong>Customize</strong> tab, add a clear chart title and axis titles. "Players by Status" tells readers far more than "Chart 1."</p>
+      <p class="mb-0">Charts made this way stay <strong>linked</strong> to your data. If you change a number in the cells, the chart updates automatically. That's why charts should be built from formula results, like your COUNTIF counts, instead of numbers you typed in by hand.</p>
+  </div>
 
   <div class="concept-box shadow-sm border-warning bg-light">
       <h5 class="fw-bold text-dark"><i class="fas fa-chart-bar me-2"></i> Worked Example: The Truncated Axis</h5>
@@ -312,6 +370,13 @@
 
   <h4 class="fw-bold mt-5 text-primary">7.3.3 Pivot Tables & Communicating a Claim</h4>
   <p>A <strong>pivot table</strong> lets you instantly reorganize and summarize thousands of rows — totaled by region, by month, by product — without touching or duplicating the original data. It's the fastest way to go from a wall of raw rows to a specific answer.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Pivot Tables, Step by Step</h5>
+      <p>A <strong>pivot table</strong> is a summary table that Sheets builds for you. Imagine a sheet with 1,000 sales, each row showing a date, a product, a store, and an amount. A pivot table can answer "What were the total sales for each store?" in a few clicks, without writing a single formula.</p>
+      <p>To make one, select your data, including headers, and click <strong>Insert → Pivot table</strong>. Sheets creates a new tab with a pivot table editor. Under <strong>Rows</strong>, add the category you want to group by, like Store. Under <strong>Values</strong>, add the number you want summarized, like Amount, and choose how: SUM, AVERAGE, or COUNTA (count). Instantly you get one row per store with its total.</p>
+      <p class="mb-0">You can rearrange it any time. Swap Store for Product, add Month as a <strong>Column</strong>, or add a <strong>Filter</strong>. The original data never changes. That's why it's called "pivoting": you're turning the same data to look at it from a different angle.</p>
+  </div>
   <p>All of this — mining, cleaning, spotting outliers and correlations, pivoting — is in service of one final step: using data to <strong>communicate a clear claim</strong>. That means picking the specific numbers and chart that support the point you're making, and presenting them so someone else reaches the same conclusion you did, on their own, at a glance.</p>
 
   <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">

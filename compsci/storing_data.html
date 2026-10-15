@@ -176,6 +176,34 @@ Aaliyah, 10th grade, Chemistry, D+</pre>
 
   <p><strong>The trap:</strong> students often assume the most convenient storage option is automatically the safest. It's usually the opposite. Privacy and control tend to move inversely to convenience — cloud storage is effortless precisely because you've handed control of the keys to someone else. That's a decision, not an accident, and it's worth making on purpose.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Local Storage</h5>
+      <p><strong>Local storage</strong> means saving data right on the device you're using: your laptop's hard drive, your phone's memory, or a USB flash drive. It's the fastest option, because the data is physically right there, and it works with no internet at all.</p>
+      <p>You also have full control. Nobody else can see your files unless they get your device. But that also means all the risk is on you. If your laptop is lost, stolen, dropped, or its drive fails, and you don't have a copy anywhere else, those files are gone. A single device is a single point of failure.</p>
+      <p class="mb-0">Local storage is great for files you're actively working on, or private things you don't want online. Just pair it with a backup somewhere else for anything you can't afford to lose.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Network Storage</h5>
+      <p><strong>Network storage</strong> keeps files on a shared drive inside a group, like a school or an office. Everyone on that network can reach it. Your school might have a shared drive where teachers save lessons, or a server where student work is kept.</p>
+      <p>It's fast when you're in the building, and it makes sharing easy. The school's tech team usually handles security and backups, so it's safer than one person's laptop. The catch is that you usually have to be on that network to reach it. From home, you may need a special secure connection.</p>
+      <p class="mb-0">Network storage is a middle ground. It's more shared and protected than local storage. But your own school or company still controls it, not an outside company.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Cloud Storage</h5>
+      <p><strong>Cloud storage</strong> means saving files on servers owned by a company, like Google Drive, iCloud, or OneDrive, and reaching them over the internet. "The cloud" isn't floating in the sky. It's real computers in giant data centers.</p>
+      <p>The cloud's big strengths are access and durability. You can open your files from any device, share them with a link, and edit them with others at the same time. Cloud companies also keep copies of your data in several data centers, so a single fire or broken server won't erase your work.</p>
+      <p class="mb-0">The tradeoffs are that you need internet access, many services charge a monthly fee for more space, and you're trusting another company with your data. That company sets the rules for privacy and security. That's the "who holds the keys" column in the table above.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Archival Storage</h5>
+      <p><strong>Archival storage</strong> is for data you need to keep for a long time but rarely need to open: old tax records, school records from years ago, or raw video footage from a family trip. Think of it like boxes in an attic. They're safe and out of the way, but slow to dig through.</p>
+      <p>Archives are the cheapest storage per gigabyte, and they're built to last for years. The tradeoff is speed: getting files back can take hours, and some services charge a fee each time you retrieve something.</p>
+      <p class="mb-0">Organizations use archival storage to follow laws that require keeping records for years, and to protect against disasters. For a student, an external hard drive kept in a drawer for old projects and photos works as a simple personal archive.</p>
+  </div>
+
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
       <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
       <p class="mb-0 text-light">Which storage option trades privacy for convenience, and why? <em class="text-white-50">(Answer: cloud storage — a third party holds both your data and the encryption keys, in exchange for access from anywhere.)</em></p>
@@ -263,6 +291,13 @@ Aaliyah, 10th grade, Chemistry, D+</pre>
           </tbody>
       </table>
       <p class="small text-muted mb-0">The ZIP shrinks by roughly a third and still hands back the exact original document — every character intact, because a single dropped letter in an essay is a real problem. The JPEG shrinks to a fraction of its size by throwing away pixel detail a human mostly can't see — but that detail is gone for good, even if you re-save it back to PNG.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: How Compression Actually Works</h5>
+      <p>Lossless compression works by finding repeated patterns and writing them in a shorter way. Imagine a row of pixels in an image: <code>WWWWWWWWBBBWWWW</code> (W for white, B for black). Instead of storing all 15 letters, you could store <code>8W 3B 4W</code>: "8 white, 3 black, 4 white." That's much shorter, and you can rebuild the exact original from it. This method is called <strong>run-length encoding</strong>.</p>
+      <p>Real lossless formats like ZIP and PNG use smarter versions of this idea, finding repeated words, phrases, and patterns throughout the file. That's why text compresses well, because words repeat a lot. A file that's already random-looking, like an encrypted file, barely compresses at all.</p>
+      <p class="mb-0">Lossy compression goes further by deciding what a human probably won't notice and throwing it away. A JPEG keeps the overall colors and shapes of a photo but drops tiny details in busy areas. An MP3 removes sounds most people can't hear. Save a JPEG over and over, and the quality drops a little each time, because each save throws away more detail.</p>
+  </div>
   </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A side-by-side comparison of the same photo of a flower compressed two ways: left labeled &quot;Lossless&quot; showing a crisp, perfectly sharp image; right labeled &quot;Lossy (heavily compressed)&quot; showing visible blocky compression artifacts and blurred detail, so the quality difference is obvious.">
@@ -305,6 +340,20 @@ Aaliyah, 10th grade, Chemistry, D+</pre>
   <h4 class="fw-bold mt-5 text-info">6.3.4 Scalability & Deletion</h4>
   <p>A storage system is <strong>scalable</strong> if it keeps working smoothly as the amount of data grows — a startup whose user base doubles every month needs a database that can handle that growth without a full redesign each time.</p>
   <p>And when you delete a file from a standard hard drive, the data isn't actually erased right away — the space is just marked as available to be overwritten later. That's also why "permanently" deleted files can sometimes be recovered, and why sensitive drives need to be securely wiped, not just have files dragged to the trash.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Scalable Storage</h5>
+      <p>A storage system is <strong>scalable</strong> if it can grow without falling apart. Picture a small notebook for tracking your music collection. It works for 20 albums. At 20,000 albums, you'd need a whole new system. Storage has the same problem.</p>
+      <p>When a new app gets popular, its data can double every month: more users, more posts, more photos. If its storage wasn't designed to grow, the team has to stop and rebuild everything, sometimes while the app is slow or down. Scalable systems are built so you can add more space or more servers without starting over.</p>
+      <p class="mb-0">Cloud storage is popular partly because it scales so easily. A company can rent more space in minutes instead of buying and installing new hardware. When you plan any system, ask: "What happens when this data is 100 times bigger?"</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: What "Delete" Really Does</h5>
+      <p>When you delete a file, it usually goes to the Trash first, where it's easy to get back. But even after you empty the trash, the data often isn't really gone. The computer just marks that space as "free." The old 1s and 0s stay there until new data is written on top of them.</p>
+      <p>Think of a library that removes a book from its catalog but leaves the book on the shelf. Nobody can look it up anymore, but someone who knows where to look can still find it. Special recovery software does exactly that, which is how deleted files are sometimes rescued, or found by investigators.</p>
+      <p class="mb-0">So before you sell or give away a phone or computer, do a full <strong>factory reset</strong>, or use a <strong>secure wipe</strong> tool that writes over the data. Newer phones are safer here. They encrypt your data, and a factory reset destroys the key. Without the key, the old data can't be read.</p>
+  </div>
 
   <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
       <div class="d-flex align-items-start">

@@ -44,6 +44,21 @@
 
   <p>Eight of these digits — a <strong>bit</strong> each — make one <strong>byte</strong>. A byte has exactly 256 possible values (2 to the 8th power), because each of its 8 bits can be either a 0 or a 1. That's not an arbitrary number — it's why an 8-bit color channel maxes out at 255, and why some old video games had a hard score limit around 65,535. The bit width sets the ceiling.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Converting Decimal to Binary</h5>
+      <p>The Worked Example showed binary → decimal: add up the columns that have a 1. Going the other way, decimal → binary, uses the same chart but works from the left. Think of it like paying with the biggest bills first: use the biggest place value that fits, subtract it, and keep going.</p>
+      <p>Let's convert <strong>45</strong>. Write the place values: 128, 64, 32, 16, 8, 4, 2, 1. Does 128 fit in 45? No, write 0. Does 64 fit? No, 0. Does 32 fit? Yes, write 1, and 45 − 32 leaves 13. Does 16 fit in 13? No, 0. Does 8 fit? Yes, 1, and 13 − 8 leaves 5. Does 4 fit? Yes, 1, leaving 1. Does 2 fit in 1? No, 0. Does 1 fit? Yes, 1, leaving 0.</p>
+      <p>Read the digits in order: <strong>00101101</strong>. Check it by adding the columns with a 1: 32 + 8 + 4 + 1 = 45. ✓ Always do that check. It catches almost every mistake.</p>
+      <p class="mb-0">Two tips: you always write all 8 places, so a byte looks like <code>00101101</code>, not just <code>101101</code>. Those leading zeros are part of the byte. And when you reach 0 left over, every remaining place is a 0.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Bits, Bytes & File Sizes</h5>
+      <p>A <strong>bit</strong> is the smallest piece of data: a single 0 or 1. A <strong>byte</strong> is 8 bits, enough to store one letter like "A." Everything bigger is built from bytes, the same way pages are built from letters.</p>
+      <p>Because files contain so many bytes, we use bigger units. A <strong>kilobyte (KB)</strong> is about a thousand bytes, roughly a short text document. A <strong>megabyte (MB)</strong> is about a million bytes, roughly one song or one phone photo. A <strong>gigabyte (GB)</strong> is about a billion bytes, roughly an hour of HD video. A <strong>terabyte (TB)</strong> is about a trillion bytes, the size of a large laptop hard drive.</p>
+      <p class="mb-0">You'll sometimes see 1 KB described as 1,024 bytes instead of 1,000. That's because computers count in powers of 2, and 2<sup>10</sup> = 1,024. For everyday purposes, "about a thousand" is close enough. The big idea is that each unit is about 1,000 times bigger than the one before it.</p>
+  </div>
+
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
       <h5 class="fw-bold text-info"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
       <p class="mb-0 text-light">Convert the decimal number 20 into binary. <em class="text-white-50">(Answer: 10100 — that's 16 + 4.)</em></p>
@@ -108,6 +123,14 @@
 
   <p><strong>The trap:</strong> students often think hexadecimal is a completely separate system from binary, unrelated to what they just learned. It isn't — it's literally the same data, just grouped four bits at a time and relabeled with a friendlier symbol. Nothing about the underlying value changes.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Hex & Binary: Four Bits at a Time</h5>
+      <p>Here's the shortcut that makes hex so useful: <strong>every hex digit equals exactly 4 bits</strong>. Four bits can hold 16 different values (0000 through 1111), and hex has exactly 16 symbols (0–F). So you can convert between hex and binary one digit at a time, with no big math.</p>
+      <p>To convert <code>3C</code> to binary, convert each digit separately into 4 bits. 3 = <code>0011</code> and C (12) = <code>1100</code>. Put them side by side: <code>00111100</code>. To go backward, split a byte into two groups of 4 and convert each: <code>0101 1010</code> becomes 5 and A (10), so it's <code>5A</code>.</p>
+      <p>To convert a decimal number into hex, divide by 16. Take <strong>90</strong>: 90 ÷ 16 = 5 with 10 left over. The 5 is the first digit, and the leftover 10 is the second digit, written as A. So 90 = <code>5A</code>. Check it with the equation above: (5 × 16) + 10 = 90. ✓</p>
+      <p class="mb-0">If you remember just one table, make it this one: 8 = <code>1000</code>, 9 = <code>1001</code>, A = <code>1010</code>, B = <code>1011</code>, C = <code>1100</code>, D = <code>1101</code>, E = <code>1110</code>, F = <code>1111</code>. With those, you can convert any hex digit in your head.</p>
+  </div>
+
   <h4 class="fw-bold mt-5 text-primary">5.2.2 Not Every Hex Code Is a Color</h4>
   <p>Every example so far has been a color, because colors are an easy way to see hex pairs at work — but hex is really just a general way to write any byte's value, for anything a computer stores. A single status flag, a memory address, an error code — any one byte can be written as exactly two hex digits, with no Red/Green/Blue channels involved at all.</p>
 
@@ -143,6 +166,13 @@
           </tbody>
       </table>
       <p class="small text-muted mb-0">"A" and "a" are two completely different numbers to a computer — capitalization isn't a font style, it's a different value. 😀's number is over 128,000, which is exactly why ASCII's 128-value limit could never have fit it.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Decoding a Character, Step by Step</h5>
+      <p>Character encoding is really just a lookup table that everyone agrees on. When your computer sees the number 72 in a text file, it looks up 72 in the table, finds "H," and draws an H on the screen. The number is what's stored. The letter is what you see.</p>
+      <p>To decode a code yourself, first get it into decimal. If it's in binary, add the place values. If it's in hex, use the hex equation. Then look that decimal number up in an ASCII table. For example, binary <code>01001000</code> = 64 + 8 = 72, and 72 in the ASCII table is <strong>H</strong>. A few handy landmarks: capital letters start at 65 (A), lowercase letters start at 97 (a), and the digit "0" is 48.</p>
+      <p class="mb-0">Modern files usually store Unicode using a system called <strong>UTF-8</strong>. In UTF-8, plain English letters still take just 1 byte, exactly matching ASCII, while other characters take 2, 3, or 4 bytes. That's why a text message full of emoji is "bigger" than one with plain letters: each emoji needs several bytes.</p>
+  </div>
   </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean infographic showing the letter &quot;A&quot; with an arrow pointing to the number 65, and a smiley-face emoji with an arrow pointing to its Unicode code point, both under the label &quot;Character Encoding.&quot;">
@@ -252,12 +282,33 @@
           </table>
       </div>
       <p class="small text-muted mb-0 mt-2">Every possible combination of two binary inputs, and what each gate outputs for it — that's a truth table. AND only lights up on one row out of four; OR lights up on three.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Logic Gates in Everyday Terms</h5>
+      <p>Logic gates sound technical, but you use the same logic every day. An <strong>AND</strong> gate is like a rule that needs <em>both</em> things to be true. "You can go to the game if you finish your homework AND clean your room." If either one isn't done, the answer is no.</p>
+      <p>An <strong>OR</strong> gate needs <em>at least one</em> thing to be true. "You can get in free if you're a student OR a teacher." Either one works, and being both works too. A <strong>NOT</strong> gate simply flips the answer. If "it's raining" is true, then "NOT raining" is false.</p>
+      <p class="mb-0">Inside a computer, gates take 1s and 0s instead of yes and no, where 1 means true and 0 means false. By connecting millions of gates in clever patterns, computers can add numbers, compare values, and make decisions. Every calculation your phone does, from a calculator app to a video game, is built out of these simple yes/no rules running billions of times a second.</p>
+  </div>
   </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A simple technical diagram of an AND logic gate and an OR logic gate side by side, each shown as its standard schematic symbol with two input lines and one output line, labeled with example TRUE/FALSE input combinations and the resulting output for each.">
 
   <h4 class="fw-bold mt-5 text-info">5.4.2 RAM & Clock Speed</h4>
   <p>While data is actively being worked on, it's held in <strong>RAM (Random Access Memory)</strong> — short-term memory built for lightning-fast access, wiped clean the moment the power turns off (unlike a hard drive, which keeps data with the power off). How fast the CPU can perform those logical operations is measured by its <strong>clock speed</strong>, given in <strong>Gigahertz (GHz)</strong> — a 3.0 GHz processor completes roughly 3 billion operation "ticks" every single second.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: RAM: The Computer's Desk</h5>
+      <p>Think of a computer like a student doing homework. The <strong>storage drive</strong> (hard drive or SSD) is the backpack, which holds everything you own, even when you're not using it. <strong>RAM</strong> is the desk, the space where you spread out what you're working on right now. The desk is much faster to reach than digging through the backpack, but it's smaller.</p>
+      <p>When you open an app, the computer copies it from storage into RAM so the processor can work with it quickly. The more apps and browser tabs you have open, the more desk space you're using. When RAM fills up, the computer has to keep shuffling things back to the slower storage, and everything starts to lag.</p>
+      <p class="mb-0">RAM is <strong>volatile</strong>, meaning it forgets everything when the power goes off. That's why you lose unsaved work if your computer suddenly shuts down: it was only on the desk, not saved in the backpack. Clicking Save copies your work from RAM to storage, where it stays even with the power off. Most laptops today have 8 to 16 GB of RAM.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Clock Speed & Cores</h5>
+      <p><strong>Clock speed</strong> is how many basic steps a processor can complete each second. It's measured in <strong>gigahertz (GHz)</strong>, where 1 GHz means 1 billion steps per second. A 3.0 GHz processor ticks about 3 billion times every second.</p>
+      <p>Higher clock speed generally means a faster computer, but it isn't the whole story. Modern processors have several <strong>cores</strong>, which are like several workers inside one processor, each able to handle its own tasks at the same time. A 4-core processor can work on four things at once, which helps when you're running several apps or editing video.</p>
+      <p class="mb-0">So when you compare devices, look at both. Clock speed tells you how fast each worker is, and the number of cores tells you how many workers there are. A slightly slower processor with more cores can beat a faster one with fewer cores on big jobs, like gaming or video editing.</p>
+  </div>
 
   <h4 class="fw-bold mt-5 text-primary">5.4.3 The Fetch-Decode-Execute Cycle</h4>
   <p>Billions of times per second, the CPU repeats the same three-step loop on a binary instruction: <strong>Fetch</strong> (retrieve the next instruction from memory), <strong>Decode</strong> (figure out what that instruction actually means), and <strong>Execute</strong> (carry it out using its logic gates). This <strong>Fetch-Decode-Execute cycle</strong> is the fundamental heartbeat underneath every program you've ever run — it's what a clock speed in GHz is actually counting.</p>

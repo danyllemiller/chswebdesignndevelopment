@@ -170,6 +170,13 @@
 
   <p><strong>The trap:</strong> students often assume the model that matches historical data most closely is automatically the best one. Often it's the opposite — a model chasing every past data point instead of the underlying pattern tends to be the one that fails hardest on anything new.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Overfitting</h5>
+      <p><strong>Overfitting</strong> is when a model learns the past <em>too</em> well. It memorizes every random bump in the old data instead of learning the general pattern, so it falls apart on anything new.</p>
+      <p>It's like studying for a test by memorizing the exact answers to the practice test. If the real test has the same questions, you ace it. If the questions are even slightly different, you're lost, because you never learned how to solve them. An overfit model has memorized the practice test.</p>
+      <p class="mb-0">How do you catch overfitting? Hold some data back. Build your model using most of your data, then test it on data it has <em>never seen</em>, like the last month you held back. If it does great on the old data but badly on the new data, it's overfit. A simpler model that captures the general trend usually predicts the future better.</p>
+  </div>
+
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
       <h5 class="fw-bold text-info"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
       <p class="mb-0 text-light">A model explains ten years of past data almost perfectly, then performs badly predicting year eleven. What's the most likely problem? <em class="text-white-50">(Answer: overfitting — the model was tuned to match the noise in the past data instead of the real underlying relationship.)</em></p>
@@ -233,10 +240,24 @@
   <div class="concept-box shadow-sm border-info bg-light">
       <h5 class="fw-bold text-info"><i class="fas fa-dice me-2"></i> Why Simulations Use Random Numbers</h5>
       <p class="mb-0">Real-world systems don't behave identically every time — customers don't arrive at a store on a perfect schedule. Simulations often add a <strong>random number generator</strong> to introduce that same realistic variability (e.g. randomizing exactly when each simulated customer arrives), instead of pretending everything happens like clockwork.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Randomness in a Spreadsheet Simulation</h5>
+      <p>Google Sheets has built-in random number generators. <code>=RAND()</code> gives a random decimal between 0 and 1. <code>=RANDBETWEEN(1, 6)</code> gives a random whole number from 1 to 6, like rolling a die. Every time the sheet recalculates, these numbers change.</p>
+      <p>You can use them to add realistic variety to a model. Say a store usually gets 8 to 12 customers an hour. Instead of assuming exactly 10 every hour, a simulation could use <code>=RANDBETWEEN(8, 12)</code> for each hour. Now each run of the simulation plays out a little differently, just like real life.</p>
+      <p class="mb-0">Because one random run could be lucky or unlucky, simulations are run <strong>many times</strong>, and the results are averaged. Run a dice simulation 10 times and the average might be off. Run it 1,000 times and the average gets very close to the true answer of 3.5. More trials mean more trustworthy results.</p>
+  </div>
   </div>
 
   <h4 class="fw-bold mt-5 text-primary">8.4.3 Abstraction: Simplifying on Purpose</h4>
   <p>A climate model could try to track every single molecule of air on Earth — but that's not practical, and it wouldn't even help. <strong>Abstraction</strong> means deliberately leaving out details that don't matter for the question you're actually asking, so the model stays understandable and runs in a reasonable amount of time. A traffic simulation that ignores each driver's personality and just models speed, spacing, and traffic lights isn't lazy — it's abstracted to the level of detail that traffic flow actually depends on.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Abstraction in Models</h5>
+      <p><strong>Abstraction</strong> means keeping the details that matter for your question and leaving out the rest. A subway map is a great example. It doesn't show streets, buildings, or the real distances between stations. It shows only the stations and the lines connecting them, because that's all a rider needs.</p>
+      <p>Every model is an abstraction. A model of how fast a rumor spreads at school might track how many people each person talks to per day. It doesn't need anyone's height, favorite food, or locker number. Leaving those out isn't lazy. It makes the model faster to build, easier to understand, and easier to check.</p>
+      <p class="mb-0">The skill is choosing the right details. Leave out something that really matters, like the fact that weekends exist and people talk less, and your model gives wrong answers. A good test: for each detail you leave out, ask "Would including this change the answer to my question?" If yes, keep it.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
       <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -245,6 +266,13 @@
 
   <h4 class="fw-bold mt-5 text-info">8.4.4 Hypotheses: What Simulations Are Really Testing</h4>
   <p>A <strong>hypothesis</strong> is a specific, testable claim — "if we increase advertising spend by 20%, sales will rise by 5%." A model or simulation is one of the main tools for testing a hypothesis without waiting for the real thing to happen: run the simulation, compare its prediction to what actually occurs, and either the hypothesis holds up or it gets refined based on where the model's output and reality disagreed.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Writing a Testable Hypothesis</h5>
+      <p>A <strong>hypothesis</strong> is a specific prediction you can check, usually written as "If I change ___, then ___ will happen." For example: "If the cafeteria opens a second lunch line, then the average wait time will drop from 12 minutes to under 7."</p>
+      <p>Good hypotheses are <strong>specific</strong> and <strong>measurable</strong>. "A second line will make lunch better" can't really be tested. What counts as "better"? But "Average wait time will drop under 7 minutes" can be tested. Run the simulation, measure the wait, and see if you were right.</p>
+      <p class="mb-0">Being wrong isn't a failure. If the simulation shows wait time only drops to 10 minutes, you've learned something real. Maybe the bottleneck is the cash register, not the line. Scientists and engineers improve their thinking by testing hypotheses, seeing where they're wrong, and refining them.</p>
+  </div>
 
   <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
       <div class="d-flex align-items-start">
