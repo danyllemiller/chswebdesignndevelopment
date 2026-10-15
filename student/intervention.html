@@ -53,7 +53,7 @@
       position: relative; color: var(--p-text);
     }
     .cal-day:hover:not(.cal-empty) { background: var(--p-accent-light); }
-    .cal-day.today { border: 2px solid var(--p-accent); background: var(--p-accent-light); }
+    .cal-day.today { border: 2px solid var(--p-accent); background: var(--p-accent-light); box-shadow: 0 4px 12px rgba(0,0,0,.16); }
     .cal-day.cal-selected:not(.today) { border: 2px solid #0d6efd; box-shadow: 0 0 0 2px rgba(13,110,253,.2); }
     /* ── Habit heat map ─────────────────────────────────── */
     .habit-hm-row { display:flex; align-items:center; gap:6px; margin-bottom:7px; }
@@ -1727,7 +1727,7 @@
 
         const isWeekendCol = i >= 5;
         const isSelected = ymd === calSelectedYMD;
-        html += `<div class="week-col ${isToday ? 'border-2' : isSelected ? 'border-2' : ''}" style="${isToday ? `border-color:var(--p-accent)!important;` : isSelected ? `border-color:#0d6efd!important;box-shadow:0 0 0 2px rgba(13,110,253,.15);` : ''}${isWeekendCol ? 'background:#f8f9fa;' : ''}">
+        html += `<div class="week-col ${isToday ? 'border-2' : isSelected ? 'border-2' : ''}" style="${isToday ? `border-color:var(--p-accent)!important;box-shadow:0 4px 12px rgba(0,0,0,.16);` : isSelected ? `border-color:#0d6efd!important;box-shadow:0 0 0 2px rgba(13,110,253,.15);` : ''}${isWeekendCol ? 'background:#f8f9fa;' : ''}">
           <div class="week-day-name d-flex align-items-center gap-1 flex-wrap" onclick="window.selectCalDay('${ymd}')" title="View ${dayNames[i]} ${dt.getMonth()+1}/${dt.getDate()} in Day view" style="cursor:pointer;">
             <span>${dayNames[i]} ${dt.getMonth()+1}/${dt.getDate()}</span>
             ${badge ? `<span class="cal-block-badge ${badge.cls}">${badge.label}</span>` : ''}

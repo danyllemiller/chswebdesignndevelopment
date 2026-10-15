@@ -619,8 +619,9 @@ async function renderWeekView() {
         return `<div class="tg-allday-col" data-date="${dateStr}">${chip}</div>`;
     }).join('');
 
+    const todayIso = isoDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
     const dayCols = days.map(({ dateStr, periods, colors }) =>
-        `<div class="tg-day-col" data-date="${dateStr}">
+        `<div class="tg-day-col${dateStr === todayIso ? ' tg-col-today' : ''}" data-date="${dateStr}">
             ${tgHourLines()}
             ${tgCurrentTimeLine(dateStr)}
             ${tgEventBlocks(periods, colors)}
