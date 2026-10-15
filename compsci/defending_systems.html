@@ -27,6 +27,13 @@
   <h3 id="section-19-1" class="fw-bold mt-4 border-bottom pb-2">19.1 The Usability-Security Tradeoff</h3>
   <p class="fs-5">A system requiring a 40-character password, changed every week, is extremely secure on paper. In practice, users write it on a sticky note stuck to the monitor. Security nobody will actually use protects nothing.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Usability vs. Security</h5>
+      <p><strong>Usability</strong> is how easy something is to use. <strong>Security</strong> is how well it's protected. These two often pull against each other, like a see-saw. A front door with ten locks is very secure, but it's a pain to use every day, so people might start leaving it unlocked.</p>
+      <p>When security gets too annoying, people find shortcuts around it: writing passwords on sticky notes, sharing one login with everyone, or turning protection features off. A shortcut like that can make the system <em>less</em> safe than a simpler setup people would actually follow.</p>
+      <p class="mb-0">So the goal isn't the most security possible. It's the <em>right amount</em> of security that people will really use. Good security designers think about real human behavior, not just how things look on paper.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A photorealistic-style illustration of a computer monitor at an office desk with a bright yellow sticky note stuck directly to the bottom bezel, handwritten with a long complicated password, visible to anyone walking past the desk.">
 
 
@@ -39,6 +46,34 @@
   </div>
   <p class="text-center text-muted small">Plus: firewalls, regular patching, and backups.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Unique Passwords & Password Managers</h5>
+      <p>Remember credential stuffing from Chapter 18? The fix is a <strong>unique password</strong> for every account, so one leak can't unlock everything. But most people have dozens of accounts, and nobody can memorize dozens of strong, different passwords.</p>
+      <p>A <strong>password manager</strong> solves this. It's an app that creates a long, random password for each account, stores them all in an encrypted vault, and fills them in for you when you log in. You only need to remember one strong <strong>master password</strong> to open the vault. Many phones and browsers have one built in.</p>
+      <p class="mb-0">The tradeoff: you're putting all your passwords in one place, so that master password has to be strong, and you should protect the vault with multi-factor authentication. Security experts still agree that a password manager is far safer than reusing the same few passwords everywhere.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Multi-Factor Authentication (MFA)</h5>
+      <p><strong>Multi-factor authentication</strong> means proving it's you in more than one way before you can log in. The factors come in three types: something you <strong>know</strong> (a password), something you <strong>have</strong> (your phone or a security key), and something you <strong>are</strong> (your fingerprint or face).</p>
+      <p>The most common setup is a password plus a code sent to your phone or shown in an authenticator app. Even if an attacker steals your password, they still can't get in without your phone. Microsoft has reported that MFA blocks more than 99.9% of automated attacks on accounts.</p>
+      <p class="mb-0">The cost is a few extra seconds at login, which is why some people turn it off. But for important accounts like email, banking, and school accounts, those few seconds are one of the best security deals there is. Turn it on wherever it's offered.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Encryption at Rest & in Transit</h5>
+      <p><strong>Encryption</strong> scrambles data using a secret key, so anyone without the key sees only gibberish. It's like writing a note in a secret code that only you and your friend know how to read.</p>
+      <p>Data needs protection in two situations. <strong>In transit</strong> means while it's traveling across a network, like your password going from your phone to a website. HTTPS, the padlock in your browser, encrypts data in transit, which stops the man-in-the-middle attacks from Chapter 18. <strong>At rest</strong> means while it's stored, like files on a laptop or records in a database. Encrypting stored data means a stolen laptop or hard drive is useless without the key.</p>
+      <p class="mb-0">Most modern phones encrypt their storage automatically when you set a passcode. That's one more reason to always use a passcode: it's the key that keeps everything on your phone unreadable to a thief.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Regular Patching</h5>
+      <p>A <strong>patch</strong> is an update that fixes a problem in software. Often it fixes a security hole. When your phone asks to install an update, it's often a patch. It closes a door that attackers could use.</p>
+      <p>Remember the WannaCry worm from Chapter 18? Microsoft had already released a patch for the hole it used about two months before the attack. The computers that got hit were mostly the ones that hadn't installed it. That's why "install updates" is one of the most important pieces of security advice.</p>
+      <p class="mb-0">Patching has a cost too. Updates take time. They may need a restart. Once in a while, they break something that used to work. So companies often test patches first, then install them on a set schedule, not "whenever someone remembers." For your own devices, the easy win is to turn on automatic updates.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A see-saw balance scale illustration with &quot;Security&quot; labeled on one side holding a padlock icon and &quot;Usability&quot; labeled on the other side holding a person icon, tilted to show that pushing one side up (more security) pushes the other side down (less usability).">
 
   <div class="concept-box shadow-sm border-warning bg-light">
@@ -46,10 +81,24 @@
       <p class="mb-0">A school, a hospital, and a game server have completely different threat models and completely different acceptable friction. The hospital tolerates far more login friction than the game server would, because the cost of a breach is far higher. The "right" security measure isn't fixed — it's scored against the specific scenario every time.</p>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Threat Models</h5>
+      <p>A <strong>threat model</strong> is a plan that answers three questions about something you want to protect. <strong>What</strong> are we protecting? <strong>Who</strong> might attack it, and why? <strong>How bad</strong> would it be if they succeeded?</p>
+      <p>Different situations have very different answers. A hospital protects private medical records and life-saving equipment, so a breach could hurt patients. A hobby game server protects mostly usernames and high scores, so a breach is annoying but not dangerous. Because the stakes are so different, the right security is different too.</p>
+      <p class="mb-0">Building a threat model keeps you from wasting money on protection you don't need, or skipping protection you really do. Before recommending any security measure, sketch the threat model first. It's the "why" behind every choice you make in the Tradeoff Matrix.</p>
+  </div>
+
   <p><strong>The trap:</strong> students often think stronger security is always better. Every control adds friction, and users defeat controls that are too painful — forced frequent password changes is the classic example, since it reliably drives people to write passwords down instead of memorizing something stronger.</p>
 
   <h4 class="fw-bold mt-5 text-info">19.1.2 Why Backups Are a Security Control</h4>
   <p>Backups don't stop an attack. They're the only reliable recovery path after one — particularly ransomware, where your only real alternative to a clean backup is paying the attacker.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Backups & the 3-2-1 Rule</h5>
+      <p>A <strong>backup</strong> is an extra copy of your important files, kept somewhere else. If the original is lost, broken, stolen, or locked by ransomware, you still have a copy. Backups don't stop attacks. But they make sure an attack, a spilled drink, or a dead hard drive isn't a disaster.</p>
+      <p>Professionals follow the <strong>3-2-1 rule</strong>: keep <strong>3</strong> copies of your data, on <strong>2</strong> different kinds of storage (like a computer and an external drive), with <strong>1</strong> copy stored somewhere else, such as in the cloud or at a different building. That way, one fire, one theft, or one ransomware infection can't destroy every copy.</p>
+      <p class="mb-0">Two more tips. First, a backup that's always plugged in can get locked by ransomware too. So keep at least one copy unplugged or protected. Second, <strong>test your backups</strong>. Every so often, try to bring back a file from one. A backup you've never tested might not work when you need it.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
       <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -101,6 +150,14 @@
   <h4 class="fw-bold mt-4 text-primary">19.2.1 The Structure That Gets Read</h4>
   <p>Every real recommendation needs five parts, in plain language: the <strong>risk</strong>, its <strong>likelihood and impact</strong>, the <strong>recommended control</strong>, what it <strong>costs</strong> in money and friction, and what happens if it's <strong>declined</strong>.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: The Five Parts, Explained</h5>
+      <p><strong>1. The risk:</strong> what could go wrong, said simply. Not "insufficient access controls," but "every employee uses the same login, so we can't tell who did what, and one leaked password lets someone into everything." <strong>2. Likelihood and impact:</strong> how likely it is to happen, and how bad it would be if it did. "Fairly likely, since the password is on a sticky note, and a thief could see every customer's email."</p>
+      <p><strong>3. Recommended control:</strong> the specific fix you're suggesting. Be concrete: "Give each employee their own login," not "improve security." <strong>4. Cost:</strong> what it takes in money, time, and inconvenience. Being honest about cost builds trust. "Free, about 30 minutes to set up, and employees will need to remember one password each."</p>
+      <p><strong>5. If declined:</strong> what happens if they choose not to do it. This isn't a scare tactic. It's information the owner needs to make a real decision. "The store can continue as is, but if a customer's data leaks, there will be no way to know which login it came from."</p>
+      <p class="mb-0">Together, these five parts turn a technical opinion into a business decision someone can actually make. Leave one out, and the reader is left guessing about the part that matters most to them.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: Five numbered icons in a horizontal row, each in its own labeled box: 1 Risk (warning triangle), 2 Likelihood & Impact (gauge dial), 3 Recommended Control (shield with checkmark), 4 Cost (dollar sign), 5 If Declined (open padlock), connected by a thin arrow showing they read left to right as one flowing recommendation.">
 
 
@@ -110,7 +167,21 @@
       <p class="mb-0"><strong>Business version:</strong> "Right now, one leaked password from another site could let someone into our admin accounts. Adding a second login step blocks that — it costs a small amount of extra login time, and skipping it leaves that door open."</p>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Writing for a Non-Technical Reader</h5>
+      <p>The people who decide what to spend on security are often business owners, principals, and managers. Most of them aren't tech experts. If they can't understand your advice, they'll ignore it, even if it's right. Your job is to translate.</p>
+      <p>Swap tech words for everyday words. "Multi-factor authentication" becomes "a second login step, like a code texted to your phone." Start with what the reader cares about, like money, customers, and time. Don't start with how the tech works. Keep sentences short, and use numbers when you can, like "30 minutes" or "$0."</p>
+      <p class="mb-0">Here's a good test. Read your advice to someone who doesn't know much about computers, like a family member. Can they explain the problem and your fix back to you in their own words? Then it's ready. If they look confused, rewrite it.</p>
+  </div>
+
   <p><strong>The trap:</strong> students often think declining a security control is always the wrong call. It isn't — declining is a legitimate business risk decision. Your job as the one making the recommendation is to make that decision an <em>informed</em> one, not to make it for them.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Four Ways to Handle a Risk</h5>
+      <p>Security professionals describe four choices for handling any risk. <strong>Reduce</strong> it: add a control that makes it less likely or less harmful, like turning on MFA. <strong>Avoid</strong> it: stop doing the risky thing entirely, like no longer storing customer birthdays you don't need.</p>
+      <p><strong>Transfer</strong> it: hand the risk to someone else, like using an outside payment company to handle credit cards instead of storing them yourself, or buying cyber insurance. <strong>Accept</strong> it: decide the risk is small enough, or the fix expensive enough, that you'll live with it.</p>
+      <p class="mb-0">Accepting a risk isn't failure, as long as it's a conscious choice. Every organization accepts some risks because nobody can afford to fix everything. Your recommendation's job is to make sure that when a risk is accepted, the decision-maker truly understands what they're accepting.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
       <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>

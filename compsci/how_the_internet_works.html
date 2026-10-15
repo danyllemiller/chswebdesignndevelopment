@@ -28,6 +28,14 @@
   <h3 id="section-17-1" class="fw-bold mt-4 border-bottom pb-2">17.1 Routers, Switches & Topology</h3>
   <p class="fs-5">You can't evaluate a network you can't describe. Every decision about reliability or security later in this unit depends on actually knowing the physical path your data takes.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Networks, the Internet & Packets</h5>
+      <p>A <strong>network</strong> is two or more devices connected so they can share information. Your phone and laptop on your home Wi-Fi form a small network. Your school has a bigger one, connecting hundreds of computers, printers, and projectors.</p>
+      <p>The <strong>internet</strong> is a network of networks. It connects millions of smaller networks (homes, schools, businesses, phone carriers) all around the world. No single company owns it. It works because every network agrees to follow the same rules, called <strong>protocols</strong>, for how to send and receive data.</p>
+      <p>When you send something over the internet, like a photo, it doesn't travel as one big piece. It's chopped into thousands of small chunks called <strong>packets</strong>. Each packet is labeled with where it came from, where it's going, and which piece of the whole it is, a lot like numbering the pages of a long letter before mailing them in separate envelopes.</p>
+      <p class="mb-0">Packets don't all have to take the same road. They can travel different routes and arrive out of order, and the receiving device puts them back together using the numbers. If a packet gets lost, the receiver asks for it again. That's why the internet keeps working even when parts of it are busy or broken.</p>
+  </div>
+
   <h4 class="fw-bold mt-4 text-primary">17.1.1 The Core Devices</h4>
   <div class="row g-4 my-3">
       <div class="col-md-4">
@@ -56,13 +64,55 @@
       </div>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Switches</h5>
+      <p>A <strong>switch</strong> connects devices <em>inside the same network</em>, like all the computers in one classroom or one office. When a packet arrives, the switch reads its destination and sends it only to the device it's meant for.</p>
+      <p>Think of a switch like the mail room in a big school. A letter addressed to Room 204 doesn't get copied to every room. The mail room looks at the room number and delivers it to Room 204 only. That keeps the network fast and keeps other devices from seeing traffic that isn't theirs.</p>
+      <p class="mb-0">Switches are usually boxes with rows of network ports, often in a closet or server room. At home, the switch is usually built into your Wi-Fi router, which is why you might never see one.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Routers</h5>
+      <p>A <strong>router</strong> connects <em>different networks</em> together and decides the best path for data to travel between them. Your home router connects your home network to your internet provider's network, and from there to the rest of the internet.</p>
+      <p>If a switch is the school's mail room, a router is the post office. It doesn't care which room a letter goes to. It figures out which city and which post office comes next. The internet has thousands of routers passing packets along, each one choosing the next stop, until the packets reach their destination.</p>
+      <p class="mb-0">The box at your house that people call "the router" usually does several jobs at once: router, switch, and Wi-Fi access point. Often there's also a <strong>modem</strong>, sometimes in the same box. The modem translates between your home network and the cable, fiber, or phone line coming into the house.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Servers</h5>
+      <p>A <strong>server</strong> is a computer whose job is to provide a service to other devices, which are called <strong>clients</strong>. When you watch a video, a video server sends it to your phone. When you load a website, a web server sends the page to your browser. Your device asks, and the server answers.</p>
+      <p>Servers are usually powerful computers kept running 24/7 in big buildings called <strong>data centers</strong>, with backup power and cooling. A popular app might use thousands of servers spread across many data centers so it can answer millions of requests at once.</p>
+      <p class="mb-0">"Server" describes a <em>job</em>, not a special kind of machine. Even a regular laptop can act as a server. For example, a laptop sharing its files with others on a network is serving them.</p>
+  </div>
+
   <p>The shape of how devices connect is called <strong>topology</strong> — star, mesh, or bus. Every device on a network needs an <strong>IP address</strong> to be reachable at all; it's the identifier that lets traffic actually find it.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Topologies: Star, Mesh & Bus</h5>
+      <p><strong>Topology</strong> is the shape of a network: how devices are connected to each other. It's like the layout of roads in a town. The layout decides how traffic flows and what happens when one road closes.</p>
+      <p>In a <strong>star</strong> topology, every device connects to one central device, like a switch, the way spokes connect to the center of a wheel. It's simple and cheap, and most homes and classrooms use it. But if the center fails, everything connected to it goes down. In a <strong>mesh</strong> topology, devices connect to many other devices, so there are several paths between any two points. If one link breaks, traffic takes another route.</p>
+      <p class="mb-0">In a <strong>bus</strong> topology, all devices share one main cable, like houses along a single street. It's cheap but slow when busy, and one break in the cable can cut off everyone. Bus networks are mostly old-fashioned now, but they help explain why modern networks use stars and meshes. The internet as a whole works like a giant mesh, which is why it's so hard to knock offline.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: IP Addresses</h5>
+      <p>An <strong>IP address</strong> (Internet Protocol address) is a device's address on a network, like a street address for your computer. Without it, packets would have no way of knowing where to go. A common kind looks like four numbers separated by dots, such as <code>192.168.1.25</code>.</p>
+      <p>Most homes have two levels of addresses. Inside your house, your router gives each device a <strong>private</strong> IP address, often starting with <code>192.168</code>. To the rest of the internet, your whole house shares one <strong>public</strong> IP address that belongs to your router. The router keeps track of which incoming packets belong to which device inside.</p>
+      <p class="mb-0">There's also a newer, much longer kind of address called <strong>IPv6</strong>, with letters and numbers like <code>2001:db8::1</code>. The world was running out of the older four-number <strong>IPv4</strong> addresses, since there are only about 4.3 billion of them, and far more devices than that.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A left-to-right labeled path diagram: a laptop icon, then a wall jack icon, then a switch icon, then a router icon, then a cloud icon labeled &quot;The Internet,&quot; connected by a single line with small hop-number labels (1, 2, 3, 4) between each device.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-map-signs me-2"></i> Worked Example: Tracing the Path to the Internet</h5>
       <p class="mb-0">From your device, the wall jack, a switch, a router, and finally out to the wider internet — naming every device along that path is the same skill as running a <strong>traceroute</strong>, a tool that reveals the actual number of hops your data takes to reach a destination. The number usually surprises people.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Hops & Traceroute</h5>
+      <p>Each time your data passes through a router on its way somewhere, that's called a <strong>hop</strong>. Reaching a website in another state might take 10 to 20 hops, through your home router, your internet provider's routers, and big routers along major internet routes.</p>
+      <p><strong>Traceroute</strong> is a tool that shows those hops. It sends test packets and lists every router that responds along the path, plus how long each step took in milliseconds. It's like getting a list of every post office your letter passed through.</p>
+      <p class="mb-0">Network technicians use traceroute to find problems. If the times jump suddenly at hop 6, something around hop 6 is slow or overloaded. Seeing a line of stars (<code>* * *</code>) usually just means that router chose not to answer, not that your connection broke.</p>
   </div>
 
   <hr class="my-5 opacity-25">
@@ -73,6 +123,20 @@
 
   <h4 class="fw-bold mt-4 text-primary">17.2.1 Two Different Questions</h4>
   <p><strong>Scalability</strong> asks: does this still work with ten times the users? <strong>Reliability</strong> asks: does this still work when one part fails? A <strong>single point of failure</strong> is any one component whose failure takes down the whole network or service — and it's the first thing a real network evaluation goes looking for.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Scalability</h5>
+      <p><strong>Scalability</strong> is a system's ability to keep working well as it grows. Imagine a school cafeteria built for 200 students. It works great with 200. With 2,000, the lines stretch out the door and the food runs out. That cafeteria doesn't scale.</p>
+      <p>Networks face the same problem. A home Wi-Fi router that handles 5 devices smoothly might crawl when 50 devices connect at once, like at a big party. A website that works fine for 100 visitors might crash when a million people visit after a famous person shares it.</p>
+      <p class="mb-0">Scalable designs plan for growth ahead of time: stronger equipment, more servers, or a way to spread the work across many machines. When you evaluate a network, ask, "What happens with ten times as many users?"</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Reliability & Single Points of Failure</h5>
+      <p><strong>Reliability</strong> is a system's ability to keep working when something goes wrong. Parts break, power goes out, and cables get cut. A reliable network is designed so that one problem doesn't stop everything.</p>
+      <p>A <strong>single point of failure</strong> is any one part that, if it breaks, takes the whole system down with it. In a house, if the only bathroom's pipe bursts, nobody can use a bathroom. In a network, if every device connects through one switch and that switch dies, the whole network is down.</p>
+      <p class="mb-0">Finding single points of failure is like a detective's first step. Look at your network map and ask, about each device: "If this one broke right now, what would stop working?" Any device whose answer is "everything" is a single point of failure.</p>
+  </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A side-by-side graphic. Left: a star topology with a red &quot;X&quot; over the central hub and every connected device shown as disconnected. Right: a mesh topology with one red &quot;X&quot; over a single node, while traffic visibly reroutes around it through other connections.">
 
@@ -119,11 +183,25 @@
   <h4 class="fw-bold mt-4 text-primary">17.3.1 IP Address vs. MAC Address</h4>
   <p>An <strong>IP address</strong> identifies a device's location on a network — it's assigned, and can change (your phone gets a different IP on home Wi-Fi than on cellular data). A <strong>MAC address</strong> is a physical identifier burned into a device's network hardware at the factory — it never changes and uniquely identifies that exact physical piece of hardware, regardless of which network it joins.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: IP vs. MAC, Explained</h5>
+      <p>Think about how mail reaches you. Your <strong>IP address</strong> is like your current mailing address. It depends on where you are, and it changes if you move. Your phone gets one IP address on your home Wi-Fi, a different one at school, and another on cellular data.</p>
+      <p>A <strong>MAC address</strong> (Media Access Control address) is more like a serial number for your device's network hardware. It's assigned by the manufacturer and written in six pairs of characters, like <code>3C:22:FB:9A:1E:07</code>. Switches use MAC addresses to deliver data to the exact right device on a local network.</p>
+      <p class="mb-0">Here's a modern twist: to protect your privacy, newer phones and laptops often show a <strong>randomized</strong> MAC address to each Wi-Fi network instead of the real one. Without that, stores and other public places could recognize your device every time you walked in. The hardware's real MAC address still doesn't change, but what a network sees might.</p>
+  </div>
+
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A browser address bar showing &quot;google.com&quot; being typed, with an arrow pointing to an open phone-book icon labeled &quot;DNS,&quot; which then points to a numeric IP address like &quot;142.250.80.14,&quot; and a final arrow to a server icon, showing the full name-to-address translation flow.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-search-location me-2"></i> DNS: The Internet's Phone Book</h5>
       <p class="mb-0">Typing <code>google.com</code> into a browser doesn't connect you directly — computers only route by IP address, and nobody could memorize those for every site they visit. The <strong>Domain Name System (DNS)</strong> translates the human-readable name into the numeric IP address behind the scenes, then your browser connects to that address.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: DNS, Step by Step</h5>
+      <p><strong>DNS</strong> (Domain Name System) is like your phone's contact list. You tap "Mom" instead of typing her phone number, and the phone looks up the number for you. DNS lets you type <code>google.com</code> instead of a string of numbers, and it looks up the IP address behind the scenes.</p>
+      <p>Here's what happens when you type a website's name. <strong>1.</strong> Your device checks whether it already remembers the address from a recent visit. <strong>2.</strong> If not, it asks a <strong>DNS server</strong>, usually run by your internet provider. <strong>3.</strong> That server finds the IP address, asking other DNS servers if it has to. <strong>4.</strong> It sends the address back. <strong>5.</strong> Your browser connects to that IP address and loads the page.</p>
+      <p class="mb-0">All of this usually takes a tiny fraction of a second. When DNS breaks, websites seem to be "down" even though they're working fine, because nobody can look up their addresses. In 2016, an attack on a major DNS company called Dyn made sites like Twitter, Netflix, and Reddit unreachable for many people for hours.</p>
   </div>
 
   <h4 class="fw-bold mt-5 text-info">17.3.2 Bandwidth & Latency</h4>
@@ -133,6 +211,20 @@
       <li><strong>Latency</strong> — how long a delay there is before data starts arriving at all (a gamer complaining their actions take a noticeable moment to register is describing high latency, not low bandwidth — think of it as how long before the first car reaches the highway's end).</li>
   </ul>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Bandwidth</h5>
+      <p><strong>Bandwidth</strong> is how much data a connection can carry each second. It's usually measured in <strong>Mbps</strong> (megabits per second). Higher bandwidth means more data can flow at the same time.</p>
+      <p>Picture a highway. Bandwidth is the number of lanes. A two-lane road can only move so many cars at once, while a ten-lane highway moves many more. If your family is streaming two movies, gaming, and on a video call all at once, you need more lanes, so you need more bandwidth.</p>
+      <p class="mb-0">Low bandwidth shows up as videos switching to blurry quality, downloads taking forever, or everything slowing down when several people are online at once.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Latency</h5>
+      <p><strong>Latency</strong> is the delay before data arrives: how long a packet takes to make the trip. It's measured in <strong>milliseconds (ms)</strong>, and you'll often see it called <strong>ping</strong>. Lower is better.</p>
+      <p>Back to the highway: latency isn't about how many lanes there are. It's about how long the trip takes. Even a ten-lane highway takes a long time if the destination is far away or the road has lots of stoplights, which in a network means many hops and busy routers.</p>
+      <p class="mb-0">Latency matters most for things that happen in real time. In online games, high ping means your character reacts a moment after you press the button. On video calls, it causes awkward pauses and people talking over each other. A connection can have huge bandwidth and still feel laggy if its latency is high.</p>
+  </div>
+
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
       <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
       <p class="mb-0 text-light">A video call has plenty of bandwidth but everyone's voice is noticeably delayed. Is that a bandwidth or a latency problem? <em class="text-white-50">(Answer: latency — the delay before data arrives, separate from how much data the connection can carry per second.)</em></p>
@@ -141,6 +233,20 @@
   <h4 class="fw-bold mt-5 text-primary">17.3.3 Redundancy & Load</h4>
   <p><strong>Redundancy</strong> means keeping a backup so a single failure doesn't take everything down — a company keeping a second, backup internet line means operations continue even if the primary connection fails completely. It's the same reliability idea from 17.2, applied specifically to connections rather than network topology.</p>
   <p>When traffic spikes dramatically — like during a big product launch — a network experiences higher <strong>load</strong>. A well-designed, scalable system (17.2) handles a load spike smoothly; a poorly designed one slows down or fails right when the most people are trying to use it.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Redundancy</h5>
+      <p><strong>Redundancy</strong> means having a backup ready so that if one part fails, another takes over. It's how you get rid of single points of failure. Hospitals have backup generators, airplanes have more than one engine, and important networks have more than one connection.</p>
+      <p>In networks, redundancy can mean a second internet line from a different company, extra switches and routers, or copies of data kept on servers in different cities. Even your phone gives you redundancy: if your home Wi-Fi goes down, you can switch to cellular data.</p>
+      <p class="mb-0">Redundancy costs money, because you're paying for equipment that sits waiting most of the time. So organizations decide how much to buy based on how costly an outage would be. A hospital can't afford to go offline, while a small hobby website might accept the risk.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Load & Load Balancing</h5>
+      <p><strong>Load</strong> is how much work a system is handling at a given moment: how many requests, users, or packets it's dealing with. Load goes up and down. A ticket website has low load most days, then a huge spike the minute tickets for a popular concert go on sale.</p>
+      <p>If load spikes past what a system can handle, it slows down or crashes. That's why a site might show an error or a "waiting room" right when everyone tries to use it at once.</p>
+      <p class="mb-0">One common fix is a <strong>load balancer</strong>, a device or program that spreads incoming requests across many servers, like a host at a restaurant seating guests evenly across all the waiters instead of giving one waiter every table. Combined with the ability to add more servers during busy times, that's how big websites survive traffic spikes.</p>
+  </div>
 
   <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
       <div class="d-flex align-items-start">
