@@ -38,6 +38,14 @@
       <li class="mb-0">Keep splitting each piece until it's small enough that one person could build and test it independently.</li>
   </ol>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Decomposition</h5>
+      <p>Think about cleaning a really messy bedroom. If you just stand in the doorway and think "clean the room," it feels impossible, so you don't know where to start. But if you break it into smaller jobs (pick up the clothes, make the bed, clear the desk, take out the trash), each one feels easy. That is <strong>decomposition</strong>: taking one big, scary problem and breaking it into smaller pieces you can actually handle.</p>
+      <p>Programmers do this before they write any code. A big project like "track attendance for the whole school" is too large to build all at once. So they ask: what are the separate jobs hiding inside it? One job is recording who showed up. Another is saving that record. Another is doing the math. Each job becomes its own smaller problem.</p>
+      <p>The four steps above are a recipe you can follow every time. First, say the problem in one sentence so you know exactly what you're solving. Second, list what must be true when you're finished (your <strong>outcomes</strong>). Third, find the separate jobs inside the problem. Fourth, keep splitting those jobs until each one is small enough for one person to build and test alone.</p>
+      <p class="mb-0">How do you know when to stop splitting? Ask yourself: "Could one person build this piece and check that it works, without needing the other pieces finished first?" If the answer is yes, stop. If the piece still feels big or confusing, split it again. Most real projects end up with three levels: the big problem at the top, the main jobs in the middle, and small, buildable tasks at the bottom.</p>
+  </div>
+
   <img src="/images/problem_solving_algorithms/fig9.1.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A three-level decomposition tree diagram. Top box reads &quot;Track Attendance.&quot; Four boxes branch down from it: &quot;Record who's present,&quot; &quot;Store the record,&quot; &quot;Calculate attendance rate,&quot; and &quot;Flag students below threshold.&quot; One of those four boxes has two smaller boxes branching further below it, showing a third level.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
@@ -46,6 +54,13 @@
   </div>
 
   <p>Decomposition produces three kinds of containers for a single responsibility: <strong>procedures</strong> (a named block of reusable steps), <strong>modules</strong> (a group of related procedures), and <strong>objects</strong> (data and the procedures that act on it, bundled together). You'll build all three later in this course — for now, just know they exist as the destination decomposition is heading toward.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Procedures, Modules & Objects</h5>
+      <p>Once you've broken a problem into small jobs, each job needs a home in your code. Programmers use three kinds of "containers" for this. You don't have to build them yet, but knowing their names now will make later chapters much easier.</p>
+      <p>A <strong>procedure</strong> (also called a <strong>function</strong>) is a set of steps with a name, like a recipe card titled "Make Pancakes." Once the recipe card exists, you don't rewrite the steps every time. You just say "make pancakes" and follow the card. In code, you write the steps once, give them a name like <code>calculateAttendanceRate</code>, and then use that name whenever you need it.</p>
+      <p class="mb-0">A <strong>module</strong> is a group of related procedures kept together, like a recipe box labeled "Breakfast" that holds the pancake card, the waffle card, and the omelet card. An <strong>object</strong> goes one step further: it bundles the <em>information</em> together with the procedures that use it. A "Student" object might hold a student's name and attendance record, plus the procedures that update that record. Every small job from your decomposition tree will eventually live in one of these three containers.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
       <h5 class="fw-bold text-info"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -79,6 +94,14 @@
   <h4 class="fw-bold mt-4 text-primary">9.2.1 What Makes Something an Algorithm</h4>
   <p>An <strong>algorithm</strong> is a sequence of instructions with three required properties: it's <strong>finite</strong> (it ends), <strong>unambiguous</strong> (only one possible interpretation), and it <strong>always terminates</strong> (it doesn't loop forever). Ambiguity is the enemy here, not length.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: What an Algorithm Really Is</h5>
+      <p>An <strong>algorithm</strong> is just a list of steps that solves a problem. You already follow algorithms every day: the steps to unlock your phone, the directions to a friend's house, the order you put on socks and shoes. Computers need algorithms too, but computers are much more literal than people. They do <em>exactly</em> what the steps say, nothing more and nothing less.</p>
+      <p>That's why a real algorithm needs three properties. It must be <strong>finite</strong>, meaning it has a limited number of steps you can actually write down. It must be <strong>unambiguous</strong>, meaning every step can only be understood one way. "Add some salt" is ambiguous. "Add 1 teaspoon of salt" is not. And it must <strong>terminate</strong>, meaning that when it runs, it eventually reaches an end and stops, instead of repeating forever.</p>
+      <p>Notice that being long is not a problem. An algorithm with 50 clear steps is better than one with 5 confusing steps. The real enemy is <strong>ambiguity</strong>: any step where the reader has to guess what you meant. People are good at guessing. Computers can't guess at all, so every guess you leave in becomes a bug.</p>
+      <p class="mb-0">Here's a quick test you can use: imagine handing your steps to someone who has never done this task and does <em>exactly</em> what the words say. If they could end up doing something you didn't mean, or get stuck not knowing what to do next, your algorithm isn't finished yet.</p>
+  </div>
+
   <div class="concept-box shadow-sm border-warning bg-light">
       <h5 class="fw-bold text-dark"><i class="fas fa-sandwich me-2"></i> The Trap: "Obvious" Steps Aren't</h5>
       <p class="mb-0">Write "put peanut butter on the bread" and a literal executor might scoop the entire jar onto one square inch, or press the whole jar against the loaf. Every gap you leave, someone — or something — will fill in the worst possible way. That's why real algorithms spell out the boring parts too.</p>
@@ -87,7 +110,30 @@
   <h4 class="fw-bold mt-5 text-info">9.2.2 Writing Pseudocode</h4>
   <p><strong>Pseudocode</strong> is how you draft an algorithm before touching real syntax — one instruction per line, explicit inputs and outputs, indentation showing structure, and no language-specific punctuation to trip over. A <strong>flowchart</strong> is the visual equivalent, and it's often clearer for anything with a lot of branching decisions.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Pseudocode</h5>
+      <p><strong>Pseudocode</strong> means "fake code." It's a way to write out your algorithm in plain English, step by step, but organized the way real code is organized. You don't have to worry about semicolons, brackets, or spelling commands perfectly. You're just getting the <em>logic</em> right first.</p>
+      <p>Good pseudocode follows a few simple rules. Write one instruction per line. Use clear action words at the start of each line, like GET (take in information), SET (store a value), IF (make a decision), and DISPLAY (show a result). Indent the lines that belong inside a decision or a repeat, so anyone can see which steps "belong" to which. Here's what it looks like for checking whether a student was late:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>START
+  GET arrivalTime
+  SET bellTime = 8:00
+  IF arrivalTime is later than bellTime THEN
+      DISPLAY "Tardy"
+  ELSE
+      DISPLAY "On time"
+  END IF
+END</code></pre>
+      <p>Read that example out loud and notice how anyone could follow it, even someone who has never coded. That's the goal. Writing pseudocode first means you find your logic mistakes while they're cheap to fix, before you're also fighting with real code syntax at the same time.</p>
+  </div>
+
   <img src="/images/problem_solving_algorithms/fig9.2.2.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A simple flowchart using standard symbols: a rounded Start oval, a rectangle for a process step, a diamond for a Yes/No decision with two labeled arrows branching out, another rectangle, and a rounded End oval, all connected by arrows showing the flow from top to bottom.">
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Flowcharts</h5>
+      <p>A <strong>flowchart</strong> shows the same logic as pseudocode, but as a picture instead of words. You follow the arrows from the top to the bottom, like following a path on a map. Some people understand pictures faster than paragraphs, so flowcharts are a great way to explain your plan to someone else.</p>
+      <p>Flowcharts use a few standard shapes, and each shape has one job. An <strong>oval</strong> marks the Start and the End. A <strong>rectangle</strong> is an action, like "add 1 to the total." A <strong>diamond</strong> is a question with a yes-or-no answer, like "Is the score above 90?" Two arrows leave every diamond, one labeled Yes and one labeled No, because the program goes a different way depending on the answer.</p>
+      <p class="mb-0">Flowcharts are especially useful when your algorithm makes lots of decisions. In pseudocode, many IF statements can start to blur together. In a flowchart, you can <em>see</em> every path the program might take. If an arrow leads nowhere, or two paths never come back together, you've found a problem in your logic before writing a single line of real code.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
       <h5 class="fw-bold text-success"><i class="fas fa-users me-2"></i> Worked Example: Peer-Testing Pseudocode</h5>
@@ -118,14 +164,51 @@
   <h3 id="section-9-3" class="fw-bold border-bottom pb-2">9.3 Your First Prototype</h3>
   <p class="fs-5">Pseudocode proves your logic works on paper. A <strong>prototype</strong> is where you find out if it actually works — a working draft, not a finished product, built in Apps Script where a spreadsheet becomes programmable.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Prototypes</h5>
+      <p>A <strong>prototype</strong> is a first working version of something, built to test an idea. Car companies build prototype cars before selling them. Game studios build rough playable levels before adding fancy graphics. A prototype isn't supposed to be perfect or pretty. Its only job is to answer one question: <em>does this idea actually work?</em></p>
+      <p>In this unit, your prototype is a small program written in <strong>Google Apps Script</strong>, a tool built into Google Sheets that lets you write code that controls a spreadsheet. It uses JavaScript, one of the most popular programming languages in the world. That means the skills you practice here carry directly into building websites and apps later.</p>
+      <p class="mb-0">Here's the key idea: your pseudocode was the plan, and your prototype is the test of that plan. Sometimes a plan that looked perfect on paper breaks the moment it runs. That's not failure. That's exactly what prototypes are for: finding the problems early, while they're small and easy to fix.</p>
+  </div>
+
   <h4 class="fw-bold mt-4 text-primary">9.3.1 From Pseudocode to Real Code</h4>
   <p>Opening the script editor, writing a function, running it, granting permission, and reading the execution log — that loop is the entire workflow you'll repeat for the rest of this unit. Variables, assignment, and basic operators are simply the vocabulary your pseudocode gets translated into.</p>
 
   <img src="/images/problem_solving_algorithms/fig9.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean side-by-side graphic showing plain-English pseudocode steps on the left with an arrow pointing to matching lines of real code on the right, connected line by line.">
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Variables, Assignment & Operators</h5>
+      <p>A <strong>variable</strong> is a labeled box that stores a piece of information so your program can use it later. You might have a box labeled <code>score</code> that holds the number 85, or a box labeled <code>studentName</code> that holds the word "Maya." The label never changes, but what's inside the box can change while the program runs.</p>
+      <p>Putting a value into a variable is called <strong>assignment</strong>, and it uses the equals sign. In code, <code>let score = 85;</code> means "make a box called score and put 85 in it." Be careful: in code, the <code>=</code> sign does <em>not</em> mean "is equal to" like in math class. It means "store this value in this box."</p>
+      <p><strong>Operators</strong> are the symbols that do math and comparisons: <code>+</code> adds, <code>-</code> subtracts, <code>*</code> multiplies, and <code>/</code> divides. Here's how one line of pseudocode turns into real Apps Script code:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>// Pseudocode: SET total = quiz1 + quiz2, then DISPLAY total
+function addQuizzes() {
+  let quiz1 = 8;
+  let quiz2 = 9;
+  let total = quiz1 + quiz2;
+  Logger.log(total);   // shows 17 in the execution log
+}</code></pre>
+      <p>Line by line, the pseudocode becomes code. Your plan from 9.2 tells you <em>what</em> to do, and these pieces of vocabulary tell the computer <em>how</em> to say it.</p>
+  </div>
+
   <img src="/images/problem_solving_algorithms/fig9.3.2.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of the Google Apps Script code editor, showing a short function in the code pane, a Run button highlighted at the top, and the Execution log panel at the bottom displaying a successful output line with a green checkmark icon.">
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: The Apps Script Workflow</h5>
+      <p>Every time you write code in this unit, you'll repeat the same five-step loop. Learn it once, and you'll use it all year. Step 1: open the editor. In your Google Sheet, click <strong>Extensions → Apps Script</strong>. A new tab opens where you type your code. Step 2: write a <strong>function</strong>, which is a named block of code that starts with the word <code>function</code>.</p>
+      <p>Step 3: <strong>run</strong> it. Pick your function's name from the dropdown at the top and click the Run button. Step 4: the very first time, Google asks for <strong>permission</strong>, because your code is about to touch your spreadsheet. Click through the prompts and allow access. This is normal and only happens once per project.</p>
+      <p>Step 5: read the <strong>execution log</strong>, the panel that appears at the bottom of the screen. Anything your code sends to <code>Logger.log()</code> shows up here, along with any error messages. The log is how your program "talks back" to you. It tells you what happened when the code ran.</p>
+      <p class="mb-0">Then you go back to Step 2, change something, and run it again. Write, run, read, fix, repeat. Professional programmers do this loop hundreds of times a day. Nobody writes perfect code on the first try. They just get fast at this loop.</p>
+  </div>
+
   <p><strong>The trap:</strong> students often think an error message means they failed. It means the environment is doing its job — every error you read and fix is exactly how you learn what the code actually required, and no working script exists without a string of fixed errors behind it.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Reading Error Messages</h5>
+      <p>An <strong>error message</strong> is the computer telling you exactly where it got confused. It feels like getting in trouble, but it's really getting help. Without error messages, you'd have to search through every line yourself to find the mistake.</p>
+      <p>Most errors you'll see fall into two groups. A <strong>syntax error</strong> means you broke a grammar rule of the language: a missing bracket <code>}</code>, a missing quotation mark, or a misspelled command. The code can't even start. A <strong>runtime error</strong> happens while the code is running, like trying to use a variable that was never created. For example, <code>ReferenceError: totl is not defined</code> means you probably typed <code>totl</code> when you meant <code>total</code>.</p>
+      <p class="mb-0">Here's how to read any error. First, look for the <strong>line number</strong>; the message tells you where to look. Second, read the error's <strong>name</strong> and the words after it, slowly. Third, compare that line to the line you meant to write. Fix one thing, run it again, and see if the error changes. A new, different error usually means you're making progress.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
       <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -159,14 +242,43 @@
   <h4 class="fw-bold mt-4 text-primary">9.4.1 Correctness, Efficiency & Tradeoffs</h4>
   <p>An algorithm's logic is <strong>correct</strong> if it produces the right output for every valid input, not just the examples you happened to test. <strong>Efficiency</strong> measures how much time and memory an algorithm uses to get there — and the two often trade off against each other. Choosing between an algorithm that runs faster but uses more memory, and one that's slower but easier to read, isn't about finding a "correct" answer; it's about weighing <strong>tradeoffs</strong> against what actually matters for your specific situation.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Correctness, Efficiency & Tradeoffs</h5>
+      <p><strong>Correctness</strong> means your algorithm gives the right answer every single time, not just for the examples you tried. Imagine a calculator that adds correctly for small numbers but gives wrong answers for numbers over 1,000. It "works" when you test it with 2 + 3, but it isn't correct. To trust an algorithm, you need to think about every kind of input it might get: big numbers, zero, negative numbers, empty lists.</p>
+      <p><strong>Efficiency</strong> is about how much work the computer has to do to get that right answer. Usually that means time (how fast it runs) and memory (how much storage it uses while it works). Finding a name in a list of 10 students is fast either way. Finding a name in a list of 10 million users is a very different job, and a slow method there could take minutes instead of a fraction of a second.</p>
+      <p>A <strong>tradeoff</strong> is when you give up some of one good thing to get more of another. You do this all the time: you might trade sleep for extra study time before a test. Programmers trade too. A super-fast algorithm might be long and confusing to read. A simpler one might be a little slower but much easier for your team to understand and fix.</p>
+      <p class="mb-0">There isn't one "right" choice in a tradeoff. It depends on the situation. A program that runs once a day can afford to be a little slow if it's easier to read. A program that runs a million times a second needs every bit of speed. Good programmers don't just pick an answer. They explain <em>why</em> it fits the situation.</p>
+  </div>
+
   <div class="concept-box shadow-sm border-info bg-light">
       <h5 class="fw-bold text-info"><i class="fas fa-tachometer-alt me-2"></i> Precise Algorithms vs. Heuristics</h5>
       <p class="mb-0">A precise algorithm guarantees the mathematically best possible answer, but can take too long for huge problems. A <strong>heuristic</strong> trades that guarantee for speed — a GPS app gives you a route in half a second that's very good, not mathematically proven to be the single shortest path possible. For most real-world uses, "very good, instantly" beats "perfect, eventually."</p>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Heuristics</h5>
+      <p>A <strong>heuristic</strong> is a shortcut that finds a <em>good</em> answer quickly, even though it can't promise the <em>best</em> possible answer. You use heuristics all the time. When you pick the shortest-looking line at the grocery store, you don't count everyone's items in every line. You make a quick, smart guess that's usually right.</p>
+      <p>Why not always find the perfect answer? Because for some problems, checking every possibility would take far too long. Imagine a delivery driver with 30 stops. The number of different orders those stops could be visited in is so enormous that even the fastest computer couldn't check them all in a lifetime. So map apps use heuristics: rules like "go to the nearest stop next" that find a very good route in a split second.</p>
+      <p class="mb-0">The tradeoff is clear: a heuristic gives up the guarantee of perfection to get speed. For most real problems, that's a great deal. A route that's 2% longer but ready instantly beats a perfect route you'd have to wait three days for.</p>
+  </div>
+
   <h4 class="fw-bold mt-5 text-info">9.4.2 Generalizable Patterns & Computational Artifacts</h4>
   <p>A <strong>generalizable pattern</strong> is a solution technique from one problem that turns out to work on a completely different one — a sorting method built for a list of numbers works just as well sorting names alphabetically, because both problems share the same underlying structure. Recognizing this is what lets programmers reuse hard-won solutions instead of reinventing them every time.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Generalizable Patterns</h5>
+      <p>A <strong>pattern</strong> is a way of solving a problem that still works when the details change. Say you learn how to find the average of your quiz scores. Now you can also find the average temperature for a week. You can find a player's average points per game. You can find the average price of shoes. The numbers change, but the steps stay the same.</p>
+      <p>When one solution works for many different problems, we call it <strong>generalizable</strong>. The trick is to look past the details, like quizzes, weather, or shoes. Look for what the problems share. Here, every one of them is the same job: "I have a list of numbers, and I want one number that shows the middle."</p>
+      <p class="mb-0">This saves programmers a lot of time. They don't solve every problem from scratch. First they ask, "Have I solved a problem with this same shape before?" Often the answer is yes. Then they reuse that solution with a few small changes.</p>
+  </div>
   <p>Anything you build with code — a program, a website, a spreadsheet tool, a simulation — counts as a <strong>computational artifact</strong>. Because a real artifact gets used by real people, <strong>accessibility</strong> (screen-reader support, captions, readable color contrast) isn't optional polish; it's part of whether the artifact actually works for its intended audience.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Computational Artifacts & Accessibility</h5>
+      <p>A <strong>computational artifact</strong> is anything you create using a computer: a program, an app, a website, a spreadsheet with formulas, a game, even a digital animation. The word "artifact" just means a made thing. The prototype you build in this unit counts as one.</p>
+      <p>Because people actually use what you build, it has to work for <em>all</em> the people who might use it. That's what <strong>accessibility</strong> means: designing so that people with disabilities can use your artifact too. Someone who is blind might use a <strong>screen reader</strong>, software that reads the screen out loud. Someone who is deaf needs <strong>captions</strong> on videos. Someone who is colorblind can't rely on red versus green alone to know what's important.</p>
+      <p class="mb-0">Simple choices make a big difference: clear labels on every button, text that contrasts strongly with its background, and controls that work with a keyboard instead of only a mouse. An app that looks great but can't be used by 1 in 4 people isn't finished. Accessibility is part of whether your artifact <em>works</em>, not an extra.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
       <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -175,7 +287,22 @@
 
   <h4 class="fw-bold mt-5 text-primary">9.4.3 AI, and Why Teams Follow a Process</h4>
   <p><strong>Artificial Intelligence</strong> increasingly handles problems too complex for a single hand-written algorithm — a streaming service predicting what you'll want to watch next isn't following one fixed rule, it's finding patterns across millions of other viewers' behavior.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Artificial Intelligence</h5>
+      <p>Most programs follow rules a person wrote by hand: "IF the score is above 90, THEN show an A." But some problems are too messy for hand-written rules. How would you write rules for recognizing a cat in a photo? Cats come in every color, size, and pose. You'd never finish writing the rules.</p>
+      <p><strong>Artificial Intelligence (AI)</strong> takes a different approach. Instead of following rules a person wrote, an AI system is shown huge amounts of examples (millions of photos labeled "cat" or "not cat") and it finds the patterns on its own. That's how streaming apps recommend shows: they notice that people who watched what you watched also liked certain other shows.</p>
+      <p class="mb-0">AI is powerful, but it's only as good as the examples it learned from. If those examples were incomplete or unfair, the AI's answers will be too. That's why people still need to check AI results instead of trusting them blindly. You'll dig deeper into this in Unit 5.</p>
+  </div>
   <p>On any project bigger than a solo script, teams don't just write code freely — they follow a <strong>Software Development Life Cycle (SDLC)</strong>: plan, design, build, test, deploy, repeat. Development is <strong>iterative</strong> on purpose: ship a basic version, collect real feedback, improve it, and ship again, rather than trying to guess everything right the first time. That's also why teams assign specific roles and track changes carefully — so real user feedback actually reaches the right person to act on it.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: The Software Development Life Cycle (SDLC)</h5>
+      <p>Big software projects, like the apps on your phone, are built by teams of people, sometimes hundreds of them. If everyone just started coding whatever they felt like, the result would be chaos. So teams follow a shared process called the <strong>Software Development Life Cycle</strong>, or <strong>SDLC</strong>.</p>
+      <p>The SDLC has six main stages. <strong>Plan:</strong> decide what problem you're solving and for whom. <strong>Design:</strong> sketch how it will work (that's your decomposition tree and pseudocode). <strong>Build:</strong> write the code. <strong>Test:</strong> try to break it and fix what breaks. <strong>Deploy:</strong> release it to real users. <strong>Maintain:</strong> keep improving it based on what users say.</p>
+      <p>The most important word here is <strong>iterative</strong>, which means "repeated in cycles." Teams don't go through the stages once and stop. They release a simple version, listen to feedback, and then go back through the cycle to make it better. That's why your phone's apps update so often. Each update is another trip around the cycle.</p>
+      <p class="mb-0">This is also why teams give people specific <strong>roles</strong> (like designer, tester, or project manager) and keep careful track of every change. When a user reports a problem, it needs to reach the person who can fix it. In this course, your own projects follow the same cycle on a smaller scale: plan, build, get feedback, improve.</p>
+  </div>
 
   <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
       <div class="d-flex align-items-start">

@@ -29,8 +29,52 @@
   <h3 id="section-10-1" class="fw-bold mt-4 border-bottom pb-2">10.1 Conditionals</h3>
   <p class="fs-5">The same branching logic can be written three completely different ways — nested if statements, a switch, or a lookup table. All three run correctly. Only one is easy for a stranger to read six months from now.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: What a Conditional Is</h5>
+      <p>Every day you make decisions based on conditions. <em>If</em> it's raining, you grab a jacket. <em>If</em> your phone is under 20%, you plug it in. A <strong>conditional</strong> lets a program make the same kind of decision: it checks whether something is true, and then does one thing or another depending on the answer.</p>
+      <p>The most common conditional is the <strong>if / else</strong> statement. The program checks a <strong>condition</strong>, which is a question with a true-or-false answer, like "Is the score 90 or higher?" If the answer is true, it runs one block of code. If it's false, the <code>else</code> block runs instead. You can add more checks in between with <code>else if</code>. The program tests them from top to bottom and stops at the first one that's true.</p>
+      <p>Here's a grade calculator written with if / else if / else:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>function letterGrade(score) {
+  if (score >= 90) {
+    return "A";
+  } else if (score >= 80) {
+    return "B";
+  } else if (score >= 70) {
+    return "C";
+  } else {
+    return "Needs work";
+  }
+}</code></pre>
+      <p>Notice the order matters. A score of 95 is also greater than 80, but the program never gets that far. It stops at the first true condition. If the checks were in the opposite order, every score above 70 would get a C. When a conditional gives a weird answer, check the order of your conditions first.</p>
+  </div>
+
   <h4 class="fw-bold mt-4 text-primary">10.1.1 Justifying Your Choice</h4>
   <p>Choosing a control structure is a real skill, not a formality — you're weighing implementation effort, readability, and performance against each other, and the "best" answer depends on the situation.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Three Ways to Write the Same Decision</h5>
+      <p>The same decision can be written in more than one way, and all of them can be correct. You've already seen <strong>if / else if / else</strong>. The second way is a <strong>switch</strong> statement. A switch compares one value against a list of exact matches, like checking which period a student is in. It's great when you're matching exact values, but it can't easily check ranges like "80 to 89."</p>
+      <p>The third way is a <strong>lookup table</strong>. Instead of writing a decision for each case, you store the answers in a list or table, and the program simply looks up the answer. It works like the menu board at a restaurant: you don't ask the cashier to decide your price, you look it up.</p>
+      <p>Here's the same "which room is my class in?" decision written as a switch and as a lookup table:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>// Switch: compares one value against exact matches
+switch (period) {
+  case "A1": room = "Room 101"; break;
+  case "A3": room = "Room 204"; break;
+  default:   room = "Unknown period";
+}
+
+// Lookup table: the answers are data, not code
+const rooms = { A1: "Room 101", A3: "Room 204" };
+room = rooms[period] || "Unknown period";</code></pre>
+      <p>Both give the same answers. The switch spells out each case as code. The lookup table keeps the data in one place, so adding a new period means adding one line of data, not writing a new piece of logic.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Choosing the Right One</h5>
+      <p>If all three ways work, how do you choose? Programmers weigh three things. <strong>Implementation effort</strong> is how much work it takes to write and change. <strong>Readability</strong> is how quickly another person (or you, a month from now) can understand it and trust it. <strong>Performance</strong> is how fast it runs.</p>
+      <p>For most small programs, the speed difference between these three is so tiny you'd never notice it. That's why readability usually wins. A decision that's easy to read is easy to check, and code that's easy to check has fewer hidden bugs.</p>
+      <p class="mb-0">Here's a simple rule of thumb. Use <strong>if / else</strong> when you're checking ranges or a few different conditions. Use a <strong>switch</strong> when you're matching one value against many exact options. Use a <strong>lookup table</strong> when you have lots of cases that are really just data, like prices, room numbers, or grade cutoffs. Whatever you pick, be ready to explain <em>why</em>. That explanation is a big part of what the Decision Logic activity and the Unit 4 project ask you for.</p>
+  </div>
 
   <div class="concept-box shadow-sm border-danger bg-light">
       <h5 class="fw-bold text-danger"><i class="fas fa-exclamation-triangle me-2"></i> The Trap: Nesting Four Levels Deep</h5>
@@ -67,8 +111,38 @@
   <h3 id="section-10-2" class="fw-bold border-bottom pb-2">10.2 Loops & Iteration</h3>
   <p class="fs-5">Write the same output line five times and count the repeated lines. Write one loop instead and watch the line count shrink while the capability grows — iteration is what lets a program scale past what a human would ever type by hand.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: What a Loop Is</h5>
+      <p>Imagine your teacher asks you to write "I will not talk in class" 100 times. You could write the sentence 100 times by hand, or you could find a way to write it once and repeat it. A <strong>loop</strong> is how a program repeats a set of instructions without you writing them over and over. Repeating steps like this is called <strong>iteration</strong>, and each single pass through the loop is one <strong>iteration</strong>.</p>
+      <p>Loops are everywhere in real software. Your music app loops through every song in a playlist. A gradebook loops through every student to calculate grades. A game loops dozens of times every second to redraw the screen. Without loops, programmers would have to write a separate line for every song, every student, and every frame.</p>
+      <p class="mb-0">Every loop needs a way to know when to stop. Otherwise it would repeat forever. As you'll see below, the two main kinds of loops, <code>for</code> and <code>while</code>, handle stopping in different ways.</p>
+  </div>
+
   <h4 class="fw-bold mt-4 text-primary">10.2.1 The For Loop's Three Parts</h4>
   <p>A <code>for</code> loop has exactly three parts: <strong>initialize</strong> a counter, check a <strong>condition</strong> that keeps the loop running, and <strong>increment</strong> the counter each pass. A <code>while</code> loop skips the built-in counter and just keeps running as long as its condition stays true — the honest choice when you don't know in advance how many times you'll need to loop.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: For Loops, Step by Step</h5>
+      <p>A <code>for</code> loop is the best choice when you know how many times you want to repeat something. Its first line has three parts inside the parentheses, separated by semicolons. Here's a loop that counts from 0 to 4:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>for (let i = 0; i &lt; 5; i++) {
+  Logger.log("Pass number " + i);
+}</code></pre>
+      <p><strong>Part 1, Initialize</strong> (<code>let i = 0</code>): create a counter variable, usually called <code>i</code>, and give it a starting value. This happens only once, at the very beginning. <strong>Part 2, Condition</strong> (<code>i &lt; 5</code>): before every pass, the loop asks, "Is this still true?" If yes, it runs the code inside. If no, the loop ends.</p>
+      <p><strong>Part 3, Increment</strong> (<code>i++</code>): after every pass, add 1 to the counter. <code>i++</code> is a short way of writing <code>i = i + 1</code>. So the loop goes: i is 0, run; i is 1, run; i is 2, run; i is 3, run; i is 4, run; i is 5, and now 5 &lt; 5 is false, so it stops. That's exactly 5 passes.</p>
+      <p>Tracing a loop like this, one pass at a time on paper, is the single best way to understand what it will do. It's also exactly what the Iteration Build activity asks you to do before you run your code.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: While Loops</h5>
+      <p>A <code>while</code> loop is simpler: it just keeps repeating as long as its condition is true. There's no built-in counter. Use it when you <em>don't</em> know ahead of time how many times you'll need to repeat, like "keep asking for a password until the user types the right one" or "keep reading rows until you reach an empty one."</p>
+      <p>Because a <code>while</code> loop has no automatic increment, it's <em>your</em> job to make sure something inside the loop eventually makes the condition false. In the example below, each pass adds one row, so <code>row</code> eventually reaches a blank cell and the loop ends:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>let row = 2;
+while (sheet.getRange(row, 1).getValue() !== "") {
+  Logger.log(sheet.getRange(row, 1).getValue());
+  row++;   // without this line, the loop never ends
+}</code></pre>
+      <p>Here's the quick way to choose. If you can finish the sentence "repeat this ___ times," use a <code>for</code> loop. If the sentence is "repeat this until ___ happens," use a <code>while</code> loop.</p>
+  </div>
 
   <img src="/images/control_structures_events/fig10.2.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A labeled diagram of a for-loop's three parts inside its parentheses: &quot;for (let i = 0;&quot; labeled Initialize, &quot;i &lt; 5;&quot; labeled Condition, and &quot;i++)&quot; labeled Increment, with a curved arrow looping from the increment back to the condition to show the repeat cycle.">
 
@@ -76,6 +150,14 @@
       <h5 class="fw-bold text-dark"><i class="fas fa-redo me-2"></i> The Classic Failures</h5>
       <p class="mb-1"><strong>Off-by-one error:</strong> a loop running one too many or one too few times, usually from confusing <code>&lt;</code> with <code>&lt;=</code>.</p>
       <p class="mb-0"><strong>Infinite loop:</strong> a condition that never becomes false — almost always caused by forgetting the increment step.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Off-by-One Errors & Infinite Loops</h5>
+      <p>An <strong>off-by-one error</strong> is when a loop runs one time too many or one time too few. It's the most common loop mistake in all of programming, even for experts. It usually comes from a single character: <code>&lt;</code> versus <code>&lt;=</code>. The loop <code>i &lt; 5</code> runs for 0, 1, 2, 3, 4 (5 times). The loop <code>i &lt;= 5</code> runs for 0, 1, 2, 3, 4, 5 (6 times). One tiny symbol, one extra pass.</p>
+      <p>Why does this matter? Suppose you have a list of 5 students. Their positions are numbered 0 through 4. A loop with <code>&lt;=</code> would try to visit position 5, which doesn't exist, so you'd get a blank, an error, or wrong data. A loop that starts at 1 instead of 0 would skip the first student completely, and nobody might notice until that student's grade goes missing.</p>
+      <p>An <strong>infinite loop</strong> is a loop whose condition never becomes false, so it never stops. In Apps Script, the program will freeze until Google stops it after a few minutes. The usual cause is forgetting to change the counter, like leaving out <code>i++</code> or <code>row++</code>. Without it, the counter stays the same forever, so the condition is always true.</p>
+      <p class="mb-0">The fix for both problems is the same habit: trace your loop on paper. Write down the counter's value at the start of each pass and check the condition each time. Do the first two passes and the last two passes, because that's where off-by-one errors hide.</p>
   </div>
 
   <p><strong>The trap:</strong> students often think an off-by-one error is a sign something is deeply wrong with their logic. Usually it's one character — a stray <code>=</code> or a missing one — hiding in an otherwise correct loop. Trace it on paper one iteration at a time and it's almost always fast to find.</p>
@@ -109,13 +191,45 @@
   <h3 id="section-10-3" class="fw-bold border-bottom pb-2">10.3 Events That Trigger Code</h3>
   <p class="fs-5">A script you have to manually launch every time is a script, not a tool. What turns it into something someone would actually use is an <strong>event</strong> — code that runs on its own, without you sitting there pressing "run."</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: What an Event Is</h5>
+      <p>An <strong>event</strong> is something that happens that a program can notice and respond to. When you tap a button on your phone, that's an event. When a new text message arrives, that's an event. When your alarm goes off at 6:30 a.m., that's an event too, triggered by the time.</p>
+      <p>So far, your code only ran when you clicked Run. That's fine for testing, but real tools don't work that way. Nobody wants to open the code editor every time they need something to happen. <strong>Event-driven</strong> code waits quietly in the background and runs automatically when its event happens.</p>
+      <p class="mb-0">The connection between an event and the code it runs is called a <strong>trigger</strong>. Think of it like a motion-sensor light: the motion is the event, the sensor is the trigger, and the light turning on is your code running. You set up the trigger once, and after that it works on its own.</p>
+  </div>
+
   <h4 class="fw-bold mt-4 text-primary">10.3.1 Event Types</h4>
   <p>The most common triggers: <strong>on open</strong> (fires when a file is opened), <strong>on edit</strong> (fires the moment a cell changes), <strong>on form submit</strong> (fires when someone submits a linked form), and <strong>time-driven</strong> (fires on a schedule you set, with nobody present at all).</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: The Four Trigger Types in Apps Script</h5>
+      <p><strong>On open</strong> runs your code every time someone opens the spreadsheet. To use it, name your function exactly <code>onOpen</code>, and Google runs it automatically. It's often used to add a custom menu to the top of the sheet, or to show a welcome message.</p>
+      <p><strong>On edit</strong> runs your code every time someone changes a cell. Name your function exactly <code>onEdit(e)</code>. The <code>e</code> holds information about the edit, like which cell changed (<code>e.range</code>) and what was typed in it. It's perfect for checking data the moment it's entered, which you'll do in the worked example below.</p>
+      <p><strong>On form submit</strong> runs when someone submits a Google Form that's connected to your sheet. Imagine a club sign-up form: every time a student signs up, your code could instantly add them to the right team list. This trigger is set up in the editor's <strong>Triggers</strong> menu (the clock icon on the left side), not just by naming a function.</p>
+      <p class="mb-0"><strong>Time-driven</strong> triggers run on a schedule: every hour, every morning at 7 a.m., every Monday, and so on. They are also set up from the Triggers (clock) menu. A time-driven trigger could email a reminder about missing assignments every Friday afternoon, with nobody even logged in.</p>
+  </div>
 
   <img src="/images/control_structures_events/fig10.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean graphic of a spreadsheet cell being edited, with a lightning bolt icon connecting it to a small gear icon labeled &quot;trigger,&quot; and an arrow showing a script firing automatically — no mouse click on a &quot;run&quot; button anywhere in the image.">
 
   <h4 class="fw-bold mt-5 text-info">10.3.2 Why Event-Driven Code Needs More Care</h4>
   <p>Nobody is watching an event-driven script run — that's the whole point. Which means if it fails, it fails silently, with nobody there to notice. Validation and error handling matter <em>more</em> here, not less.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Validation & Error Handling</h5>
+      <p>When you click Run yourself, you're right there to notice if something breaks. Event-driven code runs while nobody is watching. If it crashes or saves bad data, nobody finds out until much later, and by then the bad data may have spread to other formulas and reports.</p>
+      <p><strong>Validation</strong> means checking that data makes sense <em>before</em> you use it. Is this cell supposed to hold a number? Then check that it really is a number. Is it supposed to be between 0 and 100? Check that too. <strong>Error handling</strong> is what your code does when the check fails: it shows a helpful message and refuses the bad data, instead of crashing or quietly saving garbage.</p>
+      <p>Here's an on-edit trigger that only accepts numbers in column B. If someone types a word instead, it clears the cell and pops up a message explaining why:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>function onEdit(e) {
+  if (e.range.getColumn() !== 2) return;   // only check column B
+  const value = e.range.getValue();
+  if (value === "") return;                // ignore erased cells
+  if (typeof value !== "number") {
+    e.range.setValue("");                  // reject the bad entry
+    e.source.toast("Column B only accepts numbers. Please try again.");
+  }
+}</code></pre>
+      <p>Notice the two early <code>return</code> lines. They make the code skip edits it doesn't care about, like changes in other columns or a cell that was just erased. Good event-driven code ignores what isn't its job and handles bad input politely, so the people using the sheet always know what went wrong and how to fix it.</p>
+  </div>
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-shield-alt me-2"></i> Worked Example: Rejecting Bad Input</h5>
@@ -154,6 +268,21 @@
   <h4 class="fw-bold mt-4 text-primary">10.4.1 Lists (Arrays)</h4>
   <p>A <strong>list</strong> (or <strong>array</strong>) stores many related values under a single variable name instead of creating a separate variable for each one. Each value gets a position, called an <strong>index</strong>, usually starting at 0 — so the third item in a list of five names is at index 2, not index 3. Combined with a <code>for</code> loop, a list is what lets a program process a hundred items with the same few lines that would process one.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Lists, Arrays & Indexes</h5>
+      <p>Imagine making a separate variable for every student in a class: <code>student1</code>, <code>student2</code>, <code>student3</code>, all the way to <code>student30</code>. Now imagine a new student joins. You'd have to change your code. A <strong>list</strong>, also called an <strong>array</strong>, solves this. It stores many related values together under one name, like one row of lockers with a single name painted above it.</p>
+      <p>Each value in a list sits in a numbered spot called its <strong>index</strong>. In most programming languages, including JavaScript, the index starts at <strong>0, not 1</strong>. So the first item is at index 0, the second is at index 1, and so on. To get an item, write the list's name followed by the index in square brackets: <code>students[2]</code> means "the item at index 2," which is the <em>third</em> name.</p>
+      <p>Every list also knows how many items it holds. That number is its <code>length</code>. A list of 5 names has a length of 5, but its last index is 4, because counting started at 0. This is exactly why the off-by-one errors from 10.2 are so common with lists.</p>
+      <p>Lists and <code>for</code> loops are a perfect team. The loop's counter can be used as the index, so the loop visits every item, one after another. Because the loop uses <code>students.length</code> instead of a fixed number, the exact same code works for 5 students or 500:</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-0"><code>const students = ["Amara", "Ben", "Chen", "Deja", "Eli"];
+Logger.log(students[2]);        // Chen
+Logger.log(students.length);    // 5
+
+for (let i = 0; i &lt; students.length; i++) {
+  Logger.log(students[i]);
+}</code></pre>
+  </div>
+
   <img src="/images/control_structures_events/fig10.4.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A horizontal row of five labeled boxes containing the names Amara, Ben, Chen, Deja, Eli, with index numbers 0, 1, 2, 3, 4 printed directly below each box, and an arrow pointing to the box at index 2 labeled &quot;students[2] = Chen.&quot;">
 
   <div class="concept-box shadow-sm border-primary bg-light">
@@ -163,6 +292,18 @@
 
   <h4 class="fw-bold mt-5 text-info">10.4.2 Systematic Testing</h4>
   <p>Confirming a function works on one normal input isn't enough. <strong>Systematic testing</strong> means deliberately checking a function against a set of <strong>test cases</strong> covering the situations most likely to break it: a normal, expected input; an empty input (nothing at all); and an invalid input (the wrong type, or an out-of-range value). Each of these individual checks is one test case — running all three together is what actually gives you confidence the function is solid, not just lucky on the one input you happened to try first.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Systematic Testing & Test Cases</h5>
+      <p>When you test a program by trying it once and seeing that it works, you've only proven it works for <em>that one input</em>. Real users will type things you never expected: nothing at all, a word where a number belongs, a huge number, a negative number. <strong>Systematic testing</strong> means planning your tests on purpose to find those problems before your users do.</p>
+      <p>Each planned test is called a <strong>test case</strong>. A test case has three parts: the <strong>input</strong> you'll give the function, the <strong>expected result</strong> you should get, and the <strong>actual result</strong> you really got. If expected and actual match, the test passes. If they don't, you've found a bug, which is a good thing, because now you can fix it.</p>
+      <p>Here's a test plan for a function called <code>averageScore</code> that averages a list of scores. The empty test is the sneaky one: dividing by a list with 0 items gives <code>NaN</code> ("Not a Number") instead of a helpful answer.</p>
+      <pre class="bg-dark text-light p-3 rounded small mb-3"><code>Test case          Input              Expected result
+1. Normal          [80, 90, 100]      90
+2. Empty           []                 "No scores yet" (not NaN)
+3. Invalid         ["eighty", 90]     "Scores must be numbers"</code></pre>
+      <p>After you fix a bug, run <em>all</em> of your test cases again, not just the one that failed. A fix in one spot can accidentally break something that used to work. Re-running every test is how professionals make sure they moved forward, not sideways.</p>
+  </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
       <h5 class="fw-bold text-warning"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
