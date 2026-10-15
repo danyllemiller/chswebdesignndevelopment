@@ -79,12 +79,6 @@ Each step below links to the chapter section that actually teaches how to do it 
 
 - Reflection — what would you have done differently if you were the person in the case study?
 
-See a Finished Student Example
-
-Here's the worked example above built out as a real, full-credit project, so you can see exactly what a finished one looks like. Open it, click through it, and read the speaker notes. It's view-only, and the topic is off-limits: build your own on a different topic.
-
-Google Slides: Case File: Twitter Hack
-
 <div
 
 ===== GRADING RUBRIC =====
@@ -219,13 +213,6 @@ Each step below links to the chapter section that actually teaches how to do it 
 
 - Team Credits Slide — who did what, with real evidence you worked together (comment/edit history, or a clear role split). How to: Ch 4.2, Cloud Collaboration & Team Roles »
 
-See a Finished Student Example
-
-Here's the worked example above built out as a real, full-credit project, so you can see exactly what a finished one looks like. Open it, click through it, and read the speaker notes. It's view-only, and the topic is off-limits: build your own on a different topic.
-
-Google Slides: System & Support Deck: Library Kiosk
-Google Sheets: Kiosk Failure Data
-
 <div
 
 ===== GRADING RUBRIC =====
@@ -300,12 +287,12 @@ Slide — Team Credits
 
 ---
 
-## Unit 3 — The Personal Finance Pipeline
+## Unit 3 — The Data Pipeline (Option A: Personal Finance)
 
 ```text
 You are helping a high school Computer Science teacher at Carson High School (Nevada) make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
 
-TASK: Unit 3 Project: The Personal Finance Pipeline. Build it as a 4-tab Google Sheets workbook. CRITICAL: every real student uses the same Raw Data, which is intentionally NOT included here. Do not try to recreate it, and do not reuse any numbers that appear in the project instructions (for example the $150.00 opening balance, $335.16, or the $350 goal). Instead, extend the WORKED EXAMPLE's lunch-card account into a full-size parallel dataset: 8 codes of your own (mixed binary/hex/decimal, converted with DEC2BIN/HEX2DEC/BIN2DEC/CHAR/CODE formulas), 15-20 lunch-card transactions, a running balance with an absolute reference to the opening balance, the 4 KPIs, two COUNTIF-based charts, and 14 weeks of balances using the same weekly-change prediction method with a weeks-until-goal formula. Use the exact 4 tab names from the project instructions. FORBIDDEN (these are the real students' answers): do NOT use the letters D, P, W, I, F, G, E, or B as codes, and do NOT use the meanings Deposit, Purchase, ATM Withdrawal, Income, Food, Gas, Entertainment, or Bills. Use lunch-card codes instead, for example R = Reload, C = Charge, T = Transfer for types and M = Main Meal, S = Snack, K = Drink, X = Extra for categories (8 codes total, mixed binary/hex/decimal). Do NOT use a $150.00 opening balance, a $335.16 ending balance, or a $350 goal anywhere; use a $25.00 opening balance and a $60 goal. Every Reload goes ONLY in the Money In column and every Charge goes ONLY in the Money Out column; never put both on one row, and never leave a Txn number blank. After building, Logger.log each row's running balance and confirm the last balance equals opening balance + SUM(Money In) - SUM(Money Out).
+TASK: Unit 3 Project: The Data Pipeline (Option A: Personal Finance). Build it as a 4-tab Google Sheets workbook. CRITICAL: every real student uses the same Raw Data, which is intentionally NOT included here. Do not try to recreate it, and do not reuse any numbers that appear in the project instructions (for example the $150.00 opening balance, $335.16, or the $350 goal). Instead, extend the WORKED EXAMPLE's lunch-card account into a full-size parallel dataset: 8 codes of your own (mixed binary/hex/decimal, converted with DEC2BIN/HEX2DEC/BIN2DEC/CHAR/CODE formulas), 15-20 lunch-card transactions, a running balance with an absolute reference to the opening balance, the 4 KPIs, two COUNTIF-based charts, and 14 weeks of balances using the same weekly-change prediction method with a weeks-until-goal formula. Use the exact 4 tab names from the project instructions. FORBIDDEN (these are the real students' answers): do NOT use the letters D, P, W, I, F, G, E, or B as codes, and do NOT use the meanings Deposit, Purchase, ATM Withdrawal, Income, Food, Gas, Entertainment, or Bills. Use lunch-card codes instead, for example R = Reload, C = Charge, T = Transfer for types and M = Main Meal, S = Snack, K = Drink, X = Extra for categories (8 codes total, mixed binary/hex/decimal). Do NOT use a $150.00 opening balance, a $335.16 ending balance, or a $350 goal anywhere; use a $25.00 opening balance and a $60 goal. Every Reload goes ONLY in the Money In column and every Charge goes ONLY in the Money Out column; never put both on one row, and never leave a Txn number blank. After building, Logger.log each row's running balance and confirm the last balance equals opening balance + SUM(Money In) - SUM(Money Out).
 
 CONTENT RULES
 - This must look like a finished, FULL-CREDIT project by a strong 9th-grade student: correct, complete, clear, in a natural student voice (not corporate, not textbook, no AI-sounding filler).
@@ -498,6 +485,173 @@ Notice: Week 4 went up because of a reload. The average still works because it s
 
 ---
 
+## Unit 3B — The Data Pipeline (Option B: Grade Tracker)
+
+```text
+You are helping a high school Computer Science teacher at Carson High School (Nevada) make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
+
+TASK: Unit 3 Project: The Data Pipeline (Option B: Grade Tracker). Build it as a 4-tab Google Sheets workbook using the exact 4 tab names from the project instructions. In the real assignment each student uses their OWN real grades, so this example MUST use clearly fictional grades for "Jordan Example": 18 due items from a made-up semester of this CS class (CH# labs worth 25, two Unit tests worth 25, one U# Project worth 100; include 2 missing items worth 0 and dates in due-date order). Put a banner on the grade tab: "Fictional grades for an example student." FORBIDDEN (these are the real students' Stage 1 answers): do NOT use the code key from the project or the letters A, T, F, L, P, Q, G, M. Instead invent your own 8 codes (mixed binary/hex/decimal) for the same three ideas, using different letters, e.g. categories W = Weekly Work, S = Summative, X = Exam; types K = Lab, J = Project, U = Unit Test; statuses H = Has Score, Z = Zero/Missing. Convert them with DEC2BIN/HEX2DEC/BIN2DEC/CHAR/CODE formulas. Stage 3 needs the Percent column, the 4 KPIs, both COUNTIF charts, and the comparison sentence; do the (Bonus) weighted grade with SUMIF and 60/20/20 weights. Stage 4 needs the Running % column with an absolute-start SUM, Change, AVERAGE, two predictions, the goal-check formula, and Jordan's 2 sentences. After building, Logger.log the totals, overall %, weighted %, and every Running % so I can verify them.
+
+CONTENT RULES
+- This must look like a finished, FULL-CREDIT project by a strong 9th-grade student: correct, complete, clear, in a natural student voice (not corporate, not textbook, no AI-sounding filler).
+- The student is fictional: "Jordan Example".
+- Use EXACTLY the topic, data, and details from the WORKED EXAMPLE section below. That topic is off-limits to real students, so they can't copy it. Expand it to full project size; don't invent a different topic.
+- Cover every step/stage in the PROJECT INSTRUCTIONS, in the same order, and meet the minimum slide/tab count. Include the bonus rubric item and label it "(Bonus)".
+- Every real-world fact must be real and verifiable. No invented statistics, quotes, studies, URLs, or citations. If you aren't sure of a URL, cite the publication name and date without a link.
+- Re-check every number, formula result, trace, and conversion before you finish.
+
+TECHNICAL RULES (Google Sheets builder)
+- Write ONE complete, standalone Google Apps Script (V8 runtime) with a main function named buildExample(). I will paste it into a brand-new project at script.google.com and click Run. It must work with zero edits.
+- Use ONLY built-in services: SpreadsheetApp and Charts. No libraries, no advanced services, no external data.
+- buildExample() must create a NEW spreadsheet with SpreadsheetApp.create(...), add each tab with insertSheet using the EXACT tab names the project requires, and delete the default "Sheet1".
+- Every calculated cell must be a LIVE FORMULA set with setFormula / setFormulas (never a typed-in result), exactly as a student would build it, so students can click a cell and see the formula.
+- Build real charts with sheet.newChart()...build() and insertChart, with titles and axis labels. Use number formats ($0.00 etc.), bold headers, frozen header rows, and sensible column widths so it looks like real, careful student work.
+- Put a banner in row 1 of every tab: "STUDENT EXAMPLE — for reference only. Do not copy; your data/topic must be different." Start the real content below it, and make sure every formula points at the right rows.
+- After building, call SpreadsheetApp.flush(), then READ BACK every key formula result and Logger.log it, so I can verify the math. Then Logger.log the spreadsheet URL.
+- Before the code, show me the planned layout of each tab (columns, rows, formulas, charts). After the code, give a checklist proving every rubric line and every required step is covered, with tab + cell references.
+
+===== PROJECT INSTRUCTIONS (copied from the student assignment page) =====
+The Scenario
+
+Your grade isn't a mystery number. It's data, and you can analyze it the same way a data analyst analyzes anything else. In this version you'll take your own real grades from this class through the same four stages every data analyst uses: decode it, organize it, visualize it, and use it to predict what happens next.
+
+This isn't 4 separate assignments — it's one pipeline, one dataset (your grades), four stages. The grade register you build in Stage 2 is the exact same data your Stage 3 dashboard charts and your Stage 4 prediction comes from. By the end you'll know exactly where your grade stands, why, and what it would take to reach your goal. And the next time someone asks "why do I need spreadsheets?", you'll have your own answer.
+
+Objective
+
+Build a real, 4-tab Google Sheets workbook that tells one continuous story about your own grades: decode the grade codes, store your grades well, show them clearly, and predict where they're heading.
+
+Deliverable: A Google Sheets workbook with 4 tabs (see below), built from at least 15 of your own graded or missing assignments from this class. Turn in a PDF export or a text file with your share link below. Share it only with your teacher; it's your private grade data.
+
+New to spreadsheets entirely — rows, columns, cells? Start here: Spreadsheet Basics, From Zero »
+
+The Four Stages (one tab each)
+
+Each stage links to the chapter section that actually teaches how to do it — do that first if you haven't already. Work through them in order — each one hands off to the next.
+
+-
+Stage 1 — Tab “Decode the Grade Codes”: Many school grade systems store an assignment's category, type, and status as short codes instead of words. Build a decoder key so you can label your own grades:
+
+- Copy all 8 raw codes from the Grade Code Key section below into your sheet, with each one's Given As and Code Type.
+
+- Add three columns: Binary, Hexadecimal, and Decimal. Fill in all three for every code (one of them is just the value you were given).
+
+- Add a column for the ASCII character each code decodes to (a single capital letter).
+
+- Add a final column, Meaning, using the hint under the key. You'll use these letters to label every row in Stage 2.
+
+How to: Ch 5.5, Doing This in Google Sheets »
+
+-
+Stage 2 — Tab “Organize My Grades”: Open your Grades page and copy at least 15 assignments that are already due (graded or missing — skip anything not due yet) into a table with these columns: Item #, Due Date, Assignment, Type + Type Name, Category + Category Name, Status + Status Name, Points Earned, Points Possible. Put the rows in order by due date, oldest first.
+
+- Labeling tip: titles starting with CH# are labs/activities (Type L, Category A). U# Project is a project (Type P, Category T). Unit tests/CFAs are tests (Type Q, Category T). A missing assignment has Status M and 0 points earned.
+
+- Version A — One Flat Table: all the columns above together in one table.
+
+- Version B — Split Into Related Tables: Type Name, Category Name, and Status Name repeat the same words over and over. Move each into its own small lookup table (code + name), and keep only the one-letter codes in your grade table. Not sure what this looks like? See the worked example in 6.1.2.
+
+- Explain your choice: If the school renamed the “Projects, Tests & Quizzes” category, which version would be easier to update, and why? Write 2–3 real sentences comparing speed, size, and ease of updating, specific to your grade table.
+
+How to: Ch 6.1, Organizing Data »
+
+-
+Stage 3 — Tab “My Grade Dashboard”: Using that same grade table (Version A), build the dashboard you'd actually check every week. Every number must come from a live formula referencing your table — never typed in by hand.
+
+- Percent column: add a Percent column to your table: Points Earned ÷ Points Possible, formatted as a percent.
+
+- Four KPI numbers above your charts: =SUM(...) of Points Earned, =SUM(...) of Points Possible, your Overall % (total earned ÷ total possible), and Missing Count with =COUNTIF(...) on the Status Name column.
+
+- Chart 1 — Assignments by Status: one =COUNTIF(...) each for “Graded” and “Missing,” charted as a bar or pie chart.
+
+- Chart 2 — Assignments by Type: one =COUNTIF(...) each for “Lab / Activity,” “Project,” and “Test / Quiz,” charted as a bar or pie chart.
+
+- Check yourself: compare your Overall % to the grade on your Grades page. If they're different, write one sentence explaining why. (Hint: this class weights categories — Assignments 60%, Projects, Tests & Quizzes 20%, Final Exam 20% — and your table may not include every assignment.)
+
+How to: Ch 7.1–7.2, Formulas & Data Visualisation »
+
+-
+Stage 4 — Tab “Will I Hit My Goal?”: Pick a real goal grade for this class (for example, 80% for a B or 90% for an A). Copy your Item #, Points Earned, and Points Possible (in due-date order) into this tab, then:
+
+- Add a Running % column: your overall grade after each assignment. Use an absolute starting cell so it grows as you fill down, like =SUM($B$2:B2)/SUM($C$2:C2).
+
+- Add a Change column: starting on the second row, each Running % minus the one above it.
+
+- Below it, =AVERAGE(...) all your Change values. That's your average change per assignment — is your grade trending up or down?
+
+- Predict your Running % after the next assignment and the one after that (last Running % plus the average change, then plus it again), as live formulas.
+
+- Goal check: =(goal - last Running %) / average change estimates how many more assignments until you reach your goal. If the answer is negative, your trend is moving away from your goal — say so.
+
+- Write 2 sentences: Is this prediction realistic? Name one specific thing that could change it (like turning in a missing assignment) and estimate its effect using your own numbers.
+
+How to: Ch 8.1, Building a Model »
+
+<div
+
+===== GRADING RUBRIC =====
+- Stage 1: Decode the Grade Codes: All 8 codes are correctly converted across binary, hex, decimal, and ASCII, each with its correct Meaning, with no calculation errors.
+- Stage 2: Organize My Grades: At least 15 of the student's own due assignments, correctly coded, shown as Version A (flat) and Version B (split into lookup tables), with specific, real tradeoffs (including the category-rename question).
+- Stage 3: My Grade Dashboard: A Percent column, four KPI numbers (SUM earned, SUM possible, Overall %, COUNTIF missing), a COUNTIF-based Status chart and Type chart -- all live formulas, readable and labeled -- plus a real sentence comparing Overall % to the Grades page.
+- Stage 4: Will I Hit My Goal?: A Running % column with an absolute-start SUM, a Change column, an AVERAGE of the changes, two live-formula predictions, a goal-check formula, and 2 honest sentences using the student's own numbers.
+- One Connected Pipeline: One continuous story about the student's own grades, not four unrelated exercises -- the Stage 1 key labels the Stage 2 table, which is what Stage 3 charts and Stage 4 predicts from. Tabs are clearly labeled and easy for someone else to follow.
+- Advanced Formula (Bonus) (BONUS): Calculates a weighted grade with SUMIF per category and this class's 60/20/20 weights, OR uses conditional formatting (e.g. red for Missing) or VLOOKUP from the Version B lookup tables.
+
+===== WORKED EXAMPLE (use THIS topic and these details, expanded to full size) =====
+Worked Example: A Mini Grade Pipeline
+
+These are a fictional student's grades, not yours. Your table uses your own grades and needs at least 15 rows; this mini version uses 5 so you can see every formula.
+
+Stage 2 — Jordan's grade table (Version A, headers in row 3, data in rows 4–8)
+
+|
+| Row | Assignment | Type | Category | Status Name | I: Earned | J: Possible | K: Percent
+
+| 4 | CH5 The Binary Translator | L | A | Graded | 23 | 25 | =I4/J4 → 92%
+
+| 5 | CH5 The Encoding Lab | L | A | Graded | 18 | 25 | 72%
+
+| 6 | Unit 3 CFA | Q | T | Graded | 20 | 25 | 80%
+
+| 7 | CH6 The Organization Audit | L | A | Missing | 0 | 25 | 0%
+
+| 8 | CH6 The Storage Tradeoff Matrix | L | A | Graded | 24 | 25 | 96%
+
+Stage 3 — KPIs
+
+|
+| KPI | Formula | Result
+
+| Total Earned | =SUM(I4:I8) | 85
+
+| Total Possible | =SUM(J4:J8) | 125
+
+| Overall % | =SUM(I4:I8)/SUM(J4:J8) | 68%
+
+| Missing Count | =COUNTIF(E4:E8,"Missing") | 1
+
+Stage 4 — Running % and prediction (Earned in column B, Possible in column C, data in rows 2–6)
+
+|
+| Item | D: Running % | E: Change
+
+| 1 | =SUM($B$2:B2)/SUM($C$2:C2) → 92.0% | –
+
+| 2 | 82.0% | =D3-D2 → −10.0
+
+| 3 | 81.3% | −0.7
+
+| 4 | 61.0% | −20.3
+
+| 5 | 68.0% | +7.0
+
+Average change: =AVERAGE(E3:E6) → −6.0 points per assignment. Predicted next two: 62.0%, then 56.0%. Goal check for 80%: =(0.80-D6)/E8 comes out negative, which means Jordan's trend is moving away from the goal.
+
+Jordan's 2 sentences: “This prediction isn't realistic long-term, because one missing assignment caused most of the drop. If I turn in the Organization Audit and earn 20/25, my overall goes from 68% to 84%, which is already above my 80% goal.”
+```
+
+---
+
 ## Unit 4 — The Algorithm Design Blueprint
 
 ```text
@@ -572,12 +726,6 @@ Not sure how to lay out the deck? Use exactly this order. One slide per row is t
 | 5 | Stage 4: The Event | Three lines: Trigger (what the user does), Algorithm (your Slide 3 algorithm runs), Response (exactly what the user sees after).
 
 | 6+ | Stage 5: Trace Walkthrough | Two different inputs, each traced line by line in a table showing every variable's value as it changes, ending with the final output. (Bonus: a third trace with an edge case like an empty list or zero.)
-
-See a Finished Student Example
-
-Here's the worked example above built out as a real, full-credit project, so you can see exactly what a finished one looks like. Open it, click through it, and read the speaker notes. It's view-only, and the topic is off-limits: build your own on a different topic.
-
-Google Slides: Algorithm Blueprint: Snack Bar Checkout
 
 Before You Turn It In
 
@@ -749,12 +897,6 @@ Each step below links to the chapter section that actually teaches how to do it 
 - IP & Legal Angle — who owns the data or the algorithm, and what's the tradeoff of that ownership?
 
 - Your Verdict — is this technology a net positive or net negative for society? Defend it with real evidence, not just opinion. How to: Ch 13.2, AI's Impact on Society, Honestly »
-
-See a Finished Student Example
-
-Here's the worked example above built out as a real, full-credit project, so you can see exactly what a finished one looks like. Open it, click through it, and read the speaker notes. It's view-only, and the topic is off-limits: build your own on a different topic.
-
-Google Slides: Tech Impact Briefing: ALPRs
 
 <div
 
@@ -935,13 +1077,6 @@ Each step below links to the chapter section that actually teaches how to do it 
 
 - Slides: Why This App, For Real — name one specific real person (it can be you) who would actually use this app, and the specific real moment where not having it causes a real problem. Not "it would be useful" — the actual moment.
 
-See a Finished Student Example
-
-Here's the worked example above built out as a real, full-credit project, so you can see exactly what a finished one looks like. Open it, click through it, and read the speaker notes. It's view-only, and the topic is off-limits: build your own on a different topic.
-
-Google Sheets: App Data Structure: Who’s Feeding the Dog
-Google Slides: App Blueprint: Who’s Feeding the Dog
-
 <div
 
 ===== GRADING RUBRIC =====
@@ -1068,12 +1203,6 @@ Each step below links to the chapter section that actually teaches how to do it 
 - Compare 2 competing security measures head-to-head on usability vs. security tradeoffs. How to: Ch 19.1, The Usability »
 
 - Final Recommendation — pick your overall approach and explicitly state what tradeoff you're accepting.
-
-See a Finished Student Example
-
-Here's the worked example above built out as a real, full-credit project, so you can see exactly what a finished one looks like. Open it, click through it, and read the speaker notes. It's view-only, and the topic is off-limits: build your own on a different topic.
-
-Google Slides: Network Audit: Bakery
 
 <div
 
