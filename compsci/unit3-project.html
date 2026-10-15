@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Unit 3 Project: The Player Data Pipeline | CHS Computer Science</title>
+    <title>Unit 3 Project: The Personal Finance Pipeline | CHS Computer Science</title>
     <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
     <link href="/css/bootstrap.min.css" rel="stylesheet"/>
@@ -25,12 +25,16 @@
     <header class="text-center" style="background: linear-gradient(135deg, var(--primary-color), var(--tertiary-color)); border-radius: 0 0 20px 20px; padding: 3rem 2rem; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0, 0, 153, 0.2);">
         <div class="container">
             <span class="badge mb-2 px-3 py-2 fw-bold rounded-pill shadow-sm" style="background-color: var(--code-color); color: #ffffff;">Unit 3: Data &amp; Analysis &mdash; Project</span>
-            <h1 class="display-5 fw-bold mb-0 text-white" style="color: #ffffff !important;">The Player Data Pipeline</h1>
-            <p class="lead mt-2 opacity-100 text-white" style="color: #ffffff !important;">You're the new data analyst at an indie game studio. Built in Google Sheets. 100 points.</p>
+            <h1 class="display-5 fw-bold mb-0 text-white" style="color: #ffffff !important;">The Personal Finance Pipeline</h1>
+            <p class="lead mt-2 opacity-100 text-white" style="color: #ffffff !important;">Your first paycheck just hit your checking account. Built in Google Sheets. 100 points.</p>
         </div>
     </header>
 
     <div class="container pb-5" style="max-width: 900px;">
+
+        <div class="alert alert-info shadow-sm mb-4 small">
+            <i class="fas fa-circle-info me-2"></i><strong>Already started the Byte Size Games version?</strong> Finish that one instead &mdash; it counts for the same grade: <a href="/compsci/unit3-project-byte-size-games.html" class="alert-link">Original version (The Player Data Pipeline) &raquo;</a>
+        </div>
 
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-body p-4">
@@ -42,16 +46,16 @@
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-primary text-white fw-bold"><i class="fas fa-bullseye me-2"></i>The Scenario</div>
             <div class="card-body p-4">
-                <p><strong>Byte Size Games</strong>, a small indie studio, just hired you as their first data analyst. Their game engine is live and generating real player data &mdash; but right now that data is either unreadable (raw binary/hex codes the engine logs to save space) or just sitting in a messy pile nobody can actually use. Your job over this project is to take that data through the same four stages every real data analyst does: <strong>decode it, organize it, visualize it, and use it to predict what happens next.</strong></p>
-                <p class="mb-0">This isn't 4 separate assignments &mdash; it's <strong>one pipeline, one dataset, four stages.</strong> The player dataset you build in Stage 2 is the exact same dataset your Stage 3 dashboard charts and your Stage 4 prediction are built from. If your dashboard is about player scores, your prediction has to be about player scores too &mdash; not a random new topic. Each tab should feel like the next step in the same investigation, not a fresh start.</p>
+                <p>You just started a part-time job and opened your first checking account. Every month your bank lets you download your transactions &mdash; but the export is a mess: the bank's system stores transaction types and categories as raw <strong>binary/hex/decimal codes</strong> instead of words, and nothing tells you where your money actually went or whether you're on track for the thing you're saving up for. Your job: take one month of real-looking account data through the same four stages every data analyst uses &mdash; <strong>decode it, organize it, visualize it, and use it to predict what happens next.</strong></p>
+                <p class="mb-0">This isn't 4 separate assignments &mdash; it's <strong>one pipeline, one dataset, four stages.</strong> The check register you build in Stage 2 is the exact same data your Stage 3 dashboard charts. Each tab should feel like the next step in the same investigation into <em>your</em> money, not a fresh start. And yes &mdash; this is exactly how budgeting apps work under the hood. When someone asks "why do I need spreadsheets?", this project is the answer.</p>
             </div>
         </div>
 
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-primary text-white fw-bold"><i class="fas fa-bullseye me-2"></i>Objective</div>
             <div class="card-body p-4">
-                <p>Build a real, 4-tab Google Sheets workbook that tells <strong>one continuous story</strong> about Byte Size Games' player data: decode it, store it well, show it clearly, and predict from it.</p>
-                <p class="mb-0"><strong>Deliverable:</strong> A Google Sheets workbook with 4 tabs (see below), built around one player dataset that carries through all four. Turn in a PDF export or a text file with your share link below.</p>
+                <p>Build a real, 4-tab Google Sheets workbook that tells <strong>one continuous story</strong> about one month of a checking account: decode it, store it well, show it clearly, and predict from it.</p>
+                <p class="mb-0"><strong>Deliverable:</strong> A Google Sheets workbook with 4 tabs (see below), built around one transaction dataset that carries through Stages 2 and 3, plus the savings data in Stage 4. Turn in a PDF export or a text file with your share link below.</p>
                 <p class="mb-0 mt-2 small text-muted"><i class="fas fa-circle-info me-1"></i>New to spreadsheets entirely &mdash; rows, columns, cells? <a href="/compsci/mastering_spreadsheets.html#section-7-0a" target="_blank" rel="noopener">Start here: Spreadsheet Basics, From Zero &raquo;</a></p>
             </div>
         </div>
@@ -62,40 +66,42 @@
                 <p class="text-muted small mb-3"><i class="fas fa-circle-info me-1"></i>Each stage links to the chapter section that actually teaches how to do it — do that first if you haven't already. Work through them in order — each one hands off to the next.</p>
                 <ol class="mb-0">
                     <li class="mb-4">
-                        <strong>Stage 1 — Tab &ldquo;Decode the Feed&rdquo;:</strong> Byte Size Games' engine logs player events as raw binary/hex/decimal codes instead of plain text, to save bandwidth. Build a decoder key the rest of the studio can actually use to read the engine's raw logs:
+                        <strong>Stage 1 &mdash; Tab &ldquo;Decode the Bank Export&rdquo;:</strong> Your bank's export stores each transaction's <strong>Type</strong> and <strong>Category</strong> as a raw code instead of a word. Build a decoder key so you can actually read your own statement:
                         <ul class="mt-2 mb-0">
-                            <li class="mb-1">Copy all <strong>8 raw codes</strong> from the <strong>Raw Data</strong> section below into your sheet, along with each one's <strong>Flag Type</strong> (Item Rarity or Player Status).</li>
-                            <li class="mb-1">Add three more columns converting each code into <strong>Binary</strong>, <strong>Hexadecimal</strong>, and <strong>Decimal</strong> — whichever of those three forms it wasn't already given in.</li>
-                            <li class="mb-1">Add a fourth column: the real <strong>ASCII/Unicode character</strong> each code decodes to.</li>
-                            <li class="mb-0">Label which single letter each Item Rarity code stands for (Common/Rare/Epic/Legendary) and which each Player Status code stands for (Active/Inactive/New/VIP) — this decoder key is what makes the Player Roster in Stage 2 readable.</li>
+                            <li class="mb-1">Copy all <strong>8 raw codes</strong> from the <strong>Raw Data</strong> section below into your sheet, along with each one's <strong>Given As</strong> and <strong>Code Type</strong> (Transaction Type or Category).</li>
+                            <li class="mb-1">Add three more columns: <strong>Binary</strong>, <strong>Hexadecimal</strong>, and <strong>Decimal</strong>. Fill in all three for every code (one of them is just the value you were given).</li>
+                            <li class="mb-1">Add a column for the <strong>ASCII character</strong> each code decodes to (a single capital letter).</li>
+                            <li class="mb-0">Add a final column, <strong>Meaning</strong>: Transaction Type letters stand for <strong>D</strong>eposit, <strong>P</strong>urchase, or ATM <strong>W</strong>ithdrawal; Category letters stand for <strong>I</strong>ncome, <strong>F</strong>ood, <strong>G</strong>as, <strong>E</strong>ntertainment, or <strong>B</strong>ills. This key is what makes the Check Register in Stage 2 readable.</li>
                         </ul>
                         <div class="mt-1"><a href="/compsci/language_of_computers.html#section-5-5" target="_blank" rel="noopener">How to: Ch 5.5, Doing This in Google Sheets &raquo;</a></div>
                     </li>
                     <li class="mb-4">
-                        <strong>Stage 2 — Tab &ldquo;Organize the Player Data&rdquo;:</strong> Now that you can read the engine's codes, the studio hands you their real <strong>Player Roster</strong> (20 players — copy it from the <strong>Raw Data</strong> section below into this tab). Organize that <em>same</em> dataset two different ways and compare them:
+                        <strong>Stage 2 &mdash; Tab &ldquo;Organize the Register&rdquo;:</strong> Now that you can read the codes, copy the <strong>Check Register</strong> (20 transactions for October) from the <strong>Raw Data</strong> section below into this tab. Organize that <em>same</em> dataset two different ways and compare them:
                         <ul class="mt-2 mb-0">
-                            <li class="mb-1"><strong>Version A — One Flat Table:</strong> Keep the full Player Roster exactly as given, all columns together in one table.</li>
-                            <li class="mb-1"><strong>Version B — Split Into Related Tables:</strong> Pull out whichever column(s) you notice repeating the exact same text over and over (more than one real candidate exists in this roster), and move each into its own small lookup table, linked back to the Player Roster by its code. Not sure what this looks like? <a href="/compsci/storing_data.html#section-6-1-2" target="_blank" rel="noopener">See the worked example in 6.1.2</a> first — it walks through the exact same move on a different dataset.</li>
-                            <li class="mb-0"><strong>Explain your choice:</strong> Which version would you actually recommend to the lead engineer — the flat table, or the split tables? Write 2-3 real sentences comparing <strong>speed</strong>, <strong>size</strong>, and <strong>ease of updating</strong>, specific to this dataset, not generic pros/cons.</li>
+                            <li class="mb-1"><strong>Version A &mdash; One Flat Table:</strong> Keep the full Check Register exactly as given, all columns together in one table.</li>
+                            <li class="mb-1"><strong>Version B &mdash; Split Into Related Tables:</strong> Two columns repeat the exact same words over and over &mdash; <strong>Type Name</strong> and <strong>Category Name</strong>. Move each one into its own small lookup table (code + name, one row per code), and remove those name columns from the register so each row keeps only the one-letter code. Not sure what this looks like? <a href="/compsci/storing_data.html#section-6-1-2" target="_blank" rel="noopener">See the worked example in 6.1.2</a> first &mdash; it walks through the exact same move on a different dataset.</li>
+                            <li class="mb-0"><strong>Explain your choice:</strong> If your bank renamed the "Entertainment" category to "Fun," which version would be easier to update, and why? Write 2&ndash;3 real sentences comparing <strong>speed</strong>, <strong>size</strong>, and <strong>ease of updating</strong>, specific to this register &mdash; not generic pros/cons.</li>
                         </ul>
                         <div class="mt-1"><a href="/compsci/storing_data.html#section-6-1" target="_blank" rel="noopener">How to: Ch 6.1, Organizing Data &raquo;</a></div>
                     </li>
                     <li class="mb-4">
-                        <strong>Stage 3 — Tab &ldquo;Studio Dashboard&rdquo;:</strong> Using that <em>same</em> Player Roster from Stage 2, build a dashboard the studio's producer could actually check every week. Every number below must come from a live formula referencing the Player Roster — never typed in by hand — so it stays correct if the roster changes.
+                        <strong>Stage 3 &mdash; Tab &ldquo;My Money Dashboard&rdquo;:</strong> Using that <em>same</em> Check Register (Version A), build the dashboard you'd actually check every month. Every number must come from a live formula referencing the register &mdash; never typed in by hand &mdash; so it stays correct when next month's transactions are added.
                         <ul class="mt-2 mb-0">
-                            <li class="mb-1"><strong>Two KPI numbers</strong> above your charts: <code>=SUM(...)</code> on the <strong>Sessions</strong> column for Total Sessions This Week, and <code>=AVERAGE(...)</code> on the <strong>Total Playtime (min)</strong> column for Average Playtime Per Player.</li>
-                            <li class="mb-1"><strong>Chart 1 — Players by Status:</strong> four <code>=COUNTIF(...)</code> formulas on the <strong>Status Name</strong> column, one each counting "Active", "Inactive", "New", and "VIP" — then chart those 4 counts as a bar or pie chart.</li>
-                            <li class="mb-0"><strong>Chart 2 — Players by Region:</strong> the same move on the <strong>Region Name</strong> column instead — one <code>=COUNTIF(...)</code> for each region that actually appears in your roster — then chart those counts as a bar or pie chart.</li>
+                            <li class="mb-1"><strong>Running Balance column:</strong> In the register, put <strong>150.00</strong> (your opening balance) in its own labeled cell. Add a <strong>Balance</strong> column: the first row is <code>opening balance + Money In &minus; Money Out</code> (use an absolute reference like <code>$B$1</code> for the opening balance), and every row after that is <code>the balance above + Money In &minus; Money Out</code>. Your last row should land on <strong>$335.16</strong> &mdash; if it doesn't, find the mistake before going on.</li>
+                            <li class="mb-1"><strong>Four KPI numbers</strong> above your charts: <code>=SUM(...)</code> of the <strong>Money In</strong> column (Total Earned), <code>=SUM(...)</code> of the <strong>Money Out</strong> column (Total Spent), <code>=AVERAGE(...)</code> of the <strong>Money Out</strong> column (Average Purchase), and Ending Balance (a reference to the last Balance cell).</li>
+                            <li class="mb-1"><strong>Chart 1 &mdash; Transactions by Category:</strong> five <code>=COUNTIF(...)</code> formulas on the <strong>Category Name</strong> column, one each for "Income", "Food", "Gas", "Entertainment", and "Bills" &mdash; then chart those 5 counts as a bar or pie chart.</li>
+                            <li class="mb-0"><strong>Chart 2 &mdash; Transactions by Type:</strong> the same move on the <strong>Type Name</strong> column &mdash; one <code>=COUNTIF(...)</code> each for "Deposit", "Purchase", and "ATM Withdrawal" &mdash; then chart those 3 counts as a bar or pie chart.</li>
                         </ul>
-                        <div class="mt-1"><a href="/compsci/mastering_spreadsheets.html#section-7-1" target="_blank" rel="noopener">How to: Ch 7.1–7.2, Formulas &amp; Data Visualisation &raquo;</a></div>
+                        <div class="mt-1"><a href="/compsci/mastering_spreadsheets.html#section-7-1" target="_blank" rel="noopener">How to: Ch 7.1&ndash;7.2, Formulas &amp; Data Visualisation &raquo;</a></div>
                     </li>
                     <li class="mb-0">
-                        <strong>Stage 4 — Tab &ldquo;Predict What's Next&rdquo;:</strong> Copy the <strong>Daily Active Players</strong> table from the <strong>Raw Data</strong> section below into this tab — it's the studio's real login activity for the last 14 days. Build a prediction using this exact method:
+                        <strong>Stage 4 &mdash; Tab &ldquo;Will I Hit My Goal?&rdquo;:</strong> You're saving up for something that costs <strong>$350</strong>. Copy the <strong>Savings Account Balance</strong> table from the <strong>Raw Data</strong> section below into this tab &mdash; it's your savings balance at the end of each of the last 14 weeks. Build a prediction using this exact method:
                         <ol class="mt-2 mb-0">
-                            <li class="mb-1">Add a third column, <strong>Daily Change</strong>. Starting on Day 2, subtract each day from the day before it (<code>=B3-B2</code>, then <code>=B4-B3</code>, and so on down through Day 14) — 13 formulas in total.</li>
-                            <li class="mb-1">Below that column, calculate <code>=AVERAGE(...)</code> of all 13 Daily Change values. That's the studio's <strong>average daily change</strong> — on average, roughly how many more (or fewer) players log in each day compared to the day before.</li>
-                            <li class="mb-1"><strong>Predict Day 15:</strong> Day 14's value <em>plus</em> your average daily change. <strong>Predict Day 16:</strong> your Day 15 prediction <em>plus</em> that same average daily change again. Both as live formulas referencing your average — not typed-in numbers.</li>
-                            <li class="mb-0">Write one sentence checking your prediction: if the real Day 15 count came in 20+ players away from what you predicted, would that mean your model was wrong, or that something genuinely changed? Explain which, and why.</li>
+                            <li class="mb-1">Add a third column, <strong>Weekly Change</strong>. Starting on Week 2, subtract each week from the week before it (<code>=B3-B2</code>, then <code>=B4-B3</code>, and so on down through Week 14) &mdash; 13 formulas in total.</li>
+                            <li class="mb-1">Below that column, calculate <code>=AVERAGE(...)</code> of all 13 Weekly Change values. That's your <strong>average weekly change</strong> &mdash; on average, how much your savings grow each week.</li>
+                            <li class="mb-1"><strong>Predict Week 15:</strong> Week 14's balance <em>plus</em> your average weekly change. <strong>Predict Week 16:</strong> your Week 15 prediction <em>plus</em> that same average again. Both as live formulas referencing your average &mdash; not typed-in numbers.</li>
+                            <li class="mb-1"><strong>When do you hit $350?</strong> Add one formula: <code>=(350 - [Week 14 balance]) / [average weekly change]</code>. That's how many weeks after Week 14 you'll reach your goal. Round it <em>up</em> to a whole week and write it as a sentence: "I'll have $350 by Week __."</li>
+                            <li class="mb-0">Write one sentence checking your prediction: some weeks your savings went <em>down</em>. If Week 15 came in $30 below what you predicted, would that mean your model was wrong, or that something real happened that week? Explain which, and why.</li>
                         </ol>
                         <div class="mt-1"><a href="/compsci/computational_modeling.html#section-8-1" target="_blank" rel="noopener">How to: Ch 8.1, Building a Model &raquo;</a></div>
                     </li>
@@ -106,77 +112,79 @@
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-secondary text-white fw-bold"><i class="fas fa-table me-2"></i>Raw Data (copy these into your workbook)</div>
             <div class="card-body p-4">
-                <p class="text-muted small">Select each table below and copy/paste it directly into the matching tab in your own Google Sheet — this is the same data every student in the class starts from, so Stage 1's codes, the Stage 2 roster, and the Stage 4 login trend are all real, given data, not something you need to invent.</p>
+                <p class="text-muted small">Select each table below and copy/paste it directly into the matching tab in your own Google Sheet &mdash; this is the same data every student in the class starts from, so Stage 1's codes, the Stage 2 register, and the Stage 4 savings trend are all given data, not something you need to invent.</p>
 
-                <h6 class="fw-bold text-primary mt-4">For Stage 1 — Raw Engine Codes</h6>
+                <h6 class="fw-bold text-primary mt-4">For Stage 1 &mdash; Raw Bank Codes</h6>
                 <div class="table-responsive">
                 <table class="table table-sm table-bordered small">
-                    <thead class="table-light"><tr><th>Raw Code</th><th>Given As</th><th>Flag Type</th></tr></thead>
+                    <thead class="table-light"><tr><th>Raw Code</th><th>Given As</th><th>Code Type</th></tr></thead>
                     <tbody>
-                        <tr><td>67</td><td>Decimal</td><td>Item Rarity</td></tr>
-                        <tr><td>82</td><td>Decimal</td><td>Item Rarity</td></tr>
-                        <tr><td>1000101</td><td>Binary</td><td>Item Rarity</td></tr>
-                        <tr><td>4C</td><td>Hex</td><td>Item Rarity</td></tr>
-                        <tr><td>65</td><td>Decimal</td><td>Player Status</td></tr>
-                        <tr><td>1001001</td><td>Binary</td><td>Player Status</td></tr>
-                        <tr><td>4E</td><td>Hex</td><td>Player Status</td></tr>
-                        <tr><td>86</td><td>Decimal</td><td>Player Status</td></tr>
+                        <tr><td>68</td><td>Decimal</td><td>Transaction Type</td></tr>
+                        <tr><td>1010000</td><td>Binary</td><td>Transaction Type</td></tr>
+                        <tr><td>57</td><td>Hex</td><td>Transaction Type</td></tr>
+                        <tr><td>49</td><td>Hex</td><td>Category</td></tr>
+                        <tr><td>70</td><td>Decimal</td><td>Category</td></tr>
+                        <tr><td>1000111</td><td>Binary</td><td>Category</td></tr>
+                        <tr><td>45</td><td>Hex</td><td>Category</td></tr>
+                        <tr><td>66</td><td>Decimal</td><td>Category</td></tr>
                     </tbody>
                 </table>
                 </div>
-                <p class="text-muted small mb-0"><i class="fas fa-lightbulb me-1"></i>Each code's decoded character is a one-letter flag Byte Size Games actually uses in the Player Roster below — C/R/E/L for item rarity (Common/Rare/Epic/Legendary) and A/I/N/V for player status (Active/Inactive/New/VIP). Figuring out what each code decodes to is part of Stage 1 — don't just copy this hint table, use it to check your own conversion work.</p>
+                <p class="text-muted small mb-0"><i class="fas fa-lightbulb me-1"></i>Each code decodes to one capital letter used in the Check Register below &mdash; D/P/W for transaction type and I/F/G/E/B for category. Figuring out which code is which letter is part of Stage 1 &mdash; use the register to check your own conversion work, don't skip the conversion.</p>
 
-                <h6 class="fw-bold text-primary mt-4">For Stages 2 &amp; 3 — Player Roster (20 players)</h6>
+                <h6 class="fw-bold text-primary mt-4">For Stages 2 &amp; 3 &mdash; Check Register (October, 20 transactions)</h6>
+                <p class="text-muted small mb-2">Opening balance on October 1: <strong>$150.00</strong></p>
                 <div class="table-responsive">
                 <table class="table table-sm table-bordered small">
-                    <thead class="table-light"><tr><th>Player ID</th><th>Username</th><th>Region</th><th>Region Name</th><th>Sessions</th><th>Total Playtime (min)</th><th>High Score</th><th>Rarest Item</th><th>Rarest Item Name</th><th>Status</th><th>Status Name</th></tr></thead>
+                    <thead class="table-light"><tr><th>Txn ID</th><th>Date</th><th>Description</th><th>Type</th><th>Type Name</th><th>Category</th><th>Category Name</th><th>Money In</th><th>Money Out</th></tr></thead>
                     <tbody>
-                        <tr><td>P001</td><td>pixelpioneer</td><td>NA</td><td>North America</td><td>42</td><td>1860</td><td>9840</td><td>L</td><td>Legendary</td><td>V</td><td>VIP</td></tr>
-                        <tr><td>P002</td><td>byteblaster99</td><td>EU</td><td>Europe</td><td>18</td><td>540</td><td>4210</td><td>C</td><td>Common</td><td>A</td><td>Active</td></tr>
-                        <tr><td>P003</td><td>questcrafter</td><td>NA</td><td>North America</td><td>65</td><td>2705</td><td>11200</td><td>L</td><td>Legendary</td><td>V</td><td>VIP</td></tr>
-                        <tr><td>P004</td><td>shadowhopper</td><td>APAC</td><td>Asia-Pacific</td><td>5</td><td>95</td><td>820</td><td>C</td><td>Common</td><td>N</td><td>New</td></tr>
-                        <tr><td>P005</td><td>glitchgremlin</td><td>EU</td><td>Europe</td><td>33</td><td>1420</td><td>7650</td><td>R</td><td>Rare</td><td>A</td><td>Active</td></tr>
-                        <tr><td>P006</td><td>nova_striker</td><td>NA</td><td>North America</td><td>2</td><td>40</td><td>310</td><td>C</td><td>Common</td><td>I</td><td>Inactive</td></tr>
-                        <tr><td>P007</td><td>pixelpioneer2</td><td>NA</td><td>North America</td><td>29</td><td>980</td><td>6100</td><td>E</td><td>Epic</td><td>A</td><td>Active</td></tr>
-                        <tr><td>P008</td><td>drift_kingz</td><td>APAC</td><td>Asia-Pacific</td><td>51</td><td>2210</td><td>10450</td><td>L</td><td>Legendary</td><td>V</td><td>VIP</td></tr>
-                        <tr><td>P009</td><td>echo_walker</td><td>EU</td><td>Europe</td><td>1</td><td>20</td><td>150</td><td>C</td><td>Common</td><td>N</td><td>New</td></tr>
-                        <tr><td>P010</td><td>rustyrocket</td><td>NA</td><td>North America</td><td>22</td><td>760</td><td>5300</td><td>R</td><td>Rare</td><td>A</td><td>Active</td></tr>
-                        <tr><td>P011</td><td>mapleminer</td><td>NA</td><td>North America</td><td>8</td><td>210</td><td>1450</td><td>C</td><td>Common</td><td>I</td><td>Inactive</td></tr>
-                        <tr><td>P012</td><td>zenithzee</td><td>APAC</td><td>Asia-Pacific</td><td>47</td><td>1990</td><td>9200</td><td>E</td><td>Epic</td><td>A</td><td>Active</td></tr>
-                        <tr><td>P013</td><td>frostbyte_jr</td><td>EU</td><td>Europe</td><td>13</td><td>330</td><td>2600</td><td>R</td><td>Rare</td><td>A</td><td>Active</td></tr>
-                        <tr><td>P014</td><td>voidrunner</td><td>NA</td><td>North America</td><td>38</td><td>1650</td><td>8400</td><td>E</td><td>Epic</td><td>A</td><td>Active</td></tr>
-                        <tr><td>P015</td><td>copperclaw</td><td>APAC</td><td>Asia-Pacific</td><td>3</td><td>60</td><td>410</td><td>C</td><td>Common</td><td>N</td><td>New</td></tr>
-                        <tr><td>P016</td><td>lunarlacer</td><td>EU</td><td>Europe</td><td>60</td><td>2540</td><td>11800</td><td>L</td><td>Legendary</td><td>V</td><td>VIP</td></tr>
-                        <tr><td>P017</td><td>stormsailor</td><td>NA</td><td>North America</td><td>16</td><td>500</td><td>3700</td><td>R</td><td>Rare</td><td>A</td><td>Active</td></tr>
-                        <tr><td>P018</td><td>ashen_ace</td><td>APAC</td><td>Asia-Pacific</td><td>0</td><td>10</td><td>0</td><td>C</td><td>Common</td><td>I</td><td>Inactive</td></tr>
-                        <tr><td>P019</td><td>quillquake</td><td>EU</td><td>Europe</td><td>25</td><td>890</td><td>5900</td><td>E</td><td>Epic</td><td>A</td><td>Active</td></tr>
-                        <tr><td>P020</td><td>tidaltempo</td><td>NA</td><td>North America</td><td>44</td><td>1900</td><td>9500</td><td>L</td><td>Legendary</td><td>V</td><td>VIP</td></tr>
+                        <tr><td>T01</td><td>10/02</td><td>Paycheck (part-time job)</td><td>D</td><td>Deposit</td><td>I</td><td>Income</td><td>186.40</td><td></td></tr>
+                        <tr><td>T02</td><td>10/03</td><td>Fast food lunch</td><td>P</td><td>Purchase</td><td>F</td><td>Food</td><td></td><td>12.85</td></tr>
+                        <tr><td>T03</td><td>10/04</td><td>Gas fill-up</td><td>P</td><td>Purchase</td><td>G</td><td>Gas</td><td></td><td>38.00</td></tr>
+                        <tr><td>T04</td><td>10/05</td><td>Phone bill (autopay)</td><td>P</td><td>Purchase</td><td>B</td><td>Bills</td><td></td><td>35.00</td></tr>
+                        <tr><td>T05</td><td>10/07</td><td>Movie tickets</td><td>P</td><td>Purchase</td><td>E</td><td>Entertainment</td><td></td><td>14.50</td></tr>
+                        <tr><td>T06</td><td>10/09</td><td>ATM cash (lunch money)</td><td>W</td><td>ATM Withdrawal</td><td>F</td><td>Food</td><td></td><td>20.00</td></tr>
+                        <tr><td>T07</td><td>10/10</td><td>Music streaming (student plan)</td><td>P</td><td>Purchase</td><td>B</td><td>Bills</td><td></td><td>5.99</td></tr>
+                        <tr><td>T08</td><td>10/11</td><td>Birthday money from Grandma</td><td>D</td><td>Deposit</td><td>I</td><td>Income</td><td>50.00</td><td></td></tr>
+                        <tr><td>T09</td><td>10/12</td><td>Taco run</td><td>P</td><td>Purchase</td><td>F</td><td>Food</td><td></td><td>9.47</td></tr>
+                        <tr><td>T10</td><td>10/14</td><td>Gas fill-up</td><td>P</td><td>Purchase</td><td>G</td><td>Gas</td><td></td><td>42.15</td></tr>
+                        <tr><td>T11</td><td>10/16</td><td>Paycheck (part-time job)</td><td>D</td><td>Deposit</td><td>I</td><td>Income</td><td>192.10</td><td></td></tr>
+                        <tr><td>T12</td><td>10/17</td><td>Video game download</td><td>P</td><td>Purchase</td><td>E</td><td>Entertainment</td><td></td><td>19.99</td></tr>
+                        <tr><td>T13</td><td>10/18</td><td>Coffee</td><td>P</td><td>Purchase</td><td>F</td><td>Food</td><td></td><td>6.75</td></tr>
+                        <tr><td>T14</td><td>10/20</td><td>ATM cash (homecoming)</td><td>W</td><td>ATM Withdrawal</td><td>E</td><td>Entertainment</td><td></td><td>40.00</td></tr>
+                        <tr><td>T15</td><td>10/21</td><td>Car insurance (my share)</td><td>P</td><td>Purchase</td><td>B</td><td>Bills</td><td></td><td>60.00</td></tr>
+                        <tr><td>T16</td><td>10/23</td><td>Burger lunch</td><td>P</td><td>Purchase</td><td>F</td><td>Food</td><td></td><td>11.30</td></tr>
+                        <tr><td>T17</td><td>10/25</td><td>Gas fill-up</td><td>P</td><td>Purchase</td><td>G</td><td>Gas</td><td></td><td>35.60</td></tr>
+                        <tr><td>T18</td><td>10/27</td><td>Concert ticket</td><td>P</td><td>Purchase</td><td>E</td><td>Entertainment</td><td></td><td>45.00</td></tr>
+                        <tr><td>T19</td><td>10/30</td><td>Paycheck (part-time job)</td><td>D</td><td>Deposit</td><td>I</td><td>Income</td><td>178.25</td><td></td></tr>
+                        <tr><td>T20</td><td>10/31</td><td>Halloween costume</td><td>P</td><td>Purchase</td><td>E</td><td>Entertainment</td><td></td><td>24.99</td></tr>
                     </tbody>
                 </table>
                 </div>
-                <h6 class="fw-bold text-primary mt-4">For Stage 4 — Daily Active Players (last 14 days)</h6>
+
+                <h6 class="fw-bold text-primary mt-4">For Stage 4 &mdash; Savings Account Balance (last 14 weeks)</h6>
                 <div class="table-responsive">
                 <table class="table table-sm table-bordered small">
-                    <thead class="table-light"><tr><th>Day</th><th>Active Players</th></tr></thead>
+                    <thead class="table-light"><tr><th>Week</th><th>Savings Balance ($)</th></tr></thead>
                     <tbody>
-                        <tr><td>1</td><td>210</td></tr>
-                        <tr><td>2</td><td>224</td></tr>
-                        <tr><td>3</td><td>219</td></tr>
-                        <tr><td>4</td><td>238</td></tr>
-                        <tr><td>5</td><td>251</td></tr>
-                        <tr><td>6</td><td>247</td></tr>
-                        <tr><td>7</td><td>265</td></tr>
-                        <tr><td>8</td><td>272</td></tr>
-                        <tr><td>9</td><td>269</td></tr>
-                        <tr><td>10</td><td>281</td></tr>
-                        <tr><td>11</td><td>296</td></tr>
-                        <tr><td>12</td><td>290</td></tr>
-                        <tr><td>13</td><td>305</td></tr>
-                        <tr><td>14</td><td>312</td></tr>
+                        <tr><td>1</td><td>120</td></tr>
+                        <tr><td>2</td><td>145</td></tr>
+                        <tr><td>3</td><td>138</td></tr>
+                        <tr><td>4</td><td>170</td></tr>
+                        <tr><td>5</td><td>188</td></tr>
+                        <tr><td>6</td><td>181</td></tr>
+                        <tr><td>7</td><td>215</td></tr>
+                        <tr><td>8</td><td>230</td></tr>
+                        <tr><td>9</td><td>224</td></tr>
+                        <tr><td>10</td><td>252</td></tr>
+                        <tr><td>11</td><td>270</td></tr>
+                        <tr><td>12</td><td>263</td></tr>
+                        <tr><td>13</td><td>291</td></tr>
+                        <tr><td>14</td><td>305</td></tr>
                     </tbody>
                 </table>
                 </div>
-                <p class="text-muted small mb-0"><i class="fas fa-lightbulb me-1"></i>This trend is steadily climbing but noisy day to day &mdash; a good Stage 4 model doesn't just guess the next number, it uses a real formula (like a moving average or a trendline formula) to predict Day 15 and Day 16.</p>
+                <p class="text-muted small mb-0"><i class="fas fa-lightbulb me-1"></i>Your savings climb most weeks but dip a few times (a week you spent more than you saved) &mdash; a good Stage 4 model doesn't just guess the next number, it uses the average weekly change to predict Week 15, Week 16, and when you'll hit $350.</p>
             </div>
         </div>
 
@@ -188,12 +196,12 @@
                  data-course="CS"
                  data-exam-id="Unit3-Project"
                  data-rubric='[
-                    {"key":"bit_translator","label":"Stage 1: Decode the Feed","description":"At least 8 values are correctly converted across binary, hex, decimal, and ASCII/Unicode, with no calculation errors."},
-                    {"key":"storage_tradeoffs","label":"Stage 2: Organize the Player Data","description":"Two real organization approaches are shown for the SAME player dataset carried through the rest of the workbook, with specific, real tradeoffs, not generic pros/cons."},
-                    {"key":"dashboard_charts","label":"Stage 3: Studio Dashboard","description":"SUM (Sessions) and AVERAGE (Total Playtime) KPI numbers, plus a COUNTIF-based Status Name chart and a COUNTIF-based Region Name chart — all from live formulas (not hardcoded numbers), readable and labeled, on that SAME player dataset from Stage 2."},
-                    {"key":"model_validation","label":"Stage 4: Predict What&#39;s Next","description":"A Daily Change column (13 day-over-day formulas), an AVERAGE of those changes, and Day 15/Day 16 predictions built as live formulas from that average — plus a genuine sentence checking what a big miss on Day 15 would actually mean."},
-                    {"key":"organization","label":"One Connected Pipeline","description":"This is one continuous story about one dataset, not four unrelated exercises stapled together — Stage 2&#39;s dataset is what Stage 3 charts and Stage 4 predicts from. Tabs are clearly labeled and easy for someone else to follow without explanation."},
-                    {"key":"advanced_formula","label":"Advanced Formula (Bonus)","description":"Uses conditional formatting or an advanced formula (VLOOKUP, INDEX/MATCH, QUERY) anywhere in the workbook.","bonus":true}
+                    {"key":"bit_translator","label":"Stage 1: Decode the Bank Export","description":"All 8 codes are correctly converted across binary, hex, decimal, and ASCII, each with its correct Meaning, with no calculation errors."},
+                    {"key":"storage_tradeoffs","label":"Stage 2: Organize the Register","description":"Version A (flat) and Version B (Type and Category split into lookup tables) are both shown for the SAME register, with specific, real tradeoffs (including the category-rename question), not generic pros/cons."},
+                    {"key":"dashboard_charts","label":"Stage 3: My Money Dashboard","description":"A working running Balance column ending at $335.16, four KPI numbers (SUM in, SUM out, AVERAGE out, ending balance), plus a COUNTIF-based Category chart and a COUNTIF-based Type chart -- all from live formulas, not hardcoded numbers, readable and labeled."},
+                    {"key":"model_validation","label":"Stage 4: Will I Hit My Goal?","description":"A Weekly Change column (13 formulas), an AVERAGE of those changes, Week 15/Week 16 predictions and a weeks-to-$350 formula built from that average, plus a genuine sentence checking what a $30 miss would actually mean."},
+                    {"key":"organization","label":"One Connected Pipeline","description":"This is one continuous story about one account, not four unrelated exercises stapled together -- the Stage 1 key decodes the Stage 2 register, which is what Stage 3 charts. Tabs are clearly labeled and easy for someone else to follow without explanation."},
+                    {"key":"advanced_formula","label":"Advanced Formula (Bonus)","description":"Uses conditional formatting (e.g. red when Balance drops under $200), SUMIF (total dollars per category), or VLOOKUP/INDEX-MATCH (pulling names from the Version B lookup tables) anywhere in the workbook.","bonus":true}
                  ]'>
               <div class="card-body small p-4 text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading grading tool&hellip;</div>
             </div>
@@ -211,7 +219,7 @@
                         <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
                         <select id="uploadAssignment" class="form-select border-success" required>
                             <option value="" disabled selected>Select an assignment...</option>
-                            <option value="Unit3-Project" data-label="Project: The Player Data Pipeline (100 pts)">Project: The Player Data Pipeline (100 pts)</option>
+                            <option value="Unit3-Project" data-label="Project: The Personal Finance Pipeline (100 pts)">Project: The Personal Finance Pipeline (100 pts)</option>
                         </select>
                     </div>
                     <div class="mb-3">
