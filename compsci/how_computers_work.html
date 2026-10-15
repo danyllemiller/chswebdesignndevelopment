@@ -53,6 +53,13 @@
 
   <p>A microwave, a fitness band, a traffic light — each one hides a full computing system behind one or two buttons. That's an <strong>embedded system</strong>: a computer built into a device to do one job, with the complexity abstracted away completely.</p>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Embedded Systems</h5>
+      <p>An <strong>embedded system</strong> is a small computer built into another device to do one job. You probably don't think of a microwave, a car, or a thermostat as a computer. But each one has a tiny processor, memory, and software inside it.</p>
+      <p>Embedded systems are everywhere. A new car can have dozens of them. One runs the brakes, one runs the airbags, and one runs the radio screen. Fitness bands, smart doorbells, traffic lights, washers, and even some toothbrushes have them. There are billions of them in use around the world.</p>
+      <p class="mb-0">They're the perfect example of abstraction. You press "Start" on a microwave and never see the program deciding how long to run the magnetron or when to beep. All of that complexity is hidden behind a few buttons, so anyone can use it without knowing anything about computers.</p>
+  </div>
+
   <div class="alert alert-info mt-4 shadow-sm border-info">
       <div class="d-flex align-items-start">
           <i class="fas fa-search fa-3x me-4 text-info mt-1"></i>
@@ -106,6 +113,27 @@
   </div>
 
   <p>The handoffs between these layers have names. A <strong>system call</strong> is an app formally asking the OS to do something on its behalf. A <strong>device driver</strong> is the piece of software that lets the OS talk to one specific piece of hardware. A <strong>file permission</strong> is the OS deciding whether you're even allowed to open a file — not the app.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: What the Operating System Does</h5>
+      <p>The <strong>operating system (OS)</strong> is the manager of the whole computer. Windows, macOS, ChromeOS, iOS, and Android are all operating systems. It's the first big program that starts when you turn a device on, and everything else runs on top of it.</p>
+      <p>Think of the OS like a school's front office. Apps are like teachers who need things: a room, supplies, a schedule. They don't just take what they want. They ask the office. The OS decides which app gets to use the processor next, how much memory each app gets, and which app is allowed to use the camera, the speakers, or your files.</p>
+      <p class="mb-0">This is why one frozen app usually doesn't crash your whole computer. The OS keeps each app in its own space, and you can close the frozen one while everything else keeps running. It's also why OS updates matter so much: the OS is in charge of security for everything above it.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: System Calls & Device Drivers</h5>
+      <p>Apps aren't allowed to touch the hardware directly. Say an app needs to save a file, print, or take a photo. It makes a <strong>system call</strong>, which is a formal request to the OS, like "Please save this as essay.docx." The OS checks the request and then does it.</p>
+      <p>But the OS can't know how to talk to every printer, webcam, and game controller ever made. That's the job of a <strong>device driver</strong>. A driver is a small program, usually made by the company that built the device. It turns the OS's general commands into the exact steps that one device understands. It's like an interpreter between two people who speak different languages.</p>
+      <p class="mb-0">That's why plugging in a new printer sometimes says "installing driver." A missing or old driver is a common cause of hardware problems. If your mouse or headphones suddenly stop working after an update, check the driver first.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: File Permissions</h5>
+      <p>A <strong>file permission</strong> is a rule about who can do what with a file or folder. Common permissions are <strong>read</strong> (open and look at it), <strong>write</strong> (change it), and <strong>execute</strong> (run it, if it's a program).</p>
+      <p>The operating system enforces these rules, not the app. That's why you can't open another user's files on a shared family computer, and why installing new software sometimes asks for an administrator password. The OS is checking whether your account has permission to make that change.</p>
+      <p class="mb-0">Permissions are a security tool. They follow the same idea as "least privilege" that you'll meet in later units: each account gets only the access it needs. If a harmful program sneaks onto a student account, permissions stop it from changing the system's most important files.</p>
+  </div>
 
   <div class="concept-box shadow-sm border-success bg-light">
       <h5 class="fw-bold text-success"><i class="fas fa-save me-2"></i> Worked Example: Saving a File</h5>
@@ -179,6 +207,14 @@
   <div class="concept-box shadow-sm border-danger bg-light">
       <h5 class="fw-bold text-danger"><i class="fas fa-times-circle me-2"></i> The Trap: Changing Two Things at Once</h5>
       <p class="mb-0">Say your app is frozen. You restart your computer <em>and</em> reinstall the app at the same time, and now it works. Which one fixed it? You don't know — and now you can't teach anyone else the actual fix, because you tested two variables at once instead of one.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Troubleshooting in Action</h5>
+      <p>Let's walk through the six steps with a real problem: <em>"My laptop won't connect to Wi-Fi."</em> <strong>1. Reproduce:</strong> turn Wi-Fi off and on, and try again. Does it fail every time? Yes. <strong>2. What changed:</strong> it worked yesterday, and last night the laptop installed an update.</p>
+      <p><strong>3. Isolate the layer:</strong> can other devices, like your phone, connect to the same Wi-Fi? Yes. So the network itself is fine, and the problem is somewhere in the laptop: its hardware, its OS, or its Wi-Fi driver. Since an update just happened, the OS or driver is the top suspect.</p>
+      <p><strong>4. Test one variable:</strong> first, restart the laptop and nothing else. Still broken. Next, and only next, update the Wi-Fi driver. Now it connects. Because you changed one thing at a time, you know the driver was the real fix, not the restart.</p>
+      <p class="mb-0"><strong>5. Document:</strong> write it down: "After the Oct. update, Wi-Fi failed; restart didn't help; updating the Wi-Fi driver fixed it." <strong>6. Verify:</strong> restart again tomorrow and confirm it still connects. Now you have a fix you can explain and teach, not just a lucky guess.</p>
   </div>
 
   <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean numbered flowchart diagram showing the six troubleshooting steps as connected boxes: Reproduce the Problem, Identify What Changed, Isolate the Layer, Test One Variable, Document the Fix, Verify — with arrows connecting each step in sequence and a loop-back arrow from Verify to Reproduce if the fix fails.">
