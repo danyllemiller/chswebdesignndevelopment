@@ -62,6 +62,62 @@
             </div>
         </div>
 
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-warning text-dark fw-bold"><i class="fas fa-lightbulb me-2"></i>Worked Example: What a Finished Audit Looks Like</div>
+            <div class="card-body p-4">
+                <p class="small mb-3"><strong class="text-danger"><i class="fas fa-ban me-1"></i>You may NOT use this network (a small bakery) for your own project.</strong> It's here so you can see how every slide connects to one network &mdash; pick your own and follow the same pattern.</p>
+
+                <p class="mb-1"><strong>The Network:</strong> A small family-owned bakery with free guest Wi-Fi for customers, one point-of-sale (POS) terminal, an office PC, and a security camera recorder (DVR). The owner is not a tech person and has a small budget.</p>
+
+                <p class="mb-1 mt-3"><strong>Slide &mdash; Network Diagram</strong></p>
+<pre class="bg-light p-3 rounded small mb-2">  Internet
+     │
+ ISP modem
+     │
+ Router / firewall  (192.168.1.1)
+     │
+     ├── Staff network  192.168.1.0/24
+     │     └── Switch
+     │           ├── POS terminal      192.168.1.20
+     │           ├── Office PC         192.168.1.21
+     │           └── Camera DVR        192.168.1.30
+     │
+     └── Guest Wi-Fi    192.168.50.0/24  (customers' phones,
+                                          addresses handed out
+                                          automatically)</pre>
+                <p class="small text-muted mb-3">Private addresses only (192.168.x.x ranges are reserved for local networks), so this doesn't describe any real business.</p>
+
+                <p class="mb-1"><strong>Slide &mdash; Threats</strong></p>
+                <ol class="small mb-3">
+                    <li><strong>POS memory-scraping malware:</strong> Malware such as BlackPOS (used in the 2013 Target breach) reads card numbers out of a POS computer's memory in the split second before they're encrypted. If the office PC gets infected through a phishing email, the malware can spread to the POS because they're on the same network.</li>
+                    <li><strong>Guest device reaching staff devices:</strong> If the guest Wi-Fi isn't actually isolated, any customer's phone or laptop on it can scan for and attack the POS and the DVR.</li>
+                    <li><strong>DVR with a default password:</strong> Botnets such as Mirai (2016) took over huge numbers of cameras and DVRs simply by trying factory default usernames and passwords.</li>
+                </ol>
+
+                <p class="mb-1"><strong>Slide &mdash; Recommendations</strong></p>
+                <ul class="small mb-3">
+                    <li><strong>For threat 1:</strong> Ask the card processor for a standalone payment terminal with point-to-point encryption, so card numbers are encrypted inside the card reader and never sit readable on any bakery computer. Often low or no upfront cost from the processor, and the owner doesn't have to manage it.</li>
+                    <li><strong>For threat 2:</strong> Turn on the router's guest network isolation setting. Free, takes 10 minutes, and most small-business routers already have it.</li>
+                    <li><strong>For threat 3:</strong> Change the DVR's default password and block it from the internet. Free, one-time job; viewing cameras remotely is a nice-to-have, not a need.</li>
+                </ul>
+
+                <p class="mb-1"><strong>Slide &mdash; Head-to-Head: Guest Wi-Fi</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-3">
+                        <thead class="table-light"><tr><th></th><th>Option A: Isolated guest network, password on the counter sign</th><th>Option B: No guest Wi-Fi at all</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Security</strong></td><td>Good. Guests can't see staff devices, but they still share the same router and internet connection.</td><td>Best. No customer devices on the network at all.</td></tr>
+                            <tr><td><strong>Usability</strong></td><td>Customers get Wi-Fi; password changes monthly and the sign gets updated.</td><td>Customers who sit and work go elsewhere.</td></tr>
+                            <tr><td><strong>Cost to owner</strong></td><td>Free; 5 minutes a month.</td><td>Free, but may cost sales.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="mb-1"><strong>Slide &mdash; Final Recommendation</strong></p>
+                <p class="small mb-0">Keep guest Wi-Fi as Option A, move card payments to an encrypted standalone terminal, and lock down the DVR. <strong>Tradeoff accepted:</strong> guests still share the router with staff, so a flaw in the router itself could expose the staff network. I'm accepting that small risk because customers expect Wi-Fi, and the most valuable data (card numbers) is protected by the terminal no matter what happens on the network.</p>
+            </div>
+        </div>
+
         <div class="row mb-5">
           <div class="col-12">
             <div id="project-grading-panel"

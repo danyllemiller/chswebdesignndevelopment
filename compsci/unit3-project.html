@@ -188,6 +188,94 @@
             </div>
         </div>
 
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-warning text-dark fw-bold"><i class="fas fa-lightbulb me-2"></i>Worked Example: A Mini Pipeline, Start to Finish</div>
+            <div class="card-body p-4">
+                <p class="small mb-3"><strong class="text-danger"><i class="fas fa-ban me-1"></i>You may NOT use this mini dataset for your own project.</strong> It's a tiny, separate &ldquo;lunch card&rdquo; account &mdash; not your bank data &mdash; so you can see the <em>method</em> for all four stages. Your project uses the Raw Data above, and your answers will be different.</p>
+
+                <p class="mb-1"><strong>Stage 1 &mdash; Decode the Codes</strong> <span class="small text-muted">(2 codes for the Type column)</span></p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-2">
+                        <thead class="table-light"><tr><th>Raw Code</th><th>Given As</th><th>Binary</th><th>Hex</th><th>Decimal</th><th>ASCII</th><th>Meaning</th></tr></thead>
+                        <tbody>
+                            <tr><td>52</td><td>Hex</td><td>1010010</td><td>52</td><td>82</td><td>R</td><td>Reload</td></tr>
+                            <tr><td>1000011</td><td>Binary</td><td>1000011</td><td>43</td><td>67</td><td>C</td><td>Charge</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <ul class="small mb-3">
+                    <li><strong>Hex 52 &rarr; decimal:</strong> (5 &times; 16) + 2 = 82. <strong>82 &rarr; binary:</strong> 64 + 16 + 2 = 82, so bits 64, 16, 2 are on: <code>1010010</code>. ASCII 82 = <strong>R</strong>.</li>
+                    <li><strong>Binary 1000011 &rarr; decimal:</strong> 64 + 2 + 1 = 67. <strong>67 &rarr; hex:</strong> 67 &divide; 16 = 4 remainder 3, so <code>43</code>. ASCII 67 = <strong>C</strong>.</li>
+                </ul>
+
+                <p class="mb-1"><strong>Stage 2 &mdash; Organize the Register</strong></p>
+                <p class="small mb-1"><strong>Version A &mdash; One Flat Table</strong> (opening balance <strong>10.00</strong> is in cell <code>B1</code>; headers are in row 3, data in rows 4&ndash;8)</p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-2">
+                        <thead class="table-light"><tr><th></th><th>A: Txn</th><th>B: Date</th><th>C: Item</th><th>D: Type</th><th>E: Type Name</th><th>F: Money In</th><th>G: Money Out</th></tr></thead>
+                        <tbody>
+                            <tr><td>4</td><td>L1</td><td>9/02</td><td>Pizza slice</td><td>C</td><td>Charge</td><td></td><td>4.50</td></tr>
+                            <tr><td>5</td><td>L2</td><td>9/03</td><td>Parent reload</td><td>R</td><td>Reload</td><td>20.00</td><td></td></tr>
+                            <tr><td>6</td><td>L3</td><td>9/04</td><td>Chicken wrap</td><td>C</td><td>Charge</td><td></td><td>5.25</td></tr>
+                            <tr><td>7</td><td>L4</td><td>9/05</td><td>Juice + pretzel</td><td>C</td><td>Charge</td><td></td><td>3.75</td></tr>
+                            <tr><td>8</td><td>L5</td><td>9/08</td><td>Burrito bowl</td><td>C</td><td>Charge</td><td></td><td>6.00</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small mb-1"><strong>Version B &mdash; Split Into Related Tables:</strong> the register keeps Txn, Date, Item, Type, Money In, Money Out (no Type Name column), plus this lookup table:</p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-2" style="max-width: 260px;">
+                        <thead class="table-light"><tr><th>Type</th><th>Type Name</th></tr></thead>
+                        <tbody>
+                            <tr><td>C</td><td>Charge</td></tr>
+                            <tr><td>R</td><td>Reload</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small mb-3"><strong>Tradeoff:</strong> If the cafeteria renamed &ldquo;Charge&rdquo; to &ldquo;Purchase,&rdquo; Version B needs one cell changed, while Version A needs four rows changed and one missed row would make my COUNTIF wrong. Version A is quicker to read at a glance with only 5 rows, but Version B stays smaller and safer to update as the register grows.</p>
+
+                <p class="mb-1"><strong>Stage 3 &mdash; Dashboard Formulas</strong> (Balance goes in column H)</p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-3">
+                        <thead class="table-light"><tr><th>Cell / KPI</th><th>Formula</th><th>Result</th></tr></thead>
+                        <tbody>
+                            <tr><td>H4 (first row)</td><td><code>=$B$1+F4-G4</code></td><td>5.50</td></tr>
+                            <tr><td>H5 (every row after)</td><td><code>=H4+F5-G5</code> &mdash; fill down to H8</td><td>25.50, 20.25, 16.50, 10.50</td></tr>
+                            <tr><td>Total In</td><td><code>=SUM(F4:F8)</code></td><td>20.00</td></tr>
+                            <tr><td>Average Charge</td><td><code>=AVERAGE(G4:G8)</code> (blank cells are skipped)</td><td>4.875 &rarr; shows as $4.88</td></tr>
+                            <tr><td>Count of Charges</td><td><code>=COUNTIF(E4:E8,"Charge")</code></td><td>4</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="mb-1"><strong>Stage 4 &mdash; Will It Last?</strong> (lunch card balance at the end of each week; headers in row 1)</p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-2" style="max-width: 520px;">
+                        <thead class="table-light"><tr><th></th><th>A: Week</th><th>B: Balance</th><th>C: Weekly Change</th></tr></thead>
+                        <tbody>
+                            <tr><td>2</td><td>1</td><td>40.00</td><td></td></tr>
+                            <tr><td>3</td><td>2</td><td>33.50</td><td><code>=B3-B2</code> &rarr; -6.50</td></tr>
+                            <tr><td>4</td><td>3</td><td>28.00</td><td><code>=B4-B3</code> &rarr; -5.50</td></tr>
+                            <tr><td>5</td><td>4</td><td>30.00</td><td><code>=B5-B4</code> &rarr; 2.00</td></tr>
+                            <tr><td>6</td><td>5</td><td>22.50</td><td><code>=B6-B5</code> &rarr; -7.50</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-3">
+                        <thead class="table-light"><tr><th>Cell</th><th>Formula</th><th>Result</th></tr></thead>
+                        <tbody>
+                            <tr><td>B8: Average weekly change</td><td><code>=AVERAGE(C3:C6)</code></td><td>-4.375</td></tr>
+                            <tr><td>B9: Predict Week 6</td><td><code>=B6+B8</code></td><td>18.125 &rarr; $18.13</td></tr>
+                            <tr><td>B10: Predict Week 7</td><td><code>=B9+B8</code></td><td>13.75</td></tr>
+                            <tr><td>B11: Weeks until the card drops to $5</td><td><code>=(5-B6)/B8</code></td><td>4 &rarr; &ldquo;I'll need a reload by Week 9.&rdquo;</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small text-muted mb-0"><i class="fas fa-star me-1"></i><strong>Notice:</strong> Week 4 went <em>up</em> because of a reload. The average still works because it smooths that one week out &mdash; same idea as the dips in your savings data. Here the goal is a low point, so the change is negative; in your project you're saving <em>toward</em> a goal, so it's positive.</p>
+            </div>
+        </div>
+
         <div class="row mb-5">
           <div class="col-12">
             <div id="project-grading-panel"

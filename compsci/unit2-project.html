@@ -63,6 +63,63 @@
             </div>
         </div>
 
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-warning text-dark fw-bold"><i class="fas fa-lightbulb me-2"></i>Worked Example: What a Finished Deck Looks Like</div>
+            <div class="card-body p-4">
+                <p class="small mb-3"><strong class="text-danger"><i class="fas fa-ban me-1"></i>You may NOT use this device (a library self-checkout kiosk) for your own project.</strong> It's here so you can see how every slide connects to one device and one function &mdash; pick your own device and follow the same pattern.</p>
+
+                <p class="mb-1"><strong>The Device:</strong> A library self-checkout kiosk. <strong>The Function:</strong> checking out a book.</p>
+
+                <p class="mb-1 mt-3"><strong>Slide &mdash; Abstraction Layer Map</strong></p>
+<pre class="bg-light p-3 rounded small mb-3">┌────────────────────────────────────────────────────────────┐
+│ APPLICATION Self-checkout program: touchscreen menus,      │
+│             "Scan your card", "Scan your book"             │
+├────────────────────────────────────────────────────────────┤
+│ OPERATING   Drivers for scanner, RFID pad, printer;        │
+│ SYSTEM      network connection; runs the app full-screen   │
+├────────────────────────────────────────────────────────────┤
+│ HARDWARE    Touchscreen, barcode scanner, RFID pad,        │
+│             receipt printer, CPU, RAM, network card        │
+└────────────────────────────────────────────────────────────┘</pre>
+
+                <p class="mb-1"><strong>Slide &mdash; Hardware/Software Interaction</strong></p>
+                <ul class="small mb-3">
+                    <li><strong>Hardware:</strong> The scanner shines light on the barcode and a sensor reads the pattern of dark and light bars as digits. The RFID pad reads the chip inside the book's label.</li>
+                    <li><strong>Operating system:</strong> The scanner's driver turns those digits into input (often as if they were typed on a keyboard) and hands them to the program that's open. The OS's network software carries the request to the library's server.</li>
+                    <li><strong>Application:</strong> The program asks the library's catalog system whether this card can borrow this book (many kiosks use a standard protocol called SIP2). It then shows the due date, tells the RFID pad to switch off the book's security setting so the exit gate won't alarm, and prints a receipt.</li>
+                </ul>
+
+                <p class="mb-1"><strong>Slide &mdash; Troubleshooting Guide: &ldquo;The barcode won't scan&rdquo;</strong></p>
+                <ol class="small mb-3">
+                    <li>Is the red scanner light on? <strong>No</strong> &rarr; tap the screen to wake the kiosk. Still off? Ask staff, the scanner is unplugged or off. <strong>Yes</strong> &rarr; go to step 2.</li>
+                    <li>Is the barcode wrinkled, curved, or covered by shiny tape? <strong>Yes</strong> &rarr; flatten the book open so the barcode lies flat, then go to step 3. <strong>No</strong> &rarr; go to step 3.</li>
+                    <li>Hold the barcode 4&ndash;6 inches from the scanner and keep it still for 2 seconds. Did it beep? <strong>Yes</strong> &rarr; done! <strong>No</strong> &rarr; go to step 4.</li>
+                    <li>Try a different book. Does <em>that</em> one scan? <strong>Yes</strong> &rarr; the first book's label is damaged; take it to the front desk. <strong>No</strong> &rarr; the scanner itself has a problem; ask staff to restart the kiosk.</li>
+                </ol>
+
+                <p class="mb-1"><strong>Slide &mdash; Data Slide</strong> <span class="small text-muted">(sample data: these numbers are illustrative, not real counts)</span></p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small mb-3">
+                        <thead class="table-light"><tr><th>Rank</th><th>Failure Point</th><th>Help Requests per Month</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td>Barcode won't scan</td><td>18</td></tr>
+                            <tr><td>2</td><td>Receipt printer out of paper</td><td>11</td></tr>
+                            <tr><td>3</td><td>Library card not recognized</td><td>7</td></tr>
+                            <tr><td>4</td><td>Touchscreen frozen</td><td>3</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="mb-1"><strong>Slide &mdash; Team Credits</strong></p>
+                <ul class="small mb-0">
+                    <li><strong>Partner A:</strong> Abstraction Layer Map and Hardware/Software Interaction slides.</li>
+                    <li><strong>Partner B:</strong> Troubleshooting flowchart and the Sheets chart on the Data Slide.</li>
+                    <li><strong>Both:</strong> tested the flowchart by having a younger sibling follow it without help, then rewrote step 2 because &ldquo;occluded&rdquo; confused them.</li>
+                    <li><strong>Evidence:</strong> a screenshot of the Slides version history showing edits from both names, plus a comment thread where Partner B corrected Partner A's OS slide.</li>
+                </ul>
+            </div>
+        </div>
+
         <div class="row mb-5">
           <div class="col-12">
             <div id="project-grading-panel"
