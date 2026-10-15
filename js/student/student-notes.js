@@ -217,7 +217,7 @@ function initNotebookUI() {
 
     if (tabsContainer) {
         tabsContainer.innerHTML = units.map((ch) =>
-            `<button class="chapter-tab-btn ${ch === restoredChapter ? 'active' : ''}" data-chapter="${ch.replace(/"/g, '"')}">${ch}</button>`
+            `<button class="chapter-tab-btn ${ch === restoredChapter ? 'active' : ''}" data-chapter="${ch.replace(/"/g, '&quot;')}">${ch}</button>`
         ).join('');
     }
 
@@ -287,7 +287,11 @@ window.prepareNewNote = function() {
 window.addEventListener('prepareNewNote', window.prepareNewNote);
 
 function renderNoteList() {
-    const filtered = allNotes.filter(n => n.chapter === currentChapterTab);
+    // Match on chapter number, not the full label -- labels with quotes in
+    // them ('2: The "Rules"') have been mangled in data-chapter before, which
+    // made every saved note in those chapters vanish from this list.
+    const currentChapterId = chapterIdFromLabel(currentChapterTab);
+    const filtered = allNotes.filter(n => chapterIdFromLabel(n.chapter) === currentChapterId);
     if (dom.count) dom.count.innerText = filtered.length;
     if (filtered.length === 0) {
         if (dom.list) dom.list.innerHTML = `<li class="list-group-item p-4 text-center text-muted"><i class="fas fa-book-open mb-2 fs-3 opacity-50"></i><p class="small fw-bold mb-0">No notes in this unit.</p></li>`;
@@ -339,7 +343,7 @@ async function fetchNotes(autoOpenMostRecent = false) {
 
         renderNoteList();
 
-        const currentNote = allNotes.find(n => n.id === activeNoteId && n.chapter === currentChapterTab);
+        const currentNote = allNotes.find(n => n.id === activeNoteId && chapterIdFromLabel(n.chapter) === chapterIdFromLabel(currentChapterTab));
         if (!currentNote && activeNoteId !== null) {
             activeNoteId = null;
             showEmptyState();
