@@ -79,6 +79,12 @@ Each step below links to the chapter section that actually teaches how to do it 
 
 - Reflection — what would you have done differently if you were the person in the case study?
 
+See a Finished Student Example
+
+Here's the worked example above built out as a real, full-credit project, so you can see exactly what a finished one looks like. Open it, click through it, and read the speaker notes. It's view-only, and the topic is off-limits: build your own on a different topic.
+
+Google Slides: Case File: Twitter Hack
+
 <div
 
 ===== GRADING RUBRIC =====
@@ -213,6 +219,13 @@ Each step below links to the chapter section that actually teaches how to do it 
 
 - Team Credits Slide — who did what, with real evidence you worked together (comment/edit history, or a clear role split). How to: Ch 4.2, Cloud Collaboration & Team Roles »
 
+See a Finished Student Example
+
+Here's the worked example above built out as a real, full-credit project, so you can see exactly what a finished one looks like. Open it, click through it, and read the speaker notes. It's view-only, and the topic is off-limits: build your own on a different topic.
+
+Google Slides: System & Support Deck: Library Kiosk
+Google Sheets: Kiosk Failure Data
+
 <div
 
 ===== GRADING RUBRIC =====
@@ -292,7 +305,7 @@ Slide — Team Credits
 ```text
 You are helping a high school Computer Science teacher at Carson High School (Nevada) make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
 
-TASK: Unit 3 Project: The Personal Finance Pipeline. Build it as a 4-tab Google Sheets workbook. CRITICAL: every real student uses the same Raw Data, which is intentionally NOT included here. Do not try to recreate it, and do not reuse any numbers that appear in the project instructions (for example the $150.00 opening balance, $335.16, or the $350 goal). Instead, extend the WORKED EXAMPLE's lunch-card account into a full-size parallel dataset: 8 codes of your own (mixed binary/hex/decimal, converted with DEC2BIN/HEX2DEC/BIN2DEC/CHAR/CODE formulas), 15-20 lunch-card transactions, a running balance with an absolute reference to the opening balance, the 4 KPIs, two COUNTIF-based charts, and 14 weeks of balances using the same weekly-change prediction method with a weeks-until-goal formula. Use the exact 4 tab names from the project instructions.
+TASK: Unit 3 Project: The Personal Finance Pipeline. Build it as a 4-tab Google Sheets workbook. CRITICAL: every real student uses the same Raw Data, which is intentionally NOT included here. Do not try to recreate it, and do not reuse any numbers that appear in the project instructions (for example the $150.00 opening balance, $335.16, or the $350 goal). Instead, extend the WORKED EXAMPLE's lunch-card account into a full-size parallel dataset: 8 codes of your own (mixed binary/hex/decimal, converted with DEC2BIN/HEX2DEC/BIN2DEC/CHAR/CODE formulas), 15-20 lunch-card transactions, a running balance with an absolute reference to the opening balance, the 4 KPIs, two COUNTIF-based charts, and 14 weeks of balances using the same weekly-change prediction method with a weeks-until-goal formula. Use the exact 4 tab names from the project instructions. FORBIDDEN (these are the real students' answers): do NOT use the letters D, P, W, I, F, G, E, or B as codes, and do NOT use the meanings Deposit, Purchase, ATM Withdrawal, Income, Food, Gas, Entertainment, or Bills. Use lunch-card codes instead, for example R = Reload, C = Charge, T = Transfer for types and M = Main Meal, S = Snack, K = Drink, X = Extra for categories (8 codes total, mixed binary/hex/decimal). Do NOT use a $150.00 opening balance, a $335.16 ending balance, or a $350 goal anywhere; use a $25.00 opening balance and a $60 goal. Every Reload goes ONLY in the Money In column and every Charge goes ONLY in the Money Out column; never put both on one row, and never leave a Txn number blank. After building, Logger.log each row's running balance and confirm the last balance equals opening balance + SUM(Money In) - SUM(Money Out).
 
 CONTENT RULES
 - This must look like a finished, FULL-CREDIT project by a strong 9th-grade student: correct, complete, clear, in a natural student voice (not corporate, not textbook, no AI-sounding filler).
@@ -560,6 +573,12 @@ Not sure how to lay out the deck? Use exactly this order. One slide per row is t
 
 | 6+ | Stage 5: Trace Walkthrough | Two different inputs, each traced line by line in a table showing every variable's value as it changes, ending with the final output. (Bonus: a third trace with an edge case like an empty list or zero.)
 
+See a Finished Student Example
+
+Here's the worked example above built out as a real, full-credit project, so you can see exactly what a finished one looks like. Open it, click through it, and read the speaker notes. It's view-only, and the topic is off-limits: build your own on a different topic.
+
+Google Slides: Algorithm Blueprint: Snack Bar Checkout
+
 Before You Turn It In
 
 - My problem is not the same one I used in my Chapter 9–10 activities, and not the snack bar example above.
@@ -730,6 +749,12 @@ Each step below links to the chapter section that actually teaches how to do it 
 - IP & Legal Angle — who owns the data or the algorithm, and what's the tradeoff of that ownership?
 
 - Your Verdict — is this technology a net positive or net negative for society? Defend it with real evidence, not just opinion. How to: Ch 13.2, AI's Impact on Society, Honestly »
+
+See a Finished Student Example
+
+Here's the worked example above built out as a real, full-credit project, so you can see exactly what a finished one looks like. Open it, click through it, and read the speaker notes. It's view-only, and the topic is off-limits: build your own on a different topic.
+
+Google Slides: Tech Impact Briefing: ALPRs
 
 <div
 
@@ -910,6 +935,13 @@ Each step below links to the chapter section that actually teaches how to do it 
 
 - Slides: Why This App, For Real — name one specific real person (it can be you) who would actually use this app, and the specific real moment where not having it causes a real problem. Not "it would be useful" — the actual moment.
 
+See a Finished Student Example
+
+Here's the worked example above built out as a real, full-credit project, so you can see exactly what a finished one looks like. Open it, click through it, and read the speaker notes. It's view-only, and the topic is off-limits: build your own on a different topic.
+
+Google Sheets: App Data Structure: Who’s Feeding the Dog
+Google Slides: App Blueprint: Who’s Feeding the Dog
+
 <div
 
 ===== GRADING RUBRIC =====
@@ -1036,6 +1068,12 @@ Each step below links to the chapter section that actually teaches how to do it 
 - Compare 2 competing security measures head-to-head on usability vs. security tradeoffs. How to: Ch 19.1, The Usability »
 
 - Final Recommendation — pick your overall approach and explicitly state what tradeoff you're accepting.
+
+See a Finished Student Example
+
+Here's the worked example above built out as a real, full-credit project, so you can see exactly what a finished one looks like. Open it, click through it, and read the speaker notes. It's view-only, and the topic is off-limits: build your own on a different topic.
+
+Google Slides: Network Audit: Bakery
 
 <div
 
