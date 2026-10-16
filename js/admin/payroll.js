@@ -399,12 +399,23 @@ async function init() {
         loadDailyQuestions();
     });
 
-    const periodFilter = document.getElementById('periodFilter');
-    if (periodFilter) {
-        periodFilter.addEventListener('change', (e) => {
+    const periodMenu = document.getElementById('periodFilterMenu');
+    if (periodMenu) {
+        periodMenu.addEventListener('change', (e) => {
+            const box = e.target;
+            if (!box.matches('input[type="checkbox"]')) return;
+            const boxes = [...periodMenu.querySelectorAll('input[data-period]')];
+            if (box.dataset.all !== undefined) {
+                boxes.forEach(b => { b.checked = box.checked; });
+            } else if (box.dataset.group !== undefined) {
+                boxes.filter(b => b.dataset.course === box.dataset.group).forEach(b => { b.checked = box.checked; });
+            }
+            selectedPeriods.clear();
+            boxes.filter(b => b.checked).forEach(b => selectedPeriods.add(b.dataset.period));
+            refreshPeriodMenuState();
             const studentFilter = document.getElementById('studentFilter');
             if (studentFilter) studentFilter.value = 'All';
-            updateStudentDropdown(getFilteredStudents(e.target.value, 'All'));
+            updateStudentDropdown(getFilteredStudents([...selectedPeriods], 'All'));
             applyFiltersAndRender();
         });
     }
@@ -469,9 +480,7 @@ async function loadRoster() {
 
         roster.sort((a, b) => a.lastName.localeCompare(b.lastName));
         updatePeriodDropdown();
-        const periodSelect = document.getElementById('periodFilter');
-        const initialPeriod = periodSelect ? periodSelect.value : 'All';
-        updateStudentDropdown(getFilteredStudents(initialPeriod, 'All'));
+        updateStudentDropdown(getFilteredStudents([...selectedPeriods], 'All'));
         applyFiltersAndRender();
     } catch (e) {
         console.error("Error loading roster:", e);
@@ -481,15 +490,11 @@ async function loadRoster() {
 // ============================================================================
 // FILTERING LOGIC
 // ============================================================================
-function getFilteredStudents(periodVal, studentVal) {
-    let filtered = roster;
-
-    if (periodVal !== 'All') {
-        if (periodVal === 'All-WD1') filtered = filtered.filter(s => s.period && s.period.startsWith('WD1'));
-        else if (periodVal === 'All-WD2') filtered = filtered.filter(s => s.period && s.period.startsWith('WD2'));
-        else if (periodVal === 'All-CS') filtered = filtered.filter(s => s.period && s.period.startsWith('CS'));
-        else filtered = filtered.filter(s => s.period === periodVal);
-    }
+// periodVals: array of class periods (e.g. ['A1','B2']) picked in the
+// multi-select class filter. Empty array = nothing picked = no students.
+function getFilteredStudents(periodVals, studentVal) {
+    const wanted = new Set(Array.isArray(periodVals) ? periodVals : [periodVals]);
+    let filtered = roster.filter(s => wanted.has(s.period));
 
     if (studentVal && studentVal !== 'All') {
         filtered = filtered.filter(s => s.id === studentVal);
@@ -513,64 +518,66 @@ function updateStudentDropdown(filteredStudents) {
     });
 }
 
-function updatePeriodDropdown() {
-    const periodSelect = document.getElementById('periodFilter');
-    if (!periodSelect) return;
+// Multi-select class filter: one checkbox per class period, grouped by
+// course, with an "All Classes" box and a select-all box per course.
+const selectedPeriods = new Set();
+const COURSE_BY_PERIOD = { A1: 'Web Design 1', B2: 'Web Design 2', A3: 'Computer Science', A5: 'Computer Science', B4: 'Computer Science', B6: 'Computer Science', B8: 'Computer Science' };
+const COURSE_ORDER = ['Web Design 1', 'Web Design 2', 'Computer Science'];
 
-    const currentVal = periodSelect.value || 'All';
-    const periods = [...new Set(
-        roster.map(s => s.period).filter(p => p && p !== 'Teacher' && p !== 'Unassigned')
-    )].sort();
-
-    let html = '<option value="All">All Classes</option>';
-
-    if (periods.length === 0) {
-        periodSelect.innerHTML = html;
-        periodSelect.value = 'All';
-        return;
+function refreshPeriodMenuState() {
+    const menu = document.getElementById('periodFilterMenu');
+    const btn = document.getElementById('periodFilterBtn');
+    if (!menu) return;
+    const boxes = [...menu.querySelectorAll('input[data-period]')];
+    const allBox = menu.querySelector('input[data-all]');
+    if (allBox) {
+        allBox.checked = boxes.length > 0 && boxes.every(b => b.checked);
+        allBox.indeterminate = !allBox.checked && boxes.some(b => b.checked);
     }
-
-    const groupedPeriods = {};
-    periods.forEach(p => {
-        const prefix = p.split('-')[0];
-        if (!groupedPeriods[prefix]) groupedPeriods[prefix] = [];
-        groupedPeriods[prefix].push(p);
+    menu.querySelectorAll('input[data-group]').forEach(g => {
+        const members = boxes.filter(b => b.dataset.course === g.dataset.group);
+        g.checked = members.length > 0 && members.every(b => b.checked);
+        g.indeterminate = !g.checked && members.some(b => b.checked);
     });
-
-    const courseNames = {
-        WD1: 'Web Design 1',
-        WD2: 'Advanced Web Design',
-        CS: 'Computer Science',
-        AS: 'Advanced Studies'
-    };
-
-    Object.keys(groupedPeriods).sort().forEach(prefix => {
-        const name = courseNames[prefix] || prefix;
-        html += `<option value="All-${prefix}">All ${name}</option>`;
-    });
-
-    Object.keys(groupedPeriods).sort().forEach(prefix => {
-        const name = courseNames[prefix] || prefix;
-        html += `<optgroup label="${name}">`;
-        groupedPeriods[prefix].forEach(p => { html += `<option value="${p}">${p}</option>`; });
-        html += `</optgroup>`;
-    });
-
-    periodSelect.innerHTML = html;
-    if ([...periodSelect.options].some(opt => opt.value === currentVal)) {
-        periodSelect.value = currentVal;
-    } else {
-        periodSelect.value = 'All';
+    if (btn) {
+        const picked = boxes.filter(b => b.checked).map(b => b.dataset.period);
+        btn.textContent = picked.length === 0 ? 'Select classes...'
+            : (picked.length === boxes.length ? 'All Classes' : picked.join(', '));
     }
 }
 
+function updatePeriodDropdown() {
+    const menu = document.getElementById('periodFilterMenu');
+    if (!menu) return;
+    const periods = [...new Set(
+        roster.map(s => s.period).filter(p => p && p !== 'Teacher' && p !== 'Unassigned')
+    )].sort();
+    [...selectedPeriods].forEach(p => { if (!periods.includes(p)) selectedPeriods.delete(p); });
+
+    const groups = {};
+    periods.forEach(p => {
+        const course = COURSE_BY_PERIOD[p] || 'Other';
+        (groups[course] = groups[course] || []).push(p);
+    });
+    const order = [...COURSE_ORDER.filter(c => groups[c]), ...Object.keys(groups).filter(c => !COURSE_ORDER.includes(c))];
+
+    let html = `<label class="dropdown-item fw-bold rounded"><input type="checkbox" class="form-check-input me-2" data-all>All Classes</label><div class="dropdown-divider"></div>`;
+    order.forEach(course => {
+        html += `<label class="dropdown-item fw-bold text-primary rounded mt-1"><input type="checkbox" class="form-check-input me-2" data-group="${course}">All ${course}</label>`;
+        groups[course].forEach(p => {
+            html += `<label class="dropdown-item ps-4 rounded"><input type="checkbox" class="form-check-input me-2" data-period="${p}" data-course="${course}"${selectedPeriods.has(p) ? ' checked' : ''}>${p}</label>`;
+        });
+    });
+    menu.innerHTML = html;
+    refreshPeriodMenuState();
+}
+
 function applyFiltersAndRender() {
-    const periodFilter = document.getElementById('periodFilter');
-    const periodVal = periodFilter ? periodFilter.value : 'All';
+    const periodVals = [...selectedPeriods];
     const studentFilter = document.getElementById('studentFilter');
     const studentVal = studentFilter ? studentFilter.value : 'All';
 
-    if (periodVal === 'All' || periodVal === '' || periodVal.includes('Select')) {
+    if (periodVals.length === 0) {
         const theadRow = document.querySelector('thead tr');
         const tbody = document.getElementById('timesheetBody');
         if (theadRow) {
@@ -589,13 +596,13 @@ function applyFiltersAndRender() {
             tbody.innerHTML = `<tr><td colspan="100%" class="text-center p-5 text-muted">
                 <i class="fas fa-users-cog fa-3x mb-3 text-secondary"></i>
                 <h4 class="fw-bold">No Class Selected</h4>
-                <p>Please select a specific class period from the dropdown above to view employee timesheets.</p>
+                <p>Pick one or more classes in the Filter Classes menu above to view employee timesheets.</p>
             </td></tr>`;
         }
         return;
     }
 
-    const filteredStudents = getFilteredStudents(periodVal, studentVal);
+    const filteredStudents = getFilteredStudents(periodVals, studentVal);
     loadTimesheets(filteredStudents);
 }
 

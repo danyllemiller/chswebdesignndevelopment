@@ -58,20 +58,11 @@
                 </div>
 
                 <div>
-                    <label class="form-label small fw-bold text-muted mb-1">Filter Class:</label>
-                    <select id="periodFilter" class="form-select border-primary shadow-sm fw-bold text-primary" style="min-width: 180px;">
-                        <option value="" selected disabled>Select a class...</option>
-                        <option value="All-WD1">All Web Design 1</option>
-                        <option value="All-WD2">All Web Design 2</option>
-                        <option value="All-CS">All Computer Science</option>
-                        <option value="WD1-A1">WD1 - A1</option>
-                        <option value="WD1-A3">WD1 - A3</option>
-                        <option value="WD1-A5">WD1 - A5</option>
-                        <option value="WD2-B2">WD2 - B2</option>
-                        <option value="WD2-B4">WD2 - B4</option>
-                        <option value="CS-B6">CS - B6</option>
-                        <option value="CS-B8">CS - B8</option>
-                    </select>
+                    <label class="form-label small fw-bold text-muted mb-1">Filter Classes:</label>
+                    <div class="dropdown">
+                        <button id="periodFilterBtn" type="button" class="form-select border-primary shadow-sm fw-bold text-primary text-start" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="min-width: 200px;">Select classes...</button>
+                        <div id="periodFilterMenu" class="dropdown-menu p-2 shadow" style="min-width: 250px; max-height: 60vh; overflow-y: auto;"></div>
+                    </div>
                 </div>
                 <div>
                     <label class="form-label small fw-bold text-muted mb-1">Filter Student:</label>
@@ -267,6 +258,6 @@
     </div>
 
     <!-- Script path pointed specifically to the admin folder inside js -->
-    <script type="module" src="/js/admin/payroll.js?v=8"></script>
+    <script type="module" src="/js/admin/payroll.js?v=9"></script>
 </body>
 </html>
