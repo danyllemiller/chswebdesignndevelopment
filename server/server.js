@@ -9,6 +9,7 @@ const apiRoutes = require('./api');
 const shortlinkRoutes = require('./routes/shortlinks');
 const { scheduleDailyAutoClockout } = require('./jobs/autoClockout');
 const { scheduleDailyAttendanceSweep } = require('./jobs/attendanceSweep');
+const { scheduleAutoPayroll } = require('./jobs/autoPayroll');
 
 const app = express();
 const PORT = 3000;
@@ -167,3 +168,4 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../index.html')));
 app.listen(PORT, () => console.log(`Guild Server listening on port ${PORT}`));
 scheduleDailyAutoClockout();
 scheduleDailyAttendanceSweep();
+scheduleAutoPayroll(); // 12:00 AM on the 1st & 16th: Web Design payroll for the period that just ended

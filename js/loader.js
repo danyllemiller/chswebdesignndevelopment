@@ -51,6 +51,17 @@
 })();
 
 // ==========================================
+// PAYROLL "READY TO PRINT" ALERT (sitewide, self-guards to the teacher)
+// ==========================================
+(function injectPayrollPrintAlert() {
+  if (document.getElementById('payroll-print-alert-script')) return;
+  const script = document.createElement('script');
+  script.id = 'payroll-print-alert-script';
+  script.src = '/js/payroll-print-alert.js?v=1';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
 // READ ALOUD (sitewide, self-guards to curriculum content pages by URL path)
 // ==========================================
 (function injectReadAloud() {

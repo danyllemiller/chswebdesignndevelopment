@@ -100,6 +100,15 @@ async function ensurePaystubTables() {
                 UNIQUE KEY unique_period (period_start, period_end)
             )
         `);
+        // printed_at: NULL means "paystubs not printed yet". The automatic
+        // midnight payroll (server/jobs/autoPayroll.js) leaves it NULL so the
+        // teacher gets a "ready to print" banner; manual runs and every run
+        // that existed before this column are treated as already handled.
+        const [printedCol] = await connection.execute(`SHOW COLUMNS FROM payroll_runs LIKE 'printed_at'`);
+        if (printedCol.length === 0) {
+            await connection.execute(`ALTER TABLE payroll_runs ADD COLUMN printed_at TIMESTAMP NULL DEFAULT NULL`);
+            await connection.execute(`UPDATE payroll_runs SET printed_at = run_at WHERE printed_at IS NULL`);
+        }
         const [payDateCols] = await connection.execute(`SHOW COLUMNS FROM payroll_runs LIKE 'pay_date'`);
         if (payDateCols.length === 0) {
             await connection.execute(`ALTER TABLE payroll_runs ADD COLUMN pay_date DATE NULL`);
@@ -658,87 +667,99 @@ router.get('/admin/payroll/preview', async (req, res) => {
 });
 
 // POST /admin/payroll/run — run payroll for a pay period
+// Shared by the manual "Run Payroll" button (admin/run-payroll.html) and the
+// automatic midnight job (server/jobs/autoPayroll.js).
+async function runPayroll({ period_start, period_end, run_by, notes, course_ids }) {
+    return withConnection(async (connection) => {
+        // pay_date is tied to the PERIOD, not to whenever the run happens
+        // to be clicked -- the nearest 1st or 15th on/after period_end, so
+        // a period ending 8/29 always pays 9/1 no matter when it's run or
+        // re-run, and reprinting an old stub later never shows a
+        // different date than it did originally.
+        const payDate = computeNextPayDate(period_end);
+        await connection.execute(
+            `INSERT INTO payroll_runs (period_start, period_end, pay_date, run_by, notes, is_finalized)
+             VALUES (?, ?, ?, ?, ?, 1)
+             ON DUPLICATE KEY UPDATE pay_date = VALUES(pay_date), run_by = VALUES(run_by), notes = VALUES(notes),
+               is_finalized = 1, run_at = CURRENT_TIMESTAMP`,
+            [period_start, period_end, payDate, (run_by || 'teacher').substring(0, 100), notes || null]
+        );
+        const [[runRow]] = await connection.execute(
+            'SELECT id FROM payroll_runs WHERE period_start = ? AND period_end = ?',
+            [period_start, period_end]
+        );
+        const runId = runRow.id;
+
+        // Release this run's own prior claims (if re-running the same
+        // period) so computePayrollForPeriod sees those hours as unpaid
+        // again instead of finding nothing the second time.
+        await connection.execute('UPDATE timesheets SET paid_run_id = NULL WHERE paid_run_id = ?', [runId]);
+
+        const rows = await computePayrollForPeriod(connection, {
+            period_start, period_end,
+            course_ids: Array.isArray(course_ids) ? course_ids : []
+        });
+
+        // Re-running a period only ever inserted/updated rows for students
+        // in the current result -- a student who no longer belongs (wrong
+        // course scoping, now-excluded legacy section, etc.) kept their
+        // stale stub from a prior run instead of being removed. Purge
+        // anyone not in this run's fresh computation before inserting it.
+        const keepIds = rows.map(s => s.student_id);
+        if (keepIds.length > 0) {
+            await connection.execute(
+                `DELETE FROM student_paystubs WHERE payroll_run_id = ? AND student_id NOT IN (${keepIds.map(() => '?').join(',')})`,
+                [runId, ...keepIds]
+            );
+        } else {
+            await connection.execute('DELETE FROM student_paystubs WHERE payroll_run_id = ?', [runId]);
+        }
+
+        let generated = 0;
+        for (const s of rows) {
+            await connection.execute(`
+                INSERT INTO student_paystubs
+                  (payroll_run_id, student_id, role_title, hourly_rate, regular_hours,
+                   bonus_count, bonus_rate, gross_pay, fed_tax, ss_tax, med_tax,
+                   total_deductions, net_pay, ytd_gross, earnings_lines, tardy_count)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                  role_title = VALUES(role_title), hourly_rate = VALUES(hourly_rate),
+                  regular_hours = VALUES(regular_hours), bonus_count = VALUES(bonus_count),
+                  gross_pay = VALUES(gross_pay), fed_tax = VALUES(fed_tax),
+                  ss_tax = VALUES(ss_tax), med_tax = VALUES(med_tax),
+                  total_deductions = VALUES(total_deductions), net_pay = VALUES(net_pay),
+                  ytd_gross = VALUES(ytd_gross), earnings_lines = VALUES(earnings_lines),
+                  tardy_count = VALUES(tardy_count), generated_at = CURRENT_TIMESTAMP
+            `, [runId, s.student_id, s.role_title, s.hourly_rate, s.regular_hours.toFixed(4),
+                s.bonus_count, ON_TIME_BONUS, s.gross_pay, s.fed_tax, s.ss_tax, s.med_tax,
+                s.total_deductions, s.net_pay, s.ytd_gross, JSON.stringify(s.earnings_lines), s.tardy_count]);
+
+            if (s.timesheet_ids.length > 0) {
+                await connection.execute(
+                    `UPDATE timesheets SET paid_run_id = ? WHERE id IN (${s.timesheet_ids.map(() => '?').join(',')})`,
+                    [runId, ...s.timesheet_ids]
+                );
+            }
+            generated++;
+        }
+
+        return { runId, generated };
+    });
+}
+
 router.post('/admin/payroll/run', async (req, res) => {
     const { period_start, period_end, run_by, notes, course_ids } = req.body;
     if (!period_start || !period_end) return res.status(400).json({ error: 'period_start and period_end required' });
+    // A period that hasn't started has no shifts to pay -- running it early
+    // creates $0 paystubs that the budget game then treats as a real payday.
+    if (String(period_start) > getLocalDateStr()) {
+        return res.status(400).json({ error: `That pay period (${period_start} to ${period_end}) hasn't started yet, so there's nothing to pay. Run it after it ends.` });
+    }
 
     try {
-        const { runId, generated } = await withConnection(async (connection) => {
-            // pay_date is tied to the PERIOD, not to whenever the run happens
-            // to be clicked -- the nearest 1st or 15th on/after period_end, so
-            // a period ending 8/29 always pays 9/1 no matter when it's run or
-            // re-run, and reprinting an old stub later never shows a
-            // different date than it did originally.
-            const payDate = computeNextPayDate(period_end);
-            await connection.execute(
-                `INSERT INTO payroll_runs (period_start, period_end, pay_date, run_by, notes, is_finalized)
-                 VALUES (?, ?, ?, ?, ?, 1)
-                 ON DUPLICATE KEY UPDATE pay_date = VALUES(pay_date), run_by = VALUES(run_by), notes = VALUES(notes),
-                   is_finalized = 1, run_at = CURRENT_TIMESTAMP`,
-                [period_start, period_end, payDate, (run_by || 'teacher').substring(0, 100), notes || null]
-            );
-            const [[runRow]] = await connection.execute(
-                'SELECT id FROM payroll_runs WHERE period_start = ? AND period_end = ?',
-                [period_start, period_end]
-            );
-            const runId = runRow.id;
-
-            // Release this run's own prior claims (if re-running the same
-            // period) so computePayrollForPeriod sees those hours as unpaid
-            // again instead of finding nothing the second time.
-            await connection.execute('UPDATE timesheets SET paid_run_id = NULL WHERE paid_run_id = ?', [runId]);
-
-            const rows = await computePayrollForPeriod(connection, {
-                period_start, period_end,
-                course_ids: Array.isArray(course_ids) ? course_ids : []
-            });
-
-            // Re-running a period only ever inserted/updated rows for students
-            // in the current result -- a student who no longer belongs (wrong
-            // course scoping, now-excluded legacy section, etc.) kept their
-            // stale stub from a prior run instead of being removed. Purge
-            // anyone not in this run's fresh computation before inserting it.
-            const keepIds = rows.map(s => s.student_id);
-            if (keepIds.length > 0) {
-                await connection.execute(
-                    `DELETE FROM student_paystubs WHERE payroll_run_id = ? AND student_id NOT IN (${keepIds.map(() => '?').join(',')})`,
-                    [runId, ...keepIds]
-                );
-            } else {
-                await connection.execute('DELETE FROM student_paystubs WHERE payroll_run_id = ?', [runId]);
-            }
-
-            let generated = 0;
-            for (const s of rows) {
-                await connection.execute(`
-                    INSERT INTO student_paystubs
-                      (payroll_run_id, student_id, role_title, hourly_rate, regular_hours,
-                       bonus_count, bonus_rate, gross_pay, fed_tax, ss_tax, med_tax,
-                       total_deductions, net_pay, ytd_gross, earnings_lines, tardy_count)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE
-                      role_title = VALUES(role_title), hourly_rate = VALUES(hourly_rate),
-                      regular_hours = VALUES(regular_hours), bonus_count = VALUES(bonus_count),
-                      gross_pay = VALUES(gross_pay), fed_tax = VALUES(fed_tax),
-                      ss_tax = VALUES(ss_tax), med_tax = VALUES(med_tax),
-                      total_deductions = VALUES(total_deductions), net_pay = VALUES(net_pay),
-                      ytd_gross = VALUES(ytd_gross), earnings_lines = VALUES(earnings_lines),
-                      tardy_count = VALUES(tardy_count), generated_at = CURRENT_TIMESTAMP
-                `, [runId, s.student_id, s.role_title, s.hourly_rate, s.regular_hours.toFixed(4),
-                    s.bonus_count, ON_TIME_BONUS, s.gross_pay, s.fed_tax, s.ss_tax, s.med_tax,
-                    s.total_deductions, s.net_pay, s.ytd_gross, JSON.stringify(s.earnings_lines), s.tardy_count]);
-
-                if (s.timesheet_ids.length > 0) {
-                    await connection.execute(
-                        `UPDATE timesheets SET paid_run_id = ? WHERE id IN (${s.timesheet_ids.map(() => '?').join(',')})`,
-                        [runId, ...s.timesheet_ids]
-                    );
-                }
-                generated++;
-            }
-
-            return { runId, generated };
-        });
+        const { runId, generated } = await runPayroll({ period_start, period_end, run_by, notes, course_ids });
+        await withConnection(c => c.execute('UPDATE payroll_runs SET printed_at = COALESCE(printed_at, CURRENT_TIMESTAMP) WHERE id = ?', [runId]));
         res.json({ success: true, payroll_run_id: runId, paystubs_generated: generated });
     } catch (err) {
         console.error(err);
@@ -746,4 +767,28 @@ router.post('/admin/payroll/run', async (req, res) => {
     }
 });
 
+// Automatic runs whose paystubs haven't been printed yet (drives the
+// "Paystubs ready to print" banner, js/payroll-print-alert.js).
+router.get('/admin/payroll/print-pending', async (req, res) => {
+    try {
+        const rows = await withConnection(c => c.execute(
+            `SELECT pr.id, DATE_FORMAT(pr.period_start, '%Y-%m-%d') AS period_start,
+                    DATE_FORMAT(pr.period_end, '%Y-%m-%d') AS period_end, pr.run_at,
+                    (SELECT COUNT(*) FROM student_paystubs sp WHERE sp.payroll_run_id = pr.id) AS paystubs
+             FROM payroll_runs pr WHERE pr.printed_at IS NULL ORDER BY pr.period_end`
+        ).then(([r]) => r));
+        res.json({ runs: rows });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load print queue' }); }
+});
+
+router.post('/admin/payroll/mark-printed', async (req, res) => {
+    const runId = Number(req.body && req.body.run_id);
+    if (!runId) return res.status(400).json({ error: 'run_id required' });
+    try {
+        await withConnection(c => c.execute('UPDATE payroll_runs SET printed_at = CURRENT_TIMESTAMP WHERE id = ?', [runId]));
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to mark printed' }); }
+});
+
 module.exports = router;
+module.exports.runPayroll = runPayroll;
