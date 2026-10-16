@@ -12,7 +12,8 @@ const PAY_SCALES = {
     "Junior Developer": 20.00,
     "Web Developer": 35.00,
     "Senior Developer": 45.00,
-    "Project Manager": 50.00
+    "Project Manager": 50.00,
+    "UI/UX Designer": 38.52
 };
 const DEFAULT_ROLE = "Web Developer";
 const ON_TIME_BONUS = 5.00;
