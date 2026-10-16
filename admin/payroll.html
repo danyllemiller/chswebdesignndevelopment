@@ -84,6 +84,10 @@
                     <input type="date" id="dateFilter" class="form-control border-primary fw-bold text-primary shadow-sm" style="max-width: 180px;">
                 </div>
                 <div>
+                    <label class="form-label small fw-bold text-muted mb-1">Pay Period:</label>
+                    <select id="payPeriodFilter" class="form-select border-success fw-bold text-success shadow-sm" style="min-width: 230px;" title="Pick a pay period to see each student's pay and 5 Star points for just that period"></select>
+                </div>
+                <div>
                     <button class="btn btn-warning text-dark fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#questionModal" style="margin-bottom: 2px;">
                         <i class="fas fa-edit me-2"></i>Set Prompts
                     </button>
@@ -263,6 +267,6 @@
     </div>
 
     <!-- Script path pointed specifically to the admin folder inside js -->
-    <script type="module" src="/js/admin/payroll.js?v=7"></script>
+    <script type="module" src="/js/admin/payroll.js?v=8"></script>
 </body>
 </html>

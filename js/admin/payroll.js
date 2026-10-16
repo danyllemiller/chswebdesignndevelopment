@@ -360,8 +360,41 @@ async function init() {
     await loadRoster();
     loadDailyQuestions();
 
+    // Pay Period picker: every 14-day period from ANCHOR_DATE through the
+    // current one (newest first). Picking one jumps straight to the Pay
+    // Period view for it -- pay, bonuses, and 5 Star points for just that
+    // period -- instead of having to find a date inside it and toggle views.
+    const payPeriodSelect = document.getElementById('payPeriodFilter');
+    const syncPayPeriodSelect = () => {
+        if (payPeriodSelect) payPeriodSelect.value = getPayPeriodForDate(currentDate).startStr;
+    };
+    if (payPeriodSelect) {
+        const periods = [];
+        let cursor = getPayPeriodForDate(ANCHOR_DATE.toISOString().slice(0, 10));
+        const lastStart = getPayPeriodForDate(currentDate).startStr;
+        for (let guard = 0; guard < 60; guard++) {
+            periods.push(cursor);
+            if (cursor.startStr >= lastStart) break;
+            const next = new Date(cursor.endStr + 'T12:00:00'); next.setDate(next.getDate() + 1);
+            cursor = getPayPeriodForDate(`${next.getFullYear()}-${_pad(next.getMonth() + 1)}-${_pad(next.getDate())}`);
+        }
+        payPeriodSelect.innerHTML = periods.reverse().map((pp, i) =>
+            `<option value="${pp.startStr}">${pp.friendly}${i === 0 ? ' (current)' : ''}</option>`).join('');
+        syncPayPeriodSelect();
+        payPeriodSelect.addEventListener('change', (e) => {
+            currentDate = e.target.value;
+            document.getElementById('dateFilter').value = currentDate;
+            viewMode = 'period';
+            const vp = document.getElementById('vbtn-period');
+            if (vp) vp.checked = true;
+            applyFiltersAndRender();
+            loadDailyQuestions();
+        });
+    }
+
     document.getElementById('dateFilter').addEventListener('change', (e) => {
         currentDate = e.target.value;
+        syncPayPeriodSelect();
         applyFiltersAndRender();
         loadDailyQuestions();
     });
