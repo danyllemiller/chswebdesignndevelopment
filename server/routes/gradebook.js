@@ -107,6 +107,8 @@ async function ensureUnitPrereqOverridesTable(connection) {
 // i.e. both a self review AND a peer review submitted. See
 // js/cs-interactive.js's matching client-side gate on the Unit Project tab
 // for the same self+peer requirement, kept in sync with this one.
+const PROJECT_EXEMPT_UNITS = new Set([1, 2]);
+
 async function checkUnitPrerequisite(connection, studentId, examId) {
     const m = /^Unit(\d+)-Exam$/i.exec(examId || '');
     if (!m) return { ok: true };
@@ -148,7 +150,9 @@ async function checkUnitPrerequisite(connection, studentId, examId) {
          LIMIT 1`,
         [studentId, `UNIT${unitNum}`]
     );
-    const projectRequired = projectRows.length > 0;
+    // Per the teacher (2026-10-16): Units 1 and 2 never lock the exam over the
+    // Unit Project -- only Unit 3+ require the project's self + peer review.
+    const projectRequired = projectRows.length > 0 && !PROJECT_EXEMPT_UNITS.has(unitNum);
     const projectOk = !projectRequired || projectRows[0].status === 'complete';
 
     return { ok: scoreOk && projectOk, prevExamId, pct, scoreOk, projectOk, projectRequired };

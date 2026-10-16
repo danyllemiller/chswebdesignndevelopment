@@ -85,6 +85,9 @@ const GLOBAL_BYPASS_CONFIG = {
     requireProject: true,         // true = Unit Project (self+peer review both complete) REQUIRED before the Unit Test unlocks
     bypassAll: false              // If true, bypasses all gating requirements
 };
+// Units 1 and 2 never lock the Unit Test over the Unit Project (server/routes/
+// gradebook.js's checkUnitPrerequisite uses the same list).
+const PROJECT_EXEMPT_UNITS = [1, 2];
 
 // Per the official test-out policy: testing out of a unit (80%+ on that
 // unit's test) excuses a student from that unit's ASSIGNMENTS, not from the
@@ -1336,7 +1339,7 @@ else if (activeTab.type === 'EXAM') {
                 const worksUnlocked   = bypassWorksheets || hasAllChapWork;
                 const scaleUnlocked   = bypassPreScale   || hasPreScale;
                 const diagUnlocked    = bypassDiagnostic || hasPreTest;
-                const projectUnlocked = bypassProject    || projectStatus[activeUnit.unitNum] === 'complete';
+                const projectUnlocked = bypassProject    || PROJECT_EXEMPT_UNITS.includes(activeUnit.unitNum) || projectStatus[activeUnit.unitNum] === 'complete';
                 const examUnlocked    = worksUnlocked && scaleUnlocked && diagUnlocked && projectUnlocked;
 
                 if (!examUnlocked && dom.examOverlay) {
@@ -2418,7 +2421,7 @@ if (chapBtn) {
                     const scaleUnlocked   = bypassPreScale   || _hasPreScale;
                     const diagUnlocked    = bypassDiagnostic || _hasPreTest;
                     const worksUnlocked   = bypassWorksheets || allChaptersDone;
-                    const projectUnlocked = bypassProject    || projectStatus[activeUnit.unitNum] === 'complete';
+                    const projectUnlocked = bypassProject    || PROJECT_EXEMPT_UNITS.includes(activeUnit.unitNum) || projectStatus[activeUnit.unitNum] === 'complete';
 
                     if (scaleUnlocked && diagUnlocked && worksUnlocked && projectUnlocked) {
                         window.open(`/exams/cs-unit-${activeUnit.unitNum}-exam.html`, '_blank');
