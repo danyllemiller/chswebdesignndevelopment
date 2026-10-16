@@ -32,7 +32,6 @@ const PAY_SCALES = {
 };
 const DEFAULT_ROLE = "Web Developer";
 const ON_TIME_BONUS = 5.00; // Flat bonus per on-time punch
-const ANCHOR_DATE = new Date("2026-08-02T00:00:00");
 
 // Global State
 let currentRole = DEFAULT_ROLE;
@@ -53,13 +52,12 @@ function getPayPeriodForDate(dateStr) {
     // dateStr is expected as a plain YYYY-MM-DD (server/routes/payroll.js
     // normalizes it), but stripping any time portion defensively means a
     // stray full ISO string here can't silently produce Invalid Date again.
-    const d = new Date(String(dateStr).split('T')[0] + "T12:00:00");
-    const diffTime = d.getTime() - ANCHOR_DATE.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const periodsPassed = Math.floor(diffDays / 14);
-
-    const ppStart = new Date(ANCHOR_DATE.getTime() + periodsPassed * 14 * 24 * 60 * 60 * 1000);
-    const ppEnd = new Date(ppStart.getTime() + 13 * 24 * 60 * 60 * 1000);
+    // Semi-monthly pay periods, matching real payroll runs: the 1st-15th
+    // and the 16th-last day of the month.
+    const [y, m, day] = String(dateStr).split('T')[0].split('-').map(Number);
+    const firstHalf = day <= 15;
+    const ppStart = new Date(y, m - 1, firstHalf ? 1 : 16, 12);
+    const ppEnd = new Date(y, m - 1, firstHalf ? 15 : new Date(y, m, 0).getDate(), 12);
 
     const startStr = `${ppStart.getFullYear()}-${_pad(ppStart.getMonth() + 1)}-${_pad(ppStart.getDate())}`;
     const endStr = `${ppEnd.getFullYear()}-${_pad(ppEnd.getMonth() + 1)}-${_pad(ppEnd.getDate())}`;

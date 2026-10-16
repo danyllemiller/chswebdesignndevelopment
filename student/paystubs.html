@@ -207,16 +207,15 @@ if (!user) { location.href = '/login.html'; }
 let myMissingAssignments = [];
 
 const ON_TIME_BONUS = 5.00;
-const ANCHOR_DATE   = new Date('2026-08-02T00:00:00');
 
 function pad(n) { return n < 10 ? '0' + n : String(n); }
 
 function getPayPeriodForDate(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00');
-  const diffDays = Math.floor((d - ANCHOR_DATE) / 86400000);
-  const periodsPassed = Math.floor(diffDays / 14);
-  const ppStart = new Date(ANCHOR_DATE.getTime() + periodsPassed * 14 * 86400000);
-  const ppEnd   = new Date(ppStart.getTime() + 13 * 86400000);
+  // Semi-monthly pay periods (1st-15th, 16th-end of month), matching real payroll runs.
+  const [y, m, day] = String(dateStr).split('T')[0].split('-').map(Number);
+  const firstHalf = day <= 15;
+  const ppStart = new Date(y, m - 1, firstHalf ? 1 : 16, 12);
+  const ppEnd   = new Date(y, m - 1, firstHalf ? 15 : new Date(y, m, 0).getDate(), 12);
   const fmt = dt => `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
   return { start: fmt(ppStart), end: fmt(ppEnd) };
 }

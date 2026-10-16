@@ -310,7 +310,7 @@ let currentDate = `${_today.getFullYear()}-${_pad(_today.getMonth() + 1)}-${_pad
 
 let roster = [];
 let viewMode = 'daily';
-const ANCHOR_DATE = new Date("2026-08-02T00:00:00");
+const FIRST_PAY_PERIOD_START = "2026-08-16"; // first real payroll run of the year
 
 let privacyMode = false;
 let mappedNames = {};
@@ -321,13 +321,12 @@ function escapeHtml(str) {
 }
 
 function getPayPeriodForDate(dateStr) {
-    const d = new Date(dateStr + "T12:00:00");
-    const diffTime = d.getTime() - ANCHOR_DATE.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const periodsPassed = Math.floor(diffDays / 14);
-
-    const ppStart = new Date(ANCHOR_DATE.getTime() + (periodsPassed * 14 * 24 * 60 * 60 * 1000));
-    const ppEnd = new Date(ppStart.getTime() + (13 * 24 * 60 * 60 * 1000));
+    // Semi-monthly pay periods, matching real payroll runs (payroll_runs):
+    // the 1st-15th and the 16th-last day of the month.
+    const [y, m, day] = String(dateStr).split('T')[0].split('-').map(Number);
+    const firstHalf = day <= 15;
+    const ppStart = new Date(y, m - 1, firstHalf ? 1 : 16, 12);
+    const ppEnd = new Date(y, m - 1, firstHalf ? 15 : new Date(y, m, 0).getDate(), 12);
 
     const startStr = `${ppStart.getFullYear()}-${_pad(ppStart.getMonth() + 1)}-${_pad(ppStart.getDate())}`;
     const endStr = `${ppEnd.getFullYear()}-${_pad(ppEnd.getMonth() + 1)}-${_pad(ppEnd.getDate())}`;
@@ -360,7 +359,7 @@ async function init() {
     await loadRoster();
     loadDailyQuestions();
 
-    // Pay Period picker: every 14-day period from ANCHOR_DATE through the
+    // Pay Period picker: every semi-monthly period from the first payroll through the
     // current one (newest first). Picking one jumps straight to the Pay
     // Period view for it -- pay, bonuses, and 5 Star points for just that
     // period -- instead of having to find a date inside it and toggle views.
@@ -370,7 +369,7 @@ async function init() {
     };
     if (payPeriodSelect) {
         const periods = [];
-        let cursor = getPayPeriodForDate(ANCHOR_DATE.toISOString().slice(0, 10));
+        let cursor = getPayPeriodForDate(FIRST_PAY_PERIOD_START);
         const lastStart = getPayPeriodForDate(currentDate).startStr;
         for (let guard = 0; guard < 60; guard++) {
             periods.push(cursor);
