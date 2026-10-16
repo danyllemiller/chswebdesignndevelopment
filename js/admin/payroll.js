@@ -656,7 +656,7 @@ async function loadTimesheets(filteredStudents) {
             const tsMap = {};
             rawTimesheets.forEach(row => {
                 const pid = periodByStudentId[row.student_id] || '';
-                const adapted = adaptTimesheetRow(row, pid);
+                const adapted = adaptTimesheetRow(row, row.section_id || pid); // judge each shift by ITS class's bell schedule (dual-enrolled students)
                 if (!tsMap[row.student_id]) tsMap[row.student_id] = [];
                 tsMap[row.student_id].push(adapted);
             });
@@ -690,7 +690,7 @@ async function loadTimesheets(filteredStudents) {
                     if (ts.clockInTime) {
                         shiftMins = ts.clockOutTime
                             ? Math.round((ts.clockOutTime - ts.clockInTime) / 60000)
-                            : getExpectedDuration(ts.date, student.period);
+                            : getExpectedDuration(ts.date, ts.sectionId || student.period);
                     }
 
                     totalMins += shiftMins;
@@ -776,7 +776,7 @@ async function loadTimesheets(filteredStudents) {
         const tsMap = {};
         rawTimesheets.forEach(row => {
             const pid = periodByStudentId[row.student_id] || '';
-            tsMap[row.student_id] = adaptTimesheetRow(row, pid);
+            tsMap[row.student_id] = adaptTimesheetRow(row, row.section_id || pid);
         });
 
         let html = '';
@@ -804,7 +804,7 @@ async function loadTimesheets(filteredStudents) {
                 if (ts.clockInTime) {
                     durationMins = ts.clockOutTime
                         ? Math.round((ts.clockOutTime - ts.clockInTime) / 60000)
-                        : getExpectedDuration(currentDate, student.period);
+                        : getExpectedDuration(currentDate, (ts && ts.sectionId) || student.period);
                 }
 
                 dailyPay = (durationMins / 60 * hourlyRate) + (shiftBonusCount * ON_TIME_BONUS);
@@ -1002,7 +1002,7 @@ async function viewStudentHistory(studentId) {
             tableHtml = `<tr><td colspan="5" class="text-center p-4 text-muted fw-bold">No timesheets recorded for this employee.</td></tr>`;
         } else {
             rawTimesheets.forEach(row => {
-                const ts = adaptTimesheetRow(row, student.period);
+                const ts = adaptTimesheetRow(row, row.section_id || student.period);
                 let durationMins = 0;
                 let shiftBonusCount = 0;
 
@@ -1012,7 +1012,7 @@ async function viewStudentHistory(studentId) {
                 if (ts.clockInTime) {
                     durationMins = ts.clockOutTime
                         ? Math.round((ts.clockOutTime - ts.clockInTime) / 60000)
-                        : getExpectedDuration(ts.date, student.period);
+                        : getExpectedDuration(ts.date, ts.sectionId || student.period);
                     totalMins += durationMins;
                 }
 
@@ -1261,7 +1261,7 @@ async function generateW2Forms() {
             const sid = row.student_id;
             const student = rosterById[sid];
             if (!student) return;
-            const ts = adaptTimesheetRow(row, student.period);
+            const ts = adaptTimesheetRow(row, row.section_id || student.period);
             if (!summary[sid]) summary[sid] = { student, totalMins: 0, totalGross: 0, shifts: 0 };
 
             const hourlyRate = student.hourlyRate || PAY_SCALES[student.role] || PAY_SCALES[DEFAULT_ROLE];
@@ -1272,7 +1272,7 @@ async function generateW2Forms() {
             if (ts.clockInTime) {
                 shiftMins = ts.clockOutTime
                     ? Math.round((ts.clockOutTime - ts.clockInTime) / 60000)
-                    : getExpectedDuration(ts.date, student.period);
+                    : getExpectedDuration(ts.date, ts.sectionId || student.period);
             }
             summary[sid].totalMins += shiftMins;
             summary[sid].totalGross += (shiftMins / 60 * hourlyRate) + (bonuses * ON_TIME_BONUS);
