@@ -16,6 +16,12 @@ const PAY_SCALES = {
 };
 const DEFAULT_ROLE = "Web Developer";
 const ON_TIME_BONUS = 5.00;
+// 5 Star points mirror server/routes/paystubs.js: floor(WD-only NET pay / 10),
+// where net = gross minus 10% fed + 6.2% SS + 1.45% Medicare. Only Web Design
+// (A1/B2) shifts earn them; CS shifts never do. Final points are set on payday.
+const NET_PAY_RATE = 1 - (0.10 + 0.062 + 0.0145);
+const STAR_SECTION_IDS = new Set(['A1', 'B2']);
+const isStarShift = (sectionId) => STAR_SECTION_IDS.has(String(sectionId || '').replace(/^AS-/, ''));
 
 // ============================================================================
 // AUTH GUARD (MariaDB / auth-guard.js)
@@ -281,6 +287,7 @@ function adaptTimesheetRow(row, periodStr) {
         statusIn: clockInTime ? calcClockInStatus(clockInTime, dateStr, periodStr) : null,
         statusOut: clockOutTime ? calcClockOutStatus(clockOutTime, dateStr, periodStr) : null,
         autoClockedOut: !!row.auto_clocked_out,
+        sectionId: row.section_id || periodStr || '',
         notebookIn: {
             question: "Clock-in knowledge check",
             answerGiven: row.in_answer || "",
@@ -540,7 +547,8 @@ function applyFiltersAndRender() {
                 <th class="py-3 text-center">Clock Out</th>
                 <th class="py-3 w-25">Out: Reflection</th>
                 <th class="py-3 text-center">Time Logged</th>
-                <th class="py-3 text-center border-end">Est. Daily Pay</th>
+                <th class="py-3 text-center">Est. Daily Pay</th>
+                <th class="py-3 text-center border-end">Est. 5&#9733; Points</th>
             `;
         }
         if (tbody) {
@@ -592,11 +600,12 @@ async function loadTimesheets(filteredStudents) {
                 <th class="py-3 text-center">Shifts Logged</th>
                 <th class="py-3 text-center">Total Time</th>
                 <th class="py-3 text-center">Perf. Bonuses</th>
-                <th class="py-3 text-center border-end">Period Gross Pay</th>
+                <th class="py-3 text-center">Period Gross Pay</th>
+                <th class="py-3 text-center border-end" title="Estimated: floor(Web Design net pay / 10). Finalized on payday.">Est. 5&#9733; Points</th>
             `;
         }
 
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Calculating Pay Period (${period.friendly})...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Calculating Pay Period (${period.friendly})...</td></tr>`;
 
         try {
             const res = await fetch(`/api/admin/payroll/timesheets-period?from=${period.startStr}&to=${period.endStr}`);
@@ -629,6 +638,7 @@ async function loadTimesheets(filteredStudents) {
                 let totalMins = 0;
                 let totalGross = 0;
                 let totalBonuses = 0;
+                let starGross = 0;
 
                 shifts.forEach(ts => {
                     let shiftMins = 0;
@@ -646,8 +656,14 @@ async function loadTimesheets(filteredStudents) {
                     totalMins += shiftMins;
                     totalBonuses += shiftBonusCount;
                     const hours = shiftMins / 60;
-                    totalGross += (hours * hourlyRate) + (shiftBonusCount * ON_TIME_BONUS);
+                    const shiftPay = (hours * hourlyRate) + (shiftBonusCount * ON_TIME_BONUS);
+                    totalGross += shiftPay;
+                    if (isStarShift(ts.sectionId)) starGross += shiftPay;
                 });
+                const starPoints = Math.floor(starGross * NET_PAY_RATE / 10);
+                const starCell = starGross > 0
+                    ? `<span class="fw-bold text-warning fs-5">&#9733; ${starPoints}</span>`
+                    : `<span class="text-muted small" title="Only Web Design shifts earn 5 Star points">&mdash;</span>`;
 
                 const overallHours = Math.floor(totalMins / 60);
                 const overallRemainingMins = totalMins % 60;
@@ -676,18 +692,19 @@ async function loadTimesheets(filteredStudents) {
                             <span class="fw-bold text-success">+$${(totalBonuses * ON_TIME_BONUS).toFixed(2)}</span>
                             <div class="x-small text-muted">(${totalBonuses}x Bonuses)</div>
                         </td>
-                        <td class="text-center align-middle fw-bold text-success fs-5 bg-light border-end">
+                        <td class="text-center align-middle fw-bold text-success fs-5 bg-light">
                             $${totalGross.toFixed(2)}
                         </td>
+                        <td class="text-center align-middle border-end">${starCell}</td>
                     </tr>
                 `;
             });
 
-            if (filteredStudents.length === 0) html = `<tr><td colspan="6" class="text-center p-5 text-muted fw-bold">No students match this filter.</td></tr>`;
+            if (filteredStudents.length === 0) html = `<tr><td colspan="7" class="text-center p-5 text-muted fw-bold">No students match this filter.</td></tr>`;
             tbody.innerHTML = html;
         } catch (e) {
             console.error("Error loading period timesheets:", e);
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger p-4">Failed to load data.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger p-4">Failed to load data.</td></tr>`;
         }
         return;
     }
@@ -703,11 +720,12 @@ async function loadTimesheets(filteredStudents) {
             <th class="py-3 text-center">Clock Out</th>
             <th class="py-3 w-25">Out: Reflection</th>
             <th class="py-3 text-center">Time Logged</th>
-            <th class="py-3 text-center border-end">Est. Daily Pay</th>
+            <th class="py-3 text-center">Est. Daily Pay</th>
+            <th class="py-3 text-center border-end" title="Estimated: Web Design net pay / 10. Points are totaled and rounded down on payday.">Est. 5&#9733; Points</th>
         `;
     }
 
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading Timesheets for ${currentDate}...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading Timesheets for ${currentDate}...</td></tr>`;
 
     try {
         const res = await fetch(`/api/admin/payroll/timesheets-daily?date=${currentDate}`);
@@ -751,6 +769,11 @@ async function loadTimesheets(filteredStudents) {
 
                 dailyPay = (durationMins / 60 * hourlyRate) + (shiftBonusCount * ON_TIME_BONUS);
             }
+
+            const dailyStars = ts && isStarShift(ts.sectionId) ? (dailyPay * NET_PAY_RATE / 10) : null;
+            const starCell = dailyStars !== null && dailyPay > 0
+                ? `<span class="fw-bold text-warning">&#9733; ${dailyStars.toFixed(1)}</span>`
+                : `<span class="text-muted small"${ts && !isStarShift(ts.sectionId) ? ' title="Only Web Design shifts earn 5 Star points"' : ''}>&mdash;</span>`;
 
             let durationText = durationMins > 0 ? `${Math.floor(durationMins / 60)}h ${durationMins % 60}m` : '-';
             if (durationMins > 0 && durationMins < 60) durationText = `${durationMins}m`;
@@ -809,18 +832,19 @@ async function loadTimesheets(filteredStudents) {
                         <div class="fw-bold text-dark fs-6">${durationText}</div>
                         ${durationStatus}
                     </td>
-                    <td class="text-center align-middle fw-bold text-success fs-5 border-end">
+                    <td class="text-center align-middle fw-bold text-success fs-5">
                         $${dailyPay.toFixed(2)}
                     </td>
+                    <td class="text-center align-middle border-end">${starCell}</td>
                 </tr>
             `;
         });
 
-        if (filteredStudents.length === 0) html = `<tr><td colspan="7" class="text-center p-5 text-muted fw-bold">No students match this filter.</td></tr>`;
+        if (filteredStudents.length === 0) html = `<tr><td colspan="8" class="text-center p-5 text-muted fw-bold">No students match this filter.</td></tr>`;
         tbody.innerHTML = html;
     } catch (e) {
         console.error("Error loading timesheets:", e);
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger p-4">Failed to load data.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger p-4">Failed to load data.</td></tr>`;
     }
 }
 
