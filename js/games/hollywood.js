@@ -16,6 +16,19 @@ window.Hollywood = (() => {
         }
     };
 
+    // Questions already shown this game (by text), so the same question
+    // doesn't come up twice until every question has been used. Filled from
+    // showQuestionUI, which runs for local AND remote players' picks, so in a
+    // room both players' questions count.
+    const askedQuestions = new Set();
+    function pickQuestion(data) {
+        let pool = data.filter(q => !askedQuestions.has(String(q.question || '')));
+        if (pool.length === 0) { askedQuestions.clear(); pool = data; }
+        const q = pool[Math.floor(Math.random() * pool.length)];
+        askedQuestions.add(String(q.question || ''));
+        return q;
+    }
+
     let currentQuestion = null, currentSquareIndex = null, turn = 'X', boardState = Array(9).fill(null), xWins = 0, oWins = 0;
     let playerX = "Player X", playerO = "Player O";
     let uidX = null, uidO = null;
@@ -671,7 +684,7 @@ window.Hollywood = (() => {
         if (!(await checkCanAct("select a square", fromCpu))) return;
         
         const data = window.currentChapterData.hollywoodData;
-        const q = data[Math.floor(Math.random() * data.length)];
+        const q = pickQuestion(data);
         const isTruth = Math.random() > 0.5;
         
         const currentPlayerName = turn === 'X' ? playerX : playerO;
@@ -733,6 +746,7 @@ window.Hollywood = (() => {
     }
 
     function showQuestionUI(qData) {
+        if (qData.question) askedQuestions.add(String(qData.question));
         currentSquareIndex = qData.index;
         window.currentHSAnswer = qData.isTruth;
         
@@ -840,7 +854,7 @@ window.Hollywood = (() => {
                     setTimeout(() => {
                         hsIsTransitioning = false;
                         const data = window.currentChapterData?.hollywoodData;
-                        const q = data[Math.floor(Math.random() * data.length)];
+                        const q = pickQuestion(data);
                         const isTruth = Math.random() > 0.5;
                         const celebName = selectedCelebs[currentSquareIndex];
                         

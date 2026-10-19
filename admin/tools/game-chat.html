@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review Game Chat | Teacher Tools</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet">
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=24"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+  <style>
+    .chat-row.hidden-msg td { opacity: .5; text-decoration: line-through; }
+    .room-cell { font-size: .8rem; color: #6c757d; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="container my-4" style="max-width: 1000px;">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h3 class="fw-bold mb-0"><i class="fas fa-comments me-2"></i>Review Game Chat</h3>
+    <div class="form-check form-switch fs-5 mb-0">
+      <input class="form-check-input" type="checkbox" role="switch" id="chatEnabled">
+      <label class="form-check-label fw-bold" for="chatEnabled" id="chatEnabledLabel">Chat is on</label>
+    </div>
+  </div>
+  <p class="text-muted small">Chat only appears in multiplayer rooms. Students show as first name + last initial from their login. Messages with blocked words are refused automatically. <strong>Hide</strong> removes a message from students' screens; it stays here for your records.</p>
+
+  <div class="d-flex gap-2 align-items-center mb-2 flex-wrap">
+    <select id="daysSel" class="form-select form-select-sm" style="width:auto">
+      <option value="1">Last 24 hours</option>
+      <option value="7">Last 7 days</option>
+      <option value="30">Last 30 days</option>
+    </select>
+    <input id="searchBox" class="form-control form-control-sm" style="max-width: 260px" placeholder="Search name or message…">
+    <span class="small text-muted ms-auto">Refreshes every 10 seconds</span>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead class="table-light"><tr><th class="ps-3">Time</th><th>Student</th><th>Message</th><th>Room</th><th class="text-end pe-3"></th></tr></thead>
+        <tbody id="chatBody"><tr><td colspan="5" class="text-center text-muted py-3">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+<script type="module">
+import { apiFetch } from '/js/modules/api-client.js';
+
+const body = document.getElementById('chatBody');
+const toggle = document.getElementById('chatEnabled');
+const toggleLabel = document.getElementById('chatEnabledLabel');
+const daysSel = document.getElementById('daysSel');
+const searchBox = document.getElementById('searchBox');
+let rows = [];
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const timeStr = ts => new Date(ts).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+// room_key is "/reviewGames/csUnit2Review.html|abc" -> "csUnit2Review · abc"
+const roomLabel = k => { const [p, code] = String(k).split('|'); return `${p.split('/').pop().replace(/\.html$/, '')} · ${code || ''}`; };
+
+function setToggle(enabled) {
+    toggle.checked = enabled;
+    toggleLabel.textContent = enabled ? 'Chat is on' : 'Chat is OFF';
+    toggleLabel.classList.toggle('text-danger', !enabled);
+}
+
+function render() {
+    const q = searchBox.value.trim().toLowerCase();
+    const shown = q ? rows.filter(r => `${r.display_name} ${r.message}`.toLowerCase().includes(q)) : rows;
+    body.innerHTML = shown.length === 0
+        ? '<tr><td colspan="5" class="text-center text-muted py-3">No messages.</td></tr>'
+        : shown.map(r => `
+            <tr class="chat-row${r.hidden ? ' hidden-msg' : ''}">
+              <td class="ps-3 small text-nowrap">${esc(timeStr(r.created_at))}</td>
+              <td class="fw-bold text-nowrap">${esc(r.display_name)}</td>
+              <td>${esc(r.message)}</td>
+              <td class="room-cell">${esc(roomLabel(r.room_key))}</td>
+              <td class="text-end pe-3">
+                <button class="btn btn-sm ${r.hidden ? 'btn-outline-secondary' : 'btn-outline-danger'} fw-bold" data-id="${r.id}" data-hidden="${r.hidden ? 1 : 0}">${r.hidden ? 'Unhide' : 'Hide'}</button>
+              </td>
+            </tr>`).join('');
+}
+
+async function load() {
+    try {
+        const data = await apiFetch(`/api/admin/game-chat?days=${daysSel.value}`);
+        rows = data.messages || [];
+        setToggle(!!data.enabled);
+        render();
+    } catch (e) {
+        body.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-3">Couldn\'t load the chat log.</td></tr>';
+    }
+}
+
+toggle.addEventListener('change', async () => {
+    const want = toggle.checked;
+    try {
+        await apiFetch('/api/admin/game-chat/enabled', { method: 'POST', body: JSON.stringify({ enabled: want }) });
+        setToggle(want);
+    } catch (e) { setToggle(!want); }
+});
+
+body.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-id]');
+    if (!btn) return;
+    btn.disabled = true;
+    try {
+        await apiFetch('/api/admin/game-chat/hide', { method: 'POST', body: JSON.stringify({ id: Number(btn.dataset.id), hidden: btn.dataset.hidden !== '1' }) });
+        await load();
+    } catch (err) { btn.disabled = false; }
+});
+
+daysSel.addEventListener('change', load);
+searchBox.addEventListener('input', render);
+load();
+setInterval(load, 10000);
+</script>
+</body>
+</html>

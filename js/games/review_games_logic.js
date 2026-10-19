@@ -259,13 +259,36 @@ async function loadGameDataFromPool() {
             });
         });
 
-        // Many questions (most of the CS bank) were written in pure Jeopardy
-        // clue format with no wrong answers at all -- fine for jeopardyData,
-        // which only needs a q/a pair, but Millionaire and Hollywood Squares
-        // need real distractors to build a multiple-choice question. Without
-        // this filter, a distractor-less question silently becomes a
-        // "multiple choice" question with exactly one option.
-        const mcReady = activeQs.filter(q => Array.isArray(q.d) && q.d.length >= 3);
+        // Every game plays from the SAME question set (activeQs); only the
+        // format differs. Many questions (most of the CS bank) were written in
+        // Jeopardy clue format with no wrong answers, which Millionaire,
+        // Smarter, and Hollywood Squares need -- those used to skip such
+        // questions entirely (18 of 90 in most CS chapters, so the same few
+        // kept repeating). Questions missing wrong answers now borrow them
+        // from other questions' real answers, same category first, closest
+        // in length so the right answer doesn't stand out by being longer.
+        const answerPool = activeQs.filter(q => q.a && String(q.a).trim());
+        const withDistractors = (q) => {
+            const own = Array.isArray(q.d) ? q.d.filter(x => x && String(x).trim() && x !== q.a) : [];
+            if (own.length >= 3) return own;
+            const taken = new Set([String(q.a).trim().toLowerCase(), ...own.map(x => String(x).trim().toLowerCase())]);
+            const len = String(q.a).length;
+            const byCloseness = (list) => shuffle(list)
+                .map(o => String(o.a).trim())
+                .filter(a => !taken.has(a.toLowerCase()))
+                .sort((x, y) => Math.abs(x.length - len) - Math.abs(y.length - len));
+            const picks = [...own];
+            for (const a of [...byCloseness(answerPool.filter(o => o.cat === q.cat)), ...byCloseness(answerPool)]) {
+                if (picks.length >= 3) break;
+                if (taken.has(a.toLowerCase())) continue;
+                taken.add(a.toLowerCase());
+                picks.push(a);
+            }
+            return picks;
+        };
+        const mcReady = answerPool
+            .map(q => ({ ...q, d: withDistractors(q) }))
+            .filter(q => q.d.length >= 3);
 
         window.currentChapterData = {
             chapterTitle: targetFilter,
@@ -293,6 +316,14 @@ async function loadGameDataFromPool() {
         if (window.Millionaire) window.Millionaire.setup(dbPlaceholder, appIdPlaceholder, window.currentRoom);
         if (window.Smarter)     window.Smarter.setup(dbPlaceholder, appIdPlaceholder, window.currentRoom);
         if (window.WordGames)   window.WordGames.setup();
+
+        // Room chat only exists in multiplayer rooms (js/games/game-chat.js).
+        if (window.currentRoom && window.currentRoom !== 'solo' && !document.getElementById('game-chat-script')) {
+            const chatScript = document.createElement('script');
+            chatScript.id = 'game-chat-script';
+            chatScript.src = '/js/games/game-chat.js?v=1';
+            document.body.appendChild(chatScript);
+        }
 
         if (document.getElementById('word-games')) document.getElementById('word-games').classList.remove('d-none');
         if (document.getElementById('dynamic-title')) document.getElementById('dynamic-title').textContent = document.title;
