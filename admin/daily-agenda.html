@@ -506,6 +506,10 @@
   body.editing .edit-hint { display: inline; color: var(--tasks-title); font-size: .75rem; }
 
   .course-picker-card { max-width: 520px; margin: 4rem auto; }
+  .auto-advance-btn { margin-top: .3rem; border: 1px solid currentColor; background: transparent; color: inherit;
+    border-radius: 999px; padding: .1rem .65rem; font-size: .75rem; font-weight: 700; opacity: .75; }
+  .auto-advance-btn:hover { opacity: 1; }
+  .auto-advance-btn.off { background: #dc3545; border-color: #dc3545; color: #fff; opacity: 1; }
 </style>
 </head>
 <body>
@@ -542,6 +546,7 @@
       <div class="clock-block">
         <h2 id="clockFace" class="clock-face tag-label" data-tag="h2">--:--:--</h2>
         <div id="clockDate" class="clock-date"></div>
+        <button type="button" id="autoAdvanceBtn" class="auto-advance-btn" title="Turn off to stay on this class instead of jumping to whichever period is happening now"></button>
       </div>
     </div>
 
@@ -1364,8 +1369,33 @@ if (!courseCfg) {
   // after every class change. Skipped entirely while mid-edit, so an
   // in-progress, unsaved change to today's slide never gets silently
   // navigated away from.
+  //
+  // The Auto-switch button turns this off so another period's slide can be
+  // checked mid-day. "Off" is saved with today's date, so it only lasts the
+  // rest of today and can't be forgotten on into tomorrow's classes.
+  const AUTO_ADVANCE_OFF_KEY = 'agenda_auto_advance_off_date';
+  function autoAdvanceOff() {
+    try { return localStorage.getItem(AUTO_ADVANCE_OFF_KEY) === todayStr(); } catch (e) { return false; }
+  }
+  function renderAutoAdvanceBtn() {
+    const btn = document.getElementById('autoAdvanceBtn');
+    if (!btn) return;
+    const off = autoAdvanceOff();
+    btn.classList.toggle('off', off);
+    btn.textContent = off ? 'Auto-switch: OFF (today)' : 'Auto-switch: On';
+  }
+  document.getElementById('autoAdvanceBtn')?.addEventListener('click', () => {
+    try {
+      if (autoAdvanceOff()) localStorage.removeItem(AUTO_ADVANCE_OFF_KEY);
+      else localStorage.setItem(AUTO_ADVANCE_OFF_KEY, todayStr());
+    } catch (e) {}
+    renderAutoAdvanceBtn();
+  });
+  renderAutoAdvanceBtn();
+
   function checkAutoAdvance() {
     if (editing) return;
+    if (autoAdvanceOff()) return;
     const target = findCourseTrackForNow();
     if (!target) return;
     if (target.course === course && (target.track || 'main') === track) return;
