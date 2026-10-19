@@ -24,7 +24,7 @@ async function ensureHeadphoneTable(connection) {
 const OPEN_LIST_SQL = `
     SELECT h.id, h.student_id, h.checked_out_at, s.first_name, s.last_name, s.section_id,
            DATE(h.checked_out_at) < CURDATE() AS overdue
-    FROM headphone_checkouts h JOIN students s ON s.student_id = h.student_id
+    FROM headphone_checkouts h JOIN students s ON s.student_id = h.student_id COLLATE utf8mb4_unicode_ci
     WHERE h.returned_at IS NULL
     ORDER BY h.checked_out_at`;
 
