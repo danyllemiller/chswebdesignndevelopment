@@ -1,8 +1,9 @@
 // /js/admin/headphone-checkout.js
-// Kiosk for a USB barcode scanner (it types the student ID, then Enter).
-// Same toggle for every scan: no pair out -> check one out; already has one
-// -> return it. The input stays focused so every scan lands, and results
-// clear themselves so the station is ready for the next student.
+// Kiosk for a USB barcode scanner (it types the barcode, then Enter).
+// Borrow: scan the headphone sticker (HP01-HP30), then the student ID.
+// Return: scan the headphone sticker (scanning the ID also works).
+// The input stays focused so every scan lands, and results clear
+// themselves so the station is ready for the next student.
 import { apiFetch } from '../modules/api-client.js';
 
 const input = document.getElementById('scanInput');
@@ -19,6 +20,14 @@ const nameList = document.getElementById('nameList');
 let feedbackTimer = null;
 let roster = [];
 let busy = false;
+let pendingHeadphone = null;   // headphone number waiting for an ID scan
+let pendingTimer = null;
+const PENDING_MS = 60000;
+const HEADPHONE_RE = /^HP-?0*(\d{1,3})$/i;
+const stepPanel = document.getElementById('stepPanel');
+const stepText = document.getElementById('stepText');
+const promptTitle = document.getElementById('promptTitle');
+const promptSub = document.getElementById('promptSub');
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const timeStr = ts => new Date(ts).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
@@ -50,45 +59,89 @@ function showFeedback(kind, iconClass, name, sub) {
     feedbackTimer = setTimeout(() => { panel.style.display = 'none'; }, 4000);
 }
 
+function setPending(num) {
+    clearTimeout(pendingTimer);
+    pendingHeadphone = num;
+    if (num === null) {
+        stepPanel.classList.add('d-none');
+        promptTitle.textContent = 'Scan the Headphones';
+        promptSub.textContent = 'Borrowing: scan the sticker on the headphones, then your ID. Returning: just scan the headphones.';
+        input.placeholder = 'Waiting for scan…';
+        return;
+    }
+    stepPanel.classList.remove('d-none');
+    stepText.textContent = `Headphones #${num}`;
+    promptTitle.textContent = 'Now Scan Your ID';
+    promptSub.textContent = 'Or click "No ID?" below to pick your name.';
+    input.placeholder = 'Waiting for your ID…';
+    pendingTimer = setTimeout(() => setPending(null), PENDING_MS);
+}
+
 async function loadOut() {
     try {
         const data = await apiFetch('/api/admin/headphones/out');
         const rows = data.out || [];
         outCount.textContent = rows.length;
         outBody.innerHTML = rows.length === 0
-            ? '<tr><td colspan="4" class="text-center text-muted py-3">All headphones are in.</td></tr>'
+            ? '<tr><td colspan="5" class="text-center text-muted py-3">All headphones are in.</td></tr>'
             : rows.map(r => `
                 <tr class="out-row${r.overdue ? ' overdue' : ''}">
-                  <td class="ps-3 fw-bold">${esc(r.last_name)}, ${esc(r.first_name)}</td>
+                  <td class="ps-3 fw-bold">${r.headphone_number ? '#' + esc(r.headphone_number) : '—'}</td>
+                  <td class="fw-bold">${esc(r.last_name)}, ${esc(r.first_name)}</td>
                   <td>${esc(r.section_id)}</td>
                   <td>${esc(timeStr(r.checked_out_at))}</td>
                   <td class="text-end pe-3"><button class="btn btn-sm btn-outline-primary fw-bold" data-return="${r.id}">Mark returned</button></td>
                 </tr>`).join('');
     } catch (e) {
-        outBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger py-3">Couldn\'t load the list.</td></tr>';
+        outBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-3">Couldn\'t load the list.</td></tr>';
     }
 }
 
-async function scan(studentId) {
-    if (busy || !studentId) return;
+async function send(payload) {
+    return apiFetch('/api/admin/headphones/scan', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+function showResult(data) {
+    const who = data.student ? `${data.student.first_name} ${data.student.last_name}` : '';
+    const num = data.headphone ? ` #${data.headphone}` : '';
+    if (data.action === 'checked_out') {
+        beep(880, 150);
+        showFeedback('out', 'fas fa-headphones text-success', who, `Headphones${num} checked out. Scan them again when you bring them back.`);
+    } else {
+        beep(660, 120); setTimeout(() => beep(990, 120), 140);
+        showFeedback('back', 'fas fa-circle-check text-primary', who, `Headphones${num} returned. Thank you!`);
+    }
+}
+
+// Every scan (and every "No ID?" name click) comes through here.
+async function scan(code) {
+    if (busy || !code) return;
     busy = true;
     try {
-        const data = await apiFetch('/api/admin/headphones/scan', {
-            method: 'POST',
-            body: JSON.stringify({ student_id: studentId })
-        });
-        const who = `${data.student.first_name} ${data.student.last_name}`;
-        if (data.action === 'checked_out') {
-            beep(880, 150);
-            showFeedback('out', 'fas fa-headphones text-success', who, 'Headphones checked out. Scan again when you return them.');
+        const hp = code.match(HEADPHONE_RE);
+        if (hp) {
+            const num = Number(hp[1]);
+            const data = await send({ headphone: num });
+            if (data.action === 'need_student') {
+                beep(880, 80);
+                panel.style.display = 'none';
+                setPending(num);
+            } else {
+                setPending(null);
+                showResult(data);
+                await loadOut();
+            }
         } else {
-            beep(660, 120); setTimeout(() => beep(990, 120), 140);
-            showFeedback('back', 'fas fa-circle-check text-primary', who, 'Headphones returned. Thank you!');
+            const payload = { student_id: code };
+            if (pendingHeadphone !== null) payload.headphone = pendingHeadphone;
+            setPending(null);
+            showResult(await send(payload));
+            await loadOut();
         }
-        await loadOut();
     } catch (e) {
+        setPending(null);
         beep(220, 350);
-        showFeedback('error', 'fas fa-circle-xmark text-danger', 'Scan didn\'t work', e.message || 'Try scanning again, or click your name below.');
+        showFeedback('error', 'fas fa-circle-xmark text-danger', 'Scan didn\'t work', e.message || 'Try scanning again.');
     } finally {
         busy = false;
         focusInput();
@@ -149,6 +202,9 @@ nameList.addEventListener('click', (e) => {
     scan(b.dataset.id);
 });
 
+document.getElementById('cancelStep').addEventListener('click', () => { setPending(null); focusInput(); });
+
+setPending(null);
 loadOut();
 setInterval(loadOut, 60 * 1000);
 focusInput();

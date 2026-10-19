@@ -26,6 +26,7 @@
     .feedback-icon { font-size: 2.6rem; }
     .feedback-name { font-size: 1.5rem; font-weight: 800; margin: .25rem 0; }
     .feedback-sub { font-size: 1.05rem; font-weight: 600; }
+    .step-panel { max-width: 460px; background: #6f42c1; color: #fff; font-size: 1.3rem; font-weight: 800; border-radius: .8rem; padding: .8rem 1rem; }
     .out-row.overdue td { background: #fde0de !important; }
   </style>
 </head>
@@ -39,12 +40,19 @@
         <div class="small opacity-75 fw-bold text-uppercase">Check Out / Return</div>
         <div class="fs-4 fw-bold"><i class="fas fa-headphones me-2"></i>Headphones</div>
       </div>
-      <div class="fs-5 fw-bold"><span id="outCount">0</span> checked out</div>
+      <div class="text-end">
+        <div class="fs-5 fw-bold"><span id="outCount">0</span> checked out</div>
+        <a href="/admin/tools/headphone-labels.html" class="small text-white fw-bold"><i class="fas fa-barcode me-1"></i>Print headphone labels</a>
+      </div>
     </div>
 
     <div class="scan-body">
-      <h4 class="fw-bold mb-1">Scan Your ID</h4>
-      <p class="text-muted mb-3">Scan once to borrow headphones. Scan again when you bring them back.</p>
+      <div id="stepPanel" class="step-panel d-none mx-auto mb-3">
+        <i class="fas fa-headphones me-2"></i><span id="stepText"></span>
+        <button id="cancelStep" type="button" class="btn btn-sm btn-light fw-bold ms-3">Cancel</button>
+      </div>
+      <h4 class="fw-bold mb-1" id="promptTitle">Scan the Headphones</h4>
+      <p class="text-muted mb-3" id="promptSub"></p>
       <input type="text" id="scanInput" class="form-control mx-auto" style="max-width: 420px;" autocomplete="off" placeholder="Waiting for scan…" autofocus>
       <div id="feedbackPanel" class="feedback-panel mx-auto" style="max-width: 460px;">
         <div class="feedback-icon" id="feedbackIcon"></div>
@@ -52,7 +60,7 @@
         <div class="feedback-sub" id="feedbackSub"></div>
       </div>
 
-      <button id="noIdToggle" class="btn btn-link btn-sm mt-3 fw-bold text-decoration-none"><i class="fas fa-magnifying-glass me-1"></i>No ID? Click your name instead</button>
+      <button id="noIdToggle" class="btn btn-link btn-sm mt-3 fw-bold text-decoration-none"><i class="fas fa-magnifying-glass me-1"></i>No ID? Click your name instead (scan the headphones first)</button>
       <div id="noIdPanel" class="d-none mt-2 text-start mx-auto" style="max-width: 420px;">
         <input type="text" id="nameSearch" class="form-control mb-2" placeholder="Type to search names…">
         <div id="nameList" class="list-group" style="max-height: 260px; overflow-y: auto;"></div>
@@ -66,8 +74,8 @@
       </div>
       <div class="table-responsive">
         <table class="table table-sm align-middle mb-0 mt-2">
-          <thead class="table-light"><tr><th class="ps-3">Student</th><th>Period</th><th>Checked out</th><th class="text-end pe-3"></th></tr></thead>
-          <tbody id="outBody"><tr><td colspan="4" class="text-center text-muted py-3">Loading…</td></tr></tbody>
+          <thead class="table-light"><tr><th class="ps-3">#</th><th>Student</th><th>Period</th><th>Checked out</th><th class="text-end pe-3"></th></tr></thead>
+          <tbody id="outBody"><tr><td colspan="5" class="text-center text-muted py-3">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -75,6 +83,6 @@
 </div>
 
 <div id="footer-placeholder"></div>
-<script type="module" src="/js/admin/headphone-checkout.js?v=1"></script>
+<script type="module" src="/js/admin/headphone-checkout.js?v=2"></script>
 </body>
 </html>
