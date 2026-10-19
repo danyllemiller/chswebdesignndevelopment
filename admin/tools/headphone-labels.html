@@ -11,23 +11,27 @@
   <script src="/js/loader.js?v=24"></script>
   <script type="module" src="/js/auth-guard.js?v=1"></script>
   <style>
-    /* Avery 5160 / 8160: 3 x 10 labels, 2.625" x 1", 0.5" top margin,
-       0.1875" side margin, 0.125" gap between columns. */
+    /* Plain paper: 3 x 10 cut boxes, each exactly 5cm x 2.5cm, sharing
+       their cut lines so one straight cut separates two rows. */
     @page { size: letter; margin: 0; }
     .sheet {
       width: 8.5in; height: 11in; background: #fff; margin: 0 auto 1rem;
-      padding: 0.5in 0.1875in 0;
-      display: grid; grid-template-columns: repeat(3, 2.625in); grid-auto-rows: 1in;
-      column-gap: 0.125in; box-shadow: 0 0 .5rem rgba(0,0,0,.25);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 .5rem rgba(0,0,0,.25);
+    }
+    .grid {
+      display: grid; grid-template-columns: repeat(3, 5cm); grid-auto-rows: 2.5cm;
+      border-top: 0.3mm solid #000; border-left: 0.3mm solid #000;
     }
     .label {
-      display: flex; align-items: center; justify-content: center; gap: .08in;
-      padding: 0 .1in; overflow: hidden; font-family: Arial, Helvetica, sans-serif;
+      box-sizing: border-box; width: 5cm; height: 2.5cm;
+      border-right: 0.3mm solid #000; border-bottom: 0.3mm solid #000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 1.5mm 0; overflow: hidden; font-family: Arial, Helvetica, sans-serif;
     }
-    .label svg { height: .62in; flex: 0 0 auto; }
-    .label .num { text-align: center; line-height: 1; }
-    .label .num b { display: block; font-size: 24pt; }
-    .label .num small { font-size: 7pt; text-transform: uppercase; letter-spacing: .05em; }
+    .label svg { height: 1.35cm; display: block; }
+    .label .num { margin-top: 1mm; font-size: 9pt; font-weight: 700; line-height: 1; }
+    .label .num b { font-size: 12pt; }
     .screen-only { max-width: 8.5in; margin: 1rem auto; }
     @media print {
       body { margin: 0; background: #fff !important; }
@@ -42,10 +46,10 @@
 <div class="screen-only card shadow-sm">
   <div class="card-body">
     <h4 class="fw-bold mb-2"><i class="fas fa-barcode me-2"></i>Headphone Barcode Labels</h4>
-    <p class="mb-2">Fits <strong>Avery 5160 / 8160</strong> address labels (30 per sheet). Each sticker scans as <code>HP01</code>–<code>HP30</code>.</p>
+    <p class="mb-2">Prints on plain paper (or a full-page sticker sheet): 30 boxes per page, each <strong>5 cm × 2.5 cm</strong>. Cut along the black lines. Each sticker scans as <code>HP01</code>–<code>HP30</code>.</p>
     <ul class="small mb-3">
       <li>In the print box, set <strong>Scale: 100% / Actual size</strong> (not "Fit to page") and turn <strong>Headers and footers off</strong>, or the labels won't line up.</li>
-      <li>Print one copy on plain paper first and hold it up to a label sheet to check.</li>
+      <li>Check the size with a ruler on the first page: each box should be exactly 5 cm wide and 2.5 cm tall.</li>
       <li>Scan one sticker on the checkout page to test before sticking them all on.</li>
     </ul>
     <div class="d-flex gap-2 align-items-center flex-wrap">
@@ -82,8 +86,9 @@ function code39Svg(text) {
     if (i < chars.length - 1) x += NARROW; // gap between characters
   });
   const width = x + QUIET;
-  // 0.0125in per narrow module keeps the code well inside the scanner's range.
-  return `<svg viewBox="0 0 ${width} 50" style="width:${(width * 0.0125).toFixed(3)}in" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">${bars}</svg>`;
+  // 0.25mm per narrow module (about 10 mil): small enough to fit a 5cm box,
+  // still well inside what a USB scanner reads.
+  return `<svg viewBox="0 0 ${width} 50" style="width:${(width * 0.25).toFixed(2)}mm" preserveAspectRatio="none" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">${bars}</svg>`;
 }
 function build() {
   const from = Math.max(1, parseInt(document.getElementById('fromNum').value, 10) || 1);
@@ -91,10 +96,10 @@ function build() {
   const labels = [];
   for (let n = from; n <= to; n++) {
     const code = 'HP' + String(n).padStart(2, '0');
-    labels.push(`<div class="label">${code39Svg(code)}<div class="num"><small>Headphones</small><b>#${n}</b></div></div>`);
+    labels.push(`<div class="label">${code39Svg(code)}<div class="num">Headphones <b>#${n}</b></div></div>`);
   }
   let html = '';
-  for (let i = 0; i < labels.length; i += 30) html += `<div class="sheet">${labels.slice(i, i + 30).join('')}</div>`;
+  for (let i = 0; i < labels.length; i += 30) html += `<div class="sheet"><div class="grid">${labels.slice(i, i + 30).join('')}</div></div>`;
   document.getElementById('sheets').innerHTML = html;
 }
 document.getElementById('buildBtn').addEventListener('click', build);
