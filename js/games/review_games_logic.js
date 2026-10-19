@@ -149,7 +149,7 @@ window.launchGame = async function(gameId) {
         }
     }
 
-    const sections = ['game-smarter', 'game-jeopardy', 'game-hollywood', 'game-millionaire'];
+    const sections = ['game-smarter', 'game-jeopardy', 'game-hollywood', 'game-millionaire', ...((window.CoopGames && window.CoopGames.sectionIds) || [])];
     sections.forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('d-none'); });
     const target = document.getElementById(gameId);
     if (target) {
@@ -159,6 +159,8 @@ window.launchGame = async function(gameId) {
         buildGameShells();
         if (gameId === 'game-millionaire' && window.Millionaire) window.Millionaire.renderUI();
     }
+    // Team Jeopardy / Boss Battle / Wordle (js/games/coop-games.js)
+    if (window.CoopGames) window.CoopGames.onLaunch(gameId);
 };
 
 // ======================================================
@@ -316,6 +318,15 @@ async function loadGameDataFromPool() {
         if (window.Millionaire) window.Millionaire.setup(dbPlaceholder, appIdPlaceholder, window.currentRoom);
         if (window.Smarter)     window.Smarter.setup(dbPlaceholder, appIdPlaceholder, window.currentRoom);
         if (window.WordGames)   window.WordGames.setup();
+
+        // Team Jeopardy, Boss Battle, and Wordle add their own launcher
+        // buttons once the questions above are ready.
+        if (!document.getElementById('coop-games-script')) {
+            const coopScript = document.createElement('script');
+            coopScript.id = 'coop-games-script';
+            coopScript.src = '/js/games/coop-games.js?v=1';
+            document.body.appendChild(coopScript);
+        }
 
         // Room chat only exists in multiplayer rooms (js/games/game-chat.js).
         if (window.currentRoom && window.currentRoom !== 'solo' && !document.getElementById('game-chat-script')) {

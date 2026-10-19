@@ -75,11 +75,27 @@ router.post('/game-room', requireLogin, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to write game room' }); }
 });
 
+// Dotted-path read, the counterpart of applyDotNotationMerge's write.
+function getDotPath(state, key) {
+    return key.split('.').reduce((obj, part) => (obj == null ? undefined : obj[part]), state);
+}
+
+// Two optional extras on PATCH, used by the co-op games (js/games/coop-games.js)
+// where several students change the same numbers at nearly the same moment:
+//   increments: { "bossHp": -1, "hits.8001786": 1 }  -- added to the current
+//       value inside the row lock, so simultaneous hits all count instead of
+//       each client writing back its own stale total.
+//   ifMatch: { "active.id": "q12", "active.resolved": false } -- the whole
+//       update applies only if every listed path currently equals its value
+//       (compare-and-set), so when several clients race to resolve the same
+//       question, exactly one wins. Responds { applied: false } otherwise.
+// Requests without either field behave exactly as before (Firestore updateDoc).
 router.patch('/game-room', requireLogin, async (req, res) => {
-    const { path, updates } = req.body;
+    const { path, ifMatch, increments } = req.body;
+    const updates = req.body.updates || (increments ? {} : null);
     if (!path || !updates) return res.status(400).json({ error: 'path and updates are required' });
     try {
-        await withConnection(async (connection) => {
+        const applied = await withConnection(async (connection) => {
             await connection.execute(GAME_ROOMS_DDL);
             // Locks the row for the duration of this read-modify-write so two
             // near-simultaneous updates (two students buzzing in within the
@@ -89,18 +105,31 @@ router.patch('/game-room', requireLogin, async (req, res) => {
             try {
                 const [rows] = await connection.execute('SELECT state_json FROM game_rooms WHERE room_path = ? FOR UPDATE', [path]);
                 const state = rows.length ? JSON.parse(rows[0].state_json) : {};
+                if (ifMatch && typeof ifMatch === 'object' &&
+                    !Object.entries(ifMatch).every(([k, v]) => (getDotPath(state, k) ?? null) === v)) {
+                    await connection.commit();
+                    return false;
+                }
                 applyDotNotationMerge(state, updates);
+                if (increments && typeof increments === 'object') {
+                    const adds = {};
+                    Object.entries(increments).forEach(([k, n]) => {
+                        adds[k] = (Number(getDotPath(state, k)) || 0) + (Number(n) || 0);
+                    });
+                    applyDotNotationMerge(state, adds);
+                }
                 await connection.execute(
                     'INSERT INTO game_rooms (room_path, state_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE state_json = VALUES(state_json), updated_at = NOW()',
                     [path, JSON.stringify(state)]
                 );
                 await connection.commit();
+                return true;
             } catch (txErr) {
                 await connection.rollback();
                 throw txErr;
             }
         });
-        res.json({ success: true });
+        res.json({ success: true, applied });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to update game room' });
