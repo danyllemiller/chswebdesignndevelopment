@@ -855,6 +855,8 @@ if (!courseCfg) {
 
   let content = {};   // block_num -> content object
   let schedule = {};  // track -> block_num -> date string
+  let days = {};      // track -> date string -> block_num (from Jotability; a block can repeat)
+  let shownDate = null; // the date being shown when it came from `days`
   let currentBlock = 1;
   let editing = false;
   let editSnapshot = null;
@@ -955,6 +957,16 @@ if (!courseCfg) {
   }
 
   function findBlockForToday() {
+    const dmap = days[track] || {};
+    if (Object.keys(dmap).length) {
+      // Jotability's dates: today's block, or the nearest class day's.
+      const today = todayStr(); let best = null, bestDiff = Infinity;
+      for (const [dateStr, blockNum] of Object.entries(dmap)) {
+        const diff = Math.abs(new Date(dateStr) - new Date(today));
+        if (diff < bestDiff) { bestDiff = diff; best = blockNum; shownDate = dateStr; }
+      }
+      if (best !== null) return best;
+    }
     const map = schedule[track] || {};
     const today = todayStr();
     let exact = null, closest = null, closestDiff = Infinity;
@@ -1154,7 +1166,7 @@ if (!courseCfg) {
 
   function render() {
     const c = content[currentBlock];
-    const dateStr = (schedule[track] || {})[currentBlock];
+    const dateStr = (shownDate && (days[track] || {})[shownDate] === currentBlock) ? shownDate : (schedule[track] || {})[currentBlock];
     document.getElementById('dateLabel').textContent = dateStr ? fmtDateLabel(dateStr) : `Block ${currentBlock}`;
     document.getElementById('minDayNote').classList.toggle('d-none', !(c && c.minimumDay));
     document.getElementById('courseSubtitle').textContent = courseSubtitleText();
@@ -1547,6 +1559,22 @@ if (!courseCfg) {
   // files load once, not on every open/close of the widget).
   const TIMER_CHIME = new Audio('/sounds/soundshelfstudio-ui-alarm-clock-516360.mp3');
 
+  // Alarm volume sliders (Timer + Sound Level), 0-100, remembered per
+  // browser so the teacher sets it once for her classroom speakers.
+  function loadAlarmVolume(key) {
+    try { const v = parseInt(localStorage.getItem(key), 10); return Number.isFinite(v) ? Math.min(100, Math.max(0, v)) : 100; }
+    catch (e) { return 100; }
+  }
+  function saveAlarmVolume(key, v) { try { localStorage.setItem(key, String(v)); } catch (e) {} }
+  function volumeControlHtml(cls, value) {
+    return `<div class="d-flex align-items-center gap-2 mt-2 alarm-volume-row">
+          <i class="fas fa-volume-low small opacity-75" aria-hidden="true"></i>
+          <input type="range" class="${cls} form-range flex-grow-1" min="0" max="100" step="5" value="${value}" aria-label="Alarm volume">
+          <span class="${cls}-val small fw-bold" style="min-width:2.6rem;text-align:right">${value}%</span>
+          <button type="button" class="${cls}-test btn btn-sm btn-outline-light py-0 px-2" title="Play the alarm at this volume">Test</button>
+        </div>`;
+  }
+
   const NATIVE_TOOLS = {
     timer(body, widgetEl) {
       body.innerHTML = `
@@ -1567,11 +1595,26 @@ if (!courseCfg) {
           <input class="tt-custom-mins form-control form-control-sm" type="number" min="0" max="180" placeholder="min" style="width:60px">
           <button type="button" class="tt-set-custom btn btn-sm btn-outline-warning">Set</button>
         </div>
+        ${volumeControlHtml('tt-volume', loadAlarmVolume('agenda_timer_alarm_volume'))}
       `;
       let seconds = 300, remaining = 300, running = false, interval = null, stopwatch = false, elapsed = 0;
       const display = body.querySelector('.tt-display');
       const startBtn = body.querySelector('.tt-start');
       const modeBtn = body.querySelector('.tt-mode');
+      const volRange = body.querySelector('.tt-volume');
+      const volVal = body.querySelector('.tt-volume-val');
+      TIMER_CHIME.volume = volRange.value / 100;
+      volRange.addEventListener('input', () => {
+        TIMER_CHIME.volume = volRange.value / 100;
+        volVal.textContent = volRange.value + '%';
+        saveAlarmVolume('agenda_timer_alarm_volume', volRange.value);
+      });
+      body.querySelector('.tt-volume-test').addEventListener('click', () => {
+        try {
+          TIMER_CHIME.currentTime = 0; TIMER_CHIME.play().catch(() => {});
+          setTimeout(() => { if (!widgetEl.classList.contains('alarm-active')) { TIMER_CHIME.pause(); TIMER_CHIME.currentTime = 0; } }, 1500);
+        } catch (e) {}
+      });
 
       function fmt(t) { const m = Math.floor(t / 60), s = t % 60; return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'); }
       function update() { display.textContent = stopwatch ? fmt(elapsed) : fmt(remaining); }
@@ -1644,6 +1687,7 @@ if (!courseCfg) {
             <option value="clock">Alarm Clock</option>
             <option value="both" selected>Both</option>
           </select>
+          ${volumeControlHtml('ss-volume', loadAlarmVolume('agenda_sound_alarm_volume'))}
         </div>
         <button type="button" class="ss-mic-toggle btn btn-sm btn-outline-success w-100 mt-2"><i class="fas fa-microphone me-1"></i>Start Listening</button>
       `;
@@ -1652,7 +1696,8 @@ if (!courseCfg) {
         scratch: new Audio('/sounds/8footdino_on_scratch-alarm-301729.mp3'),
         clock: new Audio('/sounds/soundshelfstudio-ui-alarm-clock-516360.mp3')
       };
-      Object.values(ALARM_SOUNDS).forEach(a => { a.loop = true; a.volume = 1; });
+      let alarmVolume = loadAlarmVolume('agenda_sound_alarm_volume') / 100;
+      Object.values(ALARM_SOUNDS).forEach(a => { a.loop = true; a.volume = alarmVolume; });
 
       let audioCtx = null, analyser = null, stream = null, raf = null;
       let alarmLevel = 70, alarmEnabled = true, alarmActive = false, alarmAudioPrimed = false, alarmTimer = null;
@@ -1665,14 +1710,26 @@ if (!courseCfg) {
       const alarmEnabledEl = body.querySelector('.ss-alarm-enabled');
       const alarmChoiceEl = body.querySelector('.ss-alarm-choice');
       const micBtn = body.querySelector('.ss-mic-toggle');
+      const ssVolRange = body.querySelector('.ss-volume');
+      const ssVolVal = body.querySelector('.ss-volume-val');
+      ssVolRange.addEventListener('input', () => {
+        alarmVolume = ssVolRange.value / 100;
+        Object.values(ALARM_SOUNDS).forEach(a => { a.volume = alarmVolume; });
+        ssVolVal.textContent = ssVolRange.value + '%';
+        saveAlarmVolume('agenda_sound_alarm_volume', ssVolRange.value);
+      });
+      body.querySelector('.ss-volume-test').addEventListener('click', () => {
+        const sounds = activeAlarmSounds();
+        sounds.forEach(a => { a.volume = alarmVolume; a.currentTime = 0; a.play().catch(() => {}); });
+        setTimeout(() => { if (!alarmActive) sounds.forEach(a => { a.pause(); a.currentTime = 0; }); }, 1500);
+      });
 
       function primeAlarmAudio() {
         if (alarmAudioPrimed) return;
         alarmAudioPrimed = true;
         Object.values(ALARM_SOUNDS).forEach(a => {
-          const prevVol = a.volume;
           a.volume = 0;
-          a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = prevVol; }).catch(() => { a.volume = prevVol; });
+          a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = alarmVolume; }).catch(() => { a.volume = alarmVolume; });
         });
       }
       function activeAlarmSounds() {
@@ -1683,7 +1740,7 @@ if (!courseCfg) {
       function startAlarm() {
         if (alarmActive) return;
         try {
-          activeAlarmSounds().forEach(a => { a.currentTime = 0; a.play().catch(e => console.error('Alarm audio failed to play:', e)); });
+          activeAlarmSounds().forEach(a => { a.volume = alarmVolume; a.currentTime = 0; a.play().catch(e => console.error('Alarm audio failed to play:', e)); });
           widgetEl.classList.add('alarm-active');
           alarmActive = true;
           alarmTimer = setTimeout(stopAlarm, ALARM_BURST_MS);
@@ -1827,6 +1884,7 @@ if (!courseCfg) {
     .then(([data]) => {
       content = data.content || {};
       schedule = data.schedule || {};
+      days = data.days || {};
 
       // CS has two tracks (A meets on A-days, B on B-days); WD doesn't, so
       // this ambiguity is exactly why the no-pass banner only ever worked
@@ -1838,7 +1896,7 @@ if (!courseCfg) {
       // pacing guide actually has a block dated today.
       if (courseCfg.hasTracks && !params.get('track')) {
         const today = todayStr();
-        const trackForToday = Object.keys(schedule).find(t => Object.values(schedule[t] || {}).includes(today));
+        const trackForToday = Object.keys(days).find(t => (days[t] || {})[today]) || Object.keys(schedule).find(t => Object.values(schedule[t] || {}).includes(today));
         if (trackForToday && trackForToday !== track) {
           track = trackForToday;
           document.documentElement.setAttribute('data-track', track);
