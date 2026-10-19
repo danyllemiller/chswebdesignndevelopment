@@ -25,6 +25,20 @@ const AGENDA_SCHEDULE_DDL = `CREATE TABLE IF NOT EXISTS agenda_schedule (
     KEY idx_lookup (course, track, event_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
+const AGENDA_DAYS_DDL = `CREATE TABLE IF NOT EXISTS agenda_days (
+    course     VARCHAR(20) NOT NULL,
+    track      VARCHAR(10) NOT NULL DEFAULT 'main',
+    event_date DATE        NOT NULL,
+    block_num  INT         NOT NULL,
+    PRIMARY KEY (course, track, event_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
+// mysql2 hands DATE columns back as local-midnight Date objects; toISOString()
+// would shift them a day early west of UTC, so format the local parts.
+const ymd = d => (d instanceof Date)
+    ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    : String(d).slice(0, 10);
+
 // This is the teacher's own daily-planning tool (admin/daily-agenda.html),
 // not student-facing, so staff-only rather than merely requireLogin.
 router.get('/agenda/get', requireStaff, async (req, res) => {
@@ -50,9 +64,19 @@ router.get('/agenda/get', requireStaff, async (req, res) => {
                 schedule[r.track][r.block_num] = r.event_date.toISOString().split('T')[0];
             });
 
-            return { content, schedule };
+            // Date -> block, written by Jotability. A block can land on more
+            // than one date here (a "didn't finish" day repeats the same
+            // slide), which agenda_schedule's one-date-per-block key can't hold.
+            await connection.execute(AGENDA_DAYS_DDL);
+            const [dayRows] = await connection.execute(
+                'SELECT track, event_date, block_num FROM agenda_days WHERE course = ?', [course]
+            );
+            const days = {};
+            dayRows.forEach(r => { (days[r.track] = days[r.track] || {})[ymd(r.event_date)] = r.block_num; });
+
+            return { content, schedule, days };
         });
-        res.json({ course, content: result.content, schedule: result.schedule });
+        res.json({ course, content: result.content, schedule: result.schedule, days: result.days });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch agenda' }); }
 });
 
@@ -75,6 +99,98 @@ router.post('/admin/save-agenda-content', async (req, res) => {
         });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save agenda content' }); }
+});
+
+// ── Jotability sync ─────────────────────────────────────────────────────
+// Jotability (the teacher's planner app) is the master pacing calendar: it
+// decides which date each agenda block is taught on, including repeats for
+// "didn't finish" days and shifts for snow days. It runs on a different
+// origin (an iPad home-screen app), so these routes use a shared secret
+// (AGENDA_SYNC_KEY in .env) instead of the session cookie, plus CORS.
+const crypto = require('crypto');
+const SYNC_COURSES = new Set(['wd1', 'wd2', 'cs_s1']);
+
+function syncCors(req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+    res.setHeader('Access-Control-Max-Age', '600');
+    if (req.method === 'OPTIONS') return res.sendStatus(204);
+    next();
+}
+function requireSyncKey(req, res, next) {
+    const expected = process.env.AGENDA_SYNC_KEY || '';
+    if (expected.length < 24) return res.status(503).json({ error: 'Sync is not set up on the server yet (AGENDA_SYNC_KEY in .env).' });
+    const given = String(req.get('authorization') || '').replace(/^Bearer\s+/i, '');
+    const a = crypto.createHash('sha256').update(given).digest(), b = crypto.createHash('sha256').update(expected).digest();
+    if (!given || !crypto.timingSafeEqual(a, b)) return res.status(401).json({ error: 'That sync key isn’t right.' });
+    next();
+}
+router.use('/agenda/sync', syncCors);
+
+// Chapter outline of a course's agenda, so Jotability can match each of its
+// pacing units to a chapter's agenda blocks. A group is every block sharing
+// the same chapterLabel prefix (the part before " · Day N of M"), in block
+// order -- even when a re-teach day interrupts the chapter partway through.
+router.get('/agenda/sync/outline', requireSyncKey, async (req, res) => {
+    const course = String(req.query.course || '').trim();
+    if (!SYNC_COURSES.has(course)) return res.status(400).json({ error: 'Unknown course' });
+    try {
+        const rows = await withConnection(async (connection) => {
+            await connection.execute(AGENDA_CONTENT_DDL);
+            const [r] = await connection.execute('SELECT block_num, content FROM agenda_content WHERE course = ? ORDER BY block_num', [course]);
+            return r;
+        });
+        const groups = [], byName = new Map();
+        rows.forEach(r => {
+            let c = {}; try { c = JSON.parse(r.content); } catch (e) { }
+            const name = String(c.chapterLabel || `Block ${r.block_num}`).split(' · ')[0].trim();
+            let g = byName.get(name);
+            if (!g) { g = { name, full: [], short: [] }; groups.push(g); byName.set(name, g); }
+            (c.minimumDay ? g.short : g.full).push(r.block_num);
+        });
+        res.json({ course, blocks: rows.length, groups });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to read the agenda outline' }); }
+});
+
+// Replace one course/track's dates. Body: { course, track, days: [{ date: 'YYYY-MM-DD', block: N }] }
+router.post('/agenda/sync/schedule', requireSyncKey, async (req, res) => {
+    const course = String(req.body?.course || '').trim();
+    const track = String(req.body?.track || 'main').trim();
+    const days = Array.isArray(req.body?.days) ? req.body.days : null;
+    if (!SYNC_COURSES.has(course) || !/^(main|A|B)$/.test(track) || !days) return res.status(400).json({ error: 'course, track and days are required' });
+    const clean = [];
+    for (const d of days) {
+        const date = String(d?.date || ''), block = parseInt(d?.block, 10);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !(block > 0) || block > 1000) return res.status(400).json({ error: `Bad day entry: ${JSON.stringify(d)}` });
+        clean.push([date, block]);
+    }
+    if (clean.length > 1000) return res.status(400).json({ error: 'Too many days' });
+    try {
+        await withConnection(async (connection) => {
+            await connection.execute(AGENDA_SCHEDULE_DDL);
+            await connection.execute(AGENDA_DAYS_DDL);
+            // Keep the hand-made dates from before the first sync, once.
+            await connection.execute('CREATE TABLE IF NOT EXISTS agenda_schedule_backup LIKE agenda_schedule');
+            await connection.execute('INSERT IGNORE INTO agenda_schedule_backup SELECT * FROM agenda_schedule WHERE course = ? AND track = ?', [course, track]);
+            await connection.beginTransaction();
+            try {
+                await connection.execute('DELETE FROM agenda_days WHERE course = ? AND track = ?', [course, track]);
+                await connection.execute('DELETE FROM agenda_schedule WHERE course = ? AND track = ?', [course, track]);
+                const firstDate = new Map();
+                for (const [date, block] of clean) {
+                    await connection.execute('INSERT INTO agenda_days (course, track, event_date, block_num) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE block_num = VALUES(block_num)', [course, track, date, block]);
+                    if (!firstDate.has(block) || date < firstDate.get(block)) firstDate.set(block, date);
+                }
+                // agenda_schedule keeps one date per block (the first) so the jump list still labels each slide.
+                for (const [block, date] of firstDate) {
+                    await connection.execute('INSERT INTO agenda_schedule (course, track, block_num, event_date) VALUES (?, ?, ?, ?)', [course, track, block, date]);
+                }
+                await connection.commit();
+            } catch (e) { await connection.rollback(); throw e; }
+        });
+        res.json({ success: true, course, track, days: clean.length });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save the schedule' }); }
 });
 
 module.exports = router;
