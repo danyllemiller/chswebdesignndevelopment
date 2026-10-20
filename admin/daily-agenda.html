@@ -1414,6 +1414,37 @@ if (!courseCfg) {
   tickClock();
   setInterval(tickClock, 1000);
 
+  // This page is often left open all day (and overnight), but it only
+  // loaded the agenda once -- so a new pacing send from Jotability, or simply
+  // a new school day, never showed up until someone refreshed by hand.
+  // A new day reloads the page outright; within the day, re-check every
+  // 5 minutes and, if the pacing or slides changed, move to today's block
+  // (only when the page was already showing today's block, so browsing
+  // ahead or behind isn't yanked back).
+  const loadedDay = todayStr();
+  setInterval(() => {
+    if (!editing && todayStr() !== loadedDay) location.reload();
+  }, 60 * 1000);
+  async function refreshAgendaData() {
+    if (editing) return;
+    try {
+      const data = await fetch(`/api/agenda/get?course=${encodeURIComponent(course)}`).then(r => r.json());
+      if (!data || !data.content) return;
+      const changed = JSON.stringify(data.days || {}) !== JSON.stringify(days)
+        || JSON.stringify(data.schedule || {}) !== JSON.stringify(schedule)
+        || JSON.stringify(data.content || {}) !== JSON.stringify(content);
+      if (!changed || editing) return;
+      const wasOnToday = currentBlock === findBlockForToday();
+      content = data.content || {};
+      schedule = data.schedule || {};
+      days = data.days || {};
+      populateJumpSelect();
+      if (wasOnToday) currentBlock = findBlockForToday();
+      render();
+    } catch (e) { /* try again next interval */ }
+  }
+  setInterval(refreshAgendaData, 5 * 60 * 1000);
+
   // ══════════════════════════════════════════════════════════════════════
   // FLOATING CLASSROOM TOOL WIDGETS (classroomscreen-style toolbar)
   // Timer and Sound Level used to share one fixed box in the layout with a
