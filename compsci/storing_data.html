@@ -261,6 +261,13 @@ Aaliyah, 10th grade, Chemistry, D+</pre>
       <p class="mb-0">Every character you type is stored as a number, using a standard called <strong>ASCII</strong> (or its modern superset, Unicode). The letter "A" is always the number 65. One <strong>byte</strong> (8 bits) can represent 256 distinct values (2<sup>8</sup>) — enough for every letter, digit, and punctuation mark on a standard keyboard, with room to spare.</p>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Sampling Rate: Sound Quality vs. File Size</h5>
+      <p>Sound in the real world is <strong>analog</strong>: a smooth, continuous wave. To store it, a computer measures that wave over and over, very quickly, and saves each measurement as a number. Each measurement is a <strong>sample</strong>, and the number of samples taken every second is the <strong>sampling rate</strong>. CD-quality audio takes 44,100 samples every second.</p>
+      <p>More samples per second means the digital copy follows the real wave more closely, so it sounds clearer and more like the original. How close a recording is to the real sound is called its <strong>fidelity</strong>.</p>
+      <p class="mb-0">The tradeoff is size. Every sample is more data to store, so doubling the sampling rate roughly doubles the file size. That's why a voice memo app records at a lower rate than a music studio: speech is still easy to understand at lower quality, and the smaller files are easier to store and send. Higher fidelity almost always costs you a bigger file.</p>
+  </div>
+
   <h4 class="fw-bold mt-5 text-info">6.3.2 Compression: Lossless vs. Lossy</h4>
   <p>A raw file is often bigger than it needs to be. Compression shrinks it — but not all compression works the same way:</p>
   <div class="row g-3 my-3">

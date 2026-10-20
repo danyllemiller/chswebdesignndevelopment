@@ -60,6 +60,13 @@
       <p class="mb-0">They're the perfect example of abstraction. You press "Start" on a microwave and never see the program deciding how long to run the magnetron or when to beep. All of that complexity is hidden behind a few buttons, so anyone can use it without knowing anything about computers.</p>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Spotting Abstraction in Everyday Life</h5>
+      <p><strong>Abstraction</strong> means hiding complicated details so a person can use something in a simple way. You use abstraction dozens of times a day without noticing. When you swipe to unlock your phone, you don't think about the touchscreen measuring tiny changes in electricity, the processor checking your pattern, or the operating system loading your home screen. You just swipe, and it works.</p>
+      <p>The same thing happens when you tap an app icon, press a car's gas pedal, or flip a light switch. Each one is a simple "front" that hides a huge amount of machinery behind it. You only need to know what the button <em>does</em>, not how it works inside.</p>
+      <p class="mb-0">Here's how to recognize it on a test or in real life: someone uses a simple action <em>without knowing what's happening underneath</em>. That's abstraction. Its whole purpose is to make powerful, complicated technology easy enough for anyone to use, and it's the reason computers are built in layers.</p>
+  </div>
+
   <div class="alert alert-info mt-4 shadow-sm border-info">
       <div class="d-flex align-items-start">
           <i class="fas fa-search fa-3x me-4 text-info mt-1"></i>
@@ -115,6 +122,13 @@
   <p>The handoffs between these layers have names. A <strong>system call</strong> is an app formally asking the OS to do something on its behalf. A <strong>device driver</strong> is the piece of software that lets the OS talk to one specific piece of hardware. A <strong>file permission</strong> is the OS deciding whether you're even allowed to open a file — not the app.</p>
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: The Layers in Order, Bottom to Top</h5>
+      <p>Picture a computer as a stack. At the bottom is the <strong>hardware</strong>: the physical chips, circuits, and memory you could actually hold in your hand. On top of the hardware sits the <strong>system software</strong>, mainly the operating system. On top of the operating system sit the <strong>applications</strong>. At the very top is <strong>you, the user</strong>.</p>
+      <p>So from bottom to top the order is: <strong>Hardware → Operating System → Application Software → User</strong>. Each layer only talks to the layers right next to it. An app never reaches down and controls the hardware itself. It asks the operating system, and the OS is the bridge that turns the app's request into instructions the hardware can carry out.</p>
+      <p class="mb-0">How do you tell application software from system software? Ask, "Who is this for?" <strong>Application software</strong> does a job for <em>you</em>: a web browser like Chrome, a spreadsheet program like Google Sheets, a game, a photo editor, a music player. <strong>System software</strong> does a job for <em>the computer</em>: it starts the machine, manages memory, and controls devices. If you open it on purpose to get your own work or fun done, it's almost always an application.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: What the Operating System Does</h5>
       <p>The <strong>operating system (OS)</strong> is the manager of the whole computer. Windows, macOS, ChromeOS, iOS, and Android are all operating systems. It's the first big program that starts when you turn a device on, and everything else runs on top of it.</p>
       <p>Think of the OS like a school's front office. Apps are like teachers who need things: a room, supplies, a schedule. They don't just take what they want. They ask the office. The OS decides which app gets to use the processor next, how much memory each app gets, and which app is allowed to use the camera, the speakers, or your files.</p>
@@ -138,6 +152,13 @@
   <div class="concept-box shadow-sm border-success bg-light">
       <h5 class="fw-bold text-success"><i class="fas fa-save me-2"></i> Worked Example: Saving a File</h5>
       <p class="mb-0">You hit "Save." The application requests the write. The operating system validates that you have permission to write there. A device driver translates that request into commands the storage hardware understands. The hardware physically stores the bits. Four layers, one click.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: How Your Code Becomes Something the CPU Can Run</h5>
+      <p>Programmers write code in languages people can read, like Python or JavaScript. A line like <code>print("Hello")</code> makes sense to you, but the processor can't read it at all. The CPU only understands <strong>machine code</strong>: long patterns of 1s and 0s, each one a tiny instruction like "add these two numbers" or "move this value into memory."</p>
+      <p>So every program has to be <em>translated</em> into binary machine code before the hardware can run it. A <strong>compiler</strong> translates the whole program ahead of time and produces a finished file you can run again and again. Most apps you install were compiled. An <strong>interpreter</strong> translates the code a little at a time, line by line, while the program is running. Python, and JavaScript in a web browser, usually work this way.</p>
+      <p class="mb-0">This is abstraction again. The programmer works in a human-friendly layer, and the compiler or interpreter hides the hard job of turning that into binary. Either way the result is the same: human-readable code becomes machine code that the CPU can execute.</p>
   </div>
 
   <h4 class="fw-bold mt-5 text-info">3.2.2 Professional File Management</h4>
@@ -246,6 +267,13 @@
       </div>
   </div>
 
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Step One Is Naming the Problem, and Write Everything Down</h5>
+      <p>Before you can reproduce a problem, you have to <strong>identify and clearly define it</strong>. That's why many troubleshooting guides (and tests) list it as the very first step. "My computer is broken" isn't something anyone can fix. "Chrome shows an error when I open my school email, but other websites load fine" is. A clear description tells you where to start looking and keeps you from fixing the wrong thing.</p>
+      <p>As you work, <strong>write down every step you try and what happened</strong>. It feels slow, but it saves time. You won't repeat things you already tried, and if you have to ask a teacher or tech support for help, you can show them exactly what you've already ruled out.</p>
+      <p class="mb-0">Your notes also help the next person. If a classmate hits the same problem next week, your written steps become a ready-made fix. Professional IT teams save these notes in help-desk "tickets" and knowledge bases for exactly this reason. That's step 5 of the protocol, <em>Document the fix</em>, doing its job.</p>
+  </div>
+
   <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
       <div class="d-flex align-items-start">
           <i class="fas fa-tools fa-3x me-4 text-primary mt-1"></i>
@@ -299,6 +327,60 @@
   <div class="concept-box shadow-sm border-warning bg-light">
       <h5 class="fw-bold text-dark"><i class="fas fa-tv me-2"></i> Applying 3.3's Troubleshooting: A Blank Monitor</h5>
       <p class="mb-0">A monitor showing nothing at all is an Output-stage symptom — but that doesn't automatically mean the monitor itself is broken. The single best test that isolates the layer (3.3.2): swap in a different monitor (or plug your monitor into a different computer). If the second monitor also shows nothing on the same computer, the fault is upstream of Output — the computer itself. If a different monitor works fine, the original monitor is the actual problem.</p>
+  </div>
+
+  <h4 class="fw-bold mt-5 text-primary">3.4.2 Under the Hood: Bits, Gates, Memory &amp; Codes</h4>
+  <p>The Unit 2 test also asks what's happening <em>inside</em> the hardware during that Process stage. Chapter 5 goes much deeper into all of this. Here's what you need to know now.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Transistors and Binary</h5>
+      <p>A computer chip is made of billions of <strong>transistors</strong>. A transistor is a tiny electrical switch, much smaller than a grain of dust, that can be either <strong>on</strong> (electricity flowing) or <strong>off</strong> (no electricity).</p>
+      <p>Computers use those two states to store everything. On means <strong>1</strong> and off means <strong>0</strong>. This two-symbol system is called <strong>binary</strong>, and each single 1 or 0 is called a <strong>bit</strong>. So when people say computers "think in 1s and 0s," they really mean billions of switches being turned on and off.</p>
+      <p class="mb-0">Every number, word, photo, song, and video on your device is stored as a long pattern of bits. The rest of this section shows how simple on/off switches can make decisions, hold data, and turn into letters and pictures.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Logic Gates, the Hardware That Makes Decisions</h5>
+      <p>When transistors are wired together in small groups, they form <strong>logic gates</strong>. A logic gate is the piece of hardware that makes true/false decisions. It takes one or two binary inputs (1 = true, 0 = false) and produces a single output. Every decision your computer makes is built from millions of these gates.</p>
+      <p>There are three gates to know. An <strong>AND gate</strong> outputs 1 only when <em>both</em> inputs are 1, like a door that needs two keys turned at once. An <strong>OR gate</strong> outputs 1 when <em>at least one</em> input is 1, like a hallway light with switches at both ends where either one turns it on. A <strong>NOT gate</strong> (also called an <strong>inverter</strong>) has one input and flips it: 1 becomes 0 and 0 becomes 1.</p>
+      <div class="table-responsive"><table class="table table-sm table-bordered text-center w-auto mx-auto small">
+        <thead class="table-light"><tr><th>Input A</th><th>Input B</th><th>AND</th><th>OR</th></tr></thead>
+        <tbody><tr><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td><strong>1</strong></td><td>1</td></tr></tbody>
+      </table></div>
+      <p class="mb-0">A quick way to remember: <strong>AND</strong> is picky (everything must be true), <strong>OR</strong> is easygoing (anything true is enough), and <strong>NOT</strong> is contrary (it always says the opposite).</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: RAM: Where Data Waits While It's Being Used</h5>
+      <p>When the processor is actively working on something, the data it needs is held in <strong>RAM (Random Access Memory)</strong>. RAM is extremely fast, so the CPU can grab what it needs almost instantly. Every app you have open and every file you're editing is sitting in RAM right now.</p>
+      <p>RAM is <em>temporary</em>. When the power turns off, everything in RAM disappears. That's different from <strong>storage</strong> (a hard drive or SSD), which is slower but keeps your files even when the computer is off. That's why you lose unsaved work in a power outage: it was only in RAM.</p>
+      <p class="mb-0">Think of storage as your locker and RAM as your desk. You keep everything in the locker, but you take out only what you're working on right now and spread it on the desk, where it's quick to reach.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Hexadecimal: A Shorter Way to Write Binary</h5>
+      <p>Binary gets long fast. The color white is <code>11111111 11111111 11111111</code> in binary, and that's hard for people to read or copy without making mistakes.</p>
+      <p><strong>Hexadecimal</strong> (base 16) fixes this. It uses the digits 0 to 9 and then the letters A to F for the values 10 to 15. Every hex digit stands for exactly 4 bits, so <code>1111 1111</code> becomes just <code>FF</code>, and white becomes <code>#FFFFFF</code>.</p>
+      <p class="mb-0">The computer doesn't use hex. It still stores everything in binary. Hex exists for <em>humans</em>: it lets programmers write long binary values in a much shorter form that's easier to read. You'll see it in web color codes, error codes, and network addresses.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: ASCII and Unicode: Turning Bits Into Letters</h5>
+      <p>If a computer only stores numbers, how does it show letters? It uses an agreed-upon code that gives every character a number. This is called <strong>character encoding</strong>.</p>
+      <p><strong>ASCII</strong> was one of the first. In ASCII, capital A is 65, which the computer stores as the binary <code>01000001</code>. When you type A, the computer saves 65, and when it displays the text, it looks 65 up and draws an A. ASCII covers English letters, numbers, and punctuation.</p>
+      <p class="mb-0"><strong>Unicode</strong> is the much bigger, modern version. It includes the characters of almost every language in the world, plus symbols and emoji. ASCII and Unicode are the systems that translate binary into the text you read on screen.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Pixels: Turning Bits Into Pictures</h5>
+      <p>Your screen is a grid of millions of tiny dots called <strong>pixels</strong>. Each pixel can only be one color at a time. Zoom in far enough on any photo and you'll see the little squares.</p>
+      <p>The computer stores each pixel's color as a binary number. Usually that number mixes amounts of red, green, and blue light. So an image file is really a long list of color codes, one for every pixel, in order.</p>
+      <p class="mb-0">To display the image, the computer reads those codes and tells each pixel on the screen which color to light up. That's how a visual output like a photo, a video, or this page is made from nothing but 1s and 0s.</p>
+  </div>
+
+  <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
+      <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
+      <p class="mb-0 text-light">A porch light turns on if the motion sensor sees movement OR you flip the switch. Which logic gate matches that rule? <em class="text-white-50">(Answer: an OR gate — at least one true input is enough.)</em></p>
   </div>
 
   <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">

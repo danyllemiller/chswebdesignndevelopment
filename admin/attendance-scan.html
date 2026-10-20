@@ -49,6 +49,11 @@
     .status-present { background: #d1f2e0; color: #0f5132; }
     .status-tardy { background: #fff3cd; color: #997404; }
     .status-none { background: #e9ecef; color: #6c757d; }
+    .headcount-bar { background: #dc3545; color: #fff; padding: .9rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; }
+    .hc-name { border: 2px solid #dc3545; background: #fff; color: #dc3545; font-weight: 700; border-radius: 999px; padding: .25rem .8rem; }
+    .hc-name:hover { background: #dc3545; color: #fff; }
+    .feedback-panel.counted { background: #d1f2e0; border: 3px solid #198754; }
+    body.headcount-on .kiosk-header { background: #dc3545; }
   </style>
 </head>
 <body>
@@ -72,8 +77,29 @@
       <div><span class="count text-warning" id="tallyTardy">0</span>Tardy</div>
       <div><span class="count text-secondary" id="tallyAbsent">0</span>Not Yet Scanned</div>
       <div class="ms-auto d-flex gap-2">
+        <button id="headcountStart" class="btn btn-sm btn-danger fw-bold"><i class="fas fa-fire me-1"></i>Fire Drill Headcount</button>
         <a href="/admin/attendance-report.html" class="btn btn-sm btn-outline-secondary fw-bold"><i class="fas fa-clipboard-check me-1"></i>Attendance Report</a>
         <button id="rosterToggle" class="btn btn-sm btn-outline-primary fw-bold"><i class="fas fa-list me-1"></i>View List</button>
+      </div>
+    </div>
+    <!-- Headcount mode (fire drills, evacuations, returning to class). Scans
+         here only check students off a local list -- attendance itself is
+         never changed, so nobody gets marked tardy for re-entering. -->
+    <div id="headcountPanel" class="d-none">
+      <div class="headcount-bar">
+        <div>
+          <div class="fw-bold text-uppercase small opacity-75">Headcount — attendance is not changed</div>
+          <div class="fs-5 fw-bold"><span id="hcCounted">0</span> of <span id="hcExpected">0</span> accounted for · <span id="hcMissing">0</span> missing</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button id="headcountRestart" class="btn btn-sm btn-light fw-bold"><i class="fas fa-rotate-left me-1"></i>Start Over (returning)</button>
+          <button id="headcountEnd" class="btn btn-sm btn-outline-light fw-bold"><i class="fas fa-xmark me-1"></i>End Headcount</button>
+        </div>
+      </div>
+      <div class="p-3 border-bottom">
+        <div class="fw-bold text-danger mb-2"><i class="fas fa-user-clock me-1"></i>Still missing — tap a name to check them off</div>
+        <div id="hcMissingList" class="d-flex flex-wrap gap-2"></div>
+        <div id="hcAbsentNote" class="small text-muted mt-2"></div>
       </div>
     </div>
     <div id="rosterPanel" class="d-none border-bottom">
@@ -108,6 +134,6 @@
 
 <div id="footer-placeholder"></div>
 
-<script type="module" src="/js/admin/attendance-scan.js?v=1"></script>
+<script type="module" src="/js/admin/attendance-scan.js?v=2"></script>
 </body>
 </html>

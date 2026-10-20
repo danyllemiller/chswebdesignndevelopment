@@ -81,6 +81,62 @@
     {
       "q": "Personalization algorithms that isolate users from differing opinions create what effect?",
       "a": "An echo chamber"
+    },
+    {
+      "q": "What order are a computer's layers in, from the physical machine up to the person?",
+      "a": "Hardware → Operating System → Application Software → User"
+    },
+    {
+      "q": "What connects an app to the hardware?",
+      "a": "The operating system — it turns the app's requests into instructions the hardware understands"
+    },
+    {
+      "q": "Name two examples of application software.",
+      "a": "A web browser like Chrome, a spreadsheet like Google Sheets (also games, photo editors, music players)"
+    },
+    {
+      "q": "How does human-readable code (Python, JavaScript) get run by the CPU?",
+      "a": "A compiler or interpreter translates it into binary machine code"
+    },
+    {
+      "q": "What tiny on/off switch is the basis of all digital hardware?",
+      "a": "A transistor — on = 1, off = 0"
+    },
+    {
+      "q": "What hardware makes true/false decisions from binary inputs?",
+      "a": "Logic gates"
+    },
+    {
+      "q": "AND vs. OR vs. NOT gate?",
+      "a": "AND: 1 only if both inputs are 1. OR: 1 if at least one is 1. NOT: flips the input (an inverter)"
+    },
+    {
+      "q": "Where is data held while the CPU is actively working on it?",
+      "a": "RAM — fast, temporary memory"
+    },
+    {
+      "q": "Why use hexadecimal instead of binary?",
+      "a": "Hex writes long binary strings much shorter, so they're easier for people to read"
+    },
+    {
+      "q": "What systems translate binary numbers into text characters?",
+      "a": "ASCII and Unicode (character encoding)"
+    },
+    {
+      "q": "How are images shown using binary?",
+      "a": "The screen is divided into pixels, and each pixel gets a binary color code"
+    },
+    {
+      "q": "What is abstraction? Give an example.",
+      "a": "Hiding complex details so things are simple to use — like swiping to unlock a phone"
+    },
+    {
+      "q": "What is the first step in troubleshooting?",
+      "a": "Identify and clearly define the problem"
+    },
+    {
+      "q": "Why write down each troubleshooting step?",
+      "a": "So you don't repeat steps, and others can use your notes for the same problem later"
     }
   ],
   "3": [
@@ -127,6 +183,74 @@
     {
       "q": "What's a highly personalized phishing attack targeting one specific person called?",
       "a": "Spear phishing"
+    },
+    {
+      "q": "How many different values can one byte (8 bits) hold?",
+      "a": "256 (2 to the 8th power)"
+    },
+    {
+      "q": "What is metadata?",
+      "a": "Data about data — like a photo's date taken and camera model"
+    },
+    {
+      "q": "What is the tradeoff of a higher audio sampling rate?",
+      "a": "Better fidelity, but a much larger file"
+    },
+    {
+      "q": "Lossless vs. lossy compression?",
+      "a": "Lossless: uncompresses byte-for-byte identical. Lossy: removes small details for a much smaller file"
+    },
+    {
+      "q": "What happens right away when you delete a file?",
+      "a": "Only the pointer to it is removed; the bits stay until overwritten"
+    },
+    {
+      "q": "What is Big Data?",
+      "a": "Data sets so huge (billions of records) that only computers can analyze them"
+    },
+    {
+      "q": "What is data mining?",
+      "a": "Software automatically searching large data sets for hidden patterns"
+    },
+    {
+      "q": "Correlation vs. causation?",
+      "a": "Correlation: two things change together. Causation: one actually makes the other happen. Correlation alone doesn't prove cause"
+    },
+    {
+      "q": "What is an outlier?",
+      "a": "A value far away from the rest of the data"
+    },
+    {
+      "q": "What tool summarizes thousands of rows (by region, month) without changing the original data?",
+      "a": "A pivot table"
+    },
+    {
+      "q": "What is aggregation?",
+      "a": "Combining many values into one summary number, like a SUM or AVERAGE"
+    },
+    {
+      "q": "Which chart shows parts of a whole?",
+      "a": "A pie chart"
+    },
+    {
+      "q": "What is an interactive dashboard?",
+      "a": "A live display people can filter (by date, region) to explore data themselves"
+    },
+    {
+      "q": "How do you check a model's validity?",
+      "a": "Compare its results against real historical data"
+    },
+    {
+      "q": "Why add random numbers to a simulation?",
+      "a": "To copy the natural unpredictability of real-world events"
+    },
+    {
+      "q": "What is a hypothesis?",
+      "a": "A testable prediction, like \"If we do X, then Y will happen\""
+    },
+    {
+      "q": "What is a data dictionary?",
+      "a": "A document explaining what each column means, its format, and valid values"
     }
   ],
   "4": [
@@ -169,6 +293,42 @@
     {
       "q": "What measurement in GHz tells you roughly how many operations per second a CPU can do?",
       "a": "Clock speed"
+    },
+    {
+      "q": "Sequence, selection, iteration — what is each?",
+      "a": "Sequence: steps in order. Selection: choosing with if/else. Iteration: repeating with a loop"
+    },
+    {
+      "q": "Code that runs a discount only IF the total is over $50 uses which structure?",
+      "a": "Selection"
+    },
+    {
+      "q": "How do you get one item out of a list?",
+      "a": "By its index — its numbered position in the list"
+    },
+    {
+      "q": "What does a for loop over a list do?",
+      "a": "Runs its code once for every item in the list"
+    },
+    {
+      "q": "What is a computational artifact?",
+      "a": "Anything a person creates with a computer — a program, image, video, web page"
+    },
+    {
+      "q": "What is an API?",
+      "a": "A set of rules that lets different programs communicate and share data"
+    },
+    {
+      "q": "What do you weigh when choosing between algorithms?",
+      "a": "Speed, memory use, and how easy the code is to read and maintain"
+    },
+    {
+      "q": "What three containers does decomposition produce?",
+      "a": "Procedures, modules, and objects"
+    },
+    {
+      "q": "When does an \"on edit\" trigger fire?",
+      "a": "The moment a cell in the sheet is changed"
     }
   ],
   "5": [

@@ -33,6 +33,80 @@ const rosterPanel = document.getElementById('rosterPanel');
 const rosterBody = document.getElementById('rosterBody');
 let rosterPanelOpen = false;
 
+// ---- Headcount mode (fire drills / evacuations / returning to class) ----
+// Scans only check students off a list kept on this station; nothing is sent
+// to the attendance API, so real present/tardy records stay exactly as they
+// were and re-entering after a drill never counts as tardy. "Expected" is
+// everyone scanned present or tardy this period today; students with no scan
+// are listed separately as absent. Saved per date + period so a page reload
+// mid-drill doesn't lose the count.
+const hcPanel = document.getElementById('headcountPanel');
+let headcount = null; // { key, counted: [student_id, ...] }
+const hcKey = () => `attendance_headcount_${new Date().toLocaleDateString('en-CA')}_${currentPeriod}`;
+function saveHeadcount() {
+    try { if (headcount) localStorage.setItem(headcount.key, JSON.stringify(headcount.counted)); } catch (e) {}
+}
+function startHeadcount(fresh) {
+    if (!currentPeriod) return;
+    const key = hcKey();
+    let counted = [];
+    if (!fresh) { try { counted = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {} }
+    headcount = { key, counted };
+    saveHeadcount();
+    document.body.classList.add('headcount-on');
+    hcPanel.classList.remove('d-none');
+    document.querySelector('.scan-body h4').textContent = 'Headcount: Scan Your ID';
+    refreshTally();
+}
+function endHeadcount() {
+    if (headcount) { try { localStorage.removeItem(headcount.key); } catch (e) {} }
+    headcount = null;
+    document.body.classList.remove('headcount-on');
+    hcPanel.classList.add('d-none');
+    document.querySelector('.scan-body h4').textContent = 'Scan Your ID';
+    refreshTally();
+}
+function renderHeadcount() {
+    if (!headcount) return;
+    const inClass = currentRoster.filter(r => r.status === 'present' || r.status === 'tardy');
+    const absent = currentRoster.filter(r => !r.status);
+    const counted = new Set(headcount.counted);
+    const missing = inClass.filter(r => !counted.has(String(r.student_id)));
+    document.getElementById('hcCounted').textContent = inClass.length - missing.length;
+    document.getElementById('hcExpected').textContent = inClass.length;
+    document.getElementById('hcMissing').textContent = missing.length;
+    document.getElementById('hcMissingList').innerHTML = missing.length
+        ? missing.map(r => `<button type="button" class="hc-name" data-hc-id="${r.student_id}">${r.first_name} ${r.last_name}</button>`).join('')
+        : '<span class="fw-bold text-success"><i class="fas fa-circle-check me-1"></i>Everyone who was in class is accounted for.</span>';
+    document.getElementById('hcAbsentNote').textContent = absent.length
+        ? `Not in class today (no scan): ${absent.map(r => `${r.first_name} ${r.last_name}`).join(', ')}`
+        : '';
+}
+function countStudent(studentId) {
+    const id = String(studentId);
+    const r = currentRoster.find(x => String(x.student_id) === id);
+    if (!r) {
+        beep(220, 400);
+        showFeedback('error', { iconClass: 'fas fa-circle-xmark text-danger', name: 'Not on this period\'s list', sub: `ID ${id} isn't in ${currentPeriod}.` });
+        return;
+    }
+    const already = headcount.counted.includes(id);
+    if (!already) { headcount.counted.push(id); saveHeadcount(); }
+    beep(880, 150);
+    const note = r.status ? '' : ' (was marked absent today)';
+    showFeedback('counted', { iconClass: 'fas fa-circle-check text-success', name: `${r.first_name} ${r.last_name}`, sub: (already ? 'Already accounted for' : 'Accounted for') + note });
+    renderHeadcount();
+}
+document.getElementById('headcountStart').addEventListener('click', () => startHeadcount(true));
+document.getElementById('headcountRestart').addEventListener('click', () => {
+    if (confirm('Clear the headcount and start over? (Attendance is not affected.)')) startHeadcount(true);
+});
+document.getElementById('headcountEnd').addEventListener('click', endHeadcount);
+document.getElementById('hcMissingList').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-hc-id]');
+    if (b && headcount) countStudent(b.dataset.hcId);
+});
+
 function focusInput() {
     input.value = '';
     input.focus();
@@ -92,6 +166,9 @@ async function loadCurrentPeriod() {
         currentPeriod = data.current || (data.periods[0] && data.periods[0].label) || null;
         if (currentPeriod) periodSelect.value = currentPeriod;
         periodLabel.textContent = currentPeriod ? `Period ${currentPeriod}` : 'No period in session';
+        let resume = false;
+        try { resume = !!(currentPeriod && localStorage.getItem(hcKey())); } catch (e) {}
+        if (resume) { startHeadcount(false); return; }
         refreshTally();
     } catch (e) {
         periodLabel.textContent = 'Failed to load period';
@@ -109,6 +186,7 @@ async function refreshTally() {
         document.getElementById('tallyAbsent').textContent = rows.filter(r => !r.status).length;
         renderNameList();
         renderRosterTable();
+        renderHeadcount();
     } catch (e) { /* tally is a convenience, not critical */ }
 }
 
@@ -148,6 +226,7 @@ function renderNameList() {
 }
 
 async function handleScan(studentId) {
+    if (headcount && currentPeriod) { countStudent(studentId); return; }
     if (!currentPeriod) { showFeedback('error', { iconClass: 'fas fa-exclamation-triangle text-danger', name: 'No period selected', sub: 'Pick a period above first.' }); return; }
     try {
         const res = await fetch('/api/admin/attendance/scan', {
@@ -208,6 +287,7 @@ input.addEventListener('keydown', (e) => {
 document.addEventListener('click', (e) => {
     if (noIdPanelOpen || noIdPanel.contains(e.target) || e.target === noIdToggle) return;
     if (rosterPanel.contains(e.target) || e.target === rosterToggle) return;
+    if (hcPanel.contains(e.target)) return;
     if (pendingOverrideStudentId && overrideBox.contains(e.target)) return;
     if (document.activeElement !== input) focusInput();
 });
@@ -242,6 +322,7 @@ overrideBtn.addEventListener('click', async () => {
 });
 
 periodSelect.addEventListener('change', () => {
+    if (headcount) endHeadcount();
     currentPeriod = periodSelect.value || null;
     periodLabel.textContent = currentPeriod ? `Period ${currentPeriod}` : 'No period selected';
     refreshTally();

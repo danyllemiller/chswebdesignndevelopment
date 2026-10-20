@@ -171,6 +171,13 @@
   <p><strong>The trap:</strong> students often assume the model that matches historical data most closely is automatically the best one. Often it's the opposite — a model chasing every past data point instead of the underlying pattern tends to be the one that fails hardest on anything new.</p>
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: What "Validity" Means for a Model</h5>
+      <p>A model's <strong>validity</strong> is how well it matches the real thing it's supposed to represent. A valid model gives results close to what actually happens. An invalid model can look impressive and still give answers that don't match reality.</p>
+      <p>The main way to check validity is to test the model against <strong>real data you already have</strong>. Say you built a model of how a flu spreads through a school. You'd run it using last year's starting numbers, then compare its prediction to what really happened last year. If the two line up closely, that's strong evidence the model is valid.</p>
+      <p class="mb-0">Validation isn't a one-time stamp of approval. Real conditions change, so good modelers keep checking their models against new data. When the model and reality start to disagree, that's the signal to fix the model's rules or inputs.</p>
+  </div>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Overfitting</h5>
       <p><strong>Overfitting</strong> is when a model learns the past <em>too</em> well. It memorizes every random bump in the old data instead of learning the general pattern, so it falls apart on anything new.</p>
       <p>It's like studying for a test by memorizing the exact answers to the practice test. If the real test has the same questions, you ace it. If the questions are even slightly different, you're lost, because you never learned how to solve them. An overfit model has memorized the practice test.</p>
@@ -240,6 +247,13 @@
   <div class="concept-box shadow-sm border-info bg-light">
       <h5 class="fw-bold text-info"><i class="fas fa-dice me-2"></i> Why Simulations Use Random Numbers</h5>
       <p class="mb-0">Real-world systems don't behave identically every time — customers don't arrive at a store on a perfect schedule. Simulations often add a <strong>random number generator</strong> to introduce that same realistic variability (e.g. randomizing exactly when each simulated customer arrives), instead of pretending everything happens like clockwork.</p>
+
+  <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
+      <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Why Simulations Use Random Numbers</h5>
+      <p>Real life is full of chance. A store might know that about 30 customers come in each hour, but it can't know exactly <em>when</em> each one will walk through the door. Some minutes are packed and some are empty.</p>
+      <p>A model that ignored chance would treat every hour exactly the same, and that's not how the world works. A <strong>random-number generator</strong> lets the simulation copy that natural unpredictability. One run might have a rush at 12:05, another at 12:40, just like real days do.</p>
+      <p class="mb-0">Because each run comes out a little different, modelers run a simulation many times and look at the overall pattern, like the average wait time and the worst case. That gives a much more honest picture than a single run that pretends nothing is ever left to chance.</p>
+  </div>
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Randomness in a Spreadsheet Simulation</h5>

@@ -190,6 +190,50 @@
       {
         "term": "Test One Variable at a Time",
         "definition": "Changing exactly one thing during a fix and observing the result"
+      },
+      {
+        "term": "Application Software",
+        "definition": "Programs that do a job for the user, like a web browser, Google Sheets, or a game"
+      },
+      {
+        "term": "Layer Order",
+        "definition": "Hardware → Operating System → Application Software → User, from the physical machine up to the person"
+      },
+      {
+        "term": "Compiler",
+        "definition": "Translates a whole program into binary machine code ahead of time"
+      },
+      {
+        "term": "Interpreter",
+        "definition": "Translates and runs code a little at a time, line by line, while the program runs"
+      },
+      {
+        "term": "Transistor",
+        "definition": "A tiny electrical on/off switch; on = 1 and off = 0"
+      },
+      {
+        "term": "Logic Gate",
+        "definition": "Hardware built from transistors that makes true/false decisions from binary inputs"
+      },
+      {
+        "term": "AND / OR / NOT Gates",
+        "definition": "AND: 1 only if both inputs are 1. OR: 1 if at least one input is 1. NOT: flips the input"
+      },
+      {
+        "term": "RAM",
+        "definition": "Fast, temporary memory that holds the data the CPU is working on right now; cleared when power is off"
+      },
+      {
+        "term": "Hexadecimal",
+        "definition": "Base-16 shorthand for binary; each hex digit stands for 4 bits, so it is shorter and easier for people to read"
+      },
+      {
+        "term": "ASCII / Unicode",
+        "definition": "Character-encoding systems that give every letter and symbol a number, translating binary into text"
+      },
+      {
+        "term": "Pixel",
+        "definition": "One tiny dot of color on a screen; images are stored as a binary color code for each pixel"
       }
     ],
     "mc": [
@@ -219,6 +263,51 @@
           "Restarting never fixes anything",
           "Reinstalling always fixes everything"
         ]
+      },
+      {
+        "question": "Put these in order from the bottom (closest to the circuits) to the top:",
+        "options": [
+          "User → Apps → OS → Hardware",
+          "Hardware → Operating System → Application Software → User",
+          "OS → Hardware → User → Apps",
+          "Hardware → Apps → OS → User"
+        ]
+      },
+      {
+        "question": "Which of these is application software?",
+        "options": [
+          "A device driver",
+          "The operating system",
+          "Google Docs",
+          "The computer's firmware"
+        ]
+      },
+      {
+        "question": "A safe opens only when BOTH a key is turned AND the right code is entered. Which logic gate matches this rule?",
+        "options": [
+          "AND",
+          "OR",
+          "NOT",
+          "None of these"
+        ]
+      },
+      {
+        "question": "Why would a programmer write 11111010 as FA?",
+        "options": [
+          "The CPU can only read hex",
+          "Hex is a shorter, easier-to-read way to write long binary values",
+          "FA is a larger number",
+          "Hex uses less electricity"
+        ]
+      },
+      {
+        "question": "You close a document without saving and the power goes out. Where was your unsaved work?",
+        "options": [
+          "In RAM, which is cleared when power is lost",
+          "On the hard drive",
+          "In the cloud",
+          "In the monitor"
+        ]
       }
     ],
     "shortAnswer": [
@@ -227,6 +316,15 @@
       },
       {
         "question": "List the six-step troubleshooting protocol in order."
+      },
+      {
+        "question": "In your own words, explain the difference between a compiler and an interpreter. Why does code need either one?"
+      },
+      {
+        "question": "Describe how a photo on your screen is stored and shown using only 1s and 0s. Use the words pixel and binary."
+      },
+      {
+        "question": "Give one everyday example of abstraction (not from the chapter) and explain what complexity it hides."
       }
     ]
   },
@@ -421,6 +519,14 @@
       {
         "term": "Archival",
         "definition": "Cheapest per gigabyte, but slow to retrieve"
+      },
+      {
+        "term": "Sampling Rate",
+        "definition": "How many times per second a sound wave is measured when it is recorded digitally"
+      },
+      {
+        "term": "Fidelity",
+        "definition": "How closely a digital copy matches the original; higher sampling rate = higher fidelity"
       }
     ],
     "mc": [
@@ -459,6 +565,15 @@
           "Hierarchical",
           "Key-Value"
         ]
+      },
+      {
+        "question": "A podcaster switches to a much higher sampling rate. What is the tradeoff?",
+        "options": [
+          "The audio sounds worse",
+          "The file gets significantly larger",
+          "The file gets smaller",
+          "Nothing changes"
+        ]
       }
     ],
     "shortAnswer": [
@@ -467,6 +582,9 @@
       },
       {
         "question": "Which storage location would you pick for a file you need to access from anywhere, and what's the tradeoff?"
+      },
+      {
+        "question": "Why might a voice-memo app use a lower sampling rate than a music studio? Explain the tradeoff."
       }
     ]
   },
@@ -504,6 +622,14 @@
       {
         "term": "Truncated Axis",
         "definition": "A trick that makes a small difference look huge without using any fake numbers"
+      },
+      {
+        "term": "Causation",
+        "definition": "When one thing actually makes another thing happen"
+      },
+      {
+        "term": "Confounding Variable",
+        "definition": "A hidden third factor that makes two things change together without one causing the other"
       }
     ],
     "mc": [
@@ -533,6 +659,15 @@
           "It makes the formula run faster",
           "It isn't necessary if the formula looks right"
         ]
+      },
+      {
+        "question": "Sunscreen sales and sunburn cases both rise in July. What is the best description of their relationship?",
+        "options": [
+          "Sunscreen causes sunburns",
+          "They are correlated, likely because of a third factor: summer sun",
+          "They are unrelated",
+          "Sunburns cause sunscreen sales"
+        ]
       }
     ],
     "shortAnswer": [
@@ -541,6 +676,9 @@
       },
       {
         "question": "What's the difference between a static chart and an interactive dashboard?"
+      },
+      {
+        "question": "Explain the difference between correlation and causation using your own example."
       }
     ]
   },
@@ -578,6 +716,14 @@
       {
         "term": "Breaking a Model on Purpose",
         "definition": "Entering an absurd input on purpose to see if the model complains"
+      },
+      {
+        "term": "Validity",
+        "definition": "How well a model matches the real thing it represents, checked against real data"
+      },
+      {
+        "term": "Random-Number Generator",
+        "definition": "Adds chance to a simulation so it behaves like the unpredictable real world"
       }
     ],
     "mc": [
@@ -607,6 +753,24 @@
           "Only if it has more than four inputs",
           "Only if it was built in a spreadsheet"
         ]
+      },
+      {
+        "question": "A traffic model is run using last year's starting numbers and compared to last year's real traffic. What is being checked?",
+        "options": [
+          "The model's validity",
+          "The model's file size",
+          "The model's color scheme",
+          "The model's sampling rate"
+        ]
+      },
+      {
+        "question": "Why do modelers add random numbers to a simulation of customers arriving at a store?",
+        "options": [
+          "To make the spreadsheet bigger",
+          "To copy the natural unpredictability of real life",
+          "To hide errors",
+          "Because computers require random numbers"
+        ]
       }
     ],
     "shortAnswer": [
@@ -615,6 +779,9 @@
       },
       {
         "question": "What does sensitivity testing actually tell you about a model?"
+      },
+      {
+        "question": "Why do modelers run a simulation with random numbers many times instead of just once?"
       }
     ]
   },
@@ -726,6 +893,18 @@
       {
         "term": "Time-Driven Trigger",
         "definition": "Runs as long as its condition stays true, with no built-in counter"
+      },
+      {
+        "term": "Sequence",
+        "definition": "Steps that run in order, one after another"
+      },
+      {
+        "term": "Selection",
+        "definition": "Choosing which code runs based on a condition (if/else)"
+      },
+      {
+        "term": "Iteration",
+        "definition": "Repeating a block of code, using a loop"
       }
     ],
     "mc": [
@@ -755,6 +934,15 @@
           "Event-driven code runs slower",
           "Triggers can't cause errors"
         ]
+      },
+      {
+        "question": "A game awards a bonus life only if the score is over 10,000. Which control structure is this?",
+        "options": [
+          "Sequence",
+          "Selection",
+          "Iteration",
+          "Recursion"
+        ]
       }
     ],
     "shortAnswer": [
@@ -763,6 +951,9 @@
       },
       {
         "question": "Name the four event types the chapter covers and what triggers each one."
+      },
+      {
+        "question": "Pick any short program or algorithm and label one example each of sequence, selection, and iteration."
       }
     ]
   },
