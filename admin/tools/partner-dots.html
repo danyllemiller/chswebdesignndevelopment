@@ -67,16 +67,18 @@ const FOUR_SQUARE = [
   ['A', 'Red', '#e53935'], ['B', 'Orange', '#fb8c00'], ['C', 'Yellow', '#fdd835'], ['D', 'Green', '#43a047'],
   ['E', 'Blue', '#1e88e5'], ['F', 'Purple', '#8e24aa'], ['G', 'Pink', '#f48fb1']
 ];
+// Jotability's light-theme palette: its 8 pastel highlight colors plus its
+// 6 brighter ink colors -- all light, no dark colors.
 const PAIR_SHARE = [
-  ['1', 'Maroon', '#7b1f1f'], ['2', 'Navy', '#1a237e'], ['3', 'Teal', '#00897b'], ['4', 'Lime', '#c6ff00'],
-  ['5', 'Brown', '#6d4c41'], ['6', 'Black', '#111111'], ['7', 'Gray', '#9e9e9e'], ['8', 'Sky Blue', '#81d4fa'],
-  ['9', 'Lavender', '#c5b3f0'], ['10', 'Mint', '#b9f6ca'], ['11', 'Peach', '#ffcc99'], ['12', 'Olive', '#7c7c1c'],
-  ['13', 'Turquoise', '#1de9e0'], ['14', 'White', '#ffffff']
+  ['1', 'Sky', '#b5c9e9'], ['2', 'Butter', '#f1edbb'], ['3', 'Lavender', '#d0c9f4'], ['4', 'Lilac', '#e6dcf8'],
+  ['5', 'Mint', '#c6ebe1'], ['6', 'Blush', '#f4cad1'], ['7', 'Sage', '#d5e6ce'], ['8', 'Sand', '#f1ddc2'],
+  ['9', 'Violet', '#c3b4ff'], ['10', 'Rose', '#ff9bb7'], ['11', 'Periwinkle', '#9db8f0'], ['12', 'Seafoam', '#86d8bf'],
+  ['13', 'Sunshine', '#ffd93b'], ['14', 'Apricot', '#f2a764']
 ];
 // Black text on light colors, white on dark ones.
 function textColor(hex) {
   const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
-  return (0.299 * r + 0.587 * g + 0.114 * b) > 150 ? '#000' : '#fff';
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 150 ? '#211e2e' : '#fff';
 }
 const dot = ([label, name, hex]) =>
   `<div class="dot" style="background:${hex};color:${textColor(hex)}"><b>${label}</b><small>${name}</small></div>`;
