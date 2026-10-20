@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monday WRS Sprint | CHS Web Design</title>
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+  <link href="/css/student-pages.css" rel="stylesheet" />
+  <script src="/js/loader.js?v=25"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+  <style>
+    .sprint-wrap { max-width: 900px; margin: 1.5rem auto 3rem; padding: 0 1rem; }
+    .sprint-card { background: #fff; border-radius: 1rem; box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12); padding: 1.5rem; }
+    .timer-bar { position: sticky; top: 0; z-index: 20; background: #1f2a44; color: #fff; border-radius: .8rem; padding: .7rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .timer { font-size: 1.8rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: .03em; }
+    .timer.low { color: #ff8b8b; }
+    .q-meta { font-size: .85rem; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: .05em; }
+    .q-text { font-size: 1.25rem; font-weight: 700; margin: .4rem 0 1rem; }
+    .opt { display: block; width: 100%; text-align: left; border: 2px solid #ced4da; background: #fff; border-radius: .6rem; padding: .7rem 1rem; margin-bottom: .5rem; font-weight: 600; }
+    .opt:hover { border-color: #0d6efd; }
+    .opt.sel { border-color: #0d6efd; background: #e7f1ff; }
+    .opt .k { display: inline-block; min-width: 1.6rem; font-weight: 800; color: #0d6efd; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); gap: 4px; }
+    .grid button { border: 1px solid #ced4da; background: #fff; border-radius: 4px; font-size: .75rem; font-weight: 700; padding: 4px 0; font-variant-numeric: tabular-nums; }
+    .grid button.ans { background: #198754; border-color: #198754; color: #fff; }
+    .grid button.cur { outline: 3px solid #0d6efd; outline-offset: 1px; }
+    .big-num { font-size: 3rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+    .missed { border-left: 4px solid #dc3545; background: #fdf3f4; border-radius: 0 .5rem .5rem 0; padding: .7rem 1rem; margin-bottom: .6rem; }
+    .chart-wrap { overflow-x: auto; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="sprint-wrap">
+  <div id="screen" class="sprint-card"><p class="text-center text-muted my-4">Loading…</p></div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script>
+(function () {
+  const TOTAL_SECONDS = 600;
+  const screen = document.getElementById('screen');
+  let questions = [], answers = {}, cur = 0, secondsLeft = TOTAL_SECONDS, endAt = 0;
+  let tick = null, saveTimer = null, submitting = false, dirty = false;
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmtWeek = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const answeredCount = () => Object.keys(answers).length;
+
+  async function api(path, body) {
+    const res = await fetch('/api' + path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {});
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { const e = new Error(data.error || 'Something went wrong.'); e.data = data; throw e; }
+    return data;
+  }
+
+  // Bars = correct each week; the lighter bar behind = how many were answered.
+  function chart(history) {
+    if (!history || !history.length) return '<p class="text-muted small mb-0">Your weekly chart starts after your first Sprint.</p>';
+    const max = Math.max(10, ...history.map(h => h.answered || 0));
+    const top = Math.ceil(max / 10) * 10;
+    const bw = 34, gap = 22, h = 160, left = 30, bottom = 28;
+    const width = left + history.length * (bw + gap) + 10;
+    const y = v => 10 + (h - 10) * (1 - v / top);
+    let svg = `<svg width="${width}" height="${h + bottom}" role="img" aria-label="Weekly WRS Sprint results" font-family="inherit">`;
+    [0, top / 2, top].forEach(v => { svg += `<line x1="${left}" x2="${width}" y1="${y(v)}" y2="${y(v)}" stroke="#e3e6ea"/><text x="${left - 6}" y="${y(v) + 4}" font-size="10" text-anchor="end" fill="#6c757d">${v}</text>`; });
+    history.forEach((r, i) => {
+      const x = left + 8 + i * (bw + gap);
+      svg += `<rect x="${x}" y="${y(r.answered)}" width="${bw}" height="${y(0) - y(r.answered)}" fill="#cfe2ff" rx="3"/>`;
+      svg += `<rect x="${x + 6}" y="${y(r.correct)}" width="${bw - 12}" height="${y(0) - y(r.correct)}" fill="#198754" rx="2"/>`;
+      svg += `<text x="${x + bw / 2}" y="${y(r.correct) - 4}" font-size="11" font-weight="700" text-anchor="middle" fill="#198754">${r.correct}</text>`;
+      svg += `<text x="${x + bw / 2}" y="${h + 18}" font-size="10" text-anchor="middle" fill="#6c757d">${fmtWeek(r.week)}</text>`;
+    });
+    return `<div class="chart-wrap">${svg}</svg></div><p class="small text-muted mb-0"><span style="color:#198754">■</span> correct &nbsp; <span style="color:#9ec5fe">■</span> answered</p>`;
+  }
+
+  function rulesHtml() {
+    return `<ul class="mb-3">
+      <li><strong>100 questions</strong> about workplace skills, a different mix every week.</li>
+      <li>You have <strong>10 minutes</strong>. Answer as many as you can. The test submits itself when time runs out.</li>
+      <li>Skip any question and come back to it with <strong>Back</strong>, <strong>Next</strong>, or the numbered grid.</li>
+      <li>Keyboard shortcut: press <strong>1</strong>–<strong>6</strong> to pick an answer, <strong>←</strong> / <strong>→</strong> to move.</li>
+      <li>This doesn't go in the gradebook. It tracks your progress every Monday, so aim to beat last week.</li>
+    </ul>`;
+  }
+
+  function showHome(st) {
+    let action = '';
+    if (st.state === 'open') action = `<button id="startBtn" class="btn btn-primary btn-lg fw-bold w-100"><i class="fas fa-stopwatch me-2"></i>Start the 10-minute Sprint</button>${st.preview ? '<p class="small text-muted mt-2 mb-0">Teacher preview: works any day and is not saved to student results.</p>' : ''}`;
+    else if (st.state === 'in-progress') action = `<button id="startBtn" class="btn btn-warning btn-lg fw-bold w-100">Resume your Sprint (the clock kept running)</button>`;
+    else if (st.state === 'closed') action = `<div class="alert alert-info mb-0">The WRS Sprint opens on <strong>Mondays</strong>. See you then!</div>`;
+    else if (st.state === 'not-enrolled') action = `<div class="alert alert-secondary mb-0">The Monday WRS Sprint is for Web Design 2 (B2).</div>`;
+    screen.innerHTML = `
+      <h1 class="h3 fw-bold mb-1"><i class="fas fa-bolt text-warning me-2"></i>Monday WRS Sprint</h1>
+      <p class="text-muted">Workplace Readiness Skills · Web Design 2</p>
+      ${st.state === 'done' ? '' : rulesHtml()}
+      ${st.state === 'done' ? resultsHtml(st.result, st.history) : action}
+      ${st.state === 'done' ? '' : `<h2 class="h6 fw-bold mt-4">Your weekly progress</h2>${chart(st.history)}`}`;
+    const b = document.getElementById('startBtn');
+    if (b) b.addEventListener('click', start);
+  }
+
+  async function start() {
+    const b = document.getElementById('startBtn');
+    if (b) b.disabled = true;
+    try {
+      const data = await api('/wrs-sprint/start', {});
+      questions = data.questions; answers = data.answers || {}; secondsLeft = data.secondsLeft;
+      endAt = Date.now() + secondsLeft * 1000;
+      cur = 0;
+      renderTest();
+      tick = setInterval(onTick, 250);
+      saveTimer = setInterval(() => { if (dirty) save(); }, 10000);
+    } catch (e) {
+      screen.innerHTML = `<div class="alert alert-warning mb-0">${esc(e.message)}</div>`;
+      if (e.data && e.data.expired) setTimeout(load, 1500);
+    }
+  }
+
+  function onTick() {
+    secondsLeft = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+    const t = document.getElementById('timer');
+    if (t) {
+      t.textContent = `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, '0')}`;
+      t.classList.toggle('low', secondsLeft <= 60);
+    }
+    if (secondsLeft <= 0) submit(true);
+  }
+
+  async function save() {
+    dirty = false;
+    try { await api('/wrs-sprint/save', { answers }); } catch (e) { dirty = true; }
+  }
+
+  function renderTest() {
+    const q = questions[cur];
+    const kindLabel = q.kind === 'tf' ? 'True or false' : q.kind === 'match' ? 'Matching' : 'Multiple choice';
+    screen.innerHTML = `
+      <div class="timer-bar">
+        <div><div class="small opacity-75 fw-bold">TIME LEFT</div><div id="timer" class="timer">--:--</div></div>
+        <div class="fw-bold"><span id="ansCount">${answeredCount()}</span> answered</div>
+        <button id="submitBtn" class="btn btn-light fw-bold">Submit now</button>
+      </div>
+      <div class="q-meta">Question ${cur + 1} of ${questions.length} · ${kindLabel}</div>
+      ${q.kind === 'match' ? `<div class="small fw-bold text-primary mt-1">${esc(q.prompt)}</div>` : ''}
+      <div class="q-text">${esc(q.q)}</div>
+      <div>${q.options.map((o, i) => `<button class="opt ${answers[cur] === i ? 'sel' : ''}" data-opt="${i}"><span class="k">${i + 1}</span>${esc(o)}</button>`).join('')}</div>
+      <div class="d-flex justify-content-between my-3">
+        <button id="prevBtn" class="btn btn-outline-secondary fw-bold" ${cur === 0 ? 'disabled' : ''}><i class="fas fa-arrow-left me-1"></i>Back</button>
+        <button id="nextBtn" class="btn btn-outline-primary fw-bold" ${cur === questions.length - 1 ? 'disabled' : ''}>Next<i class="fas fa-arrow-right ms-1"></i></button>
+      </div>
+      <div class="small fw-bold text-muted mb-1">Jump to a question (green = answered)</div>
+      <div class="grid">${questions.map((_, i) => `<button class="${answers[i] !== undefined ? 'ans' : ''} ${i === cur ? 'cur' : ''}" data-go="${i}">${i + 1}</button>`).join('')}</div>`;
+    onTick();
+  }
+
+  function choose(i) {
+    answers[cur] = i;
+    dirty = true;
+    // Answering moves straight to the next question -- it's a speed test.
+    if (cur < questions.length - 1) cur++;
+    renderTest();
+  }
+
+  screen.addEventListener('click', (e) => {
+    if (!questions.length || submitting) return;
+    const o = e.target.closest('[data-opt]'); if (o) return choose(Number(o.dataset.opt));
+    const g = e.target.closest('[data-go]'); if (g) { cur = Number(g.dataset.go); return renderTest(); }
+    if (e.target.closest('#prevBtn') && cur > 0) { cur--; return renderTest(); }
+    if (e.target.closest('#nextBtn') && cur < questions.length - 1) { cur++; return renderTest(); }
+    if (e.target.closest('#submitBtn')) {
+      const left = questions.length - answeredCount();
+      const btn = e.target.closest('#submitBtn');
+      if (btn.dataset.confirm !== '1') { btn.dataset.confirm = '1'; btn.textContent = `Submit with ${left} unanswered?`; btn.classList.replace('btn-light', 'btn-warning'); return; }
+      submit(false);
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (!questions.length || submitting || /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+    const q = questions[cur];
+    if (/^[1-9]$/.test(e.key) && Number(e.key) <= q.options.length) { e.preventDefault(); choose(Number(e.key) - 1); }
+    else if (e.key === 'ArrowRight' && cur < questions.length - 1) { cur++; renderTest(); }
+    else if (e.key === 'ArrowLeft' && cur > 0) { cur--; renderTest(); }
+  });
+  window.addEventListener('beforeunload', () => {
+    if (questions.length && !submitting && navigator.sendBeacon) {
+      navigator.sendBeacon('/api/wrs-sprint/save', new Blob([JSON.stringify({ answers })], { type: 'application/json' }));
+    }
+  });
+
+  async function submit(timeUp) {
+    if (submitting) return;
+    submitting = true;
+    clearInterval(tick); clearInterval(saveTimer);
+    screen.innerHTML = `<p class="text-center fw-bold my-4">${timeUp ? "Time's up! " : ''}Scoring your Sprint…</p>`;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const data = await api('/wrs-sprint/submit', { answers });
+        questions = [];
+        screen.innerHTML = `<h1 class="h3 fw-bold mb-3"><i class="fas fa-bolt text-warning me-2"></i>Monday WRS Sprint</h1>${resultsHtml(data.result, data.history, timeUp)}`;
+        return;
+      } catch (e) { await new Promise(r => setTimeout(r, 1500)); }
+    }
+    screen.innerHTML = '<div class="alert alert-danger">Your Sprint could not be submitted. Tell your teacher. Your answers were saved as you went.</div>';
+  }
+
+  function resultsHtml(r, history, timeUp) {
+    const acc = r.answered ? Math.round((r.correct / r.answered) * 100) : 0;
+    const prev = history && history.length > 1 ? history[history.length - 2] : null;
+    const change = prev ? r.correct - prev.correct : null;
+    return `
+      ${timeUp ? '<div class="alert alert-warning py-2 fw-bold">Time\'s up! Your answers were submitted automatically.</div>' : ''}
+      <div class="d-flex flex-wrap gap-4 align-items-end mb-3">
+        <div><div class="big-num text-success">${r.correct}</div><div class="fw-bold text-muted">correct</div></div>
+        <div><div class="big-num">${r.answered}</div><div class="fw-bold text-muted">answered of ${r.total}</div></div>
+        <div><div class="big-num">${acc}%</div><div class="fw-bold text-muted">accuracy</div></div>
+        ${change !== null ? `<div><div class="big-num ${change >= 0 ? 'text-success' : 'text-danger'}">${change >= 0 ? '+' : ''}${change}</div><div class="fw-bold text-muted">vs. last week</div></div>` : ''}
+      </div>
+      <h2 class="h6 fw-bold">Your weekly progress</h2>
+      ${chart(history)}
+      <h2 class="h6 fw-bold mt-4">${r.missed.length ? `Questions you missed (${r.missed.length})` : 'You missed nothing you answered. Nice work!'}</h2>
+      ${r.missed.map(m => `<div class="missed">
+          ${m.prompt && m.prompt !== 'True or false?' ? `<div class="small text-muted fw-bold">${esc(m.prompt)}</div>` : ''}
+          <div class="fw-bold">${esc(m.q)}</div>
+          <div class="small mt-1"><span class="text-danger fw-bold">Your answer:</span> ${esc(m.yours)}</div>
+          <div class="small"><span class="text-success fw-bold">Correct answer:</span> ${esc(m.answer)}</div>
+          ${m.hint ? `<div class="small text-muted mt-1">${esc(m.hint)}</div>` : ''}
+        </div>`).join('')}`;
+  }
+
+  async function load() {
+    try { showHome(await api('/wrs-sprint/status')); }
+    catch (e) { screen.innerHTML = `<div class="alert alert-warning mb-0">${esc(e.message)}</div>`; }
+  }
+  load();
+})();
+</script>
+</body>
+</html>

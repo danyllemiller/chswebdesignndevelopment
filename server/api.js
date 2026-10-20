@@ -76,6 +76,7 @@ router.use('/', require('./routes/interviews'));
 router.use('/', require('./routes/practicum'));
 router.use('/', require('./routes/gameRooms'));
 router.use('/', require('./routes/gameChat'));
+router.use('/', require('./routes/wrsSprint'));
 router.use('/', require('./routes/missed-questions'));
 router.use('/', require('./routes/uploads'));
 router.use('/', require('./routes/agenda'));

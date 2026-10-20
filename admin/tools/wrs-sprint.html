@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WRS Sprint Results | Teacher Tools</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet">
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=25"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+  <style>
+    td.score, th.week { text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    td.score b { color: #198754; }
+    td.score small { color: #6c757d; }
+    tr.avg td { background: #f1f5f9; font-weight: 700; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="container my-4" style="max-width: 1100px;">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+    <h3 class="fw-bold mb-0"><i class="fas fa-bolt text-warning me-2"></i>Monday WRS Sprint Results</h3>
+    <a href="/student/wrs-sprint.html" class="btn btn-sm btn-outline-primary fw-bold"><i class="fas fa-eye me-1"></i>Preview the Sprint</a>
+  </div>
+  <p class="text-muted small">Web Design 2 (B2). Each cell is <b class="text-success">correct</b> / answered out of 100 in 10 minutes. Progress only, not in the gradebook. Your previews are not counted.</p>
+  <div class="card shadow-sm"><div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead class="table-light" id="head"></thead>
+      <tbody id="body"><tr><td class="text-center text-muted py-4">Loading…</td></tr></tbody>
+    </table>
+  </div></div>
+</div>
+<div id="footer-placeholder"></div>
+<script type="module">
+import { apiFetch } from '/js/modules/api-client.js';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+try {
+  const { students, attempts } = await apiFetch('/api/admin/wrs-sprint');
+  const weeks = [...new Set(attempts.map(a => a.week))].sort();
+  const by = {};
+  attempts.forEach(a => { (by[a.student_id] = by[a.student_id] || {})[a.week] = a; });
+  document.getElementById('head').innerHTML = `<tr><th class="ps-3">Student</th>${weeks.map(w => `<th class="week">${fmt(w)}</th>`).join('')}<th class="week">Change</th></tr>`;
+  if (!weeks.length) {
+    document.getElementById('body').innerHTML = `<tr><td class="text-center text-muted py-4">No Sprints yet. The first one opens on Monday.</td></tr>`;
+  } else {
+    const avg = weeks.map(w => {
+      const done = attempts.filter(a => a.week === w && a.done);
+      return done.length ? { c: Math.round(done.reduce((s, a) => s + a.correct, 0) / done.length), n: Math.round(done.reduce((s, a) => s + a.answered, 0) / done.length), k: done.length } : null;
+    });
+    const rows = students.map(s => {
+      const mine = by[s.student_id] || {};
+      const done = weeks.map(w => mine[w] && mine[w].done ? mine[w] : null);
+      const taken = done.filter(Boolean);
+      const change = taken.length >= 2 ? taken[taken.length - 1].correct - taken[taken.length - 2].correct : null;
+      return `<tr><td class="ps-3 fw-bold">${esc(s.last_name)}, ${esc(s.first_name)}</td>${done.map((a, i) =>
+        a ? `<td class="score"><b>${a.correct}</b> <small>/ ${a.answered}</small></td>`
+          : `<td class="score text-muted">${mine[weeks[i]] ? 'started' : '—'}</td>`).join('')}
+        <td class="score ${change === null ? 'text-muted' : change >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold'}">${change === null ? '—' : (change >= 0 ? '+' : '') + change}</td></tr>`;
+    }).join('');
+    document.getElementById('body').innerHTML = rows + `<tr class="avg"><td class="ps-3">Class average</td>${avg.map(a => a ? `<td class="score"><b>${a.c}</b> <small>/ ${a.n} · ${a.k} took it</small></td>` : '<td class="score">—</td>').join('')}<td></td></tr>`;
+  }
+} catch (e) {
+  document.getElementById('body').innerHTML = `<tr><td class="text-center text-danger py-4">Couldn't load results.</td></tr>`;
+}
+</script>
+</body>
+</html>
