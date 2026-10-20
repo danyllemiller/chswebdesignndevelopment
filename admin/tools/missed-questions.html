@@ -73,6 +73,13 @@
         <h5 class="fw-bold mb-0">Most Missed Questions</h5>
         <div id="totalsLine" class="small text-muted"></div>
       </div>
+      <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+        <label for="testFilter" class="fw-bold small mb-0">Show:</label>
+        <select id="testFilter" class="form-select form-select-sm" style="width:auto; max-width:100%;">
+          <option value="">All chapters &amp; units</option>
+        </select>
+        <span id="filterCount" class="small text-muted"></span>
+      </div>
       <div id="unmatchedNotice" class="alert alert-warning small py-2 px-3 mb-3" style="display:none;"></div>
       <div class="table-responsive">
         <table class="table table-hover miss-table mb-0">
@@ -143,6 +150,68 @@
         }
     }
 
+    const testFilter = document.getElementById('testFilter');
+    const filterCount = document.getElementById('filterCount');
+    const FILTER_KEY = 'missed_questions_filter';
+    let allQuestions = [];
+
+    // Web Design chapters first, then Computer Science units, each in number
+    // order (Chapter 2 before Chapter 10); pre-tests sit next to their test.
+    function sortKey(t) {
+        const s = String(t || '');
+        const ch = s.match(/^Chapter\s+(\d+)/i), un = s.match(/^Unit\s+(\d+)/i);
+        const diag = /diagnostic|pre-assessment/i.test(s) ? 1 : 0;
+        if (ch) return [0, Number(ch[1]), diag, s];
+        if (un) return [1, Number(un[1]), diag, s];
+        if (/^CS\b/i.test(s)) return [1, 99, 0, s];
+        return [2, 0, 0, s];
+    }
+    function cmp(a, b) {
+        const x = sortKey(a), y = sortKey(b);
+        for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i];
+        return x[3].localeCompare(y[3]);
+    }
+    function buildFilter() {
+        const counts = {};
+        allQuestions.forEach(q => { const t = q.chapter_title || '(no chapter)'; counts[t] = (counts[t] || 0) + 1; });
+        const titles = Object.keys(counts).sort(cmp);
+        const groups = { 0: 'Web Design chapters', 1: 'Computer Science units', 2: 'Other' };
+        let saved = '';
+        try { saved = localStorage.getItem(FILTER_KEY) || ''; } catch (e) {}
+        const current = testFilter.value || saved;
+        let html = '<option value="">All chapters &amp; units</option>';
+        [0, 1, 2].forEach(g => {
+            const inGroup = titles.filter(t => sortKey(t)[0] === g);
+            if (!inGroup.length) return;
+            html += `<optgroup label="${groups[g]}">` + inGroup.map(t =>
+                `<option value="${t.replace(/"/g, '&quot;')}">${t.replace(/</g, '&lt;')} (${counts[t]})</option>`).join('') + '</optgroup>';
+        });
+        testFilter.innerHTML = html;
+        testFilter.value = titles.includes(current) ? current : '';
+    }
+    function renderRows() {
+        const pick = testFilter.value;
+        const rows = pick ? allQuestions.filter(q => (q.chapter_title || '(no chapter)') === pick) : allQuestions;
+        filterCount.textContent = pick ? `${rows.length} question${rows.length === 1 ? '' : 's'}` : '';
+        if (rows.length === 0) {
+            summaryBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">${allQuestions.length ? 'No missed questions for this test.' : 'No missed questions on record yet — import some PDF reports above.'}</td></tr>`;
+            return;
+        }
+        summaryBody.innerHTML = rows.map(q => `
+            <tr>
+                <td>${q.chapter_title || '<span class="no-data">—</span>'}</td>
+                <td class="q-text">${q.question_text}</td>
+                <td>${q.correct_choice || '<span class="no-data">—</span>'}</td>
+                <td>${q.concept_tag || '<span class="no-data">—</span>'}</td>
+                <td><span class="miss-count">${q.times_missed}</span> / ${q.times_seen}</td>
+            </tr>
+        `).join('');
+    }
+    testFilter.addEventListener('change', () => {
+        try { localStorage.setItem(FILTER_KEY, testFilter.value); } catch (e) {}
+        renderRows();
+    });
+
     async function loadSummary() {
         try {
             const res = await fetch('/api/admin/missed-questions/summary');
@@ -160,20 +229,9 @@
                 unmatchedNotice.style.display = 'none';
             }
 
-            if (data.questions.length === 0) {
-                summaryBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">No missed questions on record yet — import some PDF reports above.</td></tr>`;
-                return;
-            }
-
-            summaryBody.innerHTML = data.questions.map(q => `
-                <tr>
-                    <td>${q.chapter_title || '<span class="no-data">—</span>'}</td>
-                    <td class="q-text">${q.question_text}</td>
-                    <td>${q.correct_choice || '<span class="no-data">—</span>'}</td>
-                    <td>${q.concept_tag || '<span class="no-data">—</span>'}</td>
-                    <td><span class="miss-count">${q.times_missed}</span> / ${q.times_seen}</td>
-                </tr>
-            `).join('');
+            allQuestions = data.questions;
+            buildFilter();
+            renderRows();
         } catch (e) {
             summaryBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">${e.message}</td></tr>`;
         }

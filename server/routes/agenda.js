@@ -108,6 +108,7 @@ router.post('/admin/save-agenda-content', async (req, res) => {
 // origin (an iPad home-screen app), so these routes use a shared secret
 // (AGENDA_SYNC_KEY in .env) instead of the session cookie, plus CORS.
 const crypto = require('crypto');
+const { syncDueDates, AUTO_ENABLED: DUE_DATE_SYNC_ON } = require('../jobs/dueDateSync');
 const SYNC_COURSES = new Set(['wd1', 'wd2', 'cs_s1']);
 
 function syncCors(req, res, next) {
@@ -189,7 +190,15 @@ router.post('/agenda/sync/schedule', requireSyncKey, async (req, res) => {
                 await connection.commit();
             } catch (e) { await connection.rollback(); throw e; }
         });
-        res.json({ success: true, course, track, days: clean.length });
+        // Gradebook due dates and the student calendar follow the new pacing
+        // too (server/jobs/dueDateSync.js). A failure there never fails the
+        // schedule save itself -- the slides are already updated.
+        let dueDatesMoved = null;
+        try {
+            const r = DUE_DATE_SYNC_ON ? await syncDueDates(course) : null;
+            dueDatesMoved = r ? r.applied : null;
+        } catch (e) { console.error('[agenda sync] due-date sync failed:', e); }
+        res.json({ success: true, course, track, days: clean.length, due_dates_moved: dueDatesMoved });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save the schedule' }); }
 });
 
