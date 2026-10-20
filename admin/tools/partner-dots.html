@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Partner Dots | Teacher Tools</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=24"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+  <style>
+    /* Letter paper, 1-inch dots. Each 4-Square color is one row of 4 dots;
+       each Pair-Share row holds two colors' pairs. Colors also carry a
+       letter/number and name, since 21 colors get hard to tell apart (and
+       for students who are colorblind). */
+    @page { size: letter; margin: 0.5in; }
+    .sheet { width: 7.5in; margin: 0 auto 1rem; background: #fff; padding: .25in; box-shadow: 0 0 .5rem rgba(0,0,0,.25); }
+    .sheet h3 { font-family: Arial, Helvetica, sans-serif; font-size: 14pt; font-weight: 800; margin: 0 0 .05in; }
+    .sheet p.note { font-family: Arial, Helvetica, sans-serif; font-size: 8.5pt; margin: 0 0 .15in; color: #444; }
+    .dot-row { display: flex; align-items: center; gap: .22in; margin-bottom: .2in; }
+    .dot-row .gap { width: .35in; }
+    .dot {
+      width: 1in; height: 1in; border-radius: 50%; flex: 0 0 1in; box-sizing: border-box;
+      border: 0.4mm solid #000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-family: Arial, Helvetica, sans-serif; text-align: center; line-height: 1;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .dot b { font-size: 22pt; font-weight: 900; }
+    .dot small { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; margin-top: 2px; }
+    .page-break { break-after: page; page-break-after: always; }
+    .screen-only { max-width: 7.5in; margin: 1rem auto; }
+    @media print {
+      body { background: #fff !important; margin: 0; }
+      .screen-only, #nav-placeholder, #footer-placeholder { display: none !important; }
+      .sheet { box-shadow: none; margin: 0; padding: 0; width: auto; }
+    }
+  </style>
+</head>
+<body style="background:#e5e7eb;">
+<div id="nav-placeholder"></div>
+
+<div class="screen-only card shadow-sm">
+  <div class="card-body">
+    <h4 class="fw-bold mb-2"><i class="fas fa-circle me-2"></i>Partner Dots</h4>
+    <p class="mb-2">Two pages of 1-inch dots: <strong>4-Square</strong> (7 colors × 4 dots, letters A–G) and <strong>Pair-Share</strong> (14 colors × 2 dots, numbers 1–14).</p>
+    <ul class="small mb-3">
+      <li>Print in <strong>color</strong>, with <strong>Scale: 100% / Actual size</strong> and <strong>Headers and footers off</strong>. Turn on <strong>Background graphics</strong> if the dots print white.</li>
+      <li>Check one dot with a ruler: it should be exactly 1 inch across.</li>
+      <li>Print on full-page sticker paper to make stickers, or on cardstock and cut along the black circles.</li>
+    </ul>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <label class="small fw-bold">Dots per 4-Square color
+        <input id="perGroup" type="number" min="1" max="6" value="4" class="form-control form-control-sm d-inline-block" style="width:4.5rem"></label>
+      <button id="buildBtn" class="btn btn-sm btn-outline-secondary fw-bold">Update</button>
+      <button onclick="window.print()" class="btn btn-sm btn-primary fw-bold"><i class="fas fa-print me-1"></i>Print</button>
+    </div>
+  </div>
+</div>
+
+<div id="sheets"></div>
+
+<div id="footer-placeholder"></div>
+<script>
+const FOUR_SQUARE = [
+  ['A', 'Red', '#e53935'], ['B', 'Orange', '#fb8c00'], ['C', 'Yellow', '#fdd835'], ['D', 'Green', '#43a047'],
+  ['E', 'Blue', '#1e88e5'], ['F', 'Purple', '#8e24aa'], ['G', 'Pink', '#f48fb1']
+];
+const PAIR_SHARE = [
+  ['1', 'Maroon', '#7b1f1f'], ['2', 'Navy', '#1a237e'], ['3', 'Teal', '#00897b'], ['4', 'Lime', '#c6ff00'],
+  ['5', 'Brown', '#6d4c41'], ['6', 'Black', '#111111'], ['7', 'Gray', '#9e9e9e'], ['8', 'Sky Blue', '#81d4fa'],
+  ['9', 'Lavender', '#c5b3f0'], ['10', 'Mint', '#b9f6ca'], ['11', 'Peach', '#ffcc99'], ['12', 'Olive', '#7c7c1c'],
+  ['13', 'Turquoise', '#1de9e0'], ['14', 'White', '#ffffff']
+];
+// Black text on light colors, white on dark ones.
+function textColor(hex) {
+  const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 150 ? '#000' : '#fff';
+}
+const dot = ([label, name, hex]) =>
+  `<div class="dot" style="background:${hex};color:${textColor(hex)}"><b>${label}</b><small>${name}</small></div>`;
+
+function build() {
+  const per = Math.max(1, Math.min(6, parseInt(document.getElementById('perGroup').value, 10) || 4));
+  const four = FOUR_SQUARE.map(c => `<div class="dot-row">${Array(per).fill(dot(c)).join('')}</div>`).join('');
+  const pairs = [];
+  for (let i = 0; i < PAIR_SHARE.length; i += 2) {
+    const a = PAIR_SHARE[i], b = PAIR_SHARE[i + 1];
+    pairs.push(`<div class="dot-row">${dot(a)}${dot(a)}<div class="gap"></div>${b ? dot(b) + dot(b) : ''}</div>`);
+  }
+  document.getElementById('sheets').innerHTML = `
+    <div class="sheet page-break">
+      <h3>4-Square Groups (7 colors)</h3>
+      <p class="note">Same color + letter = same group of ${per}.</p>
+      ${four}
+    </div>
+    <div class="sheet">
+      <h3>Pair-Share Partners (14 colors)</h3>
+      <p class="note">Same color + number = partners.</p>
+      ${pairs.join('')}
+    </div>`;
+}
+document.getElementById('buildBtn').addEventListener('click', build);
+build();
+</script>
+</body>
+</html>
