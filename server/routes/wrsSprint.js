@@ -18,6 +18,10 @@ const SECTIONS = ['B2', 'AS-B2'];
 // students take it normally, but it never appears on their weekly chart.
 // 2026-10-21: the teacher's trial run before the first real Monday.
 const PRACTICE_DATES = new Set(['2026-10-21']);
+// Beta testers can retake the Sprint as practice on any non-Monday (each
+// retake replaces their last practice result; never on their chart).
+// On Mondays they take the real Sprint once like everyone else.
+const BETA_TESTERS = new Set(['8009627']); // Monique Bongo (AS-B2), added 2026-10-21
 const TEST_SECONDS = 600;
 const LATE_GRACE_SECONDS = 30; // network delay on the auto-submit
 
@@ -116,12 +120,14 @@ router.get('/wrs-sprint/status', requireLogin, async (req, res) => {
             const eligible = staff || await inSection(connection, studentId);
             const [[row]] = await connection.execute(
                 'SELECT * FROM wrs_sprint_attempts WHERE student_id = ? AND week_date = ?', [studentId, today]);
+            const beta = BETA_TESTERS.has(studentId) && !isMonday(today);
             let state = 'closed';
             if (!eligible) state = 'not-enrolled';
-            else if (row && row.submitted_at) state = 'done';
-            else if (row) state = 'in-progress';
-            else if (isMonday(today) || PRACTICE_DATES.has(today) || staff) state = 'open';
-            const body = { state, today, isMonday: isMonday(today), practice: !isMonday(today) && PRACTICE_DATES.has(today), preview: staff, history: await history(connection, studentId) };
+            else if (row && row.submitted_at && !(beta && row.is_preview)) state = 'done';
+            else if (row && !row.submitted_at) state = 'in-progress';
+            else if (isMonday(today) || PRACTICE_DATES.has(today) || staff || beta) state = 'open';
+            const body = { state, today, isMonday: isMonday(today), practice: !isMonday(today) && (PRACTICE_DATES.has(today) || beta), beta, preview: staff, history: await history(connection, studentId) };
+            if (beta && row && row.submitted_at) body.lastResult = resultFor(row);
             if (state === 'done') body.result = resultFor(row);
             return body;
         });
@@ -143,14 +149,15 @@ router.post('/wrs-sprint/start', requireLogin, async (req, res) => {
             if (!staff && !(await inSection(connection, studentId))) return { status: 403, body: { error: 'The WRS Sprint is for Web Design 2 (B2) and AS-B2.' } };
             let [[row]] = await connection.execute(
                 'SELECT * FROM wrs_sprint_attempts WHERE student_id = ? AND week_date = ?', [studentId, today]);
-            if (row && row.submitted_at && row.is_preview) {
-                // Teacher previews can be retaken any time.
+            const beta = BETA_TESTERS.has(studentId) && !isMonday(today);
+            if (row && row.submitted_at && row.is_preview && (staff || beta)) {
+                // Teacher previews and beta-tester practice runs can be retaken any time.
                 await connection.execute('DELETE FROM wrs_sprint_attempts WHERE id = ?', [row.id]);
                 row = undefined;
             }
             if (row && row.submitted_at) return { status: 409, body: { error: 'You already took this week\'s WRS Sprint.' } };
             if (!row) {
-                const practice = !isMonday(today) && PRACTICE_DATES.has(today);
+                const practice = !isMonday(today) && (PRACTICE_DATES.has(today) || beta);
                 if (!isMonday(today) && !practice && !staff) return { status: 403, body: { error: 'The WRS Sprint opens on Mondays.' } };
                 const questions = buildTest(100);
                 await connection.execute(
