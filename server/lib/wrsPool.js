@@ -12,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const { WPR_MC_QUESTIONS } = require('../wprQuestionBank');
+const { SAFETY_MC, SAFETY_TF } = require('./wrsSafetyQuestions');
 
 const PRACTICE_FILES = ['', '-b', '-c', '-d'].map(s =>
     path.join(__dirname, '..', '..', 'pre-assessments', `workplace-readiness-skills${s}.html`));
@@ -64,32 +65,47 @@ function loadPool() {
 
 const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
+// "Match each situation to the most appropriate type of workplace
+// communication." -> "Which type of workplace communication best fits this
+// situation?" Matching sets become ordinary multiple-choice questions
+// (students asked for multiple choice and true/false only).
+function matchPrompt(title) {
+    const m = String(title).match(/^Match each (.+?) to (?:the |its )?(?:most appropriate |correct |best )?(.+?)\.?$/i);
+    if (!m) return String(title);
+    // "...to the WRS skill it best demonstrates" -> "Which WRS skill does this situation best demonstrate?"
+    const verb = m[2].match(/^(.+?) (?:it|they) best (\w+?)s?$/i);
+    if (verb) return `Which ${verb[1]} does this ${m[1]} best ${verb[2]}?`;
+    return `Which ${m[2]} best fits this ${m[1]}?`;
+}
+const stripLetter = c => String(c).replace(/^[A-Z]\.\s*/, '').trim();
+
+function matchAsMc(set) {
+    const choices = set.choices.map(stripLetter);
+    const letters = set.choices.map(c => String(c).trim().charAt(0).toUpperCase());
+    return set.items.map(it => {
+        const idx = letters.indexOf(String(it.answer).trim().charAt(0).toUpperCase());
+        if (idx < 0) return null;
+        const answer = choices[idx];
+        return { prompt: matchPrompt(set.title), q: it.q, options: [answer, ...shuffle(choices.filter(c => c !== answer)).slice(0, 3)], answer, hint: it.hint || '' };
+    }).filter(Boolean);
+}
+
+const asTf = (x, topic) => ({ kind: 'tf', topic, prompt: 'True or false?', q: x.q, options: ['True', 'False'], correct: (x.answer || x.a) === 'T' ? 0 : 1, hint: x.hint || '' });
+const asMc = (x, topic) => { const options = shuffle(x.options); return { kind: 'mc', topic, prompt: x.prompt || '', q: x.q, options, correct: options.indexOf(x.answer), hint: x.hint || '' }; };
+
 // One student's 100-question test, answers included (kept server-side).
-// Mix: 2 matching sets (their items stay together), ~25 true/false, the rest
-// multiple choice. Each question: { kind, prompt, q, options, correct, hint }.
+// All multiple choice and true/false, every question shuffled:
+//   2-5 workplace safety / ergonomics questions (2-5%), about 30 true/false,
+//   and the rest multiple choice (including the converted matching items).
+// Each question: { kind, topic, prompt, q, options, correct, hint }.
 function buildTest(total = 100) {
     const { tf, mc, sets } = loadPool();
-    const blocks = [];
-    let count = 0;
-    shuffle(sets).slice(0, 2).forEach(set => {
-        const letters = set.choices.map(c => String(c).trim().charAt(0).toUpperCase());
-        const block = shuffle(set.items).map(it => ({
-            kind: 'match', prompt: set.title, q: it.q, options: set.choices,
-            correct: letters.indexOf(String(it.answer).trim().charAt(0).toUpperCase()), hint: it.hint || ''
-        })).filter(x => x.correct >= 0);
-        count += block.length;
-        blocks.push(block);
-    });
-    const nTf = Math.min(tf.length, 25);
-    shuffle(tf).slice(0, nTf).forEach(x => {
-        blocks.push([{ kind: 'tf', prompt: 'True or false?', q: x.q, options: ['True', 'False'], correct: x.answer === 'T' ? 0 : 1, hint: x.hint }]);
-        count++;
-    });
-    shuffle(mc).slice(0, Math.max(0, total - count)).forEach(x => {
-        const options = shuffle(x.options);
-        blocks.push([{ kind: 'mc', prompt: '', q: x.q, options, correct: options.indexOf(x.answer), hint: x.hint }]);
-    });
-    return shuffle(blocks).flat().slice(0, total);
+    const safetyCount = 2 + Math.floor(Math.random() * 4); // 2, 3, 4, or 5
+    const safety = shuffle([...SAFETY_MC.map(x => asMc(x, 'safety')), ...SAFETY_TF.map(x => asTf(x, 'safety'))]).slice(0, safetyCount);
+    const tfPicks = shuffle(tf).slice(0, Math.min(tf.length, 30)).map(x => asTf(x, 'wrs'));
+    const mcPool = [...mc, ...sets.flatMap(matchAsMc)];
+    const mcPicks = shuffle(mcPool).slice(0, Math.max(0, total - safety.length - tfPicks.length)).map(x => asMc(x, 'wrs'));
+    return shuffle([...safety, ...tfPicks, ...mcPicks]).filter(q => q.correct >= 0).slice(0, total);
 }
 
 module.exports = { loadPool, buildTest };

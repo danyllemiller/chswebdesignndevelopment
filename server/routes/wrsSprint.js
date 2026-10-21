@@ -53,19 +53,22 @@ async function inSection(connection, studentId) {
 }
 
 // Questions as the page sees them: no answers, no hints.
-const publicQuestions = qs => qs.map((q, i) => ({ n: i + 1, kind: q.kind, prompt: q.prompt, q: q.q, options: q.options }));
+const publicQuestions = qs => qs.map((q, i) => ({ n: i + 1, kind: q.kind, topic: q.topic || '', prompt: q.prompt, q: q.q, options: q.options }));
 
+// review: every question the student answered, in test order, right or
+// wrong (students asked to see all of them, not just the misses).
 function grade(questions, answers) {
     let answered = 0, correct = 0;
-    const missed = [];
+    const review = [];
     questions.forEach((q, i) => {
         const a = answers[i];
         if (a === null || a === undefined || a === '') return;
         answered++;
-        if (Number(a) === q.correct) correct++;
-        else missed.push({ n: i + 1, prompt: q.prompt, q: q.q, yours: q.options[Number(a)] ?? '', answer: q.options[q.correct], hint: q.hint });
+        const right = Number(a) === q.correct;
+        if (right) correct++;
+        review.push({ n: i + 1, prompt: q.prompt, q: q.q, topic: q.topic || '', right, yours: q.options[Number(a)] ?? '', answer: q.options[q.correct], hint: q.hint });
     });
-    return { answered, correct, missed };
+    return { answered, correct, review, missed: review.filter(r => !r.right) };
 }
 
 function cleanAnswers(raw, total) {
@@ -99,7 +102,7 @@ function resultFor(row) {
     const questions = JSON.parse(row.questions_json);
     const answers = row.answers_json ? JSON.parse(row.answers_json) : {};
     const g = grade(questions, answers);
-    return { answered: g.answered, correct: g.correct, total: questions.length, missed: g.missed };
+    return { answered: g.answered, correct: g.correct, total: questions.length, review: g.review, missed: g.missed };
 }
 
 // GET /wrs-sprint/status -- can this student take it today, and their history
