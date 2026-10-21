@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class Agenda | CHS</title>
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+  <link href="/css/student-pages.css" rel="stylesheet" />
+  <script src="/js/loader.js?v=26"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+  <style>
+    .agenda-wrap { max-width: 860px; margin: 1.5rem auto 3rem; padding: 0 1rem; }
+    .agenda-card { background: #fff; border-radius: 1rem; box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12); overflow: hidden; }
+    .agenda-head { background: #1f2a44; color: #fff; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: .75rem; flex-wrap: wrap; }
+    .agenda-head .date { font-size: 1.35rem; font-weight: 800; }
+    .agenda-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 1.1rem; }
+    .label { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #6c757d; margin-bottom: .3rem; }
+    .chapter { font-weight: 700; color: #0d6efd; }
+    .donow { background: #fff8e1; border-left: 5px solid #f0ad00; border-radius: 0 .6rem .6rem 0; padding: .8rem 1rem; font-weight: 600; }
+    .tasks li { margin-bottom: .35rem; }
+    .exit { background: #e8f5ee; border-left: 5px solid #198754; border-radius: 0 .6rem .6rem 0; padding: .8rem 1rem; }
+    .due { background: #fdecea; color: #b02a37; font-weight: 800; border-radius: .6rem; padding: .6rem 1rem; }
+    .badge-today { background: #ffc107; color: #000; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="agenda-wrap">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="h3 fw-bold mb-0"><i class="fas fa-list-check me-2 text-primary"></i>Class Agenda</h1>
+    <select id="classPick" class="form-select form-select-sm d-none" style="width:auto"></select>
+  </div>
+  <div id="agenda" class="agenda-card"><p class="text-center text-muted my-4">Loading…</p></div>
+</div>
+<div id="footer-placeholder"></div>
+<script>
+(function () {
+  const box = document.getElementById('agenda');
+  const pick = document.getElementById('classPick');
+  let state = { course: '', track: '', date: '' };
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const longDate = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const shortDate = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+  async function load() {
+    const q = new URLSearchParams();
+    if (state.course) { q.set('course', state.course); q.set('track', state.track); }
+    if (state.date) q.set('date', state.date);
+    try {
+      const res = await fetch('/api/agenda/student?' + q.toString());
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Could not load the agenda.');
+      state = { course: data.course, track: data.track, date: data.date };
+      if (data.options.length > 1) {
+        pick.classList.remove('d-none');
+        pick.innerHTML = data.options.map(o => `<option value="${o.course}|${o.track}" ${o.course === data.course && o.track === data.track ? 'selected' : ''}>${esc(o.label)}</option>`).join('');
+      }
+      render(data);
+    } catch (e) {
+      box.innerHTML = `<div class="p-4 text-center text-muted">${esc(e.message)}</div>`;
+    }
+  }
+
+  function nav(data) {
+    return `<div class="d-flex gap-2 flex-wrap">
+      <button class="btn btn-sm btn-light fw-bold" data-go="${data.prevDate || ''}" ${data.prevDate ? '' : 'disabled'}><i class="fas fa-arrow-left me-1"></i>${data.prevDate ? shortDate(data.prevDate) : 'Previous'}</button>
+      ${data.date !== data.today ? `<button class="btn btn-sm btn-warning fw-bold" data-go="${data.today}">Today</button>` : ''}
+      <button class="btn btn-sm btn-light fw-bold" data-go="${data.nextDate || ''}" ${data.nextDate ? '' : 'disabled'}>${data.nextDate ? shortDate(data.nextDate) : 'Next'}<i class="fas fa-arrow-right ms-1"></i></button>
+    </div>`;
+  }
+
+  function render(data) {
+    const head = `<div class="agenda-head">
+        <div><div class="small opacity-75 fw-bold">${esc(data.label)}</div>
+          <div class="date">${longDate(data.date)} ${data.date === data.today ? '<span class="badge badge-today ms-1 align-middle">Today</span>' : ''}</div></div>
+        ${nav(data)}
+      </div>`;
+    if (!data.isClassDay || !data.content) {
+      box.innerHTML = head + `<div class="agenda-body"><p class="mb-0 text-muted">No class on this day.${data.nextDate ? ` The next class is <strong>${longDate(data.nextDate)}</strong>.` : ''}</p></div>`;
+      return;
+    }
+    const c = data.content;
+    const objectives = Array.isArray(c.objective) ? c.objective : (c.objective ? [c.objective] : []);
+    const tasks = Array.isArray(c.tasksList) ? c.tasksList : [];
+    const milestone = c.milestone && typeof c.milestone === 'object' && c.milestone.title ? c.milestone : null;
+    box.innerHTML = head + `<div class="agenda-body">
+      ${c.chapterLabel ? `<div class="chapter">${esc(c.chapterLabel)}${c.minimumDay ? ' · <span class="text-muted">short day</span>' : ''}</div>` : ''}
+      ${milestone ? `<div class="due"><i class="fas fa-flag-checkered me-2"></i>Due today: ${esc(milestone.title)}${milestone.pts ? ` (${esc(milestone.pts)} pts)` : ''}</div>` : ''}
+      ${objectives.length ? `<div><div class="label">Today you will</div><ul class="mb-0">${objectives.map(o => `<li>${esc(o)}</li>`).join('')}</ul></div>` : ''}
+      ${c.doNowPrompt ? `<div><div class="label">Do Now${c.doNowType ? ` · ${esc(c.doNowType)}` : ''}</div><div class="donow">${esc(c.doNowPrompt)}</div></div>` : ''}
+      ${tasks.length ? `<div><div class="label">${esc(c.tasksTitle || 'Today\'s tasks')}</div><ol class="tasks mb-0">${tasks.map(t => `<li>${esc(t)}</li>`).join('')}</ol></div>` : ''}
+      ${c.exitTicket ? `<div><div class="label">Exit ticket</div><div class="exit">Before you leave, ${esc(c.exitTicket)}</div></div>` : ''}
+    </div>`;
+  }
+
+  box.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-go]');
+    if (!b || !b.dataset.go) return;
+    state.date = b.dataset.go;
+    load();
+  });
+  pick.addEventListener('change', () => {
+    const [course, track] = pick.value.split('|');
+    state = { course, track, date: state.date };
+    load();
+  });
+  load();
+})();
+</script>
+</body>
+</html>

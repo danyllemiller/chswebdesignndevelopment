@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="/css/fontawesome.min.css">
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
   <link href="/css/student-pages.css" rel="stylesheet" />
-  <script src="/js/loader.js?v=25"></script>
+  <script src="/js/loader.js?v=26"></script>
   <script type="module" src="/js/auth-guard.js?v=1"></script>
   <style>
     .sprint-wrap { max-width: 900px; margin: 1.5rem auto 3rem; padding: 0 1rem; }
@@ -91,13 +91,13 @@
 
   function showHome(st) {
     let action = '';
-    if (st.state === 'open') action = `<button id="startBtn" class="btn btn-primary btn-lg fw-bold w-100"><i class="fas fa-stopwatch me-2"></i>Start the 10-minute Sprint</button>${st.preview ? '<p class="small text-muted mt-2 mb-0">Teacher preview: works any day and is not saved to student results.</p>' : ''}`;
+    if (st.state === 'open') action = `${st.practice && !st.preview ? '<div class="alert alert-info py-2 fw-bold">Today is a practice run. It won\'t count on your weekly chart. The real Sprint starts Monday.</div>' : ''}<button id="startBtn" class="btn btn-primary btn-lg fw-bold w-100"><i class="fas fa-stopwatch me-2"></i>Start the 10-minute Sprint</button>${st.preview ? '<p class="small text-muted mt-2 mb-0">Teacher preview: works any day and is not saved to student results.</p>' : ''}`;
     else if (st.state === 'in-progress') action = `<button id="startBtn" class="btn btn-warning btn-lg fw-bold w-100">Resume your Sprint (the clock kept running)</button>`;
     else if (st.state === 'closed') action = `<div class="alert alert-info mb-0">The WRS Sprint opens on <strong>Mondays</strong>. See you then!</div>`;
-    else if (st.state === 'not-enrolled') action = `<div class="alert alert-secondary mb-0">The Monday WRS Sprint is for Web Design 2 (B2).</div>`;
+    else if (st.state === 'not-enrolled') action = `<div class="alert alert-secondary mb-0">The Monday WRS Sprint is for Web Design 2 (B2) and AS-B2.</div>`;
     screen.innerHTML = `
       <h1 class="h3 fw-bold mb-1"><i class="fas fa-bolt text-warning me-2"></i>Monday WRS Sprint</h1>
-      <p class="text-muted">Workplace Readiness Skills · Web Design 2</p>
+      <p class="text-muted">Workplace Readiness Skills · Web Design 2 &amp; AS</p>
       ${st.state === 'done' ? '' : rulesHtml()}
       ${st.state === 'done' ? resultsHtml(st.result, st.history) : action}
       ${st.state === 'done' ? '' : `<h2 class="h6 fw-bold mt-4">Your weekly progress</h2>${chart(st.history)}`}`;

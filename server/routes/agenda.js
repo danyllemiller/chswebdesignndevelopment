@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { withConnection } = require('../db');
-const { requireStaff } = require('../helpers');
+const { requireStaff, requireLogin, isStaffSession } = require('../helpers');
 
 const AGENDA_CONTENT_DDL = `CREATE TABLE IF NOT EXISTS agenda_content (
     course     VARCHAR(20) NOT NULL,
@@ -78,6 +78,80 @@ router.get('/agenda/get', requireStaff, async (req, res) => {
         });
         res.json({ course, content: result.content, schedule: result.schedule, days: result.days });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch agenda' }); }
+});
+
+// ── Student agenda (student/agenda.html) ─────────────────────────────────
+// Read-only view of a student's own class agenda for any class day (past or
+// future). Only student-facing fields of the slide are sent. The course and
+// track come from the student's enrolled sections (primary + additional):
+// a WD1 section -> wd1, WD2 and AS sections -> wd2, CS -> cs_s1 on the A- or
+// B-day track by the period's letter. Staff can view any course.
+const COURSE_BY_ID = { '05254G1S': 'wd1', '05254G2S': 'wd2', '05254EF-201': 'wd2', '05254ES': 'wd2', '10003GS': 'cs_s1' };
+const COURSE_LABELS = { wd1: 'Web Design 1', wd2: 'Web Design 2', cs_s1: 'Computer Science' };
+const STUDENT_FIELDS = ['chapterLabel', 'minimumDay', 'objective', 'doNowType', 'doNowPrompt', 'tasksTitle', 'tasksList', 'exitTicket', 'milestone'];
+
+async function studentAgendaOptions(connection, req) {
+    if (isStaffSession(req)) {
+        return [
+            { course: 'wd1', track: 'main', label: 'Web Design 1' }, { course: 'wd2', track: 'main', label: 'Web Design 2' },
+            { course: 'cs_s1', track: 'A', label: 'Computer Science (A days)' }, { course: 'cs_s1', track: 'B', label: 'Computer Science (B days)' }
+        ];
+    }
+    const sid = String(req.session.user.student_id);
+    const [rows] = await connection.execute(
+        `SELECT cs.section_id, cs.course_id FROM class_sections cs
+         WHERE cs.archived = 0 AND (cs.section_id = (SELECT section_id FROM students WHERE student_id = ? LIMIT 1)
+            OR cs.section_id IN (SELECT section_id FROM student_additional_sections WHERE student_id = ?))`, [sid, sid]);
+    const seen = new Set(), out = [];
+    rows.forEach(r => {
+        const course = COURSE_BY_ID[r.course_id];
+        if (!course) return;
+        const track = course === 'cs_s1' ? (String(r.section_id).charAt(0).toUpperCase() === 'B' ? 'B' : 'A') : 'main';
+        const key = course + track;
+        if (seen.has(key)) return;
+        seen.add(key);
+        out.push({ course, track, label: `${COURSE_LABELS[course]} (${r.section_id})` });
+    });
+    return out;
+}
+
+// GET /agenda/student?course=&track=&date=YYYY-MM-DD
+router.get('/agenda/student', requireLogin, async (req, res) => {
+    try {
+        const out = await withConnection(async (connection) => {
+            await connection.execute(AGENDA_CONTENT_DDL);
+            await connection.execute(AGENDA_SCHEDULE_DDL);
+            await connection.execute(AGENDA_DAYS_DDL);
+            const options = await studentAgendaOptions(connection, req);
+            if (!options.length) return { options, error: 'No class agenda found for your schedule.' };
+            const pick = options.find(o => o.course === req.query.course && o.track === (req.query.track || o.track)) || options[0];
+            // Class days: Jotability's dates when it has sent them, else the original schedule.
+            let [dayRows] = await connection.execute(
+                'SELECT event_date, block_num FROM agenda_days WHERE course = ? AND track = ? ORDER BY event_date', [pick.course, pick.track]);
+            if (!dayRows.length) {
+                [dayRows] = await connection.execute(
+                    'SELECT event_date, block_num FROM agenda_schedule WHERE course = ? AND track = ? ORDER BY event_date', [pick.course, pick.track]);
+            }
+            const days = dayRows.map(r => ({ date: ymd(r.event_date), block: r.block_num }));
+            const today = ymd(new Date());
+            const want = /^\d{4}-\d{2}-\d{2}$/.test(String(req.query.date || '')) ? String(req.query.date) : today;
+            const hit = days.find(d => d.date === want);
+            const prev = [...days].reverse().find(d => d.date < want) || null;
+            const next = days.find(d => d.date > want) || null;
+            let content = null;
+            if (hit) {
+                const [[row]] = await connection.execute('SELECT content FROM agenda_content WHERE course = ? AND block_num = ?', [pick.course, hit.block]);
+                if (row) {
+                    const c = typeof row.content === 'string' ? JSON.parse(row.content) : row.content;
+                    content = {};
+                    STUDENT_FIELDS.forEach(f => { if (c[f] !== undefined) content[f] = c[f]; });
+                }
+            }
+            return { options, course: pick.course, track: pick.track, label: pick.label, date: want, today,
+                     isClassDay: !!hit, content, prevDate: prev && prev.date, nextDate: next && next.date };
+        });
+        res.json(out);
+    } catch (err) { console.error('[agenda] student view error:', err); res.status(500).json({ error: 'Failed to load the agenda.' }); }
 });
 
 // Under /admin/ -- already covered by the blanket admin gate in server/api.js.

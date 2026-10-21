@@ -452,9 +452,9 @@ const studentClass = String(
             if (isINTV) { studentMenuINTV.classList.remove('d-none'); studentMenuINTV.style.setProperty('display', 'block', 'important'); }
             else studentMenuINTV.style.setProperty('display', 'none', 'important');
         }
-        // Monday WRS Sprint is Web Design 2 (B2) only.
+        // Monday WRS Sprint is Web Design 2 (B2) and AS-B2 only.
         const wrsSprintItem = document.getElementById('wd-wrs-sprint-item');
-        if (wrsSprintItem) wrsSprintItem.classList.toggle('d-none', !(studentClass === 'B2' || studentClass.startsWith('WD2')));
+        if (wrsSprintItem) wrsSprintItem.classList.toggle('d-none', !(studentClass === 'B2' || studentClass === 'AS-B2' || studentClass.startsWith('WD2')));
     }
 
     // DEFENSIVE: Wait 50ms and verify styles were applied correctly

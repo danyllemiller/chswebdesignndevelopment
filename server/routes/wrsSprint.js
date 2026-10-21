@@ -1,6 +1,6 @@
 // server/routes/wrsSprint.js
 // Monday WRS Sprint (student/wrs-sprint.html): every Monday, Web Design 2
-// (B2) students get 100 random Workplace Readiness Skills questions and
+// (B2) and AS-B2 students get 100 random Workplace Readiness Skills questions and
 // answer as many as they can in 10 minutes. Progress only -- no gradebook
 // column. One attempt per student per Monday. Questions and answers live
 // server-side in the attempt row (the page only ever gets prompts and
@@ -13,7 +13,11 @@ const { requireLogin, requireStaff, isStaffSession } = require('../helpers');
 const { getLocalDateStr } = require('../tardyLogic');
 const { buildTest } = require('../lib/wrsPool');
 
-const SECTION = 'B2';
+const SECTIONS = ['B2', 'AS-B2'];
+// Extra one-off days the Sprint is open as a PRACTICE run (is_preview = 2):
+// students take it normally, but it never appears on their weekly chart.
+// 2026-10-21: the teacher's trial run before the first real Monday.
+const PRACTICE_DATES = new Set(['2026-10-21']);
 const TEST_SECONDS = 600;
 const LATE_GRACE_SECONDS = 30; // network delay on the auto-submit
 
@@ -41,8 +45,10 @@ const toDateStr = d => (d instanceof Date) ? getLocalDateStr(d) : String(d).slic
 
 async function inSection(connection, studentId) {
     const [[s]] = await connection.execute('SELECT section_id FROM students WHERE student_id = ? LIMIT 1', [studentId]);
-    if (s && s.section_id === SECTION) return true;
-    const [extra] = await connection.execute('SELECT 1 FROM student_additional_sections WHERE student_id = ? AND section_id = ? LIMIT 1', [studentId, SECTION]);
+    if (s && SECTIONS.includes(s.section_id)) return true;
+    const [extra] = await connection.execute(
+        `SELECT 1 FROM student_additional_sections WHERE student_id = ? AND section_id IN (${SECTIONS.map(() => '?').join(',')}) LIMIT 1`,
+        [studentId, ...SECTIONS]);
     return extra.length > 0;
 }
 
@@ -111,8 +117,8 @@ router.get('/wrs-sprint/status', requireLogin, async (req, res) => {
             if (!eligible) state = 'not-enrolled';
             else if (row && row.submitted_at) state = 'done';
             else if (row) state = 'in-progress';
-            else if (isMonday(today) || staff) state = 'open';
-            const body = { state, today, isMonday: isMonday(today), preview: staff, history: await history(connection, studentId) };
+            else if (isMonday(today) || PRACTICE_DATES.has(today) || staff) state = 'open';
+            const body = { state, today, isMonday: isMonday(today), practice: !isMonday(today) && PRACTICE_DATES.has(today), preview: staff, history: await history(connection, studentId) };
             if (state === 'done') body.result = resultFor(row);
             return body;
         });
@@ -131,7 +137,7 @@ router.post('/wrs-sprint/start', requireLogin, async (req, res) => {
         const out = await withConnection(async (connection) => {
             await ensureTable(connection);
             const today = getLocalDateStr();
-            if (!staff && !(await inSection(connection, studentId))) return { status: 403, body: { error: 'The WRS Sprint is for Web Design 2 (B2).' } };
+            if (!staff && !(await inSection(connection, studentId))) return { status: 403, body: { error: 'The WRS Sprint is for Web Design 2 (B2) and AS-B2.' } };
             let [[row]] = await connection.execute(
                 'SELECT * FROM wrs_sprint_attempts WHERE student_id = ? AND week_date = ?', [studentId, today]);
             if (row && row.submitted_at && row.is_preview) {
@@ -141,11 +147,12 @@ router.post('/wrs-sprint/start', requireLogin, async (req, res) => {
             }
             if (row && row.submitted_at) return { status: 409, body: { error: 'You already took this week\'s WRS Sprint.' } };
             if (!row) {
-                if (!isMonday(today) && !staff) return { status: 403, body: { error: 'The WRS Sprint opens on Mondays.' } };
+                const practice = !isMonday(today) && PRACTICE_DATES.has(today);
+                if (!isMonday(today) && !practice && !staff) return { status: 403, body: { error: 'The WRS Sprint opens on Mondays.' } };
                 const questions = buildTest(100);
                 await connection.execute(
                     'INSERT IGNORE INTO wrs_sprint_attempts (student_id, week_date, started_at, questions_json, total, is_preview) VALUES (?, ?, NOW(), ?, ?, ?)',
-                    [studentId, today, JSON.stringify(questions), questions.length, staff ? 1 : 0]);
+                    [studentId, today, JSON.stringify(questions), questions.length, staff ? 1 : (practice ? 2 : 0)]);
                 [[row]] = await connection.execute(
                     'SELECT * FROM wrs_sprint_attempts WHERE student_id = ? AND week_date = ?', [studentId, today]);
             }
@@ -222,17 +229,18 @@ router.get('/admin/wrs-sprint', requireStaff, async (req, res) => {
     try {
         const out = await withConnection(async (connection) => {
             await ensureTable(connection);
+            const ph = SECTIONS.map(() => '?').join(',');
             const [students] = await connection.execute(
-                `SELECT DISTINCT s.student_id, s.first_name, s.last_name FROM students s
-                 LEFT JOIN student_additional_sections x ON x.student_id = s.student_id AND x.section_id = ?
-                 WHERE (s.section_id = ? OR x.student_id IS NOT NULL) AND (s.archived IS NULL OR s.archived = 0)
-                 ORDER BY s.last_name, s.first_name`, [SECTION, SECTION]);
+                `SELECT DISTINCT s.student_id, s.first_name, s.last_name, s.section_id FROM students s
+                 LEFT JOIN student_additional_sections x ON x.student_id = s.student_id AND x.section_id IN (${ph})
+                 WHERE (s.section_id IN (${ph}) OR x.student_id IS NOT NULL) AND (s.archived IS NULL OR s.archived = 0)
+                 ORDER BY s.last_name, s.first_name`, [...SECTIONS, ...SECTIONS]);
             const [rows] = await connection.execute(
-                `SELECT student_id, week_date, answered, correct, total, submitted_at FROM wrs_sprint_attempts
-                 WHERE is_preview = 0 ORDER BY week_date`);
+                `SELECT student_id, week_date, answered, correct, total, submitted_at, is_preview FROM wrs_sprint_attempts
+                 WHERE is_preview IN (0, 2) ORDER BY week_date`);
             return {
                 students,
-                attempts: rows.map(r => ({ student_id: r.student_id, week: toDateStr(r.week_date), answered: r.answered, correct: r.correct, total: r.total, done: !!r.submitted_at }))
+                attempts: rows.map(r => ({ student_id: r.student_id, week: toDateStr(r.week_date), answered: r.answered, correct: r.correct, total: r.total, done: !!r.submitted_at, practice: r.is_preview === 2 }))
             };
         });
         res.json(out);
