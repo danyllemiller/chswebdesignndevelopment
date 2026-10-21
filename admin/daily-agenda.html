@@ -281,7 +281,7 @@
   a.sched-inner:hover .sched-period { text-decoration: underline; }
   .sched-current { outline: 2px solid rgba(0,0,0,.45); outline-offset: -2px; }
   .sched-period { font-weight: 700; font-size: 1rem; }
-  .sched-time { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .sched-time { font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 1.15rem; font-weight: 700; }
   .schedule-empty {
     flex: 1 1 auto; display: flex; align-items: center; justify-content: center;
     text-align: center; text-shadow: 0 1px 4px rgba(0,0,0,.7);
@@ -775,11 +775,12 @@ function getBellScheduleKey(dateStr) {
   return calType === 'S' ? 'summer' : calType;
 }
 
+// "7:35am" -- lowercase with no space, as the teacher prefers.
 function fmtTime(hhmm) {
   const [h, m] = hhmm.split(':').map(Number);
-  const period = h >= 12 ? 'PM' : 'AM';
+  const period = h >= 12 ? 'pm' : 'am';
   let h12 = h % 12; if (h12 === 0) h12 = 12;
-  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+  return `${h12}:${String(m).padStart(2, '0')}${period}`;
 }
 
 function renderBellSchedule(dateStr) {
