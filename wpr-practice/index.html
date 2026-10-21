@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>WPR Practice Test</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <script src="/js/wrs-test-ui.js?v=1"></script>
+  <style>
+    body { background: #eef1f5; min-height: 100vh; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+    .card-main { background: #fff; border-radius: 1rem; box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12); padding: 1.5rem; }
+    .brand { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; color: #1f2a44; }
+    .brand i { font-size: 1.6rem; color: #0d6efd; }
+    #code { text-transform: uppercase; letter-spacing: .25em; font-weight: 800; font-size: 1.4rem; text-align: center; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><i class="fas fa-briefcase"></i><div><div class="fw-bold fs-5">WPR Practice Test</div><div class="small text-muted">Nevada Workplace Readiness Skills practice</div></div></div>
+  <div id="screen" class="card-main"></div>
+</div>
+<script>
+// Student side of the WPR Practice Test (server/routes/wprPractice.js).
+// No login: students join with the teacher's class code, their name, and
+// student ID. Nothing is saved on this device except the join token for
+// this one test (sessionStorage), so a refresh can resume.
+(function () {
+  const screen = document.getElementById('screen');
+  const esc = WrsTestUI.esc;
+  let me = null; // { code, token, label, count, seconds }
+  try { me = JSON.parse(sessionStorage.getItem('wpr_join') || 'null'); } catch (e) {}
+
+  async function api(path, body) {
+    const res = await fetch('/api' + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { const e = new Error(data.error || 'Something went wrong.'); e.status = res.status; throw e; }
+    return data;
+  }
+  const fmtTime = s => s >= 3600 ? `${s / 3600} hour` : `${Math.round(s / 60)} minutes`;
+
+  function showJoin(msg) {
+    const params = new URLSearchParams(location.search);
+    screen.innerHTML = `
+      <h1 class="h4 fw-bold mb-3">Join your class's test</h1>
+      ${msg ? `<div class="alert alert-warning py-2">${esc(msg)}</div>` : ''}
+      <form id="joinForm" class="d-flex flex-column gap-3" autocomplete="off">
+        <div><label class="form-label fw-bold" for="code">Class code</label>
+          <input id="code" class="form-control" maxlength="6" required value="${esc(params.get('code') || '')}" placeholder="ABC123"></div>
+        <div class="row g-3">
+          <div class="col-sm-6"><label class="form-label fw-bold" for="first">First name</label><input id="first" class="form-control" maxlength="40" required></div>
+          <div class="col-sm-6"><label class="form-label fw-bold" for="last">Last name</label><input id="last" class="form-control" maxlength="40" required></div>
+        </div>
+        <div><label class="form-label fw-bold" for="sid">Student ID number</label><input id="sid" class="form-control" maxlength="20" inputmode="numeric" required></div>
+        <button class="btn btn-primary btn-lg fw-bold" type="submit">Join</button>
+      </form>`;
+    document.getElementById('joinForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button'); btn.disabled = true;
+      try {
+        const out = await api('/wpr/join', {
+          code: document.getElementById('code').value.trim(), firstName: document.getElementById('first').value,
+          lastName: document.getElementById('last').value, studentId: document.getElementById('sid').value
+        });
+        me = { code: out.code, token: out.token, label: out.label, count: out.count, seconds: out.seconds, name: document.getElementById('first').value.trim() };
+        try { sessionStorage.setItem('wpr_join', JSON.stringify(me)); } catch (x) {}
+        showRules(out.started);
+      } catch (err) { showJoin(err.message); }
+    });
+  }
+
+  function showRules(started) {
+    screen.innerHTML = `
+      <h1 class="h4 fw-bold mb-1">Ready, ${esc(me.name || '')}?</h1>
+      <p class="text-muted">${esc(me.label)}</p>
+      <ul class="mb-3">
+        <li><strong>${me.count} questions</strong>, multiple choice and true/false, on Nevada Workplace Readiness Skills, including workplace safety. You have <strong>${fmtTime(me.seconds)}</strong>.</li>
+        <li>Answer as many as you can. The test submits itself when time runs out.</li>
+        <li>Like the state test: <strong>Flag</strong> questions to come back to, use the on-screen <strong>Calculator</strong> and <strong>Scratch Paper</strong>, and check the <strong>Review</strong> screen before you submit.</li>
+        <li class="text-danger fw-bold">The test runs full screen. Do not leave it. Switching tabs, opening another site, or exiting full screen locks the test with a warning and tells your teacher. The second time, your test is submitted.</li>
+        <li>When you finish you'll see your score and every question you answered, with the correct answers.</li>
+      </ul>
+      <button id="startBtn" class="btn btn-primary btn-lg fw-bold w-100"><i class="fas fa-expand me-2"></i>${started ? 'Resume the test (the clock kept running)' : 'Start the test (full screen)'}</button>`;
+    document.getElementById('startBtn').addEventListener('click', start);
+  }
+
+  async function start() {
+    WrsTestUI.enterFullscreen(); // must happen inside the click itself
+    document.getElementById('startBtn').disabled = true;
+    try {
+      const data = await api('/wpr/start', { code: me.code, token: me.token });
+      WrsTestUI.run({
+        mount: screen,
+        questions: data.questions,
+        answers: data.answers || {},
+        secondsLeft: data.secondsLeft,
+        flagKey: `wpr_flags_${me.code}`,
+        save: answers => api('/wpr/save', { code: me.code, token: me.token, answers }),
+        saveBeacon: answers => navigator.sendBeacon && navigator.sendBeacon('/api/wpr/save', new Blob([JSON.stringify({ code: me.code, token: me.token, answers })], { type: 'application/json' })),
+        onViolation: count => api('/wpr/violation', { code: me.code, token: me.token, count }),
+        submit: async (answers, reason) => {
+          const out = await api('/wpr/submit', { code: me.code, token: me.token, answers, reason });
+          try { sessionStorage.removeItem('wpr_join'); } catch (x) {}
+          screen.innerHTML = `<h1 class="h4 fw-bold mb-3">Your results</h1>${WrsTestUI.reviewHtml(out.result, out.endReason || reason)}
+            <p class="small text-muted mt-3 mb-0">Your teacher has your score. You can close this page.</p>`;
+        }
+      });
+    } catch (e) {
+      try { if (document.fullscreenElement) document.exitFullscreen(); } catch (x) {}
+      if (e.status === 404) { try { sessionStorage.removeItem('wpr_join'); } catch (x) {} me = null; return showJoin(e.message); }
+      screen.innerHTML = `<div class="alert alert-warning mb-0">${esc(e.message)}</div>`;
+    }
+  }
+
+  if (me && me.token) showRules(true); else showJoin();
+})();
+</script>
+</body>
+</html>

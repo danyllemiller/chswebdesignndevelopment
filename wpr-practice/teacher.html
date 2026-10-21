@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>WPR Practice Test | Teacher</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <style>
+    body { background: #eef1f5; min-height: 100vh; }
+    .wrap { max-width: 1050px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+    .card-main { background: #fff; border-radius: 1rem; box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12); padding: 1.5rem; }
+    .brand { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; color: #1f2a44; }
+    .brand i { font-size: 1.6rem; color: #0d6efd; }
+    .code-big { font-size: 3rem; font-weight: 900; letter-spacing: .25em; color: #1f2a44; font-variant-numeric: tabular-nums; }
+    td.num, th.num { text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .pill { font-size: .75rem; font-weight: 700; padding: .15rem .55rem; border-radius: 999px; }
+    .pill.joined { background: #e9ecef; color: #495057; } .pill.testing { background: #fff3cd; color: #7a5b00; } .pill.submitted { background: #d1f2e0; color: #0f5132; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><i class="fas fa-briefcase"></i><div><div class="fw-bold fs-5">WPR Practice Test · Teacher</div><div class="small text-muted">Give the Nevada Workplace Readiness Skills practice test and download your class's results</div></div></div>
+  <div id="screen" class="card-main"></div>
+</div>
+<script>
+// Teacher side of the WPR Practice Test (server/routes/wprPractice.js).
+// Results exist only in the server's temporary memory and on this screen.
+// Download them before ending the session; nothing is kept anywhere.
+(function () {
+  const screen = document.getElementById('screen');
+  const KEY = 'wpr_teacher_session';
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  let sess = null, data = null, poll = null, confirmEnd = false;
+  try { sess = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  function showStart(msg) {
+    screen.innerHTML = `
+      <h1 class="h4 fw-bold mb-3">Start a test session</h1>
+      ${msg ? `<div class="alert alert-warning py-2">${esc(msg)}</div>` : ''}
+      <form id="startForm" class="d-flex flex-column gap-3" autocomplete="off">
+        <div><label class="form-label fw-bold" for="pass">Teacher passcode</label><input id="pass" type="password" class="form-control" required></div>
+        <div><label class="form-label fw-bold" for="tname">Your name <span class="text-muted fw-normal">(shows on your report)</span></label><input id="tname" class="form-control" maxlength="60"></div>
+        <div><label class="form-label fw-bold" for="len">Test length</label>
+          <select id="len" class="form-select">
+            <option value="full">Full state practice: 100 questions, 1 hour</option>
+            <option value="half">50 questions, 40 minutes</option>
+            <option value="short">25 questions, 20 minutes</option>
+            <option value="sprint">10-minute Sprint: 100 questions, answer as many as you can</option>
+          </select></div>
+        <div class="alert alert-info small mb-0"><i class="fas fa-lock me-1"></i><strong>Nothing is saved.</strong> Results are kept only in temporary memory while your session is open. Download them before you end the session. Sessions are erased automatically after 12 hours.</div>
+        <button class="btn btn-primary btn-lg fw-bold" type="submit">Start session</button>
+      </form>`;
+    document.getElementById('startForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button'); btn.disabled = true;
+      try {
+        const res = await fetch('/api/wpr/session', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ passcode: document.getElementById('pass').value, teacher: document.getElementById('tname').value, length: document.getElementById('len').value }) });
+        const out = await res.json();
+        if (!res.ok) throw new Error(out.error || 'Could not start a session.');
+        sess = { code: out.code, token: out.teacherToken };
+        try { localStorage.setItem(KEY, JSON.stringify(sess)); } catch (x) {}
+        startPolling();
+      } catch (err) { showStart(err.message); }
+    });
+  }
+
+  async function refresh() {
+    try {
+      const res = await fetch(`/api/wpr/session/${encodeURIComponent(sess.code)}`, { headers: { 'x-teacher-token': sess.token } });
+      if (res.status === 404) { stop(); try { localStorage.removeItem(KEY); } catch (x) {} sess = null; return showStart('That session has ended or expired.'); }
+      data = await res.json();
+      render();
+    } catch (e) { /* keep showing the last data; next poll retries */ }
+  }
+  function startPolling() { stop(); refresh(); poll = setInterval(refresh, 4000); }
+  function stop() { clearInterval(poll); poll = null; }
+
+  const fmtLeft = s => s == null ? '' : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  const pct = (a, b) => b ? Math.round((a / b) * 100) : 0;
+
+  function render() {
+    const link = `${location.origin}/wpr-practice/?code=${data.code}`;
+    const st = data.students;
+    const done = st.filter(s => s.status === 'submitted');
+    const sorted = [...st].sort((a, b) => (a.lastName + a.firstName).localeCompare(b.lastName + b.firstName));
+    screen.innerHTML = `
+      <div class="d-flex justify-content-between flex-wrap gap-3 align-items-start">
+        <div>
+          <div class="small fw-bold text-muted text-uppercase">Class code</div>
+          <div class="code-big">${esc(data.code)}</div>
+          <div class="small text-muted">${esc(data.label)}</div>
+        </div>
+        <div style="min-width:0; max-width:460px">
+          <div class="small fw-bold text-muted text-uppercase mb-1">Students go to</div>
+          <div class="input-group"><input id="link" class="form-control" readonly value="${esc(link)}"><button id="copyLink" class="btn btn-outline-primary fw-bold">Copy</button></div>
+          <div class="small text-muted mt-1">The link already includes the code. Students type their name and student ID.</div>
+        </div>
+      </div>
+      <hr>
+      <div class="d-flex flex-wrap gap-4 mb-3">
+        <div><span class="fs-3 fw-bold">${st.length}</span> joined</div>
+        <div><span class="fs-3 fw-bold">${st.filter(s => s.status === 'testing').length}</span> testing</div>
+        <div><span class="fs-3 fw-bold text-success">${done.length}</span> finished</div>
+        ${done.length ? `<div><span class="fs-3 fw-bold">${Math.round(done.reduce((s, x) => s + pct(x.result.correct, x.result.total), 0) / done.length)}%</span> class average</div>` : ''}
+      </div>
+      <div class="table-responsive mb-3"><table class="table table-sm align-middle mb-0">
+        <thead class="table-light"><tr><th>Student</th><th>ID</th><th class="num">Status</th><th class="num">Time left</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th></tr></thead>
+        <tbody>${sorted.length ? sorted.map(s => `<tr>
+          <td class="fw-bold">${esc(s.lastName)}, ${esc(s.firstName)}</td><td>${esc(s.studentId)}</td>
+          <td class="num"><span class="pill ${s.status}">${s.status}</span></td>
+          <td class="num">${s.status === 'testing' ? fmtLeft(s.secondsLeft) : ''}</td>
+          <td class="num">${s.result ? s.result.answered : s.answeredSoFar}</td>
+          <td class="num">${s.result ? s.result.correct : ''}</td>
+          <td class="num fw-bold">${s.result ? pct(s.result.correct, s.result.total) + '%' : ''}</td>
+          <td class="num ${s.violations ? 'text-danger fw-bold' : 'text-muted'}">${s.violations ? s.violations + '×' : '0'}${s.endReason === 'left-test' ? ' · auto-submitted' : ''}</td></tr>`).join('')
+          : '<tr><td colspan="8" class="text-center text-muted py-4">Waiting for students to join…</td></tr>'}</tbody>
+      </table></div>
+      <div class="d-flex flex-wrap gap-2 mb-2">
+        <button class="btn btn-success fw-bold" data-dl="summary" ${done.length ? '' : 'disabled'}><i class="fas fa-file-csv me-1"></i>Score summary (CSV)</button>
+        <button class="btn btn-success fw-bold" data-dl="items" ${done.length ? '' : 'disabled'}><i class="fas fa-table-list me-1"></i>Question-by-question (CSV)</button>
+        <button class="btn btn-success fw-bold" data-dl="report" ${done.length ? '' : 'disabled'}><i class="fas fa-chart-column me-1"></i>Printable class report</button>
+        <button class="btn ${confirmEnd ? 'btn-danger' : 'btn-outline-danger'} fw-bold ms-auto" id="endBtn">${confirmEnd ? 'Yes, erase everything and end' : 'End session'}</button>
+      </div>
+      <p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i>Nothing is saved. Results are erased when you end this session, after 12 hours, or if the server restarts. Download what you need first. Only students who finished appear in the downloads.</p>`;
+  }
+
+  // ---- Downloads (built right here in the browser)
+  const csvCell = v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const csv = rows => rows.map(r => r.map(csvCell).join(',')).join('\r\n');
+  const stamp = () => new Date().toLocaleDateString('en-CA');
+  function download(name, text, type) {
+    const blob = new Blob([text], { type });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  const finished = () => data.students.filter(s => s.status === 'submitted').sort((a, b) => (a.lastName + a.firstName).localeCompare(b.lastName + b.firstName));
+  const endedBy = s => s.endReason === 'left-test' ? 'Auto-submitted (left test)' : s.endReason === 'time' ? 'Time ran out' : 'Student submitted';
+
+  function summaryCsv() {
+    const rows = [['Last name', 'First name', 'Student ID', 'Answered', 'Correct', 'Total questions', 'Score %', 'Accuracy % (of answered)', 'Times left test', 'How it ended']];
+    finished().forEach(s => rows.push([s.lastName, s.firstName, s.studentId, s.result.answered, s.result.correct, s.result.total, pct(s.result.correct, s.result.total), pct(s.result.correct, s.result.answered), s.violations, endedBy(s)]));
+    download(`wpr-practice-summary-${data.code}-${stamp()}.csv`, csv(rows), 'text/csv');
+  }
+  function itemsCsv() {
+    const rows = [['Last name', 'First name', 'Student ID', 'Question #', 'Topic', 'Question', 'Student answer', 'Correct answer', 'Result']];
+    finished().forEach(s => s.items.forEach(it => rows.push([s.lastName, s.firstName, s.studentId, it.n, it.topic === 'safety' ? 'Workplace safety' : 'WRS', it.q, it.yours, it.answer, it.right === null ? 'Not answered' : it.right ? 'Right' : 'Wrong'])));
+    download(`wpr-practice-questions-${data.code}-${stamp()}.csv`, csv(rows), 'text/csv');
+  }
+
+  function reportHtml() {
+    const st = finished();
+    const scores = st.map(s => pct(s.result.correct, s.result.total));
+    const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+    const sortedScores = [...scores].sort((a, b) => a - b);
+    const median = sortedScores.length ? sortedScores[Math.floor((sortedScores.length - 1) / 2)] : 0;
+    const passing = scores.filter(x => x >= 75).length;
+    // Score histogram: 10-point bins.
+    const bins = Array(10).fill(0);
+    scores.forEach(x => { bins[Math.min(9, Math.floor(x / 10))]++; });
+    const maxBin = Math.max(1, ...bins), W = 560, H = 200, L = 30, B = 26, bw = (W - L - 10) / 10;
+    let hist = `<svg viewBox="0 0 ${W} ${H + B}" width="100%" style="max-width:${W}px" role="img" aria-label="Score distribution">`;
+    for (let i = 0; i <= maxBin; i += Math.max(1, Math.ceil(maxBin / 4))) { const y = 10 + (H - 10) * (1 - i / maxBin); hist += `<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" stroke="#e3e6ea"/><text x="${L - 6}" y="${y + 4}" font-size="10" text-anchor="end" fill="#6c757d">${i}</text>`; }
+    bins.forEach((n, i) => {
+      const x = L + 5 + i * bw, y = 10 + (H - 10) * (1 - n / maxBin);
+      hist += `<rect x="${x}" y="${y}" width="${bw - 6}" height="${H - y}" fill="${i >= 7 ? '#198754' : '#0d6efd'}" rx="2"/>`;
+      if (n) hist += `<text x="${x + (bw - 6) / 2}" y="${y - 4}" font-size="11" font-weight="700" text-anchor="middle" fill="#212529">${n}</text>`;
+      hist += `<text x="${x + (bw - 6) / 2}" y="${H + 16}" font-size="10" text-anchor="middle" fill="#6c757d">${i * 10}${i === 9 ? '–100' : '–' + (i * 10 + 9)}</text>`;
+    });
+    hist += '</svg>';
+    // Most-missed questions (seen by at least 2 students who answered them).
+    const qs = new Map();
+    st.forEach(s => s.items.forEach(it => {
+      if (it.right === null) return;
+      const k = it.q; const e = qs.get(k) || { q: it.q, answer: it.answer, topic: it.topic, seen: 0, wrong: 0 };
+      e.seen++; if (!it.right) e.wrong++; qs.set(k, e);
+    }));
+    const missed = [...qs.values()].filter(e => e.seen >= 2 && e.wrong > 0).sort((a, b) => (b.wrong / b.seen) - (a.wrong / a.seen) || b.seen - a.seen).slice(0, 15);
+    let safetySeen = 0, safetyRight = 0, wrsSeen = 0, wrsRight = 0;
+    st.forEach(s => s.items.forEach(it => { if (it.right === null) return; if (it.topic === 'safety') { safetySeen++; if (it.right) safetyRight++; } else { wrsSeen++; if (it.right) wrsRight++; } }));
+    const bar = (label, a, b) => `<div style="margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><b>${label}</b><span>${pct(a, b)}% right (${a} of ${b})</span></div><div style="background:#e9ecef;border-radius:6px;height:14px"><div style="width:${pct(a, b)}%;background:#198754;height:14px;border-radius:6px"></div></div></div>`;
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>WPR Practice Report ${esc(data.code)}</title>
+      <style>body{font-family:Arial,Helvetica,sans-serif;color:#212529;margin:28px;max-width:800px} h1{font-size:22px;margin:0} h2{font-size:16px;margin:24px 0 8px;border-bottom:2px solid #1f2a44;padding-bottom:4px}
+      .stats{display:flex;gap:28px;flex-wrap:wrap;margin:14px 0} .stats b{display:block;font-size:26px} table{border-collapse:collapse;width:100%;font-size:12px} th,td{border:1px solid #dee2e6;padding:5px 7px;text-align:left;vertical-align:top} th{background:#f1f3f5}
+      .num{text-align:center} .noprint{margin-bottom:16px} @media print{.noprint{display:none}} tr{page-break-inside:avoid}</style></head><body>
+      <div class="noprint"><button onclick="window.print()" style="font-size:15px;padding:8px 16px;font-weight:700">Print or save as PDF</button></div>
+      <h1>WPR Practice Test: Class Report</h1>
+      <div style="color:#6c757d;font-size:13px">${esc(data.teacher || '')}${data.teacher ? ' · ' : ''}${new Date(data.createdAt).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} · ${esc(data.label)} · Class code ${esc(data.code)}</div>
+      <div class="stats"><div><b>${st.length}</b>students finished</div><div><b>${avg}%</b>class average</div><div><b>${median}%</b>median</div><div><b>${passing} of ${st.length}</b>scored 75% or higher</div></div>
+      <h2>Score distribution</h2>${hist}<div style="font-size:11px;color:#6c757d">Score = correct out of all questions. Green bars are 70% and up.</div>
+      <h2>By topic</h2>${bar('Workplace Readiness Skills', wrsRight, wrsSeen)}${bar('Workplace safety & ergonomics', safetyRight, safetySeen)}
+      <h2>Most-missed questions</h2>${missed.length ? `<table><thead><tr><th>Question</th><th>Correct answer</th><th class="num">Missed</th></tr></thead><tbody>${missed.map(m => `<tr><td>${esc(m.q)}</td><td>${esc(m.answer)}</td><td class="num">${m.wrong} of ${m.seen}</td></tr>`).join('')}</tbody></table>` : '<p style="font-size:13px">Not enough overlap yet. Each student gets a different random set of questions, so this fills in with larger classes.</p>'}
+      <h2>Students</h2><table><thead><tr><th>Student</th><th>ID</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th><th>How it ended</th></tr></thead><tbody>
+      ${st.map(s => `<tr><td>${esc(s.lastName)}, ${esc(s.firstName)}</td><td>${esc(s.studentId)}</td><td class="num">${s.result.answered}</td><td class="num">${s.result.correct}</td><td class="num"><b>${pct(s.result.correct, s.result.total)}%</b></td><td class="num">${s.violations}</td><td>${endedBy(s)}</td></tr>`).join('')}
+      </tbody></table></body></html>`;
+  }
+
+  screen.addEventListener('click', async (e) => {
+    if (e.target.closest('#copyLink')) {
+      const input = document.getElementById('link');
+      try { await navigator.clipboard.writeText(input.value); e.target.textContent = 'Copied'; } catch (x) { input.select(); }
+      return;
+    }
+    const d = e.target.closest('[data-dl]');
+    if (d && data) {
+      if (d.dataset.dl === 'summary') summaryCsv();
+      else if (d.dataset.dl === 'items') itemsCsv();
+      else { const w = window.open('', '_blank'); if (w) { w.document.write(reportHtml()); w.document.close(); } else download(`wpr-practice-report-${data.code}-${stamp()}.html`, reportHtml(), 'text/html'); }
+      return;
+    }
+    if (e.target.closest('#endBtn')) {
+      if (!confirmEnd) { confirmEnd = true; render(); setTimeout(() => { confirmEnd = false; if (data) render(); }, 6000); return; }
+      stop();
+      try { await fetch(`/api/wpr/session/${encodeURIComponent(sess.code)}`, { method: 'DELETE', headers: { 'x-teacher-token': sess.token } }); } catch (x) {}
+      try { localStorage.removeItem(KEY); } catch (x) {}
+      sess = null; data = null; confirmEnd = false;
+      showStart();
+    }
+  });
+
+  if (sess && sess.code) startPolling(); else showStart();
+})();
+</script>
+</body>
+</html>

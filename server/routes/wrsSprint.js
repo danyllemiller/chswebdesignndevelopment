@@ -42,6 +42,10 @@ async function ensureTable(connection) {
             UNIQUE KEY uniq_student_week (student_id, week_date)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     `);
+    // Lockdown (js/wrs-test-ui.js): times the student left the test, and why
+    // it ended ('student', 'time', or 'left-test' = auto-submitted on the 2nd leave).
+    await connection.execute('ALTER TABLE wrs_sprint_attempts ADD COLUMN IF NOT EXISTS violations INT NOT NULL DEFAULT 0');
+    await connection.execute('ALTER TABLE wrs_sprint_attempts ADD COLUMN IF NOT EXISTS end_reason VARCHAR(20) NULL');
 }
 
 const isMonday = (dateStr) => new Date(`${dateStr}T12:00:00`).getDay() === 1;
@@ -93,12 +97,12 @@ async function history(connection, studentId) {
     return rows.map(r => ({ week: toDateStr(r.week_date), answered: r.answered, correct: r.correct, total: r.total }));
 }
 
-async function finish(connection, row, answers) {
+async function finish(connection, row, answers, reason) {
     const questions = JSON.parse(row.questions_json);
     const g = grade(questions, answers);
     await connection.execute(
-        'UPDATE wrs_sprint_attempts SET submitted_at = NOW(), answers_json = ?, answered = ?, correct = ? WHERE id = ? AND submitted_at IS NULL',
-        [JSON.stringify(answers), g.answered, g.correct, row.id]);
+        'UPDATE wrs_sprint_attempts SET submitted_at = NOW(), answers_json = ?, answered = ?, correct = ?, end_reason = ? WHERE id = ? AND submitted_at IS NULL',
+        [JSON.stringify(answers), g.answered, g.correct, reason || 'time', row.id]);
     return g;
 }
 
@@ -221,7 +225,8 @@ router.post('/wrs-sprint/submit', requireLogin, async (req, res) => {
                 const answers = elapsed <= TEST_SECONDS + LATE_GRACE_SECONDS
                     ? cleanAnswers(req.body && req.body.answers, row.total)
                     : (row.answers_json ? JSON.parse(row.answers_json) : {});
-                await finish(connection, row, answers);
+                const reason = ['student', 'time', 'left-test'].includes(req.body && req.body.reason) ? req.body.reason : 'student';
+                await finish(connection, row, answers, reason);
             }
             const [[done]] = await connection.execute('SELECT * FROM wrs_sprint_attempts WHERE id = ?', [row.id]);
             return { status: 200, body: { result: resultFor(done), history: await history(connection, studentId) } };
@@ -230,6 +235,24 @@ router.post('/wrs-sprint/submit', requireLogin, async (req, res) => {
     } catch (err) {
         console.error('[wrs-sprint] submit error:', err);
         res.status(500).json({ error: 'Could not submit.' });
+    }
+});
+
+// POST /wrs-sprint/violation -- { count } the student left the test screen
+router.post('/wrs-sprint/violation', requireLogin, async (req, res) => {
+    const studentId = String(req.session.user.student_id);
+    const count = Math.max(1, Math.min(20, parseInt(req.body && req.body.count, 10) || 1));
+    try {
+        await withConnection(async (connection) => {
+            await ensureTable(connection);
+            await connection.execute(
+                'UPDATE wrs_sprint_attempts SET violations = GREATEST(violations, ?) WHERE student_id = ? AND week_date = ? AND submitted_at IS NULL',
+                [count, studentId, getLocalDateStr()]);
+        });
+        res.json({ success: true });
+    } catch (err) {
+        console.error('[wrs-sprint] violation error:', err);
+        res.status(500).json({ error: 'Could not record.' });
     }
 });
 
@@ -245,11 +268,11 @@ router.get('/admin/wrs-sprint', requireStaff, async (req, res) => {
                  WHERE (s.section_id IN (${ph}) OR x.student_id IS NOT NULL) AND (s.archived IS NULL OR s.archived = 0)
                  ORDER BY s.last_name, s.first_name`, [...SECTIONS, ...SECTIONS]);
             const [rows] = await connection.execute(
-                `SELECT student_id, week_date, answered, correct, total, submitted_at, is_preview FROM wrs_sprint_attempts
+                `SELECT student_id, week_date, answered, correct, total, submitted_at, is_preview, violations, end_reason FROM wrs_sprint_attempts
                  WHERE is_preview IN (0, 2) ORDER BY week_date`);
             return {
                 students: students.filter(st => !BETA_TESTERS.has(String(st.student_id))),
-                attempts: rows.filter(r => !BETA_TESTERS.has(String(r.student_id))).map(r => ({ student_id: r.student_id, week: toDateStr(r.week_date), answered: r.answered, correct: r.correct, total: r.total, done: !!r.submitted_at, practice: r.is_preview === 2 }))
+                attempts: rows.filter(r => !BETA_TESTERS.has(String(r.student_id))).map(r => ({ student_id: r.student_id, week: toDateStr(r.week_date), answered: r.answered, correct: r.correct, total: r.total, done: !!r.submitted_at, practice: r.is_preview === 2, violations: r.violations || 0, endReason: r.end_reason || '' }))
             };
         });
         res.json(out);

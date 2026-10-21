@@ -11,45 +11,11 @@
   <link href="/css/student-pages.css" rel="stylesheet" />
   <script src="/js/loader.js?v=26"></script>
   <script type="module" src="/js/auth-guard.js?v=1"></script>
+  <script src="/js/wrs-test-ui.js?v=1"></script>
   <style>
     .sprint-wrap { max-width: 900px; margin: 1.5rem auto 3rem; padding: 0 1rem; }
     .sprint-card { background: #fff; border-radius: 1rem; box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12); padding: 1.5rem; }
-    .timer-bar { position: sticky; top: 0; z-index: 20; background: #1f2a44; color: #fff; border-radius: .8rem; padding: .7rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem; }
-    .timer { font-size: 1.8rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: .03em; }
-    .timer.low { color: #ff8b8b; }
-    .q-meta { font-size: .85rem; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: .05em; }
-    .q-text { font-size: 1.25rem; font-weight: 700; margin: .4rem 0 1rem; }
-    .opt { display: block; width: 100%; text-align: left; border: 2px solid #ced4da; background: #fff; border-radius: .6rem; padding: .7rem 1rem; margin-bottom: .5rem; font-weight: 600; }
-    .opt:hover { border-color: #0d6efd; }
-    .opt.sel { border-color: #0d6efd; background: #e7f1ff; }
-    .opt .k { display: inline-block; min-width: 1.6rem; font-weight: 800; color: #0d6efd; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); gap: 4px; }
-    .grid button { border: 1px solid #ced4da; background: #fff; border-radius: 4px; font-size: .75rem; font-weight: 700; padding: 4px 0; font-variant-numeric: tabular-nums; }
-    .grid button.ans { background: #198754; border-color: #198754; color: #fff; }
-    .grid button.cur { outline: 3px solid #0d6efd; outline-offset: 1px; }
-    .big-num { font-size: 3rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-    .missed { border-left: 4px solid #dc3545; background: #fdf3f4; border-radius: 0 .5rem .5rem 0; padding: .7rem 1rem; margin-bottom: .6rem; }
-    .got { border-left: 4px solid #198754; background: #f1faf4; border-radius: 0 .5rem .5rem 0; padding: .7rem 1rem; margin-bottom: .6rem; }
     .chart-wrap { overflow-x: auto; }
-    .opt { display: flex; align-items: center; gap: .75rem; }
-    .opt .letter { flex: 0 0 2rem; height: 2rem; border-radius: 50%; border: 2px solid #6c757d; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #495057; }
-    .opt.sel .letter { background: #0d6efd; border-color: #0d6efd; color: #fff; }
-    .tool-btn { background: rgba(255,255,255,.12); color: #fff; font-weight: 700; border: 1px solid rgba(255,255,255,.35); }
-    .tool-btn.on, .tool-btn:hover { background: #fff; color: #1f2a44; }
-    .grid button.flag { position: relative; }
-    .grid button.flag::after { content: ''; position: absolute; top: 0; right: 0; border-top: 9px solid #ffc107; border-left: 9px solid transparent; }
-    .key-ans, .key-flag, .key-cur { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; }
-    .key-ans { background: #198754; } .key-flag { background: #ffc107; } .key-cur { outline: 2px solid #0d6efd; }
-    .big-num-sm { font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .tool-panel { position: fixed; right: 18px; bottom: 18px; z-index: 1050; width: 250px; background: #fff; border-radius: .8rem; box-shadow: 0 .8rem 2rem rgba(0,0,0,.35); overflow: hidden; }
-    .tool-panel.scratch { width: 320px; bottom: 18px; right: 284px; }
-    @media (max-width: 700px) { .tool-panel.scratch { right: 18px; bottom: 330px; } }
-    .tool-head { background: #1f2a44; color: #fff; font-weight: 700; padding: .45rem .7rem; display: flex; justify-content: space-between; align-items: center; }
-    .calc-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
-    .calc-keys button { border: 1px solid #ced4da; background: #f8f9fa; border-radius: .4rem; padding: .5rem 0; font-weight: 700; font-size: 1.05rem; }
-    .calc-keys button.op { background: #e7f1ff; color: #0d6efd; }
-    .calc-keys button.eq { background: #0d6efd; color: #fff; }
-    #calcDisplay { font-size: 1.4rem; font-family: ui-monospace, Menlo, Consolas, monospace; }
   </style>
 </head>
 <body>
@@ -59,36 +25,17 @@
   <div id="screen" class="sprint-card"><p class="text-center text-muted my-4">Loading…</p></div>
 </div>
 
-<div id="calcPanel" class="tool-panel" hidden>
-  <div class="tool-head"><span><i class="fas fa-calculator me-1"></i>Calculator</span><button type="button" class="btn-close btn-close-white" data-close="calcPanel" aria-label="Close calculator"></button></div>
-  <div class="p-2">
-    <input id="calcDisplay" class="form-control text-end fw-bold mb-2" readonly value="0" aria-label="Calculator display">
-    <div id="calcKeys" class="calc-keys">
-      <button data-k="C">C</button><button data-k="⌫">⌫</button><button data-k="%">%</button><button data-k="÷" class="op">÷</button>
-      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button data-k="×" class="op">×</button>
-      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button data-k="−" class="op">−</button>
-      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button data-k="+" class="op">+</button>
-      <button data-k="±">±</button><button data-k="0">0</button><button data-k=".">.</button><button data-k="=" class="eq">=</button>
-    </div>
-  </div>
-</div>
-<div id="scratchPanel" class="tool-panel scratch" hidden>
-  <div class="tool-head"><span><i class="fas fa-pen-to-square me-1"></i>Scratch Paper</span><button type="button" class="btn-close btn-close-white" data-close="scratchPanel" aria-label="Close scratch paper"></button></div>
-  <textarea id="scratchText" class="form-control border-0" rows="9" placeholder="Work things out here. This is not graded." aria-label="Scratch paper"></textarea>
-</div>
-
 <div id="footer-placeholder"></div>
 
 <script>
+// Monday WRS Sprint: the timed test itself (tools, review screen, full-screen
+// lockdown) is the shared engine in /js/wrs-test-ui.js; this page handles
+// the Sprint's own rules (Mondays, one try, practice runs, beta testers)
+// and the weekly progress chart.
 (function () {
-  const TOTAL_SECONDS = 600;
   const screen = document.getElementById('screen');
-  let questions = [], answers = {}, cur = 0, secondsLeft = TOTAL_SECONDS, endAt = 0;
-  let tick = null, saveTimer = null, submitting = false, dirty = false;
-
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const fmtWeek = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const answeredCount = () => Object.keys(answers).length;
 
   async function api(path, body) {
     const res = await fetch('/api' + path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {});
@@ -121,254 +68,60 @@
     return `<ul class="mb-3">
       <li><strong>100 questions</strong> about workplace skills, including a few on workplace safety and ergonomics. Multiple choice and true/false, a different shuffled mix every week.</li>
       <li>You have <strong>10 minutes</strong>. Answer as many as you can. The test submits itself when time runs out.</li>
-      <li>Skip any question and come back to it with <strong>Previous</strong>, <strong>Next</strong>, or the question navigator.</li>
       <li>Just like the state WRS test: <strong>Flag</strong> questions to come back to, use the on-screen <strong>Calculator</strong> and <strong>Scratch Paper</strong>, and check the <strong>Review</strong> screen before you submit.</li>
+      <li><strong>The test runs full screen. Do not leave it.</strong> Switching tabs, opening another site, or exiting full screen locks the test with a warning. The second time, your test is submitted.</li>
       <li>Afterward you'll see every question you answered, right or wrong, with the correct answer for any you missed.</li>
       <li>This doesn't go in the gradebook. It tracks your progress every Monday, so aim to beat last week.</li>
     </ul>`;
   }
 
+  function resultsHtml(r, history, reason) {
+    const prev = history && history.length > 1 ? history[history.length - 2] : null;
+    const change = prev && history[history.length - 1] ? history[history.length - 1].correct - prev.correct : null;
+    return `${change !== null ? `<div class="mb-2 fw-bold ${change >= 0 ? 'text-success' : 'text-danger'}">${change >= 0 ? '+' : ''}${change} correct vs. last week</div>` : ''}
+      ${WrsTestUI.reviewHtml(r, reason)}
+      <h2 class="h6 fw-bold mt-4">Your weekly progress</h2>${chart(history)}`;
+  }
+
   function showHome(st) {
     let action = '';
-    if (st.state === 'open') action = `${st.beta ? '<div class="alert alert-info py-2 fw-bold">Beta tester: you can test the Sprint any day, as many times as you like. Your runs never count and aren\'t on the class results.</div>' : (st.practice && !st.preview ? '<div class="alert alert-info py-2 fw-bold">Today is a practice run. It won\'t count on your weekly chart. The real Sprint starts Monday.</div>' : '')}<button id="startBtn" class="btn btn-primary btn-lg fw-bold w-100"><i class="fas fa-stopwatch me-2"></i>Start the 10-minute Sprint</button>${st.preview ? '<p class="small text-muted mt-2 mb-0">Teacher preview: works any day and is not saved to student results.</p>' : ''}`;
+    if (st.state === 'open') action = `${st.beta ? '<div class="alert alert-info py-2 fw-bold">Beta tester: you can test the Sprint any day, as many times as you like. Your runs never count and aren\'t on the class results.</div>' : (st.practice && !st.preview ? '<div class="alert alert-info py-2 fw-bold">Today is a practice run. It won\'t count on your weekly chart. The real Sprint starts Monday.</div>' : '')}<button id="startBtn" class="btn btn-primary btn-lg fw-bold w-100"><i class="fas fa-stopwatch me-2"></i>Start the 10-minute Sprint (full screen)</button>${st.preview ? '<p class="small text-muted mt-2 mb-0">Teacher preview: works any day and is not saved to student results.</p>' : ''}`;
     else if (st.state === 'in-progress') action = `<button id="startBtn" class="btn btn-warning btn-lg fw-bold w-100">Resume your Sprint (the clock kept running)</button>`;
     else if (st.state === 'closed') action = `<div class="alert alert-info mb-0">The WRS Sprint opens on <strong>Mondays</strong>. See you then!</div>`;
     else if (st.state === 'not-enrolled') action = `<div class="alert alert-secondary mb-0">The Monday WRS Sprint is for Web Design 2 (B2) and AS-B2.</div>`;
     screen.innerHTML = `
       <h1 class="h3 fw-bold mb-1"><i class="fas fa-bolt text-warning me-2"></i>Monday WRS Sprint</h1>
       <p class="text-muted">Workplace Readiness Skills · Web Design 2 &amp; AS</p>
-      ${st.state === 'done' ? '' : rulesHtml()}
-      ${st.state === 'done' ? resultsHtml(st.result, st.history) : action}
-      ${st.state === 'done' ? '' : `<h2 class="h6 fw-bold mt-4">Your weekly progress</h2>${chart(st.history)}`}`;
+      ${st.state === 'done' ? resultsHtml(st.result, st.history) : rulesHtml() + action + `<h2 class="h6 fw-bold mt-4">Your weekly progress</h2>${chart(st.history)}`}`;
     const b = document.getElementById('startBtn');
     if (b) b.addEventListener('click', start);
   }
 
   async function start() {
+    WrsTestUI.enterFullscreen(); // must happen inside the click itself
     const b = document.getElementById('startBtn');
     if (b) b.disabled = true;
     try {
       const data = await api('/wrs-sprint/start', {});
-      questions = data.questions; answers = data.answers || {}; secondsLeft = data.secondsLeft;
-      endAt = Date.now() + secondsLeft * 1000;
-      cur = 0;
-      loadFlags();
-      renderTest();
-      tick = setInterval(onTick, 250);
-      saveTimer = setInterval(() => { if (dirty) save(); }, 10000);
+      WrsTestUI.run({
+        mount: screen,
+        questions: data.questions,
+        answers: data.answers || {},
+        secondsLeft: data.secondsLeft,
+        flagKey: `wrs_sprint_flags_${new Date().toLocaleDateString('en-CA')}`,
+        save: answers => api('/wrs-sprint/save', { answers }),
+        saveBeacon: answers => navigator.sendBeacon && navigator.sendBeacon('/api/wrs-sprint/save', new Blob([JSON.stringify({ answers })], { type: 'application/json' })),
+        onViolation: count => api('/wrs-sprint/violation', { count }),
+        submit: async (answers, reason, violations) => {
+          const out = await api('/wrs-sprint/submit', { answers, reason, violations });
+          screen.innerHTML = `<h1 class="h3 fw-bold mb-3"><i class="fas fa-bolt text-warning me-2"></i>Monday WRS Sprint</h1>${resultsHtml(out.result, out.history, reason)}`;
+        }
+      });
     } catch (e) {
+      try { if (document.fullscreenElement) document.exitFullscreen(); } catch (x) {}
       screen.innerHTML = `<div class="alert alert-warning mb-0">${esc(e.message)}</div>`;
       if (e.data && e.data.expired) setTimeout(load, 1500);
     }
-  }
-
-  function onTick() {
-    secondsLeft = Math.max(0, Math.round((endAt - Date.now()) / 1000));
-    const t = document.getElementById('timer');
-    if (t) {
-      t.textContent = `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, '0')}`;
-      t.classList.toggle('low', secondsLeft <= 60);
-    }
-    if (secondsLeft <= 0) submit(true);
-  }
-
-  async function save() {
-    dirty = false;
-    try { await api('/wrs-sprint/save', { answers }); } catch (e) { dirty = true; }
-  }
-
-  // ---- Test screen, laid out like a secure state test: one question per
-  // screen, lettered choices, Previous/Next, Flag for Review, a question
-  // navigator, on-screen Calculator and Scratch Paper, and a Review screen
-  // before submitting. Flags stay on this device (sessionStorage) so a
-  // reload mid-test keeps them.
-  const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
-  const flagKey = () => `wrs_sprint_flags_${new Date().toLocaleDateString('en-CA')}`;
-  let flags = new Set();
-  let showNav = false;
-  function loadFlags() { try { flags = new Set(JSON.parse(sessionStorage.getItem(flagKey()) || '[]')); } catch (e) { flags = new Set(); } }
-  function saveFlags() { try { sessionStorage.setItem(flagKey(), JSON.stringify([...flags])); } catch (e) {} }
-
-  function renderTest() {
-    const q = questions[cur];
-    const kindLabel = (q.kind === 'tf' ? 'True or False' : 'Multiple Choice') + (q.topic === 'safety' ? ' · Workplace Safety' : '');
-    const flagged = flags.has(cur);
-    screen.innerHTML = `
-      <div class="timer-bar">
-        <div class="d-flex align-items-center gap-3">
-          <div><div class="small opacity-75 fw-bold">TIME REMAINING</div><div id="timer" class="timer">--:--</div></div>
-          <div class="fw-bold d-none d-sm-block">Question ${cur + 1} of ${questions.length}</div>
-        </div>
-        <div class="d-flex gap-2 flex-wrap">
-          <button class="btn btn-sm tool-btn ${calcPanel.hidden ? '' : 'on'}" data-tool="calc"><i class="fas fa-calculator me-1"></i>Calculator</button>
-          <button class="btn btn-sm tool-btn ${scratchPanel.hidden ? '' : 'on'}" data-tool="scratch"><i class="fas fa-pen-to-square me-1"></i>Scratch Paper</button>
-          <button class="btn btn-sm btn-warning fw-bold" id="reviewBtn"><i class="fas fa-list-check me-1"></i>Review &amp; Submit</button>
-        </div>
-      </div>
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div class="q-meta">Question ${cur + 1} of ${questions.length} · ${kindLabel}</div>
-        <button id="flagBtn" class="btn btn-sm ${flagged ? 'btn-warning' : 'btn-outline-warning'} fw-bold"><i class="fas fa-flag me-1"></i>${flagged ? 'Flagged for review' : 'Flag for review'}</button>
-      </div>
-      ${q.prompt && q.kind !== 'tf' ? `<div class="small fw-bold text-primary mt-2">${esc(q.prompt)}</div>` : ''}
-      <div class="q-text">${esc(q.q)}</div>
-      <div role="radiogroup">${q.options.map((o, i) => `<button class="opt ${answers[cur] === i ? 'sel' : ''}" role="radio" aria-checked="${answers[cur] === i}" data-opt="${i}"><span class="letter">${LETTERS[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>
-      <div class="d-flex justify-content-between align-items-center my-3 gap-2">
-        <button id="prevBtn" class="btn btn-outline-secondary fw-bold" ${cur === 0 ? 'disabled' : ''}><i class="fas fa-arrow-left me-1"></i>Previous</button>
-        <button id="navToggle" class="btn btn-link btn-sm fw-bold text-decoration-none">${showNav ? 'Hide' : 'Show'} question navigator</button>
-        <button id="nextBtn" class="btn btn-primary fw-bold" ${cur === questions.length - 1 ? 'disabled' : ''}>Next<i class="fas fa-arrow-right ms-1"></i></button>
-      </div>
-      ${showNav ? `<div class="small text-muted mb-1"><span class="key-ans"></span> answered &nbsp; <span class="key-flag"></span> flagged &nbsp; <span class="key-cur"></span> current</div>
-      <div class="grid">${questions.map((_, i) => `<button class="${answers[i] !== undefined ? 'ans' : ''} ${i === cur ? 'cur' : ''} ${flags.has(i) ? 'flag' : ''}" data-go="${i}">${i + 1}</button>`).join('')}</div>` : ''}
-      <div class="small text-muted mt-2">Shortcuts: A–D or 1–4 choose · ← → move · F flag</div>`;
-    onTick();
-  }
-
-  // Review screen: every question's status before the student submits.
-  function renderReview() {
-    const unanswered = questions.map((_, i) => i).filter(i => answers[i] === undefined);
-    const flaggedList = [...flags].sort((a, b) => a - b);
-    const cell = i => `<button class="${answers[i] !== undefined ? 'ans' : ''} ${flags.has(i) ? 'flag' : ''}" data-go="${i}">${i + 1}</button>`;
-    screen.innerHTML = `
-      <div class="timer-bar">
-        <div><div class="small opacity-75 fw-bold">TIME REMAINING</div><div id="timer" class="timer">--:--</div></div>
-        <div class="fw-bold">Review</div>
-      </div>
-      <h2 class="h5 fw-bold">Review your answers</h2>
-      <div class="d-flex gap-4 flex-wrap mb-3">
-        <div><span class="big-num-sm">${answeredCount()}</span> answered</div>
-        <div><span class="big-num-sm">${unanswered.length}</span> unanswered</div>
-        <div><span class="big-num-sm text-warning">${flaggedList.length}</span> flagged</div>
-      </div>
-      ${flaggedList.length ? `<div class="fw-bold small mb-1"><i class="fas fa-flag text-warning me-1"></i>Flagged for review</div><div class="grid mb-3">${flaggedList.map(cell).join('')}</div>` : ''}
-      <div class="fw-bold small mb-1">All questions (click one to go back to it)</div>
-      <div class="grid mb-3">${questions.map((_, i) => cell(i)).join('')}</div>
-      <div class="d-flex justify-content-between gap-2 flex-wrap">
-        <button id="backToTest" class="btn btn-outline-secondary fw-bold"><i class="fas fa-arrow-left me-1"></i>Return to the test</button>
-        <button id="finalSubmit" class="btn btn-success fw-bold">Submit test${unanswered.length ? ` (${unanswered.length} unanswered)` : ''}</button>
-      </div>`;
-    onTick();
-  }
-
-  function choose(i) {
-    answers[cur] = i;
-    dirty = true;
-    renderTest();
-  }
-  function go(i) { if (i >= 0 && i < questions.length) { cur = i; renderTest(); } }
-
-  screen.addEventListener('click', (e) => {
-    const f = e.target.closest('[data-filter]');
-    if (f) {
-      screen.querySelectorAll('[data-filter]').forEach(b => b.classList.toggle('active', b === f));
-      screen.querySelectorAll('#reviewList [data-right]').forEach(el => { el.hidden = f.dataset.filter === 'wrong' && el.dataset.right === '1'; });
-      return;
-    }
-    if (!questions.length || submitting) return;
-    const o = e.target.closest('[data-opt]'); if (o) return choose(Number(o.dataset.opt));
-    const g = e.target.closest('[data-go]'); if (g) return go(Number(g.dataset.go));
-    const t = e.target.closest('[data-tool]'); if (t) { togglePanel(t.dataset.tool === 'calc' ? calcPanel : scratchPanel); return renderTest(); }
-    if (e.target.closest('#prevBtn')) return go(cur - 1);
-    if (e.target.closest('#nextBtn')) return go(cur + 1);
-    if (e.target.closest('#navToggle')) { showNav = !showNav; return renderTest(); }
-    if (e.target.closest('#flagBtn')) { flags.has(cur) ? flags.delete(cur) : flags.add(cur); saveFlags(); return renderTest(); }
-    if (e.target.closest('#reviewBtn')) return renderReview();
-    if (e.target.closest('#backToTest')) return renderTest();
-    if (e.target.closest('#finalSubmit')) return submit(false);
-  });
-  document.addEventListener('keydown', (e) => {
-    if (!questions.length || submitting || /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
-    if (!document.getElementById('flagBtn')) return; // not on a question screen
-    const q = questions[cur];
-    const k = e.key.toUpperCase();
-    const idx = /^[1-6]$/.test(k) ? Number(k) - 1 : LETTERS.indexOf(k);
-    if (k.length === 1 && idx >= 0 && idx < q.options.length && k !== 'F') { e.preventDefault(); choose(idx); }
-    else if (k === 'F') { flags.has(cur) ? flags.delete(cur) : flags.add(cur); saveFlags(); renderTest(); }
-    else if (e.key === 'ArrowRight') go(cur + 1);
-    else if (e.key === 'ArrowLeft') go(cur - 1);
-  });
-  window.addEventListener('beforeunload', () => {
-    if (questions.length && !submitting && navigator.sendBeacon) {
-      navigator.sendBeacon('/api/wrs-sprint/save', new Blob([JSON.stringify({ answers })], { type: 'application/json' }));
-    }
-  });
-
-  // ---- Calculator and Scratch Paper (floating panels that keep their
-  // contents while the student moves between questions).
-  const calcPanel = document.getElementById('calcPanel');
-  const scratchPanel = document.getElementById('scratchPanel');
-  function togglePanel(p) { p.hidden = !p.hidden; }
-  document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => { document.getElementById(b.dataset.close).hidden = true; if (questions.length) renderTest(); }));
-  let calc = { display: '0', prev: null, op: null, fresh: true };
-  const calcDisplay = document.getElementById('calcDisplay');
-  const showCalc = () => { calcDisplay.value = calc.display; };
-  function compute(a, b, op) {
-    const r = op === '+' ? a + b : op === '−' ? a - b : op === '×' ? a * b : op === '÷' ? (b === 0 ? NaN : a / b) : b;
-    return Number.isFinite(r) ? String(Math.round(r * 1e10) / 1e10) : 'Error';
-  }
-  document.getElementById('calcKeys').addEventListener('click', (e) => {
-    const k = e.target.closest('[data-k]'); if (!k) return;
-    const v = k.dataset.k;
-    if (/^[0-9]$/.test(v)) { calc.display = calc.fresh || calc.display === '0' ? v : calc.display + v; calc.fresh = false; }
-    else if (v === '.') { if (calc.fresh) { calc.display = '0.'; calc.fresh = false; } else if (!calc.display.includes('.')) calc.display += '.'; }
-    else if (v === 'C') calc = { display: '0', prev: null, op: null, fresh: true };
-    else if (v === '⌫') { calc.display = calc.display.length > 1 ? calc.display.slice(0, -1) : '0'; }
-    else if (v === '±') calc.display = calc.display.startsWith('-') ? calc.display.slice(1) : (calc.display === '0' ? '0' : '-' + calc.display);
-    else if (v === '%') calc.display = String(Number(calc.display) / 100);
-    else if (v === '=') { if (calc.op !== null) { calc.display = compute(Number(calc.prev), Number(calc.display), calc.op); calc.op = null; calc.prev = null; calc.fresh = true; } }
-    else { // operator
-      if (calc.op !== null && !calc.fresh) calc.display = compute(Number(calc.prev), Number(calc.display), calc.op);
-      calc.prev = calc.display; calc.op = v; calc.fresh = true;
-    }
-    showCalc();
-  });
-
-  async function submit(timeUp) {
-    if (submitting) return;
-    submitting = true;
-    clearInterval(tick); clearInterval(saveTimer);
-    calcPanel.hidden = true; scratchPanel.hidden = true;
-    try { sessionStorage.removeItem(flagKey()); } catch (e) {}
-    screen.innerHTML = `<p class="text-center fw-bold my-4">${timeUp ? "Time's up! " : ''}Scoring your Sprint…</p>`;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        const data = await api('/wrs-sprint/submit', { answers });
-        questions = [];
-        screen.innerHTML = `<h1 class="h3 fw-bold mb-3"><i class="fas fa-bolt text-warning me-2"></i>Monday WRS Sprint</h1>${resultsHtml(data.result, data.history, timeUp)}`;
-        return;
-      } catch (e) { await new Promise(r => setTimeout(r, 1500)); }
-    }
-    screen.innerHTML = '<div class="alert alert-danger">Your Sprint could not be submitted. Tell your teacher. Your answers were saved as you went.</div>';
-  }
-
-  function resultsHtml(r, history, timeUp) {
-    const acc = r.answered ? Math.round((r.correct / r.answered) * 100) : 0;
-    const prev = history && history.length > 1 ? history[history.length - 2] : null;
-    const change = prev ? r.correct - prev.correct : null;
-    return `
-      ${timeUp ? '<div class="alert alert-warning py-2 fw-bold">Time\'s up! Your answers were submitted automatically.</div>' : ''}
-      <div class="d-flex flex-wrap gap-4 align-items-end mb-3">
-        <div><div class="big-num text-success">${r.correct}</div><div class="fw-bold text-muted">correct</div></div>
-        <div><div class="big-num">${r.answered}</div><div class="fw-bold text-muted">answered of ${r.total}</div></div>
-        <div><div class="big-num">${acc}%</div><div class="fw-bold text-muted">accuracy</div></div>
-        ${change !== null ? `<div><div class="big-num ${change >= 0 ? 'text-success' : 'text-danger'}">${change >= 0 ? '+' : ''}${change}</div><div class="fw-bold text-muted">vs. last week</div></div>` : ''}
-      </div>
-      <h2 class="h6 fw-bold">Your weekly progress</h2>
-      ${chart(history)}
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4 mb-2">
-        <h2 class="h6 fw-bold mb-0">Every question you answered (${(r.review || r.missed).length})</h2>
-        <div class="btn-group btn-group-sm" role="group">
-          <button class="btn btn-outline-secondary fw-bold active" data-filter="all">All</button>
-          <button class="btn btn-outline-danger fw-bold" data-filter="wrong">Wrong only (${r.missed.length})</button>
-        </div>
-      </div>
-      <div id="reviewList">${(r.review || r.missed).map(m => `<div class="${m.right ? 'got' : 'missed'}" data-right="${m.right ? 1 : 0}">
-          <div class="small fw-bold ${m.right ? 'text-success' : 'text-danger'}"><i class="fas ${m.right ? 'fa-circle-check' : 'fa-circle-xmark'} me-1"></i>Question ${m.n} · ${m.right ? 'Right' : 'Wrong'}${m.topic === 'safety' ? ' · Workplace safety' : ''}</div>
-          ${m.prompt && m.prompt !== 'True or false?' ? `<div class="small text-muted fw-bold">${esc(m.prompt)}</div>` : ''}
-          <div class="fw-bold">${esc(m.q)}</div>
-          <div class="small mt-1"><span class="fw-bold ${m.right ? 'text-success' : 'text-danger'}">Your answer:</span> ${esc(m.yours)}</div>
-          ${m.right ? '' : `<div class="small"><span class="text-success fw-bold">Correct answer:</span> ${esc(m.answer)}</div>`}
-          ${!m.right && m.hint ? `<div class="small text-muted mt-1">${esc(m.hint)}</div>` : ''}
-        </div>`).join('')}</div>`;
   }
 
   async function load() {

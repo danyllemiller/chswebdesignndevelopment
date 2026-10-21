@@ -100,9 +100,10 @@ const asMc = (x, topic) => { const options = shuffle(x.options); return { kind: 
 // Each question: { kind, topic, prompt, q, options, correct, hint }.
 function buildTest(total = 100) {
     const { tf, mc, sets } = loadPool();
-    const safetyCount = 2 + Math.floor(Math.random() * 4); // 2, 3, 4, or 5
+    // Scales with test length: 2-5% safety (at least 1), about 30% true/false.
+    const safetyCount = Math.max(1, Math.round(total * (0.02 + Math.random() * 0.03)));
     const safety = shuffle([...SAFETY_MC.map(x => asMc(x, 'safety')), ...SAFETY_TF.map(x => asTf(x, 'safety'))]).slice(0, safetyCount);
-    const tfPicks = shuffle(tf).slice(0, Math.min(tf.length, 30)).map(x => asTf(x, 'wrs'));
+    const tfPicks = shuffle(tf).slice(0, Math.min(tf.length, Math.round(total * 0.3))).map(x => asTf(x, 'wrs'));
     const mcPool = [...mc, ...sets.flatMap(matchAsMc)];
     const mcPicks = shuffle(mcPool).slice(0, Math.max(0, total - safety.length - tfPicks.length)).map(x => asMc(x, 'wrs'));
     return shuffle([...safety, ...tfPicks, ...mcPicks]).filter(q => q.correct >= 0).slice(0, total);

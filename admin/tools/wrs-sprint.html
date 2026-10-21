@@ -25,7 +25,7 @@
     <h3 class="fw-bold mb-0"><i class="fas fa-bolt text-warning me-2"></i>Monday WRS Sprint Results</h3>
     <a href="/student/wrs-sprint.html" class="btn btn-sm btn-outline-primary fw-bold"><i class="fas fa-eye me-1"></i>Preview the Sprint</a>
   </div>
-  <p class="text-muted small">Web Design 2 (B2) and AS-B2. Each cell is <b class="text-success">correct</b> / answered out of 100 in 10 minutes. Progress only, not in the gradebook. Your previews are not counted.</p>
+  <p class="text-muted small">Web Design 2 (B2) and AS-B2. Each cell is <b class="text-success">correct</b> / answered out of 100 in 10 minutes. Progress only, not in the gradebook. Your previews are not counted. A note under a score means the student left the test screen (the 2nd time auto-submits).</p>
   <div class="card shadow-sm"><div class="table-responsive">
     <table class="table table-sm align-middle mb-0">
       <thead class="table-light" id="head"></thead>
@@ -59,7 +59,7 @@ try {
       const real = taken.filter(a => !a.practice);
       const change = real.length >= 2 ? real[real.length - 1].correct - real[real.length - 2].correct : null;
       return `<tr><td class="ps-3 fw-bold">${esc(s.last_name)}, ${esc(s.first_name)}</td>${done.map((a, i) =>
-        a ? `<td class="score"><b>${a.correct}</b> <small>/ ${a.answered}</small></td>`
+        a ? `<td class="score"><b>${a.correct}</b> <small>/ ${a.answered}</small>${a.violations ? `<br><small class="${a.endReason === 'left-test' ? 'text-danger fw-bold' : 'text-warning fw-bold'}" title="Times this student left the test screen">${a.endReason === 'left-test' ? 'auto-submitted: left test' : `left test ${a.violations}×`}</small>` : ''}</td>`
           : `<td class="score text-muted">${mine[weeks[i]] ? 'started' : '—'}</td>`).join('')}
         <td class="score ${change === null ? 'text-muted' : change >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold'}">${change === null ? '—' : (change >= 0 ? '+' : '') + change}</td></tr>`;
     }).join('');
