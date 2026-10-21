@@ -1180,7 +1180,8 @@ const checkProgressAndGate = async (isAutoAdvance = false) => {
                     const aggRes = await fetch(`/api/student/project-aggregate?student_id=${encodeURIComponent(student.student_id)}&chapter_project_id=${spec.chapter_project_id}&exam_id=${encodeURIComponent(spec.exam_id)}`);
                     if (aggRes.ok) {
                         const aggData = await aggRes.json();
-                        projectStatus[activeUnit.unitNum] = aggData.aggregate ? aggData.aggregate.status : null;
+                        // Excused students (server/lib/projectExemptions.js) never need the project.
+                        projectStatus[activeUnit.unitNum] = aggData.projectExempt ? 'excused' : (aggData.aggregate ? aggData.aggregate.status : null);
                     }
                 }
             } catch (e) { console.warn("Project status API unavailable:", e); }
@@ -1339,7 +1340,7 @@ else if (activeTab.type === 'EXAM') {
                 const worksUnlocked   = bypassWorksheets || hasAllChapWork;
                 const scaleUnlocked   = bypassPreScale   || hasPreScale;
                 const diagUnlocked    = bypassDiagnostic || hasPreTest;
-                const projectUnlocked = bypassProject    || PROJECT_EXEMPT_UNITS.includes(activeUnit.unitNum) || projectStatus[activeUnit.unitNum] === 'complete';
+                const projectUnlocked = bypassProject    || PROJECT_EXEMPT_UNITS.includes(activeUnit.unitNum) || (projectStatus[activeUnit.unitNum] === 'complete' || projectStatus[activeUnit.unitNum] === 'excused');
                 const examUnlocked    = worksUnlocked && scaleUnlocked && diagUnlocked && projectUnlocked;
 
                 if (!examUnlocked && dom.examOverlay) {
@@ -2421,7 +2422,7 @@ if (chapBtn) {
                     const scaleUnlocked   = bypassPreScale   || _hasPreScale;
                     const diagUnlocked    = bypassDiagnostic || _hasPreTest;
                     const worksUnlocked   = bypassWorksheets || allChaptersDone;
-                    const projectUnlocked = bypassProject    || PROJECT_EXEMPT_UNITS.includes(activeUnit.unitNum) || projectStatus[activeUnit.unitNum] === 'complete';
+                    const projectUnlocked = bypassProject    || PROJECT_EXEMPT_UNITS.includes(activeUnit.unitNum) || (projectStatus[activeUnit.unitNum] === 'complete' || projectStatus[activeUnit.unitNum] === 'excused');
 
                     if (scaleUnlocked && diagUnlocked && worksUnlocked && projectUnlocked) {
                         window.open(`/exams/cs-unit-${activeUnit.unitNum}-exam.html`, '_blank');
