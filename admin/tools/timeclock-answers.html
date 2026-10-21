@@ -31,7 +31,9 @@
     .empty-note { color: #6c757d; font-style: italic; padding: 1rem 0; }
     .msg-box { display: none; margin-top: .5rem; }
     .msg-box.active { display: block; }
-  </style>
+      .question-text { font-weight: 600; font-style: italic; color: #34495e; margin: .15rem 0 .3rem; }
+    .answer-tag { font-weight: 700; color: #198754; }
+</style>
 </head>
 <body>
 
@@ -133,13 +135,15 @@ function renderResults(rows) {
             ${item.in_answer ? `
               <div class="answer-block">
                 <div class="answer-label">Clock-in ${item.clock_in ? '· ' + fmtTime(item.clock_in) : ''}</div>
-                <div>${escapeHtml(item.in_answer)}</div>
+                <div class="question-text">${item.in_question ? escapeHtml(item.in_question) : '<span class="text-muted">Question not saved for this day</span>'}</div>
+                <div><span class="answer-tag">Answer:</span> ${escapeHtml(item.in_answer)}</div>
               </div>` : ''}
 
             ${item.out_answer ? `
               <div class="answer-block">
                 <div class="answer-label">Clock-out ${item.clock_out ? '· ' + fmtTime(item.clock_out) : ''}</div>
-                <div>${escapeHtml(item.out_answer)}</div>
+                <div class="question-text">${item.out_question ? escapeHtml(item.out_question) : '<span class="text-muted">Question not saved for this day</span>'}</div>
+                <div><span class="answer-tag">Answer:</span> ${escapeHtml(item.out_answer)}</div>
               </div>` : ''}
 
             ${!item.in_answer && !item.out_answer ? `<div class="text-muted small mt-1">No answers recorded.</div>` : ''}

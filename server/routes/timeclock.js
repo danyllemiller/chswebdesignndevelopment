@@ -526,6 +526,17 @@ async function verifyClockinAnswer(connection, courseKey, submittedAnswer) {
     return null;
 }
 
+// The question each answer was given for, saved next to the answer so the
+// teacher's Timeclock Answers page can show both (until 2026-10-21 only the
+// answer was stored; WD's daily journal kept the prompt, CS kept nothing).
+let timesheetQuestionColsReady = false;
+async function ensureTimesheetQuestionCols(connection) {
+    if (timesheetQuestionColsReady) return;
+    await connection.execute('ALTER TABLE timesheets ADD COLUMN IF NOT EXISTS in_question TEXT NULL');
+    await connection.execute('ALTER TABLE timesheets ADD COLUMN IF NOT EXISTS out_question TEXT NULL');
+    timesheetQuestionColsReady = true;
+}
+
 router.post('/timeclock/save', requireSelfOrStaff(), async (req, res) => {
     const { student_id, section_id, mode, answer, prompt } = req.body;
     if (!student_id || !mode) return res.status(400).json({ error: 'student_id and mode are required' });
@@ -533,6 +544,8 @@ router.post('/timeclock/save', requireSelfOrStaff(), async (req, res) => {
     const period = section_id || '';
     try {
         await withConnection(async (connection) => {
+            const question = prompt ? String(prompt).slice(0, 2000) : null;
+            try { await ensureTimesheetQuestionCols(connection); } catch (e) { console.error('[timeclock] question columns:', e.message); }
             if (mode === 'in') {
                 const courseKey = periodToCourseKeyServer(period);
                 const isCorrectVal = await verifyClockinAnswer(connection, courseKey, answer);
@@ -553,13 +566,13 @@ router.post('/timeclock/save', requireSelfOrStaff(), async (req, res) => {
                 );
                 if (existing.length > 0) {
                     await connection.execute(
-                        'UPDATE timesheets SET clock_in = CURTIME(), in_answer = ? WHERE id = ?',
-                        [answer || '', existing[0].id]
+                        'UPDATE timesheets SET clock_in = CURTIME(), in_answer = ?, in_question = ? WHERE id = ?',
+                        [answer || '', question, existing[0].id]
                     );
                 } else {
                     await connection.execute(
-                        'INSERT INTO timesheets (student_id, date, section_id, clock_in, in_answer) VALUES (?, ?, ?, CURTIME(), ?)',
-                        [student_id, today, period, answer || '']
+                        'INSERT INTO timesheets (student_id, date, section_id, clock_in, in_answer, in_question) VALUES (?, ?, ?, CURTIME(), ?, ?)',
+                        [student_id, today, period, answer || '', question]
                     );
                 }
 
@@ -645,10 +658,10 @@ router.post('/timeclock/save', requireSelfOrStaff(), async (req, res) => {
                 // one period can never stamp the same clock-out time onto a
                 // different period's still-open record for the same day.
                 await connection.execute(
-                    `UPDATE timesheets SET clock_out = CURTIME(), out_answer = ?
+                    `UPDATE timesheets SET clock_out = CURTIME(), out_answer = ?, out_question = ?
                      WHERE student_id = ? AND date = ? AND section_id = ? AND clock_out IS NULL
                      ORDER BY id DESC LIMIT 1`,
-                    [answer || '', student_id, today, period]
+                    [answer || '', question, student_id, today, period]
                 );
 
                 // WD1/WD2/AS daily journal -- clock-out's open-ended reflection
@@ -763,11 +776,17 @@ router.get('/admin/timeclock-answers', async (req, res) => {
             const params = [date, currentYear];
             let sectionClause = '';
             if (section) { sectionClause = 'AND t.section_id = ?'; params.push(section); }
+            await ensureTimesheetQuestionCols(connection);
+            await ensureWdJournalTable(connection);
             const [rows] = await connection.execute(
                 `SELECT t.id, t.student_id, t.section_id, t.clock_in, t.clock_out, t.in_answer, t.out_answer,
+                        COALESCE(t.in_question, ji.prompt) AS in_question,
+                        COALESCE(t.out_question, jo.prompt) AS out_question,
                         s.first_name, s.last_name
                  FROM timesheets t
                  JOIN students s ON s.student_id = t.student_id
+                 LEFT JOIN wd_journal ji ON ji.student_id = t.student_id AND ji.entry_date = t.date AND ji.session = 'in'
+                 LEFT JOIN wd_journal jo ON jo.student_id = t.student_id AND jo.entry_date = t.date AND jo.session = 'out'
                  WHERE t.date = ? AND (s.archived IS NULL OR s.archived = 0) AND s.school_year = ? ${sectionClause}
                  ORDER BY t.section_id, s.last_name, s.first_name`,
                 params
