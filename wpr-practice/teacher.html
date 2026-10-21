@@ -24,6 +24,10 @@
   <div class="brand"><i class="fas fa-briefcase"></i><div><div class="fw-bold fs-5">WPR Practice Test · Teacher</div><div class="small text-muted">Give the Nevada Workplace Readiness Skills practice test and download your class's results</div></div></div>
   <div id="screen" class="card-main"></div>
 </div>
+<footer class="text-center small text-muted pb-4" style="max-width:900px;margin:0 auto;padding:0 1rem;">
+  <a href="/wpr-practice/privacy.html">Privacy Policy</a> · <a href="/wpr-practice/terms.html">Terms of Use</a><br>
+  Independent practice tool. Not affiliated with or endorsed by the Nevada Department of Education. No student information is kept after a session ends.
+</footer>
 <script>
 // Teacher side of the WPR Practice Test (server/routes/wprPractice.js).
 // Results exist only in the server's temporary memory and on this screen.
@@ -50,6 +54,7 @@
             <option value="sprint">10-minute Sprint: 100 questions, answer as many as you can</option>
           </select></div>
         <div class="alert alert-info small mb-0"><i class="fas fa-lock me-1"></i><strong>Nothing is saved.</strong> Results are kept only in temporary memory while your session is open. Download them before you end the session. Sessions are erased automatically after 12 hours.</div>
+        <p class="small text-muted mb-0">By starting a session you agree to the <a href="/wpr-practice/terms.html" target="_blank">Terms of Use</a>, including giving the test only to your own students and following your district's student-privacy policies.</p>
         <button class="btn btn-primary btn-lg fw-bold" type="submit">Start session</button>
       </form>`;
     document.getElementById('startForm').addEventListener('submit', async (e) => {
