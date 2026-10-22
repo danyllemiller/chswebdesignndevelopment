@@ -13,6 +13,7 @@ const path = require('path');
 const vm = require('vm');
 const { WPR_MC_QUESTIONS } = require('../wprQuestionBank');
 const { SAFETY_MC, SAFETY_TF } = require('./wrsSafetyQuestions');
+const { WORKLIFE_MC, WORKLIFE_TF } = require('./wrsWorkLifeQuestions');
 
 const PRACTICE_FILES = ['', '-b', '-c', '-d'].map(s =>
     path.join(__dirname, '..', '..', 'pre-assessments', `workplace-readiness-skills${s}.html`));
@@ -95,7 +96,8 @@ const asMc = (x, topic) => { const options = shuffle(x.options); return { kind: 
 
 // One student's 100-question test, answers included (kept server-side).
 // All multiple choice and true/false, every question shuffled:
-//   2-5 workplace safety / ergonomics questions (2-5%), about 30 true/false,
+//   2-5 workplace safety / ergonomics questions (2-5%), 1-3 work vs.
+//   personal life scenarios (wrsWorkLifeQuestions.js), about 30 true/false,
 //   and the rest multiple choice (including the converted matching items).
 // Each question: { kind, topic, prompt, q, options, correct, hint }.
 function buildTest(total = 100) {
@@ -103,10 +105,12 @@ function buildTest(total = 100) {
     // Scales with test length: 2-5% safety (at least 1), about 30% true/false.
     const safetyCount = Math.max(1, Math.round(total * (0.02 + Math.random() * 0.03)));
     const safety = shuffle([...SAFETY_MC.map(x => asMc(x, 'safety')), ...SAFETY_TF.map(x => asTf(x, 'safety'))]).slice(0, safetyCount);
+    const worklifeCount = Math.max(1, Math.round(total * (0.01 + Math.random() * 0.02)));
+    const worklife = shuffle([...WORKLIFE_MC.map(x => asMc(x, 'worklife')), ...WORKLIFE_TF.map(x => asTf(x, 'worklife'))]).slice(0, worklifeCount);
     const tfPicks = shuffle(tf).slice(0, Math.min(tf.length, Math.round(total * 0.3))).map(x => asTf(x, 'wrs'));
     const mcPool = [...mc, ...sets.flatMap(matchAsMc)];
-    const mcPicks = shuffle(mcPool).slice(0, Math.max(0, total - safety.length - tfPicks.length)).map(x => asMc(x, 'wrs'));
-    return shuffle([...safety, ...tfPicks, ...mcPicks]).filter(q => q.correct >= 0).slice(0, total);
+    const mcPicks = shuffle(mcPool).slice(0, Math.max(0, total - safety.length - worklife.length - tfPicks.length)).map(x => asMc(x, 'wrs'));
+    return shuffle([...safety, ...worklife, ...tfPicks, ...mcPicks]).filter(q => q.correct >= 0).slice(0, total);
 }
 
 module.exports = { loadPool, buildTest };

@@ -348,12 +348,12 @@
             </div>
           </div>
           <div class="wt-review">${list.map(m => `<div class="${m.right ? 'wt-got' : 'wt-missed'}" data-right="${m.right ? 1 : 0}">
-              <div class="small fw-bold ${m.right ? 'text-success' : 'text-danger'}"><i class="fas ${m.right ? 'fa-circle-check' : 'fa-circle-xmark'} me-1"></i>Question ${m.n} · ${m.right ? 'Right' : 'Wrong'}${m.topic === 'safety' ? ' · Workplace safety' : ''}</div>
+              <div class="small fw-bold ${m.right ? 'text-success' : 'text-danger'}"><i class="fas ${m.right ? 'fa-circle-check' : 'fa-circle-xmark'} me-1"></i>Question ${m.n} · ${m.right ? 'Right' : 'Wrong'}${m.topic === 'safety' ? ' · Workplace safety' : m.topic === 'worklife' ? ' · Work &amp; personal life' : ''}</div>
               ${m.prompt && m.prompt !== 'True or false?' ? `<div class="small text-muted fw-bold">${esc(m.prompt)}</div>` : ''}
               <div class="fw-bold">${esc(m.q)}</div>
               <div class="small mt-1"><span class="fw-bold ${m.right ? 'text-success' : 'text-danger'}">Your answer:</span> ${esc(m.yours)}</div>
               ${m.right ? '' : `<div class="small"><span class="text-success fw-bold">Correct answer:</span> ${esc(m.answer)}</div>`}
-              ${!m.right && m.hint ? `<div class="small text-muted mt-1">${esc(m.hint)}</div>` : ''}
+              ${(!m.right || m.topic === 'worklife') && m.hint ? `<div class="small text-muted mt-1">${esc(m.hint)}</div>` : ''}
             </div>`).join('')}</div>`;
         return html;
     }
