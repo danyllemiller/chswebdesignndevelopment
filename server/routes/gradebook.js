@@ -99,7 +99,8 @@ async function ensureUnitPrereqOverridesTable(connection) {
 // Units 1-7 are the real sequential CS curriculum (CS_MAP in
 // admin/due-dates.html); Unit 0 is a standalone intro with no prerequisite
 // and Unit 8 is an orphaned, unlinked page, so neither is gated here.
-// Two independent requirements, both covered by the SAME override row (a
+// Pre-work first: this unit's Pre-Scale AND Pre-Test (Diagnostic) must both
+// be done (added 2026-10-22). Then two more requirements -- all covered by the SAME override row (a
 // teacher clearing a student clears everything blocking that exam, not one
 // reason at a time): (1) 60%+ on the PREVIOUS unit's exam -- skipped for
 // Unit 1, which has no previous unit -- and (2) THIS unit's own Project
@@ -121,7 +122,25 @@ async function checkUnitPrerequisite(connection, studentId, examId) {
         'SELECT id FROM unit_prereq_overrides WHERE student_id = ? AND unit_exam_id = ?',
         [studentId, examId]
     );
-    if (overrideRows.length > 0) return { ok: true, scoreOk: true, projectOk: true, projectRequired: false };
+    if (overrideRows.length > 0) return { ok: true, scoreOk: true, projectOk: true, projectRequired: false, preScaleOk: true, preTestOk: true };
+
+    // This unit's own pre-work, checked first because it's the most common
+    // gap (2026-10-22: dozens of unit exam grades had no Pre-Test at all --
+    // the only gate was cs-interactive.js's warning overlay, which a Pre-Scale
+    // grade alone satisfied). Pre-Scale = its gradebook row or the
+    // self_assessments level the Pre-Scale page writes; Pre-Test = the
+    // Diagnostic's "Unit{n}-Pre"/"Unit{n}-Pre-Score" row, any score.
+    const [[preScaleRow]] = await connection.execute(
+        `SELECT (EXISTS(SELECT 1 FROM responses WHERE student_id = ? AND exam_id = ?)
+              OR EXISTS(SELECT 1 FROM self_assessments WHERE student_id = ? AND chapter_id = ? AND level > 0)) AS done`,
+        [studentId, `Unit${unitNum} Pre-Scale`, studentId, `unit${unitNum}`]
+    );
+    const [[preTestRow]] = await connection.execute(
+        'SELECT EXISTS(SELECT 1 FROM responses WHERE student_id = ? AND exam_id IN (?, ?)) AS done',
+        [studentId, `Unit${unitNum}-Pre`, `Unit${unitNum}-Pre-Score`]
+    );
+    const preScaleOk = Number(preScaleRow.done) === 1;
+    const preTestOk = Number(preTestRow.done) === 1;
 
     let scoreOk = true, prevExamId = null, pct = null;
     if (unitNum >= 2) {
@@ -156,7 +175,7 @@ async function checkUnitPrerequisite(connection, studentId, examId) {
     const projectRequired = projectRows.length > 0 && !PROJECT_EXEMPT_UNITS.has(unitNum) && !isProjectExempt(studentId);
     const projectOk = !projectRequired || projectRows[0].status === 'complete';
 
-    return { ok: scoreOk && projectOk, prevExamId, pct, scoreOk, projectOk, projectRequired };
+    return { ok: preScaleOk && preTestOk && scoreOk && projectOk, prevExamId, pct, scoreOk, projectOk, projectRequired, preScaleOk, preTestOk };
 }
 
 // CS-only remediation gate (WD is direct instruction and tests differently,
@@ -336,6 +355,8 @@ router.post('/submit-exam', async (req, res) => {
         const prereq = await checkUnitPrerequisite(connection, student_id, exam_id);
         if (!prereq.ok) {
             const reasons = [];
+            if (!prereq.preScaleOk) reasons.push(`this unit's Pre-Scale`);
+            if (!prereq.preTestOk) reasons.push(`this unit's Pre-Test (Diagnostic)`);
             if (!prereq.scoreOk) reasons.push(`a score of at least 60% on ${prereq.prevExamId}`);
             if (!prereq.projectOk) reasons.push(`this unit's Project (self AND peer review both submitted)`);
             return { status: 403, body: {

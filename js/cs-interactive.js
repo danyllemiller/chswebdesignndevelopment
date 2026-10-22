@@ -461,10 +461,10 @@ function getProg() {
     
     // Convert grades to various formats
     Object.keys(progressCache.grades).forEach(k => {
-        if (k.match(/(Diagnostic|Pre-Assessment|Pre)/i)) {
-            const match = k.match(/Unit\s*-?\s*(\d+)/i);
-            if (match) prog[`u${match[1]}_diagnostic`] = 1;
-        }
+        // Only the Diagnostic's own row ("Unit{n}-Pre"/"Unit{n}-Pre-Score") --
+        // not "Unit{n} Pre-Scale", which the old /Pre/ test also matched.
+        const diag = k.match(/^Unit\s*(\d+)-Pre(-Score)?$/i);
+        if (diag) prog[`u${diag[1]}_diagnostic`] = 1;
         if (k.match(/(Ch|Chapter)/i)) {
             const match = k.match(/(Ch|Chapter)\s*0*(\d+)/i);
             if (match) prog[`u${activeUnit?.unitNum || 1}_ch${match[2]}_grade`] = 1;
@@ -1191,13 +1191,20 @@ const checkProgressAndGate = async (isAutoAdvance = false) => {
             // 1. API actually loaded data (gradesLoaded === true)
             // 2. We found matching data for this specific unit
             // 3. NOT empty data
-            const hasPreScale = selfAssessmentsLoaded && 
-                              selfAssessments[`unit${activeUnit.unitNum}`] !== undefined && 
-                              selfAssessments[`unit${activeUnit.unitNum}`] > 0;
-                              
-            const hasPreTest = gradesLoaded && 
-                              Object.keys(grades).length > 0 &&
-                              Object.keys(grades).some(k => k.match(new RegExp(`Unit\\s*-?\\s*${activeUnit.unitNum}`, 'i')) && k.match(/(Diagnostic|Pre-Assessment|Pre)/i));
+            // Same rule as the server gate (checkUnitPrerequisite in
+            // server/routes/gradebook.js): the Pre-Scale counts from either
+            // the self-assessment or its gradebook row, and ONLY the
+            // Diagnostic's own "Unit{n}-Pre"/"Unit{n}-Pre-Score" row counts as
+            // the Pre-Test. (The old /(Diagnostic|Pre-Assessment|Pre)/ test
+            // also matched "Unit{n} Pre-Scale", so a Pre-Scale alone unlocked
+            // the exam.)
+            const hasPreScale = (selfAssessmentsLoaded &&
+                              selfAssessments[`unit${activeUnit.unitNum}`] !== undefined &&
+                              selfAssessments[`unit${activeUnit.unitNum}`] > 0) ||
+                              (gradesLoaded && grades[`Unit${activeUnit.unitNum} Pre-Scale`] !== undefined);
+
+            const hasPreTest = gradesLoaded &&
+                              (grades[`Unit${activeUnit.unitNum}-Pre`] !== undefined || grades[`Unit${activeUnit.unitNum}-Pre-Score`] !== undefined);
                               
             const hasExam = gradesLoaded && 
                            Object.keys(grades).length > 0 &&
@@ -2411,8 +2418,10 @@ if (chapBtn) {
                     const bypassPreScale   = !GLOBAL_BYPASS_CONFIG.requirePreScale   || GLOBAL_BYPASS_CONFIG.bypassAll;
                     const bypassProject    = !GLOBAL_BYPASS_CONFIG.requireProject    || GLOBAL_BYPASS_CONFIG.bypassAll;
 
-                    const _hasPreScale = selfAssessmentsLoaded && selfAssessments[`unit${activeUnit.unitNum}`] !== undefined && selfAssessments[`unit${activeUnit.unitNum}`] > 0;
-                    const _hasPreTest = Object.keys(grades).some(k => k.match(new RegExp(`Unit\\s*-?\\s*${activeUnit.unitNum}`, 'i')) && k.match(/(Diagnostic|Pre-Assessment|Pre)/i));
+                    // Same Pre-Scale/Pre-Test rule as the tab view above and the server gate.
+                    const _hasPreScale = (selfAssessmentsLoaded && selfAssessments[`unit${activeUnit.unitNum}`] !== undefined && selfAssessments[`unit${activeUnit.unitNum}`] > 0) ||
+                                         grades[`Unit${activeUnit.unitNum} Pre-Scale`] !== undefined;
+                    const _hasPreTest = grades[`Unit${activeUnit.unitNum}-Pre`] !== undefined || grades[`Unit${activeUnit.unitNum}-Pre-Score`] !== undefined;
                     const allChaptersDone = activeUnit.chapters.every(c => {
                         const hasNote  = Object.keys(notes).some(key => key.includes(`Ch ${c.ch}`) || key.includes(`Ch${c.ch}`));
                         const hasGrade = Object.keys(grades).some(k => k.match(new RegExp(`(Ch|Chapter)\\s*0*${c.ch}[-\\s:]`, 'i')));

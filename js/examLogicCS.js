@@ -662,12 +662,17 @@ function renderPrerequisiteBlock(prereq, unit) {
     const unitExamId = `Unit${parseInt(unit, 10)}-Exam`;
 
     const reasonsHtml = [];
-    if (!prereq.scoreOk) {
+    if (prereq.preScaleOk === false || prereq.preTestOk === false) {
+        const missing = [prereq.preScaleOk === false ? 'the <strong>Pre-Scale</strong>' : '', prereq.preTestOk === false ? 'the <strong>Pre-Test (Diagnostic)</strong>' : ''].filter(Boolean).join(' and ');
+        reasonsHtml.push(`<p class="mb-1">You need to finish ${missing} for this unit before you can take the exam.</p>
+            <p class="text-muted small mb-3">Find them on the Pre-Scale and Diagnostic tabs back in the workspace.</p>`);
+    }
+    if (prereq.scoreOk === false) {
         const prevLabel = prereq.prevExamId.replace(/-/g, ' ').replace('Exam', 'Exam');
         reasonsHtml.push(`<p class="mb-1">You need a score of at least <strong>60%</strong> on <strong>${escapeHtml(prevLabel)}</strong> to unlock this exam.</p>
             <p class="text-muted small mb-3">Your current score on ${escapeHtml(prevLabel)}: ${(prereq.pct || 0).toFixed(0)}%</p>`);
     }
-    if (!prereq.projectOk) {
+    if (prereq.projectOk === false) {
         reasonsHtml.push(`<p class="mb-1">You need to complete this unit's <strong>Project</strong> first — both a <strong>self review</strong> AND an in-person <strong>peer review</strong> have to be submitted.</p>
             <p class="text-muted small mb-3">Find it on the Unit Project tab back in the workspace.</p>`);
     }
