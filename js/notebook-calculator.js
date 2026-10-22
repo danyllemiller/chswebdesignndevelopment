@@ -1,5 +1,6 @@
 // js/notebook-calculator.js
-// On-screen calculator for My Notebook (student/notes.html): a "Calculator"
+// On-screen calculator for My Notebook (student/notes.html) and the CS
+// notebook (cs-notebook.html, also shown beside CS unit exams): a "Calculator"
 // button opens a small floating panel. Same keys and math as the WRS test's
 // calculator (js/wrs-test-ui.js) so students only learn one. Typing works
 // while the panel has focus, and Copy puts the result on the clipboard to
