@@ -146,6 +146,21 @@ table.table-spreadsheet thead th.header-main-blue {
     letter-spacing: 0.03125rem; 
     transition: color 0.2s ease;
 }
+/* Assignment-name headers: wrap onto at most two tight lines instead of
+   one long one, so the header row is about half as tall. The longest
+   names (~48 chars) still fit in two lines; anything longer is clipped,
+   and the full title is always in the hover tooltip. In vertical writing
+   mode max-height is the line LENGTH and max-width is the two lines. */
+table.table-spreadsheet thead th.header-main-blue .vertical-text {
+    display: inline-block;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    line-height: 1.05;
+    max-height: 10.5rem !important;
+    max-width: calc(2 * 1.05em);
+    overflow: hidden !important;
+    text-align: start;
+}
 .vertical-text:hover {
     color: #ffc107 !important;
 }
