@@ -46,7 +46,8 @@
       <p class="mb-0">How do you know when to stop splitting? Ask yourself: "Could one person build this piece and check that it works, without needing the other pieces finished first?" If the answer is yes, stop. If the piece still feels big or confusing, split it again. Most real projects end up with three levels: the big problem at the top, the main jobs in the middle, and small, buildable tasks at the bottom.</p>
   </div>
 
-  <img src="/images/problem_solving_algorithms/fig9.1.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A three-level decomposition tree diagram. Top box reads &quot;Track Attendance.&quot; Four boxes branch down from it: &quot;Record who's present,&quot; &quot;Store the record,&quot; &quot;Calculate attendance rate,&quot; and &quot;Flag students below threshold.&quot; One of those four boxes has two smaller boxes branching further below it, showing a third level.">
+  <!-- Gemini prompt (illustration): A three-level decomposition tree diagram. Top box reads "Track Attendance." Four boxes branch down from it: "Record who's present," "Store the record," "Calculate attendance rate," and "Flag students below threshold." One of those four boxes has two smaller boxes branching further below it, showing a third level. -->
+  <img src="/images/problem_solving_algorithms/fig9.1.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Decomposition tree: Track Attendance breaks into Record who&#x27;s present, Store the record, Calculate attendance rate, and Flag students below threshold. Record who&#x27;s present breaks down further into Take classroom attendance and Process digital tardy forms.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-sitemap me-2"></i> Worked Example: Decomposing Attendance</h5>
@@ -126,7 +127,8 @@ END</code></pre>
       <p>Read that example out loud and notice how anyone could follow it, even someone who has never coded. That's the goal. Writing pseudocode first means you find your logic mistakes while they're cheap to fix, before you're also fighting with real code syntax at the same time.</p>
   </div>
 
-  <img src="/images/problem_solving_algorithms/fig9.2.2.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A simple flowchart using standard symbols: a rounded Start oval, a rectangle for a process step, a diamond for a Yes/No decision with two labeled arrows branching out, another rectangle, and a rounded End oval, all connected by arrows showing the flow from top to bottom.">
+  <!-- Gemini prompt (illustration): A simple flowchart using standard symbols: a rounded Start oval, a rectangle for a process step, a diamond for a Yes/No decision with two labeled arrows branching out, another rectangle, and a rounded End oval, all connected by arrows showing the flow from top to bottom. -->
+  <img src="/images/problem_solving_algorithms/fig9.2.2.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Flowchart: Start, then Enter the classroom, then a decision diamond asking &quot;Are you late?&quot; Yes leads to Fill out digital tardy form and then End; No goes straight to End.">
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Flowcharts</h5>
@@ -174,7 +176,8 @@ END</code></pre>
   <h4 class="fw-bold mt-4 text-primary">9.3.1 From Pseudocode to Real Code</h4>
   <p>Opening the script editor, writing a function, running it, granting permission, and reading the execution log — that loop is the entire workflow you'll repeat for the rest of this unit. Variables, assignment, and basic operators are simply the vocabulary your pseudocode gets translated into.</p>
 
-  <img src="/images/problem_solving_algorithms/fig9.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean side-by-side graphic showing plain-English pseudocode steps on the left with an arrow pointing to matching lines of real code on the right, connected line by line.">
+  <!-- Gemini prompt (illustration): A clean side-by-side graphic showing plain-English pseudocode steps on the left with an arrow pointing to matching lines of real code on the right, connected line by line. -->
+  <img src="/images/problem_solving_algorithms/fig9.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Pseudocode on the left matched line by line to Python on the right: set late_count to 0; if the student is late, add 1 to late_count and show &quot;Please fill out form&quot;; otherwise show &quot;Welcome to class!&quot;">
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Variables, Assignment & Operators</h5>
@@ -191,7 +194,8 @@ function addQuizzes() {
       <p>Line by line, the pseudocode becomes code. Your plan from 9.2 tells you <em>what</em> to do, and these pieces of vocabulary tell the computer <em>how</em> to say it.</p>
   </div>
 
-  <img src="/images/problem_solving_algorithms/fig9.3.2.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of the Google Apps Script code editor, showing a short function in the code pane, a Run button highlighted at the top, and the Execution log panel at the bottom displaying a successful output line with a green checkmark icon.">
+  <!-- Gemini prompt (screenshot): A screenshot of the Google Apps Script code editor, showing a short function in the code pane, a Run button highlighted at the top, and the Execution log panel at the bottom displaying a successful output line with a green checkmark icon. -->
+  <img src="/images/problem_solving_algorithms/fig9.3.2.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Mockup of the Google Apps Script editor showing a logAttendance function, the Run button highlighted, and the execution log reading &quot;Successfully logged 15 students&quot; and &quot;Execution completed.&quot;">
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: The Apps Script Workflow</h5>

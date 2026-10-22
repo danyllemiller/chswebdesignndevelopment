@@ -88,7 +88,8 @@ room = rooms[period] || "Unknown period";</code></pre>
       <p class="mb-0">A conditional nested four <code>if</code> statements deep might be completely correct and still be a readability failure — nobody can verify it at a glance, including you in a month. Flattening it with an early return or a lookup table often produces the exact same behavior in a form a human can actually check.</p>
   </div>
 
-  <img src="/images/control_structures_events/fig10.1.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A before-and-after comparison graphic. Left side labeled &quot;Nested&quot; shows four indented if-statement boxes stacked diagonally inside one another like nested boxes, hard to follow. Right side labeled &quot;Lookup Table&quot; shows a simple two-column table with score ranges in one column and letter grades in the other, clean and flat.">
+  <!-- Gemini prompt (illustration): A before-and-after comparison graphic. Left side labeled "Nested" shows four indented if-statement boxes stacked diagonally inside one another like nested boxes, hard to follow. Right side labeled "Lookup Table" shows a simple two-column table with score ranges in one column and letter grades in the other, clean and flat. -->
+  <img src="/images/control_structures_events/fig10.1.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Comparison graphic: on the left, four nested if-statements checking score &gt;= 90, 80, 70 and 60 are marked hard to follow; on the right, a flat lookup table maps score ranges 90-100, 80-89, 70-79, 60-69 and below 60 to grades A, B, C, D and F.">
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-primary border-5">
       <h5 class="fw-bold text-info"><i class="fas fa-code-branch me-2"></i> Worked Example: Flattening a Nested Conditional</h5>
@@ -151,7 +152,8 @@ while (sheet.getRange(row, 1).getValue() !== "") {
       <p>Here's the quick way to choose. If you can finish the sentence "repeat this ___ times," use a <code>for</code> loop. If the sentence is "repeat this until ___ happens," use a <code>while</code> loop.</p>
   </div>
 
-  <img src="/images/control_structures_events/fig10.2.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A labeled diagram of a for-loop's three parts inside its parentheses: &quot;for (let i = 0;&quot; labeled Initialize, &quot;i &lt; 5;&quot; labeled Condition, and &quot;i++)&quot; labeled Increment, with a curved arrow looping from the increment back to the condition to show the repeat cycle.">
+  <!-- Gemini prompt (illustration): A labeled diagram of a for-loop's three parts inside its parentheses: "for (let i = 0;" labeled Initialize, "i < 5;" labeled Condition, and "i++)" labeled Increment, with a curved arrow looping from the increment back to the condition to show the repeat cycle. -->
+  <img src="/images/control_structures_events/fig10.2.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Diagram of for (let i = 0; i &lt; 5; i++) with its three parts labeled: Initialize runs once at the start, Condition is checked before every pass, and Increment updates the counter after each pass. An arrow shows the loop repeating while the condition is true.">
 
   <div class="concept-box shadow-sm border-warning bg-light">
       <h5 class="fw-bold text-dark"><i class="fas fa-redo me-2"></i> The Classic Failures</h5>
@@ -216,7 +218,8 @@ while (sheet.getRange(row, 1).getValue() !== "") {
       <p class="mb-0"><strong>Time-driven</strong> triggers run on a schedule: every hour, every morning at 7 a.m., every Monday, and so on. They are also set up from the Triggers (clock) menu. A time-driven trigger could email a reminder about missing assignments every Friday afternoon, with nobody even logged in.</p>
   </div>
 
-  <img src="/images/control_structures_events/fig10.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean graphic of a spreadsheet cell being edited, with a lightning bolt icon connecting it to a small gear icon labeled &quot;trigger,&quot; and an arrow showing a script firing automatically — no mouse click on a &quot;run&quot; button anywhere in the image.">
+  <!-- Gemini prompt (illustration): A clean graphic of a spreadsheet cell being edited, with a lightning bolt icon connecting it to a small gear icon labeled "trigger," and an arrow showing a script firing automatically — no mouse click on a "run" button anywhere in the image. -->
+  <img src="/images/control_structures_events/fig10.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Diagram: a user types &quot;Late&quot; into a spreadsheet cell, which fires an onEdit trigger that runs a script automatically, with no button click needed.">
 
   <h4 class="fw-bold mt-5 text-info">10.3.2 Why Event-Driven Code Needs More Care</h4>
   <p>Nobody is watching an event-driven script run — that's the whole point. Which means if it fails, it fails silently, with nobody there to notice. Validation and error handling matter <em>more</em> here, not less.</p>
@@ -290,7 +293,8 @@ for (let i = 0; i &lt; students.length; i++) {
 }</code></pre>
   </div>
 
-  <img src="/images/control_structures_events/fig10.4.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A horizontal row of five labeled boxes containing the names Amara, Ben, Chen, Deja, Eli, with index numbers 0, 1, 2, 3, 4 printed directly below each box, and an arrow pointing to the box at index 2 labeled &quot;students[2] = Chen.&quot;">
+  <!-- Gemini prompt (illustration): A horizontal row of five labeled boxes containing the names Amara, Ben, Chen, Deja, Eli, with index numbers 0, 1, 2, 3, 4 printed directly below each box, and an arrow pointing to the box at index 2 labeled "students[2] = Chen." -->
+  <img src="/images/control_structures_events/fig10.4.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="An array of five names, Amara, Ben, Chen, Deja and Eli, with index numbers 0 through 4 below them. An arrow shows that students[2] is Chen.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-list-ol me-2"></i> Worked Example: Looping Over a List</h5>
