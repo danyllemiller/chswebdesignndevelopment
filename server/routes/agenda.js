@@ -184,6 +184,18 @@ router.post('/admin/save-agenda-content', async (req, res) => {
 const crypto = require('crypto');
 const { syncDueDates, AUTO_ENABLED: DUE_DATE_SYNC_ON } = require('../jobs/dueDateSync');
 const SYNC_COURSES = new Set(['wd1', 'wd2', 'cs_s1']);
+const MEETING_DAY_TYPES = { wd1: { main: ['A', 'A_MIN', 'C'] } };
+const SPECIAL_DATES_CSV = require('path').join(__dirname, '../../special-dates.csv');
+function loadDayTypes() {
+    const types = {};
+    try {
+        require('fs').readFileSync(SPECIAL_DATES_CSV, 'utf8').split(/\r?\n/).slice(1).forEach(line => {
+            const [date, type] = line.split(',');
+            if (/^\d{4}-\d{2}-\d{2}$/.test(date || '')) types[date] = (type || '').trim();
+        });
+    } catch (e) { console.error('[agenda sync] special-dates.csv:', e.message); }
+    return types;
+}
 
 function syncCors(req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -241,6 +253,15 @@ router.post('/agenda/sync/schedule', requireSyncKey, async (req, res) => {
         clean.push([date, block]);
     }
     if (clean.length > 1000) return res.status(400).json({ error: 'Too many days' });
+    // WD1 (A1) only meets on A, A_MIN and C days (special-dates.csv). A sync
+    // that puts it on a B/OFF day is a calendar mismatch on the sending side --
+    // refuse the whole send and name the dates, rather than save wrong slides.
+    const allowed = MEETING_DAY_TYPES[course] && MEETING_DAY_TYPES[course][track];
+    if (allowed) {
+        const types = loadDayTypes();
+        const bad = clean.filter(([date]) => !allowed.includes(types[date])).map(([date]) => `${date} (${types[date] || 'not in special-dates.csv'})`);
+        if (bad.length) return res.status(400).json({ error: `${course} ${track} only meets on ${allowed.join('/')} days. These dates are not: ${bad.join(', ')}. Use special-dates.csv for A/B days.`, bad_dates: bad });
+    }
     try {
         await withConnection(async (connection) => {
             await connection.execute(AGENDA_SCHEDULE_DDL);
