@@ -6,8 +6,8 @@
 // paste into an answer box.
 (function () {
     const css = `
-      .nbc-btn { position: fixed; left: 18px; bottom: 18px; z-index: 1040; border-radius: 2rem; box-shadow: 0 .4rem 1rem rgba(0,0,0,.25); }
-      .nbc-panel { position: fixed; left: 18px; bottom: 70px; z-index: 1050; width: 250px; background: #fff; border-radius: .8rem; box-shadow: 0 .8rem 2rem rgba(0,0,0,.35); overflow: hidden; }
+      .nbc-btn { position: fixed; right: 18px; bottom: 18px; z-index: 1040; border-radius: 2rem; box-shadow: 0 .4rem 1rem rgba(0,0,0,.25); }
+      .nbc-panel { position: fixed; right: 18px; bottom: 70px; z-index: 1050; width: 250px; background: #fff; border-radius: .8rem; box-shadow: 0 .8rem 2rem rgba(0,0,0,.35); overflow: hidden; }
       .nbc-panel:focus { outline: 3px solid #0d6efd; }
       .nbc-head { background: #1f2a44; color: #fff; font-weight: 700; padding: .45rem .7rem; display: flex; justify-content: space-between; align-items: center; }
       .nbc-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
