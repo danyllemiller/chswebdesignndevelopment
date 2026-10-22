@@ -27,6 +27,56 @@
   <script src="/js/jquery.js"></script>
   <script src="/js/loader.js?v=26"></script>
   <script type="module" src="/js/auth-guard.js?v=1"></script>
+  <style>
+    /* Guided Notebook (js/student/guided-notebook.js) */
+    #gn-status.text-muted { color: rgba(255,255,255,.8) !important; }
+    #gn-status.text-success { color: #d1f7dc !important; }
+    #gn-status.text-danger { color: #ffe08a !important; }
+    .gn-day-head { margin-bottom: .75rem; }
+    .gn-block { border: 1px solid #dee2e6; border-left: 6px solid #6c757d; border-radius: .6rem; padding: .9rem 1rem; margin-bottom: 1rem; background: #fff; }
+    .gn-label { font-size: .75rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #6c757d; margin-bottom: .35rem; }
+    .gn-block-title { font-weight: 800; color: #1f2a44; margin-bottom: .35rem; }
+    .gn-goals { border-left-color: #0d6efd; background: #f3f8ff; }
+    .gn-donow { border-left-color: #f0ad00; background: #fffcf0; }
+    .gn-disc { border-left-color: #6f42c1; }
+    .gn-lab { border-left-color: #198754; }
+    .gn-dd { border-left-color: #0dcaf0; background: #f4fdff; }
+    .gn-dok { border-left-color: #d63384; }
+    .gn-pair { border-left-color: #fd7e14; background: #fff8f2; }
+    .gn-four { border-left-color: #20c997; background: #f2fcf8; }
+    .gn-team { border-left-color: #1f2a44; background: #f6f7fb; }
+    .gn-exit { border-left-color: #212529; background: #f8f9fa; }
+    .gn-fields { border-left-color: #6610f2; background: #f8f5ff; }
+    .gn-text { position: relative; margin-bottom: .25rem; }
+    .gn-text textarea { padding-right: 3rem; }
+    .gn-mic { position: absolute; right: .4rem; top: .4rem; border-radius: 50%; width: 2.2rem; height: 2.2rem; padding: 0; }
+    .gn-listening { animation: gnPulse 1.2s infinite; }
+    @keyframes gnPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(220,53,69,.6); } 50% { box-shadow: 0 0 0 .5rem rgba(220,53,69,0); } }
+    .gn-bank, .gn-pool { display: flex; flex-wrap: wrap; gap: .4rem; padding: .6rem; border: 2px dashed #9ec5fe; border-radius: .6rem; background: #fff; margin-bottom: .75rem; min-height: 2.8rem; }
+    .gn-chip { display: inline-block; padding: .3rem .7rem; border-radius: 2rem; background: #0d6efd; color: #fff; font-weight: 700; cursor: grab; user-select: none; font-size: .92rem; }
+    .gn-chip.picked { outline: 3px solid #ffc107; outline-offset: 2px; }
+    .gn-chip.right { background: #198754; }
+    .gn-chip.wrong { background: #dc3545; }
+    .gn-lines li { margin-bottom: .6rem; line-height: 2.2; }
+    .gn-slot { display: inline-block; min-width: 7rem; min-height: 1.9rem; vertical-align: middle; line-height: 1.6; border-bottom: 3px solid #0d6efd; background: #eef4ff; border-radius: .3rem .3rem 0 0; padding: 0 .5rem; text-align: center; font-weight: 800; cursor: pointer; }
+    .gn-slot.filled { background: #dbe8ff; }
+    .gn-slot.right { background: #d1f2df; border-color: #198754; }
+    .gn-slot.wrong { background: #f8d7da; border-color: #dc3545; }
+    .gn-answer { font-weight: 700; color: #146c43; background: #fff; border-radius: .3rem; padding: 0 .3rem; }
+    .gn-buckets { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: .5rem; margin-bottom: .75rem; }
+    @media (max-width: 576px) { .gn-buckets { grid-template-columns: 1fr 1fr; } }
+    .gn-bucket { border: 2px solid #ced4da; border-radius: .6rem; background: #fff; min-height: 6rem; padding: .4rem; cursor: pointer; }
+    .gn-bucket-name { font-weight: 800; text-align: center; border-bottom: 1px solid #dee2e6; margin-bottom: .4rem; padding-bottom: .2rem; }
+    .gn-bucket-items { display: flex; flex-direction: column; gap: .3rem; align-items: flex-start; }
+    .gn-bucket-items .gn-chip { border-radius: .5rem; white-space: normal; }
+    .gn-over { outline: 3px solid #ffc107 !important; outline-offset: 2px; }
+    .gn-order { padding-left: 1.5rem; margin-bottom: .75rem; }
+    .gn-order-item { display: flex; align-items: center; gap: .3rem; background: #fff; border: 2px solid #ced4da; border-radius: .5rem; padding: .35rem .5rem; margin-bottom: .35rem; font-weight: 700; cursor: grab; }
+    .gn-order-item.right { border-color: #198754; background: #d1f2df; }
+    .gn-order-item.wrong { border-color: #dc3545; background: #f8d7da; }
+    .gn-check-row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+    .gn-team-table th { font-size: .8rem; }
+  </style>
 </head>
 <body class="bg-white">
 
@@ -59,6 +109,20 @@
       
       <!-- MAIN CONTENT COLUMN (8 COLUMNS): THE EDITOR -->
       <div class="col-lg-8">
+        <!-- Interactive Guided Notebook (js/student/guided-notebook.js) -- shows when the active chapter has guided pages -->
+        <section id="guided-section" class="mb-4 d-none">
+            <div class="card shadow-sm border-success">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span class="fw-bold"><i class="fas fa-book-open me-2"></i><span id="gn-title">Guided Notebook</span></span>
+                    <span class="d-flex align-items-center gap-2"><span id="gn-status" class="small fw-bold"></span>
+                    <button type="button" id="gn-toggle" class="btn btn-sm btn-light fw-bold">Hide</button></span>
+                </div>
+                <div class="card-body" id="gn-body">
+                    <div id="gn-days" class="d-flex flex-wrap gap-1 mb-3"></div>
+                    <div id="gn-page"></div>
+                </div>
+            </div>
+        </section>
         <section id="editor-section">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="section-title mb-0" id="editor-header-title">Notebook Editor</h2>
@@ -158,5 +222,6 @@
 
   <!-- Application Controllers -->
   <script type="module" src="/js/student/student-notes.js?v=9"></script>
+  <script src="/js/student/guided-notebook.js?v=1" defer></script>
 </body>
 </html>

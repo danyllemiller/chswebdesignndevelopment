@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Guided Notebook Responses</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+  <script src="/js/loader.js?v=26"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+  <style>
+    body { background: #f4f6fb; }
+    .tools-card { max-width: 1200px; margin: 2rem auto; }
+    .blk { background: #fff; border-radius: .8rem; box-shadow: 0 .2rem .8rem rgba(0,0,0,.06); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+    .blk-label { font-size: .75rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #6c757d; }
+    .key { background: #fff8e1; border-left: 4px solid #f0ad00; border-radius: 0 .4rem .4rem 0; padding: .35rem .6rem; font-size: .9rem; margin: .35rem 0 .6rem; }
+    .ans td { vertical-align: top; font-size: .92rem; }
+    .ans td:first-child { white-space: nowrap; font-weight: 700; width: 11rem; }
+    .empty { color: #adb5bd; font-style: italic; }
+    .pill { display: inline-block; border-radius: 1rem; padding: .1rem .6rem; font-weight: 700; font-size: .8rem; }
+    .r-Yes { background: #d1f2df; color: #146c43; } .r-Almost { background: #fff3cd; color: #946200; } .r-Notyet { background: #f8d7da; color: #b02a37; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="tools-card px-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 fw-bold mb-0"><i class="fas fa-book-open text-success me-2"></i>Guided Notebook Responses</h1>
+    <div class="d-flex flex-wrap gap-2">
+      <select id="chap" class="form-select form-select-sm" style="width:auto"></select>
+      <select id="day" class="form-select form-select-sm" style="width:auto"></select>
+      <select id="sec" class="form-select form-select-sm" style="width:auto"><option value="">All periods</option></select>
+    </div>
+  </div>
+  <p class="text-muted small">Practice only, not graded. Students fill these in on My Notebook. KEYs from the Teacher Edition show in yellow (students never see them).</p>
+  <div id="out"><p class="text-muted">Loading…</p></div>
+</div>
+<div id="footer-placeholder"></div>
+<script src="/js/bootstrap.bundle.js"></script>
+<script>
+(function () {
+  const out = document.getElementById('out'), chap = document.getElementById('chap'), dayS = document.getElementById('day'), sec = document.getElementById('sec');
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  let last = null;
+  const txt = v => v && String(v).trim() ? esc(v).replace(/\n/g, '<br>') : '<span class="empty">blank</span>';
+  const key = k => k ? `<div class="key"><strong>KEY:</strong> ${esc(k)}</div>` : '';
+
+  async function getJson(u) { const r = await fetch(u); const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || 'Could not load.'); return d; }
+
+  async function init() {
+    try {
+      const { chapters } = await getJson('/api/admin/guided-notebook/chapters');
+      if (!chapters.length) { out.innerHTML = '<p class="text-muted">No guided notebook chapters are on the server yet.</p>'; return; }
+      chap.innerHTML = chapters.map(c => `<option value="${c.chapter}">${esc(c.course)} Ch ${c.chapter}: ${esc(c.title)}</option>`).join('');
+      await load(true);
+    } catch (e) { out.innerHTML = `<div class="alert alert-warning">${esc(e.message)}</div>`; }
+  }
+
+  async function load(resetDay) {
+    const d = await getJson(`/api/admin/guided-notebook?chapter=${chap.value}&day=${resetDay ? 1 : dayS.value}`);
+    if (resetDay) dayS.innerHTML = d.days.map(x => `<option value="${x.day}">Day ${x.day}: ${esc(x.title)}</option>`).join('');
+    const secs = [...new Set(d.responses.map(r => r.section).filter(Boolean))].sort();
+    const keep = sec.value;
+    sec.innerHTML = '<option value="">All periods</option>' + secs.map(s => `<option ${s === keep ? 'selected' : ''}>${esc(s)}</option>`).join('');
+    last = d;
+    render();
+  }
+
+  function rowsFor(b, people) {
+    return people.map(p => {
+      const v = (p.data.blocks || {})[b.id] || {};
+      let cell = '';
+      switch (b.type) {
+        case 'doNow': case 'dok': cell = txt(v.text); break;
+        case 'discussion': cell = b.prompts.map((q, i) => `<div><strong>${i + 1}.</strong> ${txt(v['a' + i])}</div>`).join(''); break;
+        case 'fields': cell = b.fields.map((f, i) => `<div><strong>${esc(f.label)}:</strong> ${txt(v['f' + i])}</div>`).join(''); break;
+        case 'lab': cell = `${b.steps.map((s, i) => v['s' + i] ? '☑' : '☐').join(' ')} · <strong>By:</strong> ${txt(v.by)}<div>${txt(v.notes)}</div>`; break;
+        case 'blanks': case 'sort': case 'order': cell = v.lastCheck ? `Last check: <strong>${esc(v.lastCheck)}</strong>` : '<span class="empty">not checked</span>'; break;
+        case 'thinkShare': cell = `<strong>Partner:</strong> ${txt(v.partner)}<div><strong>Think:</strong> ${txt(v.think)}</div><div><strong>Share:</strong> ${txt(v.share)}</div><div><strong>Agree/disagree:</strong> ${txt(v.agree)}</div>`; break;
+        case 'fourSquare': cell = `<strong>Members:</strong> ${[0, 1, 2, 3].map(i => esc(v['m' + i] || '')).filter(Boolean).join(', ') || '<span class="empty">blank</span>'}<div><strong>Answer:</strong> ${txt(v.answer)}</div><div><strong>I contributed:</strong> ${txt(v.contributed)}</div>`; break;
+        case 'team': cell = `<strong>Team:</strong> ${txt(v.teamName)}<div><strong>Decided:</strong> ${txt(v.decided)}</div>${(v.rows || []).filter(r => r.member || r.task).map(r => `<div>• ${esc(r.member || '?')}: ${esc(r.task || '')}${r.due ? ` (due ${esc(r.due)})` : ''}</div>`).join('')}`; break;
+        case 'exit': cell = v.rating ? `<span class="pill r-${v.rating.replace(' ', '')}">${esc(v.rating)}</span> ${txt(v.sentence)}` : '<span class="empty">no answer</span>'; break;
+      }
+      return `<tr><td>${esc(p.name)} <span class="text-muted small">${esc(p.section)}</span></td><td>${cell}</td></tr>`;
+    }).join('');
+  }
+
+  function blockHead(b) {
+    switch (b.type) {
+      case 'doNow': return `<div class="blk-label">Do Now · ${esc(b.label || '')}</div><div class="fw-semibold">${esc(b.prompt)}</div>${key(b.key)}`;
+      case 'dok': return `<div class="blk-label">DOK ${b.level}</div><div class="fw-semibold">${esc(b.prompt)}</div>${key(b.key)}`;
+      case 'discussion': return `<div class="blk-label">${esc(b.title || 'Discussion Questions')}</div>${b.prompts.map((q, i) => `<div class="fw-semibold">${i + 1}. ${esc(q.q)}</div>${key(q.key)}`).join('')}`;
+      case 'fields': return `<div class="blk-label">${esc(b.label || '')}</div>${b.intro ? `<div class="fw-semibold">${esc(b.intro)}</div>` : ''}${b.fields.map(f => `<div class="small fw-bold mt-1">${esc(f.label)}</div>${key(f.key)}`).join('')}`;
+      case 'lab': return `<div class="blk-label">Lab Worksheet · ${esc(b.title)}${b.pts ? ` · ${b.pts} pts` : ''}</div><ol class="mb-1">${b.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>${key(b.key)}`;
+      case 'blanks': return `<div class="blk-label">Drag &amp; Drop · ${esc(b.title || '')}</div>${b.items.map(t => `<div>${esc(t).replace(/\[\[([^\]|]+)[^\]]*\]\]/g, '<strong class="text-success">$1</strong>')}</div>`).join('')}`;
+      case 'sort': return `<div class="blk-label">Drag &amp; Drop Sort · ${esc(b.title || '')}</div>${b.items.map(it => `<div>${esc(it.text)} → <strong class="text-success">${esc(it.bucket)}</strong></div>`).join('')}`;
+      case 'order': return `<div class="blk-label">Put in Order · ${esc(b.title || '')}</div><div class="text-success fw-bold">${b.items.map(esc).join(' → ')}</div>`;
+      case 'thinkShare': return `<div class="blk-label">Elbow Partner · Think / Share</div><div class="fw-semibold">${esc(b.prompt)}</div>${key(b.key)}`;
+      case 'fourSquare': return `<div class="blk-label">4-Square Challenge</div><div class="fw-semibold">${esc(b.prompt)}</div>${key(b.key)}`;
+      case 'team': return `<div class="blk-label">Project Team</div><div class="fw-semibold">${esc(b.prompt)}</div>${key(b.key)}`;
+      case 'exit': return `<div class="blk-label">Exit Ticket</div><div class="fw-semibold">${esc(b.statement)}</div>`;
+    }
+    return '';
+  }
+
+  function render() {
+    const d = last;
+    const people = d.responses.filter(r => !sec.value || r.section === sec.value);
+    const exitB = d.page.blocks.find(b => b.type === 'exit');
+    const counts = { Yes: [], Almost: [], 'Not yet': [] };
+    people.forEach(p => { const r = exitB && ((p.data.blocks || {})[exitB.id] || {}).rating; if (counts[r]) counts[r].push(p.name); });
+    out.innerHTML = `
+      <div class="blk"><div class="blk-label">Exit ticket check-in (${people.length} student${people.length === 1 ? '' : 's'} opened this page)</div>
+        ${Object.entries(counts).map(([k, v]) => `<div><span class="pill r-${k.replace(' ', '')}">${k}: ${v.length}</span> <span class="small">${esc(v.join(', '))}</span></div>`).join('')}
+        ${counts['Not yet'].length ? '<div class="small text-muted mt-1">Reteach the Not yets tomorrow.</div>' : ''}</div>
+      ${d.page.blocks.map(b => `<div class="blk">${blockHead(b)}
+        ${people.length ? `<table class="table table-sm ans mb-0"><tbody>${rowsFor(b, people)}</tbody></table>` : '<div class="empty">No students yet.</div>'}</div>`).join('')}`;
+  }
+
+  chap.addEventListener('change', () => load(true).catch(e => out.innerHTML = `<div class="alert alert-warning">${esc(e.message)}</div>`));
+  dayS.addEventListener('change', () => load(false).catch(e => out.innerHTML = `<div class="alert alert-warning">${esc(e.message)}</div>`));
+  sec.addEventListener('change', render);
+  init();
+})();
+</script>
+</body>
+</html>

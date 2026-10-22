@@ -38,3 +38,7 @@ curriculum/*.docx
 curriculum/*.pdf
 curriculum/Chapter Rewrite Prompts.md
 curriculum/VS Code - Chapter Rewrite Instructions.md
+
+# Guided Notebook content -- holds Teacher Edition KEYs and fill-in answers.
+# Lives on the server at GUIDED_NOTEBOOK_DIR (default /var/lib/chs-guided-notebook), copied by scp.
+curriculum/guided-notebook/
