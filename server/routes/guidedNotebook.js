@@ -137,8 +137,19 @@ router.get('/student/guided-notebook', requireSelfOrStaff(), async (req, res) =>
             return r;
         });
         const responses = {};
+        // Which guided day is being taught today, from the Daily Agenda's
+        // schedule (content "agenda": {course, firstBlock} -- day N = block firstBlock+N-1).
+        let todayDay = null;
+        if (c.agenda && c.agenda.course && c.agenda.firstBlock) {
+            try {
+                const [t] = await withConnection(connection => connection.execute(
+                    "SELECT block_num FROM agenda_days WHERE course = ? AND track = 'main' AND event_date = CURDATE() LIMIT 1", [c.agenda.course]));
+                const n = t.length ? t[0].block_num - c.agenda.firstBlock + 1 : null;
+                if (n && c.days.some(d => d.day === n)) todayDay = n;
+            } catch (e) { /* no agenda table -- just no "today" */ }
+        }
         rows.forEach(r => { try { responses[r.day] = JSON.parse(r.data_json); } catch (e) { /* skip bad row */ } });
-        return res.json({ available: true, ...studentChapter(c), responses });
+        return res.json({ available: true, ...studentChapter(c), responses, todayDay });
     } catch (err) { console.error(err); return res.status(500).json({ error: 'Could not load the guided notebook.' }); }
 });
 

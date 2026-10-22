@@ -55,7 +55,12 @@
             titleEl.textContent = `Guided Notebook · Ch ${out.chapter}: ${out.title}`;
             let saved = null;
             try { saved = Number(JSON.parse(localStorage.getItem(DAY_KEY) || '{}')[n]); } catch (e) { /* none */ }
-            showDay(out.days.find(d => d.day === saved) ? saved : out.days[0].day);
+            // Open on today's lesson when there is one (once per day; after that, wherever they left off).
+            const todayKey = new Date().toDateString();
+            let seenToday = false;
+            try { seenToday = localStorage.getItem(`${DAY_KEY}_today_${n}`) === todayKey; localStorage.setItem(`${DAY_KEY}_today_${n}`, todayKey); } catch (e) { /* ignore */ }
+            if (out.todayDay && !seenToday) saved = out.todayDay;
+            showDay(out.days.find(d => d.day === saved) ? saved : (out.todayDay || out.days[0].day));
         } catch (e) {
             if (seq !== loadSeq) return;
             section.classList.add('d-none');
@@ -66,7 +71,7 @@
         dayBox.innerHTML = chapterData.days.map(d => {
             const r = chapterData.responses[d.day];
             const done = r && r.blocks && r.blocks.exit && r.blocks.exit.rating;
-            return `<button type="button" class="btn btn-sm ${d.day === day.day ? 'btn-primary' : 'btn-outline-primary'} fw-bold" data-day="${d.day}" title="${esc(d.title)}">Day ${d.day}${done ? ' <i class="fas fa-check"></i>' : ''}</button>`;
+            return `<button type="button" class="btn btn-sm ${d.day === day.day ? 'btn-primary' : 'btn-outline-primary'} fw-bold" data-day="${d.day}" title="${esc(d.title)}">Day ${d.day}${d.day === chapterData.todayDay ? ' · Today' : ''}${done ? ' <i class="fas fa-check"></i>' : ''}</button>`;
         }).join('');
     }
 
