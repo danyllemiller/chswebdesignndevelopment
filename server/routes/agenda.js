@@ -297,4 +297,5 @@ router.post('/agenda/sync/schedule', requireSyncKey, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save the schedule' }); }
 });
 
+router.studentAgendaOptions = studentAgendaOptions; // reused by guidedNotebook.js (My Notebook tabs)
 module.exports = router;

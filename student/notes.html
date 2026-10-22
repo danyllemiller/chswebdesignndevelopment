@@ -231,7 +231,8 @@
       var q = new URLSearchParams(location.search), n = Number(q.get('chapter')), d = Number(q.get('day'));
       if (!n) return;
       var units = ["1: Developer's World", '2: The "Rules"', '3: The Blueprint', '4: UI/UX Design', '5: The "Bones"', '6: The "Clothes"', '7: Advanced Layout', '8: Sights & Sounds',
-        '9: The "Brains"', '10: Advanced JavaScript', '11: The Cloud', '12: The "Manager"', '13: The "Network"', '14: The "Brain"', '15: The Future', '16: The "Launch"'];
+        '9: The "Brains"', '10: Advanced JavaScript', '11: The Cloud', '12: The "Manager"', '13: The "Network"', '14: The "Brain"', '15: The Future', '16: The "Launch"',
+        '17: Boot Camp', '18: EOP Review & Exam', '19: Agency Studio'];
       try {
         if (units[n - 1]) localStorage.setItem('notebookLastChapter', units[n - 1]);
         if (d) {
@@ -242,7 +243,7 @@
       } catch (e) { /* storage blocked */ }
     })();
   </script>
-  <script type="module" src="/js/student/student-notes.js?v=9"></script>
-  <script src="/js/student/guided-notebook.js?v=4" defer></script>
+  <script type="module" src="/js/student/student-notes.js?v=10"></script>
+  <script src="/js/student/guided-notebook.js?v=5" defer></script>
 </body>
 </html>

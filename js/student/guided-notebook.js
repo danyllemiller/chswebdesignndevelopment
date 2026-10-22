@@ -151,7 +151,7 @@
             return card('gn-lab', `Group Work · Lab Worksheet${b.pts ? ` · ${b.pts} pts` : ''}`,
                 `${b.objective ? `<p class="small text-muted mb-2">Objective: ${esc(b.objective)}</p>` : ''}
                 ${b.steps.map((s, i) => `<label class="form-check d-block mb-1"><input type="checkbox" class="form-check-input" data-bind-check="${b.id}.s${i}" ${d['s' + i] ? 'checked' : ''}> <span>${i + 1}. ${esc(s)}</span></label>`).join('')}
-                ${b.turnIn ? `<p class="small fw-bold text-danger mt-2 mb-1">Turn In: ${esc(b.turnIn)}${hasTurnin() ? ' (upload it below)' : ' (use the Assignment Dropbox on the chapter page)'}</p>` : ''}
+                ${b.turnIn ? `<p class="small fw-bold text-danger mt-2 mb-1">Turn In: ${esc(b.turnIn)}${hasTurnin() ? ' (upload it below)' : ''}</p>` : ''}
                 <div class="mt-2 mb-2"><label class="small fw-bold text-muted">Completed by (4-Square Group or Project Team)</label>${lineInput(b.id, 'by', 'Names')}</div>
                 <label class="small fw-bold text-muted">Notes / what we found</label>${textBox(b.id, 'notes')}`, b.title);
         case 'blanks':
@@ -211,7 +211,7 @@
         case 'turnin': {
             const done = d.turnedIn;
             return card('gn-turnin', 'Turn In', `
-                <p class="mb-2"><strong>${esc(b.label)}</strong><br><span class="small">${esc(b.instructions || '')}</span></p>
+                <p class="mb-2"><strong>${esc(b.label)}</strong><br><span class="small">${esc(b.instructions || '')}</span>${b.page && !inTest ? ` <a class="small fw-bold" href="${esc(b.page)}" target="_blank" rel="noopener">Open the chapter page</a>` : ''}</p>
                 ${done ? `<div class="alert alert-success py-2 small mb-2"><i class="fas fa-check-circle me-1"></i>Turned in ${esc(new Date(done.at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))} (${done.files} file${done.files === 1 ? '' : 's'}). You can upload again to replace or add files.</div>` : ''}
                 ${inTest ? '<div class="small text-muted fst-italic"><i class="fas fa-lock me-1"></i>Turning in work is off during a test.</div>' : `
                 <div class="btn-group btn-group-sm mb-2" role="group">

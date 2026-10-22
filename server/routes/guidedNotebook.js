@@ -14,7 +14,8 @@ const fs = require('fs');
 const path = require('path');
 const router = express.Router();
 const { withConnection } = require('../db');
-const { requireSelfOrStaff } = require('../helpers');
+const { requireSelfOrStaff, isStaffSession } = require('../helpers');
+const { studentAgendaOptions } = require('./agenda');
 
 const CONTENT_DIR = process.env.GUIDED_NOTEBOOK_DIR || '/var/lib/chs-guided-notebook';
 const MAX_DATA_BYTES = 100 * 1024;
@@ -200,6 +201,24 @@ router.post('/student/guided-notebook/check', requireSelfOrStaff(), (req, res) =
         return res.json({ correct, answers: reveal ? b.items : undefined });
     }
     return res.status(400).json({ error: 'That activity has no auto-check.' });
+});
+
+// Which My Notebook tabs a student gets: their course(s) from their enrolled
+// sections (same lookup as the student Class Agenda), plus every chapter
+// they already have notes or guided work in.
+router.get('/student/notebook-tabs', requireSelfOrStaff(), async (req, res) => {
+    if (isStaffSession(req)) return res.json({ staff: true });
+    try {
+        const out = await withConnection(async (connection) => {
+            await ensureTable(connection);
+            const options = await studentAgendaOptions(connection, req);
+            const sid = String(req.query.student_id);
+            const [a] = await connection.execute('SELECT DISTINCT chapter_id FROM notebook_entries WHERE student_id = ?', [sid]);
+            const [b] = await connection.execute('SELECT DISTINCT chapter_id FROM guided_notebook_responses WHERE student_id = ?', [sid]);
+            return { courses: [...new Set(options.map(o => o.course))], used: [...new Set([...a, ...b].map(r => Number(r.chapter_id)))] };
+        });
+        return res.json(out);
+    } catch (err) { console.error(err); return res.status(500).json({ error: 'Could not load notebook tabs.' }); }
 });
 
 // ---- Teacher view (admin/tools/guided-notebook.html) -- /admin/* is staff-gated in api.js

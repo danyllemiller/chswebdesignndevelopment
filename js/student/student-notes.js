@@ -107,7 +107,9 @@ function getUnitLabels() {
         "1: Developer's World", "2: The \"Rules\"", "3: The Blueprint", "4: UI/UX Design",
         "5: The \"Bones\"", "6: The \"Clothes\"", "7: Advanced Layout", "8: Sights & Sounds",
         "9: The \"Brains\"", "10: Advanced JavaScript", "11: The Cloud", "12: The \"Manager\"",
-        "13: The \"Network\"", "14: The \"Brain\"", "15: The Future", "16: The \"Launch\""
+        "13: The \"Network\"", "14: The \"Brain\"", "15: The Future", "16: The \"Launch\"",
+        // WD2's non-chapter units -- stored as chapter_id 17-19, shown without the number
+        "17: Boot Camp", "18: EOP Review & Exam", "19: Agency Studio"
     ];
 }
 
@@ -217,7 +219,7 @@ function initNotebookUI() {
 
     if (tabsContainer) {
         tabsContainer.innerHTML = units.map((ch) =>
-            `<button class="chapter-tab-btn ${ch === restoredChapter ? 'active' : ''}" data-chapter="${ch.replace(/"/g, '&quot;')}">${ch}</button>`
+            `<button class="chapter-tab-btn ${ch === restoredChapter ? 'active' : ''}" data-chapter="${ch.replace(/"/g, '&quot;')}">${tabText(ch)}</button>`
         ).join('');
     }
 
@@ -234,6 +236,39 @@ function initNotebookUI() {
 
     setupToolbars();
     setupTemplatesAndHTML();
+    applyCourseTabs();
+}
+
+function tabText(label) { return String(label).replace(/^1[7-9]: /, ''); }
+
+// Only the student's own course's tabs: Web Design 1 = Chapters 1-8; Web
+// Design 2 = Boot Camp, 9-16, EOP, Agency Studio. Any tab that already
+// holds the student's notes or guided-notebook work stays visible, so
+// nothing a student wrote is ever hidden. Staff see everything.
+const COURSE_TABS = { wd1: [1, 2, 3, 4, 5, 6, 7, 8], wd2: [17, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19] };
+async function applyCourseTabs() {
+    const userId = getActiveUserId();
+    const tabsContainer = document.getElementById('chapterTabsContainer');
+    if (!userId || !tabsContainer) return;
+    let info;
+    try {
+        const res = await fetch(`/api/student/notebook-tabs?student_id=${encodeURIComponent(userId)}`);
+        if (!res.ok) return;
+        info = await res.json();
+    } catch (e) { return; }
+    if (info.staff || !info.courses || !info.courses.length) return;
+    const order = [];
+    info.courses.forEach(c => (COURSE_TABS[c] || []).forEach(n => { if (!order.includes(n)) order.push(n); }));
+    if (!order.length) return;
+    (info.used || []).forEach(n => { if (!order.includes(n)) order.push(n); });
+    const buttons = [...tabsContainer.querySelectorAll('.chapter-tab-btn')];
+    const byId = new Map(buttons.map(b => [chapterIdFromLabel(b.dataset.chapter), b]));
+    buttons.forEach(b => { if (!order.includes(chapterIdFromLabel(b.dataset.chapter))) b.remove(); });
+    order.forEach(n => { const b = byId.get(n); if (b) tabsContainer.appendChild(b); });
+    if (!tabsContainer.querySelector('.chapter-tab-btn.active')) {
+        const first = tabsContainer.querySelector('.chapter-tab-btn');
+        if (first) first.click();
+    }
 }
 
 function showEmptyState() {
