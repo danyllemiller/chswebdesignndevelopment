@@ -124,7 +124,11 @@
         return `<input class="form-control form-control-sm" data-bind="${id}.${field}" value="${esc(blockData(id)[field] || '')}" placeholder="${esc(placeholder || '')}">`;
     }
     const card = (cls, label, body, title) => `<div class="gn-block ${cls}"><div class="gn-label">${label}</div>${title ? `<div class="gn-block-title">${esc(title)}</div>` : ''}${body}</div>`;
-    const checkRow = id => `<div class="gn-check-row"><button type="button" class="btn btn-sm btn-success fw-bold" data-check="${id}"><i class="fas fa-check-double me-1"></i>Check my answers</button>
+    // Beside a test, My Notebook is loaded in an iframe (js/examLogicWD.js) -- no
+    // checking or revealing answers there; saved work still shows.
+    let inTest = false;
+    try { inTest = window.self !== window.top; } catch (e) { inTest = true; }
+    const checkRow = id => inTest ? '<div class="small text-muted fst-italic"><i class="fas fa-lock me-1"></i>Checking answers is off during a test.</div>' : `<div class="gn-check-row"><button type="button" class="btn btn-sm btn-success fw-bold" data-check="${id}"><i class="fas fa-check-double me-1"></i>Check my answers</button>
         <button type="button" class="btn btn-sm btn-outline-secondary d-none" data-reveal="${id}">Show me the answers</button><span class="gn-feedback small fw-bold"></span></div>`;
 
     function renderBlock(b) {
@@ -377,6 +381,7 @@
         }
         const add = t.closest('[data-addrow]');
         if (add) { blockData(add.dataset.addrow).rows.push({}); changed(); renderPage(); return; }
+        if (inTest && t.closest('[data-check], [data-reveal]')) return;
         const chk = t.closest('[data-check]');
         if (chk) { check(chk.dataset.check, false); return; }
         const rev = t.closest('[data-reveal]');
