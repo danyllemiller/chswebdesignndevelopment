@@ -60,7 +60,7 @@
 
   async function load(resetDay) {
     const d = await getJson(`/api/admin/guided-notebook?chapter=${chap.value}&day=${resetDay ? 1 : dayS.value}`);
-    if (resetDay) dayS.innerHTML = d.days.map(x => `<option value="${x.day}">Day ${x.day}: ${esc(x.title)}</option>`).join('');
+    if (resetDay) dayS.innerHTML = d.days.map(x => `<option value="${x.day}">${esc(x.label || 'Day ' + x.day)}: ${esc(x.title)}</option>`).join('');
     const secs = [...new Set(d.responses.map(r => r.section).filter(Boolean))].sort();
     const keep = sec.value;
     sec.innerHTML = '<option value="">All periods</option>' + secs.map(s => `<option ${s === keep ? 'selected' : ''}>${esc(s)}</option>`).join('');
@@ -74,6 +74,8 @@
       let cell = '';
       switch (b.type) {
         case 'doNow': case 'dok': cell = txt(v.text); break;
+        case 'projectSheet': cell = `${b.checklist.map((_, i) => v['c' + i] ? '☑' : '☐').join(' ')} ${b.tasks.map((_, i) => v['t' + i] ? '☑' : '☐').join(' ')} · <strong>Team:</strong> ${txt(v.teamName)}<div><strong>Progress:</strong> ${txt(v.progress)}</div><div><strong>Blockers:</strong> ${txt(v.blockers)}</div>${(v.rows || []).filter(r => r.step).map(r => `<div>• ${esc(r.step)}${r.owner ? ` (${esc(r.owner)})` : ''}${r.due ? `, due ${esc(r.due)}` : ''}</div>`).join('')}`; break;
+        case 'turnin': cell = v.turnedIn ? `<span class="pill r-Yes">Turned in</span> ${esc(new Date(v.turnedIn.at).toLocaleString())} · ${v.turnedIn.files} file(s)` : '<span class="empty">not turned in here</span>'; break;
         case 'discussion': cell = b.prompts.map((q, i) => `<div><strong>${i + 1}.</strong> ${txt(v['a' + i])}</div>`).join(''); break;
         case 'fields': cell = b.fields.map((f, i) => `<div><strong>${esc(f.label)}:</strong> ${txt(v['f' + i])}</div>`).join(''); break;
         case 'lab': cell = `${b.steps.map((s, i) => v['s' + i] ? '☑' : '☐').join(' ')} · <strong>By:</strong> ${txt(v.by)}<div>${txt(v.notes)}</div>`; break;
@@ -90,7 +92,9 @@
   function blockHead(b) {
     switch (b.type) {
       case 'doNow': return `<div class="blk-label">Do Now · ${esc(b.label || '')}</div><div class="fw-semibold">${esc(b.prompt)}</div>${key(b.key)}`;
-      case 'dok': return `<div class="blk-label">DOK ${b.level}</div><div class="fw-semibold">${esc(b.prompt)}</div>${key(b.key)}`;
+      case 'projectSheet': return `<div class="blk-label">Project Worksheet · ${esc(b.title)}${b.pts ? ` · ${b.pts} pts` : ''}</div>${b.objective ? `<div>${esc(b.objective)}</div>` : ''}${key(b.key)}`;
+      case 'turnin': return `<div class="blk-label">Turn In · ${esc(b.examId)}</div><div class="fw-semibold">${esc(b.label)}</div><div class="small">${esc(b.instructions || '')}</div>`;
+      case 'dok': return `<div class="blk-label">${b.label ? esc(b.label) : `DOK ${b.level}`}</div><div class="fw-semibold">${esc(b.prompt)}</div>${key(b.key)}`;
       case 'discussion': return `<div class="blk-label">${esc(b.title || 'Discussion Questions')}</div>${b.prompts.map((q, i) => `<div class="fw-semibold">${i + 1}. ${esc(q.q)}</div>${key(q.key)}`).join('')}`;
       case 'fields': return `<div class="blk-label">${esc(b.label || '')}</div>${b.intro ? `<div class="fw-semibold">${esc(b.intro)}</div>` : ''}${b.fields.map(f => `<div class="small fw-bold mt-1">${esc(f.label)}</div>${key(f.key)}`).join('')}`;
       case 'lab': return `<div class="blk-label">Lab Worksheet · ${esc(b.title)}${b.pts ? ` · ${b.pts} pts` : ''}</div><ol class="mb-1">${b.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>${key(b.key)}`;
@@ -99,7 +103,7 @@
       case 'order': return `<div class="blk-label">Put in Order · ${esc(b.title || '')}</div><div class="text-success fw-bold">${b.items.map(esc).join(' → ')}</div>`;
       case 'thinkShare': return `<div class="blk-label">Elbow Partner · Think / Share</div><div class="fw-semibold">${esc(b.prompt)}</div>${key(b.key)}`;
       case 'fourSquare': return `<div class="blk-label">4-Square Challenge</div><div class="fw-semibold">${esc(b.prompt)}</div>${key(b.key)}`;
-      case 'team': return `<div class="blk-label">Project Team</div><div class="fw-semibold">${esc(b.prompt)}</div>${key(b.key)}`;
+      case 'team': return `<div class="blk-label">Project Team${b.project ? ' · ' + esc(b.project) : ''}</div><div class="fw-semibold">${esc(b.prompt)}</div>${key(b.key)}`;
       case 'exit': return `<div class="blk-label">Exit Ticket</div><div class="fw-semibold">${esc(b.statement)}</div>`;
     }
     return '';

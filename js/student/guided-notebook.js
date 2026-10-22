@@ -71,7 +71,7 @@
         dayBox.innerHTML = chapterData.days.map(d => {
             const r = chapterData.responses[d.day];
             const done = r && r.blocks && r.blocks.exit && r.blocks.exit.rating;
-            return `<button type="button" class="btn btn-sm ${d.day === day.day ? 'btn-primary' : 'btn-outline-primary'} fw-bold" data-day="${d.day}" title="${esc(d.title)}">Day ${d.day}${d.day === chapterData.todayDay ? ' · Today' : ''}${done ? ' <i class="fas fa-check"></i>' : ''}</button>`;
+            return `<button type="button" class="btn btn-sm ${d.day === day.day ? 'btn-primary' : 'btn-outline-primary'} fw-bold" data-day="${d.day}" title="${esc(d.title)}">${esc(d.label || 'Day ' + d.day)}${d.day === chapterData.todayDay ? ' · Today' : ''}${done ? ' <i class="fas fa-check"></i>' : ''}</button>`;
         }).join('');
     }
 
@@ -128,6 +128,7 @@
     function lineInput(id, field, placeholder) {
         return `<input class="form-control form-control-sm" data-bind="${id}.${field}" value="${esc(blockData(id)[field] || '')}" placeholder="${esc(placeholder || '')}">`;
     }
+    const hasTurnin = () => day.blocks.some(x => x.type === 'turnin');
     const card = (cls, label, body, title) => `<div class="gn-block ${cls}"><div class="gn-label">${label}</div>${title ? `<div class="gn-block-title">${esc(title)}</div>` : ''}${body}</div>`;
     // Beside a test, My Notebook is loaded in an iframe (js/examLogicWD.js) -- no
     // checking or revealing answers there; saved work still shows.
@@ -150,6 +151,7 @@
             return card('gn-lab', `Group Work · Lab Worksheet${b.pts ? ` · ${b.pts} pts` : ''}`,
                 `${b.objective ? `<p class="small text-muted mb-2">Objective: ${esc(b.objective)}</p>` : ''}
                 ${b.steps.map((s, i) => `<label class="form-check d-block mb-1"><input type="checkbox" class="form-check-input" data-bind-check="${b.id}.s${i}" ${d['s' + i] ? 'checked' : ''}> <span>${i + 1}. ${esc(s)}</span></label>`).join('')}
+                ${b.turnIn ? `<p class="small fw-bold text-danger mt-2 mb-1">Turn In: ${esc(b.turnIn)}${hasTurnin() ? ' (upload it below)' : ' (use the Assignment Dropbox on the chapter page)'}</p>` : ''}
                 <div class="mt-2 mb-2"><label class="small fw-bold text-muted">Completed by (4-Square Group or Project Team)</label>${lineInput(b.id, 'by', 'Names')}</div>
                 <label class="small fw-bold text-muted">Notes / what we found</label>${textBox(b.id, 'notes')}`, b.title);
         case 'blanks':
@@ -165,6 +167,7 @@
         case 'order':
             return card('gn-dd', 'Drag &amp; Drop · Put in Order', `<p class="small mb-2">${esc(b.prompt)}</p><ol class="gn-order" data-order="${b.id}"></ol>${checkRow(b.id)}`, b.title);
         case 'dok':
+            if (b.label) return card('gn-dok', esc(b.label), `<p class="fw-semibold mb-2">${esc(b.prompt)}</p>${textBox(b.id, 'text', { rows: 3 })}`);
             return card('gn-dok', `DOK ${b.level} · ${['', 'Recall', 'Skills &amp; Concepts', 'Strategic Thinking', 'Extended Thinking'][b.level] || ''}`, `<p class="fw-semibold mb-2">${esc(b.prompt)}</p>${textBox(b.id, 'text', { rows: b.level >= 4 ? 5 : 3 })}`);
         case 'thinkShare':
             return card('gn-pair', 'Elbow Partner · Think Alone, Then Share', `<p class="fw-semibold mb-2">${esc(b.prompt)}</p>
@@ -181,13 +184,46 @@
         case 'team': {
             const rows = Array.isArray(d.rows) && d.rows.length ? d.rows : [{}, {}, {}];
             d.rows = rows;
-            return card('gn-team', `Project Team · ${esc(chapterData.project || '')}`, `<p class="fw-semibold mb-2">${esc(b.prompt)}</p>
+            return card('gn-team', `Project Team · ${esc(b.project || chapterData.project || '')}`, `<p class="fw-semibold mb-2">${esc(b.prompt)}</p>
                 <div class="mb-2"><label class="small fw-bold text-muted">Team name</label>${lineInput(b.id, 'teamName', 'Team name')}</div>
                 <label class="small fw-bold text-muted">What we decided</label>${textBox(b.id, 'decided', { rows: 4, placeholder: 'Type what your team decided, or tap the mic during the meeting.' })}
                 <label class="small fw-bold text-muted mt-2">Who does what</label>
                 <div class="table-responsive"><table class="table table-sm gn-team-table mb-1"><thead><tr><th>Team member</th><th>Task</th><th style="width:7rem">Due</th></tr></thead><tbody>
                 ${rows.map((r, i) => `<tr>${['member', 'task', 'due'].map(f => `<td><input class="form-control form-control-sm" data-row="${b.id}.${i}.${f}" value="${esc(r[f] || '')}"></td>`).join('')}</tr>`).join('')}
                 </tbody></table></div><button type="button" class="btn btn-sm btn-link p-0" data-addrow="${b.id}">+ Add a row</button>`);
+        }
+        case 'projectSheet': {
+            const rows = Array.isArray(d.rows) && d.rows.length ? d.rows : [{}, {}, {}];
+            d.rows = rows;
+            return card('gn-project', `Project Worksheet${b.pts ? ` · ${b.pts} pts` : ''}`, `
+                ${b.brief ? `<div class="small fw-bold text-uppercase text-muted">Project Brief · ${esc(b.brief)}</div>` : ''}
+                ${b.objective ? `<p class="small mb-2">Objective: ${esc(b.objective)}</p>` : ''}
+                ${b.checklist.map((t, i) => `<label class="form-check d-block mb-1"><input type="checkbox" class="form-check-input" data-bind-check="${b.id}.c${i}" ${d['c' + i] ? 'checked' : ''}> <span>${esc(t)}</span></label>`).join('')}
+                ${b.tasks.length ? `<div class="small fw-bold text-muted mt-2">Today's project tasks</div>${b.tasks.map((t, i) => `<label class="form-check d-block mb-1"><input type="checkbox" class="form-check-input" data-bind-check="${b.id}.t${i}" ${d['t' + i] ? 'checked' : ''}> <span>${esc(t)}</span></label>`).join('')}` : ''}
+                <div class="mt-2 mb-2"><label class="small fw-bold text-muted">Project Team name</label>${lineInput(b.id, 'teamName', 'Team name')}</div>
+                <label class="small fw-bold text-muted">Progress notes · what our team got done</label>${textBox(b.id, 'progress', { rows: 3, placeholder: 'Name what you built (a link, a screenshot, a file), not just "worked on it."' })}
+                <label class="small fw-bold text-muted mt-2">Blockers &amp; questions for the team</label>${textBox(b.id, 'blockers', { rows: 2 })}
+                <label class="small fw-bold text-muted mt-2">Next step · who owns it · due</label>
+                <div class="table-responsive"><table class="table table-sm gn-team-table mb-1"><thead><tr><th>Next step</th><th>Owner</th><th style="width:7rem">Due</th></tr></thead><tbody>
+                ${rows.map((r, i) => `<tr>${['step', 'owner', 'due'].map(f => `<td><input class="form-control form-control-sm" data-row="${b.id}.${i}.${f}" value="${esc(r[f] || '')}"></td>`).join('')}</tr>`).join('')}
+                </tbody></table></div><button type="button" class="btn btn-sm btn-link p-0" data-addrow="${b.id}">+ Add a row</button>`, b.title);
+        }
+        case 'turnin': {
+            const done = d.turnedIn;
+            return card('gn-turnin', 'Turn In', `
+                <p class="mb-2"><strong>${esc(b.label)}</strong><br><span class="small">${esc(b.instructions || '')}</span></p>
+                ${done ? `<div class="alert alert-success py-2 small mb-2"><i class="fas fa-check-circle me-1"></i>Turned in ${esc(new Date(done.at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))} (${done.files} file${done.files === 1 ? '' : 's'}). You can upload again to replace or add files.</div>` : ''}
+                ${inTest ? '<div class="small text-muted fst-italic"><i class="fas fa-lock me-1"></i>Turning in work is off during a test.</div>' : `
+                <div class="btn-group btn-group-sm mb-2" role="group">
+                    <input type="radio" class="btn-check" name="tk-${b.id}" id="tk-${b.id}-file" value="file" checked><label class="btn btn-outline-success fw-bold" for="tk-${b.id}-file"><i class="fas fa-file me-1"></i>File(s)</label>
+                    <input type="radio" class="btn-check" name="tk-${b.id}" id="tk-${b.id}-folder" value="folder"><label class="btn btn-outline-success fw-bold" for="tk-${b.id}-folder"><i class="fas fa-folder me-1"></i>Whole folder</label>
+                </div>
+                <input type="file" class="form-control form-control-sm mb-1 gn-file" data-turnin="${b.id}" multiple>
+                <input type="file" class="form-control form-control-sm mb-1 gn-folder d-none" data-turnin="${b.id}" webkitdirectory directory multiple>
+                <div class="form-text small mb-2 gn-folder-note d-none">Uploads every file and sub-folder inside the folder you pick, so your website links keep working.</div>
+                <button type="button" class="btn btn-success btn-sm fw-bold" data-upload="${b.id}"><i class="fas fa-cloud-upload-alt me-1"></i>Upload to Teacher Server</button>
+                <div class="progress mt-2 d-none" style="height:18px"><div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width:0%"></div></div>
+                <div class="gn-upload-status small fw-bold mt-2"></div>`}`);
         }
         case 'exit':
             return card('gn-exit', 'Exit Ticket', `<p class="fw-bold mb-2">${esc(b.statement)}</p>
@@ -201,7 +237,7 @@
     function renderPage() {
         pageBox.innerHTML = `
             <div class="gn-day-head">
-                <div class="small fw-bold text-uppercase text-muted">Day ${day.day} of ${chapterData.days.length}${day.short ? ' · 45-min block' : ''}</div>
+                <div class="small fw-bold text-uppercase text-muted">${day.label ? esc(day.label) : `Day ${day.day} of ${chapterData.days.filter(x => !x.label).length}`}${day.short ? ' · 45-min block' : ''}</div>
                 <h3 class="h5 fw-bold mb-1">${esc(day.title)}</h3>
                 ${day.due ? `<div class="badge bg-danger mb-2">Project due: ${esc(day.due)}</div>` : ''}
             </div>
@@ -329,6 +365,73 @@
         } catch (e) { fb.className = 'gn-feedback small fw-bold text-danger'; fb.textContent = e.message; }
     }
 
+    // ---------- turn-ins ----------
+    // Same server path as the chapter pages' Assignment Dropbox
+    // (js/assignment-uploader.js): files go to the student's folder via
+    // /api/upload (folder uploads keep their sub-folders), then the
+    // gradebook column is recorded with /api/submit-exam. Interim
+    // milestones score full credit for turning in; a "Project:" waits at 0
+    // for review -- the same rule the dropbox uses.
+    async function uploadTurnin(blockId, blk) {
+        const b = day.blocks.find(x => x.id === blockId);
+        const folderMode = blk.querySelector(`#tk-${blockId}-folder`).checked;
+        const files = [...(folderMode ? blk.querySelector('.gn-folder') : blk.querySelector('.gn-file')).files]
+            .filter(f => f.name !== '.DS_Store' && !f.name.startsWith('._') && f.name !== 'Thumbs.db');
+        const status = blk.querySelector('.gn-upload-status');
+        const bar = blk.querySelector('.progress');
+        const btn = blk.querySelector('[data-upload]');
+        const say = (msg, cls) => { status.className = 'gn-upload-status small fw-bold mt-2 ' + (cls || ''); status.textContent = msg; };
+        if (!files.length) return say('Pick a file or folder first.', 'text-danger');
+
+        let existing = [];
+        try {
+            const fd = new FormData(); fd.append('action', 'list'); fd.append('studentId', studentId);
+            const lj = await (await fetch('/api/manage-files', { method: 'POST', body: fd })).json();
+            if (lj.success) { const pre = `uploads/${studentId}/`; existing = lj.files.map(f => f.path.startsWith(pre) ? f.path.slice(pre.length) : f.path); }
+        } catch (e) { /* no duplicate check -- upload anyway */ }
+        const dupes = files.filter(f => existing.includes(f.webkitRelativePath || f.name));
+        let replace = true;
+        if (dupes.length) replace = confirm(`${dupes.length === 1 ? `"${dupes[0].webkitRelativePath || dupes[0].name}" is` : `${dupes.length} of these files are`} already on the server.\n\nOK = replace them\nCancel = keep both (save copies)`);
+
+        btn.disabled = true; bar.classList.remove('d-none');
+        let ok = 0, lastErr = null;
+        for (let i = 0; i < files.length; i++) {
+            const f = files[i];
+            let p = f.webkitRelativePath || f.name;
+            if (!replace && existing.includes(p)) {
+                const dot = p.lastIndexOf('.'), base = dot > p.lastIndexOf('/') ? p.slice(0, dot) : p, ext = dot > p.lastIndexOf('/') ? p.slice(dot) : '';
+                let n = 1, np = `${base} (Copy)${ext}`;
+                while (existing.includes(np)) { n++; np = `${base} (Copy ${n})${ext}`; }
+                p = np;
+            }
+            say(`Uploading ${i + 1} of ${files.length}…`);
+            const fd = new FormData();
+            fd.append('studentId', studentId); fd.append('assignment', b.examId); fd.append('file', f); fd.append('path', p);
+            try {
+                const resp = await fetch('/api/upload', { method: 'POST', body: fd });
+                const r = await resp.json().catch(() => ({}));
+                if (r.success) { ok++; existing.push(p); } else lastErr = r.error || `Server returned ${resp.status}`;
+            } catch (e) { lastErr = e.message; }
+            bar.firstElementChild.style.width = Math.round((i + 1) / files.length * 100) + '%';
+        }
+        if (ok) {
+            const pts = Number((b.label.match(/[\[(](\d+)\s*pts?[\])]/i) || [])[1]) || 25;
+            const held = /project|capstone|exam/i.test(b.label);
+            try {
+                const r = await fetch('/api/submit-exam', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_id: studentId, exam_id: b.examId, score: held ? 0 : pts, total_points: pts }) });
+                if (!r.ok) throw new Error('gradebook');
+                blockData(blockId).turnedIn = { at: new Date().toISOString(), files: ok };
+                changed();
+                say(`✅ Turned in ${ok} file${ok === 1 ? '' : 's'}${lastErr ? ` (some failed: ${lastErr})` : ''}.`, 'text-success');
+            } catch (e) { say('⚠️ Files uploaded, but the gradebook did not record it. Tell your teacher.', 'text-warning'); }
+        } else {
+            say(`❌ Upload failed: ${lastErr || 'unknown error'}. If it says "Not authorized," log out and back in, then try again.`, 'text-danger');
+        }
+        btn.disabled = false;
+        setTimeout(() => bar.classList.add('d-none'), 2500);
+    }
+
     // ---------- speech-to-text ----------
     let rec = null, recBtn = null;
     function stopMic() {
@@ -372,6 +475,13 @@
     });
     pageBox.addEventListener('change', e => {
         const t = e.target;
+        if (t.classList.contains('btn-check') && t.name.startsWith('tk-')) {
+            const blk = t.closest('.gn-block'), folder = t.value === 'folder';
+            blk.querySelector('.gn-file').classList.toggle('d-none', folder);
+            blk.querySelector('.gn-folder').classList.toggle('d-none', !folder);
+            blk.querySelector('.gn-folder-note').classList.toggle('d-none', !folder);
+            return;
+        }
         if (t.dataset.bindCheck) { const [id, f] = t.dataset.bindCheck.split('.'); blockData(id)[f] = t.checked; changed(); }
     });
     pageBox.addEventListener('click', e => {
@@ -384,6 +494,8 @@
             rate.parentElement.querySelectorAll('button').forEach(x => { const on = x === rate; x.classList.toggle('btn-dark', on); x.classList.toggle('btn-outline-dark', !on); });
             return;
         }
+        const up = t.closest('[data-upload]');
+        if (up) { uploadTurnin(up.dataset.upload, up.closest('.gn-block')); return; }
         const add = t.closest('[data-addrow]');
         if (add) { blockData(add.dataset.addrow).rows.push({}); changed(); renderPage(); return; }
         if (inTest && t.closest('[data-check], [data-reveal]')) return;

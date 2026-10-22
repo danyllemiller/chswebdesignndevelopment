@@ -47,6 +47,8 @@
     .gn-team { border-left-color: #1f2a44; background: #f6f7fb; }
     .gn-exit { border-left-color: #212529; background: #f8f9fa; }
     .gn-fields { border-left-color: #6610f2; background: #f8f5ff; }
+    .gn-project { border-left-color: #0d6efd; background: #f3f8ff; }
+    .gn-turnin { border-left-color: #198754; background: #effaf3; border-width: 2px; }
     .gn-text { position: relative; margin-bottom: .25rem; }
     .gn-text textarea { padding-right: 3rem; }
     .gn-mic { position: absolute; right: .4rem; top: .4rem; border-radius: 50%; width: 2.2rem; height: 2.2rem; padding: 0; }
@@ -221,7 +223,26 @@
   <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 
   <!-- Application Controllers -->
+  <script>
+    // Deep link from a chapter page: /student/notes.html?chapter=3&day=2 opens
+    // that chapter tab and Guided Notebook day. Runs before student-notes.js
+    // reads the saved tab.
+    (function () {
+      var q = new URLSearchParams(location.search), n = Number(q.get('chapter')), d = Number(q.get('day'));
+      if (!n) return;
+      var units = ["1: Developer's World", '2: The "Rules"', '3: The Blueprint', '4: UI/UX Design', '5: The "Bones"', '6: The "Clothes"', '7: Advanced Layout', '8: Sights & Sounds',
+        '9: The "Brains"', '10: Advanced JavaScript', '11: The Cloud', '12: The "Manager"', '13: The "Network"', '14: The "Brain"', '15: The Future', '16: The "Launch"'];
+      try {
+        if (units[n - 1]) localStorage.setItem('notebookLastChapter', units[n - 1]);
+        if (d) {
+          var m = JSON.parse(localStorage.getItem('guidedNotebookDay') || '{}'); m[n] = d;
+          localStorage.setItem('guidedNotebookDay', JSON.stringify(m));
+          localStorage.setItem('guidedNotebookDay_today_' + n, new Date().toDateString());
+        }
+      } catch (e) { /* storage blocked */ }
+    })();
+  </script>
   <script type="module" src="/js/student/student-notes.js?v=9"></script>
-  <script src="/js/student/guided-notebook.js?v=3" defer></script>
+  <script src="/js/student/guided-notebook.js?v=4" defer></script>
 </body>
 </html>

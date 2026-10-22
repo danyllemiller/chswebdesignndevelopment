@@ -106,7 +106,7 @@ function studentChapter(c) {
     return {
         chapter: c.chapter, course: c.course, title: c.title, project: c.project,
         days: c.days.map(d => ({
-            day: d.day, title: d.title, short: !!d.short, due: d.due || null, objectives: d.objectives || [],
+            day: d.day, label: d.label || null, title: d.title, short: !!d.short, due: d.due || null, objectives: d.objectives || [],
             blocks: d.blocks.map(b => studentBlock(b, `${c.chapter}-${d.day}-${b.id}`))
         }))
     };
@@ -138,13 +138,16 @@ router.get('/student/guided-notebook', requireSelfOrStaff(), async (req, res) =>
         });
         const responses = {};
         // Which guided day is being taught today, from the Daily Agenda's
-        // schedule (content "agenda": {course, firstBlock} -- day N = block firstBlock+N-1).
+        // schedule. Content "agenda": {course, blocks: [block for day 1, day 2, ...]}
+        // or {course, firstBlock} (day N = block firstBlock+N-1).
         let todayDay = null;
-        if (c.agenda && c.agenda.course && c.agenda.firstBlock) {
+        if (c.agenda && c.agenda.course && (c.agenda.firstBlock || Array.isArray(c.agenda.blocks))) {
             try {
                 const [t] = await withConnection(connection => connection.execute(
                     "SELECT block_num FROM agenda_days WHERE course = ? AND track = 'main' AND event_date = CURDATE() LIMIT 1", [c.agenda.course]));
-                const n = t.length ? t[0].block_num - c.agenda.firstBlock + 1 : null;
+                const n = !t.length ? null
+                    : Array.isArray(c.agenda.blocks) ? c.agenda.blocks.indexOf(t[0].block_num) + 1
+                    : t[0].block_num - c.agenda.firstBlock + 1;
                 if (n && c.days.some(d => d.day === n)) todayDay = n;
             } catch (e) { /* no agenda table -- just no "today" */ }
         }
@@ -235,7 +238,7 @@ router.get('/admin/guided-notebook', async (req, res) => {
                 section: r.section_id || '', updated_at: r.updated_at, data
             };
         });
-        return res.json({ chapter: c.chapter, course: c.course, title: c.title, days: c.days.map(x => ({ day: x.day, title: x.title })), page, responses });
+        return res.json({ chapter: c.chapter, course: c.course, title: c.title, days: c.days.map(x => ({ day: x.day, label: x.label || null, title: x.title })), page, responses });
     } catch (err) { console.error(err); return res.status(500).json({ error: 'Could not load responses.' }); }
 });
 
