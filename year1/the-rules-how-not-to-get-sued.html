@@ -183,6 +183,12 @@
                         <strong>Where Everyone Gets Ambushed:</strong> Students often think "copyright" is the umbrella term for all of IP law. It isn't — it's one of three separate protections. A related trap: students assume a patent, like copyright, is automatic. It is not. If you don't file the paperwork, there's no patent, no matter how original the invention.
                     </div>
 
+                    <!-- Exam gap-fill (Oct 2026 test results) -->
+                    <div class="alert alert-warning small border-warning border my-4">
+                        <strong>Where Everyone Gets Ambushed: Copyright vs. Trademark vs. Patent</strong>
+                        <ul class="mb-2 mt-2 ps-3"><li><strong>Copyright</strong>: creative work (code, photos, writing). <strong>Automatic</strong> the moment you make it.</li><li><strong>Trademark</strong>: a <strong>brand</strong> (logo, name, slogan). It does <em>not</em> protect inventions.</li><li><strong>Patent</strong>: an <strong>invention</strong>. <strong>Not automatic</strong>: you must apply and the government must grant it. Lasts about <strong>20 years</strong>.</li></ul><p class="mb-0">The test&rsquo;s favorite trap swaps two facts: &ldquo;A <em>trademark</em> protects an invention for about 20 years&rdquo; is <strong>false</strong>. That describes a <strong>patent</strong>. Memory hook: <strong>Copyright = Creations, Trademark = brand Tags, Patent = Paperwork.</strong></p>
+                    </div>
+
                     <div class="card border-success shadow-sm my-4">
                         <div class="card-header bg-success text-white fw-bold">Quick Check: Copyright, Trademark & Patent</div>
                         <div class="card-body small">
@@ -386,6 +392,12 @@
                         <strong>Where Everyone Gets Ambushed:</strong> Students often think HTTPS only matters if a site has a login form or takes payments, and that "security" is entirely the server's job. Any site — even a "read-only" blog — leaks browsing behavior without HTTPS, and plenty of security failures (plaintext passwords, forms with no encryption, collecting data you don't need) are decisions made directly in the code and content you write.
                     </div>
 
+                    <!-- Exam gap-fill (Oct 2026 test results) -->
+                    <div class="alert alert-warning small border-warning border my-4">
+                        <strong>Where Everyone Gets Ambushed: Postcard vs. Sealed Letter</strong>
+                        <p class="mb-0 mt-2"><strong>HTTP is a postcard</strong>: anyone who handles it can read it. <strong>HTTPS is a sealed, armored letter</strong>: encrypted, so only the website can read it. The SSL/TLS handshake that sets up that seal is the <strong>8-step</strong> sequence above, and a trusted <strong>Certificate Authority</strong> vouches for the site&rsquo;s certificate. Fill-in-the-blank version: &ldquo;HTTP is like sending a <strong>postcard</strong>.&rdquo;</p>
+                    </div>
+
                     <div class="card border-success shadow-sm my-4">
                         <div class="card-header bg-success text-white fw-bold">Quick Check: HTTPS & the SSL/TLS Handshake</div>
                         <div class="card-body small">
@@ -463,6 +475,12 @@
 
                     <div class="alert alert-warning small border-warning border mb-4">
                         <strong>Where Everyone Gets Ambushed:</strong> Students often think "opt-out" means the same protection as "opt-in," just worded differently. It doesn't — opt-out means data collection happens by default and the burden is on the user to find and use a stop-selling link. Opt-in means nothing happens until the user acts first. Mixing these up on the exam, or on a real client site, gets the compliance backwards.
+                    </div>
+
+                    <!-- Exam gap-fill (Oct 2026 test results) -->
+                    <div class="alert alert-warning small border-warning border my-4">
+                        <strong>Where Everyone Gets Ambushed: Which Law Is Opt-In?</strong>
+                        <div class="row g-2 mt-2 mb-2"><div class="col-sm-6"><div class="p-2 bg-white rounded border h-100"><strong>Opt-IN = Europe&rsquo;s GDPR</strong><br>The box starts <em>unchecked</em>. Nothing is collected until the user says yes.</div></div><div class="col-sm-6"><div class="p-2 bg-white rounded border h-100"><strong>Opt-OUT = Nevada&rsquo;s SB220</strong><br>Data can be sold by default. The user has to say &ldquo;stop.&rdquo;</div></div></div><p class="mb-0">Memory hook: <strong>Europe asks first. Nevada lets you leave.</strong> <strong>CCPA</strong> is California&rsquo;s privacy law, and <strong>PII</strong> means Personally Identifiable Information.</p>
                     </div>
                   </div>
 
@@ -851,6 +869,12 @@
                     <h2 class="section-title mt-0">Make the Web for Everyone: Accessibility (a11y)</h2>
                     <p><strong>The Why:</strong> Remember Devon, Marisol's regular customer who is blind and uses a screen reader? If her ordering page isn't built to work with assistive technology, Devon can't order lunch — and Marisol just lost a paying customer for a reason that had nothing to do with her tamales. Worse, it can be illegal.</p>
                     <p><strong>The What:</strong> In the United States, the <a href="https://www.ada.gov/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">ADA (Americans with Disabilities Act)</a> makes accessibility a <strong>legal requirement</strong> for "places of public accommodation," which courts now say include websites. Nevada businesses must follow it, but the ADA is only the U.S. piece — other regions have their own binding rules: the EU's <strong>European Accessibility Act</strong> and standard <strong>EN 301 549</strong>, Canada's <strong>AODA (Accessibility for Ontarians with Disabilities Act)</strong>, and the UK's <strong>Public Sector Bodies Accessibility Regulations</strong>. All of them point developers to the same technical standard: the <a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">WCAG (Web Content Accessibility Guidelines)</a>, divided into <strong>Level A</strong> (Minimum), <strong>Level AA</strong> (Standard/Legal Target), and <strong>Level AAA</strong> (Maximum).</p>
+
+                    <!-- Exam gap-fill (Oct 2026 test results) -->
+                    <div class="alert alert-warning small border-warning border my-4">
+                        <strong>Where Everyone Gets Ambushed: ADA, WCAG, a11y, and POUR</strong>
+                        <ul class="mb-0 mt-2 ps-3"><li><strong>The ADA (Americans with Disabilities Act, 1990) is the law</strong> that makes accessibility a legal requirement for public businesses. <strong>WCAG is the how</strong>: the guidelines courts use to measure whether a site is accessible. In <em>Robles v. Domino&rsquo;s</em>, a blind man couldn&rsquo;t order a pizza with his screen reader, and the court ruled Domino&rsquo;s broke the ADA. So &ldquo;WCAG is optional and rarely enforced&rdquo; is <strong>false</strong>.</li><li><strong>a11y = accessibility</strong>: there are 11 letters between the a and the y.</li><li><strong>POUR</strong> = <strong>P</strong>erceivable, <strong>O</strong>perable, <strong>U</strong>nderstandable, <strong>R</strong>obust. The P is <strong>Perceivable</strong>: everyone can see or hear the content.</li><li>Normal text needs a contrast ratio of at least <strong>4.5:1</strong>, and every meaningful image needs <strong>alt text</strong>.</li></ul>
+                    </div>
 
                     <h5 class="fw-bold mt-4 text-primary">The POUR Principles: The 4 Pillars of a11y</h5>
                     <p><strong>The How:</strong> To be accessible, a website must meet these four criteria established by the <a href="https://www.w3.org/WAI/" target="_blank" rel="noopener" class="text-decoration-none fw-bold">W3C WAI</a>:</p>

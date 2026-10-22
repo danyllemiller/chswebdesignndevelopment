@@ -865,6 +865,12 @@ console.log("Is Penny happy? " + isPennyHappy); // Output: true</code></pre>
             <li class="mb-2"><strong>Inputs:</strong> Which attribute of an input tag allows you to see what the user typed in JavaScript? The <strong><code>.value</code></strong> property.</li>
         </ul>
 
+        <!-- Exam gap-fill (Oct 2026 test results) -->
+        <div class="alert alert-warning small border-warning border my-4">
+            <strong>Where Everyone Gets Ambushed: The Five DOM Tools</strong>
+            <ul class="mb-0 mt-2 ps-3"><li><code>querySelector()</code> <strong>selects</strong> an element using CSS-style syntax.</li><li><code>addEventListener()</code> <strong>listens</strong> for a user action like a click.</li><li><code>createElement()</code> <strong>builds</strong> a new element <em>in memory only</em>: nothing shows yet.</li><li><code>appendChild()</code> <strong>inserts</strong> that element into the page so it finally appears.</li><li><code>innerText</code> <strong>changes the visible text</strong> of an element.</li></ul>
+        </div>
+
         <h5 class="fw-bold mt-4 text-primary">Events (The Watchmen)</h5>
         <p>Which method "listens" for a user action? <strong><code>addEventListener()</code></strong>. </p>
         <ul class="small mb-4 bg-light p-3 rounded border shadow-sm text-start">
@@ -988,6 +994,12 @@ factButton.addEventListener("click", function() {
         <p>You don't have to write HTML manually. JS can do it for you! What does <code>document.createElement('div')</code> do? It creates a new div invisibly in the browser's memory. After creating a new HTML element with JavaScript, how do you make it visible on the page? You must append it as a child to an existing parent using <strong><code>parent.appendChild(element)</code></strong>.</p>
         
         <p>To do this for a massive list of data, we use a loop. Which loop is specifically designed to iterate over the values in an Array? The <strong><code>for...of</code></strong> loop. You can use this loop to dynamically create and append 50 cards to the screen in milliseconds.</p>
+
+        <!-- Exam gap-fill (Oct 2026 test results) -->
+        <div class="alert alert-warning small border-warning border my-4">
+            <strong>Where Everyone Gets Ambushed: for...of vs. for...in</strong>
+            <p class="mb-0 mt-2"><strong><code>for...of</code></strong> gives you each <strong>value</strong> in an array, one at a time: <code>for (const pet of pets)</code>. <strong><code>for...in</code></strong> gives you the <strong>keys</strong> (property names or index numbers), which is why it&rsquo;s meant for objects, not arrays. Memory hook: <code>of</code> = the stuff <em>of</em> the array.</p>
+        </div>
 
         <!-- WALKTHROUGH 8: Arrays & Dynamic HTML -->
         <h3 class="section-title d-flex align-items-center mt-5 text-primary">

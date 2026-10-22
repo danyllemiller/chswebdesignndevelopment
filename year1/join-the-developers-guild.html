@@ -361,6 +361,12 @@
                                         <li class="mb-2"><strong>6. Team Structure:</strong> Who is doing what? This is where your specific agency roles (Project Manager, Senior Developer, etc.) are defined.</li>
                                         <li><strong>7. Financial Plan &amp; Cash Flow:</strong> What are your startup costs, monthly operating expenses, and projected revenue?</li>
                                     </ul>
+
+                                    <!-- Exam gap-fill (Oct 2026 test results) -->
+                                    <div class="alert alert-warning small border-warning border my-4">
+                                        <strong>Where Everyone Gets Ambushed: Business Plan Order</strong>
+                                        <p class="mb-0 mt-2">The first three sections always go in this order: <strong>Executive Summary &rarr; Company Description &rarr; Target Market Analysis</strong>. (Pros often <em>write</em> the Executive Summary last, but it always <em>goes</em> first.)</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -636,6 +642,12 @@
                                         <dt class="col-sm-4">Cloud Computing</dt><dd class="col-sm-8 mb-2">Delivering computing services via internet servers (no local hardware)</dd>
                                         <dt class="col-sm-4">MOOC</dt><dd class="col-sm-8 mb-0">Massive Open Online Course — free or low-cost online education at scale</dd>
                                     </dl>
+
+                                    <!-- Exam gap-fill (Oct 2026 test results) -->
+                                    <div class="alert alert-warning small border-warning border my-4">
+                                        <strong>Where Everyone Gets Ambushed: The Creator Economy</strong>
+                                        <p class="mb-0 mt-2">The key word is <strong>individuals</strong>. The Creator Economy is people, not corporations, earning money <strong>directly</strong> from their own content and audience: ad revenue, sponsorships, subscriptions, memberships, and tips on platforms like YouTube, TikTok, and Twitch.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -665,6 +677,12 @@
                             <h2 class="section-title mt-0">How You "Get" a Website (The "Where")</h2>
                             <p class="mb-3"><span class="badge bg-primary me-1">NV 6.1.1</span><span class="badge bg-primary me-1">NV 6.1.2</span><span class="badge bg-secondary me-1">NV 5.6.1</span><span class="badge bg-secondary me-1">NV 6.2.1</span></p>
                             <p>This is the most important concept to understand. Every interaction on the Web is powered by a <strong>client-server relationship</strong>. When you type a website's address into your <strong>web browser (the client)</strong>, your request is sent across the Internet to a powerful computer called a <strong>server</strong>, where the website's files are stored. The server finds those files (<strong>webpages</strong>) and sends them back to your browser, which displays the page on your screen. This constant back-and-forth of request and response is the engine that makes the Web possible.</p>
+
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: Internet, Web, DNS, CDN, and Client-Server</strong>
+                                <p class="mb-2 mt-2">These four words get swapped on the test. Keep them straight with one picture, a road system:</p><ul class="mb-2 ps-3"><li><strong>Internet</strong> = the physical network: cables, routers, and servers. <em>The roads.</em></li><li><strong>Web (World Wide Web)</strong> = the linked pages and apps that run <em>on</em> the network. <em>The cars driving on the roads.</em></li><li><strong>DNS</strong> = translates a domain name like <code>pixelpaws.com</code> into an IP address. <em>The phone book.</em></li><li><strong>CDN (Content Delivery Network)</strong> = a worldwide network of &ldquo;edge&rdquo; servers that keep copies of a site close to visitors so it loads faster. <em>Local warehouses.</em></li></ul><p class="mb-0">And the pattern underneath all of it, where <strong>your browser (the client) asks and a remote server delivers</strong>, is called the <strong>Client-Server Model</strong>.</p>
+                            </div>
 
                             <h2 class="section-title mt-5">The Internet's Address Book</h2>
                             <p>But wait. How does your browser find that specific server among the billions of devices on the internet? It can't just "drive around" looking for it. It needs a precise address. This all works thanks to a three-part system: IP addresses, Domain Names, and the DNS.</p>
@@ -722,6 +740,12 @@
                                     <tr><td class="fw-bold">NS</td><td>Name Server</td><td>Specifies which servers manage DNS for the domain</td><td>ns1.cloudflare.com</td></tr>
                                 </tbody>
                             </table>
+
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: A Record vs. MX Record</strong>
+                                <p class="mb-0 mt-2">An <strong>A Record</strong> points a domain to an <strong>IPv4 address</strong>. An <strong>MX Record</strong> routes the domain&rsquo;s <strong>email</strong>. A <strong>CNAME</strong> makes one name an alias of another (<code>www</code> &rarr; <code>pixelpaws.com</code>). Memory hook: <strong>A is for Address, MX is for Mail.</strong> If a test question says &ldquo;email,&rdquo; the answer is MX.</p>
+                            </div>
 
                             <h5 class="fw-bold mt-4 text-primary">DNS Propagation: Why Changes Take Time</h5>
                             <p>When you update a DNS record — like pointing your domain to a new server after switching hosts — the change doesn't instantly reach every device on the internet. Each record has a <strong>TTL (Time to Live)</strong>, a number in seconds that tells DNS resolvers how long to cache the answer before re-checking. A TTL of 3600 means servers worldwide may keep the old answer for up to one hour. Full global propagation can take anywhere from minutes to 48 hours. This is why developers lower their TTL values days before a planned migration.</p>
@@ -903,6 +927,12 @@
                                 <li class="mb-2"><strong>Fragment/Anchor (#details):</strong> Local instruction to jump to a specific ID.</li>
                             </ul>
 
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: Path vs. Query Parameter</strong>
+                                <p class="mb-2 mt-2">Take apart <code>https://shop.pixelpaws.com/products/collars?type=nylon#reviews</code>:</p><ul class="mb-2 ps-3"><li><code>https://</code> = <strong>protocol</strong>: <em>how</em> to connect (encrypted or not)</li><li><code>shop.</code> = <strong>subdomain</strong> &middot; <code>pixelpaws</code> = <strong>domain name</strong> &middot; <code>.com</code> = <strong>TLD</strong></li><li><code>/products/collars</code> = <strong>path</strong>: <em>where</em> the page or file lives on the server</li><li><code>?type=nylon</code> = <strong>query parameter</strong>: <em>extra data</em> sent to filter or search</li><li><code>#reviews</code> = <strong>fragment</strong>: jumps to one spot on the page</li></ul><p class="mb-0">The rule that settles most questions: <strong>everything after a <code>?</code> is a query; everything after a <code>#</code> is a fragment.</strong> The path is a location; the query is data you send.</p>
+                            </div>
+
                             <table class="table table-bordered table-sm mt-4 small shadow-sm bg-white">
                                 <thead class="bg-light text-center">
                                     <tr><th>TLD</th><th>Domain Type</th><th>Primary Use</th><th>Examples</th></tr>
@@ -925,6 +955,12 @@
                                 <li class="mb-1">Browser verifies it, creates a secret <strong>Session Key</strong>, and locks it in the Public Key "mailbox."</li>
                                 <li class="mb-1">Only the server has the <strong>Private Key</strong> to open the mailbox and get the secret code. Handshake complete.</li>
                             </ol>
+
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: What Actually Makes HTTPS Secure</strong>
+                                <p class="mb-0 mt-2">A site needs an <strong>SSL Certificate</strong> (today&rsquo;s version is technically TLS, but everyone still says SSL) to set up an encrypted HTTPS connection. A trusted <strong>Certificate Authority</strong> issues it, and it carries the site&rsquo;s public key. No certificate means no padlock and no <code>https://</code>. A password, a firewall, or a good domain name does <em>not</em> encrypt the connection. The certificate does.</p>
+                            </div>
 
                             <div class="card shadow-sm my-4" style="border:2px solid var(--primary-color);">
                                 <div class="card-header fw-bold small text-white" style="background:var(--primary-color);">
@@ -1167,6 +1203,12 @@
                                 <li class="mb-1"><strong>Vercel</strong> — Optimized for JavaScript frameworks (Next.js, React); instant global CDN deployment</li>
                                 <li class="mb-0"><strong>Glitch / Replit</strong> — Full-stack, collaborative, in-browser development with live hosting</li>
                             </ul>
+
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: Uptime Math and Free Hosting</strong>
+                                <p class="mb-0 mt-2"><strong>99.9% uptime is not &ldquo;never down.&rdquo;</strong> A year has 8,760 hours, and 0.1% of that is about <strong>8.7 hours of downtime per year</strong> that the host is still allowed. 99.99% is about 52 minutes. Also know: <strong>GitHub Pages</strong> is the free host most student developers use for <strong>static sites</strong> (HTML, CSS, and JavaScript with no database).</p>
+                            </div>
                             
                             <h5 class="fw-bold mt-4 text-primary">Speed Boost: CDNs (Content Delivery Networks) <span class="badge bg-secondary ms-2">NV 6.2.1</span></h5>
                             <p>A <strong>CDN</strong> (Content Delivery Network) is a global network of servers placed in cities worldwide called <strong>edge servers</strong>. When a user requests your site, instead of fetching files from your origin server (which might be in Virginia), they download them from the nearest edge location — Los Angeles, London, or Tokyo. Static assets like images, CSS, fonts, and JavaScript are cached at these edges. The result: dramatically faster load times globally, reduced load on your origin server, and built-in DDoS protection. <strong>Cloudflare</strong> is the most widely used CDN — its basic tier is completely free.</p>
@@ -1247,6 +1289,12 @@
                             
                             <h5 class="fw-bold mt-4 text-primary">SEO and Spamdexing</h5>
                             <p>Improving ranking is <strong>Search Engine Optimization (SEO)</strong>. Deceptive techniques are <strong>spamdexing</strong> (Keyword Stuffing, Hidden Text, Link Farming). Engines penalize sites using these tricks.</p>
+
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: Spamdexing and Website Types</strong>
+                                <p class="mb-0 mt-2"><strong>SEO</strong> earns a ranking honestly. <strong>Spamdexing</strong> cheats for one: keyword stuffing, invisible text, link farms. Two website-type traps from the test: a government site like <strong>nv.gov is not &ldquo;Commercial&rdquo;</strong> (commercial sites exist to sell, like amazon.com), and <strong>imdb.com is &ldquo;Topical&rdquo;</strong> because it goes deep on one subject: movies and TV.</p>
+                            </div>
                         </div>
 
                         <div class="col-lg-4 mt-4 mt-lg-0 text-center">
@@ -1285,6 +1333,12 @@
                                 <li class="mb-2"><strong>Value:</strong> The lightness or darkness of a color. High contrast (dark on light) creates emphasis; low contrast creates subtlety and hierarchy.</li>
                                 <li class="mb-2"><strong>Color:</strong> The most emotionally powerful element — hue (the color itself), saturation (intensity), and brightness (lightness). Covered in Color Theory below.</li>
                             </ul>
+
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: Value and White Space</strong>
+                                <p class="mb-0 mt-2"><strong>Value</strong> is the element of art about <strong>light vs. dark</strong>. It has nothing to do with price or importance. High value contrast (dark text on a light background) creates emphasis. And <strong>white space is a design tool, not wasted space</strong>: any statement saying empty areas &ldquo;should always be filled with content&rdquo; is false. White space is what makes the important things stand out.</p>
+                            </div>
 
                             <!-- ── PRINCIPLES OF DESIGN ── -->
                             <h5 class="fw-bold mt-4 text-primary">Principles of Design</h5>
@@ -1339,6 +1393,12 @@
                                 <li class="mb-2"><strong>The 60-30-10 Rule:</strong> 60% dominant color (backgrounds, large sections), 30% secondary color (cards, sidebars), 10% accent (buttons, highlights). Borrowed from interior design — it works everywhere.</li>
                                 <li class="mb-2"><strong>WCAG Contrast Standard:</strong> Normal text must achieve a 4.5:1 contrast ratio against its background. Large text (18pt+) needs 3:1. Use WebAIM's Contrast Checker to test any palette.</li>
                             </ul>
+
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: Complementary vs. Analogous</strong>
+                                <p class="mb-0 mt-2"><strong>Complementary</strong> colors sit <strong>directly opposite</strong> each other on the color wheel (red &amp; green, blue &amp; orange) and create the most contrast. <strong>Analogous</strong> colors sit <strong>next to</strong> each other and feel calm. Memory hook: complementary colors <em>complete</em> each other from across the wheel.</p>
+                            </div>
 
                             <!-- ── TYPOGRAPHY ── -->
                             <h5 class="fw-bold mt-4 text-primary">Typography Basics</h5>
@@ -1448,6 +1508,12 @@
                                     <tr><td class="fw-bold">JavaScript (JS)</td><td>The &ldquo;Brains&rdquo;</td><td>Interactivity &amp; Action (Verbs).</td></tr>
                                 </tbody>
                             </table>
+
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: Bones, Clothes, Brains</strong>
+                                <p class="mb-0 mt-2"><strong>HTML = the Bones</strong> (structure and content). <strong>CSS = the Clothes</strong> (style and appearance). <strong>JavaScript = the Brains</strong> (logic and interactivity: anything that <em>reacts</em> or <em>decides</em>). <strong>Visual Hierarchy</strong> is not a language at all. It&rsquo;s the design idea of arranging size and color to show what matters most.</p>
+                            </div>
 
                             <p class="small mt-3">Style was separated from structure in 1996 with CSS. While <strong>XML</strong> and <strong>WML</strong> exist, HTML/CSS remain essential. Developers use <strong>scripting languages</strong> to create <strong>active content</strong>.</p>
                         </div>
@@ -1707,6 +1773,12 @@
                                 </figcaption>
                             </figure>
 
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: The 8 Phases, In Order</strong>
+                                <p class="mb-2 mt-2">The diagram is a loop, and the test asks you to place every phase. Learn the order:</p><p class="mb-2 fw-bold">1 Research &amp; Analysis &rarr; 2 Planning &rarr; 3 Design &rarr; 4 Content &rarr; 5 Development &rarr; 6 Testing &rarr; 7 Deployment &rarr; 8 Maintenance &rarr; (back to 1)</p><p class="mb-0">Memory sentence: <strong>&ldquo;Really Patient Designers Create Detailed Tests Daily, Mostly.&rdquo;</strong> Common slip: Content comes <em>before</em> Development (you can&rsquo;t build pages around words and photos you don&rsquo;t have yet), and Testing comes <em>before</em> Deployment.</p>
+                            </div>
+
                             <div class="p-4 bg-site-secondary border border-primary rounded shadow-sm small text-dark mb-4">
                                 <h6 class="fw-bold text-primary mb-2">Agency Insight: Why the Cycle Never Ends</h6>
                                 <p class="mb-0">Notice that after Maintenance, the cycle restarts with Research. User behavior changes, technology evolves, search engine algorithms update, and client businesses grow. A website that is not actively maintained will decay — security holes appear, speed degrades, content becomes outdated, and competitors overtake it in search rankings. The most successful agencies sell ongoing maintenance contracts, not one-time builds. <strong>Recurring revenue is the goal.</strong></p>
@@ -1799,6 +1871,12 @@
                                     <strong>Figure 1.11:</strong> Click any role to explore what they do, what skills they need, and what they earn in Nevada.
                                 </figcaption>
                             </figure>
+
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: Who Does What</strong>
+                                <ul class="mb-2 mt-2 ps-3"><li><strong>Front-End Developer:</strong> writes the HTML, CSS, and JavaScript that run <strong>in the user&rsquo;s browser</strong>. Does <em>not</em> manage server databases.</li><li><strong>Back-End Developer:</strong> builds the <strong>server-side</strong> logic, databases, and security users never see.</li><li><strong>Full-Stack Developer:</strong> has mastered <strong>both</strong> client-side and server-side code.</li><li><strong>UI/UX Designer:</strong> focuses on looks and user psychology; builds wireframes and mockups in <strong>Figma</strong>.</li><li><strong>Database Administrator (DBA):</strong> designs database schemas, writes complex SQL queries, and keeps data <strong>secure and always available</strong>.</li></ul><p class="mb-0">Click every role in the image above too: each one has more detail.</p>
+                            </div>
                             <script>
                             (function(){
                             var CAREERS = {
@@ -2251,6 +2329,12 @@
 
                             <p>Notice that Technical Skills is only one-third of the framework. The same LinkedIn study mentioned earlier found that 92% of hiring managers say soft skills (Personal + Workplace) are equal to or more important than technical knowledge. The code gets you the interview. The other two thirds get you the job.</p>
 
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: SkillsUSA, CTSOs, and the Perkins Act</strong>
+                                <ul class="mb-0 mt-2 ps-3"><li>The <strong>SkillsUSA Framework</strong> has <strong>three</strong> parts: <strong>Personal</strong>, <strong>Workplace</strong>, and <strong>Technical</strong> Skills. A statement that it is &ldquo;entirely Technical Skills&rdquo; is false: technical is only one-third.</li><li><strong>CTSO</strong> = <strong>Career and Technical Student Organization</strong>. <strong>SkillsUSA</strong> is the CTSO for trade and technical careers.</li><li>The <strong>Perkins Act</strong> is the federal law that funds this program, and it has three requirements: <strong>(1)</strong> the curriculum must align with real industry needs, <strong>(2)</strong> CTSOs are built into the program, and <strong>(3)</strong> results are tracked and reported.</li></ul>
+                            </div>
+
                             <div class="card border-success shadow-sm my-4">
                                 <div class="card-header bg-success text-white fw-bold">Quick Check: CTSOs & the Perkins Act</div>
                                 <div class="card-body small">
@@ -2328,6 +2412,12 @@
                                 </tbody>
                             </table>
 
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: Agenda vs. Minutes (and the Motion Words)</strong>
+                                <div class="row g-2 mt-2 mb-2"><div class="col-sm-6"><div class="p-2 bg-white rounded border h-100"><strong>Agenda = BEFORE</strong><br>The plan: the list of topics, published <em>before</em> the meeting.</div></div><div class="col-sm-6"><div class="p-2 bg-white rounded border h-100"><strong>Minutes = AFTER</strong><br>The record of what was discussed and decided, kept by the <strong>Secretary</strong>.</div></div></div><p class="mb-2">Memory hook: <strong>Agenda looks Ahead. Minutes are the Memory.</strong> So &ldquo;Minutes are the pre-planned list of topics&rdquo; is <strong>false</strong>.</p><ul class="mb-0 ps-3"><li>To propose an idea, the first words are <strong>&ldquo;I move that we&hellip;&rdquo;</strong> (that&rsquo;s a <strong>motion</strong>).</li><li>A <strong>second</strong> only means &ldquo;let&rsquo;s discuss it,&rdquo; not &ldquo;I agree.&rdquo;</li><li><strong>Quorum</strong> = the minimum number of members needed to do official business.</li><li>A <strong>Standing</strong> committee is permanent; an <strong>Ad Hoc</strong> committee is temporary, for one job.</li><li>The <strong>Treasurer</strong> manages the money and tracks every dollar.</li></ul>
+                            </div>
+
                             <h5 class="fw-bold mt-4 text-primary">Picking Your Role: Officers vs. Committees</h5>
                             <p>In any organized group — from a SkillsUSA chapter to a professional web agency — leadership comes in two flavors: <strong>elected officers</strong> (permanent roles) and <strong>committees</strong> (temporary task forces).</p>
 
@@ -2378,6 +2468,12 @@
                                 <li class="mb-2"><strong>Job Interview Competition:</strong> You apply, interview, and get evaluated by real HR professionals. The best simulation of the actual experience you'll face when you graduate.</li>
                                 <li><strong>Prepared Speech:</strong> Research a career topic and deliver a professional speech. Building your ability to own a room is one of the highest-value skills you can develop.</li>
                             </ul>
+
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: SkillsUSA Facts</strong>
+                                <p class="mb-0 mt-2">The <strong>Job Interview Competition</strong> is the one that simulates a real hiring process, judged by <strong>actual HR professionals</strong>. And yes, SkillsUSA <strong>is</strong> famous for its <strong>red blazer</strong>: official dress is the red blazer with a white button-up and black slacks or skirt.</p>
+                            </div>
 
                             <div class="card border-success shadow-sm my-4">
                                 <div class="card-header bg-success text-white fw-bold">Quick Check: Parliamentary Procedure</div>
@@ -3009,6 +3105,12 @@
                         <div class="col-lg-8 pe-lg-5">
                             <h2 class="section-title mt-0">The Professional Workflow: Agile & Feedback</h2>
                             <p>In the professional world, we use the <strong>Agile</strong> methodology: a flexible project management system used to build software in small, iterative steps. We work in <strong>Sprints</strong> (usually 2 weeks) to finish specific tasks. This is exactly how your agency will manage building sites for clients.</p>
+
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: Agile, Sprints, and Rubber Ducks</strong>
+                                <p class="mb-2 mt-2"><strong>Agile</strong> means building software in <strong>small, repeated Sprints</strong> (usually 1&ndash;4 weeks), getting feedback, and improving each round. Building everything for <strong>one giant release</strong> at the end is the opposite (that&rsquo;s the older &ldquo;Waterfall&rdquo; style), so &ldquo;Agile means one single massive release&rdquo; is false.</p><p class="mb-0"><strong>Rubber Duck Debugging</strong> is explaining your code out loud, line by line, to an object (like a rubber duck). Saying it slowly makes the logic error jump out.</p>
+                            </div>
                             
                             <h5 class="fw-bold mt-4 text-primary">Giving Feedback (The "Crit-Wich")</h5>
                             <p>We use the <strong>Critique Sandwich</strong> to deliver feedback without causing conflict: start with a positive, give the "meat" (the criticism), and end with another positive.</p>
@@ -3114,6 +3216,12 @@
                             
                             <h6 class="fw-bold mt-4 text-dark">Ethics, Access &amp; Accessibility</h6>
                             <p>Avoid <strong>"Dark Patterns"</strong>—deceptive UI tricks meant to manipulate users. Professional designers use <strong>Responsive Design</strong> (layouts that adapt to any screen) and <strong>Accessibility</strong> (ensuring the site works for everyone, including those with disabilities). In the famous <strong>Domino's Lawsuit</strong>, the Supreme Court ruled that websites are public accommodations and <u>must</u> be accessible. This is often called the <strong>"Curb Cut Effect"</strong>—when you design for marginalized users, you make things better for everyone.</p>
+
+                            <!-- Exam gap-fill (Oct 2026 test results) -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Where Everyone Gets Ambushed: Dark Patterns and the Curb Cut Effect</strong>
+                                <p class="mb-0 mt-2"><strong>Dark Patterns</strong> are deceptive UI tricks that push users into clicking things they didn&rsquo;t intend: pre-checked boxes, a hidden &ldquo;cancel&rdquo; button, &ldquo;No thanks, I hate saving money.&rdquo; The <strong>Curb Cut Effect</strong> is the opposite idea: designing for people with disabilities makes things better for <em>everyone</em>. Sidewalk ramps built for wheelchairs help strollers and rolling suitcases too, and alt text built for blind users also helps search engines.</p>
+                            </div>
 
                             <h6 class="fw-bold mt-4 text-dark">Security: Hashing &amp; Salting</h6>
                             <p>Safety is a Guild rule. Never store passwords as plain text. Use <strong>hashing</strong> and <strong>salting</strong> to create irreversible, un-readable fingerprints of data.</p>
