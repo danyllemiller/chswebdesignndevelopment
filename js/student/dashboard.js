@@ -526,11 +526,22 @@ function renderGradeList(keys, myGrades, studentId, registryData, studentPeriod,
     html += `<h6 class="fw-bold text-success mt-2"><i class="fas fa-check-circle me-1"></i>Turned in (${done.length})</h6>`;
     html += done.length ? `<ul class="list-group mb-3">${done.map(row).join('')}</ul>` : '<p class="text-muted small">Nothing turned in yet.</p>';
     if (clockIns.length) {
-        html += `<details class="mb-3"><summary class="fw-bold text-primary small" style="cursor: pointer;">Daily clock-ins (${clockIns.length})</summary>
-            <ul class="list-group mt-2">${clockIns.map(row).join('')}</ul></details>`;
+        html += `<details class="mb-3" id="clockinDetails-${courseKey}"><summary class="fw-bold text-primary small" style="cursor: pointer;">Daily clock-ins (${clockIns.length}): see each question, your answer, and the right answer</summary>
+            <ul class="list-group mt-2" id="clockinList-${courseKey}">${clockIns.map(row).join('')}</ul></details>`;
     }
     html += '<p class="small text-muted mb-0"><i class="fas fa-info-circle me-1"></i>Assignments that aren\'t due yet show up here once you turn them in or their due date passes.</p>';
     listEl.innerHTML = html;
+
+    const clockinDetails = document.getElementById(`clockinDetails-${courseKey}`);
+    if (clockinDetails) {
+        const keys = new Set(clockIns.map(i => i.key));
+        clockinDetails.addEventListener('toggle', () => {
+            if (clockinDetails.open && !clockinDetails.dataset.loaded) {
+                clockinDetails.dataset.loaded = '1';
+                loadClockinHistory(studentId, keys, document.getElementById(`clockinList-${courseKey}`));
+            }
+        });
+    }
 
     const search = document.getElementById(`gradeSearch-${courseKey}`);
     if (search) search.oninput = () => {
@@ -538,6 +549,45 @@ function renderGradeList(keys, myGrades, studentId, registryData, studentPeriod,
         listEl.querySelectorAll('.grade-item').forEach(li => { li.classList.toggle('d-none', !!q && !li.dataset.search.includes(q)); });
         if (q) listEl.querySelectorAll('details').forEach(d => { d.open = true; });
     };
+}
+
+// Each clock-in with its question, the student's answer, the right answer,
+// the points it earned and the clock-out answer (/api/student/clockin-history;
+// the full page is student/clockins.html). Teacher request
+// 2026-10-23: students couldn't see any of this, so "all my clock-ins were on
+// time and correct" couldn't be checked. Only this course's days (keys).
+async function loadClockinHistory(studentId, keys, listEl) {
+    if (!listEl) return;
+    let days;
+    try {
+        const res = await fetch(`/api/student/clockin-history?student_id=${encodeURIComponent(studentId)}`);
+        if (!res.ok) return; // keep the plain list
+        days = ((await res.json()).days || []).filter(d => keys.has(`TC-${d.course}-${d.date}`));
+    } catch (e) { return; }
+    if (!days.length) return;
+    const dayName = (ymd) => new Date(ymd + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'numeric', day: 'numeric' });
+    const items = days.map(d => {
+        const pts = d.points === null || d.points === undefined ? null : Number(d.points);
+        const ptsColor = pts === null ? 'background:#6c757d;color:#fff;' : pts >= 3 ? 'background:#198754;color:#fff;' : pts === 2 ? 'background:#ffc107;color:#000;' : 'background:#dc3545;color:#fff;';
+        const onTime = d.on_time === true ? '<span style="display:inline-block;padding:.25em .65em;border-radius:999px;font-weight:700;font-size:.8em;line-height:1;background:#198754;color:#fff;">On time</span>'
+            : d.on_time === false ? '<span style="display:inline-block;padding:.25em .65em;border-radius:999px;font-weight:700;font-size:.8em;line-height:1;background:#dc3545;color:#fff;">Late</span>' : '';
+        const mark = d.is_right === true ? ' <span class="fw-bold" style="color:#198754;">&#10004; right</span>'
+            : d.is_right === false ? ' <span class="fw-bold" style="color:#dc3545;">&#10008; wrong</span>' : '';
+        const right = d.right_answer ? `<div><strong>Right answer:</strong> ${escapeHtml(d.right_answer)}</div>`
+            : d.right_answer_tomorrow ? '<div class="text-muted"><strong>Right answer:</strong> shows here tomorrow (your class has this same question today).</div>' : '';
+        return `<li class="list-group-item small">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div><strong>${dayName(d.date)}</strong>${d.clock_in ? ` &middot; clocked in ${escapeHtml(d.clock_in)}` : ''} ${onTime}</div>
+                ${pts === null ? '' : `<span style="display:inline-block;padding:.25em .65em;border-radius:999px;font-weight:700;font-size:.8em;line-height:1;font-size:.95em;${ptsColor}">${pts} / ${d.max_points || 3}</span>`}
+            </div>
+            <div class="mt-2"><strong>Question:</strong> ${d.question ? escapeHtml(d.question) : '<span class="text-muted">not saved for this day</span>'}</div>
+            <div><strong>Your answer:</strong> ${d.your_answer ? escapeHtml(d.your_answer) : '<span class="text-muted">none</span>'}${mark}</div>
+            ${right}
+            ${d.explanation ? `<div class="text-muted"><strong>Why:</strong> ${escapeHtml(d.explanation)}</div>` : ''}
+            ${d.out_answer ? `<div class="mt-1"><strong>Clock-out${d.clock_out ? ` ${escapeHtml(d.clock_out)}` : ''}:</strong> ${d.out_question ? `<em>${escapeHtml(d.out_question)}</em> ` : ''}${escapeHtml(d.out_answer)}</div>` : ''}
+        </li>`;
+    });
+    listEl.innerHTML = `<li class="list-group-item small bg-light">Each clock-in is worth <strong>3 points</strong>: 1 for clocking in, 1 for being <strong>on time</strong> (within 5 minutes of the bell), and 1 for the <strong>right answer</strong>. <a href="/student/clockins.html">Open My Clock-Ins &amp; Outs</a></li>${items.join('')}`;
 }
 
 function getRankName(lvl) {

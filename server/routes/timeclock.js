@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { withConnection } = require('../db');
 const { getCurrentSchoolYear, requireLogin, requireSelfOrStaff } = require('../helpers');
-const { pickWprQuestion, pickWprMcQuestion } = require('../wprQuestionBank');
+const { pickWprQuestion, pickWprMcQuestion, WPR_MC_QUESTIONS } = require('../wprQuestionBank');
 
 // Client-side JS errors on the timeclock widget were failing completely
 // silently for some students with no way to see why -- multiple fixes
@@ -704,6 +704,87 @@ router.get('/student/wd-journal', requireSelfOrStaff(), async (req, res) => {
         });
         res.json({ entries });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch journal' }); }
+});
+
+// A student's own clock-ins and clock-outs: the clock-in question, their
+// answer, the right answer, the points the gradebook gave, and the clock-out
+// question with their reflection (teacher 2026-10-23: CS students couldn't
+// see any of it, so "all my clock-ins were on time and correct" couldn't be
+// checked). The question text was only saved from 2026-10-21 on
+// (ensureTimesheetQuestionCols); for older days it's found by matching the
+// saved answer to the one bank question that offered it. Today's right
+// answer stays hidden until tomorrow: everyone in a class gets the same
+// question that day, so it could be passed to someone who hasn't clocked in.
+const normText = (t) => String(t || '').replace(/\s+/g, ' ').trim().toLowerCase();
+router.get('/student/clockin-history', requireSelfOrStaff(), async (req, res) => {
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ error: 'student_id is required' });
+    try {
+        const days = await withConnection(async (connection) => {
+            await ensureTimesheetQuestionCols(connection);
+            await ensureWdJournalTable(connection);
+            const [sheets] = await connection.execute(
+                `SELECT t.id, DATE_FORMAT(t.date, '%Y-%m-%d') AS date, t.section_id, DATE_FORMAT(t.clock_in, '%H:%i') AS clock_in,
+                        COALESCE(t.in_question, ji.prompt) AS question, t.in_answer AS answer,
+                        DATE_FORMAT(t.clock_out, '%H:%i') AS clock_out, COALESCE(t.out_question, jo.prompt) AS out_question, t.out_answer
+                 FROM timesheets t
+                 LEFT JOIN wd_journal ji ON ji.student_id = t.student_id AND ji.entry_date = t.date AND ji.session = 'in'
+                 LEFT JOIN wd_journal jo ON jo.student_id = t.student_id AND jo.entry_date = t.date AND jo.session = 'out'
+                 WHERE t.student_id = ? AND t.clock_in IS NOT NULL
+                 ORDER BY t.date DESC, t.id DESC LIMIT 250`,
+                [student_id]
+            );
+            const [tcRows] = await connection.execute(
+                `SELECT exam_id, score, on_time FROM responses WHERE student_id = ? AND exam_id LIKE 'TC-%'`, [student_id]);
+            const tc = new Map(tcRows.map(r => [r.exam_id, r]));
+            const [bank] = await connection.execute(
+                'SELECT question_text, option_a, option_b, option_c, option_d, correct_answer, study_hint FROM questions');
+            const csBank = bank.map(r => ({ q: r.question_text, options: [r.option_a, r.option_b, r.option_c, r.option_d], answer: r.correct_answer, hint: r.study_hint }));
+            const findIn = (list, question, answer) => {
+                if (question) {
+                    const hit = list.find(b => normText(b.q) === normText(question));
+                    if (hit) return hit;
+                }
+                if (!answer) return null;
+                const hits = list.filter(b => (b.options || []).some(o => normText(o) === normText(answer)));
+                return hits.length === 1 ? hits[0] : null;
+            };
+
+            const today = getLocalDateStr();
+            const seen = new Set();
+            const out = [];
+            for (const s of sheets) {
+                const courseKey = periodToCourseKeyServer(s.section_id);
+                if (!courseKey || seen.has(`${s.date}|${s.section_id}`)) continue;
+                seen.add(`${s.date}|${s.section_id}`);
+                // Old rows saved the chapter label after the answer ("Binary | Chapter 5: ...").
+                const answer = String(s.answer || '').replace(/\s\|\s(Chapter|Workplace).*$/s, '').trim();
+                const match = courseKey === 'CS' ? findIn(csBank, s.question, answer)
+                    : findIn(WPR_MC_QUESTIONS, s.question, answer);
+                const g = tc.get(`TC-${courseKey}-${s.date}`);
+                const isToday = s.date === today;
+                out.push({
+                    date: s.date,
+                    clock_in: s.clock_in,
+                    course: courseKey,
+                    question: match ? match.q : (s.question || null),
+                    your_answer: answer || null,
+                    right_answer: match && !isToday ? match.answer : null,
+                    right_answer_tomorrow: !!(match && isToday),
+                    is_right: match && !isToday ? normText(answer) === normText(match.answer) : null,
+                    explanation: match && !isToday ? (match.hint || null) : null,
+                    on_time: g && g.on_time !== null && g.on_time !== undefined ? Number(g.on_time) === 1 : null,
+                    points: g ? g.score : null,
+                    max_points: 3,
+                    clock_out: s.clock_out || null,
+                    out_question: s.out_question || null,
+                    out_answer: s.out_answer || null
+                });
+            }
+            return out;
+        });
+        res.json({ days });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to load clock-in history' }); }
 });
 
 // Teacher view of one student's journal (admin/tools/daily-activity.html or
