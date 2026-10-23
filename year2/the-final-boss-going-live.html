@@ -358,6 +358,20 @@
         <p>Which file is automatically recognized as the default homepage by almost all web servers? <strong><code>index.html</code></strong>. If you name your homepage <code>main.html</code>, your live site will just show an ugly directory folder list.</p>
         <p>Furthermore, what happens if you deploy an HTML file but forget to deploy the <code>images</code> folder that goes with it? <strong>The images will show as broken links (404 errors) on the live site.</strong> What is a '404 Error'? <strong>Not Found (The requested page or file does not exist on the server).</strong></p>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch16 Day 3 -->
+        <div class="card border-info shadow-sm my-4 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">It Works on My Laptop, but the Live Site Is a Blank White Page</div>
+          <div class="card-body small">
+            <p class="mb-2">Three causes explain most failed deploys:</p>
+            <ul class="mb-2">
+              <li class="mb-1"><strong>Wrong publish directory:</strong> Netlify is publishing the wrong folder (say, the repo root) instead of the folder your <code>index.html</code> actually lives in.</li>
+              <li class="mb-1"><strong>Case-sensitive paths:</strong> the server is Linux, so <code>Images/Logo.png</code> and <code>images/logo.png</code> are different files. It worked on your laptop because Windows and Mac ignore capital letters.</li>
+              <li class="mb-0"><strong>Missing environment variables:</strong> an API key or setting that lives in your local <code>.env</code> file was never added to the host's settings, so the live code can't find it.</li>
+            </ul>
+            <p class="mb-0"><strong>Read the build log from the bottom up.</strong> A failed build prints hundreds of lines, but the error that actually stopped it is near the <em>end</em>. Start at the last red line and work upward until you find the first thing that went wrong.</p>
+          </div>
+        </div>
+
         <h5 class="fw-bold mt-5 text-danger">Server-Side Error Troubleshooting</h5>
         <p>When your deployed site throws an error, the HTTP status code in the browser's Network tab tells you exactly where to look. Three common server errors you will encounter on launch day:</p>
         <table class="table table-bordered small bg-white shadow-sm mt-3 mb-4 text-start">
@@ -413,6 +427,20 @@
         
         <p>How does a Custom Domain (like <code>johndoe.com</code>) improve a portfolio? <strong>It projects professionalism, authority, and brand ownership.</strong> When you purchase a domain name from a Registrar (like GoDaddy), how long do you typically 'own' it before having to renew? <strong>One Year.</strong></p>
         
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch16 Day 4 -->
+        <div class="card border-info shadow-sm my-4 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">What Owning a Domain Really Means</div>
+          <div class="card-body small">
+            <ul class="mb-2">
+              <li class="mb-2"><strong>Registrar:</strong> the company that sells domain names (Namecheap, GoDaddy, Cloudflare, Google's successor services). A <code>.com</code> like <code>firstname-lastname.com</code> costs about $10 to $20 a year.</li>
+              <li class="mb-2"><strong>Renewal:</strong> you don't buy a domain forever; you rent it a year at a time. Miss the renewal and it expires, and anyone can buy it.</li>
+              <li class="mb-2"><strong>WHOIS privacy:</strong> every domain's owner is listed in a public directory called WHOIS. WHOIS privacy hides your name, address, and phone number from it (many registrars include it free).</li>
+              <li class="mb-0"><strong>Squatting:</strong> buying up domains that match someone else's name or brand to resell them at a high price. Registering your own name early protects you from it.</li>
+            </ul>
+            <p class="mb-0"><strong>Is about $12 a year worth it?</strong> For a developer, usually yes: your own domain is a permanent, professional address for your portfolio that no platform can take away. The costs to plan for are registration, renewal every year, and optional privacy.</p>
+          </div>
+        </div>
+
         <h5 class="fw-bold mt-4 text-primary" id="dns-explained">The DNS Phonebook</h5>
         <p>What is the Domain Name System (DNS)? <strong>The internet's master phonebook that translates human-friendly names into computer-friendly IP addresses.</strong> To connect your custom domain to your host, you must edit your DNS records:</p>
         <ul class="small mb-4 bg-light p-3 rounded border shadow-sm text-start">
@@ -420,6 +448,18 @@
             <li class="mb-2">What is a DNS 'CNAME Record' used for? <strong>Pointing a domain to another domain or subdomain URL (like a Netlify app link).</strong></li>
             <li class="mb-0">If you change a DNS setting, why might your friend in another city not see the change immediately? <strong>The change has not fully propagated across the global DNS network yet.</strong> What does 'DNS Propagation' refer to? <strong>The time it takes for a new domain setting to spread to every internet provider across the globe.</strong> How long does DNS propagation typically take? <strong>Between 24 and 72 hours in the worst case</strong>, though many providers update within minutes to a few hours. Do not panic if your domain shows a "site not found" error immediately after updating DNS records — this is expected.</li>
         </ul>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch16 Day 5 -->
+        <h5 class="fw-bold mt-4 text-primary">Follow One DNS Lookup</h5>
+        <p>For your domain to point at your site, its <strong>DNS records</strong> have to change: an <strong>A record</strong> (points to an IP address) or a <strong>CNAME</strong> (points to another domain, like <code>yoursite.netlify.app</code>). Here's what happens when someone types your domain:</p>
+        <ol class="small mb-4 bg-light p-3 ps-4 rounded border shadow-sm text-start">
+          <li class="mb-1"><strong>Browser:</strong> "Have I looked this up recently?" If not, it asks a resolver.</li>
+          <li class="mb-1"><strong>Resolver</strong> (usually your internet provider's): does the legwork of asking around.</li>
+          <li class="mb-1"><strong>Root server:</strong> "I don't know <code>yourname.com</code>, but here's who handles <code>.com</code>."</li>
+          <li class="mb-1"><strong>TLD server</strong> (for <code>.com</code>): "Here's the authoritative server for <code>yourname.com</code>."</li>
+          <li class="mb-1"><strong>Authoritative server:</strong> "Its A record says this IP address." That answer goes back to the browser.</li>
+          <li class="mb-0">The browser connects to that IP, and the resolver remembers the answer for next time. (This is why DNS changes can take a while to show up everywhere.)</li>
+        </ol>
 
         <h5 class="fw-bold mt-4 text-primary">Security: HTTP vs HTTPS</h5>
         <p>What is the primary difference between HTTP and HTTPS? <strong>HTTPS encrypts the data being transferred; HTTP sends it in plain text.</strong> What is the purpose of an SSL/TLS Certificate on a live website? <strong>To enable the padlock icon and encrypt data sent between the user and the server.</strong></p>
@@ -501,6 +541,11 @@
                     <p class="text-muted small mb-0"><i class="fas fa-spinner fa-spin me-1"></i>Loading…</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch16 Day 7 -->
+        <div class="alert alert-info small border my-4">
+          <strong>Helping search engines:</strong> a <code>sitemap.xml</code> file lists every page on your site so search engines can find them all, and a <code>robots.txt</code> file tells search crawlers which folders <em>not</em> to crawl (it's a polite request, not security). Lighthouse checks four categories: performance, accessibility, best practices, and SEO. Google's <strong>Core Web Vitals</strong> measure three things real users feel: <strong>LCP</strong> (Largest Contentful Paint: how fast the main content appears, the big one for image-heavy sites), <strong>INP</strong> (Interaction to Next Paint: how fast the page responds to a tap or click), and <strong>CLS</strong> (Cumulative Layout Shift: whether things jump around while loading).
         </div>
 
         <!-- LAB 3 & 4 CARDS -->
@@ -633,6 +678,19 @@
           <div class="card-header bg-site-secondary fw-bold text-info border-bottom">Pro Tip:</div>
           <div class="card-body small">
             <p class="mb-0">Sharing a fresh case study or new project on social media is one of the simplest ways to drive traffic back to a portfolio or client site — pair it with the Open Graph tags mentioned in the Milestone so the shared link looks professional in the feed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch16 Day 8 -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <div class="card border-info shadow-sm text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">What Rots Within a Year (and What the Numbers Mean)</div>
+          <div class="card-body small">
+            <p class="mb-2">Launch a site and never touch it again, and within a year: <strong>links break</strong> (pages you linked to move or disappear), <strong>content goes out of date</strong> (old prices, past events, staff who left), and <strong>plugins or SSL certificates expire</strong>. That's why maintenance includes checking every hyperlink on a schedule and holding a content review with the client: what to <strong>cut</strong>, <strong>keep</strong>, and <strong>rewrite</strong>.</p>
+            <p class="mb-0"><strong>Reading analytics:</strong> a <strong>session</strong> is one visit, from arriving to leaving. <strong>Bounce rate</strong> is the share of visits where someone left after viewing just one page without doing anything. Numbers like these tell you how users behave and where they leave, so tie every number to a design change: a high bounce rate on the Pricing page means fix the Pricing page.</p>
           </div>
         </div>
       </div>
