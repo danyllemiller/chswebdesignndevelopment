@@ -157,6 +157,25 @@
       </div>
     </div>
 
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch5 Days 1-2 -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">HTML's Job (and What It Is NOT)</h2>
+        <p>Your Chapter 4 mockup is beautiful, but a browser can't show it to anyone. Figma makes a <em>picture</em> of a page; a browser only reads <strong>code</strong>. Before anyone can visit your design, each Figma frame has to be translated into a real HTML file (and later styled with CSS). That translation is this chapter.</p>
+        <div class="table-responsive">
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-3 text-start">
+          <thead class="table-light"><tr><th>Language</th><th>Its job</th><th>Not its job</th></tr></thead>
+          <tbody>
+            <tr><td><strong>HTML</strong></td><td><strong>Structure and content</strong>: what each thing <em>is</em> (a heading, a list, a form, a photo)</td><td>How it looks or what it does</td></tr>
+            <tr><td><strong>CSS</strong> (Chapter 6)</td><td>Styling: colors, fonts, spacing, layout</td><td>What the content means</td></tr>
+            <tr><td><strong>JavaScript</strong> (Web Design 2)</td><td>Behavior: what happens when you click, type, or scroll</td><td>Structure or styling</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="small mb-0">If you catch yourself using an HTML tag just to make text <em>look</em> big or bold, stop: that's CSS's job. HTML says what something <em>is</em>.</p>
+      </div>
+    </div>
+
     <!-- SECTION 2: DETECTIVE & ABILITIES -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
@@ -468,6 +487,15 @@
           </ol>
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch5 Days 5-6 -->
+        <div class="card border-info shadow-sm my-4 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">What a Screen Reader Hears: Div Soup vs. Landmarks</div>
+          <div class="card-body small">
+            <p>A page built entirely from <code>&lt;div&gt;</code> tags is called <strong>div soup</strong>. To a screen reader it sounds like a long, confusing list of "group, group, group" with nothing to jump to. Semantic tags like <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, and <code>&lt;footer&gt;</code> are <strong>landmarks</strong>: a screen reader user can press one key to jump straight to the navigation or the main content, the same way a sighted user glances at the page.</p>
+            <p class="mb-0"><strong>Why is <code>&lt;main&gt;</code> better than <code>&lt;div class="main"&gt;</code>?</strong> They can look identical, but only <code>&lt;main&gt;</code> is a landmark that assistive technology can jump to. A class name means nothing to a screen reader.</p>
+          </div>
+        </div>
+
         <!-- GRADED LAB 5 CARD (Semantic Skeleton) -->
         <div class="card border-success shadow-sm my-4 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 5: The Global Skeleton [25 pts]</div>
@@ -606,6 +634,30 @@
             </div>
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch5 Days 6, 12 -->
+        <h5 class="fw-bold mt-4 text-primary">Which Tag? A Test You Can Defend</h5>
+        <p>When you're unsure which semantic tag to use, ask these questions in order:</p>
+        <ol class="small mb-3 bg-light p-3 ps-4 rounded border shadow-sm text-start">
+          <li class="mb-2">Could it stand alone and still make sense if it were copied onto another site (a blog post, a review, a news story)? Use <code>&lt;article&gt;</code>: <strong>independent, self-contained</strong> content.</li>
+          <li class="mb-2">Is it related, but not part of the main point (a sidebar ad, related links, a fun fact)? Use <code>&lt;aside&gt;</code>.</li>
+          <li class="mb-2">Is it an image, chart, or code example with a caption? Use <code>&lt;figure&gt;</code> with <code>&lt;figcaption&gt;</code>.</li>
+          <li class="mb-2">Is it a thematic group of content with its own heading (a Services area, a Testimonials area)? Use <code>&lt;section&gt;</code>.</li>
+          <li class="mb-0">None of the above, and you only need it for styling? Then (and only then) use a <code>&lt;div&gt;</code>.</li>
+        </ol>
+        <div class="table-responsive">
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-4 text-start">
+          <thead class="table-light"><tr><th>Page part</th><th>Semantic tag</th></tr></thead>
+          <tbody>
+            <tr><td>Logo and site title</td><td><code>&lt;header&gt;</code></td></tr>
+            <tr><td>Main menu</td><td><code>&lt;nav&gt;</code></td></tr>
+            <tr><td>A blog post</td><td><code>&lt;article&gt;</code></td></tr>
+            <tr><td>A sidebar ad</td><td><code>&lt;aside&gt;</code></td></tr>
+            <tr><td>The copyright line</td><td><code>&lt;footer&gt;</code></td></tr>
+            <tr><td>A photo with a caption</td><td><code>&lt;figure&gt;</code> + <code>&lt;figcaption&gt;</code></td></tr>
+          </tbody>
+        </table>
+        </div>
+
         <!-- GRADED LAB 6 CARD (Content Blocks) -->
         <div class="card border-success shadow-sm my-4 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 6: Content Blocks [25 pts]</div>
@@ -726,6 +778,21 @@
             <li class="mb-0"><strong>Save the File</strong>: Save the entire document in your project folder as <code>about.html</code> and test it in your browser!</li>
           </ol>
         </div>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch5 Days 3-4 -->
+        <h5 class="fw-bold mt-4 text-primary">Why Every Menu Is a List</h5>
+        <p>A navigation menu is a <strong>list of links</strong>, so it is coded as a list. That isn't just habit: lists give screen readers structure. A screen reader announces "navigation, list, 4 items" before reading the first link, so a blind user knows exactly how big the menu is before exploring it.</p>
+        <p><strong>Nested lists:</strong> where does a sub-menu go, inside the <code>&lt;li&gt;</code> or after it? <strong>Inside the <code>&lt;li&gt;</code>, after the link text.</strong> The sub-list belongs to that item:</p>
+        <pre class="p-3 border rounded shadow-sm mb-4 no-copy"><code>&lt;ul&gt;
+  &lt;li&gt;&lt;a href="index.html"&gt;Home&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="events.html"&gt;Events&lt;/a&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href="events/calendar.html"&gt;Calendar&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="events/past.html"&gt;Past Events&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;   &lt;!-- the Events li closes AFTER its sub-list --&gt;
+  &lt;li&gt;&lt;a href="contact.html"&gt;Contact&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
 
         <!-- GRADED LAB 3 CARD (Nav List Structure) -->
         <div class="card border-success shadow-sm my-4 text-start">
@@ -881,6 +948,19 @@
               <pre class="p-3 rounded mt-2 mb-0 no-copy"><code>&lt;img src="images/arcade_truck.jpg" alt="A mobile arcade truck with neon lights" width="600"&gt;</code></pre>
             </li>
           </ol>
+        </div>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch5 Days 7-8 -->
+        <div class="card border-info shadow-sm my-4 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">The Alt Text Decision Tree</div>
+          <div class="card-body small">
+            <p class="mb-2">Alt text is legally required for screen readers, but the <em>right</em> alt text depends on what the image is doing. Ask:</p>
+            <ul class="mb-2">
+              <li class="mb-2"><strong>Is it purely decorative</strong> (a divider line, a background swirl)? Use <strong>empty</strong> alt text: <code>alt=""</code>. The screen reader skips it instead of reading "image, image, image." (Leaving the alt attribute out completely is an error; empty is a decision.)</li>
+              <li class="mb-2"><strong>Is it informative</strong> (a photo or chart that adds information)? Describe the information: <code>alt="Volunteers planting tomatoes at the community garden"</code>.</li>
+              <li class="mb-0"><strong>Is it functional</strong> (an image inside a link or button)? Describe the <em>action</em>, not the picture: a magnifying-glass icon that searches gets <code>alt="Search"</code>, not "magnifying glass."</li>
+            </ul>
+          </div>
         </div>
 
         <!-- GRADED LAB 7 CARD (Images) -->
@@ -1072,6 +1152,11 @@
                 </ol>
             </div>
 
+            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch5 Day 8 -->
+            <div class="alert alert-warning small border-warning border my-4">
+              <strong>A placeholder is NOT a label.</strong> Every input needs a matching <code>&lt;label&gt;</code> connected with <code>for</code> and <code>id</code>. Placeholder text disappears the moment you start typing, so users with memory or attention difficulties lose track of what the field wanted, and some screen readers skip placeholder text entirely. An accessible email field looks like this: <code>&lt;label for="email"&gt;Email&lt;/label&gt; &lt;input type="email" id="email" name="email"&gt;</code>
+            </div>
+
             <!-- ADVANCED FORM ATTRIBUTES -->
             <h5 class="fw-bold mt-5 text-primary">Advanced HTML5 Form Attributes</h5>
             <p>The input attributes below make forms smarter. They allow the browser to do validation work for you <em>before</em> the data is ever sent to a server — no JavaScript required.</p>
@@ -1217,6 +1302,16 @@
       </div>
     </div>
 
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch5 Days 9-10 -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Encoding: Why Curly Quotes Turn Into Garbage</h2>
+        <p>Every character on a page is stored as a number, and the <strong>character encoding</strong> is the rulebook that turns those numbers back into letters. The web's rulebook is <strong>UTF-8</strong>, which is why your boilerplate starts with <code>&lt;meta charset="UTF-8"&gt;</code>.</p>
+        <p>Paste a curly quote (” or ’) from a Word doc into a page whose encoding doesn't match, and you get garbled characters like <code>â€™</code> instead of an apostrophe. That garbage has a name: <strong>mojibake</strong>. The fix: keep <code>&lt;meta charset="UTF-8"&gt;</code> in the <code>&lt;head&gt;</code>, save your files as UTF-8 (VS Code's default), and when in doubt, retype the quote marks yourself.</p>
+        <p class="mb-0"><strong>Why can't you just type a <code>&lt;</code> in your page text?</strong> The browser reads <code>&lt;</code> as the start of a tag, so "5 &lt; 10" can swallow the rest of your sentence. Write it as the entity <code>&amp;lt;</code> instead.</p>
+      </div>
+    </div>
+
     <!-- SECTION 13B: OPTIMIZING FOR ASSISTIVE TECHNOLOGY -->
     <div id="optimizing-for-special-needs" class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
@@ -1279,6 +1374,30 @@
               </div>
               <div class="card-body small bg-light">
                 <p class="mb-0">In the agency world, delivering broken code is how you lose clients and get bad reviews. The Zero Error Audit isn't just a grade; it's our agency's guarantee. We do not push code to production until it passes W3C Validation. This protects our reputation in the local market and saves us from costly post-launch bug fixes.</p>
+              </div>
+            </div>
+
+            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch5 Days 10-14 -->
+            <div class="card border-info shadow-sm my-4 mx-auto text-start" style="max-width: 900px;">
+              <div class="card-header bg-site-secondary fw-bold text-info">How to Read a Validator Message (and the 5 Errors Behind Most Failures)</div>
+              <div class="card-body small">
+                <p class="mb-2">Every W3C validator message has three parts:</p>
+                <ul class="mb-3">
+                  <li><strong>Line:</strong> <em>where</em> the problem is in your file.</li>
+                  <li><strong>Expected:</strong> what the validator <em>wanted</em> to find there.</li>
+                  <li><strong>Actual:</strong> what it <em>found</em> instead.</li>
+                </ul>
+                <p class="mb-2">Most failures come from the same five errors:</p>
+                <ol class="mb-3">
+                  <li><strong>Unclosed tags:</strong> a <code>&lt;p&gt;</code> or <code>&lt;li&gt;</code> that never ends.</li>
+                  <li><strong>Missing alt</strong> on an <code>&lt;img&gt;</code>.</li>
+                  <li><strong>Duplicate ids:</strong> two elements with the same <code>id</code> (an id must be unique on the page).</li>
+                  <li><strong>Stray tags:</strong> a closing tag with no opening tag ("Stray end tag").</li>
+                  <li><strong>Bad nesting:</strong> tags closed in the wrong order (first-in, last-out).</li>
+                </ol>
+                <p class="mb-2"><strong>Valid vs. semantic:</strong> <em>valid</em> means the validator found no errors. <em>Semantic</em> means you used tags for their meaning (an <code>&lt;h1&gt;</code> for the main heading, a <code>&lt;nav&gt;</code> for navigation). A page can be valid and still be div soup, so aim for both.</p>
+                <p class="mb-2"><strong>Peer code review:</strong> comment on the <em>code</em>, not the <em>coder</em>. "Line 42 is missing a closing <code>&lt;/li&gt;</code>" helps; "you're sloppy" doesn't.</p>
+                <p class="mb-0"><strong>QA report:</strong> before you submit, list every link between your three pages with its relative path, test each one, and write down each error you found and how you fixed it, page by page, with the before-and-after error count. If your HTML foundation is cracked, your CSS house will collapse.</p>
               </div>
             </div>
 
