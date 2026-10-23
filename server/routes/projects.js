@@ -4,7 +4,10 @@ const { isProjectExempt } = require('../lib/projectExemptions');
 const fs = require('fs');
 const path = require('path');
 const { withConnection } = require('../db');
+const bcrypt = require('bcrypt');
 const { resolveCourseId, clampScore, requireSelfOrStaff, requireLogin } = require('../helpers');
+const { dailyOverrideCode } = require('../lib/dailyCode');
+const { isCsUnitProject, hasProjectUpload, syncCsProjectGrade } = require('../lib/csProjectGate');
 
 // Same students.section_id -> uploads/<student_id>/ layout roster.js already
 // creates on account setup (server/routes/uploads.js writes there).
@@ -117,13 +120,21 @@ async function saveEvaluationAndAggregate(connection, { chapter_project_id, exam
            max_score = VALUES(max_score), status = VALUES(status), computed_at = CURRENT_TIMESTAMP`,
         [chapter_project_id, exam_id, student_id, selfScore, peerScore, autoScore, aggregateScaled, realMaxPoints, status]
     );
+    // A CS unit project only reaches the gradebook once it has an uploaded
+    // file AND a peer review -- a self-review alone used to post a full
+    // score here (server/lib/csProjectGate.js).
+    if (isCsUnitProject(exam_id)) {
+        const gate = await syncCsProjectGrade(connection, student_id, exam_id);
+        return { self_score: selfScore, peer_score: peerScore, auto_score: autoScore, aggregate_score: aggregateScaled, max_score: realMaxPoints, status,
+            grade_posted: gate.posted, pending_reason: gate.reason };
+    }
     await connection.execute(
         `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW())
          ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
         [student_id, exam_id, aggregateScaled, realMaxPoints]
     );
 
-    return { self_score: selfScore, peer_score: peerScore, auto_score: autoScore, aggregate_score: aggregateScaled, max_score: realMaxPoints, status };
+    return { self_score: selfScore, peer_score: peerScore, auto_score: autoScore, aggregate_score: aggregateScaled, max_score: realMaxPoints, status, grade_posted: true };
 }
 
 // Recursively collects readable-as-text source files (HTML/JS/CSS) from a
@@ -359,22 +370,43 @@ router.post('/student/project-submission', requireSelfOrStaff(), async (req, res
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save project submission metadata' }); }
 });
 
-router.post('/student/project-evaluation', requireSelfOrStaff(), async (req, res) => {
-    const { chapter_project_id, exam_id, student_id, evaluator_student_id, evaluator_type, score, max_score, rubric_json, feedback } = req.body;
+// Failed peer-review confirmations (wrong password or code), per reviewee
+// session: 5 tries per 15 minutes, so a reviewer's password can't be guessed
+// from a classmate's screen.
+const confirmFailures = new Map(); // student_id -> [timestamps]
+const CONFIRM_WINDOW_MS = 15 * 60 * 1000;
+const tooManyConfirmFailures = (id) => (confirmFailures.get(id) || []).filter(t => Date.now() - t < CONFIRM_WINDOW_MS).length >= 5;
+const noteConfirmFailure = (id) => confirmFailures.set(id, [...(confirmFailures.get(id) || []).filter(t => Date.now() - t < CONFIRM_WINDOW_MS), Date.now()]);
+
+let confirmedByColumnReady = false;
+async function ensureConfirmedByColumn(connection) {
+    if (confirmedByColumnReady) return;
+    await connection.execute('ALTER TABLE project_evaluations ADD COLUMN IF NOT EXISTS confirmed_by VARCHAR(20) NULL');
+    confirmedByColumnReady = true;
+}
+
+router.post('/student/project-evaluation', async (req, res) => {
+    const { chapter_project_id, exam_id, student_id, evaluator_student_id, evaluator_type, score, max_score, rubric_json, feedback, confirm_password, confirm_code } = req.body;
     if (!chapter_project_id || !exam_id || !student_id || !evaluator_type)
         return res.status(400).json({ error: 'chapter_project_id, exam_id, student_id, evaluator_type are required' });
     if (!['self', 'peer', 'auto'].includes(evaluator_type))
         return res.status(400).json({ error: 'evaluator_type must be one of self|peer|auto' });
 
-    // requireSelfOrStaff() above only confirms student_id (the reviewee)
-    // matches the caller's session -- it never checked WHICH evaluator_type
-    // a caller may submit, so the reviewee's own session could write a
-    // fabricated 'auto' 100% (skipping the real auto-check entirely) or a
-    // 'peer' score naming any student_id as the reviewer, including a
-    // second row reviewing themselves. Both wrote straight into the real
-    // gradebook via saveEvaluationAndAggregate's INSERT INTO responses.
+    // Allowed callers: the reviewee (student_id) themselves, staff, or -- for
+    // a peer review only -- the reviewer (evaluator_student_id) signed in on
+    // their own account.
+    //
+    // Checking only that student_id matched the session (the old
+    // requireSelfOrStaff()) never checked WHICH evaluator_type a caller may
+    // submit, so the reviewee's own session could write a fabricated 'auto'
+    // 100% or a 'peer' score naming any student_id as the reviewer. Both
+    // wrote straight into the real gradebook.
     const sessionUser = req.session?.user;
+    const sessionId = String(sessionUser?.student_id || '');
     const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
+    const isReviewee = !!sessionId && sessionId === String(student_id);
+    const isReviewer = evaluator_type === 'peer' && !!sessionId && sessionId === String(evaluator_student_id || '');
+    if (!isStaff && !isReviewee && !isReviewer) return res.status(401).json({ error: 'Not authorized.' });
     try {
         const outcome = await withConnection(async (connection) => {
             // Auto-grade scores only ever come from the real check
@@ -409,7 +441,45 @@ router.post('/student/project-evaluation', requireSelfOrStaff(), async (req, res
                 }
             }
 
+            // A peer review typed on the reviewee's own screen has to be
+            // signed by the classmate who did it -- their own password -- or
+            // witnessed by the teacher with the daily code. Before
+            // 2026-10-23 a student could pick any classmate's name and
+            // submit a "peer review" alone.
+            let confirmedBy = null;
+            if (evaluator_type === 'peer') {
+                if (isStaff) confirmedBy = 'staff';
+                else if (isReviewer) confirmedBy = 'reviewer-login';
+                else {
+                    if (tooManyConfirmFailures(sessionId)) {
+                        return { status: 429, body: { error: 'Too many wrong tries. Wait 15 minutes, or ask your teacher for the daily code.' } };
+                    }
+                    if (confirm_code && String(confirm_code).trim() === dailyOverrideCode()) {
+                        confirmedBy = 'daily-code';
+                    } else if (confirm_password) {
+                        const [[reviewer]] = await connection.execute(
+                            'SELECT password, password_hash FROM students WHERE student_id = ? LIMIT 1', [evaluator_student_id]);
+                        const hash = reviewer && (reviewer.password || reviewer.password_hash);
+                        if (hash && await bcrypt.compare(String(confirm_password), hash)) confirmedBy = 'reviewer-login';
+                    }
+                    if (!confirmedBy) {
+                        if (confirm_code || confirm_password) {
+                            noteConfirmFailure(sessionId);
+                            return { status: 403, body: { error: confirm_code ? 'That daily code is not right.' : "That password doesn't match the reviewer's account." } };
+                        }
+                        return { status: 403, body: { error: 'Your reviewer must confirm this review with their own password, or your teacher with the daily code.' } };
+                    }
+                }
+            }
+
             const result = await saveEvaluationAndAggregate(connection, { chapter_project_id, exam_id, student_id, evaluator_student_id, evaluator_type, score, max_score, rubric_json, feedback });
+            if (confirmedBy) {
+                await ensureConfirmedByColumn(connection);
+                await connection.execute(
+                    `UPDATE project_evaluations SET confirmed_by = ?
+                     WHERE chapter_project_id = ? AND exam_id = ? AND student_id = ? AND evaluator_student_id = ? AND evaluator_type = 'peer'`,
+                    [confirmedBy, chapter_project_id, exam_id, student_id, evaluator_student_id || '']);
+            }
             return { status: 200, body: { success: true, aggregate: result } };
         });
         res.status(outcome.status).json(outcome.body);
@@ -435,7 +505,17 @@ router.get('/student/project-aggregate', requireSelfOrStaff(), async (req, res) 
                  ORDER BY pe.created_at DESC`,
                 [chapter_project_id, exam_id, student_id]
             );
-            return { aggregate: aggregateRows[0] || null, evaluations: evalRows, projectExempt: isProjectExempt(student_id) };
+            // CS unit projects: what's still needed before the grade posts.
+            let gate = null;
+            if (isCsUnitProject(exam_id)) {
+                const [[posted]] = await connection.execute('SELECT COUNT(*) AS n FROM responses WHERE student_id = ? AND exam_id = ?', [student_id, exam_id]);
+                gate = {
+                    uploaded: await hasProjectUpload(connection, student_id, exam_id),
+                    peer_reviewed: !!aggregateRows[0] && aggregateRows[0].peer_score !== null,
+                    posted: Number(posted.n) > 0
+                };
+            }
+            return { aggregate: aggregateRows[0] || null, evaluations: evalRows, projectExempt: isProjectExempt(student_id), gate };
         });
         res.json(result);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch project aggregate' }); }

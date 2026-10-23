@@ -42,6 +42,7 @@ function periodGroupPrefix(period) {
 let allStudents = [];
 let allGrades = {};
 let allAssignments = {};
+let pendingProjects = new Set(); // `${studentId}::${examId}` for CS unit projects awaiting upload + peer review
 let calendarConfig = null;
 let privacyMode = false;
 let showSummaryColumns = true;
@@ -1227,6 +1228,10 @@ async function loadData(period) {
             });
         }
 
+        // CS unit projects started (file uploaded or a review submitted) but
+        // not yet graded: shown as PENDING (server/lib/csProjectGate.js).
+        pendingProjects = new Set((Array.isArray(data.pending) ? data.pending : []).map(p => `${p.student_id}::${p.exam_id}`));
+
         allGrades = {};
         if (gradesRaw && typeof gradesRaw === 'object' && !Array.isArray(gradesRaw)) {
             allGrades = gradesRaw;
@@ -1890,7 +1895,9 @@ let score = "", display = '', bg = "";
                         // is, so it stays a plain blank cell instead of a red
                         // M. Matches the row-summary calc above and
                         // js/student/dashboard.js / server/gradeCalc.js.
-                        if (!unit && !reg?.isProjectMilestone) {
+                        if (pendingProjects.has(`${s.studentId}::${key}`)) {
+                            display = '<span class="badge bg-warning text-dark px-1 shadow-sm" title="Needs an uploaded file AND a confirmed peer review before the grade posts">PENDING</span>';
+                        } else if (!unit && !reg?.isProjectMilestone) {
                             const effectiveDueDate = studentPeriodDueDate || reg?.dueDate;
                             const isPastDue = !!effectiveDueDate && new Date(effectiveDueDate + 'T00:00:00') < today;
                             if (isPastDue) {

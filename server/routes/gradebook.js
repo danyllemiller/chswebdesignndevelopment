@@ -3,6 +3,8 @@ const router = express.Router();
 const { withConnection } = require('../db');
 const { resolveCourseId, getCurrentSchoolYear, isTestingWindowOpen, requireSelfOrStaff, requireLogin } = require('../helpers');
 const { insertQuestionDetails } = require('../lib/missedQuestionsStore');
+const { dailyOverrideCode } = require('../lib/dailyCode');
+const { isCsUnitProject, syncCsProjectGrade } = require('../lib/csProjectGate');
 
 // mysql2 returns DATE columns as JS Date objects (local-timezone fields set to
 // match the stored date exactly), not strings. Reading those fields directly
@@ -413,6 +415,15 @@ router.post('/submit-exam', async (req, res) => {
             [student_id, exam_id, attemptCountRows[0].n + 1, score, effectiveTotalPoints]
         );
 
+        // A CS unit project upload (assignment-uploader.js) never writes its
+        // 0 placeholder to the gradebook: the attempt logged above is the
+        // record that a file exists, and the grade itself only posts once
+        // there's also a confirmed peer review (server/lib/csProjectGate.js).
+        if (isCsUnitProject(exam_id)) {
+            const gate = await syncCsProjectGrade(connection, student_id, exam_id);
+            return { status: 200, body: { success: true, gradePosted: gate.posted, pending: gate.reason } };
+        }
+
         const [existingRows] = await connection.execute(
             'SELECT score FROM responses WHERE student_id = ? AND exam_id = ?',
             [student_id, exam_id]
@@ -652,7 +663,19 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
                 isProjectMilestone: !!e.is_project_milestone, periodDueDates
             };
         });
-        return { students: scopedStudents, assignments: registry, grades };
+        // CS unit projects a student has started (uploaded a file or
+        // submitted a review) that have no gradebook score yet: shown as
+        // PENDING instead of blank (server/lib/csProjectGate.js).
+        const [pendingRows] = await connection.execute(
+            `SELECT DISTINCT p.student_id, p.exam_id FROM (
+                 SELECT student_id, exam_id FROM exam_attempts WHERE exam_id REGEXP '^Unit[0-9]+-Project$'
+                 UNION SELECT student_id, exam_id FROM project_grade_aggregates WHERE exam_id REGEXP '^Unit[0-9]+-Project$'
+             ) p
+             LEFT JOIN responses r ON r.student_id = p.student_id AND r.exam_id = p.exam_id
+             WHERE r.id IS NULL`);
+        const scopedSet = new Set(scopedIds.map(String));
+        const pending = pendingRows.filter(r => scopedSet.has(String(r.student_id)));
+        return { students: scopedStudents, assignments: registry, grades, pending };
         });
         res.json(result);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch gradebook' }); }
@@ -788,19 +811,6 @@ router.post('/admin/unit-prereq-override', async (req, res) => {
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save override' }); }
 });
-
-// Same deterministic per-day code as admin/daily-agenda.html's corner
-// stamp and examLogicCS.js's cooldown override (identical formula, ported
-// to Node) -- the teacher reads it off the agenda page and the student
-// types it in, no admin session needed on this device.
-function dailyOverrideCode() {
-    const d = new Date();
-    const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    const input = dateStr + 'chs-guild-2026';
-    let hash = 0;
-    for (let i = 0; i < input.length; i++) hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
-    return String(hash % 1000000).padStart(6, '0');
-}
 
 // Student-reachable (unlike /admin/unit-prereq-override): the exam page's
 // own pre-check needs the real answer, overrides included, not just the

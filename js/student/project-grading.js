@@ -156,6 +156,10 @@ async function initProjectGradingInner(container) {
     // deliverables, no source code to scan) -- the Auto-Check tab is WD-only
     // now, not just quietly unconfigured for CS like it used to be.
     const hasAutoCheck = container.dataset.course !== 'CS';
+    // CS unit projects only post to the gradebook once there's an uploaded
+    // file AND a confirmed peer review (server/lib/csProjectGate.js).
+    const isCsUnitProject = /^Unit\d+-Project$/.test(container.dataset.examId || '');
+    const PENDING_NOTE = 'Your project grade stays <strong>PENDING</strong> in the gradebook until you have <strong>uploaded your project file</strong> AND a classmate\'s <strong>peer review is confirmed</strong>. A self-assessment alone does not post a grade.';
     let rubric;
     try { rubric = JSON.parse(container.dataset.rubric); }
     catch (e) { throw new Error('Bad rubric JSON on this project page: ' + e.message); }
@@ -199,7 +203,8 @@ async function initProjectGradingInner(container) {
     // --- SELF pane ---
     const selfPane = container.querySelector('[data-pane="self"]');
     selfPane.innerHTML = `
-        <p class="text-muted mb-3">Rate your own work honestly against each part of the assignment. This becomes one-third of your project grade (averaged with a classmate's review and an automatic code check).</p>
+        <p class="text-muted mb-3">Rate your own work honestly against each part of the assignment. This is averaged with ${hasAutoCheck ? 'a classmate\'s review and an automatic code check' : 'a classmate\'s review'} to make your project grade.</p>
+        ${isCsUnitProject ? `<div class="alert alert-warning small py-2">${PENDING_NOTE}</div>` : ''}
         ${rubric.map(c => criterionRow('self', c)).join('')}
         ${metacognitionFields('self')}
         <button type="button" class="btn btn-primary fw-bold" id="btn-submit-self">Submit Self-Assessment</button>
@@ -219,7 +224,9 @@ async function initProjectGradingInner(container) {
                 body: JSON.stringify({ chapter_project_id: chapterProjectId, exam_id: examId, student_id: user.student_id, evaluator_type: 'self', score, max_score: 100, rubric_json: values, feedback })
             });
             if (!res.ok) throw new Error('Request failed');
-            statusEl.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i>Self-assessment submitted (${score}/100).</span>`;
+            const out = await res.json().catch(() => ({}));
+            const pending = out.aggregate && out.aggregate.grade_posted === false ? ` <span class="text-warning-emphasis">${escapeHtml(out.aggregate.pending_reason || 'Your grade is pending.')}</span>` : '';
+            statusEl.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i>Self-assessment submitted (${score}/100).</span>${pending}`;
         } catch (e) { statusEl.innerHTML = `<span class="text-danger">Couldn't save your self-assessment. Try again.</span>`; }
     });
 
@@ -236,7 +243,7 @@ async function initProjectGradingInner(container) {
         const res = await fetch(`/api/student/section-classmates?section_id=${encodeURIComponent(user.section_id || '')}&exclude_student_id=${encodeURIComponent(user.student_id)}`);
         const reviewers = res.ok ? await res.json() : [];
         peerPane.innerHTML = `
-            <p class="text-muted mb-3">Stay logged in on your own computer. Have your reviewer sit with you, look at your code and live site, and give you feedback out loud -- then they select their own name below and fill this out together with you.</p>
+            <p class="text-muted mb-3">Stay logged in on your own computer. Have your reviewer sit with you, look at your work, and give you feedback out loud -- then they select their own name below and fill this out together with you. <strong>Your reviewer signs it at the bottom with their own password</strong> (or your teacher enters the daily code). You can't submit a peer review by yourself.</p>
             <div class="mb-3">
                 <label class="form-label small fw-bold">Who is reviewing this project?</label>
                 <select class="form-select form-select-sm" id="peer-select">
@@ -246,10 +253,21 @@ async function initProjectGradingInner(container) {
             </div>
             ${rubric.map(c => criterionRow('peer', c)).join('')}
             ${critiqueSandwichFields('peer')}
+            <div class="border rounded p-3 bg-light mb-3">
+                <label class="form-label small fw-bold mb-1" for="peer-confirm-pass"><i class="fas fa-signature me-1"></i>Reviewer: sign this review with YOUR password</label>
+                <input type="password" class="form-control form-control-sm" id="peer-confirm-pass" autocomplete="off" placeholder="The reviewer types their own login password">
+                <div class="small text-muted mt-2">Reviewer can't sign in? <a href="#" id="peer-use-code">Have your teacher enter today's code instead</a>.</div>
+                <input type="text" inputmode="numeric" class="form-control form-control-sm mt-2 d-none" id="peer-confirm-code" autocomplete="off" placeholder="Teacher's daily code">
+            </div>
             <button type="button" class="btn btn-primary fw-bold" id="btn-submit-peer">Submit Peer Review</button>
             <div class="mt-2" id="peer-status"></div>
         `;
         wireRubricButtons(peerPane);
+        peerPane.querySelector('#peer-use-code').addEventListener('click', (ev) => {
+            ev.preventDefault();
+            peerPane.querySelector('#peer-confirm-code').classList.remove('d-none');
+            peerPane.querySelector('#peer-confirm-code').focus();
+        });
         peerPane.querySelector('#btn-submit-peer').addEventListener('click', async () => {
             const reviewerId = peerPane.querySelector('#peer-select').value;
             const statusEl = peerPane.querySelector('#peer-status');
@@ -259,13 +277,21 @@ async function initProjectGradingInner(container) {
             const feedback = readCritiqueSandwich(peerPane, 'peer');
             if (score === null) { statusEl.innerHTML = `<span class="text-danger">Rate every criterion before submitting.</span>`; return; }
             if (!feedback) { statusEl.innerHTML = `<span class="text-danger">Fill in all three parts of the Critique Sandwich before submitting.</span>`; return; }
+            const passEl = peerPane.querySelector('#peer-confirm-pass');
+            const codeEl = peerPane.querySelector('#peer-confirm-code');
+            const confirm_password = passEl.value;
+            const confirm_code = codeEl.value.trim();
+            if (!confirm_password && !confirm_code) { statusEl.innerHTML = `<span class="text-danger">Your reviewer has to sign this with their own password (or your teacher enters today's code).</span>`; return; }
             try {
                 const res2 = await fetch('/api/student/project-evaluation', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chapter_project_id: chapterProjectId, exam_id: examId, student_id: user.student_id, evaluator_student_id: reviewerId, evaluator_type: 'peer', score, max_score: 100, rubric_json: values, feedback })
+                    body: JSON.stringify({ chapter_project_id: chapterProjectId, exam_id: examId, student_id: user.student_id, evaluator_student_id: reviewerId, evaluator_type: 'peer', score, max_score: 100, rubric_json: values, feedback, confirm_password, confirm_code })
                 });
-                if (!res2.ok) throw new Error('Request failed');
-                statusEl.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i>Peer review submitted.</span>`;
+                const out = await res2.json().catch(() => ({}));
+                passEl.value = ''; codeEl.value = '';
+                if (!res2.ok) { statusEl.innerHTML = `<span class="text-danger">${escapeHtml(out.error || "Couldn't save the peer review. Try again.")}</span>`; return; }
+                const pending = out.aggregate && out.aggregate.grade_posted === false ? ` <span class="text-warning-emphasis">${escapeHtml(out.aggregate.pending_reason || '')}</span>` : '';
+                statusEl.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i>Peer review submitted and confirmed.</span>${pending}`;
             } catch (e) { statusEl.innerHTML = `<span class="text-danger">Couldn't save the peer review. Try again.</span>`; }
         });
     } catch (e) {
@@ -309,7 +335,11 @@ async function initProjectGradingInner(container) {
             const data = await res.json();
             const agg = data.aggregate;
             const evaluations = data.evaluations || [];
-            if (!agg) { resultsPane.innerHTML = `<p class="text-muted">No self-assessment, peer review, or auto-check has been submitted for you yet.</p>`; return; }
+            const gate = data.gate;
+            const gateHtml = gate ? (gate.posted
+                ? `<div class="alert alert-success small py-2"><i class="fas fa-check-circle me-1"></i>Your project grade is posted in the gradebook.</div>`
+                : `<div class="alert alert-warning small py-2"><strong>Gradebook: PENDING.</strong> Still needed: ${[!gate.uploaded && 'upload your project file in the Dropbox', !gate.peer_reviewed && 'a confirmed peer review'].filter(Boolean).join(' and ') || 'nothing; your teacher will check it'}.</div>`) : '';
+            if (!agg) { resultsPane.innerHTML = `${gateHtml}<p class="text-muted">No self-assessment, peer review, or auto-check has been submitted for you yet.</p>`; return; }
             const fmt = v => (v === null || v === undefined) ? '<span class="text-muted">not yet submitted</span>' : `${Number(v).toFixed(0)}/100`;
             const peerReviews = evaluations.filter(e => e.evaluator_type === 'peer');
             const peerReviewsHtml = peerReviews.length ? `
@@ -322,6 +352,7 @@ async function initProjectGradingInner(container) {
                 `).join('')}
             ` : '';
             resultsPane.innerHTML = `
+                ${gateHtml}
                 <table class="table table-sm">
                     <tbody>
                         <tr><th>Self-assessment</th><td>${fmt(agg.self_score)}</td></tr>
