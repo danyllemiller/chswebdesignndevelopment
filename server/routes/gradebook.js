@@ -60,17 +60,25 @@ router.get('/student/course-gradebook', requireSelfOrStaff(), async (req, res) =
                 return { status: 400, body: { error: 'Unable to resolve course for student section' } };
             }
             await ensureOnTimeColumn(connection);
+            // project_pending: a CS unit project the student has started
+            // (uploaded or reviewed) that has no grade yet -- it shows as
+            // PENDING on their grades page instead of "missing"
+            // (server/lib/csProjectGate.js).
             const [rows] = await connection.execute(
                 `SELECT e.exam_id, TRIM(e.title) AS title, e.total_points, e.course_id, e.category,
                         e.due_date, e.instructions, e.period_due_dates,
                         r.score, r.timestamp, r.on_time,
-                        (cp.exam_id IS NOT NULL) AS is_project_milestone
+                        (cp.exam_id IS NOT NULL) AS is_project_milestone,
+                        (e.exam_id REGEXP '^Unit[0-9]+-Project$' AND r.score IS NULL AND (
+                            EXISTS (SELECT 1 FROM exam_attempts ea WHERE ea.student_id = ? AND ea.exam_id = e.exam_id)
+                            OR EXISTS (SELECT 1 FROM project_grade_aggregates pga WHERE pga.student_id = ? AND pga.exam_id = e.exam_id)
+                        )) AS project_pending
                  FROM exams e
                  LEFT JOIN responses r ON e.exam_id = r.exam_id AND r.student_id = ?
                  LEFT JOIN chapter_projects cp ON cp.exam_id = e.exam_id AND cp.course_id = e.course_id
                  WHERE e.course_id = ?
                  ORDER BY e.title ASC, e.exam_id ASC`,
-                [student_id, courseCode]
+                [student_id, student_id, student_id, courseCode]
             );
             rows.forEach(r => { r.due_date = formatDbDate(r.due_date); });
             return { status: 200, body: { student_id, section_id: sectionId, course_id: courseCode, assignments: rows } };

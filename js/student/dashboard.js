@@ -197,14 +197,13 @@ function coursePanelTemplate(courseKey, sectionId) {
             </div>
         </div>
 
-        <div class="gradebook-container shadow-sm mb-4">
-            <div class="table-responsive table-responsive-gb">
-                <table class="table table-spreadsheet mb-0">
-                    <thead id="gradeHead${suffix}"></thead>
-                    <tbody id="gradeBody${suffix}">
-                        <tr><td class="p-5 text-center"><div class="spinner-border text-primary"></div></td></tr>
-                    </tbody>
-                </table>
+        <div class="card shadow-sm mb-4 border-0">
+            <div class="card-header bg-white border-bottom-0 pt-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <h6 class="fw-bold text-primary mb-0"><i class="fas fa-list-check me-2"></i>My Assignments</h6>
+                <input type="search" class="form-control form-control-sm" style="max-width: 260px;" id="gradeSearch${suffix}" placeholder="Find an assignment..." aria-label="Find an assignment">
+            </div>
+            <div class="card-body pt-2" id="gradeList${suffix}">
+                <div class="p-5 text-center"><div class="spinner-border text-primary"></div></div>
             </div>
         </div>
         ${chapterBlock}
@@ -244,6 +243,7 @@ async function renderCoursePanel(user, courseKey, sectionId) {
                     targetCourse: assignment.course_id || 'All',
                     category: assignment.category,
                     isProjectMilestone: !!assignment.is_project_milestone,
+                    projectPending: !!Number(assignment.project_pending),
                     periodDueDates: assignment.period_due_dates
                         ? (typeof assignment.period_due_dates === 'string'
                             ? JSON.parse(assignment.period_due_dates)
@@ -288,7 +288,7 @@ async function renderCoursePanel(user, courseKey, sectionId) {
 
         calculateGradeStats(keys, myGrades, registryData, courseKey);
         calculateBadges(keys, myGrades, registryData, courseKey);
-        renderGradeTable(keys, myGrades, user.student_id, registryData, studentPeriod, courseKey);
+        renderGradeList(keys, myGrades, user.student_id, registryData, studentPeriod, courseKey);
 
         if (hasCurriculumChapters(courseKey)) {
             renderProficiencyScales(keys, myGrades, user.student_id, courseKey, saData.assessments);
@@ -307,8 +307,8 @@ async function renderCoursePanel(user, courseKey, sectionId) {
         }
     } catch (e) {
         console.error(`Error loading grades for ${courseKey}:`, e);
-        const body = document.getElementById(`gradeBody-${courseKey}`);
-        if (body) body.innerHTML = `<tr><td class="p-4 text-center text-danger">Could not load this class's gradebook. Please refresh or contact your teacher.</td></tr>`;
+        const list = document.getElementById(`gradeList-${courseKey}`);
+        if (list) list.innerHTML = `<p class="p-4 text-center text-danger mb-0">Could not load this class's gradebook. Please refresh or contact your teacher.</p>`;
     }
 }
 
@@ -437,157 +437,107 @@ function calculateBadges(keys, myGrades, registryData, courseKey) {
     }
 }
 
-function renderGradeTable(keys, myGrades, studentId, registryData, studentPeriod, courseKey) {
-    const thead = document.getElementById(`gradeHead-${courseKey}`);
-    const tbody = document.getElementById(`gradeBody-${courseKey}`);
-    if (!thead || !tbody) return;
+// CS mastery exemption (same rule as js/modules/achievements.js): an 80%+
+// unit exam excuses that unit's chapter activities, so an unfinished one
+// isn't "missing."
+const CS_UNIT_CHAPTERS_FOR_LIST = { 1: [1, 2], 2: [3, 4], 3: [5, 6, 7, 8], 4: [9, 10], 5: [11, 12, 13], 6: [14, 15, 16], 7: [17, 18, 19] };
+function isCsMasteryExempt(key, myGrades, registryData, courseKey) {
+    const m = courseKey === 'CS' && key.match(/^cs_ch(\d+)_/);
+    if (!m) return false;
+    const unit = Object.keys(CS_UNIT_CHAPTERS_FOR_LIST).find(u => CS_UNIT_CHAPTERS_FOR_LIST[u].includes(Number(m[1])));
+    if (!unit) return false;
+    const exam = myGrades[`Unit${unit}-Exam`];
+    const examScore = exam ? (typeof exam === 'object' ? exam.score : exam) : null;
+    const examMax = registryData?.[`Unit${unit}-Exam`]?.maxPoints;
+    return examScore !== null && examScore !== undefined && examScore !== '' && !!examMax && (Number(examScore) / examMax) >= 0.80;
+}
 
-    let headHtml = `<tr><th class="label-cell sticky-col font-monospace px-3 py-3 assignment-header">Assignment</th>`;
+// The student's grades as a plain list (it used to be a sideways spreadsheet
+// with vertical column headers, and students couldn't find their grades).
+// Only shows what they've turned in and what's past due; assignments that
+// aren't due yet stay hidden until one of those happens (teacher request
+// 2026-10-23). Daily clock-ins fold into their own collapsed section.
+function renderGradeList(keys, myGrades, studentId, registryData, studentPeriod, courseKey) {
+    const listEl = document.getElementById(`gradeList-${courseKey}`);
+    if (!listEl) return;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const fmtDate = (ymd) => { const [, mo, d] = ymd.split('-'); return `${parseInt(mo)}/${parseInt(d)}`; };
+
+    const items = [];
     keys.forEach(key => {
-        // The real title from the exams table, not the lossy abbreviation
-        // admin/gradebook.js uses to squeeze names into its super-narrow
-        // spreadsheet columns -- that abbreviation (e.g. "The Conduct Case
-        // Studies" -> "The-Conduct") doesn't match the real assignment name
-        // shown everywhere else a student sees it (tooltips, due dates, the
-        // Digital Notebook), which is exactly what was confusing them here.
-        const displayLabel = registryData[key]?.title || abbreviateAssignmentName(key);
-        let tooltipText = key;
-        const regInfo = registryData[key];
-
-        if (regInfo) {
-            let dueDate = regInfo.dueDate || '';
-            if (regInfo.periodDueDates && regInfo.periodDueDates[studentPeriod]) dueDate = regInfo.periodDueDates[studentPeriod];
-            if (dueDate && dueDate !== '9999-99-99') {
-                const [y, m, d] = dueDate.split('-');
-                tooltipText += ` | Due: ${parseInt(m)}/${parseInt(d)}`;
-            }
-            if (regInfo.instructions) tooltipText += ` | Instructions: ${regInfo.instructions.replace(/"/g, "'")}`;
-        }
-
-        const examId = regInfo?.exam_id || key;
-        const pageLink = ASSIGNMENT_PAGE_LINKS[examId] || ASSIGNMENT_PAGE_LINKS[key];
-        const linkIcon = pageLink
-            ? `<a href="${pageLink}" target="_blank" rel="noopener" title="Go to lesson" style="color:inherit;opacity:0.7;" onclick="event.stopPropagation();"><i class="fas fa-book-open" style="font-size:0.65rem;"></i></a>`
-            : '';
-        headHtml += `<th class="header-main-blue" data-bs-toggle="tooltip" data-bs-placement="top" title="${escapeHtml(tooltipText)}">
-            <div class="h-100 d-flex flex-column align-items-center justify-content-end pb-2" style="cursor: help;">
-                <span class="vertical-text mb-2">${displayLabel}</span>
-                ${linkIcon}
-            </div>
-        </th>`;
-    });
-    headHtml += '</tr>';
-    thead.innerHTML = headHtml;
-
-    let bodyHtml = '';
-    bodyHtml += `<tr><td class="label-cell sticky-col font-monospace fw-bold text-dark bg-light" style="font-size: 0.8rem;"><i class="fas fa-calendar-day text-warning me-1"></i> Due Date</td>`;
-    keys.forEach(key => { 
-        let dateText = '-';
-        const regInfo = registryData[key];
-        if (regInfo) {
-            let dueDate = regInfo.dueDate || '';
-            if (regInfo.periodDueDates && regInfo.periodDueDates[studentPeriod]) dueDate = regInfo.periodDueDates[studentPeriod];
-            if (dueDate && dueDate !== '9999-99-99') {
-                const [y, m, d] = dueDate.split('-');
-                dateText = `${parseInt(m)}/${parseInt(d)}`;
-            }
-        }
-        bodyHtml += `<td class="text-center align-middle fw-bold text-muted bg-light border-bottom" style="font-size:0.75rem;">${dateText}</td>`; 
-    });
-    bodyHtml += `<td class="empty-cell bg-light border-bottom"></td></tr>`;
-
-    bodyHtml += `<tr><td class="label-cell sticky-col font-monospace fw-bold text-dark bg-light">Possible Points</td>`;
-    keys.forEach(key => {
-        const max = registryData?.[key]?.maxPoints || parsePts(key);
-        bodyHtml += `<td class="text-center align-middle fw-bold text-muted bg-light border-bottom">${max}</td>`;
-    });
-    bodyHtml += `<td class="empty-cell bg-light border-bottom"></td></tr>`;
-
-    bodyHtml += `<tr><td class="label-cell sticky-col font-monospace fw-bold text-primary">My Score</td>`;
-    keys.forEach(key => {
+        const reg = registryData[key] || {};
+        let due = reg.dueDate || '';
+        if (reg.periodDueDates && reg.periodDueDates[studentPeriod]) due = reg.periodDueDates[studentPeriod];
+        if (due === '9999-99-99') due = '';
         const grade = myGrades[key];
-        const isHighStakes = key.toLowerCase().includes('exam') || key.toLowerCase().includes('project') || key.toLowerCase().includes('milestone') || key.toLowerCase().includes('summative');
-        const max = registryData?.[key]?.maxPoints || parsePts(key);
-        
-        if (!grade || grade.score === "") {
-            // Red-flag a cell only once it's actually overdue with nothing
-            // turned in -- not yet due isn't "missing," it's just not due
-            // yet, and shouldn't look like a problem. Same dueDate
-            // resolution (period-specific override first) as the Due Date
-            // row above and computeGradeStats' own past-due check.
-            let dueDate = registryData?.[key]?.dueDate || '';
-            if (registryData?.[key]?.periodDueDates && registryData[key].periodDueDates[studentPeriod]) {
-                dueDate = registryData[key].periodDueDates[studentPeriod];
-            }
-            const today = new Date(); today.setHours(0, 0, 0, 0);
-            const isMissing = !!dueDate && dueDate !== '9999-99-99' && new Date(dueDate + 'T00:00:00') < today;
-            const missingClass = isMissing ? 'missing-assignment-cell' : '';
-            const missingTitle = isMissing ? 'Past due with nothing turned in' : 'Click to turn in a link or mark as done!';
+        const score = grade && typeof grade === 'object' ? grade.score : grade;
+        const hasScore = score !== undefined && score !== null && score !== '';
+        const pastDue = !!due && new Date(due + 'T00:00:00') < today;
 
-            bodyHtml += `<td class="text-center align-middle ${missingClass}">
-                <button class="btn btn-sm ${isMissing ? 'btn-outline-danger' : 'btn-outline-primary'} fw-bold px-2 py-1 shadow-sm mark-done-btn"
-                    onclick="openTurnInModal('${studentId}', '${key.replace(/'/g, "\\'")}', this)"
-                    title="${missingTitle}">
-                    <i class="fas fa-paper-plane me-1"></i> Turn In
-                </button>
-            </td>`;
-            return;
-        }
-        
-        const score = typeof grade === 'object' ? grade.score : grade;
-        const time = typeof grade === 'object' ? grade.timestamp : '';
-        const studentNote = typeof grade === 'object' && grade.studentNote ? grade.studentNote : '';
-        
-        let display;
-        let customStyle = "";
-        let dateStr = '';
-        if (time) {
-            const d = new Date(time);
-            dateStr = `${d.getMonth() + 1}/${d.getDate()}`;
-        }
+        let status;
+        if (hasScore) status = score === 'Submitted' ? 'waiting' : score === 'EX' ? 'excused' : 'graded';
+        else if (reg.projectPending) status = 'project-pending';
+        else if (isCsMasteryExempt(key, myGrades, registryData, courseKey)) return;
+        else if (pastDue) status = 'missing';
+        else return; // not due yet and not turned in: hidden
 
-        if (score === "Submitted") {
-            let noteIndicator = studentNote ? `<br><small class="text-primary text-truncate d-inline-block mt-1" style="max-width: 80px;" title="${escapeHtml(studentNote)}"><i class="fas fa-comment-dots"></i> Note attached</small>` : '';
-            display = `<span class="badge bg-warning text-dark shadow-sm px-2 py-1" style="font-size: 0.75rem;"><i class="fas fa-clock me-1"></i> Pending</span>${noteIndicator}`;
-            customStyle = "background-color: #fffbe6;";
-        } else {
-            const safeScore = (score !== undefined && score !== null) ? score : 0;
-            display = (!isHighStakes && Number(safeScore) === max) ? '<span class="check-mark">✅</span>' : `<strong>${safeScore}</strong>`;
-            if (isHighStakes && score !== "") {
-                const pct = (Number(safeScore) / max) * 100;
-                if (pct < 80) customStyle = "background-color: #FFF2CC;";
-            }
-        }
-
-        // "L" corner badge = turned in/clocked in late, on every graded (or
-        // pending) cell, not just timeclock. A TC- row uses onTime (bell-
-        // schedule-precise, set at /timeclock/save, since clock-in points
-        // roll "attempted + on-time + correct" into one total where the raw
-        // number alone can't say which point was lost); everything else
-        // compares the submission date against the assignment's own due
-        // date (period-specific first, same resolution the due-date column
-        // above already uses).
-        const isTcKey = key.startsWith('TC-');
-        let isLate = false;
-        if (typeof grade === 'object') {
-            if (isTcKey) {
-                isLate = grade.onTime === 0;
-            } else {
-                const regInfo = registryData[key];
-                let effectiveDueDate = regInfo?.dueDate || '';
-                if (regInfo?.periodDueDates && regInfo.periodDueDates[studentPeriod]) effectiveDueDate = regInfo.periodDueDates[studentPeriod];
-                const submittedDateStr = time ? String(time).split('T')[0].split(' ')[0] : null;
-                isLate = !!(effectiveDueDate && effectiveDueDate !== '9999-99-99' && submittedDateStr && submittedDateStr > effectiveDueDate);
-            }
-        }
-        if (isLate) {
-            display += `<span title="${isTcKey ? 'Clocked in late' : 'Turned in late'}" style="position:absolute;top:1px;right:2px;font-size:.6rem;font-weight:800;color:#fff;background:#dc3545;border-radius:3px;padding:0 3px;line-height:1.3;">L</span>`;
-            customStyle += 'position:relative;';
-        }
-        bodyHtml += `<td style="${customStyle}">${display} <small class="d-block text-muted opacity-75 font-monospace mt-1">${dateStr}</small></td>`;
+        const time = grade && typeof grade === 'object' ? grade.timestamp : '';
+        const turnedInYmd = time ? String(time).split('T')[0].split(' ')[0] : '';
+        const isTc = key.startsWith('TC-');
+        const isLate = status === 'graded' && (isTc ? grade.onTime === 0 : !!(due && turnedInYmd && turnedInYmd > due));
+        items.push({ key, title: reg.title || key, due, max: reg.maxPoints || parsePts(key), score, status, turnedInYmd, isLate, isTc });
     });
-    bodyHtml += `<td class="empty-cell"></td></tr>`;
-    tbody.innerHTML = bodyHtml;
+
+    const byDueDesc = (a, b) => (!a.due && !b.due) ? a.title.localeCompare(b.title) : !a.due ? 1 : !b.due ? -1 : b.due.localeCompare(a.due);
+    const missing = items.filter(i => i.status === 'missing').sort(byDueDesc);
+    const done = items.filter(i => i.status !== 'missing' && !i.isTc).sort(byDueDesc);
+    const clockIns = items.filter(i => i.status !== 'missing' && i.isTc).sort(byDueDesc);
+
+    function badgeFor(i) {
+        if (i.status === 'missing') {
+            return `<span class="badge bg-danger me-2">Missing</span>
+                <button class="btn btn-sm btn-outline-danger fw-bold mark-done-btn" onclick="openTurnInModal('${studentId}', '${i.key.replace(/'/g, "\\'")}', this)" title="Past due with nothing turned in"><i class="fas fa-paper-plane me-1"></i>Turn In</button>`;
+        }
+        if (i.status === 'waiting') return '<span class="badge bg-warning text-dark">Waiting for teacher</span>';
+        if (i.status === 'excused') return '<span class="badge bg-secondary">Excused</span>';
+        if (i.status === 'project-pending') return '<span class="badge bg-warning text-dark">PENDING</span><div class="small text-muted mt-1">Needs your upload + a confirmed peer review</div>';
+        const pct = i.max ? (Number(i.score) / i.max) * 100 : 0;
+        const color = pct >= 80 ? 'bg-success' : pct >= 60 ? 'bg-warning text-dark' : 'bg-danger';
+        return `<span class="badge ${color} fs-6">${escapeHtml(String(i.score))} / ${i.max}</span>${i.isLate ? ' <span class="badge bg-danger" title="Turned in after the due date">Late</span>' : ''}`;
+    }
+    function row(i) {
+        const pageLink = ASSIGNMENT_PAGE_LINKS[i.key];
+        const lesson = pageLink ? ` <a href="${pageLink}" target="_blank" rel="noopener" title="Go to lesson" class="text-muted"><i class="fas fa-book-open" style="font-size:.75rem;"></i></a>` : '';
+        const meta = [i.due ? `Due ${fmtDate(i.due)}` : 'No due date', `${i.max} pts`, i.turnedInYmd ? `Turned in ${fmtDate(i.turnedInYmd)}` : ''].filter(Boolean).join(' &middot; ');
+        return `<li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2 grade-item" data-search="${escapeHtml(i.title.toLowerCase())}">
+            <div class="me-auto" style="min-width: 0;">
+                <div class="fw-semibold text-dark">${escapeHtml(i.title)}${lesson}</div>
+                <div class="small text-muted">${meta}</div>
+            </div>
+            <div class="text-end">${badgeFor(i)}</div>
+        </li>`;
+    }
+
+    let html = '';
+    if (missing.length) {
+        html += `<h6 class="fw-bold text-danger mt-2"><i class="fas fa-triangle-exclamation me-1"></i>Missing: past due, not turned in (${missing.length})</h6>
+            <ul class="list-group mb-4">${missing.map(row).join('')}</ul>`;
+    }
+    html += `<h6 class="fw-bold text-success mt-2"><i class="fas fa-check-circle me-1"></i>Turned in (${done.length})</h6>`;
+    html += done.length ? `<ul class="list-group mb-3">${done.map(row).join('')}</ul>` : '<p class="text-muted small">Nothing turned in yet.</p>';
+    if (clockIns.length) {
+        html += `<details class="mb-3"><summary class="fw-bold text-primary small" style="cursor: pointer;">Daily clock-ins (${clockIns.length})</summary>
+            <ul class="list-group mt-2">${clockIns.map(row).join('')}</ul></details>`;
+    }
+    html += '<p class="small text-muted mb-0"><i class="fas fa-info-circle me-1"></i>Assignments that aren\'t due yet show up here once you turn them in or their due date passes.</p>';
+    listEl.innerHTML = html;
+
+    const search = document.getElementById(`gradeSearch-${courseKey}`);
+    if (search) search.oninput = () => {
+        const q = search.value.trim().toLowerCase();
+        listEl.querySelectorAll('.grade-item').forEach(li => { li.classList.toggle('d-none', !!q && !li.dataset.search.includes(q)); });
+        if (q) listEl.querySelectorAll('details').forEach(d => { d.open = true; });
+    };
 }
 
 function getRankName(lvl) {
