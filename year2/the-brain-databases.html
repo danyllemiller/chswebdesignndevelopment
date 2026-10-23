@@ -57,6 +57,11 @@
         
         <p>Think of a database as a website's permanent brain or its giant, super-organized digital filing cabinet. Without one, every dynamic website has amnesia—it forgets everything you did the second you close the tab. Our current Year 2 agency client, <strong>"ByteBox Arcade in Carson City,"</strong> needs a brain to store competitive high scores so players can battle each other across the internet!</p>
         
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch14 Day 1 -->
+        <div class="alert alert-info small border my-4">
+            <strong>Remember your Chapter 10 game?</strong> Reload the page and every score is gone. Why? The score lived only in a JavaScript variable, in the browser's <strong>memory</strong>, and memory resets on every reload. What's missing is a <strong>database</strong>: <strong>persistent storage</strong> that keeps data after the page closes. No memory means no <strong>accounts</strong>, no <strong>leaderboards</strong>, no <strong>saved progress</strong>, and for most apps, no business. Social media, online games, and banking all depend on one.
+        </div>
+
         <h2 class="section-title mt-5">Meet the User: "Competitive Cody"</h2>
         
         <div class="card shadow-sm border-0 bg-light mt-4 mb-5 text-start">
@@ -167,6 +172,15 @@
               </table>
               <p class="small text-success mt-2 mb-0">Cody's city is stored only once in the Users table. One update fixes everything.</p>
             </div>
+          </div>
+        </div>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch14 Day 3 -->
+        <div class="card border-info shadow-sm my-4 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">Why Copies Go Bad: The 40 Orders Problem</div>
+          <div class="card-body small">
+            <p class="mb-2">Say a store saves the customer's full address inside every order. A loyal customer has <strong>40 orders</strong>. Then they move. Now someone has to update <strong>40 copies</strong> of the same address, and if even one gets missed, the data is <strong>out of sync</strong>: two different "current" addresses for the same person, and packages go to the wrong house.</p>
+            <p class="mb-0">Normalization fixes it: store the address <strong>once</strong>, in a Customers table, with a <strong>primary key</strong> (a unique ID for each customer). Each order just stores that ID as a <strong>foreign key</strong>, a link back to the customer. Change the address in one place, and all 40 orders are instantly correct.</p>
           </div>
         </div>
 
@@ -627,6 +641,21 @@ LIMIT 10;</code></pre>
             </div>
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch14 Days 4-5 -->
+        <h5 class="fw-bold mt-4 text-primary">Asking Precise Questions</h5>
+        <p>"Every student in grade 11, sorted by last name" becomes:</p>
+        <pre class="p-3 border rounded shadow-sm mb-3 no-copy"><code>SELECT * FROM students WHERE grade = 11 ORDER BY last_name;</code></pre>
+        <p><strong>Aggregate functions</strong> calculate a summary value from many rows: <code>COUNT()</code> (how many), <code>SUM()</code> (total), <code>AVG()</code> (average), <code>MIN()</code> and <code>MAX()</code> (lowest and highest). Add <code>GROUP BY</code> to get one summary per group:</p>
+        <pre class="p-3 border rounded shadow-sm mb-3 no-copy"><code>-- Each player's best score and how many games they've played
+SELECT player_id, MAX(score) AS best, COUNT(*) AS games
+FROM scores
+GROUP BY player_id;</code></pre>
+        <div class="alert alert-danger small border-danger border mb-4">
+          <strong>The SELECT-first habit:</strong> run <code>DELETE FROM users</code> with no <code>WHERE</code> clause and you just deleted <strong>every row</strong>. The one clause you must never forget on a DELETE or UPDATE is <code>WHERE</code>. Professionals protect themselves by writing the <code>SELECT</code> first with the exact same <code>WHERE</code>, checking that the <strong>row count</strong> is what they expect, and only then changing <code>SELECT *</code> to <code>DELETE</code> or <code>UPDATE</code>:
+          <pre class="p-2 border rounded mt-2 mb-0 bg-white no-copy"><code>SELECT * FROM users WHERE id = 5;   -- 1 row? good.
+DELETE FROM users WHERE id = 5;     -- now delete exactly that row</code></pre>
+        </div>
+
         <!-- WALKTHROUGH 3: SQL Practice -->
         <h3 class="section-title d-flex align-items-center mt-5 text-primary">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2 text-primary"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
@@ -973,6 +1002,23 @@ WHERE id = 101;
           <div class="card-body small">
             <p class="mb-2">A startup asks your agency to build a user database. They want to collect name, email, birth date, home address, and political party affiliation.</p>
             <p class="mb-0">Which fields would you push back on under the <strong>Data Minimization Principle</strong>, and why?</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch14 Day 7 -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-12">
+        <div class="card border-info shadow-sm mx-auto text-start" style="max-width: 900px;">
+          <div class="card-header bg-site-secondary fw-bold text-info">The Safest Data Is the Data You Never Collect</div>
+          <div class="card-body small">
+            <p class="mb-2">Every field on a sign-up form is data you must protect, and data you can lose in a breach. A fictional gym's first draft of a sign-up form asks for: name, email, phone, home address, birthday, Social Security number, driver's license number, and emergency contact. Which fields does the gym actually <em>need</em>?</p>
+            <ul class="mb-2">
+              <li><strong>Keep:</strong> name, email (or phone), and an emergency contact (a real safety need at a gym).</li>
+              <li><strong>Cut:</strong> Social Security number and driver's license number (no business need, and a breach would enable identity theft); full birthday (ask "Are you 18 or older?" instead); home address (unless they mail something).</li>
+            </ul>
+            <p class="mb-0">Refusing to collect a field is a <strong>security decision</strong>: you can't leak data you never stored. <strong>localStorage vs. an external database:</strong> localStorage keeps small, non-sensitive data on <em>one</em> browser (a theme setting, a high score on that device); an external database keeps shared, permanent data on a server that every device can reach (accounts, a real leaderboard).</p>
           </div>
         </div>
       </div>
