@@ -451,22 +451,33 @@ router.post('/student/project-evaluation', async (req, res) => {
                 if (isStaff) confirmedBy = 'staff';
                 else if (isReviewer) confirmedBy = 'reviewer-login';
                 else {
-                    if (tooManyConfirmFailures(sessionId)) {
-                        return { status: 429, body: { error: 'Too many wrong tries. Wait 15 minutes, or ask your teacher for the daily code.' } };
-                    }
-                    if (confirm_code && String(confirm_code).trim() === dailyOverrideCode()) {
-                        confirmedBy = 'daily-code';
+                    // Separate try limits: a reviewer's wrong passwords must
+                    // never lock out the teacher's daily code (they did at
+                    // first: Liam/Isaac, 2026-10-23), and the 6-digit code
+                    // gets its own limit so it can't be guessed.
+                    const code = String(confirm_code || '').trim();
+                    if (code) {
+                        if (tooManyConfirmFailures(`${sessionId}:code`)) {
+                            return { status: 429, body: { error: 'Too many wrong codes. Wait 15 minutes and try again.' } };
+                        }
+                        if (code === dailyOverrideCode()) confirmedBy = 'daily-code';
+                        else {
+                            noteConfirmFailure(`${sessionId}:code`);
+                            return { status: 403, body: { error: 'That daily code is not right.' } };
+                        }
                     } else if (confirm_password) {
+                        if (tooManyConfirmFailures(`${sessionId}:pw`)) {
+                            return { status: 429, body: { error: 'Too many wrong passwords. Have your teacher enter today\'s code instead, or wait 15 minutes.' } };
+                        }
                         const [[reviewer]] = await connection.execute(
                             'SELECT password, password_hash FROM students WHERE student_id = ? LIMIT 1', [evaluator_student_id]);
                         const hash = reviewer && (reviewer.password || reviewer.password_hash);
                         if (hash && await bcrypt.compare(String(confirm_password), hash)) confirmedBy = 'reviewer-login';
-                    }
-                    if (!confirmedBy) {
-                        if (confirm_code || confirm_password) {
-                            noteConfirmFailure(sessionId);
-                            return { status: 403, body: { error: confirm_code ? 'That daily code is not right.' : "That password doesn't match the reviewer's account." } };
+                        else {
+                            noteConfirmFailure(`${sessionId}:pw`);
+                            return { status: 403, body: { error: "That password doesn't match the reviewer's account. Make sure the box was empty before they typed (the browser may have filled in a saved password), or have your teacher enter today's code." } };
                         }
+                    } else {
                         return { status: 403, body: { error: 'Your reviewer must confirm this review with their own password, or your teacher with the daily code.' } };
                     }
                 }
