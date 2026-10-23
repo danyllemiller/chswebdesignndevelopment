@@ -203,6 +203,20 @@
       </div>
     </div>
 
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch11 Day 1 -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h5 class="fw-bold mt-0 text-primary">What Happened to Dan's Three Days of Work</h5>
+        <p>During Dan's first month, he and a senior developer both edited the same homepage file in the agency's shared Google Drive folder. The senior developer saved last, and <strong>three days of Dan's work were gone</strong>: no history, no undo, nothing to go back to. That is exactly the disaster version control prevents. With Git, every commit is a saved snapshot in the project's <strong>history</strong>, so nothing is ever silently thrown away. And when two people's changes meet, Git <strong>merges</strong> them automatically, or flags a merge conflict so a human decides, instead of letting the last person to save overwrite everyone else.</p>
+        <h5 class="fw-bold mt-4 text-primary">Local vs. Remote</h5>
+        <ul class="small mb-0 bg-light p-3 rounded border shadow-sm text-start">
+            <li class="mb-2"><strong>Local repository:</strong> the copy of the project on <em>your</em> computer. You work and commit here, even with no Wi-Fi.</li>
+            <li class="mb-2"><strong>Remote repository:</strong> the copy on GitHub (Git nicknames it <code>origin</code>). It is the team's shared copy and your off-site backup.</li>
+            <li class="mb-0"><strong>Keeping them in sync:</strong> <code>git push</code> sends your commits from local to remote; <code>git pull</code> brings your team's commits from remote to local. The live website on a server is a remote copy too, so your local folder structure and file names must match it exactly, or links break the moment you upload.</li>
+        </ul>
+      </div>
+    </div>
+
     <!-- SECTION 2: GIT VS GITHUB -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
@@ -244,13 +258,16 @@
             <li class="mb-2"><span class="text-warning">cd [folder_name]</span> : "Change Directory" (Opens and moves you inside that folder).</li>
             <li class="mb-2"><span class="text-warning">cd ..</span> : Moves you up/backward one folder.</li>
             <li class="mb-0"><span class="text-warning">mkdir [folder_name]</span> : "Make Directory" (Creates a new folder).</li>
+            <li class="mb-0 mt-2"><span class="text-warning">touch [file_name]</span> : Creates a new, empty file, like <span class="text-warning">touch index.html</span>. (Works in the Mac Terminal and Git Bash.)</li>
           </ul>
           
           <p class="mb-2 text-info fw-bold">// 2. The Git Workflow Commands</p>
           <ul class="list-unstyled mb-0 ms-3">
             <li class="mb-2"><span class="text-warning">git init</span> : Turns your current normal folder into a tracked Git repository.</li>
             <li class="mb-2"><span class="text-warning">git add .</span> : Stages all your changed files, moving them to the "Loading Dock" to be saved.</li>
+            <li class="mb-2 text-info">// The "Loading Dock" is officially called the <strong>Staging Area</strong>: the list of changes that will go into your next commit.</li>
             <li class="mb-2"><span class="text-warning">git commit -m "Message"</span> : Takes the permanent snapshot of your staged files.</li>
+            <li class="mb-2 text-info">// Each commit is a permanent, honest record of your progress, saved to the <strong>Repository</strong>.</li>
             <li class="mb-0"><span class="text-warning">git push -u origin main</span> : Uploads your local commits to your remote GitHub cloud repository.</li>
           </ul>
         </div>
@@ -337,6 +354,19 @@
                 </div>
             </div>
         </div>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch11 Days 2-3 -->
+        <h3 class="section-title mt-5 text-primary">Pull Requests: How a Team Merges Work</h3>
+        <p>On a real agency team, nobody pushes straight to <code>main</code>. Why branch instead of editing main directly? <strong>Main stays working while you experiment.</strong> Instead, every change takes this path:</p>
+        <ol class="small mb-3 bg-light p-3 ps-4 rounded border shadow-sm text-start">
+            <li class="mb-2"><strong>Branch:</strong> make your own timeline: <code>git switch -c feature/menu</code></li>
+            <li class="mb-2"><strong>Change and commit</strong> on that branch, as many times as you need.</li>
+            <li class="mb-2"><strong>Push the branch</strong> to GitHub: <code>git push origin feature/menu</code></li>
+            <li class="mb-2"><strong>Open a Pull Request (PR)</strong> on GitHub: a request asking your team to review your branch and pull it into <code>main</code>.</li>
+            <li class="mb-2"><strong>Review:</strong> a teammate reads the changes, comments, and approves (or asks for fixes).</li>
+            <li class="mb-0"><strong>Merge:</strong> the approved branch is merged into <code>main</code>. If both branches changed the same line, you resolve the merge conflict first.</li>
+        </ol>
+        <p class="small mb-4">A pull request is also a written record of <em>why</em> a change was made and who approved it. That is how an agency knows exactly when a bug entered the client's code.</p>
 
         <!-- LAB 1 CARD -->
         <div class="card border-success shadow-sm my-4 text-start">
@@ -432,6 +462,11 @@
           </tbody>
         </table>
         <p class="small text-muted border-start border-3 border-primary px-3 mb-0">Why does Linux dominate web hosting? It's free (no per-server license fee), extremely stable under heavy traffic, and has a massive open-source community actively patching security holes — exactly what an agency needs when hosting dozens of client sites cost-effectively.</p>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch11 Day 4 -->
+        <div class="alert alert-info small border mt-3 mb-0">
+            <strong>Why the server OS matters to your file paths:</strong> Linux is <strong>case-sensitive</strong>. To a Linux server, <code>About.html</code> and <code>about.html</code> are two different files, so a link to <code>images/Logo.png</code> breaks if the file is really named <code>logo.png</code>, even though it worked fine on your Windows laptop or Mac (which ignore capital letters by default). That is why the agency rule is all-lowercase file names.
+        </div>
 
         <h5 class="fw-bold mt-5 text-primary" id="compare-cloud-platforms">The Big Three: Meet the Cloud Giants</h5>
         <p>Three gigantic companies control the vast majority of the world's cloud computing infrastructure. When companies like Netflix, Spotify, or Fortnite need servers, they rent them from these Big Three.</p>
@@ -535,6 +570,17 @@
         <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
           <strong>Trap — Where Everyone Gets Ambushed:</strong> Choosing the cheapest host purely on sticker price, without checking the uptime SLA or what happens when something breaks. A $2/month host with no real support can cost a client far more in lost sales during an outage than a slightly pricier, reliable host ever would.
         </div>
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch11 Day 5 -->
+        <h5 class="fw-bold mt-4 text-primary">Same Price, Very Different Plans</h5>
+        <p>Two hosting plans can cost exactly the same and still be very different. Compare five things: <strong>bandwidth</strong> (how much traffic before you're throttled or charged), <strong>storage</strong>, <strong>SSL</strong> (included or extra?), <strong>backups</strong> (automatic? how often? can you restore them yourself?), and <strong>support windows</strong> (24/7, or business hours only?). For most clients, <strong>backups and support matter most</strong>: they decide how fast a broken site comes back.</p>
+        <h5 class="fw-bold mt-4 text-primary">The Hosting Proposal</h5>
+        <p>A <strong>hosting proposal</strong> (also called an infrastructure proposal) is the document where you recommend hosting to a client. It has three parts:</p>
+        <ul class="small mb-4 bg-light p-3 rounded border shadow-sm text-start">
+            <li class="mb-2"><strong>Recommendation:</strong> which host and which plan, and why it fits this client's traffic, budget, and skills.</li>
+            <li class="mb-2"><strong>Costs:</strong> monthly and yearly, plus extras like the domain name, SSL, or backups.</li>
+            <li class="mb-0"><strong>Risks:</strong> what could go wrong (outages, traffic spikes, an expired certificate) and how the plan handles it.</li>
+        </ul>
+
         <div class="card border-secondary shadow-sm mb-0">
           <div class="card-header bg-light fw-bold">Quick Check</div>
           <div class="card-body small">
@@ -576,6 +622,21 @@
               <p class="mt-1 mb-1">This is the easiest model, designed for end-users, where you simply use a completed piece of software online in your browser. Google Docs and Netflix are examples of which service model? <strong>SaaS</strong>. It is the "Dine-In Restaurant" where you just sit down and eat.</p>
             </li>
         </ul>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch11 Day 4 -->
+        <h5 class="fw-bold mt-4 text-primary">The Whole Pizza Menu (Plus Doing It Yourself)</h5>
+        <p>In the classic version of this analogy, <strong>PaaS is pizza Delivery</strong>: the pizzeria makes and bakes it, and you just set the table (your code). There is also a fourth option: <strong>on-premise hosting</strong>, where a business owns and runs its own servers on its own property.</p>
+        <div class="table-responsive">
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-4 text-start">
+            <thead class="table-light"><tr><th>Model</th><th>Pizza version</th><th>You handle</th><th>The provider handles</th></tr></thead>
+            <tbody>
+                <tr><td><strong>On-premise</strong></td><td>Homemade</td><td>Everything: the building, hardware, OS, software, and updates</td><td>Nothing</td></tr>
+                <tr><td><strong>IaaS</strong></td><td>Take-and-Bake</td><td>The OS, software, and your site</td><td>Hardware, network, the data center</td></tr>
+                <tr><td><strong>PaaS</strong></td><td>Delivery</td><td>Just your code</td><td>Hardware, OS, runtime, security patches</td></tr>
+                <tr><td><strong>SaaS</strong></td><td>Dine-In</td><td>Just use it</td><td>Everything (Google Docs, Netflix)</td></tr>
+            </tbody>
+        </table>
+        </div>
 
         <h2 class="section-title mt-5">The Deployment Models: Where Your Client's Cloud Lives</h2>
         <p>Beyond the level of service, the agency must also choose where the cloud physically resides.</p>
@@ -898,6 +959,27 @@ MIT License — Copyright (c) 2026 CHS Web Design Agency</code></pre>
             <li class="mb-0"><strong>1</strong> copy stored off-site — somewhere physically or geographically separate, so a single disaster (fire, hardware failure, ransomware) can't wipe out every copy at once.</li>
         </ul>
         <p>For a client site, a backup plan typically specifies: automated <strong>daily</strong> database backups, a <strong>weekly</strong> full-site snapshot (files + database), and a defined <strong>retention window</strong> (e.g., keep the last 30 days of backups before old ones roll off).</p>
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch11 Day 3 -->
+        <p><strong>What actually gets lost when a laptop dies?</strong> Your <strong>files</strong>, your <strong>history</strong> (any commits you never pushed), and your <strong>settings</strong> (installed tools, editor setup, saved logins). Anything that lived only on that laptop is gone.</p>
+        <div class="table-responsive">
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-3 text-start">
+            <thead class="table-light"><tr><th></th><th>Local backup (external drive, second computer)</th><th>Cloud backup (Google Drive, a host's backups, cloud storage)</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Strengths</strong></td><td>Fast to back up and restore; works without internet; one-time cost</td><td>Off-site, so it survives a fire, flood, or theft; automatic; reachable from anywhere</td></tr>
+                <tr><td><strong>Weaknesses</strong></td><td>Lost in the same disaster as the original; easy to forget</td><td>Needs internet; monthly cost; slow to restore large files</td></tr>
+            </tbody>
+        </table>
+        </div>
+        <p class="small">Which should you recommend to a client? <strong>Both.</strong> Local for speed, cloud for safety: that is the 3-2-1 Rule in action.</p>
+        <p class="fw-bold mb-1">Writing the procedure a client can follow:</p>
+        <ol class="small mb-4">
+            <li class="mb-1"><strong>List exactly what gets backed up:</strong> the database, uploaded images, site files, and server settings. (This is always step 1.)</li>
+            <li class="mb-1"><strong>Set the schedule:</strong> automatic daily database backups and a weekly full-site snapshot.</li>
+            <li class="mb-1"><strong>Choose where the copies go:</strong> one cloud copy off-site, one local copy.</li>
+            <li class="mb-1"><strong>Name who is responsible</strong> and how they will find out if a backup fails.</li>
+            <li class="mb-0"><strong>Test a restore</strong> once a month.</li>
+        </ol>
+
         <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
           <strong>Trap — Where Everyone Gets Ambushed:</strong> Setting up automated backups and never actually testing a restore. A backup file that silently fails to save correctly — or that you've never practiced restoring from — is unverified, and you won't find out it's broken until the exact moment you desperately need it.
         </div>
