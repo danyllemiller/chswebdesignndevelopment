@@ -257,7 +257,37 @@ async function planCourse(connection, course, { includePast = false } = {}) {
         if (same) continue;
         plan.push({ exam_id: it.exam_id, title: it.title, oldDue, oldPdd: oldPdd || null, newDue, newPdd, perTrack, rule });
     }
+    if (!ctx.cfg.unitBased) keepLabOrder(ctx, plan);
     return { course, cfg: ctx.cfg, plan, skipped };
+}
+
+// Jotability sometimes drops or reorders lesson days (2026-10-23: WD2 Ch12
+// Days 3-6 missing, Ch14 Day 6 before Day 2), which can put Lab 4 before
+// Lab 1. Within each chapter, a lab is never due before an earlier-numbered
+// lab, and the project and exam are never due before the last lab.
+function keepLabOrder(ctx, plan) {
+    const byId = new Map(plan.map(p => [p.exam_id, p]));
+    const dueOf = it => (byId.get(it.exam_id) || {}).newDue || ymd(it.due_date);
+    const chapters = {};
+    ctx.items.forEach(it => {
+        const m = it.exam_id.match(/^ch(\d+)_(lab(\d+)|milestone)/i) || it.exam_id.match(/^ch(\d+)-(exam)$/i);
+        if (!m || !it.due_date) return;
+        (chapters[m[1]] = chapters[m[1]] || []).push({ it, n: m[3] ? Number(m[3]) : (/milestone/i.test(m[2]) ? 900 : 901) });
+    });
+    Object.values(chapters).forEach(list => {
+        let floor = null;
+        list.sort((a, b) => a.n - b.n).forEach(({ it }) => {
+            const d = dueOf(it);
+            if (floor && d < floor) {
+                const p = byId.get(it.exam_id) || (() => {
+                    const np = { exam_id: it.exam_id, title: it.title, oldDue: ymd(it.due_date), oldPdd: null, newDue: floor, newPdd: null, perTrack: { main: floor }, rule: 'keep-lab-order' };
+                    plan.push(np); byId.set(it.exam_id, np); return np;
+                })();
+                p.newDue = floor; p.perTrack = { main: floor }; p.rule = 'keep-lab-order';
+            }
+            floor = floor && floor > dueOf(it) ? floor : dueOf(it);
+        });
+    });
 }
 
 async function applyPlan(connection, result) {
