@@ -606,11 +606,16 @@ router.get('/student/cs-chapter-activities', requireSelfOrStaff(), async (req, r
             // server/routes/timeclock.js's getCurrentChapter() already uses for
             // due-date resolution).
             const excludePlaceholders = RETIRED_CS_ACTIVITY_IDS.map(() => '?').join(', ');
-            const [rows] = await connection.execute(
+            const query = (course) => connection.execute(
                 `SELECT exam_id, title, total_points, due_date FROM exams
                  WHERE exam_id REGEXP ? AND course_id = ? AND exam_id NOT IN (${excludePlaceholders}) ORDER BY exam_id`,
-                [`^cs_ch${chapterNum}_`, courseId, ...RETIRED_CS_ACTIVITY_IDS]
-            );
+                [`^cs_ch${chapterNum}_`, course, ...RETIRED_CS_ACTIVITY_IDS]
+            ).then(([r]) => r);
+            let rows = await query(courseId);
+            // The teacher's own account (section "Teacher", course 99999999)
+            // and anyone else outside a CS section got an empty list on every
+            // chapter -- the activities only exist under the CS course.
+            if (rows.length === 0 && courseId !== '10003GS') rows = await query('10003GS');
             return rows;
         });
         res.json({ activities: rows });
