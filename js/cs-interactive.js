@@ -679,9 +679,26 @@ if (!username || !studentId) {
         return;
     }
 
+    // "Not linked to the roster" is only true for a 404. A 401 means the login
+    // expired (send them to log in), and a 5xx or network error is usually a
+    // server restart or a Wi-Fi blip, so try again a few times before saying
+    // anything (2026-10-23: a student saw "not linked to the roster" for an
+    // expired login and thought she'd been dropped from the class).
+    let profileRes = null;
+    for (let attempt = 0; attempt < 4; attempt++) {
+        try {
+            profileRes = await fetch(`/api/student/profile?username=${encodeURIComponent(username)}`);
+            if (profileRes.ok || profileRes.status === 401 || profileRes.status === 404) break;
+        } catch (e) { profileRes = null; }
+        await new Promise(r => setTimeout(r, 2000));
+    }
+    if (profileRes && profileRes.status === 401) {
+        localStorage.removeItem('user');
+        window.location.replace("/login.html?redirect=" + encodeURIComponent(window.location.pathname));
+        return;
+    }
     try {
-        const profileRes = await fetch(`/api/student/profile?username=${encodeURIComponent(username)}`);
-        if (!profileRes.ok) throw new Error('Profile not found');
+        if (!profileRes || !profileRes.ok) throw new Error(profileRes ? `HTTP ${profileRes.status}` : 'network');
         currentStudentData = await profileRes.json();
         currentStudentData.student_id = currentStudentData.student_id || studentId;
 
@@ -691,10 +708,15 @@ if (!username || !studentId) {
         setupOverwriteModal();
         initCSInteractive(currentStudentData);
     } catch(e) {
-        document.getElementById('cs-interactive-pane').innerHTML = `<div class="container text-center p-5 mt-5 shadow border rounded bg-white">
-            <h2 class="text-danger gochi">Profile Not Linked</h2>
-            <p>Your account is not linked to the roster.</p>
-            <a href="/logout.html" class="btn btn-outline-danger mt-3">Log Out</a></div>`;
+        document.getElementById('cs-interactive-pane').innerHTML = profileRes && profileRes.status === 404
+            ? `<div class="container text-center p-5 mt-5 shadow border rounded bg-white">
+                <h2 class="text-danger gochi">Profile Not Linked</h2>
+                <p>Your account is not linked to the roster. Tell your teacher your username: <strong>${String(username).replace(/[<>&"']/g, '')}</strong></p>
+                <a href="/logout.html" class="btn btn-outline-danger mt-3">Log Out</a></div>`
+            : `<div class="container text-center p-5 mt-5 shadow border rounded bg-white">
+                <h2 class="text-warning gochi">The site didn't answer</h2>
+                <p>This is usually a Wi-Fi hiccup or the site restarting. Wait a few seconds, then press Try Again.</p>
+                <button type="button" class="btn btn-primary fw-bold mt-2" onclick="window.location.reload()">Try Again</button></div>`;
     }
 })();
 

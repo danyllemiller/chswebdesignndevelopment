@@ -115,6 +115,7 @@ async function executeAuthCheck() {
     // self-healing on the student's very next page load -- no logout, no
     // admin intervention, no re-report needed.
     const isTeacherAccount = user && (user.role === 'admin' || user.section_id === 'Teacher');
+    let loginExpired = false;
     if (user && user.username && !isTeacherAccount) {
         try {
             const res = await fetch(`/api/student/profile?username=${encodeURIComponent(user.username)}`);
@@ -125,6 +126,8 @@ async function executeAuthCheck() {
                 user.course_id = fresh.course_id || null;
                 user.course_name = fresh.course_name || null;
                 localStorage.setItem('user', JSON.stringify(user));
+            } else if (res.status === 401) {
+                loginExpired = true;
             }
         } catch (e) {
             console.error('[auth-guard] Could not refresh profile from server, using cached copy:', e);
@@ -158,6 +161,17 @@ async function executeAuthCheck() {
         '/proficiencyscales/'
     ];
     const isPublic = publicPages.some(p => currentPath.includes(p.toLowerCase())) || currentPath === '/' || currentPath === '';
+
+    // The browser still remembers the student, but the server's login for it
+    // is gone (it lasts 30 days, or they signed in as someone else on this
+    // device). Every page then failed in its own way; the CS Workspace said
+    // "Your account is not linked to the roster," and a student believed
+    // she'd been dropped (2026-10-23). Treat it as logged out: protected
+    // pages go to the login page below, public pages just show logged out.
+    if (loginExpired) {
+        localStorage.removeItem('user');
+        user = null;
+    }
 
     if (!user) {
         console.log('[auth-guard] No user found in localStorage. isPublic=', isPublic, 'currentPath=', currentPath);
