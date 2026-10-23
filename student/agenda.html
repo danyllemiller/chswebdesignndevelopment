@@ -80,7 +80,10 @@
         ${nav(data)}
       </div>`;
     if (!data.isClassDay || !data.content) {
-      box.innerHTML = head + `<div class="agenda-body"><p class="mb-0 text-muted">No class on this day.${data.nextDate ? ` The next class is <strong>${longDate(data.nextDate)}</strong>.` : ''}</p></div>`;
+      const msg = data.schoolDay
+        ? `Your class meets this day, but your teacher hasn't posted the agenda for it yet.${data.nextDate ? ` The next posted agenda is <strong>${longDate(data.nextDate)}</strong>.` : ''}`
+        : `No class on this day.${data.nextDate ? ` The next class is <strong>${longDate(data.nextDate)}</strong>.` : ''}`;
+      box.innerHTML = head + `<div class="agenda-body"><p class="mb-0 text-muted">${msg}</p></div>`;
       return;
     }
     const c = data.content;

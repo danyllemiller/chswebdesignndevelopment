@@ -154,6 +154,10 @@ router.get('/agenda/student', requireLogin, async (req, res) => {
             const today = ymd(new Date());
             const want = /^\d{4}-\d{2}-\d{2}$/.test(String(req.query.date || '')) ? String(req.query.date) : today;
             const hit = days.find(d => d.date === want);
+            // Whether the school calendar says this class meets that day, so a day
+            // with nothing posted doesn't tell students there's no class.
+            const meetsOn = MEETING_DAY_TYPES[pick.course] && MEETING_DAY_TYPES[pick.course][pick.track];
+            const schoolDay = meetsOn ? meetsOn.includes(loadDayTypes()[want]) : null;
             const prev = [...days].reverse().find(d => d.date < want) || null;
             const next = days.find(d => d.date > want) || null;
             let content = null;
@@ -174,7 +178,7 @@ router.get('/agenda/student', requireLogin, async (req, res) => {
                 }
             }
             return { options, course: pick.course, track: pick.track, label: pick.label, date: want, today,
-                     isClassDay: !!hit, content, prevDate: prev && prev.date, nextDate: next && next.date };
+                     isClassDay: !!hit, schoolDay, content, prevDate: prev && prev.date, nextDate: next && next.date };
         });
         res.json(out);
     } catch (err) { console.error('[agenda] student view error:', err); res.status(500).json({ error: 'Failed to load the agenda.' }); }
@@ -210,7 +214,13 @@ router.post('/admin/save-agenda-content', async (req, res) => {
 const crypto = require('crypto');
 const { syncDueDates, AUTO_ENABLED: DUE_DATE_SYNC_ON } = require('../jobs/dueDateSync');
 const SYNC_COURSES = new Set(['wd1', 'wd2', 'cs_s1']);
-const MEETING_DAY_TYPES = { wd1: { main: ['A', 'A_MIN', 'C'] } };
+// The school-calendar day types (special-dates.csv) each course/track meets on.
+// WD2 and Comp Sci joined WD1 on 2026-10-23, after Jotability put WD2 on A days.
+const MEETING_DAY_TYPES = {
+    wd1: { main: ['A', 'A_MIN', 'C'] },
+    wd2: { main: ['B', 'B_MIN', 'C'] },
+    cs_s1: { A: ['A', 'A_MIN', 'C'], B: ['B', 'B_MIN', 'C'] },
+};
 const SPECIAL_DATES_CSV = require('path').join(__dirname, '../../special-dates.csv');
 function loadDayTypes() {
     const types = {};
@@ -266,19 +276,32 @@ router.get('/agenda/sync/outline', requireSyncKey, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to read the agenda outline' }); }
 });
 
-// Dates this course/track does NOT meet on the school calendar (special-dates.csv),
-// so Jotability can leave them out before it spreads lessons over the days
-// (2026-10-23: three B-day Mondays in Jotability's calendar made the whole WD1
-// send fail the check below). Courses without a meeting-day rule: none.
-router.get('/agenda/sync/meeting-days', requireSyncKey, (req, res) => {
+// What Jotability needs before it builds a course/track's send:
+//   meeting / not_meeting -- the dates it does and doesn't meet on the school
+//     calendar (special-dates.csv), so it leaves out the rest before it spreads
+//     lessons over the days (2026-10-23: three B-day Mondays in Jotability's
+//     calendar made the whole WD1 send fail the check below);
+//   shown -- the lessons on each day before today. A re-send keeps those days,
+//     so Jotability picks up after them instead of re-spreading the whole
+//     chapter (2026-10-23: WD1 never got Ch3 Day 4 that way).
+router.get('/agenda/sync/meeting-days', requireSyncKey, async (req, res) => {
     const course = String(req.query.course || '').trim();
     const track = String(req.query.track || 'main').trim();
     if (!SYNC_COURSES.has(course) || !/^(main|A|B)$/.test(track)) return res.status(400).json({ error: 'course and track are required' });
-    const allowed = MEETING_DAY_TYPES[course] && MEETING_DAY_TYPES[course][track];
-    if (!allowed) return res.json({ course, track, meets_on: null, not_meeting: [] });
-    const types = loadDayTypes();
-    const notMeeting = Object.keys(types).filter(d => !allowed.includes(types[d])).sort();
-    res.json({ course, track, meets_on: allowed, not_meeting: notMeeting });
+    const today = ymd(new Date());
+    try {
+        const shown = await withConnection(async (connection) => {
+            await connection.execute(AGENDA_DAYS_DDL);
+            await ensureAlsoColumn(connection);
+            const [r] = await connection.execute('SELECT event_date, block_num, also_blocks FROM agenda_days WHERE course = ? AND track = ? AND event_date < ? ORDER BY event_date', [course, track, today]);
+            return r.map(x => ({ date: ymd(x.event_date), blocks: [x.block_num, ...parseAlso(x.also_blocks)] }));
+        });
+        const allowed = MEETING_DAY_TYPES[course] && MEETING_DAY_TYPES[course][track];
+        if (!allowed) return res.json({ course, track, today, shown, meets_on: null, meeting: null, not_meeting: [] });
+        const types = loadDayTypes(), dates = Object.keys(types).sort();
+        res.json({ course, track, today, shown, meets_on: allowed,
+                   meeting: dates.filter(d => allowed.includes(types[d])), not_meeting: dates.filter(d => !allowed.includes(types[d])) });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to read the class days' }); }
 });
 
 // Replace one course/track's dates. Body: { course, track, days: [{ date: 'YYYY-MM-DD', block: N, also: [N, ...] }] }
@@ -296,9 +319,10 @@ router.post('/agenda/sync/schedule', requireSyncKey, async (req, res) => {
         clean.push([date, block, also]);
     }
     if (clean.length > 1000) return res.status(400).json({ error: 'Too many days' });
-    // WD1 (A1) only meets on A, A_MIN and C days (special-dates.csv). A sync
-    // that puts it on a B/OFF day is a calendar mismatch on the sending side --
-    // refuse the whole send and name the dates, rather than save wrong slides.
+    // Each class meets only on its day types (MEETING_DAY_TYPES; WD1 is A1, so
+    // A, A_MIN and C). A sync that puts it on another day is a calendar mismatch
+    // on the sending side -- refuse the whole send and name the dates, rather
+    // than save wrong slides.
     const allowed = MEETING_DAY_TYPES[course] && MEETING_DAY_TYPES[course][track];
     if (allowed) {
         const types = loadDayTypes();
