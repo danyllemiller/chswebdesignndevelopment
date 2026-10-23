@@ -159,6 +159,9 @@ async function initProjectGradingInner(container) {
     // CS unit projects only post to the gradebook once there's an uploaded
     // file AND a confirmed peer review (server/lib/csProjectGate.js).
     const isCsUnitProject = /^Unit\d+-Project$/.test(container.dataset.examId || '');
+    // "Unit4-Project" -> "Unit 4 Project", shown so a reviewer can't review
+    // the wrong unit by mistake (it happened: a Unit 4 review landed on Unit 5).
+    const projectLabel = (container.dataset.examId || 'project').replace(/^Unit(\d+)-Project$/, 'Unit $1 Project');
     const PENDING_NOTE = 'Your project grade stays <strong>PENDING</strong> in the gradebook until you have <strong>uploaded your project file</strong> AND a classmate\'s <strong>peer review is confirmed</strong>. A self-assessment alone does not post a grade.';
     let rubric;
     try { rubric = JSON.parse(container.dataset.rubric); }
@@ -250,6 +253,7 @@ async function initProjectGradingInner(container) {
             </div>
             <p class="text-muted mb-3" data-peer-text="me">Stay logged in on your own computer. Have your reviewer sit with you, look at your work, and give you feedback out loud -- then they select their own name below and fill this out together with you. <strong>Your reviewer signs it at the bottom with their own password</strong> (or your teacher enters the daily code). You can't submit a peer review by yourself.</p>
             <p class="text-muted mb-3 d-none" data-peer-text="them">Use this on <strong>your own computer, signed in as yourself</strong>: your login confirms the review, so no password is needed. Pick whose project you're reviewing, look at their work with them, and fill this out.</p>
+            <div class="alert alert-primary py-2 small d-none" data-peer-only="them"><i class="fas fa-folder-open me-1"></i>You are reviewing a classmate's <strong>${escapeHtml(projectLabel)}</strong> (the project on this page). Reviewing a different unit? Open that unit's project page first.</div>
             <div class="mb-3" data-peer-only="me">
                 <label class="form-label small fw-bold" for="peer-select">Who is reviewing this project?</label>
                 <select class="form-select form-select-sm" id="peer-select">
@@ -287,7 +291,15 @@ async function initProjectGradingInner(container) {
             peerPane.querySelectorAll('[data-peer-text]').forEach(el => el.classList.toggle('d-none', el.dataset.peerText !== peerMode));
             peerPane.querySelectorAll('[data-peer-only]').forEach(el => el.classList.toggle('d-none', el.dataset.peerOnly !== peerMode));
             peerPane.querySelector('#peer-status').innerHTML = '';
+            updateSubmitLabel();
         }));
+        const submitBtn = peerPane.querySelector('#btn-submit-peer');
+        const revieweeSel = peerPane.querySelector('#peer-reviewee');
+        function updateSubmitLabel() {
+            const name = revieweeSel.selectedIndex > 0 ? revieweeSel.options[revieweeSel.selectedIndex].text.split(' ')[0] : 'your classmate';
+            submitBtn.textContent = peerMode === 'them' ? `Submit review of ${name}'s ${projectLabel}` : 'Submit Peer Review';
+        }
+        revieweeSel.addEventListener('change', updateSubmitLabel);
         const passEl = peerPane.querySelector('#peer-confirm-pass');
         const codeEl = peerPane.querySelector('#peer-confirm-code');
         // A saved login can be auto-filled into a password box on this site, and
@@ -330,7 +342,7 @@ async function initProjectGradingInner(container) {
                 passEl.value = ''; codeEl.value = '';
                 if (!res2.ok) { statusEl.innerHTML = `<span class="text-danger">${escapeHtml(out.error || "Couldn't save the peer review. Try again.")}</span>`; return; }
                 if (reviewingOther) {
-                    statusEl.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i>Your review of your classmate's project is submitted and confirmed by your login.</span>`;
+                    statusEl.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i>Your review of your classmate's ${escapeHtml(projectLabel)} is submitted and confirmed by your login.</span>`;
                     return;
                 }
                 const pending = out.aggregate && out.aggregate.grade_posted === false ? ` <span class="text-warning-emphasis">${escapeHtml(out.aggregate.pending_reason || '')}</span>` : '';
