@@ -59,6 +59,27 @@ body.compsci-body {
    Sized to the image itself (width: auto above) so the zoom never pushes
    past the column; only on wide screens with a real mouse -- phones and
    tablets have no hover, and a 1.5x image would overflow a small screen. */
+/* Text wraps around chapter images (teacher request 2026-10-23: more room,
+   more pictures). On tablets and up, an image floats right at 42% of the
+   column; the box beside it narrows instead of running underneath, and
+   headings always start below any image so a picture never drifts into the
+   next section. Phones keep images full width. */
+@media (min-width: 768px) {
+    img.gen-media-placeholder:not([src*="gemini-placeholder"]) {
+        float: right;
+        width: 42%;
+        max-height: none;
+        margin: 0.25rem 0 1rem 1.5rem;
+        transform-origin: right top;
+    }
+    div:has(> img.gen-media-placeholder),
+    img.gen-media-placeholder ~ div,
+    img.gen-media-placeholder ~ .concept-box { display: flow-root; }
+    h2, h3, h4 { clear: both; }
+    /* Big summary diagrams stay full width between sections. */
+    img.gen-media-placeholder.gen-wide { float: none; width: auto; max-height: 380px; margin: 1.5rem auto; transform-origin: center; }
+}
+
 @media (hover: hover) and (min-width: 992px) {
     .gen-media-placeholder:not([src*="gemini-placeholder"]) {
         cursor: zoom-in;

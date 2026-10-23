@@ -8,7 +8,7 @@
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  <link href="/css/compsci.css?v=2" rel="stylesheet" />
+  <link href="/css/compsci.css?v=3" rel="stylesheet" />
 </head>
 <body class="compsci-body">
 
@@ -31,6 +31,8 @@
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: What "Bias" Means in Computing</h5>
+      <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "WHAT BIAS MEANS IN COMPUTING". A simple machine box labeled "Program". On the left, two equal rows of 10 identical document icons go in, one row labeled "Group A" and one labeled "Group B". On the right, Group A's results show 9 green check marks and 1 red X; Group B's results show 6 green check marks and 4 red X marks. Caption at the bottom: "Same kind of input, a pattern of worse results for one group." -->
+      <img src="/images/culture_equity_bias/fig11.1.3.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A program receives the same kind of input from Group A and Group B, but Group A gets 9 of 10 correct results while Group B gets only 6 of 10: a repeated pattern of worse results for one group.">
       <p>In everyday life, <strong>bias</strong> means leaning unfairly toward or against someone. In computing, <strong>algorithmic bias</strong> means a computer system gives unfair results to certain groups of people, again and again, in a pattern. For example, a system might work great for some people but make many more mistakes for others.</p>
       <p>Here's the surprising part: a computer can be biased even when no one wanted it to be. The math inside a program doesn't have opinions. But programs learn from <em>data</em> collected from the real world, and they're built by <em>people</em> who make choices. If the data or the choices are lopsided, the program's results will be lopsided too.</p>
       <p>Why does this matter so much? Because computers now help make big decisions: who gets a job interview, who gets approved for a loan, which patients get extra medical care. A biased person affects the people they meet. A biased program can affect millions of people at once, very quickly, and it can look "objective" while doing it.</p>
@@ -65,8 +67,13 @@
       </div>
   </div>
 
+  <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "THREE WAYS BIAS GETS IN". A left-to-right pipeline of three labeled stages feeding into one result box. Stage 1: a database icon labeled "Training Data" with the caption "Who is missing from the examples?". Stage 2: a ruler icon labeled "Chosen Proxy" with the caption "Are we measuring the right thing?". Stage 3: a group-of-people icon labeled "Who Was in the Room" with the caption "What did the team never think to check?". All three arrows point into a final box labeled "Unfair Results". -->
+  <img src="/images/culture_equity_bias/fig11.1.2.jpg" class="gen-media-placeholder shadow-sm gen-wide" loading="lazy" alt="Diagram titled Three Ways Bias Gets In: training data (who is missing from the examples?), the chosen proxy (are we measuring the right thing?), and who was in the room (what did the team never think to check?) all feed into unfair results.">
+
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Entry Point 1: The Training Data</h5>
+      <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "UNBALANCED TRAINING DATA". Left: a grid of 20 small face icons labeled "Training photos", where 16 are lighter-skinned men and only 4 are other people. Right: a bar chart labeled "Error rate (Gender Shades, 2018)" with two bars: "Lighter-skinned men: 0.8%" (tiny bar) and "Darker-skinned women: up to 34.7%" (tall red bar). -->
+      <img src="/images/culture_equity_bias/fig11.1.4.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A training set of 20 face photos where 16 are lighter-skinned men, next to the 2018 Gender Shades results: about 0.8% error for lighter-skinned men versus up to 34.7% error for darker-skinned women.">
       <p>Many modern programs learn by studying examples. This collection of examples is called <strong>training data</strong>. A program that recognizes faces studies thousands of photos of faces. A program that understands speech listens to thousands of hours of people talking. Whatever is in those examples is what the program learns to be good at.</p>
       <p>Now imagine the examples aren't balanced. If most of the face photos show light-skinned men, the program gets lots of practice with light-skinned men and very little practice with anyone else. This really happened. A 2018 MIT study called "Gender Shades," led by researcher Joy Buolamwini, tested commercial face-analysis systems. They were nearly perfect on lighter-skinned men but made far more mistakes on darker-skinned women.</p>
       <p class="mb-0">Nobody programmed those systems to treat people differently. The gap came straight from the training data. That's why the first question to ask about any system that learns is: <em>"Who is in the examples, and who is missing?"</em></p>
@@ -74,6 +81,8 @@
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Entry Point 2: The Chosen Proxy</h5>
+      <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "THE WRONG STAND-IN". Left box: "What we care about: How sick is the patient?" with a heart icon. An arrow labeled "proxy" points to a right box: "What the program measured: How much was spent on care?" with a dollar icon. Below, a red warning strip: "Less was spent on Black patients who were just as sick, so the program flagged them less often." -->
+      <img src="/images/culture_equity_bias/fig11.1.5.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="The wrong stand-in: a hospital program measured how much was spent on care instead of how sick a patient was, so Black patients who were just as sick, but had less spent on them, were flagged for extra care less often.">
       <p>Computers can only measure things that can be turned into numbers. But many things we care about, like "Is this student working hard?" or "Does this patient need extra care?", can't be measured directly. So designers pick a <strong>proxy</strong>: something measurable that stands in for the thing they really care about.</p>
       <p>A proxy is like judging how hard a student studied by how many hours they sat at their desk. Sometimes that works, but someone could sit there for hours watching videos. If you pick the wrong proxy, your program carefully measures the wrong thing.</p>
       <p class="mb-0">A real example: a 2019 study published in the journal <em>Science</em> examined a hospital algorithm that predicted which patients needed extra care. It used <em>how much money had been spent on a patient's health care</em> as a proxy for <em>how sick they were</em>. But because of unequal access to care, less money had historically been spent on Black patients who were just as sick. So the algorithm flagged them less often. The researchers showed that changing the proxy greatly reduced that bias.</p>
@@ -81,6 +90,8 @@
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Entry Point 3: Who Was in the Room</h5>
+      <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "SHARED BLIND SPOTS". In the center, four look-alike team members around one laptop inside a dashed circle labeled "Blind spot"; each has a thought bubble that says "Works for me!". Around the outside, three users having problems, each with ONE short label: a wheelchair user at a computer labeled "Can't use a mouse", a person at a sign-up form labeled "Name rejected", and a person talking to a phone labeled "Voice not understood". Only these words appear. -->
+      <img src="/images/culture_equity_bias/fig11.1.6.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A team of look-alike developers all think the app works for them, while users outside their experience run into problems: a wheelchair user who can&#x27;t use the mouse-only site, a name with an accent and a hyphen rejected by a form, and a voice assistant that misunderstands an accent.">
       <p>Every program is designed by a team of people, and every person has <strong>blind spots</strong>: things they don't notice because those things never happen to them. Someone who has never used a wheelchair might not notice a website that's impossible to use without a mouse. Someone whose name is always spelled "normally" by forms might not think about names with accents or hyphens.</p>
       <p>When everyone on a design team shares the same background, they tend to share the same blind spots. They test the app the way <em>they</em> would use it, and it works. Then it reaches millions of people who are different from them, and problems show up that nobody on the team ever thought to check.</p>
       <p class="mb-0">Voice assistants are a real example. A 2020 Stanford study found that major speech-recognition systems made almost twice as many errors with Black speakers as with white speakers. A team with a wider range of voices, accents, and life experiences is much more likely to catch problems like this before the product ships, not after.</p>
@@ -104,6 +115,8 @@
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Bias Testing Is Bug Testing</h5>
+      <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "TEST FOR BIAS LIKE A BUG". A three-step flow. Step 1 "Make two inputs that match in every way except ONE" shows two identical application forms where only the ZIP code differs. Step 2 "Run both" shows a gear. Step 3 "Compare side by side" shows result A "Approved" and result B "Denied" with a magnifying glass and the label "Different? Investigate!". -->
+      <img src="/images/culture_equity_bias/fig11.2.2.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Testing for bias like a bug: make two inputs that match except for one detail, such as the ZIP code, run both, and compare. If one is approved and the other denied, investigate.">
       <p>Think back to Chapter 10, where you tested a function with a normal input, an empty input, and an invalid input. You didn't just hope it worked. You planned tests to prove it. Testing for bias works the same way. Instead of asking "Does it work?", you ask "Does it work <em>equally well for different groups of people</em>?"</p>
       <p>The basic method is simple. Run the system with inputs that are the same in every way except one, such as a different name, a different accent, or a different neighborhood. Then compare the results side by side. If changing just that one thing changes the outcome, you've found a pattern worth investigating.</p>
       <p class="mb-0">Real companies and researchers use the three steps listed below. None of them requires guessing anyone's intentions. They're just careful, honest testing, which makes them something any programmer can do.</p>
@@ -118,6 +131,8 @@
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Diverse Test Data</h5>
+      <!-- Gemini prompt (gemini-3.1-flash-image, Oct 2026): Title "TEST WITH EVERYONE". A new game controller tested by three hands: a small child's hand, a large adult hand, and one hand playing alone. Each has a label: "Small hands", "Large hands", "One-handed". A checklist on the side: "Small hands", "Large hands", "One-handed", each with a check mark. -->
+      <img src="/images/culture_equity_bias/fig11.2.3.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A game controller tested by small hands, large hands, and one-handed play, with each group checked off, showing why test data needs many kinds of users.">
       <p><strong>Diverse test data</strong> means testing your system with examples from many different kinds of people and situations, on purpose. It's easy to test with whatever is closest: your own name, your own voice, your friends' photos. But your friends probably have a lot in common with you, so they share your blind spots.</p>
       <p>Imagine testing a new video game controller only on adults with large hands. It might feel perfect to them and be awkward for kids. To really test it, you'd need people with small hands, large hands, and people who play one-handed. Diverse test data is the same idea for software.</p>
       <p class="mb-0">In practice, this means making a checklist of the groups your system will be used on and making sure each group shows up in your tests. If a group is missing from your test data, you have no idea how your system treats them.</p>
@@ -132,13 +147,15 @@
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: An Explicit Review Before Release</h5>
+      <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "FAIRNESS CHECK BEFORE RELEASE". A factory-style inspection station at the end of a conveyor belt carrying an app icon. An inspector holds a clipboard with three checklist items: "Tested with diverse data?", "Looked at results by group?", "Who might this fail?". A gate sign reads "Release only after review". -->
+      <img src="/images/culture_equity_bias/fig11.2.4.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="An app on a conveyor belt stops at a fairness inspection before release. The checklist asks: tested with diverse data, looked at results by group, and who might this fail?">
       <p>An <strong>explicit review</strong> is a planned step, right before a product is released, where someone's whole job is to check for unequal treatment. It's like a final inspection before a car leaves the factory, but for fairness.</p>
       <p>Why make it a separate step? Because when people are rushing to finish a project, "we tested it in general" can feel like enough. A dedicated review forces the team to stop and ask specific questions: Did we test with diverse data? Did we look at disaggregated results? Who might this fail, and what happens to them if it does?</p>
       <p class="mb-0">Some companies have entire teams for this, and some governments are beginning to require these reviews for systems used in hiring, lending, and policing. Even on a small school project, you can do your own version: before you call it finished, write down who might be left out and how you checked.</p>
   </div>
 
-  <!-- Gemini prompt (gemini-3 image, Oct 2026): Title "WHAT AN AVERAGE CAN HIDE". A simple bar chart. On top, one wide bar labeled "Overall Average: 80% accurate" in neutral blue with a small green check. Below it, separated by a dashed line and the label "Same results, split by group:", two bars: "Group A: 95%" (tall, green) and "Group B: 65%" (short, red). A caption at the bottom reads: "Report results by group, not just one average." -->
-  <img src="/images/culture_equity_bias/fig11.2.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Bar chart titled &quot;What an average can hide&quot;: an overall average of 80% accurate looks fine, but split by group the results are Group A 95% and Group B 65%. Caption: report results by group, not just one average.">
+  <!-- Gemini prompt (gemini-3.1-flash-image, Oct 2026): Title "WHAT AN AVERAGE CAN HIDE". A simple bar chart. On top, one wide bar labeled "Face unlock, overall: 95% accurate" in neutral blue. Below it, separated by a dashed line and the label "Same results, split by group:", two bars: "Group A: 99%" (tall, green) and "Group B: 80%" (shorter, red). A caption at the bottom reads: "Report results by group, not just one average." -->
+  <img src="/images/culture_equity_bias/fig11.2.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Bar chart titled What an Average Can Hide: face unlock is 95% accurate overall, but split by group it is 99% for Group A and only 80% for Group B. Report results by group, not just one average.">
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
       <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -188,6 +205,8 @@
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Designing for Everyone from the Start</h5>
+      <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "DESIGN FOR EVERYONE FROM THE START". A large stat at the top: "About 1 in 4 U.S. adults has a disability (CDC)". Below, a phone screen surrounded by four labeled feature icons: a speaker "Text-to-speech", a big letter A "Adjustable font size", a CC symbol "Captions", and an image with a speech tag "Alt text". -->
+      <img src="/images/culture_equity_bias/fig11.3.2.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="About 1 in 4 U.S. adults has a disability, according to the CDC. A phone app shows four built-in accessibility features: text-to-speech, adjustable font size, captions, and alt text.">
       <p>Around 1 in 4 adults in the United States lives with some kind of disability, according to the CDC. That includes people who are blind or have low vision, people who are deaf or hard of hearing, people who have trouble using their hands, and people with learning or attention differences. If your app doesn't work for them, it doesn't work for a huge part of its audience.</p>
       <p>Many accessibility features are simple. <strong>Text-to-speech</strong> reads the screen out loud. <strong>Adjustable font sizes</strong> let people zoom in without breaking the layout. <strong>Captions</strong> make videos usable for people who can't hear them, and for anyone watching in a noisy cafeteria. <strong>Alt text</strong> describes images for screen readers.</p>
       <p class="mb-0">The key phrase in this section is "from the start." Adding accessibility at the very end is like trying to add a wheelchair ramp to a building after it's finished. It's possible, but it's harder, more expensive, and usually worse. When you plan accessibility from the first sketch, it becomes part of the design instead of a patch. Bonus: features like captions and bigger buttons end up helping almost everyone.</p>
@@ -195,6 +214,8 @@
 
   <div class="concept-box shadow-sm border-info bg-light">
       <h5 class="fw-bold text-info"><i class="fas fa-users me-2"></i> Why Diverse Teams Build Better Artifacts</h5>
+      <!-- Gemini prompt (gemini-3.1-flash-image, Oct 2026): Title "MORE VIEWPOINTS, FEWER MISSED BUGS". A diverse team of five people of different ages, backgrounds, and abilities (one uses a wheelchair, one wears hearing aids) gathered around a large app wireframe, each holding a magnifying glass over a different part of it where a small red bug icon is found. -->
+      <img src="/images/culture_equity_bias/fig11.3.3.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A diverse team of five people, including a wheelchair user and someone with hearing aids, each finds a different bug in the same app design.">
       <p class="mb-0">A team built entirely of people who share one background is statistically likely to share the same blind spots (see 11.1.1's "Who Was in the Room"). Companies intentionally build development teams from different backgrounds specifically because a wider range of lived experience catches failure cases — and unfair defaults — a more uniform team would miss entirely.</p>
   </div>
 
@@ -203,6 +224,8 @@
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Cultural & Economic Ripple Effects</h5>
+      <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "THE RIPPLE EFFECT". A smartphone dropped into a pond like a stone, sending out circular ripples. Each ripple ring is labeled: "How we take photos", "How people meet", "How news spreads", "How we shop", "How we give directions". Two small side tags: "Cultural change: new habits" and "Economic change: new and lost jobs". -->
+      <img src="/images/culture_equity_bias/fig11.3.4.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A smartphone dropped into a pond sends ripples labeled how we take photos, how people meet, how news spreads, how we shop, and how we give directions: both cultural and economic changes.">
       <p>When a new technology spreads, it rarely changes just one thing. It sends out <strong>ripples</strong>, like a stone dropped in a pond. Think about smartphones. They changed how we take photos, but they also changed how people meet, how news spreads, how we shop, and even how we give directions ("just send me the location").</p>
       <p>A <strong>cultural</strong> change is a change in people's habits and shared expectations. For example, many people now expect an instant reply to a text. An <strong>economic</strong> change is a change in money and jobs. Streaming music created new jobs in data and app design, while CD stores mostly disappeared. Usually both kinds of change happen at the same time.</p>
       <p class="mb-0">Some ripples are good, and some are harmful. That's why the next idea, thinking ahead about misuse, is part of building responsibly.</p>
@@ -210,6 +233,8 @@
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Thinking Ahead About Misuse</h5>
+      <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "HOW COULD THIS GO WRONG?". A messaging app on a phone in the center. On the left, three red warning cards: "Bullying", "Hard to put down", "False information spreads fast". On the right, three green fix cards matched to them by arrows: "Easy report & block", "Take-a-break reminders", "Limits on mass forwarding". -->
+      <img src="/images/culture_equity_bias/fig11.3.5.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A messaging app with three possible misuses (bullying, being hard to put down, and fast-spreading false information) matched to design fixes: easy report and block, take-a-break reminders, and limits on mass forwarding.">
       <p>Every tool can be used in ways its designers never intended. A messaging app built to keep friends in touch can also be used to bully someone. A video app built for fun can be designed so it's very hard to put down. A tool that makes sharing easy also makes sharing false information easy.</p>
       <p>Responsible teams ask "How could this go wrong?" <em>before</em> they release a product, not after the headlines. Some teams even run a planning exercise where they pretend to be a bad actor and try to misuse their own app, so they can block the worst problems early.</p>
       <p class="mb-0">Practical fixes often come from design choices. Examples include limits on how fast a message can be forwarded to many people, easy ways to report and block, and reminders to take a break. You'll practice spotting misuse and designing a fix in the Global Audience Redesign activity below.</p>
