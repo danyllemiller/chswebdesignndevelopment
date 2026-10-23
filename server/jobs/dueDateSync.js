@@ -14,7 +14,9 @@
 //                                  spread through the chapter in lab order
 //   CS chapter labs             -> same relative spot inside their unit
 // Never touched: timeclock check-ins, items with no due date, anything already
-// due before today, and anything that would land before today.
+// due before today, and anything that would land before today -- unless a
+// hand-run passes { includePast: true } (2026-10-23: the teacher asked to
+// realign every WD2/WD1 chapter, past ones included, to Jotability's pacing).
 // Comp Sci has an A-day track and a B-day track, so CS items get one date per
 // period (period_due_dates) and due_date = the later of the two.
 // Every change is logged in due_date_sync_log (old and new values) for undo.
@@ -220,7 +222,7 @@ function buildExtra(ctx) {
 }
 
 // Computes the changes for one course. Pure read; returns a plan.
-async function planCourse(connection, course) {
+async function planCourse(connection, course, { includePast = false } = {}) {
     const ctx = await loadCourse(connection, course);
     const extra = buildExtra(ctx);
     const today = todayStr();
@@ -230,7 +232,7 @@ async function planCourse(connection, course) {
         const oldDue = ymd(it.due_date);
         if (/^TC-/i.test(it.exam_id)) continue;
         if (!oldDue) continue;
-        if (oldDue < today) continue;
+        if (oldDue < today && !includePast) continue;
         const perTrack = {};
         let rule = null;
         for (const t of trackNames) {
@@ -238,7 +240,7 @@ async function planCourse(connection, course) {
             if (r && r.date) { perTrack[t] = r.date; rule = rule || r.rule; }
         }
         if (!Object.keys(perTrack).length) { skipped.push({ exam_id: it.exam_id, title: it.title, due: oldDue, why: 'no matching lesson' }); continue; }
-        if (Object.values(perTrack).some(d => d < today)) { skipped.push({ exam_id: it.exam_id, title: it.title, due: oldDue, why: 'new date would be in the past' }); continue; }
+        if (!includePast && Object.values(perTrack).some(d => d < today)) { skipped.push({ exam_id: it.exam_id, title: it.title, due: oldDue, why: 'new date would be in the past' }); continue; }
 
         let newDue, newPdd = null;
         if (ctx.cfg.unitBased) {
@@ -297,10 +299,10 @@ async function applyPlan(connection, result) {
 }
 
 // Called after every Jotability schedule send. dryRun returns the plan only.
-async function syncDueDates(course, { dryRun = false } = {}) {
+async function syncDueDates(course, { dryRun = false, includePast = false } = {}) {
     if (!COURSES[course]) return null;
     return withConnection(async (connection) => {
-        const result = await planCourse(connection, course);
+        const result = await planCourse(connection, course, { includePast });
         if (!dryRun) result.applied = await applyPlan(connection, result);
         return result;
     });
