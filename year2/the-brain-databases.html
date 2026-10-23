@@ -25,7 +25,7 @@
 
   <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/loader.js?v=28"></script>
+  <script src="/js/loader.js?v=29"></script>
 </head>
 <body class="bg-white">
 
@@ -62,7 +62,7 @@
             <strong>Remember your Chapter 10 game?</strong> Reload the page and every score is gone. Why? The score lived only in a JavaScript variable, in the browser's <strong>memory</strong>, and memory resets on every reload. What's missing is a <strong>database</strong>: <strong>persistent storage</strong> that keeps data after the page closes. No memory means no <strong>accounts</strong>, no <strong>leaderboards</strong>, no <strong>saved progress</strong>, and for most apps, no business. Social media, online games, and banking all depend on one.
         </div>
 
-        <h2 class="section-title mt-5">Meet the User: "Competitive Cody"</h2>
+        <h2 class="section-title mt-5" id="purpose-of-database">Meet the User: "Competitive Cody"</h2>
         
         <div class="card shadow-sm border-0 bg-light mt-4 mb-5 text-start">
           <div class="card-body p-4">
@@ -123,7 +123,7 @@
     <!-- SECTION 2: DATABASES & RELATIONS -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0" id="identify-relational-db">Describing the Database</h2>
+        <h2 class="section-title mt-0" class="text-primary" id="identify-relational-db">Describing the Database</h2>
         <p>A database is the critical link between a user's action on the front-end (Client-Side) and the site's permanent storage (Server-Side). For an agency, it solves two massive problems for our clients:</p>
         <ol class="small mb-4 bg-light p-4 border rounded shadow-sm text-start">
           <li class="mb-2"><strong>Memory:</strong> It permanently stores user-generated content and account data on a remote server that stays online 24/7.</li>
@@ -389,7 +389,7 @@
     <!-- SECTION 3: DATABASE TYPES & LOCAL STORAGE LAB -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
-        <h2 class="section-title mt-0" id="analyze-db-types">Analyzing Database Types</h2>
+        <h2 class="section-title mt-0" id="analyze-db-types">Analyzing Database Types</h2></span>
         <p>Professional agency developers choose the right tool for the job. Here is how the modern web stores data:</p>
         
         <ul class="small mb-5 text-start">

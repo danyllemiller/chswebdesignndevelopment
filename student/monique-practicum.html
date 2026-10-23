@@ -180,6 +180,74 @@
             </div>
           </div>
         </div>
+
+        <h3 style="margin-top:2rem;">Round 2: found in later chapters</h3>
+        <p class="section-sub">Nobody uses these chapters until January, so take your time and fix them for real. Each one is auto-graded the same way.</p>
+
+        <div class="task" data-task-id="ch7-links">
+          <div class="task-head">
+            <div class="task-check" data-graded="1"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="task-body">
+              <span class="tag missing">Broken links</span><span class="tag pts">10 pts</span>
+              <p class="task-title">3 broken links on WD1 Chapter 7, "The Style: Advanced CSS Layout"</p>
+              <p class="task-desc">Three links on <span class="path">year1/the-style-advanced-css-layout.html</span> go to a page that doesn't exist (404). Click every link on the page to find them, or open <strong>Inspect &rarr; Network</strong> and look for red <code>404</code> rows.</p>
+              <p class="task-desc">Fix each link's <span class="path">href</span> so it points at the real file. Don't delete the links: students need them.</p>
+              <p class="task-note" data-status-note></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="task" data-task-id="ch8-alt">
+          <div class="task-head">
+            <div class="task-check" data-graded="1"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="task-body">
+              <span class="tag quick">Accessibility</span><span class="tag pts">10 pts</span>
+              <p class="task-title">4 images with blank alt text on WD1 Chapter 8, "Sights &amp; Sounds"</p>
+              <p class="task-desc">On <span class="path">year1/sights-sounds-making-it-pop-html-media.html</span>, four <span class="path">&lt;img&gt;</span> tags have <code>alt=""</code>, so a screen reader skips them completely. Search the file for <code>alt=""</code> inside an <span class="path">&lt;img&gt;</span> tag.</p>
+              <p class="task-desc">Look at each picture and write real alt text: what it actually shows, in a short phrase of at least 10 characters (not the file name, and don't start with "image of").</p>
+              <p class="task-desc"><strong>Leave alone:</strong> the <code>alt=""</code> written inside the lesson text. That one is an example teaching students about decorative images, not a broken tag.</p>
+              <p class="task-note" data-status-note></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="task" data-task-id="ch14-validate">
+          <div class="task-head">
+            <div class="task-check" data-graded="1"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="task-body">
+              <span class="tag sort">Validation</span><span class="tag pts">10 pts</span>
+              <p class="task-title">3 HTML validation errors on WD2 Chapter 14, "The Brain: Databases"</p>
+              <p class="task-desc">Run <span class="path">year2/the-brain-databases.html</span> through the W3C validator (<strong>validator.w3.org &rarr; Validate by Direct Input</strong>, paste the page's source). Find and fix these three errors: a <strong>Duplicate ID</strong>, a <strong>Duplicate attribute</strong>, and a <strong>Stray end tag</strong>.</p>
+              <p class="task-desc">Fix the code so the errors go away without changing how the page looks. Keep the first copy of the duplicated <span class="path">id</span>: other links point to it.</p>
+              <p class="task-note" data-status-note></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="task" data-task-id="ch15-typos">
+          <div class="task-head">
+            <div class="task-check" data-graded="1"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="task-body">
+              <span class="tag quick">Typos</span><span class="tag pts">10 pts</span>
+              <p class="task-title">5 typos on WD2 Chapter 15, "The Game Never Ends"</p>
+              <p class="task-desc">Five misspelled words slipped into <span class="path">year2/the-game-never-ends.html</span>. Read the page carefully (or use a spell-checker extension) to find them, then fix the spelling in the file.</p>
+              <p class="task-note" data-status-note></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="task" data-task-id="ch16-image-case">
+          <div class="task-head">
+            <div class="task-check" data-graded="1"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="task-body">
+              <span class="tag missing">Missing</span><span class="tag pts">10 pts</span>
+              <p class="task-title">Broken image on WD2 Chapter 16, "The Final Boss: Going Live"</p>
+              <p class="task-desc">The figure on <span class="path">year2/the-final-boss-going-live.html</span> shows the broken-image icon, but the file really is in <span class="path">images/the-final-boss-going-live/</span>.</p>
+              <p class="task-desc">Compare the <span class="path">src</span> path letter by letter with the real file name. Hint: the web server treats capital and lowercase letters as different letters.</p>
+              <p class="task-note" data-status-note></p>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section id="reports">
@@ -256,7 +324,7 @@
 
   <script src="/js/bootstrap.bundle.js"></script>
   <script type="module" src="/js/auth-guard.js?v=2"></script>
-  <script src="/js/loader.js?v=28"></script>
+  <script src="/js/loader.js?v=29"></script>
   <script type="module">
     import { getLoggedInUser } from '/js/modules/user-session.js';
 

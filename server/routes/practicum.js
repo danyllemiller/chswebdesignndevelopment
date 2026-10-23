@@ -94,6 +94,75 @@ const TASKS = {
             ];
             return noticesOk && wrsFiles.every(f => fixed(f, ['favicon-512x512.png']));
         }
+    },
+    // Round 2 (approved by the teacher 2026-10-23): five problems planted on
+    // purpose in chapters no class reaches before January, so a live fix is
+    // real practice without breaking anything a student is using this week.
+    'ch7-links': {
+        examId: 'AS-Task-ch7-links',
+        title: 'Fix 3 broken links on WD1 Chapter 7',
+        points: 10,
+        verify() {
+            const page = readSite('year1/the-style-advanced-css-layout.html');
+            if (!page) return false;
+            // Each link, found by its visible text, must point at a file that really exists.
+            const hrefFor = (text) => (new RegExp('<a [^>]*href="/([^"#?]+)"[^>]*>\\s*' + text).exec(page) || [])[1];
+            return ['⚡ CSS Grid Interactive', '🎮 5\\. Game: Layout Labyrinth', 'Next: Ch 8'].every(t => {
+                const href = hrefFor(t);
+                return !!href && siteFileExists(href);
+            });
+        }
+    },
+    'ch8-alt': {
+        examId: 'AS-Task-ch8-alt',
+        title: 'Write real alt text for 4 images on WD1 Chapter 8',
+        points: 10,
+        verify() {
+            const page = readSite('year1/sights-sounds-making-it-pop-html-media.html');
+            if (!page) return false;
+            return ['figure-03.png', 'figure-07.png', 'figure-15.png', 'figure-18.png'].every(file => {
+                const tag = (page.match(new RegExp('<img [^>]*' + file.replace('.', '\\.') + '[^>]*>')) || [])[0];
+                const alt = ((tag && (tag.match(/alt="([^"]*)"/) || [])[1]) || '').trim();
+                return alt.length >= 10 && !/\.(png|jpe?g|gif|svg)$/i.test(alt) && !/^(image|picture|photo) of\b/i.test(alt);
+            });
+        }
+    },
+    'ch14-validate': {
+        examId: 'AS-Task-ch14-validate',
+        title: 'Fix 3 HTML validation errors on WD2 Chapter 14',
+        points: 10,
+        verify() {
+            const page = readSite('year2/the-brain-databases.html');
+            if (!page) return false;
+            const oneId = (page.match(/id="purpose-of-database"/g) || []).length === 1;
+            const heading = (page.match(/<h2[^>]*id="identify-relational-db"[^>]*>/) || [])[0] || '';
+            const oneClass = (heading.match(/\sclass=/g) || []).length === 1;
+            const noStrayEnd = !/<\/h2>\s*<\/span>/.test(page);
+            return oneId && oneClass && noStrayEnd;
+        }
+    },
+    'ch15-typos': {
+        examId: 'AS-Task-ch15-typos',
+        title: 'Fix 5 typos on WD2 Chapter 15',
+        points: 10,
+        verify() {
+            const page = readSite('year2/the-game-never-ends.html');
+            if (!page) return false;
+            return ['recieve', 'accross', 'privacey', 'woudl', 'shoudl'].every(typo => !page.includes(typo))
+                && ['receive', 'across', 'privacy', 'would', 'should'].every(word => new RegExp('\\b' + word + '\\b').test(page));
+        }
+    },
+    'ch16-image-case': {
+        examId: 'AS-Task-ch16-image-case',
+        title: 'Fix the broken image path on WD2 Chapter 16',
+        points: 10,
+        verify() {
+            const page = readSite('year2/the-final-boss-going-live.html');
+            // Case-insensitive match finds the img either way; siteFileExists
+            // is case-sensitive on the server, so only a matching name passes.
+            const src = page && (page.match(/<img [^>]*src="\/(images\/the-final-boss-going-live\/figure-02\.png)"/i) || [])[1];
+            return !!src && siteFileExists(src);
+        }
     }
 };
 
