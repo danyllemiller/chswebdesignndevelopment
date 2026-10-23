@@ -555,7 +555,15 @@ async function tryAutoGradeNotebookActivity(connection, { student_id, title, is_
     // untagged title still auto-grades against the renamed activity.
     const normalize = (t) => String(t || '').trim().toLowerCase().replace(/^ch\d+\s+/, '');
     const normalizedTitle = normalize(title);
-    const match = activities.find(a => normalize(a.title) === normalizedTitle);
+    // Titles are NOT globally unique any more: "The Cross-Discipline Brief"
+    // is an activity in both Ch12 and Ch13 (added 2026-10-23). When more than
+    // one activity shares the title, the note's own "CH13 ..." prefix decides;
+    // with no prefix it's ambiguous, so it stays just a note rather than
+    // crediting the wrong chapter.
+    const candidates = activities.filter(a => normalize(a.title) === normalizedTitle);
+    const chPrefix = (String(title).trim().match(/^ch\s*(\d+)\b/i) || [])[1];
+    const match = candidates.length === 1 ? candidates[0]
+        : chPrefix ? candidates.find(a => a.exam_id.startsWith(`cs_ch${chPrefix}_`)) : null;
     if (!match) return;
 
     const [existing] = await connection.execute(
