@@ -159,6 +159,15 @@
                                 <li><strong>Dithering:</strong> An old technique of simulating colors using patterns of dots. It was used when color palettes were heavily restricted on early computers to prevent banding.</li>
                             </ul>
 
+                            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch8 Days 1-3 -->
+                            <div class="card border-info shadow-sm my-4 text-start">
+                              <div class="card-header bg-site-secondary fw-bold text-info">Your Layout Works. So Why Is the Page Still Slow?</div>
+                              <div class="card-body small">
+                                <p class="mb-2">Usually the answer is <strong>media</strong>: huge images, auto-playing video, and the wrong file formats. A photo straight off a phone can be 6 MB, bigger than the rest of the site combined. Before any photo goes on a website it has to be <strong>resized</strong> (to the largest size it will actually display, often 1000 to 2000px wide) and <strong>compressed</strong>.</p>
+                                <p class="mb-2"><strong>The CSS width trap:</strong> shrinking a huge image with <code>width: 300px</code> in CSS does <em>not</em> make it lighter. The browser still downloads the full 6 MB file, then just displays it small. Resize the actual file instead.</p>
+                                <p class="mb-0"><strong>Set a performance budget:</strong> a limit on how heavy a page is allowed to be, for example "every page under 1.5 MB, every image under 200 KB." Write it down before you start, check each image against it, and record before-and-after sizes when you compress, so you can prove the savings.</p>
+                              </div>
+                            </div>
                             <h5 class="fw-bold mt-4" id="media-formats">Quick-Reference Table: Image Formats</h5>
                             <table class="table table-bordered small bg-white shadow-sm mb-2">
                                 <thead class="bg-light text-center">
@@ -351,6 +360,24 @@
                         </div>
                     </div>
 
+                    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch8 Day 8 -->
+                    <div class="row mb-5 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <div class="card border-info shadow-sm text-start">
+                              <div class="card-header bg-site-secondary fw-bold text-info">A Client Hands You a Folder of Assets. What Do You Keep?</div>
+                              <div class="card-body small">
+                                <p class="mb-2">Triage every file with three questions before it goes on the site:</p>
+                                <ol class="mb-2">
+                                  <li class="mb-1"><strong>License:</strong> does the client actually have the right to use it? A photo "found on Google" fails right here.</li>
+                                  <li class="mb-1"><strong>Quality:</strong> is it sharp, well-lit, and on-brand at the size it will display?</li>
+                                  <li class="mb-0"><strong>Format:</strong> is it the right type for the job (a logo as SVG, a photo as JPG/WebP), or can it be converted?</li>
+                                </ol>
+                                <p class="mb-0">Sort each file into <strong>Keep</strong> or <strong>Cut</strong> and write the reason. Creating your own assets avoids most of these problems: no licensing questions, and everything matches the brand.</p>
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- SECTION 3: PHOTOSHOP OPTIMIZATION -->
                     <div class="row mb-4 align-items-start">
                         <div class="col-lg-8 pe-lg-5">
@@ -421,6 +448,25 @@
                     
                     <div class="row mb-4 align-items-start">
                         <div class="col-lg-8 pe-lg-5">
+                            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch8 Day 4 -->
+                            <div class="card border-info shadow-sm mb-4 text-start">
+                              <div class="card-header bg-site-secondary fw-bold text-info">Doing the Math: Resizing Without Squishing</div>
+                              <div class="card-body small">
+                                <p class="mb-2">An image's <strong>aspect ratio</strong> is its width compared to its height. A 1920 &times; 1080 image is <strong>16:9</strong> (divide both by 120). Keep the ratio and the image looks right at any size; break it and faces stretch and circles turn into ovals.</p>
+                                <p class="mb-2"><strong>The formula:</strong> new height = original height &divide; original width &times; new width. Resizing 1920 &times; 1080 to 1000px wide: 1080 &divide; 1920 &times; 1000 = <strong>562.5px</strong> tall.</p>
+                                <div class="table-responsive">
+                                <table class="table table-bordered table-sm bg-white mb-0">
+                                  <thead class="table-light"><tr><th>Original</th><th>Resized to 1000px wide</th></tr></thead>
+                                  <tbody>
+                                    <tr><td>1920 &times; 1080</td><td>1000 &times; 562.5</td></tr>
+                                    <tr><td>1600 &times; 1200</td><td>1000 &times; 750</td></tr>
+                                    <tr><td>800 &times; 800</td><td>1000 &times; 1000 (scaling up a small image makes it blurry: avoid it)</td></tr>
+                                    <tr><td>3000 &times; 2000</td><td>1000 &times; 667 (rounded)</td></tr>
+                                  </tbody>
+                                </table>
+                                </div>
+                              </div>
+                            </div>
                             <h5 class="fw-bold mt-0" id="compress-media">3. Compress (The “Squoosher”)</h5>
                             <ol class="small mb-3 ps-3">
                                 <li class="mb-2">Go to <strong>File &gt; Export &gt; Save for Web (Legacy)...</strong> (<code>Alt+Shift+Ctrl+S</code>).</li>
@@ -1158,6 +1204,10 @@
                                 <p class="small text-dark mb-0"><strong>Alternatives:</strong> If you don't have MAMP installed, you can easily bypass this issue by installing the <strong>"Live Server"</strong> extension directly inside VS Code, which launches its own temporary local server with one click!</p>
                             </div>
 
+                            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch8 Day 7 -->
+                            <div class="alert alert-info small border my-4">
+                              <strong>Who gets locked out?</strong> An audio or video player with <strong>no visible controls</strong> locks out keyboard and screen reader users, who have no way to pause or play it. A video with <strong>no captions</strong> locks out deaf and hard-of-hearing users. Captions (written in a <strong>WebVTT</strong> <code>.vtt</code> file) also help people in noisy or quiet places and language learners, and audio-only content like a podcast needs a written <strong>transcript</strong>. Browsers block <strong>autoplay</strong> with sound, and auto-playing loud audio is terrible customer service anyway: let the user press play.
+                            </div>
                             <h5 class="fw-bold mt-4">Correct Native Video Syntax</h5>
                             <p>The <code>&lt;source&gt;</code> tag is used inside your video or audio elements to provide fallback file formats.</p>
                             <pre class="p-3 border rounded shadow-sm mb-5"><code>&lt;video controls poster="media/poster.png"&gt;
@@ -1410,6 +1460,10 @@
                                 </tbody>
                             </table>
                             
+                            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch8 Day 9 -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                              <strong>Tables are for data, never for page layout.</strong> Years ago, whole websites were built inside giant tables. Layout tables break responsive design (table cells won't stack on a phone) and confuse screen readers, which announce "table, 3 columns, 12 rows" for what is really a page. Use a table only when the content truly is data in rows and columns; use Grid or Flexbox for layout.
+                            </div>
                             <h5 class="fw-bold mt-4">Table Superpowers: <code>colspan</code> &amp; <code>rowspan</code></h5>
                             <p>Use <strong><code>colspan</code></strong> to stretch a cell horizontally across multiple columns. Use <strong><code>rowspan</code></strong> to stretch a cell vertically across multiple rows. We will use <code>colspan="3"</code> in our lab to stretch a footer across the entire width.</p>
                             <p>Here is an example showing both attributes together — a schedule table where "Monday" spans two rows and a footer cell spans all three columns:</p>
@@ -1762,6 +1816,14 @@ figure:hover {
                             <p>Before launching a site, professionals run a diagnostic audit. Open your website in Google Chrome. Right-click, select <strong>Inspect</strong>, and navigate to the <strong>Lighthouse</strong> tab in DevTools. Run a report for "Desktop."</p>
                             <p>Lighthouse will grade your site out of 100 for Performance, Accessibility, Best Practices, and SEO. If your images are too large, your Performance score will tank. Use Analytical Reasoning to read the report and apply the suggested technical fixes.</p>
 
+                            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch8 Days 11-12 -->
+                            <div class="card border-info shadow-sm my-4 text-start">
+                              <div class="card-header bg-site-secondary fw-bold text-info">Bug Bash: The Broken Link Hunt</div>
+                              <div class="card-body small">
+                                <p class="mb-2">Swap sites with a partner and click <strong>every</strong> link and load every image on every page. Report each problem with three parts: the <strong>page</strong>, the <strong>link text</strong> (or image), and the <strong>fix</strong>. Example: "about.html, the 'Our Team' link, points to Team.html but the file is team.html: change it to lowercase." Use <strong>Inspect Element</strong> to see the exact path a broken image is asking for.</p>
+                                <p class="mb-0">Run a <strong>Lighthouse</strong> audit on your heaviest page before your final pass and again after, and record both sets of scores. On a media-heavy page the first thing it usually flags is oversized images.</p>
+                              </div>
+                            </div>
                             <!-- MILESTONE CARD -->
                             <div class="card border-primary shadow-sm my-4 mt-5">
                                 <div class="card-header bg-primary text-white fw-bold">
@@ -1790,6 +1852,25 @@ figure:hover {
                                     <h5 class="fw-bold text-primary mb-0">Let's Discuss:</h5>
                                 </div>
                                 <p class="mb-0 small text-dark">What was your "Performance" score on the Lighthouse audit? List one specific fix the report suggested for your images.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch8 Days 13-14 -->
+                    <div class="row mb-5 pb-4 border-bottom align-items-start">
+                        <div class="col-lg-12">
+                            <div class="card border-primary shadow-sm mx-auto text-start" style="max-width: 900px;">
+                              <div class="card-header bg-primary text-white fw-bold">Capstone: Your Year 1 Portfolio</div>
+                              <div class="card-body small p-4">
+                                <p>The year ends by putting every chapter's best work in one place: a <strong>portfolio site</strong> that is working, accessible, and responsive.</p>
+                                <ul class="mb-3">
+                                  <li class="mb-1"><strong>Choose your best work:</strong> which Chapter 2&ndash;8 deliverable best shows your growth this year? Put it front and center on the homepage, and be ready to defend why.</li>
+                                  <li class="mb-1"><strong>Assemble and deploy:</strong> bring every deliverable into one site, upload it, then run a full link and asset check across every page.</li>
+                                  <li class="mb-1"><strong>Walk it through:</strong> present your portfolio in about 3 minutes.</li>
+                                  <li class="mb-0"><strong>Reflect:</strong> write your Year 1 reflection, naming the specific skills you gained, and one goal for Level 2. (One year from now, what's the first thing you'll have forgotten? Write that down too, then put a note about it in your portfolio.)</li>
+                                </ul>
+                                <p class="mb-0"><strong>What is a CTE Program Completer?</strong> Finishing the full Web Design program sequence, and passing its end-of-program assessment, is what makes you a <strong>Program Completer</strong>. It goes on your high school record, and colleges, scholarship committees, and employers read it as proof of real, tested skills. Your teacher can tell you exactly what your record will show.</p>
+                              </div>
                             </div>
                         </div>
                     </div>
