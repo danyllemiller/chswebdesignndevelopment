@@ -89,11 +89,20 @@
     const milestone = c.milestone && typeof c.milestone === 'object' && c.milestone.title ? c.milestone : null;
     box.innerHTML = head + `<div class="agenda-body">
       ${c.chapterLabel ? `<div class="chapter">${esc(c.chapterLabel)}${c.minimumDay ? ' · <span class="text-muted">short day</span>' : ''}</div>` : ''}
+      ${(c.also || []).length ? `<div class="small fw-bold">Today's class covers ${1 + c.also.length} lessons. The other one is at the bottom.</div>` : ''}
       ${milestone ? `<div class="due"><i class="fas fa-flag-checkered me-2"></i>Due today: ${esc(milestone.title)}${milestone.pts ? ` (${esc(milestone.pts)} pts)` : ''}</div>` : ''}
       ${objectives.length ? `<div><div class="label">Today you will</div><ul class="mb-0">${objectives.map(o => `<li>${esc(o)}</li>`).join('')}</ul></div>` : ''}
       ${c.doNowPrompt ? `<div><div class="label">Do Now${c.doNowType ? ` · ${esc(c.doNowType)}` : ''}</div><div class="donow">${esc(c.doNowPrompt)}</div></div>` : ''}
       ${tasks.length ? `<div><div class="label">${esc(c.tasksTitle || 'Today\'s tasks')}</div><ol class="tasks mb-0">${tasks.map(t => `<li>${esc(t)}</li>`).join('')}</ol></div>` : ''}
       ${c.exitTicket ? `<div><div class="label">Exit ticket</div><div class="exit">Before you leave, ${esc(c.exitTicket)}</div></div>` : ''}
+      ${(c.also || []).map(a => {
+        const at = Array.isArray(a.tasksList) ? a.tasksList : [];
+        const am = a.milestone && typeof a.milestone === 'object' && a.milestone.title ? a.milestone : null;
+        return `<div class="border-top pt-3"><div class="label">Also today: ${esc(a.chapterLabel || 'the next lesson')}</div>
+          ${am ? `<div class="due"><i class="fas fa-flag-checkered me-2"></i>Due today: ${esc(am.title)}${am.pts ? ` (${esc(am.pts)} pts)` : ''}</div>` : ''}
+          ${at.length ? `<div class="small fw-bold mb-1">${esc(a.tasksTitle || 'Tasks')}</div><ol class="tasks mb-0">${at.map(t => `<li>${esc(t)}</li>`).join('')}</ol>` : ''}
+        </div>`;
+      }).join('')}
     </div>`;
   }
 

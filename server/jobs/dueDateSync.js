@@ -87,12 +87,15 @@ async function loadCourse(connection, course) {
             text: [c.tasksTitle, ...(Array.isArray(c.tasksList) ? c.tasksList : []), ms].filter(Boolean).join(' | ')
         };
     });
-    const [dayRows] = await connection.execute('SELECT track, event_date, block_num FROM agenda_days WHERE course = ?', [course]);
-    // track -> block -> [dates]
+    await connection.execute('ALTER TABLE agenda_days ADD COLUMN IF NOT EXISTS also_blocks VARCHAR(255) NULL');
+    const [dayRows] = await connection.execute('SELECT track, event_date, block_num, also_blocks FROM agenda_days WHERE course = ?', [course]);
+    // track -> block -> [dates]. A combined day (also_blocks) teaches more than
+    // one lesson, so each of them lands on that date.
     const tracks = {};
     dayRows.forEach(r => {
         const t = (tracks[r.track] = tracks[r.track] || {});
-        (t[r.block_num] = t[r.block_num] || []).push(ymd(r.event_date));
+        const extra = String(r.also_blocks || '').split(',').map(n => parseInt(n, 10)).filter(n => n > 0);
+        for (const b of [r.block_num, ...extra]) (t[b] = t[b] || []).push(ymd(r.event_date));
     });
     Object.values(tracks).forEach(t => Object.values(t).forEach(list => list.sort()));
 

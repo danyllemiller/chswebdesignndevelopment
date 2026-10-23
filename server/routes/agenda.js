@@ -33,6 +33,19 @@ const AGENDA_DAYS_DDL = `CREATE TABLE IF NOT EXISTS agenda_days (
     PRIMARY KEY (course, track, event_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
+// A combined day: when Jotability's pacing gives a chapter fewer class days
+// than it has lessons, two lessons share one day instead of one being
+// skipped (2026-10-23). block_num stays the day's first lesson; the others
+// are listed here, in order, as comma-separated block numbers.
+let alsoColumnReady = false;
+async function ensureAlsoColumn(connection) {
+    if (alsoColumnReady) return;
+    await connection.execute(AGENDA_DAYS_DDL);
+    await connection.execute('ALTER TABLE agenda_days ADD COLUMN IF NOT EXISTS also_blocks VARCHAR(255) NULL');
+    alsoColumnReady = true;
+}
+const parseAlso = v => String(v || '').split(',').map(n => parseInt(n, 10)).filter(n => n > 0);
+
 // mysql2 hands DATE columns back as local-midnight Date objects; toISOString()
 // would shift them a day early west of UTC, so format the local parts.
 const ymd = d => (d instanceof Date)
@@ -67,16 +80,20 @@ router.get('/agenda/get', requireStaff, async (req, res) => {
             // Date -> block, written by Jotability. A block can land on more
             // than one date here (a "didn't finish" day repeats the same
             // slide), which agenda_schedule's one-date-per-block key can't hold.
-            await connection.execute(AGENDA_DAYS_DDL);
+            await ensureAlsoColumn(connection);
             const [dayRows] = await connection.execute(
-                'SELECT track, event_date, block_num FROM agenda_days WHERE course = ?', [course]
+                'SELECT track, event_date, block_num, also_blocks FROM agenda_days WHERE course = ?', [course]
             );
-            const days = {};
-            dayRows.forEach(r => { (days[r.track] = days[r.track] || {})[ymd(r.event_date)] = r.block_num; });
+            const days = {}, also = {};
+            dayRows.forEach(r => {
+                (days[r.track] = days[r.track] || {})[ymd(r.event_date)] = r.block_num;
+                const extra = parseAlso(r.also_blocks);
+                if (extra.length) (also[r.track] = also[r.track] || {})[ymd(r.event_date)] = extra;
+            });
 
-            return { content, schedule, days };
+            return { content, schedule, days, also };
         });
-        res.json({ course, content: result.content, schedule: result.schedule, days: result.days });
+        res.json({ course, content: result.content, schedule: result.schedule, days: result.days, also: result.also });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch agenda' }); }
 });
 
@@ -126,13 +143,14 @@ router.get('/agenda/student', requireLogin, async (req, res) => {
             if (!options.length) return { options, error: 'No class agenda found for your schedule.' };
             const pick = options.find(o => o.course === req.query.course && o.track === (req.query.track || o.track)) || options[0];
             // Class days: Jotability's dates when it has sent them, else the original schedule.
+            await ensureAlsoColumn(connection);
             let [dayRows] = await connection.execute(
-                'SELECT event_date, block_num FROM agenda_days WHERE course = ? AND track = ? ORDER BY event_date', [pick.course, pick.track]);
+                'SELECT event_date, block_num, also_blocks FROM agenda_days WHERE course = ? AND track = ? ORDER BY event_date', [pick.course, pick.track]);
             if (!dayRows.length) {
                 [dayRows] = await connection.execute(
                     'SELECT event_date, block_num FROM agenda_schedule WHERE course = ? AND track = ? ORDER BY event_date', [pick.course, pick.track]);
             }
-            const days = dayRows.map(r => ({ date: ymd(r.event_date), block: r.block_num }));
+            const days = dayRows.map(r => ({ date: ymd(r.event_date), block: r.block_num, also: parseAlso(r.also_blocks) }));
             const today = ymd(new Date());
             const want = /^\d{4}-\d{2}-\d{2}$/.test(String(req.query.date || '')) ? String(req.query.date) : today;
             const hit = days.find(d => d.date === want);
@@ -141,10 +159,18 @@ router.get('/agenda/student', requireLogin, async (req, res) => {
             let content = null;
             if (hit) {
                 const [[row]] = await connection.execute('SELECT content FROM agenda_content WHERE course = ? AND block_num = ?', [pick.course, hit.block]);
+                const pickFields = (raw) => {
+                    const c = typeof raw === 'string' ? JSON.parse(raw) : raw, out = {};
+                    STUDENT_FIELDS.forEach(f => { if (c[f] !== undefined) out[f] = c[f]; });
+                    return out;
+                };
                 if (row) {
-                    const c = typeof row.content === 'string' ? JSON.parse(row.content) : row.content;
-                    content = {};
-                    STUDENT_FIELDS.forEach(f => { if (c[f] !== undefined) content[f] = c[f]; });
+                    content = pickFields(row.content);
+                    // A combined day: the other lesson(s) taught in the same class.
+                    for (const b of hit.also || []) {
+                        const [[extra]] = await connection.execute('SELECT content FROM agenda_content WHERE course = ? AND block_num = ?', [pick.course, b]);
+                        if (extra) (content.also = content.also || []).push(pickFields(extra.content));
+                    }
                 }
             }
             return { options, course: pick.course, track: pick.track, label: pick.label, date: want, today,
@@ -240,7 +266,8 @@ router.get('/agenda/sync/outline', requireSyncKey, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to read the agenda outline' }); }
 });
 
-// Replace one course/track's dates. Body: { course, track, days: [{ date: 'YYYY-MM-DD', block: N }] }
+// Replace one course/track's dates. Body: { course, track, days: [{ date: 'YYYY-MM-DD', block: N, also: [N, ...] }] }
+// (also = more lessons taught the same day, in order; optional)
 router.post('/agenda/sync/schedule', requireSyncKey, async (req, res) => {
     const course = String(req.body?.course || '').trim();
     const track = String(req.body?.track || 'main').trim();
@@ -249,8 +276,9 @@ router.post('/agenda/sync/schedule', requireSyncKey, async (req, res) => {
     const clean = [];
     for (const d of days) {
         const date = String(d?.date || ''), block = parseInt(d?.block, 10);
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !(block > 0) || block > 1000) return res.status(400).json({ error: `Bad day entry: ${JSON.stringify(d)}` });
-        clean.push([date, block]);
+        const also = Array.isArray(d?.also) ? d.also.map(n => parseInt(n, 10)) : [];
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !(block > 0) || block > 1000 || also.length > 6 || also.some(n => !(n > 0) || n > 1000)) return res.status(400).json({ error: `Bad day entry: ${JSON.stringify(d)}` });
+        clean.push([date, block, also]);
     }
     if (clean.length > 1000) return res.status(400).json({ error: 'Too many days' });
     // WD1 (A1) only meets on A, A_MIN and C days (special-dates.csv). A sync
@@ -265,18 +293,31 @@ router.post('/agenda/sync/schedule', requireSyncKey, async (req, res) => {
     try {
         await withConnection(async (connection) => {
             await connection.execute(AGENDA_SCHEDULE_DDL);
-            await connection.execute(AGENDA_DAYS_DDL);
+            await ensureAlsoColumn(connection);
             // Keep the hand-made dates from before the first sync, once.
             await connection.execute('CREATE TABLE IF NOT EXISTS agenda_schedule_backup LIKE agenda_schedule');
             await connection.execute('INSERT IGNORE INTO agenda_schedule_backup SELECT * FROM agenda_schedule WHERE course = ? AND track = ?', [course, track]);
             await connection.beginTransaction();
             try {
-                await connection.execute('DELETE FROM agenda_days WHERE course = ? AND track = ?', [course, track]);
+                // Days already taught keep the slides they had: a re-send only
+                // replaces today onward (2026-10-23 -- re-sending after the
+                // Jotability lesson-order fix would otherwise rewrite what
+                // every past class "did"). A course with no days on file yet
+                // takes the whole send.
+                const today = ymd(new Date());
+                const [[{ n: pastRows }]] = await connection.execute('SELECT COUNT(*) AS n FROM agenda_days WHERE course = ? AND track = ? AND event_date < ?', [course, track, today]);
+                const keepPast = Number(pastRows) > 0;
+                await connection.execute(keepPast ? 'DELETE FROM agenda_days WHERE course = ? AND track = ? AND event_date >= ?' : 'DELETE FROM agenda_days WHERE course = ? AND track = ?', keepPast ? [course, track, today] : [course, track]);
                 await connection.execute('DELETE FROM agenda_schedule WHERE course = ? AND track = ?', [course, track]);
+                for (const [date, block, also] of clean) {
+                    if (keepPast && date < today) continue;
+                    await connection.execute('INSERT INTO agenda_days (course, track, event_date, block_num, also_blocks) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE block_num = VALUES(block_num), also_blocks = VALUES(also_blocks)', [course, track, date, block, also.length ? also.join(',') : null]);
+                }
                 const firstDate = new Map();
-                for (const [date, block] of clean) {
-                    await connection.execute('INSERT INTO agenda_days (course, track, event_date, block_num) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE block_num = VALUES(block_num)', [course, track, date, block]);
-                    if (!firstDate.has(block) || date < firstDate.get(block)) firstDate.set(block, date);
+                const [allDays] = await connection.execute('SELECT event_date, block_num, also_blocks FROM agenda_days WHERE course = ? AND track = ?', [course, track]);
+                for (const r of allDays) {
+                    const date = ymd(r.event_date);
+                    for (const b of [r.block_num, ...parseAlso(r.also_blocks)]) if (!firstDate.has(b) || date < firstDate.get(b)) firstDate.set(b, date);
                 }
                 // agenda_schedule keeps one date per block (the first) so the jump list still labels each slide.
                 for (const [block, date] of firstDate) {
