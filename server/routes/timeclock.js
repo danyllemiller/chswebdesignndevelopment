@@ -305,8 +305,11 @@ router.get('/timeclock/question', requireLogin, async (req, res) => {
     // WD1/WD2/AS clock-in asks a real multiple-choice Nevada Workplace
     // Readiness Skills question (right/wrong, gradable, one per calendar
     // day) instead of a chapter content quiz -- CS keeps its own chapter
-    // test-bank quiz below, since WPR wasn't asked for there.
-    if (kind === 'WD1' || kind === 'WD2' || kind === 'AS') {
+    // test-bank quiz below, since WPR wasn't asked for there. Intervention
+    // (INTV) has no chapter bank of its own and gets the same WPR question;
+    // until 2026-10-23 it got "Unrecognized type", so no Intervention
+    // clock-in had ever saved.
+    if (kind === 'WD1' || kind === 'WD2' || kind === 'AS' || kind === 'INTV') {
         const picked = pickWprMcQuestion(getLocalDateStr());
         return res.json({
             question_text: picked.q,
@@ -465,7 +468,7 @@ router.get('/timeclock/reflection-prompt', requireLogin, async (req, res) => {
                 }
             }
 
-            if (kind === 'WD1' || kind === 'WD2' || kind === 'AS') {
+            if (kind === 'WD1' || kind === 'WD2' || kind === 'AS' || kind === 'INTV') {
                 const picked = pickWprQuestion(today);
                 return {
                     prompt_text: `[WPR ${picked.std}] ${picked.q}`,
@@ -508,7 +511,7 @@ router.get('/timeclock/reflection-prompt', requireLogin, async (req, res) => {
 async function verifyClockinAnswer(connection, courseKey, submittedAnswer) {
     if (!submittedAnswer) return null;
     try {
-        if (courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS') {
+        if (courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS' || courseKey === 'INTV') {
             const picked = pickWprMcQuestion(getLocalDateStr());
             return String(submittedAnswer).trim().toLowerCase() === String(picked.answer).trim().toLowerCase() ? 1 : 0;
         }

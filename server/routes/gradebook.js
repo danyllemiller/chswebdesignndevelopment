@@ -156,6 +156,10 @@ async function checkWdChapterPrework(connection, studentId, examId, chNum) {
 }
 
 async function checkUnitPrerequisite(connection, studentId, examId) {
+    // The teacher's own account previews every exam exactly as students see
+    // it, so none of these locks apply to it (it never has the pre-work).
+    const [[viewer]] = await connection.execute('SELECT section_id FROM students WHERE student_id = ? LIMIT 1', [studentId]);
+    if (viewer && viewer.section_id === 'Teacher') return { ok: true };
     const wd = /^Ch(\d+)-Exam$/.exec(examId || '');
     if (wd) return checkWdChapterPrework(connection, studentId, examId, parseInt(wd[1], 10));
     const m = /^Unit(\d+)-Exam$/i.exec(examId || '');

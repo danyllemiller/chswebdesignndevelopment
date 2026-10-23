@@ -836,7 +836,6 @@ function injectTimeclockUI() {
 // time, or "Clock Out" before ever clocking in, gets a clear explanation
 // instead of the wrong flow silently proceeding.
 async function handleManualOpen(forcedMode) {
-    logTimeclockError('handleManualOpen:clicked', { message: `button click received (${forcedMode})` });
     const modalEl = document.getElementById('timeclock-modal');
     const label = document.getElementById('tc-question-label');
     const optsContainer = document.getElementById('tc-options-container');

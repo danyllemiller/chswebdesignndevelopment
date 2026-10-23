@@ -1,0 +1,9 @@
+# Class site for Web Design and Computer Science. Student, teacher, test,
+# and API pages need a login and hold no public content, so search engines
+# skip them.
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /student/
+Disallow: /exams/
+Disallow: /uploads/
