@@ -285,32 +285,24 @@
             </div>
         </div>
 
-        <div class="row mb-5">
-          <div class="col-12">
-            <div id="project-grading-panel"
-                 class="card border-info shadow-sm text-start"
-                 data-chapter-project-id="5"
-                 data-course="CS"
-                 data-exam-id="Unit3-Project"
-                 data-rubric='[
-                    {"key":"bit_translator","label":"Stage 1: Decode the Bank Export","description":"All 8 codes are correctly converted across binary, hex, decimal, and ASCII, each with its correct Meaning, with no calculation errors."},
-                    {"key":"storage_tradeoffs","label":"Stage 2: Organize the Register","description":"Version A (flat) and Version B (Type and Category split into lookup tables) are both shown for the SAME register, with specific, real tradeoffs (including the category-rename question), not generic pros/cons."},
-                    {"key":"dashboard_charts","label":"Stage 3: My Money Dashboard","description":"A working running Balance column ending at $335.16, four KPI numbers (SUM in, SUM out, AVERAGE out, ending balance), plus a COUNTIF-based Category chart and a COUNTIF-based Type chart -- all from live formulas, not hardcoded numbers, readable and labeled."},
-                    {"key":"model_validation","label":"Stage 4: Will I Hit My Goal?","description":"A Weekly Change column (13 formulas), an AVERAGE of those changes, Week 15/Week 16 predictions and a weeks-to-$350 formula built from that average, plus a genuine sentence checking what a $30 miss would actually mean."},
-                    {"key":"organization","label":"One Connected Pipeline","description":"This is one continuous story about one account, not four unrelated exercises stapled together -- the Stage 1 key decodes the Stage 2 register, which is what Stage 3 charts. Tabs are clearly labeled and easy for someone else to follow without explanation."},
-                    {"key":"advanced_formula","label":"Advanced Formula (Bonus)","description":"Uses conditional formatting (e.g. red when Balance drops under $200), SUMIF (total dollars per category), or VLOOKUP/INDEX-MATCH (pulling names from the Version B lookup tables) anywhere in the workbook.","bonus":true}
-                 ]'>
-              <div class="card-body small p-4 text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading grading tool&hellip;</div>
-            </div>
-          </div>
+        <!-- Turn-in order (teacher 2026-10-23): students do exactly what they see, in the order they see it, so the Dropbox comes BEFORE the grading tool. -->
+        <div class="alert alert-primary border-primary shadow-sm mb-4" id="turn-in-order">
+            <h5 class="fw-bold mb-2"><i class="fas fa-list-ol me-2"></i>How to turn in this project: do these IN ORDER</h5>
+            <ol class="mb-2">
+                <li class="mb-1"><strong>STEP 1:</strong> Upload your finished project file in the <strong>Dropbox</strong> right below this box.</li>
+                <li class="mb-1"><strong>STEP 2A:</strong> Grade your own project on the <strong>My Self-Assessment</strong> tab.</li>
+                <li class="mb-0"><strong>STEP 2B:</strong> Get a peer review on the <strong>Peer Review</strong> tab from a classmate who has ALSO uploaded this project.</li>
+            </ol>
+            <p class="small mb-0">Your grade stays <strong>PENDING</strong> until STEP 1 and STEP 2B are both done.</p>
         </div>
 
         <div class="card shadow border-success text-start mb-5" id="submission-zone">
             <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>Student Assignment Dropbox</h4>
+                <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>STEP 1: Turn In Your Project File</h4>
                 <span class="badge bg-light text-success shadow-sm" id="student-id-badge">Verifying...</span>
             </div>
             <div class="card-body p-4">
+                <p class="fw-bold text-danger mb-3"><i class="fas fa-circle-exclamation me-1"></i>Do this FIRST. Nobody can grade or peer review your project until your file is uploaded here.</p>
                 <form id="uploadForm">
                     <div class="mb-3">
                         <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
@@ -344,14 +336,34 @@
             </div>
         </div>
 
+        <div class="row mb-5">
+          <div class="col-12">
+            <div id="project-grading-panel"
+                 class="card border-info shadow-sm text-start"
+                 data-chapter-project-id="5"
+                 data-course="CS"
+                 data-exam-id="Unit3-Project"
+                 data-rubric='[
+                    {"key":"bit_translator","label":"Stage 1: Decode the Bank Export","description":"All 8 codes are correctly converted across binary, hex, decimal, and ASCII, each with its correct Meaning, with no calculation errors."},
+                    {"key":"storage_tradeoffs","label":"Stage 2: Organize the Register","description":"Version A (flat) and Version B (Type and Category split into lookup tables) are both shown for the SAME register, with specific, real tradeoffs (including the category-rename question), not generic pros/cons."},
+                    {"key":"dashboard_charts","label":"Stage 3: My Money Dashboard","description":"A working running Balance column ending at $335.16, four KPI numbers (SUM in, SUM out, AVERAGE out, ending balance), plus a COUNTIF-based Category chart and a COUNTIF-based Type chart -- all from live formulas, not hardcoded numbers, readable and labeled."},
+                    {"key":"model_validation","label":"Stage 4: Will I Hit My Goal?","description":"A Weekly Change column (13 formulas), an AVERAGE of those changes, Week 15/Week 16 predictions and a weeks-to-$350 formula built from that average, plus a genuine sentence checking what a $30 miss would actually mean."},
+                    {"key":"organization","label":"One Connected Pipeline","description":"This is one continuous story about one account, not four unrelated exercises stapled together -- the Stage 1 key decodes the Stage 2 register, which is what Stage 3 charts. Tabs are clearly labeled and easy for someone else to follow without explanation."},
+                    {"key":"advanced_formula","label":"Advanced Formula (Bonus)","description":"Uses conditional formatting (e.g. red when Balance drops under $200), SUMIF (total dollars per category), or VLOOKUP/INDEX-MATCH (pulling names from the Version B lookup tables) anywhere in the workbook.","bonus":true}
+                 ]'>
+              <div class="card-body small p-4 text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading grading tool&hellip;</div>
+            </div>
+          </div>
+        </div>
+
         <div class="text-center">
             <a href="/proficiencyScales/cs-unit-3.html" class="btn btn-outline-primary fw-bold shadow-sm"><i class="fas fa-arrow-left me-1"></i>Back to Unit 3 Proficiency Scale</a>
         </div>
 
     </div>
 
-    <script type="module" src="/js/assignment-uploader.js"></script>
-    <script type="module" src="/js/student/project-grading.js?v=8"></script>
+    <script type="module" src="/js/assignment-uploader.js?v=2"></script>
+    <script type="module" src="/js/student/project-grading.js?v=9"></script>
 
 <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 </body>

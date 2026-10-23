@@ -511,7 +511,16 @@ router.delete('/student/cs-notebook', requireSelfOrStaff(), async (req, res) => 
 // activity and The Network Audit project). Retired rather than deleted for
 // the same reason as above, though confirmed live that zero students had
 // a response recorded for it, so nothing is lost either way.
-const RETIRED_CS_ACTIVITY_IDS = ['cs_ch3_file_system_audit', 'cs_ch19_security_brief'];
+//
+// cs_ch12_cross_discipline_brief: "The Cross-Discipline Brief" was an
+// activity in both Ch12 and Ch13; the teacher had one removed (2026-10-23).
+// Ch13 keeps it because its Impact Section activity builds on it. The 3
+// students who already turned in the Ch12 one keep that grade.
+//
+// Every retired row also has its due date cleared, so it never shows as
+// missing for a student who didn't do it (admin/due-dates.html keeps the
+// same list so a Save can't date it again).
+const RETIRED_CS_ACTIVITY_IDS = ['cs_ch3_file_system_audit', 'cs_ch19_security_brief', 'cs_ch12_cross_discipline_brief'];
 
 // Safety net for a real gap: a student can open the Digital Notebook
 // directly in plain notes mode (not via the Activities dropdown) and type
@@ -555,15 +564,15 @@ async function tryAutoGradeNotebookActivity(connection, { student_id, title, is_
     // untagged title still auto-grades against the renamed activity.
     const normalize = (t) => String(t || '').trim().toLowerCase().replace(/^ch\d+\s+/, '');
     const normalizedTitle = normalize(title);
-    // Titles are NOT globally unique any more: "The Cross-Discipline Brief"
-    // is an activity in both Ch12 and Ch13 (added 2026-10-23). When more than
-    // one activity shares the title, the note's own "CH13 ..." prefix decides;
-    // with no prefix it's ambiguous, so it stays just a note rather than
-    // crediting the wrong chapter.
+    // A note's own "CH13 ..." prefix decides which chapter it belongs to, so
+    // a note for a retired activity (say, an old "CH12 The Cross-Discipline
+    // Brief") never credits a different chapter's activity of the same name.
+    // With no prefix and more than one same-named activity it's ambiguous,
+    // so it stays just a note rather than crediting the wrong chapter.
     const candidates = activities.filter(a => normalize(a.title) === normalizedTitle);
     const chPrefix = (String(title).trim().match(/^ch\s*(\d+)\b/i) || [])[1];
-    const match = candidates.length === 1 ? candidates[0]
-        : chPrefix ? candidates.find(a => a.exam_id.startsWith(`cs_ch${chPrefix}_`)) : null;
+    const match = chPrefix ? candidates.find(a => a.exam_id.startsWith(`cs_ch${chPrefix}_`))
+        : candidates.length === 1 ? candidates[0] : null;
     if (!match) return;
 
     const [existing] = await connection.execute(

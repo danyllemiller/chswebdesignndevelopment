@@ -279,7 +279,7 @@ const CS_MAP = [
       { id: 'cs_ch5_encoding_lab',      title: 'The Encoding Lab',      pts: 25 }
     ]},
     { ch: 6, title: 'Ch 6: Storing Data', labs: [
-      { id: 'cs_ch6_organization_audit',      title: 'The Organization Audit',      pts: 25 },
+      { id: 'cs_ch6_organisation_audit',      title: 'The Organisation Audit',      pts: 25 },
       { id: 'cs_ch6_storage_tradeoff_matrix', title: 'The Storage Tradeoff Matrix', pts: 25 }
     ]},
     { ch: 7, title: 'Ch 7: Mastering Spreadsheets', labs: [
@@ -312,10 +312,12 @@ const CS_MAP = [
       { id: 'cs_ch11_bias_test', title: 'The Bias Test', pts: 25 }
     ]},
     { ch: 12, title: 'Ch 12: Ethics & Societal Impact', labs: [
-      { id: 'cs_ch12_cross_discipline_brief', title: 'The Cross-Discipline Brief', pts: 25 },
       { id: 'cs_ch12_privacy_audit',          title: 'The Privacy Audit',         pts: 25 }
     ]},
-    { ch: 13, title: 'Ch 13: AI & Cross-Disciplinary Tech', labs: [], milestones: [
+    { ch: 13, title: 'Ch 13: AI & Cross-Disciplinary Tech', labs: [
+      { id: 'cs_ch13_cross_discipline_brief',  title: 'The Cross-Discipline Brief',                  pts: 25 },
+      { id: 'cs_ch13_cross_discipline_impact', title: 'The Cross-Discipline Brief (Impact Section)', pts: 25 }
+    ], milestones: [
       { id: 'Unit5-Project', title: 'Project: The Tech Impact Briefing', pts: 100 }
     ] }
   ]},
@@ -344,8 +346,7 @@ const CS_MAP = [
       { id: 'cs_ch18_threat_log', title: 'The Threat Log', pts: 25 }
     ]},
     { ch: 19, title: 'Ch 19: Defending Systems', labs: [
-      { id: 'cs_ch19_tradeoff_matrix', title: 'The Tradeoff Matrix', pts: 25 },
-      { id: 'cs_ch19_security_brief',  title: 'The Security Brief',  pts: 25 }
+      { id: 'cs_ch19_tradeoff_matrix', title: 'The Tradeoff Matrix', pts: 25 }
     ], milestones: [
       { id: 'cs_ch19_network_audit', title: 'Project: The Network Audit', pts: 100 }
     ]}
@@ -403,7 +404,7 @@ const WD_MAP = [
     { id: 'ch5_lab7', title: 'Lab 7: Image Placeholders',      pts: 25 },
     { id: 'ch5_lab8', title: 'Lab 8: Full Contact Form',       pts: 25 },
   ], milestones: [
-    { id: 'ch5_milestone', title: 'Zero Error Audit', pts: 50 },
+    { id: 'ch5_milestone', title: 'Zero Error Audit', pts: 100 },
   ]},
   { ch: 6, title: 'The "Clothes" (Intro to CSS)', labs: [
     { id: 'ch6_lab1', title: 'Lab 1: The External Sheet',   pts: 25 },
@@ -525,8 +526,6 @@ const TITLE_MAP = (() => {
   }
   for (const ch of WD_MAP) {
     const n = ch.ch;
-    m[`WD-Ch${n}-Pre`]  = `Ch ${n} Pre-Assessment`;
-    m[`WD-Ch${n}-Exam`] = `Ch ${n}: ${ch.title} – Exam`;
     for (const lab of ch.labs)       m[lab.id] = lab.title;
     for (const ms  of ch.milestones) m[ms.id]  = ms.title;
   }
@@ -697,7 +696,7 @@ function renderWD() {
       </div>
       <div class="card-body p-0">`;
 
-    html += assignmentRow(`WD-Ch${n}-Pre`, `Ch ${n} Pre-Assessment`, 'pre', 15, courseId);
+    html += assignmentRow(wdPreId(n), `Ch ${n} Pre-Assessment`, 'pre', 10, courseId);
 
     for (const lab of ch.labs) {
       html += assignmentRow(lab.id, lab.title, 'lab', lab.pts, courseId);
@@ -707,7 +706,7 @@ function renderWD() {
       html += assignmentRow(ms.id, ms.title, 'milestone', ms.pts, courseId);
     }
 
-    html += assignmentRow(`WD-Ch${n}-Exam`, `Ch ${n}: ${ch.title} — Exam`, 'exam', 100, courseId);
+    html += assignmentRow(`Ch${n}-Exam`, `Ch ${n}: ${ch.title} — Exam`, 'exam', 20, courseId);
 
     html += `</div></div>`;
   }
@@ -739,11 +738,16 @@ function collectAllKnownCurriculumIds() {
   return new Set([...collectCSIds(), ...collectWDIds(1, 16)]);
 }
 
+// Retired activities keep their exams row (and any grades already in it) but
+// have no due date, so they never show as missing. Kept off this page so a
+// Save can't give them one again. Same list as server/routes/assessments.js.
+const RETIRED_IDS = new Set(['cs_ch3_file_system_audit', 'cs_ch19_security_brief', 'cs_ch12_cross_discipline_brief']);
+
 function renderDiagnostics(courseIds) {
   const known = collectAllKnownCurriculumIds();
   const ids = Object.keys(existingExams)
     .filter(id => !id.endsWith('-Score'))
-    .filter(id => !known.has(id))
+    .filter(id => !known.has(id) && !RETIRED_IDS.has(id))
     .filter(id => courseIds.includes(existingExams[id]?.course_id))
     .sort();
 
@@ -822,7 +826,7 @@ function collectAssignments() {
   });
 
   // Annotate with title, course_id, total_points
-  const typePoints = { exam: 100, pre: 15, chapter: 10, final: 100, lab: 25, milestone: 100 };
+  const typePoints = { exam: 100, pre: 10, chapter: 10, final: 100, lab: 25, milestone: 100 };
   const assignments = Object.values(byExam).map(a => {
     const pts      = a.pts || typePoints[a.type] || 100;
     const existing = existingExams[a.exam_id];
@@ -1346,15 +1350,19 @@ function collectCSIds() {
   return ids;
 }
 
+// The WD pre-assessment's real exam_id (js/quizLogic.js). The "[15 pts]" is
+// only a leftover in the id; it's worth 10, like every pre-test.
+function wdPreId(n) { return `Ch${n} Pre-Assessment [15 pts]`; }
+
 function collectWDIds(chStart, chEnd) {
   const ids = [];
   for (const ch of WD_MAP) {
     if (ch.ch < chStart || ch.ch > chEnd) continue;
     const n = ch.ch;
-    ids.push(`WD-Ch${n}-Pre`);
+    ids.push(wdPreId(n));
     for (const lab of ch.labs)       ids.push(lab.id);
     for (const ms  of ch.milestones) ids.push(ms.id);
-    ids.push(`WD-Ch${n}-Exam`);
+    ids.push(`Ch${n}-Exam`);
   }
   if (chEnd >= 16) ids.push('WD-Final');
   return ids;

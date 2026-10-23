@@ -563,7 +563,85 @@ async function initExam(config) {
         return;
     }
 
+    const prework = await checkChapterPrework();
+    if (!prework.ok) {
+        renderPreworkBlock(prework);
+        return;
+    }
+
     renderAuthScreen();
+}
+
+// The chapter's Pre-Scale AND Pre-Assessment come before its exam (teacher
+// 2026-10-23, same rule as CS units). Real enforcement is server-side in
+// /api/submit-exam; this is the up-front locked screen so a student doesn't
+// take the whole test and then lose it. Fails open on a network hiccup.
+async function checkChapterPrework() {
+    try {
+        const examId = `Ch${currentChapter}-Exam`;
+        const res = await fetch(`/api/exam/check-prerequisite?student_id=${encodeURIComponent(studentId)}&exam_id=${encodeURIComponent(examId)}`);
+        if (!res.ok) return { ok: true };
+        return await res.json();
+    } catch (e) {
+        console.error('[examLogicWD] Pre-work check failed:', e);
+        return { ok: true };
+    }
+}
+
+function renderPreworkBlock(prework) {
+    const container = document.getElementById('exam-container');
+    if (!container) return;
+    // The exam page shares its file name with the chapter's Proficiency
+    // Scale and Pre-Assessment pages (/exams/x.html, /proficiencyScales/x.html,
+    // /pre-assessments/x.html).
+    const page = location.pathname.split('/').pop();
+    const steps = [];
+    if (prework.preScaleOk === false) steps.push(`<a href="/proficiencyScales/${page}" class="btn btn-primary fw-bold m-1">1. Do the Proficiency Scale (Pre-Scale)</a>`);
+    if (prework.preTestOk === false) steps.push(`<a href="/pre-assessments/${page}" class="btn btn-primary fw-bold m-1">${steps.length ? '2' : '1'}. Take the Pre-Assessment</a>`);
+    container.innerHTML = `
+        <div class="alert alert-warning text-center shadow p-5">
+            <h4 class="fw-bold"><i class="fas fa-lock me-2"></i>This Exam Is Locked</h4>
+            <p class="mb-3">Finish this chapter's pre-work first, then come back to this exam.</p>
+            <div class="mb-3">${steps.join('')}</div>
+            <a href="/student" class="btn btn-outline-secondary btn-sm fw-bold">&laquo; Back to Portal</a>
+            <div class="mt-3">
+                <a href="#" id="override-toggle-link" class="small text-muted">Override</a>
+                <div id="override-box" class="d-none mt-2">
+                    <div class="input-group input-group-sm mx-auto" style="max-width: 220px;">
+                        <input type="text" id="override-code-input" class="form-control text-center" maxlength="6" inputmode="numeric">
+                        <button class="btn btn-outline-secondary" id="override-submit-btn">Go</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+    document.getElementById('override-toggle-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('override-box')?.classList.remove('d-none');
+        document.getElementById('override-code-input')?.focus();
+    });
+    document.getElementById('override-submit-btn')?.addEventListener('click', async () => {
+        const input = document.getElementById('override-code-input');
+        const code = input ? input.value.trim() : '';
+        try {
+            const res = await fetch('/api/exam/unlock-prereq', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: studentId, unit_exam_id: `Ch${currentChapter}-Exam`, code })
+            });
+            if (res.ok) {
+                window.location.reload();
+            } else if (input) {
+                input.value = '';
+                input.placeholder = 'Try again';
+            }
+        } catch (e) {
+            if (input) { input.value = ''; input.placeholder = 'Try again'; }
+        }
+    });
+    document.getElementById('override-code-input')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('override-submit-btn')?.click(); }
+    });
 }
 
 // Tests only open 7am-4pm on real school days -- real enforcement is
@@ -1278,10 +1356,10 @@ async function processSubmission() {
             })
         });
         if (!saveRes.ok) {
-            if (saveRes.status === 503) {
+            if (saveRes.status === 503 || saveRes.status === 403) {
                 try {
                     const errBody = await saveRes.json();
-                    if (errBody.testingPaused) alert(errBody.error);
+                    if (errBody.testingPaused || saveRes.status === 403) alert(errBody.error);
                 } catch {}
             }
             throw new Error(`submit-exam returned ${saveRes.status}`);

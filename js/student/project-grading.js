@@ -176,12 +176,27 @@ async function initProjectGradingInner(container) {
         return;
     }
 
+    // CS unit projects are numbered to match the page's "do these IN ORDER"
+    // box: STEP 1 is the Dropbox above this tool (teacher 2026-10-23 --
+    // students kept trying to peer review before a file was turned in).
+    // Until the file is uploaded, a STOP banner sends them back to Step 1.
+    let uploaded = true;
+    if (isCsUnitProject) {
+        try {
+            const g = await (await fetch(`/api/student/project-aggregate?chapter_project_id=${encodeURIComponent(chapterProjectId)}&exam_id=${encodeURIComponent(examId)}&student_id=${encodeURIComponent(user.student_id)}`)).json();
+            uploaded = !!(g.gate && g.gate.uploaded);
+        } catch (e) { /* the server still enforces the rule */ }
+    }
+    const stopBanner = isCsUnitProject && !uploaded
+        ? `<div class="alert alert-danger fw-bold mb-3"><i class="fas fa-hand me-2"></i>STOP: do STEP 1 first. Upload your ${escapeHtml(projectLabel)} file in the <a href="#submission-zone" class="alert-link">Dropbox above</a>. Nobody can peer review your project until it's turned in.</div>`
+        : '';
     container.innerHTML = `
-        <div class="card-header bg-info text-white fw-bold"><i class="fas fa-clipboard-check me-2"></i>Grade the Project: Self${hasAutoCheck ? ', Peer, and Auto-Check' : ' and Peer'}</div>
+        <div class="card-header bg-info text-white fw-bold"><i class="fas fa-clipboard-check me-2"></i>${isCsUnitProject ? 'STEP 2: Grade the Project (only AFTER Step 1)' : `Grade the Project: Self${hasAutoCheck ? ', Peer, and Auto-Check' : ' and Peer'}`}</div>
         <div class="card-body small p-4">
+            ${stopBanner}
             <ul class="nav nav-tabs mb-3" role="tablist">
-                <li class="nav-item"><button class="nav-link active" data-tab="self" type="button">My Self-Assessment</button></li>
-                <li class="nav-item"><button class="nav-link" data-tab="peer" type="button">Peer Review (In Person)</button></li>
+                <li class="nav-item"><button class="nav-link active" data-tab="self" type="button">${isCsUnitProject ? 'STEP 2A: My Self-Assessment' : 'My Self-Assessment'}</button></li>
+                <li class="nav-item"><button class="nav-link" data-tab="peer" type="button">${isCsUnitProject ? 'STEP 2B: Peer Review (In Person)' : 'Peer Review (In Person)'}</button></li>
                 ${hasAutoCheck ? '<li class="nav-item"><button class="nav-link" data-tab="auto" type="button">Auto-Check My Code</button></li>' : ''}
                 <li class="nav-item"><button class="nav-link" data-tab="results" type="button">My Results</button></li>
             </ul>
@@ -247,17 +262,11 @@ async function initProjectGradingInner(container) {
         // review it or be reviewed (teacher decision 2026-10-23; the server
         // enforces it too), so the list only shows them.
         const res = await fetch(`/api/student/section-classmates?section_id=${encodeURIComponent(user.section_id || '')}&exclude_student_id=${encodeURIComponent(user.student_id)}${isCsUnitProject ? `&uploaded_for=${encodeURIComponent(examId)}` : ''}`);
-        const reviewers = res.ok ? await res.json() : [];
-        let selfUploaded = true;
-        if (isCsUnitProject) {
-            try {
-                const g = await (await fetch(`/api/student/project-aggregate?chapter_project_id=${encodeURIComponent(chapterProjectId)}&exam_id=${encodeURIComponent(examId)}&student_id=${encodeURIComponent(user.student_id)}`)).json();
-                selfUploaded = !!(g.gate && g.gate.uploaded);
-            } catch (e) { /* if the check fails, the server still enforces the rule */ }
-        }
-        const noOneYet = isCsUnitProject && reviewers.length === 0;
-        const blockedMe = isCsUnitProject && (!selfUploaded || noOneYet);
-        const blockedThem = isCsUnitProject && (!selfUploaded || noOneYet);
+        let reviewers = res.ok ? await res.json() : [];
+        let selfUploaded = uploaded;
+        let noOneYet = isCsUnitProject && reviewers.length === 0;
+        let blockedMe = isCsUnitProject && (!selfUploaded || noOneYet);
+        let blockedThem = blockedMe;
         const meNotice = !isCsUnitProject ? '' : !selfUploaded
             ? `Upload your ${escapeHtml(projectLabel)} in the Dropbox first. Only a project that has been turned in can be reviewed.`
             : noOneYet ? `No classmate has turned in their ${escapeHtml(projectLabel)} yet. Only students who have completed this unit can review it.` : '';
@@ -273,8 +282,8 @@ async function initProjectGradingInner(container) {
             <p class="text-muted mb-3" data-peer-text="me">Stay logged in on your own computer. Have your reviewer sit with you, look at your work, and give you feedback out loud -- then they select their own name below and fill this out together with you. <strong>Your reviewer signs it at the bottom with their own password</strong> (or your teacher enters the daily code). You can't submit a peer review by yourself.</p>
             <p class="text-muted mb-3 d-none" data-peer-text="them">Use this on <strong>your own computer, signed in as yourself</strong>: your login confirms the review, so no password is needed. Pick whose project you're reviewing, look at their work with them, and fill this out.</p>
             <div class="alert alert-primary py-2 small d-none" data-peer-only="them"><i class="fas fa-folder-open me-1"></i>You are reviewing a classmate's <strong>${escapeHtml(projectLabel)}</strong> (the project on this page). Reviewing a different unit? Open that unit's project page first.</div>
-            ${meNotice ? `<div class="alert alert-warning py-2 small" data-peer-only="me">${meNotice}</div>` : ''}
-            ${themNotice ? `<div class="alert alert-warning py-2 small d-none" data-peer-only="them">${themNotice}</div>` : ''}
+            ${meNotice ? `<div class="alert alert-warning py-2 small peer-gate-notice" data-peer-only="me">${meNotice}</div>` : ''}
+            ${themNotice ? `<div class="alert alert-warning py-2 small d-none peer-gate-notice" data-peer-only="them">${themNotice}</div>` : ''}
             <div class="mb-3" data-peer-only="me">
                 <label class="form-label small fw-bold" for="peer-select">Who is reviewing this project?${isCsUnitProject ? ' <span class="fw-normal text-muted">(only classmates who have turned in this project are listed)</span>' : ''}</label>
                 <select class="form-select form-select-sm" id="peer-select">
@@ -292,7 +301,7 @@ async function initProjectGradingInner(container) {
             ${rubric.map(c => criterionRow('peer', c)).join('')}
             ${critiqueSandwichFields('peer')}
             <div class="border rounded p-3 bg-light mb-3" data-peer-only="me">
-                <label class="form-label small fw-bold mb-1" for="peer-confirm-pass"><i class="fas fa-signature me-1"></i>Reviewer: sign this review with YOUR password</label>
+                <label class="form-label small fw-bold mb-1" for="peer-confirm-pass" id="peer-pass-label"><i class="fas fa-signature me-1"></i>Reviewer: sign this review with YOUR password</label>
                 <div class="input-group input-group-sm">
                     <input type="password" class="form-control" id="peer-confirm-pass" name="peer-sign-${Date.now()}" autocomplete="new-password" readonly placeholder="The reviewer types their own login password">
                     <button type="button" class="btn btn-outline-secondary" id="peer-show-pass">Show</button>
@@ -319,7 +328,6 @@ async function initProjectGradingInner(container) {
         function updateSubmitLabel() {
             const name = revieweeSel.selectedIndex > 0 ? revieweeSel.options[revieweeSel.selectedIndex].text.split(' ')[0] : 'your classmate';
             submitBtn.textContent = peerMode === 'them' ? `Submit review of ${name}'s ${projectLabel}` : 'Submit Peer Review';
-            submitBtn.disabled = peerMode === 'them' ? blockedThem : blockedMe;
         }
         revieweeSel.addEventListener('change', updateSubmitLabel);
         updateSubmitLabel();
@@ -330,7 +338,42 @@ async function initProjectGradingInner(container) {
         // readonly until focused + autocomplete="new-password" keeps it empty.
         passEl.value = '';
         passEl.addEventListener('focus', () => passEl.removeAttribute('readonly'));
-        peerPane.querySelector('#peer-select').addEventListener('change', () => { passEl.value = ''; });
+        // Names the reviewer on the password box, so it's obvious whose
+        // password goes there: the reviewer's, never the logged-in student's.
+        const reviewerSel = peerPane.querySelector('#peer-select');
+        const passLabel = peerPane.querySelector('#peer-pass-label');
+        reviewerSel.addEventListener('change', () => {
+            passEl.value = '';
+            const who = reviewerSel.selectedIndex > 0 ? reviewerSel.options[reviewerSel.selectedIndex].text.split(' ')[0] : '';
+            const me = user.first_name ? ` (not ${user.first_name}'s)` : '';
+            passLabel.innerHTML = who
+                ? `<i class="fas fa-signature me-1"></i>${escapeHtml(who)}: type YOUR OWN password here${escapeHtml(me)}`
+                : '<i class="fas fa-signature me-1"></i>Reviewer: sign this review with YOUR password';
+            passEl.placeholder = who ? `${who}'s password` : 'The reviewer types their own login password';
+        });
+
+        // The page can be opened BEFORE the project is uploaded (or before a
+        // classmate uploads theirs), so a "not yet" decided at load time can be
+        // stale by the time someone clicks Submit (2026-10-23: a reviewer's
+        // Submit did nothing because the upload happened after the page
+        // loaded). Re-check live before refusing, without wiping the form.
+        async function recheckGate() {
+            try {
+                const g = await (await fetch(`/api/student/project-aggregate?chapter_project_id=${encodeURIComponent(chapterProjectId)}&exam_id=${encodeURIComponent(examId)}&student_id=${encodeURIComponent(user.student_id)}`)).json();
+                selfUploaded = !!(g.gate && g.gate.uploaded);
+                const r = await fetch(`/api/student/section-classmates?section_id=${encodeURIComponent(user.section_id || '')}&exclude_student_id=${encodeURIComponent(user.student_id)}&uploaded_for=${encodeURIComponent(examId)}`);
+                if (r.ok) reviewers = await r.json();
+            } catch (e) { return; }
+            noOneYet = reviewers.length === 0;
+            blockedMe = blockedThem = !selfUploaded || noOneYet;
+            for (const sel of [reviewerSel, revieweeSel]) {
+                const keep = sel.value;
+                sel.innerHTML = `<option value="">${sel === reviewerSel ? "Select the reviewer's name…" : "Select your classmate's name…"}</option>`
+                    + reviewers.map(c => `<option value="${escapeHtml(c.student_id)}">${escapeHtml(c.first_name)} ${escapeHtml(c.last_name)}</option>`).join('');
+                if (reviewers.some(c => String(c.student_id) === keep)) sel.value = keep;
+            }
+            if (!blockedMe) peerPane.querySelectorAll('.peer-gate-notice').forEach(el => el.remove());
+        }
         peerPane.querySelector('#peer-show-pass').addEventListener('click', (ev) => {
             const showing = passEl.type === 'text';
             passEl.type = showing ? 'password' : 'text';
@@ -344,6 +387,17 @@ async function initProjectGradingInner(container) {
         peerPane.querySelector('#btn-submit-peer').addEventListener('click', async () => {
             const statusEl = peerPane.querySelector('#peer-status');
             const reviewingOther = peerMode === 'them';
+            if (reviewingOther ? blockedThem : blockedMe) {
+                statusEl.innerHTML = `<span class="text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Checking…</span>`;
+                await recheckGate();
+                if (reviewingOther ? blockedThem : blockedMe) {
+                    statusEl.innerHTML = `<span class="text-danger fw-bold">${!selfUploaded
+                        ? (reviewingOther ? `Upload your own ${escapeHtml(projectLabel)} first (STEP 1, the Dropbox), then you can review classmates.` : `This ${escapeHtml(projectLabel)} hasn't been uploaded yet. Do STEP 1 first: upload it in the Dropbox above.`)
+                        : `No classmate has uploaded their ${escapeHtml(projectLabel)} yet. The reviewer has to turn in their own first.`}</span>`;
+                    return;
+                }
+                statusEl.innerHTML = '';
+            }
             const reviewerId = reviewingOther ? user.student_id : peerPane.querySelector('#peer-select').value;
             const revieweeId = reviewingOther ? peerPane.querySelector('#peer-reviewee').value : user.student_id;
             if (!reviewingOther && !reviewerId) { statusEl.innerHTML = `<span class="text-danger">Select the reviewer's name first.</span>`; return; }
@@ -447,3 +501,12 @@ async function initProjectGradingInner(container) {
 }
 
 document.querySelectorAll('[data-chapter-project-id]').forEach(initProjectGrading);
+
+// A file just went in through this page's Dropbox (js/assignment-uploader.js):
+// redraw the grading tool for that project so the STOP banner clears and the
+// peer review opens up without a page reload.
+window.addEventListener('assignment-uploaded', (e) => {
+    document.querySelectorAll('[data-chapter-project-id]').forEach(c => {
+        if (c.dataset.examId === e.detail?.examId) initProjectGrading(c);
+    });
+});

@@ -139,33 +139,24 @@ feeding4 = "Tue PM, ???"</pre>
             </div>
         </div>
 
-        <div class="row mb-5">
-          <div class="col-12">
-            <div id="project-grading-panel"
-                 class="card border-info shadow-sm text-start"
-                 data-chapter-project-id="8"
-                 data-course="CS"
-                 data-exam-id="Unit6-Project"
-                 data-rubric='[
-                    {"key":"data_structure","label":"Data Structure Comparison","description":"The array/list version and the plain-variables version model the same real data, and the explanation of why the list scales better is specific, not generic."},
-                    {"key":"module_design","label":"Module Design","description":"At least 3 modules are logical, non-overlapping, and each has a clear, specific job."},
-                    {"key":"sdlc_docs","label":"SDLC Documentation","description":"Every phase is shown, and the feedback round shows a real, specific change made because of real feedback, not invented."},
-                    {"key":"accessibility","label":"Accessibility Finding","description":"Names one specific, real accessibility issue in the app idea and a specific fix, not a generic accessibility statement."},
-                    {"key":"license_check","label":"License Check","description":"Every outside resource used is listed with its actual license or attribution requirement."},
-                    {"key":"real_need","label":"Why This App, For Real","description":"Names a specific real person and a specific real moment where not having this app causes an actual problem -- not a generic \"it would be useful\" statement."},
-                    {"key":"revision_history","label":"Revision History (Bonus)","description":"Includes a revision history or version log showing the plan actually changed over more than one round.","bonus":true}
-                 ]'>
-              <div class="card-body small p-4 text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading grading tool&hellip;</div>
-            </div>
-          </div>
+        <!-- Turn-in order (teacher 2026-10-23): students do exactly what they see, in the order they see it, so the Dropbox comes BEFORE the grading tool. -->
+        <div class="alert alert-primary border-primary shadow-sm mb-4" id="turn-in-order">
+            <h5 class="fw-bold mb-2"><i class="fas fa-list-ol me-2"></i>How to turn in this project: do these IN ORDER</h5>
+            <ol class="mb-2">
+                <li class="mb-1"><strong>STEP 1:</strong> Upload your finished project file in the <strong>Dropbox</strong> right below this box.</li>
+                <li class="mb-1"><strong>STEP 2A:</strong> Grade your own project on the <strong>My Self-Assessment</strong> tab.</li>
+                <li class="mb-0"><strong>STEP 2B:</strong> Get a peer review on the <strong>Peer Review</strong> tab from a classmate who has ALSO uploaded this project.</li>
+            </ol>
+            <p class="small mb-0">Your grade stays <strong>PENDING</strong> until STEP 1 and STEP 2B are both done.</p>
         </div>
 
         <div class="card shadow border-success text-start mb-5" id="submission-zone">
             <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>Student Assignment Dropbox</h4>
+                <h4 class="mb-0 gochi"><i class="fas fa-inbox me-2"></i>STEP 1: Turn In Your Project File</h4>
                 <span class="badge bg-light text-success shadow-sm" id="student-id-badge">Verifying...</span>
             </div>
             <div class="card-body p-4">
+                <p class="fw-bold text-danger mb-3"><i class="fas fa-circle-exclamation me-1"></i>Do this FIRST. Nobody can grade or peer review your project until your file is uploaded here.</p>
                 <form id="uploadForm">
                     <div class="mb-3">
                         <label class="form-label fw-bold">1. Which assignment are you turning in?</label>
@@ -199,14 +190,35 @@ feeding4 = "Tue PM, ???"</pre>
             </div>
         </div>
 
+        <div class="row mb-5">
+          <div class="col-12">
+            <div id="project-grading-panel"
+                 class="card border-info shadow-sm text-start"
+                 data-chapter-project-id="8"
+                 data-course="CS"
+                 data-exam-id="Unit6-Project"
+                 data-rubric='[
+                    {"key":"data_structure","label":"Data Structure Comparison","description":"The array/list version and the plain-variables version model the same real data, and the explanation of why the list scales better is specific, not generic."},
+                    {"key":"module_design","label":"Module Design","description":"At least 3 modules are logical, non-overlapping, and each has a clear, specific job."},
+                    {"key":"sdlc_docs","label":"SDLC Documentation","description":"Every phase is shown, and the feedback round shows a real, specific change made because of real feedback, not invented."},
+                    {"key":"accessibility","label":"Accessibility Finding","description":"Names one specific, real accessibility issue in the app idea and a specific fix, not a generic accessibility statement."},
+                    {"key":"license_check","label":"License Check","description":"Every outside resource used is listed with its actual license or attribution requirement."},
+                    {"key":"real_need","label":"Why This App, For Real","description":"Names a specific real person and a specific real moment where not having this app causes an actual problem -- not a generic \"it would be useful\" statement."},
+                    {"key":"revision_history","label":"Revision History (Bonus)","description":"Includes a revision history or version log showing the plan actually changed over more than one round.","bonus":true}
+                 ]'>
+              <div class="card-body small p-4 text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading grading tool&hellip;</div>
+            </div>
+          </div>
+        </div>
+
         <div class="text-center">
             <a href="/proficiencyScales/cs-unit-6.html" class="btn btn-outline-primary fw-bold shadow-sm"><i class="fas fa-arrow-left me-1"></i>Back to Unit 6 Proficiency Scale</a>
         </div>
 
     </div>
 
-    <script type="module" src="/js/assignment-uploader.js"></script>
-    <script type="module" src="/js/student/project-grading.js?v=8"></script>
+    <script type="module" src="/js/assignment-uploader.js?v=2"></script>
+    <script type="module" src="/js/student/project-grading.js?v=9"></script>
 
 <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 </body>

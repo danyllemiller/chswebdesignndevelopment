@@ -121,7 +121,43 @@ async function ensureUnitPrereqOverridesTable(connection) {
 const PROJECT_EXEMPT_UNITS = new Set([1, 2]);
 const { isProjectExempt } = require('../lib/projectExemptions');
 
+// WD chapter exams ("Ch3-Exam") get the same pre-work lock (teacher
+// 2026-10-23): the chapter's Pre-Scale AND Pre-Assessment first. WD has no
+// previous-exam score or project requirement, so that's all it checks, and
+// the same override row (daily code / admin tool) clears it. Grades already
+// earned without the pre-work stay as they are.
+async function checkWdChapterPrework(connection, studentId, examId, chNum) {
+    if (chNum < 1 || chNum > 16) return { ok: true };
+
+    await ensureUnitPrereqOverridesTable(connection);
+    const [overrideRows] = await connection.execute(
+        'SELECT id FROM unit_prereq_overrides WHERE student_id = ? AND unit_exam_id = ?',
+        [studentId, examId]
+    );
+    if (overrideRows.length > 0) return { ok: true, scoreOk: true, projectOk: true, projectRequired: false, preScaleOk: true, preTestOk: true };
+
+    // Pre-Scale = its gradebook row or the self_assessments level the
+    // Proficiency Scale page writes; Pre-Assessment = js/quizLogic.js's
+    // completion row or its "-Score" row (the "[15 pts]" is only a leftover
+    // in the id -- it's worth 10).
+    const [[preScaleRow]] = await connection.execute(
+        `SELECT (EXISTS(SELECT 1 FROM responses WHERE student_id = ? AND exam_id = ?)
+              OR EXISTS(SELECT 1 FROM self_assessments WHERE student_id = ? AND chapter_id = ? AND level > 0)) AS done`,
+        [studentId, `Ch${chNum} Pre-Scale`, studentId, `ch${chNum}`]
+    );
+    const preAssessmentId = `Ch${chNum} Pre-Assessment [15 pts]`;
+    const [[preTestRow]] = await connection.execute(
+        'SELECT EXISTS(SELECT 1 FROM responses WHERE student_id = ? AND exam_id IN (?, ?)) AS done',
+        [studentId, preAssessmentId, `${preAssessmentId}-Score`]
+    );
+    const preScaleOk = Number(preScaleRow.done) === 1;
+    const preTestOk = Number(preTestRow.done) === 1;
+    return { ok: preScaleOk && preTestOk, scoreOk: true, projectOk: true, projectRequired: false, preScaleOk, preTestOk };
+}
+
 async function checkUnitPrerequisite(connection, studentId, examId) {
+    const wd = /^Ch(\d+)-Exam$/.exec(examId || '');
+    if (wd) return checkWdChapterPrework(connection, studentId, examId, parseInt(wd[1], 10));
     const m = /^Unit(\d+)-Exam$/i.exec(examId || '');
     if (!m) return { ok: true };
     const unitNum = parseInt(m[1], 10);
@@ -364,9 +400,10 @@ router.post('/submit-exam', async (req, res) => {
 
         const prereq = await checkUnitPrerequisite(connection, student_id, exam_id);
         if (!prereq.ok) {
+            const isWdChapter = /^Ch\d+-Exam$/.test(exam_id);
             const reasons = [];
-            if (!prereq.preScaleOk) reasons.push(`this unit's Pre-Scale`);
-            if (!prereq.preTestOk) reasons.push(`this unit's Pre-Test (Diagnostic)`);
+            if (!prereq.preScaleOk) reasons.push(isWdChapter ? `this chapter's Pre-Scale` : `this unit's Pre-Scale`);
+            if (!prereq.preTestOk) reasons.push(isWdChapter ? `this chapter's Pre-Assessment` : `this unit's Pre-Test (Diagnostic)`);
             if (!prereq.scoreOk) reasons.push(`a score of at least 60% on ${prereq.prevExamId}`);
             if (!prereq.projectOk) reasons.push(`this unit's Project (self AND peer review both submitted)`);
             return { status: 403, body: {

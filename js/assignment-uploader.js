@@ -331,6 +331,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     status.classList.add('bg-success', 'text-white');
                     status.innerHTML = `✅ Uploaded ${successCount} files. Saved as: ${finalAssignmentKey}`;
                 }
+                // Lets the page's project grading tool (js/student/project-grading.js)
+                // know the file is in, so its "do STEP 1 first" banner clears.
+                window.dispatchEvent(new CustomEvent('assignment-uploaded', { detail: { examId: finalAssignmentKey } }));
                 uploadForm.reset();
                 uploadType.dispatchEvent(new Event('change'));
 

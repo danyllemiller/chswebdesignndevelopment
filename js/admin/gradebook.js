@@ -2188,7 +2188,10 @@ document.addEventListener('click', (e) => {
         document.getElementById('editColNewName').value = key
             .replace(/\s*[\[\(]\d+\s*pts?[\]\)]/i, '')
             .replace(/\s*\((?:WD1|WD2|AS|CS)\)\s*$/i, '');
-        document.getElementById('editColNewPts').value = parseAssignmentInfo(key).maxPoints;
+        // The catalog's real point value first: WD's pre-assessment ids still
+        // say "[15 pts]" even though they're worth 10, so parsing the name
+        // alone pre-filled 15 and one Save quietly made the column 15.
+        document.getElementById('editColNewPts').value = allAssignments[key]?.maxPoints ?? parseAssignmentInfo(key).maxPoints;
         document.getElementById('editColDueDate').value = allAssignments[key]?.dueDate || "";
         document.getElementById('editColInstructions').value = allAssignments[key]?.instructions || "";
         // targetCourse holds the raw DB course_id (e.g. '10003GS') -- map it
