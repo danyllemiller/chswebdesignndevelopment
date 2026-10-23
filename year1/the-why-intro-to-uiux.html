@@ -679,6 +679,19 @@
             <figcaption class="p-2 small text-muted text-center">The full color theory picture: properties, mixing, models, harmonies, and psychology.</figcaption>
           </figure>
 
+          <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch4 Day 2 -->
+          <div class="card border-info shadow-sm my-4 text-start">
+            <div class="card-header bg-site-secondary fw-bold text-info">Two Brands, Two Palettes</div>
+            <div class="card-body small">
+              <p class="mb-2">Put color psychology and the 60-30-10 Rule together for two very different fictional clients:</p>
+              <ul class="mb-2">
+                <li class="mb-2"><strong>Glacier Bank:</strong> 60% white and light gray, 30% <strong>navy blue</strong> (trust and stability), 10% a bright accent like teal, saved only for "Open an Account." Customers trust a bank that looks calm.</li>
+                <li class="mb-0"><strong>Blaze Burger:</strong> 60% warm cream, 30% charcoal, 10% <strong>red</strong> (urgency and appetite) on "Order Now." Red says <em>right now</em>, which is exactly what a hungry customer should feel.</li>
+              </ul>
+              <p class="mb-0">Swap the palettes and both brands feel wrong: a red bank feels like an alarm, and a navy burger stand feels like a bank. Every color is written as a <strong>hex code</strong> (like <code>#1F2A44</code>) so the whole team uses the exact same shade.</p>
+            </div>
+          </div>
+
           <h5 id="typography" class="fw-bold mt-4 text-primary">Typography: Choosing and Pairing Fonts</h5>
           <p><strong>The Why:</strong> Text makes up most of what's actually on a web page. A gorgeous color palette on unreadable type is still a failed design — typography is doing the heavy lifting of communication.</p>
           <p><strong>The What:</strong> Typefaces fall into a few families: <strong>Serif</strong> (has small decorative feet, e.g. Times New Roman — reads as traditional, trustworthy), <strong>Sans-Serif</strong> (no feet, clean lines, e.g. Helvetica — reads as modern, minimal), and <strong>Display/Script</strong> fonts (decorative, expressive — readable only in small doses, never for body text).</p>
@@ -711,6 +724,11 @@
                       <p class="text-muted small mb-0"><i class="fas fa-spinner fa-spin me-1"></i>Loading…</p>
                   </div>
               </div>
+          </div>
+
+          <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch4 Days 2-3 -->
+          <div class="alert alert-info small border my-4">
+            <strong>Why white space works: cognitive load.</strong> <strong>Cognitive load</strong> is the amount of mental effort a page demands. Every extra element is one more thing the brain has to notice, sort, and ignore. White space <strong>reduces cognitive load</strong>, which is why a spacious page feels calm and premium and the button is easy to find. It does something adding content never can: it creates <strong>focus</strong>. If a page is beautiful and nobody can find the button, that is the designer's fault: the hierarchy failed.
           </div>
 
           <h5 id="branding-message" class="fw-bold mt-5 text-primary">Crafting Your Brand Message</h5>
@@ -889,6 +907,11 @@
             <li class="mb-3"><strong>Breadcrumbs:</strong> A text path (Home > Men's Wear > Shoes) that helps users navigate back.</li>
           </ul>
 
+          <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch4 Days 3, 5 -->
+          <h5 class="fw-bold mt-4 text-primary">Choose Your Pattern (and Know What You Rejected)</h5>
+          <p>The four layout patterns you will pick between most often are the <strong>F-pattern</strong> (text-heavy pages), the <strong>Z-pattern</strong> (simple visual pages), the <strong>hero</strong> (one big image and message up top), and the <strong>card grid</strong>: the Card pattern repeated in rows and columns, like Pinterest or a streaming app's home screen, perfect for many similar items such as events, products, or games. A professional can always say which pattern they chose for a page <em>and which one they rejected, and why</em>: "We chose a card grid for the events page because users compare many events at once; we rejected a hero because no single event matters more than the rest."</p>
+          <p>Why do most shopping carts work the same way? Not laziness: <strong>strategy</strong>. Familiar patterns reduce friction because users already know how they work (<strong>Jakob's Law</strong>).</p>
+
           <!-- BUSINESS PLAN INTEGRATION: SCALING -->
           <div class="card border-dark shadow-sm my-4 mt-5">
             <div class="card-header bg-dark text-white fw-bold">
@@ -898,6 +921,23 @@
               <p class="mb-0"><strong>Agency Scaling & Profit Margins:</strong> In business, time is money. If you have to redesign the same navigation bar on 50 different pages for a client, you are losing profit. By using Figma <strong>Components</strong>, your agency builds a master template. Change the master, and all 50 pages update instantly. This workflow allows you to take on more clients without hiring more staff, drastically increasing your profit margin.</p>
             </div>
           </div>
+
+          <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch4 Day 4 -->
+          <h5 class="fw-bold mt-4 text-primary">Components Have States</h5>
+          <p>A <strong>component</strong> is a master element that can be duplicated, so changing the master updates every copy instantly. But a real button is not just one picture: it has <strong>states</strong>, and a professional designs every one of them so the user always knows what is happening:</p>
+          <div class="table-responsive">
+          <table class="table table-bordered table-sm small bg-white shadow-sm mb-3 text-start">
+            <thead class="table-light"><tr><th>State</th><th>When it shows</th><th>What it tells the user</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Default</strong></td><td>Normal, resting look</td><td>"I'm a button you can use."</td></tr>
+              <tr><td><strong>Hover</strong></td><td>The mouse is over it</td><td>"Yes, this is clickable."</td></tr>
+              <tr><td><strong>Pressed (active)</strong></td><td>While it's being clicked or tapped</td><td>"Got it, I felt that."</td></tr>
+              <tr><td><strong>Focus</strong></td><td>Selected with the keyboard (Tab key)</td><td>"You're here." (Keyboard users depend on it.)</td></tr>
+              <tr><td><strong>Disabled</strong></td><td>It can't be used yet</td><td>"Finish the form first."</td></tr>
+            </tbody>
+          </table>
+          </div>
+          <p class="small mb-4">Name every layer and state professionally (<code>btn-submit / hover</code>, not "Rectangle 542"). On a team, teammates can't find or edit layers named "Rectangle 542", the hand-off slows down, and it looks unprofessional to clients.</p>
 
           <!-- LAB 3 CARD -->
           <div class="card border-success shadow-sm my-4 mt-5 text-start">
@@ -1059,6 +1099,20 @@
             <strong>Where Everyone Gets Ambushed:</strong> Students often "help" the tester the moment they hesitate — pointing at the right button or explaining what a label means. The second you explain something, the test stops measuring your design and starts measuring your explanation. If a real customer needs a tour guide standing next to them, the design already failed; that's exactly the data point a usability test exists to surface.
           </div>
 
+          <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch4 Days 5-7 -->
+          <div class="card border-info shadow-sm my-4 mx-auto text-start" style="max-width: 900px;">
+            <div class="card-header bg-site-secondary fw-bold text-info">Running a Real Usability Test</div>
+            <div class="card-body small">
+              <p><strong>How many testers do you need?</strong> About <strong>5 users find most of the big problems</strong>. After the fifth person, new testers mostly stumble on the same problems you already saw, so it is smarter to fix what you found and test 5 more people than to test 20 at once.</p>
+              <p><strong>Think-aloud:</strong> ask the tester to say out loud what they are thinking as they work ("I'm looking for the settings... I expected that to be under my profile..."). The <strong>observer only writes</strong>. No pointing, no hints. Record the biggest problem each tester hit, and the thing they did that you never expected; that surprise is usually your most valuable finding.</p>
+              <p class="mb-1"><strong>Plan the test before anyone sits down:</strong></p>
+              <ul class="mb-0">
+                <li><strong>Roles:</strong> who is the tester, who takes notes, who runs the prototype.</li>
+                <li><strong>3 tasks</strong> every tester must complete (e.g., "Find this Saturday's events," "Join a group," "Change your notification settings").</li>
+              </ul>
+            </div>
+          </div>
+
           <!-- BUSINESS PLAN INTEGRATION: CLIENT APPROVAL -->
           <div class="card border-dark shadow-sm my-5 mx-auto text-start" style="max-width: 900px;">
             <div class="card-header bg-dark text-white fw-bold">
@@ -1066,6 +1120,20 @@
             </div>
             <div class="card-body small bg-light">
               <p class="mb-0"><strong>Securing the Signature:</strong> High-Fidelity prototypes aren't just for usability testing; they are your primary sales tool. Before your Junior and Senior Developers write a single line of expensive code, you sit down with the client, hand them the prototype, and have them click through it. Once they approve the prototype, they sign off. If they want changes <em>after</em> this point, your agency charges them a "Change Order" fee. This protects your time and your developers' sanity.</p>
+            </div>
+          </div>
+
+          <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch4 Day 6 -->
+          <div class="card border-primary shadow-sm my-4 mx-auto text-start" style="max-width: 900px;">
+            <div class="card-header bg-site-secondary fw-bold text-primary">High-Fidelity Means Real Content, Then a Clean Hand-Off</div>
+            <div class="card-body small">
+              <p>A <strong>high-fidelity mockup</strong> uses real colors, fonts, and content, and <strong>no lorem ipsum should ever reach a client</strong>. Real content reveals problems placeholder text hides: real text changes line lengths, overflows boxes, and exposes hierarchy problems. A card designed around "Lorem ipsum" looks perfect until the real event name, "Carson City Community Garden Spring Volunteer Day," wraps onto three lines and shoves the button off the card.</p>
+              <p class="mb-1">When the mockup is approved, a developer has to build it. Give them a <strong>hand-off package</strong> complete enough to build without asking you a single question:</p>
+              <ul class="mb-0">
+                <li class="mb-1"><strong>Design tokens:</strong> the named values a developer copies straight into code: color hex codes (<code>--primary: #1F2A44</code>), font sizes (heading 40px, body 16px), spacing values (8, 16, 24px), and corner radius.</li>
+                <li class="mb-1"><strong>Exported assets:</strong> icons (SVG), logo, and optimized images.</li>
+                <li class="mb-0"><strong>Notes:</strong> component states, what happens on click, and how the layout changes on mobile.</li>
+              </ul>
             </div>
           </div>
 
@@ -1114,6 +1182,26 @@
           </div>
 
         </section>
+      </div>
+    </div>
+
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch4 Days 8-9 -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-12">
+        <div class="card border-primary shadow-sm mx-auto text-start" style="max-width: 900px;">
+          <div class="card-header bg-primary text-white fw-bold">Capstone: The Community App (Assembly &amp; Pitch)</div>
+          <div class="card-body small p-4">
+            <p>This is the first time all of your Chapter 3 and 4 work comes together in one deliverable: the <strong>Blue Ocean Map</strong>, the <strong>MVP Scope List</strong>, your <strong>sitemap</strong>, <strong>wireframes</strong>, <strong>persona</strong>, and the <strong>High-Fi Figma Mockup</strong>, built with legally cited assets.</p>
+            <p class="fw-bold mb-1">Step 1: Reconcile research and design</p>
+            <p>Your blueprint and your mockup were built weeks apart, so they have probably <strong>drifted</strong>: a feature that's on the mockup but not in the MVP list, a page missing from the sitemap, a design choice your persona would never need. Cross-check your sitemap, wireframes, and persona against the final mockup. Then decide: <strong>fix</strong> any drift that ignores or contradicts your research, and <strong>defend</strong> any change that user testing supports.</p>
+            <p class="fw-bold mb-1">Step 2: The 3-minute founder pitch</p>
+            <ul class="mb-0">
+              <li class="mb-1">A stranger opens your package cold. The first thing they see should say what the app is and who it helps (its purpose and value).</li>
+              <li class="mb-1">Each team member gets a speaking part and defends <strong>one design decision</strong> with evidence: an interview quote, a test result, or a competitor gap.</li>
+              <li class="mb-0">Rehearse it. Three minutes goes fast.</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
 
