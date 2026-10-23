@@ -764,6 +764,11 @@ console.log(sparkyGreeting);</code></pre>
           </ol>
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch9 Days 2, 7 -->
+        <div class="alert alert-info small border my-4">
+          <strong>Parameter vs. argument:</strong> in <code>function multiply(a, b) { return a * b; }</code>, <code>a</code> and <code>b</code> are <strong>parameters</strong>: the named inputs the function is waiting for. In <code>multiply(4, 5)</code>, <code>4</code> and <code>5</code> are <strong>arguments</strong>: the actual values you hand it when you call it. Parameters are the empty labeled boxes; arguments are what you put in them. And if a function forgets to <code>return</code>, it hands back <code>undefined</code>, so any code that uses its result breaks.
+        </div>
+
         <!-- GRADED LAB 2 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 2: Reusable UI Functions [25 pts]</div>
@@ -1152,6 +1157,32 @@ btn.addEventListener("click", fn);
               <li class="mb-2">Save and refresh. Observe how the text disappears and says "undefined" because object keys are case-sensitive!</li>
               <li class="mb-0">Fix it to bring Sparky back!</li>
           </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch9 Days 3, 6-8 -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Try to Break It Before Anyone Else Does</h2>
+        <p>An <strong>edge case</strong> is an input at the edges of what your code expects: the weird, empty, or extreme stuff real users actually do. If a stranger clicked your Generate button five times in a row with different inputs, what would break first? Test these before a peer does:</p>
+        <ul class="small mb-3 bg-light p-3 rounded border shadow-sm text-start">
+          <li class="mb-1"><strong>Empty inputs:</strong> they click Generate without typing a name.</li>
+          <li class="mb-1"><strong>Unexpected values:</strong> "red" instead of "Red," a color your <code>if</code> never mentions, or a number where a word should go.</li>
+          <li class="mb-1"><strong>Repeated clicks:</strong> clicking five times; does the output stack up five copies, or replace itself?</li>
+          <li class="mb-0"><strong>Extreme values:</strong> a 60-character name that overflows its box.</li>
+        </ul>
+        <p>Have each teammate write one edge case, combine them into one shared test list, and run every app against it. When a peer finds a bug you didn't, ask why you missed it; that's usually your blind spot.</p>
+        <div class="card border-info shadow-sm mb-0 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">Pairs That Are Easy to Confuse</div>
+          <div class="card-body small">
+            <ul class="mb-0">
+              <li class="mb-1"><code>=</code> <strong>assigns</strong> a value; <code>===</code> <strong>compares</strong> both value and type.</li>
+              <li class="mb-1"><code>let</code> can be <strong>reassigned</strong>; <code>const</code> cannot.</li>
+              <li class="mb-1"><strong>Parameter</strong> (the name in the function definition) vs. <strong>argument</strong> (the value you pass in).</li>
+              <li class="mb-0"><strong>Scope</strong> (where a variable can be used: global everywhere, local only inside its braces) vs. <strong>DOM selection</strong> (finding an element on the page with <code>document.querySelector()</code>). Both are invisible until something breaks.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
