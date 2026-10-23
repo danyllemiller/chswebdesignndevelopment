@@ -154,6 +154,25 @@
             </tbody>
         </table>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch7 Day 1 -->
+        <div class="card border-info shadow-sm my-4 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">Why Is Everything Stacked in One Column? Bricks and Beads</div>
+          <div class="card-body small">
+            <p class="mb-2">Your site is styled and every element still sits in one tall column. That's not a bug: <strong>block elements stack by default</strong>. Think of block elements as <strong>bricks</strong> (each takes the full width and starts a new line) and inline elements as <strong>beads</strong> on a string (they sit side by side in the line of text).</p>
+            <div class="table-responsive">
+            <table class="table table-bordered table-sm bg-white mb-2">
+              <thead class="table-light"><tr><th>Block (bricks)</th><th>Inline (beads)</th><th>Inline-block (the hybrid)</th></tr></thead>
+              <tbody><tr>
+                <td><code>h1</code>, <code>p</code>, <code>div</code>, <code>li</code>, <code>section</code></td>
+                <td><code>a</code>, <code>span</code>, <code>strong</code>, <code>img</code></td>
+                <td><code>button</code>: sits in a row but respects width and height</td>
+              </tr></tbody>
+            </table>
+            </div>
+            <p class="mb-0">Inline elements ignore <code>width</code>, <code>height</code>, and vertical margins; <code>display: inline-block</code> gives you both. And remember <strong>margin collapse</strong>: when two vertical margins touch, they combine into one (the larger one) instead of adding up. Test any element's display type in DevTools to confirm.</p>
+          </div>
+        </div>
+
         <!-- ADDED TABLE: VISIBILITY & FLOW -->
         <h5 class="fw-bold mt-4 text-primary">Visibility vs. Display</h5>
         <p>When you need to hide an element, you have two choices, and they affect the layout completely differently:</p>
@@ -285,6 +304,12 @@
             </tbody>
         </table>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch7 Days 2-3 -->
+        <div class="alert alert-info small border my-4">
+          <strong>Why flexbox was a big deal:</strong> before flexbox, CSS had no reliable tool for vertical alignment, so centering something vertically took hacks. Now it's three lines: <code>display: flex; justify-content: center; align-items: center;</code> on the parent.<br>
+          <strong>Gap vs. margin:</strong> to space flex items, use <code>gap</code> on the parent. It spaces items evenly <em>between</em> them, with no extra space at the edges. Margins on each item can double up between items and leave unwanted space on the outside.
+        </div>
+
         <!-- LAB 2 & 3 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestones 2 &amp; 3: Flexbox &amp; Centering [50 pts]</div>
@@ -366,6 +391,31 @@
             </div>
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch7 Day 5 -->
+        <h5 class="fw-bold mt-4 text-primary">Named Areas: Rearranging Without Touching HTML</h5>
+        <p>What does <code>1fr</code> really mean? <strong>One share of the leftover space</strong> after fixed sizes are taken out. And with <code>grid-template-areas</code> you can name the regions of a page and draw the layout right in your CSS:</p>
+        <pre class="p-3 border rounded shadow-sm mb-3 no-copy"><code>.page {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  grid-template-areas:
+    "header header"
+    "sidebar main"
+    "footer footer";
+}
+header { grid-area: header; }
+aside  { grid-area: sidebar; }
+main   { grid-area: main; }
+footer { grid-area: footer; }
+
+/* On phones, stack everything: no HTML changes needed */
+@media (max-width: 700px) {
+  .page {
+    grid-template-columns: 1fr;
+    grid-template-areas: "header" "main" "sidebar" "footer";
+  }
+}</code></pre>
+        <p class="small mb-4">Notice the phone layout moves the sidebar <em>below</em> the main content just by redrawing the areas. The HTML order never changes.</p>
+
         <!-- LAB 4 & 5 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestones 4 &amp; 5: Grid Skeleton &amp; Gallery [50 pts]</div>
@@ -429,6 +479,11 @@
                 </tr>
             </tbody>
         </table>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch7 Days 6-7 -->
+        <div class="alert alert-warning small border-warning border my-4">
+          <strong>Where does an absolute element go if no parent is positioned?</strong> It positions itself relative to the <strong>whole page</strong> (the initial containing block), which is why an "absolute" badge can fly to the top corner of the screen. Give the parent <code>position: relative</code> to turn it into the anchor. Also remember: <code>position: static</code> is the default and ignores <code>top/right/bottom/left</code> entirely; <code>fixed</code> stays on screen no matter what, while <code>sticky</code> scrolls normally until it reaches a threshold, then sticks.
+        </div>
 
         <h5 class="fw-bold mt-4 text-primary">Stacking Order: <code>z-index</code></h5>
         <p>Which CSS property controls the stacking order of overlapping elements on the Z-axis (front-to-back)? <code>z-index</code>! Higher numbers (like 1000) sit on top. And yes, a <code>z-index</code> CAN have a negative value (e.g., <code>-1</code>), which pushes the element behind the default background layer.</p>
@@ -634,6 +689,15 @@ nav a {
             </div>
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch7 Days 8-9 -->
+        <div class="card border-info shadow-sm my-4 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">Let the Content Set the Breakpoint</div>
+          <div class="card-body small">
+            <p class="mb-2">Should a breakpoint come from a popular phone size? <strong>No: from your content.</strong> Phone sizes change every year; your layout breaks where it breaks. Slowly drag the browser window narrower (or use DevTools' responsive mode) and watch. The moment the text gets cramped or the columns overlap, say at 700px, that is your breakpoint: "the content breaks at 700px," not "iPhones are 390px."</p>
+            <p class="mb-0"><strong>Why mobile-first means less code:</strong> with <code>min-width</code> queries you write the simple phone layout first and only <em>add</em> styles as the screen grows. Desktop-first <code>max-width</code> queries start with the complex layout and then have to <em>undo</em> it for phones, override after override. Refactor to mobile-first and count how many overrides disappear. (Preprocessors like Sass made variables and nesting popular; plain CSS now has both built in.)</p>
+          </div>
+        </div>
+
         <!-- LAB 7, 8, 9 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestones 7-9: Breakpoints &amp; Refactoring [75 pts]</div>
@@ -662,6 +726,20 @@ nav a {
       <div class="col-lg-12">
         <h2 class="section-title mt-0 text-center">Final Architecture Audit</h2>
         <p class="text-center mx-auto mb-4" style="max-width: 800px;">You have the colors, the fonts, and now the advanced layout logic. It is time to finalize the structural architecture of your Custom Website using Chrome Developer Tools.</p>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch7 Days 11-14 -->
+        <div class="card border-primary shadow-sm my-4 mx-auto text-start" style="max-width: 900px;">
+          <div class="card-header bg-site-secondary fw-bold text-primary">How to Run the Architecture Audit</div>
+          <div class="card-body small">
+            <ol class="mb-3">
+              <li class="mb-2"><strong>Test every page at three widths:</strong> 320px (small phone), 768px (tablet), and 1440px (desktop). Look for <strong>horizontal scroll</strong> (something wider than the screen), <strong>orphans</strong> (a single word or card stranded alone on its own line), overlapping text, and a sticky header that stops staying on top.</li>
+              <li class="mb-2"><strong>Test on real hardware.</strong> Peer device testing on actual phones finds bugs your laptop never will: <strong>touch targets</strong> too small for a thumb, fonts that render differently, and browser quirks. If a client only tests on their own laptop, they'll never catch those.</li>
+              <li class="mb-2"><strong>Triage:</strong> list every bug and rank it by <strong>severity</strong>. Anything that blocks a user (can't reach the menu, horizontal scroll on the homepage) gets fixed before anything cosmetic.</li>
+              <li class="mb-2"><strong>Fix, then re-test every breakpoint.</strong> One fix can create a new bug, usually through a shared class or a cascade side effect, so record each bug, its fix, and whether it passed the re-test.</li>
+              <li class="mb-0"><strong>Write real bug reports:</strong> the <strong>device</strong>, the <strong>width</strong>, the steps, and what broke. "iPhone 13, 390px: open the menu, tap Services, and the dropdown appears behind the hero image" can be fixed; "it looks weird on my phone" can't.</li>
+            </ol>
+          </div>
+        </div>
 
         <!-- MILESTONE CARD -->
         <div class="card border-primary shadow-sm mt-5 mx-auto text-start" style="max-width: 900px;">
