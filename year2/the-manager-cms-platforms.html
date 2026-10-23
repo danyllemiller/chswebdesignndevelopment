@@ -55,6 +55,20 @@
         
         <p>This changes your job. What is the primary difference between a builder and a manager in web design? <strong>Builders code from scratch; managers use a pre-built CMS to post content quickly.</strong> As an agency developer, your job is no longer to write the articles. Your job is to set up the CMS architecture so the marketing team, writers, and business owners can log in and manage the site themselves safely.</p>
         
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch12 Day 1 -->
+        <div class="card border-info shadow-sm my-4 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">Do the Math: Hand-Coding vs. a CMS</div>
+          <div class="card-body small">
+            <p>A news site publishes 100 articles a day. Is someone hand-coding each page? <strong>No: a CMS generates them.</strong> Here's why. Say a fictional newspaper needs 200 pages:</p>
+            <ul class="mb-2">
+              <li class="mb-1"><strong>Hand-coded:</strong> about 1 hour per page to build, link, and check = <strong>200 hours</strong>, and every future change means editing code again.</li>
+              <li class="mb-1"><strong>CMS:</strong> about 20 hours to set up the theme and structure once, then roughly 5 minutes per article = about <strong>37 hours</strong>, and the newspaper's own staff can publish from then on.</li>
+            </ul>
+            <p class="mb-2">That gap is the business case for a CMS. Your estimates will differ, but the shape of the math almost never does: the more pages a site has, and the more often it changes, the more a CMS wins.</p>
+            <p class="mb-0"><strong>Who actually uses what?</strong> <strong>WordPress</strong> powers more than 40% of all websites on the internet, far more than any other CMS. <strong>Joomla</strong> and <strong>Drupal</strong> each power only around 1 to 2%, so you'll mostly meet them on older sites or large government and university projects.</p>
+          </div>
+        </div>
+
         <h2 class="section-title mt-5">Meet the Client: "Manager Mike"</h2>
         
         <div class="card shadow-sm border-0 bg-light mt-4 mb-5 text-start">
@@ -554,6 +568,16 @@
           <strong>Trap — Where Everyone Gets Ambushed:</strong> Installing WooCommerce and adding products isn't enough to accept real money — forgetting to configure a Payment Gateway means the checkout page exists but every purchase attempt will fail. Always test a complete purchase (using the gateway's "test mode") before launching a client's store.
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch12 Day 6 -->
+        <h5 class="fw-bold mt-4 text-primary">Selling Online: What's Now Your Legal Problem</h5>
+        <p>The moment a client sells online, the site carries real legal responsibilities:</p>
+        <ul class="small mb-3 bg-light p-3 rounded border shadow-sm text-start">
+          <li class="mb-2"><strong>Sales tax:</strong> the store has to charge the right sales tax for where the buyer lives and report it. WooCommerce has tax settings, but someone must set the rates correctly.</li>
+          <li class="mb-2"><strong>Payment security:</strong> card numbers must be protected. That is why the payment gateway (Stripe, PayPal) handles the card: the card data never touches the client's own server. Card-processing security rules (PCI) are strict, and breaking them can cost a business its ability to take cards.</li>
+          <li class="mb-0"><strong>Consumer privacy:</strong> a store collects names, addresses, and emails, so it needs a privacy policy and must keep that data safe.</li>
+        </ul>
+        <p class="mb-4"><strong>Products, variants, shipping, and tax: which is hardest?</strong> Products are easy. A <strong>variant</strong> is one version of a product (a 12 oz bag vs. a 2 lb bag; whole bean vs. ground), each with its own price and stock. <strong>Shipping and tax</strong> are usually the hardest to get right, because both change with the customer's location, weight, and the rules in each state.</p>
+
         <h5 class="fw-bold mt-4 text-danger">The Danger of Plugin Bloat</h5>
         <p>What is the primary risk of installing too many WordPress plugins? <strong>They can slow down the site, cause conflicts, and create security vulnerabilities.</strong> This is known as "Plugin Bloat."</p>
         <p>Furthermore, what does it mean if a plugin has not been 'tested with your current version of WordPress'? <strong>It might be abandoned by its developer and could break your site or introduce security flaws.</strong> Updating vulnerable plugins immediately demonstrates the WRS skill of <strong>Probity / Ethical Adherence</strong>.</p>
@@ -620,6 +644,31 @@
           </a>
           <figcaption class="p-2 small text-muted text-center"><strong>Figure 12.6:</strong> The Plugin Directory. Beware of abandoned software!</figcaption>
         </figure>
+      </div>
+    </div>
+
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch12 Day 7 -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">The One-Page Hand-Off Guide</h2>
+        <p>The site isn't done when it works for <em>you</em>. It's done when Manager Mike can run it without calling you. The test: <strong>could Mike add a blog post using only what you wrote?</strong> Be honest.</p>
+        <p>A <strong>hand-off guide</strong> is one page of numbered, non-technical steps a client can follow. For example:</p>
+        <div class="bg-light p-3 rounded border shadow-sm small mb-3">
+          <p class="fw-bold mb-1">How to add a new post (like a seasonal flavor)</p>
+          <ol class="mb-0">
+            <li>Go to <code>yourcoffeeshop.com/wp-admin</code> and log in.</li>
+            <li>On the left, click <strong>Posts</strong>, then <strong>Add New</strong>.</li>
+            <li>Type the title at the top, then type your text underneath.</li>
+            <li>On the right, check the <strong>Seasonal Flavors</strong> category.</li>
+            <li>Click the blue <strong>Publish</strong> button, then <strong>Publish</strong> again.</li>
+          </ol>
+        </div>
+        <ul class="small mb-3">
+          <li class="mb-1">One task per section, numbered steps, and no jargon ("Click Posts," not "navigate to the post-type admin screen").</li>
+          <li class="mb-1">Use the exact words that appear on the screen, and add screenshots where a step is easy to miss.</li>
+          <li class="mb-0">Cover what the client will really do: add a post, update the menu prices, change the hours, reset a password.</li>
+        </ul>
+        <p class="mb-0"><strong>Peer hand-off test:</strong> swap guides with a partner. They follow your guide exactly, without asking you anything, and record every step where they got stuck. Every stuck point is a fix your guide needs before the client ever sees it.</p>
       </div>
     </div>
 
