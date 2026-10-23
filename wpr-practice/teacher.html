@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>WPR Practice Test | Teacher</title>
+  <title>WPR Practice Pro | Teacher</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="/wpr-practice/assets/wpr-practice-pro-favicon-64.png">
+  <link rel="apple-touch-icon" href="/wpr-practice/assets/wpr-practice-pro-favicon-512.png">
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
   <style>
@@ -21,7 +23,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="brand"><i class="fas fa-briefcase"></i><div><div class="fw-bold fs-5">WPR Practice Test · Teacher</div><div class="small text-muted">Give the Nevada Workplace Readiness Skills practice test and download your class's results</div></div></div>
+  <div class="brand"><img src="/wpr-practice/assets/wpr-practice-pro-logo.svg" alt="WPR Practice Pro" style="height:56px;width:auto"><div class="ms-2 border-start ps-3"><div class="fw-bold">Teacher</div><div class="small text-muted">Give the Nevada Workplace Readiness Skills practice test and download your class's results</div></div></div>
   <div id="screen" class="card-main"></div>
 </div>
 <footer class="text-center small text-muted pb-4" style="max-width:900px;margin:0 auto;padding:0 1rem;">
@@ -39,6 +41,104 @@
   let sess = null, data = null, poll = null, confirmEnd = false;
   try { sess = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
 
+  // ---- Question banks (server/routes/wprBanks.js) ----
+  const PASS_KEY = 'wpr_teacher_pass';
+  function rememberPass(p) { try { sessionStorage.setItem(PASS_KEY, p.trim()); } catch (x) {} }
+  function savedPass() { try { return sessionStorage.getItem(PASS_KEY) || ''; } catch (x) { return ''; } }
+  async function bankApi(url, body) {
+    const res = await fetch(url, { method: body ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json', 'x-wpr-passcode': savedPass() }, body: body ? JSON.stringify(body) : undefined });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(out.error || 'Something went wrong.');
+    return out;
+  }
+  async function showBanks(msg) {
+    let banks = [];
+    try { banks = (await bankApi('/api/wpr/banks')).banks; } catch (err) { return showStart(err.message); }
+    screen.innerHTML = `
+      <div class="d-flex justify-content-between align-items-center mb-3"><h1 class="h4 fw-bold mb-0">Question banks</h1><button class="btn btn-sm btn-outline-secondary" id="back">&laquo; Back</button></div>
+      ${msg ? `<div class="alert alert-success py-2">${msg}</div>` : ''}
+      <p class="small text-muted">Question banks are shared with every teacher who has the passcode, and saved for future tests. They hold questions only, never student information. Please don't upload real state test questions: those are secure and copyrighted.</p>
+      ${banks.length ? `<table class="table table-sm align-middle"><thead><tr><th>Bank</th><th>Added by</th><th class="num">Ready</th><th class="num">Needs answer</th><th></th></tr></thead><tbody>
+        ${banks.map(b => `<tr><td class="fw-bold">${esc(b.name)}</td><td class="small">${esc(b.teacher || '')}</td><td class="num">${b.ready}</td><td class="num ${b.needs_answer ? 'text-danger fw-bold' : ''}">${b.needs_answer}</td>
+          <td class="text-end"><button class="btn btn-sm btn-outline-primary" data-review="${b.id}" data-name="${esc(b.name)}">Review</button> <button class="btn btn-sm btn-outline-danger" data-del="${b.id}" data-name="${esc(b.name)}">Delete</button></td></tr>`).join('')}</tbody></table>` : '<p class="text-muted">No question banks yet.</p>'}
+      <h2 class="h5 fw-bold mt-4">Add questions</h2>
+      <form id="upForm" class="d-flex flex-column gap-3">
+        <div class="row g-2">
+          <div class="col-md-6"><label class="form-label fw-bold small" for="bankSel">Bank</label>
+            <select id="bankSel" class="form-select"><option value="">+ New bank</option>${banks.map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('')}</select></div>
+          <div class="col-md-6" id="newNameBox"><label class="form-label fw-bold small" for="bankName">New bank name</label><input id="bankName" class="form-control" maxlength="120" placeholder="e.g. Customer Service Unit"></div>
+        </div>
+        <div><label class="form-label fw-bold small" for="upTeacher">Your name</label><input id="upTeacher" class="form-control" maxlength="60"></div>
+        <div>
+          <div class="btn-group btn-group-sm mb-2" role="group">
+            <input type="radio" class="btn-check" name="fmt" id="fmtCsv" value="csv" checked><label class="btn btn-outline-primary" for="fmtCsv">Upload a spreadsheet (CSV)</label>
+            <input type="radio" class="btn-check" name="fmt" id="fmtText" value="text"><label class="btn btn-outline-primary" for="fmtText">Paste questions</label>
+          </div>
+          <div id="csvBox"><input type="file" id="csvFile" accept=".csv,.txt,text/csv" class="form-control">
+            <div class="form-text">In Excel or Google Sheets, use columns <strong>Question, A, B, C, D, Answer</strong> (a header row is fine), then <em>File → Download → .csv</em>. Answer can be a letter (B), the choice's text, or True/False. Leave it blank if you don't have it.</div></div>
+          <div id="textBox" class="d-none"><textarea id="pasteText" class="form-control font-monospace" rows="10" placeholder="1. What should you do if you don't understand an instruction?
+A. Guess and keep working
+B. Ask your supervisor to clarify
+C. Wait until someone notices
+D. Skip that task
+Answer: B
+
+2. T/F: You should clock in for a coworker who is running late.
+Answer: False"></textarea>
+            <div class="form-text">Number each question, letter each choice, and add an <strong>Answer:</strong> line (or put a * in front of the right choice). For true/false, start with <strong>T/F:</strong>. Questions without an answer are saved as "needs answer."</div></div>
+        </div>
+        <button class="btn btn-primary fw-bold" type="submit"><i class="fas fa-upload me-1"></i>Add to bank</button>
+        <span id="upMsg" class="small fw-bold"></span>
+      </form>`;
+    document.getElementById('back').addEventListener('click', () => showStart());
+    const sel = document.getElementById('bankSel');
+    sel.addEventListener('change', () => document.getElementById('newNameBox').classList.toggle('d-none', !!sel.value));
+    document.querySelectorAll('input[name=fmt]').forEach(r => r.addEventListener('change', () => {
+      const csv = document.getElementById('fmtCsv').checked;
+      document.getElementById('csvBox').classList.toggle('d-none', !csv); document.getElementById('textBox').classList.toggle('d-none', csv);
+    }));
+    screen.querySelectorAll('[data-review]').forEach(b => b.addEventListener('click', () => showReview(b.dataset.review, b.dataset.name)));
+    screen.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
+      if (!confirm(`Delete the question bank "${b.dataset.name}" and all its questions for every teacher?`)) return;
+      try { await bankApi(`/api/wpr/bank/${b.dataset.del}/delete`, {}); showBanks('Deleted.'); } catch (err) { alert(err.message); }
+    }));
+    document.getElementById('upForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msgEl = document.getElementById('upMsg'); msgEl.className = 'small fw-bold';
+      const csv = document.getElementById('fmtCsv').checked;
+      let content = '';
+      if (csv) { const f = document.getElementById('csvFile').files[0]; if (!f) { msgEl.textContent = 'Choose a CSV file.'; return; } content = await f.text(); }
+      else content = document.getElementById('pasteText').value;
+      msgEl.textContent = 'Saving…';
+      try {
+        const out = await bankApi('/api/wpr/bank/upload', { bank_id: sel.value || null, bank_name: document.getElementById('bankName').value, teacher: document.getElementById('upTeacher').value, format: csv ? 'csv' : 'text', content });
+        showBanks(`Found ${out.found} questions: ${out.added} added${out.duplicates ? `, ${out.duplicates} already in the bank` : ''}${out.needs_answer ? `, <strong>${out.needs_answer} need an answer</strong> (click Review)` : ''}.`);
+      } catch (err) { msgEl.className = 'small fw-bold text-danger'; msgEl.textContent = err.message; }
+    });
+  }
+  async function showReview(id, name) {
+    let qs = [];
+    try { qs = (await bankApi(`/api/wpr/bank/${id}/questions`)).questions; } catch (err) { return showBanks(); }
+    screen.innerHTML = `
+      <div class="d-flex justify-content-between align-items-center mb-3"><h1 class="h5 fw-bold mb-0">${esc(name)}: ${qs.length} questions</h1><button class="btn btn-sm btn-outline-secondary" id="back">&laquo; Question banks</button></div>
+      <p class="small text-muted">Questions that need an answer are listed first. Click the correct choice to set it. Only answered questions are used in tests.</p>
+      ${qs.map((q, i) => `<div class="border rounded p-2 mb-2 ${q.answer === null ? 'border-danger' : ''}">
+        <div class="fw-bold small">${i + 1}. ${esc(q.question)} ${q.answer === null ? '<span class="badge bg-danger ms-1">needs answer</span>' : ''}</div>
+        <div class="d-flex flex-wrap gap-1 mt-1">${q.options.map((o, k) => `<button class="btn btn-sm ${q.answer === k ? 'btn-success' : 'btn-outline-secondary'}" data-q="${q.id}" data-a="${k}">${'ABCDEF'[k]}. ${esc(o)}</button>`).join('')}
+          <button class="btn btn-sm btn-link text-danger ms-auto" data-rm="${q.id}">Remove</button></div></div>`).join('')}`;
+    document.getElementById('back').addEventListener('click', () => showBanks());
+    screen.addEventListener('click', async function h(e) {
+      const a = e.target.closest('[data-a]'), rm = e.target.closest('[data-rm]');
+      if (!a && !rm) return;
+      screen.removeEventListener('click', h);
+      try {
+        if (a) await bankApi(`/api/wpr/bank/question/${a.dataset.q}`, { answer: Number(a.dataset.a) });
+        else if (confirm('Remove this question?')) await bankApi(`/api/wpr/bank/question/${rm.dataset.q}`, { remove: true });
+      } catch (err) { alert(err.message); }
+      showReview(id, name);
+    });
+  }
+
   function showStart(msg) {
     screen.innerHTML = `
       <h1 class="h4 fw-bold mb-3">Start a test session</h1>
@@ -53,16 +153,47 @@
             <option value="short">25 questions, 20 minutes</option>
             <option value="sprint">10-minute Sprint: 100 questions, answer as many as you can</option>
           </select></div>
+        <div><label class="form-label fw-bold" for="src">Questions from</label>
+          <select id="src" class="form-select">
+            <option value="standard">Standard WRS practice questions</option>
+            <option value="mixed">Standard questions + question banks (up to half the test)</option>
+            <option value="bank">Only question banks</option>
+          </select>
+          <div id="bankPick" class="mt-2 d-none"></div></div>
         <div class="alert alert-info small mb-0"><i class="fas fa-lock me-1"></i><strong>Nothing is saved.</strong> Results are kept only in temporary memory while your session is open. Download them before you end the session. Sessions are erased automatically after 12 hours.</div>
         <p class="small text-muted mb-0">By starting a session you agree to the <a href="/wpr-practice/terms.html" target="_blank">Terms of Use</a>, including giving the test only to your own students and following your district's student-privacy policies.</p>
         <button class="btn btn-primary btn-lg fw-bold" type="submit">Start session</button>
-      </form>`;
+      </form>
+      <hr class="my-4">
+      <button id="manageBanks" class="btn btn-outline-primary fw-bold"><i class="fas fa-database me-1"></i>Manage question banks</button>
+      <span class="small text-muted ms-2">Upload your own questions to use in future tests.</span>`;
+    const passEl = document.getElementById('pass');
+    try { passEl.value = sessionStorage.getItem(PASS_KEY) || ''; } catch (x) {}
+    document.getElementById('manageBanks').addEventListener('click', () => {
+      if (!passEl.value.trim()) { passEl.focus(); passEl.classList.add('is-invalid'); return; }
+      rememberPass(passEl.value); showBanks();
+    });
+    document.getElementById('src').addEventListener('change', async (e) => {
+      const box = document.getElementById('bankPick');
+      if (e.target.value === 'standard') { box.classList.add('d-none'); return; }
+      box.classList.remove('d-none');
+      if (!passEl.value.trim()) { box.innerHTML = '<div class="small text-danger">Type the teacher passcode first, then choose this again.</div>'; return; }
+      rememberPass(passEl.value);
+      box.innerHTML = '<div class="small text-muted">Loading your question banks…</div>';
+      try {
+        const banks = await bankApi('/api/wpr/banks');
+        const usable = banks.banks.filter(b => b.ready > 0);
+        box.innerHTML = usable.length ? usable.map(b => `<label class="form-check d-block"><input class="form-check-input" type="checkbox" name="bankIds" value="${b.id}" checked> ${esc(b.name)} <span class="text-muted small">(${b.ready} ready${b.needs_answer ? `, ${b.needs_answer} need answers` : ''})</span></label>`).join('')
+          : '<div class="small text-danger">No question banks with answers yet. Use "Manage question banks" below to add some.</div>';
+      } catch (err) { box.innerHTML = `<div class="small text-danger">${esc(err.message)}</div>`; }
+    });
     document.getElementById('startForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = e.target.querySelector('button'); btn.disabled = true;
       try {
         const res = await fetch('/api/wpr/session', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ passcode: document.getElementById('pass').value, teacher: document.getElementById('tname').value, length: document.getElementById('len').value }) });
+          body: JSON.stringify({ passcode: document.getElementById('pass').value, teacher: document.getElementById('tname').value, length: document.getElementById('len').value,
+            source: document.getElementById('src').value, banks: [...document.querySelectorAll('input[name=bankIds]:checked')].map(x => Number(x.value)) }) });
         const out = await res.json();
         if (!res.ok) throw new Error(out.error || 'Could not start a session.');
         sess = { code: out.code, token: out.teacherToken };

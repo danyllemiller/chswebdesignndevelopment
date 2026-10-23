@@ -17,6 +17,7 @@ const router = express.Router();
 const crypto = require('crypto');
 const fs = require('fs');
 const { buildTest } = require('../lib/wrsPool');
+const { loadReadyQuestions } = require('./wprBanks');
 
 const LENGTHS = {
     sprint: { label: '10-minute Sprint (100 questions)', count: 100, seconds: 600 },
@@ -108,24 +109,54 @@ function teacherSession(req) {
     return session;
 }
 
+// One student's test for a session, from the standard pool and/or banks.
+function shuffled(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = crypto.randomInt(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function bankItem(x) {
+    const isTf = x.options.length === 2 && x.options.every(o => /^(true|false)$/i.test(o));
+    const options = isTf ? ['True', 'False'] : shuffled(x.options);
+    return { kind: isTf ? 'tf' : 'mc', topic: 'bank', prompt: isTf ? 'True or false?' : '', q: x.q, options, correct: options.findIndex(o => o.toLowerCase() === String(x.answer).toLowerCase()), hint: '' };
+}
+function buildSessionTest(session) {
+    if (session.source === 'standard' || !session.bankQs || !session.bankQs.length) return buildTest(session.count);
+    const bank = shuffled(session.bankQs).map(bankItem).filter(q => q.correct >= 0);
+    if (session.source === 'bank') return bank.slice(0, session.count);
+    // Standard + banks: up to half the test from the banks.
+    const fromBank = bank.slice(0, Math.min(bank.length, Math.floor(session.count / 2)));
+    return shuffled([...fromBank, ...buildTest(session.count - fromBank.length)]);
+}
+
 // ---- Teacher -------------------------------------------------------------
 
 // POST /wpr/session -- { passcode, length, teacher } -> { code, teacherToken }
-router.post('/wpr/session', (req, res) => {
+router.post('/wpr/session', async (req, res) => {
     const expected = process.env.WPR_TEACHER_PASSCODE || '';
     if (expected.length < 6) return res.status(503).json({ error: 'The WPR Practice Test is not set up yet.' });
     if (throttled('pass:' + ipOf(req), 10, 15 * 60 * 1000)) return res.status(429).json({ error: 'Too many tries. Wait 15 minutes.' });
     const body = req.body || {};
     if (!safeEq(String(body.passcode || '').trim(), expected)) return res.status(401).json({ error: 'That teacher passcode isn\'t right.' });
     const length = LENGTHS[body.length] ? body.length : 'full';
+    // Where questions come from: the standard WRS pool, the standard pool plus
+    // teacher question banks (server/routes/wprBanks.js), or only the banks.
+    // Bank questions are loaded once here, not per student.
+    const source = ['mixed', 'bank'].includes(body.source) ? body.source : 'standard';
+    let bankQs = [];
+    if (source !== 'standard') {
+        try { bankQs = await loadReadyQuestions(body.banks); } catch (e) { console.error('[wpr] banks', e); }
+        if (!bankQs.length) return res.status(400).json({ error: 'Those question banks have no questions with answers yet. Add answers, or use the standard questions.' });
+    }
     const code = newCode();
     const now = Date.now();
     const session = {
-        code, teacherToken: token(), teacher: clean(body.teacher, 60), length, ...LENGTHS[length],
+        code, teacherToken: token(), teacher: clean(body.teacher, 60), length, ...LENGTHS[length], source, bankQs,
         createdAt: now, expiresAt: now + SESSION_HOURS * 3600 * 1000, students: new Map()
     };
+    // Only-bank tests can't be longer than the bank.
+    if (source === 'bank' && bankQs.length < session.count) {
+        session.count = bankQs.length;
+        session.label = `${bankQs.length} questions from your question banks, ${Math.round(session.seconds / 60)} minutes`;
+    }
     sessions.set(code, session);
-    res.json({ code, teacherToken: session.teacherToken, length, label: session.label, expiresAt: session.expiresAt });
+    res.json({ code, teacherToken: session.teacherToken, length, label: session.label, expiresAt: session.expiresAt, bank_questions: bankQs.length });
 });
 
 // GET /wpr/session/:code -- teacher's live view, with everything needed for the downloads
@@ -188,7 +219,7 @@ router.post('/wpr/start', (req, res) => {
     if (error) return res.status(404).json({ error });
     if (st.submittedAt) return res.status(409).json({ error: 'You already took this test.' });
     if (!st.startedAt) {
-        st.questions = buildTest(session.count);
+        st.questions = buildSessionTest(session);
         st.startedAt = Date.now();
         writeActiveMarker();
     }

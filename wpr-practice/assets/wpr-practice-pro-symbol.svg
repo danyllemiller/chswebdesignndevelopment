@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -4 222 300" role="img" aria-label="WPR Practice Pro">
+  <!-- clip tab with hole -->
+  <rect x="80" y="2" width="40" height="58" rx="9" fill="#1d2a48"/>
+  <rect x="92" y="12" width="16" height="22" rx="7" fill="#ffffff"/>
+  <!-- badge -->
+  <rect x="12" y="54" width="176" height="236" rx="22" fill="#1d2a48"/>
+  <!-- slot band where the clip meets the badge -->
+  <rect x="60" y="44" width="80" height="20" rx="6" fill="#ffffff" stroke="#1d2a48" stroke-width="6"/>
+  <!-- photo frame -->
+  <rect x="40" y="94" width="120" height="112" rx="5" fill="#eef2f7" stroke="#ffffff" stroke-width="7"/>
+  <!-- person -->
+  <circle cx="100" cy="136" r="21" fill="#2f7de1"/>
+  <path d="M60 206 C60 176 76 164 100 164 C124 164 140 176 140 206 Z" fill="#2f7de1"/>
+  <!-- check mark: gold with a navy outline, angled ends -->
+  <path d="M30 222 L54 198 L84 228 L184 128 L208 152 L84 276 Z" fill="#f0b13c" stroke="#1d2a48" stroke-width="7" stroke-linejoin="miter"/>
+</svg>
