@@ -266,6 +266,21 @@ router.get('/agenda/sync/outline', requireSyncKey, async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to read the agenda outline' }); }
 });
 
+// Dates this course/track does NOT meet on the school calendar (special-dates.csv),
+// so Jotability can leave them out before it spreads lessons over the days
+// (2026-10-23: three B-day Mondays in Jotability's calendar made the whole WD1
+// send fail the check below). Courses without a meeting-day rule: none.
+router.get('/agenda/sync/meeting-days', requireSyncKey, (req, res) => {
+    const course = String(req.query.course || '').trim();
+    const track = String(req.query.track || 'main').trim();
+    if (!SYNC_COURSES.has(course) || !/^(main|A|B)$/.test(track)) return res.status(400).json({ error: 'course and track are required' });
+    const allowed = MEETING_DAY_TYPES[course] && MEETING_DAY_TYPES[course][track];
+    if (!allowed) return res.json({ course, track, meets_on: null, not_meeting: [] });
+    const types = loadDayTypes();
+    const notMeeting = Object.keys(types).filter(d => !allowed.includes(types[d])).sort();
+    res.json({ course, track, meets_on: allowed, not_meeting: notMeeting });
+});
+
 // Replace one course/track's dates. Body: { course, track, days: [{ date: 'YYYY-MM-DD', block: N, also: [N, ...] }] }
 // (also = more lessons taught the same day, in order; optional)
 router.post('/agenda/sync/schedule', requireSyncKey, async (req, res) => {
