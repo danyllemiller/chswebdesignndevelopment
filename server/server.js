@@ -95,10 +95,12 @@ app.use((req, res, next) => {
 // row has already been pruned server-side, so every click on a session-gated
 // route (sending a message, resolving a tardy consequence, etc.) 403s with
 // no obvious cause. Both the store's row lifetime and the cookie's own
-// maxAge are set here, in sync, to 30 days -- long enough that normal
-// day-to-day gaps in usage don't trigger this, while still eventually
-// expiring rather than lasting forever.
-const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+// maxAge are set here, in sync. Teacher decision 2026-10-23: a login stays
+// active as long as it keeps being used (rolling: true below restarts the
+// clock on every request) and ends only after 14 days in a row of not using
+// the site. It used to be 30 days from the moment of logging in, active or
+// not. Ending a login only means typing the username and password again.
+const SESSION_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000; // 14 days of no use
 
 if (!process.env.DB_PASSWORD || !process.env.SESSION_SECRET) {
     throw new Error('DB_PASSWORD and SESSION_SECRET must be set in .env before starting the server.');
@@ -120,6 +122,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    rolling: true,
     store: sessionStore,
     // `secure: true` is deliberately NOT set here -- it depends on nginx
     // correctly forwarding X-Forwarded-Proto for `trust proxy` to see the

@@ -405,6 +405,7 @@ function filterNavigation(authData) {
         }
         if (webDesignNav) webDesignNav.style.display = '';
         if (compSciNav) compSciNav.style.display = '';
+        ['wd-wrs-sprint-item', 'wd-wpr-practice-item'].forEach(id => document.getElementById(id)?.classList.remove('d-none'));
     } else {
         // --- STUDENT LOGIC ---
         if (adminMenu) adminMenu.style.setProperty('display', 'none', 'important');
@@ -463,9 +464,14 @@ const studentClass = String(
             if (isINTV) { studentMenuINTV.classList.remove('d-none'); studentMenuINTV.style.setProperty('display', 'block', 'important'); }
             else studentMenuINTV.style.setProperty('display', 'none', 'important');
         }
-        // Monday WRS Sprint is Web Design 2 (B2) and AS-B2 only.
+        // Monday WRS Sprint and WPR Practice Tests (wprpracticepro.com, class
+        // code from the teacher) are Web Design 2 (B2) and AS-B2 only (the
+        // teacher branch above shows both).
+        const isWd2 = studentClass === 'B2' || studentClass === 'AS-B2' || studentClass.startsWith('WD2');
         const wrsSprintItem = document.getElementById('wd-wrs-sprint-item');
-        if (wrsSprintItem) wrsSprintItem.classList.toggle('d-none', !(studentClass === 'B2' || studentClass === 'AS-B2' || studentClass.startsWith('WD2')));
+        if (wrsSprintItem) wrsSprintItem.classList.toggle('d-none', !isWd2);
+        const wprPracticeItem = document.getElementById('wd-wpr-practice-item');
+        if (wprPracticeItem) wprPracticeItem.classList.toggle('d-none', !isWd2);
     }
 
     // DEFENSIVE: Wait 50ms and verify styles were applied correctly
