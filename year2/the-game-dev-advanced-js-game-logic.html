@@ -53,6 +53,11 @@
         
         <p>Why a game? Because games require <strong>Advanced Logic</strong>. A normal website usually just sits there waiting for the user to click something. A game has to have a mind of its own: it has to continuously draw graphics 60 times a second, calculate complex math for gravity, spawn enemies automatically, and detect fast keyboard inputs instantly. To build our project, "Cosmic Clicker," we need to master the <strong>Canvas API</strong>, <strong>Object-Oriented Programming (OOP)</strong>, and complex <strong>State Management</strong>.</p>
         
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Day 1 -->
+        <h5 class="fw-bold mt-4 text-primary">Why Would a Client Pay for a Game?</h5>
+        <p>Imagine a client tells you, "Nobody reads our website." Adding more paragraphs will not fix that. What could you build instead of more text? Something visitors can <em>do</em>: a <strong>quiz</strong>, a <strong>game</strong>, a <strong>calculator</strong>, or another <strong>interactive tool</strong>. Using game ideas like points, levels, and rewards to get people involved with a brand is called <strong>gamification</strong>.</p>
+        <p>Agencies prove it works with a number called <strong>time-on-page</strong>: how long a visitor stays on a page before leaving. Why does an interactive feature beat static content? Static text and pictures get skimmed in a few seconds, but <strong>interaction keeps users engaged longer, and they remember more</strong> of what they actually did than what they only read. Longer visits and a brand people remember are exactly what a client is paying for.</p>
+
         <h2 class="section-title mt-5">Meet the Target User: "Gamer Gabe"</h2>
         
         <div class="card shadow-sm border-0 bg-light mt-4 mb-5 text-start">
@@ -80,6 +85,16 @@
             </div>
           </div>
         </div>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Day 1 -->
+        <h5 class="fw-bold mt-4 text-primary">Plan Your Game Concept</h5>
+        <p>Before anyone writes a line of code, a game team agrees on a <strong>game concept</strong>: a short plan that answers three questions.</p>
+        <ul class="small mb-3 bg-light p-3 rounded border shadow-sm text-start">
+            <li class="mb-2"><strong>Genre:</strong> What kind of game is it? A dodger, a shooter, a collector, a platformer?</li>
+            <li class="mb-2"><strong>Player goal:</strong> What is the player trying to do, and how do they score points?</li>
+            <li class="mb-0"><strong>Enemies:</strong> What gets in the player's way, and what happens when the player touches one?</li>
+        </ul>
+        <p>Then the team votes on features, and each member picks <strong>one feature to prototype</strong> (build a quick, rough version of to test the idea), like the player's movement, the enemy spawner, or the score display. Prototyping separate features lets the team find problems early, before everything is put together. Check every idea against Gabe's needs: fast, responsive, a score that goes up instantly, and a game that ends cleanly when he loses.</p>
       </div>
 
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">
@@ -138,6 +153,11 @@
             <li class="mb-0">If you increase an object's "Y" coordinate value, which way does it move on the screen? It moves <strong>DOWN</strong>! Y increases from the top to the bottom. If you want a bullet to travel upwards, what should its Y-velocity be? <strong>A negative number</strong>.</li>
         </ul>
         
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Day 2 -->
+        <div class="alert alert-info small border my-4">
+            <strong>Why is (0,0) in the top-left?</strong> A screen draws its picture the way you read a page: it starts at the <strong>top-left corner</strong> and fills in row by row, moving <strong>down</strong> the screen. The computer counts from where it starts drawing, so the top-left is (0,0). Because Y grows downward, the canvas has an <strong>inverted Y-axis</strong> (flipped upside down compared to math class). That changes your math: <strong>adding</strong> to Y moves an object <strong>down</strong>, and <strong>subtracting</strong> from Y moves it <strong>up</strong>. A jump is a <em>negative</em> change in Y.
+        </div>
+
         <h5 class="fw-bold mt-4 text-primary">Drawing Shapes &amp; Images</h5>
         <p>Once we have <code>ctx</code>, we can draw. Which JavaScript method is used to draw a solid, colored rectangle? <strong><code>fillRect(x, y, width, height)</code></strong>.</p>
         <p>But what if we want it to be red? Which Canvas property is used to set the color of a shape before it is drawn? <strong><code>ctx.fillStyle = "red";</code></strong>.</p>
@@ -324,6 +344,9 @@ ctx.fillRect(50, 50, 40, 40);</code></pre>
         <h5 class="fw-bold mt-4 text-primary">The Pro Engine: <code>requestAnimationFrame</code></h5>
         <p>Which method tells the browser to perform an animation and requests a call to a function to update before the next repaint? <strong><code>requestAnimationFrame()</code></strong>. Why is requestAnimationFrame better than setInterval for games? Because it syncs with the monitor's refresh rate (for smooth 60fps motion) and automatically pauses when the user switches tabs, saving battery life. This is critical for meeting our agency's WRS Reliability standards.</p>
         
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Day 7 -->
+        <p>Most monitors refresh <strong>60 times per second (60Hz)</strong>. <code>requestAnimationFrame()</code> lines up each new frame with the monitor's refresh to prevent <strong>screen tearing</strong>: a glitch where the screen shows the top part of one frame and the bottom part of the next at the same time, so the picture looks sliced across the middle. Drawing in step with the monitor also avoids the stutter you get when frames arrive at the wrong moment.</p>
+
         <p>How do you stop a game loop when the player loses? You use <strong><code>cancelAnimationFrame()</code></strong>.</p>
         
         <h5 class="fw-bold mt-4 text-primary">The 3 Steps of a Game Loop</h5>
@@ -361,6 +384,21 @@ function gameLoop() {
 gameLoop(); // Start the engine</code></pre>
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Day 3 -->
+        <h5 class="fw-bold mt-4 text-primary">Going Further: Bounce Off All Four Edges</h5>
+        <p>The walkthrough only moves the box to the right. To keep an object bouncing around inside the canvas, give it a speed on <strong>both axes</strong> and check <strong>all four edges</strong> every frame. When it hits the left or right edge, flip its X direction. When it hits the top or bottom edge, flip its Y direction. Multiplying a speed by <code>-1</code> reverses it.</p>
+        <pre class="p-3 border rounded shadow-sm mb-3 no-copy"><code>let x = 50, y = 50, size = 40;
+let speedX = 4, speedY = 3;
+
+// Inside the UPDATE step of your game loop:
+x += speedX;
+y += speedY;
+// Left or right edge? Reverse the X direction.
+if (x &lt;= 0 || x + size &gt;= canvas.width)  { speedX *= -1; }
+// Top or bottom edge? Reverse the Y direction.
+if (y &lt;= 0 || y + size &gt;= canvas.height) { speedY *= -1; }</code></pre>
+        <p class="small mb-4">Why <code>x + size</code>? A box's <code>x</code> and <code>y</code> are its <strong>top-left corner</strong>. Its right edge is at <code>x + size</code> and its bottom edge is at <code>y + size</code>, so those are what you compare to the canvas width and height.</p>
+
         <!-- GRADED LAB 2 CARD -->
         <div class="card border-success shadow-sm my-4 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 2: The Bouncing Box Lab [25 pts]</div>
@@ -395,6 +433,21 @@ gameLoop(); // Start the engine</code></pre>
         <p>If you are building a game with 50 aliens, it would be a nightmare to create 50 `alienX` and 50 `alienY` variables. This is "Spaghetti Code," and it wastes our agency's billable hours. Instead, we use <strong>Object-Oriented Programming (OOP)</strong>.</p>
         
         <p>What is the name of the "Blueprint" used in Object-Oriented Programming to create multiple objects? A <strong>Class</strong>. What is the main advantage of using a Class to build game objects? <strong>It encapsulates properties and methods for reuse</strong>. You write the code once, and you can spawn a thousand enemies perfectly.</p>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Days 4-5 -->
+        <div class="card border-primary shadow-sm my-4 text-start">
+            <div class="card-header bg-site-secondary fw-bold text-primary">Key Terms: The Blueprint and Its Copies</div>
+            <div class="card-body small">
+                <ul class="mb-0 ps-3">
+                    <li class="mb-2"><strong>Spaghetti Code:</strong> messy, repetitive code that is tangled together and hard to follow, like <code>enemy1_x</code>, <code>enemy2_x</code>, <code>enemy3_x</code>... Every new enemy means copying more variables, and one fix has to be made in fifty places.</li>
+                    <li class="mb-2"><strong><code>class</code>:</strong> the keyword that creates a modular, reusable "Blueprint," like <code>class Enemy { }</code>.</li>
+                    <li class="mb-2"><strong><code>constructor</code>:</strong> the "birth" of the object. It runs once, at the moment a new object is created, and gives that object its starting values: where it starts, how fast it moves, and how much health it has.</li>
+                    <li class="mb-2"><strong><code>new</code>:</strong> the keyword used to <strong>instantiate</strong> (create) copies from a class: <code>new Enemy()</code>.</li>
+                    <li class="mb-2"><strong>Class vs. instance:</strong> a class is the <strong>blueprint</strong>; an <strong>instance</strong> is <strong>one object built from it</strong>. <code>Enemy</code> is the class; <code>const enemy1 = new Enemy();</code> makes an instance. Fifty enemies on screen means one class and fifty instances.</li>
+                    <li class="mb-0"><strong>Capitalized class names:</strong> class names start with a capital letter, as in <code>class Enemy</code>, so you can tell a blueprint (<code>Enemy</code>) from an instance (<code>enemy1</code>) at a glance.</li>
+                </ul>
+            </div>
+        </div>
 
         <h5 class="fw-bold mt-4 text-primary">Anatomy of a Class</h5>
         <ul class="small mb-4">
@@ -448,6 +501,20 @@ for(let i=0; i<10; i++) {
             </div>
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Day 4 -->
+        <h5 class="fw-bold mt-4 text-primary">Plan Your Class List</h5>
+        <p>Before you convert your game to classes, list every kind of object your game needs. For each class, decide its <strong>properties</strong> (what it <em>knows</em>: data like <code>this.x</code>, <code>this.speed</code>, <code>this.health</code>) and its <strong>methods</strong> (what it <em>does</em>: actions like <code>update()</code> and <code>draw()</code>). On a project team, give each class one owner, so two people never rewrite the same code at the same time.</p>
+        <div class="table-responsive">
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-4 text-start">
+            <thead class="table-light"><tr><th>Class</th><th>Properties (what it knows)</th><th>Methods (what it does)</th><th>Who designs it</th></tr></thead>
+            <tbody>
+                <tr><td><code>Player</code></td><td>x, y, width, height, speed</td><td><code>update()</code>, <code>draw()</code></td><td><em>Team member 1</em></td></tr>
+                <tr><td><code>Enemy</code></td><td>x, y, width, height, speed, health</td><td><code>update()</code>, <code>draw()</code></td><td><em>Team member 2</em></td></tr>
+                <tr><td><code>Particle</code></td><td>x, y, speed</td><td><code>update()</code>, <code>draw()</code></td><td><em>Team member 3</em></td></tr>
+            </tbody>
+        </table>
+        </div>
+
         <!-- GRADED LAB 3 CARD -->
         <div class="card border-success shadow-sm my-4 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 3: The Entity Factory [25 pts]</div>
@@ -492,6 +559,12 @@ if (rect1.x < rect2.x + rect2.width &&
     // Collision detected!
 }</code></pre>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Days 6-7 -->
+        <div class="alert alert-info small border my-4">
+            <strong>The rule in plain English:</strong> two rectangles are touching when their edges overlap on <strong>both</strong> the x-axis <strong>and</strong> the y-axis. Overlapping on just one axis is not a hit. Two boxes at the same height on opposite sides of the screen overlap on y, but not on x, so they are not touching.
+            <p class="mb-0 mt-2"><strong>Reading the x-axis half:</strong> <code>a.x &lt; b.x + b.width &amp;&amp; a.x + a.width &gt; b.x</code> means "a's left edge is to the left of b's right edge, <strong>and</strong> a's right edge is to the right of b's left edge." The y-axis half asks the same question about the top and bottom edges.</p>
+        </div>
+
         <h5 class="fw-bold mt-4 text-primary">Circular Collision</h5>
         <p>For circular hitboxes, we don't use X and Width. To check for circular collision, which mathematical theorem is typically applied to find the distance between center points? The <strong>Pythagorean theorem</strong> ($a^2+b^2=c^2$). In circular collision detection, when has a collision occurred? <strong>When the distance between centers is less than the sum of the radii.</strong></p>
 
@@ -509,6 +582,15 @@ if (rect1.x < rect2.x + rect2.width &&
         <p>Which event listener is typically used for continuous character movement in games? The <code>keydown</code> event. How do you detect if a user has released a key to stop moving? Listen for the <strong><code>'keyup'</code></strong> event.</p>
         <p>What property of a keyboard event tells you the physical key that was pressed? <strong><code>event.code</code></strong> (e.g. 'ArrowRight' or 'Space'). How do you check if a specific key (like 'Space') is currently being held down? <strong>Store the key state in a boolean variable inside keydown/keyup listeners.</strong></p>
         <p>Which event listener is used to track the mouse position on the canvas? <strong><code>'mousemove'</code></strong>.</p>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Day 6 -->
+        <h5 class="fw-bold mt-4 text-primary">Write Down Your Collision Rules</h5>
+        <p>A collision check only tells you <em>that</em> two things touched. Your team still has to decide <em>what happens next</em>, and agree on it before anyone codes it:</p>
+        <ul class="small mb-4 bg-light p-3 rounded border shadow-sm text-start">
+            <li class="mb-2"><strong>On a hit:</strong> Does the player lose health or a life? Does the enemy disappear? Does something flash or play a sound?</li>
+            <li class="mb-2"><strong>Scoring:</strong> What earns points: collecting items, dodging enemies, or surviving longer?</li>
+            <li class="mb-0"><strong>Game Over:</strong> What ends the game: one hit, health reaching 0, or running out of lives?</li>
+        </ul>
 
         <!-- LAB 4 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
@@ -597,6 +679,23 @@ document.addEventListener("keydown", function(e) {
           </div>
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Day 7 -->
+        <h5 class="fw-bold mt-4 text-primary">Map Your State Machine</h5>
+        <p>A game built this way is a <strong>state machine</strong>: it is always in <strong>exactly one</strong> state, and only specific events, called <strong>transitions</strong>, can move it to another state. Before coding, draw each state as a box and every transition as an arrow. If you cannot draw an arrow to a state, the player can never get there.</p>
+        <div class="table-responsive">
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-3 text-start">
+            <thead class="table-light"><tr><th>From</th><th>Event (the arrow)</th><th>To</th></tr></thead>
+            <tbody>
+                <tr><td><code>start</code></td><td>Player presses Space</td><td><code>playing</code></td></tr>
+                <tr><td><code>playing</code></td><td>Player presses P</td><td><code>paused</code></td></tr>
+                <tr><td><code>paused</code></td><td>Player presses P again</td><td><code>playing</code></td></tr>
+                <tr><td><code>playing</code></td><td>A deadly collision (or health reaches 0)</td><td><code>gameover</code></td></tr>
+                <tr><td><code>gameover</code></td><td>Player clicks "Play Again"</td><td><code>start</code> (or straight to <code>playing</code>)</td></tr>
+            </tbody>
+        </table>
+        </div>
+        <p class="small mb-4"><strong>Trace a journey:</strong> start &rarr; playing &rarr; paused &rarr; playing &rarr; gameover &rarr; start. Notice there is no arrow from <code>paused</code> to <code>gameover</code>: nothing can hit the player while the game is frozen.</p>
+
         <div class="card border-success shadow-sm mt-4 mb-5">
             <div class="card-header bg-success text-white fw-bold">Quick Check: Collision, Physics &amp; Game State</div>
             <div class="card-body small">
@@ -666,6 +765,45 @@ ctx.drawImage(
       </div>
     </div>
 
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Day 8 -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0" id="debugging-tools">Debugging Your Game: Breakpoints, Step Over &amp; the Call Stack</h2>
+        <p><strong>Why it matters:</strong> Sooner or later your game will freeze, and the Console will be empty. No red error, nothing. Where do you look first? A game loop runs 60 times a second, so you need tools that can stop time and let you look around.</p>
+        <p><strong>First suspect:</strong> when a game freezes with no error, a common cause is an <strong>infinite loop</strong>: a loop that never ends (like a <code>while</code> loop whose condition never becomes false), so the browser never gets the chance to draw the next frame. Put a <code>console.log()</code> <strong>inside the game loop</strong> to watch your values change frame by frame, or better yet, set a breakpoint.</p>
+        <h5 class="fw-bold mt-4 text-primary">The Three DevTools Debugging Tools</h5>
+        <ul class="small mb-4 bg-light p-3 rounded border shadow-sm text-start">
+            <li class="mb-2"><strong>Breakpoint:</strong> a marker that <strong>pauses your code</strong> on a specific line so you can inspect it: exactly what every variable holds at that moment.</li>
+            <li class="mb-2"><strong>Step Over:</strong> runs the current line, then pauses again on the next one, so you can walk through your code <strong>line by line</strong> and see exactly where a value goes wrong.</li>
+            <li class="mb-0"><strong>Call Stack:</strong> the list of functions that were called to reach the paused line. It shows <strong>where the code stopped</strong> and how it got there (for example, <code>gameLoop</code> &rarr; <code>checkCollisions</code>).</li>
+        </ul>
+        <h5 class="fw-bold mt-4 text-primary">How to Set a Breakpoint</h5>
+        <ol class="small mb-4">
+            <li class="mb-2">Open DevTools (F12, or right-click &rarr; <strong>Inspect</strong>) and click the <strong>Sources</strong> tab.</li>
+            <li class="mb-2">Open your <code>script.js</code> and <strong>click the line number</strong> where you want to pause. A blue marker appears.</li>
+            <li class="mb-2"><strong>Reload</strong> the page. Your code pauses on that line.</li>
+            <li class="mb-0">Hover over variables to see their values, then press <strong>Step Over</strong> to run one line at a time. Check the <strong>Call Stack</strong> panel to see which function you are in.</li>
+        </ol>
+        <h5 class="fw-bold mt-4 text-primary">The Three Most Common Game Bugs</h5>
+        <ul class="small mb-4">
+            <li class="mb-2"><strong>Forgetting to call <code>gameLoop()</code></strong> at the end of the script. The engine is built, but nobody turned the key, so nothing moves.</li>
+            <li class="mb-2"><strong>Forgetting <code>this.</code> inside a class method.</strong> The computer looks for a global variable instead, which causes a Reference Error.</li>
+            <li class="mb-0"><strong>A scope error on the canvas context.</strong> If <code>ctx</code> is created inside a function, your classes cannot reach it. Declare <code>canvas</code> and <code>ctx</code> at the top of <code>script.js</code>, before your classes use them.</li>
+        </ul>
+        <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-0 shadow-sm">
+          <strong>Lint to Zero:</strong> a linter flags <strong>style (quality) problems</strong> as well as likely bugs. Before you turn in your game, debug it, lint it down to <strong>zero warnings</strong>, and <strong>document each fix</strong>: what was wrong and what you changed. That log is your proof of professional QA.
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <div class="card roadmap-card border-warning shadow-sm text-start">
+          <div class="card-header bg-warning text-dark fw-bold">Pro Tip:</div>
+          <div class="card-body small">
+              <p class="mb-0"><strong>Breakpoint vs. Linter:</strong> a <strong>breakpoint</strong> pauses your code <em>while it runs</em> so you can inspect it. A <strong>linter</strong> reads your code <em>without running it</em>. Run the linter first to catch typos, then use breakpoints to find logic that runs wrong.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- SECTION 6C: CTSO COMPETITIONS -->
     <div class="row mb-5 pb-4 border-bottom align-items-start">
       <div class="col-lg-8 pe-lg-5">
@@ -673,6 +811,8 @@ ctx.drawImage(
         <p><strong>Why it matters:</strong> The game you're building this chapter isn't just a grade — it's exactly the kind of polished, playable project that Career &amp; Technical Student Organizations (CTSOs) like <strong>SkillsUSA</strong> look for in their web/app design and promotional media competitive events. Participating in these events is one of the fastest ways to build a real portfolio, meet industry professionals, and get recognized beyond your own classroom.</p>
         <p><strong>What it is:</strong> CTSO competitions run in tiers — local/regional, then state, then national — with each level qualifying top performers for the next. Categories relevant to this course include web design and interactive/promotional media, where a project like "Cosmic Clicker" (a working game loop, clean OOP code, no crashes, and a short presentation explaining your technical choices) is realistic competition-ready material.</p>
         <p><strong>How it works:</strong> Your instructor can connect you with Carson High's CTSO chapter. Competitors typically prepare a project in advance, then present and defend their technical decisions to judges — which is exactly why commenting your code and being able to explain <em>why</em> you used a Class instead of separate variables (Section 4) is a real, judged skill, not just a classroom habit.</p>
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Day 9 -->
+        <p><strong>SkillsUSA and FBLA:</strong> SkillsUSA is not your only option. <strong>FBLA</strong> (Future Business Leaders of America) also runs competitive events in website, app, and game design. Judges in both look for two things: <strong>technical skill</strong> (it works without breaking, the code is clean and commented, and you can explain how it works) and <strong>presentation</strong> (how clearly and professionally you explain your choices).</p>
         <div class="alert alert-warning border-0 border-start border-4 border-warning small mb-4 shadow-sm">
           <strong>Trap — Where Everyone Gets Ambushed:</strong> Waiting until senior year to get involved. Most students who succeed at state and national CTSO events started competing at the regional level early, building experience and a portfolio over multiple years — not trying to assemble one at the last minute.
         </div>
@@ -714,6 +854,32 @@ ctx.drawImage(
                 </ol>
                 <p class="mb-3 text-danger fw-bold mt-4">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your completed Game folder.</p>
                 <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch10 Day 9 -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-12">
+        <div class="card border-info shadow-sm mx-auto text-start" style="max-width: 900px;">
+            <div class="card-header bg-site-secondary fw-bold text-info border-bottom">QA &amp; Playtesting: Break It Before a Player Does</div>
+            <div class="card-body small p-4">
+                <p><strong>Think like a player:</strong> list every way someone could break your game in the first thirty seconds. Mash every key, hold two arrows at once, pause in the middle of a collision, press Space on the Game Over screen, run straight into a wall. Every bug you find now is one Gabe never sees.</p>
+                <p class="fw-bold mb-1">QA Audit Checklist</p>
+                <ul class="mb-3">
+                    <li class="mb-1"><strong>Clear screen:</strong> no smears. <code>clearRect()</code> runs at the start of every frame.</li>
+                    <li class="mb-1"><strong>Boundary checks:</strong> nothing flies off the screen. The player stops (or wraps) at every edge.</li>
+                    <li class="mb-1"><strong>Logic check:</strong> the score updates on collision, and Game Over triggers when it should.</li>
+                    <li class="mb-0"><strong>Common errors:</strong> <code>gameLoop()</code> is called at the end of the script, every class method uses <code>this.</code>, and your classes can reach <code>ctx</code>.</li>
+                </ul>
+                <p class="fw-bold mb-1">Swap &amp; Break Playtest</p>
+                <p class="mb-2">Swap computers with a peer for a <strong>10-minute playtest</strong>. Your partner plays <strong>cold</strong> (no instructions from you) and logs every bug with <strong>steps to reproduce</strong>: the exact actions that make the bug happen again. A developer cannot fix a bug they cannot make happen again.</p>
+                <div class="bg-light p-3 rounded border mb-0">
+                    <strong>Example bug report:</strong> The player disappears off the left edge.<br>
+                    <strong>Steps to reproduce:</strong> 1. Press Space to start. 2. Hold the Left Arrow for 3 seconds. 3. The player slides off the screen and never comes back.<br>
+                    <strong>Expected:</strong> the player stops at the left edge.
+                </div>
             </div>
         </div>
       </div>
