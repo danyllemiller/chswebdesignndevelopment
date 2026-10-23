@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report a Bug or Request | CHS</title>
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css" rel="stylesheet" />
+  <link href="/css/student-pages.css" rel="stylesheet" />
+  <script src="/js/loader.js?v=26"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+  <style>
+    .report-wrap { max-width: 760px; margin: 1.5rem auto 3rem; padding: 0 1rem; }
+    .report-card { background: #fff; border-radius: 1rem; box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12); padding: 1.5rem; }
+    .kind-btn { flex: 1; border: 2px solid #dee2e6; border-radius: .8rem; padding: .9rem; background: #fff; text-align: left; }
+    .kind-btn.on { border-color: #0d6efd; background: #f0f6ff; }
+    .kind-btn i { font-size: 1.4rem; }
+    .status-pill { font-size: .75rem; font-weight: 800; border-radius: 1rem; padding: .15rem .6rem; }
+    .st-new { background: #e9ecef; color: #495057; } .st-assigned { background: #fff3cd; color: #946200; }
+    .st-fixed { background: #cfe2ff; color: #084298; } .st-done { background: #d1f2df; color: #146c43; } .st-declined { background: #f8d7da; color: #842029; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="report-wrap">
+  <h1 class="h3 fw-bold mb-1"><i class="fas fa-bug me-2 text-danger"></i>Report a Bug or Request</h1>
+  <p class="text-muted">Found something broken on the class site, or have an idea for something new? Tell Ms. Miller here. You'll see what happens to it below.</p>
+  <div class="report-card mb-4">
+    <form id="reportForm">
+      <div class="d-flex gap-2 mb-3" role="radiogroup" aria-label="What kind of report">
+        <button type="button" class="kind-btn on" data-kind="bug" aria-pressed="true"><i class="fas fa-bug text-danger"></i><div class="fw-bold mt-1">Something's broken</div><div class="small text-muted">A typo, broken picture or link, an error, something that won't save</div></button>
+        <button type="button" class="kind-btn" data-kind="request" aria-pressed="false"><i class="fas fa-lightbulb text-warning"></i><div class="fw-bold mt-1">I have an idea</div><div class="small text-muted">A new feature, game, app, or a way to make something easier</div></button>
+      </div>
+      <label class="form-label fw-bold" for="pageUrl">Which page? <span class="fw-normal text-muted small">(paste the address, or describe it)</span></label>
+      <input id="pageUrl" class="form-control mb-3" maxlength="500" placeholder="e.g. Chapter 7 page, or https://chswebdesignndevelopment.com/...">
+      <label class="form-label fw-bold" for="desc" id="descLabel">What happened?</label>
+      <textarea id="desc" class="form-control mb-1" rows="5" maxlength="3000" required placeholder="What were you doing, what did you expect, and what happened instead?"></textarea>
+      <div class="form-text mb-3">The more exact, the faster it gets fixed: which picture, which button, what the error said.</div>
+      <button class="btn btn-primary fw-bold" type="submit"><i class="fas fa-paper-plane me-1"></i>Send</button>
+      <span id="msg" class="small fw-bold ms-2"></span>
+    </form>
+  </div>
+  <h2 class="h5 fw-bold">My reports</h2>
+  <div id="mine" class="report-card"><p class="text-muted mb-0">Loading…</p></div>
+</div>
+<div id="footer-placeholder"></div>
+<script src="/js/bootstrap.bundle.js"></script>
+<script>
+(function () {
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const STATUS = { new: 'Sent', assigned: 'Being worked on', fixed: 'Fixed, waiting for review', done: 'Done', declined: 'Not planned' };
+  let kind = 'bug';
+  // Coming from a page's link? Pre-fill which page it was.
+  const from = new URLSearchParams(location.search).get('from') || (document.referrer && !document.referrer.includes('/student/report.html') ? document.referrer : '');
+  if (from) document.getElementById('pageUrl').value = from;
+  document.querySelectorAll('.kind-btn').forEach(b => b.addEventListener('click', () => {
+    kind = b.dataset.kind;
+    document.querySelectorAll('.kind-btn').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+    document.getElementById('descLabel').textContent = kind === 'bug' ? 'What happened?' : 'What is your idea?';
+    document.getElementById('desc').placeholder = kind === 'bug'
+      ? 'What were you doing, what did you expect, and what happened instead?'
+      : 'What would it do, and how would it help you or your class?';
+  }));
+  async function loadMine() {
+    const box = document.getElementById('mine');
+    try {
+      const r = await fetch('/api/student/site-reports/mine'); const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      box.innerHTML = d.reports.length ? d.reports.map(x => `<div class="border-bottom py-2">
+          <div class="d-flex justify-content-between gap-2"><span class="fw-bold">${x.kind === 'bug' ? '🐞 Bug' : '💡 Idea'} · ${new Date(x.created_at).toLocaleDateString()}</span>
+          <span class="status-pill st-${esc(x.status)}">${esc(STATUS[x.status] || x.status)}</span></div>
+          ${x.page_url ? `<div class="small text-muted text-truncate">${esc(x.page_url)}</div>` : ''}
+          <div class="small">${esc(x.description)}</div></div>`).join('') : '<p class="text-muted mb-0">You haven\'t sent any yet.</p>';
+    } catch (e) { box.innerHTML = '<p class="text-muted mb-0">Could not load your reports.</p>'; }
+  }
+  document.getElementById('reportForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('msg'), btn = e.target.querySelector('button[type=submit]');
+    btn.disabled = true; msg.className = 'small fw-bold ms-2'; msg.textContent = 'Sending…';
+    try {
+      const r = await fetch('/api/student/site-report', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind, page_url: document.getElementById('pageUrl').value, description: document.getElementById('desc').value }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || 'Could not send.');
+      msg.classList.add('text-success'); msg.textContent = 'Sent. Thank you!';
+      document.getElementById('desc').value = '';
+      loadMine();
+    } catch (err) { msg.classList.add('text-danger'); msg.textContent = err.message; }
+    btn.disabled = false;
+  });
+  loadMine();
+})();
+</script>
+</body>
+</html>

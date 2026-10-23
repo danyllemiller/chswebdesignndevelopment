@@ -95,6 +95,7 @@
         <p>You're running site maintenance the way a junior dev handles it at a real agency: find what's broken, fix or replace it, document what you did. Check a task off once it's actually live — this page re-checks the real site before it counts, and your score updates automatically.</p>
         <nav class="toc">
           <a href="#punchlist">Punch List</a>
+          <a href="#reports">Student Reports</a>
           <a href="#howto">How-To</a>
           <a href="#schedule">Your Schedule</a>
           <a href="#ongoing">Ongoing Checklist</a>
@@ -181,6 +182,11 @@
         </div>
       </section>
 
+      <section id="reports">
+        <h2><span class="num">01b</span> From Student Reports</h2>
+        <p class="section-sub">Real problems students reported on the class site that Ms. Miller assigned to you. Fix it, then say exactly what you changed (which file, what you fixed) and mark it fixed. Ms. Miller reviews it before it counts as done.</p>
+        <div id="assignedReports"><p class="section-sub">Loading…</p></div>
+      </section>
       <section id="howto">
         <h2><span class="num">02</span> How-To — for anything not covered in a chapter</h2>
         <p class="section-sub">None of this is taught directly in your coursework, so here's the actual workflow.</p>
@@ -224,6 +230,12 @@
             <tr><td>Wed, Oct 7</td><td>Weekly Check-In: Site Image Audit</td><td><span class="cat-pill checkin">check-in</span></td><td>10 pts</td></tr>
             <tr><td>Fri, Oct 16</td><td>Weekly Check-In: Site Image Audit</td><td><span class="cat-pill checkin">check-in</span></td><td>10 pts</td></tr>
             <tr><td>Fri, Oct 16</td><td>Project Review: Image Fixes (2-Week)</td><td><span class="cat-pill project">project</span></td><td>25 pts</td></tr>
+            <tr><td>Wed, Oct 28</td><td>Weekly Check-In: Site Maintenance &amp; Student Reports</td><td><span class="cat-pill checkin">check-in</span></td><td>10 pts</td></tr>
+            <tr><td>Wed, Nov 4</td><td>Weekly Check-In: Site Maintenance &amp; Student Reports</td><td><span class="cat-pill checkin">check-in</span></td><td>10 pts</td></tr>
+            <tr><td>Wed, Nov 4</td><td>Project Review: Punch List &amp; Report Fixes (2-Week)</td><td><span class="cat-pill project">project</span></td><td>25 pts</td></tr>
+            <tr><td>Fri, Nov 13</td><td>Weekly Check-In: Site Maintenance &amp; Student Reports</td><td><span class="cat-pill checkin">check-in</span></td><td>10 pts</td></tr>
+            <tr><td>Wed, Nov 18</td><td>Weekly Check-In: Site Maintenance &amp; Student Reports</td><td><span class="cat-pill checkin">check-in</span></td><td>10 pts</td></tr>
+            <tr><td>Wed, Nov 18</td><td>Project Review: Punch List &amp; Report Fixes (2-Week)</td><td><span class="cat-pill project">project</span></td><td>25 pts</td></tr>
           </tbody>
         </table>
       </section>
@@ -319,6 +331,35 @@
     }
 
     init();
+
+    // Student bug reports assigned to Monique (server/routes/siteReports.js).
+    async function loadReports() {
+        const box = document.getElementById('assignedReports');
+        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        try {
+            const r = await fetch('/api/practicum/assigned-reports'); const d = await r.json();
+            if (!r.ok) throw new Error(d.error);
+            if (!d.reports.length) { box.innerHTML = '<p class="section-sub">Nothing assigned right now.</p>'; return; }
+            box.innerHTML = d.reports.map(x => `<div class="task${x.status === 'fixed' ? ' done' : ''}"><div class="task-body">
+                <span class="tag ${x.kind === 'bug' ? 'missing' : 'quick'}">${x.kind === 'bug' ? 'Bug' : 'Request'} #${x.id}</span>
+                <p class="task-title">${esc(x.description)}</p>
+                ${x.page_url ? `<p class="task-desc"><span class="path">${esc(x.page_url)}</span></p>` : ''}
+                ${x.staff_note ? `<p class="task-desc"><strong>Ms. Miller:</strong> ${esc(x.staff_note)}</p>` : ''}
+                ${x.status === 'fixed' ? `<p class="task-note">Marked fixed: ${esc(x.fixer_note)}. Waiting for Ms. Miller's review.</p>` : `
+                <textarea class="form-control form-control-sm mb-2" rows="2" placeholder="What did you change? (file and fix)" data-note="${x.id}"></textarea>
+                <button class="btn btn-sm btn-success fw-bold" data-fixed="${x.id}">Mark fixed</button> <span class="task-note" data-msg="${x.id}"></span>`}
+            </div></div>`).join('');
+        } catch (e) { box.innerHTML = '<p class="section-sub">Could not load reports.</p>'; }
+    }
+    document.addEventListener('click', async (e) => {
+        const b = e.target.closest('[data-fixed]'); if (!b) return;
+        const id = b.dataset.fixed, note = document.querySelector(`[data-note="${id}"]`).value;
+        const res = await fetch('/api/practicum/report-fixed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, note }) });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) { document.querySelector(`[data-msg="${id}"]`).textContent = d.error || 'Could not save.'; return; }
+        loadReports();
+    });
+    loadReports();
   </script>
 </body>
 </html>

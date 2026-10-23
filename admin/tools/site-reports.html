@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Bug Reports &amp; Requests</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css?v=1.2" rel="stylesheet"/>
+  <script src="/js/loader.js?v=26"></script>
+  <script type="module" src="/js/auth-guard.js?v=1"></script>
+  <style>
+    body { background: #f4f6fb; }
+    .wrap { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+    .rep { background: #fff; border-radius: .8rem; box-shadow: 0 .2rem .8rem rgba(0,0,0,.06); padding: 1rem 1.25rem; margin-bottom: .8rem; border-left: 6px solid #adb5bd; }
+    .rep.r-monique { border-left-color: #20c997; } .rep.r-claude { border-left-color: #6f42c1; } .rep.r-teacher { border-left-color: #fd7e14; }
+    .route-btn.active { color: #fff !important; }
+    .route-btn.monique.active { background: #20c997; border-color: #20c997; }
+    .route-btn.claude.active { background: #6f42c1; border-color: #6f42c1; }
+    .route-btn.teacher.active { background: #fd7e14; border-color: #fd7e14; }
+    .reason { font-size: .8rem; color: #6c757d; }
+    .fixer { background: #e7f6f0; border-radius: .4rem; padding: .4rem .6rem; font-size: .85rem; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="wrap">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+    <h1 class="h3 fw-bold mb-0"><i class="fas fa-bug text-danger me-2"></i>Bug Reports &amp; Requests</h1>
+    <div class="d-flex gap-2">
+      <select id="fRoute" class="form-select form-select-sm" style="width:auto"><option value="">Everyone</option><option value="monique">Monique</option><option value="claude">Claude</option><option value="teacher">You decide</option></select>
+      <select id="fStatus" class="form-select form-select-sm" style="width:auto"><option value="open">Open</option><option value="">All</option><option value="done">Done</option><option value="declined">Declined</option></select>
+    </div>
+  </div>
+  <p class="text-muted small">Students send these from <strong>Student Tools → Report a Bug / Request</strong>. Each one gets a first guess: <span class="text-success fw-bold">Monique</span> for basic content fixes (typos, broken images or links, alt text, oversized files), <span class="fw-bold" style="color:#6f42c1">Claude</span> for anything that needs code (new features, saving, logins, grades, errors), or <span class="fw-bold" style="color:#fd7e14">you decide</span>. Click to change it. <strong>Assign</strong> puts it on Monique's practicum page. For Claude's list, ask Claude in VS Code to "go through the Claude bug reports."</p>
+  <div id="list"><p class="text-muted">Loading…</p></div>
+</div>
+<div id="footer-placeholder"></div>
+<script src="/js/bootstrap.bundle.js"></script>
+<script>
+(function () {
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const LABEL = { monique: 'Monique', claude: 'Claude', teacher: 'You decide' };
+  const STATUS = { new: 'New', assigned: 'Assigned', fixed: 'Fixed: review it', done: 'Done', declined: 'Declined' };
+  let all = [];
+  async function load() {
+    const r = await fetch('/api/admin/site-reports'); const d = await r.json();
+    all = d.reports || []; render();
+  }
+  async function update(id, body) {
+    await fetch('/api/admin/site-reports/' + id, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    load();
+  }
+  function render() {
+    const fr = document.getElementById('fRoute').value, fs = document.getElementById('fStatus').value;
+    const rows = all.filter(x => (!fr || x.route === fr) && (!fs || (fs === 'open' ? !['done', 'declined'].includes(x.status) : x.status === fs)));
+    document.getElementById('list').innerHTML = rows.length ? rows.map(x => `
+      <div class="rep r-${esc(x.route)}">
+        <div class="d-flex flex-wrap justify-content-between gap-2">
+          <div><span class="fw-bold">#${x.id} ${x.kind === 'bug' ? '🐞 Bug' : '💡 Request'}</span> · ${esc((x.first_name || '') + ' ' + (x.last_name || ''))} <span class="text-muted small">${esc(x.section_id || '')} · ${new Date(x.created_at).toLocaleString()}</span></div>
+          <span class="badge bg-secondary">${esc(STATUS[x.status] || x.status)}</span>
+        </div>
+        ${x.page_url ? `<div class="small text-muted text-truncate">${esc(x.page_url)}</div>` : ''}
+        <div class="my-2">${esc(x.description)}</div>
+        <div class="reason mb-2">${x.route_auto ? 'First guess' : 'Routed'}: <strong>${esc(LABEL[x.route])}</strong>${x.route_reason && x.route_auto ? ' · ' + esc(x.route_reason) : ''}</div>
+        ${x.fixer_note ? `<div class="fixer mb-2"><strong>Monique's fix:</strong> ${esc(x.fixer_note)}</div>` : ''}
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <div class="btn-group btn-group-sm">${['monique', 'claude', 'teacher'].map(k => `<button class="btn btn-outline-secondary route-btn ${k} ${x.route === k ? 'active' : ''}" data-id="${x.id}" data-route="${k}">${LABEL[k]}</button>`).join('')}</div>
+          ${x.route === 'monique' && x.status === 'new' ? `<button class="btn btn-sm btn-success fw-bold" data-id="${x.id}" data-status="assigned">Assign to Monique</button>` : ''}
+          ${x.status === 'fixed' ? `<button class="btn btn-sm btn-primary fw-bold" data-id="${x.id}" data-status="done">Approve fix</button><button class="btn btn-sm btn-outline-warning" data-id="${x.id}" data-status="assigned">Send back</button>` : ''}
+          ${!['done', 'declined'].includes(x.status) ? `<button class="btn btn-sm btn-outline-success" data-id="${x.id}" data-status="done">Mark done</button><button class="btn btn-sm btn-outline-danger" data-id="${x.id}" data-status="declined">Decline</button>` : `<button class="btn btn-sm btn-outline-secondary" data-id="${x.id}" data-status="new">Reopen</button>`}
+        </div>
+      </div>`).join('') : '<p class="text-muted">Nothing here.</p>';
+  }
+  document.getElementById('list').addEventListener('click', e => {
+    const b = e.target.closest('button[data-id]'); if (!b) return;
+    if (b.dataset.route) update(b.dataset.id, { route: b.dataset.route });
+    else if (b.dataset.status) update(b.dataset.id, { status: b.dataset.status });
+  });
+  document.getElementById('fRoute').addEventListener('change', render);
+  document.getElementById('fStatus').addEventListener('change', render);
+  load();
+})();
+</script>
+</body>
+</html>
