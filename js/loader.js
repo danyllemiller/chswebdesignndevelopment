@@ -178,10 +178,10 @@
     });
   }
 
-  if (!resourceExists('link[href*="/css/dacStyleSheets.css"]')) {
+  if (!resourceExists('link[href*="/css/dacStyleSheets.css?v=2.0"]')) {
     const css = document.createElement('link');
     css.rel = 'stylesheet';
-    css.href = '/css/dacStyleSheets.css?v=1.4';
+    css.href = '/css/dacStyleSheets.css?v=2.0';
     head.appendChild(css);
   }
 

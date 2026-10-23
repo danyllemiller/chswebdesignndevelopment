@@ -5,11 +5,17 @@
    ========================================================================= */
 
 /* 1. UNIVERSAL RESET & FONTS */
+/* Edu NSW ACT Foundation (Google Fonts, SIL Open Font License: see
+   /css/EduNSWACTFoundation-OFL.txt). The .ttf was missing until 2026-10-23,
+   so every page had been falling back to Arial. woff2 first (smaller); swap
+   shows text in the fallback font until it loads instead of hiding it. */
 @font-face {
   font-family: 'Edu NSW ACT Foundation';
-  src: url('/css/EduNSWACTFoundation-VariableFont_wght.ttf') format('truetype');
+  src: url('/css/EduNSWACTFoundation-VariableFont_wght.woff2') format('woff2'),
+       url('/css/EduNSWACTFoundation-VariableFont_wght.ttf') format('truetype');
   font-weight: 400 700;
   font-style: normal;
+  font-display: swap;
 }
 
 :root {
