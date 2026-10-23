@@ -148,6 +148,22 @@
         <h2 class="section-title mt-0">Browser Developer Tools: Your Secret Superpower</h2>
         <p>Every browser has "Developer Tools" (just right-click on a page and hit "Inspect"). These tools are your agency's new best friend. You can see exactly which CSS is affecting an element, try out new styles live without even changing your files, and figure out why things aren't looking the way you want them to before presenting to a client.</p>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch6 Days 1, 4 -->
+        <div class="card border-info shadow-sm my-4 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">When a Correct Rule Does Nothing: Debugging in DevTools</div>
+          <div class="card-body small">
+            <p class="mb-2">Your rule is definitely correct, and nothing changed on screen. Common reasons: the <strong>selector</strong> doesn't match the element, a more <strong>specific</strong> rule is winning, the browser is showing an old <strong>cached</strong> copy (hard refresh with Ctrl+Shift+R / Cmd+Shift+R), or the CSS file <strong>isn't linked</strong> at all. Find out which in three steps:</p>
+            <ol class="mb-2">
+              <li class="mb-1">Right-click the element and choose <strong>Inspect</strong>, so you know the right element is selected.</li>
+              <li class="mb-1">In the <strong>Styles</strong> panel, look for your rule. A <s>crossed-out</s> property means another rule beat it.</li>
+              <li class="mb-0">Open the <strong>Computed</strong> panel: it shows the value that <strong>actually won</strong>, and clicking it shows which rule it came from.</li>
+            </ol>
+            <p class="mb-0">The <strong>box model diagram</strong> at the bottom of Computed shows the real content, padding, border, and margin values, which is the fastest way to find mystery extra space.</p>
+          </div>
+        </div>
+        <h5 class="fw-bold mt-4 text-primary">Why CSS Lives in Its Own File</h5>
+        <p>Your HTML validates, and it is ugly. Whose job is that? <strong>CSS's.</strong> Styling is a separate job from structure. Try this: in most browsers you can turn CSS off (or just delete the <code>&lt;link&gt;</code> for a moment). The page turns plain, but the content is all still there and still readable, in order. That's the point of keeping them separate: the HTML stays meaningful without any styling, and because every page links the same external <code>styles.css</code>, <strong>one change updates every page</strong> at once.</p>
+
         <h2 class="section-title mt-5" id="uses-of-css">What Do We Actually Use CSS For?</h2>
         <p><strong>Why it matters:</strong> Imagine a Carson City client asks you to change their agency's brand color from blue to green — but every single page has the color hard-coded inside the HTML with <code>style="color: blue;"</code> on every heading and button. You'd have to open every file and hunt down every instance. CSS exists to solve exactly this problem: it separates <em>content</em> (HTML) from <em>presentation</em> (how it looks), so one small edit in one file can update an entire site.</p>
         <p><strong>What it is:</strong> CSS isn't just "make text a color." It has real, practical jobs on every professional site:</p>
@@ -288,6 +304,15 @@ h1 {
           </a>
           <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.4:</strong> CSS Priority Hierarchy</figcaption>
         </figure>
+      </div>
+    </div>
+
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch6 Day 2 -->
+    <div class="row mb-5 align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <div class="alert alert-warning small border-warning border mb-0">
+          <strong>What the browser does with a broken rule:</strong> it doesn't crash or show an error. It quietly <strong>ignores</strong> any declaration it can't understand. Forget a semicolon and the browser reads the next two declarations as one broken one, so <em>both</em> are ignored: <code>color: red background: blue;</code> does nothing at all. Forget a closing brace and the browser can swallow the next rule too. When one style "randomly" stops working, check the line <em>above</em> it.
+        </div>
       </div>
     </div>
 
@@ -473,6 +498,11 @@ h1 {
     /* Blue hue, full saturation, medium lightness */
     background-color: hsl(240, 100%, 50%); 
 }</code></pre>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch6 Day 7 -->
+        <div class="alert alert-info small border my-4">
+          <strong>Why designers think in HSL:</strong> the same brand blue can be written as <code>#2F7DE1</code>, <code>rgb(47, 125, 225)</code>, or <code>hsl(214, 75%, 53%)</code>. Only HSL lets you make a lighter <strong>tint</strong> or darker <strong>shade</strong> by changing a single number, the lightness: <code>hsl(214, 75%, 85%)</code> for a soft background, <code>hsl(214, 75%, 30%)</code> for dark text. <strong>Check contrast:</strong> text needs enough contrast against its background to be readable (WCAG asks for at least 4.5:1 for normal text). A free contrast checker will tell you in seconds.
+        </div>
 
         <h5 class="fw-bold mt-4 text-primary">5. Transparent Colors (RGBA &amp; HSLA)</h5>
         <p>Want see-through colors? You can add an <strong>Alpha</strong> channel to RGB or HSL. The alpha value is a number between <code>0.0</code> (completely invisible) and <code>1.0</code> (completely solid). A value of <code>0.5</code> makes the color 50% transparent.</p>
@@ -785,6 +815,23 @@ h1 {
         <p>Mastering selectors is the key to writing clean, efficient CSS. Instead of adding a class to every single paragraph on your client's landing page, you can use a combination of selectors to target "only the paragraphs inside the footer" or "only the first link in the navigation." This keeps your HTML cleaner and makes your CSS much more powerful.</p>
         <p>Understanding selectors also unlocks the true potential of the "Cascading" part of Cascading Style Sheets. By leveraging specific selectors, you can create a base set of styles that apply broadly and then override them only where necessary with more targeted rules. This layered approach prevents you from writing repetitive code and makes updating your website's design much faster and less prone to errors.</p>
         
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch6 Day 5 -->
+        <h5 class="fw-bold mt-4 text-primary">Six Ways to Aim</h5>
+        <div class="table-responsive">
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-3 text-start">
+          <thead class="table-light"><tr><th>Selector type</th><th>Example</th><th>Selects</th></tr></thead>
+          <tbody>
+            <tr><td>Tag</td><td><code>p</code></td><td>Every paragraph</td></tr>
+            <tr><td>Class</td><td><code>.card</code></td><td>Every element with <code>class="card"</code></td></tr>
+            <tr><td>ID</td><td><code>#site-header</code></td><td>The one element with that id</td></tr>
+            <tr><td>Descendant</td><td><code>nav a</code></td><td>Every link anywhere inside a nav</td></tr>
+            <tr><td>Child</td><td><code>ul &gt; li</code></td><td>Only list items directly inside a ul</td></tr>
+            <tr><td>Attribute</td><td><code>input[type="email"]</code></td><td>Only email inputs</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="small mb-4"><strong>Name classes by purpose, not appearance.</strong> <code>.big-red-text</code> becomes a lie the day the brand color changes to blue; <code>.alert-message</code> stays true forever.</p>
+
         <h5 class="fw-bold mt-4 text-primary">Style Specificity: Who Wins in a Fight?</h5>
         <p>When two rules conflict, the browser uses <code>specificity</code> to pick a winner. The most specific selector wins:</p>
         <ol class="small mb-5 ps-4">
@@ -942,6 +989,19 @@ h1 {
                     <p class="text-muted small mb-0"><i class="fas fa-spinner fa-spin me-1"></i>Loading…</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch6 Day 6 -->
+        <div class="card border-info shadow-sm my-4 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">Who Wins? Specificity, Then Source Order</div>
+          <div class="card-body small">
+            <p class="mb-2">When two rules target the same element and disagree, the browser decides by <strong>specificity first, then source order</strong>: if the scores tie, the rule written <em>later</em> in the stylesheet wins. Score each selector (id = 100, class = 10, tag = 1):</p>
+            <ul class="mb-2">
+              <li><code>.nav a</code> = 10 + 1 = <strong>11</strong></li>
+              <li><code>#main p</code> = 100 + 1 = <strong>101</strong> (it beats <code>.nav a</code>)</li>
+            </ul>
+            <p class="mb-0"><strong><code>!important</code> is usually an admission of defeat.</strong> It forces a win by skipping the normal rules, and then the only way to override it is <em>another</em> <code>!important</code>. Fix the selector instead.</p>
+          </div>
         </div>
 
         <!-- GRADED LAB 3 CARD -->
@@ -1127,6 +1187,16 @@ body {
           </ol>
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch6 Days 8-9 -->
+        <div class="card border-info shadow-sm my-4 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-info">When the Web Font Doesn't Show Up</div>
+          <div class="card-body small">
+            <p class="mb-2">Your custom font fails to download on a slow connection. What does the visitor see? The next font in your <strong>font stack</strong>, the <strong>fallback</strong>:</p>
+            <pre class="p-2 border rounded mb-2 no-copy"><code>font-family: "Poppins", "Helvetica Neue", Arial, sans-serif;</code></pre>
+            <p class="mb-2">A stack always ends with a <strong>generic family</strong> (<code>sans-serif</code>, <code>serif</code>, <code>monospace</code>) because every device has one, so text is never left without a font. Add <code>font-display: swap;</code> to your <code>@font-face</code> (Google Fonts adds <code>&amp;display=swap</code> to its link) so the text shows right away in the fallback font and swaps to the custom font when it arrives, instead of staying invisible while it loads.</p>
+          </div>
+        </div>
+
         <h2 class="section-title mt-5">Go Big or Go Home: Sizing Your Text</h2>
         <ol class="small ps-3 mb-5">
             <li class="mb-3">
@@ -1147,6 +1217,11 @@ body {
               </ul>
             </li>
         </ol>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch6 Day 9 -->
+        <div class="alert alert-info small border my-4">
+          <strong>Sizing text for people who changed their settings:</strong> many users with low vision set their browser's default font size bigger. <code>rem</code> sizes scale with that setting; hard-coded <code>px</code> font sizes can ignore it. Test it yourself: set your browser's default font size to <strong>24px</strong> and reload your site. Overlapping text, clipped headings, or broken buttons all point to a fixed <code>px</code> value that should become <code>rem</code>.
+        </div>
 
         <h5 class="fw-bold mt-5 text-primary">Give it Some Breathing Room: Spacing is Key</h5>
         <ul class="small mb-5">
@@ -1318,6 +1393,16 @@ margin: 10px 20px 10px 20px;
 /* Or just two values: Top/Bottom and Left/Right */
 padding: 20px 40px;</code></pre>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch6 Days 10-11 -->
+        <h5 class="fw-bold mt-4 text-primary">Box Model Math</h5>
+        <p>By default (<code>box-sizing: content-box</code>), <code>width</code> sets only the content, and padding and border are <strong>added</strong> on both sides:</p>
+        <ul class="small mb-2 bg-light p-3 rounded border shadow-sm text-start">
+          <li class="mb-2"><code>width: 300px; padding: 20px;</code> renders <strong>340px</strong> wide (300 + 20 + 20).</li>
+          <li class="mb-2"><code>width: 200px; padding: 10px; border: 5px;</code> renders <strong>230px</strong> wide (200 + 10 + 10 + 5 + 5).</li>
+          <li class="mb-0">With <code>box-sizing: border-box</code>, the first box stays exactly <strong>300px</strong>: padding fits inside.</li>
+        </ul>
+        <p class="small mb-4"><strong>Use a spacing scale.</strong> Pick a small set of spacing values, like 4, 8, 16, and 32px, and use only those for every margin and padding. Consistent spacing is a big part of what makes a site feel professional, and the whole team uses the same numbers.</p>
+
         <!-- GRADED LAB 6 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
           <div class="card-header bg-success text-white fw-bold">Milestone 6: Spacing & Breathing [25 pts]</div>
@@ -1357,6 +1442,11 @@ padding: 20px 40px;</code></pre>
     background-position: center; /* Keeps the important part centered */
 }</code></pre>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch6 Day 11 -->
+        <div class="alert alert-info small border my-4">
+          <strong>Decoration with restraint:</strong> gradients, rounded corners, and shadows should <em>clarify</em>, not just decorate. A shadow communicates <strong>elevation</strong>: "this card sits above the page, so you can click it." Decoration clarifies when it guides attention (a focus outline, a raised button); it just decorates when it adds noise (shadows on everything, a gradient behind body text). If you can't say what a decoration tells the user, delete it.
+        </div>
+
         <!-- GRADED LAB 7 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
           <div class="card-header bg-success text-white fw-bold">Milestone 7: Visual Accents [25 pts]</div>
@@ -1382,6 +1472,11 @@ padding: 20px 40px;</code></pre>
     padding: 0;
     box-sizing: border-box;
 }</code></pre>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch6 Day 12 -->
+        <div class="alert alert-info small border my-4">
+          <strong>Reset vs. normalize:</strong> the same page looks slightly different in Chrome and Safari because each browser has its own default stylesheet. A <strong>reset</strong> removes the defaults entirely (like the <code>*</code> rule above). A <strong>normalize</strong> stylesheet keeps the useful defaults but makes them consistent across browsers. Either way, it goes <strong>first</strong> in your stylesheet, so your own rules come after it and override it.
+        </div>
 
         <!-- GRADED LAB 8 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
@@ -1626,6 +1721,33 @@ footer p::before {
           </a>
           <figcaption class="p-2 small text-muted text-center"><strong>Figure 6.24:</strong> Browser View (Hover)</figcaption>
         </figure>
+      </div>
+    </div>
+
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch6 Days 13-15 -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-8 pe-lg-5">
+        <h2 class="section-title mt-0">Keeping a Stylesheet Maintainable</h2>
+        <p>A stylesheet you wrote weeks ago should still make sense to you, and to a new developer, in seconds. The test: could your partner find your button styles in 10 seconds?</p>
+        <h5 class="fw-bold mt-4 text-primary">1. Organize in Sections</h5>
+        <p>Use the same order every time, with a comment heading for each section: <strong>reset &rarr; variables &rarr; base (body, headings, links) &rarr; layout &rarr; components (buttons, cards, nav)</strong>. Group rules by <strong>component</strong>, not by page: components repeat across pages, so grouping them avoids writing the same rule three times.</p>
+        <pre class="p-3 border rounded shadow-sm mb-3 no-copy"><code>/* ========== 1. RESET ========== */
+/* ========== 2. VARIABLES ========== */
+/* ========== 3. BASE ========== */
+/* ========== 4. LAYOUT ========== */
+/* ========== 5. COMPONENTS: buttons, cards, nav ========== */</code></pre>
+        <h5 class="fw-bold mt-4 text-primary">2. The Refactor Pass: Hunt Duplicate Rules</h5>
+        <p>How many places define your primary blue right now? List every hard-coded color, font, and spacing value, then replace each with a <strong>CSS variable</strong> in <code>:root</code>, named by <strong>purpose</strong>, not appearance:</p>
+        <pre class="p-3 border rounded shadow-sm mb-3 no-copy"><code>:root {
+  --color-primary: hsl(25, 45%, 30%);   /* not --brown */
+  --color-accent: hsl(40, 90%, 55%);
+  --font-heading: "Playfair Display", serif;
+  --space-sm: 8px;
+  --space-md: 16px;
+}</code></pre>
+        <p>Now the brand color lives in <strong>one</strong> place: change it once and every page updates.</p>
+        <h5 class="fw-bold mt-4 text-primary">3. Cross-Browser and Cross-Device Spot Check</h5>
+        <p class="mb-0">Before hand-off, open every page in at least two browsers (Chrome and Safari or Firefox) and on a phone. A style can work in one browser by accident, because of a browser default or a feature another browser doesn't support yet. Note anything that differs, fix it, and check again.</p>
       </div>
     </div>
 
