@@ -130,6 +130,11 @@
             <li class="mb-0"><strong>Code Generation:</strong> The "Copilot" mindset means viewing AI as <strong>a tool to boost human efficiency</strong>, not a replacement for human developers!</li>
         </ul>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch15 Day 1 -->
+        <div class="alert alert-info small border my-4">
+          <strong>If an AI writes 100 lines of code in two seconds, why do developers still have jobs?</strong> Because <strong>AI makes mistakes</strong>, confidently. It invents functions that don't exist, misses security holes, and has no idea what the client actually needs. The developer is the one who <strong>reviews</strong> every line, <strong>tests</strong> it, and <strong>decides</strong> what ships. That's what "copilot, not autopilot" means: the AI drafts; the human is responsible.
+        </div>
+
         <h5 class="fw-bold mt-4 text-primary" id="ai-changes-ux">How AI Reshapes the User Experience</h5>
         <p><strong>Why it matters:</strong> A client won't ask you to "add a Neural Network" to their site — they'll ask why their competitor's site "feels like it knows what I want." Understanding how AI reshapes UX lets you translate that vague request into concrete, buildable features.</p>
         <p><strong>What it is:</strong> AI changes the user experience mainly through <strong>personalization</strong> — using a visitor's data (past clicks, purchases, location, browsing time) to dynamically reshape what they see, instead of showing every visitor the exact same static page. Three common patterns:</p>
@@ -152,6 +157,10 @@
             </details>
           </div>
         </div>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch15 Day 2 -->
+        <h5 class="fw-bold mt-4 text-primary">Helpful or Noise?</h5>
+        <p>Search, recommendations, chat, and personalization can all be powered by AI, but not every AI feature helps. Test each one with a single question: <strong>does it help this user finish their task faster or better?</strong> A recommendation engine that suggests the next lesson a student actually needs is <strong>helpful</strong>. A chatbot pop-up that covers the menu on every page and can't answer basic questions is <strong>noise</strong>. When you pitch an AI feature to a client, name the user task it improves; if you can't, leave it out.</p>
 
         <h5 class="fw-bold mt-4 text-primary">The Art of Prompt Engineering</h5>
         <p>The process of carefully refining text inputs to get better AI results is called <strong>Prompt Engineering</strong>. A professional developer doesn't just ask an AI to "build a website." They provide technical context, constraints, and iterative feedback to generate usable code.</p>
@@ -227,6 +236,19 @@
                     <p class="text-muted small mb-0"><i class="fas fa-spinner fa-spin me-1"></i>Loading…</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch15 Days 3-4 -->
+        <div class="card border-danger shadow-sm my-4 text-start">
+          <div class="card-header bg-site-secondary fw-bold text-danger">Who Is Responsible When AI Gets It Wrong?</div>
+          <div class="card-body small">
+            <p class="mb-2">An AI hiring tool trained on ten years of a company's hires learns the company's past hiring patterns, <strong>including its bias</strong>. When it then rejects good candidates, "the computer decided" is not an excuse. <strong>The developers and the company share responsibility</strong>: they chose the training data, decided how to test it, and chose to use the result.</p>
+            <p class="mb-1">When you use AI on a client's behalf, you take on two ethical obligations:</p>
+            <ul class="mb-0">
+              <li><strong>Accuracy:</strong> verify what the AI produced before it reaches the client or their users (hallucinations look exactly like facts).</li>
+              <li><strong>Honesty (disclosure):</strong> tell the client where and how AI was used in their project.</li>
+            </ul>
+          </div>
         </div>
 
         <!-- LAB 2 CARD -->
@@ -374,6 +396,11 @@
                     <p class="text-muted small mb-0"><i class="fas fa-spinner fa-spin me-1"></i>Loading…</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch15 Day 5 -->
+        <div class="alert alert-warning small border-warning border my-4">
+          <strong>Why a smart doorbell is riskier than your laptop:</strong> it's a computer on the internet too, but it often ships with a <strong>default password</strong> nobody changes, its <strong>firmware</strong> (built-in software) is rarely updated, and it's <strong>always connected</strong>, so attackers have all day, every day, to find it. When you propose an IoT device, always name its worst-case scenario if it's hacked.
         </div>
 
         <!-- LAB 4 CARD -->
