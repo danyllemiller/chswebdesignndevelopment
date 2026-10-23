@@ -156,6 +156,32 @@
           </div>
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch3 Days 1-2 -->
+        <div class="row mb-5 pb-4 border-bottom align-items-start">
+          <div class="col-lg-8 pe-lg-5">
+            <h2 class="section-title">Your Team Project: The Community App</h2>
+            <p>This chapter starts your team's big project: a <strong>Community App</strong>. Your project team picks a real community (a club, a sports team, a neighborhood group, a school program) and plans a website or app built for the people in it. In Chapter 3 you build the <strong>Blueprint</strong> (Phase 1): intake questions, interviews, a shared persona, a competitor audit, an MVP feature list, a sitemap, and Mid-Fi wireframes. In Chapter 4 you design how it looks, and the Capstone puts it all together for a short founder pitch.</p>
+
+            <h5 class="fw-bold mt-4 text-primary">The Client Intake Meeting</h5>
+            <p>A client says, "Just make it look nice." What is the first question you ask instead? <strong>Who is the site for, and what does it need to accomplish?</strong> Every real project starts with an <strong>intake meeting</strong>: a conversation with the client <em>before</em> you agree to anything, so you know what you are actually being hired to build. Come with these questions:</p>
+            <ul class="small mb-3 bg-light p-3 rounded border shadow-sm text-start">
+                <li class="mb-2"><strong>Goals:</strong> What should the site accomplish? (More sign-ups? Fewer phone calls? More event attendance?)</li>
+                <li class="mb-2"><strong>Audience:</strong> Who is it for? Who is it <em>not</em> for?</li>
+                <li class="mb-2"><strong>Budget:</strong> How much can the client spend?</li>
+                <li class="mb-2"><strong>Deadline:</strong> When does it have to launch, and why that date?</li>
+                <li class="mb-2"><strong>Must-have features:</strong> What does the site absolutely need on day one?</li>
+                <li class="mb-0"><strong>Decision-maker:</strong> Who approves the design? (If three people have to agree, you need to know that now.)</li>
+            </ul>
+            <p>The answer to "who is it for?" is the <strong>target audience</strong>: the specific group a site is built for. Not "everyone." A site built for everyone is built for no one. The rest of this chapter is about finding out exactly who those people are and what they need.</p>
+          </div>
+          <div class="col-lg-4 mt-4 mt-lg-0 text-center pt-lg-5">
+            <div class="bg-light p-3 rounded border shadow-sm mb-4 text-start">
+                <h5 class="fw-bold text-primary mb-2">Team Kickoff:</h5>
+                <p class="mb-0 small text-dark">Hold your Community App intake meeting: decide who your community is, then agree on your team's top 3 questions to ask the people in it.</p>
+            </div>
+          </div>
+        </div>
+
         <!-- ROW 3: STEP 1 - RESEARCH OVERVIEW -->
         <div class="row mb-5">
           <div class="col-lg-12">
@@ -292,6 +318,28 @@
 
               <div class="alert alert-warning small border-warning border mb-0">
                 <strong>Where Everyone Gets Ambushed:</strong> Students often build a persona that's just a demographic card — name, age, job — with no real research behind it. A persona with no Goals or Pain Points traced back to actual interview notes is just a stereotype with a fake name; it can't actually answer design questions like "would Ryan find this button easy to see?" because nothing about Ryan came from evidence.
+              </div>
+
+              <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch3 Day 3 -->
+              <div class="card border-info shadow-sm mt-4 text-start">
+                <div class="card-header bg-site-secondary fw-bold text-info">Every Persona Gets an Accessibility Need</div>
+                <div class="card-body small">
+                  <p>Real research turns a quote into a person. Take this interview quote: <em>"I look up the menu on my phone while I'm on the bus, but the site takes forever to load and the text is so tiny I have to zoom in on everything."</em></p>
+                  <ul class="mb-3">
+                    <li><strong>Goal:</strong> wants to check the menu quickly on their phone while on the go.</li>
+                    <li><strong>Pain point:</strong> frustrated by slow loading and tiny text.</li>
+                    <li><strong>Accessibility need:</strong> larger, resizable text (low vision) and a fast, light page (slow connection).</li>
+                  </ul>
+                  <p>Write the need into your plan with this frame: <strong>"___ uses ___ because ___, so our site will ___."</strong> Example: "Maya uses her phone's zoom because event sites have tiny text, so our site will use large text that resizes."</p>
+                  <p class="fw-bold mb-1">Remember from Chapter 2:</p>
+                  <ul class="mb-0">
+                    <li><strong>ADA</strong> = the <strong>Americans with Disabilities Act</strong>, passed in <strong>1990</strong>. It is the federal law that makes web accessibility a legal requirement for businesses.</li>
+                    <li><strong>WCAG</strong> = <strong>Web Content Accessibility Guidelines</strong>. The ADA is the <em>law</em>; WCAG is the <em>how</em>. Courts use WCAG as the measuring stick, so it is not optional.</li>
+                    <li><strong>a11y</strong> is short for accessibility: there are <strong>11</strong> letters between the a and the y.</li>
+                    <li><strong>Robles v. Domino's:</strong> Guillermo Robles, who is blind, could not order a pizza on Domino's website or app with his screen reader. The Supreme Court refused to throw the case out, and a judge ruled Domino's violated the ADA.</li>
+                    <li><strong>Alt text</strong> is needed on every <em>meaningful</em> image. Purely decorative images get an empty <code>alt=""</code>.</li>
+                  </ul>
+                </div>
               </div>
 
               <div class="card border-success shadow-sm mt-4">
@@ -434,6 +482,20 @@
                 <strong>Where Everyone Gets Ambushed:</strong> Students often confuse a <strong>Weakness</strong> (something wrong with your own site) with a <strong>Threat</strong> (something in the outside market that could hurt you) — "our site loads slowly" is a Weakness you control and can fix; "a bigger competitor might launch a leaderboard feature next month" is a Threat you don't control. Mixing these up in a real SWOT makes the analysis useless for deciding what to actually work on first.
               </div>
 
+              <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch3 Day 4 -->
+              <div class="card border-primary shadow-sm my-4 mx-auto text-start" style="max-width: 900px;">
+                <div class="card-header bg-site-secondary fw-bold text-primary">Key Terms: Sizing Up the Competition and Deciding What You Won't Build</div>
+                <div class="card-body small">
+                  <ul class="mb-3 ps-3">
+                    <li class="mb-2"><strong>Competitor audit:</strong> comparing what similar sites do well and badly, feature by feature. The matrix above is a competitor audit.</li>
+                    <li class="mb-2"><strong>Blue Ocean:</strong> a gap in the market that no competitor is filling well.</li>
+                    <li class="mb-2"><strong>MVP (Minimum Viable Product):</strong> the smallest first release that still solves the user's main problem. If the site is about pizza, the MVP is a simple cheese slice that is actually a pizza, not a piece of bread.</li>
+                    <li class="mb-0"><strong>Scope creep:</strong> features keep getting added until the project can't finish on time. Deciding what you <em>won't</em> build in the first release (the "W" in MoSCoW, coming up next) is how you stop it.</li>
+                  </ul>
+                  <p class="mb-0"><strong>Threat or opportunity?</strong> If three competitors all do the same thing badly, that is usually an <strong>opportunity</strong>: a Blue Ocean nobody is filling well. It only becomes a threat if users don't actually need it, or if the problem is so hard that nobody, including you, can solve it. Either way, back up your answer with evidence from your interviews and your competitor audit.</p>
+                </div>
+              </div>
+
               <!-- LAB 3 CARD -->
               <div class="card border-success shadow-sm my-4 mt-5 mx-auto" style="max-width: 800px;">
                   <div class="card-header bg-success text-white fw-bold">Milestone 3: The Blue Ocean Map [25 pts]</div>
@@ -564,6 +626,9 @@
               </ul>
               <p><strong>The How:</strong> This chapter's Milestone project is you actually walking the first two steps: the Persona and research you built are the <strong>Analyze</strong> phase on paper, and the wireframe you'll design is the <strong>Design</strong> phase — a real, demonstrated pass through the cycle, not just a memorized diagram.</p>
 
+              <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch3 Day 1 -->
+              <p>You will also hear ADDIE called the <strong>web design and development cycle</strong>, or just the <strong>design cycle</strong>. It is a loop, not a straight line, because <strong>evaluation feeds back into analysis</strong>: projects improve through repeated cycles.</p>
+
               <div class="alert alert-warning small border-warning border mb-4">
                 <strong>Where Everyone Gets Ambushed:</strong> Students often picture ADDIE as a straight line you walk once. In practice it's a loop — the <strong>Evaluate</strong> step routinely sends you straight back to <strong>Analyze</strong> when user feedback reveals the original research missed something. A site is never "done"; it cycles.
               </div>
@@ -598,6 +663,21 @@
               <div class="alert alert-warning small border-warning border mb-4">
                 <strong>Where Everyone Gets Ambushed:</strong> Students often build a sitemap that's just a flat list of every page with no grouping — the digital equivalent of a junk drawer. A real navigation system groups related pages under a small number of clear parent categories; if you can't summarize your whole site in 5-7 top-level nav items, the sitemap needs more structure, not more pages.
               </div>
+
+              <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch3 Day 5 -->
+              <h5 class="fw-bold mt-4 text-primary">Card Sorting: Let Users Organize It</h5>
+              <p><strong>Card sorting</strong> groups content the way users expect to find it. Write each page or piece of content on its own card, hand the stack to someone from your target audience, and ask them to sort the cards into piles that make sense to them and name each pile. Run it with 3 people, compare their piles to your sitemap, and redesign your navigation wherever users grouped things differently than you did. Their piles are your real categories.</p>
+
+              <h5 class="fw-bold mt-4 text-primary">How Many Clicks?</h5>
+              <p>The most important page on a site should usually be <strong>1 to 3 clicks</strong> from the homepage. Every extra click is a chance for a user to give up. Trace the click path on your sitemap: if Ryan needs five clicks to reach a guide, your structure is too deep.</p>
+
+              <h5 class="fw-bold mt-4 text-primary">From Sitemap to Folders</h5>
+              <p>Your sitemap becomes your project's real folder structure. The homepage is <code>index.html</code> at the top, each category gets its own page (and folder), and child pages live inside their category's folder. Use lowercase, hyphenated filenames:</p>
+              <pre class="p-3 border rounded shadow-sm mb-4 no-copy"><code>index.html             (Home: the top of the sitemap)
+events.html            (Category)
+groups.html            (Category)
+events/calendar.html   (Child page of Events)
+groups/join.html       (Child page of Groups)</code></pre>
 
               <!-- LAB 5 CARD -->
               <div class="card border-success shadow-sm my-4 mt-5">
@@ -651,6 +731,10 @@
               <div class="alert alert-info py-2 small mt-4 border-info shadow-sm">
                 <strong>Why no color?</strong> Because if you use color, you'll waste 20 minutes talking about <strong>blue</strong> instead of what really matters: <strong>"Is the button in the right place?"</strong>
               </div>
+
+              <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch3 Day 6 -->
+              <h5 class="fw-bold mt-4 text-primary">Start With a Six-Up Sketch</h5>
+              <p>Before you open Figma, fold a sheet of paper into six boxes and sketch <strong>six different layouts</strong> for the same page, about one minute each, in pencil and grayscale. Speed is the point: when you aren't choosing colors or fonts, ideas come fast, and a bad idea costs you one minute instead of one hour. Pick the strongest sketch (or combine two) and develop it into your Mid-Fi wireframe. This is also why we build in grayscale first: it keeps everyone focused on <strong>layout and hierarchy</strong>, and changes stay cheap.</p>
 
               <h5 class="fw-bold mt-4 text-primary">Wireframing for Responsive Design</h5>
               <p class="small">Ryan checks PixelPlay on his phone between matches and on his desktop when he's writing a full walkthrough. A single wireframe isn't enough — you plan at least three <strong>Breakpoints</strong> (screen-width ranges where the layout changes): <strong>Mobile</strong> (~375px), <strong>Tablet</strong> (~768px), and <strong>Desktop</strong> (~1280px+). The content doesn't change between them. The <strong>layout</strong> does — a 3-column game grid on desktop might stack into a single scrolling column on mobile.</p>
@@ -811,6 +895,21 @@
               </div>
               <p>Both sentences describe the same site. Only one sounds like it was written by someone who plays these games.</p>
 
+              <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch3 Day 7 -->
+              <h5 class="fw-bold mt-4 text-primary">Same Facts, Four Voices</h5>
+              <p>When the same information appears on a bank site and a skate shop site, the <strong>facts stay the same</strong>. What changes is the <strong>tone</strong> (formal or casual), the <strong>word choice</strong>, and the <strong>reading level</strong>. Here are the same store hours written for four different businesses:</p>
+              <div class="table-responsive">
+              <table class="table table-bordered table-sm small bg-white shadow-sm mb-4 text-start">
+                <thead class="table-light"><tr><th>Business</th><th>Store hours, in its voice</th></tr></thead>
+                <tbody>
+                  <tr><td>Bank</td><td>"Our branch is open Monday through Friday, 9 a.m. to 5 p.m., for your convenience."</td></tr>
+                  <tr><td>Skate shop</td><td>"Doors open at noon. Come shred till 8."</td></tr>
+                  <tr><td>Children's library</td><td>"Story time is every Saturday at 10. Bring a friend and a favorite book!"</td></tr>
+                  <tr><td>Law firm</td><td>"Consultations are available by appointment during regular business hours."</td></tr>
+                </tbody>
+              </table>
+              </div>
+
               <h5 class="fw-bold mt-4 text-primary">Every Page Has a Job: Primary vs. Secondary Purpose</h5>
               <p>Before writing a word, name the page's <strong>Primary Purpose</strong> — the one thing it must accomplish — and its <strong>Secondary Purpose</strong> — a smaller, supporting goal it can also achieve without competing for attention. A game guide page's <em>primary</em> purpose is helping Ryan beat the boss. Its <em>secondary</em> purpose might be getting him to create a free account so he can save his progress. If the account signup banner is bigger than the actual walkthrough text, the page has confused its priorities and will frustrate the exact user it was built for.</p>
 
@@ -908,6 +1007,19 @@
                 <p class="small text-muted text-center mt-2">All three should include your <strong>target keyword</strong>. Google reads them as a confirmation that this page is genuinely about that topic.</p>
               </div>
 
+              <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch3 Day 7 -->
+              <div class="card border-info shadow-sm my-4 mx-auto text-start" style="max-width: 900px;">
+                <div class="card-header bg-site-secondary fw-bold text-info">The Numbers and the Honesty Rule</div>
+                <div class="card-body small">
+                  <ul class="mb-3 ps-3">
+                    <li class="mb-2">A <strong>title tag</strong> should stay under about <strong>60 characters</strong>. Longer titles get cut off with "..." in search results.</li>
+                    <li class="mb-2">A <strong>meta description</strong> is about <strong>150 characters</strong> and appears under your link in search results. It is your one-sentence ad.</li>
+                    <li class="mb-0">The words people actually type into a search bar are called <strong>keywords</strong>. You find them by thinking like your persona, not like the business owner.</li>
+                  </ul>
+                  <p class="mb-0"><strong>What makes SEO honest?</strong> Honest SEO <strong>describes the page accurately</strong>. No stuffing the same keyword in ten times, and no clickbait title promising something the page doesn't deliver. Visitors who feel tricked leave in seconds, and search engines notice.</p>
+                </div>
+              </div>
+
               <!-- LONG-TAIL KEYWORD COMPARISON -->
               <div class="mx-auto mt-4" style="max-width: 900px;">
                 <p class="fw-bold text-center mb-3">Short-Tail vs. Long-Tail Keywords</p>
@@ -980,6 +1092,34 @@
 
               <h5 class="fw-bold mt-4 text-primary">Advertising, Marketing, Social Media &amp; the Website: One Ecosystem</h5>
               <p>These four pieces work as a loop, not separate jobs: <strong>Marketing</strong> sets the goal (get 500 new visitors this month). <strong>Social media</strong> is one channel used to reach that goal (post 3x/week). <strong>Advertising</strong> can boost specific posts to reach people who don't already follow the account. The <strong>website</strong> is where all of that traffic has to land somewhere useful — a beautiful ad campaign that dumps visitors on a confusing homepage wastes the entire budget. As an agency, you don't just build the site; you're often the one explaining this whole loop to a client who only asked for "a Facebook page."</p>
+
+              <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch3 Day 8 -->
+              <h5 class="fw-bold mt-4 text-primary">You Posted a Link and Nobody Clicked</h5>
+              <p>Sometimes the problem has nothing to do with the website itself: the post reached the <strong>wrong audience</strong>, went out at a <strong>bad time</strong> (when your persona is asleep or in class), had a <strong>weak headline or image</strong>, or had <strong>no call to action</strong>. A <strong>call to action (CTA)</strong> is the specific thing you ask people to do: "See this week's events," "Join the Discord," "Sign up free."</p>
+
+              <h5 class="fw-bold mt-4 text-primary">Make the Goal Measurable</h5>
+              <p>A good posting strategy has a goal you can <strong>measure</strong>: a number and a deadline, so you can tell whether it worked.</p>
+              <div class="table-responsive">
+              <table class="table table-bordered table-sm small bg-white shadow-sm mb-3 text-start">
+                <thead class="table-light"><tr><th>Measurable</th><th>Not measurable</th></tr></thead>
+                <tbody>
+                  <tr><td>100 site visits in 30 days</td><td>Get more popular</td></tr>
+                  <tr><td>50 new followers by November 30</td><td>Make people like our app</td></tr>
+                  <tr><td>20 people click the sign-up link this week</td><td></td></tr>
+                </tbody>
+              </table>
+              </div>
+
+              <h5 class="fw-bold mt-4 text-primary">Share Links: What They Send Back</h5>
+              <p>Almost every site has share buttons because each share puts your link (with its Open Graph preview card) in front of a new audience for free. And shared links send something back: when someone clicks one, your site's <strong>analytics</strong> records where the visit came from (Discord, Instagram, a text message). Marketers often add a short tracking tag to the end of a link they post, like <code>?utm_source=discord</code>, so the analytics report shows exactly which post sent each visitor. That is how you know whether your strategy is working.</p>
+
+              <h5 class="fw-bold mt-4 text-primary">Building a 30-Day Posting Strategy</h5>
+              <ol class="small mb-4">
+                <li class="mb-1"><strong>Where:</strong> pick the platforms your persona actually uses, not the ones you use.</li>
+                <li class="mb-1"><strong>What:</strong> plan the posts (event photos, a how-to, a behind-the-scenes clip), each with a call to action.</li>
+                <li class="mb-1"><strong>When:</strong> set a schedule, like 3 posts a week at the times your persona is online.</li>
+                <li class="mb-0"><strong>Did it work?</strong> Set one measurable goal (e.g., 100 visits in 30 days) and check your analytics against it.</li>
+              </ol>
 
               <h5 class="fw-bold mt-4 text-primary">Current Trends Worth Knowing</h5>
               <ul class="small ps-3 mb-4">
@@ -1059,6 +1199,24 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch3 Day 8 -->
+        <div class="row mb-5">
+          <div class="col-lg-12">
+            <div class="card border-info shadow-sm mx-auto text-start" style="max-width: 900px;">
+              <div class="card-header bg-site-secondary fw-bold text-info">Final Blueprint Check (Project Team)</div>
+              <div class="card-body small">
+                <p class="mb-2">Before you turn in the Blueprint, put your <strong>sitemap</strong>, <strong>persona</strong>, and <strong>MVP list</strong> side by side and check that they agree:</p>
+                <ul class="mb-2">
+                  <li>Every <strong>Must Have</strong> feature has a page on the sitemap and a spot on the wireframe.</li>
+                  <li>Every page on the sitemap serves the persona's main goal, or it doesn't belong in this release.</li>
+                  <li>The persona's accessibility need shows up in the wireframe (bigger text, simpler layout, clear labels).</li>
+                </ul>
+                <p class="mb-0">Each team member <strong>signs off on one piece</strong> (sitemap, persona, or MVP list) after checking it against the other two.</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- RECAP & SOURCES -->
