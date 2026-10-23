@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WPR Practice Pro | Nevada WPR Practice Tests</title>
+  <meta name="description" content="Timed practice for the Nevada Workplace Readiness Skills (WPR) assessment. Teachers start a test in a minute; students join with a class code. No accounts, and no student data kept.">
+  <link rel="icon" type="image/png" sizes="64x64" href="/wpr-practice/assets/wpr-practice-pro-favicon-64.png">
+  <link rel="apple-touch-icon" href="/wpr-practice/assets/wpr-practice-pro-favicon-512.png">
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <script>
+  // Old join links (wprpracticepro.com/?code=ABC123) and a student refreshing
+  // mid-test both belong on the join page, not the home page.
+  (function () {
+    var joined = false;
+    try { joined = !!sessionStorage.getItem('wpr_join'); } catch (e) {}
+    if (/[?&]code=/.test(location.search) || joined) location.replace('/join' + location.search);
+  })();
+  </script>
+  <style>
+    :root {
+      --navy: #1d2a48; --navy-2: #26365c; --blue: #2f7de1; --blue-soft: #e8f1fc;
+      --gold: #f0b13c; --gold-soft: #fdf3dd; --green: #198754;
+      --ink: #1d2433; --muted: #5d6779; --line: #e3e7ee; --bg: #ffffff; --bg-2: #f5f7fb;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--blue); }
+    img { max-width: 100%; height: auto; display: block; }
+    .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    .nav { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,.92); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--line); }
+    .nav .container { display: flex; align-items: center; gap: 28px; height: 72px; }
+    .nav .logo img { height: 44px; width: auto; }
+    .nav-links { display: flex; gap: 24px; margin-left: 8px; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 15px; }
+    .nav-links a:hover { color: var(--navy); }
+    .nav-cta { margin-left: auto; display: flex; gap: 10px; }
+
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 999px; font-weight: 700; font-size: 16px; text-decoration: none; border: 2px solid transparent; transition: transform .15s, box-shadow .15s, background .15s; white-space: nowrap; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--blue); color: #fff; box-shadow: 0 6px 18px rgba(47,125,225,.3); }
+    .btn-primary:hover { background: #236bc7; }
+    .btn-ghost { background: #fff; color: var(--navy); border-color: var(--line); }
+    .btn-ghost:hover { border-color: var(--navy); }
+    .btn-gold { background: var(--gold); color: var(--navy); box-shadow: 0 6px 18px rgba(240,177,60,.35); }
+    .btn-sm { padding: 8px 16px; font-size: 14px; }
+
+    /* Hero */
+    .hero { background: radial-gradient(1100px 500px at 85% -10%, var(--blue-soft), transparent 60%), radial-gradient(700px 400px at -10% 110%, var(--gold-soft), transparent 60%); padding: 72px 0 88px; overflow: hidden; }
+    .hero .container { display: grid; grid-template-columns: 1fr 1.08fr; gap: 56px; align-items: center; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); color: var(--navy); font-weight: 700; font-size: 13px; letter-spacing: .02em; padding: 6px 14px; border-radius: 999px; }
+    .eyebrow i { color: var(--gold); }
+    h1 { font-size: clamp(38px, 5vw, 60px); line-height: 1.05; letter-spacing: -.025em; color: var(--navy); margin: 20px 0 18px; font-weight: 850; }
+    h1 .hl { color: var(--blue); }
+    .lead { font-size: 20px; color: var(--muted); max-width: 520px; margin: 0 0 30px; }
+    .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero-note { margin-top: 18px; font-size: 14px; color: var(--muted); display: flex; gap: 18px; flex-wrap: wrap; }
+    .hero-note i { color: var(--green); margin-right: 6px; }
+
+    .frame { background: #fff; border-radius: 16px; box-shadow: 0 30px 60px -20px rgba(29,42,72,.35), 0 0 0 1px rgba(29,42,72,.06); overflow: hidden; }
+    .frame-bar { display: flex; align-items: center; gap: 7px; padding: 11px 14px; background: #f1f3f7; border-bottom: 1px solid var(--line); }
+    .frame-bar span { width: 11px; height: 11px; border-radius: 50%; background: #d5d9e1; }
+    .frame-bar .url { margin-left: 10px; flex: 1; background: #fff; border-radius: 6px; font-size: 12px; color: var(--muted); padding: 3px 10px; font-family: ui-monospace, Menlo, monospace; }
+    .frame img { width: 100%; max-height: 560px; object-fit: cover; object-position: top; }
+    .hero .frame { transform: rotate(1.2deg); }
+
+    /* Stat strip */
+    .strip { background: var(--navy); color: #fff; }
+    .strip .container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding-top: 30px; padding-bottom: 30px; }
+    .stat b { display: block; font-size: 32px; line-height: 1.1; color: var(--gold); font-weight: 850; }
+    .stat span { font-size: 14px; opacity: .85; }
+
+    /* Sections */
+    section { padding: 96px 0; }
+    .section-head { text-align: center; max-width: 720px; margin: 0 auto 52px; }
+    h2 { font-size: clamp(30px, 3.6vw, 42px); line-height: 1.12; letter-spacing: -.02em; color: var(--navy); margin: 0 0 14px; font-weight: 800; }
+    .section-head p { font-size: 19px; color: var(--muted); margin: 0; }
+    .kicker { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 28px; }
+    .card .ic { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; font-size: 22px; margin-bottom: 18px; }
+    .ic.blue { background: var(--blue-soft); color: var(--blue); } .ic.gold { background: var(--gold-soft); color: #b77d0d; } .ic.green { background: #e3f4ea; color: var(--green); }
+    .card h3 { margin: 0 0 8px; font-size: 20px; color: var(--navy); }
+    .card p { margin: 0; color: var(--muted); font-size: 16px; }
+
+    .split { display: grid; grid-template-columns: 1fr 1.15fr; gap: 64px; align-items: center; }
+    .split.flip { grid-template-columns: 1.15fr 1fr; }
+    .split.flip .split-text { order: 2; }
+    .alt { background: var(--bg-2); }
+    .checks { list-style: none; padding: 0; margin: 26px 0 30px; display: grid; gap: 14px; }
+    .checks li { display: flex; gap: 14px; align-items: flex-start; }
+    .checks i { flex: 0 0 26px; height: 26px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; font-size: 12px; margin-top: 2px; }
+    .checks b { color: var(--navy); }
+    .split-text p.big { font-size: 19px; color: var(--muted); margin: 0; }
+
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; counter-reset: s; }
+    .step { position: relative; background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 30px 28px 28px; }
+    .step::before { counter-increment: s; content: counter(s); position: absolute; top: -18px; left: 28px; width: 38px; height: 38px; border-radius: 50%; background: var(--gold); color: var(--navy); font-weight: 850; display: grid; place-items: center; box-shadow: 0 0 0 6px #fff; }
+    .step h3 { margin: 6px 0 8px; font-size: 19px; color: var(--navy); }
+    .step p { margin: 0; color: var(--muted); font-size: 16px; }
+    .step code { background: var(--blue-soft); color: var(--navy); padding: 1px 7px; border-radius: 6px; font-weight: 700; }
+
+    .callout { background: var(--gold-soft); border: 1px solid #f3dca8; border-radius: 18px; padding: 26px 30px; display: flex; gap: 20px; align-items: flex-start; margin-top: 44px; }
+    .callout i { font-size: 26px; color: #b77d0d; margin-top: 4px; }
+    .callout h3 { margin: 0 0 6px; color: var(--navy); font-size: 19px; }
+    .callout p { margin: 0; color: #5a4a26; font-size: 16px; }
+
+    .privacy { background: linear-gradient(160deg, var(--navy), #121b31); color: #fff; }
+    .privacy .split { grid-template-columns: 1.1fr 1fr; }
+    .privacy h2 { color: #fff; }
+    .privacy .kicker { color: var(--gold); }
+    .privacy p.big { color: rgba(255,255,255,.78); font-size: 19px; }
+    .privacy .checks i { background: var(--gold); color: var(--navy); }
+    .privacy .checks li { color: rgba(255,255,255,.85); }
+    .privacy .checks b { color: #fff; }
+    .privacy a.link { color: var(--gold); font-weight: 700; }
+    .vault { justify-self: center; width: 100%; max-width: 380px; aspect-ratio: 1; border-radius: 32px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); display: grid; place-items: center; text-align: center; padding: 30px; }
+    .vault .big-ic { font-size: 84px; color: var(--gold); }
+    .vault .t { font-size: 22px; font-weight: 800; margin-top: 18px; }
+    .vault .s { color: rgba(255,255,255,.7); font-size: 15px; margin-top: 6px; }
+
+    .final { text-align: center; }
+    .final .hero-ctas { justify-content: center; }
+
+    footer { border-top: 1px solid var(--line); padding: 36px 0 44px; color: var(--muted); font-size: 14px; }
+    footer .container { display: flex; flex-wrap: wrap; gap: 18px 32px; align-items: center; justify-content: space-between; }
+    footer img { height: 36px; width: auto; }
+    footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
+    footer nav a { color: var(--muted); text-decoration: none; font-weight: 600; }
+    footer nav a:hover { color: var(--navy); }
+    footer .fine { flex-basis: 100%; font-size: 13px; }
+
+    @media (max-width: 960px) {
+      .nav-links { display: none; }
+      .hero .container, .split, .split.flip, .privacy .split { grid-template-columns: 1fr; gap: 40px; }
+      .split.flip .split-text { order: 0; }
+      .hero { padding: 48px 0 64px; }
+      .hero .frame { transform: none; }
+      .cards, .steps { grid-template-columns: 1fr; }
+      .steps { gap: 34px; }
+      .strip .container { grid-template-columns: repeat(2, 1fr); }
+      section { padding: 68px 0; }
+    }
+    @media (max-width: 520px) {
+      .container { padding: 0 16px; }
+      .nav .container { gap: 12px; height: 64px; }
+      .nav .logo img { height: 36px; }
+      .nav-cta .btn-ghost { display: none; }
+      .lead { font-size: 18px; }
+      .hero-ctas .btn { flex: 1 1 100%; justify-content: center; }
+      .callout { flex-direction: column; gap: 10px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .btn { transition: none; } }
+  </style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container">
+    <a class="logo" href="/" aria-label="WPR Practice Pro home"><img src="/wpr-practice/assets/wpr-practice-pro-logo.svg" alt="WPR Practice Pro"></a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#teachers">For teachers</a>
+      <a href="#students">For students</a>
+      <a href="#privacy">Privacy</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost btn-sm" href="/join">Join a test</a>
+      <a class="btn btn-primary btn-sm" href="/teacher">Give a test</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="container">
+      <div>
+        <span class="eyebrow"><i class="fas fa-star"></i>Built for Nevada CTE classrooms</span>
+        <h1>Practice the WPR test <span class="hl">before it counts.</span></h1>
+        <p class="lead">Timed, full-length practice for the Nevada Workplace Readiness Skills assessment, on a test screen built to feel like test day. Teachers start a test in under a minute. Students join with a class code.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="/teacher"><i class="fas fa-chalkboard-user"></i>Give a practice test</a>
+          <a class="btn btn-ghost" href="/join"><i class="fas fa-key"></i>I have a class code</a>
+        </div>
+        <div class="hero-note">
+          <span><i class="fas fa-check"></i>No student accounts</span>
+          <span><i class="fas fa-check"></i>Nothing to install</span>
+          <span><i class="fas fa-check"></i>Works on Chromebooks</span>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="frame-bar"><span></span><span></span><span></span><div class="url">wprpracticepro.com/join</div></div>
+        <img src="/wpr-practice/assets/home-test.jpg" width="1400" height="1115" alt="The practice test screen: a countdown timer, Calculator and Scratch Paper buttons, question 14 of 100 with four lettered choices, and a question navigator.">
+      </div>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="container">
+      <div class="stat"><b>100</b><span>questions in 1 hour, like the real thing</span></div>
+      <div class="stat"><b>4</b><span>test lengths, from a 10-minute sprint up</span></div>
+      <div class="stat"><b>0</b><span>student accounts to set up</span></div>
+      <div class="stat"><b>0</b><span>student records kept after class</span></div>
+    </div>
+  </div>
+
+  <section>
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">Why it works</div>
+        <h2>Made for how test prep actually works</h2>
+        <p>Students do better on test day when the test screen, the timing, and the tricky questions are not new to them.</p>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="ic blue"><i class="fas fa-display"></i></div>
+          <h3>Feels like test day</h3>
+          <p>One question per screen, lettered choices, Flag for Review, a question navigator, an on-screen calculator and scratch paper, and a countdown clock.</p>
+        </div>
+        <div class="card">
+          <div class="ic gold"><i class="fas fa-lock"></i></div>
+          <h3>Full-screen lockdown</h3>
+          <p>The test runs full screen. Leaving the tab locks the test behind a warning; leaving a second time submits it. You see every exit on your screen.</p>
+        </div>
+        <div class="card">
+          <div class="ic green"><i class="fas fa-lightbulb"></i></div>
+          <h3>Every answer explained</h3>
+          <p>After submitting, students see every question, the right answer, and why. That includes the work-life questions the state test grades in ways students don't expect.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="alt">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">How it works</div>
+        <h2>From "open the site" to "test started" in one minute</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <h3>Start a session</h3>
+          <p>Go to <code>/teacher</code>, enter the teacher passcode, and pick a length: 25, 50, or 100 questions, or a 10-minute sprint.</p>
+        </div>
+        <div class="step">
+          <h3>Share the class code</h3>
+          <p>You get a six-letter code and a link. Students type the code, their name, and their student ID. No sign-ups, no emails.</p>
+        </div>
+        <div class="step">
+          <h3>Watch, then download</h3>
+          <p>See who is testing, time left, and scores as they come in. Download the results, then end the session to erase them.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="teachers">
+    <div class="container split">
+      <div class="split-text">
+        <div class="kicker">For teachers</div>
+        <h2>Your whole class, live, on one screen</h2>
+        <p class="big">Know who is still working, who left the test, and how the class did, without collecting a single paper.</p>
+        <ul class="checks">
+          <li><i class="fas fa-check"></i><span><b>Live dashboard.</b> Joined, testing, and finished, with time left and how many each student has answered.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Ready-made reports.</b> A score summary and a question-by-question spreadsheet (CSV), plus a printable class report.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Your own question banks.</b> Upload questions from a spreadsheet or paste them in. Answers are optional, and you can add them later. Use only your questions, or mix them with ours.</span></li>
+          <li><i class="fas fa-check"></i><span><b>A fresh test for every student.</b> Each student gets a different random set of questions in a different order.</span></li>
+        </ul>
+        <a class="btn btn-primary" href="/teacher">Give a practice test <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="frame">
+        <div class="frame-bar"><span></span><span></span><span></span><div class="url">wprpracticepro.com/teacher</div></div>
+        <img src="/wpr-practice/assets/home-teacher.jpg" width="1400" height="899" loading="lazy" alt="The teacher dashboard: class code K7M2QX, eight students with status, time left, answered, correct, score, and times they left the test, plus buttons to download results.">
+      </div>
+    </div>
+  </section>
+
+  <section id="students" class="alt">
+    <div class="container split flip">
+      <div class="split-text">
+        <div class="kicker">For students</div>
+        <h2>Learn from every question, not just the score</h2>
+        <p class="big">The point of practice is to find out what you don't know yet, while it doesn't count.</p>
+        <ul class="checks">
+          <li><i class="fas fa-check"></i><span><b>Join in seconds.</b> Class code, name, student ID. That's it.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Same tools as test day.</b> Calculator, scratch paper, flag a question and come back, keyboard shortcuts.</span></li>
+          <li><i class="fas fa-check"></i><span><b>See what you missed.</b> Every question you answered, your answer, the right answer, and a short explanation. Filter to just the wrong ones.</span></li>
+        </ul>
+        <a class="btn btn-ghost" href="/join"><i class="fas fa-key"></i>I have a class code</a>
+      </div>
+      <div class="frame">
+        <div class="frame-bar"><span></span><span></span><span></span><div class="url">wprpracticepro.com/join</div></div>
+        <img src="/wpr-practice/assets/home-results.jpg" width="1400" height="1248" loading="lazy" alt="A student's results: 84 correct, 98 answered of 100, 86% accuracy, then each question marked right or wrong with the correct answer and an explanation.">
+      </div>
+    </div>
+    <div class="container">
+      <div class="callout">
+        <i class="fas fa-briefcase"></i>
+        <div>
+          <h3>Ready for the questions that surprise students</h3>
+          <p>The state test grades some work-life scenarios differently than students expect, like whether to stay late when your boss asks. Every practice test includes a few. The explanation gives the answer the test wants, plus what a healthy real-world version looks like.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy" class="privacy">
+    <div class="container split">
+      <div>
+        <div class="kicker">Privacy</div>
+        <h2>We don't keep student data. On purpose.</h2>
+        <p class="big">Student names and scores exist only while your session is open. Then they're gone, for good.</p>
+        <ul class="checks">
+          <li><i class="fas fa-check"></i><span><b>Temporary memory only.</b> Test results are never written to a database, a file, or a backup.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Erased automatically</b> when you end the session, after 12 hours, or if the server restarts.</span></li>
+          <li><i class="fas fa-check"></i><span><b>No accounts, ads, or tracking.</b> Nothing is sold or shared, ever.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Answers stay on the server</b> until a student submits, so they can't be found in the page.</span></li>
+        </ul>
+        <a class="link" href="/privacy">Read the privacy policy <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="vault" aria-hidden="true">
+        <div>
+          <div class="big-ic"><i class="fas fa-user-shield"></i></div>
+          <div class="t">Nothing to leak</div>
+          <div class="s">When the session ends, there is no student information left to protect.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="container">
+      <h2>Give your class a practice run</h2>
+      <p class="lead" style="margin:0 auto 30px">Need a teacher passcode? Email <a href="mailto:contact@wprpracticepro.com">contact@wprpracticepro.com</a>.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="/teacher"><i class="fas fa-chalkboard-user"></i>Give a practice test</a>
+        <a class="btn btn-gold" href="/join"><i class="fas fa-key"></i>Join a test</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <img src="/wpr-practice/assets/wpr-practice-pro-logo.svg" alt="WPR Practice Pro">
+    <nav aria-label="Footer">
+      <a href="/teacher">Teachers</a>
+      <a href="/join">Students</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Use</a>
+      <a href="mailto:contact@wprpracticepro.com">Contact</a>
+    </nav>
+    <div class="fine">An independent practice tool. Not affiliated with or endorsed by the Nevada Department of Education or the official assessment's publisher.</div>
+  </div>
+</footer>
+</body>
+</html>

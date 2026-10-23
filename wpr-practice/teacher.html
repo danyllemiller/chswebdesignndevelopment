@@ -23,7 +23,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="brand"><img src="/wpr-practice/assets/wpr-practice-pro-logo.svg" alt="WPR Practice Pro" style="height:56px;width:auto"><div class="ms-2 border-start ps-3"><div class="fw-bold">Teacher</div><div class="small text-muted">Give the Nevada Workplace Readiness Skills practice test and download your class's results</div></div></div>
+  <div class="brand"><a href="/" aria-label="WPR Practice Pro home"><img src="/wpr-practice/assets/wpr-practice-pro-logo.svg" alt="WPR Practice Pro" style="height:56px;width:auto"></a><div class="ms-2 border-start ps-3"><div class="fw-bold">Teacher</div><div class="small text-muted">Give the Nevada Workplace Readiness Skills practice test and download your class's results</div></div></div>
   <div id="screen" class="card-main"></div>
 </div>
 <footer class="text-center small text-muted pb-4" style="max-width:900px;margin:0 auto;padding:0 1rem;">
@@ -218,8 +218,8 @@ Answer: False"></textarea>
   const pct = (a, b) => b ? Math.round((a / b) * 100) : 0;
 
   function render() {
-    // On wprpracticepro.com the student page is the site root; on the class site it's /wpr-practice/.
-    const link = `${location.origin}${location.pathname.startsWith('/wpr-practice') ? '/wpr-practice/' : '/'}?code=${data.code}`;
+    // On wprpracticepro.com the student page is /join (/ is the home page); on the class site it's /wpr-practice/.
+    const link = `${location.origin}${location.pathname.startsWith('/wpr-practice') ? '/wpr-practice/' : '/join'}?code=${data.code}`;
     const st = data.students;
     const done = st.filter(s => s.status === 'submitted');
     const sorted = [...st].sort((a, b) => (a.lastName + a.firstName).localeCompare(b.lastName + b.firstName));
