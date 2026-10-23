@@ -7,7 +7,7 @@
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  <link href="/css/compsci.css" rel="stylesheet" />
+  <link href="/css/compsci.css?v=2" rel="stylesheet" />
 </head>
 <body class="compsci-body">
 
@@ -69,7 +69,8 @@
       </div>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets spreadsheet set up as a compound-interest model, with labeled input cells for Starting Balance, Interest Rate, and Years in one column, and a formula bar showing a formula that multiplies balance by (1 + rate) raised to the years, with the resulting output balance highlighted in a colored cell.">
+  <!-- Gemini prompt (gemini-3-pro-image, ui style, Oct 2026): A screenshot of a Google Sheets spreadsheet set up as a compound-interest model, with labeled input cells for Starting Balance, Interest Rate, and Years in one column, and a formula bar showing a formula that multiplies balance by (1 + rate) raised to the years, with the resulting output balance highlighted in a colored cell. Exact contents: A1 "Starting Balance" B1 "$1,000.00"; A2 "Interest Rate" B2 "5%"; A3 "Years" B3 "10"; A4 "Ending Balance" B4 "$1,628.89" highlighted in green. Cell B4 is selected and the formula bar shows =B1*(1+B2)^B3. Sheet title "Compound Interest Model". -->
+  <img src="/images/computational_modeling/fig8.1.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A Google Sheets spreadsheet set up as a compound-interest model, with labeled input cells for Starting Balance, Interest Rate, and Years in one column, and a formula bar showing a formula that multiplies balance by (1 + rate) raised to the years, with the resulting output balance highlighted in a colored cell.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-piggy-bank me-2"></i> Worked Example: A Compound-Interest Model</h5>
@@ -110,7 +111,8 @@
       <p class="small text-muted mb-0">Change the rate alone, and the 10-year output swings 32.5%. Change years alone, it swings 27.6%. This model's output is more sensitive to the interest rate than to how long the money sits — that's exactly the kind of thing sensitivity testing is built to reveal.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean graphic showing three sliders labeled Input A, Input B, Input C, with only one slider highlighted and moving while an output number changes, and the other two sliders staying still and grayed out.">
+  <!-- Gemini prompt (gemini-3.1-flash-image, info style, Oct 2026): A clean graphic showing three sliders labeled Input A, Input B, Input C, with only one slider highlighted and moving while an output number changes, and the other two sliders staying still and grayed out. Title "CHANGE ONE INPUT AT A TIME". The output box reads "Output: 42" with a small "changed" arrow. -->
+  <img src="/images/computational_modeling/fig8.2.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Graphic showing three sliders labeled Input A, Input B, Input C, with only one slider highlighted and moving while an output number changes, and the other two sliders staying still and grayed out.">
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">
       <h5 class="fw-bold text-warning"><i class="fas fa-bug me-2"></i> Worked Example: Breaking a Model on Purpose</h5>
@@ -166,7 +168,8 @@
       <p class="small text-muted mb-0 mt-2">Perfect on every training day — because it had a custom-fitted term for each one — and off by 23 degrees the first time it had to predict a day it hadn't already memorized the answer to.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A two-panel comparison graphic. Left panel labeled &quot;Training Data&quot; shows a model line and an actual-data line overlapping almost perfectly. Right panel labeled &quot;New Data&quot; shows the same model line now far apart from a new actual-data line, with the gap between them highlighted.">
+  <!-- Gemini prompt (gemini-3.1-flash-image, info style, Oct 2026): A two-panel comparison graphic. Left panel labeled "Training Data" shows a model line and an actual-data line overlapping almost perfectly. Right panel labeled "New Data" shows the same model line now far apart from a new actual-data line, with the gap between them highlighted. Title "WHEN A MODEL MEETS NEW DATA". Label the gap "Model error". -->
+  <img src="/images/computational_modeling/fig8.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A two-panel comparison graphic. Left panel labeled &quot;Training Data&quot; shows a model line and an actual-data line overlapping almost perfectly. Right panel labeled &quot;New Data&quot; shows the same model line now far apart from a new actual-data line, with the gap between them highlighted.">
 
   <p><strong>The trap:</strong> students often assume the model that matches historical data most closely is automatically the best one. Often it's the opposite — a model chasing every past data point instead of the underlying pattern tends to be the one that fails hardest on anything new.</p>
 
@@ -216,7 +219,8 @@
   <h4 class="fw-bold mt-4 text-primary">8.4.1 Complex Systems</h4>
   <p>A system counts as genuinely <strong>complex</strong> when it has many interacting parts whose combined behavior is hard to predict just by looking at each part alone — a wildfire's spread depends on wind, humidity, terrain, and fuel all interacting at once; traffic flow depends on hundreds of individual drivers reacting to each other in real time. You can't just plug numbers into one formula and get a trustworthy answer the way you could for a savings account.</p>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A side-by-side comparison diagram. Left side labeled &quot;Static Model&quot; shows a single arrow from Inputs straight into a box into one Output. Right side labeled &quot;Simulation&quot; shows a looping sequence of small steps labeled Step 1, Step 2, Step 3... progressing forward through a timeline, each step feeding into the next, ending in an Output.">
+  <!-- Gemini prompt (gemini-3-pro-image, info style, Oct 2026): A side-by-side comparison diagram. Left side labeled "Static Model" shows a single arrow from Inputs straight into a box into one Output. Right side labeled "Simulation" shows a looping sequence of small steps labeled Step 1, Step 2, Step 3... progressing forward through a timeline, each step feeding into the next, ending in an Output. Title "STATIC MODEL VS. SIMULATION". -->
+  <img src="/images/computational_modeling/fig8.4.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A side-by-side comparison diagram. Left side labeled &quot;Static Model&quot; shows a single arrow from Inputs straight into a box into one Output. Right side labeled &quot;Simulation&quot; shows a looping sequence of small steps labeled Step 1, Step 2, Step 3... progressing forward through a timeline, each step feeding into the next, ending in an Output.">
 
   <h4 class="fw-bold mt-5 text-info">8.4.2 Simulation vs. a Static Model</h4>
   <p>A static model (like this chapter's compound-interest example) calculates one output from one set of inputs. A <strong>simulation</strong> runs that process forward, often step by step through time or over many repeated trials, to see how a complex system behaves — a meteorologist's storm-tracking software doesn't solve one equation, it simulates the storm's likely path minute by minute based on current conditions and physics.</p>

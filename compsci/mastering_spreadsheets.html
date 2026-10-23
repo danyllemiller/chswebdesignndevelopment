@@ -7,7 +7,7 @@
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  <link href="/css/compsci.css" rel="stylesheet" />
+  <link href="/css/compsci.css?v=2" rel="stylesheet" />
 </head>
 <body class="compsci-body">
 
@@ -51,7 +51,8 @@
       <p class="small text-muted mb-0">Column letter first, row number second — no space, no punctuation. Column A, row 1 is <code>A1</code>; column C, row 4 is <code>C4</code>.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets grid with column letters A-E and row numbers 1-6 clearly visible, cell A1 selected with a blue border, and the Name Box in the top-left corner showing &quot;A1&quot; with an arrow and label pointing to it reading &quot;This is the Name Box — it always shows which cell is selected.&quot;">
+  <!-- Gemini prompt (gemini-3-pro-image, ui style, Oct 2026): A screenshot of a Google Sheets grid with column letters A-E and row numbers 1-6 clearly visible, cell A1 selected with a blue border, and the Name Box in the top-left corner showing "A1" with an arrow and label pointing to it reading "This is the Name Box — it always shows which cell is selected." Generic spreadsheet in the style of Google Sheets. The callout text must read exactly: "This is the Name Box. It always shows which cell is selected." -->
+  <img src="/images/mastering_spreadsheets/fig7.0.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A Google Sheets grid with column letters A-E and row numbers 1-6 clearly visible, cell A1 selected with a blue border, and the Name Box in the top-left corner showing &quot;A1&quot; with an arrow and label pointing to it reading &quot;This is the Name Box — it always shows which cell is selected.&quot;">
 
   <h4 class="fw-bold mt-4 text-info">Typing Data vs. Writing a Formula</h4>
   <p>Click a cell and start typing, and whatever you type just sits there as text or a number — that's <strong>data</strong>. Press <kbd>Enter</kbd> to move down to the next cell, or <kbd>Tab</kbd> to move right.</p>
@@ -133,7 +134,8 @@
       <p class="small text-muted mb-0">Column C was copied straight down (<code>=A2*B2</code>, <code>=A3*B3</code>, <code>=A4*B4</code>) — the tax rate reference shifts to a blank cell after row 2, so every row after the first quietly multiplies by nothing. Column D locks the tax rate with <code>$</code> (<code>=A2*$B$2</code>, <code>=A3*$B$2</code>, <code>=A4*$B$2</code>) — every row keeps pointing at the real 0.08, no matter where the formula is copied.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets column being dragged/filled down with a formula, showing two side-by-side examples: one column where a relative reference (B2) correctly shifts to B3, B4, B5 as it's copied down, and one column where an absolute reference ($B$2) stays locked to row 2 in every copied cell, with small callout labels explaining each.">
+  <!-- Gemini prompt (gemini-3-pro-image, ui style, Oct 2026): A realistic spreadsheet mockup in the style of Google Sheets. Column A "Item" with Apple, Banana, Cherry, Date; column B "Value" with 10, 20, 30, 40. Column C header "Relative" with cells showing the formulas =B2*2, =B3*2, =B4*2, =B5*2; column D header "Absolute" with every cell showing =$B$2*2. Red callout to the right of column C: "Shifts as you copy down"; red callout to the right of column D: "Stays locked to B2". Callout arrows point at the columns but do NOT cover any cell text; every formula is fully readable. -->
+  <img src="/images/mastering_spreadsheets/fig7.1.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A Google Sheets column being dragged/filled down with a formula, showing two side-by-side examples: one column where a relative reference (B2) correctly shifts to B3, B4, B5 as it&#x27;s copied down, and one column where an absolute reference ($B$2) stays locked to row 2 in every copied cell, with small callout labels explaining each.">
 
   <h4 class="fw-bold mt-5 text-info">7.1.2 The Function Families</h4>
   <div class="row g-3 my-4 text-center">
@@ -267,7 +269,8 @@
       <p class="small text-muted mb-0">The real gap between 91 and 93 is 2 points either way. Start the axis at 0 and the bars land at 91% and 93% of the chart's height — nearly identical. Start it at 90 (a 10-point range instead of 100) and that same 2-point gap now spans 20% of the chart's height, three times taller relative to the axis — same two numbers, wildly different visual story.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A side-by-side comparison of two identical bar charts with the exact same data (bars at 91 and 93). Left chart's Y-axis starts at 0, so the bars look almost the same height, labeled &quot;Honest.&quot; Right chart's Y-axis starts at 90, so the same bars look dramatically different heights, labeled &quot;Misleading — same data.&quot;">
+  <!-- Gemini prompt (gemini-3.1-flash-image, info style, Oct 2026): A side-by-side comparison of two identical bar charts with the exact same data (bars at 91 and 93). Left chart's Y-axis starts at 0, so the bars look almost the same height, labeled "Honest." Right chart's Y-axis starts at 90, so the same bars look dramatically different heights, labeled "Misleading — same data." Title "SAME DATA, DIFFERENT STORY". Both charts have two bars labeled "Team A: 91" and "Team B: 93". The left axis is labeled 0 to 100; the right axis is labeled 90 to 94. -->
+  <img src="/images/mastering_spreadsheets/fig7.2.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A side-by-side comparison of two identical bar charts with the exact same data (bars at 91 and 93). Left chart&#x27;s Y-axis starts at 0, so the bars look almost the same height, labeled &quot;Honest.&quot; Right chart&#x27;s Y-axis starts at 90, so the same bars look dramatically different heights, labeled &quot;Misleading — same data.&quot;">
 
   <p><strong>The trap:</strong> students often think a chart is only "wrong" if it uses fake numbers. It doesn't need to. A truncated axis, an inconsistent scale, or a 3D effect that distorts area can all mislead a reader while every single number on the chart stays technically correct.</p>
 
@@ -286,7 +289,8 @@
       <p class="small text-muted mb-0">That's a dashboard built from the exact data set you're using in this chapter — one key number, two grouped charts answering related questions, and one filter that drives all of them at once.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean dashboard mockup graphic with one large key metric at the top left, three smaller related charts grouped below it, and a visible filter dropdown in the corner.">
+  <!-- Gemini prompt (gemini-3.1-flash-image, info style, Oct 2026): Title "A GOOD DASHBOARD". A dashboard card. Top left, large: "Attendance: 94%". Top right: a dropdown "Period: All". Below, three small charts with titles "Attendance by Day" (bars labeled Mon, Tue, Wed, Thu, Fri), "Absence Reasons" (pie chart with labels Illness, Appointment, Other), and "Weekly Trend" (line chart). IMPORTANT: no other text anywhere in the image besides what is listed here; no code snippets; no made-up words. -->
+  <img src="/images/mastering_spreadsheets/fig7.2.2.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Dashboard mockup graphic with one large key metric at the top left, three smaller related charts grouped below it, and a visible filter dropdown in the corner.">
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
       <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -354,7 +358,8 @@
       <p class="small text-muted mb-0">Priya's duplicate row is gone, Devon's blank got filled in (from the gradebook, not guessed), and Sam's "9O" — a letter O, not a zero, so it wasn't even a number to the spreadsheet — got corrected to <code>90</code>. Nothing here changed what actually happened; it just made the sheet tell the truth.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A before-and-after split graphic of a small spreadsheet. Left side labeled &quot;Before&quot; shows messy rows with a duplicate entry highlighted red, a blank cell highlighted yellow, and a typo like &quot;9O&quot; instead of &quot;90&quot; highlighted orange. Right side labeled &quot;After&quot; shows the same rows cleaned up, duplicate removed, blank filled in, typo corrected, with a green checkmark.">
+  <!-- Gemini prompt (gemini-3-pro-image, info style, Oct 2026): A before-and-after split graphic of a small spreadsheet. Left side labeled "Before" shows messy rows with a duplicate entry highlighted red, a blank cell highlighted yellow, and a typo like "9O" instead of "90" highlighted orange. Right side labeled "After" shows the same rows cleaned up, duplicate removed, blank filled in, typo corrected, with a green checkmark. Title "CLEANING YOUR DATA". Columns "Name" and "Score". Before rows: "Ava 88", "Ben 9O" (orange), "Ava 88" (duplicate, red), "Cara" with a blank score (yellow). After rows: "Ava 88", "Ben 90", "Cara 85". -->
+  <img src="/images/mastering_spreadsheets/fig7.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A before-and-after split graphic of a small spreadsheet. Left side labeled &quot;Before&quot; shows messy rows with a duplicate entry highlighted red, a blank cell highlighted yellow, and a typo like &quot;9O&quot; instead of &quot;90&quot; highlighted orange. Right side labeled &quot;After&quot; shows the same rows cleaned up, duplicate removed, blank filled in, typo corrected, with a green checkmark.">
 
   <h4 class="fw-bold mt-5 text-info">7.3.2 Outliers & Correlation</h4>
   <p>Once your data is clean, two ideas come up constantly when looking for patterns:</p>

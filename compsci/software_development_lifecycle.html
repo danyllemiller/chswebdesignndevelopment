@@ -8,7 +8,7 @@
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  <link href="/css/compsci.css" rel="stylesheet" />
+  <link href="/css/compsci.css?v=2" rel="stylesheet" />
 </head>
 <body class="compsci-body">
 
@@ -56,7 +56,8 @@
       <p class="mb-0">Don't jump in to help unless they're completely stuck. The moment you explain how it works, you've lost the chance to learn what wasn't clear. Your real users won't have you sitting next to them, so the tool has to explain itself.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: Six labeled boxes — Analyze, Design, Develop, Test, Deploy, Maintain — arranged in a circle, connected by arrows flowing clockwise from one to the next, with the arrow from Maintain curving back around to Analyze to show the cycle repeats instead of ending.">
+  <!-- Gemini prompt (gemini-3.1-flash-image, info style, Oct 2026): Title "THE SOFTWARE DEVELOPMENT LIFE CYCLE". Six rounded boxes arranged in a circle, each containing only one word: "Analyze", "Design", "Develop", "Test", "Deploy", "Maintain", connected clockwise by arrows in that order, with the arrow from "Maintain" returning to "Analyze". IMPORTANT: no other text anywhere in the image besides what is listed here; no code snippets; no made-up words. -->
+  <img src="/images/software_development_lifecycle/fig16.1.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Six labeled boxes — Analyze, Design, Develop, Test, Deploy, Maintain — arranged in a circle, connected by arrows flowing clockwise from one to the next, with the arrow from Maintain curving back around to Analyze to show the cycle repeats instead of ending.">
 
 
   <div class="concept-box shadow-sm border-warning bg-light">
@@ -200,7 +201,8 @@
       <p class="mb-0">Put attributions where people can find them, such as a Credits slide, the bottom of a web page, or a README file for code. When you do the License Audit, every image, icon, font, and code snippet you didn't make yourself needs one.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A horizontal spectrum bar with three labeled zones from left to right: green &quot;Permissive&quot; (a lock icon that's mostly open), yellow &quot;Copyleft&quot; (a lock icon that's half open with a chain), and red &quot;Proprietary&quot; (a fully closed padlock icon), showing increasing restriction left to right.">
+  <!-- Gemini prompt (gemini-3-pro-image, info style, Oct 2026): A horizontal spectrum bar with three labeled zones from left to right: green "Permissive" (a lock icon that's mostly open), yellow "Copyleft" (a lock icon that's half open with a chain), and red "Proprietary" (a fully closed padlock icon), showing increasing restriction left to right. Title "SOFTWARE LICENSES". Small examples under each zone: Permissive "MIT", Copyleft "GPL", Proprietary "Microsoft Office". -->
+  <img src="/images/software_development_lifecycle/fig16.2.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A horizontal spectrum bar with three labeled zones from left to right: green &quot;Permissive&quot; (a lock icon that&#x27;s mostly open), yellow &quot;Copyleft&quot; (a lock icon that&#x27;s half open with a chain), and red &quot;Proprietary&quot; (a fully closed padlock icon), showing increasing restriction left to right.">
 
 
   <div class="alert alert-info mt-4 shadow-sm border-info">
@@ -285,7 +287,8 @@
       <p class="mb-0"><strong>Keyboard access</strong> and <strong>plain language</strong> round out the list. Try your whole tool using only Tab, Shift+Tab, and Enter. Then reread your instructions and swap any technical words for everyday ones. Each of these fixes takes minutes, and together they open your tool to far more people.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — short video/gif]: A short screen-recording gif of someone navigating a web form using only the Tab key, showing a visible blue focus outline moving from field to field in order, with a mouse cursor sitting untouched off to the side the whole time.">
+  <!-- Gemini prompt (gemini-3-pro-image, info style, Oct 2026): Title "KEYBOARD-ONLY NAVIGATION". A still image of a simple web form with fields "Name", "Email", "Message" and a "Submit" button. Each field has a numbered badge 1, 2, 3, 4 showing the Tab order, connected by arrows with a small "Tab" key icon on each arrow, and the "Email" field shows a thick blue focus outline. A mouse icon sits off to the side, crossed out, labeled "Mouse not used". -->
+  <img src="/images/software_development_lifecycle/fig16.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Title &quot;KEYBOARD-ONLY NAVIGATION&quot;. A still image of a simple web form with fields &quot;Name&quot;, &quot;Email&quot;, &quot;Message&quot; and a &quot;Submit&quot; button. Each field has a numbered badge 1, 2, 3, 4 showing the Tab order, connected by arrows with a small &quot;Tab&quot; key icon on each arrow, and the &quot;Email&quot; field shows a thick blue focus outline. A mouse icon sits off to the side, crossed out, labeled &quot;Mouse not used&quot;.">
 
 
   <p><strong>The trap:</strong> students often treat accessibility as an add-on step at the very end. Evaluate and refine — it's a genuine revision pass on an existing artifact, not a checkbox added after the "real" work is done.</p>
@@ -384,7 +387,8 @@
       <p class="mb-0">Here's a famous example. In 2006, Netflix shared "anonymous" movie ratings for a contest. Researchers compared them with public reviews people had posted on IMDb. That let them figure out who some of the users were. So removing names isn't enough. You have to remove or blur <em>any</em> mix of details that could point to one person.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A login form screenshot mockup with a suspicious crafted string typed into the password field, an arrow pointing from that field into a database icon, and a red warning label reading &quot;Unsanitized input reaches the database directly&quot; over the connection.">
+  <!-- Gemini prompt (gemini-3.1-flash-image, info style, Oct 2026): Title "SQL INJECTION". A simple login form: the "Username" field contains "admin" and the "Password" field contains ' OR '1'='1 in monospace, with a "Log in" button. A thick arrow goes from the password field to a database icon. A red warning label on the arrow reads "Unsanitized input reaches the database directly". IMPORTANT: no other text anywhere in the image besides what is listed here; no code snippets; no made-up words. -->
+  <img src="/images/software_development_lifecycle/fig16.4.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A login form screenshot mockup with a suspicious crafted string typed into the password field, an arrow pointing from that field into a database icon, and a red warning label reading &quot;Unsanitized input reaches the database directly&quot; over the connection.">
 
   <div class="concept-box shadow-sm border-danger bg-light">
       <h5 class="fw-bold text-danger"><i class="fas fa-shield-virus me-2"></i> A Real Coding Flaw: SQL Injection</h5>

@@ -7,7 +7,7 @@
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  <link href="/css/compsci.css" rel="stylesheet" />
+  <link href="/css/compsci.css?v=2" rel="stylesheet" />
 </head>
 <body class="compsci-body">
 
@@ -175,7 +175,8 @@
   </div>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean infographic showing the letter &quot;A&quot; with an arrow pointing to the number 65, and a smiley-face emoji with an arrow pointing to its Unicode code point, both under the label &quot;Character Encoding.&quot;">
+  <!-- Gemini prompt (gemini-3.1-flash-image, info style, Oct 2026): Title "CHARACTER ENCODING" (shown once). Row 1: a big letter "A", an arrow to "65" labeled "Decimal", an arrow to "01000001" labeled "Binary". Row 2: the grinning-face emoji, an arrow to "U+1F600" labeled "Unicode code point". IMPORTANT: no other text anywhere in the image besides what is listed here; no code snippets; no made-up words. -->
+  <img src="/images/language_of_computers/fig5.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Infographic showing the letter &quot;A&quot; with an arrow pointing to the number 65, and a smiley-face emoji with an arrow pointing to its Unicode code point, both under the label &quot;Character Encoding.&quot;">
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
       <h5 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
@@ -291,7 +292,8 @@
   </div>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A simple technical diagram of an AND logic gate and an OR logic gate side by side, each shown as its standard schematic symbol with two input lines and one output line, labeled with example TRUE/FALSE input combinations and the resulting output for each.">
+  <!-- Gemini prompt (gemini-3-pro-image, info style, Oct 2026): Title "LOGIC GATES". Left: a standard AND gate symbol with two inputs labeled "TRUE" and "FALSE" and the output labeled "FALSE"; under it the rule "AND: true only if BOTH inputs are true". Right: a standard OR gate symbol with inputs "TRUE" and "FALSE" and the output labeled "TRUE"; under it the rule "OR: true if AT LEAST ONE input is true". Both outputs are shown the same neutral color; do not mark anything right or wrong. IMPORTANT: no other text anywhere in the image besides what is listed here; no code snippets; no made-up words. -->
+  <img src="/images/language_of_computers/fig5.4.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Technical diagram of an AND logic gate and an OR logic gate side by side, each shown as its standard schematic symbol with two input lines and one output line, labeled with example TRUE/FALSE input combinations and the resulting output for each.">
 
   <h4 class="fw-bold mt-5 text-info">5.4.2 RAM & Clock Speed</h4>
   <p>While data is actively being worked on, it's held in <strong>RAM (Random Access Memory)</strong> — short-term memory built for lightning-fast access, wiped clean the moment the power turns off (unlike a hard drive, which keeps data with the power off). How fast the CPU can perform those logical operations is measured by its <strong>clock speed</strong>, given in <strong>Gigahertz (GHz)</strong> — a 3.0 GHz processor completes roughly 3 billion operation "ticks" every single second.</p>
@@ -325,7 +327,8 @@
       <p class="small text-muted mb-0">One cycle, one instruction, one result — then it immediately fetches the next instruction and does it again. A 3.0 GHz processor runs roughly 3 billion of these cycles every second.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A clean circular/looping diagram showing the Fetch-Decode-Execute cycle as three connected arrows forming a loop: &quot;Fetch&quot; (an arrow pulling an instruction from a memory icon), &quot;Decode&quot; (a magnifying glass over the instruction), &quot;Execute&quot; (a lightning bolt/gear icon), looping back to Fetch.">
+  <!-- Gemini prompt (gemini-3-pro-image, info style, Oct 2026): A clean circular/looping diagram showing the Fetch-Decode-Execute cycle as three connected arrows forming a loop: "Fetch" (an arrow pulling an instruction from a memory icon), "Decode" (a magnifying glass over the instruction), "Execute" (a lightning bolt/gear icon), looping back to Fetch. Title "THE FETCH-DECODE-EXECUTE CYCLE". The CPU is labeled "CPU" and the memory icon "Memory (RAM)". -->
+  <img src="/images/language_of_computers/fig5.4.2.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Circular/looping diagram showing the Fetch-Decode-Execute cycle as three connected arrows forming a loop: &quot;Fetch&quot; (an arrow pulling an instruction from a memory icon), &quot;Decode&quot; (a magnifying glass over the instruction), &quot;Execute&quot; (a lightning bolt/gear icon), looping back to Fetch.">
 
   <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
       <div class="d-flex align-items-start">
@@ -377,7 +380,8 @@
       </ul>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets spreadsheet with cell A1 selected, the formula bar at the top showing &quot;=DEC2BIN(20,8)&quot; being typed, and the cell displaying the result &quot;00010100&quot;, with a Decimal/Binary/Hex column header row visible below.">
+  <!-- Gemini prompt (gemini-3-pro-image, ui style, Oct 2026): A screenshot of a Google Sheets spreadsheet with cell A1 selected, the formula bar at the top showing "=DEC2BIN(20,8)" being typed, and the cell displaying the result "00010100", with a Decimal/Binary/Hex column header row visible below. Below the formula row, a small table with the header row "Decimal | Binary | Hex" and the values "20 | 00010100 | 14". Generic spreadsheet look in the style of Google Sheets. -->
+  <img src="/images/language_of_computers/fig5.5.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A Google Sheets spreadsheet with cell A1 selected, the formula bar at the top showing &quot;=DEC2BIN(20,8)&quot; being typed, and the cell displaying the result &quot;00010100&quot;, with a Decimal/Binary/Hex column header row visible below.">
 
   <h4 class="fw-bold mt-4 text-primary">5.5.1 Worked Example: #FF5733 With Real Formulas</h4>
   <p>Section 5.2's Worked Example decoded <code>#FF5733</code> by hand. Here's the exact same conversion as formulas, using <code>MID()</code> to pull out each two-character pair before converting it:</p>

@@ -44,11 +44,30 @@ body.compsci-body {
    not just in page text. */
 .gen-media-placeholder {
     display: block;
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     max-height: 320px;
     object-fit: contain;
-    margin: 1.5rem 0;
+    margin: 1.5rem auto;
     border-radius: 8px;
+    position: relative;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+/* Same idea as the WD chapters' figure:hover zoom (dacStyleSheets.css 5.5):
+   chapter images grow on hover so labels and screenshot text are readable.
+   Sized to the image itself (width: auto above) so the zoom never pushes
+   past the column; only on wide screens with a real mouse -- phones and
+   tablets have no hover, and a 1.5x image would overflow a small screen. */
+@media (hover: hover) and (min-width: 992px) {
+    .gen-media-placeholder:not([src*="gemini-placeholder"]) {
+        cursor: zoom-in;
+    }
+    .gen-media-placeholder:not([src*="gemini-placeholder"]):hover {
+        transform: scale(1.5);
+        z-index: 50;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+    }
 }
 
 .highlight-text { 

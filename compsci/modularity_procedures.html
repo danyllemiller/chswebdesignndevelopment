@@ -8,7 +8,7 @@
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  <link href="/css/compsci.css" rel="stylesheet" />
+  <link href="/css/compsci.css?v=2" rel="stylesheet" />
 </head>
 <body class="compsci-body">
 
@@ -52,7 +52,8 @@
       </div>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A labeled diagram of a function call and definition side by side. Left box shows &quot;greet(&quot;Jordan&quot;)&quot; with &quot;Jordan&quot; circled and labeled Argument. An arrow points to a right box showing &quot;function greet(name) { ... }&quot; with &quot;name&quot; circled and labeled Parameter, and a return arrow coming back out labeled Return Value.">
+  <!-- Gemini prompt (gemini-3-pro-image, info style, Oct 2026): A labeled diagram of a function call and definition side by side. Left box shows "greet("Jordan")" with "Jordan" circled and labeled Argument. An arrow points to a right box showing "function greet(name) { ... }" with "name" circled and labeled Parameter, and a return arrow coming back out labeled Return Value. Title "ARGUMENTS VS. PARAMETERS". The function body reads return "Hello, " + name; and the return arrow shows "Hello, Jordan". -->
+  <img src="/images/modularity_procedures/fig15.1.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A labeled diagram of a function call and definition side by side. Left box shows &quot;greet(&quot;Jordan&quot;)&quot; with &quot;Jordan&quot; circled and labeled Argument. An arrow points to a right box showing &quot;function greet(name) { ... }&quot; with &quot;name&quot; circled and labeled Parameter, and a return arrow coming back out labeled Return Value.">
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: The Four Parts, in Real Code</h5>
@@ -158,7 +159,8 @@ function runReport() {               // 3. entry point
 }</code></pre>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot of a Google Sheets menu bar with a custom menu item added at the end (after Help), labeled with a tool name, clicked open to show a dropdown of custom menu options like &quot;Run Report&quot; and &quot;Clear Data.&quot;">
+  <!-- Gemini prompt (gemini-3-pro-image, ui style, Oct 2026): A screenshot of a Google Sheets menu bar with a custom menu item added at the end (after Help), labeled with a tool name, clicked open to show a dropdown of custom menu options like "Run Report" and "Clear Data." Generic spreadsheet menu bar in the style of Google Sheets: File, Edit, View, Insert, Format, Data, Tools, Extensions, Help, then a custom menu "Attendance Tools" that is open, showing "Run Report" and "Clear Data". A red callout reads "Your custom menu". -->
+  <img src="/images/modularity_procedures/fig15.2.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A Google Sheets menu bar with a custom menu item added at the end (after Help), labeled with a tool name, clicked open to show a dropdown of custom menu options like &quot;Run Report&quot; and &quot;Clear Data.&quot;">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-mouse-pointer me-2"></i> Worked Example: A Menu for Non-Technical Users</h5>
@@ -228,7 +230,8 @@ function runReport() {               // 3. entry point
   <h4 class="fw-bold mt-4 text-primary">15.3.1 Recursion: A Procedure That Calls Itself</h4>
   <p><strong>Recursion</strong> is a procedure that calls itself with a smaller version of the same problem, until it reaches a <strong>base case</strong> simple enough to answer directly. A factorial function calculating <code>5!</code> calls itself to calculate <code>4!</code>, which calls itself for <code>3!</code>, and so on, until it hits the base case (<code>1! = 1</code>) and the answers combine back up the chain.</p>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A vertical stack of five labeled boxes showing a recursive call chain: 5! calls 4!, which calls 3!, which calls 2!, which calls 1! at the bottom labeled &quot;Base Case.&quot; A second column of arrows curves back up the stack showing each answer multiplying and combining back to the top for the final result.">
+  <!-- Gemini prompt (gemini-3.1-flash-image, info style, Oct 2026): A vertical stack of five labeled boxes showing a recursive call chain: 5! calls 4!, which calls 3!, which calls 2!, which calls 1! at the bottom labeled "Base Case." A second column of arrows curves back up the stack showing each answer multiplying and combining back to the top for the final result. Title "HOW RECURSION SOLVES 5!". Exact values: going down: "5! = 5 x 4!", "4! = 4 x 3!", "3! = 3 x 2!", "2! = 2 x 1!", "1! = 1 (Base Case)". Coming back up: "2! = 2", "3! = 6", "4! = 24", "5! = 120". Final answer at the top: "5! = 120". -->
+  <img src="/images/modularity_procedures/fig15.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A vertical stack of five labeled boxes showing a recursive call chain: 5! calls 4!, which calls 3!, which calls 2!, which calls 1! at the bottom labeled &quot;Base Case.&quot; A second column of arrows curves back up the stack showing each answer multiplying and combining back to the top for the final result.">
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Recursion</h5>

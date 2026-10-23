@@ -7,7 +7,7 @@
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  <link href="/css/compsci.css" rel="stylesheet" />
+  <link href="/css/compsci.css?v=2" rel="stylesheet" />
 </head>
 <body class="compsci-body">
 
@@ -138,7 +138,8 @@
       <p class="mb-0 text-light">Why is cybersecurity described as everyone's responsibility, not just the IT department's? <em class="text-white-50">(Answer: most successful attacks target people through tricks like phishing, not the underlying systems themselves.)</em></p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — screenshot]: A screenshot mockup of a scam email inbox view, with three separate red circles and callout arrows pointing to: a slightly misspelled sender domain, an urgent countdown phrase, and a hyperlink whose visible text doesn't match a suspicious destination URL shown in a tooltip below it.">
+  <!-- Gemini prompt (gemini-3-pro-image, ui style, Oct 2026): A realistic mockup of a desktop email app window (generic, not a real brand) showing ONE open email. From: "PayPal Security <security@paypa1-support.com>"; To: "you@example.com"; Subject: "Action required: account locked in 2 hours!"; Body: "Dear customer, your account has been locked due to suspicious activity. Verify your identity now to restore access." and a blue button with the text "www.paypal.com". A hover tooltip under the button shows "http://paypa1-verify.xyz/login". Three red circles with callouts: on the sender domain "Misspelled domain: paypa1"; on the subject "Fake urgency"; on the button and tooltip "Link text does not match where it goes". The inbox list on the left has only three rows: "PayPal Security", "Ms. Davis - Homework Reminder", "School Newsletter". All interface words spelled correctly. -->
+  <img src="/images/cybersecurity_threats/fig18.2.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A scam email inbox view, with three separate red circles and callout arrows pointing to: a slightly misspelled sender domain, an urgent countdown phrase, and a hyperlink whose visible text doesn&#x27;t match a suspicious destination URL shown in a tooltip below it.">
 
   <div class="card h-100 shadow-sm border-secondary my-4">
       <div class="card-header bg-secondary text-white small fw-bold"><i class="fas fa-envelope-open-text me-1"></i> Phishing Attempt to Dissect</div>
@@ -209,7 +210,8 @@
       <p class="mb-0">Because the traffic comes from thousands of different places, it's hard to block just one source. Large websites defend themselves with special services that filter out junk traffic and spread the load across huge numbers of servers, the load-balancing idea from Chapter 17.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: Two stick-figure people labeled &quot;You&quot; and &quot;Website&quot; with a straight dashed line between them representing a normal connection. A third figure labeled &quot;Attacker&quot; sits directly on that dashed line in the middle with small eye icons, secretly reading the messages passing between the other two.">
+  <!-- Gemini prompt (gemini-3-pro-image, info style, Oct 2026): Title "MAN-IN-THE-MIDDLE ATTACK". Three simple stick figures in a row: "You" on the left, "Attacker" in the middle, "Website" on the right. A dashed line runs from You to Website, and small envelope icons travel along it. The Attacker sits directly on the line in the middle, with small eye icons around them, reading the envelopes as they pass. One caption under the Attacker: "Secretly reading your messages". IMPORTANT: no other text anywhere in the image besides what is listed here; no code snippets; no made-up words. -->
+  <img src="/images/cybersecurity_threats/fig18.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="Two stick-figure people labeled &quot;You&quot; and &quot;Website&quot; with a straight dashed line between them representing a normal connection. A third figure labeled &quot;Attacker&quot; sits directly on that dashed line in the middle with small eye icons, secretly reading the messages passing between the other two.">
 
   <div class="concept-box shadow-sm border-danger bg-light">
       <h5 class="fw-bold text-danger"><i class="fas fa-wifi me-2"></i> Why Public Wi-Fi Is an Easy Target</h5>
@@ -239,7 +241,8 @@
       <p class="mb-0 text-light">Why does the Principle of Least Privilege limit damage even after an account is successfully hacked? <em class="text-white-50">(Answer: that account never had access to anything beyond what it actually needed, so a breach can't reach data or systems it was never given permission to touch.)</em></p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A single target server icon on the right being flooded by dozens of small arrows all pointing at it from a wide spread of hijacked computer icons on the left, labeled &quot;Botnet,&quot; with a small group of legitimate user icons at the very edge unable to get through, labeled &quot;Real customers blocked.&quot;">
+  <!-- Gemini prompt (gemini-3.1-flash-image, info style, Oct 2026): A single target server icon on the right being flooded by dozens of small arrows all pointing at it from a wide spread of hijacked computer icons on the left, labeled "Botnet," with a small group of legitimate user icons at the very edge unable to get through, labeled "Real customers blocked." Title "DDOS ATTACK". -->
+  <img src="/images/cybersecurity_threats/fig18.3.2.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A single target server icon on the right being flooded by dozens of small arrows all pointing at it from a wide spread of hijacked computer icons on the left, labeled &quot;Botnet,&quot; with a small group of legitimate user icons at the very edge unable to get through, labeled &quot;Real customers blocked.&quot;">
 
   <h4 class="fw-bold mt-5 text-info">18.3.4 Firewalls & Zero-Days</h4>
   <p>A <strong>firewall</strong> monitors incoming and outgoing network traffic and blocks anything that doesn't match its security rules — a barrier between a trusted internal network and the open internet. But even a well-defended system can be caught off guard by a <strong>zero-day vulnerability</strong>: a flaw attackers are already actively exploiting before the software's own developer even knows it exists, meaning no official fix exists yet.</p>

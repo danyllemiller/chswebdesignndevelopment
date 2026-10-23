@@ -8,7 +8,7 @@
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
   <link href="/css/dacStyleSheets.css" rel="stylesheet" />
-  <link href="/css/compsci.css" rel="stylesheet" />
+  <link href="/css/compsci.css?v=2" rel="stylesheet" />
 </head>
 <body class="compsci-body">
 
@@ -45,7 +45,8 @@ for (let i = 0; i &lt; names.length; i++) {
 // Add a name to the list, and the loop still works unchanged.</code></pre>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A horizontal row of six labeled boxes containing student names, with index numbers 0 through 5 printed below each box, and a curved loop arrow drawn beneath the whole row labeled &quot;one loop visits every box,&quot; contrasted above with six separate crossed-out variable-name tags.">
+  <!-- Gemini prompt (gemini-3.1-flash-image, info style, Oct 2026): A horizontal row of six labeled boxes containing student names, with index numbers 0 through 5 printed below each box, and a curved loop arrow drawn beneath the whole row labeled "one loop visits every box," contrasted above with six separate crossed-out variable-name tags. Title "WHY ARRAYS BEAT SEPARATE VARIABLES". The six names are Amara, Ben, Chen, Deja, Eli, Faith with indexes 0, 1, 2, 3, 4, 5. The crossed-out tags above read student1, student2, student3, student4, student5, student6. -->
+  <img src="/images/advanced_data_structures/fig14.1.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A horizontal row of six labeled boxes containing student names, with index numbers 0 through 5 printed below each box, and a curved loop arrow drawn beneath the whole row labeled &quot;one loop visits every box,&quot; contrasted above with six separate crossed-out variable-name tags.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-compress-arrows-alt me-2"></i> Worked Example: Refactoring Six Variables</h5>
@@ -153,7 +154,8 @@ while (current !== null) {
       <p class="mb-0">So the skill isn't picking a favorite. It's asking, "What will my program do <em>most often</em>?" Lots of looking things up by position? Use an array. Lots of inserting and removing in the middle? Use a linked list.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A side-by-side graphic. Left: numbered boxes in a solid row labeled &quot;Array — direct access by index.&quot; Right: circles connected by arrows to the next one labeled &quot;Linked List — each node points to the next.&quot;">
+  <!-- Gemini prompt (gemini-3.1-flash-image, info style, Oct 2026): Title "ARRAY VS. LINKED LIST". Left side, labeled "Array: direct access by index": four connected boxes in a solid row labeled 0, 1, 2, 3, with an arrow pointing straight to box 2 and the label "Jump straight to any item". Right side, labeled "Linked List: each node points to the next": four circles in a row, each with an arrow to the next circle, and the last circle pointing to the word "null", with the label "Follow the links one by one". IMPORTANT: no other text anywhere in the image besides what is listed here; no code snippets; no made-up words. -->
+  <img src="/images/advanced_data_structures/fig14.2.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A side-by-side graphic. Left: numbered boxes in a solid row labeled &quot;Array — direct access by index.&quot; Right: circles connected by arrows to the next one labeled &quot;Linked List — each node points to the next.&quot;">
 
   <p><strong>The trap:</strong> students often look for the "better" structure between the two. There isn't one — arrays win when you need instant access by position; linked lists win when you're constantly inserting and deleting in the middle. Naming both properties correctly is the actual skill being tested here, not picking a favorite.</p>
 
@@ -241,7 +243,8 @@ grades["Ben"] = 90;           // update an existing value</code></pre>
       <p>One rule: keys must be <strong>unique</strong>. If two students are both named "Alex," saving the second one would overwrite the first. That's why real systems often use something guaranteed to be unique, like a student ID, as the key.</p>
   </div>
 
-  <img src="/images/gemini-placeholder.svg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="[Gemini prompt — illustration]: A sorted row of numbered boxes from 1 to 16 with three successive step panels below it. Step 1 highlights the middle box and an X over half the row that gets eliminated. Step 2 repeats on the remaining half. Step 3 lands on the target number, each step labeled and shown as a smaller shrinking row.">
+  <!-- Gemini prompt (gemini-3.1-flash-image, info style, Oct 2026): A sorted row of numbered boxes from 1 to 16 with three successive step panels below it. Step 1 highlights the middle box and an X over half the row that gets eliminated. Step 2 repeats on the remaining half. Step 3 lands on the target number, each step labeled and shown as a smaller shrinking row. Title "BINARY SEARCH: FIND 14". Exact steps: Step 1: check the middle value 8; 14 is bigger, so cross out 1-8. Step 2: in 9-16, check 12; 14 is bigger, so cross out 9-12. Step 3: in 13-16, check 14: found it! Label each step with that text. -->
+  <img src="/images/advanced_data_structures/fig14.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A sorted row of numbered boxes from 1 to 16 with three successive step panels below it. Step 1 highlights the middle box and an X over half the row that gets eliminated. Step 2 repeats on the remaining half. Step 3 lands on the target number, each step labeled and shown as a smaller shrinking row.">
 
   <div class="concept-box shadow-sm border-primary bg-light">
       <h5 class="fw-bold text-primary"><i class="fas fa-search me-2"></i> Binary Search</h5>
