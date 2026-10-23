@@ -163,7 +163,10 @@ function targetFor(ctx, track, item, extra) {
     const dates = groupDates(ctx, track, g);
     if (!dates.length) return null;
     const chBlocks = Object.values(ctx.blocks).filter(b => b.group === g).sort((a, b) => a.num - b.num);
-    const msBlock = chBlocks.filter(b => b.milestone).pop();
+    const projItem = ctx.items.find(i => i.exam_id.toLowerCase() === `ch${cm[1]}_milestone`);
+    const projWords = projItem ? words(coreTitle(projItem.title)) : [];
+    const projNamed = projWords.length ? Object.values(ctx.blocks).filter(b => b.milestone && projWords.filter(w => words(b.milestone).includes(w)).length / projWords.length >= 0.6).sort((a, b) => b.num - a.num)[0] : null;
+    const msBlock = projNamed || chBlocks.filter(b => b.milestone).pop();
     if (/pre-(assessment|scale)/i.test(id)) return { date: dates[0], rule: 'chapter-first-day' };
     if (/-Exam$/i.test(id)) {
         const examBlock = chBlocks.filter(b => /\bexam\b|\btest\b/i.test(b.title) && !/retest/i.test(b.title)).pop();
@@ -233,6 +236,7 @@ async function planCourse(connection, course, { includePast = false } = {}) {
         if (/^TC-/i.test(it.exam_id)) continue;
         if (!oldDue) continue;
         if (oldDue < today && !includePast) continue;
+        const pastItem = oldDue < today;
         const perTrack = {};
         let rule = null;
         for (const t of trackNames) {
@@ -255,6 +259,9 @@ async function planCourse(connection, course, { includePast = false } = {}) {
         try { if (typeof oldPdd === 'string') oldPdd = JSON.parse(oldPdd); } catch (e) { oldPdd = null; }
         const same = newDue === oldDue && JSON.stringify(newPdd || null) === JSON.stringify(oldPdd || null);
         if (same) continue;
+        // A past due date is only ever moved LATER: moving it earlier could turn
+        // work a student already turned in on time into late work.
+        if (pastItem && newDue < oldDue) { skipped.push({ exam_id: it.exam_id, title: it.title, due: oldDue, why: `past item; agenda says earlier (${newDue}), left alone` }); continue; }
         plan.push({ exam_id: it.exam_id, title: it.title, oldDue, oldPdd: oldPdd || null, newDue, newPdd, perTrack, rule });
     }
     if (!ctx.cfg.unitBased) keepLabOrder(ctx, plan);
@@ -278,7 +285,8 @@ function keepLabOrder(ctx, plan) {
         let floor = null;
         list.sort((a, b) => a.n - b.n).forEach(({ it }) => {
             const d = dueOf(it);
-            if (floor && d < floor) {
+            const guessed = !byId.get(it.exam_id) || ['lab-in-order', 'keep-lab-order', 'project-due-day', 'chapter-last-day', 'exam-day'].includes(byId.get(it.exam_id).rule) || !/_lab/i.test(it.exam_id);
+            if (floor && d < floor && guessed) {
                 const p = byId.get(it.exam_id) || (() => {
                     const np = { exam_id: it.exam_id, title: it.title, oldDue: ymd(it.due_date), oldPdd: null, newDue: floor, newPdd: null, perTrack: { main: floor }, rule: 'keep-lab-order' };
                     plan.push(np); byId.set(it.exam_id, np); return np;
