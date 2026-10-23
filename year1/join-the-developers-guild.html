@@ -576,6 +576,10 @@
                             <h5 class="fw-bold mt-4 text-primary">The Rules of the Road: Meet the W3C</h5>
                             <p>Imagine you're building with Lego. What if every company had its own unique Lego block that didn't fit with anyone else's? That would be a total mess! The <strong>World Wide Web Consortium (W3C)</strong> is like the international committee that makes sure all the Lego bricks fit together. They are the rule-makers who decide on the standards for technologies like HTML, CSS, and JavaScript, so that websites and browsers can all talk to each other. This is why you can view the same website on a Chrome browser on your laptop and a Safari browser on your phone without things breaking.</p>
 
+                            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch1 Days 2-3 -->
+                            <div class="alert alert-info small border my-4">
+                                <strong>Internet, but not the Web:</strong> email, online gaming, video calls, and file transfers all travel over the <strong>Internet</strong> (the physical cables, routers, and servers), but none of them are the <strong>World Wide Web</strong> (the pages, links, and HTML that run on top of it). <strong>Test yourself:</strong> if an undersea cable is cut, which one is damaged? The <em>Internet</em> is (a physical cable broke). The Web keeps working everywhere traffic can be rerouted; only the pages that had to travel across that cable are affected.
+                            </div>
                             <!-- LAB 2 ASSIGNMENT CARD -->
                             <div class="card border-success shadow-sm my-4 mt-5">
                                 <div class="card-header bg-success text-white fw-bold">
@@ -753,6 +757,18 @@
                             <h5 class="fw-bold mt-4 text-primary">Public DNS: Faster &amp; More Private</h5>
                             <p>By default your computer uses your ISP's DNS server. You can change it to a faster, more private alternative. <strong>Cloudflare (1.1.1.1)</strong> is consistently the fastest public resolver and has a strict no-log policy. <strong>Google (8.8.8.8)</strong> is the world's most widely used. <strong>OpenDNS</strong> offers family filtering. Switching your home or school router's DNS takes about 60 seconds and costs nothing.</p>
 
+                            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch1 Days 5-6 -->
+                            <div class="card border-info shadow-sm my-4 text-start">
+                              <div class="card-header bg-site-secondary fw-bold text-info">Two Bills, Two Different Things You're Renting</div>
+                              <div class="card-body small">
+                                <ul class="mb-2">
+                                  <li class="mb-1"><strong>The registrar bill:</strong> the <strong>domain name</strong> itself, renewed every year (like renting your address).</li>
+                                  <li class="mb-0"><strong>The host bill:</strong> <strong>server space</strong>, storage, and bandwidth, where your files actually live (like renting the building).</li>
+                                </ul>
+                                <p class="mb-2">The request cycle ties them together: the <strong>browser</strong> asks for a domain, <strong>DNS</strong> finds the server's IP address, the <strong>server</strong> sends back the files, and the browser displays them.</p>
+                                <p class="mb-0"><strong>Detective question:</strong> a site loads when you type its IP address but fails when you type its domain name. Where is the problem? Not the server (the IP works). It's <strong>DNS</strong>: a wrong or missing DNS record, an expired domain, or a recent change that hasn't finished propagating.</p>
+                              </div>
+                            </div>
                             <!-- LAB 3 ASSIGNMENT CARD -->
                             <div class="card border-success shadow-sm my-4 mt-5">
                                 <div class="card-header bg-success text-white fw-bold">
@@ -989,6 +1005,20 @@
                                 </div>
                             </div>
 
+                            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch1 Day 7 -->
+                            <div class="card border-danger shadow-sm my-4 text-start">
+                              <div class="card-header bg-site-secondary fw-bold text-danger">Read the Link Before You Click It</div>
+                              <div class="card-body small">
+                                <p class="mb-2">The padlock means the connection is <strong>encrypted</strong>. It does <strong>not</strong> promise the site is <strong>trustworthy</strong>: scammers get padlocks too. A link that looks like your bank but goes to <code>bank-secure-login.co</code> is <strong>phishing</strong>: the real domain is "bank-secure-login.co," not your bank's domain. Check before you click:</p>
+                                <ol class="mb-0">
+                                  <li>Find the real <strong>domain</strong>: the part right before the TLD (in <code>shop.example.com</code>, it's <code>example</code>).</li>
+                                  <li>Check the <strong>TLD</strong>: does <code>.co</code> or <code>.xyz</code> belong on a bank?</li>
+                                  <li>Check the <strong>spelling</strong>: <code>paypa1.com</code> is not <code>paypal.com</code>.</li>
+                                  <li>Extra words like "secure," "login," or "verify" bolted onto a name are a warning sign.</li>
+                                  <li>Don't trust the padlock alone; when in doubt, type the bank's address yourself.</li>
+                                </ol>
+                              </div>
+                            </div>
                             <!-- LAB 4 ASSIGNMENT CARD -->
                             <div class="card border-success shadow-sm my-4 mt-5">
                                 <div class="card-header bg-success text-white fw-bold">
@@ -1275,6 +1305,15 @@
                                 </tbody>
                             </table>
 
+                            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch1 Day 10 -->
+                            <div class="card border-info shadow-sm my-4 text-start">
+                              <div class="card-header bg-site-secondary fw-bold text-info">E-Commerce: Getting Paid, and the Risks Design Can't Fix</div>
+                              <div class="card-body small">
+                                <p class="mb-2">A small shop wants to sell online. Some of the biggest things that can go wrong have nothing to do with design: a <strong>payment data breach</strong>, <strong>fraud and chargebacks</strong> (a customer disputes a charge and the bank takes the money back), shipping problems, and <strong>sales tax</strong> mistakes.</p>
+                                <p class="mb-2">That's why stores use a <strong>payment processor</strong> (like Stripe, PayPal, or Square) instead of handling card numbers themselves. Compare processors on three things: their <strong>fees</strong> (usually a small percentage plus a few cents per sale), their <strong>speed</strong> (how fast the money reaches the shop's bank), and <strong>who carries the risk</strong> when fraud happens.</p>
+                                <p class="mb-0"><strong>What does a breach really cost?</strong> Fines, lost customers, legal costs, and a damaged reputation, often far more than the website cost to build. The safest card number is one the shop never stores.</p>
+                              </div>
+                            </div>
                             <!-- BUSINESS PLAN INTEGRATION: TARGET MARKET -->
                             <div class="card border-dark shadow-sm my-4 mt-5">
                                 <div class="card-header bg-dark text-white fw-bold">
@@ -1366,6 +1405,10 @@
                                 <li class="mb-2"><strong>Alignment, Balance &amp; Contrast:</strong> Aligned elements feel intentional; misaligned elements feel careless. Contrast makes critical information impossible to miss.</li>
                             </ul>
 
+                            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch1 Day 9 -->
+                            <div class="alert alert-info small border my-4">
+                                <strong>The Squint Test:</strong> why do some sites look expensive and others look cheap? Squint at the screen until it blurs. On a professional page your eye still lands on <strong>one</strong> thing first, usually the headline or the main button, because the designer made it the biggest, highest-contrast element and surrounded it with <strong>white space</strong>. On a cluttered page nothing stands out, because everything is competing. The designer decides what you see first; a clear <strong>visual hierarchy</strong> is what makes a site look expensive.
+                            </div>
                             <!-- VISUAL HIERARCHY CALLOUT -->
                             <div class="card border-primary shadow-sm my-4">
                                 <div class="card-header bg-primary text-white fw-bold"><span class="badge bg-warning text-dark me-2">Key Concept</span> Visual Hierarchy <span class="badge bg-light text-primary ms-2">NV 4.3.1</span></div>
@@ -2171,6 +2214,10 @@
                             <p><strong>Why join?</strong> It's a "cheat code" for your career. You can network, compete to win scholarships, and learn leadership. It is the fastest way for a <strong>Junior Developer</strong> (entry-level) to gain the skills needed to work alongside senior mentors.</p>
                             <p>The goal is to build your most valuable professional asset: a <strong>Portfolio</strong>—a collection of real-world projects that demonstrate your skills to employers (or your future clients).</p>
 
+                            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch1 Days 11, 14 -->
+                            <div class="alert alert-info small border my-4">
+                                <strong>What does it take to participate?</strong> A <strong>CTSO</strong> (Career and Technical Student Organization) like <strong>SkillsUSA</strong> or <strong>FBLA</strong> usually means joining the school chapter, paying yearly membership <strong>dues</strong>, taking part in chapter meetings and activities, and following each competitive event's rules: who is eligible, the format (a written test, a portfolio, or a live build), and the team size. Your teacher or chapter advisor has the current event guidelines.
+                            </div>
                             <h2 class="section-title mt-5">The Ultimate Goal: CTE Program Completer</h2>
                             <p>Your journey in the Guild isn't just about learning code; it's about graduating with a massive head start. If you complete the full Web Design CTE pathway, you can achieve <strong>Program Completer Status</strong>.</p>
                             
@@ -2216,6 +2263,15 @@
                         </div>
                     </div>
 
+
+                    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch1 Day 14 -->
+                    <div class="row mb-5 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <div class="alert alert-success small border mb-0">
+                                <strong>Where does "Program Completer" show up?</strong> On your high school record, which you'll list on <strong>resumes and applications</strong>. <strong>Employers and colleges</strong> read it as proof that you finished a full program of study and passed its assessments, not just a single class. Your teacher can tell you exactly how it appears on your record.
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- SECTION: THE ORIGIN STORY — How CTSOs Came to Be (WDD 1.1) -->
                     <div id="section-ctso-origins" class="row mb-5 pb-4 border-bottom align-items-start mt-5">
@@ -2502,6 +2558,15 @@
                                 <div class="card-body x-small">
                                     <strong>Conflict Resolution:</strong> In professional environments, disputes don't get resolved by whoever is loudest or most popular. Parliamentary procedure ensures that even the most unpopular opinion gets heard fairly — and that the final decision represents the group, not one person's ego.
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch1 Day 12 -->
+                    <div class="row mb-5 align-items-start">
+                        <div class="col-lg-8 pe-lg-5">
+                            <div class="alert alert-info small border mb-0">
+                                <strong>Two more meeting words:</strong> <strong>bylaws</strong> are a chapter's written rules (how officers are chosen, how votes work, when meetings happen), so decisions don't depend on who is loudest that day. And every decision should end with <strong>action items</strong>: a specific task, the person who owns it, and a due date. A meeting with no agenda, no decisions, and no action items is the one that was pointless.
                             </div>
                         </div>
                     </div>
@@ -3264,6 +3329,10 @@
                     <!-- ROW 17: PROFESSIONAL SETUP -->
                     <div id="section-root-setup" class="row mb-5 pb-4 border-bottom align-items-start mt-5">
                         <div class="col-lg-8 pe-lg-5">
+                            <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch1 Days 1, 8 -->
+                            <div class="alert alert-warning small border-warning border my-4">
+                                <strong>Why the file rules aren't just a teacher preference:</strong> real web servers run Linux, which is <strong>case-sensitive</strong>, so <code>Home.html</code> and <code>home.html</code> are two different files and a link to the wrong one breaks. <strong>Spaces</strong> turn into <code>%20</code> in a web address (<code>my%20page.html</code>), which breaks links and looks unprofessional. And a server holding a million files knows which one to hand you first because of one rule: the homepage is always named <code>index.html</code>. Lowercase, no spaces, hyphens between words, every time.
+                            </div>
                             <!-- LAB: ROOT SETUP -->
                             <div class="card border-success shadow-sm my-4 mt-0">
                                 <div class="card-header bg-success text-white fw-bold">
