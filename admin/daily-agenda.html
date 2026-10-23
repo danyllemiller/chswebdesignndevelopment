@@ -877,28 +877,24 @@ if (!courseCfg) {
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
 
-  // Deterministic per-day 6-digit code, same formula duplicated in
-  // examLogicCS.js/examLogicWD.js -- lets the retake-cooldown override
-  // screen verify a typed code purely client-side (no server round trip,
-  // no DB row, both servers agree automatically since it's just today's
-  // date run through the same hash). Rendered here with no label at all.
-  function dailyStampCode() {
-    const input = todayStr() + 'chs-guild-2026';
-    let hash = 0;
-    for (let i = 0; i < input.length; i++) hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
-    return String(hash % 1000000).padStart(6, '0');
-  }
-
+  // Today's 6-digit daily code, rendered here with no label at all. It comes
+  // from the server (/api/admin/daily-code, teacher-only): the formula used to
+  // be duplicated in this page and in examLogicCS.js/examLogicWD.js, where any
+  // student could read it. Students type it into exam and peer-review boxes,
+  // and the server checks it.
   function renderPageStamp() {
     const el = document.getElementById('pageStamp');
-    if (el) el.textContent = dailyStampCode();
+    if (!el) return;
+    fetch('/api/admin/daily-code', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && d.code) el.textContent = d.code; })
+      .catch(() => {});
   }
 
   // Bottom-right box on the slide art, previously empty. One entry per
   // day, same student-facing slide all day (not re-randomized on every
-  // render) -- picked via the same deterministic date-hash trick as
-  // dailyStampCode above, just with a different salt so the two never
-  // land on the same index by coincidence.
+  // render) -- picked by a deterministic hash of today's date (this has
+  // nothing to do with the daily code, which now comes from the server).
   const QUOTES = [
     { text: "The only way to learn a new programming language is by writing programs in it.", author: "Dennis Ritchie" },
     { text: "It's not that I'm so smart, it's just that I stay with problems longer.", author: "Albert Einstein" },

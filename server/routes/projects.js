@@ -6,7 +6,7 @@ const path = require('path');
 const { withConnection } = require('../db');
 const bcrypt = require('bcrypt');
 const { resolveCourseId, clampScore, requireSelfOrStaff, requireLogin } = require('../helpers');
-const { dailyOverrideCode } = require('../lib/dailyCode');
+const { isValidDailyCode } = require('../lib/dailyCode');
 const { isCsUnitProject, hasProjectUpload, syncCsProjectGrade } = require('../lib/csProjectGate');
 
 // Same students.section_id -> uploads/<student_id>/ layout roster.js already
@@ -483,7 +483,7 @@ router.post('/student/project-evaluation', async (req, res) => {
                         if (tooManyConfirmFailures(`${sessionId}:code`)) {
                             return { status: 429, body: { error: 'Too many wrong codes. Wait 15 minutes and try again.' } };
                         }
-                        if (code === dailyOverrideCode()) confirmedBy = 'daily-code';
+                        if (isValidDailyCode(code)) confirmedBy = 'daily-code';
                         else {
                             noteConfirmFailure(`${sessionId}:code`);
                             return { status: 403, body: { error: 'That daily code is not right.' } };

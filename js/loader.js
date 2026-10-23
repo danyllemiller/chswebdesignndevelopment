@@ -29,6 +29,17 @@
 })();
 
 // ==========================================
+// "THE SITE WAS JUST UPDATED -- REFRESH" BAR (sitewide; never on tests)
+// ==========================================
+(function injectUpdateNotice() {
+  if (document.getElementById('update-notice-script')) return;
+  const script = document.createElement('script');
+  script.id = 'update-notice-script';
+  script.src = '/js/update-notice.js?v=1';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
 // MESSAGES BADGE (sitewide, self-guards per role -- students and teacher alike)
 // ==========================================
 (function injectMessagesBadge() {

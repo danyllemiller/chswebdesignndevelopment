@@ -264,17 +264,17 @@ function canTakeExam() {
     return { allowed: true };
 }
 
-// Same formula as admin/daily-agenda.html's unlabeled corner stamp -- a
-// deterministic per-day 6-digit code, purely client-side (no server round
-// trip, no DB row, both servers naturally agree since it's just today's
-// date through the same hash). Typing it here clears the cooldown early.
-function dailyOverrideCode() {
-    const d = new Date();
-    const dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-    const input = dateStr + 'chs-guild-2026';
-    let hash = 0;
-    for (let i = 0; i < input.length; i++) hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
-    return String(hash % 1000000).padStart(6, '0');
+// The teacher's daily code is checked on the server
+// (/api/exam/verify-daily-code, server/lib/dailyCode.js). Its formula used to
+// live right here in the browser, where any student could read it.
+async function verifyDailyCode(code) {
+    try {
+        const res = await fetch('/api/exam/verify-daily-code', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code })
+        });
+        const data = await res.json().catch(() => ({}));
+        return !!data.ok;
+    } catch (e) { return false; }
 }
 
 function showCooldownMessage(remainingMs) {
@@ -305,9 +305,9 @@ function showCooldownMessage(remainingMs) {
         document.getElementById('override-box')?.classList.remove('d-none');
         document.getElementById('override-code-input')?.focus();
     });
-    document.getElementById('override-submit-btn')?.addEventListener('click', () => {
+    document.getElementById('override-submit-btn')?.addEventListener('click', async () => {
         const input = document.getElementById('override-code-input');
-        if (input && input.value.trim() === dailyOverrideCode()) {
+        if (input && await verifyDailyCode(input.value.trim())) {
             lastSubmissionTime = 0;
             saveAttemptData();
             window.location.reload();
@@ -369,9 +369,9 @@ function showAttemptLimitMessage() {
         document.getElementById('override-box')?.classList.remove('d-none');
         document.getElementById('override-code-input')?.focus();
     });
-    document.getElementById('override-submit-btn')?.addEventListener('click', () => {
+    document.getElementById('override-submit-btn')?.addEventListener('click', async () => {
         const input = document.getElementById('override-code-input');
-        if (input && input.value.trim() === dailyOverrideCode()) {
+        if (input && await verifyDailyCode(input.value.trim())) {
             attemptCount = 0;
             lastSubmissionTime = 0;
             saveAttemptData();

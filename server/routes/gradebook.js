@@ -3,7 +3,7 @@ const router = express.Router();
 const { withConnection } = require('../db');
 const { resolveCourseId, getCurrentSchoolYear, isTestingWindowOpen, requireSelfOrStaff, requireLogin } = require('../helpers');
 const { insertQuestionDetails } = require('../lib/missedQuestionsStore');
-const { dailyOverrideCode } = require('../lib/dailyCode');
+const { dailyOverrideCode, isValidDailyCode } = require('../lib/dailyCode');
 const { isCsUnitProject, syncCsProjectGrade } = require('../lib/csProjectGate');
 
 // mysql2 returns DATE columns as JS Date objects (local-timezone fields set to
@@ -820,6 +820,27 @@ router.post('/admin/unit-prereq-override', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save override' }); }
 });
 
+// Today's daily code for the teacher's agenda page corner stamp. Under
+// /admin/, so server/api.js only answers it for a staff session.
+router.get('/admin/daily-code', (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    res.json({ code: dailyOverrideCode() });
+});
+
+// The exam pages' cooldown/attempt-limit "Override" box sends the typed code
+// here instead of checking it in the browser (the formula used to ship in
+// examLogicCS.js/examLogicWD.js, so any student could compute it). Wrong
+// guesses are limited per student so a 6-digit code can't be guessed.
+const codeFailures = new Map(); // student_id -> [timestamps]
+router.post('/exam/verify-daily-code', requireLogin, (req, res) => {
+    const who = String(req.session.user.student_id || req.session.user.username || '');
+    const recent = (codeFailures.get(who) || []).filter(t => Date.now() - t < 15 * 60 * 1000);
+    if (recent.length >= 10) return res.status(429).json({ ok: false, error: 'Too many tries. Wait 15 minutes.' });
+    if (isValidDailyCode(req.body?.code)) { codeFailures.delete(who); return res.json({ ok: true }); }
+    codeFailures.set(who, [...recent, Date.now()]);
+    res.json({ ok: false });
+});
+
 // Student-reachable (unlike /admin/unit-prereq-override): the exam page's
 // own pre-check needs the real answer, overrides included, not just the
 // raw previous-exam score -- otherwise a student stays stuck on "This Unit
@@ -852,7 +873,7 @@ router.post('/exam/unlock-prereq', async (req, res) => {
     const isSelf = sessionUser?.student_id && String(sessionUser.student_id) === String(student_id);
     const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
     if (!isSelf && !isStaff) return res.status(401).json({ error: 'Not authorized.' });
-    if (String(code).trim() !== dailyOverrideCode()) {
+    if (!isValidDailyCode(code)) {
         return res.status(403).json({ error: 'Incorrect code.' });
     }
     try {
