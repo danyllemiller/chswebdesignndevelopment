@@ -55,6 +55,11 @@
         
         <p>It is the "Network" that connects your code to the rest of the digital world. When you write code that makes requests to an API and uses its data in your client's application, you are <strong>"Consuming"</strong> an API. This is a premium service your agency offers to clients to automate their business!</p>
         
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch13 Day 1 -->
+        <div class="alert alert-info small border my-4">
+            <strong>Who updates live data?</strong> If Anna wants today's space data on her homepage forever, nobody should have to type it in each morning. <strong>Code updates it: an API</strong> sends fresh data every time the page loads. JavaScript runs in the browser and makes the page react, but it can't produce that data by itself; it needs a <strong>server</strong> and an <strong>API</strong> to ask.
+        </div>
+
         <h2 class="section-title mt-5">Meet the Client: "Astro Anna"</h2>
         
         <div class="card shadow-sm border-0 bg-light mt-4 mb-5 text-start">
@@ -435,6 +440,23 @@ console.log(str);
             </div>
         </div>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch13 Days 4-5 -->
+        <h5 class="fw-bold mt-4 text-primary">Prove It: Why the Middle Line Prints Last</h5>
+        <p>Your code asks a server 3,000 miles away for data. What does the rest of your program do while it waits? <strong>It keeps running</strong>; the fetch finishes later. Run this and watch the order in the Console:</p>
+        <pre class="p-3 border rounded shadow-sm mb-3 no-copy"><code>console.log("1. Asking the API...");
+
+fetch("https://pokeapi.co/api/v2/pokemon/pikachu")
+  .then(response =&gt; response.json())
+  .then(data =&gt; console.log("2. Got the data:", data.name));
+
+console.log("3. The rest of my code kept running!");
+
+// Console output:
+// 1. Asking the API...
+// 3. The rest of my code kept running!
+// 2. Got the data: pikachu</code></pre>
+        <p class="small mb-4">Line 2 is in the middle of the code but prints <strong>last</strong>, because the fetch is <strong>asynchronous</strong>: JavaScript starts the request, moves on, and runs the <code>.then()</code> only when the answer arrives. That is also why <code>await</code> is easier to read than chained <code>.then()</code> calls: inside an <code>async</code> function, <code>await</code> lets the code read top to bottom, like regular code.</p>
+
         <!-- LAB 2 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 2: The Fetch Connection [25 pts]</div>
@@ -709,6 +731,22 @@ API_KEY=abc123yoursecretkey</pre>
 
         <p>If the server replies with a 404, the fetch didn't "fail"—it successfully talked to the server. You must check manually! If you call <code>response.ok</code> on a fetch response and it returns <code>false</code>, what should your code do next? <strong>Throw an error so the <code>catch</code> block can handle the failure gracefully.</strong> What does <code>console.error()</code> do that <code>console.log()</code> does not? <strong>It formats the message in red text in the developer tools, specifically designed for highlighting failures in a <code>catch</code> block.</strong></p>
 
+        <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch13 Day 6 -->
+        <h5 class="fw-bold mt-4 text-primary">The Four UI States (Never Lie to the User)</h5>
+        <p>Every screen that shows remote data can be in one of four states, and a professional app designs all four:</p>
+        <div class="table-responsive">
+        <table class="table table-bordered table-sm small bg-white shadow-sm mb-3 text-start">
+          <thead class="table-light"><tr><th>State</th><th>What triggers it</th><th>What the user should see</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Loading</strong></td><td>The request was sent</td><td>"Loading..." or a spinner</td></tr>
+            <tr><td><strong>Empty</strong></td><td>The request worked, but there were no results</td><td>"No results for 'pikachuu'. Check the spelling?"</td></tr>
+            <tr><td><strong>Error</strong></td><td>The request failed (404, 500, offline)</td><td>A clear message and what to try next</td></tr>
+            <tr><td><strong>Success</strong></td><td>Data arrived</td><td>The data, rendered on the page</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="small mb-4">Why must an app tell users when something fails? Because a <strong>silent failure</strong> looks broken, or worse, lies: a blank screen tells the user "there's nothing here" when really the request failed. Users need to know what happened so they can try again.</p>
+
         <!-- LAB 4 CARD -->
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 4: UX States Lab [25 pts]</div>
@@ -799,6 +837,24 @@ API_KEY=abc123yoursecretkey</pre>
           <div class="card-header bg-site-secondary fw-bold text-info border-bottom">E.O.P. Exam Tip:</div>
           <div class="card-body small">
               <p class="mb-0">Know the pairing: <strong>React/Vue/Angular</strong> = front-end frameworks. <strong>Node.js/Python/PHP</strong> = back-end platforms. <strong>React Native/Flutter</strong> = cross-platform mobile.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch13 Day 7 -->
+    <div class="row mb-5 pb-4 border-bottom align-items-start">
+      <div class="col-lg-12">
+        <div class="card border-info shadow-sm mx-auto text-start" style="max-width: 900px;">
+          <div class="card-header bg-site-secondary fw-bold text-info">Peer QA: Three Ways to Break a Data App</div>
+          <div class="card-body small">
+            <p class="mb-2">Before you turn in your Real-Time App, swap with a classmate and run these three tests. Log exactly what the app showed the user each time:</p>
+            <ol class="mb-2">
+              <li class="mb-1"><strong>Offline:</strong> in DevTools, open the Network tab and set throttling to <strong>Offline</strong>, then search. Does the app show an error state, or just spin forever?</li>
+              <li class="mb-1"><strong>A bad query:</strong> search for nonsense or a typo ("pikachuu"). Does the app explain it, or crash?</li>
+              <li class="mb-0"><strong>An empty result:</strong> a search that should legitimately return nothing. Does the user see an empty state, or a blank page?</li>
+            </ol>
+            <p class="mb-0">Also write down the input you're most afraid a tester will try. If it scares you, test it yourself first.</p>
           </div>
         </div>
       </div>
