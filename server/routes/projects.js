@@ -14,7 +14,10 @@ const { isCsUnitProject, hasProjectUpload, syncCsProjectGrade } = require('../li
 const UPLOADS_ROOT = path.join(__dirname, '..', '..', 'uploads');
 
 router.get('/student/section-classmates', requireLogin, async (req, res) => {
-    const { section_id, exclude_student_id } = req.query;
+    // uploaded_for (a CS unit project exam_id): only classmates who have
+    // uploaded that project -- only students who completed the unit may
+    // peer review it (teacher decision 2026-10-23).
+    const { section_id, exclude_student_id, uploaded_for } = req.query;
     if (!section_id) return res.status(400).json({ error: 'section_id is required' });
     // requireSelfOrStaff('exclude_student_id') used to be the guard here --
     // it checked the caller's identity against exclude_student_id (a value
@@ -42,11 +45,16 @@ router.get('/student/section-classmates', requireLogin, async (req, res) => {
             // aides, so pull both rosters no matter which side is asking.
             const sections = section_id.startsWith('AS-') ? [section_id, section_id.slice(3)] : [section_id, `AS-${section_id}`];
             const placeholders = sections.map(() => '?').join(', ');
+            const uploadedOnly = isCsUnitProject(uploaded_for);
+            // Students enrolled through an additional section count too.
             return connection.execute(
-                `SELECT student_id, first_name, last_name FROM students
-                 WHERE section_id IN (${placeholders}) AND (archived IS NULL OR archived = 0) AND student_id != ?
-                 ORDER BY last_name ASC, first_name ASC`,
-                [...sections, exclude_student_id || '']
+                `SELECT s.student_id, s.first_name, s.last_name FROM students s
+                 WHERE (s.section_id IN (${placeholders})
+                        OR s.student_id IN (SELECT student_id FROM student_additional_sections WHERE section_id IN (${placeholders})))
+                   AND (s.archived IS NULL OR s.archived = 0) AND s.student_id != ?
+                   ${uploadedOnly ? 'AND EXISTS (SELECT 1 FROM exam_attempts ea WHERE ea.student_id = s.student_id AND ea.exam_id = ?)' : ''}
+                 ORDER BY s.last_name ASC, s.first_name ASC`,
+                [...sections, ...sections, exclude_student_id || '', ...(uploadedOnly ? [uploaded_for] : [])]
             ).then(([rows]) => rows);
         });
         res.json(rows);
@@ -433,11 +441,26 @@ router.post('/student/project-evaluation', async (req, res) => {
                     ? [revieweeSection, revieweeSection.slice(3)]
                     : [revieweeSection, `AS-${revieweeSection}`];
                 const [peerRows] = await connection.execute(
-                    `SELECT student_id FROM students WHERE student_id = ? AND section_id IN (?, ?) AND (archived IS NULL OR archived = 0)`,
-                    [evaluator_student_id, validSections[0], validSections[1]]
+                    `SELECT s.student_id FROM students s
+                     WHERE s.student_id = ? AND (s.archived IS NULL OR s.archived = 0)
+                       AND (s.section_id IN (?, ?)
+                            OR s.student_id IN (SELECT student_id FROM student_additional_sections WHERE section_id IN (?, ?)))`,
+                    [evaluator_student_id, validSections[0], validSections[1], validSections[0], validSections[1]]
                 );
                 if (peerRows.length === 0) {
                     return { status: 403, body: { error: 'evaluator_student_id must be an active classmate in the same section.' } };
+                }
+                // CS unit projects: only someone who has completed the unit
+                // (uploaded their own project) can review, and only an
+                // uploaded project can be reviewed (teacher decision 2026-10-23).
+                if (isCsUnitProject(exam_id)) {
+                    const unit = String(exam_id).replace(/^Unit(\d+)-Project$/, 'Unit $1');
+                    if (!(await hasProjectUpload(connection, student_id, exam_id))) {
+                        return { status: 403, body: { error: `This ${unit} project hasn't been uploaded yet. Upload it in the Dropbox before anyone reviews it.` } };
+                    }
+                    if (!(await hasProjectUpload(connection, evaluator_student_id, exam_id))) {
+                        return { status: 403, body: { error: `The reviewer hasn't turned in their own ${unit} project yet. Only students who have completed ${unit} can review it.` } };
+                    }
                 }
             }
 

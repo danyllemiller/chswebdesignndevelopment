@@ -243,8 +243,27 @@ async function initProjectGradingInner(container) {
     const peerPane = container.querySelector('[data-pane="peer"]');
     peerPane.innerHTML = `<p class="text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading reviewers…</p>`;
     try {
-        const res = await fetch(`/api/student/section-classmates?section_id=${encodeURIComponent(user.section_id || '')}&exclude_student_id=${encodeURIComponent(user.student_id)}`);
+        // CS unit projects: only classmates who have uploaded THIS project can
+        // review it or be reviewed (teacher decision 2026-10-23; the server
+        // enforces it too), so the list only shows them.
+        const res = await fetch(`/api/student/section-classmates?section_id=${encodeURIComponent(user.section_id || '')}&exclude_student_id=${encodeURIComponent(user.student_id)}${isCsUnitProject ? `&uploaded_for=${encodeURIComponent(examId)}` : ''}`);
         const reviewers = res.ok ? await res.json() : [];
+        let selfUploaded = true;
+        if (isCsUnitProject) {
+            try {
+                const g = await (await fetch(`/api/student/project-aggregate?chapter_project_id=${encodeURIComponent(chapterProjectId)}&exam_id=${encodeURIComponent(examId)}&student_id=${encodeURIComponent(user.student_id)}`)).json();
+                selfUploaded = !!(g.gate && g.gate.uploaded);
+            } catch (e) { /* if the check fails, the server still enforces the rule */ }
+        }
+        const noOneYet = isCsUnitProject && reviewers.length === 0;
+        const blockedMe = isCsUnitProject && (!selfUploaded || noOneYet);
+        const blockedThem = isCsUnitProject && (!selfUploaded || noOneYet);
+        const meNotice = !isCsUnitProject ? '' : !selfUploaded
+            ? `Upload your ${escapeHtml(projectLabel)} in the Dropbox first. Only a project that has been turned in can be reviewed.`
+            : noOneYet ? `No classmate has turned in their ${escapeHtml(projectLabel)} yet. Only students who have completed this unit can review it.` : '';
+        const themNotice = !isCsUnitProject ? '' : !selfUploaded
+            ? `You can review classmates' ${escapeHtml(projectLabel)}s after you've uploaded your own. Only students who have completed this unit can review it.`
+            : noOneYet ? `No classmate has turned in their ${escapeHtml(projectLabel)} yet, so there is nothing to review.` : '';
         const classmateOptions = reviewers.map(c => `<option value="${escapeHtml(c.student_id)}">${escapeHtml(c.first_name)} ${escapeHtml(c.last_name)}</option>`).join('');
         peerPane.innerHTML = `
             <div class="btn-group btn-group-sm mb-3 flex-wrap" role="group" aria-label="Who is being reviewed">
@@ -254,15 +273,17 @@ async function initProjectGradingInner(container) {
             <p class="text-muted mb-3" data-peer-text="me">Stay logged in on your own computer. Have your reviewer sit with you, look at your work, and give you feedback out loud -- then they select their own name below and fill this out together with you. <strong>Your reviewer signs it at the bottom with their own password</strong> (or your teacher enters the daily code). You can't submit a peer review by yourself.</p>
             <p class="text-muted mb-3 d-none" data-peer-text="them">Use this on <strong>your own computer, signed in as yourself</strong>: your login confirms the review, so no password is needed. Pick whose project you're reviewing, look at their work with them, and fill this out.</p>
             <div class="alert alert-primary py-2 small d-none" data-peer-only="them"><i class="fas fa-folder-open me-1"></i>You are reviewing a classmate's <strong>${escapeHtml(projectLabel)}</strong> (the project on this page). Reviewing a different unit? Open that unit's project page first.</div>
+            ${meNotice ? `<div class="alert alert-warning py-2 small" data-peer-only="me">${meNotice}</div>` : ''}
+            ${themNotice ? `<div class="alert alert-warning py-2 small d-none" data-peer-only="them">${themNotice}</div>` : ''}
             <div class="mb-3" data-peer-only="me">
-                <label class="form-label small fw-bold" for="peer-select">Who is reviewing this project?</label>
+                <label class="form-label small fw-bold" for="peer-select">Who is reviewing this project?${isCsUnitProject ? ' <span class="fw-normal text-muted">(only classmates who have turned in this project are listed)</span>' : ''}</label>
                 <select class="form-select form-select-sm" id="peer-select">
                     <option value="">Select the reviewer's name…</option>
                     ${classmateOptions}
                 </select>
             </div>
             <div class="mb-3 d-none" data-peer-only="them">
-                <label class="form-label small fw-bold" for="peer-reviewee">Whose project are you reviewing?</label>
+                <label class="form-label small fw-bold" for="peer-reviewee">Whose project are you reviewing?${isCsUnitProject ? ' <span class="fw-normal text-muted">(only classmates who have turned in this project are listed)</span>' : ''}</label>
                 <select class="form-select form-select-sm" id="peer-reviewee">
                     <option value="">Select your classmate's name…</option>
                     ${classmateOptions}
@@ -298,8 +319,10 @@ async function initProjectGradingInner(container) {
         function updateSubmitLabel() {
             const name = revieweeSel.selectedIndex > 0 ? revieweeSel.options[revieweeSel.selectedIndex].text.split(' ')[0] : 'your classmate';
             submitBtn.textContent = peerMode === 'them' ? `Submit review of ${name}'s ${projectLabel}` : 'Submit Peer Review';
+            submitBtn.disabled = peerMode === 'them' ? blockedThem : blockedMe;
         }
         revieweeSel.addEventListener('change', updateSubmitLabel);
+        updateSubmitLabel();
         const passEl = peerPane.querySelector('#peer-confirm-pass');
         const codeEl = peerPane.querySelector('#peer-confirm-code');
         // A saved login can be auto-filled into a password box on this site, and
