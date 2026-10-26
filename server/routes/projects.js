@@ -495,7 +495,9 @@ router.post('/student/project-evaluation', async (req, res) => {
                         const [[reviewer]] = await connection.execute(
                             'SELECT password, password_hash FROM students WHERE student_id = ? LIMIT 1', [evaluator_student_id]);
                         const hash = reviewer && (reviewer.password || reviewer.password_hash);
-                        if (hash && await bcrypt.compare(String(confirm_password), hash)) confirmedBy = 'reviewer-login';
+                        // A stray space a touch keyboard adds after the last character doesn't count against them.
+                        const typed = String(confirm_password);
+                        if (hash && (await bcrypt.compare(typed, hash) || (typed.trim() !== typed && await bcrypt.compare(typed.trim(), hash)))) confirmedBy = 'reviewer-login';
                         else {
                             noteConfirmFailure(`${sessionId}:pw`);
                             return { status: 403, body: { error: "That password doesn't match the reviewer's account. Make sure the box was empty before they typed (the browser may have filled in a saved password), or have your teacher enter today's code." } };

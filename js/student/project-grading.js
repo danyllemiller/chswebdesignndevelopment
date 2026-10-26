@@ -303,7 +303,7 @@ async function initProjectGradingInner(container) {
             <div class="border rounded p-3 bg-light mb-3" data-peer-only="me">
                 <label class="form-label small fw-bold mb-1" for="peer-confirm-pass" id="peer-pass-label"><i class="fas fa-signature me-1"></i>Reviewer: sign this review with YOUR password</label>
                 <div class="input-group input-group-sm">
-                    <input type="password" class="form-control" id="peer-confirm-pass" name="peer-sign-${Date.now()}" autocomplete="new-password" readonly placeholder="The reviewer types their own login password">
+                    <input type="text" class="form-control" id="peer-confirm-pass" name="peer-sign-${Date.now()}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore style="-webkit-text-security: disc;" placeholder="The reviewer types their own login password">
                     <button type="button" class="btn btn-outline-secondary" id="peer-show-pass">Show</button>
                 </div>
                 <div class="small text-muted mt-1">Make sure the box is empty before the reviewer types: the browser may try to fill in a saved password.</div>
@@ -333,11 +333,12 @@ async function initProjectGradingInner(container) {
         updateSubmitLabel();
         const passEl = peerPane.querySelector('#peer-confirm-pass');
         const codeEl = peerPane.querySelector('#peer-confirm-code');
-        // A saved login can be auto-filled into a password box on this site, and
-        // a reviewer's typing then gets tacked onto the reviewee's own password.
-        // readonly until focused + autocomplete="new-password" keeps it empty.
+        // Not a real password box: on the reviewee's computer the browser offered
+        // the reviewee's saved password (or a "suggested strong password") the
+        // moment the reviewer clicked it, and every signature then failed
+        // (2026-10-26: a Unit 5 pair, eight refusals in a row). A plain text
+        // box with masked characters is invisible to password managers.
         passEl.value = '';
-        passEl.addEventListener('focus', () => passEl.removeAttribute('readonly'));
         // Names the reviewer on the password box, so it's obvious whose
         // password goes there: the reviewer's, never the logged-in student's.
         const reviewerSel = peerPane.querySelector('#peer-select');
@@ -375,8 +376,8 @@ async function initProjectGradingInner(container) {
             if (!blockedMe) peerPane.querySelectorAll('.peer-gate-notice').forEach(el => el.remove());
         }
         peerPane.querySelector('#peer-show-pass').addEventListener('click', (ev) => {
-            const showing = passEl.type === 'text';
-            passEl.type = showing ? 'password' : 'text';
+            const showing = passEl.style.webkitTextSecurity === 'none';
+            passEl.style.webkitTextSecurity = showing ? 'disc' : 'none';
             ev.currentTarget.textContent = showing ? 'Show' : 'Hide';
         });
         peerPane.querySelector('#peer-use-code').addEventListener('click', (ev) => {
@@ -417,7 +418,14 @@ async function initProjectGradingInner(container) {
                 });
                 const out = await res2.json().catch(() => ({}));
                 passEl.value = ''; codeEl.value = '';
-                if (!res2.ok) { statusEl.innerHTML = `<span class="text-danger">${escapeHtml(out.error || "Couldn't save the peer review. Try again.")}</span>`; return; }
+                if (!res2.ok) {
+                    // A refused signature: say whose password it has to be, and the way that needs none.
+                    const who = reviewerSel.selectedIndex > 0 ? reviewerSel.options[reviewerSel.selectedIndex].text.split(' ')[0] : 'The reviewer';
+                    const otherWay = !reviewingOther && res2.status === 403 && /password/i.test(out.error || '')
+                        ? `<div class="small mt-1">Check Caps Lock and try again, typing <strong>${escapeHtml(who)}'s</strong> own password. Or ${escapeHtml(who)} can submit this review from their own computer: open this page there, choose <strong>"I'm reviewing a CLASSMATE's project"</strong>, and no password is needed.</div>` : '';
+                    statusEl.innerHTML = `<span class="text-danger">${escapeHtml(out.error || "Couldn't save the peer review. Try again.")}</span>${otherWay}`;
+                    return;
+                }
                 if (reviewingOther) {
                     statusEl.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i>Your review of your classmate's ${escapeHtml(projectLabel)} is submitted and confirmed by your login.</span>`;
                     return;
