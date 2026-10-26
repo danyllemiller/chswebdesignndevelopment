@@ -452,6 +452,25 @@ function isCsMasteryExempt(key, myGrades, registryData, courseKey) {
     return examScore !== null && examScore !== undefined && examScore !== '' && !!examMax && (Number(examScore) / examMax) >= 0.80;
 }
 
+// The grade list's groups, in page order (teacher request 2026-10-26).
+const GRADE_GROUPS = [
+    { id: 'projects', label: 'Projects', icon: 'fa-diagram-project' },
+    { id: 'assignments', label: 'Assignments & Labs', icon: 'fa-flask' },
+    { id: 'tests', label: 'Tests & Quizzes', icon: 'fa-file-pen' },
+    { id: 'pre', label: 'Pre-Tests & Pre-Scales', icon: 'fa-clipboard-question' },
+    { id: 'clockins', label: 'Daily Clock-Ins', icon: 'fa-clock' },
+];
+// Which group an assignment goes in, by its exam_id first: WD labs
+// (ch3_lab4) are titled "Milestone 1: ..." but are labs, while ch3_milestone
+// is the chapter project.
+function gradeGroupOf(key, title, reg) {
+    if (/^TC-/i.test(key)) return 'clockins';
+    if (/\bpre\b|pre-(assessment|scale|test)/i.test(key)) return 'pre';
+    if (reg?.isProjectMilestone || /(^|_)milestone(_|$)|_proj|project/i.test(key) || (!/_lab/i.test(key) && /project|capstone/i.test(title))) return 'projects';
+    if (/exam|quiz|^final|wrs-practice/i.test(key) || /\b(exam|quiz)\b/i.test(title)) return 'tests';
+    return 'assignments';
+}
+
 // The student's grades as a plain list (it used to be a sideways spreadsheet
 // with vertical column headers, and students couldn't find their grades).
 // Only shows what they've turned in and what's past due; assignments that
@@ -489,9 +508,14 @@ function renderGradeList(keys, myGrades, studentId, registryData, studentPeriod,
     });
 
     const byDueDesc = (a, b) => (!a.due && !b.due) ? a.title.localeCompare(b.title) : !a.due ? 1 : !b.due ? -1 : b.due.localeCompare(a.due);
-    const missing = items.filter(i => i.status === 'missing').sort(byDueDesc);
-    const done = items.filter(i => i.status !== 'missing' && !i.isTc).sort(byDueDesc);
-    const clockIns = items.filter(i => i.status !== 'missing' && i.isTc).sort(byDueDesc);
+    // Grouped by kind, each group closed until the student clicks it
+    // (teacher request 2026-10-26): what's turned in and what's officially
+    // missing, missing first. Excused work isn't shown at all.
+    const groups = GRADE_GROUPS.map(g => {
+        const mine = items.filter(i => i.status !== 'excused' && gradeGroupOf(i.key, i.title, registryData[i.key]) === g.id);
+        return { ...g, missing: mine.filter(i => i.status === 'missing').sort(byDueDesc), done: mine.filter(i => i.status !== 'missing').sort(byDueDesc) };
+    }).filter(g => g.missing.length || g.done.length);
+    const missingCount = groups.reduce((n, g) => n + g.missing.length, 0);
 
     function badgeFor(i) {
         if (i.status === 'missing') {
@@ -518,27 +542,31 @@ function renderGradeList(keys, myGrades, studentId, registryData, studentPeriod,
         </li>`;
     }
 
-    let html = '';
-    if (missing.length) {
-        html += `<h6 class="fw-bold text-danger mt-2"><i class="fas fa-triangle-exclamation me-1"></i>Missing: past due, not turned in (${missing.length})</h6>
-            <ul class="list-group mb-4">${missing.map(row).join('')}</ul>`;
-    }
-    html += `<h6 class="fw-bold text-success mt-2"><i class="fas fa-check-circle me-1"></i>Turned in (${done.length})</h6>`;
-    html += done.length ? `<ul class="list-group mb-3">${done.map(row).join('')}</ul>` : '<p class="text-muted small">Nothing turned in yet.</p>';
-    if (clockIns.length) {
-        html += `<details class="mb-3" id="clockinDetails-${courseKey}"><summary class="fw-bold text-primary small" style="cursor: pointer;">Daily clock-ins (${clockIns.length}): see each question, your answer, and the right answer</summary>
-            <ul class="list-group mt-2" id="clockinList-${courseKey}">${clockIns.map(row).join('')}</ul></details>`;
-    }
-    html += '<p class="small text-muted mb-0"><i class="fas fa-info-circle me-1"></i>Assignments that aren\'t due yet show up here once you turn them in or their due date passes.</p>';
+    let html = missingCount
+        ? `<p class="fw-bold text-danger mb-2"><i class="fas fa-triangle-exclamation me-1"></i>${missingCount} missing: past due, not turned in. Click a group to see what.</p>`
+        : '<p class="fw-bold text-success mb-2"><i class="fas fa-check-circle me-1"></i>Nothing missing.</p>';
+    html += groups.map(g => `<details class="grade-group mb-2" id="gradeGroup-${courseKey}-${g.id}">
+        <summary class="d-flex flex-wrap align-items-center gap-2 px-3 py-2 rounded border bg-light fw-bold">
+            <i class="fas fa-chevron-right small text-muted grade-group-chevron"></i><i class="fas ${g.icon} text-primary"></i>${g.label}
+            <span class="ms-auto d-flex flex-wrap gap-1">${g.missing.length ? `<span class="badge bg-danger">${g.missing.length} missing</span>` : ''}${g.done.length ? `<span class="badge bg-success">${g.done.length} turned in</span>` : ''}</span>
+        </summary>
+        ${g.missing.length ? `<ul class="list-group mt-2">${g.missing.map(row).join('')}</ul>` : ''}
+        ${g.done.length ? `<ul class="list-group mt-2"${g.id === 'clockins' ? ` id="clockinList-${courseKey}"` : ''}>${g.done.map(row).join('')}</ul>` : ''}
+    </details>`).join('');
+    if (!groups.length) html += '<p class="text-muted small">Nothing turned in yet.</p>';
+    html += '<p class="small text-muted mt-3 mb-0"><i class="fas fa-info-circle me-1"></i>Assignments that aren\'t due yet show up here once you turn them in or their due date passes.</p>';
     listEl.innerHTML = html;
 
-    const clockinDetails = document.getElementById(`clockinDetails-${courseKey}`);
-    if (clockinDetails) {
-        const keys = new Set(clockIns.map(i => i.key));
-        clockinDetails.addEventListener('toggle', () => {
-            if (clockinDetails.open && !clockinDetails.dataset.loaded) {
-                clockinDetails.dataset.loaded = '1';
-                loadClockinHistory(studentId, keys, document.getElementById(`clockinList-${courseKey}`));
+    // Each clock-in's question, answer and right answer load the first time
+    // its group opens.
+    const clockinGroup = document.getElementById(`gradeGroup-${courseKey}-clockins`);
+    const clockinList = document.getElementById(`clockinList-${courseKey}`);
+    if (clockinGroup && clockinList) {
+        const keys = new Set(groups.find(g => g.id === 'clockins').done.map(i => i.key));
+        clockinGroup.addEventListener('toggle', () => {
+            if (clockinGroup.open && !clockinGroup.dataset.loaded) {
+                clockinGroup.dataset.loaded = '1';
+                loadClockinHistory(studentId, keys, clockinList);
             }
         });
     }
