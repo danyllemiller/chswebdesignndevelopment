@@ -514,7 +514,7 @@ async function finishRosterUpload(students) {
         return;
     }
     const d = await res.json();
-    showStatus(`Roster uploaded — ${d.created || 0} added, ${d.updated || 0} updated, ${d.archived || 0} archived (not on this file).`, 'success');
+    showStatus(`Roster uploaded — ${d.created || 0} added, ${d.updated || 0} updated, ${d.archived || 0} archived (not on this file).${d.multiClass ? ` ${d.multiClass} student(s) are in more than one class and stay in all of them.` : ''}`, 'success');
     fetchRoster();
 }
 

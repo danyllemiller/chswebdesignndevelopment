@@ -329,6 +329,21 @@ router.delete('/admin/sections/:section_id', async (req, res) => {
     }
 });
 
+// Extra classes a student is in beyond their main one. source says where the row
+// came from: 'manual' (picked on the roster page; every row from before
+// 2026-10-26 counts as manual) or 'upload' (a roster file listed the student there).
+async function ensureAdditionalSections(connection) {
+    await connection.execute(`
+        CREATE TABLE IF NOT EXISTS student_additional_sections (
+          student_id VARCHAR(50) NOT NULL,
+          section_id VARCHAR(50) NOT NULL,
+          added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (student_id, section_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+    await connection.execute("ALTER TABLE student_additional_sections ADD COLUMN IF NOT EXISTS source VARCHAR(10) NOT NULL DEFAULT 'manual'");
+}
+
 router.post('/admin/upload-roster', async (req, res) => {
     let students = req.body;
     if (!students) return res.status(400).json({ error: 'Roster payload is required.' });
@@ -380,6 +395,8 @@ router.post('/admin/upload-roster', async (req, res) => {
             return { status: 400, body: { error: 'Unknown course/section IDs in payload', invalid: Array.from(new Set(invalid)) } };
         }
 
+        // Table changes commit on their own in MySQL, so they go before the transaction.
+        await ensureAdditionalSections(connection);
         await connection.beginTransaction();
         try {
         const year = getCurrentSchoolYear();
@@ -400,8 +417,20 @@ router.post('/admin/upload-roster', async (req, res) => {
             missingIds = activeRows.map((r) => r.student_id).filter((id) => !uploadedIds.has(id));
         }
 
-        const [existingRows] = await connection.execute('SELECT student_id FROM students');
-        const existingIds = new Set(existingRows.map((r) => r.student_id));
+        const [existingRows] = await connection.execute('SELECT student_id, section_id FROM students');
+        const existing = new Map(existingRows.map((r) => [r.student_id, r.section_id]));
+
+        // A student in more than one of these classes is listed once per class
+        // (2026-10-26). They keep every class: their main class (section_id)
+        // stays the one they have now if the file still lists it, otherwise the
+        // first one listed, and the rest become additional sections. Before
+        // this, each row overwrote the last and the student kept only one class.
+        const byStudent = new Map();
+        for (const s of resolved) {
+            const e = byStudent.get(s.student_id);
+            if (!e) byStudent.set(s.student_id, { ...s, sections: [s.section_id], courseOf: { [s.section_id]: s.course_id } });
+            else if (!e.sections.includes(s.section_id)) { e.sections.push(s.section_id); e.courseOf[s.section_id] = s.course_id; }
+        }
 
         const stmt = `INSERT INTO students (student_id, first_name, last_name, section_id, course_id, role, school_year, archived)
                       VALUES (?, ?, ?, ?, ?, ?, ?, 0)
@@ -409,11 +438,29 @@ router.post('/admin/upload-roster', async (req, res) => {
                         first_name = VALUES(first_name), last_name = VALUES(last_name),
                         section_id = VALUES(section_id), course_id = VALUES(course_id),
                         role = VALUES(role), school_year = VALUES(school_year), archived = 0`;
-        let created = 0, updated = 0;
-        for (const s of resolved) {
-            const role = s.section_id === 'Teacher' ? 'teacher' : 'student';
-            await connection.execute(stmt, [s.student_id, s.first_name, s.last_name, s.section_id, s.course_id, role, year]);
-            if (existingIds.has(s.student_id)) { updated++; } else { created++; ensureUploadFolder(s.student_id); }
+        let created = 0, updated = 0, multiClass = 0;
+        for (const s of byStudent.values()) {
+            const cur = existing.get(s.student_id);
+            const main = s.sections.includes(cur) ? cur : s.sections[0];
+            const extra = s.sections.filter((x) => x !== main);
+            const role = main === 'Teacher' ? 'teacher' : 'student';
+            await connection.execute(stmt, [s.student_id, s.first_name, s.last_name, main, s.courseOf[main], role, year]);
+            if (existing.has(s.student_id)) { updated++; } else { created++; ensureUploadFolder(s.student_id); }
+            await connection.execute('DELETE FROM student_additional_sections WHERE student_id = ? AND section_id = ?', [s.student_id, main]);
+            for (const x of extra) {
+                await connection.execute("INSERT IGNORE INTO student_additional_sections (student_id, section_id, source) VALUES (?, ?, 'upload')", [s.student_id, x]);
+            }
+            // The full roster drops an additional class an earlier upload added
+            // that this file no longer lists. Ones added by hand on the roster
+            // page (source 'manual', e.g. dual-enrolled students) always stay.
+            if (archiveMissing) {
+                const keep = extra.length ? extra : [''];
+                await connection.execute(
+                    `DELETE FROM student_additional_sections WHERE student_id = ? AND source = 'upload' AND section_id NOT IN (${keep.map(() => '?').join(',')})`,
+                    [s.student_id, ...keep]
+                );
+            }
+            if (extra.length) multiClass++;
         }
 
         // Anyone active before this upload but absent from the new file is
@@ -430,7 +477,7 @@ router.post('/admin/upload-roster', async (req, res) => {
         }
 
         await connection.commit();
-        return { status: 200, body: { success: true, count: cleaned.length, created, updated, archived } };
+        return { status: 200, body: { success: true, count: cleaned.length, created, updated, archived, multiClass } };
         } catch (txErr) {
             await connection.rollback();
             throw txErr;
