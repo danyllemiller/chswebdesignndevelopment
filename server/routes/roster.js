@@ -426,9 +426,11 @@ router.post('/admin/upload-roster', async (req, res) => {
         let missingIds = [];
         if (archiveMissing) {
             const [activeRows] = await connection.execute(
+                // Test accounts (sections whose course is TEST-*) are never on the school's roster.
                 `SELECT student_id FROM students
                  WHERE (archived IS NULL OR archived = 0) AND school_year = ?
-                   AND (role IS NULL OR LOWER(role) <> 'teacher') AND section_id <> 'Teacher'`,
+                   AND (role IS NULL OR LOWER(role) <> 'teacher') AND section_id <> 'Teacher'
+                   AND section_id NOT IN (SELECT section_id FROM class_sections WHERE course_id LIKE 'TEST%')`,
                 [year]
             );
             const uploadedIds = new Set(resolved.map((s) => s.student_id));
