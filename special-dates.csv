@@ -90,10 +90,10 @@ Date,Type,Description
 2026-12-09,B,
 2026-12-10,A,
 2026-12-11,B,
-2026-12-14,A,
-2026-12-15,B,
-2026-12-16,A,
-2026-12-17,B,
+2026-12-14,B,
+2026-12-15,A_MIN,
+2026-12-16,B,
+2026-12-17,A,
 2026-12-18,OFF,Teacher Work Day / End S1
 2026-12-21,OFF,First Day of Winter / Start Winter Break
 2026-12-22,OFF,No School
@@ -143,7 +143,7 @@ Date,Type,Description
 2027-02-17,B,
 2027-02-18,A,
 2027-02-19,B,
-2027-02-22,A,
+2027-02-22,C,All Period Day
 2027-02-23,A_MIN,
 2027-02-24,B,
 2027-02-25,A,
@@ -223,7 +223,7 @@ Date,Type,Description
 2027-05-31,OFF,Memorial Day No School
 2027-06-01,A,
 2027-06-02,B_MIN,
-2027-06-03,B_MIN,Last Day of School
+2027-06-03,A_MIN,Last Day of School
 2027-06-04,none,Graduation
 2027-06-14,none,Flag Day
 2027-06-19,none,Juneteenth
