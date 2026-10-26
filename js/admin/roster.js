@@ -22,11 +22,15 @@ function escapeHtml(value) {
     return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// Problems stay on screen until the next message (2026-10-26: a 5-second
+// "Unknown Course IDs" message went by unseen and the roster never uploaded).
+let statusTimer = null;
 function showStatus(msg, type = 'info') {
     statusDiv.innerText = msg;
     statusDiv.className = `alert alert-${type} text-center fw-bold small mb-3`;
     statusDiv.classList.remove('d-none');
-    setTimeout(() => statusDiv.classList.add('d-none'), 5000);
+    clearTimeout(statusTimer);
+    if (type !== 'danger' && type !== 'warning') statusTimer = setTimeout(() => statusDiv.classList.add('d-none'), 8000);
 }
 
 // Make key functions globally accessible immediately
@@ -466,27 +470,22 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
             if (!sid || isNaN(Number(sid))) return;
             // School CSVs may have "05254GIF-101 WEB DESIGN I" — take first token only
             const course_id = rawCourseCol.split(' ')[0].trim();
+            // An optional 5th column names the period (A1, B4, INTV...), for a
+            // course ID that more than one period shares.
+            const period = (cols[4] || '').trim();
             students.push({
                 first_name: cols[0].trim(),
                 last_name:  cols[1].trim(),
                 student_id: sid,
-                course_id
+                course_id,
+                ...(period ? { section_id: period } : {})
             });
         });
+        if (!students.length) return showStatus('No students found in that file. It needs: First Name, Last Name, Student ID, Course ID.', 'danger');
 
-        // Client-side validation: ensure all course_id values exist in the catalog
-        const validCourseIds = new Set(availableSections.map(s => (s.course_id || '').trim()).filter(Boolean));
-        const invalidRows = students.filter(s => {
-            const cid = (s.course_id || '').trim();
-            if (!cid) return true;
-            return !validCourseIds.has(cid);
-        });
-
-        if (invalidRows.length > 0) {
-            const invalidList = Array.from(new Set(invalidRows.map(r => r.course_id)));
-            showStatus(`Unknown Course IDs: ${invalidList.join(', ')} — add these sections first, then re-upload.`, 'danger');
-            return;
-        }
+        // Which period each course ID belongs to is worked out on the server: the
+        // school's IDs (10003GF-301...) aren't in the section list, which holds the
+        // gradebook's. The check step below lists anything it can't place.
 
         // upload-roster now handles the whole thing atomically in one call:
         // matched students get their period/name corrected, brand-new IDs

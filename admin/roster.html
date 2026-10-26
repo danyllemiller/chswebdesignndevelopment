@@ -209,7 +209,7 @@
           <!-- BULK CSV TAB -->
           <div class="tab-pane fade" id="pills-bulk">
             <div class="alert alert-warning small">
-                Upload CSV: <code>First Name, Last Name, Student ID, Course ID</code> — use the Course ID from the school's system (e.g. <code>05254GIF-101</code>). The period is looked up automatically.
+                Upload CSV: <code>First Name, Last Name, Student ID, Course ID</code> — use the Course ID from the school's system (e.g. <code>10003GF-301</code>). The period is looked up automatically; a student in more than one class is listed once per class. An optional 5th column, <code>Period</code> (A1, B4, INTV…), is only needed when one course ID covers several periods. You'll see every change before it's applied.
             </div>
             <input class="form-control mb-3" type="file" id="csvFileInput" accept=".csv">
             <button id="uploadBtn" class="btn btn-danger w-100 fw-bold">Process CSV Upload</button>
@@ -377,7 +377,7 @@
 
 <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/admin/roster.js?v=16"></script>
+  <script src="/js/admin/roster.js?v=17"></script>
   <script src="/js/admin/attendance-reminder.js"></script>
 </body>
 </html>

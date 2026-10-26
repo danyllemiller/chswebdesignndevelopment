@@ -374,28 +374,45 @@ router.post('/admin/upload-roster', async (req, res) => {
 
     try {
         const result = await withConnection(async (connection) => {
-        const [catalogRows] = await connection.execute('SELECT section_id, course_id FROM class_sections');
-        const courseToSection = {};
-        const validCourseIds = new Set();
-        const validSectionIds = new Set();
+        const [catalogRows] = await connection.execute('SELECT section_id, course_id, archived FROM class_sections');
+        const validSectionIds = new Set(), sectionsByCourse = new Map();
         for (const r of catalogRows) {
-            courseToSection[String(r.course_id).trim()] = String(r.section_id).trim();
-            validCourseIds.add(String(r.course_id).trim());
-            validSectionIds.add(String(r.section_id).trim());
+            const sid = String(r.section_id).trim(), cid = String(r.course_id || '').trim();
+            validSectionIds.add(sid);
+            if (cid && !Number(r.archived)) sectionsByCourse.set(cid, [...(sectionsByCourse.get(cid) || []), sid]);
+        }
+        // The school's system gives every class period its own ID (10003GF-301,
+        // 10003GF-401, ...), while the section list holds the gradebook's course
+        // IDs (all five Comp Sci periods are 10003GS). Earlier uploads stored the
+        // school's ID on each student, so a school ID's period is where most of
+        // the students carrying it are now (2026-10-26: every ID in the teacher's
+        // roster file was "unknown" and the upload never left the page).
+        const [learnedRows] = await connection.execute(
+            `SELECT course_id, section_id, COUNT(*) AS n FROM students
+             WHERE COALESCE(archived, 0) = 0 AND course_id IS NOT NULL AND course_id <> ''
+             GROUP BY course_id, section_id ORDER BY n DESC`);
+        const learned = new Map();
+        for (const r of learnedRows) {
+            const cid = String(r.course_id).trim(), sid = String(r.section_id).trim();
+            if (!learned.has(cid) && validSectionIds.has(sid)) learned.set(cid, sid);
         }
 
-        const resolved = [], invalid = [];
+        // A period named in the file wins; then a course ID only one period uses;
+        // then the school ID's period. A course ID several periods share needs the period.
+        const resolved = [], invalid = new Set(), shared = new Set();
         for (const s of cleaned) {
-            if (s.course_id && validCourseIds.has(s.course_id)) {
-                resolved.push({ ...s, section_id: courseToSection[s.course_id] });
-            } else if (s.section_id && validSectionIds.has(s.section_id)) {
-                resolved.push({ ...s, course_id: s.course_id || null });
-            } else {
-                invalid.push(s.course_id || s.section_id || '(empty)');
-            }
+            const secs = s.course_id ? sectionsByCourse.get(s.course_id) : null;
+            if (s.section_id && validSectionIds.has(s.section_id)) resolved.push(s);
+            else if (secs && secs.length === 1) resolved.push({ ...s, section_id: secs[0] });
+            else if (s.course_id && learned.has(s.course_id)) resolved.push({ ...s, section_id: learned.get(s.course_id) });
+            else if (secs) shared.add(`${s.course_id} (${secs.join(', ')})`);
+            else invalid.add(s.course_id || s.section_id || '(empty)');
         }
-        if (invalid.length > 0) {
-            return { status: 400, body: { error: 'Unknown course/section IDs in payload', invalid: Array.from(new Set(invalid)) } };
+        if (shared.size || invalid.size) {
+            const why = [];
+            if (shared.size) why.push(`More than one period uses ${[...shared].join('; ')}, so the file has to say which period each student is in: add a Period column (the 5th column).`);
+            if (invalid.size) why.push(`Unknown course IDs: ${[...invalid].join(', ')}. Add them to the right period under Sections, or add a Period column.`);
+            return { status: 400, body: { error: why.join(' '), invalid: [...invalid] } };
         }
 
         // Table changes commit on their own in MySQL, so they go before the transaction.
