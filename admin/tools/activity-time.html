@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading &amp; Notes Time | Teacher Tools</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css?v=2.0" rel="stylesheet">
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=29"></script>
+  <script type="module" src="/js/auth-guard.js?v=2"></script>
+  <style>
+    th.m, td.m { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    tr.pick { cursor: pointer; }
+    tr.pick:hover td { background: #f1f5ff; }
+    tr.sel td { background: #e3ecff; }
+    .zero { color: #adb5bd; }
+    .kind { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="container my-4" style="max-width: 1150px;">
+  <h3 class="fw-bold mb-1"><i class="fas fa-stopwatch text-primary me-2"></i>Reading &amp; Notes Time</h3>
+  <p class="text-muted small mb-3">Real minutes on the site. A minute counts only while the page is in front of the student and they scrolled, typed, clicked or touched something in the last 2 minutes.
+    <b>Reading</b>: chapter pages. <b>Notes</b>: notes in the notebook and Guided Notes. <b>Activities</b>: activity work in the notebook. <b>Tests</b>: pre-tests, exams, quizzes. <b>Projects</b>: unit project pages.
+    Collecting since October 26, 2026. Click a student to see every chapter and day.</p>
+  <div class="d-flex flex-wrap gap-2 align-items-end mb-3">
+    <label class="small fw-bold">Period<br><select id="section" class="form-select form-select-sm"></select></label>
+    <label class="small fw-bold">From<br><input type="date" id="from" class="form-control form-control-sm"></label>
+    <label class="small fw-bold">To<br><input type="date" id="to" class="form-control form-control-sm"></label>
+    <div class="btn-group btn-group-sm" role="group" aria-label="Date range">
+      <button type="button" class="btn btn-outline-secondary" data-range="today">Today</button>
+      <button type="button" class="btn btn-outline-secondary" data-range="week">This week</button>
+      <button type="button" class="btn btn-outline-secondary" data-range="30">Last 30 days</button>
+      <button type="button" class="btn btn-outline-secondary" data-range="year">School year</button>
+    </div>
+  </div>
+  <div class="card shadow-sm mb-4"><div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead class="table-light"><tr><th>Student</th><th class="m">Reading</th><th class="m">Notes</th><th class="m">Activities</th><th class="m">Tests</th><th class="m">Projects</th><th class="m">Other</th><th class="m">Total</th><th class="m">Days</th><th>Last active</th></tr></thead>
+      <tbody id="body"><tr><td colspan="10" class="text-center text-muted py-4">Loading…</td></tr></tbody>
+    </table>
+  </div></div>
+  <div id="detail"></div>
+</div>
+<div id="footer-placeholder"></div>
+<script type="module">
+import { apiFetch } from '/js/modules/api-client.js';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const KINDS = [['reading', 'Reading', 'primary'], ['notes', 'Notes', 'success'], ['activity', 'Activities', 'warning'], ['test', 'Tests', 'danger'], ['project', 'Projects', 'info'], ['other', 'Other', 'secondary']];
+const mins = s => { const m = Math.round((s || 0) / 60); return m >= 60 ? `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}m` : `${m}m`; };
+const cell = s => s >= 30 ? mins(s) : '<span class="zero">–</span>';
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const dayName = s => new Date(s + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+const pageName = r => String(r.title || '').split(' | ')[0].trim() || r.path;
+const $ = id => document.getElementById(id);
+const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
+
+function setRange(kind) {
+  const t = new Date(), f = new Date(t);
+  if (kind === 'week') f.setDate(t.getDate() - ((t.getDay() + 6) % 7));
+  else if (kind === '30') f.setDate(t.getDate() - 29);
+  else if (kind === 'year') { f.setFullYear(t.getMonth() >= 6 ? t.getFullYear() : t.getFullYear() - 1, 7, 1); }
+  $('from').value = ymd(f); $('to').value = ymd(t);
+}
+const q = () => `from=${$('from').value}&to=${$('to').value}`;
+
+async function loadSummary() {
+  const section = $('section').value; if (!section) return;
+  store.set('activityTimeSection', section);
+  $('detail').innerHTML = '';
+  $('body').innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4">Loading…</td></tr>';
+  try {
+    const data = await apiFetch(`/api/admin/activity-time?section=${encodeURIComponent(section)}&${q()}`);
+    if (!data.students.length) { $('body').innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4">No students in this period.</td></tr>'; return; }
+    $('body').innerHTML = data.students.map(s => {
+      const total = Object.values(s.secs).reduce((a, b) => a + b, 0);
+      return `<tr class="pick" data-id="${esc(s.student_id)}" data-name="${esc(s.name)}"><td class="fw-semibold">${esc(s.name)}</td>${KINDS.map(([k]) => `<td class="m">${cell(s.secs[k])}</td>`).join('')}<td class="m fw-bold">${cell(total)}</td><td class="m">${s.days || '<span class="zero">0</span>'}</td><td class="small text-muted">${s.last_at ? new Date(s.last_at).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''}</td></tr>`;
+    }).join('');
+  } catch (e) { $('body').innerHTML = `<tr><td colspan="10" class="text-center text-danger py-4">${esc(e.message)}</td></tr>`; }
+}
+
+async function loadDetail(tr) {
+  document.querySelectorAll('tr.sel').forEach(x => x.classList.remove('sel')); tr.classList.add('sel');
+  const name = tr.dataset.name;
+  $('detail').innerHTML = `<div class="text-muted">Loading ${esc(name)}…</div>`;
+  try {
+    const { rows } = await apiFetch(`/api/admin/activity-time/student?student_id=${encodeURIComponent(tr.dataset.id)}&${q()}`);
+    if (!rows.length) { $('detail').innerHTML = `<div class="alert alert-light border">${esc(name)} has no active time on the site in these dates.</div>`; return; }
+    // Each chapter or page, all days together
+    const pages = new Map();
+    rows.forEach(r => { const p = pages.get(r.path) || { name: pageName(r), path: r.path, secs: {}, total: 0 }; p.secs[r.category] = (p.secs[r.category] || 0) + r.seconds; p.total += r.seconds; pages.set(r.path, p); });
+    const byPage = [...pages.values()].sort((a, b) => b.total - a.total).map(p => `<tr><td>${esc(p.name)}<div class="small text-muted">${esc(p.path)}</div></td>${KINDS.map(([k]) => `<td class="m">${cell(p.secs[k])}</td>`).join('')}<td class="m fw-bold">${mins(p.total)}</td></tr>`).join('');
+    // Day by day
+    const days = new Map(); rows.forEach(r => { if (!days.has(r.day)) days.set(r.day, []); days.get(r.day).push(r); });
+    const byDay = [...days.entries()].map(([d, rs]) => `<div class="mb-3"><div class="fw-bold border-bottom pb-1 mb-1">${dayName(d)} <span class="text-muted fw-normal">· ${mins(rs.reduce((a, r) => a + r.seconds, 0))}</span></div>
+      ${rs.map(r => { const k = KINDS.find(x => x[0] === r.category) || KINDS[5]; return `<div class="d-flex flex-wrap gap-2 align-items-baseline small py-1"><span class="badge bg-${k[2]} kind">${k[1]}</span><span class="flex-grow-1">${esc(pageName(r))}</span><span class="text-muted">${r.first_at}–${r.last_at}</span><b style="min-width:58px; text-align:right">${mins(r.seconds)}</b></div>`; }).join('')}</div>`).join('');
+    $('detail').innerHTML = `<div class="card shadow-sm mb-4"><div class="card-header bg-white fw-bold">${esc(name)} · by chapter and page</div><div class="table-responsive"><table class="table table-sm align-middle mb-0"><thead class="table-light"><tr><th>Page</th>${KINDS.map(([, l]) => `<th class="m">${l}</th>`).join('')}<th class="m">Total</th></tr></thead><tbody>${byPage}</tbody></table></div></div>
+      <div class="card shadow-sm"><div class="card-header bg-white fw-bold">${esc(name)} · day by day <span class="text-muted fw-normal small">(first and last minute of activity on each page)</span></div><div class="card-body">${byDay}</div></div>`;
+    $('detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) { $('detail').innerHTML = `<div class="alert alert-danger">${esc(e.message)}</div>`; }
+}
+
+setRange('week');
+try {
+  const { sections } = await apiFetch(`/api/admin/activity-time?${q()}`);
+  const saved = store.get('activityTimeSection');
+  $('section').innerHTML = sections.map(s => `<option ${s === saved ? 'selected' : ''}>${esc(s)}</option>`).join('');
+  await loadSummary();
+} catch (e) { $('body').innerHTML = `<tr><td colspan="10" class="text-center text-danger py-4">${esc(e.message)}</td></tr>`; }
+$('section').addEventListener('change', loadSummary);
+['from', 'to'].forEach(id => $(id).addEventListener('change', loadSummary));
+document.querySelectorAll('[data-range]').forEach(b => b.addEventListener('click', () => { setRange(b.dataset.range); loadSummary(); }));
+$('body').addEventListener('click', e => { const tr = e.target.closest('tr.pick'); if (tr) loadDetail(tr); });
+</script>
+</body>
+</html>
