@@ -1,0 +1,46 @@
+/* Chapter concept images on the Web Design chapter pages (one picture per concept,
+   teacher request 2026-10-26). Same layout as the Comp Sci chapters (compsci.css):
+   on tablets and up an image floats right at 42% of the column and the text wraps
+   beside it; headings always start below any image; phones keep images full width.
+   Big summary diagrams (.gen-wide) stay full width between sections. Each image's
+   Gemini prompt is kept in an HTML comment right above it. */
+.gen-media-placeholder {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    margin: 1.5rem auto;
+    border-radius: 8px;
+    position: relative;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+@media (min-width: 768px) {
+    img.gen-media-placeholder {
+        float: right;
+        width: 42%;
+        max-height: none;
+        margin: 0.25rem 0 1rem 1.5rem;
+        transform-origin: right top;
+    }
+    div:has(> img.gen-media-placeholder),
+    img.gen-media-placeholder ~ div { display: flow-root; }
+    h2, h3, h4 { clear: both; }
+    img.gen-media-placeholder.gen-wide { float: none; width: auto; max-height: 380px; margin: 1.5rem auto; transform-origin: center; }
+}
+
+/* Labels are easier to read bigger: hover zoom, only with a real mouse on wide screens
+   (a 1.5x image would overflow a phone or tablet). */
+@media (hover: hover) and (min-width: 992px) {
+    .gen-media-placeholder { cursor: zoom-in; }
+    .gen-media-placeholder:hover {
+        transform: scale(1.5);
+        z-index: 50;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+    }
+}
+
+@media print {
+    img.gen-media-placeholder { float: none; width: auto; max-width: 70%; max-height: 3.5in; margin: 0.5rem auto; transform: none; box-shadow: none; }
+}
