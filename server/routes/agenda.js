@@ -177,8 +177,10 @@ router.get('/agenda/student', requireLogin, async (req, res) => {
                     }
                 }
             }
+            // Every Monday, Web Design 2 does the 10-minute WRS Sprint (wrsSprint.js; teacher, 2026-10-26).
+            const sprint = pick.course === 'wd2' && !!schoolDay && new Date(`${want}T12:00:00`).getDay() === 1;
             return { options, course: pick.course, track: pick.track, label: pick.label, date: want, today,
-                     isClassDay: !!hit, schoolDay, content, prevDate: prev && prev.date, nextDate: next && next.date };
+                     isClassDay: !!hit, schoolDay, sprint, content, prevDate: prev && prev.date, nextDate: next && next.date };
         });
         res.json(out);
     } catch (err) { console.error('[agenda] student view error:', err); res.status(500).json({ error: 'Failed to load the agenda.' }); }

@@ -24,6 +24,7 @@
     .exit { background: #e8f5ee; border-left: 5px solid #198754; border-radius: 0 .6rem .6rem 0; padding: .8rem 1rem; }
     .due { background: #fdecea; color: #b02a37; font-weight: 800; border-radius: .6rem; padding: .6rem 1rem; }
     .badge-today { background: #ffc107; color: #000; }
+    .sprint { background: #fff3cd; border: 2px solid #f0ad00; border-radius: .6rem; padding: .7rem 1rem; font-weight: 800; color: #5c4400; }
   </style>
 </head>
 <body>
@@ -79,11 +80,13 @@
           <div class="date">${longDate(data.date)} ${data.date === data.today ? '<span class="badge badge-today ms-1 align-middle">Today</span>' : ''}</div></div>
         ${nav(data)}
       </div>`;
+    // Mondays in Web Design 2: the 10-minute WRS Sprint, with a button on the day itself.
+    const sprint = data.sprint ? `<div class="sprint"><i class="fas fa-bolt me-2"></i>Monday WRS Sprint: 10 minutes${data.date === data.today ? ' <a class="btn btn-sm fw-bold ms-2" style="background:#1f2a44;color:#fff;border:0;" href="/student/wrs-sprint.html">Take it now</a>' : ''}</div>` : '';
     if (!data.isClassDay || !data.content) {
       const msg = data.schoolDay
         ? `Your class meets this day, but your teacher hasn't posted the agenda for it yet.${data.nextDate ? ` The next posted agenda is <strong>${longDate(data.nextDate)}</strong>.` : ''}`
         : `No class on this day.${data.nextDate ? ` The next class is <strong>${longDate(data.nextDate)}</strong>.` : ''}`;
-      box.innerHTML = head + `<div class="agenda-body"><p class="mb-0 text-muted">${msg}</p></div>`;
+      box.innerHTML = head + `<div class="agenda-body">${sprint}<p class="mb-0 text-muted">${msg}</p></div>`;
       return;
     }
     const c = data.content;
@@ -91,6 +94,7 @@
     const tasks = Array.isArray(c.tasksList) ? c.tasksList : [];
     const milestone = c.milestone && typeof c.milestone === 'object' && c.milestone.title ? c.milestone : null;
     box.innerHTML = head + `<div class="agenda-body">
+      ${sprint}
       ${c.chapterLabel ? `<div class="chapter">${esc(c.chapterLabel)}${c.minimumDay ? ' · <span class="text-muted">short day</span>' : ''}</div>` : ''}
       ${(c.also || []).length ? `<div class="small fw-bold">Today's class covers ${1 + c.also.length} lessons. The other one is at the bottom.</div>` : ''}
       ${milestone ? `<div class="due"><i class="fas fa-flag-checkered me-2"></i>Due today: ${esc(milestone.title)}${milestone.pts ? ` (${esc(milestone.pts)} pts)` : ''}</div>` : ''}

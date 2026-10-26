@@ -104,6 +104,7 @@
   }
   .date-block h2 { color: var(--text-muted); font-weight: 600; font-size: 1rem; margin: 0; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
   .min-day-note { color: var(--tasks-title); font-size: .75rem; font-style: italic; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
+  .sprint-note { display: inline-block; margin-top: .2rem; background: #ffc107; color: #000; font-weight: 800; font-size: .8rem; border-radius: 999px; padding: .1rem .6rem; }
   .title-block { flex: 1; text-align: center; }
   .agenda-title {
     color: var(--h1-color);
@@ -539,6 +540,7 @@
         <h2 id="dateLabel" class="tag-label" data-tag="h2">—</h2>
         <div id="minDayNote" class="min-day-note d-none">45-minute minimum day</div>
         <div id="alsoNote" class="min-day-note d-none"></div>
+        <div id="sprintNote" class="sprint-note d-none"><i class="fas fa-bolt me-1"></i>Monday WRS Sprint: 10 min</div>
       </div>
       <div class="title-block">
         <h1 class="agenda-title tag-label" data-tag="h1">Today's Agenda</h1>
@@ -1201,6 +1203,8 @@ if (!courseCfg) {
     const dateStr = onClassDay() ? shownDate : (schedule[track] || {})[currentBlock];
     document.getElementById('dateLabel').textContent = dateStr ? fmtDateLabel(dateStr) : `Block ${currentBlock}`;
     document.getElementById('minDayNote').classList.toggle('d-none', !(c && c.minimumDay));
+    // Web Design 2 does the 10-minute WRS Sprint every Monday (student/wrs-sprint.html).
+    document.getElementById('sprintNote').classList.toggle('d-none', !(course === 'wd2' && dateStr && new Date(dateStr + 'T12:00:00').getDay() === 1));
     // A combined day (Jotability gave the chapter fewer days than lessons):
     // say which lessons share this class so none gets skipped.
     const alsoNote = document.getElementById('alsoNote');
