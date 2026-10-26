@@ -508,10 +508,14 @@ router.get('/timeclock/reflection-prompt', requireLogin, async (req, res) => {
 // state to recompute. Used instead of trusting the client's own is_correct
 // flag, which a student could otherwise just always send as true for a
 // free point on every clock-in regardless of the real answer picked.
+// The day had no question to answer (the CS bank had none for the current chapter), so the
+// "right answer" point is given rather than lost (teacher 2026-10-26: on Oct 19 every CS student
+// saw "no question bank available" and lost that point).
+const NO_QUESTION = 'no-question';
 async function verifyClockinAnswer(connection, courseKey, submittedAnswer) {
-    if (!submittedAnswer) return null;
     try {
         if (courseKey === 'WD1' || courseKey === 'WD2' || courseKey === 'AS' || courseKey === 'INTV') {
+            if (!submittedAnswer) return null;
             const picked = pickWprMcQuestion(getLocalDateStr());
             return String(submittedAnswer).trim().toLowerCase() === String(picked.answer).trim().toLowerCase() ? 1 : 0;
         }
@@ -520,7 +524,8 @@ async function verifyClockinAnswer(connection, courseKey, submittedAnswer) {
             const groupKey = pairGroupKey(dayTypes, getLocalDateStr());
             const { chapter } = await getCurrentCSChapter(connection);
             const q = await getDeterministicQuestion(connection, 'questions', chapter, groupKey);
-            if (!q) return null;
+            if (!q) return NO_QUESTION;
+            if (!submittedAnswer) return null;
             return String(submittedAnswer).trim().toLowerCase() === String(q.answer).trim().toLowerCase() ? 1 : 0;
         }
     } catch (e) {
@@ -551,7 +556,8 @@ router.post('/timeclock/save', requireSelfOrStaff(), async (req, res) => {
             try { await ensureTimesheetQuestionCols(connection); } catch (e) { console.error('[timeclock] question columns:', e.message); }
             if (mode === 'in') {
                 const courseKey = periodToCourseKeyServer(period);
-                const isCorrectVal = await verifyClockinAnswer(connection, courseKey, answer);
+                const verdict = await verifyClockinAnswer(connection, courseKey, answer);
+                const isCorrectVal = verdict === NO_QUESTION ? null : verdict;
                 await connection.execute(
                     'INSERT INTO clockins (student_id, section_id, type, answer, is_correct, timestamp) VALUES (?, ?, ?, ?, ?, NOW())',
                     [student_id, period, 'in', answer || '', isCorrectVal]
@@ -597,7 +603,7 @@ router.post('/timeclock/save', requireSelfOrStaff(), async (req, res) => {
                         const onTime = isOnTime(startTime);
                         let points = 1; // attempted
                         if (onTime) points += 1;
-                        if (isCorrectVal === 1) points += 1;
+                        if (isCorrectVal === 1 || verdict === NO_QUESTION) points += 1;
 
                         const examId = `TC-${courseKey}-${today}`;
                         // due_date = the check-in's own day -- a missed day never
