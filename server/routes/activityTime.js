@@ -9,13 +9,23 @@ const { getLocalDateStr } = require('../tardyLogic');
 
 const CATS = ['reading', 'notes', 'activity', 'test', 'project', 'other'];
 let tableReady = false;
+// The table takes the students table's collation: made with the server's default, a join on
+// student_id failed with "Illegal mix of collations" (2026-10-26), and the default differs between
+// database versions, so it's read, not hard-coded, and a table made the old way is converted.
 async function ensureTable(connection) {
     if (tableReady) return;
+    const [[col]] = await connection.execute(`SELECT CHARACTER_SET_NAME AS cs, COLLATION_NAME AS co FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'students' AND COLUMN_NAME = 'student_id'`);
+    const ok = v => /^[a-z0-9_]+$/i.test(v || ''), cs = ok(col?.cs) ? col.cs : 'utf8mb4', co = ok(col?.co) ? col.co : null;
     await connection.execute(`CREATE TABLE IF NOT EXISTS student_activity_time (
         student_id VARCHAR(20) NOT NULL, day DATE NOT NULL, path VARCHAR(190) NOT NULL, category VARCHAR(12) NOT NULL,
         seconds INT NOT NULL DEFAULT 0, title VARCHAR(190) NULL, first_at DATETIME NOT NULL, last_at DATETIME NOT NULL,
         PRIMARY KEY (student_id, day, path, category), KEY by_day (day)
-    )`);
+    )${co ? ` DEFAULT CHARSET=${cs} COLLATE=${co}` : ''}`);
+    if (co) {
+        const [[t]] = await connection.execute(`SELECT TABLE_COLLATION AS co FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'student_activity_time'`);
+        if (t && t.co !== co) await connection.execute(`ALTER TABLE student_activity_time CONVERT TO CHARACTER SET ${cs} COLLATE ${co}`);
+    }
     tableReady = true;
 }
 
