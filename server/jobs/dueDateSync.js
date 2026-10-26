@@ -79,12 +79,15 @@ async function loadCourse(connection, course) {
         let c = r.content;
         try { if (typeof c === 'string') c = JSON.parse(c); } catch (e) { c = {}; }
         const ms = c.milestone && typeof c.milestone === 'object' ? c.milestone.title : null;
+        const tasks = Array.isArray(c.tasksList) ? c.tasksList : [];
         blocks[r.block_num] = {
             num: r.block_num,
             group: groupOf(c.chapterLabel),
             title: c.tasksTitle || '',
             milestone: ms || null,
-            text: [c.tasksTitle, ...(Array.isArray(c.tasksList) ? c.tasksList : []), ms].filter(Boolean).join(' | ')
+            text: [c.tasksTitle, ...tasks, ms].filter(Boolean).join(' | '),
+            // the lines that assign work: "Lab: ...", "Milestones 4 & 5: ...", and the Due slot
+            labLines: [...tasks.filter(t => /^\s*(lab|milestones?)\b/i.test(String(t))), ms].filter(Boolean)
         };
     });
     await connection.execute('ALTER TABLE agenda_days ADD COLUMN IF NOT EXISTS also_blocks VARCHAR(255) NULL');
@@ -122,14 +125,20 @@ function groupDates(ctx, track, group) {
 }
 const blockLastDate = (ctx, track, block) => { const l = (ctx.tracks[track] || {})[block.num] || []; return l.length ? l[l.length - 1] : null; };
 
+// A lab's slide is one whose "Lab: ..." / "Milestone: ..." line or Due slot names it -- the last
+// such slide when the lab spans days ("start today, due Thursday"). A slide that only mentions it
+// in passing counts only when no slide names it (2026-10-26: Ch6 Day 14's "Confirm every page
+// pulls from the same external sheet" was taking Lab 1's due date away from Day 1's
+// "Lab: The External Sheet").
 function bestBlockByName(ctx, group, title) {
     const want = words(coreTitle(title));
     if (!want.length) return null;
-    let best = null, bestScore = 0;
+    const score = s => { const have = new Set(words(s)); return want.filter(w => have.has(w)).length / want.length; };
+    let best = null, bestScore = 0, bestLab = false;
     Object.values(ctx.blocks).filter(b => b.group === group).forEach(b => {
-        const have = new Set(words(b.text));
-        const hit = want.filter(w => have.has(w)).length / want.length;
-        if (hit > bestScore || (hit === bestScore && best && b.num > best.num)) { bestScore = hit; best = b; }
+        const labScore = Math.max(0, ...b.labLines.map(score)), lab = labScore >= 0.6;
+        const hit = lab ? labScore : score(b.text);
+        if ((lab && !bestLab) || (lab === bestLab && (hit > bestScore || (hit === bestScore && best && b.num > best.num)))) { bestScore = hit; best = b; bestLab = lab; }
     });
     return bestScore >= 0.6 ? best : null;
 }
@@ -168,7 +177,14 @@ function targetFor(ctx, track, item, extra) {
     const chBlocks = Object.values(ctx.blocks).filter(b => b.group === g).sort((a, b) => a.num - b.num);
     const projItem = ctx.items.find(i => i.exam_id.toLowerCase() === `ch${cm[1]}_milestone`);
     const projWords = projItem ? words(coreTitle(projItem.title)) : [];
-    const projNamed = projWords.length ? Object.values(ctx.blocks).filter(b => b.milestone && projWords.filter(w => words(b.milestone).includes(w)).length / projWords.length >= 0.6).sort((a, b) => b.num - a.num)[0] : null;
+    // The Due slot that names the project best; on a tie, the first one from this chapter on
+    // (Ch3's Blueprint is due on Ch4 Day 1, not Ch1's "Agency Founder's Blueprint"). 2026-10-26:
+    // taking the last close match sent Ch10's "Game Assembly & QA" to Ch12's "Client Site Assembly & QA".
+    const chStart = chBlocks.length ? chBlocks[0].num : 0, here = b => b.num >= chStart;
+    const projHits = projWords.length ? Object.values(ctx.blocks).filter(b => b.milestone)
+        .map(b => ({ b, s: projWords.filter(w => words(b.milestone).includes(w)).length / projWords.length })).filter(x => x.s >= 0.6) : [];
+    projHits.sort((x, y) => (y.s - x.s) || (here(y.b) - here(x.b)) || (here(x.b) ? x.b.num - y.b.num : y.b.num - x.b.num));
+    const projNamed = projHits.length ? projHits[0].b : null;
     const msBlock = projNamed || chBlocks.filter(b => b.milestone).pop();
     if (/pre-(assessment|scale)/i.test(id)) return { date: dates[0], rule: 'chapter-first-day' };
     if (/-Exam$/i.test(id)) {
