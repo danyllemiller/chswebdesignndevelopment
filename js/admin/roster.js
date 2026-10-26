@@ -503,19 +503,55 @@ async function finishRosterUpload(students) {
     // payload IS meant to be the full current roster. Never add this flag
     // to the single Add Student call above; that payload is intentionally
     // just one student and would read as everyone else having dropped out.
-    const res = await fetch('/api/admin/upload-roster?archiveMissing=true', {
+    // The file is checked against the current roster first (dryRun): the
+    // teacher sees who will be added, dropped and moved, and nothing changes
+    // until Apply (2026-10-26; a file missing one class would otherwise
+    // archive that whole class the moment it was uploaded).
+    const send = (dry) => fetch(`/api/admin/upload-roster?archiveMissing=true${dry ? '&dryRun=true' : ''}`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(students)
     });
-    if (!res.ok) {
+    const failed = async (res) => {
         const j = await res.json().catch(() => ({}));
         showStatus(j && j.error ? `Upload failed: ${j.error}` : 'Upload failed', 'danger');
-        return;
-    }
-    const d = await res.json();
-    showStatus(`Roster uploaded — ${d.created || 0} added, ${d.updated || 0} updated, ${d.archived || 0} archived (not on this file).${d.multiClass ? ` ${d.multiClass} student(s) are in more than one class and stay in all of them.` : ''}`, 'success');
-    fetchRoster();
+    };
+    const check = await send(true);
+    if (!check.ok) return failed(check);
+    const { plan } = await check.json();
+    showRosterPreview(plan, async () => {
+        const res = await send(false);
+        if (!res.ok) return failed(res);
+        const d = await res.json();
+        showStatus(`Roster uploaded — ${d.created || 0} added, ${d.updated || 0} updated, ${d.archived || 0} archived (not on this file).${d.multiClass ? ` ${d.multiClass} student(s) are in more than one class and stay in all of them.` : ''}`, 'success');
+        fetchRoster();
+    });
+}
+
+function showRosterPreview(plan, apply) {
+    const list = (items, fmt) => {
+        const shown = items.slice(0, 40);
+        return `<ul class="small mb-0">${shown.map(x => `<li>${fmt(x)}</li>`).join('')}${items.length > shown.length ? `<li class="text-muted">and ${items.length - shown.length} more</li>` : ''}</ul>`;
+    };
+    const group = (title, items, fmt, cls) => items.length ? `<div class="mb-3"><div class="fw-bold ${cls}">${title} (${items.length})</div>${list(items, fmt)}</div>` : '';
+    const who = (x) => escapeHtml(x.name), classes = (a) => a.map(escapeHtml).join(', ');
+    const changes = plan.added.length + plan.returning.length + plan.dropped.length + plan.moved.length + plan.leaving.length;
+    document.getElementById('rosterPreviewBody').innerHTML =
+        (changes ? '' : '<p class="mb-3">This file matches the current roster: nobody will be added, dropped or moved.</p>')
+        + group('Will be added', plan.added, x => `${who(x)} · ${classes(x.sections)}`, 'text-success')
+        + group('Coming back (were archived)', plan.returning, x => `${who(x)} · ${classes(x.sections)}`, 'text-success')
+        + group('Will be dropped because they’re not on this file (archived: their grades and work are kept)', plan.dropped, x => `${who(x)}${x.section ? ' · ' + escapeHtml(x.section) : ''}`, 'text-danger')
+        + group('Changing their main class', plan.moved, x => `${who(x)} · ${escapeHtml(x.from)} → ${escapeHtml(x.to)}`, 'text-primary')
+        + group('Leaving an extra class', plan.leaving, x => `${who(x)} · ${escapeHtml(x.section)}`, 'text-primary')
+        + group('In more than one class (they stay in all of them)', plan.multi, x => `${who(x)} · ${classes(x.sections)}`, '')
+        + (plan.dropped.length > 10 ? `<div class="alert alert-warning small mb-0">${plan.dropped.length} students would be dropped. If a class is missing from this file, cancel and upload a file with every class.</div>` : '');
+    const modal = new bootstrap.Modal(document.getElementById('rosterPreviewModal'));
+    const btn = document.getElementById('rosterPreviewApply');
+    btn.onclick = async () => {
+        btn.disabled = true;
+        try { await apply(); } finally { btn.disabled = false; modal.hide(); }
+    };
+    modal.show();
 }
 
 // --- MODAL ACTIONS ---

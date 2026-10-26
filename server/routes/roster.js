@@ -356,6 +356,9 @@ router.post('/admin/upload-roster', async (req, res) => {
     // Opt-in and defaults to off on purpose so a future caller can't
     // reintroduce the same mistake by omission.
     const archiveMissing = req.query.archiveMissing === 'true';
+    // dryRun: work out every change and send back the list without touching
+    // anything, so the roster page can show it for the teacher to approve first.
+    const dryRun = req.query.dryRun === 'true';
 
     const cleaned = students
         .map((s) => ({
@@ -397,8 +400,6 @@ router.post('/admin/upload-roster', async (req, res) => {
 
         // Table changes commit on their own in MySQL, so they go before the transaction.
         await ensureAdditionalSections(connection);
-        await connection.beginTransaction();
-        try {
         const year = getCurrentSchoolYear();
 
         // Snapshot who's currently active BEFORE the upsert below touches
@@ -417,8 +418,10 @@ router.post('/admin/upload-roster', async (req, res) => {
             missingIds = activeRows.map((r) => r.student_id).filter((id) => !uploadedIds.has(id));
         }
 
-        const [existingRows] = await connection.execute('SELECT student_id, section_id FROM students');
+        const [existingRows] = await connection.execute('SELECT student_id, section_id, first_name, last_name, archived FROM students');
         const existing = new Map(existingRows.map((r) => [r.student_id, r.section_id]));
+        const before = new Map(existingRows.map((r) => [r.student_id, r]));
+        const [extraRows] = await connection.execute('SELECT student_id, section_id, source FROM student_additional_sections');
 
         // A student in more than one of these classes is listed once per class
         // (2026-10-26). They keep every class: their main class (section_id)
@@ -432,6 +435,25 @@ router.post('/admin/upload-roster', async (req, res) => {
             else if (!e.sections.includes(s.section_id)) { e.sections.push(s.section_id); e.courseOf[s.section_id] = s.course_id; }
         }
 
+        // What this upload changes, in words the roster page can show before anything happens.
+        const nameOf = (r) => `${r.first_name || ''} ${r.last_name || ''}`.trim() || r.student_id;
+        const plan = { added: [], returning: [], moved: [], multi: [], leaving: [], dropped: [] };
+        for (const s of byStudent.values()) {
+            const was = before.get(s.student_id), main = s.sections.includes(was?.section_id) ? was.section_id : s.sections[0];
+            const extra = s.sections.filter((x) => x !== main), who = nameOf(s);
+            if (!was) plan.added.push({ name: who, sections: s.sections });
+            else if (Number(was.archived) === 1) plan.returning.push({ name: who, sections: s.sections });
+            else if (was.section_id !== main) plan.moved.push({ name: who, from: was.section_id, to: main });
+            if (was && archiveMissing) {
+                for (const x of extraRows) if (x.student_id === s.student_id && x.source === 'upload' && x.section_id !== main && !extra.includes(x.section_id)) plan.leaving.push({ name: who, section: x.section_id });
+            }
+            if (extra.length) plan.multi.push({ name: who, sections: s.sections });
+        }
+        for (const id of missingIds) { const r = before.get(id); plan.dropped.push({ name: r ? nameOf(r) : id, section: r?.section_id || '' }); }
+        if (dryRun) return { status: 200, body: { success: true, dryRun: true, plan } };
+
+        await connection.beginTransaction();
+        try {
         const stmt = `INSERT INTO students (student_id, first_name, last_name, section_id, course_id, role, school_year, archived)
                       VALUES (?, ?, ?, ?, ?, ?, ?, 0)
                       ON DUPLICATE KEY UPDATE

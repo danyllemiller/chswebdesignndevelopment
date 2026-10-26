@@ -356,11 +356,28 @@
     </div>
   </div>
 
+  <!-- Roster upload check: who will be added, dropped and moved, before anything changes -->
+  <div class="modal fade" id="rosterPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title fw-bold">Check the changes before the roster updates</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4" id="rosterPreviewBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel (nothing changes)</button>
+          <button type="button" class="btn btn-primary fw-bold" id="rosterPreviewApply">Apply these changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="footer-placeholder" class="no-print"></div>
 
 <script src="/js/bootstrap.bundle.js"></script>
   <script src="/js/jquery.js"></script>
-  <script src="/js/admin/roster.js?v=15"></script>
+  <script src="/js/admin/roster.js?v=16"></script>
   <script src="/js/admin/attendance-reminder.js"></script>
 </body>
 </html>
