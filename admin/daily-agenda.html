@@ -960,17 +960,35 @@ if (!courseCfg) {
     }
   }
 
-  function findBlockForToday() {
-    const dmap = days[track] || {};
-    if (Object.keys(dmap).length) {
-      // Jotability's dates: today's block, or the nearest class day's.
-      const today = todayStr(); let best = null, bestDiff = Infinity;
-      for (const [dateStr, blockNum] of Object.entries(dmap)) {
-        const diff = Math.abs(new Date(dateStr) - new Date(today));
-        if (diff < bestDiff) { bestDiff = diff; best = blockNum; shownDate = dateStr; }
-      }
-      if (best !== null) return best;
+  // Class days in order from Jotability's dates: each date's lesson, then any more lessons taught
+  // in the same class. Prev/Next and the jump list walk these, so a lesson that repeats shows up on
+  // every day it's taught (2026-10-26: WD2's Ch10 Day 8 ran Oct 23, 26 and 28, but the list showed
+  // only Oct 23 and Next went straight to Nov 4).
+  function classDays() {
+    const dmap = days[track] || {}, amap = alsoDays[track] || {}, out = [];
+    Object.keys(dmap).sort().forEach(d => { out.push({ date: d, block: dmap[d] }); (amap[d] || []).forEach(b => out.push({ date: d, block: b })); });
+    return out;
+  }
+  const onClassDay = () => !!shownDate && ((days[track] || {})[shownDate] === currentBlock || ((alsoDays[track] || {})[shownDate] || []).includes(currentBlock));
+  // Show lesson b, on the first class day it's taught unless the one shown already teaches it.
+  function showBlock(b) {
+    currentBlock = b;
+    if (!onClassDay()) { const hit = classDays().find(x => x.block === b); shownDate = hit ? hit.date : null; }
+  }
+  // Today's class day, or the nearest one (the next one on a tie): { date, block }.
+  function todayStop() {
+    const today = todayStr(); let best = null, bestDiff = Infinity;
+    for (const [dateStr, blockNum] of Object.entries(days[track] || {})) {
+      const diff = Math.abs(new Date(dateStr) - new Date(today));
+      if (diff < bestDiff || (diff === bestDiff && dateStr > best.date)) { bestDiff = diff; best = { date: dateStr, block: blockNum }; }
     }
+    return best;
+  }
+
+  function findBlockForToday() {
+    const t = todayStop();
+    if (t) { shownDate = t.date; return t.block; }
+    shownDate = null;
     const map = schedule[track] || {};
     const today = todayStr();
     let exact = null, closest = null, closestDiff = Infinity;
@@ -1011,18 +1029,28 @@ if (!courseCfg) {
     return PERIOD_COURSE_LINKS[chosen.period_label];
   }
 
+  // Option values are "date|block" for a class day and "|block" for a lesson not on one.
   function populateJumpSelect() {
     const sel = document.getElementById('jumpSelect');
     sel.innerHTML = '';
+    const add = (parent, value, text) => { const opt = document.createElement('option'); opt.value = value; opt.textContent = text; parent.appendChild(opt); };
+    const list = classDays();
+    if (list.length) {
+      list.forEach((x, i) => add(sel, `${x.date}|${x.block}`, `${fmtDateLabel(x.date)}${i && list[i - 1].date === x.date ? ' (same class)' : ''} — ${(content[x.block] || {}).chapterLabel || `Block ${x.block}`}`));
+      const used = new Set(list.map(x => x.block)), rest = [];
+      for (let b = 1; b <= courseCfg.totalBlocks; b++) if (!used.has(b)) rest.push(b);
+      if (rest.length) {
+        const group = document.createElement('optgroup'); group.label = 'Not on a class day';
+        rest.forEach(b => add(group, `|${b}`, `Block ${b} — ${(content[b] || {}).chapterLabel || ''}`));
+        sel.appendChild(group);
+      }
+      return;
+    }
     const map = schedule[track] || {};
     for (let b = 1; b <= courseCfg.totalBlocks; b++) {
       const c = content[b];
       const dateStr = map[b] ? fmtDateLabel(map[b]) : '?';
-      const label = c ? `Block ${b} — ${dateStr} — ${c.chapterLabel || ''}` : `Block ${b} — ${dateStr}`;
-      const opt = document.createElement('option');
-      opt.value = b;
-      opt.textContent = label;
-      sel.appendChild(opt);
+      add(sel, `|${b}`, c ? `Block ${b} — ${dateStr} — ${c.chapterLabel || ''}` : `Block ${b} — ${dateStr}`);
     }
   }
 
@@ -1170,7 +1198,7 @@ if (!courseCfg) {
 
   function render() {
     const c = content[currentBlock];
-    const dateStr = (shownDate && (days[track] || {})[shownDate] === currentBlock) ? shownDate : (schedule[track] || {})[currentBlock];
+    const dateStr = onClassDay() ? shownDate : (schedule[track] || {})[currentBlock];
     document.getElementById('dateLabel').textContent = dateStr ? fmtDateLabel(dateStr) : `Block ${currentBlock}`;
     document.getElementById('minDayNote').classList.toggle('d-none', !(c && c.minimumDay));
     // A combined day (Jotability gave the chapter fewer days than lessons):
@@ -1186,7 +1214,7 @@ if (!courseCfg) {
     renderPageStamp();
     renderQuote();
 
-    document.getElementById('jumpSelect').value = currentBlock;
+    document.getElementById('jumpSelect').value = onClassDay() ? `${shownDate}|${currentBlock}` : `|${currentBlock}`;
     renderBellSchedule(dateStr);
 
     const objList = document.getElementById('objectiveList');
@@ -1256,16 +1284,19 @@ if (!courseCfg) {
   }
 
   // ── Navigation ──────────────────────────────────────────────────────────
-  document.getElementById('prevBtn').addEventListener('click', () => {
-    currentBlock = Math.max(1, currentBlock - 1);
+  // The next/previous class day; off the class-day list (or past either end), the next lesson.
+  function step(dir) {
+    const list = classDays(), i = list.findIndex(x => x.date === shownDate && x.block === currentBlock);
+    if (i >= 0 && list[i + dir]) { shownDate = list[i + dir].date; currentBlock = list[i + dir].block; }
+    else showBlock(Math.min(courseCfg.totalBlocks, Math.max(1, currentBlock + dir)));
     render();
-  });
-  document.getElementById('nextBtn').addEventListener('click', () => {
-    currentBlock = Math.min(courseCfg.totalBlocks, currentBlock + 1);
-    render();
-  });
+  }
+  document.getElementById('prevBtn').addEventListener('click', () => step(-1));
+  document.getElementById('nextBtn').addEventListener('click', () => step(1));
   document.getElementById('jumpSelect').addEventListener('change', (e) => {
-    currentBlock = parseInt(e.target.value, 10);
+    const [date, block] = e.target.value.split('|');
+    currentBlock = parseInt(block, 10);
+    shownDate = date || null;
     render();
   });
   document.getElementById('todayBtn').addEventListener('click', () => {
@@ -1442,13 +1473,13 @@ if (!courseCfg) {
         || JSON.stringify(data.schedule || {}) !== JSON.stringify(schedule)
         || JSON.stringify(data.content || {}) !== JSON.stringify(content);
       if (!changed || editing) return;
-      const wasOnToday = currentBlock === findBlockForToday();
+      const t = todayStop(), wasOnToday = t ? t.date === shownDate && t.block === currentBlock : currentBlock === findBlockForToday();
       content = data.content || {};
       schedule = data.schedule || {};
       days = data.days || {};
       alsoDays = data.also || {};
       populateJumpSelect();
-      if (wasOnToday) currentBlock = findBlockForToday();
+      if (wasOnToday) currentBlock = findBlockForToday(); else showBlock(currentBlock);
       render();
     } catch (e) { /* try again next interval */ }
   }
