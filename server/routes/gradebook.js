@@ -5,6 +5,7 @@ const { resolveCourseId, getCurrentSchoolYear, isTestingWindowOpen, requireSelfO
 const { insertQuestionDetails } = require('../lib/missedQuestionsStore');
 const { dailyOverrideCode, isValidDailyCode } = require('../lib/dailyCode');
 const { isCsUnitProject, syncCsProjectGrade } = require('../lib/csProjectGate');
+const { clockinDate, loadClockinDays } = require('../lib/clockinDays');
 
 // mysql2 returns DATE columns as JS Date objects (local-timezone fields set to
 // match the stored date exactly), not strings. Reading those fields directly
@@ -81,7 +82,14 @@ router.get('/student/course-gradebook', requireSelfOrStaff(), async (req, res) =
                 [student_id, student_id, student_id, courseCode]
             );
             rows.forEach(r => { r.due_date = formatDbDate(r.due_date); });
-            return { status: 200, body: { student_id, section_id: sectionId, course_id: courseCode, assignments: rows } };
+            // A clock-in day this student's period didn't meet isn't theirs
+            // to miss (server/lib/clockinDays.js); one they clocked in on anyway still counts.
+            const days = await loadClockinDays(connection);
+            const assignments = rows.filter(r => {
+                const day = clockinDate(r.exam_id);
+                return !day || (r.score !== null && r.score !== '') || days.meets(sectionId, day);
+            });
+            return { status: 200, body: { student_id, section_id: sectionId, course_id: courseCode, assignments } };
         });
         res.status(outcome.status).json(outcome.body);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch student course gradebook.' }); }
@@ -697,6 +705,12 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
             periodScope !== 'All' ? scopedIds : []
         );
         const registry = {};
+        // A clock-in day lists only the periods that met that day, so the
+        // gradebook's period exemption shows EX for the rest instead of a
+        // missing zero; a day no period met has no due date at all
+        // (server/lib/clockinDays.js).
+        const days = await loadClockinDays(connection);
+        const sectionIds = [...new Set(students.flatMap(s => [s.section_id, ...(s.additional_sections || []).map(a => a.section_id)]).filter(Boolean))];
         exams.forEach(e => {
             let periodDueDates = {};
             if (e.period_due_dates) {
@@ -705,9 +719,16 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
                         ? JSON.parse(e.period_due_dates) : e.period_due_dates;
                 } catch (_) { periodDueDates = {}; }
             }
+            let dueDate = formatDbDate(e.due_date);
+            const day = clockinDate(e.exam_id);
+            if (day) {
+                const met = days.periodsOn(day) ? sectionIds.filter(s => days.meets(s, day)) : [];
+                if (met.length) periodDueDates = Object.fromEntries(met.map(s => [s, day]));
+                else dueDate = '';
+            }
             registry[e.exam_id] = {
                 title: e.title, maxPoints: e.total_points,
-                dueDate: formatDbDate(e.due_date), instructions: e.instructions || '',
+                dueDate, instructions: e.instructions || '',
                 targetCourse: e.course_id || 'All', category: e.category,
                 isProjectMilestone: !!e.is_project_milestone, periodDueDates
             };

@@ -5,6 +5,7 @@
 // diverges (period-specific due dates, an "EX" sentinel) and would produce
 // a different number than the student-facing one this is meant to mirror.
 const { resolveCourseId } = require('./helpers');
+const { clockinDate, loadClockinDays } = require('./lib/clockinDays');
 
 const COURSE_WEIGHTS = {
     WD1:  { assignment: 0.50, project_quiz: 0.20, final: 0.20, career: 0.10 },
@@ -180,9 +181,14 @@ async function computeStudentGrade(connection, studentId, sectionId) {
 
     const byKey = {};
     rows.forEach(r => { byKey[r.exam_id] = r; });
+    const days = await loadClockinDays(connection);
 
     rows.forEach(r => {
         const key = r.exam_id;
+        // A clock-in day this student's period didn't meet isn't theirs to
+        // miss (server/lib/clockinDays.js).
+        const day = clockinDate(key);
+        if (day && (r.score === null || r.score === '') && !days.meets(sectionId, day)) return;
         const registryEntry = { title: r.title, targetCourse: courseCode };
         if (!isAssignmentVisible(key, courseKey, registryEntry)) return;
 
