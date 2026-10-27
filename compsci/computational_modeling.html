@@ -180,11 +180,23 @@
       <p class="mb-0">Validation isn't a one-time stamp of approval. Real conditions change, so good modelers keep checking their models against new data. When the model and reality start to disagree, that's the signal to fix the model's rules or inputs.</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Checking a Model Against Real Data</strong>
+      <p class="mb-0 mt-2">Running a disease model on last year's starting numbers and comparing its prediction to what really happened tests the model's <strong>validity</strong>: how closely it matches reality. How fast the simulation runs has nothing to do with validity.</p>
+  </div>
+
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Overfitting</h5>
       <p><strong>Overfitting</strong> is when a model learns the past <em>too</em> well. It memorizes every random bump in the old data instead of learning the general pattern, so it falls apart on anything new.</p>
       <p>It's like studying for a test by memorizing the exact answers to the practice test. If the real test has the same questions, you ace it. If the questions are even slightly different, you're lost, because you never learned how to solve them. An overfit model has memorized the practice test.</p>
       <p class="mb-0">How do you catch overfitting? Hold some data back. Build your model using most of your data, then test it on data it has <em>never seen</em>, like the last month you held back. If it does great on the old data but badly on the new data, it's overfit. A simpler model that captures the general trend usually predicts the future better.</p>
+  </div>
+
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: The Real Danger of Overfitting</strong>
+      <p class="mb-0 mt-2">An overfit model matches the past almost perfectly but <strong>fails to predict anything new</strong>, because it memorized the old data instead of learning the pattern. The danger isn't too many charts on a dashboard. It is a model that only works backward.</p>
   </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
@@ -259,6 +271,12 @@
       <p class="mb-0">Because each run comes out a little different, modelers run a simulation many times and look at the overall pattern, like the average wait time and the worst case. That gives a much more honest picture than a single run that pretends nothing is ever left to chance.</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Random Numbers Copy Real-Life Chance</strong>
+      <p class="mb-0 mt-2">Simulations add a random number generator to copy the <strong>natural unpredictability</strong> of real events, like customers arriving at slightly different times each day. It has nothing to do with hardware, privacy, or network addresses. It just keeps the model from pretending everything happens like clockwork.</p>
+  </div>
+
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Randomness in a Spreadsheet Simulation</h5>
       <p>Google Sheets has built-in random number generators. <code>=RAND()</code> gives a random decimal between 0 and 1. <code>=RANDBETWEEN(1, 6)</code> gives a random whole number from 1 to 6, like rolling a die. Every time the sheet recalculates, these numbers change.</p>
@@ -284,6 +302,12 @@
 
   <h4 class="fw-bold mt-5 text-info">8.4.4 Hypotheses: What Simulations Are Really Testing</h4>
   <p>A <strong>hypothesis</strong> is a specific, testable claim — "if we increase advertising spend by 20%, sales will rise by 5%." A model or simulation is one of the main tools for testing a hypothesis without waiting for the real thing to happen: run the simulation, compare its prediction to what actually occurs, and either the hypothesis holds up or it gets refined based on where the model's output and reality disagreed.</p>
+
+      <!-- Exam gap-fill (Oct 2026 test results) -->
+      <div class="alert alert-warning small border-warning border my-4">
+          <strong>Where Everyone Gets Ambushed: What a Hypothesis Is, and What Models Are For</strong>
+          <ul class="mb-2 mt-2 ps-3"><li>"If we increase advertising spend by 20%, sales will rise by 5%" is a <strong>hypothesis</strong>: a specific claim you are about to test. It is not proven, and it is not an algorithm.</li><li>Models are best for <strong>complex situations that change over time</strong> and are hard or dangerous to test for real, like a disease spreading through a city for 30 days. Compressing a video to email it is not modeling.</li></ul>
+      </div>
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Writing a Testable Hypothesis</h5>

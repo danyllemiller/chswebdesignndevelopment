@@ -55,8 +55,20 @@
       <p class="mb-0">When you read any code, try labeling each part. Is this just steps in order (sequence)? Is it making a choice (selection)? Is it repeating (iteration)? Those three words show up a lot on tests, and almost any algorithm can be described using only those three ideas.</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: IF Means Selection</strong>
+      <p class="mb-0 mt-2">Code that runs only <strong>if</strong> something is true, like a discount only when the cart is over $50, is <strong>selection</strong>. Iteration means repeating, which is what loops do; a plain IF doesn't repeat anything. Sequence, selection, and iteration are the <strong>control structures</strong>: the code blocks that decide which code runs and how many times.</p>
+  </div>
+
   <h4 class="fw-bold mt-4 text-primary">10.1.1 Justifying Your Choice</h4>
   <p>Choosing a control structure is a real skill, not a formality — you're weighing implementation effort, readability, and performance against each other, and the "best" answer depends on the situation.</p>
+
+      <!-- Exam gap-fill (Oct 2026 test results) -->
+      <div class="alert alert-warning small border-warning border my-4">
+          <strong>Where Everyone Gets Ambushed: What You Weigh When Choosing a Control Structure</strong>
+          <p class="mb-0 mt-2">This chapter's three factors are <strong>implementation effort, readability, and performance</strong>. The programming language, the operating system, and internet speed are not part of that choice.</p>
+      </div>
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Three Ways to Write the Same Decision</h5>
@@ -169,6 +181,12 @@ while (sheet.getRange(row, 1).getValue() !== "") {
       <p class="mb-0">The fix for both problems is the same habit: trace your loop on paper. Write down the counter's value at the start of each pass and check the condition each time. Do the first two passes and the last two passes, because that's where off-by-one errors hide.</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: No Stopping Point Means an Infinite Loop</strong>
+      <p class="mb-0 mt-2">If a loop's condition never becomes false (usually because the counter is never increased), you get an <strong>infinite loop</strong>. The program keeps going until it freezes or crashes. It is not a syntax error: the code is written correctly; it just never stops.</p>
+  </div>
+
   <p><strong>The trap:</strong> students often think an off-by-one error is a sign something is deeply wrong with their logic. Usually it's one character — a stray <code>=</code> or a missing one — hiding in an otherwise correct loop. Trace it on paper one iteration at a time and it's almost always fast to find.</p>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">
@@ -216,6 +234,12 @@ while (sheet.getRange(row, 1).getValue() !== "") {
       <p><strong>On edit</strong> runs your code every time someone changes a cell. Name your function exactly <code>onEdit(e)</code>. The <code>e</code> holds information about the edit, like which cell changed (<code>e.range</code>) and what was typed in it. It's perfect for checking data the moment it's entered, which you'll do in the worked example below.</p>
       <p><strong>On form submit</strong> runs when someone submits a Google Form that's connected to your sheet. Imagine a club sign-up form: every time a student signs up, your code could instantly add them to the right team list. This trigger is set up in the editor's <strong>Triggers</strong> menu (the clock icon on the left side), not just by naming a function.</p>
       <p class="mb-0"><strong>Time-driven</strong> triggers run on a schedule: every hour, every morning at 7 a.m., every Monday, and so on. They are also set up from the Triggers (clock) menu. A time-driven trigger could email a reminder about missing assignments every Friday afternoon, with nobody even logged in.</p>
+  </div>
+
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: On Edit vs. Time-Driven</strong>
+      <p class="mb-0 mt-2">An <strong>on edit</strong> trigger fires the moment a cell changes. A trigger that runs once a day at midnight is <strong>time-driven</strong>, which is a different trigger type.</p>
   </div>
 
   <!-- Gemini prompt (illustration): A clean graphic of a spreadsheet cell being edited, with a lightning bolt icon connecting it to a small gear icon labeled "trigger," and an arrow showing a script firing automatically — no mouse click on a "run" button anywhere in the image. -->
@@ -293,6 +317,12 @@ for (let i = 0; i &lt; students.length; i++) {
 }</code></pre>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Getting One Item Out of a List</strong>
+      <p class="mb-0 mt-2">You get an item out of a list by its <strong>index</strong>, its numbered position. Indexes usually start at 0, so the third item in a list of five is at index 2. You don't need an IF statement to find it.</p>
+  </div>
+
   <!-- Gemini prompt (illustration): A horizontal row of five labeled boxes containing the names Amara, Ben, Chen, Deja, Eli, with index numbers 0, 1, 2, 3, 4 printed directly below each box, and an arrow pointing to the box at index 2 labeled "students[2] = Chen." -->
   <img src="/images/control_structures_events/fig10.4.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="An array of five names, Amara, Ben, Chen, Deja and Eli, with index numbers 0 through 4 below them. An arrow shows that students[2] is Chen.">
 
@@ -314,6 +344,12 @@ for (let i = 0; i &lt; students.length; i++) {
 2. Empty           []                 "No scores yet" (not NaN)
 3. Invalid         ["eighty", 90]     "Scores must be numbers"</code></pre>
       <p>After you fix a bug, run <em>all</em> of your test cases again, not just the one that failed. A fix in one spot can accidentally break something that used to work. Re-running every test is how professionals make sure they moved forward, not sideways.</p>
+  </div>
+
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Five Terms You'll See on the Unit 4 Test</strong>
+      <ul class="mb-2 mt-2 ps-3"><li><strong>Test case</strong>: one specific input you try on purpose, like an empty list or a negative number, to check that the code behaves correctly.</li><li><strong>Code review</strong>: a teammate reads your code for bugs and style problems <em>before</em> it is merged into the main project. A person does it, not a compiler.</li><li><strong>Vulnerability</strong>: a flaw an attacker can exploit, like a login form that skips the password check. Chapter 15 goes deeper.</li><li><strong>Library</strong>: a package of pre-written, tested code you import, like a date formatter, so you don't reinvent the wheel. It is about reusing code, not protecting it legally.</li><li><strong>Recursion</strong>: a function that calls itself with a smaller version of the problem until it reaches a stopping point (the base case). A factorial function that calls itself is recursion, not a loop. Chapter 15 teaches it fully.</li></ul>
   </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-warning border-5">

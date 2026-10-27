@@ -221,6 +221,12 @@
       <p class="mb-0">Computer vision is also where the face-recognition bias from Chapter 11 came from. When a vision system is trained mostly on certain kinds of faces, it sees those faces best. So the same question always applies: who was in the training data?</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: NLP and Training Data</strong>
+      <ul class="mb-2 mt-2 ps-3"><li>A voice assistant understanding your spoken question and answering in plain language is <strong>Natural Language Processing (NLP)</strong>.</li><li>Before a machine-learning model can predict anything, it needs <strong>training data</strong>: the examples it learns its patterns from.</li></ul>
+  </div>
+
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Natural Language Processing (NLP)</h5>
       <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "HOW LANGUAGE AI WRITES". A sentence "The cat sat on the ___" with a list of predicted next words and bars: "mat 62%", "sofa 20%", "roof 8%". Below, a chatbot speech bubble with a confident tone and the warning label "Sounding right is not the same as being right." -->
@@ -263,6 +269,12 @@
       <p><strong>Minimax</strong> is a strategy for two-player games. Its big idea is to assume your opponent is smart and will always make the move that's worst for you. So instead of hoping for the best, you plan for the worst and pick the move that still leaves you in the best position.</p>
       <p>Here's how it works on a decision tree. For each move you could make, look at every response your opponent could make, and find the one that hurts you most. That's the score you should expect from that move. Then, out of all your moves, pick the one with the best of those worst-case scores. You're <strong>maximizing</strong> your result while your opponent tries to <strong>minimize</strong> it. That's where the name "mini-max" comes from.</p>
       <p class="mb-0">You already think this way in real games. In chess or checkers, you don't make a move that looks great only if your opponent makes a silly mistake. You ask, "What's their best answer to this?" Minimax is that same careful thinking, done by a computer across many possible futures at once.</p>
+  </div>
+
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: State and Minimax</strong>
+      <ul class="mb-2 mt-2 ps-3"><li>The exact arrangement of the pieces on the board at one moment is the game's <strong>state</strong>.</li><li><strong>Minimax</strong> assumes the opponent will always make the <strong>smartest possible move</strong>, then picks the move that leaves the AI best off even then. It doesn't pick moves at random, and it doesn't copy the opponent's style.</li></ul>
   </div>
 
   <!-- Gemini prompt (gemini-3 image, Oct 2026): Title "HOW MINIMAX CHOOSES A MOVE". A top-down tree diagram. The top node is labeled "Current Board". It branches to three nodes labeled "AI Move A", "AI Move B", and "AI Move C". Each AI move branches to two bottom leaf nodes labeled with scores: Move A leads to leaves "3" and "5"; Move B leads to leaves "2" and "9"; Move C leads to leaves "6" and "4". In each pair, the lower score (the opponent's choice) is highlighted in red: "3" under Move A, "2" under Move B, "4" under Move C. Each AI move node shows its worst-case score in a small badge: Move A "worst case 3", Move B "worst case 2", Move C "worst case 4". The path from "Current Board" to "AI Move C" is highlighted in thick green with the label "Minimax picks Move C (best worst case: 4)". A small legend: red = "opponent's best reply", green = "AI's choice". -->

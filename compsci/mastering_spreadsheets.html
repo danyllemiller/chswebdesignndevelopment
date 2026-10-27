@@ -91,6 +91,12 @@
 
   <p>You can't scroll through fifteen million rows looking for a trend by eye. Every skill in this chapter — a formula that runs once and applies to every row, a chart that answers one clear question, a dashboard that lets someone filter down to just what they need — exists because of Big Data. They're the same tools whether the sheet has 15 rows or 15 million; you're just about to find out why they matter at all.</p>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Big Data and Data Mining</strong>
+      <p class="mb-0 mt-2">Billions of transaction records from millions of customers is <strong>Big Data</strong>: data so large that people need software to find the patterns in it. Big Data is the data itself, not a programming language. <strong>Data mining</strong> is the process of having software dig through that data to find a pattern no human noticed.</p>
+  </div>
+
   <div class="row g-3 my-4 text-center">
       <div class="col-md-4">
           <div class="card h-100 shadow-sm"><div class="card-body"><h6 class="fw-bold text-primary">Volume</h6><p class="small mb-0">The sheer amount of data — often too much for a human to read, only to compute</p></div></div>
@@ -151,6 +157,12 @@
       <div class="col-md-3">
           <div class="card h-100 shadow-sm"><div class="card-body"><h6 class="fw-bold text-primary">Text</h6><p class="small mb-0">CONCATENATE, TRIM</p><p class="small text-muted mb-0 mt-1">Use when: the data's messy or split apart and needs reshaping first.</p></div></div>
       </div>
+  </div>
+
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Adding Up Many Rows Is Aggregation</strong>
+      <p class="mb-0 mt-2">A formula that adds up every sale in March to get one total is <strong>aggregation</strong>: SUM, AVERAGE, and COUNT turn many rows into one number. Conditional formatting only changes how cells <em>look</em>, like turning low scores red. It doesn't calculate anything.</p>
   </div>
 
   <p>Always <strong>verify</strong> a new formula against a small sample you calculated by hand before trusting it on 2,000 rows. It costs thirty seconds and it's the only thing standing between you and a wrong number nobody catches.</p>
@@ -242,6 +254,12 @@
       <p><strong>Composition</strong> asks "what are the parts of the whole?", like what percent of your spending goes to food, gas, and fun. Use a <strong>pie chart</strong> for just a few parts, or a stacked bar for more. <strong>Distribution</strong> asks "how spread out are the values?", like how many students scored in the 60s, 70s, 80s, and 90s. Use a <strong>histogram</strong>.</p>
       <p><strong>Relationship</strong> asks "do these two things move together?", like study hours and quiz scores. Use a <strong>scatter plot</strong>, with one dot per student. <strong>Change over time</strong> asks "is it going up or down?", like your savings week by week. Use a <strong>line chart</strong>, because the line shows the trend.</p>
       <p class="mb-0">If you can't say what question your chart answers in one sentence, you're not ready to make it yet. And if the chart type doesn't match the question, like a pie chart for change over time, readers will struggle to see the point even if every number is right.</p>
+  </div>
+
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Parts of a Whole Means Pie</strong>
+      <p class="mb-0 mt-2">Market share, a budget split into categories, the percent of the class that chose each answer: these are <strong>parts of a whole</strong>, so use a <strong>pie chart</strong> (or a stacked bar). A scatter plot shows a <em>relationship</em> between two numbers, like hours studied and test score.</p>
   </div>
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
@@ -380,6 +398,12 @@
       <p class="mb-0">So when two columns in a spreadsheet rise and fall together, call it a correlation and stop there unless you have more evidence. Proving cause takes a controlled experiment. Keeping these two ideas separate is how you avoid making a confident claim that your data doesn't actually support.</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Outliers, and Correlation vs. Cause</strong>
+      <ul class="mb-2 mt-2 ps-3"><li>A score of 12 in a class that mostly scored 70 to 95 is an <strong>outlier</strong>: one value far from the rest. Check it before you average it in.</li><li><strong>Correlation</strong> means two things rise and fall together. It does <strong>not</strong> mean one causes the other. Ice cream sales and drownings both go up in summer because of hot weather, not because of each other.</li><li>If a question says two things are related "though one doesn't cause the other," the answer is correlation, never cause and effect.</li></ul>
+  </div>
+
   <h4 class="fw-bold mt-5 text-primary">7.3.3 Pivot Tables & Communicating a Claim</h4>
   <p>A <strong>pivot table</strong> lets you instantly reorganize and summarize thousands of rows — totaled by region, by month, by product — without touching or duplicating the original data. It's the fastest way to go from a wall of raw rows to a specific answer.</p>
 
@@ -388,6 +412,12 @@
       <p>A <strong>pivot table</strong> is a summary table that Sheets builds for you. Imagine a sheet with 1,000 sales, each row showing a date, a product, a store, and an amount. A pivot table can answer "What were the total sales for each store?" in a few clicks, without writing a single formula.</p>
       <p>To make one, select your data, including headers, and click <strong>Insert → Pivot table</strong>. Sheets creates a new tab with a pivot table editor. Under <strong>Rows</strong>, add the category you want to group by, like Store. Under <strong>Values</strong>, add the number you want summarized, like Amount, and choose how: SUM, AVERAGE, or COUNTA (count). Instantly you get one row per store with its total.</p>
       <p class="mb-0">You can rearrange it any time. Swap Store for Product, add Month as a <strong>Column</strong>, or add a <strong>Filter</strong>. The original data never changes. That's why it's called "pivoting": you're turning the same data to look at it from a different angle.</p>
+  </div>
+
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Summarize Thousands of Rows Without Touching Them</strong>
+      <p class="mb-0 mt-2">When you need to total thousands of rows by region, month, or product <strong>without changing the original data</strong>, the tool is a <strong>pivot table</strong>. It builds a separate summary and leaves your data exactly as it was.</p>
   </div>
   <p>All of this — mining, cleaning, spotting outliers and correlations, pivoting — is in service of one final step: using data to <strong>communicate a clear claim</strong>. That means picking the specific numbers and chart that support the point you're making, and presenting them so someone else reaches the same conclusion you did, on their own, at a glance.</p>
 

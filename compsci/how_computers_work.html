@@ -135,6 +135,12 @@
       <p class="mb-0">How do you tell application software from system software? Ask, "Who is this for?" <strong>Application software</strong> does a job for <em>you</em>: a web browser like Chrome, a spreadsheet program like Google Sheets, a game, a photo editor, a music player. <strong>System software</strong> does a job for <em>the computer</em>: it starts the machine, manages memory, and controls devices. If you open it on purpose to get your own work or fun done, it's almost always an application.</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Which Way Is Up?</strong>
+      <ul class="mb-2 mt-2 ps-3"><li>"From the physical machine up" means <strong>start at the hardware</strong>: Hardware → Operating System → Application Software → User. Starting with the user turns the stack upside down.</li><li><strong>Hardware</strong> is the layer you could hold: circuits, chips, memory. Firmware (like a computer's BIOS) is software stored on a chip. It is low-level system software, not the hardware layer, and it is never application software.</li><li>Application or not? A spreadsheet, a browser, a game: application software. The BIOS, the operating system, a device driver: system software.</li></ul>
+  </div>
+
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: What the Operating System Does</h5>
       <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "THE OS IS THE FRONT OFFICE". A school front-office counter with a sign reading "OPERATING SYSTEM" and an office worker behind it. In front of the counter, three teacher characters wait in line, each wearing a name badge and holding a request slip: badge "Browser" with the slip "Need memory", badge "Game" with the slip "Need the processor", badge "Video call" with the slip "Need the camera". Caption at the bottom: "Apps ask. The OS decides who gets what." -->
@@ -297,6 +303,12 @@
       <p class="mb-0">Your notes also help the next person. If a classmate hits the same problem next week, your written steps become a ready-made fix. Professional IT teams save these notes in help-desk "tickets" and knowledge bases for exactly this reason. That's step 5 of the protocol, <em>Document the fix</em>, doing its job.</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: The First Step, and the Blank-Monitor Test</strong>
+      <ul class="mb-2 mt-2 ps-3"><li>The <strong>first</strong> troubleshooting step is to <strong>clearly identify and define the problem</strong>. Updating the operating system is not step one.</li><li>Blank monitor? Plug that monitor into a <strong>different computer</strong> (or a different monitor into this computer). That one test shows whether the monitor or the computer is the problem. Pressing Ctrl+Alt+Delete can't tell you, because a dead screen shows nothing either way.</li></ul>
+  </div>
+
   <div class="alert alert-primary mt-4 shadow-lg border-primary border-3 pulse-animation">
       <div class="d-flex align-items-start">
           <i class="fas fa-tools fa-3x me-4 text-primary mt-1"></i>
@@ -363,6 +375,12 @@
       <p class="mb-0">Every number, word, photo, song, and video on your device is stored as a long pattern of bits. The rest of this section shows how simple on/off switches can make decisions, hold data, and turn into letters and pictures.</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Transistor, Not Resistor</strong>
+      <p class="mb-0 mt-2">A <strong>transistor</strong> is the tiny on/off switch that stores a 1 or a 0. A <strong>resistor</strong> only slows the flow of electricity; it can't switch anything on or off. And the number system the hardware runs on is <strong>binary</strong>, because a switch has only two states. Hexadecimal is just a shorter way for people to write binary (see the hex box below).</p>
+  </div>
+
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Logic Gates, the Hardware That Makes Decisions</h5>
       <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "THREE LOGIC GATES". Three columns, each with a gate name, a simple everyday picture, and its rule. Column 1 "AND: picky": a door with two key locks that both must be turned, rule "1 only if BOTH inputs are 1". Column 2 "OR: easygoing": a hallway with a light switch at each end and the light on, rule "1 if AT LEAST ONE input is 1". Column 3 "NOT: contrary": a switch flipping an arrow the opposite way, rule "Flips it: 1 becomes 0, 0 becomes 1". -->
@@ -376,6 +394,12 @@
       <p class="mb-0">A quick way to remember: <strong>AND</strong> is picky (everything must be true), <strong>OR</strong> is easygoing (anything true is enough), and <strong>NOT</strong> is contrary (it always says the opposite).</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: AND vs. NAND, OR vs. NOR, and XOR</strong>
+      <ul class="mb-2 mt-2 ps-3"><li>"Outputs 1 only when <strong>both</strong> inputs are 1" is <strong>AND</strong>. Not NAND, and not XOR.</li><li>"Outputs 1 when <strong>at least one</strong> input is 1" is <strong>OR</strong>. Not NOR.</li><li>The <strong>N</strong> in NAND and NOR means <strong>NOT</strong>: NAND gives the exact opposite of AND, and NOR gives the exact opposite of OR.</li><li><strong>XOR</strong> ("exclusive OR") outputs 1 when <strong>exactly one</strong> input is 1, so two 1s give 0.</li><li>Check yourself with inputs 1 and 1: AND → 1, OR → 1, XOR → 0, NAND → 0, NOR → 0.</li></ul>
+  </div>
+
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: RAM: Where Data Waits While It's Being Used</h5>
       <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "RAM IS YOUR DESK, STORAGE IS YOUR LOCKER". Left: a school desk with open books and papers spread on it, labeled "RAM: fast, holds what you're working on now" and a small power-plug icon with the note "Cleared when power goes off". Right: a tall school locker full of neatly stacked books and folders, labeled "STORAGE (SSD or hard drive): slower, keeps everything" with the note "Still there after you turn it off". An arrow from the locker to the desk labeled "Open a file". -->
@@ -383,6 +407,12 @@
       <p>When the processor is actively working on something, the data it needs is held in <strong>RAM (Random Access Memory)</strong>. RAM is extremely fast, so the CPU can grab what it needs almost instantly. Every app you have open and every file you're editing is sitting in RAM right now.</p>
       <p>RAM is <em>temporary</em>. When the power turns off, everything in RAM disappears. That's different from <strong>storage</strong> (a hard drive or SSD), which is slower but keeps your files even when the computer is off. That's why you lose unsaved work in a power outage: it was only in RAM.</p>
       <p class="mb-0">Think of storage as your locker and RAM as your desk. You keep everything in the locker, but you take out only what you're working on right now and spread it on the desk, where it's quick to reach.</p>
+  </div>
+
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: The CPU Does the Work; RAM Only Holds It</strong>
+      <ul class="mb-2 mt-2 ps-3"><li>The <strong>CPU (Central Processing Unit)</strong> is the part that actually carries out logic and processing. <strong>RAM</strong> only holds the data the CPU is working on; it doesn't process anything.</li><li>The CPU repeats one loop billions of times a second: <strong>Fetch</strong> the next instruction from memory, <strong>Decode</strong> what it means, <strong>Execute</strong> it. That is the <strong>Fetch-Decode-Execute cycle</strong>. A compiler is something else: it translates code before the program ever runs.</li><li><strong>Clock speed</strong>, measured in gigahertz (GHz), tells you roughly how many operations per second a CPU can do. A 3.0 GHz processor ticks about 3 billion times every second.</li><li>RAM is where active data waits for the fastest access. <strong>Virtual memory</strong> (a pagefile) is storage space the computer borrows when RAM fills up, and it is much slower.</li></ul>
   </div>
 
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
@@ -399,11 +429,23 @@
       <p class="mb-0"><strong>Unicode</strong> is the much bigger, modern version. It includes the characters of almost every language in the world, plus symbols and emoji. ASCII and Unicode are the systems that translate binary into the text you read on screen.</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Binary, Hex, and ASCII Do Three Different Jobs</strong>
+      <ul class="mb-2 mt-2 ps-3"><li><strong>Binary</strong> is how the computer stores and processes everything. It is the foundation.</li><li><strong>Hexadecimal</strong> is a shorter way for <em>people</em> to write binary. The CPU doesn't run hex, and hex isn't faster. It is just easier for humans to read (FF instead of 11111111).</li><li><strong>ASCII and Unicode</strong> turn binary numbers into letters, numbers, and punctuation. "Hexadecimal encoding" is not how text is made.</li><li>Quick sort: How is it stored? <em>Binary.</em> How do programmers write it shorter? <em>Hex.</em> How do numbers become letters? <em>ASCII or Unicode.</em></li></ul>
+  </div>
+
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Pixels: Turning Bits Into Pictures</h5>
       <p>Your screen is a grid of millions of tiny dots called <strong>pixels</strong>. Each pixel can only be one color at a time. Zoom in far enough on any photo and you'll see the little squares.</p>
       <p>The computer stores each pixel's color as a binary number. Usually that number mixes amounts of red, green, and blue light. So an image file is really a long list of color codes, one for every pixel, in order.</p>
       <p class="mb-0">To display the image, the computer reads those codes and tells each pixel on the screen which color to light up. That's how a visual output like a photo, a video, or this page is made from nothing but 1s and 0s.</p>
+  </div>
+
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Every Picture on a Screen Is Pixels</strong>
+      <p class="mb-0 mt-2">The answer to "how do computers show images using binary?" is <strong>pixels, each with a binary color code</strong>. Even a vector image (stored as shapes and lines) is turned into pixels before your screen shows it, because a screen can only light up pixels.</p>
   </div>
 
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-success border-5">

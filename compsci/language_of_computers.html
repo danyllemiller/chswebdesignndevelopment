@@ -48,6 +48,12 @@
 
   <p>Eight of these digits — a <strong>bit</strong> each — make one <strong>byte</strong>. A byte has exactly 256 possible values (2 to the 8th power), because each of its 8 bits can be either a 0 or a 1. That's not an arbitrary number — it's why an 8-bit color channel maxes out at 255, and why some old video games had a hard score limit around 65,535. The bit width sets the ceiling.</p>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: 256, Not 128 or 512</strong>
+      <ul class="mb-2 mt-2 ps-3"><li>One byte is 8 bits, and 8 bits can make <strong>256</strong> different patterns (2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 = 256).</li><li>The values run from 0 to 255. That is still 256 values, because 0 counts as one of them.</li><li>128 is what <em>7</em> bits can make (2<sup>7</sup>), and 512 would take <em>9</em> bits (2<sup>9</sup>). A byte is neither.</li></ul>
+  </div>
+
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Converting Decimal to Binary</h5>
       <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "DECIMAL TO BINARY: BIGGEST FIRST". Start with a large number "45" on the left. A row of eight boxes labeled 128, 64, 32, 16, 8, 4, 2, 1 with the bits written under them: 0, 0, 1, 0, 1, 1, 0, 1. Small notes under the boxes that get a 1: under 32 "45 - 32 = 13", under 8 "13 - 8 = 5", under 4 "5 - 4 = 1", under 1 "1 - 1 = 0". Under the boxes that get a 0, the note "too big". At the right, the answer in large text: "00101101" and a green check with "Check: 32 + 8 + 4 + 1 = 45". -->

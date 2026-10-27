@@ -282,6 +282,12 @@ Aaliyah, 10th grade, Chemistry, D+</pre>
       <p class="mb-0">The tradeoff is size. Every sample is more data to store, so doubling the sampling rate roughly doubles the file size. That's why a voice memo app records at a lower rate than a music studio: speech is still easy to understand at lower quality, and the smaller files are easier to store and send. Higher fidelity almost always costs you a bigger file.</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Better Sound Always Costs Space</strong>
+      <p class="mb-0 mt-2">Recording at a higher sampling rate takes more samples every second, so you get better quality and a <strong>bigger file</strong>. That is the whole tradeoff. It doesn't speed anything up, and it doesn't lock the file into a special format.</p>
+  </div>
+
   <h4 class="fw-bold mt-5 text-info">6.3.2 Compression: Lossless vs. Lossy</h4>
   <p>A raw file is often bigger than it needs to be. Compression shrinks it — but not all compression works the same way:</p>
   <div class="row g-3 my-3">
@@ -323,6 +329,12 @@ Aaliyah, 10th grade, Chemistry, D+</pre>
   </div>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Lossless vs. Lossy</strong>
+      <ul class="mb-2 mt-2 ps-3"><li><strong>Lossless</strong>: uncompress it and you get the original back <strong>exactly</strong>, byte for byte. Nothing changes, not even a line break. Use it for text, code, and spreadsheets.</li><li><strong>Lossy</strong>: throws away details you probably won't notice to make the file much smaller. Use it for music, photos, and video, when a tiny quality drop is fine.</li><li>Encryption is a different job. It locks a file so others can't read it; it isn't a way to make the file smaller.</li></ul>
+  </div>
+
   <!-- Gemini prompt (gemini-3.1-flash-image, photo style, Oct 2026): A side-by-side comparison of the same photo of a flower compressed two ways: left labeled "Lossless" showing a crisp, perfectly sharp image; right labeled "Lossy (heavily compressed)" showing visible blocky compression artifacts and blurred detail, so the quality difference is obvious. The same close-up photo of a pink flower twice side by side, with white label bars "Lossless" and "Lossy (heavily compressed)". -->
   <img src="/images/storing_data/fig6.3.1.jpg" class="gen-media-placeholder shadow-sm" loading="lazy" alt="A side-by-side comparison of the same photo of a flower compressed two ways: left labeled &quot;Lossless&quot; showing a crisp, perfectly sharp image; right labeled &quot;Lossy (heavily compressed)&quot; showing visible blocky compression artifacts and blurred detail, so the quality difference is obvious.">
 
@@ -333,6 +345,12 @@ Aaliyah, 10th grade, Chemistry, D+</pre>
 
   <h4 class="fw-bold mt-5 text-primary">6.3.3 Metadata & Data Dictionaries</h4>
   <p><strong>Metadata</strong> is data <em>about</em> data — not the content itself, but information describing it. A photo's metadata might secretly store the date it was taken, the camera model, and the GPS location, none of which show up when you just look at the picture.</p>
+
+      <!-- Exam gap-fill (Oct 2026 test results) -->
+      <div class="alert alert-warning small border-warning border my-4">
+          <strong>Where Everyone Gets Ambushed: Metadata Is Data About the Data</strong>
+          <p class="mb-0 mt-2">The date a photo was taken, the camera model, and the GPS location are <strong>metadata</strong>: information about the file that is stored along with it. It is not CPU cache data, and it is not part of the picture itself.</p>
+      </div>
   <p>On a larger scale, a <strong>data dictionary</strong> is a document a database team keeps that explains exactly what every column in a dataset means, its expected format, and its valid values — so anyone new to the project (or a computer program reading it later) knows a column labeled <code>dob</code> is a date of birth in <code>YYYY-MM-DD</code> format, not a guess.</p>
 
   <div class="row g-3 my-4">

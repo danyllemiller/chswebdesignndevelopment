@@ -325,6 +325,12 @@ Logger.log(factorial(5));      // 120</code></pre>
       <p class="mb-0">You already know many of the defenses. Check every input. Keep data protected so it can only change through approved methods. And never trust users to type what you expect. Real teams also run security reviews, and they fix weak spots fast once they find them.</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Unintended Implications</strong>
+      <p class="mb-0 mt-2">An <strong>unintended implication</strong> is when changing one module to add a feature accidentally breaks another part of the program that depended on the old behavior. It is a software problem; changing code can't damage the CPU's physical logic gates.</p>
+  </div>
+
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Unintended Implications</h5>
       <p>An <strong>unintended implication</strong> is a side effect you didn't see coming: you change one part of your program, and a totally different part breaks. It happens because parts of a program quietly depend on each other in ways that aren't obvious.</p>

@@ -63,6 +63,12 @@
       <p class="mb-0">A <strong>module</strong> is a group of related procedures kept together, like a recipe box labeled "Breakfast" that holds the pancake card, the waffle card, and the omelet card. An <strong>object</strong> goes one step further: it bundles the <em>information</em> together with the procedures that use it. A "Student" object might hold a student's name and attendance record, plus the procedures that update that record. Every small job from your decomposition tree will eventually live in one of these three containers.</p>
   </div>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: Procedure, Module, or Object?</strong>
+      <ul class="mb-2 mt-2 ps-3"><li>Decomposition's three containers are <strong>procedures, modules, and objects</strong>. Not variables, loops, and conditionals.</li><li><strong>Procedure</strong>: a named block of reusable steps.</li><li><strong>Module</strong>: a group of related procedures kept together.</li><li><strong>Object</strong>: <em>data</em> plus the procedures that act on it, bundled together, like a Student object with a name and an attendance record. If the answer mentions data bundled with procedures, it is describing an object, not a procedure.</li></ul>
+  </div>
+
   <div class="bg-dark text-white p-4 rounded shadow-sm my-4 border-start border-info border-5">
       <h5 class="fw-bold text-info"><i class="fas fa-check-circle me-2"></i> Quick Check</h5>
       <p class="mb-0 text-light">When is a subproblem small enough to stop splitting? <em class="text-white-50">(Answer: when one person could build and test it independently.)</em></p>
@@ -246,6 +252,12 @@ function addQuizzes() {
   <h4 class="fw-bold mt-4 text-primary">9.4.1 Correctness, Efficiency & Tradeoffs</h4>
   <p>An algorithm's logic is <strong>correct</strong> if it produces the right output for every valid input, not just the examples you happened to test. <strong>Efficiency</strong> measures how much time and memory an algorithm uses to get there — and the two often trade off against each other. Choosing between an algorithm that runs faster but uses more memory, and one that's slower but easier to read, isn't about finding a "correct" answer; it's about weighing <strong>tradeoffs</strong> against what actually matters for your specific situation.</p>
 
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: What a Tradeoff Actually Weighs</strong>
+      <p class="mb-0 mt-2">Choosing an algorithm means balancing <strong>speed, memory use, and how easy the code is to read and maintain</strong>. Whether the program has buttons or a command line isn't part of that choice.</p>
+  </div>
+
   <div class="my-4 p-4 bg-white rounded shadow-sm border-start border-4 border-info">
       <h5 class="fw-bold text-info mb-3"><i class="fas fa-book-open me-2"></i>Breaking It Down: Correctness, Efficiency & Tradeoffs</h5>
       <p><strong>Correctness</strong> means your algorithm gives the right answer every single time, not just for the examples you tried. Imagine a calculator that adds correctly for small numbers but gives wrong answers for numbers over 1,000. It "works" when you test it with 2 + 3, but it isn't correct. To trust an algorithm, you need to think about every kind of input it might get: big numbers, zero, negative numbers, empty lists.</p>
@@ -274,6 +286,12 @@ function addQuizzes() {
       <p>A <strong>pattern</strong> is a way of solving a problem that still works when the details change. Say you learn how to find the average of your quiz scores. Now you can also find the average temperature for a week. You can find a player's average points per game. You can find the average price of shoes. The numbers change, but the steps stay the same.</p>
       <p>When one solution works for many different problems, we call it <strong>generalizable</strong>. The trick is to look past the details, like quizzes, weather, or shoes. Look for what the problems share. Here, every one of them is the same job: "I have a list of numbers, and I want one number that shows the middle."</p>
       <p class="mb-0">This saves programmers a lot of time. They don't solve every problem from scratch. First they ask, "Have I solved a problem with this same shape before?" Often the answer is yes. Then they reuse that solution with a few small changes.</p>
+  </div>
+
+  <!-- Exam gap-fill (Oct 2026 test results) -->
+  <div class="alert alert-warning small border-warning border my-4">
+      <strong>Where Everyone Gets Ambushed: What Counts as a Computational Artifact</strong>
+      <p class="mb-0 mt-2">A <strong>computational artifact</strong> is anything a person creates using a computer: a program, an app, a website, an image, a video, a podcast episode. It is not old hardware, and it is not a temporary file the CPU makes on its own.</p>
   </div>
   <p>Anything you build with code — a program, a website, a spreadsheet tool, a simulation — counts as a <strong>computational artifact</strong>. Because a real artifact gets used by real people, <strong>accessibility</strong> (screen-reader support, captions, readable color contrast) isn't optional polish; it's part of whether the artifact actually works for its intended audience.</p>
 
