@@ -7,6 +7,7 @@ const MySQLStore = require('express-mysql-session')(session);
 const authRoutes = require('./auth');
 const apiRoutes = require('./api');
 const shortlinkRoutes = require('./routes/shortlinks');
+const { requireLogin } = require('./helpers');
 const { scheduleDailyAutoClockout } = require('./jobs/autoClockout');
 const { scheduleDailyAttendanceSweep } = require('./jobs/attendanceSweep');
 const { scheduleAutoPayroll } = require('./jobs/autoPayroll');
@@ -67,11 +68,16 @@ app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 // were never meant to be public, checked before any static handler runs.
 const BLOCKED_STATIC_PREFIXES = [
     '/server', '/memory', '/readme-files', '/.git', '/.claude',
-    '/node_modules', '/migrations', '/_screenshot-helpers', '/tests'
+    '/node_modules', '/migrations', '/_screenshot-helpers', '/tests',
+    '/curriculum/guided-notebook'
 ];
+// Working files left on the server (grade-export scratch CSVs and one-off
+// fix scripts at the top of the site, dumps and backups anywhere) were
+// public the same way, so they're blocked by name too.
+const BLOCKED_STATIC_NAMES = /^\/(scratch|_tmp|tmp)[^/]*$|\.(sql|bak|log|dump|gz|tar)$/;
 app.use((req, res, next) => {
     const p = req.path.toLowerCase();
-    if (p.endsWith('/.env') || p === '/.env' || BLOCKED_STATIC_PREFIXES.some(prefix => p === prefix || p.startsWith(prefix + '/'))) {
+    if (p.endsWith('/.env') || p === '/.env' || BLOCKED_STATIC_NAMES.test(p) || BLOCKED_STATIC_PREFIXES.some(prefix => p === prefix || p.startsWith(prefix + '/'))) {
         return res.status(404).end();
     }
     next();
@@ -137,6 +143,19 @@ app.use(session({
 app.use('/api', authRoutes);
 app.use('/api', apiRoutes);
 app.use('/go', shortlinkRoutes);
+
+// Student uploads (work, resumes) were open to anyone who guessed a student
+// ID and file name. Every page that shows them is signed in, so the files
+// now need a class-site login. Anything that can run code -- a student's web
+// page, a script, an SVG -- opens sandboxed in its own throwaway origin, so
+// it can't use the viewer's login to call the site (PDFs and images stay
+// unsandboxed; Chrome won't show a PDF in a sandbox).
+const ACTIVE_UPLOAD = /\.(html?|xhtml|svg|xml|js|mjs)$/i;
+app.use('/uploads', requireLogin, (req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    if (ACTIVE_UPLOAD.test(req.path)) res.setHeader('Content-Security-Policy', 'sandbox allow-scripts allow-forms allow-popups allow-modals');
+    next();
+});
 
 // Explicitly map your folders
 app.use('/js', express.static(path.join(__dirname, '../js')));
