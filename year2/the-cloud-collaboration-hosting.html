@@ -215,6 +215,18 @@
             <li class="mb-0"><strong>Keeping them in sync:</strong> <code>git push</code> sends your commits from local to remote; <code>git pull</code> brings your team's commits from remote to local. The live website on a server is a remote copy too, so your local folder structure and file names must match it exactly, or links break the moment you upload.</li>
         </ul>
       </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-center">
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "WHY DAN LOST THREE DAYS OF WORK". Two panels side by side. Left panel headed "Shared folder": two developers, one labeled "Dan" and one labeled "Senior dev", both editing the same file icon labeled "index.html". The senior dev's copy lands on top with the label "Saved last", while Dan's copy falls into a trash can with the label "3 days of work gone". Right panel headed "With Git": a horizontal timeline of four commit dots, alternating labels "Dan" and "Senior dev", leading into one file icon labeled "index.html", with the label "Every version kept". -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.2.1.jpg" alt="Left: Dan and a senior developer edit the same index.html in a shared folder; the senior developer saves last and Dan&#x27;s three days of work go in the trash. Right: with Git, both people&#x27;s commits stay on one timeline and every version is kept." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">Why Dan lost three days of work</figcaption>
+        </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "LOCAL VS. REMOTE REPOSITORY". On the left, a laptop with a folder on its screen, labeled "Local repository", with a small label under it: "Your computer, works offline". On the right, a large cloud shape with a folder inside, labeled "Remote repository (origin)", with a small label under it: "On GitHub, the team's shared copy". Between them, one arrow from the laptop up to the cloud labeled "git push" and one arrow from the cloud down to the laptop labeled "git pull". No logos. -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.2.2.jpg" alt="A laptop labeled Local repository (your computer, works offline) and a cloud labeled Remote repository, origin (on GitHub, the team&#x27;s shared copy), with git push sending commits up to the cloud and git pull bringing them down." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">Local vs. remote repository</figcaption>
+        </figure>
+      </div>
     </div>
 
     <!-- SECTION 2: GIT VS GITHUB -->
@@ -423,6 +435,31 @@
           </a>
           <figcaption class="p-2 small text-muted text-center"><strong>Figure 11.3:</strong> Creating a Repository.</figcaption>
         </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "GIT IS THE ENGINE, GITHUB IS THE HUB". Left half: a laptop with a large gear-shaped engine drawn on its screen, labeled "Git", with the small label "Software on your laptop" and three small tags under it: "Commits", "Branches", "History". Right half: a large cloud hub with four small laptops connected to it by lines, labeled "GitHub", with the small label "Website in the cloud" and three small tags under it: "Team access", "Pull requests", "Off-site backup". A two-headed arrow between the halves. No logos. -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.3.1.jpg" alt="Git, shown as an engine inside a laptop (software on your laptop: commits, branches, history), connected to GitHub, a cloud hub with four team laptops attached (website in the cloud: team access, pull requests, off-site backup)." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">Git is the engine, GitHub is the hub</figcaption>
+        </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "THE GIT WORKFLOW". Four stations from left to right joined by arrows. Station 1 "Working folder": a folder with three files, two of them marked with small orange dots. Arrow labeled "git add .". Station 2 "Staging area": a small loading dock with packed boxes, with the small label "The loading dock". Arrow labeled "git commit". Station 3 "Repository": a stack of instant photos, with the small label "Snapshots". Arrow labeled "git push". Station 4 "GitHub": a cloud. -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.3.2.jpg" alt="Four stations joined by arrows: Working folder, then git add to the Staging area (the loading dock), then git commit to the Repository (snapshots), then git push to GitHub in the cloud." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">The Git workflow: add, commit, push</figcaption>
+        </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "GUI VS. CLI". Left panel headed "GUI": a desktop with folder icons and a mouse pointer clicking one of them. Right panel headed "CLI": a dark terminal window with exactly four lines of white monospace text, in this order: "$ pwd", "/Users/dan/Desktop", "$ mkdir portfolio-repo", "$ cd portfolio-repo". Below the terminal, one folder icon labeled "portfolio-repo". -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.3.3.jpg" alt="Left: a mouse pointer clicking folder icons (GUI). Right: a terminal window running pwd, which prints /Users/dan/Desktop, then mkdir portfolio-repo and cd portfolio-repo, which makes and opens a portfolio-repo folder (CLI)." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">Clicking (GUI) vs. typing commands (CLI)</figcaption>
+        </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "MERGE CONFLICT: SAME LINE, TWO CHANGES". Top: two developers at laptops. The left laptop is labeled "main" and shows the heading "Local Legends Coffee". The right laptop is labeled "feature/rebrand" and shows the heading "Local Legends Coffee Roasters". Both arrows point down into one file icon labeled "index.html, line 10". Middle: a red stop sign with the label "Git stops". Bottom: a code panel with exactly five lines of monospace text, in this order: "<<<<<<< HEAD", "<h1>Local Legends Coffee</h1>", "=======", "<h1>Local Legends Coffee Roasters</h1>", ">>>>>>> feature/rebrand". Next to the code panel, a person pointing at it with the label "A human decides". -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.3.4.jpg" alt="Two developers change line 10 of index.html: on main the heading says Local Legends Coffee, on feature/rebrand it says Local Legends Coffee Roasters. Git stops and marks the file with &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD, the two versions split by =======, and &gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/rebrand, and a human decides." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">A merge conflict and its markers</figcaption>
+        </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "HOW A PULL REQUEST WORKS". A long horizontal line labeled "main" along the bottom. A branch line splits off it, runs along above it, and joins back into it. Along the branch, six numbered steps with simple icons, in this order: "1 Branch" (a fork in the line), "2 Commit" (a camera), "3 Push" (an upload arrow to a small cloud), "4 Open PR" (a document with a speech bubble), "5 Review" (a teammate giving a green check mark), "6 Merge" (the branch joining back into main). -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.3.5.jpg" alt="A branch splits off main and rejoins it through six steps: 1 Branch, 2 Commit, 3 Push, 4 Open a pull request, 5 Review (a teammate approves), 6 Merge back into main." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">How a pull request works</figcaption>
+        </figure>
       </div>
     </div>
 
@@ -542,6 +579,16 @@
           </a>
           <figcaption class="p-2 small text-muted text-center"><strong>Figure 11.4:</strong> A Server Data Center.</figcaption>
         </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "WHY NOT HOST ON YOUR LAPTOP?". Left: a closed school laptop with three red X marks and the labels "Slow", "Offline when the lid closes" and "Crashes at 10,000 visitors". Right: a row of tall server racks in a data center with three green check marks and the labels "Always on", "Fast" and "Handles big traffic". -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.4.1.jpg" alt="A school laptop marked slow, offline when the lid closes, and crashing at 10,000 visitors, next to data-center server racks marked always on, fast, and able to handle big traffic." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">Why client sites live in a data center</figcaption>
+        </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "WHY DATA CENTERS NEED COOLING". A side view of two rows of server racks inside a data center. Blue arrows rise from floor vents into the fronts of the racks, labeled "Cold air in". Red arrows leave the backs of the racks and rise to ceiling vents, labeled "Hot air out". On the right, a large cooling unit labeled "Cooling system". A thermometer icon next to the racks, labeled "Servers make heat". -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.4.2.jpg" alt="A side view of server racks: blue cold air comes up from floor vents into the front of the racks, red hot air leaves the back and rises to ceiling vents, and a large cooling system on the right keeps the room cool because servers make heat." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">Why data centers need cooling</figcaption>
+        </figure>
       </div>
     </div>
 
@@ -599,6 +646,26 @@
               <p class="mb-0">"Uptime SLA," "bandwidth," "SSL renewal," and "security patching" are exactly the kind of terms that show up when comparing web hosts — know what each one actually controls.</p>
           </div>
         </div>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "WHAT UPTIME REALLY MEANS". A small calendar icon labeled "1 year". Two long horizontal bars, each standing for one year. The top bar is labeled "99.9% uptime": it is green almost all the way across with a red sliver at the right end labeled "about 8.7 hours down". The bottom bar is labeled "99.99% uptime": it is green with a much thinner red sliver at the right end labeled "about 52 minutes down". -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.5.1.jpg" alt="Two bars for one year: 99.9% uptime still allows about 8.7 hours of downtime a year; 99.99% uptime allows only about 52 minutes." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">What 99.9% vs. 99.99% uptime means</figcaption>
+        </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "SAME PRICE, VERY DIFFERENT PLANS". Two hosting plan cards side by side, each with "$10 / month" at the top. Left card headed "Plan A" with five rows: "Bandwidth: limited", "Storage: 10 GB", "SSL: extra cost", "Backups: none", "Support: business hours", each with a small red X. Right card headed "Plan B" with five rows: "Bandwidth: unmetered", "Storage: 50 GB", "SSL: included", "Backups: daily", "Support: 24/7", each with a small green check. Under the cards, one line: "Check backups and support first". -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.5.2.jpg" alt="Two hosting plans that both cost $10 a month: Plan A has limited bandwidth, 10 GB storage, SSL at extra cost, no backups and business-hours support; Plan B has unmetered bandwidth, 50 GB, SSL included, daily backups and 24/7 support. Check backups and support first." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">Same price, very different plans</figcaption>
+        </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "HOSTING IS NOT SET IT AND FORGET IT". A server icon in the center with five steps arranged in a circle around it, joined by curved arrows into a loop: "Security patching" (a shield), "Monitor CPU, RAM, disk" (a gauge), "Review logs" (a magnifying glass over a list), "Renew SSL" (a padlock with a small calendar), "Update software" (circular refresh arrows). -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.5.3.jpg" alt="A loop of five routine jobs around a server: security patching, monitoring CPU, RAM and disk, reviewing logs, renewing SSL certificates, and updating software." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">The hosting maintenance routine</figcaption>
+        </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "THE HOSTING PROPOSAL". One document page with three stacked sections. Section "1 Recommendation": a small server icon and a thumbs-up. Section "2 Costs": a dollar sign with three small tags "Domain", "SSL" and "Backups". Section "3 Risks": a warning triangle with three small tags "Outages", "Traffic spikes" and "Expired certificate". -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.5.4.jpg" alt="A hosting proposal page with three parts: 1 Recommendation, 2 Costs (including the domain, SSL and backups), and 3 Risks (outages, traffic spikes, an expired certificate)." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">The three parts of a hosting proposal</figcaption>
+        </figure>
       </div>
     </div>
 
@@ -944,6 +1011,11 @@ MIT License — Copyright (c) 2026 CHS Web Design Agency</code></pre>
           };
         })();
         </script>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "A PROFESSIONAL README". Left: a plain text editor panel headed "README.md" showing exactly five lines of monospace text, in this order: "# Portfolio Site", "A portfolio for PixelPioneers.", "## Setup", "- Clone the repo", "- Open index.html". Right: a white web page panel headed "On GitHub" showing the same content formatted: a big bold heading "Portfolio Site", a normal sentence "A portfolio for PixelPioneers.", a smaller bold heading "Setup", and two bullet points "Clone the repo" and "Open index.html". A thick arrow from the left panel to the right panel labeled "Renders as". -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.8.1.jpg" alt="Raw Markdown in README.md (# Portfolio Site, a description, ## Setup, and two - list items) next to the same README rendered on GitHub with a big heading, a smaller Setup heading and two bullet points." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">Markdown in, formatted README out</figcaption>
+        </figure>
       </div>
     </div>
 
@@ -1001,6 +1073,21 @@ MIT License — Copyright (c) 2026 CHS Web Design Agency</code></pre>
           </div>
           <p class="mb-0 small text-dark">Why does the "1 off-site copy" part of the 3-2-1 Rule matter even if the other 2 copies are on reliable cloud servers?</p>
         </div>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "THE 3-2-1 BACKUP RULE". Three columns, each with a big numeral at the top. Column "3": three identical file stacks labeled "Original", "Backup 1" and "Backup 2", with the label "3 copies". Column "2": a server hard drive and a cloud storage bucket, with the label "2 types of storage". Column "1": one copy inside a small building far away with a map pin, with the label "1 off-site". -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.9.1.jpg" alt="The 3-2-1 rule: 3 copies (the original plus two backups), on 2 types of storage (a server disk and cloud storage), with 1 copy off-site in a different place." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">The 3-2-1 backup rule</figcaption>
+        </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "GIT IS NOT A BACKUP PLAN". Left box headed "Git tracks" with a big green check and a stack of code file icons labeled "Code files". Right box headed "Git does NOT back up" with three items, each with a red X: "Live database (orders, accounts)", "Uploaded images", "Server settings". -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.9.2.jpg" alt="Git tracks code files, but it does not back up the live database (orders, accounts), uploaded images, or server settings." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">What Git does and doesn&#x27;t back up</figcaption>
+        </figure>
+        <!-- Gemini prompt (gemini-3-pro-image, Oct 2026): Title "WRITING A BACKUP PROCEDURE". A clipboard holding a checklist with five numbered rows, each with a checked box, in this order: "1 List what gets backed up", "2 Set the schedule", "3 Choose where copies go", "4 Name who is responsible", "5 Test a restore monthly". -->
+        <figure class="mb-4">
+          <img src="/images/the-cloud-collaboration-hosting/fig11.9.3.jpg" alt="A clipboard checklist: 1 list what gets backed up, 2 set the schedule, 3 choose where copies go, 4 name who is responsible, 5 test a restore monthly." class="img-fluid rounded border shadow-sm w-100" loading="lazy">
+          <figcaption class="p-2 small text-muted text-center">Five steps of a backup procedure</figcaption>
+        </figure>
       </div>
     </div>
 
