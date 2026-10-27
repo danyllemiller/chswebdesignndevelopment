@@ -5,6 +5,27 @@ const bcrypt = require('bcrypt');
 const { withConnection } = require('./db');
 const { validatePassword } = require('./helpers');
 
+// The teacher's admin account lives in students too, so the public sign-up and
+// recovery forms below must never touch a staff row: with only the account's ID
+// number (and the teacher's name) anyone could have set a new password on it.
+// A visitor who keeps getting those forms wrong also has to wait, so nobody can
+// walk through student IDs one after another.
+const STAFF_ROW = "(LOWER(COALESCE(role, '')) IN ('admin', 'teacher') OR COALESCE(section_id, '') = 'Teacher')";
+const isStaffRow = s => ['admin', 'teacher'].includes(String(s.role || '').toLowerCase()) || s.section_id === 'Teacher';
+const RECOVERY_WINDOW_MS = 15 * 60 * 1000, RECOVERY_MAX_FAILS = 25;   // generous: a whole class shares the school's address
+const recoveryFails = new Map();
+const visitor = req => req.get('CF-Connecting-IP') || req.ip;
+function recoveryBlocked(req) {
+    const now = Date.now(), recent = (recoveryFails.get(visitor(req)) || []).filter(t => now - t < RECOVERY_WINDOW_MS);
+    if (recent.length) recoveryFails.set(visitor(req), recent); else recoveryFails.delete(visitor(req));
+    return recent.length >= RECOVERY_MAX_FAILS;
+}
+function recoveryFailed(req) {
+    if (recoveryFails.size > 5000) recoveryFails.clear();
+    recoveryFails.set(visitor(req), [...(recoveryFails.get(visitor(req)) || []), Date.now()]);
+}
+const TOO_MANY_TRIES = { error: 'Too many tries. Wait 15 minutes, or ask your teacher.' };
+
 // LOGIN
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
@@ -76,11 +97,16 @@ router.post('/register', async (req, res) => {
     if (passwordError) {
         return res.status(400).json({ error: passwordError });
     }
+    if (recoveryBlocked(req)) return res.status(429).json(TOO_MANY_TRIES);
 
+    // Sign-up claims an account once. It used to overwrite whatever login an ID
+    // already had, so anyone with a student's (or the teacher's) ID could take it.
+    const ALREADY = { status: 409, body: { error: 'This student ID already has an account. Use Forgot username or Reset password, or ask your teacher.' } };
     try {
         const outcome = await withConnection(async (connection) => {
             const [students] = await connection.execute('SELECT * FROM students WHERE student_id = ?', [student_id]);
-            if (students.length === 0) return { status: 400, body: { error: 'ID not on roster.' } };
+            if (students.length === 0 || isStaffRow(students[0])) return { status: 400, body: { error: 'ID not on roster.' } };
+            if (students[0].username) return ALREADY;
 
             const [taken] = await connection.execute('SELECT student_id FROM students WHERE username = ? AND student_id != ?', [username, student_id]);
             if (taken.length > 0) {
@@ -88,10 +114,14 @@ router.post('/register', async (req, res) => {
             }
 
             const hashedPassword = await bcrypt.hash(password, 10);
-            await connection.execute('UPDATE students SET username = ?, password = ?, first_name = ?, last_name = ? WHERE student_id = ?',
+            const [r] = await connection.execute(
+                `UPDATE students SET username = ?, password = ?, first_name = ?, last_name = ?
+                 WHERE student_id = ? AND COALESCE(username, '') = '' AND NOT ${STAFF_ROW}`,
                 [username, hashedPassword, first_name, last_name, student_id]);
+            if (r.affectedRows !== 1) return ALREADY;
             return { status: 200, body: { success: true } };
         });
+        if (outcome.status >= 400) recoveryFailed(req);
         res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error('[register] Database error:', err);
@@ -160,12 +190,13 @@ router.post('/lookup-username', async (req, res) => {
     if (!first_name || !last_name || !student_id) {
         return res.status(400).json({ error: 'First name, last name, and student ID are required.' });
     }
+    if (recoveryBlocked(req)) return res.status(429).json(TOO_MANY_TRIES);
 
     try {
         const outcome = await withConnection(async (connection) => {
             const [rows] = await connection.execute(
                 `SELECT username FROM students
-                 WHERE student_id = ? AND LOWER(first_name) = LOWER(?) AND LOWER(last_name) = LOWER(?)
+                 WHERE student_id = ? AND LOWER(first_name) = LOWER(?) AND LOWER(last_name) = LOWER(?) AND NOT ${STAFF_ROW}
                  LIMIT 1`,
                 [student_id, first_name, last_name]
             );
@@ -178,6 +209,7 @@ router.post('/lookup-username', async (req, res) => {
             }
             return { status: 200, body: { success: true, username: rows[0].username } };
         });
+        if (outcome.status >= 400) recoveryFailed(req);
         return res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error(err);
@@ -200,13 +232,14 @@ router.post('/reset-password', async (req, res) => {
     if (passwordError) {
         return res.status(400).json({ error: passwordError });
     }
+    if (recoveryBlocked(req)) return res.status(429).json(TOO_MANY_TRIES);
 
     try {
         const outcome = await withConnection(async (connection) => {
             const [rows] = await connection.execute(
                 `SELECT student_id, first_name, last_name, username
                  FROM students
-                 WHERE student_id = ? AND LOWER(first_name) = LOWER(?) AND LOWER(last_name) = LOWER(?) AND LOWER(username) = LOWER(?)
+                 WHERE student_id = ? AND LOWER(first_name) = LOWER(?) AND LOWER(last_name) = LOWER(?) AND LOWER(username) = LOWER(?) AND NOT ${STAFF_ROW}
                  LIMIT 1`,
                 [student_id, first_name, last_name, username]
             );
@@ -221,7 +254,7 @@ router.post('/reset-password', async (req, res) => {
             // which is unrelated to this self-service route).
             const resetHash = await bcrypt.hash(new_password, 10);
             await connection.execute(
-                'UPDATE students SET password = ?, password_hash = ?, must_change_password = 0, password_updated_at = NOW() WHERE student_id = ?',
+                `UPDATE students SET password = ?, password_hash = ?, must_change_password = 0, password_updated_at = NOW() WHERE student_id = ? AND NOT ${STAFF_ROW}`,
                 [resetHash, resetHash, student_id]
             );
             return {
@@ -229,6 +262,7 @@ router.post('/reset-password', async (req, res) => {
                 body: { success: true, message: 'Password reset successful. You can now log in with your new password.' }
             };
         });
+        if (outcome.status >= 400) recoveryFailed(req);
         return res.status(outcome.status).json(outcome.body);
     } catch (err) {
         console.error(err);
