@@ -20,6 +20,7 @@
  *                   clock() -> Promise<{ secondsLeft }>,  // optional: checked every 15 s, for a time limit the teacher changes
  *                   noTranslate });                       // true: translating the page counts as leaving
  *   WrsTestUI.reviewHtml(result)                // results + every answered question
+ *   WrsTestUI.scoreHtml(result)                 // just the score (answers held until the teacher ends the test)
  */
 (function () {
     if (window.WrsTestUI) return;
@@ -364,20 +365,27 @@
         renderQuestion();
     }
 
-    // Score summary + every answered question (right or wrong, with the
-    // correct answer for misses), with an All / Wrong-only filter.
-    function reviewHtml(r, reason) {
+    // The score: how it ended, then correct / answered / accuracy.
+    function scoreHtml(r, reason) {
+        install();   // results can show without a test on this page load (a refresh while answers are held)
         const acc = r.answered ? Math.round((r.correct / r.answered) * 100) : 0;
-        const list = r.review || r.missed || [];
-        const wrong = list.filter(m => !m.right).length;
         const note = reason === 'time' ? '<div class="alert alert-warning py-2 fw-bold">Time\'s up! Your answers were submitted automatically.</div>'
-            : reason === 'left-test' ? '<div class="alert alert-danger py-2 fw-bold">You left the test a second time, so it was submitted automatically.</div>' : '';
-        const html = `${note}
+            : reason === 'left-test' ? '<div class="alert alert-danger py-2 fw-bold">You left the test a second time, so it was submitted automatically.</div>'
+            : reason === 'ended' ? '<div class="alert alert-warning py-2 fw-bold">Your teacher ended the test, so your saved answers were scored.</div>' : '';
+        return `${note}
           <div class="d-flex flex-wrap gap-4 align-items-end mb-3">
             <div><div class="wt-big text-success">${r.correct}</div><div class="fw-bold text-muted">correct</div></div>
             <div><div class="wt-big">${r.answered}</div><div class="fw-bold text-muted">answered of ${r.total}</div></div>
             <div><div class="wt-big">${acc}%</div><div class="fw-bold text-muted">accuracy</div></div>
-          </div>
+          </div>`;
+    }
+    // Score summary + every answered question (right or wrong, with the
+    // correct answer for misses), with an All / Wrong-only filter.
+    function reviewHtml(r, reason) {
+        install();
+        const list = r.review || r.missed || [];
+        const wrong = list.filter(m => !m.right).length;
+        const html = `${scoreHtml(r, reason)}
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4 mb-2">
             <h2 class="h6 fw-bold mb-0">Every question you answered (${list.length})</h2>
             <div class="btn-group btn-group-sm" role="group">
@@ -402,5 +410,5 @@
         root.querySelectorAll('.wt-review [data-right]').forEach(el => { el.hidden = f.dataset.wtFilter === 'wrong' && el.dataset.right === '1'; });
     });
 
-    window.WrsTestUI = { install, run, reviewHtml, enterFullscreen, esc };
+    window.WrsTestUI = { install, run, reviewHtml, scoreHtml, enterFullscreen, esc };
 })();
