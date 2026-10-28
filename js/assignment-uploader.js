@@ -52,6 +52,51 @@ function waitForAuth(timeout = 8000) {
     });
 }
 
+// CS project pages put data-folder on the assignment option (e.g. "Unit 6 Project"): those uploads go into
+// that folder in the student's My Files, and the page lists what's in it, so a student can check they turned
+// in the right files (teacher request 2026-10-28). Pages without data-folder upload exactly as before.
+const projectFolderOf = (opt) => String((opt && opt.dataset.folder) || '').replace(/[\\/]/g, '').trim();
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+async function showProjectFiles(folder) {
+    if (!folder || !currentStudent) return;
+    let box = document.getElementById('project-files');
+    if (!box) {
+        box = document.createElement('div');
+        box.id = 'project-files';
+        box.className = 'mt-3 p-3 border border-success rounded bg-light text-start';
+        (document.getElementById('uploadStatus') || document.getElementById('uploadForm')).after(box);
+    }
+    const id = currentStudent.student_id;
+    let files = [];
+    try {
+        const listData = new FormData();
+        listData.append("action", "list");
+        listData.append("studentId", id);
+        const listJson = await (await fetch(hostgatorManageUrl, { method: "POST", body: listData })).json();
+        const prefix = `uploads/${id}/${folder}/`;
+        files = (listJson.files || []).filter(f => f.path.startsWith(prefix)).map(f => ({ ...f, rel: f.path.slice(`uploads/${id}/`.length) }));
+    } catch (err) {
+        box.innerHTML = `<div class="small text-danger fw-bold">Could not load your files for this project. Refresh the page to try again.</div>`;
+        return;
+    }
+    files.sort((a, b) => b.time - a.time);
+    const size = n => n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
+    const when = t => new Date(t * 1000).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    const href = rel => '/uploads/' + [id, ...rel.split('/')].map(encodeURIComponent).join('/');
+    const head = `<div class="fw-bold text-success mb-2"><i class="fas fa-folder-open text-warning me-1"></i>Your files for this project
+        <span class="small text-muted fw-normal">(in My Files, folder "${escapeHtml(folder)}")</span></div>`;
+    box.innerHTML = head + (files.length
+        ? `<ul class="list-unstyled small mb-2">${files.map(f => `<li class="mb-1"><i class="fas fa-file me-1 text-secondary"></i>
+              <a href="${href(f.rel)}" target="_blank" rel="noopener" class="fw-bold">${escapeHtml(f.rel.slice(folder.length + 1))}</a><span
+              class="text-muted"> (${size(f.size)}, turned in ${escapeHtml(when(f.time))})</span></li>`).join('')}</ul>
+           <div class="small text-muted">Click each file to open it and make sure it's the right one. Wrong file? Delete it in
+              <a href="/student/files.html">My Files</a>, then upload the right one here.</div>`
+        : `<div class="small mb-1">Nothing here yet. Do STEP 1: upload your file(s) above.</div>
+           <div class="small text-muted">Turned this project in before October 29? Your file is still in
+              <a href="/student/files.html">My Files</a>, just not in this folder.</div>`);
+}
+
 function setupOverwriteModal() {
     if (document.getElementById('overwriteModal')) return;
     const modalHtml = `
@@ -162,6 +207,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    // The project's file list shows right away (each CS project page has one project in its dropdown)
+    const folderOption = [...assignSelect.options].find(o => projectFolderOf(o));
+    if (folderOption) showProjectFiles(projectFolderOf(folderOption));
+    assignSelect.addEventListener('change', () => {
+        const folder = projectFolderOf(assignSelect.options[assignSelect.selectedIndex]);
+        if (folder) showProjectFiles(folder);
+    });
+
     uploadForm.onsubmit = async (e) => {
         e.preventDefault();
         if (!currentStudent) return alert("Identity error.");
@@ -187,6 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectedOption = assignSelect.options[assignSelect.selectedIndex];
         const rawAssignmentText = selectedOption.dataset.label || selectedOption.text;
         const finalAssignmentKey = selectedOption.value;
+        const projectFolder = projectFolderOf(selectedOption);
 
         // Calculate points
         const ptsMatch = rawAssignmentText.match(/[\[\(](\d+)\s*pts?[\]\)]/i);
@@ -256,7 +310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             submitBtn.innerHTML = `⏳ Uploading file ${i + 1} of ${files.length}...`;
 
-            let finalPath = file.webkitRelativePath || file.name;
+            let finalPath = (projectFolder ? projectFolder + '/' : '') + (file.webkitRelativePath || file.name);
 
             // Check duplicates
             if (existingFiles.includes(finalPath)) {
@@ -329,8 +383,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (status) {
                     status.classList.remove('bg-light', 'text-dark', 'd-none');
                     status.classList.add('bg-success', 'text-white');
-                    status.innerHTML = `✅ Uploaded ${successCount} files. Saved as: ${finalAssignmentKey}`;
+                    status.innerHTML = projectFolder
+                        ? `✅ Uploaded ${successCount} file${successCount === 1 ? '' : 's'}. Check the list below to make sure ${successCount === 1 ? "it's the right one" : "they're the right ones"}.`
+                        : `✅ Uploaded ${successCount} files. Saved as: ${finalAssignmentKey}`;
                 }
+                if (projectFolder) showProjectFiles(projectFolder);
                 // Lets the page's project grading tool (js/student/project-grading.js)
                 // know the file is in, so its "do STEP 1 first" banner clears.
                 window.dispatchEvent(new CustomEvent('assignment-uploaded', { detail: { examId: finalAssignmentKey } }));

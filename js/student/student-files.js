@@ -158,6 +158,7 @@ async function startFileManager() {
         }
 
         setupFileUI(currentStudentId);
+        setupDownloadAll();
         setupMoveModal();
         setupOverwriteModal();
         setupShareModal();
@@ -174,6 +175,39 @@ async function startFileManager() {
 }
 
 startFileManager();
+
+// ==========================================
+// DOWNLOAD ALL (Save your work to Google Drive card)
+// ==========================================
+// Always the student's own folder, even while they're looking at a classmate's shared one. The server is
+// asked first (?check=1) so an empty or too-big folder gets a message here instead of a failed download.
+function setupDownloadAll() {
+    const btn = document.getElementById('btn-download-all');
+    const msg = document.getElementById('download-all-status');
+    if (!btn || !msg) return;
+    const say = (text, color) => { msg.className = `small fw-bold mt-2 ${color}`; msg.textContent = text; };
+    btn.onclick = async () => {
+        const url = `/api/student/files-zip?studentId=${encodeURIComponent(myOwnStudentId)}`;
+        btn.disabled = true;
+        say('Checking your folder...', 'text-muted');
+        try {
+            const res = await fetch(url + '&check=1');
+            const info = await res.json().catch(() => ({}));
+            if (!res.ok) return say(info.error || 'Something went wrong. Refresh the page and try again.', 'text-danger');
+            say(`Downloading ${info.files} file${info.files === 1 ? '' : 's'}. When it finishes, look in your Downloads folder for my-class-files, then follow the steps below.`, 'text-success');
+            document.getElementById('drive-steps').open = true;
+            window.location.href = url;
+        } catch (e) {
+            say('Could not reach the server. Check your internet and try again.', 'text-danger');
+        } finally {
+            btn.disabled = false;
+        }
+    };
+    // The end-of-semester reminder links to #save-to-drive: open the steps for them
+    const openSteps = () => { if (location.hash === '#save-to-drive') document.getElementById('drive-steps').open = true; };
+    openSteps();
+    window.addEventListener('hashchange', openSteps);
+}
 
 // ==========================================
 // FILE SYSTEM (HostGator)

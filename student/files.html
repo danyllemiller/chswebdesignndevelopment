@@ -102,6 +102,51 @@
                 </div>
             </div>
 
+            <!-- Save your work (teacher request 2026-10-28): the whole folder as one .zip (GET /api/student/files-zip),
+                 then step-by-step into Google Drive. The end-of-semester reminder bar (js/cs-semester-reminder.js) links here. -->
+            <div class="card shadow-sm mb-4 border-success" id="save-to-drive" style="scroll-margin-top: 110px;">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <h5 class="fw-bold text-success mb-1"><i class="fas fa-cloud-download-alt me-2"></i>Save your work to Google Drive</h5>
+                            <p class="small text-muted mb-0">Keep your own copy of everything in your folder. Do this before the semester ends.</p>
+                        </div>
+                        <button type="button" class="btn btn-success fw-bold shadow-sm px-4" id="btn-download-all">
+                            <i class="fas fa-file-archive me-2"></i>Download all my files (.zip)
+                        </button>
+                    </div>
+                    <div id="download-all-status" class="small fw-bold mt-2 d-none" role="status"></div>
+                    <details class="mt-3" id="drive-steps">
+                        <summary class="fw-bold text-primary" style="cursor: pointer;">How to put it in Google Drive, step by step</summary>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 h-100 bg-light">
+                                    <h6 class="fw-bold"><i class="fab fa-chrome me-1"></i>On a Chromebook</h6>
+                                    <ol class="small mb-0 ps-3">
+                                        <li class="mb-1"><strong>STEP 1:</strong> Click <strong>Download all my files (.zip)</strong> above. Wait until the download finishes.</li>
+                                        <li class="mb-1"><strong>STEP 2:</strong> Open the <strong>Files</strong> app (the blue folder icon) and click <strong>Downloads</strong>.</li>
+                                        <li class="mb-1"><strong>STEP 3:</strong> Double-click <strong>my-class-files</strong> (the .zip file). It opens on the left side, like a USB drive.</li>
+                                        <li class="mb-1"><strong>STEP 4:</strong> Right-click the <strong>My class files</strong> folder inside it and click <strong>Copy</strong>.</li>
+                                        <li class="mb-0"><strong>STEP 5:</strong> On the left side, click <strong>Google Drive</strong>, then <strong>My Drive</strong>. Right-click an empty spot and click <strong>Paste</strong>. Done!</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 h-100 bg-light">
+                                    <h6 class="fw-bold"><i class="fas fa-desktop me-1"></i>On a Windows or Mac computer</h6>
+                                    <ol class="small mb-0 ps-3">
+                                        <li class="mb-1"><strong>STEP 1:</strong> Click <strong>Download all my files (.zip)</strong> above. Wait until the download finishes.</li>
+                                        <li class="mb-1"><strong>STEP 2:</strong> Open your <strong>Downloads</strong> folder. <strong>Windows:</strong> right-click the .zip file, click <strong>Extract All</strong>, then <strong>Extract</strong>. <strong>Mac:</strong> double-click the .zip file.</li>
+                                        <li class="mb-1"><strong>STEP 3:</strong> Go to <a href="https://drive.google.com" target="_blank" rel="noopener">drive.google.com</a> and sign in with your <strong>school</strong> Google account.</li>
+                                        <li class="mb-0"><strong>STEP 4:</strong> Click <strong>+ New</strong>, then <strong>Folder upload</strong>. Pick the <strong>My class files</strong> folder and click <strong>Upload</strong>. Done!</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
             <div class="card shadow-sm border-info">
                 <div class="card-header bg-info text-white pt-3">
                     <h5 class="fw-bold m-0"><i class="fas fa-share-alt me-2"></i>Shared With Me</h5>
@@ -221,6 +266,6 @@
   <script src="/js/jquery.js"></script>
   <script src="/js/loader.js?v=29"></script>
   <!-- Master Timeclock Engine -->
-  <script type="module" src="/js/student/student-files.js"></script>
+  <script type="module" src="/js/student/student-files.js?v=2"></script>
 </body>
 </html>

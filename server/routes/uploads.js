@@ -223,4 +223,75 @@ router.post('/manage-files', multer().none(), async (req, res) => {
     }
 });
 
+// GET /student/files-zip?studentId= -- "Download all my files" (student/files.html): the student's whole folder
+// as one .zip, so they can keep their work in Google Drive when the semester ends. Built while it streams:
+// one file at a time is read and compressed off the main thread, so a big folder neither fills memory nor
+// stalls the site for anyone else.
+const zlib = require('zlib');
+const deflateRaw = require('util').promisify(zlib.deflateRaw);
+const dosTime = d => ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xffff;
+const dosDate = d => (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xffff;
+router.get('/student/files-zip', requireSelfOrStaff('studentId'), async (req, res) => {
+    const studentId = cleanStudentId(req.query.studentId);
+    const root = studentId && path.join(UPLOADS_ROOT, studentId);
+    if (!root || !fs.existsSync(root)) return res.status(404).json({ error: 'There are no files in your folder yet.' });
+    const files = [];
+    (function walk(dir) {
+        for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+            const full = path.join(dir, e.name);
+            if (e.isDirectory()) walk(full);
+            else if (e.isFile() && !/^(\.DS_Store|Thumbs\.db)$|^\._/.test(e.name)) files.push(full);
+        }
+    })(root);
+    if (!files.length) return res.status(404).json({ error: 'There are no files in your folder yet.' });
+    const total = files.reduce((n, f) => n + fs.statSync(f).size, 0);
+    if (files.length > 60000 || total > 1.5 * 1024 ** 3) return res.status(413).json({ error: 'Your folder is too big to download in one piece. Ask your teacher for help.' });
+    // ?check=1: the page asks first, so an empty or too-big folder gets a message on the page, not a failed download
+    if (req.query.check) return res.json({ files: files.length, bytes: total });
+
+    res.set({ 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename="my-class-files-${new Date().toISOString().slice(0, 10)}.zip"`, 'Cache-Control': 'no-store' });
+    let offset = 0;
+    const central = [];
+    // Waits for the browser to catch up, or for it to go away: a closed tab never sends 'drain', so without
+    // 'close' an abandoned download would sit here forever holding its buffers.
+    const caughtUp = () => new Promise(ok => {
+        const done = () => { res.off('drain', done); res.off('close', done); ok(); };
+        res.on('drain', done).on('close', done);
+    });
+    const write = async buf => {
+        if (res.destroyed) throw new Error('the download was stopped');
+        offset += buf.length;
+        if (!res.write(buf)) await caughtUp();
+    };
+    try {
+        for (const full of files) {
+            const data = await fs.promises.readFile(full), mtime = (await fs.promises.stat(full)).mtime;
+            const name = Buffer.from('My class files/' + path.relative(root, full).split(path.sep).join('/'), 'utf8');
+            const packed = await deflateRaw(data), deflate = packed.length < data.length, body = deflate ? packed : data;
+            const crc = zlib.crc32(data), method = deflate ? 8 : 0, t = dosTime(mtime), d = dosDate(mtime);
+            const local = Buffer.alloc(30);
+            local.writeUInt32LE(0x04034b50, 0); local.writeUInt16LE(20, 4); local.writeUInt16LE(0x0800, 6); local.writeUInt16LE(method, 8);
+            local.writeUInt16LE(t, 10); local.writeUInt16LE(d, 12); local.writeUInt32LE(crc, 14); local.writeUInt32LE(body.length, 18);
+            local.writeUInt32LE(data.length, 22); local.writeUInt16LE(name.length, 26);
+            const at = offset;
+            await write(local); await write(name); await write(body);
+            const cd = Buffer.alloc(46);
+            cd.writeUInt32LE(0x02014b50, 0); cd.writeUInt16LE(20, 4); cd.writeUInt16LE(20, 6); cd.writeUInt16LE(0x0800, 8); cd.writeUInt16LE(method, 10);
+            cd.writeUInt16LE(t, 12); cd.writeUInt16LE(d, 14); cd.writeUInt32LE(crc, 16); cd.writeUInt32LE(body.length, 20);
+            cd.writeUInt32LE(data.length, 24); cd.writeUInt16LE(name.length, 28); cd.writeUInt32LE(at, 42);
+            central.push(cd, name);
+        }
+        const start = offset;
+        for (const b of central) await write(b);
+        const end = Buffer.alloc(22);
+        end.writeUInt32LE(0x06054b50, 0); end.writeUInt16LE(files.length, 8); end.writeUInt16LE(files.length, 10);
+        end.writeUInt32LE(offset - start, 12); end.writeUInt32LE(start, 16);
+        res.end(end);
+    } catch (err) {
+        if (res.destroyed) return;   // the student closed the tab or cancelled: nothing went wrong
+        console.error('[uploads] zip failed:', err);
+        res.destroy(err);   // headers are already sent: cut it off so the browser shows a failed download, not a broken zip
+    }
+});
+
 module.exports = router;
