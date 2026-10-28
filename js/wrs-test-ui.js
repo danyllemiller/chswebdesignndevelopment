@@ -367,6 +367,7 @@
 
     // The score: how it ended, then correct / answered / accuracy.
     function scoreHtml(r, reason) {
+        install();   // results can show without a test on this page load (a refresh while answers are held)
         const acc = r.answered ? Math.round((r.correct / r.answered) * 100) : 0;
         const note = reason === 'time' ? '<div class="alert alert-warning py-2 fw-bold">Time\'s up! Your answers were submitted automatically.</div>'
             : reason === 'left-test' ? '<div class="alert alert-danger py-2 fw-bold">You left the test a second time, so it was submitted automatically.</div>'
@@ -381,6 +382,7 @@
     // Score summary + every answered question (right or wrong, with the
     // correct answer for misses), with an All / Wrong-only filter.
     function reviewHtml(r, reason) {
+        install();
         const list = r.review || r.missed || [];
         const wrong = list.filter(m => !m.right).length;
         const html = `${scoreHtml(r, reason)}
