@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="/wpr-practice/assets/wpr-practice-pro-favicon-512.png">
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
-  <script src="/js/wrs-test-ui.js?v=3"></script>
+  <script src="/js/wrs-test-ui.js?v=4"></script>
   <style>
     body { background: #eef1f5; min-height: 100vh; }
     .wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -46,7 +46,10 @@
     if (!res.ok) { const e = new Error(data.error || 'Something went wrong.'); e.status = res.status; throw e; }
     return data;
   }
-  const fmtTime = s => s >= 3600 ? `${s / 3600} hour` : `${Math.round(s / 60)} minutes`;
+  const fmtTime = s => {
+    const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+    return [h ? `${h} hour${h > 1 ? 's' : ''}` : '', m ? `${m} minutes` : ''].filter(Boolean).join(' ') || '0 minutes';
+  };
 
   function showJoin(msg) {
     const params = new URLSearchParams(location.search);
@@ -108,6 +111,7 @@
         save: answers => api('/wpr/save', { code: me.code, token: me.token, answers }),
         saveBeacon: answers => navigator.sendBeacon && navigator.sendBeacon('/api/wpr/save', new Blob([JSON.stringify({ code: me.code, token: me.token, answers })], { type: 'application/json' })),
         onViolation: count => api('/wpr/violation', { code: me.code, token: me.token, count }),
+        clock: () => api('/wpr/clock', { code: me.code, token: me.token }),
         noTranslate: true,   // the state test can't be translated, so the practice can't either
         submit: async (answers, reason) => {
           const out = await api('/wpr/submit', { code: me.code, token: me.token, answers, reason });

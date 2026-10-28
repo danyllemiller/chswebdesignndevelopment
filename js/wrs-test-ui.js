@@ -17,6 +17,7 @@
  *                   save(answers), saveBeacon(answers),
  *                   submit(answers, reason) -> Promise,   // reason: 'student' | 'time' | 'left-test'
  *                   onViolation(count),
+ *                   clock() -> Promise<{ secondsLeft }>,  // optional: checked every 15 s, for a time limit the teacher changes
  *                   noTranslate });                       // true: translating the page counts as leaving
  *   WrsTestUI.reviewHtml(result)                // results + every answered question
  */
@@ -123,7 +124,7 @@
         const mount = opts.mount;
         const questions = opts.questions;
         const answers = opts.answers || {};
-        const endAt = Date.now() + opts.secondsLeft * 1000;
+        let endAt = Date.now() + opts.secondsLeft * 1000;
         const flagKey = opts.flagKey || 'wt_flags';
         let flags = new Set();
         try { flags = new Set(JSON.parse(sessionStorage.getItem(flagKey) || '[]')); } catch (e) {}
@@ -150,6 +151,13 @@
         }
         const tick = setInterval(tickNow, 250);
         const autosave = setInterval(() => { if (dirty) { dirty = false; Promise.resolve(opts.save(answers)).catch(() => { dirty = true; }); } }, 10000);
+        // The teacher can change a student's time limit mid-test; the clock catches up here.
+        const clockCheck = opts.clock ? setInterval(() => {
+            Promise.resolve(opts.clock()).then(r => {
+                const left = r && r.secondsLeft;
+                if (Number.isFinite(left) && Math.abs(Date.now() + left * 1000 - endAt) > 3000) { endAt = Date.now() + left * 1000; tickNow(); }
+            }).catch(() => {});
+        }, 15000) : null;
 
         function bar(title) {
             return `<div class="wt-bar">
@@ -322,7 +330,7 @@
         window.addEventListener('beforeunload', onUnload);
 
         function teardown() {
-            clearInterval(tick); clearInterval(autosave);
+            clearInterval(tick); clearInterval(autosave); clearInterval(clockCheck);
             mount.removeEventListener('click', onClick);
             document.removeEventListener('keydown', onKey);
             document.getElementById('wtCalcKeys').removeEventListener('click', onCalc);

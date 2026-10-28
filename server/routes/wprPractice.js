@@ -32,18 +32,24 @@ const LENGTHS = {
 const SESSION_HOURS = 12;
 const GRACE_SECONDS = 30;
 const IN_USE_MINUTES = 45;
+const MARKER_DIR = process.env.WPR_MARKER_DIR || '/tmp';
+const TIME_X = [1, 1.5, 2];   // standard, time and a half, double time
 const sessions = new Map(); // code -> session
+
+// One student's time limit: the session's, or more if the teacher gave them time and a half or double
+// time (POST /wpr/session/:code/time).
+const secondsFor = (session, st) => Math.round(session.seconds * (st.timeX || 1));
 
 function writeActiveMarker() {
     const now = Date.now();
     let active = 0, inUse = 0;
     sessions.forEach(s => {
         if (now - s.lastActive < IN_USE_MINUTES * 60 * 1000) inUse++;
-        s.students.forEach(st => { if (st.startedAt && !st.submittedAt && now - st.startedAt < (s.seconds + 120) * 1000) active++; });
+        s.students.forEach(st => { if (st.startedAt && !st.submittedAt && now - st.startedAt < (secondsFor(s, st) + 120) * 1000) active++; });
     });
     try {
-        fs.writeFileSync('/tmp/wpr_active_sessions', String(active));
-        fs.writeFileSync('/tmp/wpr_sessions_in_use', String(inUse));
+        fs.writeFileSync(`${MARKER_DIR}/wpr_active_sessions`, String(active));
+        fs.writeFileSync(`${MARKER_DIR}/wpr_sessions_in_use`, String(inUse));
     } catch (e) { /* best effort */ }
 }
 setInterval(() => {
@@ -181,7 +187,8 @@ router.get('/wpr/session/:code', (req, res) => {
     const students = [...s.students.values()].map(st => ({
         firstName: st.firstName, lastName: st.lastName, studentId: st.studentId,
         status: st.submittedAt ? 'submitted' : st.startedAt ? 'testing' : 'joined',
-        secondsLeft: st.startedAt && !st.submittedAt ? Math.max(0, Math.round((st.startedAt + s.seconds * 1000 - now) / 1000)) : null,
+        secondsLeft: st.startedAt && !st.submittedAt ? Math.max(0, Math.round((st.startedAt + secondsFor(s, st) * 1000 - now) / 1000)) : null,
+        timeX: st.timeX || 1, secondsAllowed: secondsFor(s, st),
         answeredSoFar: st.submittedAt ? st.result.answered : Object.keys(st.answers || {}).length,
         violations: st.violations, endReason: st.endReason || '',
         result: st.submittedAt ? { answered: st.result.answered, correct: st.result.correct, total: st.result.total } : null,
@@ -191,7 +198,23 @@ router.get('/wpr/session/:code', (req, res) => {
             yours: st.answers[i] !== undefined ? q.options[st.answers[i]] : '', right: st.answers[i] !== undefined ? st.answers[i] === q.correct : null
         })) : null
     }));
-    res.json({ code: s.code, label: s.label, length: s.length, teacher: s.teacher, createdAt: s.createdAt, expiresAt: s.expiresAt, students });
+    res.json({ code: s.code, label: s.label, length: s.length, teacher: s.teacher, createdAt: s.createdAt, expiresAt: s.expiresAt, timed: s.seconds > 0, students });
+});
+
+// POST /wpr/session/:code/time -- { studentId, x } gives one student standard time (1), time and a half
+// (1.5), or double time (2). It can change mid-test: the student's clock catches up within 15 seconds
+// (/wpr/clock). Downloads call it "Time allowed" and never say why.
+router.post('/wpr/session/:code/time', (req, res) => {
+    const s = teacherSession(req);
+    if (!s) return res.status(404).json({ error: 'Session not found. It may have ended or expired.' });
+    const st = s.students.get(String((req.body || {}).studentId || ''));
+    if (!st) return res.status(404).json({ error: 'That student isn\'t in this session.' });
+    const x = Number(req.body.x);
+    if (!TIME_X.includes(x)) return res.status(400).json({ error: 'Pick standard time, time and a half, or double time.' });
+    if (st.submittedAt) return res.status(409).json({ error: 'That student already finished.' });
+    st.timeX = x;
+    writeActiveMarker();
+    res.json({ success: true, secondsAllowed: secondsFor(s, st) });
 });
 
 // DELETE /wpr/session/:code -- teacher ends the session; everything is erased
@@ -225,7 +248,7 @@ router.post('/wpr/join', (req, res) => {
     } else {
         st.token = token(); // rejoining (e.g. after a refresh) issues a fresh token
     }
-    res.json({ token: st.token, code: session.code, label: session.label, count: session.count, seconds: session.seconds, started: !!st.startedAt });
+    res.json({ token: st.token, code: session.code, label: session.label, count: session.count, seconds: secondsFor(session, st), started: !!st.startedAt });
 });
 
 // POST /wpr/start -- { code, token } begins (or resumes) the clock
@@ -239,18 +262,26 @@ router.post('/wpr/start', (req, res) => {
         writeActiveMarker();
     }
     const elapsed = (Date.now() - st.startedAt) / 1000;
-    if (elapsed > session.seconds + GRACE_SECONDS) {
+    if (elapsed > secondsFor(session, st) + GRACE_SECONDS) {
         finish(session, st, st.answers, 'time');
         return res.status(409).json({ error: 'Time ran out. Your saved answers were scored.' });
     }
-    res.json({ questions: publicQuestions(st.questions), answers: st.answers, secondsLeft: Math.max(0, Math.round(session.seconds - elapsed)) });
+    res.json({ questions: publicQuestions(st.questions), answers: st.answers, secondsLeft: Math.max(0, Math.round(secondsFor(session, st) - elapsed)) });
+});
+
+// POST /wpr/clock -- { code, token } -> the student's time left, which changes if the teacher changes their time
+router.post('/wpr/clock', (req, res) => {
+    const { session, st, error } = getStudent(req);
+    if (error) return res.status(404).json({ error });
+    if (!st.startedAt || st.submittedAt) return res.json({ secondsLeft: null });
+    res.json({ secondsLeft: Math.max(0, Math.round(secondsFor(session, st) - (Date.now() - st.startedAt) / 1000)) });
 });
 
 // POST /wpr/save -- { code, token, answers }
 router.post('/wpr/save', (req, res) => {
     const { session, st, error } = getStudent(req);
     if (error) return res.status(404).json({ error });
-    if (st.startedAt && !st.submittedAt && (Date.now() - st.startedAt) / 1000 <= session.seconds + GRACE_SECONDS) {
+    if (st.startedAt && !st.submittedAt && (Date.now() - st.startedAt) / 1000 <= secondsFor(session, st) + GRACE_SECONDS) {
         st.answers = cleanAnswers(req.body.answers, st.questions.length);
     }
     res.json({ success: true });
@@ -270,7 +301,7 @@ router.post('/wpr/submit', (req, res) => {
     if (error) return res.status(404).json({ error });
     if (!st.startedAt) return res.status(400).json({ error: 'The test has not started.' });
     if (!st.submittedAt) {
-        const inTime = (Date.now() - st.startedAt) / 1000 <= session.seconds + GRACE_SECONDS;
+        const inTime = (Date.now() - st.startedAt) / 1000 <= secondsFor(session, st) + GRACE_SECONDS;
         const answers = inTime ? cleanAnswers(req.body.answers, st.questions.length) : st.answers;
         const reason = ['student', 'time', 'left-test'].includes(req.body.reason) ? req.body.reason : 'student';
         finish(session, st, answers, reason);
