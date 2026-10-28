@@ -20,9 +20,62 @@
 
   <div class="sticky-toc">
       <span class="fw-bold text-muted me-2"><i class="fas fa-list-ul me-1"></i> In this chapter:</span>
+      <a href="#open-apps-script">Getting into Apps Script</a>
       <a href="#section-14-1">14.1 Arrays</a>
       <a href="#section-14-2">14.2 Linked Lists</a>
       <a href="#section-14-3">14.3 Objects, Dictionaries & Searching Fast</a>
+  </div>
+
+  <!-- How to get into Apps Script, step by step (added Oct 2026: students couldn't find their way into the editor) -->
+  <div id="open-apps-script" class="card border-success border-2 shadow-sm my-4">
+      <div class="card-header bg-success text-white fw-bold"><i class="fas fa-code me-2"></i>Before You Code: How to Get Into Apps Script</div>
+      <div class="card-body">
+          <p class="mb-3">Apps Script lives <strong>inside a Google Sheet</strong>, so you always open it from the Sheet. Do these steps in this order.</p>
+          <ol class="mb-0 ps-3">
+              <li class="mb-2"><strong>STEP 1: Open your Google Sheet.</strong> Go to <a href="https://sheets.google.com" target="_blank" rel="noopener">sheets.google.com</a> signed in with your <strong>school</strong> Google account. Open the Sheet for this activity, or click <strong>Blank spreadsheet</strong> to make a new one.</li>
+              <li class="mb-2"><strong>STEP 2: Name it.</strong> Click <strong>Untitled spreadsheet</strong> at the top left and type a name, like <em>Ch 14 Arrays</em>, so you can find it again later.</li>
+              <li class="mb-2"><strong>STEP 3: Click Extensions, then Apps Script.</strong> <strong>Extensions</strong> is in the menu bar at the top of the Sheet, between Tools and Help. A new tab opens with the code editor. (Older videos say "Tools → Script editor." That menu is gone now. Use Extensions.)
+                  <div class="my-2" aria-hidden="true" style="max-width:540px">
+                      <div class="small text-muted mb-1">What it looks like:</div>
+                      <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;border:1px solid #dadce0;border-radius:8px;background:#fff;overflow:hidden">
+                          <div style="padding:6px 10px;background:#f8f9fa;border-bottom:1px solid #dadce0;color:#3c4043">File &nbsp; Edit &nbsp; View &nbsp; Insert &nbsp; Format &nbsp; Data &nbsp; Tools &nbsp; <span style="background:#e8f0fe;color:#1967d2;border-radius:4px;padding:2px 6px;font-weight:700">Extensions</span> &nbsp; Help</div>
+                          <div style="display:flex;justify-content:flex-end;padding:0 40px 10px">
+                              <div style="width:220px;border:1px solid #dadce0;border-top:0;border-radius:0 0 6px 6px;box-shadow:0 2px 6px rgba(0,0,0,.15);background:#fff">
+                                  <div style="padding:6px 12px;color:#3c4043">Add-ons <span style="float:right">&#9656;</span></div>
+                                  <div style="padding:6px 12px;color:#3c4043">Macros <span style="float:right">&#9656;</span></div>
+                                  <div style="padding:6px 12px;background:#e8f0fe;color:#1967d2;font-weight:700">Apps Script &larr; click this</div>
+                              </div>
+                          </div>
+                      </div>
+                  </div></li>
+              <li class="mb-2"><strong>STEP 4: Name the project.</strong> In the editor, click <strong>Untitled project</strong> at the top left and give it the same name as your Sheet.</li>
+              <li class="mb-2"><strong>STEP 5: Clear out the starter code.</strong> The editor starts with <code>function myFunction() { }</code>. Click in the code, press <kbd>Ctrl</kbd>+<kbd>A</kbd> (<kbd>&#8984;</kbd>+<kbd>A</kbd> on a Mac) to select all of it, and press <kbd>Delete</kbd>. Now type or paste your code.</li>
+              <li class="mb-2"><strong>STEP 6: Save.</strong> Press <kbd>Ctrl</kbd>+<kbd>S</kbd> (<kbd>&#8984;</kbd>+<kbd>S</kbd> on a Mac), or click the <strong>Save</strong> icon above your code (it looks like a floppy disk). Code won't run until it's saved.</li>
+              <li class="mb-2"><strong>STEP 7: Run.</strong> Pick your function's name from the dropdown next to the <strong>Run</strong> button, then click <strong>Run</strong>.</li>
+              <li class="mb-2"><strong>STEP 8: Say yes the first time.</strong> Google asks before your code can use your Sheet. This only happens once per project.
+                  <ol type="a" class="mt-1">
+                      <li>A box says <strong>Authorization required</strong>. Click <strong>Review permissions</strong>.</li>
+                      <li>Pick your <strong>school</strong> account.</li>
+                      <li>If you see <strong>Google hasn't verified this app</strong>, click <strong>Advanced</strong> (a small link at the bottom left), then <strong>Go to [your project name] (unsafe)</strong>. It's your own code, so it's safe.</li>
+                      <li>If you see checkboxes, check <strong>Select all</strong>. Then click <strong>Allow</strong> (or <strong>Continue</strong>).</li>
+                  </ol></li>
+              <li class="mb-0"><strong>STEP 9: Read the Execution log</strong> at the bottom of the screen. Anything your code sends to <code>Logger.log()</code> shows up there, and so do error messages. Don't see it? Click <strong>Execution log</strong> at the top.</li>
+          </ol>
+          <p class="mt-3 mb-0"><strong>Coming back later?</strong> Open the same Sheet, then click <strong>Extensions → Apps Script</strong> again. Your code is saved inside that Sheet.</p>
+      </div>
+  </div>
+
+  <div class="alert alert-warning border-warning shadow-sm my-4">
+      <h5 class="fw-bold"><i class="fas fa-life-ring me-2"></i>Stuck? Find what you see here</h5>
+      <ul class="mb-0">
+          <li class="mb-1"><strong>"Sorry, unable to open the file at present."</strong> You're signed in to more than one Google account (like a personal Gmail and your school account), and Apps Script picked the wrong one. Open a Guest or Incognito window, sign in with <em>only</em> your school account, open your Sheet, and try Extensions → Apps Script again.</li>
+          <li class="mb-1"><strong>Nothing happens when you click Apps Script.</strong> Your browser blocked the new tab. Look for a blocked pop-up icon at the right end of the address bar, choose <strong>Always allow</strong>, and click Apps Script again.</li>
+          <li class="mb-1"><strong>There's no Extensions menu.</strong> You're in the Sheets app on a phone or tablet, or your file is an Excel file (you'll see <strong>.XLSX</strong> next to its name). Use a computer browser. For an Excel file, click <strong>File → Save as Google Sheets</strong> first.</li>
+          <li class="mb-1"><strong>The Run button is gray, or the dropdown says No functions.</strong> Your code isn't saved, or it has no function yet. Check that it starts with <code>function</code> and a name, like <code>function listNames() {</code>, then save.</li>
+          <li class="mb-1"><strong>"You do not have permission" or "permissions are not sufficient."</strong> A checkbox was skipped in Step 8. Click Run again and check <strong>Select all</strong> this time.</li>
+          <li class="mb-1"><strong>"This app is blocked" or "Access blocked."</strong> School settings stopped it. Raise your hand so your teacher knows.</li>
+          <li class="mb-0"><strong>A red "ReferenceError" or "TypeError."</strong> The setup worked; this one is in your code. Check spelling and capital letters: <code>Logger</code> and <code>SpreadsheetApp</code> must be capitalized exactly like that.</li>
+      </ul>
   </div>
 
   <!-- Section 14.1 -->
@@ -101,6 +154,7 @@ for (let i = 0; i &lt; data.length; i++) {
               </ol>
               <p class="mb-0 fw-bold">Turn In: A screenshot of your refactored array-and-loop code, and a screenshot of the spreadsheet-range code with its output.</p>
               <p class="mb-0 fw-bold mt-2">👉 Load <strong>The Array Refactor</strong> in your Digital Notebook on the right.</p>
+              <p class="mb-0 small mt-2"><i class="fas fa-circle-question me-1"></i>Can't get into Apps Script? Follow STEP 1 to STEP 9 in the green box at the top of this page: <a href="#open-apps-script">How to Get Into Apps Script</a>.</p>
           </div>
       </div>
   </div>
