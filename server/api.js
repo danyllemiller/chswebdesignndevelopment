@@ -84,6 +84,7 @@ router.use('/', require('./routes/activityTime'));
 router.use('/', require('./routes/wprPractice'));
 router.use('/', require('./routes/wprBanks'));
 router.use('/', require('./routes/wprFeedback'));
+router.use('/', require('./routes/wprCfa'));
 router.use('/', require('./routes/missed-questions'));
 router.use('/', require('./routes/uploads'));
 router.use('/', require('./routes/agenda'));

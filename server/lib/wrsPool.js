@@ -81,10 +81,13 @@ const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0
 function matchPrompt(title) {
     const m = String(title).match(/^Match each (.+?) to (?:the |its )?(?:most appropriate |correct |best )?(.+?)\.?$/i);
     if (!m) return String(title);
+    const [, item, target] = m;
     // "...to the WRS skill it best demonstrates" -> "Which WRS skill does this situation best demonstrate?"
-    const verb = m[2].match(/^(.+?) (?:it|they) best (\w+?)s?$/i);
-    if (verb) return `Which ${verb[1]} does this ${m[1]} best ${verb[2]}?`;
-    return `Which ${m[2]} best fits this ${m[1]}?`;
+    const verb = target.match(/^(.+?) (?:it|they) (.+)$/i);
+    if (verb) return `Which ${verb[1]} does this ${item} ${verb[2].replace(/\b(demonstrate|violate|show|represent|describe)s\b/g, '$1')}?`;
+    // "Match each career term to its correct definition": the items are the definitions and the choices are the terms
+    if (/^(definition|description)s?$/i.test(target)) return `Which ${item} matches this ${target}?`;
+    return `Which ${target} best fits this ${item}?`;
 }
 const stripLetter = c => String(c).replace(/^[A-Z]\.\s*/, '').trim();
 

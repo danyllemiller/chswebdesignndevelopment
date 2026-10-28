@@ -254,4 +254,5 @@ async function loadReadyQuestions(bankIds) {
 
 module.exports = router;
 module.exports.loadReadyQuestions = loadReadyQuestions;
+module.exports.passcodeOk = passcodeOk;   // the CFA review (wprCfa.js) uses the same passcode and throttle
 module.exports._parse = { parseCsvQuestions, parseTextQuestions };
