@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="/wpr-practice/assets/wpr-practice-pro-favicon-512.png">
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
-  <script src="/js/wrs-test-ui.js?v=6"></script>
+  <script src="/js/wrs-test-ui.js?v=7"></script>
   <style>
     body { background: #eef1f5; min-height: 100vh; }
     .wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -117,6 +117,9 @@
         saveBeacon: answers => navigator.sendBeacon && navigator.sendBeacon('/api/wpr/save', new Blob([JSON.stringify({ code: me.code, token: me.token, answers })], { type: 'application/json' })),
         onViolation: count => api('/wpr/violation', { code: me.code, token: me.token, count }),
         clock: () => api('/wpr/clock', { code: me.code, token: me.token }),
+        clockEvery: 5000,   // a pause for a break (or Read aloud) from the teacher shows up within 5 seconds
+        readAloud: !!data.readAloud,
+        paused: !!data.paused,
         noTranslate: true,   // the state test can't be translated, so the practice can't either
         submit: async (answers, reason) => {
           const out = await api('/wpr/submit', { code: me.code, token: me.token, answers, reason });
