@@ -16,7 +16,8 @@
  *   WrsTestUI.run({ mount, questions, answers, secondsLeft,
  *                   save(answers), saveBeacon(answers),
  *                   submit(answers, reason) -> Promise,   // reason: 'student' | 'time' | 'left-test'
- *                   onViolation(count) });
+ *                   onViolation(count),
+ *                   noTranslate });                       // true: translating the page counts as leaving
  *   WrsTestUI.reviewHtml(result)                // results + every answered question
  */
 (function () {
@@ -84,9 +85,9 @@
       <div id="wtLock" class="wt-lock" hidden>
         <div class="box">
           <div style="font-size:3rem"><i class="fas fa-triangle-exclamation text-warning"></i></div>
-          <h2 class="fw-bold">You left the test</h2>
-          <p class="fs-5">Leaving the test screen, switching tabs, or exiting full screen is not allowed.</p>
-          <p class="fs-5 fw-bold text-warning">This is your only warning. If you leave again, your test will be submitted.</p>
+          <h2 class="fw-bold" id="wtLockTitle">You left the test</h2>
+          <p class="fs-5" id="wtLockWhy">Leaving the test screen, switching tabs, or exiting full screen is not allowed.</p>
+          <p class="fs-5 fw-bold text-warning" id="wtLockWarn">This is your only warning. If you leave again, your test will be submitted.</p>
           <p class="small opacity-75">Your teacher can see that this happened. The clock is still running.</p>
           <button id="wtReturn" class="btn btn-warning btn-lg fw-bold mt-2">Return to the test</button>
         </div>
@@ -269,13 +270,25 @@
         // ---- Lockdown
         const block = e => { if (!(e.target && e.target.id === 'wtScratchText' && e.type !== 'paste')) e.preventDefault(); };
         ['contextmenu', 'copy', 'cut', 'paste', 'dragstart'].forEach(ev => document.addEventListener(ev, block));
-        function leftTest() {
+        const LOCK = {
+            leave: ['You left the test', 'Leaving the test screen, switching tabs, or exiting full screen is not allowed.', 'This is your only warning. If you leave again, your test will be submitted.'],
+            translate: ['Translating is not allowed', 'The state test is only in English, so this practice test is too. Turn the translator off and switch the page back to English, then return to the test.', 'This is your only warning. If the test is translated again, it will be submitted.'],
+            still: ['The translator is still on', 'Turn the translator off and switch the page back to English first, then return to the test.', 'This is your only warning. If the test is translated again, it will be submitted.']
+        };
+        function showLock(kind) {
+            const [title, why, warn] = LOCK[kind];
+            document.getElementById('wtLockTitle').textContent = title;
+            document.getElementById('wtLockWhy').textContent = why;
+            document.getElementById('wtLockWarn').textContent = warn;
+            lock.hidden = false;
+        }
+        function leftTest(kind) {
             if (submitting || away) return;
             away = true;
             violations++;
             Promise.resolve(opts.onViolation && opts.onViolation(violations)).catch(() => {});
             if (violations >= 2) { finish('left-test'); return; }
-            lock.hidden = false;
+            showLock(kind === 'translate' ? 'translate' : 'leave');
         }
         const onVis = () => { if (document.visibilityState === 'hidden') leftTest(); };
         const onBlur = () => setTimeout(() => { if (!document.hasFocus()) leftTest(); }, 150);
@@ -284,7 +297,23 @@
         window.addEventListener('blur', onBlur);
         document.addEventListener('fullscreenchange', onFs);
         document.addEventListener('webkitfullscreenchange', onFs);
-        document.getElementById('wtReturn').onclick = () => { enterFullscreen(); lock.hidden = true; away = false; };
+        // No translating (opts.noTranslate), like the state test. The page itself asks browsers not to translate
+        // it (translate="no"); if a translator does it anyway, that counts as leaving the test.
+        const translated = () => {
+            const html = document.documentElement;
+            return /\btranslated-(ltr|rtl)\b/.test(html.className)            // Chrome / Google Translate
+                || (!!html.lang && !/^en\b/i.test(html.lang))                   // translators relabel the page's language
+                || !!document.querySelector('font[style*="vertical-align"], [_msttexthash], [_msthash]');   // Google's and Edge's markers
+        };
+        const watch = opts.noTranslate ? new MutationObserver(() => { if (translated()) leftTest('translate'); }) : null;
+        if (watch) {
+            watch.observe(document.documentElement, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['lang', 'class'] });
+            if (translated()) leftTest('translate');
+        }
+        document.getElementById('wtReturn').onclick = () => {
+            if (watch && translated()) { showLock('still'); return; }
+            enterFullscreen(); lock.hidden = true; away = false;
+        };
         const onUnload = e => {
             if (submitting) return;
             try { opts.saveBeacon && opts.saveBeacon(answers); } catch (err) {}
@@ -304,6 +333,7 @@
             document.removeEventListener('fullscreenchange', onFs);
             document.removeEventListener('webkitfullscreenchange', onFs);
             window.removeEventListener('beforeunload', onUnload);
+            if (watch) watch.disconnect();
             calcPanel.hidden = true; scratchPanel.hidden = true; lock.hidden = true;
             document.body.classList.remove('wt-locked');
             try { sessionStorage.removeItem(flagKey); } catch (e) {}

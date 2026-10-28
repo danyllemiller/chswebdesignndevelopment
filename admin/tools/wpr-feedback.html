@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | WPR Practice Pro Feedback</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css?v=2.0" rel="stylesheet"/>
+  <script src="/js/loader.js?v=29"></script>
+  <script type="module" src="/js/auth-guard.js?v=2"></script>
+  <style>
+    body { background: #f4f6fb; }
+    .wrap { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+    .fb { background: #fff; border-radius: .8rem; box-shadow: 0 .2rem .8rem rgba(0,0,0,.06); padding: 1rem 1.25rem; margin-bottom: .8rem; border-left: 6px solid #adb5bd; }
+    .fb.t-bug { border-left-color: #dc3545; } .fb.t-confusing { border-left-color: #fd7e14; } .fb.t-idea { border-left-color: #0d6efd; } .fb.t-great { border-left-color: #198754; }
+    .fb.k-survey { border-left-color: #6f42c1; }
+    .fb .msg { white-space: pre-wrap; }
+    .shot img { max-height: 200px; max-width: 100%; border: 1px solid #dee2e6; border-radius: .4rem; }
+    .stat { background: #fff; border-radius: .8rem; box-shadow: 0 .2rem .8rem rgba(0,0,0,.06); padding: .75rem 1rem; height: 100%; }
+    .stat .big { font-size: 1.5rem; font-weight: 800; line-height: 1.2; }
+    .stat .lbl { font-size: .8rem; color: #6c757d; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="wrap">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+    <h1 class="h3 fw-bold mb-0"><i class="fas fa-comment-dots text-primary me-2"></i>WPR Practice Pro Feedback</h1>
+    <div class="d-flex gap-2">
+      <select id="fKind" class="form-select form-select-sm" style="width:auto"><option value="">Everything</option><option value="pilot">Pilot feedback</option><option value="survey">After-test surveys</option><option value="report">Bug reports &amp; requests</option></select>
+      <select id="fStatus" class="form-select form-select-sm" style="width:auto"><option value="open">Open</option><option value="">All</option><option value="fixed">Fixed</option><option value="wontfix">Won't fix</option></select>
+    </div>
+  </div>
+  <p class="text-muted small">From <strong>wprpracticepro.com</strong>: the <strong>Give feedback</strong> button, the <strong>Report a bug / Request a feature</strong> link, and the 3 quick questions students see under their score. Students who took a test in class are never asked for a name. <span id="pilotNote"></span> To have Claude work through the open bugs, ask Claude in VS Code to "go through the WPR feedback."</p>
+  <div id="stats" class="row g-2 mb-3"></div>
+  <div id="list"><p class="text-muted">Loading…</p></div>
+</div>
+<div id="footer-placeholder"></div>
+<script src="/js/bootstrap.bundle.js"></script>
+<script>
+// Inbox for server/routes/wprFeedback.js (the form is wpr-practice/assets/feedback.js).
+(function () {
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const TYPE = { bug: '🐞 Something broke', confusing: '😕 Confusing', idea: '💡 Idea / request', great: '👍 Worked well' };
+  const SEV = { blocks: 'It stopped them', annoying: 'Annoying', minor: 'Small thing' };
+  const ROLE = { tester: 'Student tester', teacher: 'Teacher', 'class-student': 'Student in a class', other: 'Someone else' };
+  const STATUS = { new: 'New', working: 'Working on it', fixed: 'Fixed', wontfix: "Won't fix" };
+  const FELT = { smooth: 'Smooth', okay: 'Okay', frustrating: 'Frustrating' };
+  let all = [];
+
+  async function load() {
+    const r = await fetch('/api/admin/wpr-feedback');
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { document.getElementById('list').innerHTML = `<div class="alert alert-danger">${esc(d.error || 'Could not load feedback.')}</div>`; return; }
+    all = d.items || [];
+    const until = new Date(d.pilotUntil + 'T12:00:00').toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+    document.getElementById('pilotNote').textContent = d.pilot ? `The pilot questions (who are you, 1-5 ratings, and the after-test survey) run through ${until}.` : `The pilot ended ${until}; the site now shows just the bug and request form.`;
+    stats(); render();
+  }
+  async function update(id, body) {
+    await fetch('/api/admin/wpr-feedback/' + id, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const x = all.find(i => i.id === Number(id)); if (x) Object.assign(x, body);
+    stats(); render();
+  }
+
+  const avg = (rows, k) => { const v = rows.map(x => x.ratings && x.ratings[k]).filter(Number.isFinite); return v.length ? `${(v.reduce((a, b) => a + b, 0) / v.length).toFixed(1)} <span class="fs-6 text-muted">/ 5 (${v.length})</span>` : '<span class="text-muted">none</span>'; };
+  function stats() {
+    const fb = all.filter(x => x.kind !== 'survey'), sv = all.filter(x => x.kind === 'survey');
+    const count = (rows, f) => rows.filter(f).length;
+    const tile = (lbl, big) => `<div class="col-6 col-md-3"><div class="stat"><div class="lbl">${lbl}</div><div class="big">${big}</div></div></div>`;
+    document.getElementById('stats').innerHTML = all.length ? [
+      tile('Open bugs', `${count(fb, x => x.type === 'bug' && !['fixed', 'wontfix'].includes(x.status))} <span class="fs-6 text-muted">of ${count(fb, x => x.type === 'bug')}</span>`),
+      tile('Easy to use', avg(fb, 'easy')),
+      tile('Clear directions', avg(all, 'clear')),
+      tile('Teachers: reports useful', avg(fb, 'reports')),
+      tile('Surveys', sv.length),
+      tile('Survey: something broke', `${count(sv, x => x.ratings && x.ratings.broke === 'yes')} <span class="fs-6 text-muted">said yes</span>`),
+      tile('Survey: how it felt', `<span class="fs-6">${['smooth', 'okay', 'frustrating'].map(k => `${count(sv, x => x.ratings && x.ratings.felt === k)} ${FELT[k].toLowerCase()}`).join('<br>')}</span>`),
+      tile('Ideas / requests', count(fb, x => x.type === 'idea'))
+    ].join('') : '';
+  }
+
+  function ratingLine(x) {
+    const r = x.ratings; if (!r) return '';
+    const parts = [];
+    if (r.easy) parts.push(`Easy to use ${r.easy}/5`);
+    if (r.clear) parts.push(`Clear directions ${r.clear}/5`);
+    if (r.reports) parts.push(`Reports useful ${r.reports}/5`);
+    if (r.broke) parts.push(`Something broke: ${r.broke}`);
+    if (r.felt) parts.push(`Felt: ${FELT[r.felt] || r.felt}`);
+    return parts.length ? `<div class="small mb-2"><i class="fas fa-star text-warning me-1"></i>${esc(parts.join(' · '))}</div>` : '';
+  }
+
+  function render() {
+    const fk = document.getElementById('fKind').value, fs = document.getElementById('fStatus').value;
+    const rows = all.filter(x => (!fk || x.kind === fk) && (!fs || (fs === 'open' ? !['fixed', 'wontfix'].includes(x.status) : x.status === fs)));
+    document.getElementById('list').innerHTML = rows.length ? rows.map(x => `
+      <div class="fb t-${esc(x.type || 'none')} k-${esc(x.kind)}">
+        <div class="d-flex flex-wrap justify-content-between gap-2">
+          <div><span class="fw-bold">#${x.id} ${x.kind === 'survey' ? '📝 After-test survey' : esc(TYPE[x.type] || 'Feedback')}</span>${x.severity ? ` · <span class="fw-bold text-danger">${esc(SEV[x.severity])}</span>` : ''}
+            · ${esc(ROLE[x.role] || 'Visitor')}${x.name ? ` · <strong>${esc(x.name)}</strong>` : ''}${x.contact ? ` · <a href="mailto:${esc(x.contact)}">${esc(x.contact)}</a>` : ''}
+            <span class="text-muted small">· ${new Date(x.created_at).toLocaleString()}</span></div>
+          <span class="badge ${x.status === 'fixed' ? 'bg-success' : x.status === 'wontfix' ? 'bg-secondary' : x.status === 'working' ? 'bg-warning text-dark' : 'bg-primary'}">${esc(STATUS[x.status] || x.status)}</span>
+        </div>
+        <div class="small text-muted mb-2">${esc([x.page, x.device, x.class_code ? 'class ' + x.class_code : ''].filter(Boolean).join(' · '))}</div>
+        ${x.message ? `<div class="msg mb-2">${esc(x.message)}</div>` : ''}
+        ${x.expected ? `<div class="msg small mb-2"><span class="fw-bold">Expected:</span> ${esc(x.expected)}</div>` : ''}
+        ${ratingLine(x)}
+        ${x.screenshot ? `<div class="shot mb-2"><a href="/api/admin/wpr-feedback/${x.id}/screenshot" target="_blank" rel="noopener"><img src="/api/admin/wpr-feedback/${x.id}/screenshot" alt="Screenshot sent with #${x.id}" loading="lazy"></a></div>` : ''}
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <input class="form-control form-control-sm" style="max-width:420px" data-note="${x.id}" maxlength="500" placeholder="Your note (saves when you click away)" value="${esc(x.note || '')}">
+          ${['working', 'fixed', 'wontfix'].filter(s => s !== x.status).map(s => `<button class="btn btn-sm ${s === 'fixed' ? 'btn-outline-success' : s === 'wontfix' ? 'btn-outline-secondary' : 'btn-outline-warning'}" data-id="${x.id}" data-status="${s}">${STATUS[s]}</button>`).join('')}
+          ${x.status !== 'new' ? `<button class="btn btn-sm btn-outline-primary" data-id="${x.id}" data-status="new">Reopen</button>` : ''}
+          <button class="btn btn-sm btn-outline-danger ms-auto" data-id="${x.id}" data-delete="1" title="Delete it and its screenshot"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>`).join('') : '<p class="text-muted">Nothing here.</p>';
+  }
+
+  document.getElementById('list').addEventListener('click', async e => {
+    const b = e.target.closest('button[data-id]'); if (!b) return;
+    if (b.dataset.status) return update(b.dataset.id, { status: b.dataset.status });
+    if (b.dataset.delete && confirm(`Delete #${b.dataset.id}? This can't be undone.`)) {
+      await fetch('/api/admin/wpr-feedback/' + b.dataset.id, { method: 'DELETE' });
+      all = all.filter(x => x.id !== Number(b.dataset.id)); stats(); render();
+    }
+  });
+  document.getElementById('list').addEventListener('change', e => {
+    const n = e.target.closest('[data-note]'); if (!n) return;
+    fetch('/api/admin/wpr-feedback/' + n.dataset.note, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ note: n.value }) });
+    const x = all.find(i => i.id === Number(n.dataset.note)); if (x) x.note = n.value;
+  });
+  document.getElementById('fKind').addEventListener('change', render);
+  document.getElementById('fStatus').addEventListener('change', render);
+  load();
+})();
+</script>
+</body>
+</html>

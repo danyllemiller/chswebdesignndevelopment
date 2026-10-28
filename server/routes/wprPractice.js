@@ -11,7 +11,11 @@
 // whenever the server restarts -- so teachers download their results
 // (summary CSV, question-by-question CSV, printable report) before ending.
 // A count of active sessions (no student data) is written to
-// /tmp/wpr_active_sessions so deploys can wait instead of restarting mid-test.
+// /tmp/wpr_active_sessions so deploys can wait instead of restarting mid-test,
+// and a count of sessions still in use (anyone active in the last 45 minutes,
+// including a teacher's results page, which checks in every few seconds) to
+// /tmp/wpr_sessions_in_use, so a deploy also waits for a teacher whose class
+// has finished but who may not have downloaded the results yet.
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
@@ -27,13 +31,20 @@ const LENGTHS = {
 };
 const SESSION_HOURS = 12;
 const GRACE_SECONDS = 30;
+const IN_USE_MINUTES = 45;
 const sessions = new Map(); // code -> session
 
 function writeActiveMarker() {
     const now = Date.now();
-    let active = 0;
-    sessions.forEach(s => { s.students.forEach(st => { if (st.startedAt && !st.submittedAt && now - st.startedAt < (s.seconds + 120) * 1000) active++; }); });
-    try { fs.writeFileSync('/tmp/wpr_active_sessions', String(active)); } catch (e) { /* best effort */ }
+    let active = 0, inUse = 0;
+    sessions.forEach(s => {
+        if (now - s.lastActive < IN_USE_MINUTES * 60 * 1000) inUse++;
+        s.students.forEach(st => { if (st.startedAt && !st.submittedAt && now - st.startedAt < (s.seconds + 120) * 1000) active++; });
+    });
+    try {
+        fs.writeFileSync('/tmp/wpr_active_sessions', String(active));
+        fs.writeFileSync('/tmp/wpr_sessions_in_use', String(inUse));
+    } catch (e) { /* best effort */ }
 }
 setInterval(() => {
     const now = Date.now();
@@ -98,6 +109,7 @@ function getStudent(req) {
     const body = req.body || {};
     const session = sessions.get(String(body.code || '').toUpperCase());
     if (!session) return { error: 'That class code has ended or does not exist.' };
+    session.lastActive = Date.now();
     const st = [...session.students.values()].find(x => x.token === body.token);
     if (!st) return { error: 'Your test session was not found. Ask your teacher.' };
     return { session, st };
@@ -106,6 +118,7 @@ function teacherSession(req) {
     const session = sessions.get(String(req.params.code || '').toUpperCase());
     const t = req.get('x-teacher-token') || '';
     if (!session || !t || !safeEq(t, session.teacherToken)) return null;
+    session.lastActive = Date.now();
     return session;
 }
 
@@ -148,7 +161,7 @@ router.post('/wpr/session', async (req, res) => {
     const now = Date.now();
     const session = {
         code, teacherToken: token(), teacher: clean(body.teacher, 60), length, ...LENGTHS[length], source, bankQs,
-        createdAt: now, expiresAt: now + SESSION_HOURS * 3600 * 1000, students: new Map()
+        createdAt: now, lastActive: now, expiresAt: now + SESSION_HOURS * 3600 * 1000, students: new Map()
     };
     // Only-bank tests can't be longer than the bank.
     if (source === 'bank' && bankQs.length < session.count) {
@@ -156,6 +169,7 @@ router.post('/wpr/session', async (req, res) => {
         session.label = `${bankQs.length} questions from your question banks, ${Math.round(session.seconds / 60)} minutes`;
     }
     sessions.set(code, session);
+    writeActiveMarker();
     res.json({ code, teacherToken: session.teacherToken, length, label: session.label, expiresAt: session.expiresAt, bank_questions: bankQs.length });
 });
 
@@ -197,6 +211,7 @@ router.post('/wpr/join', (req, res) => {
     const body = req.body || {};
     const session = sessions.get(String(body.code || '').trim().toUpperCase());
     if (!session) return res.status(404).json({ error: 'That class code has ended or does not exist. Check with your teacher.' });
+    session.lastActive = Date.now();
     const firstName = clean(body.firstName, 40), lastName = clean(body.lastName, 40), studentId = clean(body.studentId, 20);
     if (!firstName || !lastName || !studentId) return res.status(400).json({ error: 'Enter your first name, last name, and student ID.' });
     let st = session.students.get(studentId);
