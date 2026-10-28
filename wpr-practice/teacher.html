@@ -27,7 +27,7 @@
   <div id="screen" class="card-main"></div>
 </div>
 <footer class="text-center small text-muted pb-4" style="max-width:900px;margin:0 auto;padding:0 1rem;">
-  <a href="/wpr-practice/privacy.html">Privacy Policy</a> · <a href="/wpr-practice/terms.html">Terms of Use</a><br>
+  <a href="/wpr-practice/privacy.html">Privacy Policy</a> · <a href="/wpr-practice/terms.html">Terms of Use</a> · <a href="mailto:contact@wprpracticepro.com?subject=WPR%20Practice%20Pro%20bug%20or%20idea" data-wfb-open>Report a bug / Request a feature</a><br>
   Independent practice tool. Not affiliated with or endorsed by the Nevada Department of Education. No student information is kept after a session ends.
 </footer>
 <script>
@@ -38,7 +38,7 @@
   const screen = document.getElementById('screen');
   const KEY = 'wpr_teacher_session';
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  let sess = null, data = null, poll = null, confirmEnd = false;
+  let sess = null, data = null, poll = null, confirmEnd = false, timeFor = null;   // timeFor: the student whose time is being set
   try { sess = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
 
   // ---- Question banks (server/routes/wprBanks.js) ----
@@ -216,6 +216,22 @@ Answer: False"></textarea>
 
   const fmtLeft = s => s == null ? '' : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   const pct = (a, b) => b ? Math.round((a / b) * 100) : 0;
+  const mins = sec => `${Math.round(sec / 60)} min`;
+  const TIME_LABEL = { 1: 'Standard time', 1.5: 'Time and a half', 2: 'Double time' };
+  // A student's time button, and under their row the choices, while it's open (untimed tests have neither)
+  function timeCell(s) {
+    if (s.status === 'submitted') return `<span class="small text-muted">${mins(s.secondsAllowed)}</span>`;
+    return `<button class="btn btn-sm py-0 ${s.timeX > 1 ? 'btn-outline-primary fw-bold' : 'btn-outline-secondary'}" data-timefor="${esc(s.studentId)}" aria-expanded="${timeFor === s.studentId}" title="Change this student's time">${mins(s.secondsAllowed)}</button>`;
+  }
+  function timeRow(s, cols) {
+    if (timeFor !== s.studentId || s.status === 'submitted') return '';
+    const base = s.secondsAllowed / (s.timeX || 1);
+    return `<tr class="table-active"><td colspan="${cols}"><div class="d-flex flex-wrap align-items-center gap-2 py-1">
+      <span class="small fw-bold">Time allowed for ${esc(s.firstName)} ${esc(s.lastName)}:</span>
+      ${[1, 1.5, 2].map(x => `<button class="btn btn-sm fw-bold ${(s.timeX || 1) === x ? 'btn-primary' : 'btn-outline-primary'}" data-time="${esc(s.studentId)}" data-x="${x}">${TIME_LABEL[x]} · ${mins(base * x)}</button>`).join('')}
+      <button class="btn btn-sm btn-link" data-timefor="">Close</button>
+      ${s.status === 'testing' ? '<span class="small text-muted">Their clock changes within 15 seconds.</span>' : ''}</div></td></tr>`;
+  }
 
   function render() {
     // On wprpracticepro.com the student page is /join (/ is the home page); on the class site it's /wpr-practice/.
@@ -223,6 +239,7 @@ Answer: False"></textarea>
     const st = data.students;
     const done = st.filter(s => s.status === 'submitted');
     const sorted = [...st].sort((a, b) => (a.lastName + a.firstName).localeCompare(b.lastName + b.firstName));
+    const timed = data.timed !== false, cols = timed ? 9 : 8;
     screen.innerHTML = `
       <div class="d-flex justify-content-between flex-wrap gap-3 align-items-start">
         <div>
@@ -244,16 +261,17 @@ Answer: False"></textarea>
         ${done.length ? `<div><span class="fs-3 fw-bold">${Math.round(done.reduce((s, x) => s + pct(x.result.correct, x.result.total), 0) / done.length)}%</span> class average</div>` : ''}
       </div>
       <div class="table-responsive mb-3"><table class="table table-sm align-middle mb-0">
-        <thead class="table-light"><tr><th>Student</th><th>ID</th><th class="num">Status</th><th class="num">Time left</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th></tr></thead>
+        <thead class="table-light"><tr><th>Student</th><th>ID</th><th class="num">Status</th><th class="num">Time left</th>${timed ? '<th class="num">Time allowed</th>' : ''}<th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th></tr></thead>
         <tbody>${sorted.length ? sorted.map(s => `<tr>
           <td class="fw-bold">${esc(s.lastName)}, ${esc(s.firstName)}</td><td>${esc(s.studentId)}</td>
           <td class="num"><span class="pill ${s.status}">${s.status}</span></td>
           <td class="num">${s.status === 'testing' ? fmtLeft(s.secondsLeft) : ''}</td>
+          ${timed ? `<td class="num">${timeCell(s)}</td>` : ''}
           <td class="num">${s.result ? s.result.answered : s.answeredSoFar}</td>
           <td class="num">${s.result ? s.result.correct : ''}</td>
           <td class="num fw-bold">${s.result ? pct(s.result.correct, s.result.total) + '%' : ''}</td>
-          <td class="num ${s.violations ? 'text-danger fw-bold' : 'text-muted'}">${s.violations ? s.violations + '×' : '0'}${s.endReason === 'left-test' ? ' · auto-submitted' : ''}</td></tr>`).join('')
-          : '<tr><td colspan="8" class="text-center text-muted py-4">Waiting for students to join…</td></tr>'}</tbody>
+          <td class="num ${s.violations ? 'text-danger fw-bold' : 'text-muted'}">${s.violations ? s.violations + '×' : '0'}${s.endReason === 'left-test' ? ' · auto-submitted' : ''}</td></tr>${timed ? timeRow(s, cols) : ''}`).join('')
+          : `<tr><td colspan="${cols}" class="text-center text-muted py-4">Waiting for students to join…</td></tr>`}</tbody>
       </table></div>
       <div class="d-flex flex-wrap gap-2 mb-2">
         <button class="btn btn-success fw-bold" data-dl="summary" ${done.length ? '' : 'disabled'}><i class="fas fa-file-csv me-1"></i>Score summary (CSV)</button>
@@ -277,10 +295,11 @@ Answer: False"></textarea>
   }
   const finished = () => data.students.filter(s => s.status === 'submitted').sort((a, b) => (a.lastName + a.firstName).localeCompare(b.lastName + b.firstName));
   const endedBy = s => s.endReason === 'left-test' ? 'Auto-submitted (left test)' : s.endReason === 'time' ? 'Time ran out' : 'Student submitted';
+  const allowed = s => data.timed === false ? 'Untimed' : `${Math.round(s.secondsAllowed / 60)} minutes`;
 
   function summaryCsv() {
-    const rows = [['Last name', 'First name', 'Student ID', 'Answered', 'Correct', 'Total questions', 'Score %', 'Accuracy % (of answered)', 'Times left test', 'How it ended']];
-    finished().forEach(s => rows.push([s.lastName, s.firstName, s.studentId, s.result.answered, s.result.correct, s.result.total, pct(s.result.correct, s.result.total), pct(s.result.correct, s.result.answered), s.violations, endedBy(s)]));
+    const rows = [['Last name', 'First name', 'Student ID', 'Answered', 'Correct', 'Total questions', 'Score %', 'Accuracy % (of answered)', 'Times left test', 'How it ended', 'Time allowed']];
+    finished().forEach(s => rows.push([s.lastName, s.firstName, s.studentId, s.result.answered, s.result.correct, s.result.total, pct(s.result.correct, s.result.total), pct(s.result.correct, s.result.answered), s.violations, endedBy(s), allowed(s)]));
     download(`wpr-practice-summary-${data.code}-${stamp()}.csv`, csv(rows), 'text/csv');
   }
   function itemsCsv() {
@@ -331,8 +350,8 @@ Answer: False"></textarea>
       <h2>Score distribution</h2>${hist}<div style="font-size:11px;color:#6c757d">Score = correct out of all questions. Green bars are 70% and up.</div>
       <h2>By topic</h2>${bar('Workplace Readiness Skills', wrsRight, wrsSeen)}${bar('Workplace safety & ergonomics', safetyRight, safetySeen)}
       <h2>Most-missed questions</h2>${missed.length ? `<table><thead><tr><th>Question</th><th>Correct answer</th><th class="num">Missed</th></tr></thead><tbody>${missed.map(m => `<tr><td>${esc(m.q)}</td><td>${esc(m.answer)}</td><td class="num">${m.wrong} of ${m.seen}</td></tr>`).join('')}</tbody></table>` : '<p style="font-size:13px">Not enough overlap yet. Each student gets a different random set of questions, so this fills in with larger classes.</p>'}
-      <h2>Students</h2><table><thead><tr><th>Student</th><th>ID</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th><th>How it ended</th></tr></thead><tbody>
-      ${st.map(s => `<tr><td>${esc(s.lastName)}, ${esc(s.firstName)}</td><td>${esc(s.studentId)}</td><td class="num">${s.result.answered}</td><td class="num">${s.result.correct}</td><td class="num"><b>${pct(s.result.correct, s.result.total)}%</b></td><td class="num">${s.violations}</td><td>${endedBy(s)}</td></tr>`).join('')}
+      <h2>Students</h2><table><thead><tr><th>Student</th><th>ID</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th><th>How it ended</th><th class="num">Time allowed</th></tr></thead><tbody>
+      ${st.map(s => `<tr><td>${esc(s.lastName)}, ${esc(s.firstName)}</td><td>${esc(s.studentId)}</td><td class="num">${s.result.answered}</td><td class="num">${s.result.correct}</td><td class="num"><b>${pct(s.result.correct, s.result.total)}%</b></td><td class="num">${s.violations}</td><td>${endedBy(s)}</td><td class="num">${allowed(s)}</td></tr>`).join('')}
       </tbody></table></body></html>`;
   }
 
@@ -341,6 +360,20 @@ Answer: False"></textarea>
       const input = document.getElementById('link');
       try { await navigator.clipboard.writeText(input.value); e.target.textContent = 'Copied'; } catch (x) { input.select(); }
       return;
+    }
+    const tf = e.target.closest('[data-timefor]');
+    if (tf) { timeFor = tf.dataset.timefor && tf.dataset.timefor !== timeFor ? tf.dataset.timefor : null; render(); return; }
+    const tx = e.target.closest('[data-time]');
+    if (tx && data) {
+      tx.textContent = 'Saving…';
+      try {
+        const res = await fetch(`/api/wpr/session/${encodeURIComponent(sess.code)}/time`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-teacher-token': sess.token },
+          body: JSON.stringify({ studentId: tx.dataset.time, x: Number(tx.dataset.x) }) });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(out.error || 'Could not change the time.');
+        timeFor = null;
+      } catch (err) { alert(err.message); }
+      return refresh();
     }
     const d = e.target.closest('[data-dl]');
     if (d && data) {
@@ -362,5 +395,6 @@ Answer: False"></textarea>
   if (sess && sess.code) startPolling(); else showStart();
 })();
 </script>
+<script src="/wpr-practice/assets/feedback.js?v=1" data-role="teacher"></script>
 </body>
 </html>

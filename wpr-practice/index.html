@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no" class="notranslate">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="google" content="notranslate">
   <title>WPR Practice Pro</title>
   <link rel="icon" type="image/png" sizes="64x64" href="/wpr-practice/assets/wpr-practice-pro-favicon-64.png">
   <link rel="apple-touch-icon" href="/wpr-practice/assets/wpr-practice-pro-favicon-512.png">
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
-  <script src="/js/wrs-test-ui.js?v=2"></script>
+  <script src="/js/wrs-test-ui.js?v=4"></script>
   <style>
     body { background: #eef1f5; min-height: 100vh; }
     .wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -25,7 +26,7 @@
   <div id="screen" class="card-main"></div>
 </div>
 <footer class="text-center small text-muted pb-4" style="max-width:900px;margin:0 auto;padding:0 1rem;">
-  <a href="/wpr-practice/privacy.html">Privacy Policy</a> · <a href="/wpr-practice/terms.html">Terms of Use</a><br>
+  <a href="/wpr-practice/privacy.html">Privacy Policy</a> · <a href="/wpr-practice/terms.html">Terms of Use</a> · <a href="mailto:contact@wprpracticepro.com?subject=WPR%20Practice%20Pro%20bug%20or%20idea" data-wfb-open>Report a bug / Request a feature</a><br>
   Independent practice tool. Not affiliated with or endorsed by the Nevada Department of Education. No student information is kept after a session ends.
 </footer>
 <script>
@@ -45,7 +46,10 @@
     if (!res.ok) { const e = new Error(data.error || 'Something went wrong.'); e.status = res.status; throw e; }
     return data;
   }
-  const fmtTime = s => s >= 3600 ? `${s / 3600} hour` : `${Math.round(s / 60)} minutes`;
+  const fmtTime = s => {
+    const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+    return [h ? `${h} hour${h > 1 ? 's' : ''}` : '', m ? `${m} minutes` : ''].filter(Boolean).join(' ') || '0 minutes';
+  };
 
   function showJoin(msg) {
     const params = new URLSearchParams(location.search);
@@ -85,7 +89,8 @@
         <li><strong>${me.count} questions</strong>, multiple choice and true/false, on Nevada Workplace Readiness Skills, including workplace safety. You have <strong>${fmtTime(me.seconds)}</strong>.</li>
         <li>Answer as many as you can. The test submits itself when time runs out.</li>
         <li>Like the state test: <strong>Flag</strong> questions to come back to, use the on-screen <strong>Calculator</strong> and <strong>Scratch Paper</strong>, and check the <strong>Review</strong> screen before you submit.</li>
-        <li class="text-danger fw-bold">The test runs full screen. Do not leave it. Switching tabs, opening another site, or exiting full screen locks the test with a warning and tells your teacher. The second time, your test is submitted.</li>
+        <li class="text-danger fw-bold">The test runs full screen. Do not leave it. Switching tabs, opening another site, exiting full screen, or translating the page locks the test with a warning and tells your teacher. The second time, your test is submitted.</li>
+        <li>The test is in English only, like the state test. Translators are turned off.</li>
         <li>When you finish you'll see your score and every question you answered, with the correct answers.</li>
       </ul>
       <button id="startBtn" class="btn btn-primary btn-lg fw-bold w-100"><i class="fas fa-expand me-2"></i>${started ? 'Resume the test (the clock kept running)' : 'Start the test (full screen)'}</button>`;
@@ -106,11 +111,15 @@
         save: answers => api('/wpr/save', { code: me.code, token: me.token, answers }),
         saveBeacon: answers => navigator.sendBeacon && navigator.sendBeacon('/api/wpr/save', new Blob([JSON.stringify({ code: me.code, token: me.token, answers })], { type: 'application/json' })),
         onViolation: count => api('/wpr/violation', { code: me.code, token: me.token, count }),
+        clock: () => api('/wpr/clock', { code: me.code, token: me.token }),
+        noTranslate: true,   // the state test can't be translated, so the practice can't either
         submit: async (answers, reason) => {
           const out = await api('/wpr/submit', { code: me.code, token: me.token, answers, reason });
           try { sessionStorage.removeItem('wpr_join'); } catch (x) {}
           screen.innerHTML = `<h1 class="h4 fw-bold mb-3">Your results</h1>${WrsTestUI.reviewHtml(out.result, out.endReason || reason)}
             <p class="small text-muted mt-3 mb-0">Your teacher has your score. You can close this page.</p>`;
+          const score = screen.querySelector('.wt-big');   // the pilot survey goes right under the score
+          if (window.WprFeedback && score) WprFeedback.survey(score.closest('.d-flex'), { code: me.code });
         }
       });
     } catch (e) {
@@ -123,5 +132,6 @@
   if (me && me.token) showRules(true); else showJoin();
 })();
 </script>
+<script src="/wpr-practice/assets/feedback.js?v=1"></script>
 </body>
 </html>
