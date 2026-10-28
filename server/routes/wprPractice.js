@@ -7,9 +7,13 @@
 // Sprint (js/wrs-test-ui.js).
 //
 // NOTHING IS STORED: sessions live only in this process's memory. They are
-// erased when the teacher ends the session, 12 hours after they start, or
-// whenever the server restarts -- so teachers download their results
-// (summary CSV, question-by-question CSV, printable report) before ending.
+// erased 15 minutes after the teacher ends the session, 12 hours after they
+// start, or whenever the server restarts -- so teachers download their
+// results (summary CSV, question-by-question CSV, printable report).
+//
+// Answers are held: when students submit they see only their score. Ending
+// the session releases every student's answers and their report (a PDF made
+// in their browser, wpr-practice/assets/report-pdf.js) for those 15 minutes.
 // A count of active sessions (no student data) is written to
 // /tmp/wpr_active_sessions so deploys can wait instead of restarting mid-test,
 // and a count of sessions still in use (anyone active in the last 45 minutes,
@@ -34,6 +38,7 @@ const GRACE_SECONDS = 30;
 const IN_USE_MINUTES = 45;
 const MARKER_DIR = process.env.WPR_MARKER_DIR || '/tmp';
 const TIME_X = [1, 1.5, 2];   // standard, time and a half, double time
+const RELEASE_MINUTES = 15;   // after the teacher ends the test: students see their answers and save their report
 const sessions = new Map(); // code -> session
 
 // One student's time limit: the session's, or more if the teacher gave them time and a half or double
@@ -91,10 +96,18 @@ function grade(questions, answers) {
         answered++;
         const right = Number(a) === q.correct;
         if (right) correct++;
-        review.push({ n: i + 1, prompt: q.prompt, q: q.q, topic: q.topic || '', right, yours: q.options[Number(a)] ?? '', answer: q.options[q.correct], hint: q.hint });
+        review.push({ n: i + 1, prompt: q.prompt, q: q.q, topic: q.topic || '', indicator: q.indicator || '', right, yours: q.options[Number(a)] ?? '', answer: q.options[q.correct], hint: q.hint });
     });
     return { answered, correct, total: questions.length, review };
 }
+// What a student sees before the teacher ends the test: the score, not the answers.
+const scoreOnly = r => ({ answered: r.answered, correct: r.correct, total: r.total });
+// What the student's report needs, once released. Initials only: the report never shows a name or student ID.
+const initials = st => [st.firstName, st.lastName].map(n => (String(n || '').trim()[0] || '').toUpperCase()).filter(Boolean).map(c => c + '.').join('');
+const reportFor = (s, st) => ({
+    initials: initials(st), teacher: s.teacher, code: s.code, label: s.label,
+    submittedAt: st.submittedAt, violations: st.violations, endReason: st.endReason, availableUntil: s.expiresAt
+});
 function cleanAnswers(raw, total) {
     const out = {};
     if (raw && typeof raw === 'object') Object.entries(raw).forEach(([k, v]) => {
@@ -198,7 +211,27 @@ router.get('/wpr/session/:code', (req, res) => {
             yours: st.answers[i] !== undefined ? q.options[st.answers[i]] : '', right: st.answers[i] !== undefined ? st.answers[i] === q.correct : null
         })) : null
     }));
-    res.json({ code: s.code, label: s.label, length: s.length, teacher: s.teacher, createdAt: s.createdAt, expiresAt: s.expiresAt, timed: s.seconds > 0, students });
+    res.json({ code: s.code, label: s.label, length: s.length, teacher: s.teacher, createdAt: s.createdAt, expiresAt: s.expiresAt, endedAt: s.endedAt || null, timed: s.seconds > 0, students });
+});
+
+// POST /wpr/session/:code/end -- the teacher ends the test. Anyone still testing is scored on their saved
+// answers, and every student can see their answers and save their report for RELEASE_MINUTES; then it's
+// all erased. If no one finished, there's nothing to release, so it's erased right away.
+router.post('/wpr/session/:code/end', (req, res) => {
+    const s = teacherSession(req);
+    if (!s) return res.status(404).json({ error: 'Session not found. It may have ended or expired.' });
+    if (!s.endedAt) {
+        s.students.forEach(st => { if (st.startedAt && !st.submittedAt) finish(s, st, st.answers, 'ended'); });
+        if (![...s.students.values()].some(st => st.submittedAt)) {
+            sessions.delete(s.code);
+            writeActiveMarker();
+            return res.json({ erased: true });
+        }
+        s.endedAt = Date.now();
+        s.expiresAt = Math.min(s.expiresAt, s.endedAt + RELEASE_MINUTES * 60 * 1000);
+        writeActiveMarker();
+    }
+    res.json({ endedAt: s.endedAt, expiresAt: s.expiresAt });
 });
 
 // POST /wpr/session/:code/time -- { studentId, x } gives one student standard time (1), time and a half
@@ -217,7 +250,7 @@ router.post('/wpr/session/:code/time', (req, res) => {
     res.json({ success: true, secondsAllowed: secondsFor(s, st) });
 });
 
-// DELETE /wpr/session/:code -- teacher ends the session; everything is erased
+// DELETE /wpr/session/:code -- the teacher erases everything now (or, on an older page, ends without the 15 minutes)
 router.delete('/wpr/session/:code', (req, res) => {
     const s = teacherSession(req);
     if (!s) return res.status(404).json({ error: 'Session not found.' });
@@ -234,11 +267,12 @@ router.post('/wpr/join', (req, res) => {
     const body = req.body || {};
     const session = sessions.get(String(body.code || '').trim().toUpperCase());
     if (!session) return res.status(404).json({ error: 'That class code has ended or does not exist. Check with your teacher.' });
+    if (session.endedAt) return res.status(409).json({ error: 'This test has ended. Check with your teacher.' });
     session.lastActive = Date.now();
     const firstName = clean(body.firstName, 40), lastName = clean(body.lastName, 40), studentId = clean(body.studentId, 20);
     if (!firstName || !lastName || !studentId) return res.status(400).json({ error: 'Enter your first name, last name, and student ID.' });
     let st = session.students.get(studentId);
-    if (st && st.submittedAt) return res.status(409).json({ error: 'You already took this test.' });
+    if (st && st.submittedAt) return res.status(409).json({ error: 'You already took this test. If you closed your results page, ask your teacher for your score.' });
     if (st && (st.firstName.toLowerCase() !== firstName.toLowerCase() || st.lastName.toLowerCase() !== lastName.toLowerCase())) {
         return res.status(409).json({ error: 'That student ID is already in use in this class. Check your ID or ask your teacher.' });
     }
@@ -256,6 +290,7 @@ router.post('/wpr/start', (req, res) => {
     const { session, st, error } = getStudent(req);
     if (error) return res.status(404).json({ error });
     if (st.submittedAt) return res.status(409).json({ error: 'You already took this test.' });
+    if (session.endedAt) return res.status(409).json({ error: 'This test has ended. Check with your teacher.' });
     if (!st.startedAt) {
         st.questions = buildSessionTest(session);
         st.startedAt = Date.now();
@@ -273,8 +308,19 @@ router.post('/wpr/start', (req, res) => {
 router.post('/wpr/clock', (req, res) => {
     const { session, st, error } = getStudent(req);
     if (error) return res.status(404).json({ error });
-    if (!st.startedAt || st.submittedAt) return res.json({ secondsLeft: null });
+    if (st.submittedAt) return res.json({ secondsLeft: 0 });   // the teacher ended the test: the student's screen wraps up
+    if (!st.startedAt) return res.json({ secondsLeft: null });
     res.json({ secondsLeft: Math.max(0, Math.round(secondsFor(session, st) - (Date.now() - st.startedAt) / 1000)) });
+});
+
+// POST /wpr/results -- { code, token } -> 'testing', 'held' (the score only), or 'released' once the teacher
+// ends the test: every question the student answered, with the right answers, and what their report needs.
+router.post('/wpr/results', (req, res) => {
+    const { session, st, error } = getStudent(req);
+    if (error) return res.status(404).json({ error });
+    if (!st.submittedAt) return res.json({ status: 'testing' });
+    if (!session.endedAt) return res.json({ status: 'held', result: scoreOnly(st.result), endReason: st.endReason });
+    res.json({ status: 'released', result: st.result, endReason: st.endReason, report: reportFor(session, st) });
 });
 
 // POST /wpr/save -- { code, token, answers }
@@ -306,7 +352,7 @@ router.post('/wpr/submit', (req, res) => {
         const reason = ['student', 'time', 'left-test'].includes(req.body.reason) ? req.body.reason : 'student';
         finish(session, st, answers, reason);
     }
-    res.json({ result: st.result, endReason: st.endReason });
+    res.json({ result: scoreOnly(st.result), endReason: st.endReason, released: !!session.endedAt });
 });
 
 module.exports = router;

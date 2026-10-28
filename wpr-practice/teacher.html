@@ -160,7 +160,7 @@ Answer: False"></textarea>
             <option value="bank">Only question banks</option>
           </select>
           <div id="bankPick" class="mt-2 d-none"></div></div>
-        <div class="alert alert-info small mb-0"><i class="fas fa-lock me-1"></i><strong>Nothing is saved.</strong> Results are kept only in temporary memory while your session is open. Download them before you end the session. Sessions are erased automatically after 12 hours.</div>
+        <div class="alert alert-info small mb-0"><i class="fas fa-lock me-1"></i><strong>Nothing is saved.</strong> Results are kept only in temporary memory. Students see their score when they finish. When you end the test, they see their answers and can save their own report for 15 minutes, and then everything is erased. Download what you need before then. Sessions are erased automatically after 12 hours.</div>
         <p class="small text-muted mb-0">By starting a session you agree to the <a href="/wpr-practice/terms.html" target="_blank">Terms of Use</a>, including giving the test only to your own students and following your district's student-privacy policies.</p>
         <button class="btn btn-primary btn-lg fw-bold" type="submit">Start session</button>
       </form>
@@ -240,7 +240,9 @@ Answer: False"></textarea>
     const done = st.filter(s => s.status === 'submitted');
     const sorted = [...st].sort((a, b) => (a.lastName + a.firstName).localeCompare(b.lastName + b.firstName));
     const timed = data.timed !== false, cols = timed ? 9 : 8;
+    const testing = st.filter(s => s.status === 'testing').length;
     screen.innerHTML = `
+      ${data.endedAt ? `<div class="alert alert-warning"><i class="fas fa-hourglass-half me-1"></i><strong>Test ended at ${clock(data.endedAt)}.</strong> Students can see their answers and save their report until <strong>${clock(data.expiresAt)}</strong>. Then everything is erased, including this page. Download what you need now.</div>` : ''}
       <div class="d-flex justify-content-between flex-wrap gap-3 align-items-start">
         <div>
           <div class="small fw-bold text-muted text-uppercase">Class code</div>
@@ -277,10 +279,11 @@ Answer: False"></textarea>
         <button class="btn btn-success fw-bold" data-dl="summary" ${done.length ? '' : 'disabled'}><i class="fas fa-file-csv me-1"></i>Score summary (CSV)</button>
         <button class="btn btn-success fw-bold" data-dl="items" ${done.length ? '' : 'disabled'}><i class="fas fa-table-list me-1"></i>Question-by-question (CSV)</button>
         <button class="btn btn-success fw-bold" data-dl="report" ${done.length ? '' : 'disabled'}><i class="fas fa-chart-column me-1"></i>Printable class report</button>
-        <button class="btn ${confirmEnd ? 'btn-danger' : 'btn-outline-danger'} fw-bold ms-auto" id="endBtn">${confirmEnd ? 'Yes, erase everything and end' : 'End session'}</button>
+        <button class="btn ${confirmEnd ? 'btn-danger' : 'btn-outline-danger'} fw-bold ms-auto" id="endBtn">${data.endedAt ? (confirmEnd ? 'Yes, erase everything now' : 'Erase everything now') : confirmEnd ? `Yes, end the test${testing ? ` (${testing} still testing)` : ''}` : 'End the test'}</button>
       </div>
-      <p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i>Nothing is saved. Results are erased when you end this session, after 12 hours, or if the server restarts. Download what you need first. Only students who finished appear in the downloads.</p>`;
+      <p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i>Nothing is saved. ${data.endedAt ? '' : 'Ending the test shows students their answers and lets them save their report for 15 minutes; anyone still testing is scored on their saved answers. '}Results are erased 15 minutes after you end the test, after 12 hours, or if the server restarts. Download what you need. Only students who finished appear in the downloads.</p>`;
   }
+  const clock = t => new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
   // ---- Downloads (built right here in the browser)
   const csvCell = v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
@@ -294,7 +297,7 @@ Answer: False"></textarea>
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
   const finished = () => data.students.filter(s => s.status === 'submitted').sort((a, b) => (a.lastName + a.firstName).localeCompare(b.lastName + b.firstName));
-  const endedBy = s => s.endReason === 'left-test' ? 'Auto-submitted (left test)' : s.endReason === 'time' ? 'Time ran out' : 'Student submitted';
+  const endedBy = s => s.endReason === 'left-test' ? 'Auto-submitted (left test)' : s.endReason === 'time' ? 'Time ran out' : s.endReason === 'ended' ? 'Teacher ended the test' : 'Student submitted';
   const allowed = s => data.timed === false ? 'Untimed' : `${Math.round(s.secondsAllowed / 60)} minutes`;
 
   function summaryCsv() {
@@ -384,17 +387,28 @@ Answer: False"></textarea>
     }
     if (e.target.closest('#endBtn')) {
       if (!confirmEnd) { confirmEnd = true; render(); setTimeout(() => { confirmEnd = false; if (data) render(); }, 6000); return; }
-      stop();
-      try { await fetch(`/api/wpr/session/${encodeURIComponent(sess.code)}`, { method: 'DELETE', headers: { 'x-teacher-token': sess.token } }); } catch (x) {}
-      try { localStorage.removeItem(KEY); } catch (x) {}
-      sess = null; data = null; confirmEnd = false;
-      showStart();
+      confirmEnd = false;
+      // The first time ends the test (students get 15 minutes with their answers); once ended, it erases everything.
+      const erase = !!(data && data.endedAt);
+      let out = {};
+      try {
+        const res = await fetch(`/api/wpr/session/${encodeURIComponent(sess.code)}${erase ? '' : '/end'}`, { method: erase ? 'DELETE' : 'POST', headers: { 'x-teacher-token': sess.token } });
+        out = await res.json().catch(() => ({}));
+        if (res.status === 404) out.erased = true;
+      } catch (x) { return refresh(); }
+      if (erase || out.erased) {
+        stop();
+        try { localStorage.removeItem(KEY); } catch (x) {}
+        sess = null; data = null;
+        return showStart(erase ? 'Everything from that session was erased.' : 'Session ended. No one had finished, so there was nothing to keep.');
+      }
+      refresh();
     }
   });
 
   if (sess && sess.code) startPolling(); else showStart();
 })();
 </script>
-<script src="/wpr-practice/assets/feedback.js?v=1" data-role="teacher"></script>
+<script src="/wpr-practice/assets/feedback.js?v=2" data-role="teacher"></script>
 </body>
 </html>

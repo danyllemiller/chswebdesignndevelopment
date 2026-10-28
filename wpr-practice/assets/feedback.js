@@ -296,7 +296,7 @@
           <div class="wfb-row"><button type="button" class="wfb-send" data-sv-send>Send</button><button type="button" class="wfb-ghost" data-sv-skip>No thanks</button></div>`;
         after.insertAdjacentElement('afterend', card);
         document.body.classList.add('wfb-surveying');   // the survey stands in for the floating button
-        const finished = () => document.body.classList.remove('wfb-surveying');
+        const finished = () => { document.body.classList.remove('wfb-surveying'); if (opts && opts.onDone) opts.onDone(); };
         card.addEventListener('change', () => { card.querySelector('[data-what]').hidden = picked(card, 'sv_broke') !== 'yes'; });
         card.querySelector('[data-sv-skip]').addEventListener('click', () => { card.remove(); finished(); });
         card.querySelector('[data-sv-send]').addEventListener('click', async (e) => {

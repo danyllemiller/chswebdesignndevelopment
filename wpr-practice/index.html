@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="/wpr-practice/assets/wpr-practice-pro-favicon-512.png">
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
-  <script src="/js/wrs-test-ui.js?v=4"></script>
+  <script src="/js/wrs-test-ui.js?v=5"></script>
   <style>
     body { background: #eef1f5; min-height: 100vh; }
     .wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -33,7 +33,9 @@
 // Student side of the WPR Practice Test (server/routes/wprPractice.js).
 // No login: students join with the teacher's class code, their name, and
 // student ID. Nothing is saved on this device except the join token for
-// this one test (sessionStorage), so a refresh can resume.
+// this one test (sessionStorage), so a refresh can resume, or come back to
+// the results. Students see their score when they finish; their answers and
+// report (assets/report-pdf.js) unlock when the teacher ends the test.
 (function () {
   const screen = document.getElementById('screen');
   const esc = WrsTestUI.esc;
@@ -91,7 +93,7 @@
         <li>Like the state test: <strong>Flag</strong> questions to come back to, use the on-screen <strong>Calculator</strong> and <strong>Scratch Paper</strong>, and check the <strong>Review</strong> screen before you submit.</li>
         <li class="text-danger fw-bold">The test runs full screen. Do not leave it. Switching tabs, opening another site, exiting full screen, or translating the page locks the test with a warning and tells your teacher. The second time, your test is submitted.</li>
         <li>The test is in English only, like the state test. Translators are turned off.</li>
-        <li>When you finish you'll see your score and every question you answered, with the correct answers.</li>
+        <li>When you finish you'll see your score right away. Your answers and your report unlock when your teacher ends the test.</li>
       </ul>
       <button id="startBtn" class="btn btn-primary btn-lg fw-bold w-100"><i class="fas fa-expand me-2"></i>${started ? 'Resume the test (the clock kept running)' : 'Start the test (full screen)'}</button>`;
     document.getElementById('startBtn').addEventListener('click', start);
@@ -115,11 +117,9 @@
         noTranslate: true,   // the state test can't be translated, so the practice can't either
         submit: async (answers, reason) => {
           const out = await api('/wpr/submit', { code: me.code, token: me.token, answers, reason });
-          try { sessionStorage.removeItem('wpr_join'); } catch (x) {}
-          screen.innerHTML = `<h1 class="h4 fw-bold mb-3">Your results</h1>${WrsTestUI.reviewHtml(out.result, out.endReason || reason)}
-            <p class="small text-muted mt-3 mb-0">Your teacher has your score. You can close this page.</p>`;
-          const score = screen.querySelector('.wt-big');   // the pilot survey goes right under the score
-          if (window.WprFeedback && score) WprFeedback.survey(score.closest('.d-flex'), { code: me.code });
+          me.submitted = true; me.reason = out.endReason || reason;
+          remember();
+          showResults(out.result);
         }
       });
     } catch (e) {
@@ -129,9 +129,58 @@
     }
   }
 
-  if (me && me.token) showRules(true); else showJoin();
+  // ---- After submitting: the score now; the answers and the report once the teacher ends the test
+  const remember = () => { try { sessionStorage.setItem('wpr_join', JSON.stringify(me)); } catch (x) {} };
+  let resultsPoll = null;
+  function showResults(score) {
+    screen.innerHTML = `<h1 class="h4 fw-bold mb-3">Your results</h1>
+      <div id="scoreBox">${score ? WrsTestUI.scoreHtml(score, me.reason) : '<p class="text-muted">Loading your score…</p>'}</div>
+      <div class="alert alert-info"><i class="fas fa-lock me-2"></i><strong>Your answers and your report unlock when your teacher ends the test.</strong> Keep this page open. It updates by itself.</div>
+      <p class="small text-muted mb-0">Your teacher has your score.</p>`;
+    if (score) addSurvey();
+    checkResults();
+    clearInterval(resultsPoll);
+    resultsPoll = setInterval(checkResults, 10000);
+  }
+  function addSurvey() {   // the pilot survey goes right under the score
+    const score = screen.querySelector('.wt-big');
+    if (window.WprFeedback && score && !me.surveyDone) WprFeedback.survey(score.closest('.d-flex'), { code: me.code, onDone: () => { me.surveyDone = true; remember(); } });
+  }
+  async function checkResults() {
+    let out;
+    try { out = await api('/wpr/results', { code: me.code, token: me.token }); }
+    catch (e) {
+      if (e.status !== 404) return;   // try again on the next check
+      clearInterval(resultsPoll);
+      try { sessionStorage.removeItem('wpr_join'); } catch (x) {}
+      screen.innerHTML = '<h1 class="h4 fw-bold mb-3">Your results</h1><div class="alert alert-secondary mb-0">The results for this test have been erased. Ask your teacher if you need your score.</div>';
+      return;
+    }
+    if (out.status === 'held' && !screen.querySelector('.wt-big')) { document.getElementById('scoreBox').innerHTML = WrsTestUI.scoreHtml(out.result, out.endReason); addSurvey(); }
+    if (out.status === 'released') { clearInterval(resultsPoll); showReleased(out); }
+  }
+  function showReleased(out) {
+    const until = new Date(out.report.availableUntil).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    screen.innerHTML = `<h1 class="h4 fw-bold mb-3">Your results</h1>
+      <div class="alert alert-success d-flex flex-wrap align-items-center gap-3">
+        <div class="flex-grow-1"><strong>Your teacher ended the test.</strong> Here are your answers. Save your report before <strong>${until}</strong>. After that, everything is erased.</div>
+        <button id="pdfBtn" class="btn btn-success fw-bold"><i class="fas fa-file-pdf me-1"></i>Download my report (PDF)</button>
+      </div>
+      ${WrsTestUI.reviewHtml(out.result, out.endReason)}`;
+    addSurvey();
+    document.getElementById('pdfBtn').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true; btn.textContent = 'Making your report…';
+      try { await WprReport.download(out.report, out.result); btn.innerHTML = '<i class="fas fa-check me-1"></i>Saved. Download again'; }
+      catch (err) { btn.textContent = 'Try again'; alert(err.message); }
+      btn.disabled = false;
+    });
+  }
+
+  if (me && me.token) { if (me.submitted) showResults(); else showRules(true); } else showJoin();
 })();
 </script>
-<script src="/wpr-practice/assets/feedback.js?v=1"></script>
+<script src="/wpr-practice/assets/report-pdf.js?v=1"></script>
+<script src="/wpr-practice/assets/feedback.js?v=2"></script>
 </body>
 </html>
