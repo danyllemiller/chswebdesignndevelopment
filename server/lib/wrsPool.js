@@ -8,9 +8,15 @@
 // evaluated in an empty sandbox -- one source of truth, no copied bank to
 // drift out of date. Picture-labeling questions are left out (they need the
 // practice page's drawings).
+//
+// Each question also carries its Nevada CTE Employability Skills indicator
+// (1.1.1-1.3.4) from wprIndicators.json, keyed by the first 12 hex digits of
+// the SHA-1 of its normalized text, for the standards breakdowns in WPR
+// Practice Pro reports (wpr-practice/assets/standards.js names them).
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const crypto = require('crypto');
 const { WPR_MC_QUESTIONS } = require('../wprQuestionBank');
 const { SAFETY_MC, SAFETY_TF } = require('./wrsSafetyQuestions');
 const { WORKLIFE_MC, WORKLIFE_TF } = require('./wrsWorkLifeQuestions');
@@ -19,6 +25,9 @@ const PRACTICE_FILES = ['', '-b', '-c', '-d'].map(s =>
     path.join(__dirname, '..', '..', 'pre-assessments', `workplace-readiness-skills${s}.html`));
 
 let cache = null;
+const INDICATORS = require('./wprIndicators.json');
+const norm = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+const indicatorFor = q => INDICATORS[crypto.createHash('sha1').update(norm(q)).digest('hex').slice(0, 12)] || '';
 
 function readSections(file) {
     const html = fs.readFileSync(file, 'utf8');
@@ -32,7 +41,6 @@ function readSections(file) {
 
 function loadPool() {
     if (cache) return cache;
-    const norm = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
     const seen = new Set();
     const tf = [], mc = [], sets = [];
     const sources = PRACTICE_FILES.filter(f => fs.existsSync(f)).map(readSections);
@@ -91,15 +99,15 @@ function matchAsMc(set) {
     }).filter(Boolean);
 }
 
-const asTf = (x, topic) => ({ kind: 'tf', topic, prompt: 'True or false?', q: x.q, options: ['True', 'False'], correct: (x.answer || x.a) === 'T' ? 0 : 1, hint: x.hint || '' });
-const asMc = (x, topic) => { const options = shuffle(x.options); return { kind: 'mc', topic, prompt: x.prompt || '', q: x.q, options, correct: options.indexOf(x.answer), hint: x.hint || '' }; };
+const asTf = (x, topic) => ({ kind: 'tf', topic, prompt: 'True or false?', q: x.q, options: ['True', 'False'], correct: (x.answer || x.a) === 'T' ? 0 : 1, hint: x.hint || '', indicator: indicatorFor(x.q) });
+const asMc = (x, topic) => { const options = shuffle(x.options); return { kind: 'mc', topic, prompt: x.prompt || '', q: x.q, options, correct: options.indexOf(x.answer), hint: x.hint || '', indicator: indicatorFor(x.q) }; };
 
 // One student's 100-question test, answers included (kept server-side).
 // All multiple choice and true/false, every question shuffled:
 //   2-5 workplace safety / ergonomics questions (2-5%), 1-3 work vs.
 //   personal life scenarios (wrsWorkLifeQuestions.js), about 30 true/false,
 //   and the rest multiple choice (including the converted matching items).
-// Each question: { kind, topic, prompt, q, options, correct, hint }.
+// Each question: { kind, topic, prompt, q, options, correct, hint, indicator }.
 function buildTest(total = 100) {
     const { tf, mc, sets } = loadPool();
     // Scales with test length: 2-5% safety (at least 1), about 30% true/false.
@@ -113,4 +121,4 @@ function buildTest(total = 100) {
     return shuffle([...safety, ...worklife, ...tfPicks, ...mcPicks]).filter(q => q.correct >= 0).slice(0, total);
 }
 
-module.exports = { loadPool, buildTest };
+module.exports = { loadPool, buildTest, indicatorFor };

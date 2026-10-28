@@ -203,11 +203,11 @@ router.get('/wpr/session/:code', (req, res) => {
         secondsLeft: st.startedAt && !st.submittedAt ? Math.max(0, Math.round((st.startedAt + secondsFor(s, st) * 1000 - now) / 1000)) : null,
         timeX: st.timeX || 1, secondsAllowed: secondsFor(s, st),
         answeredSoFar: st.submittedAt ? st.result.answered : Object.keys(st.answers || {}).length,
-        violations: st.violations, endReason: st.endReason || '',
+        violations: st.violations, endReason: st.endReason || '', submittedAt: st.submittedAt || null,
         result: st.submittedAt ? { answered: st.result.answered, correct: st.result.correct, total: st.result.total } : null,
         // Question-by-question detail (only after submitting)
         items: st.submittedAt ? st.questions.map((q, i) => ({
-            n: i + 1, topic: q.topic, q: q.q, answer: q.options[q.correct],
+            n: i + 1, topic: q.topic, indicator: q.indicator || '', prompt: q.prompt || '', q: q.q, answer: q.options[q.correct],
             yours: st.answers[i] !== undefined ? q.options[st.answers[i]] : '', right: st.answers[i] !== undefined ? st.answers[i] === q.correct : null
         })) : null
     }));

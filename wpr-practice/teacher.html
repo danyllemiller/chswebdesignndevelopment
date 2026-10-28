@@ -9,6 +9,8 @@
   <link rel="apple-touch-icon" href="/wpr-practice/assets/wpr-practice-pro-favicon-512.png">
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <script src="/wpr-practice/assets/standards.js?v=1"></script>
+  <script src="/wpr-practice/assets/report-pdf.js?v=2"></script>
   <style>
     body { background: #eef1f5; min-height: 100vh; }
     .wrap { max-width: 1050px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -279,6 +281,9 @@ Answer: False"></textarea>
         <button class="btn btn-success fw-bold" data-dl="summary" ${done.length ? '' : 'disabled'}><i class="fas fa-file-csv me-1"></i>Score summary (CSV)</button>
         <button class="btn btn-success fw-bold" data-dl="items" ${done.length ? '' : 'disabled'}><i class="fas fa-table-list me-1"></i>Question-by-question (CSV)</button>
         <button class="btn btn-success fw-bold" data-dl="report" ${done.length ? '' : 'disabled'}><i class="fas fa-chart-column me-1"></i>Printable class report</button>
+        <button class="btn btn-success fw-bold" data-dl="standards" ${done.length ? '' : 'disabled'}><i class="fas fa-list-check me-1"></i>By standard (CSV)</button>
+        <button class="btn btn-success fw-bold" data-dl="reteach" ${done.length ? '' : 'disabled'}><i class="fas fa-bullseye me-1"></i>Where to reteach</button>
+        <button class="btn btn-success fw-bold" data-dl="pdfs" ${done.length ? '' : 'disabled'}><i class="fas fa-file-pdf me-1"></i>All student reports (PDF)</button>
         <button class="btn ${confirmEnd ? 'btn-danger' : 'btn-outline-danger'} fw-bold ms-auto" id="endBtn">${data.endedAt ? (confirmEnd ? 'Yes, erase everything now' : 'Erase everything now') : confirmEnd ? `Yes, end the test${testing ? ` (${testing} still testing)` : ''}` : 'End the test'}</button>
       </div>
       <p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i>Nothing is saved. ${data.endedAt ? '' : 'Ending the test shows students their answers and lets them save their report for 15 minutes; anyone still testing is scored on their saved answers. '}Results are erased 15 minutes after you end the test, after 12 hours, or if the server restarts. Download what you need. Only students who finished appear in the downloads.</p>`;
@@ -310,6 +315,73 @@ Answer: False"></textarea>
     finished().forEach(s => s.items.forEach(it => rows.push([s.lastName, s.firstName, s.studentId, it.n, it.topic === 'safety' ? 'Workplace safety' : 'WRS', it.q, it.yours, it.answer, it.right === null ? 'Not answered' : it.right ? 'Right' : 'Wrong'])));
     download(`wpr-practice-questions-${data.code}-${stamp()}.csv`, csv(rows), 'text/csv');
   }
+
+  // ---- By state standard (wpr-practice/assets/standards.js): percents are of the questions answered
+  const STD = window.WprStandards;
+  const flat = t => t.flatMap(x => [x, ...x.indicators]);
+  const BAND_LABEL = { green: 'On track', yellow: 'Almost', red: 'Reteach' };
+  const chip = p => `<span class="chip ${STD.band(p)}">${BAND_LABEL[STD.band(p)]}</span>`;
+  const CHIP_CSS = '.chip{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px} .chip.green{background:#d1f2e0;color:#0f5132} .chip.yellow{background:#fff3cd;color:#6b4f00} .chip.red{background:#f8d7da;color:#842029} tr.std td{background:#f1f3f5}';
+  const initialsOf = s => [s.firstName, s.lastName].map(n => (String(n || '').trim()[0] || '').toUpperCase()).filter(Boolean).map(c => c + '.').join('');
+  function standardsTable(t) {
+    const rows = t.filter(x => x.seen).map(x => `<tr class="std"><td><b>${x.id} ${esc(x.name)}</b></td><td class="num"><b>${x.pct}%</b></td><td class="num">${x.right} of ${x.seen}</td><td>${chip(x.pct)}</td></tr>` +
+      x.indicators.filter(i => i.seen).map(i => `<tr><td style="padding-left:18px">${i.id} ${esc(i.name)}</td><td class="num">${i.pct}%</td><td class="num">${i.right} of ${i.seen}</td><td>${chip(i.pct)}</td></tr>`).join('')).join('');
+    return rows ? `<table><thead><tr><th>Standard / indicator</th><th class="num">Right</th><th class="num">Answers</th><th>Band</th></tr></thead><tbody>${rows}</tbody></table>
+      <div style="font-size:11px;color:#6c757d;margin-top:4px">Nevada CTE Employability Skills for Career Readiness. Percent right of all the answers your class gave. Green 80% and up, yellow 70-79%, red under 70% (reteach).</div>` : '<p style="font-size:13px">These questions aren\'t tagged with state standards (question banks).</p>';
+  }
+  function standardsCsv() {
+    const cols = flat(STD.tally([]));
+    const rows = [['Last name', 'First name', 'Student ID', 'Score %', ...cols.map(c => `${c.id} ${c.name} %`)]];
+    finished().forEach(s => {
+      const by = {}; flat(STD.tally(s.items)).forEach(x => { by[x.id] = x; });
+      rows.push([s.lastName, s.firstName, s.studentId, pct(s.result.correct, s.result.total), ...cols.map(c => (by[c.id].seen ? by[c.id].pct : ''))]);
+    });
+    download(`wpr-practice-standards-${data.code}-${stamp()}.csv`, csv(rows), 'text/csv');
+  }
+  // Weakest indicators first, then the most-missed questions with the wrong answer students picked most
+  function reteachHtml() {
+    const st = finished();
+    const perStudent = st.map(s => { const by = {}; flat(STD.tally(s.items)).forEach(x => { by[x.id] = x; }); return by; });
+    const weak = flat(STD.tally(st.flatMap(s => s.items))).filter(x => /^1\.\d+\.\d+$/.test(x.id) && x.seen)
+      .map(x => Object.assign(x, { under: perStudent.filter(by => by[x.id].seen && by[x.id].pct < 70).length, tried: perStudent.filter(by => by[x.id].seen).length }))
+      .sort((a, b) => a.pct - b.pct || b.seen - a.seen);
+    const qs = new Map();
+    st.forEach(s => s.items.forEach(it => {
+      if (it.right === null) return;
+      const e = qs.get(it.q) || { q: it.q, prompt: it.prompt, answer: it.answer, indicator: it.indicator, seen: 0, wrong: 0, picks: {} };
+      e.seen++; if (!it.right) { e.wrong++; e.picks[it.yours] = (e.picks[it.yours] || 0) + 1; }
+      qs.set(it.q, e);
+    }));
+    const missed = [...qs.values()].filter(e => e.wrong && e.seen >= Math.min(2, st.length)).sort((a, b) => b.wrong / b.seen - a.wrong / a.seen || b.seen - a.seen).slice(0, 20);
+    const top = e => Object.entries(e.picks).sort((a, b) => b[1] - a[1])[0];
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Where to reteach ${esc(data.code)}</title>
+      <style>body{font-family:Arial,Helvetica,sans-serif;color:#212529;margin:28px;max-width:860px} h1{font-size:22px;margin:0} h2{font-size:16px;margin:24px 0 8px;border-bottom:2px solid #1f2a44;padding-bottom:4px}
+      table{border-collapse:collapse;width:100%;font-size:12px} th,td{border:1px solid #dee2e6;padding:5px 7px;text-align:left;vertical-align:top} th{background:#f1f3f5} .num{text-align:center} .noprint{margin-bottom:16px} @media print{.noprint{display:none}} tr{page-break-inside:avoid} ${CHIP_CSS}</style></head><body>
+      <div class="noprint"><button onclick="window.print()" style="font-size:15px;padding:8px 16px;font-weight:700">Print or save as PDF</button></div>
+      <h1>Where to reteach</h1>
+      <div style="color:#6c757d;font-size:13px">${esc(data.teacher || '')}${data.teacher ? ' · ' : ''}${new Date(data.createdAt).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} · ${esc(data.label)} · Class code ${esc(data.code)} · ${st.length} students</div>
+      <h2>Weakest indicators first</h2>
+      ${weak.length ? `<table><thead><tr><th>Indicator</th><th class="num">Class right</th><th class="num">Answers</th><th class="num">Students under 70%</th><th>Band</th></tr></thead><tbody>
+        ${weak.map(x => `<tr><td><b>${x.id}</b> ${esc(x.name)}</td><td class="num"><b>${x.pct}%</b></td><td class="num">${x.right} of ${x.seen}</td><td class="num">${x.under} of ${x.tried}</td><td>${chip(x.pct)}</td></tr>`).join('')}</tbody></table>
+        <div style="font-size:11px;color:#6c757d;margin-top:4px">Percent right of the answers given. "Students under 70%" counts students who answered at least one question on that indicator.</div>` : '<p style="font-size:13px">These questions aren\'t tagged with state standards (question banks).</p>'}
+      <h2>Most-missed questions</h2>
+      ${missed.length ? `<table><thead><tr><th>Question</th><th>Indicator</th><th>Correct answer</th><th class="num">Missed</th><th>Most common wrong answer</th></tr></thead><tbody>
+        ${missed.map(e => { const t = top(e); return `<tr><td>${e.prompt && e.prompt !== 'True or false?' ? `<span style="color:#6c757d">${esc(e.prompt)}</span><br>` : ''}${esc(e.q)}</td><td>${e.indicator ? `${e.indicator} ${esc((STD.byId[e.indicator] || {}).name || '')}` : ''}</td><td>${esc(e.answer)}</td><td class="num">${e.wrong} of ${e.seen}</td><td>${t ? `${esc(t[0] || '(blank)')} <span style="color:#6c757d">(${t[1]})</span>` : ''}</td></tr>`; }).join('')}</tbody></table>` : '<p style="font-size:13px">No question was missed by enough students yet. Each student gets a different random set of questions, so this fills in with larger classes.</p>'}
+      </body></html>`;
+  }
+  async function allReports(btn) {
+    const label = btn.innerHTML;
+    btn.disabled = true; btn.textContent = 'Making the reports…';
+    try {
+      const list = finished().map(s => ({
+        report: { initials: initialsOf(s), teacher: data.teacher, code: data.code, label: data.label, submittedAt: s.submittedAt, violations: s.violations, endReason: s.endReason },
+        result: { answered: s.result.answered, correct: s.result.correct, total: s.result.total, review: s.items.filter(it => it.right !== null) }
+      }));
+      (await WprReport.build(list)).save(`wpr-practice-student-reports-${data.code}-${stamp()}.pdf`);
+    } catch (err) { alert(err.message); }
+    btn.disabled = false; btn.innerHTML = label;
+  }
+  const openPage = (html, name) => { const w = window.open('', '_blank'); if (w) { w.document.write(html); w.document.close(); } else download(name, html, 'text/html'); };
 
   function reportHtml() {
     const st = finished();
@@ -345,12 +417,13 @@ Answer: False"></textarea>
     return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>WPR Practice Report ${esc(data.code)}</title>
       <style>body{font-family:Arial,Helvetica,sans-serif;color:#212529;margin:28px;max-width:800px} h1{font-size:22px;margin:0} h2{font-size:16px;margin:24px 0 8px;border-bottom:2px solid #1f2a44;padding-bottom:4px}
       .stats{display:flex;gap:28px;flex-wrap:wrap;margin:14px 0} .stats b{display:block;font-size:26px} table{border-collapse:collapse;width:100%;font-size:12px} th,td{border:1px solid #dee2e6;padding:5px 7px;text-align:left;vertical-align:top} th{background:#f1f3f5}
-      .num{text-align:center} .noprint{margin-bottom:16px} @media print{.noprint{display:none}} tr{page-break-inside:avoid}</style></head><body>
+      .num{text-align:center} .noprint{margin-bottom:16px} @media print{.noprint{display:none}} tr{page-break-inside:avoid} ${CHIP_CSS}</style></head><body>
       <div class="noprint"><button onclick="window.print()" style="font-size:15px;padding:8px 16px;font-weight:700">Print or save as PDF</button></div>
       <h1>WPR Practice Test: Class Report</h1>
       <div style="color:#6c757d;font-size:13px">${esc(data.teacher || '')}${data.teacher ? ' · ' : ''}${new Date(data.createdAt).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} · ${esc(data.label)} · Class code ${esc(data.code)}</div>
       <div class="stats"><div><b>${st.length}</b>students finished</div><div><b>${avg}%</b>class average</div><div><b>${median}%</b>median</div><div><b>${passing} of ${st.length}</b>scored 75% or higher</div></div>
       <h2>Score distribution</h2>${hist}<div style="font-size:11px;color:#6c757d">Score = correct out of all questions. Green bars are 70% and up.</div>
+      <h2>By state standard</h2>${standardsTable(STD.tally(st.flatMap(s => s.items)))}
       <h2>By topic</h2>${bar('Workplace Readiness Skills', wrsRight, wrsSeen)}${bar('Workplace safety & ergonomics', safetyRight, safetySeen)}
       <h2>Most-missed questions</h2>${missed.length ? `<table><thead><tr><th>Question</th><th>Correct answer</th><th class="num">Missed</th></tr></thead><tbody>${missed.map(m => `<tr><td>${esc(m.q)}</td><td>${esc(m.answer)}</td><td class="num">${m.wrong} of ${m.seen}</td></tr>`).join('')}</tbody></table>` : '<p style="font-size:13px">Not enough overlap yet. Each student gets a different random set of questions, so this fills in with larger classes.</p>'}
       <h2>Students</h2><table><thead><tr><th>Student</th><th>ID</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th><th>How it ended</th><th class="num">Time allowed</th></tr></thead><tbody>
@@ -382,7 +455,10 @@ Answer: False"></textarea>
     if (d && data) {
       if (d.dataset.dl === 'summary') summaryCsv();
       else if (d.dataset.dl === 'items') itemsCsv();
-      else { const w = window.open('', '_blank'); if (w) { w.document.write(reportHtml()); w.document.close(); } else download(`wpr-practice-report-${data.code}-${stamp()}.html`, reportHtml(), 'text/html'); }
+      else if (d.dataset.dl === 'standards') standardsCsv();
+      else if (d.dataset.dl === 'reteach') openPage(reteachHtml(), `wpr-practice-reteach-${data.code}-${stamp()}.html`);
+      else if (d.dataset.dl === 'pdfs') allReports(d);
+      else openPage(reportHtml(), `wpr-practice-report-${data.code}-${stamp()}.html`);
       return;
     }
     if (e.target.closest('#endBtn')) {

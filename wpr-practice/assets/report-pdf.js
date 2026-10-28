@@ -1,7 +1,8 @@
 // wpr-practice/assets/report-pdf.js
 // A student's WPR Practice report as a PDF file, made in their browser once the teacher ends the test
-// (wpr-practice/index.html; the data comes from POST /api/wpr/results). It names the student by initials only,
-// never by name or student ID, so it can be shared, and it says nothing about anyone's time limit.
+// (wpr-practice/index.html; the data comes from POST /api/wpr/results), or every student's report in one file
+// for the teacher (teacher.html). It names the student by initials only, never by name or student ID, so it can
+// be shared, and it says nothing about anyone's time limit. Scores by state standard come from standards.js.
 // jsPDF (assets/vendor/jspdf.umd.min.js, MIT license) loads only when a report is made.
 (function () {
     let loading = null;
@@ -38,9 +39,10 @@
         return Object.keys(TOPIC).filter(k => by.has(k)).map(k => by.get(k));
     }
 
-    async function build(report, result) {
-        await load();
-        const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'letter' });
+    // One student's report, from a new page of doc (the first report starts on page 1). Returns its page range.
+    function draw(doc, report, result, first) {
+        if (!first) doc.addPage();
+        const from = doc.getNumberOfPages();
         const W = 612, M = 54, R = W - M, BOTTOM = 735;
         let y = 0;
         const font = (size, style, rgb) => { doc.setFont('helvetica', style || 'normal'); doc.setFontSize(size); doc.setTextColor(...(rgb || INK)); };
@@ -51,6 +53,16 @@
             y += gap || 0;
         };
         const heading = text => { room(44); y += 10; font(13, 'bold', NAVY); doc.text(text, M, y); y += 6; doc.setDrawColor(...NAVY); doc.setLineWidth(1.5); doc.line(M, y, R, y); y += 18; };
+        // A label, "75% (3 of 4)" on the right, and a bar in the color band underneath
+        const bar = (label, right, seen, size, style, x, h) => {
+            const p = pct(right, seen), c = band(p);
+            font(size, style, INK); doc.text(plain(label), x, y);
+            font(size, 'normal', INK); doc.text(`${p}% (${right} of ${seen})`, R, y, { align: 'right' });
+            y += 6;
+            doc.setFillColor(...LINE); doc.roundedRect(x, y, R - x, h, h / 2, h / 2, 'F');
+            if (p) { doc.setFillColor(...c.rgb); doc.roundedRect(x, y, Math.max(h, (R - x) * p / 100), h, h / 2, h / 2, 'F'); }
+            y += h + 14;
+        };
 
         // Banner
         doc.setFillColor(...NAVY); doc.rect(0, 0, W, 62, 'F');
@@ -78,20 +90,23 @@
         doc.text('Green: 80% or higher   Yellow: 70-79%   Red: under 70%, review it', M + 172, y + 70);
         y += 118;
 
-        // By topic
+        // By state standard and indicator (questions from the standard pool); otherwise by topic
         const review = result.review || [];
-        heading('By topic');
-        font(9, 'normal', MUTED); doc.text('Based on the questions you answered.', M, y); y += 16;
-        topics(review).forEach(g => {
-            room(36);
-            const p = pct(g.right, g.seen), c = band(p);
-            font(11, 'bold', INK); doc.text(plain(g.name), M, y);
-            font(11, 'normal', INK); doc.text(`${p}% (${g.right} of ${g.seen})`, R, y, { align: 'right' });
-            y += 7;
-            doc.setFillColor(...LINE); doc.roundedRect(M, y, R - M, 9, 4, 4, 'F');
-            if (p) { doc.setFillColor(...c.rgb); doc.roundedRect(M, y, Math.max(9, (R - M) * p / 100), 9, 4, 4, 'F'); }
-            y += 25;
-        });
+        const S = window.WprStandards, std = S ? S.tally(review).filter(s => s.seen) : [];
+        if (std.length) {
+            heading('By state standard');
+            font(9, 'normal', MUTED); doc.text('Nevada CTE Employability Skills for Career Readiness. Based on the questions you answered.', M, y); y += 18;
+            std.forEach(s => {
+                room(48);
+                bar(`${s.id} ${s.name}`, s.right, s.seen, 11, 'bold', M, 9);
+                s.indicators.filter(i => i.seen).forEach(i => { room(28); bar(`${i.id} ${i.name}`, i.right, i.seen, 10, 'normal', M + 14, 5); });
+                y += 6;
+            });
+        } else {
+            heading('By topic');
+            font(9, 'normal', MUTED); doc.text('Based on the questions you answered.', M, y); y += 18;
+            topics(review).forEach(g => { room(36); bar(g.name, g.right, g.seen, 11, 'bold', M, 9); });
+        }
 
         // Missed questions
         const missed = review.filter(m => !m.right);
@@ -105,18 +120,36 @@
             lines(`Correct answer: ${m.answer}`, M + 12, R - M - 12, 10, 'bold', [20, 108, 67], 12);
         });
 
-        // Footer on every page
-        const pages = doc.getNumberOfPages();
-        for (let i = 1; i <= pages; i++) {
-            doc.setPage(i);
-            font(8, 'normal', MUTED);
-            doc.text(`WPR Practice Pro  -  wprpracticepro.com  -  Practice only, not the official state assessment  -  Page ${i} of ${pages}`, W / 2, 770, { align: 'center' });
+        // What the indicators on this report mean
+        if (std.length) {
+            heading('What the standards mean');
+            std.forEach(s => s.indicators.filter(i => i.seen).forEach(i => lines(`${i.id} ${i.name}: ${i.full}`, M, R - M, 9, 'normal', MUTED, 4)));
         }
+        return { from, to: doc.getNumberOfPages(), initials: plain(report.initials) };
+    }
+
+    // Footer on every page, numbered within each student's report
+    function footers(doc, ranges) {
+        ranges.forEach(r => {
+            const n = r.to - r.from + 1;
+            for (let p = r.from; p <= r.to; p++) {
+                doc.setPage(p);
+                doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...MUTED);
+                doc.text(`WPR Practice Pro  -  wprpracticepro.com  -  Practice only, not the official state assessment  -  ${r.initials ? r.initials + '  -  ' : ''}Page ${p - r.from + 1} of ${n}`, 306, 770, { align: 'center' });
+            }
+        });
+    }
+
+    // One PDF with a report for each { report, result }, each starting on its own page
+    async function build(list) {
+        await load();
+        const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'letter' });
+        footers(doc, list.map((x, i) => draw(doc, x.report, x.result, i === 0)));
         return doc;
     }
 
     async function download(report, result) {
-        const doc = await build(report, result);
+        const doc = await build([{ report, result }]);
         const day = new Date(report.submittedAt || Date.now()).toLocaleDateString('en-CA');
         const who = String(report.initials || '').replace(/[^A-Za-z]/g, '');
         doc.save(`WPR-report-${who ? who + '-' : ''}${day}.pdf`);
