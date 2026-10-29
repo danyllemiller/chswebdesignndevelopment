@@ -122,6 +122,24 @@ const PROPERTIES_TABLE_SQL = `
     KEY idx_student (student_id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
+// Renting out a home you own, and roommates (a student's request, teacher OK
+// 2026-10-29). A property's status: 'live' (the student lives there -- at most
+// one), 'rented' (a tenant pays the owner every payday) or 'empty'. A roommate
+// lives wherever the student does: place is 'apartment' (renting) or the id
+// of the property they live in; active = 0 until the next payday, so a
+// roommate never splits a bill that was already due without them.
+const ROOMMATES_TABLE_SQL = `
+  CREATE TABLE IF NOT EXISTS budget_game_roommates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(50) NOT NULL,
+    place VARCHAR(20) NOT NULL,
+    name VARCHAR(60) NOT NULL,
+    active TINYINT(1) NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_student (student_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+let propertyColumnsReady = false;
+
 // Added after groceries/clothes were already seeded -- the empty-table
 // seed below only fires once, ever, so these go in through their own
 // idempotent check instead (same INSERT ... WHERE NOT EXISTS pattern
@@ -149,6 +167,12 @@ async function ensureTables(connection) {
     await connection.execute(CART_TABLE_SQL);
     await connection.execute(VEHICLES_TABLE_SQL);
     await connection.execute(PROPERTIES_TABLE_SQL);
+    await connection.execute(ROOMMATES_TABLE_SQL);
+    if (!propertyColumnsReady) {
+        await connection.execute(`ALTER TABLE budget_game_properties ADD COLUMN IF NOT EXISTS status VARCHAR(10) NOT NULL DEFAULT 'live',
+            ADD COLUMN IF NOT EXISTS tenant_name VARCHAR(60) NULL`);
+        propertyColumnsReady = true;
+    }
     const [[{ cnt }]] = await connection.execute('SELECT COUNT(*) AS cnt FROM budget_game_store_items');
     if (cnt === 0) {
         for (const item of SEED_STORE_ITEMS) {
@@ -263,18 +287,23 @@ async function computeBillsForStudent(connection, studentId) {
     const avgPay = row && row.avg_pay !== null ? Number(row.avg_pay) : null;
     const rentAmount = avgPay ? round2(avgPay / 3) : 6.00;
 
-    // Buying a place (category 'housing') replaces Rent with Property Tax &
-    // HOA, not an addition to it -- you don't pay rent on a home you own.
-    // That's the actual trade a real home purchase makes: a bigger one-time
-    // cost in exchange for a smaller recurring one from then on.
-    const [[propertyRow]] = await connection.execute(
-        'SELECT id FROM budget_game_properties WHERE student_id = ? LIMIT 1', [studentId]
-    );
+    // Living in a place you bought (category 'housing') replaces Rent with
+    // Property Tax & HOA, not an addition to it -- you don't pay rent on a
+    // home you own. That's the actual trade a real home purchase makes: a
+    // bigger one-time cost in exchange for a smaller recurring one from then
+    // on. Every home you own costs its Property Tax & HOA, lived in or not.
+    // Roommates split rent (when renting) and utilities evenly.
+    const h = await housingFor(connection, studentId);
+    const ways = h.roommates.filter(m => m.active).length + 1;
+    const share = ways > 1 ? ` (your share, split ${ways} ways)` : '';
     const bills = [
-        propertyRow
-            ? { key: 'property_tax_hoa', label: 'Property Tax & HOA', amount: 8.00 }
-            : { key: 'rent', label: 'Rent', amount: rentAmount },
-        { key: 'utilities', label: 'Utilities', amount: 2.00 },
+        h.home
+            ? { key: 'property_tax_hoa', label: `Property Tax & HOA (${h.home.label}, your home)`, amount: PROPERTY_TAX_HOA }
+            : { key: 'rent', label: `Rent${share}`, amount: round2(rentAmount / ways) },
+        ...h.props.filter(p => p !== h.home).map(p => ({
+            key: `property_tax_hoa_${p.id}`, label: `Property Tax & HOA (${p.label}, ${p.status === 'rented' ? 'rented out' : 'empty'})`, amount: PROPERTY_TAX_HOA
+        })),
+        { key: 'utilities', label: `Utilities${share}`, amount: round2(2.00 / ways) },
         { key: 'phone', label: 'Phone Bill', amount: 2.00 }
     ];
 
@@ -286,7 +315,109 @@ async function computeBillsForStudent(connection, studentId) {
     );
     if (vehicleRow) bills.push({ key: 'auto_insurance', label: 'Auto Insurance', amount: 5.00 });
 
-    return { bills, total: round2(bills.reduce((sum, b) => sum + b.amount, 0)) };
+    return { bills, total: round2(bills.reduce((sum, b) => sum + b.amount, 0)), rentAmount, housing: h };
+}
+
+// ---- Renting out homes and roommates ---------------------------------------
+// A tenant's rent depends on the home (a house rents for more than a
+// trailer); a roommate in a home you own pays a flat room rent. Home types
+// added later in the Store Manager rent for DEFAULT_TENANT_RENT and have one
+// spare room.
+const PROPERTY_TAX_HOA = 8.00;
+const TENANT_RENT = { trailer: 12, condo: 16, townhome: 20, single_family_home: 28 };
+const DEFAULT_TENANT_RENT = 16;
+const ROOMS = { apartment: 2, trailer: 1, condo: 1, townhome: 2, single_family_home: 3 };
+const ROOM_RENT = 8.00;
+const FIRST_NAMES = ['Jordan', 'Riley', 'Avery', 'Morgan', 'Casey', 'Quinn', 'Drew', 'Jamie', 'Reese', 'Skyler', 'Rowan', 'Emerson', 'Parker', 'Hayden', 'Sage', 'Dakota'];
+const LAST_NAMES = ['Rivera', 'Nguyen', 'Brooks', 'Patel', 'Kim', 'Okafor', 'Garcia', 'Sullivan', 'Chen', 'Hughes', 'Ramos', 'Foster'];
+const fakeName = (taken = []) => {
+    for (let i = 0; i < 20; i++) {
+        const n = `${FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)]} ${LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)]}`;
+        if (!taken.includes(n)) return n;
+    }
+    return `${FIRST_NAMES[0]} ${LAST_NAMES[0]}`;
+};
+const tenantRentFor = itemKey => TENANT_RENT[itemKey] ?? DEFAULT_TENANT_RENT;
+
+// Being a landlord isn't free money: rolled once per rented home per payday.
+const LANDLORD_EVENT_CHANCE = 0.2;
+const LANDLORD_EVENTS = [
+    { key: 'small_repair', message: 'A leaky faucet needed a plumber.', amount: -5.00, weight: 5 },
+    { key: 'big_repair', message: 'The water heater broke, and you paid for a new one.', amount: -12.00, weight: 3 },
+    { key: 'damage', message: "Your tenant damaged the carpet. Their deposit covered part of it, and you paid the rest.", amount: -6.00, weight: 2 },
+    { key: 'vacancy', message: 'Your tenant moved out, so it sat empty this pay period (no rent). Cleaning and advertising it cost $4, and a new tenant moves in next pay period.', amount: -4.00, weight: 3 },
+    { key: 'late_fee', message: 'Your tenant paid late and owed you a late fee.', amount: 3.00, weight: 2 }
+];
+// Roommates help, until they don't: rolled once per roommate per payday.
+const ROOMMATE_EVENT_CHANCE = 0.15;
+const ROOMMATE_EVENTS = [
+    { key: 'short', weight: 3 },
+    { key: 'moved_out', weight: 2 },
+    { key: 'chipped_in', message: 'chipped in extra for groceries.', amount: 3.00, weight: 3 },
+    { key: 'broke_something', message: 'broke the microwave, and you split a new one.', amount: -4.00, weight: 2 }
+];
+const pickWeighted = list => {
+    let roll = Math.random() * list.reduce((sum, e) => sum + e.weight, 0);
+    for (const e of list) { if (roll < e.weight) return e; roll -= e.weight; }
+    return list[list.length - 1];
+};
+
+// Where the student lives, what they own, and who lives with them
+async function housingFor(connection, studentId) {
+    const [props] = await connection.execute(
+        'SELECT id, item_key, label, status, tenant_name FROM budget_game_properties WHERE student_id = ? ORDER BY id', [studentId]);
+    const home = props.find(p => p.status === 'live') || null;
+    const place = home ? String(home.id) : 'apartment';
+    const [mates] = await connection.execute(
+        'SELECT id, place, name, active FROM budget_game_roommates WHERE student_id = ? ORDER BY id', [studentId]);
+    return { props, home, place, rooms: home ? (ROOMS[home.item_key] ?? 1) : ROOMS.apartment, roommates: mates.filter(m => m.place === place) };
+}
+
+// One payday's housing: new roommates move in, tenants and roommates pay, and
+// sometimes something happens. Returns the new checking balance (allowed to
+// go negative, same as life events).
+async function housingTurn(connection, studentId, checking) {
+    const { rentAmount, housing: h } = await computeBillsForStudent(connection, studentId);
+    for (const m of h.roommates.filter(m => !m.active)) {
+        await connection.execute('UPDATE budget_game_roommates SET active = 1 WHERE id = ?', [m.id]);
+        m.active = 1;
+    }
+    for (const p of h.props.filter(p => p.status === 'rented')) {
+        const ev = Math.random() < LANDLORD_EVENT_CHANCE ? pickWeighted(LANDLORD_EVENTS) : null;
+        if (!ev || ev.key !== 'vacancy') {
+            const rent = tenantRentFor(p.item_key);
+            checking = round2(checking + rent);
+            await logTxn(connection, studentId, 'rent_income', `Rent from your tenant ${p.tenant_name || ''} (${p.label})`.replace('  ', ' '), rent, checking);
+        } else {
+            const tenant = fakeName([p.tenant_name]);
+            await connection.execute('UPDATE budget_game_properties SET tenant_name = ? WHERE id = ?', [tenant, p.id]);
+        }
+        if (ev) {
+            checking = round2(checking + ev.amount);
+            await logTxn(connection, studentId, 'landlord', `Your ${p.label}: ${ev.message}`, ev.amount, checking);
+        }
+    }
+    const living = h.roommates.filter(m => m.active), ways = living.length + 1;
+    for (const m of living) {
+        const ev = Math.random() < ROOMMATE_EVENT_CHANCE ? pickWeighted(ROOMMATE_EVENTS) : null;
+        if (h.home) {
+            const paid = ev && ev.key === 'short' ? round2(ROOM_RENT / 2) : ROOM_RENT;
+            checking = round2(checking + paid);
+            await logTxn(connection, studentId, 'room_rent', paid < ROOM_RENT ? `${m.name} could only pay half their room rent this pay period` : `Room rent from your roommate ${m.name}`, paid, checking);
+        } else if (ev && ev.key === 'short') {
+            const covered = round2(rentAmount / ways);
+            checking = round2(checking - covered);
+            await logTxn(connection, studentId, 'roommate', `${m.name} couldn't pay their share of the rent, so you covered it`, -covered, checking);
+        }
+        if (ev && ev.key === 'moved_out') {
+            await connection.execute('DELETE FROM budget_game_roommates WHERE id = ?', [m.id]);
+            await logTxn(connection, studentId, 'housing', `${m.name} moved out. You can find a new roommate on The Paycheck page.`, 0, checking);
+        } else if (ev && ev.amount) {
+            checking = round2(checking + ev.amount);
+            await logTxn(connection, studentId, 'roommate', `${m.name} ${ev.message}`, ev.amount, checking);
+        }
+    }
+    return checking;
 }
 
 const SAVINGS_INTEREST_RATE = 0.02;   // guaranteed, applied per new paycheck synced
@@ -413,6 +544,8 @@ async function syncRealPay(connection, studentId) {
                 await logTxn(connection, studentId, 'life_event', `${event.label} -- ${event.message}`, event.amount, checking);
             }
         }
+        // Tenants and roommates pay every pay period, worked or not
+        checking = await housingTurn(connection, studentId, checking);
         if (savings > 0) {
             const interest = round2(savings * SAVINGS_INTEREST_RATE);
             if (interest > 0) {
@@ -463,7 +596,7 @@ router.get('/student/budget-game/state', requireSelfOrStaff(), async (req, res) 
             const billsPaidThisPeriod = state.bills_paid_through_paystub_id === state.last_synced_paystub_id
                 && state.last_synced_paystub_id !== null;
             const store = await getStoreCatalog(connection);
-            const { bills, total: billsTotal } = await computeBillsForStudent(connection, student_id);
+            const { bills, total: billsTotal, rentAmount, housing: h } = await computeBillsForStudent(connection, student_id);
 
             return {
                 checking: Number(state.checking_balance),
@@ -473,6 +606,15 @@ router.get('/student/budget-game/state', requireSelfOrStaff(), async (req, res) 
                 bills,
                 bills_total: billsTotal,
                 bills_paid_this_period: billsPaidThisPeriod,
+                housing: {
+                    home: h.home ? { id: h.home.id, label: h.home.label } : null,
+                    rent: rentAmount, rooms: h.rooms, room_rent: ROOM_RENT, tax_hoa: PROPERTY_TAX_HOA,
+                    roommates: h.roommates.map(m => ({ id: m.id, name: m.name, pending: !m.active })),
+                    properties: h.props.map(p => ({
+                        id: p.id, label: p.label, status: p.status, tenant: p.tenant_name,
+                        tenant_rent: tenantRentFor(p.item_key), rooms: ROOMS[p.item_key] ?? 1
+                    }))
+                },
                 store,
                 transactions: txns
             };
@@ -601,6 +743,89 @@ router.post('/student/budget-game/transfer', requireSelfOrStaff(), async (req, r
     } catch (err) {
         console.error('[budget-game] transfer error:', err);
         res.status(500).json({ error: 'Failed to complete transfer' });
+    }
+});
+
+// POST /student/budget-game/housing -- { student_id, action, property_id?, roommate_id? }
+//   rent_out      a home you own gets a tenant, who pays you every payday from
+//                 the next one on (renting out the home you live in moves you
+//                 into an apartment, so Rent is back)
+//   stop_renting  the tenant moves out; the home sits empty
+//   move_in       live in a home you own (its tenant, and the roommates where
+//                 you lived before, move out)
+//   add_roommate / remove_roommate  where you live now; a new roommate moves
+//                 in at the next payday
+// Nothing here moves money: rent, room rent and bills follow at payday.
+router.post('/student/budget-game/housing', requireSelfOrStaff(), async (req, res) => {
+    const { student_id, action } = req.body || {};
+    const propertyId = parseInt(req.body?.property_id, 10), roommateId = parseInt(req.body?.roommate_id, 10);
+    if (!student_id || !['rent_out', 'stop_renting', 'move_in', 'add_roommate', 'remove_roommate'].includes(action)) {
+        return res.status(400).json({ error: 'student_id and a valid action are required' });
+    }
+    try {
+        const outcome = await withConnection(async (connection) => {
+            await ensureTables(connection);
+            const [[state]] = await connection.execute('SELECT checking_balance FROM budget_game_state WHERE student_id = ?', [student_id]);
+            if (!state) return { status: 400, body: { error: 'No game state yet -- open the game first.' } };
+            const h = await housingFor(connection, student_id);
+            const note = async text => logTxn(connection, student_id, 'housing', text, 0, Number(state.checking_balance));
+            const leaveBehind = async place => {
+                const [r] = await connection.execute('DELETE FROM budget_game_roommates WHERE student_id = ? AND place = ?', [student_id, place]);
+                return r.affectedRows || 0;
+            };
+            const p = h.props.find(x => x.id === propertyId);
+            if (['rent_out', 'stop_renting', 'move_in'].includes(action) && !p) return { status: 400, body: { error: 'That home isn\'t yours.' } };
+
+            if (action === 'rent_out') {
+                if (p.status === 'rented') return { status: 400, body: { error: `Your ${p.label} is already rented out.` } };
+                const tenant = fakeName();
+                const left = p.status === 'live' ? await leaveBehind(String(p.id)) : 0;
+                await connection.execute("UPDATE budget_game_properties SET status = 'rented', tenant_name = ? WHERE id = ?", [tenant, p.id]);
+                await note(`Rented out your ${p.label} to ${tenant}`);
+                return { status: 200, body: { success: true, message:
+                    `${tenant} is renting your ${p.label} and pays you $${tenantRentFor(p.item_key).toFixed(2)} every payday, starting next payday.`
+                    + (p.status === 'live' ? ' You moved into an apartment, so Rent is back on your bills.' : '')
+                    + (left ? ` Your roommate${left === 1 ? '' : 's'} moved out too.` : '') } };
+            }
+            if (action === 'stop_renting') {
+                if (p.status !== 'rented') return { status: 400, body: { error: `Your ${p.label} isn't rented out.` } };
+                await connection.execute("UPDATE budget_game_properties SET status = 'empty', tenant_name = NULL WHERE id = ?", [p.id]);
+                await note(`${p.tenant_name || 'Your tenant'} moved out of your ${p.label}`);
+                return { status: 200, body: { success: true, message: `${p.tenant_name || 'Your tenant'} moved out. Your ${p.label} is empty now, and you still pay its Property Tax & HOA.` } };
+            }
+            if (action === 'move_in') {
+                if (p.status === 'live') return { status: 400, body: { error: `You already live in your ${p.label}.` } };
+                const left = await leaveBehind(h.place);
+                if (h.home) await connection.execute("UPDATE budget_game_properties SET status = 'empty' WHERE id = ?", [h.home.id]);
+                await connection.execute("UPDATE budget_game_properties SET status = 'live', tenant_name = NULL WHERE id = ?", [p.id]);
+                await note(`Moved into your ${p.label}`);
+                return { status: 200, body: { success: true, message: `You moved into your ${p.label}.`
+                    + (p.status === 'rented' ? ` ${p.tenant_name || 'Your tenant'} moved out, so no more rent from them.` : '')
+                    + (h.home ? ` Your ${h.home.label} is empty now.` : ' No more Rent: you pay Property Tax & HOA instead.')
+                    + (left ? ` Your roommate${left === 1 ? '' : 's'} stayed at your old place.` : '') } };
+            }
+            if (action === 'add_roommate') {
+                if (h.roommates.length >= h.rooms) {
+                    return { status: 400, body: { error: `There's no room for another roommate ${h.home ? `in your ${h.home.label}` : 'in your apartment'} (${h.rooms} room${h.rooms === 1 ? '' : 's'}).` } };
+                }
+                const name = fakeName(h.roommates.map(m => m.name));
+                await connection.execute('INSERT INTO budget_game_roommates (student_id, place, name) VALUES (?, ?, ?)', [student_id, h.place, name]);
+                await note(`${name} is moving in as your roommate`);
+                return { status: 200, body: { success: true, message: h.home
+                    ? `${name} moves into your ${h.home.label} next payday and pays you $${ROOM_RENT.toFixed(2)} room rent every payday. You'll split the utilities.`
+                    : `${name} moves in next payday. After that, you split the rent and utilities.` } };
+            }
+            // remove_roommate
+            const m = h.roommates.find(x => x.id === roommateId);
+            if (!m) return { status: 400, body: { error: 'That roommate doesn\'t live with you.' } };
+            await connection.execute('DELETE FROM budget_game_roommates WHERE id = ?', [m.id]);
+            await note(`${m.name} moved out`);
+            return { status: 200, body: { success: true, message: `${m.name} moved out.` + (h.home ? ' No more room rent from them.' : ' You pay your rent and utilities without them now.') } };
+        });
+        res.status(outcome.status).json(outcome.body);
+    } catch (err) {
+        console.error('[budget-game] housing error:', err);
+        res.status(500).json({ error: 'Failed to update your housing' });
     }
 });
 
@@ -766,13 +991,18 @@ router.post('/student/budget-game/checkout', requireSelfOrStaff(), async (req, r
 
             // Same pattern for buying a place (category 'housing') -- starts
             // Property Tax & HOA and drops Rent from the very next bills cycle.
+            // The first home is where they live (an apartment roommate doesn't
+            // come along); any more start empty, ready to rent out.
             const propertiesBought = items.filter(it => it.category === 'housing');
             for (const p of propertiesBought) {
                 for (let i = 0; i < p.quantity; i++) {
+                    const [[live]] = await connection.execute(
+                        "SELECT id FROM budget_game_properties WHERE student_id = ? AND status = 'live' LIMIT 1", [student_id]);
                     await connection.execute(
-                        'INSERT INTO budget_game_properties (student_id, item_key, label) VALUES (?, ?, ?)',
-                        [student_id, p.item_key, p.label]
+                        'INSERT INTO budget_game_properties (student_id, item_key, label, status) VALUES (?, ?, ?, ?)',
+                        [student_id, p.item_key, p.label, live ? 'empty' : 'live']
                     );
+                    if (!live) await connection.execute("DELETE FROM budget_game_roommates WHERE student_id = ? AND place = 'apartment'", [student_id]);
                 }
             }
 
@@ -822,7 +1052,7 @@ router.get('/admin/budget-game/leaderboard', requireStaff, async (req, res) => {
                         SUM(CASE WHEN t.type = 'bill' THEN 1 ELSE 0 END) AS bills_paid,
                         SUM(CASE WHEN t.type IN ('to_savings', 'to_invest') THEN ABS(t.amount) ELSE 0 END) AS saved_in,
                         SUM(CASE WHEN t.type IN ('from_savings', 'from_invest') THEN ABS(t.amount) ELSE 0 END) AS saved_out,
-                        SUM(CASE WHEN t.type NOT IN ('interest', 'invest_return') AND t.balance_after < 0 THEN 1 ELSE 0 END) AS overdrafts,
+                        SUM(CASE WHEN t.type NOT IN ('interest', 'invest_return', 'housing', 'rent_income', 'room_rent') AND t.balance_after < 0 THEN 1 ELSE 0 END) AS overdrafts,
                         SUM(CASE WHEN t.type = 'life_event' THEN 1 ELSE 0 END) AS life_events,
                         SUM(CASE WHEN t.type = 'life_event' AND t.amount < 0 THEN 1 ELSE 0 END) AS life_events_negative
                  FROM budget_game_transactions t

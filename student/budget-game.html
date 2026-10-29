@@ -61,6 +61,10 @@
     .store-nav-tile.grocery { background: linear-gradient(135deg, #2f9e44, #51cf66); }
     .store-nav-tile.mall { background: linear-gradient(135deg, #343a40, #495057); }
     .store-nav-tile.card { background: linear-gradient(135deg, #000099, #1f246b); }
+    /* --- Where You Live (renting out homes, roommates) --- */
+    .housing-head { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #6c757d; margin: 1.1rem 0 .3rem; }
+    .housing-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .4rem; padding: .45rem 0; border-bottom: 1px solid #eee; }
+    .housing-row:last-child { border-bottom: none; }
   </style>
 </head>
 <body class="bg-light">
@@ -135,6 +139,22 @@
     </div>
   </div>
 
+  <div class="card shadow-sm mb-4" id="housingCard">
+    <div class="card-header bg-white fw-bold"><i class="fas fa-house-chimney me-2 text-primary"></i>Where You Live</div>
+    <div class="card-body">
+      <div id="homeLine"></div>
+
+      <div class="housing-head">Roommates</div>
+      <div id="roommateList"></div>
+      <div class="small text-muted mt-1" id="roommateHelp"></div>
+      <button class="btn btn-outline-primary btn-sm fw-bold mt-2" id="addRoommateBtn"><i class="fas fa-user-plus me-1"></i>Find a Roommate</button>
+
+      <div class="housing-head">Homes You Own</div>
+      <div id="propertyList"></div>
+      <div id="housingMsg" class="small mt-2" role="status"></div>
+    </div>
+  </div>
+
   <div class="row g-3 mb-4">
     <div class="col-md-4">
       <a href="/student/budget-game-grocery.html" class="store-nav-tile grocery">
@@ -189,6 +209,6 @@
 <div id="footer-placeholder"></div>
 <a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
 
-<script type="module" src="/js/student/budget-game.js?v=10"></script>
+<script type="module" src="/js/student/budget-game.js?v=11"></script>
 </body>
 </html>
