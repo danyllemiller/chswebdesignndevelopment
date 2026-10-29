@@ -91,5 +91,6 @@ router.use('/', require('./routes/agenda'));
 router.use('/', require('./routes/appointments'));
 router.use('/', require('./routes/headphones'));
 router.use('/', require('./routes/search'));
+router.use('/', require('./routes/accommodations'));
 
 module.exports = router;

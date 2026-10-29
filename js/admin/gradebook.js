@@ -9,6 +9,9 @@
 // Weighted grading config is shared with the student dashboard via js/modules/grade-weights.js —
 // edit there, not here, so teacher and student views never diverge.
 import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=5';
+import { dueFor } from '../modules/due-extension.js?v=1';
+// Extra school days on assignments per student, from master-gradebook-data (set on every load)
+let dueExt = { days: {}, off: new Set() };
 
 // Dynamically load Chart.js for the Analytics Graph
 if (!document.getElementById('chartjs-lib')) {
@@ -1192,6 +1195,8 @@ async function loadData(period) {
         const studentsRaw = Array.isArray(data.students) ? data.students : [];
         const assignmentsRaw = data.assignments;
         const gradesRaw = data.grades;
+        // Students whose accommodation plans give extra school days on assignments (admin/accommodations.html)
+        dueExt = { days: data.extensions || {}, off: new Set(data.offDays || []) };
 
         allStudents = studentsRaw.map(d => ({
             ...d,
@@ -1745,7 +1750,7 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
                 // Ungraded — only count it as a missed zero once its due date
                 // has actually passed, so students aren't dinged for work
                 // that isn't due yet. Matches js/student/dashboard.js.
-                const effectiveDueDate = studentPeriodDueDate || reg?.dueDate;
+                const effectiveDueDate = dueFor(studentPeriodDueDate || reg?.dueDate, key, dueExt.days[s.studentId], dueExt.off);
                 const isPastDue = !!effectiveDueDate && new Date(effectiveDueDate + 'T00:00:00') < today;
                 if (!isPastDue) return;
             }
@@ -1835,7 +1840,7 @@ let score = "", display = '', bg = "";
                     if (isTcKey) {
                         isLate = g.onTime === 0;
                     } else {
-                        const effectiveDueDate = studentPeriodDueDate || reg?.dueDate;
+                        const effectiveDueDate = dueFor(studentPeriodDueDate || reg?.dueDate, key, dueExt.days[s.studentId], dueExt.off);
                         const submittedDateStr = g.timestamp ? String(g.timestamp).split('T')[0].split(' ')[0] : null;
                         isLate = !!(effectiveDueDate && submittedDateStr && submittedDateStr > effectiveDueDate);
                     }
@@ -1898,7 +1903,7 @@ let score = "", display = '', bg = "";
                         if (pendingProjects.has(`${s.studentId}::${key}`)) {
                             display = '<span class="badge bg-warning text-dark px-1 shadow-sm" title="Needs an uploaded file AND a confirmed peer review before the grade posts">PENDING</span>';
                         } else if (!unit && !reg?.isProjectMilestone) {
-                            const effectiveDueDate = studentPeriodDueDate || reg?.dueDate;
+                            const effectiveDueDate = dueFor(studentPeriodDueDate || reg?.dueDate, key, dueExt.days[s.studentId], dueExt.off);
                             const isPastDue = !!effectiveDueDate && new Date(effectiveDueDate + 'T00:00:00') < today;
                             if (isPastDue) {
                                 display = '<span class="text-danger fw-bold" title="Missing">M</span>';

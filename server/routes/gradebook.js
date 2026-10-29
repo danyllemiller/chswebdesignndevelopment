@@ -6,6 +6,7 @@ const { insertQuestionDetails } = require('../lib/missedQuestionsStore');
 const { dailyOverrideCode, isValidDailyCode } = require('../lib/dailyCode');
 const { isCsUnitProject, syncCsProjectGrade } = require('../lib/csProjectGate');
 const { clockinDate, loadClockinDays } = require('../lib/clockinDays');
+const accommodations = require('../lib/accommodations');
 
 // mysql2 returns DATE columns as JS Date objects (local-timezone fields set to
 // match the stored date exactly), not strings. Reading those fields directly
@@ -82,6 +83,20 @@ router.get('/student/course-gradebook', requireSelfOrStaff(), async (req, res) =
                 [student_id, student_id, student_id, courseCode]
             );
             rows.forEach(r => { r.due_date = formatDbDate(r.due_date); });
+            // Extra school days on assignments from the student's accommodation plan: their own due dates,
+            // so their grades page counts an assignment missing only after their real deadline
+            const { extraDays } = await accommodations.settingsFor(connection, student_id);
+            if (extraDays) rows.forEach(r => {
+                if (!accommodations.isShiftable(r.exam_id) || clockinDate(r.exam_id)) return;
+                r.due_date = accommodations.shiftDue(r.due_date, extraDays);
+                if (r.period_due_dates) {
+                    try {
+                        const pd = typeof r.period_due_dates === 'string' ? JSON.parse(r.period_due_dates) : r.period_due_dates;
+                        Object.keys(pd).forEach(k => { pd[k] = accommodations.shiftDue(formatDbDate(pd[k]), extraDays); });
+                        r.period_due_dates = JSON.stringify(pd);
+                    } catch (e) { /* malformed override: leave it */ }
+                }
+            });
             // A clock-in day this student's period didn't meet isn't theirs
             // to miss (server/lib/clockinDays.js); one they clocked in on anyway still counts.
             const days = await loadClockinDays(connection);
@@ -791,7 +806,12 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
              WHERE r.id IS NULL`);
         const scopedSet = new Set(scopedIds.map(String));
         const pending = pendingRows.filter(r => scopedSet.has(String(r.student_id)));
-        return { students: scopedStudents, assignments: registry, grades, pending };
+        // Extra school days on assignments, per student (accommodation plans), for the gradebook's due dates
+        const ext = await accommodations.settingsMap(connection);
+        const extensions = {};
+        scopedStudents.forEach(s => { const e = ext.get(String(s.student_id)); if (e && e.extraDays) extensions[s.student_id] = e.extraDays; });
+        return { students: scopedStudents, assignments: registry, grades, pending, extensions,
+            offDays: Object.keys(extensions).length ? [...accommodations.offDays()] : [] };
         });
         res.json(result);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch gradebook' }); }

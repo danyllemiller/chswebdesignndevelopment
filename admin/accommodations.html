@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Accommodations | Teacher</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css?v=2.0" rel="stylesheet"/>
+  <script type="module" src="/js/auth-guard-admin.js"></script>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/loader.js?v=29"></script>
+  <style>
+    /* Accommodations (IEP / 504 plans), teacher only. js/admin/accommodations.js; server/routes/accommodations.js */
+    .ac-item { border: 1px solid #dee2e6; border-radius: .5rem; padding: .5rem .6rem; margin-bottom: .5rem; background: #fff; }
+    .ac-item textarea { font-size: .9rem; }
+    .ac-site { font-size: .7rem; }
+    .ac-plan { background: #fff; border: 1px solid #dee2e6; border-radius: .7rem; padding: 1rem; margin-bottom: .8rem; }
+    .ac-chip { display: inline-block; font-size: .78rem; font-weight: 700; border-radius: 999px; padding: .15rem .6rem; margin: 0 .3rem .3rem 0; }
+    .ac-auto { background: #d1f2e0; color: #0f5132; }
+    .ac-none { background: #e9ecef; color: #495057; }
+    .ac-group { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: #6c757d; margin-top: .5rem; }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container-fluid sticky-top px-0 no-print"><div id="nav-placeholder"></div></div>
+
+  <div class="container my-4" style="max-width: 1100px;">
+    <h2 class="fw-bold text-primary mb-1"><i class="fas fa-universal-access me-2"></i>Accommodations</h2>
+    <p class="text-muted mb-4">IEP and 504 plans. Only you can see this page. Students never see their plan; they only get its effects: their own extra days on assignments, and extra time and Read aloud on the Monday WRS Sprint.</p>
+
+    <div class="card shadow-sm mb-4" id="editor">
+      <div class="card-header bg-white fw-bold" id="editorTitle"><i class="fas fa-file-medical me-2 text-primary"></i>Add a plan</div>
+      <div class="card-body">
+        <div id="stepUpload">
+          <label class="form-label fw-bold" for="pdf">STEP 1: Upload the plan's At-A-Glance PDF</label>
+          <input type="file" id="pdf" accept="application/pdf,.pdf" class="form-control">
+          <div class="form-text">The "IEP At A Glance" or the "Section 504 Student Accommodations At-A-Glance". The PDF isn't kept; only what you save below is.</div>
+          <button type="button" class="btn btn-link px-0 mt-1" id="manualBtn">No PDF? Type the plan in instead.</button>
+          <div id="readStatus" class="small fw-bold mt-1" role="status"></div>
+        </div>
+
+        <form id="planForm" class="d-none mt-2" autocomplete="off">
+          <div class="fw-bold mb-2">STEP 2: Check what it says</div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold" for="student">Student</label>
+              <select id="student" class="form-select" required></select>
+              <div id="matchNote" class="form-text"></div>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small fw-bold" for="planType">Plan</label>
+              <select id="planType" class="form-select"><option>IEP</option><option>504</option><option>Other</option></select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small fw-bold" for="start">Starts</label>
+              <input type="date" id="start" class="form-control">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small fw-bold" for="end">Ends</label>
+              <input type="date" id="end" class="form-control">
+            </div>
+          </div>
+
+          <div class="border rounded p-3 mb-3 bg-light">
+            <div class="fw-bold mb-2"><i class="fas fa-wand-magic-sparkles me-1 text-success"></i>What the class site does on its own</div>
+            <div class="row g-3 align-items-start">
+              <div class="col-md-4">
+                <label class="form-label small fw-bold" for="extraDays">Extra school days on assignments</label>
+                <input type="number" id="extraDays" class="form-control" min="0" max="10" step="1" value="0">
+                <div class="form-text">An assignment isn't missing or late until this many school days after its due date. Tests keep their dates. 0 = none.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold" for="testTimeX">Time on timed tests</label>
+                <select id="testTimeX" class="form-select"><option value="1">Standard time</option><option value="1.5">Time and a half</option><option value="2">Double time</option></select>
+                <div class="form-text">The Monday WRS Sprint. (WPR practice tests: give it from your live list there.)</div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check mt-4">
+                  <input type="checkbox" id="readAloud" class="form-check-input">
+                  <label class="form-check-label small fw-bold" for="readAloud">Read aloud on timed tests</label>
+                </div>
+                <div class="form-text">A Read aloud button on the Monday WRS Sprint. Make sure they have headphones.</div>
+              </div>
+            </div>
+            <div id="flags" class="small text-warning-emphasis fw-bold mt-2"></div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="fw-bold">What the plan says <span class="small text-muted fw-normal">(your reminders; edit or remove any)</span></span>
+            <button type="button" class="btn btn-sm btn-outline-primary fw-bold" id="addItem"><i class="fas fa-plus me-1"></i>Add one</button>
+          </div>
+          <div id="items"></div>
+
+          <label class="form-label small fw-bold mt-2" for="notes">Your notes</label>
+          <textarea id="notes" class="form-control mb-3" rows="2" placeholder="Anything else to remember"></textarea>
+
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <button type="submit" class="btn btn-success fw-bold px-4"><i class="fas fa-floppy-disk me-1"></i>STEP 3: Save the plan</button>
+            <button type="button" class="btn btn-outline-secondary fw-bold" id="cancelBtn">Cancel</button>
+            <span id="saveStatus" class="small fw-bold" role="status"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <h4 class="fw-bold mb-3">Students with plans <span id="planCount" class="badge bg-primary"></span></h4>
+    <div id="planList"><div class="text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div></div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <script type="module" src="/js/admin/accommodations.js?v=1"></script>
+</body>
+</html>

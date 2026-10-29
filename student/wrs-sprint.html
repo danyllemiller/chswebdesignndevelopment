@@ -109,6 +109,7 @@
         questions: data.questions,
         answers: data.answers || {},
         secondsLeft: data.secondsLeft,
+        readAloud: !!data.readAloud,   // from the student's accommodation plan (admin/accommodations.html)
         flagKey: `wrs_sprint_flags_${new Date().toLocaleDateString('en-CA')}`,
         save: answers => api('/wrs-sprint/save', { answers }),
         saveBeacon: answers => navigator.sendBeacon && navigator.sendBeacon('/api/wrs-sprint/save', new Blob([JSON.stringify({ answers })], { type: 'application/json' })),
