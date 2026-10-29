@@ -88,6 +88,25 @@
         renderDayPills();
         renderPage();
         setStatus('');
+        jumpToTurnin();
+    }
+    // A milestone's "Jump to Dropbox" on a chapter page opens this day with &turnin=<milestone>: scroll to that
+    // milestone's Turn In box and light it up (the only one, or the first, if the name doesn't match exactly).
+    function jumpToTurnin() {
+        const j = window.__gnJump;
+        if (!j || j.chapter !== chapterData.chapter || j.day !== day.day) return;
+        window.__gnJump = null;
+        const norm = s => String(s || '').toLowerCase().replace(/[\[(][^\])]*pts?[\])]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+        const want = norm(j.label), boxes = [...pageBox.querySelectorAll('.gn-turnin')];
+        const box = boxes.find(b => norm(b.querySelector('strong')?.textContent) === want)
+            || boxes.find(b => { const t = norm(b.querySelector('strong')?.textContent); return want && t && (t.startsWith(want) || want.startsWith(t)); })
+            || boxes[0];
+        if (!box) return;
+        setTimeout(() => {
+            box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            box.classList.add('gn-jump');
+            setTimeout(() => box.classList.remove('gn-jump'), 4000);
+        }, 300);
     }
 
     // ---------- saving ----------
