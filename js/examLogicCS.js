@@ -639,7 +639,7 @@ function setupTabLockdown() {
 async function checkUnitPrerequisite(unit) {
     const unitNum = parseInt(unit, 10);
     // 9 is cs-final-exam.html's own number for the CS Final (there is no real Unit 9). It locks
-    // until all seven unit tests are taken and all seven Unit Projects are finished.
+    // until all seven unit tests are taken and the Unit 3-7 Projects are finished.
     const isFinal = unitNum === 9;
     if (!isFinal && (isNaN(unitNum) || unitNum < 1 || unitNum > 7)) return { ok: true };
 
@@ -668,7 +668,7 @@ function renderPrerequisiteBlock(prereq, unit) {
     if (prereq.final) {
         const items = [...(prereq.missingExams || []).map(n => `<li>Take the <strong>Unit ${n} Test</strong></li>`),
             ...(prereq.missingProjects || []).map(n => `<li>Finish the <strong>Unit ${n} Project</strong>: upload it, then get your self review AND peer review in</li>`)];
-        reasonsHtml.push(`<p class="mb-2">The CS Final unlocks when every unit test and every Unit Project is done. You still need to:</p>
+        reasonsHtml.push(`<p class="mb-2">The CS Final unlocks when every unit test and the Unit 3&ndash;7 Projects are done. You still need to:</p>
             <ul class="text-start d-inline-block mb-3">${items.join('')}</ul>`);
     }
     if (prereq.preScaleOk === false || prereq.preTestOk === false) {

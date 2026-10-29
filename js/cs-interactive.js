@@ -1426,8 +1426,8 @@ if (!hasExam) {
 
                 // Units 1–7 are required; Units 0 and 8 are extra credit.
                 // Every unit test taken (any score — testing out of a unit
-                // excuses its assignments, not the test itself) AND every
-                // Unit Project finished (teacher 2026-10-29). The server
+                // excuses its assignments, not the test itself) AND the
+                // Unit 3-7 Projects finished (teacher 2026-10-29). The server
                 // decides, with the same lock the Final itself checks
                 // (/api/exam/check-prerequisite, exam_id Final-Exam); if it
                 // can't be reached, the unit tests in this page's grades.
@@ -1447,14 +1447,14 @@ if (!hasExam) {
                         ...(lock.missingProjects || []).map(n => `<li>Finish the Unit ${n} Project (upload it, then your self review AND peer review)</li>`)].join('');
                     dom.examOverlay.innerHTML = `<i class="fas fa-lock text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
                         <h3 class="fw-bold">Final Exam Locked</h3>
-                        <p class="text-muted px-4 mb-2">The CS Final Exam unlocks when you've taken every unit test and finished every Unit Project. You still need to:</p>
+                        <p class="text-muted px-4 mb-2">The CS Final Exam unlocks when you've taken every unit test and finished the Unit 3&ndash;7 Projects. You still need to:</p>
                         <ul class="text-start text-danger fw-bold d-inline-block mb-0">${missing}</ul>
                         <p class="text-muted small mt-3">Units 0 and 8 are extra credit and not required.</p>`;
                 } else if (dom.examOverlay) {
                     dom.examOverlay.innerHTML = `
                         <i class="fas fa-graduation-cap text-warning fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
                         <h3 class="fw-bold">CS Course Final Exam</h3>
-                        <p class="text-muted px-4 mb-4">You've taken all seven unit tests and finished all seven Unit Projects. The final exam will open in a new tab.</p>
+                        <p class="text-muted px-4 mb-4">You've taken all seven unit tests and finished the Unit 3&ndash;7 Projects. The final exam will open in a new tab.</p>
                         <button id="btn-launch-final" class="btn btn-success btn-lg fw-bold px-5 shadow-sm mt-2">
                             <i class="fas fa-graduation-cap me-2"></i> Launch CS Final Exam
                         </button>`;

@@ -164,12 +164,14 @@ async function checkWdChapterPrework(connection, studentId, examId, chNum) {
 }
 
 // The CS Final ("Final-Exam", exams/cs-final-exam.html) unlocks once a student has taken all seven
-// unit tests (any score) AND finished all seven Unit Projects (teacher 2026-10-29: students were
+// unit tests (any score) AND finished the Unit 3-7 Projects (teacher 2026-10-29: students were
 // reaching the Final with projects undone, since only the unit tests were checked, and only on
-// the workspace's Final tab). "Finished" counts the way the unit-test lock above does -- a self
-// review AND a peer review in -- or a project grade that has posted (for a project under the
-// upload + peer review gate in server/lib/csProjectGate.js, or EX). Students excused from projects
-// (projectExemptions) skip that half; the same override row (daily code / admin tool) clears it.
+// the workspace's Final tab; Units 1-2 stay out, the same as PROJECT_EXEMPT_UNITS for the unit
+// tests, since most of those files were on the server that died). "Finished" counts the way the
+// unit-test lock above does -- a self review AND a peer review in -- or a project grade that has
+// posted (for a project under the upload + peer review gate in server/lib/csProjectGate.js, or EX).
+// Students excused from projects (projectExemptions) skip that half; the same override row (daily
+// code / admin tool) clears it.
 const CS_UNITS = [1, 2, 3, 4, 5, 6, 7];
 async function checkCsFinalPrereq(connection, studentId) {
     await ensureUnitPrereqOverridesTable(connection);
@@ -194,7 +196,7 @@ async function checkCsFinalPrereq(connection, studentId) {
             [studentId, studentId, ...CS_UNITS.map(n => `UNIT${n}`)]);
         const finished = p => p.status === 'complete' || p.score === 'EX' || (isCsUnitProject(p.exam_id) && Number(p.score) > 0);
         // A unit whose project was never seeded can't be required (same as the unit-test lock)
-        missingProjects = CS_UNITS.filter(n => {
+        missingProjects = CS_UNITS.filter(n => !PROJECT_EXEMPT_UNITS.has(n)).filter(n => {
             const rows = projectRows.filter(p => p.chapter_id === `UNIT${n}`);
             return rows.length > 0 && !rows.some(finished);
         });
