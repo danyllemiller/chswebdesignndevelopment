@@ -132,10 +132,14 @@ router.get('/admin/site-reports', async (req, res) => {
     try {
         const rows = await withConnection(async (connection) => {
             await ensureTable(connection);
-            const [r] = await connection.execute(
-                `SELECT r.*, s.first_name, s.last_name, s.section_id FROM site_reports r
-                 LEFT JOIN students s ON s.student_id = r.student_id ORDER BY r.id DESC LIMIT 500`);
-            return r;
+            // Names come from a second query: site_reports and students were created with different
+            // collations, and comparing their student_id columns in a JOIN is an error in MariaDB.
+            const [r] = await connection.execute('SELECT * FROM site_reports ORDER BY id DESC LIMIT 500');
+            const ids = [...new Set(r.map(x => String(x.student_id)).filter(Boolean))];
+            const [names] = ids.length ? await connection.execute(
+                `SELECT student_id, first_name, last_name, section_id FROM students WHERE student_id IN (${ids.map(() => '?').join(',')})`, ids) : [[]];
+            const byId = new Map(names.map(n => [String(n.student_id), n]));
+            return r.map(x => { const n = byId.get(String(x.student_id)) || {}; return { ...x, first_name: n.first_name || null, last_name: n.last_name || null, section_id: n.section_id || null }; });
         });
         res.json({ reports: rows });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Could not load reports.' }); }

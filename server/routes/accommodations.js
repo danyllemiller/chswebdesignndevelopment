@@ -70,20 +70,21 @@ router.get('/admin/accommodations', async (req, res) => {
     try {
         const out = await withConnection(async (c) => {
             await acc.ensureTable(c);
-            const [rows] = await c.execute(
-                `SELECT a.*, s.first_name, s.last_name, s.section_id FROM student_accommodations a
-                 LEFT JOIN students s ON s.student_id = a.student_id ORDER BY s.last_name, s.first_name`);
+            // Names come from the roster below, not a JOIN: the two tables can have different collations
+            const [rows] = await c.execute('SELECT * FROM student_accommodations');
+            const students = await roster(c), byId = new Map(students.map(s => [s.id, s]));
             const plans = rows.map(r => {
+                const s = byId.get(String(r.student_id)) || {};
                 let items = [];
                 try { items = JSON.parse(r.items_json || '[]'); } catch (e) { /* keep empty */ }
                 return {
-                    id: String(r.student_id), first: r.first_name || '', last: r.last_name || '', section: r.section_id || '',
+                    id: String(r.student_id), first: s.first || '', last: s.last || '', section: s.section || '',
                     planType: r.plan_type, start: dateStr(r.plan_start), end: dateStr(r.plan_end),
                     extraDays: Number(r.extra_days) || 0, testTimeX: Number(r.test_time_x) || 1, readAloud: !!r.read_aloud,
                     items, notes: r.notes || '', updatedAt: r.updated_at, updatedBy: r.updated_by || ''
                 };
-            });
-            return { plans, students: await roster(c) };
+            }).sort((a, b) => `${a.last} ${a.first}`.localeCompare(`${b.last} ${b.first}`));
+            return { plans, students };
         });
         res.set('Cache-Control', 'no-store');
         res.json(out);

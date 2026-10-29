@@ -326,7 +326,7 @@ async function checkRetakeClearance(connection, studentId, examId, preloadedAtte
     if (!m) return { ok: true };
 
     const attempts = preloadedAttempts || (await connection.execute(
-        'SELECT score, total_points FROM exam_attempts WHERE student_id = ? AND exam_id = ? ORDER BY attempt_number ASC',
+        'SELECT score, total_points, timestamp FROM exam_attempts WHERE student_id = ? AND exam_id = ? ORDER BY attempt_number ASC',
         [studentId, examId]
     ))[0];
     if (attempts.length === 0) return { ok: true };
@@ -388,11 +388,16 @@ async function checkRetakeClearance(connection, studentId, examId, preloadedAtte
         // too (only 73 of ~1,300 unit Worksheet rows are ever submitted); that
         // tier stays stricter only by excluding bare 'Notes' (see categories).
         const savedCounts = 'OR LENGTH(content) >= 300';
+        // The test tab's scratchpad also saves as plain "Unit Exam Scratchpad", with no unit number (teacher
+        // 2026-10-29: students' real post-fail notes were sitting there unseen, and every one of them landed on
+        // the teacher's "approve notes" list). Those count when they were saved after the failed try.
+        const lastAt = last.timestamp ? new Date(last.timestamp) : new Date('9999-12-31');
         const [qualifying] = await connection.execute(
             `SELECT id FROM turnins WHERE student_id = ?
-             AND (chapter LIKE ? OR chapter = ? OR chapter = ?) AND category IN (${placeholders})
+             AND (chapter LIKE ? OR chapter = ? OR chapter = ? OR (chapter = 'Unit Exam Scratchpad' AND timestamp > ?))
+             AND category IN (${placeholders})
              AND ((is_submitted = 1 AND LENGTH(content) > 100) ${savedCounts}) LIMIT 1`,
-            [studentId, `Unit ${unitMatch[1]} - %`, `Unit ${unitMatch[1]} Exam Scratchpad`, `Unit ${unitMatch[1]} General`, ...categories]
+            [studentId, `Unit ${unitMatch[1]} - %`, `Unit ${unitMatch[1]} Exam Scratchpad`, `Unit ${unitMatch[1]} General`, lastAt, ...categories]
         );
         if (qualifying.length > 0) {
             await connection.execute(
@@ -403,9 +408,11 @@ async function checkRetakeClearance(connection, studentId, examId, preloadedAtte
         }
     }
 
+    // The student does it on their own: the next time they open the test, the check above finds the work and the
+    // test unlocks by itself (teacher 2026-10-29: no teacher approval step).
     const message = requirement === 'notes'
-        ? 'Before retaking this test, show your teacher your notes on this chapter.'
-        : 'Before retaking this test, finish every activity and worksheet in this chapter and check in with your teacher.';
+        ? 'Before you retake this test, write your notes for this unit in your Comp Sci workspace (a full paragraph or more) and save them. Then come back here: the test unlocks by itself.'
+        : 'Before you retake this test a second time, finish and save a worksheet or reflection for this unit in your Comp Sci workspace. Then come back here: the test unlocks by itself.';
     return { ok: false, requirement, message };
 }
 

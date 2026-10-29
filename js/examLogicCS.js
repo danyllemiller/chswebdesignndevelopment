@@ -753,7 +753,7 @@ async function checkRetakeGate(unit) {
 function renderRetakeBlock(requirement, message, unit) {
     const container = document.getElementById('exam-container');
     if (!container) return;
-    const label = requirement === 'notes' ? 'Notes Check Needed' : 'Chapter Work Needed';
+    const label = requirement === 'notes' ? 'Write Your Notes First' : 'Finish Your Unit Work First';
     const unitNum = parseInt(unit, 10);
     const flashcardsLink = !isNaN(unitNum)
         ? `<a href="/cs-flashcards.html?unit=${unitNum}" target="_blank" class="btn btn-outline-primary fw-bold ms-2"><i class="fas fa-layer-group me-1"></i> Study Flashcards</a>`

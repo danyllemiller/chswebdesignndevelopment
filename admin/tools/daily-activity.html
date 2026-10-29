@@ -50,9 +50,9 @@
   </div>
 
   <div class="card shadow-sm border-0 mb-4 section-card">
-    <div class="card-header bg-white"><i class="fas fa-book me-2 text-primary"></i>Retake Clearances Needed <span id="retakeCount" class="badge bg-secondary ms-1"></span></div>
+    <div class="card-header bg-white"><i class="fas fa-book me-2 text-primary"></i>Waiting on Notes Before a Retake <span id="retakeCount" class="badge bg-secondary ms-1"></span></div>
     <div class="card-body" id="retakeBody">
-      <p class="text-muted small mb-2">Comp Sci only — a student under 80% on a unit test needs to show notes before retake #1, or finish all chapter activities/worksheets before retake #2. Clearing here is what unlocks the retake for them.</p>
+      <p class="text-muted small mb-2">Comp Sci only. <strong>Nothing to do here:</strong> a student under 80% on a unit test retakes it once they've saved notes for that unit in their workspace (after a 2nd try, a worksheet or reflection). The site checks and unlocks the test by itself; these students haven't saved that work yet. Use "Clear anyway" only if a student showed you their work on paper.</p>
       <div id="retakeList"></div>
     </div>
   </div>
@@ -194,11 +194,11 @@
     list.innerHTML = items.map(item => `
       <div class="activity-row d-flex align-items-start gap-2">
         <button class="btn btn-sm btn-success fw-bold clear-retake-btn flex-shrink-0" data-student-id="${item.student_id}" data-exam-id="${item.exam_id}" data-requirement="${item.requirement}">
-          <i class="fas fa-check me-1"></i>Mark Cleared
+          <i class="fas fa-check me-1"></i>Clear anyway
         </button>
         <div>
           <strong>${name(item)}</strong> <span class="text-muted small">${escapeHtml(item.section_id || '')}</span>
-          <div class="text-muted small">${escapeHtml(item.exam_id)} — attempt ${item.attempt_number} scored ${item.pct}%, needs <strong>${item.requirement === 'notes' ? 'notes shown' : 'chapter activities/worksheets finished'}</strong> before retake</div>
+          <div class="text-muted small">${escapeHtml(item.exam_id)} — attempt ${item.attempt_number} scored ${item.pct}%, hasn't saved <strong>${item.requirement === 'notes' ? 'notes for this unit' : 'a worksheet or reflection for this unit'}</strong> yet</div>
         </div>
       </div>`).join('');
   }
