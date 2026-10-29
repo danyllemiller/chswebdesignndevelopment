@@ -206,6 +206,7 @@ async function loadCourseMap() {
 
 let activeUnit = csCourseMap[0];
 let activeTab = { type: 'PRE_SCALE' };
+let pendingSection = null;   // a section of the chapter to open at (search results link ?goto=chapter&...&sec=)
 let currentStudentData = null;
 let worksheetsLibrary = {};
 
@@ -1338,7 +1339,8 @@ else if (activeTab.type === 'PRE_TEST') {
 
                 // Allow them to READ the chapter content
                 const url = `/compsci/${activeTab.data.file}`;
-                if (dom.curriculumFrame && !dom.curriculumFrame.src.includes(url)) dom.curriculumFrame.src = url;
+                if (dom.curriculumFrame && pendingSection) { dom.curriculumFrame.src = `${url}#${pendingSection}`; pendingSection = null; }
+                else if (dom.curriculumFrame && !dom.curriculumFrame.src.includes(url)) dom.curriculumFrame.src = url;
                 if (dom.curriculumFrame) dom.curriculumFrame.classList.remove('d-none');
 
                 // Workspace is accessible - user manually selects mode via toggle buttons
@@ -2633,6 +2635,8 @@ window.addEventListener('message', async (event) => {
                 activeUnit = found;
                 const chapterData = found.chapters.find(c => c.ch === gotoCh);
                 activeTab = chapterData ? { type: 'CHAPTER', data: chapterData } : { type: 'PRE_SCALE' };
+                const sec = urlParams.get('sec');
+                if (chapterData && sec && /^[\w-]+$/.test(sec)) pendingSection = sec;
                 skipAutoAdvance = true;
             }
         }

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Search | CHS Web Design & CS</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css?v=2.0" rel="stylesheet" />
+  <link href="/css/student-pages.css" rel="stylesheet" />
+  <style>
+    /* Search (students asked 2026-10-29): every chapter, section by section, and all of a student's own notes */
+    .sr-card { border: 1px solid #dee2e6; border-radius: .6rem; background: #fff; padding: .9rem 1rem; margin-bottom: .8rem; }
+    .sr-sec { border-left: 3px solid var(--primary-color, #0d6efd); padding: .2rem 0 .2rem .75rem; margin-top: .6rem; }
+    .sr-sec a { font-weight: 700; }
+    .sr-snip { color: #444; font-size: .92rem; margin: .15rem 0 0; }
+    .sr-snip mark { background: #fff3a8; padding: 0 .1em; border-radius: .2em; }
+    .sr-badge { font-size: .7rem; letter-spacing: .03em; }
+    .sr-note-full { border: 1px dashed #adb5bd; border-radius: .5rem; padding: .75rem; margin-top: .6rem; max-height: 420px; overflow: auto; background: #fbfbfd; }
+    .sr-note-full img { max-width: 100%; height: auto; }
+    .sr-note-full table { border-collapse: collapse; } .sr-note-full td, .sr-note-full th { border: 1px solid #ccc; padding: 4px 6px; }
+  </style>
+  <script type="module" src="/js/auth-guard.js?v=2"></script>
+</head>
+<body class="bg-white">
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div class="container my-5" style="max-width: 1200px;">
+    <h2 class="gochi text-primary mb-1"><i class="fas fa-magnifying-glass me-2"></i>Search</h2>
+    <p class="text-muted mb-3">Search every chapter and all of your own notes at once.</p>
+
+    <form id="searchForm" role="search" class="mb-2">
+      <label for="q" class="form-label fw-bold">STEP 1: Type a word or two</label>
+      <div class="input-group input-group-lg">
+        <input id="q" type="search" class="form-control" placeholder="Like: database, flexbox, linked list" autocomplete="off" aria-describedby="searchHelp">
+        <button class="btn btn-primary fw-bold px-4" type="submit"><i class="fas fa-search me-2"></i>Search</button>
+      </div>
+      <div id="searchHelp" class="form-text">Results show up as you type. Every word has to match.</div>
+    </form>
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-4" id="scopeRow">
+      <span class="small fw-bold">Chapters from:</span>
+      <div class="btn-group btn-group-sm" role="group" aria-label="Which classes' chapters to search">
+        <button type="button" class="btn btn-outline-primary fw-bold" data-scope="mine">My class</button>
+        <button type="button" class="btn btn-outline-primary fw-bold" data-scope="all">All classes</button>
+      </div>
+    </div>
+
+    <div id="startHint" class="alert alert-light border">STEP 2: Click a result to open it. Chapter results open right at the matching section. Note results can show the whole note right here.</div>
+
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <h4 class="fw-bold mb-3"><i class="fas fa-book-open me-2 text-primary"></i>In the chapters <span id="chapCount" class="badge bg-primary"></span></h4>
+        <div id="chapResults" aria-live="polite"></div>
+      </div>
+      <div class="col-lg-5">
+        <h4 class="fw-bold mb-3"><i class="fas fa-pen-to-square me-2 text-success"></i>In your notes <span id="noteCount" class="badge bg-success"></span></h4>
+        <div id="noteResults" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=29"></script>
+  <script src="/js/student/site-search.js?v=1"></script>
+</body>
+</html>

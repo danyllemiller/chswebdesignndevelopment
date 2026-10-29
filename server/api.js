@@ -90,5 +90,6 @@ router.use('/', require('./routes/uploads'));
 router.use('/', require('./routes/agenda'));
 router.use('/', require('./routes/appointments'));
 router.use('/', require('./routes/headphones'));
+router.use('/', require('./routes/search'));
 
 module.exports = router;
