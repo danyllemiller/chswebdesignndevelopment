@@ -163,11 +163,51 @@ async function checkWdChapterPrework(connection, studentId, examId, chNum) {
     return { ok: preScaleOk && preTestOk, scoreOk: true, projectOk: true, projectRequired: false, preScaleOk, preTestOk };
 }
 
+// The CS Final ("Final-Exam", exams/cs-final-exam.html) unlocks once a student has taken all seven
+// unit tests (any score) AND finished all seven Unit Projects (teacher 2026-10-29: students were
+// reaching the Final with projects undone, since only the unit tests were checked, and only on
+// the workspace's Final tab). "Finished" counts the way the unit-test lock above does -- a self
+// review AND a peer review in -- or a project grade that has posted (for a project under the
+// upload + peer review gate in server/lib/csProjectGate.js, or EX). Students excused from projects
+// (projectExemptions) skip that half; the same override row (daily code / admin tool) clears it.
+const CS_UNITS = [1, 2, 3, 4, 5, 6, 7];
+async function checkCsFinalPrereq(connection, studentId) {
+    await ensureUnitPrereqOverridesTable(connection);
+    const [overrideRows] = await connection.execute(
+        'SELECT id FROM unit_prereq_overrides WHERE student_id = ? AND unit_exam_id = ?', [studentId, 'Final-Exam']);
+    if (overrideRows.length > 0) return { ok: true, final: true, missingExams: [], missingProjects: [] };
+    const marks = CS_UNITS.map(() => '?').join(',');
+    const [examRows] = await connection.execute(
+        `SELECT DISTINCT exam_id FROM responses WHERE student_id = ? AND exam_id IN (${marks})`,
+        [studentId, ...CS_UNITS.map(n => `Unit${n}-Exam`)]);
+    const taken = new Set(examRows.map(r => r.exam_id));
+    const missingExams = CS_UNITS.filter(n => !taken.has(`Unit${n}-Exam`));
+    let missingProjects = [];
+    if (!isProjectExempt(studentId)) {
+        const [projectRows] = await connection.execute(
+            `SELECT cp.chapter_id, cp.exam_id, pga.status, r.score
+             FROM chapter_projects cp
+             LEFT JOIN project_grade_aggregates pga
+               ON pga.chapter_project_id = cp.id AND pga.exam_id = cp.exam_id AND pga.student_id = ?
+             LEFT JOIN responses r ON r.exam_id = cp.exam_id AND r.student_id = ?
+             WHERE cp.course_id = '10003GS' AND cp.is_active = 1 AND cp.chapter_id IN (${marks})`,
+            [studentId, studentId, ...CS_UNITS.map(n => `UNIT${n}`)]);
+        const finished = p => p.status === 'complete' || p.score === 'EX' || (isCsUnitProject(p.exam_id) && Number(p.score) > 0);
+        // A unit whose project was never seeded can't be required (same as the unit-test lock)
+        missingProjects = CS_UNITS.filter(n => {
+            const rows = projectRows.filter(p => p.chapter_id === `UNIT${n}`);
+            return rows.length > 0 && !rows.some(finished);
+        });
+    }
+    return { ok: !missingExams.length && !missingProjects.length, final: true, missingExams, missingProjects };
+}
+
 async function checkUnitPrerequisite(connection, studentId, examId) {
     // The teacher's own account previews every exam exactly as students see
     // it, so none of these locks apply to it (it never has the pre-work).
     const [[viewer]] = await connection.execute('SELECT section_id FROM students WHERE student_id = ? LIMIT 1', [studentId]);
     if (viewer && viewer.section_id === 'Teacher') return { ok: true };
+    if (examId === 'Final-Exam') return checkCsFinalPrereq(connection, studentId);
     const wd = /^Ch(\d+)-Exam$/.exec(examId || '');
     if (wd) return checkWdChapterPrework(connection, studentId, examId, parseInt(wd[1], 10));
     const m = /^Unit(\d+)-Exam$/i.exec(examId || '');
@@ -411,6 +451,10 @@ router.post('/submit-exam', async (req, res) => {
         }
 
         const prereq = await checkUnitPrerequisite(connection, student_id, exam_id);
+        if (!prereq.ok && prereq.final) {
+            const reasons = [...prereq.missingExams.map(n => `the Unit ${n} Test`), ...prereq.missingProjects.map(n => `the Unit ${n} Project`)];
+            return { status: 403, body: { error: `The CS Final is locked. Finish ${reasons.join(', ')} first.` } };
+        }
         if (!prereq.ok) {
             const isWdChapter = /^Ch\d+-Exam$/.test(exam_id);
             const reasons = [];

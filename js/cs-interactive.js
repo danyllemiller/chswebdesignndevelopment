@@ -1425,29 +1425,36 @@ if (!hasExam) {
                 if (dom.examOverlay) dom.examOverlay.classList.remove('d-none');
 
                 // Units 1–7 are required; Units 0 and 8 are extra credit.
-                // A unit counts as done once its test has been taken (any
-                // score) — testing out of a unit excuses its assignments,
-                // not the test itself, and everyone sits every unit test.
+                // Every unit test taken (any score — testing out of a unit
+                // excuses its assignments, not the test itself) AND every
+                // Unit Project finished (teacher 2026-10-29). The server
+                // decides, with the same lock the Final itself checks
+                // (/api/exam/check-prerequisite, exam_id Final-Exam); if it
+                // can't be reached, the unit tests in this page's grades.
                 const requiredUnits = [1, 2, 3, 4, 5, 6, 7];
-                const unitStatus = requiredUnits.map(n => ({
-                    n,
-                    done: gradesLoaded && hasSatUnitTest(n, grades)
-                }));
-                const allUnitsDone = unitStatus.every(s => s.done);
+                let lock = null;
+                try {
+                    const lockRes = await fetch(`/api/exam/check-prerequisite?student_id=${encodeURIComponent(currentStudentData.student_id)}&exam_id=Final-Exam`);
+                    if (lockRes.ok) lock = await lockRes.json();
+                } catch (e) { /* fall back below */ }
+                if (!lock) {
+                    const missingExams = requiredUnits.filter(n => !(gradesLoaded && hasSatUnitTest(n, grades)));
+                    lock = { ok: missingExams.length === 0, missingExams, missingProjects: [] };
+                }
 
-                if (!allUnitsDone && dom.examOverlay) {
-                    const missing = unitStatus.filter(s => !s.done)
-                        .map(s => `<li>Unit ${s.n} Test</li>`).join('');
+                if (!lock.ok && dom.examOverlay) {
+                    const missing = [...(lock.missingExams || []).map(n => `<li>Take the Unit ${n} Test</li>`),
+                        ...(lock.missingProjects || []).map(n => `<li>Finish the Unit ${n} Project (upload it, then your self review AND peer review)</li>`)].join('');
                     dom.examOverlay.innerHTML = `<i class="fas fa-lock text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
                         <h3 class="fw-bold">Final Exam Locked</h3>
-                        <p class="text-muted px-4 mb-2">You must sit every unit test before the CS Final Exam unlocks — testing out of a unit excuses its assignments, not the test itself:</p>
+                        <p class="text-muted px-4 mb-2">The CS Final Exam unlocks when you've taken every unit test and finished every Unit Project. You still need to:</p>
                         <ul class="text-start text-danger fw-bold d-inline-block mb-0">${missing}</ul>
                         <p class="text-muted small mt-3">Units 0 and 8 are extra credit and not required.</p>`;
                 } else if (dom.examOverlay) {
                     dom.examOverlay.innerHTML = `
                         <i class="fas fa-graduation-cap text-warning fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
                         <h3 class="fw-bold">CS Course Final Exam</h3>
-                        <p class="text-muted px-4 mb-4">You've taken all seven unit tests. The final exam will open in a new tab.</p>
+                        <p class="text-muted px-4 mb-4">You've taken all seven unit tests and finished all seven Unit Projects. The final exam will open in a new tab.</p>
                         <button id="btn-launch-final" class="btn btn-success btn-lg fw-bold px-5 shadow-sm mt-2">
                             <i class="fas fa-graduation-cap me-2"></i> Launch CS Final Exam
                         </button>`;

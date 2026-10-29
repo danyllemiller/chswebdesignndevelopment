@@ -638,9 +638,12 @@ function setupTabLockdown() {
 // server-side check skips the score half for Unit 1 on its own).
 async function checkUnitPrerequisite(unit) {
     const unitNum = parseInt(unit, 10);
-    if (isNaN(unitNum) || unitNum < 1 || unitNum > 7) return { ok: true };
+    // 9 is cs-final-exam.html's own number for the CS Final (there is no real Unit 9). It locks
+    // until all seven unit tests are taken and all seven Unit Projects are finished.
+    const isFinal = unitNum === 9;
+    if (!isFinal && (isNaN(unitNum) || unitNum < 1 || unitNum > 7)) return { ok: true };
 
-    const examId = `Unit${unitNum}-Exam`;
+    const examId = isFinal ? 'Final-Exam' : `Unit${unitNum}-Exam`;
     try {
         // Shared with the real server-side gate (server/routes/gradebook.js)
         // instead of duplicating the score check here -- this version also
@@ -659,9 +662,15 @@ async function checkUnitPrerequisite(unit) {
 function renderPrerequisiteBlock(prereq, unit) {
     const container = document.getElementById('exam-container');
     if (!container) return;
-    const unitExamId = `Unit${parseInt(unit, 10)}-Exam`;
+    const unitExamId = prereq.final ? 'Final-Exam' : `Unit${parseInt(unit, 10)}-Exam`;
 
     const reasonsHtml = [];
+    if (prereq.final) {
+        const items = [...(prereq.missingExams || []).map(n => `<li>Take the <strong>Unit ${n} Test</strong></li>`),
+            ...(prereq.missingProjects || []).map(n => `<li>Finish the <strong>Unit ${n} Project</strong>: upload it, then get your self review AND peer review in</li>`)];
+        reasonsHtml.push(`<p class="mb-2">The CS Final unlocks when every unit test and every Unit Project is done. You still need to:</p>
+            <ul class="text-start d-inline-block mb-3">${items.join('')}</ul>`);
+    }
     if (prereq.preScaleOk === false || prereq.preTestOk === false) {
         const missing = [prereq.preScaleOk === false ? 'the <strong>Pre-Scale</strong>' : '', prereq.preTestOk === false ? 'the <strong>Pre-Test (Diagnostic)</strong>' : ''].filter(Boolean).join(' and ');
         reasonsHtml.push(`<p class="mb-1">You need to finish ${missing} for this unit before you can take the exam.</p>
@@ -679,7 +688,7 @@ function renderPrerequisiteBlock(prereq, unit) {
 
     container.innerHTML = `
         <div class="alert alert-warning text-center shadow p-5">
-            <h4 class="fw-bold"><i class="fas fa-lock me-2"></i>This Unit Is Locked</h4>
+            <h4 class="fw-bold"><i class="fas fa-lock me-2"></i>${prereq.final ? 'The CS Final Is Locked' : 'This Unit Is Locked'}</h4>
             ${reasonsHtml.join('')}
             <a href="/cs-interactive.html" class="btn btn-warning fw-bold">&laquo; Back to Class</a>
             <div class="mt-3">
