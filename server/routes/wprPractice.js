@@ -302,15 +302,20 @@ router.post('/wpr/join', (req, res) => {
     const body = req.body || {};
     const session = sessions.get(String(body.code || '').trim().toUpperCase());
     if (!session) return res.status(404).json({ error: 'That class code has ended or does not exist. Check with your teacher.' });
-    if (session.endedAt) return res.status(409).json({ error: 'This test has ended. Check with your teacher.' });
     session.lastActive = Date.now();
     const firstName = clean(body.firstName, 40), lastName = clean(body.lastName, 40), studentId = clean(body.studentId, 20);
     if (!firstName || !lastName || !studentId) return res.status(400).json({ error: 'Enter your first name, last name, and student ID.' });
     let st = session.students.get(studentId);
-    if (st && st.submittedAt) return res.status(409).json({ error: 'You already took this test. If you closed your results page, ask your teacher for your score.' });
     if (st && (st.firstName.toLowerCase() !== firstName.toLowerCase() || st.lastName.toLowerCase() !== lastName.toLowerCase())) {
         return res.status(409).json({ error: 'That student ID is already in use in this class. Check your ID or ask your teacher.' });
     }
+    // A student who finished can come back to their results (a closed tab, a refresh in a new tab, another
+    // device), including after the teacher ends the test, when their answers and report unlock.
+    // Their key stays the same, so a results page they still have open elsewhere keeps working.
+    if (st && st.submittedAt) {
+        return res.json({ token: st.token, code: session.code, label: session.label, count: session.count, seconds: secondsFor(session, st), started: true, submitted: true, endReason: st.endReason });
+    }
+    if (session.endedAt) return res.status(409).json({ error: 'This test has ended. Check with your teacher.' });
     if (!st) {
         st = { token: token(), firstName, lastName, studentId, joinedAt: Date.now(), startedAt: null, questions: null, answers: {}, violations: 0, submittedAt: null };
         session.students.set(studentId, st);

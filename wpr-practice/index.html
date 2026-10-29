@@ -80,8 +80,10 @@
           lastName: document.getElementById('last').value, studentId: document.getElementById('sid').value
         });
         me = { code: out.code, token: out.token, label: out.label, count: out.count, seconds: out.seconds, name: document.getElementById('first').value.trim() };
+        // Already finished (came back from a closed tab or another device): straight to their results
+        if (out.submitted) { me.submitted = true; me.reason = out.endReason || ''; }
         try { sessionStorage.setItem('wpr_join', JSON.stringify(me)); } catch (x) {}
-        showRules(out.started);
+        if (out.submitted) showResults(); else showRules(out.started);
       } catch (err) { showJoin(err.message); }
     });
   }
@@ -138,6 +140,8 @@
   // ---- After submitting: the score now; the answers and the report once the teacher ends the test
   const remember = () => { try { sessionStorage.setItem('wpr_join', JSON.stringify(me)); } catch (x) {} };
   let resultsPoll = null;
+  // A tab left in the background checks far less often, so check again as soon as it's back in front
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && resultsPoll) checkResults(); });
   function showResults(score) {
     screen.innerHTML = `<h1 class="h4 fw-bold mb-3">Your results</h1>
       <div id="scoreBox">${score ? WrsTestUI.scoreHtml(score, me.reason) : '<p class="text-muted">Loading your score…</p>'}</div>
@@ -157,13 +161,13 @@
     try { out = await api('/wpr/results', { code: me.code, token: me.token }); }
     catch (e) {
       if (e.status !== 404) return;   // try again on the next check
-      clearInterval(resultsPoll);
+      clearInterval(resultsPoll); resultsPoll = null;
       try { sessionStorage.removeItem('wpr_join'); } catch (x) {}
       screen.innerHTML = '<h1 class="h4 fw-bold mb-3">Your results</h1><div class="alert alert-secondary mb-0">The results for this test have been erased. Ask your teacher if you need your score.</div>';
       return;
     }
     if (out.status === 'held' && !screen.querySelector('.wt-big')) { document.getElementById('scoreBox').innerHTML = WrsTestUI.scoreHtml(out.result, out.endReason); addSurvey(); }
-    if (out.status === 'released') { clearInterval(resultsPoll); showReleased(out); }
+    if (out.status === 'released') { clearInterval(resultsPoll); resultsPoll = null; showReleased(out); }
   }
   function showReleased(out) {
     const until = new Date(out.report.availableUntil).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
