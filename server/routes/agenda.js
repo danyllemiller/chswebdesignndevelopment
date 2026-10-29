@@ -33,6 +33,17 @@ const AGENDA_DAYS_DDL = `CREATE TABLE IF NOT EXISTS agenda_days (
     PRIMARY KEY (course, track, event_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
+// Every slide a Jotability send replaces, as it was (POST /agenda/sync/lessons).
+const AGENDA_HISTORY_DDL = `CREATE TABLE IF NOT EXISTS agenda_content_history (
+    id          INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    course      VARCHAR(20) NOT NULL,
+    block_num   INT         NOT NULL,
+    content     LONGTEXT    NOT NULL,
+    source      VARCHAR(40) NOT NULL,
+    replaced_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_block (course, block_num)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
 // A combined day: when Jotability's pacing gives a chapter fewer class days
 // than it has lessons, two lessons share one day instead of one being
 // skipped (2026-10-23). block_num stays the day's first lesson; the others
@@ -45,6 +56,19 @@ async function ensureAlsoColumn(connection) {
     alsoColumnReady = true;
 }
 const parseAlso = v => String(v || '').split(',').map(n => parseInt(n, 10)).filter(n => n > 0);
+
+// Slides made from Jotability lesson plans (2026-10-29): seq is the lesson's
+// place in Jotability's teaching order, retired = its lesson was deleted
+// (kept for the past days that showed it), jot_lesson = the Jotability lesson
+// the slide comes from, so the slide editor sends the teacher there.
+let jotColumnsReady = false;
+async function ensureJotColumns(connection) {
+    if (jotColumnsReady) return;
+    await connection.execute(AGENDA_CONTENT_DDL);
+    await connection.execute('ALTER TABLE agenda_content ADD COLUMN IF NOT EXISTS seq INT NULL, ADD COLUMN IF NOT EXISTS retired TINYINT(1) NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS jot_lesson INT NULL');
+    await connection.execute(AGENDA_HISTORY_DDL);
+    jotColumnsReady = true;
+}
 
 // mysql2 hands DATE columns back as local-midnight Date objects; toISOString()
 // would shift them a day early west of UTC, so format the local parts.
@@ -91,9 +115,15 @@ router.get('/agenda/get', requireStaff, async (req, res) => {
                 if (extra.length) (also[r.track] = also[r.track] || {})[ymd(r.event_date)] = extra;
             });
 
-            return { content, schedule, days, also };
+            // Slides that come from a Jotability lesson: the editor sends the teacher there
+            await ensureJotColumns(connection);
+            const [jotRows] = await connection.execute('SELECT block_num, jot_lesson FROM agenda_content WHERE course = ? AND jot_lesson IS NOT NULL', [course]);
+            const jot = {};
+            jotRows.forEach(r => { jot[r.block_num] = r.jot_lesson; });
+
+            return { content, schedule, days, also, jot };
         });
-        res.json({ course, content: result.content, schedule: result.schedule, days: result.days, also: result.also });
+        res.json({ course, content: result.content, schedule: result.schedule, days: result.days, also: result.also, jot: result.jot });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch agenda' }); }
 });
 
@@ -195,14 +225,20 @@ router.post('/admin/save-agenda-content', async (req, res) => {
         return res.status(400).json({ error: 'course, block_num, and content are required' });
     }
     try {
-        await withConnection(async (connection) => {
-            await connection.execute(AGENDA_CONTENT_DDL);
+        const saved = await withConnection(async (connection) => {
+            await ensureJotColumns(connection);
+            // Jotability is the master copy of these (teacher, 2026-10-29): an edit
+            // here would be replaced by the lesson the next time it's sent.
+            const [[row]] = await connection.execute('SELECT jot_lesson FROM agenda_content WHERE course = ? AND block_num = ?', [course, blockNum]);
+            if (row && row.jot_lesson != null) return false;
             await connection.execute(
                 `INSERT INTO agenda_content (course, block_num, content) VALUES (?, ?, ?)
                  ON DUPLICATE KEY UPDATE content = VALUES(content)`,
                 [course, blockNum, JSON.stringify(content)]
             );
+            return true;
         });
+        if (!saved) return res.status(409).json({ error: 'This slide comes from your Jotability lesson plan. Change the lesson in Jotability and this slide updates by itself.' });
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save agenda content' }); }
 });
@@ -257,13 +293,15 @@ router.use('/agenda/sync', syncCors);
 // pacing units to a chapter's agenda blocks. A group is every block sharing
 // the same chapterLabel prefix (the part before " · Day N of M"), in block
 // order -- even when a re-teach day interrupts the chapter partway through.
+// Slides sent from Jotability's lesson plans go in Jotability's order (seq)
+// instead, and a retired one (its lesson was deleted) is left out.
 router.get('/agenda/sync/outline', requireSyncKey, async (req, res) => {
     const course = String(req.query.course || '').trim();
     if (!SYNC_COURSES.has(course)) return res.status(400).json({ error: 'Unknown course' });
     try {
         const rows = await withConnection(async (connection) => {
-            await connection.execute(AGENDA_CONTENT_DDL);
-            const [r] = await connection.execute('SELECT block_num, content FROM agenda_content WHERE course = ? ORDER BY block_num', [course]);
+            await ensureJotColumns(connection);
+            const [r] = await connection.execute('SELECT block_num, content FROM agenda_content WHERE course = ? AND retired = 0 ORDER BY seq IS NULL, seq, block_num', [course]);
             return r;
         });
         const groups = [], byName = new Map();
@@ -377,6 +415,82 @@ router.post('/agenda/sync/schedule', requireSyncKey, async (req, res) => {
         } catch (e) { console.error('[agenda sync] due-date sync failed:', e); }
         res.json({ success: true, course, track, days: clean.length, due_dates_moved: dueDatesMoved });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save the schedule' }); }
+});
+
+// Jotability's lesson plans -> the slides. Jotability's server sends a
+// course's whole lesson list whenever a lesson changes (the teacher's edits
+// and Claude's alike), in teaching order, and each slide is rebuilt from its
+// lesson; server/lib/jotabilitySlides.js has the rules. Body:
+//   { course, lessons: [{ id, block, unitId, unit, title, label, short, objectives,
+//     standards, doNow, activities, exitTicket, due }], dryRun?, allowRetire? }
+// Answers the block numbers given to new lessons (assigned), which Jotability
+// saves as their ref, and what changed.
+const { planLessonSync } = require('../lib/jotabilitySlides');
+const syncText = (v, n) => String(v ?? '').slice(0, n);
+const syncList = v => (Array.isArray(v) ? v : []).slice(0, 80).map(x => syncText(x, 2000));
+function incomingLesson(x) {
+    const id = parseInt(x?.id, 10), block = parseInt(x?.block, 10);
+    if (!(id > 0)) return null;
+    return {
+        id, block: block > 0 ? block : null, unitId: syncText(x.unitId, 40), unit: syncText(x.unit, 200),
+        title: syncText(x.title, 300), label: syncText(x.label, 200), short: !!x.short,
+        objectives: syncList(x.objectives), standards: syncText(x.standards, 4000), doNow: syncText(x.doNow, 4000),
+        activities: syncList(x.activities), exitTicket: syncText(x.exitTicket, 4000), due: syncText(x.due, 400)
+    };
+}
+router.post('/agenda/sync/lessons', requireSyncKey, async (req, res) => {
+    const course = String(req.body?.course || '').trim();
+    const list = Array.isArray(req.body?.lessons) ? req.body.lessons : null;
+    if (!SYNC_COURSES.has(course) || !list) return res.status(400).json({ error: 'course and lessons are required' });
+    const lessons = list.slice(0, 1001).map(incomingLesson);
+    if (!lessons.length || lessons.length > 1000 || lessons.some(l => !l) || new Set(lessons.map(l => l.id)).size !== lessons.length) {
+        return res.status(400).json({ error: 'Send 1 to 1000 lessons, each with its own id.' });
+    }
+    const dryRun = !!req.body.dryRun;
+    try {
+        const out = await withConnection(async (connection) => {
+            await ensureJotColumns(connection);
+            await connection.beginTransaction();
+            try {
+                const [rows] = await connection.execute('SELECT block_num, content, seq, retired, jot_lesson FROM agenda_content WHERE course = ? FOR UPDATE', [course]);
+                const existing = rows.map(r => {
+                    let c = null; try { c = JSON.parse(r.content); } catch (e) { /* rebuilt from the lesson */ }
+                    return { block: r.block_num, raw: r.content, content: c, seq: r.seq, retired: !!r.retired, jot: r.jot_lesson };
+                });
+                const plan = planLessonSync(existing, lessons);
+                // Taking a big share of a course off the website at once is far more
+                // likely a mix-up (the wrong notebook on this class) than real deletions.
+                const active = existing.filter(r => !r.retired).length;
+                if (plan.retire.length > Math.max(5, Math.ceil(active / 4)) && !req.body.allowRetire) {
+                    await connection.rollback();
+                    return { status: 409, body: { error: `This would take ${plan.retire.length} of the ${active} ${course} slides off the class website. Check that the right notebook is attached to this class, then send again and confirm.`, retire: plan.retire } };
+                }
+                if (dryRun) await connection.rollback();
+                else {
+                    for (const w of plan.writes) {
+                        if (w.changed) {
+                            if (w.raw != null) await connection.execute('INSERT INTO agenda_content_history (course, block_num, content, source) VALUES (?, ?, ?, ?)', [course, w.block, w.raw, 'jotability']);
+                            await connection.execute(
+                                `INSERT INTO agenda_content (course, block_num, content, seq, retired, jot_lesson) VALUES (?, ?, ?, ?, 0, ?)
+                                 ON DUPLICATE KEY UPDATE content = VALUES(content), seq = VALUES(seq), retired = 0, jot_lesson = VALUES(jot_lesson)`,
+                                [course, w.block, JSON.stringify(w.content), w.seq, w.lessonId]);
+                        } else if (w.meta) {
+                            await connection.execute('UPDATE agenda_content SET seq = ?, retired = 0, jot_lesson = ? WHERE course = ? AND block_num = ?', [w.seq, w.lessonId, course, w.block]);
+                        }
+                    }
+                    for (const b of plan.retire) await connection.execute('UPDATE agenda_content SET retired = 1 WHERE course = ? AND block_num = ?', [course, b]);
+                    await connection.commit();
+                }
+                return {
+                    status: 200, body: {
+                        success: true, dryRun, course, lessons: lessons.length, assigned: plan.assigned, retired: plan.retire,
+                        changed: plan.writes.filter(w => w.changed).map(w => ({ block: w.block, lesson: w.lessonId, new: w.isNew, fields: w.fields }))
+                    }
+                };
+            } catch (e) { await connection.rollback(); throw e; }
+        });
+        res.status(out.status).json(out.body);
+    } catch (err) { console.error('[agenda sync] lessons:', err); res.status(500).json({ error: 'Failed to save the lesson plans' }); }
 });
 
 router.studentAgendaOptions = studentAgendaOptions; // reused by guidedNotebook.js (My Notebook tabs)

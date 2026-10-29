@@ -866,6 +866,7 @@ if (!courseCfg) {
   let schedule = {};  // track -> block_num -> date string
   let days = {};      // track -> date string -> block_num (from Jotability; a block can repeat)
   let alsoDays = {};  // track -> date string -> [more block_nums taught the same day] (a combined day)
+  let jotBlocks = {}; // block_num -> Jotability lesson id: slides made from Jotability's lesson plans
   let shownDate = null; // the date being shown when it came from `days`
   let currentBlock = 1;
   let editing = false;
@@ -1325,7 +1326,15 @@ if (!courseCfg) {
     if (on) editSnapshot = JSON.parse(JSON.stringify(content[currentBlock] || {}));
     render();
   }
-  document.getElementById('editToggle').addEventListener('click', () => setEditing(true));
+  // Web Design slides come from the Jotability lesson plans (teacher, 2026-10-29):
+  // they're changed there, and an edit here would be replaced by the lesson.
+  document.getElementById('editToggle').addEventListener('click', () => {
+    if (jotBlocks[currentBlock]) {
+      if (confirm('This slide comes from your Jotability lesson plan. Change the lesson in Jotability (Lessons) and this slide updates by itself.\n\nOpen Jotability now?')) window.open('https://jotability.com/teacher/', '_blank', 'noopener');
+      return;
+    }
+    setEditing(true);
+  });
   document.getElementById('cancelBtn').addEventListener('click', () => {
     if (editSnapshot) content[currentBlock] = editSnapshot;
     setEditing(false);
@@ -1475,13 +1484,15 @@ if (!courseCfg) {
       if (!data || !data.content) return;
       const changed = JSON.stringify(data.days || {}) !== JSON.stringify(days)
         || JSON.stringify(data.schedule || {}) !== JSON.stringify(schedule)
-        || JSON.stringify(data.content || {}) !== JSON.stringify(content);
+        || JSON.stringify(data.content || {}) !== JSON.stringify(content)
+        || JSON.stringify(data.jot || {}) !== JSON.stringify(jotBlocks);
       if (!changed || editing) return;
       const t = todayStop(), wasOnToday = t ? t.date === shownDate && t.block === currentBlock : currentBlock === findBlockForToday();
       content = data.content || {};
       schedule = data.schedule || {};
       days = data.days || {};
       alsoDays = data.also || {};
+      jotBlocks = data.jot || {};
       populateJumpSelect();
       if (wasOnToday) currentBlock = findBlockForToday(); else showBlock(currentBlock);
       render();
@@ -1991,6 +2002,7 @@ if (!courseCfg) {
       schedule = data.schedule || {};
       days = data.days || {};
       alsoDays = data.also || {};
+      jotBlocks = data.jot || {};
 
       // CS has two tracks (A meets on A-days, B on B-days); WD doesn't, so
       // this ambiguity is exactly why the no-pass banner only ever worked
