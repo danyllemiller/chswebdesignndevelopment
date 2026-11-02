@@ -137,8 +137,10 @@ const LOOK_BACK = { name: 'Look back', cue: 'From memory first, then check.', fu
 const dotGrid = (h, id) => `<svg class="dots" width="100%" height="${h}" aria-hidden="true"><defs><pattern id="d${id}" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="9" cy="9" r="0.9" fill="#a9a9a9"/></pattern></defs><rect width="100%" height="100%" fill="url(#d${id})"/></svg>`;
 const lines = n => `<div class="lines">${'<div class="ln"></div>'.repeat(n)}</div>`;
 const circles = (n = 4) => `<span class="circles">${Array.from({ length: n }, (_, i) => `<span class="c">${i + 1}</span>`).join('')}</span>`;
-const blankify = item => esc(item).replace(/\[\[(.+?)\]\]/g, (m, w) => `<span class="blank" style="min-width:${Math.min(2.6, Math.max(0.9, w.length * 0.09)).toFixed(2)}in"></span>`);
-const wordBank = items => [...new Set(items.flatMap(i => [...i.matchAll(/\[\[(.+?)\]\]/g)].map(m => m[1])))].sort((a, b) => a.localeCompare(b));
+// "[[a|b]]" accepts either answer online; the first is the one in the word bank (server/routes/guidedNotebook.js)
+const answerOf = w => w.split('|')[0].trim();
+const blankify = item => esc(item).replace(/\[\[(.+?)\]\]/g, (m, w) => `<span class="blank" style="min-width:${Math.min(2.6, Math.max(0.9, answerOf(w).length * 0.09)).toFixed(2)}in"></span>`);
+const wordBank = items => [...new Set(items.flatMap(i => [...i.matchAll(/\[\[(.+?)\]\]/g)].map(m => answerOf(m[1]))))].sort((a, b) => a.localeCompare(b));
 
 // A CS day's own notebook page. Writing space splits what's left of the page in proportion
 // to the rows the notebook gives it.
