@@ -59,11 +59,11 @@ const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/
 const pilotOn = () => today() <= PILOT_UNTIL;
 const ipOf = req => String(req.headers['cf-connecting-ip'] || req.ip || '');
 
-// A whole school shares one internet address, so the limits per address are roomy: 120 sends (a few classes'
-// after-test surveys) and 10 screenshots every 15 minutes. The counts stay in memory for 15 minutes at most,
-// as the privacy policy (wpr-practice/privacy.html) promises.
+// A whole school shares one internet address, so the limits per address are roomy: 500 after-test surveys
+// (15 classes of 25 can finish together), 120 other sends and 10 screenshots every 15 minutes. The counts stay
+// in memory for 15 minutes at most, as the privacy policy (wpr-practice/privacy.html) promises.
 const WINDOW = 15 * 60 * 1000;
-const sends = new Map(), shots = new Map();
+const sends = new Map(), surveys = new Map(), shots = new Map();
 function over(counts, req, max) {
     const ip = ipOf(req), now = Date.now(), list = (counts.get(ip) || []).filter(t => now - t < WINDOW);
     const full = list.length >= max;
@@ -125,8 +125,8 @@ router.post('/wpr/feedback', (req, res) => {
         if (err) return res.status(400).json({ error: err.code === 'LIMIT_FILE_SIZE' ? 'That picture is too big. Use one under 5 MB.' : 'Could not read that form.' });
         const b = req.body || {};
         if (b.website) return res.json({ success: true });   // a hidden field only bots fill in
-        if (over(sends, req, 120)) return res.status(429).json({ error: 'Thanks! That\'s a lot of feedback all at once. Try again in a few minutes.' });
         const kind = pick(b.kind, KINDS) || 'report';
+        if (kind === 'survey' ? over(surveys, req, 500) : over(sends, req, 120)) return res.status(429).json({ error: 'Thanks! That\'s a lot of feedback all at once. Try again in a few minutes.' });
         const role = kind === 'survey' ? 'class-student' : pick(b.role, ROLES);
         const type = pick(b.type, TYPES);
         const message = clean(b.message, 4000);

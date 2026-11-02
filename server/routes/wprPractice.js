@@ -64,18 +64,19 @@ function writeActiveMarker() {
 setInterval(() => {
     const now = Date.now();
     sessions.forEach((s, code) => { if (now > s.expiresAt) sessions.delete(code); });
+    attempts.forEach((list, key) => { if (!list.some(t => now - t < PASS_MISSES.ms)) attempts.delete(key); });
     writeActiveMarker();
 }, 60 * 1000).unref();
 
-// Small in-memory throttle so the passcode and class codes can't be guessed.
+// Small in-memory throttles so the passcode and class codes can't be guessed. A whole school shares one
+// internet address (15 classes of 25 can start at once), so only wrong tries count: a class code that
+// doesn't exist, a wrong passcode. Students joining or rejoining, and teachers starting sessions, never do.
 const attempts = new Map();
-function throttled(key, max, windowMs) {
-    const now = Date.now();
-    const list = (attempts.get(key) || []).filter(t => now - t < windowMs);
-    list.push(now);
-    attempts.set(key, list);
-    return list.length > max;
-}
+const JOIN_MISSES = { max: 100, ms: 10 * 60 * 1000 }, PASS_MISSES = { max: 20, ms: 15 * 60 * 1000 };
+const MAX_STUDENTS = 200;   // per session, so a known class code can't be flooded with made-up students
+const recent = (key, limit) => (attempts.get(key) || []).filter(t => Date.now() - t < limit.ms);
+const tooMany = (key, limit) => recent(key, limit).length >= limit.max;
+const miss = (key, limit) => attempts.set(key, [...recent(key, limit), Date.now()]);
 const ipOf = req => String(req.headers['cf-connecting-ip'] || req.ip || '');
 const token = () => crypto.randomBytes(18).toString('hex');
 const safeEq = (a, b) => {
@@ -167,9 +168,13 @@ function buildSessionTest(session) {
 router.post('/wpr/session', async (req, res) => {
     const expected = process.env.WPR_TEACHER_PASSCODE || '';
     if (expected.length < 6) return res.status(503).json({ error: 'The WPR Practice Test is not set up yet.' });
-    if (throttled('pass:' + ipOf(req), 10, 15 * 60 * 1000)) return res.status(429).json({ error: 'Too many tries. Wait 15 minutes.' });
+    const passKey = 'pass:' + ipOf(req);
+    if (tooMany(passKey, PASS_MISSES)) return res.status(429).json({ error: 'Too many wrong passcodes. Wait 15 minutes.' });
     const body = req.body || {};
-    if (!safeEq(String(body.passcode || '').trim(), expected)) return res.status(401).json({ error: 'That teacher passcode isn\'t right.' });
+    if (!safeEq(String(body.passcode || '').trim(), expected)) {
+        miss(passKey, PASS_MISSES);
+        return res.status(401).json({ error: 'That teacher passcode isn\'t right.' });
+    }
     const length = LENGTHS[body.length] ? body.length : 'full';
     // Where questions come from: the standard WRS pool, the standard pool plus
     // teacher question banks (server/routes/wprBanks.js), or only the banks.
@@ -298,10 +303,14 @@ router.delete('/wpr/session/:code', (req, res) => {
 
 // POST /wpr/join -- { code, firstName, lastName, studentId }
 router.post('/wpr/join', (req, res) => {
-    if (throttled('join:' + ipOf(req), 60, 10 * 60 * 1000)) return res.status(429).json({ error: 'Too many tries. Wait a few minutes.' });
+    const joinKey = 'join:' + ipOf(req);
+    if (tooMany(joinKey, JOIN_MISSES)) return res.status(429).json({ error: 'Too many wrong class codes. Wait a few minutes.' });
     const body = req.body || {};
     const session = sessions.get(String(body.code || '').trim().toUpperCase());
-    if (!session) return res.status(404).json({ error: 'That class code has ended or does not exist. Check with your teacher.' });
+    if (!session) {
+        miss(joinKey, JOIN_MISSES);
+        return res.status(404).json({ error: 'That class code has ended or does not exist. Check with your teacher.' });
+    }
     session.lastActive = Date.now();
     const firstName = clean(body.firstName, 40), lastName = clean(body.lastName, 40), studentId = clean(body.studentId, 20);
     if (!firstName || !lastName || !studentId) return res.status(400).json({ error: 'Enter your first name, last name, and student ID.' });
@@ -316,6 +325,7 @@ router.post('/wpr/join', (req, res) => {
         return res.json({ token: st.token, code: session.code, label: session.label, count: session.count, seconds: secondsFor(session, st), started: true, submitted: true, endReason: st.endReason });
     }
     if (session.endedAt) return res.status(409).json({ error: 'This test has ended. Check with your teacher.' });
+    if (!st && session.students.size >= MAX_STUDENTS) return res.status(409).json({ error: `This class code is full (${MAX_STUDENTS} students). Check with your teacher.` });
     if (!st) {
         st = { token: token(), firstName, lastName, studentId, joinedAt: Date.now(), startedAt: null, questions: null, answers: {}, violations: 0, submittedAt: null };
         session.students.set(studentId, st);
