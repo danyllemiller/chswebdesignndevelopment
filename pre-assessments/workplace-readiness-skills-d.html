@@ -42,63 +42,14 @@
     </div>
   </section>
 
-  <script src="/js/wrsLogic.js?v=6"></script>
+  <script src="/js/wrsLogic.js?v=7"></script>
   <script>
   (function () {
 
-    // ── PART 1: TRUE / FALSE (25 items) ──────────────────────────────────────
-    var tfSection = [
-      { q: "In brainstorming, the most creative process starts by accepting the very first idea someone suggests and building only on that.",
-        a: "F", hint: "Brainstorming's divergent phase generates many ideas without judgment before evaluating any—accepting the first idea shuts down creative exploration." },
-      { q: "Confirmation bias means deliberately seeking only information that confirms your existing beliefs or preferred conclusion.",
-        a: "T", hint: "Confirmation bias is a critical thinking threat—skilled professionals actively seek disconfirming evidence to test whether their beliefs hold up." },
-      { q: "Asking for help or guidance when assigned an unfamiliar task demonstrates poor initiative and professional weakness.",
-        a: "F", hint: "Asking for guidance on an unfamiliar task shows good judgment and saves the organization from costly mistakes—this is professional self-awareness, not weakness." },
-      { q: "Padding your hours on a timesheet is only considered fraud if the extra amount claimed is financially significant.",
-        a: "F", hint: "Any false claim on a timesheet—regardless of amount—is fraud and a serious integrity violation that can result in immediate termination." },
-      { q: "Consistently meeting deadlines without being reminded is considered a hallmark of strong professional work ethic.",
-        a: "T", hint: "Reliability—consistently delivering on commitments without supervision—is one of the most valued professional traits employers look for." },
-      { q: "In a successful workplace compromise, each party gives up something and gains something to reach a workable agreement.",
-        a: "T", hint: "Compromise requires mutual concession—both parties must receive something of value for an agreement to be sustainable and respected by both sides." },
-      { q: "Overusing filler words like 'um' and 'like' in professional spoken communication can undermine your credibility.",
-        a: "T", hint: "Excessive filler words signal uncertainty and under-preparation. Pausing silently while gathering your thoughts sounds far more confident." },
-      { q: "Using someone's preferred name and pronouns is an optional professional courtesy rather than a basic workplace standard.",
-        a: "F", hint: "Using preferred names and pronouns is a fundamental professional respect—it signals that each person's identity is valued in the workplace." },
-      { q: "A customer who has already posted a negative review cannot realistically be converted into a satisfied customer.",
-        a: "F", hint: "Studies show that customers whose complaints are resolved effectively often become more loyal than customers who never experienced a problem at all." },
-      { q: "In collaborative projects, credit for success should be shared across the whole team rather than attributed solely to the team leader.",
-        a: "T", hint: "Giving credit to the full team builds morale and accurately reflects how collaborative work actually happens—leaders who hoard credit lose team trust." },
-      { q: "Understanding how your department's budget connects to the organization's overall financial health is an example of big-picture thinking.",
-        a: "T", hint: "Professionals who understand the financial context of their department make better spending decisions and communicate more effectively with leadership." },
-      { q: "A SMART goal is one that is Specific, Measurable, Achievable, Relevant, and Time-bound.",
-        a: "T", hint: "SMART goals are the gold standard of professional goal-setting—vague goals like 'do better' are impossible to measure, track, or celebrate." },
-      { q: "Asking multiple questions during a training session is a sign that you were not paying close enough attention.",
-        a: "F", hint: "Questions during training signal active engagement and deep processing of new material—instructors value participants who probe for understanding." },
-      { q: "Delegation means assigning a task to someone else and taking no further personal responsibility for its outcome.",
-        a: "F", hint: "Effective delegation retains accountability—you assign the work, but you remain responsible for ensuring it is done correctly and on time." },
-      { q: "Clicking 'Accept All Cookies' on every website you visit is the most information-secure browsing practice.",
-        a: "F", hint: "Accepting all cookies enables extensive data tracking across many sites. Reviewing cookie settings and accepting only necessary ones protects your privacy." },
-      { q: "Two-factor authentication significantly reduces the risk of unauthorized account access even if your password is compromised.",
-        a: "T", hint: "2FA requires a second verification step that an attacker typically cannot complete—even with your stolen password, they cannot log in without that second factor." },
-      { q: "Keyboard shortcuts for common tasks can significantly increase your productivity in everyday professional software use.",
-        a: "T", hint: "Power users who master keyboard shortcuts work faster with less mouse switching—over a career, these small efficiency gains add up to significant time savings." },
-      { q: "When two tools produce the same professional result, the simpler tool is generally the better choice for everyday workplace use.",
-        a: "T", hint: "Simplicity reduces training time, error rates, and dependency on specialized knowledge. The best tool is the one that does the job reliably with the least complexity." },
-      { q: "Federal law requires overtime pay at 1.5 times the regular hourly rate for hours worked beyond 40 in a single workweek.",
-        a: "T", hint: "The FLSA (Fair Labor Standards Act) mandates time-and-a-half for overtime. Knowing your rights—including how overtime is calculated—is financial literacy." },
-      { q: "A professional who consistently shows up prepared and follows through on commitments is building a reputation for reliability.",
-        a: "T", hint: "Reliability is your professional brand. Every kept commitment builds trust; every missed one erodes it—consistently being the person others count on is invaluable." },
-      { q: "Using passive voice in professional writing generally makes your message clearer and more direct.",
-        a: "F", hint: "Active voice assigns action to a subject ('The manager approved the request') and is clearer and more direct than passive voice ('The request was approved')." },
-      { q: "The word 'ergonomics' refers to the science of designing workspaces and tools to fit the human body and reduce physical strain.",
-        a: "T", hint: "Ergonomics reduces injury risk and improves productivity—a well-designed workspace prevents the repetitive strain injuries that are among the most common workplace health issues." },
-      { q: "Setting personal professional learning goals for the quarter, without being prompted by management, is an example of taking initiative.",
-        a: "T", hint: "Self-directed goal-setting demonstrates that your professional development is internally motivated—a quality employers recognize and reward." },
-      { q: "If you work 44 hours in a week at $16.00 per hour, the overtime premium (the extra pay earned for the 4 overtime hours beyond 40) is $32.",
-        a: "T", hint: "Overtime premium = 4 hours × ($16 × 0.5) = 4 × $8 = $32. The full overtime pay is 4 × $24 = $96; the extra 'premium' portion is $32." },
-      { q: "The divergent phase of creative problem-solving is when you narrow down a list of ideas to select the single best solution.",
-        a: "F", hint: "Divergent thinking GENERATES many ideas without judgment. Convergent thinking narrows down and selects. You must diverge before you converge." }
-    ];
+    // ── PART 1: TRUE / FALSE: none ───────────────────────────────────────────
+    // The Nevada WPR state test has no true/false questions (2026-11-02), so the 25
+    // statements that were here are multiple choice now, at the end of Part 3.
+    var tfSection = [];
 
     // ── PART 2: MATCHING (5 sets × 5 items = 25 items) ───────────────────────
     var matchSection = [
@@ -219,7 +170,7 @@
       }
     ];
 
-    // ── PART 3: MULTIPLE CHOICE (44 items) ───────────────────────────────────
+    // ── PART 3: MULTIPLE CHOICE (67 items) ───────────────────────────────────
     var mcSection = [
       {
         q: "Design thinking is a problem-solving approach that differs from traditional approaches because it:",
@@ -476,6 +427,157 @@
         options: ["Being assigned more tasks than less reliable peers, with no additional compensation","Increased trust from supervisors, clients, and teammates—leading to greater autonomy, better opportunities, and stronger professional relationships","The ability to avoid all difficult or high-stakes assignments","Being excused from team meetings since their work can be trusted without monitoring"],
         answer: "Increased trust from supervisors, clients, and teammates—leading to greater autonomy, better opportunities, and stronger professional relationships",
         hint: "Trust is the currency of professional opportunity. Reliable professionals are given more important work, greater autonomy, and first consideration for advancement—because people bet on what they can count on."
+      },
+      // ── Rewritten from Part 1's true/false statements (2026-11-02) ──
+      {
+        q: "How should a brainstorming session begin?",
+        options: ["By generating many ideas without judging them","By accepting the first idea and building only on it","By voting on ideas before anyone shares them","By having the leader choose the answer in advance"],
+        answer: "By generating many ideas without judging them",
+        hint: "Brainstorming's divergent phase generates many ideas without judgment before evaluating any—accepting the first idea shuts down creative exploration."
+      },
+      {
+        q: "What is confirmation bias?",
+        options: ["Seeking only information that supports what you already believe","Confirming facts with more than one reliable source","Asking a supervisor to approve your decision","Double-checking your work before you submit it"],
+        answer: "Seeking only information that supports what you already believe",
+        hint: "Confirmation bias is a critical thinking threat—skilled professionals actively seek disconfirming evidence to test whether their beliefs hold up."
+      },
+      {
+        q: "How do employers usually view a new employee who asks questions about an unfamiliar task?",
+        options: ["As showing good judgment and self-awareness","As lacking initiative","As not paying attention in training","As someone who will not last long"],
+        answer: "As showing good judgment and self-awareness",
+        hint: "Asking for guidance on an unfamiliar task shows good judgment and saves the organization from costly mistakes—this is professional self-awareness, not weakness."
+      },
+      {
+        q: "An employee adds 15 minutes they did not work to their timesheet. How should this be viewed?",
+        options: ["As fraud, no matter how small the amount","As acceptable, because the amount is small","As fraud only if it happens every week","As fine if they once worked through lunch"],
+        answer: "As fraud, no matter how small the amount",
+        hint: "Any false claim on a timesheet—regardless of amount—is fraud and a serious integrity violation that can result in immediate termination."
+      },
+      {
+        q: "An employee consistently meets every deadline without needing reminders. Which quality does this show most?",
+        options: ["A strong, reliable work ethic","Creativity","Team leadership","Conflict resolution"],
+        answer: "A strong, reliable work ethic",
+        hint: "Reliability—consistently delivering on commitments without supervision—is one of the most valued professional traits employers look for."
+      },
+      {
+        q: "What happens in a successful workplace compromise?",
+        options: ["Each side gives up something and gains something","One side gets everything it wanted","Both sides drop the issue entirely","A manager decides without hearing either side"],
+        answer: "Each side gives up something and gains something",
+        hint: "Compromise requires mutual concession—both parties must receive something of value for an agreement to be sustainable and respected by both sides."
+      },
+      {
+        q: "How can overusing filler words like 'um' and 'like' affect a professional presentation?",
+        options: ["They can make the speaker seem less prepared and credible","They make the speaker sound more relaxed and trustworthy","They have no effect on how the audience sees the speaker","They help the audience remember the main points"],
+        answer: "They can make the speaker seem less prepared and credible",
+        hint: "Excessive filler words signal uncertainty and under-preparation. Pausing silently while gathering your thoughts sounds far more confident."
+      },
+      {
+        q: "Using a coworker's preferred name and pronouns is:",
+        options: ["A basic standard of professional respect","An optional courtesy if you remember","Only required of managers","Only needed in written communication"],
+        answer: "A basic standard of professional respect",
+        hint: "Using preferred names and pronouns is a fundamental professional respect—it signals that each person's identity is valued in the workplace."
+      },
+      {
+        q: "A customer has posted a negative review of your business. What is the most professional response?",
+        options: ["Reply politely and try to resolve their problem","Ignore it, since that customer is already lost","Reply explaining why the customer is wrong","Ask friends to post positive reviews to bury it"],
+        answer: "Reply politely and try to resolve their problem",
+        hint: "Studies show that customers whose complaints are resolved effectively often become more loyal than customers who never experienced a problem at all."
+      },
+      {
+        q: "A team project is a big success. How should the credit be given?",
+        options: ["Shared with everyone on the team","Given only to the team leader","Given only to the person who presented it","Kept private so no one feels left out"],
+        answer: "Shared with everyone on the team",
+        hint: "Giving credit to the full team builds morale and accurately reflects how collaborative work actually happens—leaders who hoard credit lose team trust."
+      },
+      {
+        q: "Understanding how your department's budget affects the whole organization's finances is an example of:",
+        options: ["Big-picture thinking","Micromanaging","Customer service","Conflict resolution"],
+        answer: "Big-picture thinking",
+        hint: "Professionals who understand the financial context of their department make better spending decisions and communicate more effectively with leadership."
+      },
+      {
+        q: "In a SMART goal, what do the letters S-M-A-R-T stand for?",
+        options: ["Specific, Measurable, Achievable, Relevant, Time-bound","Simple, Meaningful, Ambitious, Realistic, Tested","Strategic, Motivating, Accurate, Reasonable, Timely","Specific, Manageable, Assigned, Reviewed, Tracked"],
+        answer: "Specific, Measurable, Achievable, Relevant, Time-bound",
+        hint: "SMART goals are the gold standard of professional goal-setting—vague goals like 'do better' are impossible to measure, track, or celebrate."
+      },
+      {
+        q: "During a training session, an employee asks several questions about the new material. What does this usually show?",
+        options: ["Active engagement and a desire to understand","That they were not paying attention","That the trainer did a poor job","That they want the training to end early"],
+        answer: "Active engagement and a desire to understand",
+        hint: "Questions during training signal active engagement and deep processing of new material—instructors value participants who probe for understanding."
+      },
+      {
+        q: "When you delegate a task to someone else, what is your responsibility for it?",
+        options: ["You stay accountable for how it turns out","You have no further responsibility for it","You must redo the task yourself to be safe","You only check it if your supervisor asks"],
+        answer: "You stay accountable for how it turns out",
+        hint: "Effective delegation retains accountability—you assign the work, but you remain responsible for ensuring it is done correctly and on time."
+      },
+      {
+        q: "When a website asks about cookies, which choice best protects your privacy?",
+        options: ["Review the settings and accept only the necessary cookies","Click 'Accept All Cookies' every time","Turn off your antivirus so the site loads faster","Enter your email address to make the message go away"],
+        answer: "Review the settings and accept only the necessary cookies",
+        hint: "Accepting all cookies enables extensive data tracking across many sites. Reviewing cookie settings and accepting only necessary ones protects your privacy."
+      },
+      {
+        q: "Why does two-factor authentication (2FA) make an account more secure?",
+        options: ["An attacker needs a second step, not just your password","It makes your password longer automatically","It hides your account from search engines","It lets you share your password safely"],
+        answer: "An attacker needs a second step, not just your password",
+        hint: "2FA requires a second verification step that an attacker typically cannot complete—even with your stolen password, they cannot log in without that second factor."
+      },
+      {
+        q: "What is the main benefit of learning keyboard shortcuts for software you use every day?",
+        options: ["You can complete common tasks faster","Your files take up less storage space","Your computer becomes more secure","You no longer need to save your work"],
+        answer: "You can complete common tasks faster",
+        hint: "Power users who master keyboard shortcuts work faster with less mouse switching—over a career, these small efficiency gains add up to significant time savings."
+      },
+      {
+        q: "Two software tools produce the same result for an everyday task. Which is generally the better choice?",
+        options: ["The simpler, more reliable tool","The more complex tool","The more expensive tool","The newest tool, even if no one is trained on it"],
+        answer: "The simpler, more reliable tool",
+        hint: "Simplicity reduces training time, error rates, and dependency on specialized knowledge. The best tool is the one that does the job reliably with the least complexity."
+      },
+      {
+        q: "Federal law requires overtime pay at what rate for hours worked beyond 40 in a workweek?",
+        options: ["1.5 times the regular rate","2 times the regular rate","The regular rate","1.25 times the regular rate"],
+        answer: "1.5 times the regular rate",
+        hint: "The FLSA (Fair Labor Standards Act) mandates time-and-a-half for overtime. Knowing your rights—including how overtime is calculated—is financial literacy."
+      },
+      {
+        q: "An employee always shows up prepared and follows through on commitments. What reputation are they building?",
+        options: ["A reputation for reliability","A reputation for perfectionism","A reputation for avoiding teamwork","A reputation for needing supervision"],
+        answer: "A reputation for reliability",
+        hint: "Reliability is your professional brand. Every kept commitment builds trust; every missed one erodes it—consistently being the person others count on is invaluable."
+      },
+      {
+        q: "Which sentence uses active voice, which is usually clearer in professional writing?",
+        options: ["The manager approved the request.","The request was approved by the manager.","The request has been approved.","Approval of the request was given."],
+        answer: "The manager approved the request.",
+        hint: "Active voice assigns action to a subject ('The manager approved the request') and is clearer and more direct than passive voice ('The request was approved')."
+      },
+      {
+        q: "What is ergonomics?",
+        options: ["The science of designing workspaces and tools to fit the human body","The study of finishing work in the least amount of time","A set of rules for workplace dress codes","The science of reducing a company's energy use"],
+        answer: "The science of designing workspaces and tools to fit the human body",
+        hint: "Ergonomics reduces injury risk and improves productivity—a well-designed workspace prevents the repetitive strain injuries that are among the most common workplace health issues."
+      },
+      {
+        q: "An employee sets their own professional learning goals for the next three months without being asked. What does this show?",
+        options: ["Initiative and commitment to growth","That they are unhappy with their job","That their supervisor is not doing enough","That they want to avoid their regular work"],
+        answer: "Initiative and commitment to growth",
+        hint: "Self-directed goal-setting demonstrates that your professional development is internally motivated—a quality employers recognize and reward."
+      },
+      {
+        q: "You earn $16.00 per hour and work 44 hours in a week, with time and a half after 40. How much MORE do you earn for the 4 overtime hours than you would at your regular rate?",
+        options: ["$32.00","$64.00","$96.00","$24.00"],
+        answer: "$32.00",
+        hint: "Overtime premium = 4 hours × ($16 × 0.5) = 4 × $8 = $32. The full overtime pay is 4 × $24 = $96; the extra 'premium' portion is $32."
+      },
+      {
+        q: "In creative problem-solving, what happens during the divergent phase?",
+        options: ["Generating as many ideas as possible without judging them","Narrowing the list to the single best solution","Testing the chosen solution with customers","Reporting the final results to management"],
+        answer: "Generating as many ideas as possible without judging them",
+        hint: "Divergent thinking GENERATES many ideas without judgment. Convergent thinking narrows down and selects. You must diverge before you converge."
       }
     ];
 

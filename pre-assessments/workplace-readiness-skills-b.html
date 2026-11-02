@@ -42,63 +42,14 @@
     </div>
   </section>
 
-  <script src="/js/wrsLogic.js?v=6"></script>
+  <script src="/js/wrsLogic.js?v=7"></script>
   <script>
   (function () {
 
-    // ── PART 1: TRUE / FALSE (25 items) ──────────────────────────────────────
-    var tfSection = [
-      { q: "An employee who tries a new approach to solve a workplace problem, and it doesn't work, has demonstrated poor professional judgment.",
-        a: "F", hint: "Trying new approaches—even when they fail—is part of creative problem-solving. What matters is learning from the attempt." },
-      { q: "Before accepting information as fact, a professional should consider the source's authority, publication date, and purpose.",
-        a: "T", hint: "Evaluating the credibility of information before acting on it is the core of information literacy and critical thinking." },
-      { q: "Taking on an extra responsibility without being asked, when you have the capacity, demonstrates initiative.",
-        a: "T", hint: "Proactively identifying and addressing unmet needs—without waiting for direction—is the definition of self-direction and initiative." },
-      { q: "It is acceptable to take small office supplies home for personal use because the items have minimal monetary value.",
-        a: "F", hint: "Taking any company property without authorization—regardless of size—is considered theft and a violation of workplace integrity." },
-      { q: "Doing only the minimum amount of work required to avoid being fired demonstrates a strong work ethic.",
-        a: "F", hint: "Strong work ethic means going beyond the minimum—showing dedication, consistency, and genuine effort in all tasks." },
-      { q: "In a workplace conflict, the first step should always be to document the incident and submit a formal complaint to HR.",
-        a: "F", hint: "Direct, private conversation is the recommended first step in resolving most workplace conflicts before escalating to formal processes." },
-      { q: "It is appropriate to multitask on other work during a professional phone call as long as you can still hear the other person.",
-        a: "F", hint: "Multitasking during a phone call prevents true active listening and signals disrespect to the other party." },
-      { q: "Workplace diversity refers only to differences in race and gender.",
-        a: "F", hint: "Diversity encompasses race, gender, age, culture, religion, disability, sexual orientation, and many other dimensions of human difference." },
-      { q: "Promising a customer a specific resolution that you are not authorized to deliver is a good customer service strategy.",
-        a: "F", hint: "Making promises you cannot keep damages trust. Communicate what you CAN do and escalate if a resolution requires authorization you don't have." },
-      { q: "A team's overall success depends in part on the performance of its weakest contributor, not just its star performers.",
-        a: "T", hint: "Teams are interdependent—a chain is only as strong as its weakest link. Supporting struggling teammates is a professional responsibility." },
-      { q: "An employee should understand the organization's mission statement in order to make better decisions about their own priorities.",
-        a: "T", hint: "Knowing why your organization exists helps you make decisions that align with its goals—a sign of big-picture thinking." },
-      { q: "A resume should be updated only when you are actively looking for a new job.",
-        a: "F", hint: "Keeping your resume current means adding achievements, skills, and certifications as they happen—not scrambling when you need it." },
-      { q: "If you already know how to do something well, there is no need to seek additional training in that area.",
-        a: "F", hint: "Industries evolve constantly. Even experts need to keep up with new tools, regulations, and best practices in their field." },
-      { q: "Checking your personal phone frequently throughout the workday is an efficient use of downtime between tasks.",
-        a: "F", hint: "Frequent personal phone use during work hours disrupts focus and reduces productivity—even during brief pauses between tasks." },
-      { q: "A website ending in .gov is generally a more authoritative source for regulatory information than a personal blog.",
-        a: "T", hint: ".gov sites publish official government information—they are primary sources for policy, safety rules, and legal standards." },
-      { q: "Using the same password for all your work accounts saves time without creating significant security risk.",
-        a: "F", hint: "Reusing passwords means a single breach compromises all accounts. Use unique, strong passwords and a password manager." },
-      { q: "Sharing a large file with a colleague by attaching it to multiple emails is as secure and efficient as using approved file-sharing tools.",
-        a: "F", hint: "Email attachments risk exceeding size limits, version confusion, and security exposure. Approved file-sharing tools are designed for this purpose." },
-      { q: "Learning how to use multiple tools for the same task makes you more versatile and valuable in the workplace.",
-        a: "T", hint: "Proficiency with multiple tools means you can adapt when one is unavailable or when an employer uses a different platform." },
-      { q: "If an employee works 35 hours at $14.00 per hour, their gross pay is $490.00.",
-        a: "T", hint: "35 × $14 = $490. Gross pay is simply hours worked multiplied by the hourly rate, before any deductions." },
-      { q: "Arriving at a job interview in business casual attire when the dress code was not specified is a safe professional choice.",
-        a: "T", hint: "When in doubt, dress one level above what you expect the environment to be. It's easier to dress down than to recover from being underdressed." },
-      { q: "In professional writing, using bullet points and clear headers makes a document easier to scan and understand.",
-        a: "T", hint: "Structure and visual hierarchy are core professional writing skills—they help busy readers find key information quickly." },
-      { q: "Wearing personal protective equipment (PPE) is optional if you personally believe the risk of injury is low.",
-        a: "F", hint: "PPE requirements are mandatory, not suggestions. 'Low risk' is a judgment call that may be wrong—always follow required safety protocols." },
-      { q: "An employee who identifies a process that could save the company money should keep the idea to themselves to avoid appearing presumptuous.",
-        a: "F", hint: "Sharing cost-saving ideas through appropriate channels is exactly what initiative looks like—employers value this kind of proactive thinking." },
-      { q: "A 20% discount on a $75.00 item reduces the price to $55.00.",
-        a: "F", hint: "20% of $75 = $15 discount. $75 − $15 = $60, not $55. Always calculate the discount first, then subtract from the original price." },
-      { q: "If two credible sources disagree about a fact, the most professional response is to assume both are wrong.",
-        a: "F", hint: "Disagreement between credible sources calls for deeper investigation—check dates, methodology, and primary data to determine which is more reliable." }
-    ];
+    // ── PART 1: TRUE / FALSE: none ───────────────────────────────────────────
+    // The Nevada WPR state test has no true/false questions (2026-11-02), so the 25
+    // statements that were here are multiple choice now, at the end of Part 3.
+    var tfSection = [];
 
     // ── PART 2: MATCHING (5 sets × 5 items = 25 items) ───────────────────────
     var matchSection = [
@@ -219,7 +170,7 @@
       }
     ];
 
-    // ── PART 3: MULTIPLE CHOICE (44 items) ───────────────────────────────────
+    // ── PART 3: MULTIPLE CHOICE (68 items) ───────────────────────────────────
     var mcSection = [
       {
         q: "You can only think of conventional solutions to a problem your supervisor asked you to solve creatively. The most professional next step is:",
@@ -482,6 +433,157 @@
         options: ["Customer service skills","Professionalism and reliability","Advanced information literacy","Creative problem-solving"],
         answer: "Professionalism and reliability",
         hint: "Reliability—being consistently prepared, meeting commitments, and communicating proactively—is a cornerstone of workplace professionalism."
+      },
+      // ── Rewritten from Part 1's true/false statements (2026-11-02) ──
+      {
+        q: "An employee tries a new way to solve a workplace problem, and it does not work. What is the most professional way to view this?",
+        options: ["As part of creative problem-solving, if they learn from it","As poor professional judgment","As proof the old way is always better","As a reason to stop suggesting new ideas"],
+        answer: "As part of creative problem-solving, if they learn from it",
+        hint: "Trying new approaches—even when they fail—is part of creative problem-solving. What matters is learning from the attempt."
+      },
+      {
+        q: "Before accepting information from a website as fact, what should a professional check?",
+        options: ["The source's authority, publication date, and purpose","How many times the article has been shared","Whether the page has an attractive design","Whether it agrees with what they already believe"],
+        answer: "The source's authority, publication date, and purpose",
+        hint: "Evaluating the credibility of information before acting on it is the core of information literacy and critical thinking."
+      },
+      {
+        q: "Your team needs someone to update the shared supply list, and you have time available. Which response shows initiative?",
+        options: ["Volunteer to update the list without being asked","Wait to see if your supervisor assigns it to you","Point out that it is not in your job description","Update it only if someone offers to help"],
+        answer: "Volunteer to update the list without being asked",
+        hint: "Proactively identifying and addressing unmet needs—without waiting for direction—is the definition of self-direction and initiative."
+      },
+      {
+        q: "Is it acceptable to take a few pens and a notepad from work for personal use?",
+        options: ["No; taking company property without permission is an integrity violation","Yes, because small items have very little value","Yes, once you have worked there for a year","Yes, if your coworkers do it too"],
+        answer: "No; taking company property without permission is an integrity violation",
+        hint: "Taking any company property without authorization—regardless of size—is considered theft and a violation of workplace integrity."
+      },
+      {
+        q: "Which employee demonstrates the strongest work ethic?",
+        options: ["One who gives consistent, genuine effort on every task","One who does just enough to avoid being disciplined","One who works hard only when the supervisor is watching","One who finishes quickly by skipping quality checks"],
+        answer: "One who gives consistent, genuine effort on every task",
+        hint: "Strong work ethic means going beyond the minimum—showing dedication, consistency, and genuine effort in all tasks."
+      },
+      {
+        q: "You have a minor disagreement with a coworker about how a task should be done. What is usually the best first step?",
+        options: ["Talk privately and directly with the coworker","File a formal complaint with HR","Ask other coworkers to take your side","Email your supervisor and copy the whole team"],
+        answer: "Talk privately and directly with the coworker",
+        hint: "Direct, private conversation is the recommended first step in resolving most workplace conflicts before escalating to formal processes."
+      },
+      {
+        q: "During a professional phone call, what should you do?",
+        options: ["Give the caller your full attention","Answer emails as long as you can still hear the caller","Put the caller on speaker and keep typing","Mute the call until it is your turn to speak"],
+        answer: "Give the caller your full attention",
+        hint: "Multitasking during a phone call prevents true active listening and signals disrespect to the other party."
+      },
+      {
+        q: "Which best describes workplace diversity?",
+        options: ["Many kinds of differences, such as age, culture, religion, and ability","Only differences in race and gender","Only differences in job title and pay","Only differences in years with the company"],
+        answer: "Many kinds of differences, such as age, culture, religion, and ability",
+        hint: "Diversity encompasses race, gender, age, culture, religion, disability, sexual orientation, and many other dimensions of human difference."
+      },
+      {
+        q: "An upset customer wants a refund that you are not authorized to approve. What should you do?",
+        options: ["Explain what you can do and bring in someone who can approve it","Promise the refund to calm the customer down","Tell the customer refunds are never possible","Ask the customer to come back another day"],
+        answer: "Explain what you can do and bring in someone who can approve it",
+        hint: "Making promises you cannot keep damages trust. Communicate what you CAN do and escalate if a resolution requires authorization you don't have."
+      },
+      {
+        q: "Why should strong team members help a teammate who is struggling?",
+        options: ["The team's results depend on every member's work","It makes the helpers look better to the supervisor","The struggling teammate will owe them a favor","It lets the strong members skip their own tasks"],
+        answer: "The team's results depend on every member's work",
+        hint: "Teams are interdependent—a chain is only as strong as its weakest link. Supporting struggling teammates is a professional responsibility."
+      },
+      {
+        q: "How can understanding your organization's mission statement help you at work?",
+        options: ["It helps you set priorities that match the organization's goals","It tells you exactly which tasks to do each day","It replaces the need to talk with your supervisor","It only matters to the company's leaders"],
+        answer: "It helps you set priorities that match the organization's goals",
+        hint: "Knowing why your organization exists helps you make decisions that align with its goals—a sign of big-picture thinking."
+      },
+      {
+        q: "When should you update your resume?",
+        options: ["Whenever you gain a new skill, achievement, or certification","Only when you are applying for a new job","Only once every five years","Only after you leave a job"],
+        answer: "Whenever you gain a new skill, achievement, or certification",
+        hint: "Keeping your resume current means adding achievements, skills, and certifications as they happen—not scrambling when you need it."
+      },
+      {
+        q: "You are already skilled at a task, and your employer offers optional training on new methods for it. What is the best choice?",
+        options: ["Attend, since methods and tools keep changing","Skip it, since you already know the task","Attend only if the training is paid","Send a coworker and ask if it was useful"],
+        answer: "Attend, since methods and tools keep changing",
+        hint: "Industries evolve constantly. Even experts need to keep up with new tools, regulations, and best practices in their field."
+      },
+      {
+        q: "Which is the best use of a few spare minutes between tasks at work?",
+        options: ["Organizing your workspace or preparing for the next task","Checking your personal phone and social media","Starting a long personal phone call","Chatting away from your station until someone notices"],
+        answer: "Organizing your workspace or preparing for the next task",
+        hint: "Frequent personal phone use during work hours disrupts focus and reduces productivity—even during brief pauses between tasks."
+      },
+      {
+        q: "Which source is generally the most authoritative for regulatory information?",
+        options: ["A website ending in .gov","A personal blog","A popular influencer's video","A product advertisement"],
+        answer: "A website ending in .gov",
+        hint: ".gov sites publish official government information—they are primary sources for policy, safety rules, and legal standards."
+      },
+      {
+        q: "What is the safest way to manage passwords for your work accounts?",
+        options: ["Use a different strong password for each account","Use one strong password for every account","Keep your passwords on a note by your monitor","Share them with a trusted coworker as a backup"],
+        answer: "Use a different strong password for each account",
+        hint: "Reusing passwords means a single breach compromises all accounts. Use unique, strong passwords and a password manager."
+      },
+      {
+        q: "You need to share a very large file with a colleague. What is the best method?",
+        options: ["Use your workplace's approved file-sharing tool","Split it up and attach the pieces to several emails","Copy it to a personal USB drive and mail it","Upload it to any free website you can find"],
+        answer: "Use your workplace's approved file-sharing tool",
+        hint: "Email attachments risk exceeding size limits, version confusion, and security exposure. Approved file-sharing tools are designed for this purpose."
+      },
+      {
+        q: "Why is it valuable to know more than one tool for the same kind of task?",
+        options: ["You can adapt if a tool is unavailable or replaced","You will never have to learn anything new","Employers pay extra for every program you list","You will never need to ask anyone for help"],
+        answer: "You can adapt if a tool is unavailable or replaced",
+        hint: "Proficiency with multiple tools means you can adapt when one is unavailable or when an employer uses a different platform."
+      },
+      {
+        q: "An employee works 35 hours at $14.00 per hour. What is their gross pay?",
+        options: ["$490.00","$420.00","$475.00","$560.00"],
+        answer: "$490.00",
+        hint: "35 × $14.00 = $490.00. Gross pay is hours worked times the hourly rate, before any deductions."
+      },
+      {
+        q: "A job interview invitation does not mention a dress code. What is the safest choice of clothing?",
+        options: ["Business casual or a little dressier","What you usually wear on weekends","Athletic wear, so you look relaxed","The newest fashion trend"],
+        answer: "Business casual or a little dressier",
+        hint: "When in doubt, dress one level above what you expect the environment to be. It's easier to dress down than to recover from being underdressed."
+      },
+      {
+        q: "Which choice makes a professional document easier for busy readers to scan?",
+        options: ["Clear headings and bullet points","Long paragraphs with no breaks","All capital letters in every sentence","Several different decorative fonts"],
+        answer: "Clear headings and bullet points",
+        hint: "Structure and visual hierarchy are core professional writing skills—they help busy readers find key information quickly."
+      },
+      {
+        q: "When is it okay to skip the personal protective equipment (PPE) your job requires?",
+        options: ["Never; required PPE must be worn every time","When you believe the risk of injury is low","When the task only takes a few minutes","When your supervisor is not around"],
+        answer: "Never; required PPE must be worn every time",
+        hint: "PPE requirements are mandatory, not suggestions. 'Low risk' is a judgment call that may be wrong—always follow required safety protocols."
+      },
+      {
+        q: "You spot a change to a process that could save your company money. What should you do?",
+        options: ["Share the idea with your supervisor through the proper channel","Keep it to yourself so you do not seem presumptuous","Make the change yourself without telling anyone","Wait until you are promoted to suggest it"],
+        answer: "Share the idea with your supervisor through the proper channel",
+        hint: "Sharing cost-saving ideas through appropriate channels is exactly what initiative looks like—employers value this kind of proactive thinking."
+      },
+      {
+        q: "An item costs $75.00 and is on sale for 20% off. What is the sale price?",
+        options: ["$60.00","$55.00","$15.00","$70.00"],
+        answer: "$60.00",
+        hint: "20% of $75.00 is $15.00, and $75.00 − $15.00 = $60.00. Find the discount first, then subtract it from the original price."
+      },
+      {
+        q: "Two credible sources disagree about an important fact. What is the most professional response?",
+        options: ["Look deeper at their dates, methods, and original data","Assume both sources are wrong","Use whichever source you found first","Leave the fact out without mentioning the disagreement"],
+        answer: "Look deeper at their dates, methods, and original data",
+        hint: "Disagreement between credible sources calls for deeper investigation—check dates, methodology, and primary data to determine which is more reliable."
       }
     ];
 
