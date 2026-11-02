@@ -89,6 +89,12 @@ function slideFromLesson(prev, lesson, chapter) {
         const m = /^([\s\S]*?)\s*\((\d+)\s*(?:pts?|points?)\)\s*$/i.exec(due);
         c.milestone = !due ? null : m ? { title: m[1].trim(), pts: Number(m[2]) } : { title: due };
     }
+    // Hook, Line & Sinker (2026-11-02) only ever come from Jotability: the lesson's
+    // version, and none when the lesson has none
+    for (const [k, v] of [['hook', l.hook], ['hookLine', l.line], ['hookSinker', l.sinker]]) {
+        const t = String(v || '').trim();
+        if (t) c[k] = t; else delete c[k];
+    }
     return c;
 }
 
@@ -138,7 +144,7 @@ function planLessonSync(existing, lessons) {
         const block = at.get(l.id), row = byBlock.get(block), prev = row ? row.content : null;
         const content = slideFromLesson(prev, l, chapterFor(l));
         const before = prev ? { ...TEMPLATE, ...prev } : null;
-        const fields = before ? Object.keys(content).filter(k => stable(content[k]) !== stable(before[k])) : Object.keys(content);
+        const fields = before ? [...new Set([...Object.keys(content), ...Object.keys(before)])].filter(k => stable(content[k]) !== stable(before[k])) : Object.keys(content);
         return {
             block, lessonId: l.id, seq: i + 1, content, isNew: !row, changed: fields.length > 0, fields,
             raw: row ? row.raw : null,

@@ -135,7 +135,8 @@ router.get('/agenda/get', requireStaff, async (req, res) => {
 // B-day track by the period's letter. Staff can view any course.
 const COURSE_BY_ID = { '05254G1S': 'wd1', '05254G2S': 'wd2', '05254EF-201': 'wd2', '05254ES': 'wd2', '10003GS': 'cs_s1' };
 const COURSE_LABELS = { wd1: 'Web Design 1', wd2: 'Web Design 2', cs_s1: 'Computer Science' };
-const STUDENT_FIELDS = ['chapterLabel', 'minimumDay', 'objective', 'doNowType', 'doNowPrompt', 'tasksTitle', 'tasksList', 'exitTicket', 'milestone'];
+const STUDENT_FIELDS = ['chapterLabel', 'minimumDay', 'objective', 'doNowType', 'doNowPrompt', 'tasksTitle', 'tasksList', 'exitTicket', 'milestone', 'hook', 'hookLine', 'hookSinker'];
+const HOOK_FIELDS = ['hook', 'hookLine', 'hookSinker'];
 
 async function studentAgendaOptions(connection, req) {
     if (isStaffSession(req)) {
@@ -207,6 +208,8 @@ router.get('/agenda/student', requireLogin, async (req, res) => {
                     }
                 }
             }
+            // A lesson's Hook, Line & Sinker opens class: students see it on the day, not ahead of time
+            if (content && want > today) [content, ...(content.also || [])].forEach(x => HOOK_FIELDS.forEach(f => { delete x[f]; }));
             // Every Monday, Web Design 2 does the 10-minute WRS Sprint (wrsSprint.js; teacher, 2026-10-26).
             const sprint = pick.course === 'wd2' && !!schoolDay && new Date(`${want}T12:00:00`).getDay() === 1;
             return { options, course: pick.course, track: pick.track, label: pick.label, date: want, today,
@@ -435,7 +438,8 @@ function incomingLesson(x) {
         id, block: block > 0 ? block : null, unitId: syncText(x.unitId, 40), unit: syncText(x.unit, 200),
         title: syncText(x.title, 300), label: syncText(x.label, 200), short: !!x.short,
         objectives: syncList(x.objectives), standards: syncText(x.standards, 4000), doNow: syncText(x.doNow, 4000),
-        activities: syncList(x.activities), exitTicket: syncText(x.exitTicket, 4000), due: syncText(x.due, 400)
+        activities: syncList(x.activities), exitTicket: syncText(x.exitTicket, 4000), due: syncText(x.due, 400),
+        hook: syncText(x.hook, 1000), line: syncText(x.line, 1000), sinker: syncText(x.sinker, 1000)
     };
 }
 router.post('/agenda/sync/lessons', requireSyncKey, async (req, res) => {

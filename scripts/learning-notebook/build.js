@@ -182,6 +182,8 @@ const head = (eyebrow, title, extra = '') => `<header class="ph"><div><div class
 
 // ---- Build ----
 const scales = readScales();
+// Each chapter's (unit's) Hook, Line & Sinker, keyed like "wd1-3" or "cs-6" (data/chapter-hooks.json)
+const HOOKS = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'chapter-hooks.json'), 'utf8')).hooks || {}; } catch (e) { return {}; } })();
 const units = DOCX ? require('./csDocx').readCsDocx(DOCX) : null;
 const chapters = CHAPTERS.map(n => DOCX ? readUnit(n, scales, units) : readChapter(n, scales));
 const total = chapters.reduce((s, c) => s + c.lessons.length, 0);
@@ -249,7 +251,9 @@ for (const c of chapters) {
     const start = pageNo + 1;
     contents.push({ c, start });
 
+    const hk = HOOKS[`${COURSE}-${c.n}`];
     page(`${head(`${Wc} ${c.n} · Before we start`, c.title)}
+      ${hk ? `<div class="hookbox"><div class="hk"><span class="tag">HOOK</span><span>${esc(hk.hook)}</span></div><div class="hk"><span class="tag">LINE</span><span>${esc(hk.line)}</span></div><div class="hk"><span class="tag">SINKER</span><span>${esc(hk.sinker)}</span></div><div class="qt sm">My answer:</div>${lines(2)}</div>` : ''}
       <div class="q big"><div class="qt">I used to think... <span class="hint">(What do I think about this ${W}'s topic right now? Guesses are fine.)</span></div>${lines(8)}</div>
       <div class="two"><div class="q"><div class="qt">What I already know</div>${lines(8)}</div><div class="q"><div class="qt">What I want to find out</div>${lines(8)}</div></div>
       <div class="q grow"><div class="qt">How could this ${W} help ${c.project ? `my project, <b>${esc(c.project)}</b>` : 'what I am building'}?</div>${lines(20)}</div>`, { foot: tag, kind: 'opener' });
@@ -415,6 +419,8 @@ table.targets td:nth-child(n+2) { white-space: nowrap; } .targets td { font-size
 .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.03in 0.2in; font-size: 9.5pt; margin: 0.04in 0; } .check-score { font-weight: 700; text-align: right; } .check-key { font-size: 8.5pt; color: #333; }
 .two.grow { flex: 1; min-height: 0; overflow: hidden; } .two.grow .q { overflow: hidden; }
 .checks { font-size: 10pt; }
+.hookbox { border: 2px solid #111; border-radius: 8px; padding: 0.07in 0.12in; display: flex; flex-direction: column; gap: 0.04in; font-size: 9.5pt; }
+.hookbox .hk { display: flex; gap: 0.1in; align-items: baseline; } .hookbox .tag { flex: none; width: 0.62in; text-align: center; font-weight: 700; font-size: 7.5pt; letter-spacing: .06em; border: 1.2px solid #111; border-radius: 4px; padding: 1px 0; }
 /* CS day pages */
 .std { font-size: 8.5pt; color: #444; margin-top: -0.06in; }
 .parts { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.06in; overflow: hidden; }

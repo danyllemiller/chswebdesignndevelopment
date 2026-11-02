@@ -606,6 +606,7 @@
     <select id="jumpSelect" class="form-select form-select-sm"></select>
     <button id="nextBtn" class="btn btn-outline-light btn-sm">Next <i class="fas fa-chevron-right"></i></button>
     <button id="todayBtn" class="btn btn-outline-info btn-sm">Today</button>
+    <button id="hookBtn" class="btn btn-warning btn-sm fw-bold d-none" title="Open class with today's Hook, Line &amp; Sinker"><i class="fas fa-fish me-1"></i>Hook</button>
     <span id="trackToggle" class="track-toggle btn-group d-none" role="group"></span>
     <span class="nav-bar-divider"></span>
     <div id="toolBeltBar"></div>
@@ -1221,6 +1222,10 @@ if (!courseCfg) {
 
     document.getElementById('jumpSelect').value = onClassDay() ? `${shownDate}|${currentBlock}` : `|${currentBlock}`;
     renderBellSchedule(dateStr);
+
+    const hookBtn = document.getElementById('hookBtn');
+    hookBtn.classList.toggle('d-none', !(c && c.hook));
+    hookBtn.onclick = () => window.openHook && window.openHook(content[currentBlock] || {});
 
     const objList = document.getElementById('objectiveList');
     objList.innerHTML = '';
@@ -2034,6 +2039,52 @@ if (!courseCfg) {
       console.error(err);
     });
 }
+</script>
+
+<!-- Hook, Line & Sinker: opens class, one part at a time (from the Jotability lesson) -->
+<div id="hookOverlay" class="hook-overlay d-none" role="dialog" aria-modal="true" aria-label="Hook, Line and Sinker">
+  <div class="hook-card">
+    <div class="hook-part" data-part="0"><span class="hook-tag tag-hook">HOOK</span><div id="hookText" class="hook-text"></div></div>
+    <div class="hook-part" data-part="1"><span class="hook-tag tag-line">LINE</span><div id="hookLineText" class="hook-text"></div></div>
+    <div class="hook-part" data-part="2"><span class="hook-tag tag-sinker">SINKER</span><div id="hookSinkerText" class="hook-text"></div></div>
+    <div class="hook-actions"><button type="button" id="hookNext" class="btn btn-warning btn-lg fw-bold">Next</button><button type="button" id="hookClose" class="btn btn-outline-light">Close</button></div>
+  </div>
+</div>
+<style>
+  .hook-overlay { position: fixed; inset: 0; z-index: 3000; background: rgba(8, 10, 40, .94); display: flex; align-items: center; justify-content: center; padding: 3vh 4vw; }
+  .hook-card { width: min(1400px, 100%); display: flex; flex-direction: column; gap: 3.5vh; }
+  .hook-part { display: flex; gap: 2vw; align-items: baseline; transition: opacity .35s; }
+  .hook-part.hidden { opacity: 0; }
+  .hook-tag { flex: none; min-width: 9.5rem; text-align: center; font-weight: 900; letter-spacing: .1em; font-size: 1.6rem; color: #fff; border-radius: .6rem; padding: .3rem .8rem; }
+  .tag-hook { background: #c2410c; } .tag-line { background: #2f3fb5; } .tag-sinker { background: #2b7a33; }
+  .hook-text { color: #fff; font-size: clamp(1.4rem, 2.6vw, 2.6rem); line-height: 1.35; font-weight: 600; }
+  .hook-actions { display: flex; gap: 1rem; justify-content: flex-end; }
+</style>
+<script>
+  // The Hook button shows when this slide's lesson has a hook. Next (or Space / Right arrow)
+  // reveals LINE, then SINKER, then closes into the agenda; Esc closes.
+  (function () {
+    const overlay = document.getElementById('hookOverlay'), next = document.getElementById('hookNext');
+    let step = 0;
+    function showStep() {
+      overlay.querySelectorAll('.hook-part').forEach(p => p.classList.toggle('hidden', Number(p.dataset.part) > step));
+      next.textContent = step < 2 ? 'Next' : 'Start class';
+    }
+    window.openHook = c => {
+      document.getElementById('hookText').textContent = c.hook || '';
+      document.getElementById('hookLineText').textContent = c.hookLine || '';
+      document.getElementById('hookSinkerText').textContent = c.hookSinker || '';
+      step = 0; showStep(); overlay.classList.remove('d-none'); next.focus();
+    };
+    const close = () => overlay.classList.add('d-none');
+    next.addEventListener('click', () => { if (step < 2) { step++; showStep(); } else close(); });
+    document.getElementById('hookClose').addEventListener('click', close);
+    document.addEventListener('keydown', e => {
+      if (overlay.classList.contains('d-none')) return;
+      if (e.key === 'Escape') { close(); e.preventDefault(); }
+      else if (e.key === ' ' || e.key === 'ArrowRight' || e.key === 'Enter') { next.click(); e.preventDefault(); e.stopPropagation(); }
+    }, true);
+  })();
 </script>
 </body>
 </html>
