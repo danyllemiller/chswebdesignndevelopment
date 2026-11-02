@@ -26,8 +26,10 @@ const PRACTICE_FILES = ['', '-b', '-c', '-d'].map(s =>
 
 let cache = null;
 const INDICATORS = require('./wprIndicators.json');
+const { cfaKeys } = require('./wprCfaQuestions');
 const norm = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
-const indicatorFor = q => INDICATORS[crypto.createHash('sha1').update(norm(q)).digest('hex').slice(0, 12)] || '';
+const keyOf = q => crypto.createHash('sha1').update(norm(q)).digest('hex').slice(0, 12);
+const indicatorFor = q => INDICATORS[keyOf(q)] || '';
 
 function readSections(file) {
     const html = fs.readFileSync(file, 'utf8');
@@ -115,13 +117,16 @@ const asMc = (x, topic) => { const options = shuffle(x.options); return { kind: 
 // Each question: { kind, topic, prompt, q, options, correct, hint, indicator }.
 function buildTest(total = 100) {
     const { tf, mc, sets } = loadPool();
+    // Questions on the baseline CFA stay off practice tests (wprCfaQuestions.js)
+    const cfa = cfaKeys(), open = x => !cfa.has(keyOf(x.q));
     // Scales with test length: 2-5% safety (at least 1), and up to 30% true/false if the pool had any.
     const safetyCount = Math.max(1, Math.round(total * (0.02 + Math.random() * 0.03)));
-    const safety = shuffle([...SAFETY_MC.map(x => asMc(x, 'safety')), ...SAFETY_TF.map(x => asTf(x, 'safety'))]).slice(0, safetyCount);
+    const safety = shuffle([...SAFETY_MC.filter(open).map(x => asMc(x, 'safety')), ...SAFETY_TF.filter(open).map(x => asTf(x, 'safety'))]).slice(0, safetyCount);
     const worklifeCount = Math.max(1, Math.round(total * (0.01 + Math.random() * 0.02)));
-    const worklife = shuffle([...WORKLIFE_MC.map(x => asMc(x, 'worklife')), ...WORKLIFE_TF.map(x => asTf(x, 'worklife'))]).slice(0, worklifeCount);
-    const tfPicks = shuffle(tf).slice(0, Math.min(tf.length, Math.round(total * 0.3))).map(x => asTf(x, 'wrs'));
-    const mcPool = [...mc, ...sets.flatMap(matchAsMc)];
+    const worklife = shuffle([...WORKLIFE_MC.filter(open).map(x => asMc(x, 'worklife')), ...WORKLIFE_TF.filter(open).map(x => asTf(x, 'worklife'))]).slice(0, worklifeCount);
+    const tfOpen = tf.filter(open);
+    const tfPicks = shuffle(tfOpen).slice(0, Math.min(tfOpen.length, Math.round(total * 0.3))).map(x => asTf(x, 'wrs'));
+    const mcPool = [...mc, ...sets.flatMap(matchAsMc)].filter(open);
     const mcPicks = shuffle(mcPool).slice(0, Math.max(0, total - safety.length - worklife.length - tfPicks.length)).map(x => asMc(x, 'wrs'));
     return shuffle([...safety, ...worklife, ...tfPicks, ...mcPicks]).filter(q => q.correct >= 0).slice(0, total);
 }
