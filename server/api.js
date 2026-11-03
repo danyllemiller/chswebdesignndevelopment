@@ -54,6 +54,7 @@ router.use('/', require('./routes/roster'));
 router.use('/', require('./routes/payroll'));
 router.use('/', require('./routes/notebooks'));
 router.use('/', require('./routes/guidedNotebook'));
+router.use('/', require('./routes/answerKeys'));
 router.use('/', require('./routes/siteReports'));
 router.use('/', require('./routes/siteVersion'));
 router.use('/', require('./routes/projects'));
